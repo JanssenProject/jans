@@ -37,6 +37,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -87,7 +88,7 @@ public class SsaCreateAction {
      * request has to have at least scope "ssa.admin",
      * it will also return a {@link WebApplicationException} with status {@code 500} in case an uncontrolled
      * error occurs when processing the method.
-     * <p/>
+     * <p>
      * <p>
      * Response of this method can be modified using the following custom script
      * <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/ssa_modify_response/ssa_modify_response.py">SSA Custom Script</a>,
@@ -95,7 +96,7 @@ public class SsaCreateAction {
      * </p>
      * <p>
      * SSA returned by this method is stored in the corresponding database, so it can be later retrieved, validated or revoked.
-     * <p/>
+     * <p>
      *
      * @param requestParams Valid json request
      * @param httpRequest   Http request
@@ -110,6 +111,7 @@ public class SsaCreateAction {
             final SsaCreateRequest ssaCreateRequest = SsaCreateRequest.fromJson(jsonRequest);
             log.debug("Attempting to create ssa: {}", ssaCreateRequest);
 
+            prepareCreateRequest(ssaCreateRequest);
             ssaRestWebServiceValidator.validateSsaCreateRequest(ssaCreateRequest);
 
             String ssaBaseDN = staticConfiguration.getBaseDn().getSsa();
@@ -118,7 +120,7 @@ public class SsaCreateAction {
             ssaRestWebServiceValidator.checkScopesPolicy(client, SsaScopeType.SSA_ADMIN.getValue());
 
             final Date creationDate = new Date();
-            final Date expirationDate = getExpiration(ssaCreateRequest);
+            final Date expirationDate = getExpiration(ssaCreateRequest.getExpiration());
 
             final Ssa ssa = new Ssa();
             ssa.setDn("inum=" + inum + "," + ssaBaseDN);
@@ -130,6 +132,7 @@ public class SsaCreateAction {
             ssa.setDescription(ssaCreateRequest.getDescription());
             ssa.getAttributes().setSoftwareId(ssaCreateRequest.getSoftwareId());
             ssa.getAttributes().setSoftwareRoles(ssaCreateRequest.getSoftwareRoles());
+            ssa.getAttributes().setScopes(getScopesForRoles(ssaCreateRequest.getSoftwareRoles()));
             ssa.getAttributes().setGrantTypes(ssaCreateRequest.getGrantTypes());
             ssa.getAttributes().setCustomAttributes(getCustomAttributes(jsonRequest));
             ssa.getAttributes().setClientDn(client.getDn());
@@ -167,6 +170,43 @@ public class SsaCreateAction {
         builder.header(Constants.PRAGMA, Constants.NO_CACHE);
         builder.type(MediaType.APPLICATION_JSON_TYPE);
         return builder.build();
+    }
+
+    private List<String> getScopesForRoles(List<String> softwareRoles) {
+        log.debug("scopesForRoles - softwareRoles: {}", softwareRoles);
+        final Map<String, List<String>> map = appConfiguration.getSsaConfiguration().getSsaMapSoftwareRolesToScopes();
+        if (map == null || map.isEmpty()) {
+            log.debug("scopesForRoles - no mappings in ssaConfiguration.ssaMapSoftwareRolesToScopes");
+            return new ArrayList<>();
+        }
+
+        List<String> scopes = new ArrayList<>();
+        for (String role : softwareRoles) {
+            final List<String> scopesFromMap = map.get(role);
+            if (scopesFromMap != null && scopes.size() < scopesFromMap.size()) {
+                scopes = scopesFromMap;
+                log.debug("scopesForRoles - set scopes: {} for role: {}", scopes, role);
+            }
+        }
+
+        log.debug("scopesForRoles - scopes: {}", scopes);
+        return scopes;
+    }
+
+    private void prepareCreateRequest(SsaCreateRequest request) {
+        if (request.getExpiration() == null || request.getExpiration() == 0) {
+            final Date expiration = getExpiration(request.getExpiration());
+            request.setExpiration(expiration.getTime() / 1000L);
+        }
+        if (request.getLifetime() == null || request.getLifetime() < 1) {
+            int lifetime = (int) (request.getExpiration() - (new Date().getTime() / 1000L));
+            request.setLifetime(lifetime);
+        }
+
+        // Mike: All are optional. If the software_id isn't provided, we should just create a uuid.
+        if (StringUtils.isBlank(request.getSoftwareId())) {
+            request.setSoftwareId(UUID.randomUUID().toString());
+        }
     }
 
     /**
@@ -216,13 +256,13 @@ public class SsaCreateAction {
      * of the request is null.
      * </p>
      *
-     * @param ssaCreateRequest Request of SSA
+     * @param expiration date in UTC
      * @return Respective new Date instance.
      */
-    private Date getExpiration(SsaCreateRequest ssaCreateRequest) {
+    private Date getExpiration(Long expiration) {
         Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-        if (ssaCreateRequest.getExpiration() != null && ssaCreateRequest.getExpiration() > 0) {
-            calendar.setTimeInMillis(ssaCreateRequest.getExpiration() * 1000L);
+        if (expiration != null && expiration > 0) {
+            calendar.setTimeInMillis(expiration * 1000L);
             return calendar.getTime();
         }
         calendar.add(Calendar.DATE, appConfiguration.getSsaConfiguration().getSsaExpirationInDays());

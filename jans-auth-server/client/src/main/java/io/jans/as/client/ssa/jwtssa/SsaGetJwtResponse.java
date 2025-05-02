@@ -9,7 +9,7 @@ package io.jans.as.client.ssa.jwtssa;
 import io.jans.as.client.BaseResponseWithErrors;
 import io.jans.as.model.ssa.SsaErrorResponseType;
 import jakarta.ws.rs.core.Response;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;

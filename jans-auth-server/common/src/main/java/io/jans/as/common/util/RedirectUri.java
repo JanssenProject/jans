@@ -20,8 +20,8 @@ import io.jans.as.model.jwe.JweEncrypterImpl;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -404,8 +404,8 @@ public class RedirectUri {
             sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
             sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
             for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
-                String entryKey = StringEscapeUtils.escapeHtml(entry.getKey());
-                String entryValue = StringEscapeUtils.escapeHtml(entry.getValue());
+                String entryKey = StringEscapeUtils.escapeHtml4(entry.getKey());
+                String entryValue = StringEscapeUtils.escapeHtml4(entry.getValue());
                 sb.append("<input type=\"hidden\" name=\"").append(entryKey).append("\" value=\"").append(entryValue).append("\"/>");
             }
             sb.append("</form>");

@@ -1,5 +1,5 @@
 # pinned to py3-grpcio version to avoid failure on native extension build
-joblib
+joblib>=1.2.0
 pygtail
 psycopg2-binary
-PyMySQL
+PyMySQL>=1.1.1

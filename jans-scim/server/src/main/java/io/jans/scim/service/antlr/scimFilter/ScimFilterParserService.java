@@ -19,7 +19,7 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import io.jans.scim.model.exception.SCIMException;
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.service.AttributeService;

@@ -62,6 +62,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("postAuthnScripts")
     private List<String> postAuthnScripts;
 
+    @JsonProperty("tokenExchangeScripts")
+    private List<String> tokenExchangeScripts;
+
     @JsonProperty("consentGatheringScripts")
     private List<String> consentGatheringScripts;
 
@@ -113,6 +116,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("allowOfflineAccessWithoutConsent")
     private Boolean allowOfflineAccessWithoutConsent;
 
+    @JsonProperty("requirePkce")
+    private Boolean requirePkce = false;
+
     @JsonProperty("minimumAcrLevel")
     private Integer minimumAcrLevel = -1;
 
@@ -151,6 +157,17 @@ public class ClientAttributes implements Serializable {
 
     @JsonProperty("authorizationDetailsTypes")
     private List<String> authorizationDetailsTypes;
+
+    public Boolean getRequirePkce() {
+        if (requirePkce == null) {
+            requirePkce = false;
+        }
+        return requirePkce;
+    }
+
+    public void setRequirePkce(Boolean requirePkce) {
+        this.requirePkce = requirePkce;
+    }
 
     public List<String> getAuthorizationDetailsTypes() {
         if (authorizationDetailsTypes == null) authorizationDetailsTypes = new ArrayList<>();
@@ -348,6 +365,16 @@ public class ClientAttributes implements Serializable {
         this.postAuthnScripts = postAuthnScripts;
     }
 
+    public List<String> getTokenExchangeScripts() {
+        if (tokenExchangeScripts == null) tokenExchangeScripts = Lists.newArrayList();
+        return tokenExchangeScripts;
+    }
+
+    public ClientAttributes setTokenExchangeScripts(List<String> tokenExchangeScripts) {
+        this.tokenExchangeScripts = tokenExchangeScripts;
+        return this;
+    }
+
     public List<String> getConsentGatheringScripts() {
         if (consentGatheringScripts == null) consentGatheringScripts = Lists.newArrayList();
         return consentGatheringScripts;
@@ -539,6 +566,7 @@ public class ClientAttributes implements Serializable {
                 ", backchannelLogoutSessionRequired=" + backchannelLogoutSessionRequired +
                 ", additionalAudience=" + additionalAudience +
                 ", postAuthnScripts=" + postAuthnScripts +
+                ", tokenExchangeScripts=" + tokenExchangeScripts +
                 ", consentGatheringScripts=" + consentGatheringScripts +
                 ", introspectionScripts=" + introspectionScripts +
                 ", rptClaimsScripts=" + rptClaimsScripts +

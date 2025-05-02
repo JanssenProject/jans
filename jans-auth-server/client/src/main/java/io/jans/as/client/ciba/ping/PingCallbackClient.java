@@ -8,7 +8,7 @@ package io.jans.as.client.ciba.ping;
 
 import io.jans.as.client.BaseClient;
 import io.jans.as.client.util.ClientUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.json.JSONObject;

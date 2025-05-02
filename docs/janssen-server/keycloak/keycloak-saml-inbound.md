@@ -6,7 +6,7 @@ tags:
   - inbound
 ---
 
-## Overview
+# Inbound SAML
 Janssen supports authentication against external SAML identity provider (IDP) namely inbound SAML/inbound identity.
 This document provides instructions for configuring Janssen server
 

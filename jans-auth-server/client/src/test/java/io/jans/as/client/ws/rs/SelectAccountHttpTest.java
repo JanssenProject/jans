@@ -20,7 +20,6 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
 import org.apache.logging.log4j.util.Strings;
 import org.json.JSONArray;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Parameters;
@@ -42,7 +41,7 @@ public class SelectAccountHttpTest extends BaseTest {
 
     @BeforeTest
     public void setUp() {
-        driver = new HtmlUnitDriver(true);
+        startSelenium();
         pageConfig = newPageConfig(driver);
     }
 

@@ -5,6 +5,8 @@ tags:
   - bulk-users
 ---
 
+# Bulk Adding Users via SCIM
+
 ## Adding user in bulk
 
 SCIM supports a bulk operation allowing consumers of the service to send multiple resource operations in a single request. This means the body of a bulk operation may contain one or more operations belonging to any of the supported HTTP verbs, e.g., POST, PUT, DELETE, etc.

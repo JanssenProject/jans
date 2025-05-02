@@ -4,9 +4,9 @@ tags:
   - fido
 ---
 
-# Overview
+# FIDO Administration Guide
 
-## Janssen's FIDO2 server
+## Janssen FIDO2 server
 
 FIDO2 as an open standard for authentication is based on public key cryptography.
 
@@ -43,7 +43,13 @@ Response:
 
 ## Customization authentication flow using Interception script
 
-  In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found [here](../../script-catalog/person_authentication/fido2-external-authenticator/README.md).
+  In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn
+  API and the FIDO server is achieved using an interception script, details of it can be found
+  [here](../../script-catalog/person_authentication/fido2-external-authenticator/README.md).
+
+## Managing User FIDO Devices
+
+  TUI privdes managing user FIDO devices, see [here](../usermgmt/usermgmt-cli-tui.md#manage-user-fido-devices).
 
 
 ## References

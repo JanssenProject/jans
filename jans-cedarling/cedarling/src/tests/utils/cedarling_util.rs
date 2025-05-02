@@ -1,27 +1,78 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
+use crate::authorization_config::IdTokenTrustMode;
+use crate::{AuthorizationConfig, EntityBuilderConfig, JsonRule, JwtConfig};
 pub use crate::{
-    BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource,
+    BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 
-/// create [`Cedarling`] from [`PolicyStoreSource`]
-pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
-    Cedarling::new(BootstrapConfig {
+/// fixture for [`BootstrapConfig`]
+pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
+    BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
+            log_level: crate::LogLevel::DEBUG,
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,
         },
-        jwt_config: JwtConfig::Disabled,
+        jwt_config: JwtConfig::new_without_validation(),
+        authorization_config: AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            principal_bool_operator: JsonRule::default(),
+            id_token_trust_mode: IdTokenTrustMode::None,
+            ..Default::default()
+        },
+        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+    }
+}
+
+/// create [`Cedarling`] from [`PolicyStoreSource`]
+pub async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
+    Cedarling::new(&get_config(policy_source))
+        .await
+        .expect("bootstrap config should initialize correctly")
+}
+
+/// create [`Cedarling`] from [`PolicyStoreSource`]
+/// with a callback function to modify the bootstrap configuration.
+pub async fn get_cedarling_with_callback<F>(policy_source: PolicyStoreSource, cb: F) -> Cedarling
+where
+    F: FnOnce(&mut BootstrapConfig),
+{
+    let mut config = get_config(policy_source);
+    cb(&mut config); // Apply the callback function
+
+    Cedarling::new(&config)
+        .await
+        .expect("bootstrap config should initialize correctly")
+}
+
+/// create [`Cedarling`] from [`PolicyStoreSource`]
+pub async fn get_cedarling_with_authorization_conf(
+    policy_source: PolicyStoreSource,
+    auth_conf: AuthorizationConfig,
+    entity_builder_conf: EntityBuilderConfig,
+) -> Cedarling {
+    Cedarling::new(&BootstrapConfig {
+        application_name: "test_app".to_string(),
+        log_config: LogConfig {
+            log_type: LogTypeConfig::StdOut,
+            log_level: crate::LogLevel::DEBUG,
+        },
+        policy_store_config: PolicyStoreConfig {
+            source: policy_source,
+        },
+        jwt_config: JwtConfig::new_without_validation(),
+        authorization_config: auth_conf,
+        entity_builder_config: entity_builder_conf,
     })
+    .await
     .expect("bootstrap config should initialize correctly")
 }
 
@@ -39,6 +90,7 @@ pub fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String
 ///
 /// It is designed to assert that the policy ID retrieved from a response
 /// matches a vector of policy IDs (converted to a specific format).
+/// Before checking it sort arrays to be consistent
 ///
 /// # Arguments
 ///
@@ -54,17 +106,28 @@ pub fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String
 #[macro_export]
 macro_rules! cmp_policy {
     ($resp:expr, $vec_policy_id:expr, $msg:expr) => {
-        assert_eq!(
-            crate::tests::utils::cedarling_util::get_policy_id(&$resp),
-            Some($vec_policy_id.iter().map(|v| v.to_string()).collect()),
-            $msg
-        )
+        let policy_ids_resp =
+            $crate::tests::utils::cedarling_util::get_policy_id(&$resp).map(|mut v| {
+                v.sort();
+                v
+            });
+
+        let mut policy_ids_test = $vec_policy_id
+            .iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<_>>();
+        policy_ids_test.sort();
+
+        assert_eq!(policy_ids_resp, Some(policy_ids_test), $msg)
     };
 }
 
 /// util function for convenient conversion Decision
 pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_policy::Decision> {
-    resp.as_ref().map(|v| v.decision())
+    resp.as_ref().map(|v| {
+        println!("diagnostics: {:?}\n", v.diagnostics());
+        v.decision()
+    })
 }
 
 /// This macro removes code duplication when comparing a decision in tests.
@@ -87,7 +150,7 @@ pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_polic
 macro_rules! cmp_decision {
     ($resp:expr, $decision:expr, $msg:expr) => {
         assert_eq!(
-            crate::tests::utils::cedarling_util::get_decision(&$resp),
+            $crate::tests::utils::cedarling_util::get_decision(&$resp),
             Some($decision),
             $msg
         )

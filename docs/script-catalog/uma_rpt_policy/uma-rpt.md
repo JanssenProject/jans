@@ -6,7 +6,7 @@ tags:
   - UmaRptPolicy
 ---
 
-## Overview
+# UMA RPT Policy
 This is a special script for UMA. It allows an admin to protect UMA scopes with policies. It is possible to add more than one UMA policy to an UMA scope. On requesting access to a specified resource, the application should call specified UMA policies in order to grant or deny access.
 
 ## Interface

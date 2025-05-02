@@ -8,7 +8,7 @@
             <p>${pageScope.description}</p>
         </div>
         <div class="pa3">
-            <a href="${zkService.contextPath}/" class="${css.primaryButton}">${labels.usr.logout.back_home}</a>
+            <a href="${zkService.contextPath}/" class="link ${css.primaryButton}">${labels.usr.logout.back_home}</a>
         </div>
     </div>
 </div>

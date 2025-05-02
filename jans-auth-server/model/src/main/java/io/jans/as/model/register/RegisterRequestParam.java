@@ -6,7 +6,7 @@
 
 package io.jans.as.model.register;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Listed all standard parameters involved in client registration request.
@@ -135,6 +135,11 @@ public enum RegisterRequestParam {
      * Whether to return RPT as signed JWT
      */
     RPT_AS_JWT("rpt_as_jwt"),
+
+    /**
+     * Whether to require PKCE
+     */
+    REQUIRE_PKCE("require_pkce"),
 
     /**
      * Whether to return access token as signed JWT
@@ -392,6 +397,11 @@ public enum RegisterRequestParam {
      * list of post authn script dns
      */
     POST_AUTHN_SCRIPT_DNS("post_authn_script_dns"),
+
+    /**
+     * list of token exchange script dns
+     */
+    TOKEN_EXCHANGE_SCRIPT_DNS("token_exchange_script_dns"),
 
     /**
      * list of consent gathering script dns

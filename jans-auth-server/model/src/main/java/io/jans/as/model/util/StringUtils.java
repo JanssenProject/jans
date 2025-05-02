@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.StringJoiner;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author Javier Rojas Blum
@@ -50,11 +50,11 @@ public class StringUtils {
      * @param str1 first String param
      * @param str2 second String param
      * @return true if both are null, true if both are equals, false in other cases
-     * @deprecated it is possible to use directly:   org.apache.commons.lang.StringUtils.equals(str1, str2);
+     * @deprecated it is possible to use directly:   org.apache.commons.lang3.StringUtils.equals(str1, str2);
      */
     @Deprecated
     public static boolean equals(String str1, String str2) {
-        return org.apache.commons.lang.StringUtils.equals(str1, str2);
+        return org.apache.commons.lang3.StringUtils.equals(str1, str2);
     }
 
     public static boolean equalsIgnoringSpaces(String a, String b) {

@@ -10,7 +10,7 @@ import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.model.common.GrantType;
 import io.jans.service.CacheService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import jakarta.inject.Inject;
 

@@ -43,7 +43,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.slf4j.Logger;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 @Path(Constants.SAML_PATH + Constants.IDENTITY_PROVIDER)

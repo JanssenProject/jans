@@ -9,7 +9,7 @@ package io.jans.link.service.config;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.link.model.config.AppConfiguration;
@@ -90,7 +90,7 @@ public class ConfigurationFactory {
 	private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
 	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
-	private static final String APP_PROPERTIES_FILE = DIR + "cache-refresh.properties";
+	private static final String APP_PROPERTIES_FILE = DIR + "link-interception.properties";
 
 	private final String SALT_FILE_NAME = "salt";
 

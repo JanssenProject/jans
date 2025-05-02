@@ -9,7 +9,7 @@ package io.jans.as.server.comp;
 import io.jans.as.model.common.IdType;
 import io.jans.as.server.BaseComponentTest;
 import io.jans.as.server.idgen.ws.rs.InumGenerator;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

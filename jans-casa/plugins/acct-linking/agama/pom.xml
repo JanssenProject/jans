@@ -6,7 +6,13 @@
     <groupId>io.jans.casa.plugins</groupId>
     <artifactId>acct-linking-agama</artifactId>
     <version>0.0.0-nightly</version>
-    
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
     <dependencies>
     </dependencies>
 

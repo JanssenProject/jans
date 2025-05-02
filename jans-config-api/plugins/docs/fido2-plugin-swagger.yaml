@@ -560,11 +560,7 @@ components:
           type: array
           items:
             type: string
-        superGluuEnabled:
-          type: boolean
         sessionIdPersistInCache:
-          type: boolean
-        oldU2fMigrationEnabled:
           type: boolean
         errorReasonEnabled:
           type: boolean
@@ -583,38 +579,53 @@ components:
           type: string
         checkU2fAttestations:
           type: boolean
-        userAutoEnrollment:
+        debugUserAutoEnrollment:
           type: boolean
         unfinishedRequestExpiration:
           type: integer
           format: int32
-        authenticationHistoryExpiration:
+        metadataRefreshInterval:
           type: integer
           format: int32
         serverMetadataFolder:
           type: string
-        requestedCredentialTypes:
+        enabledFidoAlgorithms:
           type: array
           items:
             type: string
-        requestedParties:
+        metadataServers:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetadataServer'
+        disableMetadataService:
+          type: boolean
+        hints:
+          type: array
+          items:
+            type: string
+        enterpriseAttestation:
+          type: boolean
+        attestationMode:
+          type: string
+        rp:
           type: array
           items:
             $ref: '#/components/schemas/RequestedParty'
-        metadataUrlsProvider:
+    MetadataServer:
+      type: object
+      properties:
+        url:
           type: string
-        skipDownloadMdsEnabled:
-          type: boolean
-        skipValidateMdsInAttestationEnabled:
-          type: boolean
-        assertionOptionsGenerateEndpointEnabled:
-          type: boolean
+        certificateDocumentInum:
+          type: array
+          items:
+            type: string
     RequestedParty:
       type: object
       properties:
-        name:
+        id:
           type: string
-        domains:
+        origins:
           type: array
           items:
             type: string
@@ -677,15 +688,15 @@ components:
           type: string
         username:
           type: string
-        domain:
+        origin:
           type: string
         userId:
           type: string
         challenge:
           type: string
-        attenstationRequest:
+        attestationRequest:
           type: string
-        attenstationResponse:
+        attestationResponse:
           type: string
         uncompressedECPoint:
           type: string
@@ -708,8 +719,28 @@ components:
         signatureAlgorithm:
           type: integer
           format: int32
-        applicationId:
+        rpId:
           type: string
+        backupStateFlag:
+          type: boolean
+        backupEligibilityFlag:
+          type: boolean
+        attestedCredentialDataFlag:
+          type: boolean
+        extensionDataFlag:
+          type: boolean
+        userVerifiedFlag:
+          type: boolean
+        userPresentFlag:
+          type: boolean
+        authentictatorAttachment:
+          type: string
+        credId:
+          type: string
+        transports:
+          type: array
+          items:
+            type: string
     Fido2RegistrationEntry:
       type: object
       properties:

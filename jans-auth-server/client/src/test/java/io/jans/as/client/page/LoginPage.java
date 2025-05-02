@@ -6,7 +6,7 @@
 
 package io.jans.as.client.page;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebElement;
 
 /**

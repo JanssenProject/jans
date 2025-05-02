@@ -25,7 +25,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,8 +38,8 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
-import io.jans.scim.model.GluuBoolean;
-import io.jans.scim.model.GluuGroup;
+import io.jans.scim.model.JansBoolean;
+import io.jans.scim.model.JansGroup;
 import io.jans.scim.model.scim.ScimCustomPerson;
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.Meta;
@@ -160,7 +160,6 @@ public class Scim2UserService implements Serializable {
 	private void transferAttributesToPerson(UserResource res, ScimCustomPerson person) {
 
 		log.debug("transferAttributesToPerson");
-		// NOTE: calling person.setAttribute("ATTR", null) is not changing the attribute in LDAP :(
 
 		// Set values trying to follow the order found in BaseScimResource class
 		person.setAttribute("jansExtId", res.getExternalId());
@@ -334,7 +333,7 @@ public class Scim2UserService implements Serializable {
 		res.setTimezone(person.getTimezone());
 
 		res.setActive(Boolean.valueOf(person.getAttribute("jansActive"))
-				|| GluuBoolean.getByValue(person.getAttribute("jansStatus")).isBooleanValue());
+				|| JansBoolean.getByValue(person.getAttribute("jansStatus")).isBooleanValue());
 		res.setPassword(person.getUserPassword());
 
 		res.setEmails(getAttributeListValue(person, Email.class, "jansEmail"));
@@ -361,7 +360,7 @@ public class Scim2UserService implements Serializable {
 
 			for (String groupDN : listOfGroups) {
 				try {
-					GluuGroup gluuGroup = groupService.getGroupByDn(groupDN);
+					JansGroup gluuGroup = groupService.getGroupByDn(groupDN);
 
 					Group group = new Group();
 					group.setValue(gluuGroup.getInum());
@@ -654,6 +653,7 @@ public class Scim2UserService implements Serializable {
 		    
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
+			return false;
 		}
 		return true;
          

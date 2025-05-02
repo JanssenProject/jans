@@ -33,7 +33,7 @@ public class EDDSAPublicKey extends PublicKey {
      * Constructor
      *
      * @param signatureAlgorithm
-     * @param publicKeyData
+     * @param xEncoded
      */
     public EDDSAPublicKey(final SignatureAlgorithm signatureAlgorithm, byte[] xEncoded) {
         setSignatureAlgorithm(signatureAlgorithm);

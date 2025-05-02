@@ -79,6 +79,11 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-timer-weld</artifactId>
+		</dependency>		
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-orm-model</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -139,6 +144,10 @@
 			<artifactId>swagger-annotations</artifactId>
 			<version>1.5.3-M1</version>
 		</dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+        </dependency>
 	</dependencies>
 
 </project>

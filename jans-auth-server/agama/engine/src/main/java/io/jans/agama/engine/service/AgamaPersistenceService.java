@@ -111,19 +111,25 @@ public class AgamaPersistenceService {
         
     }
     
-    public int getEffectiveFlowTimeout(String flowName) {
+    public int getEffectiveFlowTimeout(String flowName, boolean nativeClient) {
 
         Flow fl = entryManager.findEntries(AGAMA_FLOWS_BASE, Flow.class, 
                Filter.createEqualityFilter(Flow.ATTR_NAMES.QNAME, flowName),
                new String[]{ Flow.ATTR_NAMES.META }, 1).get(0);
 
-        int unauth = appConfiguration.getSessionIdUnauthenticatedUnusedLifetime();
+        int unauth = appConfiguration.getSessionIdUnauthenticatedUnusedLifetime();        
+        if (nativeClient) {
+            unauth = Optional.ofNullable(
+                        appConfiguration.getAuthorizationChallengeSessionLifetimeInSeconds())
+                            .orElse(unauth);
+        }
+
         Integer flowTimeout = fl.getMetadata().getTimeout();
         int timeout = Optional.ofNullable(flowTimeout).map(Integer::intValue).orElse(unauth);
         return Math.min(unauth, timeout);
 
     }
-    
+
     public Flow getFlow(String flowName, boolean full) throws IOException {
 
         try {
@@ -189,7 +195,7 @@ public class AgamaPersistenceService {
         
         logger.debug("Saving state of current flow run");
         entryManager.merge(run);
-        
+
     }
     
     public void finishFlow(String sessionId, FlowResult result) throws IOException {
@@ -212,6 +218,7 @@ public class AgamaPersistenceService {
             status.setTemplatePath(null);
             status.setTemplateDataModel(null);
             status.setExternalRedirectUrl(null);
+            status.setStartUrl(null);
 
             run.setEncodedContinuation(null);
             run.setHash(null);

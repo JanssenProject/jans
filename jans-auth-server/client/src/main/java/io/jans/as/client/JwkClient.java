@@ -10,7 +10,7 @@ import io.jans.as.model.crypto.PublicKey;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.json.JSONObject;
 

@@ -23,7 +23,22 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jans.scim.model.scim2.ErrorScimType;
+import io.jans.scim.model.scim2.bulk.BulkOperation;
+import io.jans.scim.model.scim2.bulk.BulkRequest;
+import io.jans.scim.model.scim2.bulk.BulkResponse;
+import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
+import io.jans.scim.model.scim2.group.GroupResource;
+import io.jans.scim.model.scim2.patch.PatchRequest;
+import io.jans.scim.model.scim2.user.UserResource;
+import io.jans.scim.service.filter.ProtectedApi;
+import io.jans.util.Pair;
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.Consumes;
@@ -34,24 +49,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.apache.commons.lang.StringUtils;
-import io.jans.scim.model.scim2.ErrorScimType;
-import io.jans.scim.model.scim2.bulk.BulkOperation;
-import io.jans.scim.model.scim2.bulk.BulkRequest;
-import io.jans.scim.model.scim2.bulk.BulkResponse;
-import io.jans.scim.model.scim2.fido.FidoDeviceResource;
-import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
-import io.jans.scim.model.scim2.group.GroupResource;
-import io.jans.scim.model.scim2.patch.PatchRequest;
-import io.jans.scim.model.scim2.user.UserResource;
-import io.jans.scim.service.filter.ProtectedApi;
-import io.jans.util.Pair;
-
 /**
  * SCIM Bulk Endpoint Implementation
  */
+@Dependent
 @Named("scim2BulkEndpoint")
 @Path("/v2/Bulk")
 public class BulkWebService extends BaseScimWebService {
@@ -65,7 +66,6 @@ public class BulkWebService extends BaseScimWebService {
 
     private String usersEndpoint;
     private String groupsEndpoint;
-    private String fidodevicesEndpoint;
     private String fido2devicesEndpoint;
     private String commonWsEndpointPrefix;
 
@@ -74,9 +74,6 @@ public class BulkWebService extends BaseScimWebService {
 
     @Inject
     private GroupWebService groupWS;
-
-    @Inject
-    private FidoDeviceWebService fidoDeviceWS;
     
     @Inject
     private Fido2DeviceWebService fido2DeviceWS;
@@ -233,7 +230,7 @@ public class BulkWebService extends BaseScimWebService {
                         throw new Exception("method not recognized: " + method);
 
                     //Check if path passed is consistent with respect to method:
-                    List<String> availableEndpoints=Arrays.asList(usersEndpoint, groupsEndpoint, fidodevicesEndpoint, fido2devicesEndpoint);
+                    List<String> availableEndpoints=Arrays.asList(usersEndpoint, groupsEndpoint, fido2devicesEndpoint);
                     boolean consistent = false;
                     for (String endpoint : availableEndpoints) {
                         if (verb.equals(POST))
@@ -273,9 +270,6 @@ public class BulkWebService extends BaseScimWebService {
         else
         if (path.startsWith(groupsEndpoint))
             return groupWS;
-        else
-        if (path.startsWith(fidodevicesEndpoint))
-            return fidoDeviceWS;
         else
         if (path.startsWith(fido2devicesEndpoint))
             return fido2DeviceWS;
@@ -366,24 +360,6 @@ public class BulkWebService extends BaseScimWebService {
                         break;
                 }
 
-            else
-            if (ws==fidoDeviceWS)
-                switch (verb){
-                    case PUT:
-                        FidoDeviceResource dev=mapper.readValue(data, FidoDeviceResource.class);
-                        response=fidoDeviceWS.updateDevice(dev, fragment, "id", null);
-                        break;
-                    case DELETE:
-                        response=fidoDeviceWS.deleteDevice(fragment);
-                        break;
-                    case PATCH:
-                        PatchRequest pr=mapper.readValue(data, PatchRequest.class);
-                        response=fidoDeviceWS.patchDevice(pr, fragment, "id", null);
-                        break;
-                    case POST:
-                        response=fidoDeviceWS.createDevice();
-                        break;
-                }
 
             else
             if (ws==fido2DeviceWS)
@@ -414,13 +390,12 @@ public class BulkWebService extends BaseScimWebService {
 
     @PostConstruct
     public void setup() {
-        //Do not use getClass() here... a typical weld issue...
+        //Do not use getClass() here... weld issue...
         endpointUrl=appConfiguration.getBaseEndpoint() + BulkWebService.class.getAnnotation(Path.class).value();
         availableMethods= Arrays.asList(Verb.values());
 
         usersEndpoint=userWS.getEndpointUrl();
         groupsEndpoint=groupWS.getEndpointUrl();
-        fidodevicesEndpoint=fidoDeviceWS.getEndpointUrl();
         fido2devicesEndpoint=fido2DeviceWS.getEndpointUrl();
         commonWsEndpointPrefix=usersEndpoint.substring(0, usersEndpoint.lastIndexOf("/"));
     }

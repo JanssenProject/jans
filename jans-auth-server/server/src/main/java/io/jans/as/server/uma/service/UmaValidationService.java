@@ -39,8 +39,8 @@ import io.jans.as.server.uma.authorization.UmaWebException;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Iterables;
 import org.slf4j.Logger;
 

@@ -6,7 +6,8 @@ tags:
   - tui
 ---
 
-## Local User Management
+# Jans CLI/TUI User Management
+
 
 In this document we will cover managing people in the Jans Server's Jans CLI and Jans TUI.
 
@@ -65,6 +66,25 @@ Let's add an user by selecting `Add Users` tab. Initially we can provide bellow 
 ![add-claim](https://github.com/JanssenProject/jans/assets/43112579/97673b9e-4f45-4af3-869a-dfb86a8e972f)
 
 Finally `save` and exit. We will get an unique `inum`
+
+
+## Change User Password
+No chance to recover user password, but you can change.
+To change password of a user navigate/or search user and press key **p** when the target user is higlighted.
+In the figure below, passowrd of user **sakamura** is being changed.
+
+![Change User Password](../../assets/tui-user-change-password.png)
+
+Once you write new password (it will be displayed while you type), go to button `< Save >` and press Enter.
+
+## Manage User FIDO Devices
+To view and manage users registered FIDO devices, first navigate/or search user and press key **f** on the keyboard.
+If user has any registered FIDO device, a popup will appears as in image below:
+
+![User FIDO Devices](../../assets/tui-ser-fido-device-list.png)
+
+You can veiw details of a device by pressing Enter. To delete a device press key **d**, you will be
+prompted for confirmation.
 
 
 ## This content is in progress

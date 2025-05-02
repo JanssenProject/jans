@@ -168,7 +168,7 @@ class PersonAuthentication(PersonAuthenticationType):
         config = entryManager.find(config.getClass(), "ou=configuration,o=jans")
         # Pick (one) attribute where user id is stored (e.g. uid/mail)
         # primaryKey is the primary key on the backend AD / LDAP Server
-        # localPrimaryKey is the primary key on Janssen. This attr value has been mapped with the primary key attr of the backend AD / LDAP when configuring cache refresh
+        # localPrimaryKey is the primary key on Janssen. This attr value has been mapped with the primary key attr of the backend AD / LDAP when configuring link
         uid_attr = config.getIdpAuthn().get(0).getConfig().findValue("localPrimaryKey").asText()
         print "GitHub: init. uid attribute is '%s'" % uid_attr
         return uid_attr

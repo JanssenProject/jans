@@ -3,7 +3,7 @@ tags:
   - administration
   - developer
 ---
-
+# Script Debugging
 ## Setup
 
 For development the kubernetes setup must be local and accessible to the debug server address. The following steps will walk you trough a setup using Minikube with docker driver, and [ksync](https://ksync.github.io/ksync/) for syncing the files between local, and the container. The following instructions assume a fresh ubuntu 20.04, however the setup can be done on a different operating systems such as macOS or Windows.  
@@ -414,7 +414,7 @@ For Jython scripts, we need additional steps to enable breakpoints.
 
     ![LDAP basic script ](../../../assets/basic_script.png)
    
-1. Choose to load the script from file instead of ldap. Inside the browser change `jansModuleProperty` with value `{"value1":"location_type","value2":"ldap","description":""}` to `{"value1":"location_type","value2":"file","description":""}`
+1. Choose to load the script from file instead of db. Inside the browser change `jansModuleProperty` with value `{"value1":"location_type","value2":"db","description":""}` to `{"value1":"location_type","value2":"file","description":""}`
 
 1. Specify the `Script Path` location to the location of the folder inside auth server pods: `/deploy/interception-scripts-ksync/basic.py`. Right click the upper `jansModuleProperty` and click `New Value`. A new entry for `jansModuleProperty` will be created. Insert the following for the value: `{"value1":"location_path","value2":"/deploy/interception-scripts-ksync/basic.py","description":""}`
   

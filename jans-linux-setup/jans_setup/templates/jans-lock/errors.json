@@ -1,9 +1,26 @@
 {
-  "common": [
-    {
-      "id": "unknown_error",
-      "description": "Unknown or not found error",
-      "uri": null
-    }
-  ]
-}
+    "common": [
+        {
+             "id": "invalid_request",
+             "description": "The request is missing a required parameter, includes an unsupported parameter or parameter value, or is otherwise malformed",
+             "uri": null
+        },
+        {
+             "id": "unknown_error",
+             "description": "Unknown or not found error",
+             "uri": null
+        }
+    ],
+    "stat":[
+        {
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats a parameter, includes multiple credentials, utilizes more than one mechanism for authenticating the client, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"access_denied",
+            "description":"The resource owner or authorization server denied the request.",
+            "uri":null
+        }
+    ]
+  }

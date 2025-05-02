@@ -1,9 +1,30 @@
 package io.jans.scim.ws.rs.scim2;
 
+import static io.jans.scim.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+
 //import io.jans.scim.ldap.service.IGroupService;
-//import io.jans.scim.model.GluuGroup;
-import org.apache.commons.lang.StringUtils;
+//import io.jans.scim.model.JansGroup;
+import org.apache.commons.lang3.StringUtils;
+
 import io.jans.model.attribute.AttributeDataType;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.model.SortOrder;
+import io.jans.orm.search.filter.Filter;
 import io.jans.scim.model.scim.ScimCustomPerson;
 //import io.jans.scim.model.scim2.group.GroupResource;
 import io.jans.scim.model.scim2.util.DateUtil;
@@ -13,12 +34,8 @@ import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
 //import io.jans.scim.service.scim2.Scim2GroupService;
 import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.scim.util.ServiceUtil;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.model.SortOrder;
-import io.jans.orm.search.filter.Filter;
-
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.GET;
@@ -28,14 +45,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import static io.jans.scim.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-
+@Dependent
 @Named
 @Path("/v2/UpdatedUsers")
 public class ScimResourcesUpdatedWebService extends BaseScimWebService {

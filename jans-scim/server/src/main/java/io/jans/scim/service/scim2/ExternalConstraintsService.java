@@ -19,7 +19,7 @@ import io.jans.scim.service.external.OperationContext;
 import io.jans.scim.service.external.TokenDetails;
 import io.jans.scim.ws.rs.scim2.BaseScimWebService;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import org.slf4j.Logger;

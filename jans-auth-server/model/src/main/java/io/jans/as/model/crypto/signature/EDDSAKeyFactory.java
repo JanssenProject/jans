@@ -9,7 +9,7 @@ import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.KeyFactory;
 import io.jans.util.security.SecurityProviderUtility;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -123,11 +123,7 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
      * @param expirationDate
      * @param dnName
      * @return
-     * @throws CertificateEncodingException
-     * @throws InvalidKeyException
      * @throws IllegalStateException
-     * @throws NoSuchProviderException
-     * @throws NoSuchAlgorithmException
      * @throws SignatureException
      */
     public Certificate generateV3Certificate(final Date startDate, final Date expirationDate, final String dnName) throws SignatureException {

@@ -17,7 +17,6 @@ public class User {
     private String userName;
     private String givenName;
     private String lastName;
-    private String email;
     private boolean admin;
     private String id;
     private String preferredMethod;

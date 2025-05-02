@@ -1,7 +1,7 @@
 package io.jans.as.server.util;
 
 import com.google.common.base.Preconditions;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.json.JSONObject;
 
 import static org.testng.Assert.assertTrue;

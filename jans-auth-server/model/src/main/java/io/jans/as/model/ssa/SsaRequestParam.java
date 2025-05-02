@@ -16,6 +16,7 @@ public enum SsaRequestParam {
     GRANT_TYPES("grant_types"),
     ONE_TIME_USE("one_time_use"),
     ROTATE_SSA("rotate_ssa"),
+    SCOPE("scope"),
 
     CREATED_AT("created_at"),
     ISSUER("iss"),

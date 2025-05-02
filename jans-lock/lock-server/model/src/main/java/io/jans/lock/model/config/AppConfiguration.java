@@ -16,7 +16,6 @@
 
 package io.jans.lock.model.config;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +45,14 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "OpenID issuer URL")
     @Schema(description = "OpenID issuer URL")
     private String openIdIssuer;
+    
+    @DocProperty(description = "Active stat enabled")
+    @Schema(description = "Active stat enabled")
+    private boolean statEnabled;
+
+    @DocProperty(description = "Statistical data capture time interval")
+    @Schema(description = "Statistical data capture time interval")
+    private int statTimerIntervalInSeconds;
 
     @DocProperty(description = "List of token channel names", defaultValue = "jans_token")
     @Schema(description = "List of token channel names")
@@ -62,10 +69,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
     @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
     private String tokenUrl;
-    
-    @DocProperty(description = "Group scope enabled")
-    @Schema(description = "Group scope enabled")
-    private boolean groupScopeEnabled;
 
     @DocProperty(description = "Endpoint groups")
     @Schema(description = "Endpoint groups")
@@ -91,10 +94,6 @@ public class AppConfiguration implements Configuration {
     @Schema(description = "The path to the external log4j2 logging configuration")
     private String externalLoggerConfiguration;
 
-    @DocProperty(description = "Channel for metric reports", defaultValue = "jans_pdp_metric")
-    @Schema(description = "Channel for metric reports")
-    private String metricChannel;
-
     @DocProperty(description = "The interval for metric reporter in seconds")
     @Schema(description = "The interval for metric reporter in seconds")
     private int metricReporterInterval;
@@ -112,13 +111,6 @@ public class AppConfiguration implements Configuration {
     @Schema(description = "Time interval for the Clean Service in seconds")
     private int cleanServiceInterval;
 
-    @Schema(description = "Opa Configuration")
-    private OpaConfiguration opaConfiguration;
-
-    @DocProperty(description = "PDP type")
-    @Schema(description = "PDP type")
-    private String pdpType;
-
     @DocProperty(description = "Authorization token to access Json Uris")
     @Schema(description = "Authorization token to access Json Uris")
     private String policiesJsonUrisAuthorizationToken;
@@ -134,6 +126,17 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "List of Zip Uris with policies")
     @Schema(description = "List of Zip Uris with policies")
     private List<String> policiesZipUris;
+
+    @DocProperty(description = "PubSub consumer service")
+    @Schema(description = "PubSub consumer service")
+    private String messageConsumerType;
+
+    @DocProperty(description = "Policy consumer service")
+    @Schema(description = "Policy consumer service")
+    private String policyConsumerType;
+    
+    @DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from AS. Default value is false", defaultValue = "false")
+    private Boolean errorReasonEnabled = false;
 
     public String getBaseDN() {
         return baseDN;
@@ -159,7 +162,23 @@ public class AppConfiguration implements Configuration {
         this.openIdIssuer = openIdIssuer;
     }
 
-    public List<String> getTokenChannels() {
+    public boolean isStatEnabled() {
+		return statEnabled;
+	}
+
+	public void setStatEnabled(boolean statEnabled) {
+		this.statEnabled = statEnabled;
+	}
+
+	public int getStatTimerIntervalInSeconds() {
+		return statTimerIntervalInSeconds;
+	}
+
+	public void setStatTimerIntervalInSeconds(int statTimerIntervalInSeconds) {
+		this.statTimerIntervalInSeconds = statTimerIntervalInSeconds;
+	}
+
+	public List<String> getTokenChannels() {
         return tokenChannels;
     }
 
@@ -189,14 +208,6 @@ public class AppConfiguration implements Configuration {
 
     public void setTokenUrl(String tokenUrl) {
         this.tokenUrl = tokenUrl;
-    }
-    
-    public boolean isGroupScopeEnabled() {
-        return groupScopeEnabled;
-    }
-
-    public void setGroupScopeEnabled(boolean groupScopeEnabled) {
-        this.groupScopeEnabled = groupScopeEnabled;
     }
 
     public Map<String, List<String>> getEndpointGroups() {
@@ -247,14 +258,6 @@ public class AppConfiguration implements Configuration {
         this.externalLoggerConfiguration = externalLoggerConfiguration;
     }
 
-    public String getMetricChannel() {
-        return metricChannel;
-    }
-
-    public void setMetricChannel(String metricChannel) {
-        this.metricChannel = metricChannel;
-    }
-
     public int getMetricReporterInterval() {
         return metricReporterInterval;
     }
@@ -285,22 +288,6 @@ public class AppConfiguration implements Configuration {
 
     public void setCleanServiceInterval(int cleanServiceInterval) {
         this.cleanServiceInterval = cleanServiceInterval;
-    }
-
-    public OpaConfiguration getOpaConfiguration() {
-        return opaConfiguration;
-    }
-
-    public void setOpaConfiguration(OpaConfiguration opaConfiguration) {
-        this.opaConfiguration = opaConfiguration;
-    }
-
-    public String getPdpType() {
-        return pdpType;
-    }
-
-    public void setPdpType(String pdpType) {
-        this.pdpType = pdpType;
     }
 
     public String getPoliciesJsonUrisAuthorizationToken() {
@@ -335,19 +322,48 @@ public class AppConfiguration implements Configuration {
         this.policiesZipUris = policiesZipUris;
     }
 
-    @Override
-    public String toString() {
-        return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
-                + openIdIssuer + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId + ", tokenUrl="
-                + tokenUrl + ", groupScopeEnabled=" + groupScopeEnabled+ ", endpointGroups=" + endpointGroups + ", endpointDetails=" + endpointDetails
-                + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel=" + loggingLevel + ", loggingLayout="
-                + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", metricChannel="
-                + metricChannel + ", metricReporterInterval=" + metricReporterInterval + ", metricReporterKeepDataDays="
-                + metricReporterKeepDataDays + ", metricReporterEnabled=" + metricReporterEnabled
-                + ", cleanServiceInterval=" + cleanServiceInterval + ", opaConfiguration=" + opaConfiguration
-                + ", pdpType=" + pdpType + ", policiesJsonUrisAuthorizationToken=" + policiesJsonUrisAuthorizationToken
-                + ", policiesJsonUris=" + policiesJsonUris + ", policiesZipUrisAuthorizationToken="
-                + policiesZipUrisAuthorizationToken + ", policiesZipUris=" + policiesZipUris + "]";
+    public String getMessageConsumerType() {
+        if (messageConsumerType == null) messageConsumerType = "DISABLED";
+		return messageConsumerType;
+	}
+
+	public void setMessageConsumerType(String messageConsumerType) {
+		this.messageConsumerType = messageConsumerType;
+	}
+
+	public String getPolicyConsumerType() {
+        if (policyConsumerType == null) policyConsumerType = "DISABLED";
+		return policyConsumerType;
+	}
+
+	public void setPolicyConsumerType(String policyConsumerType) {
+		this.policyConsumerType = policyConsumerType;
+	}
+
+	public Boolean getErrorReasonEnabled() {
+        if (errorReasonEnabled == null) errorReasonEnabled = false;
+        return errorReasonEnabled;
     }
+
+    public void setErrorReasonEnabled(Boolean errorReasonEnabled) {
+        this.errorReasonEnabled = errorReasonEnabled;
+    }
+
+    @Override
+	public String toString() {
+		return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
+				+ openIdIssuer + ", statEnabled=" + statEnabled + ", statTimerIntervalInSeconds="
+				+ statTimerIntervalInSeconds + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId
+				+ ", clientPassword=" + clientPassword + ", tokenUrl=" + tokenUrl + ", endpointGroups=" + endpointGroups
+				+ ", endpointDetails=" + endpointDetails + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel="
+				+ loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
+				+ externalLoggerConfiguration + ", metricReporterInterval=" + metricReporterInterval
+				+ ", metricReporterKeepDataDays=" + metricReporterKeepDataDays + ", metricReporterEnabled="
+				+ metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval
+				+ ", policiesJsonUrisAuthorizationToken=" + policiesJsonUrisAuthorizationToken + ", policiesJsonUris="
+				+ policiesJsonUris + ", policiesZipUrisAuthorizationToken=" + policiesZipUrisAuthorizationToken
+				+ ", policiesZipUris=" + policiesZipUris + ", messageConsumerType=" + messageConsumerType
+				+ ", policyConsumerType=" + policyConsumerType + ", errorReasonEnabled=" + errorReasonEnabled + "]";
+	}
 
 }

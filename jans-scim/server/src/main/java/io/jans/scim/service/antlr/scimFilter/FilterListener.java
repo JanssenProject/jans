@@ -1,6 +1,6 @@
 package io.jans.scim.service.antlr.scimFilter;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import io.jans.scim.model.scim2.AttributeDefinition.Type;

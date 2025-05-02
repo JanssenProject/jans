@@ -111,6 +111,13 @@
       <scope>provided</scope>
     </dependency>
     <!-- end jboss dependencies -->
+
+    <!-- commons beanutils dependency -->
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+    </dependency>
+    <!-- commons beanutils dependency -->
   </dependencies>
 
   <build>

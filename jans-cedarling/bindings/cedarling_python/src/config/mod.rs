@@ -4,25 +4,12 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
-use pyo3::prelude::*;
 use pyo3::Bound;
+use pyo3::prelude::*;
 
 pub(crate) mod bootstrap_config;
-mod jwt_config;
-mod memory_log_config;
-mod off_log_config;
-mod policy_store_config;
-mod policy_store_source;
-mod stdout_log_config;
 
 pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_class::<memory_log_config::MemoryLogConfig>()?;
-    m.add_class::<off_log_config::DisabledLoggingConfig>()?;
-    m.add_class::<stdout_log_config::StdOutLogConfig>()?;
-    m.add_class::<policy_store_source::PolicyStoreSource>()?;
-    m.add_class::<policy_store_config::PolicyStoreConfig>()?;
     m.add_class::<bootstrap_config::BootstrapConfig>()?;
-    m.add_class::<jwt_config::JwtConfig>()?;
-
     Ok(())
 }

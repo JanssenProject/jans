@@ -21,7 +21,7 @@ import io.jans.as.server.uma.authorization.UmaScriptByScope;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.uma.ClaimDefinition;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;

@@ -10,7 +10,7 @@ import io.jans.as.model.common.ExchangeTokenType;
 import io.jans.as.model.common.TokenType;
 import io.jans.as.model.token.TokenErrorResponseType;
 import jakarta.ws.rs.core.Response;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;

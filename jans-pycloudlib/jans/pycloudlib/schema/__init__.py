@@ -4,6 +4,7 @@ import json
 import logging
 import re
 from base64 import b64decode
+from contextlib import suppress
 
 import pem
 from fqdn import FQDN
@@ -20,6 +21,7 @@ from marshmallow.validate import Length
 from marshmallow.validate import OneOf
 from marshmallow.validate import Predicate
 from marshmallow.validate import Range
+from sprig_aes import sprig_decrypt_aes
 
 logger = logging.getLogger(__name__)
 
@@ -515,7 +517,7 @@ class SecretSchema(Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @validates("encoded_salt")
-    def validate_salt(self, value):
+    def validate_salt(self, value, data_key):
         if value and len(value) != 24:
             raise ValidationError("Length must be 24")
 
@@ -523,7 +525,7 @@ class SecretSchema(Schema):
             raise ValidationError("Only alphanumeric characters are allowed")
 
     @validates("admin_password")
-    def validate_password(self, value, **kwargs):
+    def validate_password(self, value, data_key):
         if not PASSWD_RGX.search(value):
             raise ValidationError(
                 "Must be at least 6 characters and include "
@@ -827,7 +829,7 @@ class ConfigmapSchema(Schema):
     )
 
     @validates("hostname")
-    def validate_fqdn(self, value):
+    def validate_fqdn(self, value, data_key):
         if not FQDN(value).is_valid:
             raise ValidationError("Invalid FQDN format.")
 
@@ -838,7 +840,7 @@ class ConfigmapSchema(Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @validates("optional_scopes")
-    def validate_optional_scopes(self, value):
+    def validate_optional_scopes(self, value, data_key):
         try:
             scopes = json.loads(value)
         except json.decoder.JSONDecodeError:
@@ -884,38 +886,72 @@ class ConfigurationSchema(Schema):
     _configmap = Nested(ConfigmapSchema, required=True)
 
 
-def load_schema_from_file(path, exclude_configmap=False, exclude_secret=False):
+def load_schema_from_file(path, exclude_configmap=False, exclude_secret=False, key_file=""):
     """Loads schema from file."""
-    out = {}
-    err = {}
-    code = 0
+    out, err, code = maybe_encrypted_schema(path, key_file)
 
-    try:
-        with open(path) as f:
-            docs = json.loads(f.read())
-    except (IOError, ValueError) as exc:
-        err = exc
-        code = 1
+    if code != 0:
         return out, err, code
 
     # dont exclude attributes
-    exclude_attrs = False
+    exclude_attrs = []
 
     # exclude configmap from loading mechanism
     if exclude_configmap:
         key = "_configmap"
         exclude_attrs = [key]
-        docs.pop(key, None)
+        out.pop(key, None)
 
     # exclude secret from loading mechanism
     if exclude_secret:
         key = "_secret"
         exclude_attrs = [key]
-        docs.pop(key, None)
+        out.pop(key, None)
 
     try:
-        out = ConfigurationSchema().load(docs, partial=exclude_attrs)
+        out = ConfigurationSchema().load(out, partial=exclude_attrs)
     except ValidationError as exc:
         err = exc.messages
         code = 1
+    return out, err, code
+
+
+def load_schema_key(path):
+    try:
+        with open(path) as f:
+            key = f.read().strip()
+    except FileNotFoundError:
+        key = ""
+    return key
+
+
+def maybe_encrypted_schema(path, key_file):
+    out, err, code = {}, {}, 0
+
+    try:
+        # read schema as raw string
+        with open(path) as f:
+            raw_txt = f.read()
+    except FileNotFoundError as exc:
+        err = {
+            "error": f"Unable to load schema {path}",
+            "reason": exc,
+        }
+        code = exc.errno
+    else:
+        if key := load_schema_key(key_file):
+            # try to decrypt schema (if applicable)
+            with suppress(ValueError):
+                raw_txt = sprig_decrypt_aes(raw_txt, key)
+
+        try:
+            out = json.loads(raw_txt)
+        except (json.decoder.JSONDecodeError, UnicodeDecodeError) as exc:
+            err = {
+                "error": f"Unable to decode JSON from {path}",
+                "reason": exc,
+            }
+            code = 1
+
+    # finalized results
     return out, err, code

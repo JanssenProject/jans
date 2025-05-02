@@ -18,7 +18,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import io.jans.exception.ConfigurationException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Conf;
@@ -68,9 +68,6 @@ public class ConfigurationFactory {
 
 	@Inject
 	private Instance<Configuration> configurationInstance;
-
-	@Inject
-	private Instance<AbstractCryptoProvider> abstractCryptoProviderInstance;
 
 	private ErrorResponseFactory errorResponseFactory;
 
@@ -283,9 +280,6 @@ public class ConfigurationFactory {
 				if (this.loaded) {
 					destroy(AppConfiguration.class);
 					destroy(StaticConfiguration.class);
-//					destroy(Fido2ErrorResponseFactory.class);
-
-					destroyCryptoProviderInstance(AbstractCryptoProvider.class);
 				}
 
 				this.loaded = true;
@@ -303,11 +297,6 @@ public class ConfigurationFactory {
 	public void destroy(Class<? extends Configuration> clazz) {
 		Instance<? extends Configuration> confInstance = configurationInstance.select(clazz);
 		configurationInstance.destroy(confInstance.get());
-	}
-
-	public void destroyCryptoProviderInstance(Class<? extends AbstractCryptoProvider> clazz) {
-		AbstractCryptoProvider abstractCryptoProvider = abstractCryptoProviderInstance.get();
-		abstractCryptoProviderInstance.destroy(abstractCryptoProvider);
 	}
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {

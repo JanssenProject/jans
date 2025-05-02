@@ -5,12 +5,14 @@
  * Copyright (c) 2024 U-Zyn Chua
  */
 
+use chrono::Duration;
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Config {
     pub max_items: usize,
     pub max_item_size: usize,
-    pub max_ttl: std::time::Duration,
-    pub default_ttl: std::time::Duration,
+    pub max_ttl: Duration,
+    pub default_ttl: Duration,
     pub auto_clear_expired: bool,
 }
 
@@ -19,8 +21,8 @@ impl Config {
         Config {
             max_items: 10_000,
             max_item_size: 500_000,
-            max_ttl: std::time::Duration::from_secs(60 * 60),
-            default_ttl: std::time::Duration::from_secs(5 * 60), // 5 minutes
+            max_ttl: Duration::seconds(60 * 60),
+            default_ttl: Duration::seconds(5 * 60), // 5 minutes
             auto_clear_expired: true,
         }
     }
@@ -41,8 +43,8 @@ mod tests {
         let config: Config = Config::new();
         assert_eq!(config.max_items, 10_000);
         assert_eq!(config.max_item_size, 500_000);
-        assert_eq!(config.max_ttl, std::time::Duration::from_secs(60 * 60));
-        assert_eq!(config.default_ttl, std::time::Duration::from_secs(5 * 60));
+        assert_eq!(config.max_ttl, Duration::seconds(60 * 60));
+        assert_eq!(config.default_ttl, Duration::seconds(5 * 60));
         assert!(config.auto_clear_expired);
     }
 }

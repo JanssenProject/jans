@@ -30,7 +30,7 @@ By default, the engine sends rendered pages using `UTF-8` character encoding. To
 
 ### Localization and internationalization
 
-To allow templates render text according to users' language or country, you can add a file named `labels.txt` to the `web` directory of a project. There you can place the so called "internationalization labels" (common UI-related messages) as per your needs. The file is expected to have a structure as follows:
+To allow templates render text according to users' language or country, you can add a file named `labels.txt` to the `web` directory of a project. There you can place the so-called "internationalization labels" (common UI-related messages) as per your needs. The file is expected to have a structure as follows:
 
 ```
 key = value
@@ -52,16 +52,16 @@ key/value pairs for this locale
 
 ```
 
-Note the file is divided into sections for every locale to support. The first section (no locale) will contain the "default" labels - more on this later. One locale conveys mostly the same concept of a Java locale (class `java.util.Locale`). In this case, a locale represents a language, country/region, and variant combination. Example of locale IDs are:
+Note how the file is split into sections for every locale to support. The first section (no locale) will contain the "default" labels - more on this later. One locale conveys mostly the same concept of a Java locale (class `java.util.Locale`). In this case, a locale represents a language, country/region, and variant combination. Examples of locale IDs are:
 
 - `de_CH`: German as used in Switzerland
 - `ca_ES_VALENCIA`: Catalan as used in Spain (province of Valencia)
-- ` th_TH_TH`: Thai as used in Thailand together with Thai digits
+- `th_TH_TH`: Thai as used in Thailand together with Thai digits
 - `ja`: Japanese (in general)
 
-Note the _labels_ file may contain several sections for the same language, like `de_CH`, `de_DE`, `de_LU`, and plain `de`. Agama engine will pick the text from the section that best maches the settings of the end-user browser. Normally, this is supplied through the HTTP header `Accept-Language`. As an example, if the browser's preferred language is German from Luxembourg, the lookup is made in `de_LU` section. If no text is found there, then `de` section is tried. The "no locale" (first section) is used as a last resort. That's why it is said to contain the "default" labels.
+There may be several sections regarding the same language, like `de_CH`, `de_DE`, `de_LU`, and plain `de`. Agama engine will pick the text from the section that best maches the settings of the end-user browser (normally, this is supplied through the `Accept-Language` HTTP header). As an example, if the browser's preferred language is German from Luxembourg, the lookup is made in `de_LU` section. If no text is found there, the `de` section is tried. The opening "no locale" section is used as a last resort - that's why it is said to contain the "default" labels.
 
-To reference a label from a template use an expression like `${labels("<KEY>")}`. This will retrieve the proper text using the rules just described. When the lookup fails thoroughly (no way to found a label matching the key), the four character string `null` is returned. This helps to easily identify when a template has issues.
+To reference a label from a template an expression like `${labels("<KEY>")}` can be used. This will retrieve the proper text using the rules just described. When the lookup fails thoroughly (no way to found a label matching the key), the four character string `null` is returned. This helps to easily locate template issues if any.
 
 A value (message) associated to a key can contain placeholders where data can be injected. Suppose the following key/value pair:
 
@@ -69,9 +69,9 @@ A value (message) associated to a key can contain placeholders where data can be
 disk.count = The disk {1} contains {0} file(s)
 ```
 
-Using `${labels("disk.count")}` will just retrieve the message as is, however, positional arguments can be passed. As an example, `${labels("disk.count", 10, "SSD-NVME-123")}` will generate `The disk SSD-NVME-123 contains 10 file(s)`. Note parameters are not only restricted to literals (fixed values) like `0`, `false`, or `"world"`. Variables can also be used. It is recommended to only employ literals/variables whose data types are string/number/date/boolean.
+Using `${labels("disk.count")}` will just retrieve the message as is, however, positional arguments can be passed. As an example, `${labels("disk.count", 7, "SSD-NVME-123")}` will generate `The disk SSD-NVME-123 contains 7 file(s)`. Note parameters are not restricted to literals (fixed values) like `0`, `false`, or `"world"`. Variables can also be used. It is recommended to employ literals/variables whose data types are string, number, date, or boolean only.
 
-Labels are global. This means they are not restricted to the project where they are originally defined. This allows [template overrides](#template-overrides) to work smoothly. Since a label defined in project `A` can be freely used in templates of project `B`, the chance of key collisions is high, that is, two or more projects may be defining labels with the same key. To mitigate this problem, it is recommended to prefix all keys with the name/identifier of the originating project, like:
+Labels are global: not only can they be accessed from the project where they are originally defined but from any other project. This allows [template overrides](#template-overrides) to work smoothly, however, it brings the possibility of key collisions, that is, two or more projects defining labels with the same keys. To mitigate this problem, it is recommended to prefix all keys with the name/identifier of the originating project, like:
 
 ```
 myproject.salutation = hello!
@@ -84,18 +84,18 @@ myproject.salutation = ciao!
 
 ```
 
-If leaving `salutation` alone, it is likely other projects added to the server in the future may contain their own version of `salutation` leading to unexpected results. 
+When leaving `salutation` alone, it is likely other projects added to the server in the future may contain their own version of `salutation` leading to unexpected results. 
 
 Additional notes:
 
 - Language codes should follow the ISO 639 alpha-2 standard
 - Country/region codes should be driven by ISO 3166 alpha-2 or UN M.49 numeric-3 area code
-- Except for the locale IDs section markers, the syntax of `labels.txt` adheres to that of Java properties files. This is a human-friendly, low-surpise format: a label key starts a line and its value comes after an equal sign or a colon. For readability one or more empty lines can be used between contiguous key/value pairs. Any line starting with `!` or `#`  is ignored and thus can be used as a comment or note 
+- Except for the locale section headings, the syntax of `labels.txt` adheres to that of Java properties files. This is a human-friendly, low-surpise format: a label key starts a line and its value comes after an equal sign or a colon. For readability one or more empty lines can be used between contiguous key/value pairs. Any line starting with `!` or `#`  is ignored and thus can be used as a comment or note 
 - When positional arguments are passed, Java class `java.text.MessageFormat` is internally employed. This allows  powerful formatting and proper handling of plurals. If for some reason, formatting fails, the resulting string will be `error!`. Check the server logs and try to simplify your message in this case
 
 #### Access to AS labels
 
-The jans-auth server comes with a series of files known as "resource bundles" that follow the naming `jans-auth_xx.properties` where `xx` represents an ISO language code. Bundles can be added or overridden by placing suitable property files in directory `/opt/jans/jetty/jans-auth/custom/i18n`. Strings stored in these bundles can be accessed from templates using expressions like `${msgs.<KEY>}`. As most keys in resource bundles contain dot characters, the alternative notation `${msgs["KEY"]}` works better for FreeMarker, for example `${msgs["login.errorMessage"]}`.
+The jans-auth server comes with a series of files known as "resource bundles" that follow the naming `jans-auth_xx.properties` where `xx` represents an ISO 639 language code. Bundles can be added or overridden by placing suitable properties files in directory `/opt/jans/jetty/jans-auth/custom/i18n`. Strings stored in these bundles can be accessed from templates using expressions like `${msgs.<KEY>}`. As most keys in resource bundles contain dot characters, the alternative notation `${msgs["KEY"]}` works better for FreeMarker, for example `${msgs["login.errorMessage"]}`.
 
 Whenever possible, it is recommended to place your internationalization labels in the `web` folder of the project and use the `${labels(...` notation instead. Note `msgs` has no support for parameterized placeholders: strings are all static.
 

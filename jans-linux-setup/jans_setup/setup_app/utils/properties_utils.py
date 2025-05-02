@@ -281,17 +281,17 @@ class PropertiesUtils(SetupUtils):
 
 
     def prompt_for_jans_link(self):
-        if Config.installed_instance and Config.install_jans_ldap_link:
+        if Config.installed_instance and Config.install_link:
             return
 
         prompt_jans_link = self.getPrompt("Install Jans LDAP Link Server?",
-                                            self.getDefaultOption(Config.install_jans_ldap_link)
+                                            self.getDefaultOption(Config.install_link)
                                             )[0].lower()
 
-        Config.install_jans_ldap_link = prompt_jans_link == 'y'
+        Config.install_link = prompt_jans_link == 'y'
 
-        if Config.installed_instance and Config.install_jans_ldap_link:
-            Config.addPostSetupService.append('install_jans_ldap_link')
+        if Config.installed_instance and Config.install_link:
+            Config.addPostSetupService.append('install_link')
 
 
     def prompt_for_jans_keycloak_link(self):
@@ -350,10 +350,6 @@ class PropertiesUtils(SetupUtils):
                 prompt = self.getPrompt("  Install Jans Lock as Auth Service?", self.getDefaultOption(True))[0].lower()
                 if prompt == 'y':
                     Config.install_jans_lock = True
-
-            if Config.install_jans_lock:
-                prompt = self.getPrompt("  Install OPA?", self.getDefaultOption(Config.install_opa))[0].lower()
-                Config.install_opa = prompt == 'y'
 
         if Config.installed_instance and Config.install_jans_lock:
             Config.addPostSetupService.append('install_jans_lock')
@@ -617,7 +613,7 @@ class PropertiesUtils(SetupUtils):
             self.promptForConfigApi()
             self.promptForScimServer()
             self.promptForFido2Server()
-            self.prompt_for_jans_link()
+            #self.prompt_for_jans_link()
             self.prompt_for_jans_keycloak_link()
             self.prompt_for_casa()
             self.pompt_for_jans_lock()

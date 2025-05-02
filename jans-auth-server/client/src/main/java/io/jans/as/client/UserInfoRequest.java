@@ -7,7 +7,7 @@
 package io.jans.as.client;
 
 import io.jans.as.model.common.AuthorizationMethod;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -50,30 +50,165 @@ values of the `scope` claim), or other claims--domains frequently enhance the ac
 contain business specific data needed for policy evaluation.
 
 The Cedarling authorizes a Person using a certain piece of software, which is called a "Workload".
-From a logical perspective, (`person_allowed` AND `workload_allowed`) OR (`role_allowed` AND `workload_allowed`) must be `True`. The JWT's,
+From a logical perspective, (`person_allowed` AND `workload_allowed`) must be `True`. The JWT's,
 Action, Resource and Context is sent by the application in the authorization request. For example,
 this is a sample request from a hypothetical application:
 
 ```js
-input = { 
-           "access_token": "eyJhbGc....", 
-           "id_token": "eyJjbGc...", 
-           "userinfo_token": "eyJjbGc...",
-           "tx_token": "eyJjbGc...",
-           "action": "View",
-           "resource": {
-                          "id": "ticket-10101",
-                          "type" : "Ticket",
-                          "owner": "bob@acme.com", 
-                          "org_id": "Acme"
-                        },
-           "context": {
-                       "ip_address": "54.9.21.201",
-                       "network_type": "VPN",
-                       "user_agent": "Chrome 125.0.6422.77 (Official Build) (arm64)",
-                       "time": "1719266610.98636",
-                      }
-         }
+const bootstrap_config = {...};
+const cedarling = await init(bootstrap_config);
+let input = { 
+  "tokens": {
+    "access_token": "eyJhbGc....", 
+    "id_token": "eyJjbGc...", 
+    "userinfo_token": "eyJjbGc...",
+  },
+  "action": "View",
+  "resource": {
+    "id": "ticket-10101",
+    "type" : "Ticket",
+    "owner": "bob@acme.com", 
+    "org_id": "Acme"
+  },
+  "context": {
+    "ip_address": "54.9.21.201",
+    "network_type": "VPN",
+    "user_agent": "Chrome 125.0.6422.77 (Official Build) (arm64)",
+    "time": "1719266610.98636",
+  }
+}
 
-decision_result = authz(input)
+decision_result = await cedarling.authorize(input)
 ```
+
+## Automatically Adding Entity References to the Context
+
+Cedarling simplifies context creation by automatically including certain entities. This means you don't need to manually pass their references when using them in your policies. The following entities are automatically added to the context.
+
+- Workload Entity
+- User Entity
+- Resource Entity
+- Access Token Entity
+- ID Token Entity
+- Userinfo Token Entity
+
+### Example Policy
+
+Below is an example policy schema that illustrates how entities are used:  
+
+```cedarschema
+type Context = {
+  "access_token": Access_token, 
+  "time": Long, 
+  "user": User, 
+  "workload": Workload
+};
+
+type Url = {
+  "host": String, 
+  "path": String, 
+  "protocol": String
+};
+
+entity Access_token = {
+  "exp": Long, 
+  "iss": TrustedIssuer
+};
+
+entity Issue = {
+  "country": String, 
+  "org_id": String
+};
+
+entity Role;
+
+entity TrustedIssuer = {
+  "issuer_entity_id": Url
+};
+
+entity User in [Role] = {
+  "country": String, 
+  "email": String, 
+  "sub": String, 
+  "username": String
+};
+
+entity Workload = {
+  "client_id": String, 
+  "iss": TrustedIssuer, 
+  "name": String, 
+  "org_id": String
+};
+
+action "Update" appliesTo {
+  principal: [Role, Workload, User],
+  resource: [Issue],
+  context: {
+    "access_token": Access_token, 
+    "time": Long, 
+    "user": User, 
+    "workload": Workload
+  }
+};
+
+action "View" appliesTo {
+  principal: [Role, Workload, User],
+  resource: [Issue],
+  context: Context
+};
+```
+
+With this schema, you only need to provide the fields that are not automatically included. For instance, to define the `time` in the context:
+
+```js
+let context = {
+  "time": 1719266610.98636,
+}
+```
+
+## Unsigned Authorization (authorize_unsigned)
+
+The `authorize_unsigned` method allows making authorization decisions without JWT token verification. This is useful when:
+
+- You already have verified the principals through other means
+- You need to make authorization decisions for non-token based scenarios
+- You're implementing custom authentication flows
+
+Example usage:
+
+```js
+let input = {
+  "principals": [
+    {
+      "id": "user123",
+      "type": "User",
+      "email": "user@example.com",
+      "roles": ["admin"]
+    }
+  ],
+  "action": "View",
+  "resource": {
+    "id": "ticket-10101",
+    "type" : "Ticket",
+    "owner": "bob@acme.com", 
+    "org_id": "Acme"
+  },
+  "context": {
+    "ip_address": "54.9.21.201",
+    "network_type": "VPN",
+    "user_agent": "Chrome 125.0.6422.77 (Official Build) (arm64)",
+    "time": "1719266610.98636",
+  }
+};
+
+decision_result = await cedarling.authorize_unsigned(input);
+```
+
+### When to use authorize_unsigned vs authorize
+
+| Feature               | authorize          | authorize_unsigned  |
+|-----------------------|--------------------|---------------------|
+| JWT validation        | Yes                | No                  |
+| Token requirements    | Requires valid JWTs| Accepts raw entities|
+| Use case              | Standard auth flows| Custom auth flows   |
+| Security              | Higher (validates) | Lower (trusts input)|

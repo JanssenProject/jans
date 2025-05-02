@@ -102,12 +102,14 @@ recommended in the
 
 Following properties of the Janssen Server can be used to tailor the behavior concerning DPoP.
 
-- [dpopJtiCacheTime](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopjticachetime)
-- [dpopSigningAlgValuesSupported](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopsigningalgvaluessupported)
-- [dpopTimeframe](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpoptimeframe)
-- [dpopUseNonce](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopusenonce)
-- [dpopNonceCacheTime](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopnoncecachetime)
-- [dpopJktForceForAuthorizationCode]((https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopjktforceforauthorizationcode))
+- [dpopJtiCacheTime](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpopjticachetime)
+- [dpopSigningAlgValuesSupported](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpopsigningalgvaluessupported)
+- [dpopTimeframe](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpoptimeframe)
+- [dpopUseNonce](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpopusenonce)
+- [dpopNonceCacheTime](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpopnoncecachetime)
+- [dpopJktForceForAuthorizationCode](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpopjktforceforauthorizationcode)
+
+
 
 ## Have questions in the meantime?
 

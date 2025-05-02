@@ -18,7 +18,7 @@ import io.jans.util.security.StringEncrypter;
 import java.io.File;
 import java.util.Properties;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import org.jboss.logging.Logger;
 

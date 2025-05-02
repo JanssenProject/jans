@@ -9,7 +9,7 @@ package io.jans.as.server.uma.authorization;
 import io.jans.as.model.error.DefaultErrorResponse;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaErrorResponseType;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

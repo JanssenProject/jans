@@ -22,7 +22,7 @@ import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.server.service.ClientService;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.security.StringEncrypter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import java.util.Date;

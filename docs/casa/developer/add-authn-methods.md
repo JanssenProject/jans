@@ -51,7 +51,7 @@ Then call the `main` macro and supply your markup, like this:
 <@com.main>
 ```
 
-The above will generate a page incorporating the required CSS files and will render the header and footer appropriately while leaving your content in the center of the page. The _casa_ project makes heavy use of Bootstrap and Tachyons CSS frameworks. You may like to use those for building templates instead of incorporating yet another styling framework.
+The above will generate a page incorporating the required CSS files and will render the header and footer appropriately while leaving your content in the center of the page. The _casa_ project makes heavy use the Tachyons CSS. You may like to use those for building templates instead of incorporating yet another styling framework.
 
 It is highly recommended to include the following near the bottom of your markup (still inside the `main` call block): 
 
@@ -99,7 +99,20 @@ For example, if your authentication method is backed by a flow `com.acme.authn.f
 }
 ```
 
-Both `icon` and `text` may contain HTML markup. In this example we are using the font awesome library available in the selector page for rendering a nice [icon](https://fontawesome.com/v5/search?q=pizza&o=r&m=free) but we could have used any other thing here like an `img` tag, for instance.
+Alternatively, a pointer to a localized message can be used instead of `text`. This is the recommended practice if [localization/internationalization](../../janssen-server/developer/agama/advanced-usages.md#localization-and-internationalization) is relevant. In this case, something like the below will work:
+
+```
+            ...
+            "com.acme.authn.food": {
+                "icon": "<i class='fas fa-pizza-slice'></i>",
+                "textKey": "foodAuth.methodTitle"
+            }
+            ...
+```
+
+as long as the message key `foodAuth.methodTitle` is defined in the project's `labels.txt` file, or elsewhere in another project. Note `textKey` takes precedence over `text` when rendering the page. 
+
+Both `icon` and `textKey` (or `text`) may contain HTML markup. In this example we are using the font awesome library available in the selector page for rendering a nice [icon](https://fontawesome.com/v5/search?q=pizza&o=r&m=free) but we could have used any other thing here like an `img` tag, for instance.
 
 Ensure to properly escape double quotes if necessary. Also make the markup a one-liner: JSON strings cannot span several lines.
 

@@ -15,12 +15,14 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.slf4j.Logger;
+
 import java.util.List;
+
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Javier Rojas Blum
@@ -65,7 +67,7 @@ public class PairwiseIdentifierService {
         }
     }
 
-    public PairwiseIdentifier findPairWiseIdentifier(String userInum, String sectorIdentifier, String clientId) throws Exception {
+    public PairwiseIdentifier findPairWiseIdentifier(String userInum, String sectorIdentifier, String clientId, String openidSubValue) throws Exception {
         PairwiseIdType pairwiseIdType = PairwiseIdType.fromString(appConfiguration.getPairwiseIdType());
 
         if (PairwiseIdType.PERSISTENT == pairwiseIdType) {
@@ -74,7 +76,7 @@ public class PairwiseIdentifierService {
             String baseDnForPairwiseIdentifiers = getBaseDnForPairwiseIdentifiers(userInum);
 
             final Filter filter;
-            if (appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId()) {
+            if (isTrue(appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId())) {
                 Filter sectorIdentifierFilter = Filter.createEqualityFilter("jansSectorIdentifier", sectorIdentifier);
                 Filter userInumFilter = Filter.createEqualityFilter("jansUsrId", userInum);
 
@@ -91,7 +93,7 @@ public class PairwiseIdentifierService {
             if (entries != null && !entries.isEmpty()) {
                 // if more then one entry then it's problem, non-deterministic behavior, id must be unique
                 if (entries.size() > 1) {
-                    log.error("Found more then one pairwise identifier by sector identifier: {}" + sectorIdentifier);
+                    log.error("Found more then one pairwise identifier by sector identifier: {}", sectorIdentifier);
                     for (PairwiseIdentifier pairwiseIdentifier : entries) {
                         log.error("PairwiseIdentifier: {}", pairwiseIdentifier);
                     }
@@ -101,8 +103,11 @@ public class PairwiseIdentifierService {
         } else { // PairwiseIdType.ALGORITHMIC
             String key = appConfiguration.getPairwiseCalculationKey();
             String salt = appConfiguration.getPairwiseCalculationSalt();
-            String localAccountId = appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId() ?
+            String localAccountId = isTrue(appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId()) ?
                     userInum : userInum + clientId;
+            if (isTrue(appConfiguration.getUseOpenidSubAttributeValueForPairwiseLocalAccountId())) {
+                localAccountId = openidSubValue;
+            }
 
             String calculatedSub = SubjectIdentifierGenerator.generatePairwiseSubjectIdentifier(
                     sectorIdentifier, localAccountId, key, salt, appConfiguration);

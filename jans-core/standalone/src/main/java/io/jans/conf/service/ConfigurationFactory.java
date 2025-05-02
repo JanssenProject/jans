@@ -19,7 +19,7 @@ import io.jans.util.exception.ConfigurationException;
 import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import io.jans.conf.model.AppConfigurationEntry;
 import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.cache.InMemoryConfiguration;

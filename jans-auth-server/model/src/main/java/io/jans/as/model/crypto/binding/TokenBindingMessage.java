@@ -8,7 +8,7 @@ package io.jans.as.model.crypto.binding;
 
 import com.google.common.base.Function;
 import io.jans.as.model.token.JsonWebResponse;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * <pre>
  * struct {
- *     TokenBinding tokenbindings<132..2^16-1>;
+ *     TokenBinding tokenbindings&lt;132..2^16-1&gt;;
  * } TokenBindingMessage;
  * </pre>
  *

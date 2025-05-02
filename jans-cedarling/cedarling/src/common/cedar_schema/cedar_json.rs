@@ -1,293 +1,361 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-//! Module contains the JSON representation of a [cedar_policy::Schema]  
-//! Support translated schema from human representation to JSON via CLI version `cedar-policy-cli 4.1`.  
-//! To translate human redable format to JSON via CLI use next command:  
-//! `cedar translate-schema --direction cedar-to-json  -s .\cedar.schema`
-//! [cedar json schema grammar](https://docs.cedarpolicy.com/schema/json-schema-grammar.html) - documentation about json structure of cedar schema.
+//! This module is responsible for deserializing the JSON Cedar schema
 
-use std::collections::HashMap;
-mod entity_types;
+use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
+use action::*;
+use attribute::*;
+use cedar_policy::ParseErrors;
+use entity_type::*;
+use serde::Deserialize;
+use std::{collections::HashMap, str::FromStr};
 
-pub use entity_types::{CedarSchemaEntityShape, CedarSchemaRecord};
+pub(crate) mod action;
+pub(crate) mod attribute;
+pub(crate) mod entity_type;
 
-/// Represent `cedar-policy` schema type for external usage.
-pub enum CedarType {
-    Long,
-    String,
-    Boolean,
-    TypeName(String),
-    Set(Box<CedarType>),
+mod deserialize;
+
+const CEDAR_EMPTY_NAMESPACE: &str = "";
+
+pub type ActionName = String;
+pub type ActionGroupName = String;
+pub type AttributeName = String;
+pub type CommonTypeName = String;
+pub type EntityName = String;
+pub type EntityTypeName = String;
+pub type EntityOrCommonName = String;
+pub type ExtensionName = String;
+pub type NamespaceName = String;
+
+/// Joins the given type name with the given namespace if it's not an empty string.
+fn join_namespace(namespace: &str, type_name: &str) -> String {
+    if namespace.is_empty() {
+        return type_name.to_string();
+    }
+    [namespace, type_name].join(CEDAR_NAMESPACE_SEPARATOR)
 }
 
-/// Possible errors that may occur when retrieving a [`CedarType`] from cedar-policy schema.
-#[derive(Debug, thiserror::Error)]
-pub enum GetCedarTypeError {
-    /// Error while getting `cedar-policy` schema not implemented type
-    #[error("could not get cedar-policy type {0}, it is not implemented")]
-    TypeNotImplemented(String),
-}
-
-/// Enum to get info about type based on name.
-/// Is used as a result in [`CedarSchemaJson::find_type`]
-pub enum SchemaDefinedType<'a> {
-    #[allow(dead_code)]
-    Entity(&'a CedarSchemaEntityShape),
-    CommonType(&'a CedarSchemaRecord),
-}
-
-/// JSON representation of a [`cedar_policy::Schema`]
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
-pub(crate) struct CedarSchemaJson {
+#[derive(Debug, Deserialize, PartialEq, Clone)]
+pub struct CedarSchemaJson {
     #[serde(flatten)]
-    pub namespace: HashMap<String, CedarSchemaEntities>,
+    namespaces: HashMap<NamespaceName, Namespace>,
 }
 
 impl CedarSchemaJson {
-    /// Get schema record by namespace name and entity type name
-    pub fn entity_schema(
-        &self,
-        namespace: &str,
-        typename: &str,
-    ) -> Option<&CedarSchemaEntityShape> {
-        let namespace = self.namespace.get(namespace)?;
-        namespace.entity_types.get(typename)
+    pub fn get_action(&self, namespace: &str, name: &str) -> Option<&Action> {
+        self.namespaces
+            .get(namespace)
+            .and_then(|nmspce| nmspce.actions.get(name))
     }
 
-    /// Find the typename if exist in the schema and return it definition
-    pub fn find_type(&self, type_name: &str, namespace: &str) -> Option<SchemaDefinedType> {
-        let namespace = self.namespace.get(namespace)?;
+    pub fn get_common_type(
+        &self,
+        type_name: &str,
+        default_namespace: Option<&str>,
+    ) -> Result<Option<(cedar_policy::EntityTypeName, &Attribute)>, ParseErrors> {
+        let entity_type_name = cedar_policy::EntityTypeName::from_str(type_name)?;
 
-        let schema_type = namespace
-            .common_types
-            .get(type_name)
-            .as_ref()
-            .map(|common_type| SchemaDefinedType::CommonType(common_type));
+        let namespace = entity_type_name.namespace();
+        let basename = entity_type_name.basename();
 
-        if schema_type.is_some() {
-            return schema_type;
+        if !namespace.is_empty() {
+            if let Some(entity_schema) = self.get_comon_type_from_namespace(&namespace, basename) {
+                return Ok(Some((entity_type_name, entity_schema)));
+            }
         }
 
-        let schema_type = namespace
-            .entity_types
-            .get(type_name)
-            .as_ref()
-            .map(|entity| SchemaDefinedType::Entity(entity));
-        if schema_type.is_some() {
-            return schema_type;
+        // If namespace is empty (in type_name), look for the type in the default namespace.
+        if let Some(namespace) = default_namespace {
+            if let Some(entity_schema) = self.get_comon_type_from_namespace(namespace, basename) {
+                let entity_type_name =
+                    cedar_policy::EntityTypeName::from_str(&join_namespace(namespace, type_name))?;
+
+                return Ok(Some((entity_type_name, entity_schema)));
+            }
+        } else {
+            // If the type is not found in the default namespace, look for it in the empty namespace.
+            if let Some(entity_schema) =
+                self.get_comon_type_from_namespace(CEDAR_EMPTY_NAMESPACE, basename)
+            {
+                let entity_type_name = cedar_policy::EntityTypeName::from_str(type_name)?;
+
+                return Ok(Some((entity_type_name, entity_schema)));
+            }
         }
 
+        Ok(None)
+    }
+
+    fn get_comon_type_from_namespace(&self, namespace: &str, basename: &str) -> Option<&Attribute> {
+        if let Some(namespace) = self.namespaces.get(namespace) {
+            if let Some(entity_type) = namespace.common_types.get(basename) {
+                return Some(entity_type);
+            }
+        }
+        None
+    }
+
+    /// Get the entity schema for a given type name.
+    /// `default_namespace` is the default namespace for entities to search if no namespace is provided in type_name.
+    ///
+    /// If the type name does not have namespace, it will look for the type in the default namespace.
+    /// If not found in default namespace, it will look with `empty` namespace (value: "").
+    pub fn get_entity_schema(
+        &self,
+        type_name: &str,
+        default_namespace: Option<&str>,
+    ) -> Result<Option<(cedar_policy::EntityTypeName, &EntityType)>, ParseErrors> {
+        let entity_type_name = cedar_policy::EntityTypeName::from_str(type_name)?;
+
+        let namespace = entity_type_name.namespace();
+        let basename = entity_type_name.basename();
+
+        if !namespace.is_empty() {
+            if let Some(entity_schema) = self.get_entity_schema_from_namespace(&namespace, basename)
+            {
+                return Ok(Some((entity_type_name, entity_schema)));
+            }
+        }
+
+        // If namespace is empty (in type_name), look for the type in the default namespace.
+        if let Some(namespace) = default_namespace {
+            if let Some(entity_schema) = self.get_entity_schema_from_namespace(namespace, basename)
+            {
+                let entity_type_name =
+                    cedar_policy::EntityTypeName::from_str(&join_namespace(namespace, type_name))?;
+
+                return Ok(Some((entity_type_name, entity_schema)));
+            }
+        }
+
+        // If the type is not found in the default namespace, look for it in the empty namespace.
+        if let Some(entity_schema) =
+            self.get_entity_schema_from_namespace(CEDAR_EMPTY_NAMESPACE, basename)
+        {
+            let entity_type_name = cedar_policy::EntityTypeName::from_str(type_name)?;
+
+            return Ok(Some((entity_type_name, entity_schema)));
+        }
+
+        Ok(None)
+    }
+
+    fn get_entity_schema_from_namespace(
+        &self,
+        namespace: &str,
+        basename: &str,
+    ) -> Option<&EntityType> {
+        if let Some(namespace) = self.namespaces.get(namespace) {
+            if let Some(entity_type) = namespace.entity_types.get(basename) {
+                return Some(entity_type);
+            }
+        }
         None
     }
 }
 
-/// CedarSchemaEntities hold all entities and their shapes in the namespace.
-//
-// It may contain more fields, but we don't need all of them.
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
-pub struct CedarSchemaEntities {
+#[derive(Debug, Deserialize, PartialEq, Clone)]
+pub struct Namespace {
     #[serde(rename = "entityTypes", default)]
-    pub entity_types: HashMap<String, CedarSchemaEntityShape>,
+    entity_types: HashMap<EntityTypeName, EntityType>,
     #[serde(rename = "commonTypes", default)]
-    pub common_types: HashMap<String, CedarSchemaRecord>,
+    common_types: HashMap<CommonTypeName, Attribute>,
+    #[serde(default)]
+    actions: HashMap<ActionName, Action>,
 }
 
 #[cfg(test)]
-mod tests {
-
-    use super::entity_types::*;
-
+mod test_deserialize_json_cedar_schema {
     use super::*;
+    use serde_json::json;
+    use std::collections::HashSet;
     use test_utils::assert_eq;
-    use test_utils::SortedJson;
 
-    /// Test to parse the cedar json schema
-    /// to debug deserialize the schema
     #[test]
-    fn parse_correct_example() {
-        let json_value = include_str!("test_files/test_data_cedar.json");
-
-        let parsed_cedar_schema: CedarSchemaJson =
-            serde_json::from_str(json_value).expect("failed to parse json");
-
-        let entity_types = HashMap::from_iter(vec![
-            (
-                "Access_token".to_string(),
-                CedarSchemaEntityShape {
-                    shape: Some(CedarSchemaRecord {
-                        entity_type: "Record".to_string(),
-                        attributes: HashMap::from_iter(vec![
-                            (
-                                "aud".to_string(),
-                                CedarSchemaEntityAttribute {
-                                    cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                        kind: "EntityOrCommon".to_string(),
-                                        name: "String".to_string(),
-                                    }),
-                                    required: true,
-                                },
-                            ),
-                            (
-                                "exp".to_string(),
-                                CedarSchemaEntityAttribute {
-                                    cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                        kind: "EntityOrCommon".to_string(),
-                                        name: "Long".to_string(),
-                                    }),
-                                    required: true,
-                                },
-                            ),
-                            (
-                                "iat".to_string(),
-                                CedarSchemaEntityAttribute {
-                                    cedar_type: CedarSchemaEntityType::Primitive(PrimitiveType {
-                                        kind: PrimitiveTypeKind::Long,
-                                    }),
-                                    required: true,
-                                },
-                            ),
-                            (
-                                "scope".to_string(),
-                                CedarSchemaEntityAttribute {
-                                    cedar_type: CedarSchemaEntityType::Set(Box::new(
-                                        SetEntityType {
-                                            element: CedarSchemaEntityType::Typed(EntityType {
-                                                kind: "EntityOrCommon".to_string(),
-                                                name: "String".to_string(),
-                                            }),
-                                        },
-                                    )),
-
-                                    required: false,
-                                },
-                            ),
-                        ]),
-                    }),
+    fn can_deserialize_entity_types() {
+        let schema = json!({
+            "Jans": {
+                "entityTypes": {
+                    "User": {
+                        "memberOfTypes": [ "UserGroup" ],
+                        "shape": {
+                            "type": "Record",
+                            "attributes": {
+                                "department": { "type": "String" },
+                                "jobLevel": { "type": "Long" }
+                            }
+                        }
+                    },
+                    "UserGroup": {},
                 },
-            ),
-            ("Role".to_string(), CedarSchemaEntityShape { shape: None }),
-            (
-                "TrustedIssuer".to_string(),
-                CedarSchemaEntityShape {
-                    shape: Some(CedarSchemaRecord {
-                        entity_type: "Record".to_string(),
-                        attributes: HashMap::from_iter([(
-                            "issuer_entity_id".to_string(),
-                            CedarSchemaEntityAttribute {
-                                required: true,
-                                cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                    name: "Url".to_string(),
-                                    kind: "EntityOrCommon".to_string(),
-                                }),
-                            },
-                        )]),
-                    }),
-                },
-            ),
-            ("Issue".to_string(), CedarSchemaEntityShape { shape: None }),
-        ]);
-
-        let common_types = HashMap::from_iter([(
-            "Url".to_string(),
-            CedarSchemaRecord {
-                entity_type: "Record".to_string(),
-                attributes: HashMap::from_iter([
-                    (
-                        "host".to_string(),
-                        CedarSchemaEntityAttribute {
-                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                kind: "EntityOrCommon".to_string(),
-                                name: "String".to_string(),
-                            }),
-                            required: true,
-                        },
-                    ),
-                    (
-                        "path".to_string(),
-                        CedarSchemaEntityAttribute {
-                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                kind: "EntityOrCommon".to_string(),
-                                name: "String".to_string(),
-                            }),
-                            required: true,
-                        },
-                    ),
-                    (
-                        "protocol".to_string(),
-                        CedarSchemaEntityAttribute {
-                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                kind: "EntityOrCommon".to_string(),
-                                name: "String".to_string(),
-                            }),
-                            required: true,
-                        },
-                    ),
-                ]),
-            },
-        )]);
-
-        let schema_to_compare = CedarSchemaJson {
-            namespace: HashMap::from_iter(vec![(
-                "Jans".to_string(),
-                CedarSchemaEntities {
-                    entity_types,
-                    common_types,
-                },
-            )]),
+            }
+        });
+        let schema = serde_json::from_value::<CedarSchemaJson>(schema).unwrap();
+        let namespace = Namespace {
+            entity_types: HashMap::from([
+                ("User".into(), EntityType {
+                    member_of: Some(HashSet::from(["UserGroup".into()])),
+                    shape: Some(EntityShape::required(HashMap::from([
+                        ("department".into(), Attribute::string()),
+                        ("jobLevel".into(), Attribute::long()),
+                    ]))),
+                    tags: None,
+                }),
+                ("UserGroup".into(), EntityType {
+                    member_of: None,
+                    shape: None,
+                    tags: None,
+                }),
+            ]),
+            common_types: HashMap::new(),
+            actions: HashMap::new(),
         };
+        assert_eq!(schema, CedarSchemaJson {
+            namespaces: HashMap::from([("Jans".into(), namespace)])
+        });
+    }
 
-        assert_eq!(
-            serde_json::json!(parsed_cedar_schema).sorted(),
-            serde_json::json!(schema_to_compare).sorted()
+    /// Tests if the entity can be found in the given `default_namespace`
+    #[test]
+    fn can_get_entity_from_default_namespace() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": {
+                "entityTypes": {
+                    "Workload": {
+                        "shape": {
+                            "type": "Record",
+                            "attributes":  {},
+                        }
+                    }
+                }
+            },
+        }))
+        .expect("should successfully build schema");
+        assert!(
+            schema.namespaces.contains_key("Jans"),
+            "schema should contain the \"Jans\" namespace"
         );
+        let (entity_type_name, entity_type) = schema
+            .get_entity_schema("Workload", Some("Jans"))
+            .expect("should not error while calling getting schema for Workload")
+            .expect("should find workload entity in schema");
+        assert_eq!(
+            entity_type_name,
+            cedar_policy::EntityTypeName::from_str("Jans::Workload")
+                .expect("should parse workload entity type name")
+        );
+        assert_eq!(entity_type, &EntityType {
+            member_of: None,
+            shape: Some(EntityShape {
+                required: true,
+                attrs: HashMap::new()
+            }),
+            tags: None,
+        });
     }
 
-    /// test to check if we get error on parsing invalid `EntityOrCommon` type
+    /// Tests if the entity wont be found if it's not in the `""` namespace or
+    /// in the given `default_namespace`
     #[test]
-    fn parse_error_entity_or_common() {
-        // In this file we skipped field `name` for `EntityOrCommon`
-        let json_value = include_str!("test_files/test_data_cedar_err_entity_or_common.json");
-
-        let parse_error =
-            serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
-        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityType: failed to deserialize EntityOrCommon: missing field `name` at line 17 column 1")
+    fn should_not_get_entity_from_another_namespace() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Custom": {
+                "entityTypes": {
+                    "Another_entity": {},
+                }
+            }
+        }))
+        .expect("should successfully build schema");
+        assert!(
+            schema.namespaces.contains_key("Custom"),
+            "schema should contain the \"Custom\" namespace"
+        );
+        let result = schema
+            .get_entity_schema("Another_entity", Some("Jans"))
+            .expect("should not error while calling getting schema for Another_entity");
+        assert_eq!(result, None);
     }
 
-    /// test to check if we get error on parsing invalid `PrimitiveType` type
+    // Test if the entity can be found on the `""` namespace if it's not
+    // in the given `default_namespace`
     #[test]
-    fn parse_error_primitive_type() {
-        // In this file we use `"type": 123` but in OK case should be `"type": "Long"`
-        let json_value = include_str!("test_files/test_data_cedar_err_primitive_type.json");
-
-        let parse_error =
-            serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
-        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityType: invalid type: integer `123`, expected a string at line 17 column 1")
+    fn should_get_entity_from_default_namespace() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "": {
+                "entityTypes": {
+                    "Some_entity": {},
+                }
+            },
+        }))
+        .expect("should successfully build schema");
+        assert!(
+            schema.namespaces.contains_key(""),
+            "schema should countain the `\"\"` namespace"
+        );
+        let (entity_type_name, entity_type) = schema
+            .get_entity_schema("Some_entity", Some("Jans"))
+            .expect("should not error while calling getting schema for Some_entity")
+            .expect("should find Some_entity in schema");
+        assert_eq!(
+            entity_type_name,
+            cedar_policy::EntityTypeName::from_str("Some_entity")
+                .expect("should parse Some_entity entity type name")
+        );
+        assert_eq!(entity_type, &EntityType {
+            member_of: None,
+            shape: None,
+            tags: None,
+        });
     }
 
-    /// test to check if we get error on parsing invalid nested Sets :`Set<Set<EntityOrCommon>>` type
     #[test]
-    fn parse_error_set_entity_or_common() {
-        // In this file we skipped field `name` for `EntityOrCommon` in the nested set
-        let json_value = include_str!("test_files/test_data_cedar_err_set.json");
-
-        let parse_error =
-            serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
-        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityType: failed to deserialize Set: failed to deserialize Set: failed to deserialize EntityOrCommon: missing field `name` at line 24 column 1")
-    }
-
-    /// test to check if we get error on parsing invalid type in field `is_required`
-    #[test]
-    fn parse_error_field_is_required() {
-        // In this file we use ` "required": 1234` but in OK case should be ` "required": false` or omit
-        let json_value = include_str!("test_files/test_data_cedar_err_field_is_required.json");
-
-        let parse_error =
-            serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
-        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityAttribute, field 'is_required': invalid type: integer `1234`, expected a boolean at line 22 column 1")
+    fn can_get_entity_from_namespace() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": {
+                "entityTypes": {
+                    "SomeEntity": {
+                        "shape": {
+                            "type": "Record",
+                            "attributes":  {},
+                        }
+                    }
+                }
+            },
+            "": {
+                "entityTypes": {
+                    "AnotherEntity": {
+                        "shape": {
+                            "type": "Record",
+                            "attributes":  {},
+                        }
+                    }
+                }
+            },
+        }))
+        .expect("should successfully build schema");
+        assert_eq!(
+            schema
+                .namespaces
+                .keys()
+                .map(|k| k.as_str())
+                .collect::<HashSet<&str>>(),
+            HashSet::from(["", "Jans"])
+        );
+        assert!(
+            schema
+                .get_entity_schema_from_namespace("Jans", "SomeEntity")
+                .is_some(),
+            "should get entity from \"Jans\" namespace"
+        );
+        assert!(
+            schema
+                .get_entity_schema_from_namespace("", "AnotherEntity")
+                .is_some(),
+            "should get entity from `\"\"` namespace"
+        );
     }
 }

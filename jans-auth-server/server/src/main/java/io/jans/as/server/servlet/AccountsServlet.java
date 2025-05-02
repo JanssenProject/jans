@@ -9,7 +9,7 @@ import io.jans.as.model.util.CertUtils;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.token.TokenService;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;

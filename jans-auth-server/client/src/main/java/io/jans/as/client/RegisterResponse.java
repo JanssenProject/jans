@@ -12,7 +12,7 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;

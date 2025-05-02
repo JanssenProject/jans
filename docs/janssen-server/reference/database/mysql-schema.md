@@ -340,7 +340,6 @@ tags:
 | jansLevel          | int          | YES  |     | None    | Level                                                         |
 | jansRevision       | int          | YES  |     | None    | Revision                                                      |
 | jansEnabled        | smallint     | YES  |     | None    | Status of the entry, used by many objectclasses               |
-| jansAlias          | json         | YES  |     | None    | jansAlias                                                     |
 
 ### jansFido2AuthnEntry
 | Field                 | Type         | Null | Key | Default | Comment                                         |

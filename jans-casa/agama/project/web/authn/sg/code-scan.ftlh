@@ -67,7 +67,7 @@ function onSignInCallback(result) {
         document.forms[0].submit()
     } else {
         if (result == "error") {
-            setError("An error has occurred")
+            setError("${labels("casa.sg.error")?no_esc}")
         }
         timeLeft = 1
         $("#timer").html("")
@@ -85,15 +85,15 @@ window.onload = (event) => {
 
 <section class="pa4 shadow-4 bg-blank gray cust-section">
 
-    <h2 class="f3 dark-blue2">Scan the QR code with your Super Gluu</h2>
+    <h2 class="f3 dark-blue2">${labels("casa.sg.scanQR")}</h2>
 
     <div class="tc mb2 pt2" id="qr_container"></div>
         
     <div class="mw5 dark-red tc pv2 ph0 mt3 f6" id="error"></div>
 
-    <div class="tc mb3 dark-blue" id="timer">Time remaining: <span id="time">-</span> secs</div>
+    <div class="tc mb3 dark-blue" id="timer">${labels("casa.sg.remaining")} <span id="time">-</span> ${labels("casa.sg.secondsAbbr")}</div>
     
-    <p class="tc f6 mb4">We'll log you in as soon as we detect your approval.</p>
+    <p class="tc f6 mb4">${labels("casa.sg.waitAuthn2")}</p>
     
     <form method="post" enctype="application/x-www-form-urlencoded">
     </form>

@@ -27,7 +27,7 @@ import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -87,7 +87,7 @@ public class ConfigurationFactory {
 	private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
 	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
-	private static final String APP_PROPERTIES_FILE = DIR + "cache-refresh.properties";
+	private static final String APP_PROPERTIES_FILE = DIR + "link-interception.properties";
 
 	private final String SALT_FILE_NAME = "salt";
 

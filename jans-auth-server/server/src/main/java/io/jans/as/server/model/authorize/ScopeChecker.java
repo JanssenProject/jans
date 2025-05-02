@@ -12,7 +12,7 @@ import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SpontaneousScopeService;
 import io.jans.as.server.service.external.ExternalSpontaneousScopeService;
 import io.jans.as.server.service.external.context.SpontaneousScopeExternalContext;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;

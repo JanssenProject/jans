@@ -6,6 +6,7 @@ tags:
   - feature
   - logout
 ---
+# Customizing Logout
 
 ## This content is in progress
 

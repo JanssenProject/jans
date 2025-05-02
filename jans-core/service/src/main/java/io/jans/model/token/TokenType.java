@@ -6,7 +6,7 @@
 
 package io.jans.model.token;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Yuriy Zabrovarnyy

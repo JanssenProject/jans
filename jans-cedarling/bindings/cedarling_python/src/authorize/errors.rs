@@ -25,44 +25,9 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    AccessTokenEntitiesError,
+    ProcessTokens,
     AuthorizeError,
-    "Error encountered while creating access token entities"
-);
-
-create_exception!(
-    authorize_errors,
-    CreateIdTokenEntityError,
-    AuthorizeError,
-    "Error encountered while creating id token entities"
-);
-
-create_exception!(
-    authorize_errors,
-    CreateUserinfoTokenEntityError,
-    AuthorizeError,
-    "Error encountered while creating Userinfo_token entity"
-);
-
-create_exception!(
-    authorize_errors,
-    CreateUserEntityError,
-    AuthorizeError,
-    "Error encountered while creating User entity"
-);
-
-create_exception!(
-    authorize_errors,
-    ResourceEntityError,
-    AuthorizeError,
-    "Error encountered while creating resource entity"
-);
-
-create_exception!(
-    authorize_errors,
-    RoleEntityError,
-    AuthorizeError,
-    "Error encountered while creating role entity"
+    "Error encountered while processing JWT token data"
 );
 
 create_exception!(
@@ -81,30 +46,58 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    CreateRequestWorkloadEntityError,
+    InvalidPrincipalError,
     AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for workload entity principal"
+    "Error encountered while creating cedar_policy::Request for principal"
 );
 
 create_exception!(
     authorize_errors,
-    CreateRequestUserEntityError,
+    ValidateEntitiesError,
     AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for user entity principal"
+    "Error encountered while validating the entities to the schema"
 );
 
 create_exception!(
     authorize_errors,
-    CreateRequestRoleEntityError,
+    EntitiesToJsonError,
     AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for role entity principal"
+    "Error encountered while parsing all entities to json for logging"
 );
 
 create_exception!(
     authorize_errors,
-    EntitiesError,
+    BuildContextError,
     AuthorizeError,
-    "Error encountered while collecting all entities"
+    "Error encountered while building the request context"
+);
+
+create_exception!(
+    authorize_errors,
+    IdTokenTrustModeError,
+    AuthorizeError,
+    "Error encountered while running on strict id token trust mode"
+);
+
+create_exception!(
+    authorize_errors,
+    BuildEntityError,
+    AuthorizeError,
+    "Error encountered while running on strict id token trust mode"
+);
+
+create_exception!(
+    authorize_errors,
+    ExecuteRuleError,
+    AuthorizeError,
+    "Error encountered while executing the rule for principals"
+);
+
+create_exception!(
+    authorize_errors,
+    BuildUnsignedRoleEntityError,
+    AuthorizeError,
+    "Error building Role entity for unsigned request"
 );
 
 #[pyclass]
@@ -145,19 +138,17 @@ macro_rules! errors_functions {
 // This function is used to convert `cedarling::AuthorizeError` to a Python exception.
 // For each possible case of `AuthorizeError`, we have created a corresponding Python exception that inherits from `cedarling::AuthorizeError`.
 errors_functions! {
-    DecodeTokens => DecodeTokens,
-    AccessTokenEntities => AccessTokenEntitiesError,
-    CreateIdTokenEntity => CreateIdTokenEntityError,
-    CreateUserinfoTokenEntity => CreateUserinfoTokenEntityError,
-    CreateUserEntity => CreateUserEntityError,
-    ResourceEntity => ResourceEntityError,
-    RoleEntity => RoleEntityError,
+    ProcessTokens => ProcessTokens,
     Action => ActionError,
     CreateContext => CreateContextError,
-    CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
-    CreateRequestUserEntity => CreateRequestUserEntityError,
-    CreateRequestRoleEntity => CreateRequestRoleEntityError,
-    Entities => EntitiesError
+    InvalidPrincipal => InvalidPrincipalError,
+    ValidateEntities => ValidateEntitiesError,
+    EntitiesToJson => EntitiesToJsonError,
+    BuildContext => BuildContextError,
+    IdTokenTrustMode => IdTokenTrustModeError,
+    BuildEntity => BuildEntityError,
+    ExecuteRule => ExecuteRuleError,
+    BuildUnsignedRoleEntity => BuildUnsignedRoleEntityError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

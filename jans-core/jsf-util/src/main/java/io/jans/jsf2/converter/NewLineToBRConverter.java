@@ -6,12 +6,12 @@
 
 package io.jans.jsf2.converter;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
 import jakarta.faces.convert.FacesConverter;
-
-import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * @author: Yuriy Movchan Date: 07.11.2012
@@ -24,7 +24,7 @@ public class NewLineToBRConverter implements Converter {
     }
 
     public String getAsString(FacesContext arg0, UIComponent converter, Object obj) {
-        return StringEscapeUtils.escapeHtml((String) obj).replace("\r\n", "<br/>").replace("\n", "<br/>");
+        return StringEscapeUtils.escapeHtml4((String) obj).replace("\r\n", "<br/>").replace("\n", "<br/>");
     }
 
 }

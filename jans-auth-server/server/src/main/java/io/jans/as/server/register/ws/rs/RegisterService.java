@@ -31,7 +31,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -232,6 +232,9 @@ public class RegisterService {
         if (requestObject.getAccessTokenAsJwt() != null) {
             client.setAccessTokenAsJwt(requestObject.getAccessTokenAsJwt());
         }
+        if (requestObject.getRequirePkce() != null) {
+            client.getAttributes().setRequirePkce(requestObject.getRequirePkce());
+        }
         if (requestObject.getTlsClientAuthSubjectDn() != null) {
             client.getAttributes().setTlsClientAuthSubjectDn(requestObject.getTlsClientAuthSubjectDn());
         }
@@ -255,6 +258,9 @@ public class RegisterService {
         }
         if (requestObject.getPostAuthnScriptDns() != null) {
             client.getAttributes().setPostAuthnScripts(requestObject.getPostAuthnScriptDns());
+        }
+        if (requestObject.getTokenExchangeScriptDns() != null) {
+            client.getAttributes().setTokenExchangeScripts(requestObject.getTokenExchangeScriptDns());
         }
         if (requestObject.getConsentGatheringScriptDns() != null) {
             client.getAttributes().setConsentGatheringScripts(requestObject.getConsentGatheringScriptDns());

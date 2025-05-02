@@ -17,7 +17,10 @@
 package io.jans.lock.util;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +32,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.jans.util.Util;
 import jakarta.ws.rs.core.CacheControl;
 
 /**
@@ -92,5 +96,17 @@ public class ServerUtil {
     public static String toPrettyJson(ObjectNode jsonObject) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+    }
+    
+
+    public static String urlDecode(String str) {
+        if (StringUtils.isNotBlank(str)) {
+            try {
+                return URLDecoder.decode(str, Util.UTF8);
+            } catch (UnsupportedEncodingException e) {
+                log.trace(e.getMessage(), e);
+            }
+        }
+        return str;
     }
 }

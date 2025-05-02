@@ -38,17 +38,15 @@ func TestResourceFido2Config_Mapping(t *testing.T) {
 			ServerMetadataFolder:     "/etc/jans/conf/fido2/server_metadata",
 			RequestedParties: []jans.RequestedParties{
 				{
-					Name:    "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info",
-					Domains: []string{"moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info"},
+					Id:      "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info",
+					Origins: []string{"moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info"},
 				},
 			},
-			UserAutoEnrollment:              false,
+			DebugUserAutoEnrollment:         false,
 			UnfinishedRequestExpiration:     180,
 			AuthenticationHistoryExpiration: 1296000,
-			RequestedCredentialTypes:        []string{"RS256", "ES256"},
+			EnabledFidoAlgorithms:           []string{"RS256", "ES256"},
 		},
-		SuperGluuEnabled:       true,
-		OldU2fMigrationEnabled: true,
 	}
 
 	if err := toSchemaResource(data, cfg); err != nil {

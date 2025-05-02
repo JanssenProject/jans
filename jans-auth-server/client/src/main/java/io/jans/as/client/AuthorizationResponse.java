@@ -16,7 +16,7 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -8,7 +8,7 @@ import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.orm.PersistenceEntryManager;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.enterprise.context.ApplicationScoped;

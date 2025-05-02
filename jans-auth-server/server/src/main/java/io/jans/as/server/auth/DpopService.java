@@ -27,8 +27,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import java.security.NoSuchAlgorithmException;
@@ -36,8 +36,8 @@ import java.security.NoSuchProviderException;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.apache.commons.lang.BooleanUtils.isFalse;
-import static org.apache.commons.lang.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Z
@@ -221,7 +221,7 @@ public class DpopService {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
     }
 
-    public String getDpopJwkThumbprint(String dpopStr) throws InvalidJwtException, NoSuchAlgorithmException, JWKException, NoSuchProviderException {
+    public static String getDpopJwkThumbprint(String dpopStr) throws InvalidJwtException, NoSuchAlgorithmException, JWKException, NoSuchProviderException {
         final Jwt dpop = Jwt.parseOrThrow(dpopStr);
         JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
         return jwk.getJwkThumbprint();

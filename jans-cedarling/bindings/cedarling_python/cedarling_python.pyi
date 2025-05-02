@@ -1,66 +1,95 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+
 from typing import Optional, List, final, Dict, Any
 
 
 @final
-class MemoryLogConfig:
-
-    log_ttl: int
-
-    def __init__(self, log_ttl: int = 60) -> None: ...
-
-
-@final
-class StdOutLogConfig:
-    def __init__(self, /, *args, **kwargs) -> None: ...
-
-
-@final
-class DisabledLoggingConfig:
-    def __init__(self, /, *args, **kwargs) -> None: ...
-
-
-@final
-class PolicyStoreSource:
-    def __init__(self, json: Optional[str] = None,
-                 yaml: Optional[str] = None) -> None: ...
-
-
-@final
-class PolicyStoreConfig:
-    source: PolicyStoreSource | None
-    store_id: str | None
-
-    def __init__(
-        self,
-        source: PolicyStoreSource | None = None,
-        store_id: str | None = None
-    ) -> None: ...
-
-
-@final
-class JwtConfig:
-    enabled: bool
-    signature_algorithms: List[str] | None
-
-    def __init__(
-        self, enabled: bool,
-        signature_algorithms: List[str] | None = None) -> None: ...
-
-
-@final
 class BootstrapConfig:
-    application_name: str | None
-    log_config: MemoryLogConfig | StdOutLogConfig | DisabledLoggingConfig | None
-    policy_store_config: PolicyStoreConfig | None
-    jwt_config: JwtConfig | None
+    """
+    Represents the configuration options for bootstrapping the application.
+
+    Example Usage:
+        bootstrap_config = BootstrapConfig({
+            "CEDARLING_APPLICATION_NAME": "MyApp",
+            "CEDARLING_POLICY_STORE_ID": "12345",
+            "CEDARLING_LOG_TYPE": "memory",
+            "CEDARLING_LOG_TTL": 30,
+            ...
+        })
+    """
 
     def __init__(
         self,
-        application_name: str | None = None,
-        log_config: MemoryLogConfig | StdOutLogConfig | DisabledLoggingConfig | None = None,
-        policy_store_config: PolicyStoreConfig | None = None,
-        jwt_config: JwtConfig | None = None
-    ) -> None: ...
+        options: dict,
+    ) -> None:
+        """
+        Initialize a new instance of the class with configuration options.
+
+        Args:
+            options (dict): A dictionary containing configuration key-value pairs.
+            For more imformation visit https://docs.jans.io/head/cedarling/cedarling-properties/
+        Returns:
+            None: This method initializes the instance.
+
+        Raises:
+            KeyError: If any required configuration key is missing.
+            ValueError: If a provided value is invalid or extraction fails.
+        """
+        ...
+
+    @staticmethod
+    def load_from_file(path: str) -> BootstrapConfig:
+        """
+        Loads the configuration from a file.
+
+        Args:
+            path (str): The path to the configuration file.
+
+        Returns:
+            BootstrapConfig: An instance of the configuration class.
+
+        Raises:
+            ValueError: If a provided value is invalid or decoding fails.
+            OSError: If there is an error while reading the file.
+        """
+        ...
+
+    @staticmethod
+    def load_from_json(config_json: str) -> BootstrapConfig:
+        """
+        Loads the configuration from a JSON string.
+
+        Args:
+            config_json (str): The JSON string containing the configuration.
+
+        Returns:
+            BootstrapConfig: An instance of the configuration class.
+
+        Raises:
+            ValueError: If a provided value is invalid or extraction fails.
+        """
+        ...
+
+    @staticmethod
+    def from_env(options: Dict | None = None) -> BootstrapConfig:
+        """
+        Loads the configuration from environment variables.
+
+        Reads environment variables matching the configuration keys listed in the
+        class documentation. All required keys must be present in the environment.
+        You can specify dict, but keys from environment variables have bigger priority.
+
+        Returns:
+            BootstrapConfig: An instance of the configuration class.
+
+        Raises:
+            KeyError: If any required environment variable is missing.
+            ValueError: If a provided value is invalid or extraction fails.
+        """
+        ...
 
 
 @final
@@ -68,43 +97,63 @@ class Cedarling:
 
     def __init__(self, config: BootstrapConfig) -> None: ...
 
+    def authorize(self, request: Request) -> AuthorizeResult: ...
+
+    def authorize_unsigned(
+        self, request: RequestUnsigned) -> AuthorizeResult: ...
+
     def pop_logs(self) -> List[Dict]: ...
 
     def get_log_by_id(self, id: str) -> Optional[Dict]: ...
 
     def get_log_ids(self) -> List[str]: ...
 
-    def authorize(self, request: Request) -> AuthorizeResult: ...
+    def get_logs_by_tag(self, tag: str) -> List[Dict]: ...
+
+    def get_logs_by_request_id(self, request_id: str) -> List[Dict]: ...
+
+    def get_logs_by_request_id_and_tag(
+        self, request_id: str, tag: str) -> List[Dict]: ...
 
 
 @final
 class Request:
-    access_token: str
-    id_token: str
-    userinfo_token: str
+    tokens: Dict[str, str]
     action: str
-    resource: ResourceData
+    resource: EntityData
     context: Dict[str, Any]
 
-    def __init__(self, 
-                 access_token: str,
-                 id_token: str,
-                 userinfo_token: str,
+    def __init__(self,
+                 tokens: Dict[str, Any],
                  action: str,
-                 resource: ResourceData,
+                 resource: EntityData,
                  context: Dict[str, Any]) -> None: ...
 
 
 @final
-class ResourceData:
-    resource_type: str
+class RequestUnsigned:
+    principals: List[EntityData]
+    action: str
+    resource: EntityData
+    context: Dict[str, Any]
+
+    def __init__(self,
+                 principals: List[EntityData],
+                 action: str,
+                 resource: EntityData,
+                 context: Dict[str, Any]) -> None: ...
+
+
+@final
+class EntityData:
+    entity_type: str
     id: str
     payload: Dict[str, Any]
 
-    def __init__(self, resource_type: str, id: str, **kwargs) -> None: ...
+    def __init__(self, entity_type: str, id: str, **kwargs) -> None: ...
 
     @classmethod
-    def from_dict(cls, value: Dict[str, Any]) -> "ResourceData": ...
+    def from_dict(cls, value: Dict[str, Any]) -> "EntityData": ...
 
 
 @final
@@ -115,7 +164,9 @@ class AuthorizeResult:
 
     def person(self) -> AuthorizeResultResponse | None: ...
 
-    def role(self) -> AuthorizeResultResponse | None: ...
+    def principal(self, principal: str) -> AuthorizeResultResponse | None: ...
+
+    def request_id(self) -> str: ...
 
 
 @final

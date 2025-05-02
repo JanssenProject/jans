@@ -26,6 +26,8 @@ public class TokenAttributes implements Serializable {
     private String x5cs256;
     @JsonProperty("online_access")
     private boolean onlineAccess;
+    @JsonProperty("authorization_challenge")
+    private boolean authorizationChallenge;
     @JsonProperty("attributes")
     private Map<String, String> attributes;
     @JsonProperty("dpopJkt")
@@ -34,6 +36,15 @@ public class TokenAttributes implements Serializable {
     private String authorizationDetails;
     @JsonProperty("statusListIndex")
     private Integer statusListIndex;
+
+    public boolean isAuthorizationChallenge() {
+        return authorizationChallenge;
+    }
+
+    public TokenAttributes setAuthorizationChallenge(boolean authorizationChallenge) {
+        this.authorizationChallenge = authorizationChallenge;
+        return this;
+    }
 
     public Integer getStatusListIndex() {
         return statusListIndex;
@@ -92,6 +103,7 @@ public class TokenAttributes implements Serializable {
                 "onlineAccess='" + onlineAccess + '\'' +
                 "dpopJkt='" + dpopJkt + '\'' +
                 "authorizationDetails='" + authorizationDetails + '\'' +
+                "authorizationChallenge='" + authorizationChallenge + '\'' +
                 '}';
     }
 }

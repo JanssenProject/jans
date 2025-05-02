@@ -25,7 +25,7 @@ import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -282,8 +282,18 @@ public class WebhookService {
             }
             entryManager.merge(webhook);
 
+            List<AuiFeature> features = getAllAuiFeatures();
+            //removing webhookId from auiFeatures table from the feature records
+            features.stream()
+                    .filter(feature -> feature.getWebhookIdsMapped() != null)
+                    .filter(feature -> feature.getWebhookIdsMapped().contains(webhook.getInum()))
+                    .forEach(feature -> {
+                        feature.getWebhookIdsMapped().remove(webhook.getInum());
+                        entryManager.merge(feature);
+                    });
+            //adding webhook-id to the feature record
             if (webhook.getAuiFeatureIds() != null) {
-                List<AuiFeature> features = getAuiFeaturesByIds(webhook.getAuiFeatureIds());
+                features = getAuiFeaturesByIds(webhook.getAuiFeatureIds());
                 features.stream().forEach(feature -> {
                     feature.setWebhookIdsMapped(addNonExistingElements(webhook.getInum(), feature.getWebhookIdsMapped()));
                     entryManager.merge(feature);

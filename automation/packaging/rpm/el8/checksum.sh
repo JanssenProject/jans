@@ -8,5 +8,9 @@ else
         RELEASE="$REL.el8"
 fi
 pushd rpmbuild/RPMS/x86_64
-sha256sum jans-$VERSION-$RELEASE.x86_64.rpm > jans-$VERSION-$RELEASE.x86_64.rpm.sha256sum
+
+echo "VERSION: $VERSION"
+echo "RELEASE: $RELEASE"
+echo "Creating checksum file for release build"
+sha256sum jans-"$VERSION"-"$RELEASE".x86_64.rpm > jans-"$VERSION"-"$RELEASE".x86_64.rpm.sha256sum
 popd

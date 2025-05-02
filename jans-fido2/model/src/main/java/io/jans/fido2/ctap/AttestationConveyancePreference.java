@@ -8,6 +8,19 @@ package io.jans.fido2.ctap;
 
 public enum AttestationConveyancePreference {
 
-	direct, indirect, none
+    direct("direct"),
+    indirect("indirect"),
+    enterprise("enterprise"),
+    none("none");
+
+    private String keyName;
+
+    private AttestationConveyancePreference(String keyName) {
+        this.keyName = keyName;
+    }
+
+    public String getKeyName() {
+        return this.keyName;
+    }
 
 }

@@ -90,7 +90,7 @@ tags:
 
     - PostgreSQL for persistence storage
 
-        In a production environment, a production grade PostgreSQL server should be used such as `Cloud SQL`
+        In a production environment, a production-grade PostgreSQL server should be used such as `Cloud SQL`
 
         For testing purposes, you can deploy it on the GKE cluster using the following command:
 
@@ -117,7 +117,7 @@ tags:
 
     - MySQL for persistence storage
 
-        In a production environment, a production grade MySQL server should be used such as `Cloud SQL`
+        In a production environment, a production-grade MySQL server should be used such as `Cloud SQL`
 
         For testing purposes, you can deploy it on the GKE cluster using the following command:
 

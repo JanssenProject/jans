@@ -1,6 +1,7 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import io.jans.as.model.util.QueryStringDecoder;
+import io.jans.as.server.auth.DpopService;
 import io.jans.as.server.service.RequestParameterService;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,6 +39,8 @@ public class AuthorizationChallengeEndpoint {
             @FormParam("acr_values") String acrValues,
             @FormParam("auth_session") String authorizationChallengeSession,
             @FormParam("use_auth_session") String useAuthorizationChallengeSession,
+            @FormParam("device_session") String deviceSession, // old name in draft 00
+            @FormParam("use_device_session") String useDeviceSession, // old name in draft 00
             @FormParam("prompt") String prompt,
             @FormParam("state") String state,
             @FormParam("nonce") String nonce,
@@ -63,6 +66,15 @@ public class AuthorizationChallengeEndpoint {
         authzRequest.setCodeChallenge(codeChallenge);
         authzRequest.setCodeChallengeMethod(codeChallengeMethod);
         authzRequest.setAuthzDetailsString(authorizationDetails);
+        authzRequest.setDpop(httpRequest.getHeader(DpopService.DPOP));
+
+        // backwards compatibilty: device_session (up to draft 02) vs auth_session (draft 02 and later)
+        if (authorizationChallengeSession == null && deviceSession != null) {
+            authzRequest.setAuthorizationChallengeSession(deviceSession);
+        }
+        if (useAuthorizationChallengeSession == null && useDeviceSession != null) {
+            authzRequest.setUseAuthorizationChallengeSession(Boolean.parseBoolean(useDeviceSession));
+        }
 
         return authorizationChallengeService.requestAuthorization(authzRequest);
     }

@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.as.common.service.OrganizationService;
@@ -13,9 +13,9 @@ import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.plugin.lock.model.stat.HealthEntry;
-import io.jans.configapi.plugin.lock.model.stat.LogEntry;
-import io.jans.configapi.plugin.lock.model.stat.TelemetryEntry;
+import io.jans.lock.model.audit.HealthEntry;
+import io.jans.lock.model.audit.LogEntry;
+import io.jans.lock.model.audit.TelemetryEntry;
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;

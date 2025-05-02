@@ -8,7 +8,7 @@ package io.jans.as.model.util;
 
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -129,7 +129,7 @@ public class CertUtils {
     }
 
     public static String confirmationMethodHashS256(String certificateAsPem) {
-        if (org.apache.commons.lang.StringUtils.isBlank(certificateAsPem)) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(certificateAsPem)) {
             return "";
         }
         try {
@@ -145,8 +145,8 @@ public class CertUtils {
     }
 
     private static String confirmationMethodHashS256Internal(String certificateAsPem) {
-        certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----BEGIN CERTIFICATE-----");
-        certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----END CERTIFICATE-----");
+        certificateAsPem = org.apache.commons.lang3.StringUtils.remove(certificateAsPem, "-----BEGIN CERTIFICATE-----");
+        certificateAsPem = org.apache.commons.lang3.StringUtils.remove(certificateAsPem, "-----END CERTIFICATE-----");
         certificateAsPem = StringUtils.replace(certificateAsPem, "\n", "");
         return Base64Util.base64urlencode(DigestUtils.sha256(Base64.decode(certificateAsPem)));
     }

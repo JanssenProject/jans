@@ -10,22 +10,47 @@ import static io.jans.scim.model.scim2.Constants.QUERY_PARAM_SORT_ORDER;
 import static io.jans.scim.model.scim2.Constants.QUERY_PARAM_START_INDEX;
 import static io.jans.scim.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.time.Instant;
 
+import javax.management.InvalidAttributeValueException;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
+import io.jans.orm.model.fido2.Fido2DeviceData;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
+import io.jans.orm.search.filter.Filter;
+import io.jans.scim.model.exception.SCIMException;
+import io.jans.scim.model.scim2.BaseScimResource;
+import io.jans.scim.model.scim2.ErrorScimType;
+import io.jans.scim.model.scim2.Meta;
+import io.jans.scim.model.scim2.SearchRequest;
+import io.jans.scim.model.scim2.fido.DeviceData;
+import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
+import io.jans.scim.model.scim2.patch.PatchRequest;
+import io.jans.scim.model.scim2.util.DateUtil;
+import io.jans.scim.model.scim2.util.ScimResourceUtil;
+import io.jans.scim.service.Fido2DeviceService;
+import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
+import io.jans.scim.service.filter.ProtectedApi;
+import io.jans.scim.service.scim2.interceptor.RefAdjusted;
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import javax.management.InvalidAttributeValueException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
@@ -41,32 +66,11 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.apache.commons.lang.StringUtils;
-
-import io.jans.scim.model.exception.SCIMException;
-import io.jans.scim.model.fido2.Fido2DeviceData;
-import io.jans.scim.model.GluuFido2Device;
-import io.jans.scim.model.scim2.*;
-import io.jans.scim.model.scim2.fido.DeviceData;
-import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
-import io.jans.scim.model.scim2.patch.PatchRequest;
-import io.jans.scim.model.scim2.util.DateUtil;
-import io.jans.scim.model.scim2.util.ScimResourceUtil;
-import io.jans.scim.service.Fido2DeviceService;
-import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
-import io.jans.scim.service.filter.ProtectedApi;
-import io.jans.scim.service.scim2.interceptor.RefAdjusted;
-import io.jans.scim.ws.rs.scim2.IFido2DeviceWebService;
-import io.jans.scim.ws.rs.scim2.PATCH;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SortOrder;
-import io.jans.orm.search.filter.Filter;
-
 /**
  * Implementation of /Fido2Devices endpoint. Methods here are intercepted.
  * Filter io.jans.scim.service.filter.AuthorizationProcessingFilter secures invocations
  */
+@Dependent
 @Named("scim2Fido2DeviceEndpoint")
 @Path("/v2/Fido2Devices")
 public class Fido2DeviceWebService extends BaseScimWebService implements IFido2DeviceWebService {
@@ -87,7 +91,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
     private Response doSearchDevices(String userId, String filter, Integer startIndex, 
             Integer count, String sortBy, String sortOrder, String attrsList, String excludedAttrsList,
             String method) {
-        
+
         Response response;
         try {            
             SearchRequest searchReq = new SearchRequest();
@@ -98,7 +102,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
             response = externalConstraintsService.applySearchCheck(searchReq,
                     httpHeaders, uriInfo, method, fido2ResourceType);
             if (response != null) return response;
-            
+
             response = validateExistenceOfUser(userId);
             if (response != null) return response;
 
@@ -149,7 +153,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         try {
             log.debug("Executing web service method. getF2DeviceById");
 
-            GluuFido2Device device = fidoDeviceService.getFido2DeviceById(userId, id);
+            Fido2RegistrationEntry device = fidoDeviceService.getFido2DeviceById(userId, id);
             if (device == null) return notFoundResponse(id, fido2ResourceType);
             
             response = externalConstraintsService.applyEntityCheck(device, null,
@@ -194,8 +198,11 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
                 throw new SCIMException("Parameter id does not match id attribute of Device");
 
             String userId = fidoDeviceResource.getUserId();
-            GluuFido2Device device = fidoDeviceService.getFido2DeviceById(userId, id);
+            Fido2RegistrationEntry device = fidoDeviceService.getFido2DeviceById(userId, id);
             if (device == null) return notFoundResponse(id, fido2ResourceType);
+            
+            if (userId == null)
+                userId = userPersistenceHelper.getUserInumFromDN(device.getDn());
 
             response = externalConstraintsService.applyEntityCheck(device, fidoDeviceResource,
                     httpHeaders, uriInfo, HttpMethod.PUT, fido2ResourceType);
@@ -241,7 +248,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         try {
             log.debug("Executing web service method. deleteDevice");
 
-            GluuFido2Device device = fidoDeviceService.getFido2DeviceById(null, id);
+            Fido2RegistrationEntry device = fidoDeviceService.getFido2DeviceById(null, id);
             if (device == null) return notFoundResponse(id, fido2ResourceType);
 
             response = externalConstraintsService.applyEntityCheck(device, null,
@@ -305,7 +312,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
 
     }
 
-    private void transferAttributesToFido2Resource(GluuFido2Device fidoDevice, Fido2DeviceResource res, String url, String userId) {
+    private void transferAttributesToFido2Resource(Fido2RegistrationEntry fidoDevice, Fido2DeviceResource res, String url, String userId) {
 
         res.setId(fidoDevice.getId());
 
@@ -320,7 +327,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         res.setCreationDate(meta.getCreated());
         res.setCounter(fidoDevice.getRegistrationData().getCounter());
 
-        res.setStatus(fidoDevice.getRegistrationStatus());
+        res.setStatus(fidoDevice.getRegistrationStatus().getValue());
         res.setDisplayName(fidoDevice.getDisplayName());
 
         Fido2DeviceData f2dd = fidoDevice.getDeviceData();
@@ -346,12 +353,12 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         
     }
 
-    private void transferAttributesToDevice(Fido2DeviceResource res, GluuFido2Device device) {
+    private void transferAttributesToDevice(Fido2DeviceResource res, Fido2RegistrationEntry device) {
 
         device.setId(res.getId());
 
         device.getRegistrationData().setCounter(res.getCounter());
-        device.setRegistrationStatus(res.getStatus());
+        device.setRegistrationStatus(Fido2RegistrationStatus.getByValue(res.getStatus()));
         device.setDisplayName(res.getDisplayName());
         
         Instant instant = Instant.parse(res.getMeta().getLastModified());
@@ -387,10 +394,10 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         	ldapFilter=Filter.createANDFilter(ldapFilter, Filter.createEqualityFilter("personInum", userId));
         }
 
-        PagedResult<GluuFido2Device> list;
+        PagedResult<Fido2RegistrationEntry> list;
         try {
             list = entryManager.findPagedEntries(fidoDeviceService.getDnForFido2Device(null, userId),
-                    GluuFido2Device.class, ldapFilter, null, sortBy, sortOrder, startIndex - 1, count, getMaxCount());
+                    Fido2RegistrationEntry.class, ldapFilter, null, sortBy, sortOrder, startIndex - 1, count, getMaxCount());
         } catch (Exception e) {
             log.info("Returning an empty listViewReponse");
             log.error(e.getMessage(), e);
@@ -399,7 +406,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         }
         List<BaseScimResource> resources=new ArrayList<>();
 
-        for (GluuFido2Device device : list.getEntries()){
+        for (Fido2RegistrationEntry device : list.getEntries()){
             Fido2DeviceResource scimDev=new Fido2DeviceResource();
             transferAttributesToFido2Resource(device, scimDev, endpointUrl, userPersistenceHelper.getUserInumFromDN(device.getDn()));
             resources.add(scimDev);
