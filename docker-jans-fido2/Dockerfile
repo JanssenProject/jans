@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.24
+ARG JETTY_VERSION=12.0.19
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -42,21 +42,14 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-04-11 08:25'
-
+ENV CN_BUILD_DATE='2025-05-01 10:27'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
-COPY static/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
 RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
-    && wget -q ${CN_SOURCE_URL} -O /tmp/jans-fido2.war \
-    && cd /tmp \
-    && zip -d jans-fido2.war WEB-INF/jetty-web.xml \
-    && zip -r jans-fido2.war WEB-INF/jetty-env.xml \
-    && cp jans-fido2.war ${JETTY_BASE}/jans-fido2/webapps/jans-fido2.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
-    && rm -rf /tmp/jans-fido2.war /tmp/WEB-INF
+    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-fido2/webapps/jans-fido2.war \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-modules=server,resources,http,forwarded,threadpool,ee9-jsp,ee9-deploy,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
 
 # ===========
 # Assets sync

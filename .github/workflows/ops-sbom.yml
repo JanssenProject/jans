@@ -1,0 +1,97 @@
+on:
+    push:
+      tags:
+      - 'v**'
+      - 'nightly'
+permissions:
+    contents: read
+jobs:
+  enrich_and_upload_sbom:
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Fetch Jans SBOM from Github
+      run: |
+            curl -H "Accept: application/vnd.github.v3.raw" \
+                 -o gh-sbom.json \
+                 https://api.github.com/repos/JanssenProject/jans/dependency-graph/sbom
+            wc gh-sbom.json
+
+    # Trim the SBOM to remove the additional parent `SBOM` element. 
+    # install jq to trim the SBOM
+    - name: Install jq
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y jq
+
+    # Trim the SBOM to only have value of `SBOM` element
+    - name: Trim SBOM
+      run: |
+        jq '.sbom' gh-sbom.json > trimmed-sbom.json
+        wc trimmed-sbom.json
+
+    # Install Parlay CLI
+    - name: Install Parlay CLI
+      run: |
+        curl -s https://api.github.com/repos/snyk/parlay/releases/latest |     
+          grep "browser_download_url" |     
+          grep -P "parlay_\d+\.\d+\.\d+_linux_amd64.deb" |     
+          cut -d '"' -f 4 | 
+          xargs curl -LO
+        
+        sudo dpkg -i parlay_*_linux_amd64.deb
+
+    # Enrich the SBOM using Parlay CLI with ecosystems and scorecard
+    - name: Enrich trimmed SBOM using Parlay
+      run: |
+        cat trimmed-sbom.json | \
+        parlay ecosystems enrich - | \
+        parlay scorecard enrich - > jans-sbom.json
+        # debug
+        wc jans-sbom.json 
+
+    # install sbomqs
+    - name: Install sbomqs to generate compliance reports
+      run: |
+        # get binary from latest release
+        curl -s https://api.github.com/repos/interlynk-io/sbomqs/releases/latest | \
+        grep "browser_download_url" | \
+        grep -P "sbomqs_\d+\.\d+\.\d+_amd64.deb" | \
+        cut -d '"' -f 4 | xargs curl -LO
+
+        # install sbomqs
+        sudo dpkg -i sbomqs_*_amd64.deb
+
+    # Generate compliance reports using sbomqs
+    - name: Generate compliance reports using sbomqs
+      run: |        
+
+        # generate Framing Software Component Transparency (v3) compliance report
+        sbomqs compliance --fsct -j jans-sbom.json > jans-sbom-fsct-report.json
+        # To confirm the file is generated
+        wc jans-sbom-fsct-report.json 
+
+        # generate BSI TR-03183-2 (v2.0.0) compliance report
+        sbomqs compliance --bsi-v2 -j jans-sbom.json > jans-sbom-bsi-v2-report.json
+        # To confirm the file is generated
+        wc jans-sbom-bsi-TR0318-v2-report.json
+
+        # generate NTIA minimum elements (July 12, 2021) compliance report
+        sbomqs compliance --ntia -j jans-sbom.json > jans-sbom-NTIA-report.json
+        # To confirm the file is generated
+        wc jans-sbom-NTIA-report.json
+
+        # generate OpenChain Telco SBOM (v1.0) compliance report
+        sbomqs compliance --oct -j jans-sbom.json > jans-sbom-openchain-report.json
+        # To confirm the file is generated
+        wc jans-sbom-openchain-report.json
+
+
+    # Upload the enriched SBOM and compliance reports to the release
+    - name: Upload the enriched SBOM and compliance reports to the release
+      run: |
+        VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+        gh release upload "${VERSION}" jans-sbom.json jans-sbom-fsct-report.json \
+        jans-sbom-bsi-TR0318-v2-report.json jans-sbom-NTIA-report.json \
+        jans-sbom-openchain-report.json --clobber
