@@ -19,6 +19,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.servlet.ServletContext;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -51,6 +53,9 @@ public class ConfigurationService implements Serializable {
 
 	@Inject
 	private EncryptionService encryptionService;
+
+	@Inject
+	private ServletContext servletContext;
 
 	private static final SimpleDateFormat PERIOD_DATE_FORMAT = new SimpleDateFormat("yyyyMM");
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -230,8 +235,7 @@ public class ConfigurationService implements Serializable {
 		String version = getClass().getPackage().getImplementationVersion();
 		if (version == null) {
 			Properties prop = new Properties();
-			try (InputStream is = FacesContext.getCurrentInstance().getExternalContext()
-					.getResourceAsStream("/META-INF/MANIFEST.MF")) {
+			try (InputStream is = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF")) {
 				prop.load(is);
 				version = prop.getProperty("Implementation-Version");
 			} catch (IOException e) {
