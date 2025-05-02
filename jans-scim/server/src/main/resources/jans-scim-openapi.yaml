@@ -483,335 +483,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: searchRequest
-  /FidoDevices:
-    get:
-      tags:
-        - fido devices
-      operationId: get-fido-devices
-      description: Query Fido resources
-      security:
-        - scim_oauth: [https://jans.io/scim/fido.read]
-      parameters:
-      - name: attributes
-        in: query
-        description: A comma-separated list of attribute names to return in the response
-        schema:
-          type: string
-      - name: excludedAttributes
-        in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-        schema:
-          type: string
-      - name: userId
-        in: query
-        description: Used to restrict the search to fido resources owned by a specific
-          user
-        schema:
-          type: string
-      - name: filter
-        in: query
-        description: An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644
-        example: status eq "compromised"
-        schema:
-          type: string
-      - name: startIndex
-        in: query
-        description: The 1-based index of the first query result
-        schema:
-          type: integer
-      - name: count
-        in: query
-        description: Specifies the desired maximum number of query results per page
-        schema:
-          type: integer
-      - name: sortBy
-        in: query
-        description: The attribute whose value will be used to order the returned responses
-        schema:
-          type: string
-      - name: sortOrder
-        in: query
-        description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending"
-        schema:
-          type: string
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/FidoListResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FidoListResponse'
-        400:
-          description: Parameter count exceeds the maximum allowed value or the filter
-            supplied was unparsable
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        404:
-          description: If userId param was supplied and the user is not known
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        500:
-          description: There was an unexpected failure executing the operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /FidoDevices/{id}:
-    get:
-      tags:
-        - fido devices
-      operationId: get-fido-device-by-id
-      description: Retrieves a U2F/Super Gluu device by Id
-      security:
-        - scim_oauth: [https://jans.io/scim/fido.read]
-      parameters:
-      - name: attributes
-        in: query
-        description: A comma-separated list of attribute names to return in the response
-        schema:
-          type: string
-      - name: excludedAttributes
-        in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-        schema:
-          type: string
-      - name: userId
-        in: query
-        description: Identifier (inum) of the device owner. This param is not required when underlying database is LDAP
-        schema:
-          type: string
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/FidoDeviceResource'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FidoDeviceResource'
-        404:
-          description: Id passed unknown
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        500:
-          description: There was an unexpected failure executing the operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    put:
-      tags:
-        - fido devices
-      operationId: update-fido-device-by-id
-      description: "Updates a Fido resource. Update works in a replacement fashion&amp;#58;\
-        \ every attribute value found in the payload sent will replace the one in\
-        \ the existing resource representation. Attributes \nnot passed in the payload\
-        \ will be left intact.\n"
-      security:
-        - scim_oauth: [https://jans.io/scim/fido.write]
-      parameters:
-      - name: attributes
-        in: query
-        description: A comma-separated list of attribute names to return in the response
-        schema:
-          type: string
-      - name: excludedAttributes
-        in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-        schema:
-          type: string
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: Payload with the data to replace in the existing device identified
-          by the id param
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/FidoDeviceResource'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FidoDeviceResource'
-        required: true
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/FidoDeviceResource'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FidoDeviceResource'
-        400:
-          description: |
-            An invalid value was passed in the payload or there was an attempt to update an immutable attribute
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        404:
-          description: Id passed unknown
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        500:
-          description: There was an unexpected failure executing the operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-codegen-request-body-name: fidoDeviceResource
-    delete:
-      tags:
-        - fido devices
-      operationId: delete-fido-device-by-id
-      description: Deletes a Fido resource
-      security:
-        - scim_oauth: [https://jans.io/scim/fido.write]
-      parameters:
-      - name: id
-        in: path
-        description: Identifier of the resource to delete
-        required: true
-        schema:
-          type: string
-      responses:
-        204:
-          description: Successful operation. Empty response
-          content: {}
-        404:
-          description: Id passed unknown
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        500:
-          description: There was an unexpected failure executing the operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /FidoDevices/.search:
-    post:
-      tags:
-        - fido devices
-      operationId: search-fido-device
-      description: Query Fido resources
-      security:
-        - scim_oauth: [https://jans.io/scim/fido.read]
-      parameters:
-      - name: userId
-        in: query
-        description: Used to restrict the search to fido resources owned by a specific
-          user
-        schema:
-          type: string
-      requestBody:
-        description: Payload that represents the search criteria
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/SearchRequest'
-            examples:
-              samplePayload:
-                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/search_post_2.json'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SearchRequest'
-            examples:
-              samplePayload:
-                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/search_post_2.json'
-        required: true
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/FidoListResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FidoListResponse'
-        400:
-          description: |
-            Parameter count exceeds the maximum allowed value, the filter supplied was unparsable,
-            or invalid schema in search request
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        404:
-          description: If userId param was supplied and the user is not known
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        500:
-          description: There was an unexpected failure executing the operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-codegen-request-body-name: searchRequest
   /Fido2Devices:
     get:
       tags:
@@ -1106,9 +777,6 @@ paths:
           description: Successful operation
           content:
             application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Fido2ListResponse'
-            application/json:
               schema:
                 $ref: '#/components/schemas/Fido2ListResponse'
         400:
@@ -2078,28 +1746,15 @@ components:
       allOf:
       - $ref: '#/components/schemas/BasicListResponse'
       - type: object
-      - type: object
         properties:
           Resources:
             type: array
             items:
               $ref: '#/components/schemas/GroupResource'
-    FidoListResponse:
-      description: Results for fido devices search
-      allOf:
-      - $ref: '#/components/schemas/BasicListResponse'
-      - type: object
-      - type: object
-        properties:
-          Resources:
-            type: array
-            items:
-              $ref: '#/components/schemas/FidoDeviceResource'
     Fido2ListResponse:
       description: Results for fido 2 devices search
       allOf:
       - $ref: '#/components/schemas/BasicListResponse'
-      - type: object
       - type: object
         properties:
           Resources:
@@ -2111,7 +1766,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/BasicListResponse'
       - type: object
-      - type: object
         properties:
           Resources:
             type: array
@@ -2121,7 +1775,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/BasicListResponse'
       - type: object
-      - type: object
         properties:
           Resources:
             type: array
@@ -2130,7 +1783,6 @@ components:
     SchemaListResponse:
       allOf:
       - $ref: '#/components/schemas/BasicListResponse'
-      - type: object
       - type: object
         properties:
           Resources:
@@ -2212,7 +1864,6 @@ components:
     BulkRequest:
       allOf:
       - $ref: '#/components/schemas/BulkData'
-      - type: object
       - type: object
         properties:
           failOnErrors:
@@ -2432,7 +2083,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/BaseResource'
       - type: object
-      - type: object
         properties:
           displayName:
             type: string
@@ -2446,7 +2096,6 @@ components:
         Gluu device
       allOf:
       - $ref: '#/components/schemas/BaseResource'
-      - type: object
       - type: object
         properties:
           userId:
@@ -2491,7 +2140,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/BaseResource'
       - type: object
-      - type: object
         properties:
           userId:
             type: string
@@ -2508,6 +2156,8 @@ components:
             enum:
             - registered
             - pending
+            - compromised
+            - canceled
           displayName:
             type: string
             description: Device name suitable for display to end-users
@@ -2515,7 +2165,6 @@ components:
       description: Represents a user resource. See section 4.1 of RFC 7643
       allOf:
       - $ref: '#/components/schemas/BaseResource'
-      - type: object
       - type: object
         properties:
           externalId:
@@ -2601,12 +2250,10 @@ components:
       oneOf:
         - $ref: '#/components/schemas/GroupResource'
         - $ref: '#/components/schemas/UserResource'
-        - $ref: '#/components/schemas/FidoDeviceResource'
         - $ref: '#/components/schemas/Fido2DeviceResource'
     GenericListResponse:
       allOf:
       - $ref: '#/components/schemas/BasicListResponse'
-      - type: object
       - type: object
         properties:
           Resources:

@@ -37,4 +37,12 @@ pub struct MemoryLogConfig {
     /// `CEDARLING_LOG_TTL` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     /// The maximum time to live (in seconds) of the log entries.
     pub log_ttl: u64,
+
+    /// `CEDARLING_LOG_MAX_ITEMS` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
+    /// The maximum number of log entries to keep in memory.
+    pub max_items: Option<usize>,
+
+    /// `CEDARLING_LOG_MAX_ITEM_SIZE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
+    /// The maximum size of a log entry in bytes.
+    pub max_item_size: Option<usize>,
 }

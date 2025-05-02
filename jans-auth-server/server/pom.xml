@@ -509,6 +509,13 @@
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
 
+        <!-- Bucket4j for rate limiting -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk11-core</artifactId>
+            <version>8.14.0</version>
+        </dependency>
+
 		<!-- JMS -->
 		<dependency>
 		    <groupId>jakarta.jms</groupId>
@@ -794,18 +801,12 @@
 				</dependency> -->
 
 				<dependency>
-					<groupId>org.glassfish</groupId>
-					<artifactId>jakarta.el</artifactId>
-				</dependency>
-				<dependency>
 					<groupId>jakarta.el</groupId>
 					<artifactId>jakarta.el-api</artifactId>
-					<scope>test</scope>
 				</dependency>
 				<dependency>
 				    <groupId>jakarta.servlet.jsp</groupId>
 				    <artifactId>jakarta.servlet.jsp-api</artifactId>
-				    <scope>provided</scope>
 				</dependency>
 
 				<dependency>
@@ -824,7 +825,6 @@
     		        <groupId>jakarta.ejb</groupId>
                     <artifactId>jakarta.ejb-api</artifactId>
                 </dependency>
-
 
 				<!-- Test: Embedded Jetty -->
 				<dependency>

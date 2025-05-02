@@ -366,11 +366,21 @@ class ViewProperty(JansGDialog, DialogUtils):
 
         elif properties['type'] == 'object':
 
+            if not 'properties' in properties:
+                properties['properties'] = {self.property_name: {'type': 'object'}}
+            if not self.value:
+                self.value = {self.property_name: {}}
+            elif not self.property_name in self.value:
+                self.value = {self.property_name: self.value}
+
             if 'properties' in properties:
                 self.widgets = self.get_widgets(properties['properties'], values=self.value)
             else:
-                self.widgets = self.get_widgets({properties['title']: {'type': 'string'}}, values={properties['title']: self.value})
-                self.check_json_types.append(properties['title'])
+                if 'title' in properties:
+                    self.widgets = self.get_widgets({properties['title']: {'type': 'string'}}, values={properties['title']: self.value})
+                    self.check_json_types.append(properties['title'])
+                else:
+                    self.widgets = self.get_widgets(properties)
 
         if not self.tab_widget:
             self.value_content = HSplit(self.widgets, width=D())

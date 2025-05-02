@@ -13,12 +13,12 @@ import jakarta.inject.Named;
 
 import org.slf4j.Logger;
 
+import io.jans.scim.model.JansOrganization;
 import io.jans.scim.model.conf.AppConfiguration;
-import io.jans.config.oxtrust.LdapOxAuthConfiguration;
+
 import io.jans.model.ApplicationType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
-import io.jans.scim.model.JansOrganization;
 import io.jans.service.BaseCacheService;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;

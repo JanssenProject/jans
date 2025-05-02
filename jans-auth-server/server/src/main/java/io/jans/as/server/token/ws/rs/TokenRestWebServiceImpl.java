@@ -450,7 +450,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         if (!authorizationCodeGrant.isAuthorizationChallenge()) {
             tokenRestWebServiceValidator.validateRedirectUri(redirectUri, executionContext.getAuditLog());
         }
-        tokenRestWebServiceValidator.validatePKCE(authorizationCodeGrant, codeVerifier, executionContext.getAuditLog());
+        tokenRestWebServiceValidator.validatePKCE(authorizationCodeGrant, codeVerifier, executionContext.getAuditLog(), client);
         dPoPService.validateDpopThumprint(authorizationCodeGrant.getDpopJkt(), executionContext.getDpop());
 
         authorizationCodeGrant.setIsCachedWithNoPersistence(false);

@@ -116,8 +116,7 @@ class DBUtils:
     def read_jans_schema(self, others=[]):
         self.jans_attributes = []
 
-        for schema_fn_ in ['jans_schema.json', 'custom_schema.json'] + others:
-            schema_fn = schema_fn_ if schema_fn_.startswith('/') else os.path.join(Config.install_dir, 'schema', schema_fn_)
+        for schema_fn in Config.schema_files + others:
             schema = base.readJsonFile(schema_fn)
             self.jans_attributes += schema['attributeTypes']
 

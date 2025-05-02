@@ -18,6 +18,7 @@ type OidcClientAttribute struct {
 	BackchannelLogoutSessionRequired        bool     `schema:"backchannel_logout_session_required" json:"backchannelLogoutSessionRequired,omitempty"`
 	AdditionalAudience                      []string `schema:"additional_audience" json:"additionalAudience,omitempty"`
 	PostAuthnScripts                        []string `schema:"post_authn_scripts" json:"postAuthnScripts,omitempty"`
+	TokenExchangeScripts                    []string `schema:"token_exchange_scripts" json:"tokenExchangeScripts,omitempty"`
 	ConsentGatheringScripts                 []string `schema:"consent_gathering_scripts" json:"consentGatheringScripts,omitempty"`
 	IntrospectionScripts                    []string `schema:"introspection_scripts" json:"introspectionScripts,omitempty"`
 	RptClaimsScripts                        []string `schema:"rpt_claims_scripts" json:"rptClaimsScripts,omitempty"`
@@ -35,6 +36,7 @@ type OidcClientAttribute struct {
 	TxTokenLifetime                         int      `schema:"tx_token_lifetime" json:"txTokenLifetime,omitempty"`
 	IdTokenLifetime                         int      `schema:"id_token_lifetime" json:"idTokenLifetime,omitempty"`
 	AllowOfflineAccessWithoutConsent        bool     `schema:"allow_offline_access_without_consent" json:"allowOfflineAccessWithoutConsent,omitempty"`
+	RequirePcke                             bool     `schema:"require_pcke" json:"requirePcke,omitempty"`
 	MinimumAcrLevel                         int      `schema:"minimum_acr_level" json:"minimumAcrLevel,omitempty"`
 	MinimumAcrLevelAutoresolve              bool     `schema:"minimum_acr_level_autoresolve" json:"minimumAcrLevelAutoresolve,omitempty"`
 	AdditionalTokenEndpointAuthMethods      []string `schema:"additional_token_endpoint_auth_methods" json:"additionalTokenEndpointAuthMethods,omitempty"`

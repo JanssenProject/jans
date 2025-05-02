@@ -9,10 +9,7 @@
 // and `use std::env` prevents that compilation.
 #![cfg(not(target_family = "wasm"))]
 
-use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogStorage,
-    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, WorkloadBoolOp,
-};
+use cedarling::*;
 use std::env;
 
 // The human-readable policy and schema file is located in next folder:
@@ -58,9 +55,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: JsonRule::default(),
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
     })
     .await?;
 
@@ -98,5 +96,9 @@ fn extract_memory_config(args: Vec<String>) -> LogTypeConfig {
     let log_ttl: u64 = args[2]
         .parse()
         .expect("Invalid ttl value, should be integer");
-    LogTypeConfig::Memory(MemoryLogConfig { log_ttl })
+    LogTypeConfig::Memory(MemoryLogConfig {
+        log_ttl,
+        max_item_size: None,
+        max_items: None,
+    })
 }

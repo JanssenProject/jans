@@ -17,7 +17,7 @@ limitations under the License.
 from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
 from cedarling_python import (
-    ResourceData,
+    EntityData,
     Request,
     AuthorizeResultResponse
 )
@@ -55,15 +55,16 @@ class CedarlingInstance:
     def get_cedarling_instance(self) -> Cedarling:
         return self._cedarling
 
-    def generate_resource(self, resource: DictType) -> ResourceData:
+    def generate_resource(self, resource: DictType) -> EntityData:
         resource_properties = resource.get("properties", {})
         resource_entity_dict = {
+            "entity_type": "resource",
             "type": resource.get("type_field"),
             "id": resource.get("id")
         }
         for key in resource_properties.keys():
             resource_entity_dict[key] = resource_properties[key]
-        resource_entity = ResourceData.from_dict(resource_entity_dict)
+        resource_entity = EntityData.from_dict(resource_entity_dict)
         return resource_entity
 
     def validate_subject(self, subject: DictType) -> bool:

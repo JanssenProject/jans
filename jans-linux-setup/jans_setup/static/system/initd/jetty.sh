@@ -152,7 +152,7 @@ return 1
 
 started()
 {
-  # wait for 60s to see "STARTED" in PID file, needs jetty-started.xml as argument
+  # wait for 60s to see "STARTED" in PID file
   for ((T = 0; T < $(($3 / 4)); T++))
   do
     sleep 4
@@ -517,17 +517,12 @@ case "$ACTION" in
 
     fi
 
-    if expr "${JETTY_ARGS[*]}" : '.*jetty-started.xml.*' >/dev/null
+    if started "$JETTY_STATE" "$JETTY_PID" "$JETTY_START_TIMEOUT"
     then
-      if started "$JETTY_STATE" "$JETTY_PID" "$JETTY_START_TIMEOUT"
-      then
-        echo "OK `date`"
-      else
-        echo "FAILED `date`"
-        exit 1
-      fi
+      echo "OK `date`"
     else
-      echo "ok `date`"
+      echo "FAILED `date`"
+      exit 1
     fi
 
     ;;

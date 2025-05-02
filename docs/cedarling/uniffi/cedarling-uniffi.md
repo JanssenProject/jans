@@ -18,8 +18,14 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    **Usage in Swift:**
 
    ```declarative
-   let cedarling = try Cedarling.loadFromJson(config: jsonString)
+   let cedarling = try Cedarling.loadFromJson(config: configJson);
    ```
+
+  **Usage in Kotlin:**
+
+  ```declarative
+  val cedarling: Cedarling = Cedarling.loadFromJson(configJson)
+  ```
 
 - **Cedarling::load_from_file**
 
@@ -35,6 +41,12 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    ```declarative
    let cedarling = try Cedarling.loadFromFile(path: "/path/to/config.json")
    ```
+
+  **Usage in Kotlin:**
+
+  ```declarative
+  val cedarling: Cedarling = Cedarling.loadFromJson("/path/to/config.json")
+  ```
 
 - **Cedarling::authorize**
 
@@ -56,8 +68,14 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    **Usage in Swift:**
 
    ```declarative
-   let result = try cedarling.authorize(tokens: tokenMap, action: "read", resourceType: "file", resourceId: "123", payload: "{}", context: "")
+   let result = try cedarling.authorize(tokens: tokenMap, action: "Jans::Action::\"Update\"", resourceType: "Jans::Issue", resourceId: "some_id", payload: "{}", context: "")
    ```
+
+  **Usage in Kotlin:**
+
+  ```declarative
+  val authResult: AuthorizeResult = cedarling.authorize(tokenMap, "Jans::Action::\"Update\"", "Jans::Issue", "some_id", "{}", "{}")
+  ```
 
 - **Cedarling::pop_logs**
 
@@ -74,6 +92,13 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    let logs = try cedarling.popLogs()
    ```
 
+  **Usage in Kotlin:**
+
+  ```declarative
+  val logs = cedarling.popLogs()
+
+  ```
+
 - **Cedarling::get_log_by_id**
 
    Retrieves a log entry by ID.
@@ -88,6 +113,13 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    ```declarative
    let log = try cedarling.getLogById(id: "log123")
    ```
+
+  **Usage in Kotlin:**
+
+  ```declarative
+  val logs = cedarling.getLogById("log123")
+
+  ```
 
 - **Cedarling::get_log_ids**
 
@@ -104,6 +136,13 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    let ids = try cedarling.getLogIds()
    ```
 
+  **Usage in Kotlin:**
+
+  ```declarative
+  val ids = cedarling.getLogById("log123")
+
+  ```
+
 - **Cedarling::get_logs_by_tag**
 
    Get logs by tag, like `log_kind` or `log level`.
@@ -118,6 +157,13 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    ```declarative
    let logs = try cedarling.getLogsByTag(tag: "DEBUG")
    ```
+
+  **Usage in Kotlin:**
+
+  ```declarative
+  val logs = cedarling.getLogsByTag("DEBUG")
+
+  ```
    
 - **Cedarling::get_logs_by_request_id**
 
@@ -133,6 +179,13 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    ```declarative
    let logs = try cedarling.getLogsByRequestId(request_id: "12434-32323-43434")
    ```
+
+  **Usage in Kotlin:**
+
+  ```declarative
+  val logs = cedarling.getLogsByRequestId("12434-32323-43434")
+
+  ```
 
 - **Cedarling::get_logs_by_request_id_and_tag**
 
@@ -152,3 +205,10 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    ```declarative
    let logs = try cedarling.getLogsByRequestIdAndTag(request_id: "12434-32323-43434", tag: "Decision")
    ```
+
+  **Usage in Kotlin:**
+
+  ```declarative
+  val logs = cedarling.getLogsByRequestId("12434-32323-43434", "Decision")
+
+  ```

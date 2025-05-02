@@ -102,6 +102,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value to indicate of Pushed Authorisation Request(PAR)is required", defaultValue = "false")
     private Boolean requirePar = false;
 
+    @DocProperty(description = "Boolean value to indicate whether public client is allowed for Pushed Authorisation Request(PAR)", defaultValue = "false")
+    private Boolean parForbidPublicClient = false;
+
     @DocProperty(description = "URL for the Device Authorization")
     private String deviceAuthzEndpoint;
 
@@ -375,9 +378,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service")
     private String opTosUri;
 
-    @DocProperty(description = "Defines client inactivity period in hours which means that client will be removed once it is passed.")
-    public int cleanUpInactiveClientAfterHoursOfInactivity = -1;
-
     @DocProperty(description = "Interval for client periodic update timer. Update timer is used to debounce frequent updates of the client to avoid performance degradation.")
     public int clientPeriodicUpdateTimerInterval = 3;
 
@@ -407,12 +407,6 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "The lifetime of the User Info", defaultValue = "3600")
     private int userInfoLifetime;
-
-    @DocProperty(description = "Time interval for the Clean Service in seconds")
-    private int cleanServiceInterval;
-
-    @DocProperty(description = "Clean service chunk size which is used during clean up", defaultValue = "100")
-    private int cleanServiceBatchChunkSize = 100;
 
     @DocProperty(description = "Boolean value specifying whether to regenerate keys")
     private Boolean keyRegenerationEnabled;
@@ -542,6 +536,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Boolean value specifying whether to persist session_id in cache", defaultValue = "false")
     private Boolean sessionIdPersistInCache = false;
+
+    @DocProperty(description = "Defines list of user claims that has to be put in session attributes")
+    private List<String> sessionIdUserClaimsInAttributes = new ArrayList<>();
 
     @DocProperty(description = "Boolean value specifying whether to include sessionId in response", defaultValue = "false")
     private Boolean includeSidInResponse = false;
@@ -717,6 +714,12 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Authorization challenge session lifetime in seconds")
     private Integer authorizationChallengeSessionLifetimeInSeconds;
+
+    @DocProperty(description = "Request count limit - for /register endpoint (Rate Limit)")
+    private Integer rateLimitRegistrationRequestCount;
+
+    @DocProperty(description = "Period in seconds limit - for /register endpoint (Rate Limit)")
+    private Integer rateLimitRegistrationPeriodInSeconds;
 
     // Token Exchange
     @DocProperty(description = "", defaultValue = "false")
@@ -1060,6 +1063,24 @@ public class AppConfiguration implements Configuration {
         this.returnDeviceSecretFromAuthzEndpoint = returnDeviceSecretFromAuthzEndpoint;
     }
 
+    public Integer getRateLimitRegistrationRequestCount() {
+        return rateLimitRegistrationRequestCount;
+    }
+
+    public AppConfiguration setRateLimitRegistrationRequestCount(Integer rateLimitRegistrationRequestCount) {
+        this.rateLimitRegistrationRequestCount = rateLimitRegistrationRequestCount;
+        return this;
+    }
+
+    public Integer getRateLimitRegistrationPeriodInSeconds() {
+        return rateLimitRegistrationPeriodInSeconds;
+    }
+
+    public AppConfiguration setRateLimitRegistrationPeriodInSeconds(Integer rateLimitRegistrationPeriodInSeconds) {
+        this.rateLimitRegistrationPeriodInSeconds = rateLimitRegistrationPeriodInSeconds;
+        return this;
+    }
+
     public Integer getAuthorizationChallengeSessionLifetimeInSeconds() {
         if (authorizationChallengeSessionLifetimeInSeconds == null) {
            authorizationChallengeSessionLifetimeInSeconds = DEFAULT_AUTHORIZATION_CHALLENGE_SESSION_LIFETIME;
@@ -1381,6 +1402,15 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionIdPersistInCache(Boolean sessionIdPersistInCache) {
         this.sessionIdPersistInCache = sessionIdPersistInCache;
+    }
+
+    public List<String> getSessionIdUserClaimsInAttributes() {
+        return sessionIdUserClaimsInAttributes;
+    }
+
+    public AppConfiguration setSessionIdUserClaimsInAttributes(List<String> sessionIdUserClaimsInAttributes) {
+        this.sessionIdUserClaimsInAttributes = sessionIdUserClaimsInAttributes;
+        return this;
     }
 
     public Boolean getChangeSessionIdOnAuthentication() {
@@ -1957,6 +1987,16 @@ public class AppConfiguration implements Configuration {
         this.requirePar = requirePar;
     }
 
+    public Boolean getParForbidPublicClient() {
+        if (parForbidPublicClient == null) parForbidPublicClient = false;
+        return parForbidPublicClient;
+    }
+
+    public AppConfiguration setParForbidPublicClient(Boolean parForbidPublicClient) {
+        this.parForbidPublicClient = parForbidPublicClient;
+        return this;
+    }
+
     public String getOpenIdConfigurationEndpoint() {
         return openIdConfigurationEndpoint;
     }
@@ -2366,14 +2406,6 @@ public class AppConfiguration implements Configuration {
         this.opTosUri = opTosUri;
     }
 
-    public int getCleanUpInactiveClientAfterHoursOfInactivity() {
-        return cleanUpInactiveClientAfterHoursOfInactivity;
-    }
-
-    public void setCleanUpInactiveClientAfterHoursOfInactivity(int cleanUpInactiveClientAfterHoursOfInactivity) {
-        this.cleanUpInactiveClientAfterHoursOfInactivity = cleanUpInactiveClientAfterHoursOfInactivity;
-    }
-
     public int getClientPeriodicUpdateTimerInterval() {
         return clientPeriodicUpdateTimerInterval;
     }
@@ -2527,22 +2559,6 @@ public class AppConfiguration implements Configuration {
 
     public void setStatusListIndexAllocationBlockSize(int statusListIndexAllocationBlockSize) {
         this.statusListIndexAllocationBlockSize = statusListIndexAllocationBlockSize;
-    }
-
-    public int getCleanServiceInterval() {
-        return cleanServiceInterval;
-    }
-
-    public void setCleanServiceInterval(int cleanServiceInterval) {
-        this.cleanServiceInterval = cleanServiceInterval;
-    }
-
-    public int getCleanServiceBatchChunkSize() {
-        return cleanServiceBatchChunkSize;
-    }
-
-    public void setCleanServiceBatchChunkSize(int cleanServiceBatchChunkSize) {
-        this.cleanServiceBatchChunkSize = cleanServiceBatchChunkSize;
     }
 
     public Boolean getKeyRegenerationEnabled() {

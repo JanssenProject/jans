@@ -170,6 +170,29 @@ errors : list of PolicyEvaluationError
     A list of errors that occurred during the authorization process. These are unordered as policies may be evaluated in any order.
 ___
 
+EntityData
+============
+
+A Python wrapper for the Rust `cedarling::EntityData` struct. This class represents
+a resource entity with a type, ID, and attributes. Attributes are stored as a payload
+in a dictionary format.
+
+Attributes
+----------  
+:param entity_type: Type of the entity.  
+:param id: ID of the entity.  
+:param payload: Optional dictionary of attributes.
+
+Methods
+-------
+.. method:: __init__(self, entity_type: str, id: str, **kwargs: dict)
+    Initialize a new EntityData. In kwargs the payload is a dictionary of entity attributes.
+
+.. method:: from_dict(cls, value: dict) -> EntityData
+    Initialize a new EntityData from a dictionary.
+    To pass `entity_type` you need to use `type` key.
+___
+
 PolicyEvaluationError
 =====================
 
@@ -193,7 +216,7 @@ Attributes
 ----------  
 :param tokens: A class containing the JWTs what will be used for the request.  
 :param action: The action to be authorized.  
-:param resource: Resource data (wrapped `ResourceData` object).  
+:param resource: Resource data (wrapped `EntityData` object).  
 :param context: Python dictionary with additional context.
 
 Example
@@ -204,27 +227,26 @@ request = Request(access_token="token123", action="read", resource=resource, con
 ```
 ___
 
-ResourceData
-============
+# RequestUnsigned
+Request
+=======
 
-A Python wrapper for the Rust `cedarling::ResourceData` struct. This class represents
-a resource entity with a type, ID, and attributes. Attributes are stored as a payload
-in a dictionary format.
+A Python wrapper for the Rust `cedarling::RequestUnsigned` struct. Represents
+authorization data for unsigned authorization requests for many principals.
 
 Attributes
 ----------  
-:param resource_type: Type of the resource entity.  
-:param id: ID of the resource entity.  
-:param payload: Optional dictionary of attributes.
+:param principals: A list of `EntityData` objects representing the principals.  
+:param action: The action to be authorized.  
+:param resource: Resource data (wrapped `ResourceData` object).  
+:param context: Python dictionary with additional context.
 
-Methods
+Example
 -------
-.. method:: __init__(self, resource_type: str, id: str, **kwargs: dict)
-    Initialize a new ResourceData. In kwargs the payload is a dictionary of entity attributes.
-
-.. method:: from_dict(cls, value: dict) -> ResourceData
-    Initialize a new ResourceData from a dictionary.
-    To pass `resource_type` you need to use `type` key.
+```python
+# Create a request for authorization
+request = Request(principals=[principal], action="read", resource=resource, context={})
+```
 ___
 
 # authorize_errors.ActionError
@@ -243,31 +265,35 @@ ___
 Error encountered while running on strict id token trust mode
 ___
 
-# authorize_errors.CreateContextError
-Error encountered while validating context according to the schema
+# authorize_errors.BuildUnsignedRoleEntityError
+Error building Role entity for unsigned request
 ___
 
-# authorize_errors.EntitiesError
-Error encountered while collecting all entities
+# authorize_errors.CreateContextError
+Error encountered while validating context according to the schema
 ___
 
 # authorize_errors.EntitiesToJsonError
 Error encountered while parsing all entities to json for logging
 ___
 
+# authorize_errors.ExecuteRuleError
+Error encountered while executing the rule for principals
+___
+
 # authorize_errors.IdTokenTrustModeError
 Error encountered while running on strict id token trust mode
+___
+
+# authorize_errors.InvalidPrincipalError
+Error encountered while creating cedar_policy::Request for principal
 ___
 
 # authorize_errors.ProcessTokens
 Error encountered while processing JWT token data
 ___
 
-# authorize_errors.UserRequestValidationError
-Error encountered while creating cedar_policy::Request for user entity principal
-___
-
-# authorize_errors.WorkloadRequestValidationError
-Error encountered while creating cedar_policy::Request for workload entity principal
+# authorize_errors.ValidateEntitiesError
+Error encountered while validating the entities to the schema
 ___
 

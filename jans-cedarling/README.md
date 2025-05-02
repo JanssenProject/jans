@@ -131,3 +131,13 @@ You can run the benchmarks using:
 ```sh
 cargo bench -p cedarling
 ```
+
+## Profiling
+
+Profiling is done using the [`pprof`](https://crates.io/crates/pprof) crate. We have an example you can run with
+
+```sh
+cargo run --example profiling
+```
+
+that outputs an SVG named `cedarling_profiling_flamegraph`.

@@ -23,12 +23,12 @@ resource "jans_api_app_configuration" "global" {
 
 ### Optional
 
+- `acr_validation_enabled` (Boolean)
 - `agama_configuration` (Block List) (see [below for nested schema](#nestedblock--agama_configuration))
 - `api_approved_issuer` (List of String)
 - `api_client_id` (String)
 - `api_client_password` (String)
 - `api_protection_type` (String)
-- `acr_validation_enabled` (Boolean)
 - `asset_mgt_configuration` (Block List) (see [below for nested schema](#nestedblock--asset_mgt_configuration))
 - `audit_log_conf` (Block List) (see [below for nested schema](#nestedblock--audit_log_conf))
 - `auth_issuer_url` (String)
@@ -71,12 +71,10 @@ Optional:
 
 Optional:
 
-- `asset_base_directory` (String)
 - `asset_dir_mappings` (Block List) (see [below for nested schema](#nestedblock--asset_mgt_configuration--asset_dir_mappings))
 - `asset_mgt_enabled` (Boolean)
 - `asset_server_upload_enabled` (Boolean)
 - `file_extension_validation_enabled` (Boolean)
-- `jans_service_module` (List of String)
 - `module_name_validation_enabled` (Boolean)
 
 <a id="nestedblock--asset_mgt_configuration--asset_dir_mappings"></a>

@@ -39,7 +39,11 @@ fn test_new_log_strategy_off() {
 fn test_new_log_strategy_memory() {
     // Arrange
     let config = LogConfig {
-        log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
+        log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig {
+            log_ttl: 60,
+            max_item_size: None,
+            max_items: None,
+        }),
         log_level: crate::LogLevel::DEBUG,
     };
 
@@ -74,10 +78,14 @@ fn test_log_memory_logger() {
     let app_name = None;
     // Arrange
     let config = LogConfig {
-        log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
+        log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig {
+            log_ttl: 60,
+            max_item_size: None,
+            max_items: None,
+        }),
         log_level: crate::LogLevel::TRACE,
     };
-    let strategy = LogStrategy::new(&config, pdp_id.clone(), app_name.clone());
+    let strategy = LogStrategy::new(&config, pdp_id, app_name.clone());
     let entry = LogEntry {
         base: BaseLogEntry::new(LogType::Decision, gen_uuid7()),
         auth_info: None,
@@ -115,12 +123,12 @@ fn test_log_memory_logger() {
 
     let entry1_json = json!(LogEntryWithClientInfo::from_loggable(
         entry1.clone(),
-        pdp_id.clone(),
+        pdp_id,
         app_name.clone()
     ));
     let entry2_json = json!(LogEntryWithClientInfo::from_loggable(
         entry2.clone(),
-        pdp_id.clone(),
+        pdp_id,
         app_name.clone()
     ));
 
@@ -170,7 +178,7 @@ fn test_log_stdout_logger() {
     // Serialize the log entry to JSON
     let json_str = json!(LogEntryWithClientInfo::from_loggable(
         log_entry.clone(),
-        pdp_id.clone(),
+        pdp_id,
         app_name.clone()
     ))
     .to_string();
@@ -179,7 +187,7 @@ fn test_log_stdout_logger() {
     let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
     let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
     let strategy =
-        LogStrategy::new_with_logger(LogStrategyLogger::StdOut(logger), pdp_id.clone(), app_name);
+        LogStrategy::new_with_logger(LogStrategyLogger::StdOut(logger), pdp_id, app_name);
 
     // Act
     strategy.log_any(log_entry);

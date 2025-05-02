@@ -21,20 +21,19 @@ Resource for managing Janssen assets.
 
 ### Optional
 
+- `alias` (String) The Jans alias of the document.
 - `base_dn` (String) The base DN of the document.
 - `creation_date` (String) The creation date of the document.
 - `description` (String) The description of the document.
-- `display_name` (String) The display name of the document.
 - `dn` (String) The DN of the document.
 - `document` (String) The document.
+- `enabled` (Boolean) The Jans enabled of the document.
+- `file_name` (String) The file name of the document.
+- `file_path` (String) The Jans file path of the document.
 - `inum` (String) The inum of the document.
-- `jans_alias` (String) The Jans alias of the document.
-- `jans_enabled` (Boolean) The Jans enabled of the document.
-- `jans_file_path` (String) The Jans file path of the document.
-- `jans_level` (String) The Jans level of the document.
-- `jans_module_property` (List of String) The Jans module property of the document.
-- `jans_revision` (String) The Jans revision of the document.
-- `selected` (Boolean) The selected of the document.
+- `level` (String) The Jans level of the document.
+- `revision` (String) The Jans revision of the document.
+- `service` (String) The Jans service of the document.
 
 ### Read-Only
 

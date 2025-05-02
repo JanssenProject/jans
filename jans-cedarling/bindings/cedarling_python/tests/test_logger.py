@@ -4,11 +4,10 @@
 # Copyright (c) 2024, Gluu, Inc.
 
 from cedarling_python import Cedarling
-from cedarling_python import ResourceData, Request
 from config import load_bootstrap_config
 
 # reuse already defined tokens
-from test_authorize import ACCESS_TOKEN, ID_TOKEN, USERINFO_TOKEN, RESOURCE, REQUEST
+from test_authorize import REQUEST
 
 
 # In python unit tests we not cover all possible scenarios, but most common.

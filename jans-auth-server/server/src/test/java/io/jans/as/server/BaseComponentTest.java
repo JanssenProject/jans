@@ -13,7 +13,6 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.server.idgen.ws.rs.InumGenerator;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.config.ConfigurationFactory;
-import io.jans.as.server.service.CleanerTimer;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.GrantService;
 import io.jans.as.server.service.SessionIdService;
@@ -57,10 +56,6 @@ public abstract class BaseComponentTest extends BaseTest {
 
     public InumService getInumService() {
         return CdiUtil.bean(InumService.class);
-    }
-
-    public CleanerTimer getCleanerTimer() {
-        return CdiUtil.bean(CleanerTimer.class);
     }
 
     public CacheService getCacheService() {

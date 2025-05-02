@@ -6,6 +6,7 @@ tags:
   - certificate management
   - certification and key rotation
 ---
+# Certificate Management
 
 ## Overview
 
@@ -45,11 +46,11 @@ Rotating Certificates and Keys in Kubernetes setup
           restartPolicy: Never
           containers:
             - name: web-key-rotation
-              image: ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm # This may be differnet in Helm
-              args: ["patch", "web", "--opts", "valid-to:365"]
+              args: ["certmanager", "patch", "web", "--opts", "valid-to:365"]
     ```
             
 2.  Apply job        
@@ -97,7 +98,7 @@ Rotating Certificates and Keys in Kubernetes setup
                   path: web_https.key                              
           containers:
             - name: load-web-key-rotation
-              image: ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm  #This may be differnet in Helm
@@ -108,7 +109,7 @@ Rotating Certificates and Keys in Kubernetes setup
                 - name: web-key
                   mountPath: /etc/certs/web_https.key
                   subPath: web_https.key
-              args: ["patch", "web", "--opts", "source:from-files"]
+              args: ["certmanager", "patch", "web", "--opts", "source:from-files"]
     ```
             
 3.  Apply job
@@ -147,7 +148,7 @@ kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
             spec:
               containers:
                 - name: auth-key-rotation
-                  image: ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1
+                  image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
                   resources:
                     requests:
                       memory: "300Mi"
@@ -158,7 +159,7 @@ kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
                   envFrom:
                     - configMapRef:
                         name: janssen-config-cm
-                  args: ["patch", "auth", "--opts", "interval:48", "--opts", "key-strategy:OLDER", "--opts", "privkey-push-delay:300", "--opts", "privkey-push-strategy:NEWER"]
+                  args: ["certmanager", "patch", "auth", "--opts", "interval:48", "--opts", "key-strategy:OLDER", "--opts", "privkey-push-delay:300", "--opts", "privkey-push-strategy:NEWER"]
               restartPolicy: Never
     ```
 

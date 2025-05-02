@@ -6,6 +6,8 @@ tags:
   - health-checks
 ---
 
+# Health Check
+
 ## Overview
 
 Health checks are used to determine if a container is working as it should or not. This is done in Kubernetes using probes.

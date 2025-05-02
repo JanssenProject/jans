@@ -6,8 +6,6 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use url::Url;
-
 use crate::common::policy_store::TrustedIssuer;
 
 type IssuerId = String; // e.g. '7ca8ccc6e8682ad91f47e651cf7e3dcea4f8133663ae'
@@ -33,8 +31,7 @@ impl TrustedIssuersStore {
             Some(issuers) => issuers
                 .values()
                 .map(|iss| {
-                    let endpoint = Url::parse(&iss.openid_configuration_endpoint).unwrap();
-                    let iss_origin: IssuerOrigin = endpoint.origin().ascii_serialization();
+                    let iss_origin: IssuerOrigin = iss.oidc_endpoint.origin().ascii_serialization();
                     (iss_origin, iss.clone())
                 })
                 .collect::<HashMap<IssuerOrigin, TrustedIssuer>>(),
