@@ -6,30 +6,30 @@
 
 package io.jans.scim.service;
 
-import io.jans.model.*;
-import io.jans.model.custom.script.CustomScriptType;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.util.StringHelper;
-import io.jans.util.security.StringEncrypter.EncryptionException;
-import org.slf4j.Logger;
-
-import io.jans.scim.model.JansConfiguration;
-import io.jans.service.EncryptionService;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.faces.context.FacesContext;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.servlet.ServletContext;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+
+import org.slf4j.Logger;
+
+import io.jans.model.AuthenticationScriptUsageType;
+import io.jans.model.ProgrammingLanguage;
+import io.jans.model.ScriptLocationType;
+import io.jans.model.SmtpConfiguration;
+import io.jans.model.custom.script.CustomScriptType;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.scim.model.JansConfiguration;
+import io.jans.service.EncryptionService;
+import io.jans.util.StringHelper;
+import io.jans.util.security.StringEncrypter.EncryptionException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.ServletContext;
 
 /**
  * JansConfiguration service
