@@ -94,7 +94,7 @@ class JansDialogWithNav():
             buttons=[
                 Button(
                     text=str(self.button_functions[k][1]),
-                    width=len(str(self.button_functions[k][1]))+2,
+                    width=len(str(self.button_functions[k][1]))+4,
                     handler=self.button_functions[k][0],
                 ) for k in range(len(self.button_functions))
             ],

@@ -1,0 +1,15 @@
+{
+  "lastPolicyLoadTime": "2012-04-21T18:25:43-05:00",
+  "lastPolicyLoadSize": 1,
+  "status": "Success",
+  "policySuccessLoadCounter": 2,
+  "policyFailedLoadCounter": 0,
+  "lastPolicyEvaluationTimeNs": 5,
+  "avgPolicyEvaluationTimeNs": 3,
+  "evaluationRequestsCount": 2,
+  "memoryusage": "2200",
+  "policyRequestData": {
+    "aname": "puja",
+    "gender": "femmale"
+  }
+}

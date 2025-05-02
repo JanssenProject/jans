@@ -17,6 +17,7 @@ from itertools import cycle
 from requests.models import Response
 from logging.handlers import RotatingFileHandler
 
+tcols, trows = os.get_terminal_size()
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
 
@@ -24,10 +25,48 @@ pylib_dir = os.path.join(cur_dir, 'cli', 'pylib')
 if os.path.exists(pylib_dir):
     sys.path.insert(0, pylib_dir)
 
+from prompt_toolkit.shortcuts import clear
+
+### start splash logo
+with open(os.path.join(cur_dir, 'jans-logo.txt')) as f:
+    jans_logo = f.read()
+
+jans_logo_list = jans_logo.splitlines()
+
+if tcols < len(jans_logo_list[0])+1 or trows < len(jans_logo_list)+1:
+    jans_logo_list_resized = []
+    for line in jans_logo_list[::2]:
+        jans_logo_list_resized.append(line[::2])
+
+    jans_logo_list = jans_logo_list_resized[:]
+
+logo_cols = len(jans_logo_list[3])
+
+pre_cols = (int((tcols - logo_cols)/2) -1) * ' '
+for i, line in enumerate(jans_logo_list[:]):
+    jans_logo_list[i] = pre_cols + jans_logo_list[i]
+
+pre_rows = int((trows - len(jans_logo_list))/2) -2
+for _ in range(pre_rows):
+    jans_logo_list.insert(0, ' ')
+
+jans_logo = '\n'.join(jans_logo_list)
+
+clear()
+print(jans_logo)
+### send plash logo
+
 no_tui = False
 if '--no-tui' in sys.argv:
     sys.argv.remove('--no-tui')
     no_tui = True
+
+
+def print_text(txt):
+    print("\033[%d;%dH" % (trows-2, 0))
+    print(txt.ljust(tcols))
+
+print_text("Importing CLI ...")
 
 from cli import config_cli
 
@@ -60,13 +99,13 @@ from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.layout import Layout
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.widgets import (
-    Button,
     Frame,
+    Button,
     Label,
     RadioList,
-    TextArea,
     CheckboxList,
     Checkbox,
+    TextArea
 )
 from collections import OrderedDict
 from typing import Any, Optional, Sequence, Union
@@ -93,6 +132,7 @@ config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
 
+
 def accept_yes() -> None:
     get_app().exit(result=True)
 
@@ -107,6 +147,7 @@ class JansCliApp(Application):
     entries_per_page = 20 # we can make this configurable
 
     def __init__(self):
+
         common_data.app = self
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
         self.set_keybindings()
@@ -152,6 +193,7 @@ class JansCliApp(Application):
                     jans_name='main:nav_bar',
                     last_to_right=True,
                     )
+
         self.center_frame = FloatContainer(content=
                     Frame(
                         body=DynamicContainer(lambda: self.center_container),
@@ -159,6 +201,7 @@ class JansCliApp(Application):
                         ),
                         floats=[],
                 )
+
         self.root_layout = FloatContainer(
                         HSplit([
                                 Frame(self.nav_bar.nav_window),
@@ -168,6 +211,7 @@ class JansCliApp(Application):
                                 ),
                         floats=[]
                 )
+
         super(JansCliApp, self).__init__(
                 layout=Layout(self.root_layout),
                 key_bindings=self.bindings, 
@@ -319,7 +363,7 @@ class JansCliApp(Application):
                 test_client=test_client
             )
 
-        print(_("Checking health of Jans Config Api Server"))
+        print_text(_("Checking health of Jans Config Api Server ..."))
         response = self.cli_requests({'operation_id': 'get-config-health'})
 
         if response.status_code != 200:
@@ -334,7 +378,8 @@ class JansCliApp(Application):
                     print(healt_status)
                     sys.exit()
 
-        print(_("Health of Jans Config Api Server seems good"))
+        time.sleep(1)
+        print_text(_("Health of Jans Config Api Server seems good."))
 
         status = self.cli_object.check_connection()
 
@@ -1040,7 +1085,6 @@ class JansCliApp(Application):
         buttons = [Button(_("No")), Button(_("Yes"), handler=confirm_handler)]
         dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons, width=self.dialog_width-20)
         return dialog
-
 
 application = JansCliApp()
 

@@ -67,8 +67,8 @@ It will return the result as below:
 
 ```json title="Sample Output" linenums="1"
 {
-  "issuer": "https://jans-project.lxd",
-  "baseEndpoint": "https://jans-project.lxd/jans-fido2/restv1",
+  "issuer": "https://example.jans.io",
+  "baseEndpoint": "https://example.jans.io/jans-fido2/restv1",
   "cleanServiceInterval": 60,
   "cleanServiceBatchChunkSize": 10000,
   "useLocalCache": true,
@@ -82,36 +82,45 @@ It will return the result as below:
     "jansCustomPerson",
     "jansPerson"
   ],
-  "superGluuEnabled": false,
   "sessionIdPersistInCache": false,
-  "oldU2fMigrationEnabled": true,
   "errorReasonEnabled": false,
   "fido2Configuration": {
     "authenticatorCertsFolder": "/etc/jans/conf/fido2/authenticator_cert",
     "mdsCertsFolder": "/etc/jans/conf/fido2/mds/cert",
     "mdsTocsFolder": "/etc/jans/conf/fido2/mds/toc",
     "checkU2fAttestations": false,
-    "userAutoEnrollment": false,
+    "debugUserAutoEnrollment": false,
     "unfinishedRequestExpiration": 180,
-    "authenticationHistoryExpiration": 1296000,
+    "metadataRefreshInterval": 1296000,
     "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
-    "requestedCredentialTypes": [
+    "enabledFidoAlgorithms": [
       "RS256",
       "ES256"
     ],
-    "requestedParties": [
+    "metadataServers": [
       {
-        "name": "https://jans-project.lxd",
-        "domains": [
-          "jans-project.lxd"
-        ]
+        "url": "https://mds.fidoalliance.org/"
       }
     ],
-    "skipDownloadMdsEnabled": false,
-    "skipValidateMdsInAttestationEnabled": false,
-    "assertionOptionsGenerateEndpointEnabled": true
+    "disableMetadataService": false,
+    "hints": [
+      "security-key",
+      "client-device",
+      "hybrid"
+    ],
+    "enterpriseAttestation": false,
+    "attestationMode": "monitor",
+    "rp": [
+      {
+        "id": "https://example.jans.io",
+        "origins": [
+          "example.jans.io"
+        ]
+      }
+    ]
   }
 }
+
 
 ```
 

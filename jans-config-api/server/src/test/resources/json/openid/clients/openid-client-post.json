@@ -1,0 +1,53 @@
+{
+            "deletable": false,
+            "clientSecret": "Test@123",
+            "frontChannelLogoutSessionRequired": false,
+            "redirectUris": [
+                "https://localhost/admin-ui",
+                "http://localhost:4100"
+            ],
+            "grantTypes": [
+                "password"
+            ],
+            "applicationType": "web",
+            "clientName": "test",
+            "clientNameLocalized": {},
+            "logoUriLocalized": {},
+            "clientUriLocalized": {},
+            "policyUriLocalized": {},
+            "tosUriLocalized": {},
+            "subjectType": "pairwise",
+            "idTokenSignedResponseAlg": "RS256",
+            "tokenEndpointAuthMethod": "client_secret_basic",
+            "scopes": [
+                "inum=F0C4,ou=scopes,o=jans"
+            ],
+            "trustedClient": false,
+            "persistClientAuthorizations": true,
+            "includeClaimsInIdToken": false,
+            "customAttributes": [],
+            "customObjectClasses": [
+                "top"
+            ],
+            "rptAsJwt": false,
+            "accessTokenAsJwt": false,
+            "accessTokenSigningAlg": "RS256",
+            "disabled": false,
+            "attributes": {
+                "runIntrospectionScriptBeforeJwtCreation": false,
+                "keepClientAuthorizationAfterExpiration": false,
+                "allowSpontaneousScopes": false,
+                "backchannelLogoutSessionRequired": false,
+                "parLifetime": 600,
+                "requirePar": false,
+                "dpopBoundAccessToken": false,
+                "jansDefaultPromptLogin": false,
+                "minimumAcrLevel": -1
+            },
+            "description": "Test Client 1",
+            "displayName": "Test Client 1",
+            "allAuthenticationMethods": [
+                "client_secret_basic"
+            ],
+            "authenticationMethod": "client_secret_basic"
+        }

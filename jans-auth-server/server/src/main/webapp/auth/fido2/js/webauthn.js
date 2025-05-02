@@ -1,26 +1,8 @@
-// Copyright (c) 2018, Yubico AB
-// All rights reserved.
+// Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
 //
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-// 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer.
-//
-// 2. Redistributions in binary form must reproduce the above copyright notice,
-//    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// Copyright (c) 2020, Janssen Project
+
+const authAbortController = new AbortController();
 
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -46,10 +28,24 @@
    *   `publicKey` parameter to `navigator.credentials.create()`
    */
   function decodePublicKeyCredentialCreationOptions(request) {
+	console.log("Request : "+request);
+	console.log("JSON.stringify request: "+ JSON.stringify(request));
+	
     const excludeCredentials = request.excludeCredentials.map(credential => extend(
       credential, {
       id: base64url.toByteArray(credential.id),
     }));
+
+	// Default authenticatorSelection if not specified
+	const defaultAuthenticatorSelection = {
+		authenticatorAttachment: 'platform', // or 'cross-platform' 
+		userVerification: 'preferred',      // 'required' or 'preferred'
+		requireResidentKey: false           // set to true if you require a resident key
+	};
+
+	// Use provided authenticatorSelection if available, otherwise use default
+	const authenticatorSelection = request.authenticatorSelection || defaultAuthenticatorSelection;
+
 
     const publicKeyCredentialCreationOptions = extend(
       request, {
@@ -60,6 +56,7 @@
       }),
       challenge: base64url.toByteArray(request.challenge),
       excludeCredentials,
+	  authenticatorSelection,
     });
 
     return publicKeyCredentialCreationOptions;
@@ -95,10 +92,20 @@
       id: base64url.toByteArray(credential.id),
     }));
 
+	// Default authenticatorSelection for assertion requests
+	const defaultAuthenticatorSelection = {
+		authenticatorAttachment: 'platform', // or 'cross-platform' based on your requirement
+		userVerification: 'preferred',      // 'required' or 'preferred'
+	};
+	// Use provided authenticatorSelection if available, otherwise use default
+	const authenticatorSelection = request.authenticatorSelection || defaultAuthenticatorSelection;
+
+
     const publicKeyCredentialRequestOptions = extend(
       request, {
       allowCredentials,
       challenge: base64url.toByteArray(request.challenge),
+	  authenticatorSelection, 
     });
 
     return publicKeyCredentialRequestOptions;
@@ -120,6 +127,17 @@
     });
   }
 
+ function getAssertionConditional(request) {
+	
+	const authAbortSignal = authAbortController.signal;
+			
+    console.log('Get assertion conditional', request);
+    return navigator.credentials.get({
+       publicKey: decodePublicKeyCredentialRequestOptions(request),
+	   mediation: "conditional",
+	   signal : authAbortSignal,
+    });
+  }
 
   /** Turn a PublicKeyCredential object into a plain object with base64url encoded binary values */
   function responseToObject(response) {
@@ -131,16 +149,25 @@
     } catch (e) {
       console.error('getClientExtensionResults failed', e);
     }
-
+	console.log("Response : "+response);
+	console.log("JSON.stringify: "+ JSON.stringify(response));
+	
     if (response.response.attestationObject) {
       return {
         type: response.type,
         id: response.id,
+		rawId: base64url.fromByteArray(response.rawId),
         response: {
           attestationObject: base64url.fromByteArray(response.response.attestationObject),
+		  authenticatorData: base64url.fromByteArray(response.response.getAuthenticatorData()),
           clientDataJSON: base64url.fromByteArray(response.response.clientDataJSON),
+		  publicKey : base64url.fromByteArray(response.response.getPublicKey()),
+		  publicKeyAlgorithm : response.response.getPublicKeyAlgorithm(),
+		  transports : response.response.getTransports(),
         },
         clientExtensionResults,
+		authenticatorAttachment : response.authenticatorAttachment,
+		
       };
     } else {
       return {
@@ -154,6 +181,7 @@
           userHandle: response.response.userHandle && base64url.fromByteArray(response.response.userHandle),
         },
         clientExtensionResults,
+		authenticatorAttachment : response.authenticatorAttachment,
       };
     }
   }
@@ -163,6 +191,7 @@
     decodePublicKeyCredentialRequestOptions,
     createCredential,
     getAssertion,
+	getAssertionConditional,
     responseToObject,
   };
 

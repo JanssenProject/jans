@@ -1,0 +1,13 @@
+{
+   "jsonPatchString": "[ {\"op\":\"add\", \"path\": \"/userId\", \"value\":\"config_test_user_100_final_patch\" } ]",
+   "customAttributes": [{
+            "name": "emailVerified",
+            "multiValued": false,
+            "values": [
+                true
+            ],
+            "value": true,
+            "displayValue": true
+        }
+        ]
+}

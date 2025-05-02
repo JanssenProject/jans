@@ -1,10 +1,13 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.AuthorizationChallengeSession;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.token.TokenErrorResponseType;
+import io.jans.as.server.auth.DpopService;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.service.ScopeService;
 import jakarta.enterprise.context.RequestScoped;
@@ -12,9 +15,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import javax.inject.Named;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -23,9 +26,7 @@ import java.util.Set;
  * @author Yuriy Z
  */
 @RequestScoped
-@Named
 public class AuthorizationChallengeValidator {
-
     @Inject
     private Logger log;
 
@@ -37,6 +38,30 @@ public class AuthorizationChallengeValidator {
 
     @Inject
     private ScopeService scopeService;
+
+    public void validateDpopJkt(AuthorizationChallengeSession session, String dpop) {
+        final String jkt = session.getAttributes().getJkt();
+        if (StringUtils.isBlank(jkt)) {
+            return;
+        }
+
+        try {
+            final String dpopJwkThumbprint = DpopService.getDpopJwkThumbprint(dpop);
+            if (jkt.equals(dpopJwkThumbprint)) {
+                return;
+            } else {
+                log.debug("Unable to match dpopJkt: {} with sessionJkt: {}", dpopJwkThumbprint, jkt);
+            }
+        } catch (Exception e) {
+            String msg = String.format("Failed to validate dpop jtk. jkt: %s, dpop: %s", jkt, dpop);
+            log.debug(msg, e);
+        }
+
+        throw new WebApplicationException(errorResponseFactory
+                .newErrorResponse(Response.Status.BAD_REQUEST)
+                .entity(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_DPOP_PROOF, "", "Invalid DPoP."))
+                .build());
+    }
 
     public void validateGrantType(Client client, String state) {
         if (client == null) {

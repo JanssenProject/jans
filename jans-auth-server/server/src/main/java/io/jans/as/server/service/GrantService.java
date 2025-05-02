@@ -111,7 +111,8 @@ public class GrantService {
     }
 
     public void persist(TokenEntity token) {
-        if (shouldPersist()) {
+        // always save access_token into persistence because we need to fetch it by session, see getGrantsBySessionDn
+        if (token.isAccessToken() || shouldPersist()) {
             persistenceEntryManager.persist(token);
         }
 

@@ -14,12 +14,13 @@ public class Constants {
     public static final String LOCK = "/lock";
     public static final String LOCK_CONFIG = "/lockConfig";
     public static final String AUDIT = "/audit";
+    public static final String LOCK_STAT = "/lockStat";
     public static final String HEALTH = "/health";
     public static final String LOG = "/log";
     public static final String TELEMETRY = "/telemetry";
     public static final String SEARCH = "/search";
     public static final String BULK = "/bulk";
-    
+
     public static final String LOCK_READ_ACCESS = "https://jans.io/oauth/lock/read-all";
     public static final String LOCK_WRITE_ACCESS = "https://jans.io/oauth/lock/write-all";
 

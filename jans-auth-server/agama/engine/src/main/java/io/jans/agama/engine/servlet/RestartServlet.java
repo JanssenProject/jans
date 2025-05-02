@@ -37,27 +37,31 @@ public class RestartServlet extends BaseServlet {
         try {
             FlowStatus st = flowService.getRunningFlowStatus();
 
-            if (st == null || st.getStartedAt() == FlowStatus.FINISHED) {
-                //If flow exists, ensure it is not about to be collected by cleaner job
+            if (st == null || st.getStartedAt() == FlowStatus.FINISHED)
                 throw new IOException("No flow to restart");
-            } else {
-                
-                try {
-                    flowService.ensureTimeNotExceeded(st);
-                    flowService.terminateFlow();
 
-                    logger.debug("Sending user's browser for a flow start");
-                    //This redirection relies on the (unauthenticated) session id being still alive 
-                    //(so the flow name and its inputs can be remembered in the bridge script)
-                    //see AgamaBridge.py#prepareForStep
-                    String url = bridge.scriptPageUrl().replaceFirst("\\.xhtml", ".htm");
-                    response.sendRedirect(request.getContextPath() + "/" + url);
+            try {
+                //If flow exists, ensure it is not about to be collected by cleaner job
+                flowService.ensureTimeNotExceeded(st);
+                flowService.terminateFlow();
+                logger.debug("Sending user's browser for a flow start");
 
-                } catch (FlowTimeoutException e) {
-                    sendFlowTimeout(response, e.getMessage());
+                //This redirection relies on the (unauthenticated) sessionId being still alive 
+                //(so the flow name and its inputs can be remembered in the script). See
+                //for instance AgamaBridge.py#prepareForStep or AgamaConsent.py#prepareForStep
+                String url = st.getStartUrl();
+                if (url == null) {
+                    logger.warn("Check the Engine's config startEndUrlMapping");
+                    throw new IOException("Unknown end url for " + url);
                 }
-                
+
+                url = url.replaceFirst("\\.xhtml", ".htm");
+                response.sendRedirect(request.getContextPath() + "/" + url);
+
+            } catch (FlowTimeoutException e) {
+                sendFlowTimeout(response, e.getMessage());
             }
+             
         } catch (IOException e) {
             sendFlowCrashed(response, e.getMessage());
         }

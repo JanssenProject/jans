@@ -1,21 +1,23 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::{
-    BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig,
-    PolicyStoreConfig, PolicyStoreSource,
-};
+// The following macro uses conditional compilation to include this file code
+// only when the target platform is NOT WebAssembly. This is not required to
+// use the library but is needed here since Cedarling compiles binding to WASM
+// and `use std::env` prevents that compilation.
+#![cfg(not(target_family = "wasm"))]
+
+use cedarling::*;
 use std::env;
 
 // The human-readable policy and schema file is located in next folder:
 // `test_files\policy-store_ok`
 static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.yaml");
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Collect command-line arguments
     let args: Vec<String> = env::args().collect();
 
@@ -40,14 +42,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     println!("Cedarling initialized with log type: {:?}", log_type);
-    let cedarling = Cedarling::new(BootstrapConfig {
+    let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
-        log_config: LogConfig { log_type },
+        log_config: LogConfig {
+            log_type,
+            log_level: LogLevel::INFO,
+        },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         },
-        jwt_config: JwtConfig::Disabled,
-    })?;
+        jwt_config: JwtConfig::new_without_validation(),
+        authorization_config: AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            principal_bool_operator: JsonRule::default(),
+            ..Default::default()
+        },
+        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+    })
+    .await?;
 
     println!("Stage 1:");
     let logs_ids = cedarling.get_log_ids();
@@ -83,5 +96,9 @@ fn extract_memory_config(args: Vec<String>) -> LogTypeConfig {
     let log_ttl: u64 = args[2]
         .parse()
         .expect("Invalid ttl value, should be integer");
-    LogTypeConfig::Memory(MemoryLogConfig { log_ttl })
+    LogTypeConfig::Memory(MemoryLogConfig {
+        log_ttl,
+        max_item_size: None,
+        max_items: None,
+    })
 }

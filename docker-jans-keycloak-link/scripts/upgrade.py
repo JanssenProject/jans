@@ -58,7 +58,7 @@ class Upgrade:
         kwargs = {"table_name": "jansCustomScr"}
         script_id = doc_id_from_dn("inum=13D3-E7AD,ou=scripts,o=jans")
 
-        # toggle cache-refresh script
+        # toggle link-interception script
         entry = self.backend.get_entry(script_id, **kwargs)
 
         if entry:
@@ -69,7 +69,7 @@ class Upgrade:
 def main():
     manager = get_manager()
 
-    with manager.lock.create_lock("keycloak-link-upgrade"):
+    with manager.create_lock("keycloak-link-upgrade"):
         upgrade = Upgrade(manager)
         upgrade.invoke()
 

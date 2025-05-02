@@ -1,27 +1,38 @@
 package io.jans.as.server.token.ws.rs;
 
-import io.jans.as.model.authzdetails.AuthzDetails;
+import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.model.token.TokenErrorResponseType;
+import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.authorize.ws.rs.AuthzDetailsService;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.external.ExternalTokenExchangeService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
+import io.jans.as.server.util.ServerUtil;
+import io.jans.model.custom.script.type.token.ScriptTokenExchangeControl;
+import io.jans.model.user.SimpleUser;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -70,6 +81,15 @@ public class TokenExchangeService {
     @Inject
     private AuthzDetailsService authzDetailsService;
 
+    @Inject
+    private ExternalTokenExchangeService externalTokenExchangeService;
+
+    @Inject
+    private ApplicationAuditLogger applicationAuditLogger;
+
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     public void rotateDeviceSecretOnRefreshToken(HttpServletRequest httpRequest, AuthorizationGrant refreshGrant, String scope) {
         if (StringUtils.isBlank(scope) || !scope.contains(ScopeConstants.DEVICE_SSO)) {
             log.debug("Skip rotate device secret on refresh token. No device_sso scope.");
@@ -116,25 +136,40 @@ public class TokenExchangeService {
         final Client client = executionContext.getClient();
         final OAuth2AuditLog auditLog = executionContext.getAuditLog();
 
-        final String audience = httpRequest.getParameter("audience");
-        final String subjectToken = httpRequest.getParameter("subject_token");
-        final String subjectTokenType = httpRequest.getParameter("subject_token_type");
-        final String deviceSecret = httpRequest.getParameter("actor_token");
-        final String actorTokenType = httpRequest.getParameter("actor_token_type");
+        final ScriptTokenExchangeControl scriptControl = externalTokenExchangeService.externalValidate(executionContext);
 
-        tokenRestWebServiceValidator.validateAudience(audience, auditLog);
-        tokenRestWebServiceValidator.validateSubjectTokenType(subjectTokenType, auditLog);
-        tokenRestWebServiceValidator.validateActorTokenType(actorTokenType, auditLog);
-        tokenRestWebServiceValidator.validateActorToken(deviceSecret, auditLog);
+        String rotatedDeviceSecret = null;
+        SessionId sessionId = null;
 
-        final SessionId sessionId = sessionIdService.getSessionByDeviceSecret(deviceSecret);
-        tokenRestWebServiceValidator.validateSessionForTokenExchange(sessionId, deviceSecret, auditLog);
-        checkNotNull(sessionId); // it checked by validator, added it only to relax static bugs checker
+        if (!scriptControl.isSkipBuiltinValidation()) {
+            final String audience = httpRequest.getParameter("audience");
+            final String subjectToken = httpRequest.getParameter("subject_token");
+            final String subjectTokenType = httpRequest.getParameter("subject_token_type");
+            final String deviceSecret = httpRequest.getParameter("actor_token");
+            final String actorTokenType = httpRequest.getParameter("actor_token_type");
 
-        tokenRestWebServiceValidator.validateSubjectToken(deviceSecret, subjectToken, sessionId, auditLog);
+            tokenRestWebServiceValidator.validateAudience(audience, auditLog);
+            tokenRestWebServiceValidator.validateSubjectTokenType(subjectTokenType, auditLog);
+            tokenRestWebServiceValidator.validateActorTokenType(actorTokenType, auditLog);
+            tokenRestWebServiceValidator.validateActorToken(deviceSecret, auditLog);
 
-        TokenExchangeGrant tokenExchangeGrant = authorizationGrantList.createTokenExchangeGrant(sessionIdService.getUser(sessionId), client);
-        tokenExchangeGrant.setSessionDn(sessionId.getDn());
+            sessionId = sessionIdService.getSessionByDeviceSecret(deviceSecret);
+            tokenRestWebServiceValidator.validateSessionForTokenExchange(sessionId, deviceSecret, auditLog);
+            checkNotNull(sessionId); // it checked by validator, added it only to relax static bugs checker
+
+            tokenRestWebServiceValidator.validateSubjectToken(deviceSecret, subjectToken, sessionId, auditLog);
+
+            rotatedDeviceSecret = rotateDeviceSecret(sessionId, deviceSecret);
+
+            if (scriptControl.getUser() == null) {
+                scriptControl.setUser(sessionIdService.getUser(sessionId));
+            }
+        }
+        checkUserType(scriptControl.getUser(), executionContext);
+
+        final User user = scriptControl.getUser() != null ? (User) scriptControl.getUser() : new User();
+        TokenExchangeGrant tokenExchangeGrant = authorizationGrantList.createTokenExchangeGrant(user, client);
+        tokenExchangeGrant.setSessionDn(sessionId != null ? sessionId.getDn() : null);
 
         executionContext.setGrant(tokenExchangeGrant);
 
@@ -162,8 +197,6 @@ public class TokenExchangeService {
 
         executionContext.getAuditLog().updateOAuth2AuditLog(tokenExchangeGrant, true);
 
-        String rotatedDeviceSecret = rotateDeviceSecret(sessionId, deviceSecret);
-
         JSONObject jsonObj = new JSONObject();
         try {
             TokenRestWebServiceImpl.fillJsonObject(jsonObj, accessToken, accessToken.getTokenType(), accessToken.getExpiresIn(), reToken, scope, idToken, checkedAuthzDetails);
@@ -175,7 +208,27 @@ public class TokenExchangeService {
             log.error(e.getMessage(), e);
         }
 
+        JSONObject clone = new JSONObject(jsonObj.toString());
+        if (externalTokenExchangeService.externalModifyResponse(jsonObj, executionContext)) {
+            log.debug("Successfully run external token-exchange scripts.");
+        } else {
+            jsonObj = clone; // restore back original state (script may already changed jsonObj object)
+            log.trace("Canceled changes made by external token-exchange script since method returned `false`.");
+        }
+
         return jsonObj;
+    }
+
+    private void checkUserType(SimpleUser user, ExecutionContext context) {
+        if (user == null) {
+            return;
+        }
+
+        if (!(user instanceof User)) {
+            final String msg = "Custom token-exchange script sets user which is not 'io.jans.as.common.model.common.User'. Please fix script.";
+            log.error(msg);
+            throw new WebApplicationException(response(error(500, TokenErrorResponseType.INVALID_GRANT, msg), context.getAuditLog()));
+        }
     }
 
     public String createNewDeviceSecret(String sessionDn, Client client, String scope) {
@@ -205,5 +258,18 @@ public class TokenExchangeService {
             log.error("Failed to generate device_secret", e);
         }
         return null;
+    }
+
+    private Response response(Response.ResponseBuilder builder, OAuth2AuditLog oAuth2AuditLog) {
+        builder.cacheControl(ServerUtil.cacheControl(true, false));
+        builder.header("Pragma", "no-cache");
+
+        applicationAuditLogger.sendMessage(oAuth2AuditLog);
+
+        return builder.build();
+    }
+
+    public Response.ResponseBuilder error(int status, TokenErrorResponseType type, String reason) {
+        return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
     }
 }

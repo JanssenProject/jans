@@ -18,7 +18,7 @@ tags:
 
 1.  Install [aws cli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
-2.  Configure your AWS user account using [aws configure](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) command. This makes you able to authenticate before creating the cluster.
+2.  Configure your AWS user account using the [aws configure](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) command. This makes you able to authenticate before creating the cluster.
     Note that this user account must have permissions to work with Amazon EKS IAM roles and service linked roles, AWS CloudFormation, and a VPC and related resources
     
 3.  Install [kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html)
@@ -98,7 +98,7 @@ tags:
 
       - PostgreSQL for persistence storage
 
-        In a production environment, a production grade PostgreSQL server should be used such as `Amazon RDS`
+        In a production environment, a production-grade PostgreSQL server should be used such as `Amazon RDS`
 
         For testing purposes, you can deploy it on the EKS cluster using the following command:
 
@@ -125,9 +125,9 @@ tags:
 
     - MySQL for persistence storage
 
-        In a production environment, a production grade MySQL server should be used such as `Amazon RDS`
+        In a production environment, a production-grade MySQL server should be used such as `Amazon RDS`
 
-        For testing purposes, you can deploy it on the EKS cluster using the following commands:
+        For testing purposes, you can deploy it on the EKS cluster using the following command:
 
         ```
         helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/mysql        

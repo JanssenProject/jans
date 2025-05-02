@@ -9,7 +9,7 @@
     "moduleProperties": [
         {
             "value1": "location_type",
-            "value2": "ldap"
+            "value2": "db"
         }
     ],
     "level": 1,
@@ -17,6 +17,6 @@
     "enabled": true,
     "modified": false,
     "internal": false,
-    "locationType": "ldap",
+    "locationType": "db",
     "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
 }

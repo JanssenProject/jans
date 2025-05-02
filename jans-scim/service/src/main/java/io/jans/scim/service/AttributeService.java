@@ -17,7 +17,7 @@ import jakarta.inject.Inject;
 
 import io.jans.model.JansAttribute;
 import io.jans.orm.model.base.CustomObjectAttribute;
-import io.jans.scim.model.GluuCustomAttribute;
+import io.jans.scim.model.JansCustomAttribute;
 import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.scim.service.cdi.event.Events;
 import io.jans.service.BaseCacheService;
@@ -98,13 +98,13 @@ public class AttributeService extends io.jans.service.AttributeService {
 		return cacheService;
 	}
 
-	public void applyMetaData(List<GluuCustomAttribute> customAttributes) {
+	public void applyMetaData(List<JansCustomAttribute> customAttributes) {
 		if ((customAttributes == null) || (customAttributes.size() == 0)) {
 			return;
 		}
 		
 		Map<String, JansAttribute> allAttributesMap = getAllAttributesMap();
-		for (GluuCustomAttribute customAttribute : customAttributes) {
+		for (JansCustomAttribute customAttribute : customAttributes) {
 			String attributeName = StringHelper.toLowerCase(customAttribute.getName());
 			
 			JansAttribute attribute = allAttributesMap.get(attributeName);

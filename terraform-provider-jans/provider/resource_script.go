@@ -70,12 +70,15 @@ func resourceScript() *schema.Resource {
 						"introspection",
 						"resource_owner_password_credentials",
 						"application_session",
-						"cache_refresh",
+						"link_interception",
 						"client_registration",
 						"id_generator",
 						"uma_rpt_policy",
 						"uma_rpt_claims",
 						"uma_claims_gathering",
+						"access_evaluation",
+						"access_evaluation_discovery",
+						"token_exchange",
 						"consent_gathering",
 						"dynamic_scope",
 						"spontaneous_scope",
@@ -98,6 +101,7 @@ func resourceScript() *schema.Resource {
 						"fido2_extension",
 						"lock_extension",
 					}
+
 					return validateEnum(v, enums)
 				},
 			},

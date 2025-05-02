@@ -334,19 +334,6 @@ func resourceApiAppConfiguration() *schema.Resource {
 							Optional:    true,
 							Description: "",
 						},
-						"asset_base_directory": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "",
-						},
-						"jans_service_module": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: "",
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
 						"asset_dir_mappings": {
 							Type:        schema.TypeList,
 							Optional:    true,

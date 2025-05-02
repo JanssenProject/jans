@@ -35,12 +35,14 @@ class JansGDialog:
         self.body = body
         self.myparent = parent
         self.title = title
+        self.buttons = buttons
+        self.width = width
 
-        if not width:
-            width = parent.dialog_width
+        if not self.width:
+            self.width = self.myparent.dialog_width
 
-        if not buttons:
-            buttons = [Button(text=_("OK"))]
+        if not self.buttons:
+            self.buttons = [Button(text=_("OK"))]
 
         def do_handler(button_text, handler, keep_dialog):
             if handler:
@@ -50,17 +52,20 @@ class JansGDialog:
             if not (keep_dialog or self.future.done()):
                 self.future.set_result(button_text)
 
-        for button in buttons:
+        for button in self.buttons:
             button.handler = partial(do_handler, button.text, button.handler, getattr(button, 'keep_dialog', False))
 
         self.dialog = Dialog(
             title=title,
-            body=body,
-            buttons=buttons,
-            width=width,
+            body=self.body,
+            buttons=self.buttons,
+            width=self.width,
             modal=True,
             with_background=True
         )
+
+    def close(self):
+        self.future.set_result(False)
 
     def __pt_container__(self)-> Dialog:
         return self.dialog

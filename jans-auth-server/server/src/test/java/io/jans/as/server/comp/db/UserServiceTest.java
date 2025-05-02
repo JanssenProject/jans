@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -87,7 +88,8 @@ public class UserServiceTest {
     @Produces
     @ApplicationScoped
     public StringEncrypter getStringEncrypter() throws EncryptionException {
-        FileConfiguration cryptoConfiguration = new FileConfiguration(".\\target\\conf\\salt");
+        String saltFilePath = Paths.get(Paths.get("").toAbsolutePath().toString(), "target/conf/salt").toAbsolutePath().toString();
+        FileConfiguration cryptoConfiguration = new FileConfiguration(saltFilePath);
         String encodeSalt = cryptoConfiguration.getString("encodeSalt");
 
         return StringEncrypter.instance(encodeSalt);
@@ -295,7 +297,7 @@ public class UserServiceTest {
         assertNotNull(user.getAuthenticator());
         assertNotNull(user.getAuthenticator().getAuthenticators());
         assertEquals(user.getAuthenticator().getAuthenticators().size(), 1);
-        assertEquals(userAuthenticatorService.getUserAuthenticatorsByType(user, "type1"), Arrays.asList(new UserAuthenticator("id2", "type2")));
+        assertEquals(userAuthenticatorService.getUserAuthenticatorsByType(user, "type2"), Arrays.asList(new UserAuthenticator("id2", "type2")));
 
     }
 

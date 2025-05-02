@@ -4,8 +4,8 @@ After=%(order_jans_keycloak_link_service)s
 
 [Service]
 Type=forking
-ExecStart=/opt/dist/scripts/jans-keycloak-link start
-ExecStop=/opt/dist/scripts/jans-keycloak-link stop
+ExecStart=%(jans_scripts_dir)s/jans-keycloak-link start
+ExecStop=%(jans_scripts_dir)s/jans-keycloak-link stop
 User=jetty
 Group=jetty
 

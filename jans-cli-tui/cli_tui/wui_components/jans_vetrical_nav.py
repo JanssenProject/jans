@@ -102,7 +102,7 @@ class JansVerticalNav():
 
         if not is_formatted_text(jans_help):
             jans_help = HTML(jans_help)
-        self.jans_help = merge_formatted_text([HTML(_("Press <b>F1</b> for Help.") + " "), jans_help])
+        self.jans_help = merge_formatted_text([HTML(_("Press <b>F1</b> for Help.") + " "), HTML(jans_help)])
 
         self.on_enter = on_enter
         self.on_delete = on_delete
@@ -342,6 +342,9 @@ class JansVerticalNav():
         self.list_box.height = 0
         self.selectes = 0
         self.italic_line = -1
+
+    def get_selection(self):
+        return self.all_data[self.selectes]
 
     def _get_key_bindings(self) -> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar

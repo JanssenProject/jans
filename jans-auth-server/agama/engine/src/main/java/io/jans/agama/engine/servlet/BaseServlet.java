@@ -1,5 +1,8 @@
 package io.jans.agama.engine.servlet;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jans.agama.engine.exception.TemplateProcessingException;
 import io.jans.agama.engine.misc.FlowUtils;
 import io.jans.agama.engine.page.BasicTemplateModel;
@@ -13,12 +16,17 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.MediaType;
+import java.util.Map;
 import java.io.IOException;
 import java.io.StringWriter;
 
 import org.slf4j.Logger;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public abstract class BaseServlet extends HttpServlet {
+    
+    private static final String TEMPLATE_PATH_KEY = "_template";
     
     @Inject
     protected Logger logger;
@@ -28,6 +36,9 @@ public abstract class BaseServlet extends HttpServlet {
     
     @Inject
     private TemplatingService templatingService;
+    
+    @Inject
+    private ObjectMapper mapper;
     
     @Inject
     protected EngineConfig engineConf;
@@ -49,6 +60,8 @@ public abstract class BaseServlet extends HttpServlet {
 
     protected void sendFlowTimeout(HttpServletResponse response, String message) throws IOException {
 
+        response.setStatus(HttpServletResponse.SC_GONE);
+
         String errorPage = engineConf.getInterruptionErrorPage();
         page.setTemplatePath(errorPath(errorPage));
         page.setDataModel(new BasicTemplateModel(message));
@@ -62,7 +75,7 @@ public abstract class BaseServlet extends HttpServlet {
 
         String errorPage = engineConf.getCrashErrorPage();
         page.setTemplatePath(errorPath(errorPage));
-        page.setRawDataModel(new BasicTemplateModel(error));
+        page.setDataModel(new BasicTemplateModel(error));
         sendPageContents(response);
         
     }
@@ -79,11 +92,22 @@ public abstract class BaseServlet extends HttpServlet {
 
     }
 
-    protected void sendPageContents(HttpServletResponse response) throws IOException {
+    protected void sendPageContents(HttpServletResponse response) throws IOException {        
+        sendPageContents(response, false);
+    }
+
+    protected void sendPageContents(HttpServletResponse response, boolean nativeClient) throws IOException {
         
         try {
-            processTemplate(response, page.getTemplatePath(), page.getDataModel());
-        } catch (TemplateProcessingException e) {
+            if (nativeClient) {
+                String simplePath = shortenPath(page.getTemplatePath(), 2);
+                Object model = page.getAugmentedDataModel(false, Map.of(TEMPLATE_PATH_KEY, simplePath));
+                String entity = mapper.writeValueAsString(model);
+                processResponse(response, UTF_8.toString(), MediaType.APPLICATION_JSON, entity);                
+            } else {
+                processTemplate(response, page.getTemplatePath(), page.getAugmentedDataModel(true, null));
+            }
+        } catch (TemplateProcessingException | JsonProcessingException e) {
 
             try {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -100,23 +124,41 @@ public abstract class BaseServlet extends HttpServlet {
     private String errorPath(String page) {
         return isJsonRequest() ? engineConf.getJsonErrorPage(page) : page;
     }
-    
+
     private void processTemplate(HttpServletResponse response, String path, Object dataModel)
             throws TemplateProcessingException, IOException {
 
         StringWriter sw = new StringWriter();
         Pair<String, String> contentType = templatingService.process(path, dataModel, sw, false);
-        
-        //encoding MUST be set before calling getWriter 
-        response.setCharacterEncoding(contentType.getSecond());
+        processResponse(response, contentType.getSecond(), contentType.getFirst(), sw.toString());        
 
+    }
+    
+    private void processResponse(HttpServletResponse response, String charset, String mediaType,
+            String entity) throws IOException {
+    
+        //encoding MUST be set before calling getWriter
+        response.setCharacterEncoding(charset);        
         engineConf.getDefaultResponseHeaders().forEach((h, v) -> response.setHeader(h, v));
-        String mediaType = contentType.getFirst();
+        
         if (mediaType != null) {
             response.setContentType(mediaType);
         }
-        response.getWriter().write(sw.toString());
+        response.getWriter().write(entity);
 
+    }
+
+    private String shortenPath(String str, int subPaths) {
+
+        int idx = (str.charAt(0) == '/') ? 1 : 0;
+        
+        for (int i = 0; i < subPaths; i++) {
+            int j = str.indexOf("/", idx);
+            if (j == -1) break;
+            idx = j + 1;
+        }
+        return str.substring(idx);
+        
     }
 
 }

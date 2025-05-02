@@ -1,12 +1,13 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-pub(crate) use cedar_json::CedarSchemaJson;
+use cedar_policy_core::extensions::Extensions;
+use cedar_policy_validator::ValidatorSchema;
+
 pub(crate) mod cedar_json;
+pub(crate) const CEDAR_NAMESPACE_SEPARATOR: &str = "::";
 
 /// cedar_schema value which specifies both encoding and content_type
 ///
@@ -35,9 +36,10 @@ enum MaybeEncoded {
 /// Box that holds the [`cedar_policy::Schema`] and
 /// JSON representation that is used to create entities from the schema in the policy store.
 #[derive(Debug, Clone)]
-pub(crate) struct CedarSchema {
+pub struct CedarSchema {
     pub schema: cedar_policy::Schema,
     pub json: cedar_json::CedarSchemaJson,
+    pub validator_schema: ValidatorSchema,
 }
 
 impl PartialEq for CedarSchema {
@@ -177,7 +179,22 @@ impl<'de> serde::Deserialize<'de> for CedarSchema {
             ))
         })?;
 
-        Ok(CedarSchema { schema, json })
+        let validator_schema =
+            ValidatorSchema::from_json_str(&json_string, Extensions::all_available()).map_err(
+                |err| {
+                    serde::de::Error::custom(format!(
+                        "{}: {}",
+                        deserialize::ParseCedarSchemaSetMessage::ParseCedarSchemaJson,
+                        err
+                    ))
+                },
+            )?;
+
+        Ok(CedarSchema {
+            schema,
+            json,
+            validator_schema,
+        })
     }
 }
 
@@ -192,16 +209,16 @@ mod deserialize {
         Parse,
         #[error("invalid utf8 detected while decoding cedar policy")]
         Utf8,
+        #[error("failed to parse cedar schema from JSON")]
+        ParseCedarSchemaJson,
     }
 
     #[cfg(test)]
     mod tests {
         use test_utils::assert_eq;
 
-        use crate::common::policy_store::AgamaPolicyStore;
-        use crate::common::policy_store::PolicyStore;
-
         use super::*;
+        use crate::common::policy_store::{AgamaPolicyStore, PolicyStore};
 
         #[test]
         fn test_read_ok() {
@@ -258,7 +275,7 @@ mod deserialize {
 
         // In fact this fails because of limitations in cedar_policy::Policy::from_json
         // see PolicyContentType
-        #[allow(dead_code)]
+        #[test]
         fn test_both_ok() {
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../../test_files/policy-store_blobby.json");
@@ -292,7 +309,10 @@ mod deserialize {
             let err = policy_result.unwrap_err();
             let msg = err.to_string();
             assert!(
-                msg.contains("unable to parse cedar policy schema: error parsing schema: unexpected end of input"),
+                msg.contains(
+                    "unable to parse cedar policy schema: error parsing schema: unexpected end of \
+                     input"
+                ),
                 "{err:?}"
             );
         }
@@ -306,7 +326,8 @@ mod deserialize {
             let err_msg = policy_result.unwrap_err().to_string();
             assert_eq!(
                 err_msg,
-                "policy_stores.a1bf93115de86de760ee0bea1d529b521489e5a11747: unable to parse cedar policy schema: failed to resolve type: User_TypeNotExist at line 4 column 5"
+                "policy_stores.a1bf93115de86de760ee0bea1d529b521489e5a11747: unable to parse \
+                 cedar policy schema: failed to resolve type: User_TypeNotExist at line 8 column 5"
             );
         }
     }

@@ -54,7 +54,7 @@
                 <!-- grow horizontally and vertically as much as possible -->
                 <div class="flex flex-column justify-between w-100 h-100">
                     <div class="flex flex-column items-center justify-center w-100 h-100 mv4">                    
-                        <noscript><p class="red">Please enable javascript to use this page!</p></noscript>
+                        <noscript><p class="red">${labels("casa.enableJS")}</p></noscript>
                         
                         <#nested>
 
@@ -79,10 +79,10 @@
 
 <form method="post" enctype="application/x-www-form-urlencoded">
     <div class="flex flex-column items-center pt3 mt2">
-        <span class="f7">Stuck or changed your mind?</span>
+        <span class="f7">${labels("casa.stuck_authn")}</span>
         <button class="f7-cust pa0 bw0 br0 blue hover-dark-blue underline-hover bg-transparent cust-link-button"
                 type="submit" id="skipped" name="skipped" value="">
-            Use a different authentication method
+            ${labels("casa.alternative_authn")}
         </button>
     </div>
 </form> 

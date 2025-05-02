@@ -55,6 +55,7 @@ public class AuthzRequest {
     private String claims;
     private String authReqId;
     private String dpopJkt;
+    private String dpop;
     private String authzDetailsString;
     private AuthzDetails authzDetails;
     private String httpMethod;
@@ -95,8 +96,21 @@ public class AuthzRequest {
         this.dpopJkt = dpopJkt;
     }
 
+    public String getDpop() {
+        return dpop;
+    }
+
+    public AuthzRequest setDpop(String dpop) {
+        this.dpop = dpop;
+        return this;
+    }
+
     public AuthorizationChallengeSession getAuthorizationChallengeSessionObject() {
         return authorizationChallengeSessionObject;
+    }
+
+    public Map<String, String> getAuthorizationChallengeSessionAttributesSafely() {
+        return authorizationChallengeSessionObject != null ? authorizationChallengeSessionObject.getAttributes().getAttributes() : new HashMap<>();
     }
 
     public void setAuthorizationChallengeSessionObject(AuthorizationChallengeSession authorizationChallengeSessionObject) {

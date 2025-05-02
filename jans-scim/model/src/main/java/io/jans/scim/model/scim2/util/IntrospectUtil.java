@@ -14,7 +14,6 @@ import io.jans.scim.model.scim2.annotations.StoreReference;
 import io.jans.scim.model.scim2.annotations.Validator;
 import io.jans.scim.model.scim2.extensions.Extension;
 import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
-import io.jans.scim.model.scim2.fido.FidoDeviceResource;
 import io.jans.scim.model.scim2.provider.resourcetypes.ResourceType;
 import io.jans.scim.model.scim2.provider.config.ServiceProviderConfig;
 import io.jans.scim.model.scim2.BaseScimResource;
@@ -436,7 +435,7 @@ public class IntrospectUtil {
             resetMaps();
 
             List<Class<? extends BaseScimResource>> resourceClasses=Arrays.asList(UserResource.class, GroupResource.class,
-                    FidoDeviceResource.class, Fido2DeviceResource.class, ServiceProviderConfig.class, ResourceType.class, SchemaResource.class);
+                    Fido2DeviceResource.class, ServiceProviderConfig.class, ResourceType.class, SchemaResource.class);
 
             //Perform initializations needed for all resource types
             for (Class<? extends BaseScimResource> aClass : resourceClasses){

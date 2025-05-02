@@ -8,6 +8,7 @@
 coverage.txt
 lcov.info
 test_profile.profraw
+*profiling*.svg
 
 # files for debug
 cedar_files/demo_tokens_data.txt
@@ -97,3 +98,6 @@ docs/_build/
 
 # Pyenv
 .python-version
+
+# allow commit of cedarling_native_apps bindings
+!/bindings/cedarling_uniffi/src/bin

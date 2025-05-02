@@ -17,8 +17,10 @@ import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.JwtUtil;
@@ -43,6 +45,7 @@ import io.jans.model.metric.MetricType;
 import io.jans.model.token.TokenEntity;
 import io.jans.model.token.TokenType;
 import io.jans.service.CacheService;
+import io.jans.util.security.StringEncrypter;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
@@ -201,6 +204,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
 
         token.getAttributes().setAuthorizationDetails(getAuthzDetailsAsString());
+        token.getAttributes().setAuthorizationChallenge(isAuthorizationChallenge());
         token.setScope(getScopesAsString());
         token.setAuthMode(getAcrValues());
         token.setSessionDn(getSessionDn());
@@ -281,8 +285,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-    public JwtSigner createAccessTokenAsJwt(AccessToken accessToken, ExecutionContext context) throws Exception {
-        final User user = getUser();
+    public JwtSigner createAccessTokenAsJwt(AccessToken accessToken, ExecutionContext context) throws StringEncrypter.EncryptionException, CryptoProviderException {
         final Client client = getClient();
 
         context.initFromGrantIfNeeded(this);
@@ -297,33 +300,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         final JwtSigner jwtSigner = new JwtSigner(appConfiguration, webKeysConfiguration, signatureAlgorithm,
                 client.getClientId(), clientService.decryptSecret(client.getClientSecret()));
         final Jwt jwt = jwtSigner.newJwt();
-        jwt.getClaims().setClaim("scope", Lists.newArrayList(getScopes()));
-        jwt.getClaims().setClaim("client_id", getClientId());
-        jwt.getClaims().setClaim("username", user != null ? user.getAttribute("displayName") : null);
-        jwt.getClaims().setClaim("token_type", accessToken.getTokenType().getName());
-        jwt.getClaims().setClaim("code", accessToken.getCode()); // guarantee uniqueness : without it we can get race condition
-        jwt.getClaims().setClaim("acr", getAcrValues());
-        jwt.getClaims().setClaim("auth_time", ServerUtil.dateToSeconds(getAuthenticationTime()));
-        jwt.getClaims().setExpirationTime(accessToken.getExpirationDate());
-        jwt.getClaims().setIat(accessToken.getCreationDate());
-        jwt.getClaims().setNbf(accessToken.getCreationDate());
-        jwt.getClaims().setSubjectIdentifier(getSub());
-        jwt.getClaims().setClaim("x5t#S256", accessToken.getX5ts256());
-        jwt.getClaims().setClaim("jti", context.getTokenReferenceId());
-
-        final AuthzDetails authzDetails = getAuthzDetails();
-        if (!AuthzDetails.isEmpty(authzDetails)) {
-            jwt.getClaims().setClaim("authorization_details", authzDetails.asJsonArray());
-        }
-
-        // DPoP
-        final String dpop = context.getDpop();
-        if (StringUtils.isNotBlank(dpop)) {
-            jwt.getClaims().setNotBefore(accessToken.getCreationDate());
-            JSONObject cnf = new JSONObject();
-            cnf.put("jkt", dpop);
-            jwt.getClaims().setClaim("cnf", cnf);
-        }
+        fillPayloadOfAccessTokenJwt(jwt.getClaims(), accessToken, context);
 
         Audience.setAudience(jwt.getClaims(), getClient());
         statusListService.addStatusClaimWithIndex(jwt, context);
@@ -333,6 +310,38 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
 
         return jwtSigner;
+    }
+
+    public void fillPayloadOfAccessTokenJwt(JwtClaims claims, AccessToken accessToken, ExecutionContext context) {
+        final User user = getUser();
+
+        claims.setClaim("scope", Lists.newArrayList(getScopes()));
+        claims.setClaim("client_id", getClientId());
+        claims.setClaim("username", user != null ? user.getAttribute("displayName") : null);
+        claims.setClaim("token_type", accessToken.getTokenType().getName());
+        claims.setClaim("acr", getAcrValues());
+        claims.setClaim("auth_time", ServerUtil.dateToSeconds(getAuthenticationTime()));
+        claims.setExpirationTime(accessToken.getExpirationDate());
+        claims.setIat(accessToken.getCreationDate());
+        claims.setNbf(accessToken.getCreationDate());
+        claims.setSubjectIdentifier(getSub());
+        claims.setClaim("x5t#S256", accessToken.getX5ts256());
+        // jti also guarantees uniqueness : without it we can get race condition
+        claims.setClaim("jti", context.getTokenReferenceId());
+
+        final AuthzDetails authzDetails = getAuthzDetails();
+        if (!AuthzDetails.isEmpty(authzDetails)) {
+            claims.setClaim("authorization_details", authzDetails.asJsonArray());
+        }
+
+        // DPoP
+        final String dpop = context.getDpop();
+        if (StringUtils.isNotBlank(dpop)) {
+            claims.setNotBefore(accessToken.getCreationDate());
+            JSONObject cnf = new JSONObject();
+            cnf.put("jkt", dpop);
+            claims.setClaim("cnf", cnf);
+        }
     }
 
     private void runIntrospectionScriptAndInjectValuesIntoJwt(Jwt jwt, ExecutionContext executionContext) {

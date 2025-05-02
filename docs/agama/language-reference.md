@@ -2,9 +2,11 @@
 tags:
   - developer
   - agama
+  - DSL
+  - reference
 ---
 
-## Agama DSL reference
+# Agama DSL reference
 
 This document surveys the different constructs of the Agama domain-specific language.
 

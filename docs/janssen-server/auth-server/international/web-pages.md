@@ -3,7 +3,10 @@ tags:
   - administration
   - auth-server
   - i18n
+  - internationalization
 ---
+
+# Internationalization for Web Pages
 
 ## This content is in progress
 

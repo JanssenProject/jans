@@ -31,7 +31,6 @@ public class ResteasyInitializer extends Application {
 		classes.add(ScimResourcesUpdatedWebService.class);
 		classes.add(ServiceProviderConfigWS.class);
 		classes.add(BulkWebService.class);
-		classes.add(FidoDeviceWebService.class);
 		classes.add(Fido2DeviceWebService.class);
 
 		// Providers

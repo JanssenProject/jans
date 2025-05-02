@@ -497,6 +497,71 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.readonly
+  /api/v1/agama-repo/download:
+    get:
+      tags:
+      - Agama
+      summary: Download agama project.
+      description: Download agama project.
+      operationId: get-agama-project
+      parameters:
+      - name: downloadLink
+        in: query
+        description: Agama project download Link
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Agama project
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama-repo.readonly
+        - https://jans.io/oauth/config/agama-repo.write
+        - https://jans.io/oauth/config/read-all
+  /api/v1/agama-repo:
+    get:
+      tags:
+      - Agama
+      summary: Gets all agama repositories.
+      description: Gets all agama repositories.
+      operationId: get-agama-repositories
+      responses:
+        "200":
+          description: Agama repositories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonNode'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama-repo.readonly
+        - https://jans.io/oauth/config/agama-repo.write
+        - https://jans.io/oauth/config/read-all
   /api/v1/agama/syntax-check/{qname}:
     post:
       tags:
@@ -1031,7 +1096,7 @@ paths:
                   : \"Config api pligin\",\n    \"document\":\"\",\n    \"jansModuleProperty\"\
                   : [\n\t\t\"config-api\",\n\t\t\"jar\",\n\t\t\"/opt/jans/jetty/jans-config-api/custom/lib\"\
                   \n\t],\t\n    \"jansLevel\": \"1\",\n    \"jansRevision\": \"1\"\
-                  ,\n    \"jansEnabled\": true,\n    \"jansAlias\": \"\"\n}\n"
+                  ,\n    \"jansEnabled\": true\n}\n"
       responses:
         "201":
           description: Newly created Asset
@@ -1047,7 +1112,7 @@ paths:
                     \    \"jansModuleProperty\": [\n\t\t\"config-api\",\n\t\t\"jar\"\
                     ,\n\t\t\"/opt/jans/jetty/jans-config-api/custom/lib\"\n\t],\t\n\
                     \    \"jansLevel\": \"1\",\n    \"jansRevision\": \"1\",\n   \
-                    \ \"jansEnabled\": true,\n    \"jansAlias\": \"\"\n}\n"
+                    \ \"jansEnabled\": true\n}\n"
         "400":
           description: Bad Request
           content:
@@ -4201,7 +4266,7 @@ paths:
                                 "moduleProperties": [
                                     {
                                         "value1": "location_type",
-                                        "value2": "ldap"
+                                        "value2": "db"
                                     }
                                 ],
                                 "level": 1,
@@ -4209,7 +4274,7 @@ paths:
                                 "enabled": true,
                                 "modified": false,
                                 "internal": false,
-                                "locationType": "ldap",
+                                "locationType": "db",
                                 "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
                             },
                             {
@@ -4223,7 +4288,7 @@ paths:
                                 "moduleProperties": [
                                     {
                                         "value1": "location_type",
-                                        "value2": "ldap"
+                                        "value2": "db"
                                     }
                                 ],
                                 "level": 100,
@@ -4231,7 +4296,7 @@ paths:
                                 "enabled": false,
                                 "modified": false,
                                 "internal": false,
-                                "locationType": "ldap",
+                                "locationType": "db",
                                 "baseDn": "inum=031C-4A65,ou=scripts,o=jans"
                             }
                         ]
@@ -4268,7 +4333,7 @@ paths:
                               "moduleProperties": [
                                   {
                                       "value1": "location_type",
-                                      "value2": "ldap"
+                                      "value2": "db"
                                   }
                               ],
                               "level": 800,
@@ -4276,7 +4341,7 @@ paths:
                               "enabled": false,
                               "modified": false,
                               "internal": false,
-                              "locationType": "ldap"
+                              "locationType": "db"
                           }
       responses:
         "200":
@@ -4300,7 +4365,7 @@ paths:
                         "moduleProperties": [
                             {
                                 "value1": "location_type",
-                                "value2": "ldap"
+                                "value2": "db"
                             }
                         ],
                         "level": 800,
@@ -4308,7 +4373,7 @@ paths:
                         "enabled": false,
                         "modified": false,
                         "internal": false,
-                        "locationType": "ldap",
+                        "locationType": "db",
                         "baseDn": "inum=4144edf6-af99-451d-be29-f3eb5c0e9143,ou=scripts,o=jans"
                     }
         "401":
@@ -4354,7 +4419,7 @@ paths:
                               "moduleProperties": [
                                   {
                                       "value1": "location_type",
-                                      "value2": "ldap"
+                                      "value2": "db"
                                   }
                               ],
                               "level": 800,
@@ -4362,7 +4427,7 @@ paths:
                               "enabled": false,
                               "modified": false,
                               "internal": false,
-                              "locationType": "ldap"
+                              "locationType": "db"
                           }
       responses:
         "201":
@@ -4386,7 +4451,7 @@ paths:
                         "moduleProperties": [
                             {
                                 "value1": "location_type",
-                                "value2": "ldap"
+                                "value2": "db"
                             }
                         ],
                         "level": 800,
@@ -4394,7 +4459,7 @@ paths:
                         "enabled": false,
                         "modified": false,
                         "internal": false,
-                        "locationType": "ldap",
+                        "locationType": "db",
                         "baseDn": "inum=4144edf6-af99-451d-be29-f3eb5c0e9143,ou=scripts,o=jans"
                     }
         "401":
@@ -4511,7 +4576,7 @@ paths:
                         "moduleProperties": [
                             {
                                 "value1": "location_type",
-                                "value2": "ldap"
+                                "value2": "db"
                             }
                         ],
                         "level": 1,
@@ -4519,7 +4584,7 @@ paths:
                         "enabled": true,
                         "modified": false,
                         "internal": false,
-                        "locationType": "ldap",
+                        "locationType": "db",
                         "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
                     }
         "401":
@@ -4567,7 +4632,7 @@ paths:
                         "moduleProperties": [
                             {
                                 "value1": "location_type",
-                                "value2": "ldap"
+                                "value2": "db"
                             }
                         ],
                         "level": 1,
@@ -4575,7 +4640,7 @@ paths:
                         "enabled": true,
                         "modified": false,
                         "internal": false,
-                        "locationType": "ldap",
+                        "locationType": "db",
                         "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
                     }
         "401":
@@ -4609,13 +4674,15 @@ paths:
                   - introspection
                   - resource_owner_password_credentials
                   - application_session
-                  - cache_refresh
+                  - link_interception
                   - client_registration
                   - id_generator
                   - uma_rpt_policy
                   - uma_rpt_claims
                   - uma_claims_gathering
                   - access_evaluation
+                  - access_evaluation_discovery
+                  - token_exchange
                   - consent_gathering
                   - dynamic_scope
                   - spontaneous_scope
@@ -4649,7 +4716,7 @@ paths:
                         "idp",
                         "introspection",
                         "persistence_extension",
-                        "cache_refresh",
+                        "link_interception",
                         "uma_rpt_policy",
                         "update_token",
                         "scim",
@@ -4700,7 +4767,7 @@ paths:
                         "idp",
                         "introspection",
                         "persistence_extension",
-                        "cache_refresh",
+                        "link_interception",
                         "uma_rpt_policy",
                         "update_token",
                         "scim",
@@ -4807,7 +4874,7 @@ paths:
                                 "moduleProperties": [
                                     {
                                         "value1": "location_type",
-                                        "value2": "ldap"
+                                        "value2": "db"
                                     }
                                 ],
                                 "level": 1,
@@ -4815,7 +4882,7 @@ paths:
                                 "enabled": true,
                                 "modified": false,
                                 "internal": false,
-                                "locationType": "ldap",
+                                "locationType": "db",
                                 "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
                             }
                         ]
@@ -9107,8 +9174,6 @@ components:
           format: int32
         enabled:
           type: boolean
-        alias:
-          type: string
         baseDn:
           type: string
     DocumentPagedResult:
@@ -9271,19 +9336,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
-          type: boolean
         userCanEdit:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9337,6 +9402,8 @@ components:
           type: string
         requirePar:
           type: boolean
+        parForbidPublicClient:
+          type: boolean
         deviceAuthzEndpoint:
           type: string
         mtlsAuthorizationEndpoint:
@@ -9371,6 +9438,9 @@ components:
           type: boolean
         accessEvaluationScriptName:
           type: string
+        accessEvaluationDiscoveryCacheLifetimeInMinutes:
+          type: integer
+          format: int32
         requireRequestObjectEncryption:
           type: boolean
         requirePkce:
@@ -9630,9 +9700,6 @@ components:
           type: string
         opTosUri:
           type: string
-        cleanUpInactiveClientAfterHoursOfInactivity:
-          type: integer
-          format: int32
         clientPeriodicUpdateTimerInterval:
           type: integer
           format: int32
@@ -9657,10 +9724,7 @@ components:
         accessTokenLifetime:
           type: integer
           format: int32
-        cleanServiceInterval:
-          type: integer
-          format: int32
-        cleanServiceBatchChunkSize:
+        userInfoLifetime:
           type: integer
           format: int32
         keyRegenerationEnabled:
@@ -9729,6 +9793,14 @@ components:
           type: object
           additionalProperties:
             type: string
+        acrToConsentScriptNameMapping:
+          type: object
+          additionalProperties:
+            type: string
+        acrToAgamaConsentFlowMapping:
+          type: object
+          additionalProperties:
+            type: string
         authenticationFiltersEnabled:
           type: boolean
         clientAuthenticationFiltersEnabled:
@@ -9763,6 +9835,10 @@ components:
           type: boolean
         sessionIdPersistInCache:
           type: boolean
+        sessionIdUserClaimsInAttributes:
+          type: array
+          items:
+            type: string
         includeSidInResponse:
           type: boolean
         disablePromptLogin:
@@ -9819,6 +9895,8 @@ components:
         pairwiseCalculationSalt:
           type: string
         shareSubjectIdBetweenClientsWithSameSectorId:
+          type: boolean
+        useOpenidSubAttributeValueForPairwiseLocalAccountId:
           type: boolean
         webKeysStorage:
           type: string
@@ -9914,6 +9992,12 @@ components:
         disableU2fEndpoint:
           type: boolean
         authorizationChallengeSessionLifetimeInSeconds:
+          type: integer
+          format: int32
+        rateLimitRegistrationRequestCount:
+          type: integer
+          format: int32
+        rateLimitRegistrationPeriodInSeconds:
           type: integer
           format: int32
         rotateDeviceSecret:
@@ -10103,6 +10187,7 @@ components:
             - STAT
             - PAR
             - ACCESS_EVALUATION
+            - RATE_LIMIT
             - SSA
         httpLoggingEnabled:
           type: boolean
@@ -10137,8 +10222,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10148,6 +10231,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10277,8 +10362,10 @@ components:
           type: string
         finishedFlowPage:
           type: string
-        bridgeScriptPage:
-          type: string
+        startEndUrlMapping:
+          type: object
+          additionalProperties:
+            type: string
         serializeRules:
           type: object
           additionalProperties:
@@ -10310,6 +10397,12 @@ components:
         ssaExpirationInDays:
           type: integer
           format: int32
+        ssaMapSoftwareRolesToScopes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
     SsaValidationConfig:
       type: object
       properties:
@@ -10822,6 +10915,10 @@ components:
           type: array
           items:
             type: string
+        tokenExchangeScripts:
+          type: array
+          items:
+            type: string
         consentGatheringScripts:
           type: array
           items:
@@ -10869,6 +10966,8 @@ components:
           format: int32
         allowOfflineAccessWithoutConsent:
           type: boolean
+        requirePkce:
+          type: boolean
         minimumAcrLevel:
           type: integer
           format: int32
@@ -10914,10 +11013,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -11201,13 +11300,15 @@ components:
           - introspection
           - resource_owner_password_credentials
           - application_session
-          - cache_refresh
+          - link_interception
           - client_registration
           - id_generator
           - uma_rpt_policy
           - uma_rpt_claims
           - uma_claims_gathering
           - access_evaluation
+          - access_evaluation_discovery
+          - token_exchange
           - consent_gathering
           - dynamic_scope
           - spontaneous_scope
@@ -11692,10 +11793,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -11786,6 +11887,8 @@ components:
           type: string
         online_access:
           type: boolean
+        authorization_challenge:
+          type: boolean
         attributes:
           type: object
           additionalProperties:
@@ -11865,6 +11968,8 @@ components:
           - REFRESH_TOKEN
           - AUTHORIZATION_CODE
           - TX_TOKEN
+        accessToken:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

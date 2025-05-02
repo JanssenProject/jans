@@ -54,6 +54,7 @@ class JansLabelContainer:
             width=self.width-2,
             height=self.height
         )
+        self.body.jans_label_values = self.entries
 
         widgets = [self.body]
         if buttonbox:
