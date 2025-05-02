@@ -41,7 +41,9 @@
 		<jakarta.websocket.api.version>2.1.0</jakarta.websocket.api.version>
 		<jakarta.xml.bind.api.version>3.0.1</jakarta.xml.bind.api.version>
 		<org.glassfish.jakarta.el.api.version>5.0.0-M1</org.glassfish.jakarta.el.api.version>
-		<jakarta.el.api.version>5.0.0-RC1</jakarta.el.api.version>
+		<jakarta.el.api.version>6.0.1</jakarta.el.api.version>
+		<jakarta.servlet.jsp-api.version>4.0.0</jakarta.servlet.jsp-api.version>
+		
 
 		<jackson.bom.version>2.13.4.20221013</jackson.bom.version>
 		<jackson.version>2.13.4</jackson.version>
@@ -405,6 +407,11 @@
 				<artifactId>jakarta.el-api</artifactId>
 				<version>${jakarta.el.api.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>jakarta.servlet.jsp</groupId>
+				<artifactId>jakarta.servlet.jsp-api</artifactId>
+				<version>${jakarta.servlet.jsp-api.version}</version>
+			</dependency>
 			<!-- <dependency>
 				<groupId>org.glassfish</groupId>
 				<artifactId>jakarta.faces</artifactId>
@@ -420,7 +427,7 @@
 			    <version>${org.jboss.annotations.api.version}</version>
 				<scope>provided</scope>
 			</dependency>
-		<!-- 	<dependency>
+			<!-- 	<dependency>
 				<groupId>javax.websocket</groupId>
 				<artifactId>javax.websocket-api</artifactId>
 				<version>1.1</version>
@@ -443,7 +450,7 @@
 			    <artifactId>hibernate-validator-cdi</artifactId>
 			    <version>${org.hibernate.validator.cdi.version}</version>
 			</dependency>
-			
+
 			<!-- omnifaces -->
 			<dependency>
 			    <groupId>org.omnifaces</groupId>

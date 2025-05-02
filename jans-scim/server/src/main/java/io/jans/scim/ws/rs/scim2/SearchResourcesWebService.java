@@ -9,7 +9,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import io.jans.scim.model.scim2.ListResponse;
+import io.jans.scim.model.scim2.SearchRequest;
+import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
+import io.jans.scim.model.scim2.group.GroupResource;
+import io.jans.scim.model.scim2.user.UserResource;
+import io.jans.scim.model.scim2.util.ScimResourceUtil;
+import io.jans.scim.service.filter.ProtectedApi;
+import io.jans.scim.service.scim2.interceptor.RefAdjusted;
+import io.jans.scim.service.scim2.serialization.ListResponseJsonSerializer;
+import io.jans.util.Pair;
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.Consumes;
@@ -21,24 +37,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import io.jans.scim.model.scim2.ListResponse;
-import io.jans.scim.model.scim2.SearchRequest;
-import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
-import io.jans.scim.model.scim2.group.GroupResource;
-import io.jans.scim.model.scim2.user.UserResource;
-import io.jans.scim.model.scim2.util.ScimResourceUtil;
-import io.jans.scim.service.filter.ProtectedApi;
-import io.jans.scim.service.scim2.interceptor.RefAdjusted;
-import io.jans.scim.service.scim2.serialization.ListResponseJsonSerializer;
-import io.jans.util.Pair;
-
 /**
  * Implementation of the /.search endpoint for the root URL of the service
  */
+@Dependent
 @Named
 @Path("/v2/.search")
 public class SearchResourcesWebService extends BaseScimWebService {

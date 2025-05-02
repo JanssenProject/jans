@@ -11,7 +11,13 @@ import static io.jans.scim.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
 
 import java.util.Collections;
 
+import io.jans.scim.model.scim2.Meta;
+import io.jans.scim.model.scim2.provider.config.AuthenticationScheme;
+import io.jans.scim.model.scim2.provider.config.ServiceProviderConfig;
+import io.jans.scim.model.scim2.util.ScimResourceUtil;
+import io.jans.scim.service.scim2.interceptor.RejectFilterParam;
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Named;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
@@ -20,12 +26,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 
-import io.jans.scim.model.scim2.Meta;
-import io.jans.scim.model.scim2.provider.config.AuthenticationScheme;
-import io.jans.scim.model.scim2.provider.config.ServiceProviderConfig;
-import io.jans.scim.model.scim2.util.ScimResourceUtil;
-import io.jans.scim.service.scim2.interceptor.RejectFilterParam;
-
+@Dependent
 @Named("serviceProviderConfig")
 @Path("/v2/ServiceProviderConfig")
 public class ServiceProviderConfigWS extends BaseScimWebService {

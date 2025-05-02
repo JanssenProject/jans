@@ -81,7 +81,7 @@ export default function HomePage({ data, notifyOnDataChange }) {
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <CedarlingMgmt
-              data={data.cedarlingConfig}
+              data={data}
               isLoggedIn={(!Utils.isEmpty(data.loginDetails) && Object.keys(data.loginDetails).length !== 0)}
               notifyOnDataChange={notifyOnDataChange}
             />
