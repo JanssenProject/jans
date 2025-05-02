@@ -4,8 +4,8 @@
   <Set name="contextPath">/jans-casa/custom</Set>
   <Set name="handler">
     <New class="org.eclipse.jetty.server.handler.ResourceHandler">
-      <Set name="resourceBase">/opt/jans/jetty/jans-casa/static</Set>
-      <Set name="directoriesListed">false</Set>
+      <Set name="baseResourceAsString">/opt/jans/jetty/jans-casa/static</Set>
+      <Set name="dirAllowed">false</Set>
     </New>
   </Set>
 </Configure>
