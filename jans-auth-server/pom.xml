@@ -501,6 +501,7 @@
 					<configuration>
 						<failOnError>false</failOnError>
 					</configuration>
+					<version>3.11.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.owasp</groupId>
@@ -536,6 +537,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.11.2</version>
 			</plugin>
 
 			<!-- OWASP plugin -->

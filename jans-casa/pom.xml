@@ -266,6 +266,7 @@
                         <source>8</source>
                         <failOnError>false</failOnError>
                     </configuration>
+                    <version>3.11.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>
