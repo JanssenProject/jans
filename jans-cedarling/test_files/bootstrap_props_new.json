@@ -1,0 +1,41 @@
+{
+  "application_name": "My App",
+  "policy_store_id": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
+  "log_type": "std_out",
+  "log_level": "DEBUG",
+  "user_authz": "enabled",
+  "workload_authz": "enabled",
+  "principal_boolean_operation": {
+    "and": [
+      {
+        "===": [
+          {
+            "var": "Jans::Workload"
+          },
+          "ALLOW"
+        ]
+      },
+      {
+        "===": [
+          {
+            "var": "Jans::User"
+          },
+          "ALLOW"
+        ]
+      }
+    ]
+  },
+  "policy_store_local_fn": "../test_files/policy-store_blobby.json",
+  "jwt_sig_validation": "enabled",
+  "jwt_status_validation": "disabled",
+  "jwt_signature_algorithms_supported": [
+    "HS256",
+    "RS256"
+  ],
+  "id_token_trust_mode": "strict",
+  "lock": "disabled",
+  "lock_dynamic_configuration": "disabled",
+  "lock_health_interval": 0,
+  "lock_telemetry_interval": 0,
+  "lock_listen_sse": "disabled"
+}

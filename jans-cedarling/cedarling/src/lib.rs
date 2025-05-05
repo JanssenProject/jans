@@ -13,8 +13,10 @@
 //! The Cedarling is a more productive and flexible way to handle authorization.
 
 mod authz;
+#[deprecated]
 mod bootstrap_config;
 mod common;
+pub mod config;
 mod entity_builder;
 mod http;
 mod init;

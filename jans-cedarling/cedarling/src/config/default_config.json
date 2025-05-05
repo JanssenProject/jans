@@ -1,0 +1,49 @@
+{
+	"user_authz": "enabled",
+	"workload_authz": "enabled",
+	"user_workload_boolean_operation": {
+		"and": [
+			{
+				"===": [
+					{
+						"var": "Jans::Workload"
+					},
+					"ALLOW"
+				]
+			},
+			{
+				"===": [
+					{
+						"var": "Jans::User"
+					},
+					"ALLOW"
+				]
+			}
+		]
+	},
+	"mapping_iss": "Jans::TrustedIssuer",
+	"mapping_user": "Jans::User",
+	"mapping_workload": "Jans::Workload",
+	"mapping_role": "Jans::Workload",
+	"log_type": "std_out",
+	"log_level": "DEBUG",
+	"decision_log_user_claims": [],
+	"decision_log_workload_claims": [],
+	"decision_log_default_jwt_id": "jti",
+	"jwt_sig_validation": "enabled",
+	"jwt_status_validation": "disabled",
+	"jwt_signature_algorithms_supported": [
+		"RS256",
+		"RS384",
+		"RS512",
+		"ES256",
+		"ES384"
+	],
+	"id_token_trust_mode": "none",
+	"lock": "disabled",
+	"lock_dynamic_configuration": "enabled",
+	"lock_log_interval": 60,
+	"lock_health_interval": 60,
+	"lock_telemetry_interval": 60,
+	"lock_listen_sse": "enabled"
+}
