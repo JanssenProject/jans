@@ -208,6 +208,7 @@ data:
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
+  {{- end }}
   {{- if index .Values "keycloak-link" "enabled" }}
   CN_KEYCLOAK_LINK_APP_LOGGERS: {{ index .Values "keycloak-link" "appLoggers"
   | toJson
@@ -222,6 +223,7 @@ data:
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
+  {{- end }}
 
 ---
 
