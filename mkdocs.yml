@@ -427,11 +427,11 @@ nav:
     - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
+    - Kotlin: 'cedarling/cedarling-kotlin.md'
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
       - Android Apps: 'cedarling/uniffi/cedarling-android.md'
       - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'
-    - Kotlin: 'cedarling/cedarling-kotlin.md'
     - Sidecar: 'cedarling/cedarling-sidecar-overview.md'
     - Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
   - Integrations:
