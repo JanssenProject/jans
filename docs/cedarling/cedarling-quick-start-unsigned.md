@@ -123,7 +123,7 @@ Video walkthrough:
 
 https://streamable.com/25wcb7
 
-1. Go to Tarp, under `Cedarling` tab, click on `Cedarling Authz Form`
+1. Go to Tarp, under `Cedarling` tab, click on `Cedarling Unsigned Authz Form`
 2. Input the following:
 
 ```JSON title="Principal"
