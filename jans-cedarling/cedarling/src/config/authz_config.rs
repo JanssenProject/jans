@@ -42,6 +42,16 @@ pub struct AuthzConfig {
     pub user_workload_boolean_operation: JsonRule,
 }
 
+impl Default for AuthzConfig {
+    fn default() -> Self {
+        Self {
+            user_authz: FeatureToggle::Enabled,
+            workload_authz: FeatureToggle::Enabled,
+            user_workload_boolean_operation: JsonRule::default(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::{JsonRule, config::*};

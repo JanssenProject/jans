@@ -1,5 +1,5 @@
 {
-  "application_name": "My App",
+  "application_name": "my_cedarling_app",
   "policy_store_id": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
   "log_type": "std_out",
   "log_level": "DEBUG",

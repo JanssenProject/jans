@@ -7,7 +7,7 @@ use derive_more::derive::Deref;
 use serde::{Deserialize, Serialize};
 
 /// Config specific to entity mapping
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct EntityMappingConfig {
     /// Mapping name of cedar schema TrustedIssuer entity
     #[serde(alias = "CEDARLING_MAPPING_TRUSTED_ISSUER", default)]
@@ -28,7 +28,7 @@ pub struct EntityMappingConfig {
 
 /// Mapping name of cedar schema TrustedIssuer entity
 #[derive(Debug, Deref, Deserialize, Serialize, PartialEq)]
-pub struct MappingTrustedIssuer(String);
+pub struct MappingTrustedIssuer(pub String);
 
 impl Default for MappingTrustedIssuer {
     /// Defaults to `"Jans::TrustedIssuer"`
@@ -39,7 +39,7 @@ impl Default for MappingTrustedIssuer {
 
 /// Name of Cedar User schema entity
 #[derive(Debug, Deref, Deserialize, Serialize, PartialEq)]
-pub struct MappingUser(String);
+pub struct MappingUser(pub String);
 
 impl Default for MappingUser {
     /// Defaults to `"Jans::User"`
@@ -50,7 +50,7 @@ impl Default for MappingUser {
 
 /// Name of Cedar Workload schema entity
 #[derive(Debug, Deref, Deserialize, Serialize, PartialEq)]
-pub struct MappingWorkload(String);
+pub struct MappingWorkload(pub String);
 
 impl Default for MappingWorkload {
     /// Defaults to `"Jans::Workload"`
@@ -61,7 +61,7 @@ impl Default for MappingWorkload {
 
 /// Name of Cedar Role schema entity
 #[derive(Debug, Deref, Deserialize, Serialize, PartialEq)]
-pub struct MappingRole(String);
+pub struct MappingRole(pub String);
 
 impl Default for MappingRole {
     /// Defaults to `"Jans::Role"`

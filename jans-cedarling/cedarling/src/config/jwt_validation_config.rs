@@ -18,8 +18,12 @@ pub struct JwtValidationConfig {
     /// Toggles validatingto the signature JWTs.
     ///
     /// This requires an iss is present.
-    #[serde(alias = "CEDARLING_JWT_SIG_VALIDATION", default)]
-    pub jwt_sig_validation: FeatureToggle,
+    #[serde(
+        rename = "jwt_sig_validation",
+        alias = "CEDARLING_JWT_SIG_VALIDATION",
+        default
+    )]
+    pub sig_validation: FeatureToggle,
 
     /// Toggles checking the status of the JWT on startup.
     ///
@@ -28,12 +32,20 @@ pub struct JwtValidationConfig {
     /// cache it. See the [`IETF Draft`] for more info.
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
-    #[serde(alias = "CEDARLING_JWT_STATUS_VALIDATION", default)]
-    pub jwt_status_validation: FeatureToggle,
+    #[serde(
+        rename = "jwt_status_validation",
+        alias = "CEDARLING_JWT_STATUS_VALIDATION",
+        default
+    )]
+    pub status_validation: FeatureToggle,
 
     /// Cedarling will only accept tokens signed with these algorithms.
-    #[serde(alias = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED", default)]
-    pub jwt_signature_algorithms_supported: Vec<Algorithm>,
+    #[serde(
+        rename = "jwt_signature_algorithms_supported",
+        alias = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED",
+        default
+    )]
+    pub signature_algorithms_supported: Vec<Algorithm>,
 
     /// Varying levels of validations based on the preference of the developer.
     ///
@@ -45,6 +57,25 @@ pub struct JwtValidationConfig {
     ///         the aud matches the access token client_id.
     #[serde(alias = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
     pub id_token_trust_mode: IdTokenTrustMode,
+}
+
+impl Default for JwtValidationConfig {
+    fn default() -> Self {
+        Self {
+            local_jwks: None,
+            sig_validation: FeatureToggle::Enabled,
+            status_validation: FeatureToggle::Disabled,
+            signature_algorithms_supported: vec![
+                Algorithm::RS256,
+                Algorithm::RS384,
+                Algorithm::RS512,
+                Algorithm::ES256,
+                Algorithm::ES384,
+                Algorithm::EdDSA,
+            ],
+            id_token_trust_mode: IdTokenTrustMode::None,
+        }
+    }
 }
 
 /// Defines the level of validation for ID tokens.

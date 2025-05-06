@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 /// Config specific to logging
 #[allow(missing_docs)]
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub struct LoggingConfig {
     #[serde(rename = "log_type", alias = "CEDARLING_LOG_TYPE", default)]
@@ -28,14 +28,18 @@ pub struct LoggingConfig {
     #[serde(alias = "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID", default)]
     pub decision_log_default_jwt_id: DecisionLogDefaultJwtId,
 
-    #[serde(alias = "CEDARLING_LOG_TTL", default)]
-    pub log_ttl: LogTtl,
+    #[serde(rename = "log_ttl", alias = "CEDARLING_LOG_TTL", default)]
+    pub ttl: LogTtl,
 
-    #[serde(alias = "CEDARLING_LOG_MAX_ITEMS", default)]
-    pub log_max_items: LogMaxItems,
+    #[serde(rename = "log_max_items", alias = "CEDARLING_LOG_MAX_ITEMS", default)]
+    pub max_items: LogMaxItems,
 
-    #[serde(alias = "CEDARLING_LOG_MAX_ITEM_SIZE", default)]
-    pub log_max_item_size: LogMaxItemSize,
+    #[serde(
+        rename = "log_max_item_size",
+        alias = "CEDARLING_LOG_MAX_ITEM_SIZE",
+        default
+    )]
+    pub max_item_size: LogMaxItemSize,
 }
 
 // Used to add a link in the docstring.
@@ -47,7 +51,6 @@ use crate::LogStorage;
 #[serde(rename_all = "snake_case")]
 #[allow(missing_docs)]
 pub enum LoggerKind {
-    #[default]
     Off,
     /// Logger that collect messages in memory which will be available for retrieval
     /// using [`pop_logs`].
@@ -55,6 +58,7 @@ pub enum LoggerKind {
     /// [`pop_logs`]: crate::Cedarling::pop_logs
     Memory,
     /// Logger that print logs to stdout
+    #[default]
     StdOut,
 }
 
@@ -64,8 +68,8 @@ pub enum LoggerKind {
 pub enum LogLevel {
     Fatal = 5,
     Error = 4,
-    #[default]
     Warn = 3,
+    #[default]
     Info = 2,
     Debug = 1,
     Trace = 0,
@@ -73,12 +77,12 @@ pub enum LogLevel {
 
 #[derive(Debug, Deref, Deserialize, Serialize, PartialEq)]
 #[allow(missing_docs)]
-pub struct DecisionLogDefaultJwtId(String);
+pub struct DecisionLogDefaultJwtId(pub String);
 
 impl Default for DecisionLogDefaultJwtId {
     /// `"jwt"`
     fn default() -> Self {
-        Self("jwt".to_string())
+        Self("jti".to_string())
     }
 }
 
@@ -97,7 +101,7 @@ impl Default for LogTtl {
 ///
 /// Set this to 0 to remove the limit.
 #[derive(Debug, Deref, Deserialize, Serialize, PartialEq)]
-pub struct LogMaxItems(u64);
+pub struct LogMaxItems(pub u64);
 
 impl Default for LogMaxItems {
     /// No limit (`0`)
@@ -110,7 +114,7 @@ impl Default for LogMaxItems {
 ///
 /// Set this to 0 to remove the limit.
 #[derive(Debug, Deref, Deserialize, Serialize, PartialEq)]
-pub struct LogMaxItemSize(u64);
+pub struct LogMaxItemSize(pub u64);
 
 impl Default for LogMaxItemSize {
     /// No limit (`0`)

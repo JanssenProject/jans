@@ -24,9 +24,9 @@
 	"mapping_iss": "Jans::TrustedIssuer",
 	"mapping_user": "Jans::User",
 	"mapping_workload": "Jans::Workload",
-	"mapping_role": "Jans::Workload",
+	"mapping_role": "Jans::Role",
 	"log_type": "std_out",
-	"log_level": "DEBUG",
+	"log_level": "INFO",
 	"decision_log_user_claims": [],
 	"decision_log_workload_claims": [],
 	"decision_log_default_jwt_id": "jti",
@@ -37,7 +37,8 @@
 		"RS384",
 		"RS512",
 		"ES256",
-		"ES384"
+		"ES384",
+		"EdDSA"
 	],
 	"id_token_trust_mode": "none",
 	"lock": "disabled",

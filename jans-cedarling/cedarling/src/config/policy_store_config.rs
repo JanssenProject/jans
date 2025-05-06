@@ -140,8 +140,8 @@ struct PolicyStoreConfigRaw {
     pub policy_store_id: Option<String>,
 }
 
+/// The method of loading the policy store
 #[derive(Debug, PartialEq)]
-/// The source of the policy store to be loaded
 pub enum PolicyStoreSource {
     /// JSON object as String.
     JsonString(String),
