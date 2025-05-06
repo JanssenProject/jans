@@ -80,7 +80,7 @@ setup(
     description="",
     long_description=__doc__,
     packages=find_packages(),
-    package_data={'': ['*.yaml', '.enabled']},
+    package_data={'': ['*.yaml', '.enabled', 'jans-logo.txt']},
     zip_safe=False,
     install_requires=[
         "ruamel.yaml>=0.16.5,<0.18.0",
