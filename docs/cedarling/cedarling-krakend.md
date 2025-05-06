@@ -94,7 +94,7 @@ If you are running a different version of KrakenD, you can use the following ste
 
 To test the plugin, you will need:
 
-- A cedarling policy store with a policy for our gateway. To create this, please follow [these](https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#1-author-policies) steps.
+- A cedarling policy store with a policy for our gateway. To create this, please follow [these](https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World#1-author-policies) steps.
 - For our demo, we will use this sample policy as outlined in the instructions:
     ```
     @id("allow_one")
