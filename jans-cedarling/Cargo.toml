@@ -20,9 +20,7 @@ tokio = "1.42.0"
 
 
 [profile.release]
-strip = "symbols"
 debug-assertions = false
-lto = true
 opt-level = "z"
 codegen-units = 1
 overflow-checks = false

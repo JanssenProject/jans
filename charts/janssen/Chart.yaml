@@ -26,6 +26,8 @@ annotations:
       image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly
     - name: cleanup
       image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly
+    - name: keycloak-link
+      image: ghcr.io/janssenproject/jans/keycloak-link:0.0.0-nightly
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
@@ -100,4 +102,8 @@ dependencies:
 
     - name: cleanup
       condition: global.cleanup.enabled
+      version: 0.0.0-nightly
+
+    - name: keycloak-link
+      condition: global.keycloak-link.enabled
       version: 0.0.0-nightly

@@ -143,6 +143,9 @@ Create aio enabled list
 {{- if .Values.saml.enabled}}
 {{ $newList = append $newList ("jans-saml") }}
 {{- end}}
+{{- if index .Values "keycloak-link" "enabled" }}
+{{ $newList = append $newList ("jans-keycloak-link") }}
+{{- end }}
 {{ toJson $newList }}
 {{- end }}
 

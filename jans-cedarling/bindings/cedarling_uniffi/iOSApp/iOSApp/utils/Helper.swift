@@ -54,7 +54,7 @@ class Helper{
         }
         return ["": ""]
     }
-    
+
     static func dictionaryFromFile(filename: String) -> [String: String] {
         do {
             if let policyStoreUrl = Bundle.main.path(forResource: filename, ofType: "json") {
@@ -80,6 +80,21 @@ class Helper{
         } catch {
             print("Error converting dictionary to JSON string: \(error)")
             return ""
+        }
+    }
+    
+    static func toJSONString<T: Codable>(_ object: T, prettyPrinted: Bool = true) -> String? {
+        let encoder = JSONEncoder()
+        if prettyPrinted {
+            encoder.outputFormatting = .prettyPrinted
+        }
+
+        do {
+            let data = try encoder.encode(object)
+            return String(data: data, encoding: .utf8)
+        } catch {
+            print("❌ Failed to encode object to JSON: \(error)")
+            return nil
         }
     }
     

@@ -37,12 +37,12 @@ func NewCedarling(bootstrap_config map[string]any) (*Cedarling, error) {
 	return instance, nil
 }
 
-func NewCedarlingWithEnv(bootstrap_config *map[string]any) (Cedarling, error) {
+func NewCedarlingWithEnv(bootstrap_config *map[string]any) (*Cedarling, error) {
 	instance_id, err := internal.NewInstanceWithEnv(bootstrap_config)
 	if err != nil {
-		return Cedarling{}, err
+		return nil, err
 	}
-	instance := Cedarling{instance_id: instance_id}
+	instance := &Cedarling{instance_id: instance_id}
 	runtime.SetFinalizer(instance, cedarlingFinalizer)
 	return instance, nil
 }
