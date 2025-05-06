@@ -1,0 +1,43 @@
+{{- if and (.Values.global.istio.ingress) (index .Values "global" "keycloak-link" "ingress" "keycloakLinkEnabled") }}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-istio-keycloak-link
+  namespace: {{.Release.Namespace}}
+  labels:
+    APP_NAME: keycloak-link
+{{ include "keycloak-link.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (index .Values.global "keycloak-link" "customAnnotations" "virtualService") }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if index .Values.global "keycloak-link" "customAnnotations" "virtualService" }}
+{{ toYaml (index .Values.global "keycloak-link" "customAnnotations" "virtualService") | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+{{- if .Values.global.istio.gateways }}
+  gateways:
+{{ toYaml .Values.global.istio.gateways | indent 2 }}
+{{- else }}
+  gateways:
+  - {{ .Release.Name }}-global-gtw
+{{- end }}
+  hosts:
+  - {{ .Values.global.fqdn }}
+  http:
+  - name: {{ .Release.Name }}-istio-keycloak-link
+    match:
+    - uri:
+        prefix: /jans-keycloak-link
+    route:
+    - destination:
+        host: {{ index .Values "global" "keycloak-link" "keycloakLinkServiceName" }}.{{.Release.Namespace}}.svc.cluster.local
+        port:
+          number: 9092
+      weight: 100
+{{- end }}
