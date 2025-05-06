@@ -21,10 +21,6 @@ impl Config {
 impl ConfigBuilder {
     /// Creates a [`Config`]
     pub fn build(self) -> Result<Config, ConfigError> {
-        let Some(app_name) = self.application_name else {
-            return Err(ConfigError::MissingApplicationName);
-        };
-
         let Some(source) = self.policy_store.source else {
             return Err(ConfigError::MissingPolicySource);
         };
@@ -36,8 +32,13 @@ impl ConfigBuilder {
 
         self.lock.validate()?;
 
+        let application_name = self
+            .application_name
+            .map(|name| AppName::from_string(name))
+            .unwrap_or_default();
+
         Ok(Config {
-            application_name: AppName(app_name),
+            application_name,
             policy_store,
             authz: self.authz,
             entity_mapping: self.entity_mapping,

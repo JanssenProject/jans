@@ -32,7 +32,7 @@ use thiserror::Error;
 #[allow(missing_docs)]
 pub struct Config {
     /// Human friendly identifier for the app. Used for logging.
-    #[serde(alias = "CEDARLING_APPLICATION_NAME")]
+    #[serde(alias = "CEDARLING_APPLICATION_NAME", default)]
     pub application_name: AppName,
     #[serde(flatten)]
     pub policy_store: PolicyStoreConfig,
@@ -49,8 +49,26 @@ pub struct Config {
 }
 
 /// The name of the application that will be used for log entries
-#[derive(Debug, Serialize, PartialEq, Display)]
-pub struct AppName(pub String);
+#[derive(Debug, Default, Serialize, PartialEq)]
+pub struct AppName(Option<String>);
+
+#[allow(missing_docs)]
+impl AppName {
+    pub fn from_string(s: String) -> Self {
+        if s.is_empty() {
+            return Self(None);
+        }
+
+        Self(Some(s))
+    }
+}
+
+impl Display for AppName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let disp_name = self.0.as_deref().unwrap_or_else(|| "unnamed_cedarling_app");
+        write!(f, "{disp_name}")
+    }
+}
 
 impl<'de> Deserialize<'de> for AppName {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -63,7 +81,8 @@ impl<'de> Deserialize<'de> for AppName {
                 "an application name was not provided. please set the `CEDARLING_APPLICATION_NAME` environment variable",
             )
         })?;
-        Ok(Self(app_name))
+
+        Ok(Self::from_string(app_name))
     }
 }
 
@@ -123,8 +142,6 @@ impl Config {
 #[derive(Debug, Error)]
 #[allow(missing_docs)]
 pub enum ConfigError {
-    #[error("the config is missing the required application name")]
-    MissingApplicationName,
     #[error("the config is missing the required policy source")]
     MissingPolicySource,
     #[error("the config is missing the required lock server configuration uri")]
@@ -143,13 +160,11 @@ mod test {
     #[test]
     fn test_builder_has_same_defaults() {
         let default_config = Config::load_with_test_overrides(json!({
-            "application_name": "my_cedarling_app",
             "policy_store_uri": "https://test.com/policy_store.json"
         }))
         .expect("load default config");
 
         let config_from_builder = Config::builder()
-            .application_name("my_cedarling_app".to_string())
             .policy_store_src(PolicyStoreSource::Url(
                 "https://test.com/policy_store.json".parse().unwrap(),
             ))
