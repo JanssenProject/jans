@@ -72,15 +72,29 @@ The bootstrap configuration and policy store directly influence how Cedarling pe
 === "Kotlin"
 
     ```kt
-    val instance: Cedarling? = bootstrapConfig?.let {
-      Cedarling.loadFromJson(...);
-    };
+    // Assigning a multi-line JSON string representing the Bootstrap configuration for Cedarling
+    val bootstrapConfig: String = """
+        {
+            "CEDARLING_APPLICATION_NAME": "My App",
+        ...
+        }
+    """;
+    
+    val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
     ```
 
 === "Swift"
 
     ```swift
-    let cedarling = try Cedarling.loadFromJson(config: "...")
+    // Assigning a multi-line JSON string representing the Bootstrap configuration for Cedarling
+    let bootstrapConfig: String = """
+        {
+            "CEDARLING_APPLICATION_NAME": "My App",
+        ...
+        }
+    """
+
+    let cedarling = try Cedarling.loadFromJson(config: bootstrapConfig)
     ```
 
 ### Authorization
