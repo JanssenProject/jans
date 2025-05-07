@@ -6,9 +6,9 @@
 //! The [`LogWorker`] runs in the background and is responsible for collecting and sending
 //! logs to the lock server's `/audit/log` endpoint.
 
+use super::OptLogAny;
 use super::log_entry::LockLogEntry;
-use crate::LogWriter;
-use crate::log::LoggerWeak;
+use crate::log::{LogStrategy, LoggerWeak};
 
 use super::WORKER_HTTP_RETRY_DUR;
 use futures::StreamExt;
@@ -19,6 +19,7 @@ use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
+use tokio_util::sync::CancellationToken;
 use url::Url;
 
 pub type SerializedLogEntry = Box<str>;
@@ -54,7 +55,11 @@ impl LogWorker {
         }
     }
 
-    pub async fn run(&mut self, mut log_rx: mpsc::Receiver<SerializedLogEntry>) {
+    pub async fn run(
+        &mut self,
+        mut log_rx: mpsc::Receiver<SerializedLogEntry>,
+        cancel_tkn: CancellationToken,
+    ) {
         loop {
             tokio::select! {
                 // Append log to the buffer
@@ -66,81 +71,96 @@ impl LogWorker {
                 },
 
                 // Send logs to the server
-                _ = sleep(self.log_interval) => self.post_logs().await,
-            }
-        }
-    }
+                _ = sleep(self.log_interval) => {
+                    let logger = self.logger.as_ref().and_then(|logger| logger.upgrade());
+                    post_logs(&mut self.log_buffer, &logger, self.http_client.clone(), &self.log_endpoint).await;
+                },
 
-    async fn post_logs(&mut self) {
-        // save the length at the time the function is called
-        let batch_size = self.log_buffer.len();
-
-        if batch_size == 0 {
-            return;
-        }
-
-        let mut failed_serializations = 0;
-        let logs = self
-            .log_buffer
-            .iter()
-            .map(|entry| {
-                serde_json::from_str::<Value>(entry)
-                    .map_err(|_| failed_serializations += 1)
-                    .ok()
-            })
-            .collect::<Value>();
-
-        // log errors to stdout since there's nowhere else to log
-        if failed_serializations > 1 {
-            if let Some(fallback_logger_weak) = self.logger.as_ref() {
-                // upgrade the weak reference to a strong one before logging
-                // if the upgrade is successful, log the error using the fallback logger
-                // if the upgrade fails, do nothing
-                if let Some(fallback_logger) = fallback_logger_weak.upgrade() {
-                    fallback_logger.log_any(LockLogEntry::error(format!(
-                        // This probably wouldn't happen as we define the log entries
-                        // internally and they should always be serializable
-                        "skipping {} log entries that couldn't be serialized",
-                        failed_serializations
-                    )));
+                _ = cancel_tkn.cancelled() => {
+                    let logger = self.logger.as_ref().and_then(|logger| logger.upgrade());
+                    post_logs(&mut self.log_buffer, &logger, self.http_client.clone(), &self.log_endpoint).await;
+                    logger.log_any(LockLogEntry::info(
+                        "gracefully shutting down lock log worker",
+                    ));
+                    break;
                 }
             }
         }
+    }
+}
 
-        loop {
-            let resp = self
-                .http_client
-                .post(self.log_endpoint.as_ref())
-                .body(logs.to_string())
-                .send()
-                .await
-                .and_then(|resp| resp.error_for_status());
+async fn post_logs(
+    log_buf: &mut VecDeque<Box<str>>,
+    logger: &Option<Arc<LogStrategy>>,
+    http_client: Arc<Client>,
+    log_endpoint: &Url,
+) {
+    // save the length at the time the function is called
+    let batch_size = log_buf.len();
 
-            match resp {
-                Ok(_) => {
-                    if let Some(logger) = self.logger.as_ref().and_then(|logger| logger.upgrade()) {
-                        logger.log_any(LockLogEntry::info(format!(
-                            "sent logs to '{}'",
-                            self.log_endpoint.as_ref(),
-                        )));
-                        sleep(WORKER_HTTP_RETRY_DUR).await;
-                    }
-                    break;
-                },
-                Err(err) => {
-                    if let Some(logger) = self.logger.as_ref().and_then(|logger| logger.upgrade()) {
-                        logger.log_any(LockLogEntry::error(format!(
-                            "failed to POST logs to '{}': {}",
-                            self.log_endpoint.as_ref(),
-                            err
-                        )));
-                        sleep(WORKER_HTTP_RETRY_DUR).await;
-                    }
-                },
-            }
+    if batch_size == 0 {
+        return;
+    }
+
+    let mut failed_serializations = 0;
+    let logs = log_buf
+        .iter()
+        .map(|entry| {
+            serde_json::from_str::<Value>(entry)
+                .map_err(|_| failed_serializations += 1)
+                .ok()
+        })
+        .collect::<Value>();
+
+    // log errors to stdout since there's nowhere else to log
+    if failed_serializations > 1 {
+        logger.log_any(LockLogEntry::error(format!(
+            // This probably wouldn't happen as we define the log entries
+            // internally and they should always be serializable
+            "skipping {} log entries that couldn't be serialized",
+            failed_serializations
+        )));
+    }
+
+    loop {
+        let resp = http_client
+            .post(log_endpoint.as_ref())
+            .body(logs.to_string())
+            .send()
+            .await
+            .and_then(|resp| resp.error_for_status());
+
+        match resp {
+            Ok(_) => {
+                logger.log_any(LockLogEntry::info(format!(
+                    "sent logs to '{}'",
+                    log_endpoint.as_ref(),
+                )));
+                break;
+            },
+            Err(err) => {
+                logger.log_any(LockLogEntry::error(format!(
+                    "failed to POST logs to '{}': {}",
+                    log_endpoint.as_ref(),
+                    err
+                )));
+                sleep(WORKER_HTTP_RETRY_DUR).await;
+            },
         }
+    }
 
-        // drain the POSTed logs from the buffer
-        self.log_buffer.drain(0..batch_size);
+    // drain the POSTed logs from the buffer
+    log_buf.drain(0..batch_size);
+}
+
+impl Drop for LogWorker {
+    fn drop(&mut self) {
+        let logger = self.logger.as_ref().and_then(|logger| logger.upgrade());
+
+        if !self.log_buffer.is_empty() {
+            logger.log_any(LockLogEntry::warn(
+                "log worker still has some log entries that were not sent to the lock server. did you forget to call Cedarling.shut_down()?",
+            ));
+        }
     }
 }

@@ -108,10 +108,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e, e),
     }
 
-    println!("sleeping for 10 secs to give time for Cedarling's Lock service to send the logs");
     // we sleep for a bit so we don't exit before any logs are sent
-    sleep(Duration::from_secs(10)).await;
+    println!("sleeping for 5 secs to give time for Cedarling's Lock service to send the logs");
+    sleep(Duration::from_secs(5)).await;
+
     println!("logs should be sent to the lock server by now!");
+
+    // make sure to call shut_down() to flush any remaining logs
+    cedarling.shut_down().await;
+    println!("exiting");
 
     Ok(())
 }

@@ -33,6 +33,15 @@ impl LockLogEntry {
             id: gen_uuid7(),
         }
     }
+
+    /// Helper function to create a [`LogLevel::WARN`] entry.
+    pub fn warn(msg: impl Into<String>) -> Self {
+        Self {
+            message: msg.into(),
+            level: LogLevel::WARN,
+            id: gen_uuid7(),
+        }
+    }
 }
 
 impl Loggable for LockLogEntry {

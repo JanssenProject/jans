@@ -168,6 +168,11 @@ impl Cedarling {
         let tokens = self.authz.decode_tokens(request).await?;
         self.authz.build_entities(request, &tokens)
     }
+
+    /// Closes the connections to the Lock Server and pushes all available logs.
+    pub async fn shut_down(&self) {
+        self.log.shut_down().await;
+    }
 }
 
 // implements LogStorage for Cedarling

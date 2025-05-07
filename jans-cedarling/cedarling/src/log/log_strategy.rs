@@ -67,8 +67,7 @@ impl LogStrategy {
         }
     }
 
-    #[cfg(test)]
-    pub fn logger(&self) -> &LogStrategyLogger {
+    pub(crate) fn logger(&self) -> &LogStrategyLogger {
         &self.logger
     }
 
@@ -77,6 +76,17 @@ impl LogStrategy {
             .lock_service
             .write()
             .expect("obtain lock_service write lock") = Some(lock_service);
+    }
+
+    pub async fn shut_down(&self) {
+        let mut lock = self
+            .lock_service
+            .write()
+            .expect("obtain lock_service write lock");
+
+        if let Some(mut lock_service) = lock.take() {
+            lock_service.shut_down().await
+        }
     }
 }
 

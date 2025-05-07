@@ -109,3 +109,7 @@ func (c *Cedarling) GetLogsByRequestId(request_id string) []string {
 func (c *Cedarling) GetLogsByRequestIdAndTag(request_id string, tag string) []string {
 	return internal.CallGetLogsByRequestIdAndTag(c.instance_id, request_id, tag)
 }
+
+func (c *Cedarling) ShutDown() {
+	internal.ShutDown(c.instance_id)
+}

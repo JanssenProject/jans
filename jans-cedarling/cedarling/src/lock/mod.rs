@@ -14,8 +14,9 @@ mod log_worker;
 mod register_client;
 
 use crate::app_types::PdpID;
-use crate::log::LoggerWeak;
 use crate::log::interface::Loggable;
+use crate::log::log_strategy::LogStrategyLogger;
+use crate::log::{LogStrategy, LoggerWeak};
 use crate::{LockServiceConfig, LogWriter};
 use futures::channel::mpsc;
 use lock_config::*;
@@ -24,17 +25,25 @@ use log_worker::*;
 use register_client::*;
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, RwLock, Weak};
 use std::time::Duration;
 use thiserror::Error;
+use tokio::task::JoinHandle;
+use tokio_util::sync::CancellationToken;
 
 /// The base duration to wait for if an http request fails for workers.
 pub const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
 
+struct WorkerSenderAndHandle {
+    tx: RwLock<mpsc::Sender<SerializedLogEntry>>,
+    handle: JoinHandle<()>,
+}
+
 /// Stores logs in a buffer then sends them to the lock server in the background
 pub(crate) struct LockService {
-    log_worker_tx: RwLock<Option<mpsc::Sender<SerializedLogEntry>>>,
+    log_worker: Option<WorkerSenderAndHandle>,
     logger: Option<LoggerWeak>,
+    cancel_tkn: CancellationToken,
 }
 
 pub fn init_http_client(
@@ -101,7 +110,8 @@ impl LockService {
             bootstrap_conf.accept_invalid_certs,
         )?);
 
-        let log_worker_tx = match (bootstrap_conf.log_interval, lock_config.audit_endpoints.log) {
+        let cancel_tkn = CancellationToken::new();
+        let log_worker = match (bootstrap_conf.log_interval, lock_config.audit_endpoints.log) {
             // Case where Cedarling's config enables sending logs but the lock server
             // does not have a log endpoint
             (Some(_), None) => None,
@@ -116,58 +126,63 @@ impl LockService {
                     logger.clone(),
                 );
 
+                let cancel_tkn = cancel_tkn.clone();
                 #[cfg(any(target_arch = "wasm32", target_arch = "wasm64"))]
-                wasm_bindgen_futures::spawn_local(async move { log_worker.run(log_rx).await });
+                wasm_bindgen_futures::spawn_local(async move { log_worker.run(log_rx, tkn).await });
 
                 #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
-                tokio::spawn(async move { log_worker.run(log_rx).await });
+                let handle = tokio::spawn(async move { log_worker.run(log_rx, cancel_tkn).await });
 
-                Some(log_tx)
+                Some(WorkerSenderAndHandle {
+                    tx: log_tx.into(),
+                    handle,
+                })
             },
             // Other cases that will always resolve to Cedarling not having to send logs
             _ => None,
-        }
-        .into();
+        };
 
         Ok(Self {
-            log_worker_tx,
+            log_worker,
             logger,
+            cancel_tkn,
         })
+    }
+
+    pub async fn shut_down(&mut self) {
+        self.cancel_tkn.cancel();
+        if let Some(log_worker) = self.log_worker.take() {
+            _ = log_worker.handle.await;
+        }
     }
 }
 
 impl LogWriter for LockService {
     fn log_any<T: Loggable>(&self, entry: T) {
+        let Some(WorkerSenderAndHandle { tx: tx_lock, .. }) = self.log_worker.as_ref() else {
+            return;
+        };
+
         let entry = serde_json::to_string(&entry)
             .expect("entry should serialize successfully")
             .into_boxed_str();
 
-        let mut log_tx = match self.log_worker_tx.write() {
+        let mut log_tx = match tx_lock.write() {
             Ok(log_tx) => log_tx,
             Err(err) => {
-                if let Some(logger_weak) = self.logger.as_ref() {
-                    if let Some(logger) = logger_weak.upgrade() {
-                        logger.log_any(LockLogEntry::error(format!(
-                        "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {}",
-                        err
-                    )));
-                    }
-                }
+                self.logger.log_any(LockLogEntry::error(format!(
+                    "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {}",
+                    err
+                )));
                 return;
             },
         };
 
-        if let Some(log_tx) = log_tx.as_mut() {
-            if let Err(err) = log_tx.try_send(entry) {
-                if let Some(logger_weak) = self.logger.as_ref() {
-                    if let Some(logger) = logger_weak.upgrade() {
-                        logger.log_any(LockLogEntry::error(format!(
-                        "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {}",
-                        err
-                    )));
-                    }
-                }
-            }
+        if let Err(err) = log_tx.try_send(entry) {
+            self.logger.log_any(LockLogEntry::error(format!(
+                "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {}",
+                err
+            )));
         }
     }
 }
@@ -184,6 +199,48 @@ pub enum InitLockServiceError {
     ClientRegistration(#[from] ClientRegistrationError),
     #[error("failed to initialize the Lock logger's HttpClient: {0}")]
     InitHttpClient(#[from] reqwest::Error),
+}
+
+/// DO NOT use this outside of the lock module.
+///
+/// This is used as a helper function in the lock module but this WILL NOT send logs to
+/// the lock server if used outside of the lock module.
+pub trait OptLogAny {
+    /// Logs the entry if the struct is [`Option::is_some`]
+    fn log_any<T: Loggable>(&self, entry: T);
+}
+
+impl OptLogAny for Option<Arc<LogStrategy>> {
+    fn log_any<T: Loggable>(&self, entry: T) {
+        if let Some(log_strategy) = self.as_ref() {
+            match log_strategy.logger() {
+                LogStrategyLogger::Off(log) => log.log_any(entry),
+                LogStrategyLogger::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
+                LogStrategyLogger::StdOut(std_out_logger) => std_out_logger.log_any(entry),
+            }
+            return;
+        }
+
+        // we log the error manually to stdout if the logger is gone
+        let log = match serde_json::to_value(&entry) {
+            Ok(json) => json.to_string(),
+            Err(err) => {
+                let err_msg = format!("failed to serialize log entry to JSON: {err}");
+                serde_json::to_value(LockLogEntry::error(&err_msg))
+                    .expect(&err_msg)
+                    .to_string()
+            },
+        };
+
+        println!("{log}");
+    }
+}
+
+impl OptLogAny for Option<Weak<LogStrategy>> {
+    fn log_any<T: Loggable>(&self, entry: T) {
+        let logger = self.as_ref().and_then(|logger| logger.upgrade());
+        logger.log_any(entry);
+    }
 }
 
 #[cfg(test)]
