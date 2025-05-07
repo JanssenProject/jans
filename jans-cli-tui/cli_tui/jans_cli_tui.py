@@ -127,11 +127,15 @@ from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
+
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
+data_dir = home_dir.joinpath('.jans-cli-tui')
 
+if not data_dir.exists():
+    data_dir.mkdir(parents=True, exist_ok=True)
 
 def accept_yes() -> None:
     get_app().exit(result=True)
@@ -149,6 +153,7 @@ class JansCliApp(Application):
     def __init__(self):
 
         common_data.app = self
+        common_data.app.data_dir = data_dir
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
         self.set_keybindings()
         self.init_logger()

@@ -1,4 +1,7 @@
 import os
+import copy
+import json
+import hashlib
 import asyncio
 from datetime import datetime
 from typing import Any
@@ -8,7 +11,7 @@ from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit
 from prompt_toolkit.layout.containers import DynamicContainer, Window
-from prompt_toolkit.widgets import Button, Label, Checkbox, RadioList, Dialog
+from prompt_toolkit.widgets import Button, Label, Checkbox, RadioList, Dialog, TextArea
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
 
@@ -30,6 +33,14 @@ class SSA(DialogUtils):
 
         self.app = self.myparent = app
         self.data = []
+        self.ssa_templates = {}
+        self.templates_dir = self.app.data_dir.joinpath('ssa_templates')
+
+        if not self.templates_dir.exists():
+            self.templates_dir.mkdir(parents=True, exist_ok=True)
+
+        self.templates_button = Window(width=0)
+        self.load_templates()
 
         self.working_container = JansVerticalNav(
                 myparent=app,
@@ -48,6 +59,7 @@ class SSA(DialogUtils):
                     VSplit([
                         self.app.getTitledText(_("Search"), name='oauth:ssa:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_ssa, style=cli_style.edit_text),
                         self.app.getButton(text=_("Add SSA"), name='oauth:ssa:add', jans_help=_("To add a new SSA press this button"), handler=self.add_ssa),
+                        DynamicContainer(lambda: self.templates_button),
                         ],
                         padding=3,
                         width=D(),
@@ -64,6 +76,65 @@ class SSA(DialogUtils):
                 access_token=self.app.cli_object.access_token,
                 op_mode = 'auth'
             )
+
+    def load_templates(self):
+        self.ssa_templates.clear()
+        for tmp_path in self.templates_dir.glob('ssa-*.json'):
+            tmp_data = json.loads(tmp_path.read_text())
+            tmp_name = tmp_data['_template_name_']
+            self.ssa_templates[tmp_name] = tmp_data
+
+        if self.ssa_templates:
+            self.templates_button = self.app.getButton(text=_("Templates"), name='oauth:ssa:load', jans_help=_("To SSA from template press this button"), handler=self.templates_button_handler)
+        else:
+            self.templates_button = Window(width=0)
+
+    def templates_button_handler(self):
+        templates_list = []
+
+        for tmp_name in sorted(self.ssa_templates.keys()):
+            templates_list.append((tmp_name, tmp_name))
+
+        templates_radio_list = RadioList(values=templates_list)
+
+        def load_ssa_template(dialog):
+            selected_tmp = templates_radio_list.current_value
+            template_data = self.ssa_templates[selected_tmp]
+            self.edit_ssa_dialog(data=template_data)
+
+
+        def delete_ssa_template(dialog):
+            def do_delete_ssa_template(cdialog):
+                template_name_path = self.get_template_path(templates_radio_list.current_value)
+                template_name_path.unlink()
+                self.load_templates()
+                dialog.future.set_result(True)
+                self.app.show_message(
+                        _("Deleted"),
+                        HTML(_("SSA template <b>%s</b> was deleted.") % templates_radio_list.current_value),
+                        tobefocused=self.working_container
+                    )
+
+            confirm_dialog = self.app.get_confirm_dialog(
+                    message=_("Are you sure deleting SSA template <b>%s</b>?") % templates_radio_list.current_value,
+                    confirm_handler=do_delete_ssa_template
+                    )
+
+            self.app.show_jans_dialog(confirm_dialog)
+
+        delete_button = Button(_("Delete"), handler=delete_ssa_template)
+        delete_button.keep_dialog = True
+        buttons = [Button(_("Cancel")), Button(_("Load"), handler=load_ssa_template), delete_button]
+
+        templatesDialog = JansGDialog(
+            self.app,
+            title="SSA Templates",
+            body=templates_radio_list,
+            buttons=buttons,
+            )
+
+        self.app.show_jans_dialog(templatesDialog)
+
 
     def update_ssa_container(self, start_index=0, search_str=''):
 
@@ -115,6 +186,13 @@ class SSA(DialogUtils):
         data = self.data[params['selected']]['ssa']
         self.edit_ssa_dialog(data=data)
 
+    def get_template_path(self, template_name):
+        sha1 = hashlib.sha1()
+        sha1.update(template_name.encode())
+        sha1_hash = sha1.hexdigest()
+        return self.templates_dir.joinpath(f'ssa-{sha1_hash}.json')
+
+
     def save_ssa(self, dialog):
         new_data = self.make_data_from_dialog(tabs={'ssa': dialog.body})
 
@@ -127,8 +205,22 @@ class SSA(DialogUtils):
 
         new_data['software_roles'] = new_data['software_roles'].splitlines()
 
+        template_data = copy.deepcopy(new_data)
+        template_data['_custom_attributes_'] = {}
+
         for custom_attrib_name, custom_attrib_value in self.custom_attributes_container.all_data:
             new_data[custom_attrib_name] = custom_attrib_value
+            template_data['_custom_attributes_'][custom_attrib_name] = custom_attrib_value
+
+        if self.save_template_cb.checked:
+            template_name = self.template_name_widget.me.text
+            template_name_path = self.get_template_path(template_name)
+            
+            template_data['_template_name_'] = template_name
+            if self.never_expire_cb.checked:
+                template_data.pop('expiration')
+            template_name_path.write_text(json.dumps(template_data, indent=2))
+            self.load_templates()
 
         if self.check_required_fields(dialog.body, data=new_data):
 
@@ -155,7 +247,7 @@ class SSA(DialogUtils):
             dialog_title = _("Add Custom Attribute")
             attrib_name = args[0].dialog.body.current_value
             attrib_value = ''
-            
+
         else:
             dialog_title = _("Edit Custom Attribute")
             attrib_name, attrib_value = kwargs.get('data', ('',''))
@@ -246,11 +338,19 @@ class SSA(DialogUtils):
         self.app.show_jans_dialog(dialog)
 
     def edit_ssa_dialog(self, data=None):
+
         if data:
             title = _("Edit SSA")
         else:
             data = {}
             title = _("Add new SSA")
+
+        custom_attributes = data.pop('_custom_attributes_', {})
+        template_name = data.pop('_template_name_', None)
+
+        if not template_name:
+            n = len(list(self.templates_dir.glob('ssa-*.json')))
+            template_name = _("SSA Template ") + str((n+1))
 
         self.ssa_custom_attributes = self.app.app_configuration.get('ssaConfiguration', {}).get('ssaCustomAttributes', [])
 
@@ -264,6 +364,7 @@ class SSA(DialogUtils):
         self.never_expire_cb = Checkbox(never_expire_label)
         never_expire_cb_handler_org = self.never_expire_cb._handle_enter
 
+
         def hide_show_expire_widget():
             never_expire_cb_handler_org()
             if self.never_expire_cb.checked:
@@ -275,9 +376,36 @@ class SSA(DialogUtils):
 
         hide_show_expire_widget()
 
+        save_template_label = _("Save as Template")
+        template_name_label = _("Template Name")
+        self.save_template_cb = Checkbox('')
+        save_template_cb_handler_org = self.save_template_cb._handle_enter
+        save_template_cb_handler_org()
+
+        def hide_show_template_name_widget():
+            save_template_cb_handler_org()
+            if not self.save_template_cb.checked:
+                self.template_name_widget = Window()
+            else:
+                self.template_name_widget = self.app.getTitledText(
+                            title=template_name_label,
+                            name='template_name',
+                            value=template_name,
+                            style=cli_style.edit_text
+                            )
+
+        self.save_template_cb._handle_enter = hide_show_template_name_widget
+
+        hide_show_template_name_widget()
+
         custom_attribute_len = self.attributes_max_len or 20
         custom_attributes_title = _("Custom Attributes")
         add_custom_attribute_title = _("Add Attribute")
+
+        custom_attributes_data = []
+        for attrib_name in custom_attributes:
+            custom_attributes_data.append((attrib_name, custom_attributes[attrib_name]))
+
         self.custom_attributes_container =  JansVerticalNav(
                 myparent=self.app,
                 headers=[_('Name'), _('Value')],
@@ -286,7 +414,8 @@ class SSA(DialogUtils):
                 on_delete=self.delete_custom_attribute,
                 on_display=self.myparent.data_display_dialog,
                 selectes=0,
-                all_data=[],
+                data=custom_attributes_data,
+                all_data=custom_attributes_data,
                 headerColor=cli_style.navbar_headcolor,
                 entriesColor=cli_style.navbar_entriescolor,
                 underline_headings=False,
@@ -344,15 +473,15 @@ class SSA(DialogUtils):
                             ),
 
                 self.app.getTitledCheckBox(
-                            _("One Time Use"), 
-                            name='one_time_use', 
+                            _("One Time Use"),
+                            name='one_time_use',
                             checked=data.get('one_time_use', False),
                             style=cli_style.check_box
                             ),
 
                 self.app.getTitledCheckBox(
-                            _("Rotate SSA"), 
-                            name='rotate_ssa', 
+                            _("Rotate SSA"),
+                            name='rotate_ssa',
                             checked=data.get('rotate_ssa', False),
                             style=cli_style.check_box
                             ),
@@ -361,6 +490,13 @@ class SSA(DialogUtils):
                     Label(expiration_label + ': ', width=len(expiration_label)+2, style=cli_style.titled_text),
                     HSplit([self.never_expire_cb], width=len(never_expire_label)+7),
                     DynamicContainer(lambda: self.expire_widget),
+                    ], height=1),
+
+
+                VSplit([
+                    Label(save_template_label + ': ', width=len(save_template_label)+2, style=cli_style.titled_text),
+                    HSplit([self.save_template_cb], width=4),
+                    DynamicContainer(lambda: self.template_name_widget),
                     ], height=1),
 
             ])
