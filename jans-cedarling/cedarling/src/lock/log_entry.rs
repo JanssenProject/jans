@@ -16,20 +16,20 @@ pub struct LockLogEntry {
 }
 
 impl LockLogEntry {
-    #[allow(dead_code)]
-    pub fn error(msg: &'static str) -> Self {
+    /// Helper function to create a [`LogLevel::ERROR`] entry.
+    pub fn error(msg: impl Into<String>) -> Self {
         Self {
-            message: msg.to_string(),
+            message: msg.into(),
             level: LogLevel::ERROR,
             id: gen_uuid7(),
         }
     }
 
-    /// If you're not using [`format!`] to build the message, it's better to use [`Self::error`].
-    pub fn error_fmt(msg: String) -> Self {
+    /// Helper function to create a [`LogLevel::INFO`] entry.
+    pub fn info(msg: impl Into<String>) -> Self {
         Self {
-            message: msg,
-            level: LogLevel::ERROR,
+            message: msg.into(),
+            level: LogLevel::INFO,
             id: gen_uuid7(),
         }
     }

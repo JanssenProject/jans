@@ -147,7 +147,7 @@ impl LogWriter for LockService {
             Err(err) => {
                 if let Some(logger_weak) = self.logger.as_ref() {
                     if let Some(logger) = logger_weak.upgrade() {
-                        logger.log_any(LockLogEntry::error_fmt(format!(
+                        logger.log_any(LockLogEntry::error(format!(
                         "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {}",
                         err
                     )));
@@ -161,7 +161,7 @@ impl LogWriter for LockService {
             if let Err(err) = log_tx.try_send(entry) {
                 if let Some(logger_weak) = self.logger.as_ref() {
                     if let Some(logger) = logger_weak.upgrade() {
-                        logger.log_any(LockLogEntry::error_fmt(format!(
+                        logger.log_any(LockLogEntry::error(format!(
                         "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {}",
                         err
                     )));

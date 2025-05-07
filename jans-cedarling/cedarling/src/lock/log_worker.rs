@@ -35,7 +35,7 @@ pub struct LogWorker {
     log_interval: Duration,
     http_client: Arc<Client>,
     log_endpoint: Url,
-    fallback_logger: Option<LoggerWeak>,
+    logger: Option<LoggerWeak>,
 }
 
 impl LogWorker {
@@ -50,7 +50,7 @@ impl LogWorker {
             log_buffer: VecDeque::new(),
             http_client,
             log_endpoint,
-            fallback_logger: logger,
+            logger,
         }
     }
 
@@ -92,12 +92,12 @@ impl LogWorker {
 
         // log errors to stdout since there's nowhere else to log
         if failed_serializations > 1 {
-            if let Some(fallback_logger_weak) = self.fallback_logger.as_ref() {
+            if let Some(fallback_logger_weak) = self.logger.as_ref() {
                 // upgrade the weak reference to a strong one before logging
                 // if the upgrade is successful, log the error using the fallback logger
                 // if the upgrade fails, do nothing
                 if let Some(fallback_logger) = fallback_logger_weak.upgrade() {
-                    fallback_logger.log_any(LockLogEntry::error_fmt(format!(
+                    fallback_logger.log_any(LockLogEntry::error(format!(
                         // This probably wouldn't happen as we define the log entries
                         // internally and they should always be serializable
                         "skipping {} log entries that couldn't be serialized",
@@ -118,21 +118,23 @@ impl LogWorker {
 
             match resp {
                 Ok(_) => {
+                    if let Some(logger) = self.logger.as_ref().and_then(|logger| logger.upgrade()) {
+                        logger.log_any(LockLogEntry::info(format!(
+                            "sent logs to '{}'",
+                            self.log_endpoint.as_ref(),
+                        )));
+                        sleep(WORKER_HTTP_RETRY_DUR).await;
+                    }
                     break;
                 },
                 Err(err) => {
-                    if let Some(fallback_logger_weak) = self.fallback_logger.as_ref() {
-                        // upgrade the weak reference to a strong one before logging
-                        // if the upgrade is successful, log the error using the fallback logger
-                        // if the upgrade fails, do nothing
-                        if let Some(fallback_logger) = fallback_logger_weak.upgrade() {
-                            fallback_logger.log_any(LockLogEntry::error_fmt(format!(
-                                "failed to POST logs to '{}': {}",
-                                self.log_endpoint.as_ref(),
-                                err
-                            )));
-                            sleep(WORKER_HTTP_RETRY_DUR).await;
-                        }
+                    if let Some(logger) = self.logger.as_ref().and_then(|logger| logger.upgrade()) {
+                        logger.log_any(LockLogEntry::error(format!(
+                            "failed to POST logs to '{}': {}",
+                            self.log_endpoint.as_ref(),
+                            err
+                        )));
+                        sleep(WORKER_HTTP_RETRY_DUR).await;
                     }
                 },
             }
