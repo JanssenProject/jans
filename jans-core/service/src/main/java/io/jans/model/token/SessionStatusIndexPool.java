@@ -11,5 +11,5 @@ import io.jans.orm.annotation.ObjectClass;
 @ObjectClass(value = "jansSessionStatusIdxPool")
 public class SessionStatusIndexPool extends AbstractIndexPool {
 
-	private static final long serialVersionUID = -5522431771066187529L;
+    private static final long serialVersionUID = -5522431771066187529L;
 }

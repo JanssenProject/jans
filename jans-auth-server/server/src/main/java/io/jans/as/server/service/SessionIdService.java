@@ -42,6 +42,7 @@ import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
+import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.ExternalContext;
@@ -796,6 +797,8 @@ public class SessionIdService {
             }
         }
 
+        PersistenceEntryManager entryManager = CdiUtil.bean(PersistenceEntryManager.class);
+        SessionId sessionFromDb = persistenceEntryManager.find(SessionId.class, sessionDn);
         try {
             final SessionId sessionId;
             if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
