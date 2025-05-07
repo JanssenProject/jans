@@ -23,7 +23,7 @@
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 
-		<jans.bom.version>${project.version}</jans.bom.version>
+		<jans.bom.version>0.0.0-nightly</jans.bom.version>
 
 		<jans-core.version>${project.version}</jans-core.version>
 		<jans-notify.version>${project.version}</jans-notify.version>
