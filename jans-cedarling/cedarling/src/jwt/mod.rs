@@ -126,7 +126,7 @@ impl JwtService {
                 for (tkn, metadata) in iss.token_metadata.iter() {
                     if !metadata.trusted {
                         if let Some(logger) = logger.as_ref() {
-                            logger.log_any(JwtLogEntry::system(format!(
+                            logger.log_any(JwtLogEntry::warn(format!(
                                 "skipping metadata for {tkn} since `trusted == false`"
                             )));
                         }
@@ -163,13 +163,6 @@ impl JwtService {
         Ok(Self { validators, logger })
     }
 
-    /// Helper for making [`crate::LogType::System`] logs.
-    fn system_log(&self, msg: String) {
-        if let Some(logger) = self.logger.as_ref() {
-            logger.log_any(JwtLogEntry::system(msg));
-        }
-    }
-
     pub async fn validate_tokens<'a>(
         &'a self,
         tokens: &'a HashMap<String, String>,
@@ -197,9 +190,11 @@ impl JwtService {
                 // we just ignore input tokens that are not defined
                 // in the policy store's tokens
                 if let Some(iss) = iss {
-                    self.system_log(format!(
-                        "ignoring {token_name} since it's from an untrusted issuer: '{iss}'"
-                    ));
+                    self.logger.as_ref().map(|logger| {
+                        logger.log_any(JwtLogEntry::warn(format!(
+                            "ignoring {token_name} since it's from an untrusted issuer: '{iss}'"
+                        )));
+                    });
                 }
                 continue;
             };

@@ -124,7 +124,7 @@ impl JwkStore {
                     // we can safely ignore it.
                     if e.to_string().contains("unknown variant") {
                         if let Some(logger) = logger.as_ref() {
-                            logger.log_any(JwtLogEntry::system(format!(
+                            logger.log_any(JwtLogEntry::warn(format!(
                                 "encountered a JWK with an unsupported algorithm, ignoring it: {e}"
                             )));
                         }
