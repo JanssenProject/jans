@@ -120,6 +120,18 @@ public class LicenseDetailsService extends BaseService {
         if (daysDiffOfLicenseDetailsLastUpdated > intervalForSyncLicenseDetailsInDays) {
             return syncLicenseOIDCClientDetails(licenseConfiguration);
         }
+        // Check if the 'licenseValidUpto' field is not null or empty
+        if (!Strings.isNullOrEmpty(licenseConfiguration.getLicenseValidUpto())) {
+            // Calculate the number of days between today and the license expiry date
+            long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(LocalDate.now(), CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseValidUpto()));
+            log.info("License will expire after {} days", daysDiffOfLicenseValidity);
+            // If the license has already expired (daysDiffOfLicenseValidity < 0),
+            // sync the license OIDC client details to update or renew the license
+            if (daysDiffOfLicenseValidity < 0) {
+                return syncLicenseOIDCClientDetails(licenseConfiguration);
+            }
+        }
+
         return CommonUtils.createGenericResponse(true, 200, "No error in license configuration.");
     }
 

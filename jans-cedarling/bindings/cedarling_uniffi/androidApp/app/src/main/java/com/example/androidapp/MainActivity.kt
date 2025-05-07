@@ -24,9 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.androidapp.ui.theme.AndroidAppTheme
-import com.example.androidapp.utils.addFieldToJson
-import com.example.androidapp.utils.anyToJson
-import com.example.androidapp.utils.jsonToMapWithAnyType
 import com.example.androidapp.utils.jsonToMapWithStringType
 import com.example.androidapp.utils.readJsonFromAssets
 import com.example.androidapp.widgets.DataCard
@@ -36,7 +33,8 @@ import uniffi.mobile.AuthorizeResult
 import uniffi.mobile.Cedarling
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.io.File
+import uniffi.mobile.EntityData
+import uniffi.mobile.JsonValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,17 +129,13 @@ fun CardListScreen() {
 
             val nonNullableAction: String = action.orEmpty()
 
-            val nullableResource = resource?.let { jsonToMapWithAnyType(it) };
-            val resourceMap = nullableResource.orEmpty();
-
-            val nonNullableConext: String = context.orEmpty()
-
+            val nonNullableResource: String = resource.orEmpty();
+            val nonNullableConext: String = context.orEmpty();
+            val jsonContext: JsonValue = nonNullableConext;
             val result: AuthorizeResult? = instance?.authorize(tokensMap,
                 nonNullableAction,
-                resourceMap.get("resource_type").toString(),
-                resourceMap.get("resource_id").toString(),
-                anyToJson(resourceMap.get("payload")),
-                nonNullableConext
+                EntityData.fromJson(nonNullableResource),
+                jsonContext
             );
 
             val logs: List<String>? = instance?.getLogsByRequestIdAndTag(result?.requestId.orEmpty(), logType)

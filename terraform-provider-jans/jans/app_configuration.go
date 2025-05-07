@@ -8,16 +8,16 @@ import (
 // EngineConfiguration enables an alternative way to build authentication
 // flows in the Janssen server.
 type EngineConfiguration struct {
-	Enabled                     bool   `schema:"enabled" json:"enabled"`
-	RootDir                     string `schema:"root_dir" json:"rootDir"`
-	TemplatesPath               string `schema:"templates_path" json:"templatesPath"`
-	ScriptsPath                 string `schema:"scripts_path" json:"scriptsPath"`
-	MaxItemsLoggedInCollections int    `schema:"max_items_logged_in_collections" json:"maxItemsLoggedInCollections"`
-	PageMismatchErrorPage       string `schema:"page_mismatch_error_page" json:"pageMismatchErrorPage"`
-	InterruptionErrorPage       string `schema:"interruption_error_page" json:"interruptionErrorPage"`
-	CrashErrorPage              string `schema:"crash_error_page" json:"crashErrorPage"`
-	FinishedFlowPage            string `schema:"finished_flow_page" json:"finishedFlowPage"`
-	BridgeScriptPage            string `schema:"bridge_script_page" json:"bridgeScriptPage"`
+	Enabled                     bool              `schema:"enabled" json:"enabled"`
+	RootDir                     string            `schema:"root_dir" json:"rootDir"`
+	TemplatesPath               string            `schema:"templates_path" json:"templatesPath"`
+	ScriptsPath                 string            `schema:"scripts_path" json:"scriptsPath"`
+	MaxItemsLoggedInCollections int               `schema:"max_items_logged_in_collections" json:"maxItemsLoggedInCollections"`
+	PageMismatchErrorPage       string            `schema:"page_mismatch_error_page" json:"pageMismatchErrorPage"`
+	InterruptionErrorPage       string            `schema:"interruption_error_page" json:"interruptionErrorPage"`
+	CrashErrorPage              string            `schema:"crash_error_page" json:"crashErrorPage"`
+	FinishedFlowPage            string            `schema:"finished_flow_page" json:"finishedFlowPage"`
+	StartEndUrlMapping          map[string]string `schema:"start_end_url_mapping" json:"startEndUrlMapping"`
 	// TODO: we have to figure out a way to support this in the terraform schema
 	// SerializeRules              map[string][]string `schema:"serialize_rules" json:"serializeRules"`
 	DefaultResponseHeaders map[string]string `schema:"default_response_headers" json:"defaultResponseHeaders"`
@@ -215,7 +215,6 @@ type AppConfiguration struct {
 	RequestUriBlockList                                       []string                              `schema:"request_uri_block_list" json:"requestUriBlockList"`
 	OpPolicyUri                                               string                                `schema:"op_policy_uri" json:"opPolicyUri"`
 	OpTosUri                                                  string                                `schema:"op_tos_uri" json:"opTosUri"`
-	CleanUpInactiveClientAfterHoursOfInactivity               int                                   `schema:"clean_up_inactive_client_after_hours_of_inactivity" json:"cleanUpInactiveClientAfterHoursOfInactivity"`
 	ClientPeriodicUpdateTimerInterval                         int                                   `schema:"client_periodic_update_timer_interval" json:"clientPeriodicUpdateTimerInterval"`
 	AuthorizationCodeLifetime                                 int                                   `schema:"authorization_code_lifetime" json:"authorizationCodeLifetime"`
 	RefreshTokenLifetime                                      int                                   `schema:"refresh_token_lifetime" json:"refreshTokenLifetime"`
@@ -225,8 +224,7 @@ type AppConfiguration struct {
 	SaveTokensInCache                                         bool                                  `schema:"save_tokens_in_cache" json:"saveTokensInCache"`
 	SaveTokensInCacheAndDontSaveInPersistence                 bool                                  `schema:"save_tokens_in_cache_and_dont_save_in_persistence" json:"saveTokensInCacheAndDontSaveInPersistence"`
 	AccessTokenLifetime                                       int                                   `schema:"access_token_lifetime" json:"accessTokenLifetime"`
-	CleanServiceInterval                                      int                                   `schema:"clean_service_interval" json:"cleanServiceInterval"`
-	CleanServiceBatchChunkSize                                int                                   `schema:"clean_service_batch_chunk_size" json:"cleanServiceBatchChunkSize"`
+	UserInfoLifetime                                          int                                   `schema:"user_info_lifetime" json:"userInfoLifetime"`
 	KeyRegenerationEnabled                                    bool                                  `schema:"key_regeneration_enabled" json:"keyRegenerationEnabled"`
 	KeyRegenerationInterval                                   int                                   `schema:"key_regeneration_interval" json:"keyRegenerationInterval"`
 	DefaultSignatureAlgorithm                                 string                                `schema:"default_signature_algorithm" json:"defaultSignatureAlgorithm"`
@@ -257,6 +255,8 @@ type AppConfiguration struct {
 	RedirectUrisRegexEnabled                                  bool                                  `schema:"redirect_uris_regex_enabled" json:"redirectUrisRegexEnabled"`
 	UseHighestLevelScriptIfAcrScriptNotFound                  bool                                  `schema:"use_highest_level_script_if_acr_script_not_found" json:"useHighestLevelScriptIfAcrScriptNotFound"`
 	AcrMappings                                               map[string]string                     `schema:"acr_mappings" json:"acrMappings"`
+	AcrToConsentScriptNameMapping                             map[string]string                     `schema:"acr_to_consent_script_name_mapping" json:"acrToConsentScriptNameMapping"`
+	AcrToAgamaConsentFlowMapping                              map[string]string                     `schema:"acr_to_agama_consent_flow_mapping" json:"acrToAgamaConsentFlowMapping"`
 	AuthenticationFiltersEnabled                              bool                                  `schema:"authentication_filters_enabled" json:"authenticationFiltersEnabled"`
 	ClientAuthenticationFiltersEnabled                        bool                                  `schema:"client_authentication_filters_enabled" json:"clientAuthenticationFiltersEnabled"`
 	ClientRegDefaultToCodeFlowWithRefresh                     bool                                  `schema:"client_reg_default_to_code_flow_with_refresh" json:"clientRegDefaultToCodeFlowWithRefresh"`
@@ -327,6 +327,8 @@ type AppConfiguration struct {
 	OpenidScopeBackwardCompatibility                          bool                                  `schema:"openid_scope_backward_compatibility" json:"openidScopeBackwardCompatibility"`
 	AuthorizeChallengeSessionLifetimeInSeconds                int                                   `schema:"authorize_challenge_session_lifetime_in_seconds" json:"authorizeChallengeSessionLifetimeInSeconds"`
 	DisableU2fEndpoint                                        bool                                  `schema:"disable_u2f_endpoint" json:"disableU2fEndpoint"`
+	RateLimitRegistrationRequestCount                         int                                   `schema:"rate_limit_registration_request_count" json:"rateLimitRegistrationRequestCount"`
+	RateLimitRegistrationPeriodInSeconds                      int                                   `schema:"rate_limit_registration_period_in_seconds" json:"rateLimitRegistrationPeriodInSeconds"`
 	RotateDeviceSecret                                        bool                                  `schema:"rotate_device_secret" json:"rotateDeviceSecret"`
 	ReturnDeviceSecretFromAuthzEndpoint                       bool                                  `schema:"return_device_secret_from_authz_endpoint" json:"returnDeviceSecretFromAuthzEndpoint"`
 	DcrForbidExpirationTimeInRequest                          bool                                  `schema:"dcr_forbid_expiration_time_in_request" json:"dcrForbidExpirationTimeInRequest"`

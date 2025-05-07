@@ -95,8 +95,6 @@ class JansLockInstaller(JettyInstaller):
 
     def install_as_server(self):
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
-        self.logIt(f"Copying {self.source_files[0][0]} into jetty webapps folder...")
-        self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         self.enable()
 
     def install_as_service(self):
@@ -140,7 +138,7 @@ class JansLockInstaller(JettyInstaller):
             proxy_port = Config.jans_auth_port
             proxy_context = 'jans-auth'
 
-        jans_lock_well_known_proxy_pass = f'    ProxyPass   /.well-known/lock-server-configuration http://localhost:{proxy_port}/{proxy_context}/v1/configuration'
+        jans_lock_well_known_proxy_pass = f'    ProxyPass   /.well-known/lock-server-configuration http://localhost:{proxy_port}/{proxy_context}/api/v1/configuration'
         jans_lock_well_known_proxy_pass += f'\n\n    <Location /jans-lock>\n     Header edit Set-Cookie ^((?!opbs|session_state).*)$ $1;HttpOnly\n     ProxyPass http://localhost:{proxy_port}/{proxy_context} retry=5 connectiontimeout=60 timeout=60\n     Order deny,allow\n     Allow from all\n    </Location>\n'
 
 

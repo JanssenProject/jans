@@ -23,20 +23,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DefaultValue;
-import jakarta.ws.rs.HeaderParam;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.apache.commons.lang3.StringUtils;
 import io.jans.scim.model.scim2.ErrorScimType;
 import io.jans.scim.model.scim2.bulk.BulkOperation;
 import io.jans.scim.model.scim2.bulk.BulkRequest;
@@ -47,10 +37,22 @@ import io.jans.scim.model.scim2.patch.PatchRequest;
 import io.jans.scim.model.scim2.user.UserResource;
 import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.util.Pair;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * SCIM Bulk Endpoint Implementation
  */
+@Dependent
 @Named("scim2BulkEndpoint")
 @Path("/v2/Bulk")
 public class BulkWebService extends BaseScimWebService {
