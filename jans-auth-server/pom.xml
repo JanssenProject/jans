@@ -25,9 +25,9 @@
 
 		<jans.bom.version>0.0.0-nightly</jans.bom.version>
 
-		<jans-core.version>${project.version}</jans-core.version>
-		<jans-notify.version>${project.version}</jans-notify.version>
-		<jans-fido2.version>${project.version}</jans-fido2.version>
+		<jans-core.version>0.0.0-nightly</jans-core.version>
+		<jans-notify.version>0.0.0-nightly</jans-notify.version>
+		<jans-fido2.version>0.0.0-nightly</jans-fido2.version>
 
 		<jakarta.jms.api.version>2.0.3</jakarta.jms.api.version>
 		<activemq.version>5.15.16</activemq.version>
