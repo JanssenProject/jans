@@ -42,6 +42,7 @@
                 <configuration>
                     <failOnError>false</failOnError>
                 </configuration>
+                <version>3.8.0</version>
             </plugin>
         </plugins>
     </build>
