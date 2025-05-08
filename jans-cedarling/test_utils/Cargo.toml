@@ -9,3 +9,4 @@ serde_json = { workspace = true }
 jsonwebtoken = { workspace = true }
 jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 serde = { workspace = true }
+josekit = "0.10.1"
