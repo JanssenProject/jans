@@ -1,370 +1,90 @@
 # Changelog
 
-## [1.6.0](https://github.com/JanssenProject/jans/compare/v2.0.0...v1.6.0) (2025-05-08)
-
-
-### ⚠ BREAKING CHANGES
-
-* **jans-cedarling:** Fix all tokens_metadata to token_metadata ([#11215](https://github.com/JanssenProject/jans/issues/11215))
-* **jans-cedarling:** role entity not being created in the unsigned interface ([#11176](https://github.com/JanssenProject/jans/issues/11176))
-* **jans-cedarling:** move TOKEN_CONFIGS into the token_metadata schema ([#10972](https://github.com/JanssenProject/jans/issues/10972))
-* **charts:** remove couchbase support from Helm charts ([#10138](https://github.com/JanssenProject/jans/issues/10138))
-* **cloud-native:** remove couchbase support from OCI images ([#10132](https://github.com/JanssenProject/jans/issues/10132))
-* **jans-pycloudlib:** remove couchbase support from pycloudlib ([#10129](https://github.com/JanssenProject/jans/issues/10129))
-* **cloud-native:** remove spanner support from OCI images ([#10070](https://github.com/JanssenProject/jans/issues/10070))
-* **charts:** remove spanner support from Helm charts ([#10071](https://github.com/JanssenProject/jans/issues/10071))
-
-### bug
-
-* **jans-cedarling:** Fix all tokens_metadata to token_metadata ([#11215](https://github.com/JanssenProject/jans/issues/11215)) ([1bbf2f2](https://github.com/JanssenProject/jans/commit/1bbf2f26987427a87a11fc989fe1c12274cccc31))
-
-
-### Features
-
-* add ability to decode token jwt so that users can check claims in payload ([#10930](https://github.com/JanssenProject/jans/issues/10930)) ([a88aab3](https://github.com/JanssenProject/jans/commit/a88aab32c5f6bbe5f733872df3c91798fdc163c5))
-* add ability to show decision, system and metric logs in tarp based on user selection ([#10917](https://github.com/JanssenProject/jans/issues/10917)) ([4df25f0](https://github.com/JanssenProject/jans/commit/4df25f00e848fd001a8f40e80af6bbc0609b7064))
-* add ability to to use cedarling authorize_unsigned in tarp ([#11147](https://github.com/JanssenProject/jans/issues/11147)) ([3185a89](https://github.com/JanssenProject/jans/commit/3185a899e5e1b289f1a562ccbf69f63ffdb11003))
-* add ability to use cedarling authz before and after authentication ([#11203](https://github.com/JanssenProject/jans/issues/11203)) ([6652a4a](https://github.com/JanssenProject/jans/commit/6652a4a86a32868988b83bbc9734752a746caea6))
-* add field reset button in cedarling authz form ([#11260](https://github.com/JanssenProject/jans/issues/11260)) ([a663611](https://github.com/JanssenProject/jans/commit/a663611107801a5b80f7d749f95a67b32e3b1739))
-* add internationalization in selector page ([#10405](https://github.com/JanssenProject/jans/issues/10405)) ([0198c32](https://github.com/JanssenProject/jans/commit/0198c321444909590894d431e8d4da5610d53873))
-* add programatic access to labels in Agama ([#10313](https://github.com/JanssenProject/jans/issues/10313)) ([7e9baa9](https://github.com/JanssenProject/jans/commit/7e9baa9e8a3454aa1b3ab717db988849741c0fff))
-* add tolerations ([03ae383](https://github.com/JanssenProject/jans/commit/03ae383d15e159cd867e554dee2cd4d455526dac))
-* add tolerations to helm charts ([#11100](https://github.com/JanssenProject/jans/issues/11100)) ([03ae383](https://github.com/JanssenProject/jans/commit/03ae383d15e159cd867e554dee2cd4d455526dac))
-* adding allowSmtpKeystoreEdit property in admin-ui configuration ([ee4bbc8](https://github.com/JanssenProject/jans/commit/ee4bbc8e06f967cc35cf86637bf33ad48aad7b6e))
-* admin-ui should only make monthly request agama-lab to validate license ([#10966](https://github.com/JanssenProject/jans/issues/10966)) ([3647fe8](https://github.com/JanssenProject/jans/commit/3647fe8d648ee06752f5802447818e8dca91f8b4))
-* **agama:** add support for parameterizable enter/exit urls in flows ([#10716](https://github.com/JanssenProject/jans/issues/10716)) ([71fbcb7](https://github.com/JanssenProject/jans/commit/71fbcb7c453bebba5106dbfcca6974a3829c1da0))
-* **agama:** allow integration of Agama flows in AS consent ([#10727](https://github.com/JanssenProject/jans/issues/10727)) ([4ef6c9a](https://github.com/JanssenProject/jans/commit/4ef6c9adb2e71b5b5c0dbacfc8716c452f77f2d2))
-* **agama:** modify RRF and RFAC behavior for non-web clients ([#10547](https://github.com/JanssenProject/jans/issues/10547)) ([58fd359](https://github.com/JanssenProject/jans/commit/58fd3598777a31b5a4f7b7be3fac31a9f2131268))
-* allow integration of Agama flows into the authz challenge enpoint ([#10587](https://github.com/JanssenProject/jans/issues/10587)) ([856f9fe](https://github.com/JanssenProject/jans/commit/856f9fed1d58a6d41503a0459bbe04f52b0bb8e7))
-* allow linking to occur in a popup ([#11305](https://github.com/JanssenProject/jans/issues/11305)) ([5efef2c](https://github.com/JanssenProject/jans/commit/5efef2cc46213d3a86f25c35d6f641bc9787a8a6))
-* allow linking to occur in a popup [#11304](https://github.com/JanssenProject/jans/issues/11304) ([5efef2c](https://github.com/JanssenProject/jans/commit/5efef2cc46213d3a86f25c35d6f641bc9787a8a6))
-* apply password policy to set/reset password  ([#11149](https://github.com/JanssenProject/jans/issues/11149)) ([52f0f47](https://github.com/JanssenProject/jans/commit/52f0f475eb3a04d412a4b000f1b59a286dc7c03a))
-* cedarling integration with tarp ([#10681](https://github.com/JanssenProject/jans/issues/10681)) ([4f44337](https://github.com/JanssenProject/jans/commit/4f443370153a074bf87834f44ba068266b2b9792))
-* **charts:** cloudtools integration with Helm charts ([#11102](https://github.com/JanssenProject/jans/issues/11102)) ([5739aa3](https://github.com/JanssenProject/jans/commit/5739aa305b44fea84a36b9983e2b3b4026e2c7ab))
-* **cloud-native:** create utility image to run commands for cluster ([#10987](https://github.com/JanssenProject/jans/issues/10987)) ([51e175c](https://github.com/JanssenProject/jans/commit/51e175cdbbd7ac6b6e618571d22a4a431736b78b))
-* **cloud-native:** secure mounted configuration schema ([#10577](https://github.com/JanssenProject/jans/issues/10577)) ([57c266a](https://github.com/JanssenProject/jans/commit/57c266af928186f45c8d346ce0f7c8c0baba01b1))
-* **cloud-native:** upgrade to Jetty 12 ([#11297](https://github.com/JanssenProject/jans/issues/11297)) ([78ae137](https://github.com/JanssenProject/jans/commit/78ae137527149b15efefc2824ed2968bcc23a0a4))
-* code refactoring for UI improvement in tarp ([#11151](https://github.com/JanssenProject/jans/issues/11151)) ([123e62f](https://github.com/JanssenProject/jans/commit/123e62f80076549545402217034c2b43a01b874a))
-* **config-api:** agama download endpoint ([#10463](https://github.com/JanssenProject/jans/issues/10463)) ([777fe3b](https://github.com/JanssenProject/jans/commit/777fe3b8284c7ff6aecbb7224349e9635327682d))
-* **config-api:** implemenetd agama repo endpoint and fixed user pwd validation for patch ([#10373](https://github.com/JanssenProject/jans/issues/10373)) ([df53b71](https://github.com/JanssenProject/jans/commit/df53b713d5e6e96028e2d18726124bc436ac19f3))
-* **config-api:** lock stat endpoint and SAML TR fix ([#10755](https://github.com/JanssenProject/jans/issues/10755)) ([11bddd1](https://github.com/JanssenProject/jans/commit/11bddd1547eb8dacc240f69560c4a6deadc81121))
-* **config-api:** testng framework cleanup changes ([#10736](https://github.com/JanssenProject/jans/issues/10736)) ([77d6646](https://github.com/JanssenProject/jans/commit/77d6646314503f2a14fcc1fcdac31692f10aec3a))
-* **core:** update resteasy to new version ([#11269](https://github.com/JanssenProject/jans/issues/11269)) ([aed45d6](https://github.com/JanssenProject/jans/commit/aed45d6b364041450f52ad974b82ee55f5cc6d11))
-* **demo-tarp:** use @janssenproject/cedarling_wasm npm package [#10805](https://github.com/JanssenProject/jans/issues/10805) ([#10806](https://github.com/JanssenProject/jans/issues/10806)) ([b178d4a](https://github.com/JanssenProject/jans/commit/b178d4a7b748185671e1c77f9f89dac1da19c036))
-* **docs:** session management ([#11098](https://github.com/JanssenProject/jans/issues/11098)) ([d3fcf8b](https://github.com/JanssenProject/jans/commit/d3fcf8b4f8ed053f32cb94cc15a67466234eabdd))
-* extract wasm tar in /jans-tarp folder ([#10689](https://github.com/JanssenProject/jans/issues/10689)) ([ca8f453](https://github.com/JanssenProject/jans/commit/ca8f45311747b645ac70458ff2dba4664abf47b7))
-* implement native internationalization for Agama projects ([#10165](https://github.com/JanssenProject/jans/issues/10165)) ([f992b79](https://github.com/JanssenProject/jans/commit/f992b79813ff931fee1f6142f07c16731280d91a))
-* integrate cedarling with jans-tarp ([#10662](https://github.com/JanssenProject/jans/issues/10662)) ([9f9ae8a](https://github.com/JanssenProject/jans/commit/9f9ae8a9d09f9da9cd6b02e07a591132604ee857))
-* **jans-agama:** update htmlunit ([#10464](https://github.com/JanssenProject/jans/issues/10464)) ([1d82c8d](https://github.com/JanssenProject/jans/commit/1d82c8d103464525a41578464d43789bd43374c7))
-* **jans-auth-server:** access token lifetime from UpdateToken interception script has highest priority [#9748](https://github.com/JanssenProject/jans/issues/9748) ([#10379](https://github.com/JanssenProject/jans/issues/10379)) ([0b4aba2](https://github.com/JanssenProject/jans/commit/0b4aba26b4788ddb932eda1e4ffc5298fdcda65e))
-* **jans-auth-server:** add none client authentication support to PAR endpoint [#10573](https://github.com/JanssenProject/jans/issues/10573) ([#11201](https://github.com/JanssenProject/jans/issues/11201)) ([de5bab9](https://github.com/JanssenProject/jans/commit/de5bab96315078941f51d845928ae5ef4ce3edaa))
-* **jans-auth-server:** added configurable way to put user claims to session attributes [#9625](https://github.com/JanssenProject/jans/issues/9625) ([#11219](https://github.com/JanssenProject/jans/issues/11219)) ([2b7d3b3](https://github.com/JanssenProject/jans/commit/2b7d3b378a77bb9689341fc1638929a11061e903))
-* **jans-auth-server:** added exp,nbf, and iat to UserInfo JWT ([#10390](https://github.com/JanssenProject/jans/issues/10390)) ([1d7742b](https://github.com/JanssenProject/jans/commit/1d7742bcafc5e194f8f1ae1d93ebf612faed826a))
-* **jans-auth-server:** added ssa_map_software_roles_to_scopes AS property support ([#11130](https://github.com/JanssenProject/jans/issues/11130)) ([1b961a1](https://github.com/JanssenProject/jans/commit/1b961a13029ff788ec033e97c547ed553c909bbe))
-* **jans-auth-server:** added Token Exchange interception script [#8157](https://github.com/JanssenProject/jans/issues/8157) ([#10520](https://github.com/JanssenProject/jans/issues/10520)) ([2dc55c2](https://github.com/JanssenProject/jans/commit/2dc55c2ebade77ba2c53f48a823327c8ae7978e6))
-* **jans-auth-server:** allow invoke consent script by acr [#10548](https://github.com/JanssenProject/jans/issues/10548) ([#10712](https://github.com/JanssenProject/jans/issues/10712)) ([e1982e1](https://github.com/JanssenProject/jans/commit/e1982e1d1bb332a0d16f6f80b71d43c6bba28bf4))
-* **jans-auth-server:** allow to use openidSubAttribute for localAccountId for pairwise identifier look up [#9696](https://github.com/JanssenProject/jans/issues/9696) ([#10269](https://github.com/JanssenProject/jans/issues/10269)) ([19298dd](https://github.com/JanssenProject/jans/commit/19298dde960cb78910531365de174069d34bf2c3))
-* **jans-auth-server:** do not return claim in introspection response if it's null.  [#10865](https://github.com/JanssenProject/jans/issues/10865) ([#10877](https://github.com/JanssenProject/jans/issues/10877)) ([eb3de16](https://github.com/JanssenProject/jans/commit/eb3de16741179878486bf80e9710a3a853170805))
-* **jans-auth-server:** introduce rate limit support for DCR ([#10991](https://github.com/JanssenProject/jans/issues/10991)) ([6a1ccce](https://github.com/JanssenProject/jans/commit/6a1cccea5dfa169381c73b2e6cc4dea7dee7383b))
-* **jans-auth-server:** introduced `/.well-known/authzen-configuration` endpoint ([#10321](https://github.com/JanssenProject/jans/issues/10321)) ([35d97a8](https://github.com/JanssenProject/jans/commit/35d97a8a40b87cf0967b31a9db84a1c83ce1beb3))
-* **jans-auth-server:** introduced new 'prepareAuthzRequest' method in authorization challenge script ([#10598](https://github.com/JanssenProject/jans/issues/10598)) ([02c240e](https://github.com/JanssenProject/jans/commit/02c240effba327358a3d2781ddd91b72213d6604))
-* **jans-auth-server:** make all ssa attributes optional during creation [#10858](https://github.com/JanssenProject/jans/issues/10858) ([#10896](https://github.com/JanssenProject/jans/issues/10896)) ([a01b1ca](https://github.com/JanssenProject/jans/commit/a01b1cacc2de2d9875a7e4cd420f59c1ef9cf9fb))
-* **jans-auth-server:** openID AuthZEN implementation ([#10197](https://github.com/JanssenProject/jans/issues/10197)) ([fa45075](https://github.com/JanssenProject/jans/commit/fa45075c841713b76260b92f2c1f292f0eeba926))
-* **jans-auth-server:** rate limit - use guava cache to auto-expire buckets during high load [#11054](https://github.com/JanssenProject/jans/issues/11054) ([#11059](https://github.com/JanssenProject/jans/issues/11059)) ([01a0a9f](https://github.com/JanssenProject/jans/commit/01a0a9fb4667e8e1fe2c75541fc3b9729f3a6474))
-* **jans-auth-server:** removed CleanerTimer from AS (replaced by independent clean service)  ([#11096](https://github.com/JanssenProject/jans/issues/11096)) ([bb51848](https://github.com/JanssenProject/jans/commit/bb51848e3f86a544d9e7fa581d1c888bbf917e1c))
-* **jans-auth-server:** requirePkce configuration property on client level ([#10962](https://github.com/JanssenProject/jans/issues/10962)) ([4cda61c](https://github.com/JanssenProject/jans/commit/4cda61c20d484c47d85fcecc5b7ee584a6386fcb))
-* **jans-auth-server:** set expiration to the past (to clean up) on SSA revoke [#10916](https://github.com/JanssenProject/jans/issues/10916) ([#10939](https://github.com/JanssenProject/jans/issues/10939)) ([8c460ca](https://github.com/JanssenProject/jans/commit/8c460cad72ae4349abab9a110f5389ad95a5128d))
-* **jans-auth-server:** updated first party native authn implementation ( in backwards compatibility way) [#10380](https://github.com/JanssenProject/jans/issues/10380) ([#10442](https://github.com/JanssenProject/jans/issues/10442)) ([2e9a7aa](https://github.com/JanssenProject/jans/commit/2e9a7aa4862be25da08d595c3079f6ba78cbeb3a))
-* **jans-auth:** add missing erver side tests dependecy ([#11315](https://github.com/JanssenProject/jans/issues/11315)) ([3c40cc0](https://github.com/JanssenProject/jans/commit/3c40cc0be0edb4f291e3034921378071b139944a))
-* **jans-auth:** log current folder in UserJansExtUidAttributeTest test ([ca79ace](https://github.com/JanssenProject/jans/commit/ca79acec74cef8aeaa9274d3ce3a79657de755af))
-* **jans-auth:** log current folder in UserJansExtUidAttributeTest test ([#10667](https://github.com/JanssenProject/jans/issues/10667)) ([51ce4dc](https://github.com/JanssenProject/jans/commit/51ce4dcfb10c903f81a4fc0310218c4264d7d0cf))
-* **jans-auth:** Remove copyright footer ([#10666](https://github.com/JanssenProject/jans/issues/10666)) ([474661c](https://github.com/JanssenProject/jans/commit/474661cd100704592e7af7736330ed5aec877d96))
-* **jans-auth:** restore Nashorn engine ([#11363](https://github.com/JanssenProject/jans/issues/11363)) ([2536a3f](https://github.com/JanssenProject/jans/commit/2536a3f3b511d215247553242a90ccc9efddaf6b))
-* **jans-auth:** Show valid client name or id in consent form ([#10649](https://github.com/JanssenProject/jans/issues/10649)) ([5a53d53](https://github.com/JanssenProject/jans/commit/5a53d53b50dd0b559254a7008b5db69e08e64f1b))
-* **jans-cedarling:** add alias to load key policy_store_version` ([#10893](https://github.com/JanssenProject/jans/issues/10893)) ([21e4acc](https://github.com/JanssenProject/jans/commit/21e4acc54a683fa922109f42fe40e4aaa1c71aa8))
-* **jans-cedarling:** add an example that runs profiling ([#10979](https://github.com/JanssenProject/jans/issues/10979)) ([dc38e10](https://github.com/JanssenProject/jans/commit/dc38e1047c5d4f1631573be90821db5471c89277))
-* **jans-cedarling:** Add bootstrap properties of memory logger max_items and max_item_size ([#10924](https://github.com/JanssenProject/jans/issues/10924)) ([2189094](https://github.com/JanssenProject/jans/commit/2189094813c08635cf76cdd5e1abbb880f94731c))
-* **jans-cedarling:** add env variable for python ([#10115](https://github.com/JanssenProject/jans/issues/10115)) ([f4cbd08](https://github.com/JanssenProject/jans/commit/f4cbd08982b1c3a67819dab5a42f2e0a64b327eb))
-* **jans-cedarling:** add krakend plugin ([#10713](https://github.com/JanssenProject/jans/issues/10713)) ([78457b6](https://github.com/JanssenProject/jans/commit/78457b63f30864e2e7f9d0e332304d9872767228))
-* **jans-cedarling:** add logging `cedarling` version on start application ([#10288](https://github.com/JanssenProject/jans/issues/10288)) ([4743ad2](https://github.com/JanssenProject/jans/commit/4743ad2fe368fc7a19f307cf9ffe87e4347bdef9))
-* **jans-cedarling:** add some logging msgs for jwt service startup ([#11178](https://github.com/JanssenProject/jans/issues/11178)) ([c16a80d](https://github.com/JanssenProject/jans/commit/c16a80d190247f1072ed67fe06fb52038aa7a680))
-* **jans-cedarling:** add support for Cedar schema action introspection ([#10358](https://github.com/JanssenProject/jans/issues/10358)) ([22d902e](https://github.com/JanssenProject/jans/commit/22d902e295d5d1c46389b6ef9073187a82d6246f))
-* **jans-cedarling:** add to decision log diagnostic info ([#10581](https://github.com/JanssenProject/jans/issues/10581)) ([6f8dc7c](https://github.com/JanssenProject/jans/commit/6f8dc7c08a0b3d810e2336abc7fe370fdd1f7147))
-* **jans-cedarling:** add WASM bindings for Cedarling ([#10542](https://github.com/JanssenProject/jans/issues/10542)) ([ec7c7e1](https://github.com/JanssenProject/jans/commit/ec7c7e186c4b2508a53fe1a7666a4e4023829489))
-* **jans-cedarling:** add well-known authzen configuration endpoint ([#10435](https://github.com/JanssenProject/jans/issues/10435)) ([211d9d4](https://github.com/JanssenProject/jans/commit/211d9d4e8e204ce075fa221142b6d85dee7de11e))
-* **jans-cedarling:** automatically add entity references into the context ([#10387](https://github.com/JanssenProject/jans/issues/10387)) ([5cb5fe2](https://github.com/JanssenProject/jans/commit/5cb5fe2bfb1b0849071df9505455250f958c615b))
-* **jans-cedarling:** Bootstrap support for JSON and YAML properties ([#10216](https://github.com/JanssenProject/jans/issues/10216)) ([6beefc6](https://github.com/JanssenProject/jans/commit/6beefc624a7b6cf677fb10c275e0d67fcf40be3d))
-* **jans-cedarling:** create uniffi binding for cedarling with sample ios app using it ([#10816](https://github.com/JanssenProject/jans/issues/10816)) ([026ed0b](https://github.com/JanssenProject/jans/commit/026ed0b765ff2a7960f2f52b7860278c564c92fc))
-* **jans-cedarling:** custom tokens and putting tokens in principal attrs ([#10706](https://github.com/JanssenProject/jans/issues/10706)) ([c342a05](https://github.com/JanssenProject/jans/commit/c342a055b7d21a032114c9924b02f788830dc762))
-* **jans-cedarling:** ensure that all cedarling test fixture files are human-readable. ([#10036](https://github.com/JanssenProject/jans/issues/10036)) ([e4d5434](https://github.com/JanssenProject/jans/commit/e4d54340e8422d47dd32c2a4c0875fa79d87f6cf))
-* **jans-cedarling:** go binding for cedarling ([#11239](https://github.com/JanssenProject/jans/issues/11239)) ([3a6334d](https://github.com/JanssenProject/jans/commit/3a6334d7321aa9d4c6ac89a94836e85e1f2cf6f6))
-* **jans-cedarling:** implement benchmarks for startup and authz ([#10775](https://github.com/JanssenProject/jans/issues/10775)) ([80f0b63](https://github.com/JanssenProject/jans/commit/80f0b63af7e8ffdab8719b57387716a507b8071e))
-* **jans-cedarling:** implement CEDARLING_ID_TOKEN_TRUST_MODE ([#10585](https://github.com/JanssenProject/jans/issues/10585)) ([d76f28c](https://github.com/JanssenProject/jans/commit/d76f28c64109a9f347058be2fa268abdca1d69e9))
-* **jans-cedarling:** Implement check authorization principals based on the schema for action ([#10126](https://github.com/JanssenProject/jans/issues/10126)) ([26669f6](https://github.com/JanssenProject/jans/commit/26669f6c8ecdd4383dd7221b75801124088db3de))
-* **jans-cedarling:** implement environment variable loading for sidecar ([#10751](https://github.com/JanssenProject/jans/issues/10751)) ([21d8ef5](https://github.com/JanssenProject/jans/commit/21d8ef521288f013fc5e31d91c5fb6a125398aa5))
-* **jans-cedarling:** implement loading policy store from CEDARLING_POLICY_STORE_URI ([#10336](https://github.com/JanssenProject/jans/issues/10336)) ([62fcf9e](https://github.com/JanssenProject/jans/commit/62fcf9e5a8ecc21aec2a730edf86bee4740834a4))
-* **jans-cedarling:** implement loading role from many JWT tokens ([#10422](https://github.com/JanssenProject/jans/issues/10422)) ([6eecbfa](https://github.com/JanssenProject/jans/commit/6eecbfac34724850fde8ceb8a9753a1a9e27422c))
-* **jans-cedarling:** implement loading types from other namespace ([#10807](https://github.com/JanssenProject/jans/issues/10807)) ([da05595](https://github.com/JanssenProject/jans/commit/da05595565b0f0a998cf416acbafbeace910c7ec))
-* **jans-cedarling:** implement mapping JWT payload to `cedar-policy` entity ([#10169](https://github.com/JanssenProject/jans/issues/10169)) ([4dfa2f1](https://github.com/JanssenProject/jans/commit/4dfa2f1ca6c9134a2963cdcf1d30e2dea0b76808))
-* **jans-cedarling:** implement new bootstrap configs for JWT validation ([#10306](https://github.com/JanssenProject/jans/issues/10306)) ([a2dee8c](https://github.com/JanssenProject/jans/commit/a2dee8cbed90d83eab09a3f0b3712c6b8872ad0a))
-* **jans-cedarling:** improve error handling for JWKS responses ([#9982](https://github.com/JanssenProject/jans/issues/9982)) ([04f7fc7](https://github.com/JanssenProject/jans/commit/04f7fc78e6a58be0c8958dd16ea9acfb8a3bc1ec))
-* **jans-cedarling:** Improve log searching and retrieval ([#10772](https://github.com/JanssenProject/jans/issues/10772)) ([9286f82](https://github.com/JanssenProject/jans/commit/9286f829c179545c25c39c5f8a2f984fb9a4c9ba))
-* **jans-cedarling:** include a sample android app in cedarling uniffi binding ([#10994](https://github.com/JanssenProject/jans/issues/10994)) ([5b74f9d](https://github.com/JanssenProject/jans/commit/5b74f9d37769d6d2f696946785ffa270cfe20077))
-* **jans-cedarling:** initialize flask sidecar ([#10270](https://github.com/JanssenProject/jans/issues/10270)) ([561b5ad](https://github.com/JanssenProject/jans/commit/561b5ad0c1a25f84e2b271ae9fe92fcf169762e9))
-* **jans-cedarling:** Load bootstrap properties from environment variables ([#10692](https://github.com/JanssenProject/jans/issues/10692)) ([d7200cb](https://github.com/JanssenProject/jans/commit/d7200cb9c82b49998f173cb9ac847a8f9ba49983))
-* **jans-cedarling:** Make SparKV use generics, and update MemoryLogger to use those. ([#10593](https://github.com/JanssenProject/jans/issues/10593)) ([25c7a49](https://github.com/JanssenProject/jans/commit/25c7a49c4f41c5750d24950511909db57226dda6))
-* **jans-cedarling:** New interface: authorizeUnverified - send Principal as Object v. JWT ([#11035](https://github.com/JanssenProject/jans/issues/11035)) ([37b72ad](https://github.com/JanssenProject/jans/commit/37b72ad19e82258eacd616713230ca90473e62fd))
-* **jans-cedarling:** Optimize Cedar libraries size ([#11281](https://github.com/JanssenProject/jans/issues/11281)) ([538dc4d](https://github.com/JanssenProject/jans/commit/538dc4def081cff2438f7dc91a6110c1ad12417e))
-* **jans-cedarling:** pass entities data into the context ([#10275](https://github.com/JanssenProject/jans/issues/10275)) ([63274b2](https://github.com/JanssenProject/jans/commit/63274b20960ea1585af5781816a610b81c45a672))
-* **jans-cedarling:** Support JSON logic for principal boolean operations ([#10956](https://github.com/JanssenProject/jans/issues/10956)) ([cbe4dbc](https://github.com/JanssenProject/jans/commit/cbe4dbc61fabe63075a5f463bd92a5d05c2a21e8))
-* **jans-cedarling:** update optimization profile for release build ([538dc4d](https://github.com/JanssenProject/jans/commit/538dc4def081cff2438f7dc91a6110c1ad12417e))
-* **jans-cedarling:** update sidecar for log retrieval ([#10786](https://github.com/JanssenProject/jans/issues/10786)) ([bd67f89](https://github.com/JanssenProject/jans/commit/bd67f89258e9c91e8382a2b1d5ed03be7b57f1c7))
-* **jans-cedarling:** update Trusted Issuers schema in the policy store ([#10141](https://github.com/JanssenProject/jans/issues/10141)) ([dd33994](https://github.com/JanssenProject/jans/commit/dd3399449ade93b79a5195520a97a15053c31343))
-* **jans-cli-tui:** add hints to fido configuration screen ([#10864](https://github.com/JanssenProject/jans/issues/10864)) ([39ffa8a](https://github.com/JanssenProject/jans/commit/39ffa8a0757b0f9a533d1642baeaa3ad3537b089))
-* **jans-cli-tui:** session management ([#10164](https://github.com/JanssenProject/jans/issues/10164)) ([700aec1](https://github.com/JanssenProject/jans/commit/700aec153e1cd06dda28ccd910f3794a96945772))
-* **jans-cli-tui:** splash screen ([#11298](https://github.com/JanssenProject/jans/issues/11298)) ([4566d9d](https://github.com/JanssenProject/jans/commit/4566d9d43996800eeb8e89664614042ea4713f4e))
-* **jans-cli-tui:** SSA custom attributes 10855 ([#10870](https://github.com/JanssenProject/jans/issues/10870)) ([6f2cb6b](https://github.com/JanssenProject/jans/commit/6f2cb6bb5bcbfc6e819de7f7ac3bde388ea01bd5))
-* **jans-cli-tui:** user fido devices ([#10305](https://github.com/JanssenProject/jans/issues/10305)) ([95561a2](https://github.com/JanssenProject/jans/commit/95561a26c653d2ff0678cf8c912badef0c431d4f))
-* **jans-config-api:** adding allowSmtpKeystoreEdit property in admin-ui configuration ([#10091](https://github.com/JanssenProject/jans/issues/10091)) ([ee4bbc8](https://github.com/JanssenProject/jans/commit/ee4bbc8e06f967cc35cf86637bf33ad48aad7b6e))
-* **jans-config-api:** disable jetty ee9-jsp module in jans-config-api ([#11324](https://github.com/JanssenProject/jans/issues/11324)) ([81c95ca](https://github.com/JanssenProject/jans/commit/81c95ca6a8f65134871a992c126406383f78b305))
-* **jans-fido2:** Add test cases for RP domain origin validation and handle multiple origins [#9248](https://github.com/JanssenProject/jans/issues/9248) ([22f0cbe](https://github.com/JanssenProject/jans/commit/22f0cbe4bdc41888c6caa5efa1ab249c6fc47298))
-* **jans-fido2:** Add test cases for RP domain origin. ([#10572](https://github.com/JanssenProject/jans/issues/10572)) ([22f0cbe](https://github.com/JanssenProject/jans/commit/22f0cbe4bdc41888c6caa5efa1ab249c6fc47298))
-* **jans-fido2:** major FIDO2 / Passkeys upgrade ProjectPasskeys ([#10080](https://github.com/JanssenProject/jans/issues/10080)) ([0a77e22](https://github.com/JanssenProject/jans/commit/0a77e22e10e99dcbcc6261cd1b83ffb078931728))
-* **jans-link:** add ingress resource for jans-link ([#10494](https://github.com/JanssenProject/jans/issues/10494)) ([07dbc6f](https://github.com/JanssenProject/jans/commit/07dbc6fe32e6b782d6ba0136f9852d9e122d28cb))
-* **jans-link:** Refactor Link Interception Script ([#11144](https://github.com/JanssenProject/jans/issues/11144)) ([15a44bc](https://github.com/JanssenProject/jans/commit/15a44bcb369e1d5ef045e2a2664c2c995fb89a61))
-* **jans-link:** turn off Weld dev mode in production ([#11347](https://github.com/JanssenProject/jans/issues/11347)) ([b012922](https://github.com/JanssenProject/jans/commit/b012922c5c0d34c3be652015c73f28ba2ee4467f))
-* **jans-linux-setup:** data cleaning cron job task ([#10946](https://github.com/JanssenProject/jans/issues/10946)) ([33d5eb2](https://github.com/JanssenProject/jans/commit/33d5eb2e079cb8ba4f2155eb25799991235d964e))
-* **jans-linux-setup:** jans-fido2-model auth lib ([#10468](https://github.com/JanssenProject/jans/issues/10468)) ([7db3d6f](https://github.com/JanssenProject/jans/commit/7db3d6f1caeba822b1a7f6b5ad6e7a32e69ed165))
-* **jans-linux-setup:** LDAP Link installation is optional ([#10964](https://github.com/JanssenProject/jans/issues/10964)) ([673d7fb](https://github.com/JanssenProject/jans/commit/673d7fb2f7a3c5ec100508f7688811a81d3beae3))
-* **jans-linux-setup:** link jans script to /usr/local/bin ([#11125](https://github.com/JanssenProject/jans/issues/11125)) ([d8c7a17](https://github.com/JanssenProject/jans/commit/d8c7a17b9bf0a1990a460ea342ebc8a8faabc1c3))
-* **jans-linux-setup:** link jans script to /usr/localbin ([d8c7a17](https://github.com/JanssenProject/jans/commit/d8c7a17b9bf0a1990a460ea342ebc8a8faabc1c3))
-* **jans-linux-setup:** location of service scripts, config-api plugins ([#10341](https://github.com/JanssenProject/jans/issues/10341)) ([eaf5c1d](https://github.com/JanssenProject/jans/commit/eaf5c1d44e2ef524f431aa4f9b71993514fa7d06))
-* **jans-linux-setup:** restart admin-ui via jans ([#10740](https://github.com/JanssenProject/jans/issues/10740)) ([2a0aaf6](https://github.com/JanssenProject/jans/commit/2a0aaf6de1174188ad2a2581259e9e3b6253cece))
-* **jans-linux-setup:** Retreive Agama Lab project scripts ([#10335](https://github.com/JanssenProject/jans/issues/10335)) ([f141a71](https://github.com/JanssenProject/jans/commit/f141a71a770fac7f0c410098320840f219cd7346))
-* **jans-linux-setup:** support for cleanUpInactiveClientAfterHoursOfInactivity for clients ([#11231](https://github.com/JanssenProject/jans/issues/11231)) ([bff1478](https://github.com/JanssenProject/jans/commit/bff147881fc0cd18a430f49113ad080d2c612455))
-* **jans-linux-setup:** ubuntu24 support ([#10949](https://github.com/JanssenProject/jans/issues/10949)) ([481fdca](https://github.com/JanssenProject/jans/commit/481fdcae5868e2ae95e3f79e946aba2e635f8fda))
-* **jans-lock:** configure maven to update OpenAPI lock-server.yaml ([#10952](https://github.com/JanssenProject/jans/issues/10952)) ([11c2249](https://github.com/JanssenProject/jans/commit/11c2249b81b901e736145e50c35b7c9a8802e4c3))
-* **jans-lock:** configure maven to update OpenAPI lock-server.yaml ([#10953](https://github.com/JanssenProject/jans/issues/10953)) ([a8f09f2](https://github.com/JanssenProject/jans/commit/a8f09f2a06510a8e2fb1b6128956077baa8c5407))
-* **jans-lock:** lock should collect MAU and MAC based on log entries… ([#10328](https://github.com/JanssenProject/jans/issues/10328)) ([b8a7e1a](https://github.com/JanssenProject/jans/commit/b8a7e1a493a2e7059a8e220eb6ff4305866bfc70))
-* **jans-lock:** redirect for consent if external script is enabled a… ([#10771](https://github.com/JanssenProject/jans/issues/10771)) ([c3e4a97](https://github.com/JanssenProject/jans/commit/c3e4a972254cc1a19855c8d1bf1c5fc2eaf2fe03))
-* **jans-lock:** redirect for consent if external script is enabled and client is not authorized ([c3e4a97](https://github.com/JanssenProject/jans/commit/c3e4a972254cc1a19855c8d1bf1c5fc2eaf2fe03))
-* **jans-pycloudlib:** secure mounted configuration schema ([#10551](https://github.com/JanssenProject/jans/issues/10551)) ([2d27184](https://github.com/JanssenProject/jans/commit/2d27184ac81c57596b527143c0a60fec6761cf02))
-* migrate and fix e-mail otp plugin ([#10294](https://github.com/JanssenProject/jans/issues/10294)) ([55fe389](https://github.com/JanssenProject/jans/commit/55fe3894a9d9ee0e6da2087a61bf6848e9a35549))
-* misc UI updates ([#10278](https://github.com/JanssenProject/jans/issues/10278)) ([ad1539a](https://github.com/JanssenProject/jans/commit/ad1539a89a39213a190a705f14274d5b729f0ea1))
-* refactor tarp to adjust with security changes in chrome browser ([#11232](https://github.com/JanssenProject/jans/issues/11232)) ([5692618](https://github.com/JanssenProject/jans/commit/5692618ef3ddb76b0a630aa65cdb29f045cc9214))
-* rename jans-tarp project to janssen-tarp ([#11249](https://github.com/JanssenProject/jans/issues/11249)) ([1fd7c5d](https://github.com/JanssenProject/jans/commit/1fd7c5d8eed46f92773423f9078429753160bc73))
-* **terraform-provider-jans:** update terraform provider with latest API changes ([#10485](https://github.com/JanssenProject/jans/issues/10485)) ([7e00955](https://github.com/JanssenProject/jans/commit/7e00955dfc25eafaa31551cf1637cedd2ec27d9f))
-* update help section of tarp ([#10708](https://github.com/JanssenProject/jans/issues/10708)) ([bee683b](https://github.com/JanssenProject/jans/commit/bee683b255c2f8f0e554a20a098cbc1ab6c73b46))
-* use @janssenproject/cedarling_wasm npm package [#10805](https://github.com/JanssenProject/jans/issues/10805) ([b178d4a](https://github.com/JanssenProject/jans/commit/b178d4a7b748185671e1c77f9f89dac1da19c036))
+## [1.6.0](https://github.com/JanssenProject/jans/compare/v1.5.0...v1.6.0) (2025-05-08)
 
 
 ### Bug Fixes
 
-* account absent start url in native flows ([#10731](https://github.com/JanssenProject/jans/issues/10731)) ([2c0cc62](https://github.com/JanssenProject/jans/commit/2c0cc6238544f32f022e7cd81cee927ad5c2230b))
-* account absent start url in native flows [#10729](https://github.com/JanssenProject/jans/issues/10729) ([2c0cc62](https://github.com/JanssenProject/jans/commit/2c0cc6238544f32f022e7cd81cee927ad5c2230b))
-* **actions:** immutable github sha  instead of github head_ref ([5091b56](https://github.com/JanssenProject/jans/commit/5091b56102be0dd1d683d74703b8352c8cb27693))
-* **actions:** microk8s action passing correct arguments ([#10363](https://github.com/JanssenProject/jans/issues/10363)) ([689793d](https://github.com/JanssenProject/jans/commit/689793da77a1de463213b6e8585e25c723fdbc39))
-* admin UI unable to fetch MAU _threshold on restart of config-api ([b4cfaa2](https://github.com/JanssenProject/jans/commit/b4cfaa2ae9a6ed6b71a6b450ac42c68ca95ddc60))
-* admin-ui plugin should send appropriate message on expiry/ for inactive license. [#10178](https://github.com/JanssenProject/jans/issues/10178) ([#10189](https://github.com/JanssenProject/jans/issues/10189)) ([21c9315](https://github.com/JanssenProject/jans/commit/21c9315318663fd7c082270e96e87b7bfaf1763f))
-* **agama:** update expected status code ([#10618](https://github.com/JanssenProject/jans/issues/10618)) ([c0dce75](https://github.com/JanssenProject/jans/commit/c0dce7530cf3dd304238b6d93ded693a5c3b81b5))
-* align consent script wrt latest AS updates ([#10780](https://github.com/JanssenProject/jans/issues/10780)) ([6cb802b](https://github.com/JanssenProject/jans/commit/6cb802b5ab67f074a31bc5cb12b9dc20e3e79ab8))
-* assign nightly version ([a453001](https://github.com/JanssenProject/jans/commit/a4530018547c7e0045b2b990dbc3566ae3ab1bf6))
-* **bom:** deprecate commons-lang due to conflict with commons-lang3 ([#10267](https://github.com/JanssenProject/jans/issues/10267)) ([49a6476](https://github.com/JanssenProject/jans/commit/49a6476f4262fc89458a9a53538bafd439f4561b))
-* **bom:** deprecate jackson-module-jaxb-annotations ([#11286](https://github.com/JanssenProject/jans/issues/11286)) ([6e54b10](https://github.com/JanssenProject/jans/commit/6e54b108fb0f43086ed1314c639b84eb67a97120))
-* **bom:** deprecate jackson-module-jaxb-annotations ([#11287](https://github.com/JanssenProject/jans/issues/11287)) ([397f5ab](https://github.com/JanssenProject/jans/commit/397f5ab761ed4ddfb7728ecfe519a75268fd1e52))
-* **bom:** use right jakarta.ws.rs-api version ([#11278](https://github.com/JanssenProject/jans/issues/11278)) ([d91daf8](https://github.com/JanssenProject/jans/commit/d91daf80541c5076f5cfac2b47af71878a595964))
-* bug if version passed is a tag ([79b89b7](https://github.com/JanssenProject/jans/commit/79b89b726a826099537cd38905cd440d22bfa94d))
-* build acct linking agama ([#10575](https://github.com/JanssenProject/jans/issues/10575)) ([85b95ec](https://github.com/JanssenProject/jans/commit/85b95ec91f17ca26964558bb085a5bbc9aad13d0))
-* **charts:** broken istio integration ([#11041](https://github.com/JanssenProject/jans/issues/11041)) ([8b536ab](https://github.com/JanssenProject/jans/commit/8b536ab21626254c6194c2876bef00b59f89cdce))
-* **charts:** missing feature of jans-keycloak-link ([#11257](https://github.com/JanssenProject/jans/issues/11257)) ([7523d4b](https://github.com/JanssenProject/jans/commit/7523d4b9937ce0ca4be2f25cf5079e8c0a62d8b0))
-* **cloud-native:** add missing endpoints to aio image ([#10595](https://github.com/JanssenProject/jans/issues/10595)) ([5fb1903](https://github.com/JanssenProject/jans/commit/5fb1903f5f5f49b188b6daf6c194ffb3ecadfd38))
-* **cloud-native:** applications are failing to start when prometheus metrics are enabled ([#10459](https://github.com/JanssenProject/jans/issues/10459)) ([a156307](https://github.com/JanssenProject/jans/commit/a1563079601cdd7de51876f3a4aac59352ab3e71))
-* **cloud-native:** demo scripts fail to deploy cluster due to python externally-managed-environment error ([#11290](https://github.com/JanssenProject/jans/issues/11290)) ([f76e249](https://github.com/JanssenProject/jans/commit/f76e24908e80b048d5d5ff9171982df2bf9c8c4a))
-* **cloud-native:** resolve image builds on slow network ([#10524](https://github.com/JanssenProject/jans/issues/10524)) ([3409098](https://github.com/JanssenProject/jans/commit/3409098777f8696d7a6485e0ae6b226f55cbb6ec))
-* **config-api:** adding missing scope in spec and udated example of search field ([#10156](https://github.com/JanssenProject/jans/issues/10156)) ([87217f9](https://github.com/JanssenProject/jans/commit/87217f9701594bc48b8fd20e78994ad7b84a412c))
-* **config-api:** application status endpoint specification changes ([#10203](https://github.com/JanssenProject/jans/issues/10203)) ([65d3787](https://github.com/JanssenProject/jans/commit/65d37872cc3bbb10a91f10b4e511f0d58a644050))
-* **config-api:** asset upload config and saml document store changes ([#10734](https://github.com/JanssenProject/jans/issues/10734)) ([8e9d43e](https://github.com/JanssenProject/jans/commit/8e9d43e1c33f4c7a7b8b705e2d04c50330eff3b1))
-* **config-api:** custom script creation failing [#11307](https://github.com/JanssenProject/jans/issues/11307) ([#11308](https://github.com/JanssenProject/jans/issues/11308)) ([49f4475](https://github.com/JanssenProject/jans/commit/49f4475c66df54497507b0f5f6ac32e847a382fa))
-* **config-api:** date filter fix ([#10075](https://github.com/JanssenProject/jans/issues/10075)) ([e50a8f7](https://github.com/JanssenProject/jans/commit/e50a8f726bc343a484971cd946418d00722d8b24))
-* **config-api:** setting agama flow as auth method ([#10539](https://github.com/JanssenProject/jans/issues/10539)) ([3c00152](https://github.com/JanssenProject/jans/commit/3c0015224aec4a2333735478333496baa31ef9b6))
-* **config-api:** user password being displayed as clear text ([#10441](https://github.com/JanssenProject/jans/issues/10441)) ([fdfd7a6](https://github.com/JanssenProject/jans/commit/fdfd7a6809bd03b576be5b5def47dde263e69d79))
-* **config-api:** user password patch fix  ([#10396](https://github.com/JanssenProject/jans/issues/10396)) ([18ea28d](https://github.com/JanssenProject/jans/commit/18ea28d60c4ee892b14d2a70aff73a9f1ce959e6))
-* **core:** fix ClassNotFoundException XmlElement exception ([#11293](https://github.com/JanssenProject/jans/issues/11293)) ([c9b1aed](https://github.com/JanssenProject/jans/commit/c9b1aed7f5e439728d2003bdf5c29a591038ee0b))
-* **core:** fix unable to decorate com.sun.faces.config.ConfigureListener ([#11345](https://github.com/JanssenProject/jans/issues/11345)) ([e1d98a1](https://github.com/JanssenProject/jans/commit/e1d98a1250ef93b3a5e748753f33f59c2afac9cb))
-* **core:** remove jansAlias from jansDocument ([#11085](https://github.com/JanssenProject/jans/issues/11085)) ([a3a9bb2](https://github.com/JanssenProject/jans/commit/a3a9bb2828b33e4573289f0330e48a9e44500c12))
-* **core:** update resteasy to new version ([aed45d6](https://github.com/JanssenProject/jans/commit/aed45d6b364041450f52ad974b82ee55f5cc6d11))
-* Corrected fido-2-devices link to heading in user management document. issue[#9636](https://github.com/JanssenProject/jans/issues/9636). ([8ffc483](https://github.com/JanssenProject/jans/commit/8ffc483369fd7e480eab3076dd024b02e9976353))
-* **docker-jans-auth:** missing permissions on /app/templates ([#10641](https://github.com/JanssenProject/jans/issues/10641)) ([f1b3ca2](https://github.com/JanssenProject/jans/commit/f1b3ca2294f4eb56bcde3f78a4f6b05f0bb879d7))
-* **docker-jans-config-api:** resolve path to external healthcheck script ([#10450](https://github.com/JanssenProject/jans/issues/10450)) ([ff65c0f](https://github.com/JanssenProject/jans/commit/ff65c0f119a99ff531859c236419f362025c8c19))
-* **docker-jans-monolith:** update scripts location ([#10481](https://github.com/JanssenProject/jans/issues/10481)) ([46241f2](https://github.com/JanssenProject/jans/commit/46241f21f60e4c81dadb6bb6890f50b4643c1b9f))
-* **docker-jans-persistence-loader:** exclude external tables when creating indexes ([#10522](https://github.com/JanssenProject/jans/issues/10522)) ([9610bc1](https://github.com/JanssenProject/jans/commit/9610bc15908331e8344dfaed16ee8a397bd999d5))
-* **docs:** add Cedarling quick start guide and binding type documents ([#10906](https://github.com/JanssenProject/jans/issues/10906)) ([bc0686f](https://github.com/JanssenProject/jans/commit/bc0686f10be6eb010788128395c552e95d6543de))
-* **docs:** add documentation for `jans` wrapper command ([#10611](https://github.com/JanssenProject/jans/issues/10611)) ([b65f5e1](https://github.com/JanssenProject/jans/commit/b65f5e109bfc41fa6bc39da8466b4b94c6020788))
-* **docs:** add missing script to index ([#11186](https://github.com/JanssenProject/jans/issues/11186)) ([d008be9](https://github.com/JanssenProject/jans/commit/d008be973047112afd00d984c787578a1001ac58))
-* **docs:** add SSA configuration docs ([#10823](https://github.com/JanssenProject/jans/issues/10823)) ([602532d](https://github.com/JanssenProject/jans/commit/602532dad32376d52a7b51392b715c77eddb18ec))
-* **docs:** autogenerate docs ([#10232](https://github.com/JanssenProject/jans/issues/10232)) ([ad21cda](https://github.com/JanssenProject/jans/commit/ad21cda46d388438c9c081e88a7868daf56f06ef))
-* **docs:** Cedarling docs updates ([#10998](https://github.com/JanssenProject/jans/issues/10998)) ([903e29f](https://github.com/JanssenProject/jans/commit/903e29fb8ed0be70bd71b5b8de8c92bcb096e52c))
-* **docs:** Cedarling documentation reorganisation ([#10900](https://github.com/JanssenProject/jans/issues/10900)) ([33920c2](https://github.com/JanssenProject/jans/commit/33920c2462703598f1c34f9aa154367ddb4dc16e))
-* **docs:** correct the file name for Keycloak link document ([#10680](https://github.com/JanssenProject/jans/issues/10680)) ([35e6ef0](https://github.com/JanssenProject/jans/commit/35e6ef01e8a8c330604249a4fe415d50dea4cf4f))
-* **docs:** corrected fido-2-devices link to heading in user management document ([8ffc483](https://github.com/JanssenProject/jans/commit/8ffc483369fd7e480eab3076dd024b02e9976353))
-* **docs:** fix docs link ([#10123](https://github.com/JanssenProject/jans/issues/10123)) ([b78102a](https://github.com/JanssenProject/jans/commit/b78102adf39dfa94059248ab1a685ae3da38b428))
-* **docs:** fix image paths in SAML SSO document ([#11183](https://github.com/JanssenProject/jans/issues/11183)) ([5abb790](https://github.com/JanssenProject/jans/commit/5abb79039f6f7c3d919a17f5a7e61b02bc559fa8))
-* **docs:** incorrect package name in rhel document ([#10890](https://github.com/JanssenProject/jans/issues/10890)) ([1d98a9c](https://github.com/JanssenProject/jans/commit/1d98a9c567f6720eae087f6d2d900e8b56e66df3))
-* **docs:** minor fixes to the Jans README ([#10604](https://github.com/JanssenProject/jans/issues/10604)) ([41bf8b8](https://github.com/JanssenProject/jans/commit/41bf8b892bc69c665a4e27b265de11eceab0ea6d))
-* **docs:** minor URL fixes ([ba9908d](https://github.com/JanssenProject/jans/commit/ba9908dea395a9a8974e55a4cf9a079749bfcda3))
-* **docs:** minor URL fixes ([#10632](https://github.com/JanssenProject/jans/issues/10632)) ([ba9908d](https://github.com/JanssenProject/jans/commit/ba9908dea395a9a8974e55a4cf9a079749bfcda3))
-* **docs:** moving contributor license agreement to GitHub ([#11034](https://github.com/JanssenProject/jans/issues/11034)) ([6ce100a](https://github.com/JanssenProject/jans/commit/6ce100a0256c398fc859c51b9baca450feed6835))
-* **docs:** proofread and update the Cedarling quick start guide ([#11210](https://github.com/JanssenProject/jans/issues/11210)) ([53e54c2](https://github.com/JanssenProject/jans/commit/53e54c26fc44eee482752bde7d3d0e71f736bd87))
-* **docs:** proofread and update the TBAC Cedarling quick start guide ([#11214](https://github.com/JanssenProject/jans/issues/11214)) ([e5fbe04](https://github.com/JanssenProject/jans/commit/e5fbe044bdc6a7863506d42b49a55cbe59c76805))
-* **docs:** remove agama lab quick start guide ([7a7ae38](https://github.com/JanssenProject/jans/commit/7a7ae3823ce6a340d3d27c80b7ac37442ababb3a))
-* **docs:** remove agama lab quick start guide from Jans docs ([#11132](https://github.com/JanssenProject/jans/issues/11132)) ([7a7ae38](https://github.com/JanssenProject/jans/commit/7a7ae3823ce6a340d3d27c80b7ac37442ababb3a))
-* **docs:** remove Couchbase references ([#10119](https://github.com/JanssenProject/jans/issues/10119)) ([475f295](https://github.com/JanssenProject/jans/commit/475f29544b0bdffc5a171e626dc4ee4459d30fd0))
-* **docs:** remove tent references ([040ff17](https://github.com/JanssenProject/jans/commit/040ff17942019bc10433ce17d819b8d8474f13c8))
-* **docs:** remove tent references from documentation ([#10603](https://github.com/JanssenProject/jans/issues/10603)) ([040ff17](https://github.com/JanssenProject/jans/commit/040ff17942019bc10433ce17d819b8d8474f13c8))
-* **docs:** review and update Cedarling WASM document ([#10988](https://github.com/JanssenProject/jans/issues/10988)) ([2136bdf](https://github.com/JanssenProject/jans/commit/2136bdff3cfd126c0942ca98d82d1155cc280f81))
-* **docs:** update Agama Lab quick start guide ([#10779](https://github.com/JanssenProject/jans/issues/10779)) ([7403ed1](https://github.com/JanssenProject/jans/commit/7403ed18fdeee2516d14eafbd33d08f030368e30))
-* **docs:** update broken link in custom claims document ([#10781](https://github.com/JanssenProject/jans/issues/10781)) ([40b7039](https://github.com/JanssenProject/jans/commit/40b70391f429531bf0f6ee657ba9345796479bf1))
-* **docs:** update cedarling docs navigation ([#11001](https://github.com/JanssenProject/jans/issues/11001)) ([4da085f](https://github.com/JanssenProject/jans/commit/4da085f8fba590973bc704a7481fbcf0054133e2))
-* **docs:** update document titles for better search results ([#11105](https://github.com/JanssenProject/jans/issues/11105)) ([6b6815d](https://github.com/JanssenProject/jans/commit/6b6815dbf00b06b5eb697d7ca410e9db75d41fe5))
-* **docs:** update LDAP link document with configuration details ([#10824](https://github.com/JanssenProject/jans/issues/10824)) ([53dd493](https://github.com/JanssenProject/jans/commit/53dd49394ac9452a058ed9abe84022120a725e9e))
-* **docs:** update titles for better docs search results ([#11131](https://github.com/JanssenProject/jans/issues/11131)) ([b9cb65e](https://github.com/JanssenProject/jans/commit/b9cb65e7f5124f17976c27de9dff5734b87e3d1b))
-* **docs:** update titles for quick start guides ([61a43b0](https://github.com/JanssenProject/jans/commit/61a43b0c470ff776231f261c28b6c84dcf0609ec))
-* **docs:** update titles for the Cedarling quick start guides ([#11220](https://github.com/JanssenProject/jans/issues/11220)) ([61a43b0](https://github.com/JanssenProject/jans/commit/61a43b0c470ff776231f261c28b6c84dcf0609ec))
-* error when deselect one of the tokens in the cedarling authz form ([#10986](https://github.com/JanssenProject/jans/issues/10986)) ([8444271](https://github.com/JanssenProject/jans/commit/84442715ede67e43d4f22903bd288fcf322a8c14))
-* fix the android and iOS sample app based on changes in cedarling uniffi binding ([#11294](https://github.com/JanssenProject/jans/issues/11294)) ([c0a1948](https://github.com/JanssenProject/jans/commit/c0a1948c6138211711b823361852dbfa4c926949))
-* fox docs formatting ([3da3644](https://github.com/JanssenProject/jans/commit/3da3644ed21854fea20c2689f07180b2b1d57fe7))
-* getting 401 Unauthorized for /jans-config-api/api/v1/stat ([#10857](https://github.com/JanssenProject/jans/issues/10857)) ([0d0794c](https://github.com/JanssenProject/jans/commit/0d0794cf0cd68b95283fe7634d9890069278e60b))
-* ignore null authz input tokens ([56af565](https://github.com/JanssenProject/jans/commit/56af5653da59bda838bf5211c57bbe568e07fa8b))
-* implement missing method from interface ([#10646](https://github.com/JanssenProject/jans/issues/10646)) ([2381a09](https://github.com/JanssenProject/jans/commit/2381a09cd7a51f2582c041bcab4941d7c5138696))
-* **jans-auth-server:** access evaluation tests are failing on jenkins ([#10630](https://github.com/JanssenProject/jans/issues/10630)) ([8789289](https://github.com/JanssenProject/jans/commit/87892899b455b009d1493ef47b7ab7ae8dccb69b))
-* **jans-auth-server:** access evaluation tests are failing on jenkins [#10629](https://github.com/JanssenProject/jans/issues/10629) ([37e177c](https://github.com/JanssenProject/jans/commit/37e177c1de0f3efd4dabc14da0bbd6fef3072d62))
-* **jans-auth-server:** access evaluation tests are failing on jenkins [#10629](https://github.com/JanssenProject/jans/issues/10629) ([8789289](https://github.com/JanssenProject/jans/commit/87892899b455b009d1493ef47b7ab7ae8dccb69b))
-* **jans-auth-server:** Access Token from and OIDC flow should not contain the code [#11181](https://github.com/JanssenProject/jans/issues/11181) ([#11197](https://github.com/JanssenProject/jans/issues/11197)) ([c62b0cf](https://github.com/JanssenProject/jans/commit/c62b0cfdbf14f663481c319877f1e8951521f1cd))
-* **jans-auth-server:** always save access_token to persistence regardless of cache configuration [#10763](https://github.com/JanssenProject/jans/issues/10763) ([#10784](https://github.com/JanssenProject/jans/issues/10784)) ([cf8ce67](https://github.com/JanssenProject/jans/commit/cf8ce67a20b3ce4f6339fe1cb94209ed84d9b53c))
-* **jans-auth-server:** challenge endpoint returns 400 if authorize throws an unexpected exception ([#10553](https://github.com/JanssenProject/jans/issues/10553)) ([02c3df7](https://github.com/JanssenProject/jans/commit/02c3df77be977248529ccfc23145a37049e12633))
-* **jans-auth-server:** correction after removing CleanerTimer from AS (replaced by independent clean service) [#10935](https://github.com/JanssenProject/jans/issues/10935) ([#11108](https://github.com/JanssenProject/jans/issues/11108)) ([13b5ea6](https://github.com/JanssenProject/jans/commit/13b5ea6ae78adbcbc375077628fc4b6eb7cea4ca))
-* **jans-auth-server:** failing test - SelectAccountHttpTest selectAccountTest [#10647](https://github.com/JanssenProject/jans/issues/10647) ([d19e34f](https://github.com/JanssenProject/jans/commit/d19e34f943a34cf7ed2fa5f5ece7e17c97eaa5a2))
-* **jans-auth-server:** lower possibility to get data loss during status index pool update [#10284](https://github.com/JanssenProject/jans/issues/10284) ([#10285](https://github.com/JanssenProject/jans/issues/10285)) ([3b9e1b2](https://github.com/JanssenProject/jans/commit/3b9e1b22eca8bb74b7ad6c3f2b300364a4a317cd))
-* **jans-auth-server:** NPE during client name rendering [#10663](https://github.com/JanssenProject/jans/issues/10663)  ([9dbcb0d](https://github.com/JanssenProject/jans/commit/9dbcb0dead119e2bf780bda9153b84c8ce379266))
-* **jans-auth-server:** second authorization challenge call does not invoke the right script [#10745](https://github.com/JanssenProject/jans/issues/10745) ([#10746](https://github.com/JanssenProject/jans/issues/10746)) ([3ba585c](https://github.com/JanssenProject/jans/commit/3ba585c33e8cb665a365c6dc14805d33bbf373e7))
-* **jans-auth-server:** test is failing - TokenRestWebServiceHttpTest requestAccessTokenFail [#10637](https://github.com/JanssenProject/jans/issues/10637) ([db38009](https://github.com/JanssenProject/jans/commit/db38009d97a29b57e9b180c8b1e7314fa4edb5f2))
-* **jans-auth-server:** tests corrections ([ef8a07a](https://github.com/JanssenProject/jans/commit/ef8a07aced8eb7eafaac1bda7f36d26a6909bd85))
-* **jans-auth-server:** typo in determineConsentFlow method [#10758](https://github.com/JanssenProject/jans/issues/10758) ([#10759](https://github.com/JanssenProject/jans/issues/10759)) ([52cabdb](https://github.com/JanssenProject/jans/commit/52cabdb5e12c1d4a5364502ad9e836b7c5be33a5))
-* **jans-auth:** fido - [#10445](https://github.com/JanssenProject/jans/issues/10445) modified the script and properties file for fido ([#10446](https://github.com/JanssenProject/jans/issues/10446)) ([a3c6777](https://github.com/JanssenProject/jans/commit/a3c6777d3f96b62cdd27071656ec556621a15746))
-* **jans-auth:** fix client side jans-auth tests failures [#10212](https://github.com/JanssenProject/jans/issues/10212) ([#10213](https://github.com/JanssenProject/jans/issues/10213)) ([f31f756](https://github.com/JanssenProject/jans/commit/f31f7568eabbf92e1ea2a60dc691ed1b8f1c8d8d))
-* **jans-auth:** log current folder in UserServiceTest test ([#10675](https://github.com/JanssenProject/jans/issues/10675)) ([1468b47](https://github.com/JanssenProject/jans/commit/1468b477b4b7956b731930ddb0381513b47d17a8))
-* **jans-bom:** define plugins in base parent project ([#10087](https://github.com/JanssenProject/jans/issues/10087)) ([fae21d4](https://github.com/JanssenProject/jans/commit/fae21d4870ba93492f59cb22d030b37c0d0a3a98))
-* **jans-bom:** update libs ([#10154](https://github.com/JanssenProject/jans/issues/10154)) ([cb413ea](https://github.com/JanssenProject/jans/commit/cb413eaa773f38aeaeddfa855caf4c79c3073c95))
-* **jans-casa:** [#10470](https://github.com/JanssenProject/jans/issues/10470) Enrollment of a passkey implies the enrollment of all three types of authenticator - client-device, hybrid, security-key ([c0c141d](https://github.com/JanssenProject/jans/commit/c0c141d77ad58e020d11fa67f7100072474ac6b6))
-* **jans-casa:** assign nightly version for email 2fa plugin ([#10300](https://github.com/JanssenProject/jans/issues/10300)) ([a453001](https://github.com/JanssenProject/jans/commit/a4530018547c7e0045b2b990dbc3566ae3ab1bf6))
-* **jans-casa:** enrollment of a passkey implies the enrollment… ([#10473](https://github.com/JanssenProject/jans/issues/10473)) ([c0c141d](https://github.com/JanssenProject/jans/commit/c0c141d77ad58e020d11fa67f7100072474ac6b6))
-* **jans-casa:** primary button not changing color when customized via custom branding plugin ([#10084](https://github.com/JanssenProject/jans/issues/10084)) ([da03eb8](https://github.com/JanssenProject/jans/commit/da03eb842a71ff8b51b12157924b5ead6abd7273))
-* **jans-cedarling:** add handling nonexistent authorization decisions ([#10431](https://github.com/JanssenProject/jans/issues/10431)) ([14e304d](https://github.com/JanssenProject/jans/commit/14e304d49c48a0075b74da03034bbe237376b0bb))
-* **jans-cedarling:** add missing fields on LogEntry struct ([#10297](https://github.com/JanssenProject/jans/issues/10297)) ([bdcf627](https://github.com/JanssenProject/jans/commit/bdcf627d4164a90c5e2875b0e7b475a68431011d))
-* **jans-cedarling:** entity builder not finding the 'iss' entity ([#11235](https://github.com/JanssenProject/jans/issues/11235)) ([3da7b4a](https://github.com/JanssenProject/jans/commit/3da7b4a5c06c992cc7993df266338a7ded0f75e4))
-* **jans-cedarling:** fix `CEDARLING_TOKEN_CONFIGS` to have namespace ([66dd8a7](https://github.com/JanssenProject/jans/commit/66dd8a734591067864066e6dc96105e905177d6f))
-* **jans-cedarling:** fix Cedarling WASM docs ([#10601](https://github.com/JanssenProject/jans/issues/10601)) ([7690030](https://github.com/JanssenProject/jans/commit/76900307ca0fab78a981c517585499f7b75685e0))
-* **jans-cedarling:** fix docs bootstrap properties, remove redundant property ([#11275](https://github.com/JanssenProject/jans/issues/11275)) ([53841f3](https://github.com/JanssenProject/jans/commit/53841f32a567ba2d8cdfcbbad171b021396b7fb1))
-* **jans-cedarling:** fix documentation CEDARLING_POLICY_STORE_LOCAL can hold only string ([#11015](https://github.com/JanssenProject/jans/issues/11015)) ([2c6a112](https://github.com/JanssenProject/jans/commit/2c6a112c6ee50de6f7975f73f2f52950e6218f8f))
-* **jans-cedarling:** fix log workload authz info ([87672d8](https://github.com/JanssenProject/jans/commit/87672d8d1f2a1c04ab1d127443e3ec333bdf256f))
-* **jans-cedarling:** fix sidecar docker ([#10361](https://github.com/JanssenProject/jans/issues/10361)) ([808f54f](https://github.com/JanssenProject/jans/commit/808f54f26048d504bae4e3d86e12d80d405b462f))
-* **jans-cedarling:** fix token handling ([#10761](https://github.com/JanssenProject/jans/issues/10761)) ([2533e30](https://github.com/JanssenProject/jans/commit/2533e3086edacbd70b4d0f49950d7e3cf2ff64ec))
-* **jans-cedarling:** fix usage outdated field resource_type ([#11266](https://github.com/JanssenProject/jans/issues/11266)) ([98dfa1b](https://github.com/JanssenProject/jans/commit/98dfa1b55138af7be5afe1332d40ef71b0d83124))
-* **jans-cedarling:** ignore null authz input tokens and improve error message ([#11063](https://github.com/JanssenProject/jans/issues/11063)) ([56af565](https://github.com/JanssenProject/jans/commit/56af5653da59bda838bf5211c57bbe568e07fa8b))
-* **jans-cedarling:** reason missing from decision log ([#10895](https://github.com/JanssenProject/jans/issues/10895)) ([87672d8](https://github.com/JanssenProject/jans/commit/87672d8d1f2a1c04ab1d127443e3ec333bdf256f))
-* **jans-cedarling:** revert "pass entities data into the context" ([#10290](https://github.com/JanssenProject/jans/issues/10290)) ([ced4b24](https://github.com/JanssenProject/jans/commit/ced4b2495bbac11392f06bd02a9af875e514f1ea))
-* **jans-cedarling:** role entity not being created in the unsigned interface ([#11176](https://github.com/JanssenProject/jans/issues/11176)) ([5333c5e](https://github.com/JanssenProject/jans/commit/5333c5e824097a1c0b43028e951e2de3f726159f))
-* **jans-cedarling:** switch cedarling instance to pointer ([#11338](https://github.com/JanssenProject/jans/issues/11338)) ([7f63d64](https://github.com/JanssenProject/jans/commit/7f63d64e5c12e223e04cef74e69d90ddb828e36b))
-* **jans-cedarling:** update example authorize_without_jwt_validation ([#10308](https://github.com/JanssenProject/jans/issues/10308)) ([be3a3eb](https://github.com/JanssenProject/jans/commit/be3a3eba862d481a8dbd8029199f7dcfa31a7198))
-* **jans-cli-tui:** add pylib to path before importing promptoolkit ([#11313](https://github.com/JanssenProject/jans/issues/11313)) ([b1ba83c](https://github.com/JanssenProject/jans/commit/b1ba83ca36f80a7b931c239817aaefd2d7e746ac))
-* **jans-cli-tui:** Catch errors when changing user password ([#11154](https://github.com/JanssenProject/jans/issues/11154)) ([9fc36c3](https://github.com/JanssenProject/jans/commit/9fc36c3233f45fb18901e1bb99ccde2f97e73b99))
-* **jans-cli-tui:** display error for session search ([#10251](https://github.com/JanssenProject/jans/issues/10251)) ([bca18e8](https://github.com/JanssenProject/jans/commit/bca18e82ee46239ef7f693bf22baa8b26a3fe08d))
-* **jans-cli-tui:** file type scripts ([#10181](https://github.com/JanssenProject/jans/issues/10181)) ([e144131](https://github.com/JanssenProject/jans/commit/e144131dab23757c2fe5dd538fe0adcd9032a5b1))
-* **jans-cli-tui:** include jans-logo.txt in package ([#11359](https://github.com/JanssenProject/jans/issues/11359)) ([50f5429](https://github.com/JanssenProject/jans/commit/50f54294c8c0b4507dbab86b4ca357ff1508acc7))
-* **jans-cli-tui:** more verbose in smtp test response ([#10090](https://github.com/JanssenProject/jans/issues/10090)) ([70eb806](https://github.com/JanssenProject/jans/commit/70eb80684f02b50b238fd82deb595fda728ed115))
-* **jans-cli-tui:** multivalued claims for users ([#11011](https://github.com/JanssenProject/jans/issues/11011)) ([159b512](https://github.com/JanssenProject/jans/commit/159b5123143ab8d88e99ce803c61cf65ad0c8c9f))
-* **jans-cli-tui:** null value in client grantTypes ([#10872](https://github.com/JanssenProject/jans/issues/10872)) ([a609f8c](https://github.com/JanssenProject/jans/commit/a609f8c91868c6f551f22bb4eac185858322654e))
-* **jans-cli-tui:** properties acrMappings ([#11048](https://github.com/JanssenProject/jans/issues/11048)) ([f025083](https://github.com/JanssenProject/jans/commit/f025083d91fa13f31ca9f31ceaa372fe300e6ed5))
-* **jans-cli-tui:** properties object with no keys ([#10411](https://github.com/JanssenProject/jans/issues/10411)) ([f84d00b](https://github.com/JanssenProject/jans/commit/f84d00b41beacf4a76c536ab475585fb5ad4fda1))
-* **jans-cli-tui:** remove filePath when putting asset ([#10107](https://github.com/JanssenProject/jans/issues/10107)) ([50e10b8](https://github.com/JanssenProject/jans/commit/50e10b808d127f7fde854a77308318abbac576ac))
-* **jans-cli-tui:** save config-api configuration ([#10724](https://github.com/JanssenProject/jans/issues/10724)) ([6a955a4](https://github.com/JanssenProject/jans/commit/6a955a4c0c7355d05d5fac95c965dd4a504e003b))
-* **jans-cli-tui:** ScrollablePane for config-api main screen ([#10722](https://github.com/JanssenProject/jans/issues/10722)) ([4585f3a](https://github.com/JanssenProject/jans/commit/4585f3abd1f97e47009969c97bd8ca68d26aec26))
-* **jans-cli-tui:** smtp test failing [#11330](https://github.com/JanssenProject/jans/issues/11330) ([#11358](https://github.com/JanssenProject/jans/issues/11358)) ([a6b0de0](https://github.com/JanssenProject/jans/commit/a6b0de04613e9ea5186eb8c503981f2e2f8d075c))
-* **jans-cli-tui:** typo in editing attribute ([#11152](https://github.com/JanssenProject/jans/issues/11152)) ([f42dd4a](https://github.com/JanssenProject/jans/commit/f42dd4a9b6ba384b98266e150fe7cd731420a973))
-* **jans-cli-tui:** update user password ([#10456](https://github.com/JanssenProject/jans/issues/10456)) ([bee1f9c](https://github.com/JanssenProject/jans/commit/bee1f9c95491c4d81485e1cea30a24cdbdf34057))
-* **jans-config-api:** admin UI unable to fetch MAU _threshold on restart of config-api ([#10969](https://github.com/JanssenProject/jans/issues/10969)) ([b4cfaa2](https://github.com/JanssenProject/jans/commit/b4cfaa2ae9a6ed6b71a6b450ac42c68ca95ddc60))
-* **jans-config-api:** unable to update Admin-ui feature in webhook ([#10220](https://github.com/JanssenProject/jans/issues/10220)) ([b6c503e](https://github.com/JanssenProject/jans/commit/b6c503eb43e619cf02571b4d7ecdce6edd1a06ab))
-* **jans-core:** reverted back CleanerEvent (used by fido2) [#11113](https://github.com/JanssenProject/jans/issues/11113) ([#11115](https://github.com/JanssenProject/jans/issues/11115)) ([266583f](https://github.com/JanssenProject/jans/commit/266583f91563332b670ab8f083ca1b370d311e37))
-* **jans-fido2:** [#10244](https://github.com/JanssenProject/jans/issues/10244) + docs ([#11057](https://github.com/JanssenProject/jans/issues/11057)) ([3912551](https://github.com/JanssenProject/jans/commit/391255150d8c1839b147046bb08be00ad7b063a3))
-* **jans-fido2:** [#10947](https://github.com/JanssenProject/jans/issues/10947) syncing configuration parameters in docs and … ([#10948](https://github.com/JanssenProject/jans/issues/10948)) ([b635cbc](https://github.com/JanssenProject/jans/commit/b635cbc45db287166cc913918909d7d8192d1fed))
-* **jans-fido2:** [#10947](https://github.com/JanssenProject/jans/issues/10947) syncing configuration parameters in docs and templates ([b635cbc](https://github.com/JanssenProject/jans/commit/b635cbc45db287166cc913918909d7d8192d1fed))
-* **jans-fido2:** [#11331](https://github.com/JanssenProject/jans/issues/11331) minor edits ([#11332](https://github.com/JanssenProject/jans/issues/11332)) ([e1998eb](https://github.com/JanssenProject/jans/commit/e1998ebef79cac78a14f23c8af5a5a88d45eb993))
-* **jans-fido2:** fixes to downloading mds3 blob [#11126](https://github.com/JanssenProject/jans/issues/11126) ([#11127](https://github.com/JanssenProject/jans/issues/11127)) ([3776c0c](https://github.com/JanssenProject/jans/commit/3776c0ca1b009493a23779712996aad4433d4f05))
-* **jans-fido2:** U2F attestation and corrected auth_cert link [#10911](https://github.com/JanssenProject/jans/issues/10911) ([#10912](https://github.com/JanssenProject/jans/issues/10912)) ([b47ca75](https://github.com/JanssenProject/jans/commit/b47ca7565161c64ccfb4f363aa31e25940dde4e6))
-* **jans-fido:** Resolve dependecy issue  ([e5518cf](https://github.com/JanssenProject/jans/commit/e5518cfad142f47dd90c6f7903a97a9df48eb9ef))
-* **jans-fido:** Resolve dependecy issue [#10080](https://github.com/JanssenProject/jans/issues/10080) ([#10406](https://github.com/JanssenProject/jans/issues/10406)) ([0bb2881](https://github.com/JanssenProject/jans/commit/0bb288152241abf73abe3b5cd80aea1dbd3e5722))
-* **jans-kc-link:** remove default keycloak configs ([#10679](https://github.com/JanssenProject/jans/issues/10679)) ([261c936](https://github.com/JanssenProject/jans/commit/261c936acf732fa249231ff65193de68a47558ca))
-* **jans-keycloak-integration:** kc startup issues [#10348](https://github.com/JanssenProject/jans/issues/10348) ([#10349](https://github.com/JanssenProject/jans/issues/10349)) ([7cbb081](https://github.com/JanssenProject/jans/commit/7cbb08115384bf16b831223eab2f5baa29662dea))
-* **jans-keycloak-link:** unstatisfied dependencies ([#10627](https://github.com/JanssenProject/jans/issues/10627)) ([721b8fe](https://github.com/JanssenProject/jans/commit/721b8fe5b68e23988ca298bb06cc405091945f67))
-* **jans-link:** add missing configuration providers ([#10124](https://github.com/JanssenProject/jans/issues/10124)) ([5da43a8](https://github.com/JanssenProject/jans/commit/5da43a8a8e922c8b2448d67c1953d66ca0c93a50))
-* **jans-linux-setup:** auth server test configuration ([#10365](https://github.com/JanssenProject/jans/issues/10365)) ([427ab4b](https://github.com/JanssenProject/jans/commit/427ab4b0df29a93fd3d0109066f6f43868b03737))
-* **jans-linux-setup:** bug if version passed is a tag ([#10274](https://github.com/JanssenProject/jans/issues/10274)) ([79b89b7](https://github.com/JanssenProject/jans/commit/79b89b726a826099537cd38905cd440d22bfa94d))
-* **jans-linux-setup:** config-api plugin installation ([#10389](https://github.com/JanssenProject/jans/issues/10389)) ([af07457](https://github.com/JanssenProject/jans/commit/af074577489852963749529b560b4149ac1b17ea))
-* **jans-linux-setup:** display CLI logs in jans script ([#10262](https://github.com/JanssenProject/jans/issues/10262)) ([a27aa97](https://github.com/JanssenProject/jans/commit/a27aa975b68efcfe31e4996463c8f2eb9bae21c5))
-* **jans-linux-setup:** download from tags ([#10391](https://github.com/JanssenProject/jans/issues/10391)) ([655ae72](https://github.com/JanssenProject/jans/commit/655ae726b070f15c6a5501ed419a62cb9307244f))
-* **jans-linux-setup:** fido document store paths ([#10801](https://github.com/JanssenProject/jans/issues/10801)) ([881c1e0](https://github.com/JanssenProject/jans/commit/881c1e0818a0aed6b413280ee7d85bd02d92bbb6))
-* **jans-linux-setup:** jetty.sh script waits service started ([#11319](https://github.com/JanssenProject/jans/issues/11319)) ([f74e21b](https://github.com/JanssenProject/jans/commit/f74e21b3a820d120c5535749fe64d114d8b13272))
-* **jans-linux-setup:** lock client creation with setup.properties ([#10929](https://github.com/JanssenProject/jans/issues/10929)) ([f374ed2](https://github.com/JanssenProject/jans/commit/f374ed2f313b1c624ebde5dbef2e6da9dfca932d))
-* **jans-linux-setup:** missing scopes of api-admin ([#10162](https://github.com/JanssenProject/jans/issues/10162)) ([edcdb6b](https://github.com/JanssenProject/jans/commit/edcdb6b2b46ce026f3b0b593e447008647474cf9))
-* **jans-linux-setup:** owner of service status script ([#11122](https://github.com/JanssenProject/jans/issues/11122)) ([aad24a3](https://github.com/JanssenProject/jans/commit/aad24a35c86af8b39dd15d8b186553e35fd715d0))
-* **jans-linux-setup:** pass -n to setup.py when invoked by -yes ([#11180](https://github.com/JanssenProject/jans/issues/11180)) ([00988a3](https://github.com/JanssenProject/jans/commit/00988a34760e9a36219fc8ee243203b1a4ddfff1))
-* **jans-linux-setup:** rename permission to role in attribute inum=6049 ([#10915](https://github.com/JanssenProject/jans/issues/10915)) ([359dc75](https://github.com/JanssenProject/jans/commit/359dc75ea52a904b6914a3f18e48fa25c0843bf7))
-* **jans-linux-setup:** revert admin-ui restart ([27faefc](https://github.com/JanssenProject/jans/commit/27faefc4f8d9497adb853cce542997ac0733bd30))
-* **jans-linux-setup:** Store fido2 authenticator_cert in DB ([#10697](https://github.com/JanssenProject/jans/issues/10697)) ([86966df](https://github.com/JanssenProject/jans/commit/86966df52d45d4963e04dcdbfc39a09dc9f81a4b))
-* **jans-linux-setup:** update jansservices module post setup ([#10715](https://github.com/JanssenProject/jans/issues/10715)) ([cfa301f](https://github.com/JanssenProject/jans/commit/cfa301f40fc63ebcfa139fdb8a849d2c61f0a98e))
-* **jans-linux-setup:** use sqlconnection instead of mysqlconnection ([#10161](https://github.com/JanssenProject/jans/issues/10161)) ([25310c6](https://github.com/JanssenProject/jans/commit/25310c6e5edfc5fc11565df657cc2867b511d169))
-* **jans-lock:** fix broken linjk in lock docs ([#10110](https://github.com/JanssenProject/jans/issues/10110)) ([ec142d8](https://github.com/JanssenProject/jans/commit/ec142d889418b338ff71c37c3dbaf4c8bdbe21b8))
-* **jans-orm:** merge ORM changes from Gluu ([#10293](https://github.com/JanssenProject/jans/issues/10293)) ([197a4c5](https://github.com/JanssenProject/jans/commit/197a4c56a39c5c506d221d9079929d1a5e6f4339))
-* **jans-orm:** Throw exception if table in DB is not exists ([86a888c](https://github.com/JanssenProject/jans/commit/86a888c6c7ab914d20c55c83804955748e7c800a))
-* **jans-orm:** throw exception if table in DB is not exists ([#10096](https://github.com/JanssenProject/jans/issues/10096)) ([86a888c](https://github.com/JanssenProject/jans/commit/86a888c6c7ab914d20c55c83804955748e7c800a))
-* **jans-orm:** update SQL ORM tests to conform latest JSON Filter API ([#10150](https://github.com/JanssenProject/jans/issues/10150)) ([5ed23c0](https://github.com/JanssenProject/jans/commit/5ed23c0475c132745de49646615a795a5f5106bc))
-* **jans-pycloudlib:** resolve schema error caused by marshmallow upgrades ([#11247](https://github.com/JanssenProject/jans/issues/11247)) ([d2bc747](https://github.com/JanssenProject/jans/commit/d2bc747e157a6e48a4270dff70ecea2cb78afd16))
-* **jans-tarp:** unsigned authorization form not working ([#11159](https://github.com/JanssenProject/jans/issues/11159)) ([cc9c7fd](https://github.com/JanssenProject/jans/commit/cc9c7fd921018b5685302448ae98e5c8b1cdc3b7))
-* **logging:** improve detail formatting ([#10955](https://github.com/JanssenProject/jans/issues/10955)) ([9334d61](https://github.com/JanssenProject/jans/commit/9334d61e4b48a3e8d2dbeb9a6481976731a1ff90))
-* modified plugins ([#11167](https://github.com/JanssenProject/jans/issues/11167)) ([f331efa](https://github.com/JanssenProject/jans/commit/f331efa74614cb1c027b2813cac747af2b8904f8))
-* **monolithic:** update scripts location ([46241f2](https://github.com/JanssenProject/jans/commit/46241f21f60e4c81dadb6bb6890f50b4643c1b9f))
-* references to file location_type ([#10797](https://github.com/JanssenProject/jans/issues/10797)) ([cfaab7e](https://github.com/JanssenProject/jans/commit/cfaab7e276192f677185b17cd77ff050ab82a03c))
-* remove ID from profile instead of nullify it ([#11253](https://github.com/JanssenProject/jans/issues/11253)) ([98b1d1a](https://github.com/JanssenProject/jans/commit/98b1d1ad4c52fe6d232177714469eeb1cdf854fa))
-* remove ID from profile instead of nullify it [#11248](https://github.com/JanssenProject/jans/issues/11248) ([98b1d1a](https://github.com/JanssenProject/jans/commit/98b1d1ad4c52fe6d232177714469eeb1cdf854fa))
-* remove unnecessary mount for k8s setup ([#10112](https://github.com/JanssenProject/jans/issues/10112)) ([f0ec281](https://github.com/JanssenProject/jans/commit/f0ec281c34c0aac1adaa38f71f9d7b7714fcd290))
-* return 500 instead of 404 on lookup error ([#11156](https://github.com/JanssenProject/jans/issues/11156)) ([ecc1eac](https://github.com/JanssenProject/jans/commit/ecc1eac863fc1c91daa576c852c1972f3b21ea9b))
-* scope not getting added if dropdown is not used ([#10908](https://github.com/JanssenProject/jans/issues/10908)) ([63bc735](https://github.com/JanssenProject/jans/commit/63bc73501800abfdb1f14dc428f98bf823b5ccd2))
-* show proper error message for when MAU threshold absent when checking flex license ([#11110](https://github.com/JanssenProject/jans/issues/11110)) ([40f9d09](https://github.com/JanssenProject/jans/commit/40f9d09357d598c11b213d5a1f86c7baf35d5732))
-* show proper error message for when MAU threshold absent when checking flex license [#11093](https://github.com/JanssenProject/jans/issues/11093) ([40f9d09](https://github.com/JanssenProject/jans/commit/40f9d09357d598c11b213d5a1f86c7baf35d5732))
-* ssaCustomAttributes is missing in response from Auth server Configuration endpoint ([#11120](https://github.com/JanssenProject/jans/issues/11120)) ([b4a4cf6](https://github.com/JanssenProject/jans/commit/b4a4cf6a0da0a999242224142935fdfab7970d08))
-* **startjanssendemo:** enhance the script ([1ba8e98](https://github.com/JanssenProject/jans/commit/1ba8e9883ec7e1bcf1aa9b57bbe100211edfadb2))
-* **startjanssendemo:** remove unneeded code and packages installation ([#10531](https://github.com/JanssenProject/jans/issues/10531)) ([1ba8e98](https://github.com/JanssenProject/jans/commit/1ba8e9883ec7e1bcf1aa9b57bbe100211edfadb2))
-* tf license ([#11382](https://github.com/JanssenProject/jans/issues/11382)) ([e687165](https://github.com/JanssenProject/jans/commit/e6871651b528dafacba5db6ba7b1751795cc6e50))
-* update javadocs plugin to allow generation of javadocs ([#11364](https://github.com/JanssenProject/jans/issues/11364)) ([137153d](https://github.com/JanssenProject/jans/commit/137153d287ced23f04cd26037cdd3e783babdd95))
-* update resource endpoints for terraform ([#10836](https://github.com/JanssenProject/jans/issues/10836)) ([5dfee2b](https://github.com/JanssenProject/jans/commit/5dfee2bf40206cf8c5928723a5afb3d5f620807a))
-* update terraform provider docs and API calls ([#11301](https://github.com/JanssenProject/jans/issues/11301)) ([d659268](https://github.com/JanssenProject/jans/commit/d6592687b3b504aa97eacd43d8db3579669919a8))
-* update token script (role_based_scopes_update_token) should reje… ([#10536](https://github.com/JanssenProject/jans/issues/10536)) ([3cd5d88](https://github.com/JanssenProject/jans/commit/3cd5d88af2bf4850779b4107d939b97e1e79624b))
-* update token script (role_based_scopes_update_token) should reject the tampered user-info-jwt [#10535](https://github.com/JanssenProject/jans/issues/10535) ([3cd5d88](https://github.com/JanssenProject/jans/commit/3cd5d88af2bf4850779b4107d939b97e1e79624b))
-* validate license configuration in the database when fetching license details from Agama Lab server upon expiry (Admin UI) ([#11245](https://github.com/JanssenProject/jans/issues/11245)) ([f9fcfae](https://github.com/JanssenProject/jans/commit/f9fcfaec360bf056b07eae92056d8c8455f9b7b1))
-
-
-### Miscellaneous Chores
-
-* **charts:** remove couchbase support from Helm charts ([#10138](https://github.com/JanssenProject/jans/issues/10138)) ([e97dfa7](https://github.com/JanssenProject/jans/commit/e97dfa730ac6331c1db28294353a21f3d1b87bb9))
-* **charts:** remove spanner support from Helm charts ([#10071](https://github.com/JanssenProject/jans/issues/10071)) ([b7783fd](https://github.com/JanssenProject/jans/commit/b7783fd7cf7441eea9ca38a8fcf71e60d6fa5d3c))
-* **cloud-native:** remove couchbase support from OCI images ([#10132](https://github.com/JanssenProject/jans/issues/10132)) ([40938c1](https://github.com/JanssenProject/jans/commit/40938c17f51563578ed6705406f16e83c3aadc05))
-* **cloud-native:** remove spanner support from OCI images ([#10070](https://github.com/JanssenProject/jans/issues/10070)) ([9ddb7e4](https://github.com/JanssenProject/jans/commit/9ddb7e4cc4425b044c58cab1445448bc07c1207f))
-* **jans-pycloudlib:** remove couchbase support from pycloudlib ([#10129](https://github.com/JanssenProject/jans/issues/10129)) ([dc232d2](https://github.com/JanssenProject/jans/commit/dc232d250848c72cf637ac1d7027f4aad3eeebb9))
-
-
-### Code Refactoring
-
-* **jans-cedarling:** move TOKEN_CONFIGS into the token_metadata schema ([#10972](https://github.com/JanssenProject/jans/issues/10972)) ([533236a](https://github.com/JanssenProject/jans/commit/533236ae9e005ff013e0e00ea10f8d50641155c3))
+* fix(jans-linux-setup): pass -n to setup.py when invoked by -yes by @devrimyatar in https://github.com/JanssenProject/jans/pull/11180
+* fix(docs): fix image paths in SAML SSO document by @ossdhaval in https://github.com/JanssenProject/jans/pull/11183
+* fix(docs): add missing script to index by @yurem in https://github.com/JanssenProject/jans/pull/11186
+* fix(jans-auth-server): Access Token from and OIDC flow should not contain the code #11181 by @yuriyz in https://github.com/JanssenProject/jans/pull/11197
+* docs(jans-cedarling): improve cedarling docs by @rmarinn in https://github.com/JanssenProject/jans/pull/11193
+* docs(jans-cedarling): new quickstart using tarp by @SafinWasi in https://github.com/JanssenProject/jans/pull/11004
+* chore: release nightly by @moabu in https://github.com/JanssenProject/jans/pull/11213
+* feat(jans-auth-server): add none client authentication support to PAR endpoint #10573 by @yuriyz in https://github.com/JanssenProject/jans/pull/11201
+* feat: add ability to use cedarling authz before and after authentication by @duttarnab in https://github.com/JanssenProject/jans/pull/11203
+* fix(jans-cedarling)!: role entity not being created in the unsigned interface by @rmarinn in https://github.com/JanssenProject/jans/pull/11176
+* fix(docs): proofread and update the Cedarling quick start guide by @ossdhaval in https://github.com/JanssenProject/jans/pull/11210
+* fix(docs): proofread and update the TBAC Cedarling quick start guide by @ossdhaval in https://github.com/JanssenProject/jans/pull/11214
+* fix(docs): update titles for the Cedarling quick start guides by @ossdhaval in https://github.com/JanssenProject/jans/pull/11220
+* Update rhel.md for sha command update by @manojs1978 in https://github.com/JanssenProject/jans/pull/11189
+* feat: refactor tarp to adjust with security changes in chrome browser by @duttarnab in https://github.com/JanssenProject/jans/pull/11232
+* feat(jans-linux-setup): support for cleanUpInactiveClientAfterHoursOfInactivity for clients by @devrimyatar in https://github.com/JanssenProject/jans/pull/11231
+* chore(deps): bump blazemeter/taurus from 1.16.38@sha256:5bb39436180f7c769e00140b781bb1054a1eb4592dd9b82f76dcde470811bf39 to sha256:aa22ab6b42d24ec87ea9f68e4d6db9118619eecf69db76c1c0711f3515897780 in /demos/benchmarking/docker-jans-loadtesting-jmeter by @dependabot in https://github.com/JanssenProject/jans/pull/11238
+* fix(jans-cedarling): entity builder not finding the 'iss' entity by @rmarinn in https://github.com/JanssenProject/jans/pull/11235
+* bug(jans-cedarling)!: Fix all tokens_metadata to token_metadata by @olehbozhok in https://github.com/JanssenProject/jans/pull/11215
+* feat(jans-auth-server): add configurable way to put user claims to session attributes #9625 by @yuriyz in https://github.com/JanssenProject/jans/pull/11219
+* fix: validate license configuration in the database when fetching license details from Agama Lab server upon expiry (Admin UI) by @duttarnab in https://github.com/JanssenProject/jans/pull/11245
+* fix(jans-pycloudlib): resolve schema error caused by marshmallow upgrades by @iromli in https://github.com/JanssenProject/jans/pull/11247
+* fix: remove ID from profile instead of nullify it by @jgomer2001 in https://github.com/JanssenProject/jans/pull/11253
+* chore(cloud-native): sync jans-pycloudlib to handle marshmallow library API changes by @iromli in https://github.com/JanssenProject/jans/pull/11255
+* feat: rename jans-tarp project to janssen-tarp by @duttarnab in https://github.com/JanssenProject/jans/pull/11249
+* chore: updgrade nimbus so json-smart is bumped to 2.5.2 by @jgomer2001 in https://github.com/JanssenProject/jans/pull/11264
+* chore(jans-cedarling): add post to cedar schema by @SafinWasi in https://github.com/JanssenProject/jans/pull/11227
+* [Snyk] Security upgrade io.swagger.core.v3:swagger-core-jakarta from 2.2.7 to 2.2.11 by @mo-auto in https://github.com/JanssenProject/jans/pull/11166
+* build(config-api): lib version to resolve vulnerabilities  by @pujavs in https://github.com/JanssenProject/jans/pull/11262
+* feat(core): update resteasy to new version by @yurem in https://github.com/JanssenProject/jans/pull/11269
+* Update resteasy by @yurem in https://github.com/JanssenProject/jans/pull/11273
+* fix(jans-cedarling): fix usage outdated field resource_type by @olehbozhok in https://github.com/JanssenProject/jans/pull/11266
+* fix(bom): use right jakarta.ws.rs-api version by @yurem in https://github.com/JanssenProject/jans/pull/11278
+* feat(jans-cedarling): Optimize Cedar libraries size by @olehbozhok in https://github.com/JanssenProject/jans/pull/11281
+* fix(jans-cedarling): fix docs bootstrap properties, remove redundant property by @olehbozhok in https://github.com/JanssenProject/jans/pull/11275
+* fix(bom): deprecate jackson-module-jaxb-annotations by @yurem in https://github.com/JanssenProject/jans/pull/11286
+* fix(bom): deprecate jackson-module-jaxb-annotations by @yurem in https://github.com/JanssenProject/jans/pull/11287
+* fix(core): fix ClassNotFoundException XmlElement exception by @yurem in https://github.com/JanssenProject/jans/pull/11293
+* fix(cloud-native): demo scripts fail to deploy cluster due to python externally-managed-environment error by @iromli in https://github.com/JanssenProject/jans/pull/11290
+* feat(jans-cedarling): add some logging msgs for jwt service startup by @rmarinn in https://github.com/JanssenProject/jans/pull/11178
+* feat: add field reset button in cedarling authz form by @duttarnab in https://github.com/JanssenProject/jans/pull/11260
+* fix: update terraform provider docs and API calls by @moabu in https://github.com/JanssenProject/jans/pull/11301
+* feat(jans-cli-tui): splash screen by @devrimyatar in https://github.com/JanssenProject/jans/pull/11298
+* feat: allow linking to occur in a popup by @jgomer2001 in https://github.com/JanssenProject/jans/pull/11305
+* fix(config-api): custom script creation failing #11307 by @pujavs in https://github.com/JanssenProject/jans/pull/11308
+* Jans linux setup jetty 12 11276 by @devrimyatar in https://github.com/JanssenProject/jans/pull/11295
+* fix(jans-cli-tui): add pylib to path before importing promptoolkit by @devrimyatar in https://github.com/JanssenProject/jans/pull/11313
+* feat(jans-cedarling): go binding for cedarling by @olehbozhok in https://github.com/JanssenProject/jans/pull/11239
+* fix(jans-linux-setup): jetty.sh script waits service started by @devrimyatar in https://github.com/JanssenProject/jans/pull/11319
+* feat(jans-auth): add missing erver side tests dependecy by @yurem in https://github.com/JanssenProject/jans/pull/11315
+* Lock api by @yurem in https://github.com/JanssenProject/jans/pull/11317
+* Auth deps by @yuremm in https://github.com/JanssenProject/jans/pull/11321
+* feat(jans-config-api): disable jetty ee9-jsp module in jans-config-api by @yurem in https://github.com/JanssenProject/jans/pull/11324
+* chore(deps): bump setuptools from 70.0.0 to 80.1.0 in /docs by @dependabot in https://github.com/JanssenProject/jans/pull/11327
+* chore(deps): bump blazemeter/taurus from 1.16.40 to 1.16.41 in /demos/benchmarking/docker-jans-loadtesting-jmeter by @dependabot in https://github.com/JanssenProject/jans/pull/11302
+* chore(deps): bump docker/setup-qemu-action from 5306bad0baa6b616b9934712d4eba8da2112606d to 737ba1e397ec2caff0d098f75e1136f9a926dc0a by @dependabot in https://github.com/JanssenProject/jans/pull/11283
+* chore(deps): bump actions/setup-python from 5.0.0 to 5.6.0 by @dependabot in https://github.com/JanssenProject/jans/pull/11282
+* chore(deps): bump sigstore/cosign-installer from 3.5.0 to 3.8.2 by @dependabot in https://github.com/JanssenProject/jans/pull/11270
+* fix(jans-fido2): #11331 minor edits by @maduvena in https://github.com/JanssenProject/jans/pull/11332
+* chore: misc casa image updates by @jgomer2001 in https://github.com/JanssenProject/jans/pull/11334
+* docs: add cedarling rust docs by @moabu in https://github.com/JanssenProject/jans/pull/11311
+* chore(deps): bump org.quartz-scheduler:quartz from 2.3.2 to 2.5.0 in /jans-casa by @dependabot in https://github.com/JanssenProject/jans/pull/10206
+* chore(deps): bump commons-io:commons-io from 2.17.0 to 2.19.0 in /jans-casa by @dependabot in https://github.com/JanssenProject/jans/pull/11217
+* fix: fix the android and iOS sample app based on changes in cedarling uniffi binding by @duttarnab in https://github.com/JanssenProject/jans/pull/11294
+* chore(deps): bump org.apache.maven.plugins:maven-clean-plugin from 2.5 to 3.4.1 in /jans-casa by @dependabot in https://github.com/JanssenProject/jans/pull/10903
+* chore(deps): bump org.apache.maven.plugins:maven-war-plugin from 2.3 to 3.4.0 in /jans-casa by @dependabot in https://github.com/JanssenProject/jans/pull/9985
+* chore(deps): bump org.apache.maven.plugins:maven-resources-plugin from 2.6 to 3.3.1 in /jans-casa by @dependabot in https://github.com/JanssenProject/jans/pull/9996
+* chore(deps): bump org.apache.maven.plugins:maven-site-plugin from 2.1.1 to 3.21.0 in /jans-casa by @dependabot in https://github.com/JanssenProject/jans/pull/10064
+* chore(ci): SBOM enrichment and upload as a release asset by @ossdhaval in https://github.com/JanssenProject/jans/pull/11267
+* feat(cloud-native): upgrade to Jetty 12 by @iromli in https://github.com/JanssenProject/jans/pull/11297
+* fix(jans-cedarling): switch cedarling instance to pointer by @SafinWasi in https://github.com/JanssenProject/jans/pull/11338
+* fix(core): fix unable to decorate com.sun.faces.config.ConfigureListener by @yurem in https://github.com/JanssenProject/jans/pull/11345
+* feat(jans-link): turn off Weld dev mode in production by @yuremm in https://github.com/JanssenProject/jans/pull/11347
+* fix(charts): missing feature of jans-keycloak-link by @iromli in https://github.com/JanssenProject/jans/pull/11257
+* fix(jans-cli-tui): include jans-logo.txt in package by @devrimyatar in https://github.com/JanssenProject/jans/pull/11359
+* fix(jans-cli-tui): smtp test failing #11330 by @pujavs in https://github.com/JanssenProject/jans/pull/11358
+* feat(jans-auth): restore Nashorn engine by @yurem in https://github.com/JanssenProject/jans/pull/11363
+* fix: update javadocs plugin to allow generation of javadocs by @moabu in https://github.com/JanssenProject/jans/pull/11364
+* chore: prepare release of 1.6.0 by @moabu in https://github.com/JanssenProject/jans/pull/11376
+* fix: tf license by @moabu in https://github.com/JanssenProject/jans/pull/11382
 
 ## [1.5.0](https://github.com/JanssenProject/jans/compare/v1.4.0...v1.5.0) (2025-04-04)
 
