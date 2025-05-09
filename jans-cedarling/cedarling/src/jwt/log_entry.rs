@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::log::interface::{Indexed, Loggable};
-use crate::log::{BaseLogEntry, LogType};
+use crate::log::{BaseLogEntry, LogLevel, LogType};
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -15,15 +15,19 @@ pub struct JwtLogEntry {
 }
 
 impl JwtLogEntry {
-    /// Shorthand for creating a [`LogType::System`] log.
-    pub fn system(msg: String) -> Self {
-        let base = BaseLogEntry::new_opt_request_id(LogType::System, None);
-        Self { base, msg }
+    /// Helper function for creating log messages
+    pub fn new(msg: impl Into<String>, level: LogLevel) -> Self {
+        let mut base = BaseLogEntry::new_opt_request_id(LogType::System, None);
+        base.level = Some(level);
+        Self {
+            base,
+            msg: msg.into(),
+        }
     }
 }
 
 impl Loggable for JwtLogEntry {
-    fn get_log_level(&self) -> Option<crate::LogLevel> {
+    fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
 }
