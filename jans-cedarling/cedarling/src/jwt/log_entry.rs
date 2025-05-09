@@ -15,10 +15,10 @@ pub struct JwtLogEntry {
 }
 
 impl JwtLogEntry {
-    /// Helper for creating a [`LogLevel::WARN`] log.
-    pub fn warn(msg: String) -> Self {
+    /// Helper function for creating log messages
+    pub fn new(msg: String, level: LogLevel) -> Self {
         let mut base = BaseLogEntry::new_opt_request_id(LogType::System, None);
-        base.level = Some(LogLevel::WARN);
+        base.level = Some(level);
         Self { base, msg }
     }
 }

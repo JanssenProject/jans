@@ -15,11 +15,11 @@ use serde_json::Value;
 use time::OffsetDateTime;
 
 use super::{KeyId, TrustedIssuerId};
-use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
 use crate::http::{HttpClient, HttpClientError};
 use crate::jwt::log_entry::JwtLogEntry;
 use crate::log::Logger;
+use crate::{LogLevel, LogWriter};
 
 #[derive(Deserialize)]
 struct OpenIdConfig {
@@ -124,9 +124,9 @@ impl JwkStore {
                     // we can safely ignore it.
                     if e.to_string().contains("unknown variant") {
                         if let Some(logger) = logger.as_ref() {
-                            logger.log_any(JwtLogEntry::warn(format!(
+                            logger.log_any(JwtLogEntry::new(format!(
                                 "encountered a JWK with an unsupported algorithm, ignoring it: {e}"
-                            )));
+                            ), LogLevel::WARN));
                         }
                         continue;
                     } else {

@@ -21,6 +21,7 @@ mod token;
 mod validator;
 
 use crate::JwtConfig;
+use crate::LogLevel;
 use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
@@ -126,9 +127,10 @@ impl JwtService {
                 for (tkn, metadata) in iss.token_metadata.iter() {
                     if !metadata.trusted {
                         if let Some(logger) = logger.as_ref() {
-                            logger.log_any(JwtLogEntry::warn(format!(
-                                "skipping metadata for {tkn} since `trusted == false`"
-                            )));
+                            logger.log_any(JwtLogEntry::new(
+                                format!("skipping metadata for {tkn} since `trusted == false`"),
+                                LogLevel::WARN,
+                            ));
                         }
                         continue;
                     }
@@ -190,11 +192,14 @@ impl JwtService {
                 // we just ignore input tokens that are not defined
                 // in the policy store's tokens
                 if let Some(iss) = iss {
-                    self.logger.as_ref().map(|logger| {
-                        logger.log_any(JwtLogEntry::warn(format!(
-                            "ignoring {token_name} since it's from an untrusted issuer: '{iss}'"
-                        )));
-                    });
+                    if let Some(logger) = self.logger.as_ref() {
+                        logger.log_any(JwtLogEntry::new(
+                            format!(
+                                "ignoring {token_name} since it's from an untrusted issuer: '{iss}'"
+                            ),
+                            LogLevel::WARN,
+                        ));
+                    }
                 }
                 continue;
             };
