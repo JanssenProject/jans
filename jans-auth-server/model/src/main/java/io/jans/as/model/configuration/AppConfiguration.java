@@ -35,7 +35,6 @@ public class AppConfiguration implements Configuration {
 
     public static final int DEFAULT_AUTHORIZATION_CHALLENGE_SESSION_LIFETIME = 86400;
     public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
-    public static final int DEFAULT_SESSION_JWT_LIFETIME_IN_SECONDS = 86400;
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
     public static final String DEFAULT_AUTHORIZATION_CHALLENGE_ACR = "default_challenge";
@@ -292,9 +291,6 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Session JWT at Authorization Endpoint to encode the claims in a JWT")
     private List<String> sessionJwtSigningAlgValuesSupported;
-
-    @DocProperty(description = "Session JWT lifetime in seconds", defaultValue = "86400")
-    private int sessionJwtLifetimeInSeconds = DEFAULT_SESSION_JWT_LIFETIME_IN_SECONDS;
 
     @DocProperty(description = "Specifies session status list bit size. (2 bits - 4 statuses, 4 bits - 16 statuses). Defaults to 2.")
     private int sessionStatusListBitSize = DEFAULT_SESSION_STATUS_LIST_BIT_SIZE;
@@ -2134,16 +2130,6 @@ public class AppConfiguration implements Configuration {
 
     public void setIntrospectionEncryptionEncValuesSupported(List<String> introspectionEncryptionEncValuesSupported) {
         this.introspectionEncryptionEncValuesSupported = introspectionEncryptionEncValuesSupported;
-    }
-
-    public int getSessionJwtLifetimeInSeconds() {
-        if (sessionJwtLifetimeInSeconds <= 0) sessionJwtLifetimeInSeconds = DEFAULT_SESSION_JWT_LIFETIME_IN_SECONDS;
-        return sessionJwtLifetimeInSeconds;
-    }
-
-    public AppConfiguration setSessionJwtLifetimeInSeconds(int sessionJwtLifetimeInSeconds) {
-        this.sessionJwtLifetimeInSeconds = sessionJwtLifetimeInSeconds;
-        return this;
     }
 
     public List<String> getSessionJwtSigningAlgValuesSupported() {

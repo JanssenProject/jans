@@ -66,7 +66,7 @@ public class SessionJwtService {
             Date now = new Date();
             Calendar expirationCalendar = Calendar.getInstance();
             expirationCalendar.setTime(now);
-            expirationCalendar.add(Calendar.SECOND, appConfiguration.getSessionJwtLifetimeInSeconds());
+            expirationCalendar.add(Calendar.SECOND, appConfiguration.getSessionIdLifetime());
 
             final JwtSigner jwtSigner = new JwtSigner(appConfiguration, webKeysConfiguration, signatureAlgorithm,
                     client.getClientId(), clientService.decryptSecret(client.getClientSecret()));
