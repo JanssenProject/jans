@@ -490,6 +490,7 @@ jobs:
         gh release upload "${VERSION}" *.tar.gz *.sha256sum *.asc
   build_cedarling_krakend:
     if: github.repository == 'JanssenProject/jans'
+    needs: build_cedarling_go
     runs-on: ubuntu-22.04
     strategy:
       matrix:
