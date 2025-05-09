@@ -16,10 +16,13 @@ pub struct JwtLogEntry {
 
 impl JwtLogEntry {
     /// Helper function for creating log messages
-    pub fn new(msg: String, level: LogLevel) -> Self {
+    pub fn new(msg: impl Into<String>, level: LogLevel) -> Self {
         let mut base = BaseLogEntry::new_opt_request_id(LogType::System, None);
         base.level = Some(level);
-        Self { base, msg }
+        Self {
+            base,
+            msg: msg.into(),
+        }
     }
 }
 
