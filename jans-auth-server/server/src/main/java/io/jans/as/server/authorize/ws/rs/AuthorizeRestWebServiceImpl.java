@@ -1035,6 +1035,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.SESSION_ID, authzRequest.getSessionId());
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.CLAIMS, authzRequest.getClaims());
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.AUTHORIZATION_DETAILS, authzRequest.getAuthzDetailsString());
+        redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.SESSION_JWT, Boolean.toString(authzRequest.getShouldReturnSessionJwt()));
 
         // CIBA param
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.AUTH_REQ_ID, authzRequest.getAuthReqId());
