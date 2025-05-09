@@ -114,6 +114,7 @@ public class RegisterRequest extends BaseRequest {
     private SignatureAlgorithm txTokenSignedResponseAlg;
     private KeyEncryptionAlgorithm txTokenEncryptedResponseAlg;
     private BlockEncryptionAlgorithm txTokenEncryptedResponseEnc;
+    private SignatureAlgorithm sessionJwtSignedResponseAlg;
     private SignatureAlgorithm requestObjectSigningAlg;
     private KeyEncryptionAlgorithm requestObjectEncryptionAlg;
     private BlockEncryptionAlgorithm requestObjectEncryptionEnc;
@@ -1000,6 +1001,24 @@ public class RegisterRequest extends BaseRequest {
         this.introspectionEncryptedResponseEnc = introspectionEncryptedResponseEnc;
     }
 
+    /**
+     * Returns the JWS alg algorithm (JWA) required for Session JWT.
+     *
+     * @return The JWS algorithm (JWA) for Session JWT.
+     */
+    public SignatureAlgorithm getSessionJwtSignedResponseAlg() {
+        return sessionJwtSignedResponseAlg;
+    }
+
+    /**
+     * Sets the JWS alg algorithm (JWA) required for Session JWT.
+     *
+     * @param sessionJwtSignedResponseAlg The JWS algorithm (JWA) for Session JWT.
+     */
+    public RegisterRequest setSessionJwtSignedResponseAlg(SignatureAlgorithm sessionJwtSignedResponseAlg) {
+        this.sessionJwtSignedResponseAlg = sessionJwtSignedResponseAlg;
+        return this;
+    }
 
     /**
      * Returns the JWS alg algorithm (JWA) required for Transaction Token responses.
@@ -1911,6 +1930,7 @@ public class RegisterRequest extends BaseRequest {
         result.setTxTokenSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(TX_TOKEN_SIGNED_RESPONSE_ALG.toString())));
         result.setTxTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(TX_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())));
         result.setTxTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(TX_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())));
+        result.setSessionJwtSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(SESSION_JWT_SIGNED_RESPONSE_ALG.toString())));
         result.setRequestObjectSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(REQUEST_OBJECT_SIGNING_ALG.toString())));
         result.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
         result.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
@@ -2100,6 +2120,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (txTokenEncryptedResponseEnc != null) {
             function.apply(TX_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), txTokenEncryptedResponseEnc.getName());
+        }
+        if (sessionJwtSignedResponseAlg != null) {
+            function.apply(SESSION_JWT_SIGNED_RESPONSE_ALG.toString(), sessionJwtSignedResponseAlg.getName());
         }
         if (requestObjectSigningAlg != null) {
             function.apply(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());

@@ -85,6 +85,7 @@ public interface AuthorizeRestWebService {
      * @param dpopJkt             The value of the dpop_jkt authorization request parameter is the JSON Web Key (JWK) Thumbprint
      *                            of the proof-of-possession public key using the SHA-256 hash function - the same value
      *                            as used for the jkt confirmation method defined
+     * @param shouldReturnSessionJwt If true is passed then AS returns back Session JWT
      * @param authorizationDetails The request parameter authorization_details contains, in JSON notation, an array of objects.
      *                             Each JSON object contains the data to specify the authorization requirements for a certain
      *                             type of resource. The type of resource or access requirement is determined by the type field.
@@ -166,6 +167,7 @@ public interface AuthorizeRestWebService {
             @QueryParam("claims") String claims,
             @QueryParam("auth_req_id") String authReqId,
             @QueryParam("dpop_jkt") String dpopJkt,
+            @QueryParam("session_jwt") String shouldReturnSessionJwt,
             @QueryParam("authorization_details") String authorizationDetails,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
@@ -220,6 +222,7 @@ public interface AuthorizeRestWebService {
      * @param dpopJkt            The value of the dpop_jkt authorization request parameter is the JSON Web Key (JWK) Thumbprint
      *                            of the proof-of-possession public key using the SHA-256 hash function - the same value
      *                            as used for the jkt confirmation method defined
+     * @param shouldReturnSessionJwt If true is passed then AS returns back Session JWT
      * @param authorizationDetails The request parameter authorization_details contains, in JSON notation, an array of objects.
      *                             Each JSON object contains the data to specify the authorization requirements for a certain
      *                             type of resource. The type of resource or access requirement is determined by the type field.
@@ -301,6 +304,7 @@ public interface AuthorizeRestWebService {
             @FormParam("claims") String claims,
             @FormParam("auth_req_id") String authReqId,
             @FormParam("dpop_jkt") String dpopJkt,
+            @FormParam("session_jwt") String shouldReturnSessionJwt,
             @FormParam("authorization_details") String authorizationDetails,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,

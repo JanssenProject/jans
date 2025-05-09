@@ -1500,6 +1500,9 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                session_jwt_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Session JWT.
                 tx_token_signed_response_alg:
                   type: string
                   description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -1953,6 +1956,9 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                session_jwt_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Session JWT.
                 tx_token_signed_response_alg:
                   type: string
                   description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -2386,6 +2392,9 @@ paths:
                   introspection_encrypted_response_enc:
                     type: string
                     description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                  session_jwt_signed_response_alg:
+                    type: string
+                    description: JWS alg algorithm (JWA) required for signing Session JWT.
                   tx_token_signed_response_alg:
                     type: string
                     description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
