@@ -1,0 +1,29 @@
+{
+  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+  "email_verified": true,
+  "role": [
+    "CasaAdmin"
+  ],
+  "iss": "https://account.gluu.org",
+  "given_name": "Admin",
+  "middle_name": "Admin",
+  "inum": "a6a70301-af49-4901-9687-0bcdcf4e34fa",
+  "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
+  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
+  "updated_at": 1731698135,
+  "name": "Default Admin User",
+  "nickname": "Admin",
+  "family_name": "User",
+  "jti": "OIn3g1SPSDSKAYDzENVoug",
+  "email": "admin@jans.test",
+  "jansAdminUIRole": [
+    "api-admin"
+  ],
+  "user_name": "admin",
+  "exp": 1724945978,
+  "iat": 1724832259,
+  "acr": "pass",
+  "amr": [
+    "pass"
+  ]
+}
