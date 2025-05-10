@@ -82,6 +82,9 @@ use serde_pyobject::to_pyobject;
 ///
 ///     :returns: A list of log entries matching both the request ID and tag, each converted to a Python dictionary.
 ///
+/// .. method:: shut_down(self)
+///
+///     Closes the connections to the Lock Server and pushes all available logs.
 #[derive(Clone)]
 #[pyclass]
 pub struct Cedarling {
@@ -178,6 +181,11 @@ impl Cedarling {
                 .map(|entry| log_entry_to_py(py, entry))
                 .collect::<PyResult<Vec<PyObject>>>()
         })
+    }
+
+    /// Closes the connections to the Lock Server and pushes all available logs.
+    fn shut_down(&self) {
+        self.inner.shut_down();
     }
 }
 

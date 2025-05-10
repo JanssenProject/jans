@@ -257,7 +257,6 @@ def authorize_with_token():
 
     print()
 
-
 def authorize_without_token():
     # //// Execute authentication request without token ////
 

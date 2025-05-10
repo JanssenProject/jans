@@ -90,3 +90,7 @@ func CallGetLogsByRequestIdAndTag(instance_id uint, request_id string, tag strin
 	logs := G2R.get_logs_by_request_id_and_tag(&instance_id, &request_id, &tag)
 	return logs
 }
+
+func CallShutDown(instance_id uint) {
+	G2R.shut_down(&instance_id)
+}

@@ -40,6 +40,7 @@ const void c_G2RCall_get_log_ids(const void*, const void*);
 const void c_G2RCall_get_logs_by_tag(const void*, const void*);
 const void c_G2RCall_get_logs_by_request_id(const void*, const void*);
 const void c_G2RCall_get_logs_by_request_id_and_tag(const void*, const void*);
+const void c_G2RCall_shut_down(const void*);
 */
 import "C"
 import (
@@ -417,4 +418,12 @@ func (G2RCallImpl) get_logs_by_request_id_and_tag(instance_id *uint, id *string,
 	val := new_list_mapper(ownString)(*(*C.ListRef)(_internal_slot[0]))
 	asmcall.CallFuncG0P1(unsafe.Pointer(C.c_rust2go_internal_drop), unsafe.Pointer(_internal_slot[1]))
 	return val
+}
+func (G2RCallImpl) shut_down(instance_id *uint) {
+	_internal_params := [1]unsafe.Pointer{}
+	instance_id_ref, instance_id_buffer := cvt_ref(cntC_uintptr_t, refC_uintptr_t)(instance_id)
+	_internal_params[0] = unsafe.Pointer(&instance_id_ref)
+	asmcall.CallFuncG0P1(unsafe.Pointer(C.c_G2RCall_shut_down), unsafe.Pointer(&_internal_params))
+	runtime.KeepAlive(_internal_params)
+	runtime.KeepAlive(instance_id_buffer)
 }

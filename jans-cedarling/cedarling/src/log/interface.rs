@@ -67,7 +67,7 @@ pub(crate) trait Indexed {
     }
 }
 
-pub(crate) trait Loggable: serde::Serialize + Indexed {
+pub(crate) trait Loggable: serde::Serialize + Indexed + Clone {
     /// get log level for entity
     /// not all log entities have log level, only when `log_kind` == `System`
     fn get_log_level(&self) -> Option<LogLevel>;
