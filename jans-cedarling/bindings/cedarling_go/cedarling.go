@@ -111,5 +111,5 @@ func (c *Cedarling) GetLogsByRequestIdAndTag(request_id string, tag string) []st
 }
 
 func (c *Cedarling) ShutDown() {
-	internal.ShutDown(c.instance_id)
+	internal.CallShutDown(c.instance_id)
 }
