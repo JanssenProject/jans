@@ -44,12 +44,17 @@ The method will execute the steps for Cedarling initialization with a sample boo
 
 Note the following points in the sample Java Maven project to understand the changes required for using the Kotlin binding in other Java projects.
 
-1. The sample `tokens`, `resource` and `context` input files along with files containing `bootstrap configuration` and `policy- store` used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`.
-2. Refer to the Java code in org.example.Main to see how Cedarling's `init`, `authz`, and `log` interfaces are called using the Kotlin binding.
-3. Added dependencies in pom.xml:
+- The sample `tokens`, `resource` and `context` input files along with files containing `bootstrap configuration` and `policy- store` used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`.
+- Refer to the Java code in org.example.Main to see how Cedarling's `init`, `authz`, and `log` interfaces are called using the Kotlin binding.
+
+#### Added dependencies in pom.xml:
 
 - **Java Native Access (JNA):** A Java library that allows Java code to call native shared libraries (like .so on Linux, .dll on Windows, or .dylib on macOS) without writing JNI (Java Native Interface) code. 
+
 - **kotlinx.coroutines:** Adds support for asynchronous programming using coroutines.
+
 - **kotlin-stdlib-jdk:** The kotlin-stdlib-jdk8 library is a variant of the Kotlin standard library that includes additional features specifically designed to work with JDK 8 (Java Development Kit 8) or higher.
+
 - **nimbus-jose-jwt:** The nimbus-jose-jwt library is a Java library used for working with JWTs (JSON Web Tokens) and JOSE (JavaScript Object Signing and Encryption) standards
+
 - **jackson-databind:** The jackson-databind library is a core module of the Jackson JSON processing framework in Java
