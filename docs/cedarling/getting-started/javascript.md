@@ -62,7 +62,7 @@ const id_token = "<id_token>"
 const userinfo_token = "<userinfo_token>"
 ```
 
-Your *principals* will be built from this tokens.
+Your *principals* will be built from these tokens.
 
 **2. Define the resource**
 
