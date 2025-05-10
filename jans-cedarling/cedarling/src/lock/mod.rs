@@ -12,6 +12,7 @@ mod lock_config;
 mod log_entry;
 mod log_worker;
 mod register_client;
+mod spawn_task;
 
 use crate::app_types::PdpID;
 use crate::log::interface::Loggable;
@@ -25,10 +26,10 @@ use log_worker::*;
 use register_client::*;
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
+use spawn_task::*;
 use std::sync::{Arc, RwLock, Weak};
 use std::time::Duration;
 use thiserror::Error;
-use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
 
 /// The base duration to wait for if an http request fails for workers.
@@ -127,11 +128,8 @@ impl LockService {
                 );
 
                 let cancel_tkn = cancel_tkn.clone();
-                #[cfg(any(target_arch = "wasm32", target_arch = "wasm64"))]
-                wasm_bindgen_futures::spawn_local(async move { log_worker.run(log_rx, cancel_tkn).await });
 
-                #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
-                let handle = tokio::spawn(async move { log_worker.run(log_rx, cancel_tkn).await });
+                let handle = spawn_task(async move { log_worker.run(log_rx, cancel_tkn).await });
 
                 Some(WorkerSenderAndHandle {
                     tx: log_tx.into(),
@@ -152,7 +150,7 @@ impl LockService {
     pub async fn shut_down(&mut self) {
         self.cancel_tkn.cancel();
         if let Some(log_worker) = self.log_worker.take() {
-            _ = log_worker.handle.await;
+            _ = log_worker.handle.await_result().await;
         }
     }
 }
