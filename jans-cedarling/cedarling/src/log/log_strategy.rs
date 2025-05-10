@@ -79,12 +79,13 @@ impl LogStrategy {
     }
 
     pub async fn shut_down(&self) {
-        let mut lock = self
+        let lock = self
             .lock_service
             .write()
-            .expect("obtain lock_service write lock");
+            .expect("obtain lock_service write lock")
+            .take();
 
-        if let Some(mut lock_service) = lock.take() {
+        if let Some(mut lock_service) = lock {
             lock_service.shut_down().await
         }
     }
