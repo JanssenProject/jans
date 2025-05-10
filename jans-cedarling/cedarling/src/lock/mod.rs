@@ -128,7 +128,7 @@ impl LockService {
 
                 let cancel_tkn = cancel_tkn.clone();
                 #[cfg(any(target_arch = "wasm32", target_arch = "wasm64"))]
-                wasm_bindgen_futures::spawn_local(async move { log_worker.run(log_rx, tkn).await });
+                wasm_bindgen_futures::spawn_local(async move { log_worker.run(log_rx, cancel_tkn).await });
 
                 #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
                 let handle = tokio::spawn(async move { log_worker.run(log_rx, cancel_tkn).await });
