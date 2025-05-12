@@ -701,6 +701,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             log.trace("Granting access to session {}, clientTrusted: {}, clientHasAllScopes: {}, permissionGrantedForClient: {}, pairwiseWithOnlyOpenIdScope: {}",
                     sessionUser.getId(), client.getTrustedClient(), clientHasAllScopes, permissionGrantedForClient, pairwiseWithOnlyOpenIdScope);
             sessionUser.addPermission(authzRequest.getClientId(), true);
+            sessionIdService.setSessionIndexIfNeeded(sessionUser);
             sessionIdService.updateSessionId(sessionUser);
         } else {
             clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), client.getClientId());
@@ -717,6 +718,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
                 log.trace("Granting access to session {}, clientAuthorization has all scopes {}", sessionUser.getId(), clientAuthorization.getScopes());
                 sessionUser.addPermission(authzRequest.getClientId(), true);
+                sessionIdService.setSessionIndexIfNeeded(sessionUser);
                 sessionIdService.updateSessionId(sessionUser);
             } else {
                 log.debug("no required scopes in client authz - redirect to authorization page, request {}", authzRequest);

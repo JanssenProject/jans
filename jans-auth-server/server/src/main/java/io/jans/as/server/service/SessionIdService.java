@@ -34,6 +34,7 @@ import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.as.server.service.external.session.SessionEventType;
+import io.jans.as.server.service.session.SessionStatusListIndexService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.JansAttribute;
@@ -130,6 +131,9 @@ public class SessionIdService {
 
     @Inject
     private AttributeService attributeService;
+
+    @Inject
+    private SessionStatusListIndexService sessionStatusListIndexService;
 
     private String buildDn(String sessionId) {
         return String.format("jansId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
@@ -458,6 +462,12 @@ public class SessionIdService {
             if (log.isErrorEnabled())
                 log.error("Failed generating session state! " + e.getMessage(), e);
             throw new FailedComputeSessionStateException(e.getMessage(), e);
+        }
+    }
+
+    public void setSessionIndexIfNeeded(SessionId session) {
+        if (session.getPredefinedAttributes().getIndex() == null) {
+            session.getPredefinedAttributes().setIndex(sessionStatusListIndexService.next());
         }
     }
 
