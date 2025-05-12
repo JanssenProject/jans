@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -104,7 +105,7 @@ public class RevokeSessionRestWebService {
             sessionIdService.remove(authenticatedSessions);
 
             sessionStatusListPool.execute(() -> {
-                final List<Integer> indexes = authenticatedSessions.stream().map(sessionId -> sessionId.getPredefinedAttributes().getIndex()).collect(Collectors.toList());
+                final List<Integer> indexes = authenticatedSessions.stream().map(sessionId -> sessionId.getPredefinedAttributes().getIndex()).filter(Objects::nonNull).collect(Collectors.toList());
                 sessionStatusListIndexService.updateStatusAtIndexes(indexes, TokenStatus.INVALID);
             });
             log.debug("Revoked {} user's sessions (user: {})", authenticatedSessions.size(), user.getUserId());
