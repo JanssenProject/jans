@@ -8,6 +8,7 @@ package io.jans.lock.service;
 
 import java.io.Serializable;
 
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 
 import io.jans.as.client.OpenIdConfigurationClient;
@@ -56,7 +57,7 @@ public class OpenIdService extends Initializable implements Serializable {
 		OpenIdConfigurationClient client = new OpenIdConfigurationClient(openIdIssuerEndpoint);
 		openIdConfiguration = client.execOpenIdConfiguration();
 
-		if (openIdConfiguration == null) {
+		if ((openIdConfiguration == null) || (openIdConfiguration.getStatus() != HttpStatus.SC_OK)) {
 			throw new MissingResourceException("Failed to load OpenID configuration!");
 		}
 
