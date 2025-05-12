@@ -9019,25 +9019,6 @@
                   
   
 
-  <nav class="md-tags" >
-    
-      
-      
-        <span class="md-tag">Cedar</span>
-      
-    
-      
-      
-        <span class="md-tag">Cedarling</span>
-      
-    
-      
-      
-        <span class="md-tag">KrakenD</span>
-      
-    
-  </nav>
-
 
 
   <a href="https://github.com/JanssenProject/jans/edit/main/docs/cedarling/cedarling-krakend.md" title="Edit this page" class="md-content__button md-icon">
@@ -9047,16 +9028,18 @@
 
 
 <h1 id="cedarling-krakend-plugin">Cedarling KrakenD Plugin<a class="headerlink" href="#cedarling-krakend-plugin" title="Permanent link">#</a></h1>
-<p>This is a <a href="https://www.krakend.io/docs/extending/http-server-plugins/">KrakenD HTTP server plugin</a> that intercepts a call to a selected endpoint, uses the embedded <a href="https://docs.jans.io/head/cedarling/cedarling-getting-started/">Cedarling</a> PDP and allows access only if the authorization result is <code>true</code>.</p>
+<p>This is a <a href="https://www.krakend.io/docs/extending/http-server-plugins/">KrakenD HTTP server plugin</a> that intercepts a call to a selected endpoint, calls the <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/README.md">sidecar</a> and allows access only if the sidecar responds with <code>true</code>.</p>
 <h2 id="functionality">Functionality<a class="headerlink" href="#functionality" title="Permanent link">#</a></h2>
+<p>When an end user calls the KrakenD endpoint protected by the plugin, the following steps happen:</p>
 <ol>
-<li>During startup, the KrakenD plugin reads the environment variables and initializes a Cedarling instance</li>
-<li>When the protected endpoint is called, the plugin intercepts the call and creates a Cedarling authorization request.</li>
-<li>If the result of the authorization request is <code>true</code>, the plugin allows the endpoint to respond. Otherwise, the plugin responds with <code>403 Forbidden</code></li>
+<li>The plugin intercepts the call, and creates an <a href="https://openid.github.io/authzen/">AuthZen</a> access evaluation request.</li>
+<li>The plugin sends the request to the sidecar, which is running on the same host as KrakenD</li>
+<li>The sidecar calls cedarling's <code>authz()</code> interface to check if this call is allowed or not according to the policy store loaded</li>
+<li>The sidecar responds back to the plugin. If the decision was <code>true</code>, the plugin allows the request to pass through to the KrakenD backend. Otherwise, it responds with 403 Forbidden.</li>
 </ol>
-<p><a href="https://sequencediagram.org/index.html#initialData=C4S2BsFMAIGFICYEMBO4QDsDm0DSKkBrSDAEWgAdwBXLTAKACMB7YYZgWwtVAGMRuGYAGdo9etxR8BSIXHQlgEniH6DgeAsTLKpqmXPjI0mLOPxESpALQA+C9tIAuaJjAgk6AF4wjqdNjQAGYonAA6GCQAbiChGByK0FGoHoxQwvSwCkJ2DlYuAOIAogAq0AD0FKHAkLw1CBHQ1gAS0ABEAILUwAAWzCggXkigzBguAEKQqJAo0AA8AFIA6iW2bfR5ZHZ+JtguAN5twtSMAFa1wG1Oh+zawleHSLy8kMLCAPq3JFdtiytrAF8AQAaCJtFCvZjUFAvB5tYAATwokB+C1kwicTmaJRKAAV3gAlSAAR2or0uwLaIAQP2EnEg72pbUpVWYyL0rzaEWubR6UwQMweILa0PAcL6wkuTjaAEYAEwAdgAdAAGVVKmXMtrcXo-SrVC6IZlg1nsXjMMXSnpsChtIEgsFPEYYOEYJAJVHozEdOogUaYsJtYolQN2gH0TwaYAoMmZRD+Uy5LT5aDR2ObGy2LIgRQHbUGuqIRkYILMK7tTClu30SDgYQwIKeetx4wBLBJyxkFyNuuQDbJrZZ7LAFwAFhVAGZoAAxfqMakCjA1jAIIA">Sequence Diagram</a></p>
+<p><a href="https://sequencediagram.org/index.html#initialData=C4S2BsFMAIGFICYEMBO4QDsDm0DSKkBrSDAEWgAdwBXLTAKACMB7YYZgWwtVAGMRuGYAGdo9etxR8BSIXHQlgEniH6DgeAsTLKpqmXIDKIBJF6pd09XESp02cbAVCAtAD58REqQBc0AOIAogAq0AD0FCisZsCIADoY0C4AEtAARACC1MAAFswoIABeSKDMGH4AQpCokCjQADwAUgDqwW5p9J7apO7GpuYofgDeacLUjABWMWk+I8AAnhSQM2ktwWkANAlpJiu8tmiYWJvbkcxLepDCMyNIvPvCwgD67NorTa3tAL5fWxhpKCuzGoKH2NzSCyWK0asmEPh8yWCwQACk8AEqQACO1CuwBO-12PlGnEgT12GzSZwuoCu4Jy1VMKBuv22IPAdOYwjxRIAjAAmADsADoAAyioU8zaUko5FYRKKxXixBD4ykK5i8Zjsok5NgUNI-Fn-O6lf6zNIYJAcZZEmEYOE+DJKkBleFxNJBYLug1feh9MyodzwZCHbB+JDZHKFAAUdwez1eJAAvB82n9AcJgaDIEmhXm-iaXRhc3mAJT0JDgDTAFA4+jBuxHXomAODaA1uv+gbuLreYZpfogYRFmbt2uQX29shB5zAftnRXKskYABmzFHO1X699kHAwhgK8r+-rB3sWGb-VQfkPe8gfpb3Y8Wj70BGg+HZVHN-3k+f07cTggIofgACwigAzNAABi+SMCYpgYPQJAIEAA">Sequence Diagram</a></p>
 <h2 id="downloading">Downloading<a class="headerlink" href="#downloading" title="Permanent link">#</a></h2>
-<p>The cedarling-krakend plugin builds are available via <a href="https://github.com/JanssenProject/jans/releases">Janssen</a> releases. Please note that builds are architecture, platform, and KrakenD version specific. This means that builds compiled against KrakenD version <code>2.9.0</code> for Windows will not work on other versions or operating systems. The build tags are formatted as follows:</p>
+<p>The cedarling-krakend plugin builds are available via <a href="https://github.com/JanssenProject/jans/releases">Janssen</a> releases. Please note that builds are architecture, platform, and KrakenD version specific. This means that builds compiled against KrakenD version <code>2.9.0</code> will not work on other versions. The build tags are formatted as follows:</p>
 <div class="highlight"><pre><span></span><code>cedarling-krakend-&lt;architecture&gt;-&lt;krakend version and platform&gt;-&lt;Janssen version&gt;.so 
 </code></pre></div>
 <p>Use the following table to find which build you need:</p>
@@ -9083,8 +9066,9 @@
 </table>
 <p>If you are running a different version of KrakenD, you can use the following steps to build the plugin yourself.</p>
 <h2 id="building">Building<a class="headerlink" href="#building" title="Permanent link">#</a></h2>
+<p>Krakend recommends building via their builder docker image, to produce builds that match the target architecture and Go version. To build:</p>
 <ul>
-<li>Clone the <code>cedarling-krakend</code> folder of the Janssen Repository:
+<li>Clone the Janssen repository
     <div class="highlight"><pre><span></span><code>git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans
 cd jans
 git sparse-checkout init --cone
@@ -9092,16 +9076,6 @@ git checkout main
 git sparse-checkout set jans-cedarling 
 cd cedarling-krakend
 </code></pre></div></li>
-<li>Download the dynamic shared object file(s) for the <code>cedarling_go</code> binding, compiled for your platform: <ul>
-<li>Windows:<ul>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.dll">cedarling_go.dll</a></li>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.lib">cedarling_go.lib</a></li>
-</ul>
-</li>
-<li>Mac OS: <a href="https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.dylib">cedarling_go.dylib</a></li>
-<li>Linux: <a href="https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.so">libcedarling_go.so</a></li>
-</ul>
-</li>
 <li>
 <p>Build the plugin, replacing <code>&lt;x.y.z&gt;</code> with the KrakenD version you want to build against: </p>
 <ul>
@@ -9112,7 +9086,7 @@ cd cedarling-krakend
 <ul>
 <li>For on-premise installations:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>docker run -it -v &quot;$PWD:/app&quot; -w /app krakend/builder:&lt;x.y.z&gt;-linux-generic go build -buildmode=plugin -o cedarling-krakend.so .
+<div class="highlight"><pre><span></span><code>docker run -it -v &quot;$PWD:/app&quot; -w /app krakend/builder:&lt;x.y.z&gt;-linux-generic go build -buildmode=plugin -o yourplugin.so .
 </code></pre></div>
 <ul>
 <li>For ARM64 Docker targets:</li>
@@ -9124,7 +9098,7 @@ cd cedarling-krakend
 <span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;GOHOSTARCH=amd64&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>krakend/builder:&lt;x.y.z&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>go<span class="w"> </span>build<span class="w"> </span>-ldflags<span class="o">=</span><span class="s1">&#39;-extldflags=-fuse-ld=bfd -extld=aarch64-linux-musl-gcc&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-buildmode<span class="o">=</span>plugin<span class="w"> </span>-o<span class="w"> </span>cedarling-krakend.so<span class="w"> </span>.
+<span class="w">    </span>-buildmode<span class="o">=</span>plugin<span class="w"> </span>-o<span class="w"> </span>yourplugin.so<span class="w"> </span>.
 </code></pre></div>
 <ul>
 <li>For ARM64 on-premise installs:</li>
@@ -9136,14 +9110,16 @@ cd cedarling-krakend
 <span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;GOHOSTARCH=amd64&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>krakend/builder:&lt;x.y.z&gt;-linux-generic<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>go<span class="w"> </span>build<span class="w"> </span>-ldflags<span class="o">=</span><span class="s1">&#39;-extldflags=-fuse-ld=bfd -extld=aarch64-linux-gnu-gcc&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-buildmode<span class="o">=</span>plugin<span class="w"> </span>-o<span class="w"> </span>cedarling-krakend.so<span class="w"> </span>.
+<span class="w">    </span>-buildmode<span class="o">=</span>plugin<span class="w"> </span>-o<span class="w"> </span>yourplugin.so<span class="w"> </span>.
 </code></pre></div>
 </li>
 </ul>
+<p>Check <a href="https://www.krakend.io/docs/extending/injecting-plugins/">KrakenD documentation</a> on how to load plugins.</p>
 <h2 id="prerequisites-for-testing">Prerequisites for testing<a class="headerlink" href="#prerequisites-for-testing" title="Permanent link">#</a></h2>
 <p>To test the plugin, you will need:</p>
 <ul>
-<li>A cedarling policy store with a policy for our gateway. To create this, please follow <a href="https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World#1-author-policies">these</a> steps.</li>
+<li>A cedarling policy store with a policy for our gateway. To create this, please follow <a href="https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#1-author-policies">these</a> steps.</li>
+<li>An instance of the cedarling sidecar, using the policy store mentioned above. Please follow <a href="https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#2-deploy-cedarling-sidecar">these</a> steps. </li>
 <li>For our demo, we will use this sample policy as outlined in the instructions:
     <div class="highlight"><pre><span></span><code>@id(&quot;allow_one&quot;)
 permit(
@@ -9159,21 +9135,11 @@ when {
 <li>This policy will allow access so long as the access token contains the <code>profile</code> scope.</li>
 <li>A <a href="https://www.krakend.io/docs/overview/installing/">KrakenD server installation</a>. For development purposes, the binary install is recommended. For production setups, the Docker method is recommended.</li>
 <li>The plugin <code>.so</code> file for your architecture. For Mac OS hosts, ARM64 is required.</li>
-<li>The dynamic shared object file(s) for the <code>cedarling_go</code> binding, compiled for your platform: <ul>
-<li>Windows:<ul>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.dll">cedarling_go.dll</a></li>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.lib">cedarling_go.lib</a></li>
-</ul>
-</li>
-<li>Mac OS: <a href="https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.dylib">cedarling_go.dylib</a></li>
-<li>Linux: <a href="https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.so">libcedarling_go.so</a></li>
-</ul>
-</li>
 <li>A configuration file. Sample configuration is provided in <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling-krakend/krakend.json">krakend.json</a>.</li>
 </ul>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
-<p>Check the sample configuration in <code>krakend.json</code> to see an example KrakenD configuration which loads the plugin. The following table describes the plugin-specific configuration keys. These keys are mandatory and must be provided. Additional configuration is described in <a href="https://www.krakend.io/docs/configuration/structure/">KrakenD documentation</a>.</p>
-<p>The <code>namespace</code> field in the configuration needs to be the cedar namespace you used when creating the policy store. By default, Agama Lab sets the namespace to <code>Jans</code>. If you are following the demo, you will use the same name. </p>
+<p>See <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling-krakend/krakend.json">krakend.json</a> to see an example KrakenD configuration which loads the plugin. The following table describes the plugin-specific configuration keys. These keys are mandatory and must be provided. Additional configuration is described in <a href="https://www.krakend.io/docs/configuration/structure/">KrakenD documentation</a>.</p>
+<p>The <code>namespace</code> field in the configuration needs to be the cedar namespace you used when creating the policy store. By default, Agama Lab sets the namespace to the name of the policy store. If you are following the demo, this value is <code>gatewayDemo</code>.</p>
 <table>
 <thead>
 <tr>
@@ -9191,46 +9157,29 @@ when {
 <td>KrakenD endpoint to protect</td>
 </tr>
 <tr>
+<td>sidecar_endpoint</td>
+<td>String</td>
+<td>http://127.0.0.1:5000/cedarling/evaluation</td>
+<td>Sidecar evaluation URL</td>
+</tr>
+<tr>
 <td>namespace</td>
 <td>String</td>
-<td>Jans</td>
-<td>Cedar namespace being used by the policy store</td>
+<td>gatewayDemo</td>
+<td>Cedar namespace being used by the sidecar</td>
 </tr>
 </tbody>
 </table>
 <h2 id="running">Running<a class="headerlink" href="#running" title="Permanent link">#</a></h2>
-<p><strong>Warning</strong>: Windows and Mac OS are untested. Only Linux has been fully tested against KrakenD.</p>
 <ol>
-<li>Place <code>krakend.json</code> and the dynamic shared object file(s) in your current working directory</li>
-<li>Create a folder named <code>plugin</code> in the current working directory and place the plugin <code>.so</code> file in that folder</li>
-<li>
-<p>To properly load the shared library, Linux and Mac OS platforms need to be told where to find your shared object file. On Windows this is detected automatically so long as the object file is placed in the current working directory.</p>
-<ul>
-<li>Mac OS: <code>export DYLD_LIBRARY_PATH=$(pwd):$DYLD_LIBRARY_PATH</code> </li>
-<li>
-<p>Linux: <code>export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH</code></p>
-<p>On Linux, you can verify the dynamic linking like so:</p>
-<p><div class="highlight"><pre><span></span><code>$ ldd plugin/*.so 
-...
-libcedarling_go.so =&gt; /path/to/current/directory/libcedarling_go.so
-</code></pre></div>
-4. Set the Cedarling <a href="https://docs.jans.io/head/cedarling/cedarling-properties/">bootstrap</a> variables in your environment.
-    - For gateway functionality, at minimum you will need the following properties set:</p>
-</li>
-</ul>
-<p><div class="highlight"><pre><span></span><code>CEDARLING_APPLICATION_NAME=Gateway
-CEDARLING_POLICY_STORE_URI=&lt;Your policy store URI&gt;
-CEDARLING_WORKLOAD_AUTHZ=enabled
-CEDARLING_PRINCIPAL_BOOLEAN_OPERATION={\&quot;===\&quot;:[{\&quot;var\&quot;:\&quot;Jans::Workload\&quot;},\&quot;ALLOW\&quot;]}
-CEDARLING_ID_TOKEN_TRUST_MODE=none
-</code></pre></div>
-5. Run the KrakenD server: <code>krakend run -c krakend.json</code>
-6. KrakenD is running on <code>http://127.0.0.1:8080</code>
-7. Test with no authentication: <code>curl http://127.0.0.1:8080/protected</code>. You should get a 403 Forbidden
-8. Test with authentication (a sample token is provided):</p>
-</li>
+<li>Start the cedarling sidecar. The sample config expects the sidecar to be running on port 5000</li>
+<li>Place <code>krakend.json</code> and the plugin <code>.so</code> file in your current working directory</li>
+<li>Run the KrakenD server: <code>krakend run -c krakend.json</code></li>
+<li>KrakenD is running on <code>http://127.0.0.1:8080</code></li>
+<li>Test with no authentication: <code>curl http://127.0.0.1:8080/protected</code>. You should get a 403 Forbidden</li>
+<li>Test with authentication:</li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">ACCESS_TOKEN</span><span class="o">=</span>eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiY29kZSI6IjNlMmEyMDEyLTA5OWMtNDY0Zi04OTBiLTQ0ODE2MGMyYWIyNSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhdWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhY3IiOiJzaW1wbGVfcGFzc3dvcmRfYXV0aCIsIng1dCNTMjU2IjoiIiwibmJmIjoxNzMxOTUzMDMwLCJzY29wZSI6WyJyb2xlIiwib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTczMTk1MzAyNywiZXhwIjoxNzMyMTIxNDYwLCJpYXQiOjE3MzE5NTMwMzAsImp0aSI6InVaVWgxaERVUW82UEZrQlBud3BHemciLCJ1c2VybmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMwNiwidXJpIjoiaHR0cHM6Ly9qYW5zLnRlc3QvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.Pt-Y7F-hfde_WP7ZYwyvvSS11rKYQWGZXTzjH_aJKC5VPxzOjAXqI3Igr6gJLsP1aOd9WJvOPchflZYArctopXMWClbX_TxpmADqyCMsz78r4P450TaMKj-WKEa9cL5KtgnFa0fmhZ1ZWolkDTQ_M00Xr4EIvv4zf-92Wu5fOrdjmsIGFot0jt-12WxQlJFfs5qVZ9P-cDjxvQSrO1wbyKfHQ_txkl1GDATXsw5SIpC5wct92vjAVm5CJNuv_PE8dHAY-KfPTxOuDYBuWI5uA2Yjd1WUFyicbJgcmYzUSVt03xZ0kQX9dxKExwU2YnpDorfwebaAPO7G114Bkw208g
+<div class="highlight"><pre><span></span><code><span class="nv">ACCESS_TOKEN</span><span class="o">=</span>eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiY29kZSI6IjNlMmEyMDEyLTA5OWMtNDY0Zi04OTBiLTQ0ODE2MGMyYWIyNSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhdWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhY3IiOiJzaW1wbGVfcGFzc3dvcmRfYXV0aCIsIng1dCNTMjU2IjoiIiwibmJmIjoxNzMxOTUzMDMwLCJzY29wZSI6WyJyb2xlIiwib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTczMTk1MzAyNywiZXhwIjoxNzMyMTIxNDYwLCJpYXQiOjE3MzE5NTMwMzAsImp0aSI6InVaVWgxaERVUW82UEZrQlBud3BHemciLCJ1c2VybmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMwNiwidXJpIjoiaHR0cHM6Ly9qYW5zLnRlc3QvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.Pt-Y7F-hfde_WP7ZYwyvvSS11rKYQWGZXTzjH_aJKC5VPxzOjAXqI3Igr6gJLsP1aOd9WJvOPchflZYArctopXMWClbX_TxpmADqyCMsz78r4P450TaMKj-WKEa9cL5KtgnFa0fmhZ1ZWolkDTQ_M00Xr4EIvv4zf-92Wu5fOrdjmsIGFot0jt-12WxQlJFfs5qVZ9P-cDjxvQSrO1wbyKfHQ_txkl1GDATXsw5SIpC5wct92vjAVm5CJNuv_PE8dHAY-KfPTxOuDYBuWI5uA2Yjd1WUFyicbJgcmYzUSVt03xZ0kQX9dxKExwU2YnpDorfwebaAPO7G114Bkw208g
 
 curl<span class="w"> </span>http://127.0.0.1:8080/protected<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$ACCESS_TOKEN</span><span class="s2">&quot;</span>
 </code></pre></div>
@@ -9241,7 +9190,7 @@ curl<span class="w"> </span>http://127.0.0.1:8080/protected<span class="w"> </sp
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-12T16:12:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-12T12:09:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-12</span>
       
         <br>
         Created:
