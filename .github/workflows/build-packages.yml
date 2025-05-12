@@ -653,7 +653,10 @@ jobs:
           
           case "${{ matrix.name }}" in
             ubuntu22)
-              FILE="libcedarling_go-${TAG}.so"
+              FILE="libcedarling_go-${TAG}_x86-64.so"
+              ;;
+            ubuntu22-arm)
+              FILE="libcedarling_go-${TAG}_arm64.so"
               ;;
             mac)
               FILE="libcedarling_go-${TAG}.dylib"
