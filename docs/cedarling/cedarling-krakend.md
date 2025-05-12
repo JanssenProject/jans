@@ -25,8 +25,8 @@ Use the following table to find which build you need:
 
 |   | amd64 | arm64 |
 | - | ----- | ----- |
-| Docker | `amd64-builder-2.9.0-1.6.0.so` | `arm64-builder-2.9.0-1.6.0.so` |
-| On-premise | `amd64-builder-2.9.0-linux-generic-1.6.0.so` | `arm64-builder-2.9.0-linux-generic-1.6.0.so` |
+| Docker | `amd64-builder-2.9.0-0.0.0.so` | `arm64-builder-2.9.0-0.0.0.so` |
+| On-premise | `amd64-builder-2.9.0-linux-generic-0.0.0.so` | `arm64-builder-2.9.0-linux-generic-0.0.0.so` |
 
 If you are running a different version of KrakenD, you can use the following steps to build the plugin yourself.
 
