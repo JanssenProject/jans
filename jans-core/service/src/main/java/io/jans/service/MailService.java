@@ -41,15 +41,15 @@ import jakarta.inject.Named;
 import jakarta.activation.CommandMap;
 import jakarta.activation.MailcapCommandMap;
 
-import javax.mail.Message;
-import javax.mail.Multipart;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import jakarta.mail.Message;
+import jakarta.mail.Multipart;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
 
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -246,7 +246,7 @@ public class MailService {
             final String userName = smtpConfiguration.getSmtpAuthenticationAccountUsername();
             final String password = smtpConfiguration.getSmtpAuthenticationAccountPasswordDecrypted();
 
-            session = Session.getInstance(props, new javax.mail.Authenticator() {
+            session = Session.getInstance(props, new jakarta.mail.Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(userName, password);
                 }

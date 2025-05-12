@@ -5,7 +5,7 @@
 	<artifactId>jans-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>jans-bom</name>
-	<version>0.0.0-nightly</version>
+	<version>1.6.0</version>
 
     <distributionManagement>
 	  <repository>
@@ -436,7 +436,7 @@
 			<!-- <dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
-				<version>0.0.0-nightly</version>
+				<version>1.6.0</version>
 			</dependency> -->
 
 			<!-- hibernate -->
@@ -1037,7 +1037,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.6.3</version>
+					<version>3.8.0</version>
 					<configuration>
 						<failOnError>false</failOnError>
 						<additionalJOption>-Xdoclint:none</additionalJOption>
