@@ -197,10 +197,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String dpopJkt, String shouldReturnSessionJwt, String authorizationDetails,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
-        if (log.isDebugEnabled()) {
-            log.debug(">> shouldReturnSessionJwt={}", shouldReturnSessionJwt);
-        }
-
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setHttpMethod(HttpMethod.GET);
         authzRequest.setScope(scope);

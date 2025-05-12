@@ -61,6 +61,7 @@ public class AuthorizationRequest extends BaseRequest {
     private String request;
     private String requestUri;
 
+    private boolean requestSessionJwt;
     private boolean requestSessionId;
     private String sessionId;
 
@@ -451,6 +452,26 @@ public class AuthorizationRequest extends BaseRequest {
     }
 
     /**
+     * Returns whether request session jwt
+     *
+     * @return whether request session jwt
+     */
+    public boolean isRequestSessionJwt() {
+        return requestSessionJwt;
+    }
+
+    /**
+     * Sets whether to request session jwt
+     *
+     * @param requestSessionJwt request session jwt     *
+     * @return authorization request
+     */
+    public AuthorizationRequest setRequestSessionJwt(boolean requestSessionJwt) {
+        this.requestSessionJwt = requestSessionJwt;
+        return this;
+    }
+
+    /**
      * Gets session id.
      *
      * @return session id.
@@ -616,6 +637,7 @@ public class AuthorizationRequest extends BaseRequest {
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REQUEST, request);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REQUEST_URI, requestUri);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REQUEST_SESSION_ID, requestSessionId);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.SESSION_JWT, requestSessionJwt);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.SESSION_ID, sessionId);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
@@ -678,6 +700,7 @@ public class AuthorizationRequest extends BaseRequest {
             putNotBlank(parameters, AuthorizeRequestParam.REQUEST, request);
             putNotBlank(parameters, AuthorizeRequestParam.REQUEST_URI, requestUri);
             putNotBlank(parameters, AuthorizeRequestParam.REQUEST_SESSION_ID, requestSessionId ? Boolean.toString(requestSessionId) : null);
+            putNotBlank(parameters, AuthorizeRequestParam.SESSION_JWT, requestSessionJwt ? Boolean.toString(requestSessionJwt) : null);
             putNotBlank(parameters, AuthorizeRequestParam.SESSION_ID, sessionId);
             putNotBlank(parameters, AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
             putNotBlank(parameters, AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
