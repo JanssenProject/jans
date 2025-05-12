@@ -572,7 +572,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         sessionStatusListPool.execute(() -> {
             final SessionId session = pair.getFirst();
-            if (session != null && session.getPredefinedAttributes().getIndex() >= 0) {
+            if (session != null && session.getPredefinedAttributes().getIndex() != null && session.getPredefinedAttributes().getIndex() >= 0) {
                 sessionStatusListIndexService.updateStatusAtIndexes(Lists.newArrayList(session.getPredefinedAttributes().getIndex()), TokenStatus.INVALID);
             }
         });

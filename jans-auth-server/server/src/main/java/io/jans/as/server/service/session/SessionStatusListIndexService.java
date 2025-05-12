@@ -10,11 +10,9 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * @author Yuriy Z
@@ -64,6 +62,9 @@ public class SessionStatusListIndexService {
     }
 
     private Collection<SessionStatusIndexPool> findPoolsByIndexes(List<Integer> indexes) {
+        // filter out nulls
+        indexes = indexes.stream().filter(Objects::nonNull).collect(Collectors.toList());
+
         String logPrefix = sessionStatusIndexPoolService.logPrefix();
         Map<Integer, SessionStatusIndexPool> pools = new HashMap<>();
         for (Integer index : indexes) {
