@@ -91,11 +91,13 @@ public class SessionStatusListIndexService {
     }
 
     public Integer next() {
+        String logPrefix = sessionStatusIndexPoolService.logPrefix();
         try {
-            return nextIndex().getFirst();
+            final Integer first = nextIndex().getFirst();
+            log.trace("{} Next index: {}", logPrefix, first);
+            return first;
         } catch (Exception e) {
             // return -1. Even if we failed to get next index, we don't want to fail entire call
-            String logPrefix = sessionStatusIndexPoolService.logPrefix();
             log.error(logPrefix + "Failed to get next index", e);
             return -1;
         }

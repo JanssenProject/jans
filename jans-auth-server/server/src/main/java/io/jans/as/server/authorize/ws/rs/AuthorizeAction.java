@@ -379,6 +379,7 @@ public class AuthorizeAction {
                 for (Map.Entry<String, Boolean> entity : session.getPermissionGrantedMap().getPermissionGranted().entrySet()) {
                     unauthenticatedSession.addPermission(entity.getKey(), entity.getValue());
                 }
+                sessionIdService.setSessionIndexIfNeeded(unauthenticatedSession);
                 sessionIdService.remove(session); // #1030, remove previous session
             }
 
