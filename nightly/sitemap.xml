@@ -237,6 +237,10 @@
          <lastmod>2025-05-13</lastmod>
     </url>
     <url>
+         <loc>https://jans.io/docs/nightly/cedarling/uniffi/cedarling-kotlin/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
          <loc>https://jans.io/docs/nightly/cedarling/uniffi/cedarling-uniffi/</loc>
          <lastmod>2025-05-13</lastmod>
     </url>
@@ -261,43 +265,95 @@
          <lastmod>2025-05-13</lastmod>
     </url>
     <url>
-         <loc>https://jans.io/docs/nightly/contribute/implementation-design/agama/</loc>
-         <lastmod>2025-05-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-auth-server/</loc>
-         <lastmod>2025-05-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-cli/</loc>
-         <lastmod>2025-05-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-config-api/</loc>
-         <lastmod>2025-05-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-core/</loc>
-         <lastmod>2025-05-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-fido2/</loc>
-         <lastmod>2025-05-13</lastmod>
-    </url>
-    <url>
          <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-notify/</loc>
          <lastmod>2025-05-13</lastmod>
     </url>
     <url>
-         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-orm/</loc>
-         <lastmod>2025-05-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-scim/</loc>
-         <lastmod>2025-05-13</lastmod>
-    </url>
-    <url>
          <loc>https://jans.io/docs/nightly/contribute/implementation-design/technical-overview-template/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/agama-design/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/agama-design/adr/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-auth-server-design/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-auth-server-design/adr/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-casa-design/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-casa-design/adr/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-cedarling-design/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-cedarling-design/adr/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-cedarling-design/adr/adr-cedarling-initial-design-discussion/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-cli-design/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-cli-design/adr/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-config-api-design/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-config-api-design/adr/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-core-design/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-core-design/adr/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-fido2-design/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-fido2-design/adr/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-orm-design/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-orm-design/adr/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-scim-design/</loc>
+         <lastmod>2025-05-13</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/contribute/implementation-design/jans-scim-design/adr/</loc>
          <lastmod>2025-05-13</lastmod>
     </url>
     <url>
