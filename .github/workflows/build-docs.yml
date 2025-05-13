@@ -22,7 +22,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g."v1.1.6")'
+        description: 'Version tag (e.g."v1.6.0")'
         default: "nightly"
         required: false
 concurrency:
