@@ -2,16 +2,17 @@
 
 package main
 
+// #cgo LDFLAGS: -L. -lcedarling_go
+import "C"
+
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"html"
-	"io"
 	"net/http"
 	"strings"
+
+	"github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
 )
 
 // pluginName is the plugin name
@@ -24,34 +25,20 @@ func (r registerer) RegisterHandlers(f func(name string, handler func(context.Co
 	f(string(r), r.registerHandlers)
 }
 
-func createPayload(req *http.Request, namespace string) AuthZenPayload {
-	bearer := req.Header.Get("Authorization")
-	split_bearer := strings.Split(bearer, " ")
-	token := split_bearer[1]
-	var subject_properties = map[string]string{}
-	subject_properties["access_token"] = token
-	resource_properties := map[string]map[string]string{}
-	resource_properties["header"] = map[string]string{}
-	resource_properties["url"] = map[string]string{}
-	resource_properties["url"]["host"] = req.Host
-	resource_properties["url"]["path"] = req.URL.Path
-	resource_properties["url"]["protocol"] = "http"
-	payload := AuthZenPayload{
-		Subject: Subject{
-			Type:       "JWT",
-			Id:         "cedarling",
-			Properties: subject_properties,
-		},
-		Resource: Resource{
-			Type:       fmt.Sprintf("%s::HTTP_Request", namespace),
-			Id:         "some_id",
-			Properties: resource_properties,
-		},
-		Action: Action{
-			Name: fmt.Sprintf("%s::Action::\"%s\"", namespace, req.Method),
+func createResource(req *http.Request, namespace string) cedarling_go.EntityData {
+	resource := cedarling_go.EntityData{
+		EntityType: fmt.Sprintf("%s::HTTP_Request", namespace),
+		ID:         "krakend_request",
+		Payload: map[string]any{
+			"header": map[string]string{},
+			"url": map[string]string{
+				"host":     req.Host,
+				"path":     req.URL.Path,
+				"protocol": "http",
+			},
 		},
 	}
-	return payload
+	return resource
 }
 
 func (r registerer) registerHandlers(_ context.Context, extra map[string]interface{}, h http.Handler) (http.Handler, error) {
@@ -78,13 +65,13 @@ func (r registerer) registerHandlers(_ context.Context, extra map[string]interfa
 	if !ok {
 		return h, errors.New("No path provided")
 	}
-	sidecar_endpoint, ok := config["sidecar_endpoint"].(string)
-	if !ok {
-		return h, errors.New("No sidecar endpoint provided")
-	}
 	namespace, ok := config["namespace"].(string)
 	if !ok {
 		return h, errors.New("No cedar namespace provided")
+	}
+	cedarling_instance, err := cedarling_go.NewCedarlingWithEnv(nil)
+	if err != nil {
+		return h, errors.New(fmt.Sprintf("Error initializing Cedarling: %s", err))
 	}
 	logger.Debug(fmt.Sprintf("The plugin is now protecting %s\n", path))
 
@@ -93,36 +80,41 @@ func (r registerer) registerHandlers(_ context.Context, extra map[string]interfa
 		// If the requested path is not what we defined, continue.
 		if req.URL.Path != path {
 			h.ServeHTTP(w, req)
+			return
 		}
 
 		// The path has to be hijacked:
 		if req.Header.Get("Authorization") == "" {
 			http.Error(w, "Authorization not found", http.StatusForbidden)
+			return
 		} else {
-			payload := createPayload(req, namespace)
-			body_bytes, _ := json.Marshal(payload)
-			response, err := http.Post(sidecar_endpoint, "application/json", bytes.NewReader(body_bytes))
+			bearer := req.Header.Get("Authorization")
+			split_bearer := strings.Split(bearer, " ")
+			token := split_bearer[1]
+			action := fmt.Sprintf("%s::Action::\"%s\"", namespace, req.Method)
+			resource := createResource(req, namespace)
+			request := cedarling_go.Request{
+				Tokens: map[string]string{
+					"access_token": token,
+				},
+				Action:   action,
+				Resource: resource,
+				Context:  nil,
+			}
+			result, err := cedarling_instance.Authorize(request)
 			if err != nil {
-				logger.Warning(err)
+				logger.Debug(fmt.Sprintf("%s", err))
 				http.Error(w, "Forbidden", http.StatusForbidden)
 				return
 			}
-			defer response.Body.Close()
-			response_bytes, err := io.ReadAll(response.Body)
-			if err != nil {
-				logger.Warning(err)
-				http.Error(w, "Forbidden", http.StatusForbidden)
-				return
-			}
-			var response_json AuthzenResponse
-			json.Unmarshal(response_bytes, &response_json)
-			if response_json.Decision == true {
+			if result.Decision == true {
 				h.ServeHTTP(w, req)
+				return
 			} else {
 				http.Error(w, "Forbidden", http.StatusForbidden)
+				return
 			}
 		}
-		logger.Debug("request:", html.EscapeString(req.URL.Path))
 	}
 	return http.HandlerFunc(customHandler), nil
 }
