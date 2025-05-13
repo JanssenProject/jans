@@ -15,8 +15,11 @@ mod issuers_store;
 mod jwk_store;
 mod key_service;
 mod log_entry;
+mod status_list;
+
 #[cfg(test)]
 mod test_utils;
+
 mod token;
 mod validator;
 
