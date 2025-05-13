@@ -126,7 +126,7 @@ impl JwkStore {
                         if let Some(logger) = logger.as_ref() {
                             logger.log_any(JwtLogEntry::new(format!(
                                 "encountered a JWK with an unsupported algorithm, ignoring it: {e}"
-                            ), LogLevel::WARN));
+                            ), Some(LogLevel::WARN)));
                         }
                         continue;
                     } else {

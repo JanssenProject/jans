@@ -97,7 +97,7 @@ impl JwtService {
                 // Case: no JWKS provided
                 (true, None, None) => {
                     let err = JwtServiceInitError::MissingJwksConfig;
-                    logger.log_any(JwtLogEntry::new(format!("{err}"), LogLevel::ERROR));
+                    logger.log_any(JwtLogEntry::new(format!("{err}"), Some(LogLevel::ERROR)));
                     return Err(err);
                 },
                 // Case: Trusted issuers provided
@@ -107,7 +107,7 @@ impl JwtService {
                         .inspect_err(|e| {
                             logger.log_any(JwtLogEntry::new(
                                 format!("failed to initialize the JWT validation service: {}", e),
-                                LogLevel::ERROR,
+                                Some(LogLevel::ERROR),
                             ))
                         })
                         .map_err(JwtServiceInitError::KeyService)?;
@@ -119,7 +119,7 @@ impl JwtService {
                         .inspect_err(|e| {
                             logger.log_any(JwtLogEntry::new(
                                 format!("failed to initialize the JWT validation service: {}", e),
-                                LogLevel::ERROR,
+                                Some(LogLevel::ERROR),
                             ))
                         })
                         .map_err(JwtServiceInitError::KeyService)?;
@@ -128,7 +128,7 @@ impl JwtService {
                 // Case: Both a local JWKS and trusted issuers were provided
                 (true, Some(_), Some(_)) => {
                     let err = JwtServiceInitError::ConflictingJwksConfig;
-                    logger.log_any(JwtLogEntry::new(format!("{err}"), LogLevel::ERROR));
+                    logger.log_any(JwtLogEntry::new(format!("{err}"), Some(LogLevel::ERROR)));
                     return Err(err);
                 },
                 // Case: Signature validation is Off so no key service is needed.
@@ -151,7 +151,7 @@ impl JwtService {
                     if !metadata.trusted {
                         logger.log_any(JwtLogEntry::new(
                             format!("skipping metadata for {tkn} since `trusted == false`"),
-                            LogLevel::WARN,
+                            Some(LogLevel::WARN),
                         ));
                         continue;
                     }
@@ -217,7 +217,7 @@ impl JwtService {
                         format!(
                             "ignoring {token_name} since it's from an untrusted issuer: '{iss}'"
                         ),
-                        LogLevel::WARN,
+                        Some(LogLevel::WARN),
                     ));
                 }
                 continue;
@@ -226,7 +226,7 @@ impl JwtService {
             let validated_jwt = validator.process_jwt(jwt).map_err(|e| {
                 self.logger.log_any(JwtLogEntry::new(
                     format!("failed to validate token: {e}"),
-                    LogLevel::ERROR,
+                    Some(LogLevel::ERROR),
                 ));
                 JwtProcessingError::InvalidToken(token_name.to_string(), e)
             })?;
@@ -235,7 +235,7 @@ impl JwtService {
                 .map_err(|err| {
                     self.logger.log_any(JwtLogEntry::new(
                         format!("failed to deserialize token claims: {err}"),
-                        LogLevel::ERROR,
+                        Some(LogLevel::ERROR),
                     ));
                     err
                 })
