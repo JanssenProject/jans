@@ -323,6 +323,22 @@ Kubernetes: `>=v1.22.0-0`
 | kc-scheduler.usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |
 | kc-scheduler.volumeMounts | list | `[]` | Configure any additional volumesMounts that need to be attached to the containers |
 | kc-scheduler.volumes | list | `[]` | Configure any additional volumes that need to be attached to the pod |
+| keycloak-link.appLoggers | object | `{"enableStdoutLogPrefix":"true","keycloakLinkLogLevel":"INFO","keycloakLinkLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
+| keycloak-link.appLoggers.enableStdoutLogPrefix | string | `"true"` | Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e keycloak-link-persistence ===> 2022-12-20 17:49:55,744 INFO |
+| keycloak-link.appLoggers.keycloakLinkLogLevel | string | `"INFO"` | jans-keycloak-link.log level |
+| keycloak-link.appLoggers.keycloakLinkLogTarget | string | `"STDOUT"` | jans-keycloak-link.log target |
+| keycloak-link.appLoggers.persistenceDurationLogLevel | string | `"INFO"` | jans-keycloak-link_persistence_duration.log level |
+| keycloak-link.appLoggers.persistenceDurationLogTarget | string | `"FILE"` | jans-keycloak-link_persistence_duration.log target |
+| keycloak-link.appLoggers.persistenceLogLevel | string | `"INFO"` | jans-keycloak-link_persistence.log level |
+| keycloak-link.appLoggers.persistenceLogTarget | string | `"FILE"` | jans-keycloak-link_persistence.log target |
+| keycloak-link.appLoggers.scriptLogLevel | string | `"INFO"` | jans-keycloak-link_script.log level |
+| keycloak-link.appLoggers.scriptLogTarget | string | `"FILE"` | jans-keycloak-link_script.log target |
+| keycloak-link.cnCustomJavaOptions | string | `""` | passing custom java options to link. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
+| keycloak-link.enabled | bool | `false` | Boolean flag to enable/disable the link chart. |
+| keycloak-link.ingress | object | `{"keycloakLinkAdditionalAnnotations":{},"keycloakLinkEnabled":true,"keycloakLinkLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
+| keycloak-link.ingress.keycloakLinkAdditionalAnnotations | object | `{}` | keycloak-link ingress resource additional annotations. |
+| keycloak-link.ingress.keycloakLinkLabels | object | `{}` | keycloak-link ingress resource labels. key app is taken |
+| keycloak-link.keycloakLinkServiceName | string | `"keycloak-link"` | Name of the keycloak-link service. Please keep it as default. |
 | lbIp | string | `"22.22.22.22"` | The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `fqdn` is globally resolvable. |
 | lifecycle | object | `{}` |  |
 | link.appLoggers | object | `{"enableStdoutLogPrefix":"true","linkLogLevel":"INFO","linkLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |

@@ -224,10 +224,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>
-			<artifactId>jakarta.faces</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
 			<artifactId>jakarta.json</artifactId>
 		</dependency>
 

@@ -432,6 +432,7 @@ nav:
     - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
+    - Kotlin/ Java: 'cedarling/uniffi/cedarling-kotlin.md'
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
       - Android Apps: 'cedarling/uniffi/cedarling-android.md'
@@ -474,14 +475,36 @@ nav:
   - Code of Conduct: CODE_OF_CONDUCT.md
   - Design and Implementation:
     - contribute/implementation-design/README.md
-    - Agama: contribute/implementation-design/agama.md
-    - jans-auth-server: contribute/implementation-design/jans-auth-server.md
-    - jans-cli: contribute/implementation-design/jans-cli.md
-    - jans-config-api: contribute/implementation-design/jans-config-api.md
-    - jans-core: contribute/implementation-design/jans-core.md
-    - jans-fido2: contribute/implementation-design/jans-fido2.md
-    - jans-orm: contribute/implementation-design/jans-orm.md
-    - jans-scim: contribute/implementation-design/jans-scim.md
+    - Agama: 
+      - contribute/implementation-design/agama-design/README.md
+      - ADR: contribute/implementation-design/agama-design/adr/README.md
+    - jans-auth-server: 
+      - contribute/implementation-design/jans-auth-server-design/README.md
+      - ADR: contribute/implementation-design/jans-auth-server-design/adr/README.md
+    - jans-cli: 
+       - contribute/implementation-design/jans-cli-design/README.md
+       - ADR: contribute/implementation-design/jans-cli-design/adr/README.md
+    - jans-config-api: 
+       - contribute/implementation-design/jans-config-api-design/README.md
+       - ADR: contribute/implementation-design/jans-config-api-design/adr/README.md
+    - jans-core: 
+       - contribute/implementation-design/jans-core-design/README.md
+       - ADR: contribute/implementation-design/jans-core-design/adr/README.md
+    - jans-fido2: 
+       - contribute/implementation-design/jans-fido2-design/README.md
+       - ADR: contribute/implementation-design/jans-fido2-design/adr/README.md
+    - jans-orm: 
+      - contribute/implementation-design/jans-orm-design/README.md
+      - ADR: contribute/implementation-design/jans-orm-design/adr/README.md
+    - jans-scim: 
+      - contribute/implementation-design/jans-scim-design/README.md
+      - ADR: contribute/implementation-design/jans-scim-design/adr/README.md
+    - jans-casa: 
+      - contribute/implementation-design/jans-casa-design/README.md
+      - ADR: contribute/implementation-design/jans-casa-design/adr/README.md
+    - jans-cedarling:
+      - contribute/implementation-design/jans-cedarling-design/README.md
+      - ADR: contribute/implementation-design/jans-cedarling-design/adr/README.md
   - CI-CD:
     #- GitHub CI: contribute/ci-cd/github-ci.md
     - Release Process: contribute/ci-cd/release-process.md

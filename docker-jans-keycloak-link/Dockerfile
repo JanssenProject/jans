@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.24
+ARG JETTY_VERSION=12.0.19
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -42,26 +42,20 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-04-11 08:25'
+ENV CN_BUILD_DATE='2025-05-04 08:39'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-keycloak-link-server/${CN_VERSION}/jans-keycloak-link-server-${CN_VERSION}.war
 
-# Install Link
-COPY static/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
+# Install KC Link
 RUN mkdir -p ${JETTY_BASE}/jans-keycloak-link/webapps \
-    && wget -q ${CN_SOURCE_URL} -O /tmp/jans-keycloak-link.war \
-    && cd /tmp \
-    && zip -d jans-keycloak-link.war WEB-INF/jetty-web.xml \
-    && zip -r jans-keycloak-link.war WEB-INF/jetty-env.xml \
-    && cp jans-keycloak-link.war ${JETTY_BASE}/jans-keycloak-link/webapps/jans-keycloak-link.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-keycloak-link --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
-    && rm -rf /tmp/jans-keycloak-link.war /tmp/WEB-INF
+    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-keycloak-link/webapps/jans-keycloak-link.war \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-keycloak-link --add-modules=server,resources,http,forwarded,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
 
 # ===========
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=d2bc747e157a6e48a4270dff70ecea2cb78afd16
+ENV JANS_SOURCE_VERSION=137153d287ced23f04cd26037cdd3e783babdd95
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)

@@ -254,7 +254,7 @@ class App:
             "jans-scim": ["upstream", "location"],
             "jans-casa": ["upstream", "location"],
             "jans-link": ["upstream", "location"],
-            "jans-keycloak-link": ["upstream"],
+            "jans-keycloak-link": ["upstream", "location"],
             "jans-saml": ["upstream", "location"],
         }
 
