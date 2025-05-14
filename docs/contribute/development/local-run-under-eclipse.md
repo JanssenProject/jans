@@ -2,6 +2,8 @@
 tags:
 - development
 - contribute
+- workspace
+- eclipse
 ---
 
 

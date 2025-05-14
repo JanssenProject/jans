@@ -3,6 +3,8 @@ tags:
 - development
 - contribute
 - vm
+- integration tests
+- workspace
 ---
 
 

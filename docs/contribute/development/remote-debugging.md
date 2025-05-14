@@ -2,6 +2,7 @@
 tags:
 - development
 - contribute
+- remote debug
 ---
 
 # Remote Debugging
