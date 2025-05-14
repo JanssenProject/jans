@@ -314,7 +314,8 @@ public abstract class AbstractToken implements Serializable, Deletable {
 
         checkExpired();
         if (isValid()) {
-            long diff = expirationDate.getTime() - new Date().getTime();
+            Date start = creationDate != null ? creationDate : new Date();
+            long diff = expirationDate.getTime() - start.getTime();
             expiresIn = diff != 0 ? (int) (diff / 1000) : 0;
         }
 

@@ -640,11 +640,18 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         JSONObject jsonObj = new JSONObject();
         try {
             fillJsonObject(jsonObj, accessToken, tokenType, expiresIn, refreshToken, scope, idToken, checkedAuthzDetails);
+            addRefreshTokenLifetime(jsonObj, refreshToken, appConfiguration.getIncludeRefreshTokenLifetimeInTokenResponse());
         } catch (JSONException e) {
             log.error(e.getMessage(), e);
         }
 
         return jsonObj.toString();
+    }
+
+    public static void addRefreshTokenLifetime(JSONObject jsonObj, RefreshToken refreshToken, boolean includeRefreshTokenLifetimeInResponse) {
+        if (refreshToken != null && includeRefreshTokenLifetimeInResponse) {
+            jsonObj.put("refresh_token_expires_in", refreshToken.getExpiresIn());
+        }
     }
 
     public static void fillJsonObject(JSONObject jsonObj, AccessToken accessToken, TokenType tokenType,
