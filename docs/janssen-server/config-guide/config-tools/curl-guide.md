@@ -365,22 +365,23 @@ and other properties of [Jans Auth Server](https://github.com/JanssenProject/jan
 
 ### Authentication
 
-Jans Config API endpoints are OAuth protected. It supports basic token as well as JWT token.
+Janssen Config API endpoints are OAuth protected. It supports basic token as well as JWT token.
 
-### Invoking Jans Config API via curl
+### Invoking API using curl
 
-Jans Config API has REST endpoints and can be invoked via curl.
+Janssen Config API has [REST endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) and can be invoked using curl.
 
-#### 1. Prerequisites
+#### Prerequisites
 
 You will need:
 
 * **Jans endpoint URL:** https://<server.url>/jans-config-api/....
 * **Token:** The endpoints are OAuth protected and hence will require a token with appropriate scopes.
 
-#### 2. Sample
+#### Steps
 
- * Refer to [jans-config-api documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml) to check the endpoint path and required OAuth scopes. Example: Attribute Endpoint.
+ * Refer to [API documentation]((https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml)) to know the endpoint path and required OAuth scopes to access that 
+ endpoint. Example: Attribute Endpoint.
 
     ![image](../../../assets/jans-attribute.png)
 
