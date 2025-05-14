@@ -385,7 +385,9 @@ You will need:
 
     ![image](../../../assets/jans-attribute.png)
 
- * You will need a client with the required scopes. Jans Config API internal client that starts with `1800` has the required scopes.
+
+ * You will need a client that has the required scopes. The Jans TUI provides a default client named `jans-config-api-client`, whose `client ID` starts with `1800` and has required scopes. You can use this client to generate a token.
+
  * Use the auth token to generate the basic token.
 
     Syntax:
