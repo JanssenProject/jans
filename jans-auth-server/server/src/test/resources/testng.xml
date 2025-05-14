@@ -24,6 +24,7 @@
             <class name="io.jans.as.server.service.external.ExternalAuthenticationServiceTest" />
             <class name="io.jans.as.server.servlet.OpenIdConfigurationTest" />
             <class name="io.jans.as.server.service.net.UriServiceTest" />
+            <class name="io.jans.as.server.service.net.UriServiceTest" />
             <class name="io.jans.as.server.service.GrantServiceTest" />
             <class name="io.jans.as.server.service.LocalResponseCacheTest" />
             <class name="io.jans.as.server.service.SessionIdServiceTest" />
@@ -37,6 +38,7 @@
             <class name="io.jans.as.server.token.ws.rs.TxTokenServiceTest" />
             <class name="io.jans.as.server.token.ws.rs.TxTokenValidatorTest" />
             <class name="io.jans.as.server.token.ws.rs.TokenRestWebServiceValidatorTest" />
+            <class name="io.jans.as.server.token.ws.rs.TokenRestWebServiceImplTest" />
             <class name="io.jans.as.server.ws.rs.stat.MonthsTest" />
 
             <!-- AUTHORIZE -->
