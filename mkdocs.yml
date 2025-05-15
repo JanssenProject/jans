@@ -480,6 +480,7 @@ nav:
        - ADR: contribute/implementation-design/jans-cli-design/adr/README.md
     - jans-config-api: 
        - contribute/implementation-design/jans-config-api-design/README.md
+       - OpenAPI Spec generation: contribute/implementation-design/jans-config-api-design/config-api-swagger-spec-generation.md
        - ADR: contribute/implementation-design/jans-config-api-design/adr/README.md
     - jans-core: 
        - contribute/implementation-design/jans-core-design/README.md
