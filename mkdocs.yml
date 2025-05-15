@@ -406,14 +406,19 @@ nav:
       - Using SCIM: janssen-server/usermgmt/usermgmt-scim.md
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
-- Cedarling:
-  - Getting Started: 
-    - 'cedarling/cedarling-getting-started.md'
-    - Golang: 'cedarling/getting-started/go.md'
-  - Overview: 'cedarling/cedarling-overview.md'
+- 'Cedarling':
+  - Overview: 'cedarling/README.md'
   - Quick Start:
     - Authorization Using Cedarling: 'cedarling/cedarling-quick-start-unsigned.md'
     - Implement TBAC Using Cedarling: 'cedarling/cedarling-quick-start-tbac.md'
+  - Tutorials: 
+    - 'cedarling/cedarling-getting-started.md'
+    - Javascript: 'cedarling/getting-started/javascript.md'
+    - Python: 'cedarling/getting-started/python.md'
+    - Rust: 'cedarling/getting-started/rust.md'
+    - Golang: 'cedarling/getting-started/go.md'
+    - Kotlin: 'cedarling/getting-started/kotlin.md'
+    - Swift: 'cedarling/getting-started/swift.md'
   - Reference:
     - Policy Store: 'cedarling/cedarling-policy-store.md'
     - Properties: 'cedarling/cedarling-properties.md'
@@ -431,9 +436,10 @@ nav:
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
       - Android Apps: 'cedarling/uniffi/cedarling-android.md'
-      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'
-    - Sidecar: 'cedarling/cedarling-sidecar-overview.md'
-    - Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
+      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'  
+    - Sidecar: 
+      - Sidecar: 'cedarling/cedarling-sidecar-overview.md'
+      - Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
   - Integrations:
     - Krakend: 'cedarling/cedarling-krakend.md'
 - Agama:
