@@ -1,70 +1,32 @@
-# Developing for Janssen Project
+---
+tags:
+- development
+- contribute
+- vm
+- integration tests
+- workspace
+---
 
-## Remote Debugging
 
-Janssen Server modules run as Java processes. Hence, like any other Java process
-the JVM running the module can be configured to open a debug port where a remote
-debugger can be attached. The steps below will show how to configure 
-`auth-server` module for remote debugging.
+# Run Integration Tests with a Janssen Server VM
 
-1. Pass the command-line options to the JVM
+The procedures for running the Janssen integration test suite against an installed 
+Janssen Server.
 
-   On the Janssen Server host, open the service config file 
-   `/etc/default/jans-auth` and add the following JVM parameters to as 
-   `JAVA_OPTIONS`
-    ```
-    -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001
-    ```
-   This will open the port `6001` for the remote debugger. Any other port can 
-   also be used based on availability.
-
-2. Restart `jans-auth` services
-    ```
-    systemctl restart jans-auth.service
-    ```
-
-3. Check if the port is open and accessible from within the Janssen Server host
-   Use the `jdb` tool from JDK to test if the JVM port has been opened
-   ```
-   ./<path-to-JDK>/bin/jdb -attach 6001
-   ```
-   if the port is open, it'll give you output like the below:
-   ```
-   Set uncaught java.lang.Throwable
-   Set deferred uncaught java.lang.Throwable
-   Initializing jdb ...
-   >
-   ```
-   press `ctrl+c` to come out of it.
-
-4. Ensure that the port is accessible from outside the host VM as well and 
-   firewalls are configured accordingly
-
-5. Connect to the remote port on the Janssen Server host from the developer 
-   workstation. Use any IDE (Intellij, Eclipse,
-   etc.) to create and run a remote debugging profile. Provide IP and debug 
-   port of the Janssen Server host.
-
-   For IntelliJIdea, create a debug configuration as below:
-
-   ![](../assets/image-jans-remote-debug-intellij.png)
-
-## Run Integration Tests with a Janssen Server VM
-
-In this guide, we will look at steps to run the Janssen integration test suite 
-against an installed Janssen Server.
-
-### Component Setup
+## Component Setup
 
 Instructions in this guide can be used if Janssen Server is installed on a VM. 
-Developers can use a virtualization software (like VMWare) or use LxD containers to create VM on developer workstation or use a remote cloud VM.
+Developers can use a virtualization software (like VMWare) or use LxD containers 
+to create VM on developer workstation or use a remote cloud VM.
 
-![Component Diagram](../assets/image-run-integration-test-from-workspace-06122022.png)
 
+
+![Component Diagram](../../assets/image-run-integration-test-from-workspace-06122022.png)
 !!! note "OS platform for Developer Workstation"
-    Steps in this guide are applicable to any OS platform a Developer workstation may have. Example commands given in this guide are for Ubuntu Linux based workstation.  
+    Steps in this guide are applicable to any OS platform a Developer workstation may have. 
+    Example commands given in this guide are for Ubuntu Linux based workstation.  
 
-### Install Janssen Server
+## Install Janssen Server
 
 Install the Janssen server using one of the methods described in the
 VM installation guide. Note the points below when
@@ -136,7 +98,7 @@ similar to those below.
     
   ```
 
-### Setup The Certificates
+## Setup The Certificates
 
 To run the tests against the installed Janssen Server, the workstation JRE 
 needs to have the appropriate
@@ -157,7 +119,7 @@ certificate installed. Update cacerts using the steps below:
   keytool -import -alias janssen.op.io -keystore /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts -file /tmp/httpd.crt
   ``` 
 
-### Configure developer workspace
+## Configure developer workspace
 
 Now that we have Janssen Server running in a VM and it is accessible from the 
 developer workstation as well, we will
@@ -181,7 +143,7 @@ Below are the instructions for configuring each module for tests.
     - This guide uses Janssen Server hostname,
      `janssen.op.io`, as profile name.
 
-#### Configuring the jans-auth-server module
+### Configuring the jans-auth-server module
 
 Configuring `jans-auth-server` module involves setting up profiles for `client`,
 `server` and `agama` sub-modules.
@@ -226,7 +188,7 @@ from the `jans-auth-server` workspace.
    cp -f ./server/profiles/default/client_keystore.p12 ./server/profiles/janssen.op.io
    ```
 
-##### Running The Tests
+#### Running The Tests
 
 Each module in Janssen Server has its tests that have to be executed separately.
 For example, to run integration tests for `jans-auth-server` module, run the 
@@ -236,7 +198,7 @@ following maven command at the directory level:
   mvn -Dcfg=janssen.op.io test
   ```
 
-#### Configuring the jans-core module
+### Configuring the jans-core module
 
 This module does not require a profile setup. It can be built with below maven
 command.
@@ -245,7 +207,7 @@ command.
 mvn clean compile install
 ```
 
-#### Configuring the jans-link module
+### Configuring the jans-link module
 
 This module does not require a profile setup. It can be built with the below 
 maven command.
@@ -254,7 +216,7 @@ maven command.
 mvn clean compile install
 ```
 
-#### Configuring the jans-orm module
+### Configuring the jans-orm module
 
 This module does not require a profile setup. It can be built with the below 
 maven command.
@@ -263,7 +225,7 @@ maven command.
 mvn clean compile install
 ```
 
-#### Configuring the agama module
+### Configuring the agama module
 
 This module does not require a profile setup. It can be built with the below 
 maven command.
@@ -272,12 +234,12 @@ maven command.
 mvn clean compile install
 ```
 
-#### Configuring the SCIM module
+### Configuring the SCIM module
 
 This module does not require a profile setup. It can be built with the below
 maven command.
 
-##### Profile setup for client and server modules
+#### Profile setup for client and server modules
 
 Many Janssen Server modules and sub-modules use test configuration stored in a
 directory named `profile`. The profile
@@ -307,15 +269,3 @@ use the command below:
   ```
   mvn -Dcfg=janssen.op.io test
   ```
-
-## Setup Janssen Schema with Test data
-
-## Useful Tools 
-
-While working with Janssen Server, either as developer or administrator,
-following tools can come in handy. 
-
-1. [jsonbin.io](https://jsonbin.io/)
-2. [jwt.io](https://jwt.io/)
-3. [oidcdebugger.com](https://oidcdebugger.com/)
-4. [keytool.online](https://keytool.online/)
