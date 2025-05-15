@@ -6,28 +6,30 @@
 
 package io.jans.scim.service;
 
-import io.jans.model.*;
-import io.jans.model.custom.script.CustomScriptType;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.util.StringHelper;
-import io.jans.util.security.StringEncrypter.EncryptionException;
-import org.slf4j.Logger;
-
-import io.jans.scim.model.JansConfiguration;
-import io.jans.service.EncryptionService;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.faces.context.FacesContext;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+
+import org.slf4j.Logger;
+
+import io.jans.model.AuthenticationScriptUsageType;
+import io.jans.model.ProgrammingLanguage;
+import io.jans.model.ScriptLocationType;
+import io.jans.model.SmtpConfiguration;
+import io.jans.model.custom.script.CustomScriptType;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.scim.model.JansConfiguration;
+import io.jans.service.EncryptionService;
+import io.jans.util.StringHelper;
+import io.jans.util.security.StringEncrypter.EncryptionException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.ServletContext;
 
 /**
  * JansConfiguration service
@@ -51,6 +53,9 @@ public class ConfigurationService implements Serializable {
 
 	@Inject
 	private EncryptionService encryptionService;
+
+	@Inject
+	private ServletContext servletContext;
 
 	private static final SimpleDateFormat PERIOD_DATE_FORMAT = new SimpleDateFormat("yyyyMM");
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -164,7 +169,7 @@ public class ConfigurationService implements Serializable {
 	public CustomScriptType[] getCustomScriptTypes() {
 		return new CustomScriptType[] { CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CONSENT_GATHERING,
 				CustomScriptType.CLIENT_REGISTRATION,
-				CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.ID_GENERATOR, CustomScriptType.CACHE_REFRESH,
+				CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.ID_GENERATOR, CustomScriptType.LINK_INTERCEPTION,
 				CustomScriptType.UMA_RPT_POLICY, CustomScriptType.UMA_CLAIMS_GATHERING, CustomScriptType.UMA_RPT_CLAIMS, CustomScriptType.INTROSPECTION,
 				CustomScriptType.RESOURCE_OWNER_PASSWORD_CREDENTIALS, CustomScriptType.APPLICATION_SESSION,
 				CustomScriptType.END_SESSION, CustomScriptType.SCIM, CustomScriptType.POST_AUTHN,
@@ -173,7 +178,7 @@ public class ConfigurationService implements Serializable {
 
 	public CustomScriptType[] getOthersCustomScriptTypes() {
 		return new CustomScriptType[] { CustomScriptType.CONSENT_GATHERING, CustomScriptType.CLIENT_REGISTRATION,
-				CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.ID_GENERATOR, CustomScriptType.CACHE_REFRESH,
+				CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.ID_GENERATOR, CustomScriptType.LINK_INTERCEPTION,
 				CustomScriptType.UMA_RPT_POLICY, CustomScriptType.UMA_CLAIMS_GATHERING, CustomScriptType.UMA_RPT_CLAIMS, CustomScriptType.INTROSPECTION,
 				CustomScriptType.RESOURCE_OWNER_PASSWORD_CREDENTIALS, CustomScriptType.APPLICATION_SESSION,
 				CustomScriptType.END_SESSION, CustomScriptType.SCIM, CustomScriptType.POST_AUTHN,
@@ -230,8 +235,7 @@ public class ConfigurationService implements Serializable {
 		String version = getClass().getPackage().getImplementationVersion();
 		if (version == null) {
 			Properties prop = new Properties();
-			try (InputStream is = FacesContext.getCurrentInstance().getExternalContext()
-					.getResourceAsStream("/META-INF/MANIFEST.MF")) {
+			try (InputStream is = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF")) {
 				prop.load(is);
 				version = prop.getProperty("Implementation-Version");
 			} catch (IOException e) {

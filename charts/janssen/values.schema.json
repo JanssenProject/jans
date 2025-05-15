@@ -1133,37 +1133,37 @@
                             "type": "object",
                             "properties": {
                                 "linkLogTarget": {
-                                    "description": "cacherefresh.log target",
+                                    "description": "jans-link.log target",
                                     "type": "string",
                                     "pattern": "^(STDOUT|FILE)$"
                                 },
                                 "linkLogLevel": {
-                                    "description": "cacherefresh.log level",
+                                    "description": "jans-link.log level",
                                     "type": "string",
                                     "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
                                 },
                                 "persistenceLogLevel": {
-                                    "description": "cacherefresh_persistence.log level",
+                                    "description": "jans-link_persistence.log level",
                                     "type": "string",
                                     "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
                                 },
                                 "persistenceDurationLogTarget": {
-                                    "description": "cacherefresh_persistence_duration.log target",
+                                    "description": "jans-link_persistence_duration.log target",
                                     "type": "string",
                                     "pattern": "^(STDOUT|FILE)$"
                                 },
                                 "persistenceDurationLogLevel": {
-                                    "description": "cacherefresh_persistence_duration.log level",
+                                    "description": "jans-link_persistence_duration.log level",
                                     "type": "string",
                                     "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
                                 },
                                 "scriptLogTarget": {
-                                    "description": "cacherefresh_script.log target",
+                                    "description": "jans-link_script.log target",
                                     "type": "string",
                                     "pattern": "^(STDOUT|FILE)$"
                                 },
                                 "scriptLogLevel": {
-                                    "description": "cacherefresh_script.log level",
+                                    "description": "jans-link_script.log level",
                                     "type": "string",
                                     "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
                                 }
@@ -1259,6 +1259,104 @@
                     "description": "Key to encrypt/decrypt configuration schema file using AES-256 CBC mode. Set the value to empty string to disable encryption/decryption, or 32 alphanumeric characters to enable it.",
                     "type": "string",
                     "pattern": "^(?:[a-zA-Z0-9]{32})?$"
+                },
+                "keycloak-link": {
+                    "type": "object",
+                    "properties": {
+                        "customAnnotations": {
+                            "type": "object",
+                            "properties": {
+                                "destinationRule": {
+                                    "type": "object"
+                                },
+                                "podDisruptionBudget": {
+                                    "type": "object"
+                                },
+                                "virtualService": {
+                                    "type": "object"
+                                },
+                                "pod": {
+                                    "type": "object"
+                                },
+                                "deployment": {
+                                    "type": "object"
+                                },
+                                "horizontalPodAutoscaler": {
+                                    "type": "object"
+                                },
+                                "service": {
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "keycloakLinkServiceName": {
+                            "description": "Name of the keycloak-link service. Please keep it as default.",
+                            "type": "string",
+                            "pattern": "^[a-z0-9-]+$"
+                        },
+                        "enabled": {
+                            "description": "Boolean flag to enable/disable the keycloak-link chart.",
+                            "type": "boolean"
+                        },
+                        "appLoggers": {
+                            "type": "object",
+                            "properties": {
+                                "keycloakLinkLogTarget": {
+                                    "description": "jans-keycloak-link.log target",
+                                    "type": "string",
+                                    "pattern": "^(STDOUT|FILE)$"
+                                },
+                                "keycloakLinkLogLevel": {
+                                    "description": "jans-keycloak-link.log level",
+                                    "type": "string",
+                                    "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
+                                },
+                                "persistenceLogLevel": {
+                                    "description": "jans-keycloak-link_persistence.log level",
+                                    "type": "string",
+                                    "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
+                                },
+                                "persistenceDurationLogTarget": {
+                                    "description": "jans-keycloak-link_persistence_duration.log target",
+                                    "type": "string",
+                                    "pattern": "^(STDOUT|FILE)$"
+                                },
+                                "persistenceDurationLogLevel": {
+                                    "description": "jans-keycloak-link_persistence_duration.log level",
+                                    "type": "string",
+                                    "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
+                                },
+                                "scriptLogTarget": {
+                                    "description": "jans-keycloak-link_script.log target",
+                                    "type": "string",
+                                    "pattern": "^(STDOUT|FILE)$"
+                                },
+                                "scriptLogLevel": {
+                                    "description": "jans-keycloak-link_script.log level",
+                                    "type": "string",
+                                    "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
+                                }
+                            }
+                        },
+                        "ingress": {
+                            "description": "Endpoint control",
+                            "type": "object",
+                            "properties": {
+                                "keycloakLinkEnabled": {
+                                    "description": "Enable keycloak-link endpoints /jans-keycloak-link",
+                                    "type": "boolean"
+                                },
+                                "keycloakLinkLabels": {
+                                    "description": "keycloak-link ingress resource labels. key app is taken",
+                                    "type": "object"
+                                },
+                                "keycloakLinkAdditionalAnnotations": {
+                                    "description": "keycloak-link ingress resource additional annotations.",
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },

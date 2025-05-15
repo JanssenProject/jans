@@ -10,22 +10,47 @@ import static io.jans.scim.model.scim2.Constants.QUERY_PARAM_SORT_ORDER;
 import static io.jans.scim.model.scim2.Constants.QUERY_PARAM_START_INDEX;
 import static io.jans.scim.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.time.Instant;
 
+import javax.management.InvalidAttributeValueException;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
+import io.jans.orm.model.fido2.Fido2DeviceData;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
+import io.jans.orm.search.filter.Filter;
+import io.jans.scim.model.exception.SCIMException;
+import io.jans.scim.model.scim2.BaseScimResource;
+import io.jans.scim.model.scim2.ErrorScimType;
+import io.jans.scim.model.scim2.Meta;
+import io.jans.scim.model.scim2.SearchRequest;
+import io.jans.scim.model.scim2.fido.DeviceData;
+import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
+import io.jans.scim.model.scim2.patch.PatchRequest;
+import io.jans.scim.model.scim2.util.DateUtil;
+import io.jans.scim.model.scim2.util.ScimResourceUtil;
+import io.jans.scim.service.Fido2DeviceService;
+import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
+import io.jans.scim.service.filter.ProtectedApi;
+import io.jans.scim.service.scim2.interceptor.RefAdjusted;
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import javax.management.InvalidAttributeValueException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
@@ -41,31 +66,11 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.apache.commons.lang3.StringUtils;
-
-import io.jans.scim.model.exception.SCIMException;
-import io.jans.orm.model.fido2.*;
-import io.jans.scim.model.scim2.*;
-import io.jans.scim.model.scim2.fido.DeviceData;
-import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
-import io.jans.scim.model.scim2.patch.PatchRequest;
-import io.jans.scim.model.scim2.util.DateUtil;
-import io.jans.scim.model.scim2.util.ScimResourceUtil;
-import io.jans.scim.service.Fido2DeviceService;
-import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
-import io.jans.scim.service.filter.ProtectedApi;
-import io.jans.scim.service.scim2.interceptor.RefAdjusted;
-import io.jans.scim.ws.rs.scim2.IFido2DeviceWebService;
-import io.jans.scim.ws.rs.scim2.PATCH;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SortOrder;
-import io.jans.orm.search.filter.Filter;
-
 /**
  * Implementation of /Fido2Devices endpoint. Methods here are intercepted.
  * Filter io.jans.scim.service.filter.AuthorizationProcessingFilter secures invocations
  */
+@Dependent
 @Named("scim2Fido2DeviceEndpoint")
 @Path("/v2/Fido2Devices")
 public class Fido2DeviceWebService extends BaseScimWebService implements IFido2DeviceWebService {

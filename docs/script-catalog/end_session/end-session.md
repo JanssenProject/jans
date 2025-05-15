@@ -6,7 +6,7 @@ tags:
   - EndSession
 ---
 
-## Overview
+# End Session
 End Session scripts allows the administrator to modify HTML response for OpenID Connect Frontchannel logout ([spec](https://openid.net/specs/openid-connect-frontchannel-1_0.html)).
 
 ## Interface

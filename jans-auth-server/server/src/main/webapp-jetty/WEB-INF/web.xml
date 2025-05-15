@@ -4,7 +4,7 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
          version="5.0">
 
-	<display-name>oxAuth Server</display-name>
+	<display-name>Jans Auth Server</display-name>
 
 	<!-- Jetty -->
 	<context-param>
@@ -67,6 +67,10 @@
 		<listener-class>com.sun.faces.config.ConfigureListener</listener-class>
 	</listener>
 	<!-- FILTERS MAPPING -->
+    <filter-mapping>
+        <filter-name>RateLimitFilter</filter-name>
+        <url-pattern />
+    </filter-mapping>
 	<filter-mapping>
 		<filter-name>ServletLoggingFilter</filter-name>
 		<url-pattern />

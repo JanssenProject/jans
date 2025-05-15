@@ -59,7 +59,11 @@ parameters as described below:
         ...
     ],
     "ssaSigningAlg": "RS512",
-    "ssaExpirationInDays": 30
+    "ssaExpirationInDays": 30,
+    "ssaMapSoftwareRolesToScopes": {
+        "admin": ["read", "write", "delete"],
+        "user": ["read"]
+    }
 }
 ```
 
@@ -67,6 +71,7 @@ parameters as described below:
 - `ssaCustomAttributes` — List of custom attributes, which are received in the request when creating an SSA.
 - `ssaSigningAlg` — Algorithm to sign the JWT that is returned after creating an SSA.
 - `ssaExpirationInDays` — Expiration expressed in days, when an SSA is created and the expiration is not sent.
+- `ssaMapSoftwareRolesToScopes` - mapping between software roles of SSA and scopes. When SSA is created it will try to set scopes based on software roles.
 
 ## SSA Security
 
@@ -410,7 +415,7 @@ Connection: Keep-Alive
 
 ## Revoke SSA
 
-Revoke existing active SSA based on `jti` or `org_id`.
+Revoke existing active SSA based on `jti` or `org_id`. On SSA revoke expiration date is set to `now` which makes it eligible for clean up.
 
 ### Query Parameters
 
@@ -505,7 +510,7 @@ def get(self, jsonArray, context):
 
 ### Revoke method
 
-This method is executed after the SSA list has been revoked.
+This method is executed after the SSA list has been revoked. On SSA revoke expiration date is set to `now` which makes it eligible for clean up.
 
 ```
 def revoke(self, ssaList, context):

@@ -18,8 +18,8 @@ from utils.multi_lang import _
 common_data = SimpleNamespace()
 common_data.background_tasks_feeds = {}
 
-class DialogUtils:
 
+class DialogUtils:
 
     def get_item_data(self, item):
         if hasattr(item, 'me'):
@@ -204,7 +204,7 @@ def fromisoformat(dt_str=None):
     return dt
 
 def check_email(email):
-    return re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$', email, re.IGNORECASE)
+    return re.match(r'^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$', email, re.IGNORECASE)
 
 def get_help_with(helps: str='', without: List[str]=None):
     if not without:

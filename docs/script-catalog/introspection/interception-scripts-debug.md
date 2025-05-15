@@ -3,7 +3,7 @@ tags:
   - administration
   - developer
 ---
-
+# Script Debugging
 ## Setup
 
 For development the kubernetes setup must be local and accessible to the debug server address. The following steps will walk you trough a setup using Minikube with docker driver, and [ksync](https://ksync.github.io/ksync/) for syncing the files between local, and the container. The following instructions assume a fresh ubuntu 20.04, however the setup can be done on a different operating systems such as macOS or Windows.  

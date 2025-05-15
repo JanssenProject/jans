@@ -84,7 +84,7 @@ public class AuthenticationPersistenceService {
         // user == null could imply conditional UI as well
         log.debug("User is null");
         if (user == null) {
-            if (appConfiguration.getFido2Configuration().isDebugUserAutoEnrollment()) {
+            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
                 user = userService.addDefaultUser(userName);
             } else {
                 log.debug("Building fido authentication entry");

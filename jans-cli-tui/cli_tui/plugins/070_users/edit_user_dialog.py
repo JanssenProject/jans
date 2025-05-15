@@ -10,7 +10,7 @@ from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.containers import HSplit, VSplit,\
     DynamicContainer, Window
 from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.widgets import Button, Label, CheckboxList, Dialog
+from prompt_toolkit.widgets import Button, Label, CheckboxList, Dialog, TextArea
 from prompt_toolkit.eventloop import get_event_loop
 
 from utils.multi_lang import _
@@ -76,10 +76,41 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         return ret_val
 
+
+
+    def add_multivalued_value(self, widget):
+
+        claim_text_area = TextArea()
+
+        def do_add_multivalue(dialog):
+            widget.container.add_label(claim_text_area.text, claim_text_area.text)
+
+        claim_label = _("Value")
+        body = VSplit([Label(claim_label + ' :', width=(len(claim_label)+3)), claim_text_area])
+        buttons = [Button(_("Cancel")), Button(_("OK"), handler=do_add_multivalue)]
+        dialog = JansGDialog(common_data.app, title=_(f"Add new {widget.title}"), body=body, buttons=buttons, width=common_data.app.dialog_width-20)
+        common_data.app.show_jans_dialog(dialog)
+
+
+    def get_multivalued_widget(self, title, values, jans_name, data=[]):
+        add_handler = None if data else self.add_multivalued_value
+        widget = JansLabelWidget(
+                        title = _(title),
+                        values = values,
+                        data = [],
+                        label_width=100,
+                        add_handler=add_handler,
+                        jans_name = jans_name
+                        )
+
+        return widget
+
     def create_window(self) -> None:
 
+        custom_attributes = self.data.get('customAttributes', [])
+
         def get_custom_attribute(attribute, multi=False):
-            for ca in self.data.get('customAttributes', []):
+            for ca in custom_attributes:
                 if ca['name'] == attribute:
                     values = ca.get('values', [])
                     #check if there is a bool value
@@ -108,38 +139,54 @@ class EditUserDialog(JansGDialog, DialogUtils):
                     common_data.app.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'displayName')),
                     common_data.app.getTitledText(_("Email *"), name='mail', value=self.data.get('mail',''), style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'mail')),
                     common_data.app.getTitledCheckBox(_("Active"), name='active', checked=active_checked, style='class:script-checkbox', jans_help=common_data.app.get_help_from_schema(self.schema, 'enabled')),
-                    common_data.app.getTitledText(_("Nickname"), name='nickname', value='\n'.join(get_custom_attribute('nickname', multi=True)), style='class:script-titledtext', height=3, jans_help=common_data.app.get_help_from_schema(self.schema, 'nickname')),
-
+                    common_data.app.getTitledText(_("Nickname"), name='nickname', value=get_custom_attribute('nickname', multi=False), style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'nickname')),
                     Button(_("Add Claim"), handler=self.add_claim),
                 ]
 
         if common_data.app.plugin_enabled('admin'):
-            self.admin_ui_roles_container = JansLabelWidget(
-                        title = _("Admin UI Roles"),
-                        values = get_custom_attribute('jansAdminUIRole', multi=True),
-                        data = [ (role['role'], role['role']) for role in common_data.admin_ui_roles ]
-                        )
+            widget = self.get_multivalued_widget(
+                    title=_("Admin UI Roles"),
+                    values=get_custom_attribute('jansAdminUIRole', multi=True),
+                    data=[ (role['role'], role['role']) for role in common_data.admin_ui_roles ],
+                    jans_name = 'jansAdminUIRole'
+                    )
 
-            self.edit_user_content.insert(-1, self.admin_ui_roles_container)
-
+            self.edit_user_content.insert(-1, widget)
 
         if not self.data:
             self.edit_user_content.insert(2,
                     common_data.app.getTitledText(_("Password *"), name='userPassword', value='', style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'userPassword'))
                 )
 
-        for ca in self.data.get('customAttributes', []):
+
+        for ca in custom_attributes:
 
             if ca['name'] in ('middleName', 'sn', 'status', 'nickname', 'jansActive', 'userPassword', 'jansAdminUIRole'):
                 continue
 
             claim_prop = self.get_claim_properties(ca['name'])
+            value = get_custom_attribute(ca['name'], multi=claim_prop.get('oxMultiValuedAttribute'))
 
-            if claim_prop.get('dataType', 'string') in ('string', 'json'):
-                value = get_custom_attribute(ca['name'])
-                self.edit_user_content.insert(-1, 
-                    common_data.app.getTitledText(_(claim_prop.get('displayName', ca['name'])), name=ca['name'], value=value, style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, ca['name']))
-                )
+            if claim_prop.get('oxMultiValuedAttribute'):
+                widget = self.get_multivalued_widget(
+                    title=claim_prop.get('displayName', ca['name']),
+                    values=value,
+                    jans_name=ca['name']
+                    )
+                self.edit_user_content.insert(-1, widget)
+
+            elif claim_prop.get('dataType', 'string') in ('string', 'json'):
+                widget = common_data.app.getTitledText(
+                    _(claim_prop.get('displayName', ca['name'])),
+                    name=ca['name'],
+                    value=value,
+                    style='class:script-titledtext',
+                    jans_help=common_data.app.get_help_from_schema(self.schema, ca['name']),
+                    jans_list_type = claim_prop.get('oxMultiValuedAttribute'),
+                    height = 2 if claim_prop.get('oxMultiValuedAttribute') else 1
+                    )
+
+                self.edit_user_content.insert(-1, widget)
 
             elif claim_prop.get('dataType') == 'boolean':
                 self.edit_user_content.insert(-1, 
@@ -147,8 +194,6 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 )
 
         self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),show_scrollbar=False)
-
-
 
         self.dialog = JansDialogWithNav(
             title=self.title,
@@ -183,10 +228,30 @@ class EditUserDialog(JansGDialog, DialogUtils):
                     if claim_prop['name'] == claim_:
                         break
                 display_name = claim_prop['displayName']
-                if claim_prop['dataType'] == 'boolean':
-                    widget = common_data.app.getTitledCheckBox(_(display_name), name=claim_, style='class:script-checkbox', jans_help=common_data.app.get_help_from_schema(self.schema, claim_))
+                
+                if claim_prop.get('oxMultiValuedAttribute'):
+                    widget = self.get_multivalued_widget(
+                        title=display_name,
+                        values=[],
+                        jans_name=claim_
+                        )
+
+                elif claim_prop['dataType'] == 'boolean':
+                    widget = common_data.app.getTitledCheckBox(
+                        _(display_name),
+                        name=claim_,
+                        style='class:script-checkbox',
+                        jans_help=common_data.app.get_help_from_schema(self.schema, claim_)
+                        )
+
                 else:
-                    widget = common_data.app.getTitledText(_(display_name), name=claim_, value='', style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, claim_))
+                    widget = common_data.app.getTitledText(
+                        _(display_name),
+                        name=claim_,
+                        value='',
+                        style='class:script-titledtext',
+                        jans_help=common_data.app.get_help_from_schema(self.schema, claim_)
+                        )
                 self.edit_user_content.insert(-1, widget)
             self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),show_scrollbar=False)
 
@@ -203,6 +268,9 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         fix_title = _("Please fix!")
         raw_data = self.make_data_from_dialog(tabs={'user': self.edit_user_container.content})
+        for widget in self.edit_user_content:
+            if isinstance(widget, JansLabelWidget):
+                raw_data[widget.jans_name] = widget.get_values()
 
         if not (raw_data['userId'].strip() and raw_data['mail'].strip()):
             common_data.app.show_message(fix_title, _("Username and/or Email is empty"))
@@ -233,7 +301,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
         user_info['status'] = 'active' if status else 'inactive'
 
         for key_ in raw_data:
-            multi_valued = False
+            multi_valued = isinstance(raw_data[key_], list)
             key_prop = self.get_claim_properties(key_)
 
             if key_prop.get('dataType') == 'json' and raw_data[key_]:
@@ -247,25 +315,25 @@ class EditUserDialog(JansGDialog, DialogUtils):
                             )
                     return
 
+            if multi_valued:
+                if raw_data[key_]:
+                    claim_data = raw_data[key_]
+                else:
+                    multi_valued = False
+                    claim_data = None
+            else:
+                claim_data = [raw_data[key_]]
+
             user_info['customAttributes'].append({
                     'name': key_, 
                     'multiValued': multi_valued, 
-                    'values': [raw_data[key_]],
+                    'values': claim_data,
                     })
 
-        for ca in self.data.get('customAttributes', []):
+        for ca in self.data.get('customAttributes', [])[:]:
             if ca['name'] == 'memberOf':
                 user_info['customAttributes'].append(ca)
                 break
-
-        if hasattr(self, 'admin_ui_roles_container'):
-            admin_ui_roles = self.admin_ui_roles_container.get_values()
-            if admin_ui_roles:
-               user_info['customAttributes'].append({
-                        'name': 'jansAdminUIRole', 
-                        'multiValued': len(admin_ui_roles) > 1, 
-                        'values': admin_ui_roles,
-                        })
 
         async def coroutine():
             operation_id = 'put-user' if self.data.get('baseDn') else 'post-user'

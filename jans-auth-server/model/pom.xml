@@ -171,7 +171,6 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-doc</artifactId>
-			<version>${jans-core.version}</version>
 		</dependency>
 		
 		<!-- Swagger -->
@@ -180,6 +179,13 @@
 				io.swagger.core.v3</groupId>
 			<artifactId>swagger-core-jakarta</artifactId>
 			<version>2.2.10</version>
+		</dependency>
+
+        <!-- Nashorn -->
+		<dependency>
+			<groupId>org.openjdk.nashorn</groupId>
+			<artifactId>nashorn-core</artifactId>
+			<version>15.6</version>
 		</dependency>
 
 	</dependencies>

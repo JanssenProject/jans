@@ -6,6 +6,8 @@ tags:
   - userinfo-token
 ---
 
+# OpenID Userinfo Token
+
 ## `Userinfo` JWT
 
 An OpenID Connect client, after obtaining an access token, can present it

@@ -72,6 +72,7 @@ public class CertificateService {
         	
         	return certificate;
         } catch (CertificateException e) {
+        	
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, e.getMessage(), e);
         }
     }

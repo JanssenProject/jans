@@ -6,8 +6,8 @@ tags:
 - json-web-key-set
 - endpoint
 ---
-
-# Overview
+# JWKS URI
+## Overview
 
 Janssen Server supports `/jwks` metadata endpoint and publishes its JSON Web Key Set (JWKS) at this endpoint. This 
 endpoint publishes signing keys as well as encryption keys used by Janssen Server. RP can use these keys to validate

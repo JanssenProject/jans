@@ -1004,11 +1004,6 @@ func resourceAppConfiguration() *schema.Resource {
 								service. Example: http://ox.gluu.org/doku.php?id=jans:tos`,
 				ValidateDiagFunc: validateURL,
 			},
-			"clean_up_inactive_client_after_hours_of_inactivity": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: `The time interval in hours after which the client is considered inactive.`,
-			},
 			"client_periodic_update_timer_interval": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -1054,15 +1049,10 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "The lifetime of the short-lived Access Token. Example: 3600",
 			},
-			"clean_service_interval": {
+			"user_info_lifetime": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Time interval for the Clean Service in seconds. Example: 60",
-			},
-			"clean_service_batch_chunk_size": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: "Each clean up iteration fetches chunk of expired data per base dn and removes it from storage. Example: 10000",
+				Description: "The lifetime of the User Info Token. Example: 3600",
 			},
 			"key_regeneration_enabled": {
 				Type:        schema.TypeBool,
@@ -1235,6 +1225,22 @@ func resourceAppConfiguration() *schema.Resource {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				Description: `A map of ACR mappings. Example: { "acr1": "script1", "acr2": "script2" }`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"acr_to_consent_script_mapping": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: `A map of ACR to consent script mapping. Example: { "acr1": "script1", "acr2": "script2" }`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"acr_to_agama_consent_flow_mapping": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: `A map of ACR to agama consent flow mapping. Example: { "acr1": "agama1", "acr2": "agama2" }`,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -1690,6 +1696,16 @@ func resourceAppConfiguration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Enable/Disable U2F endpoints.",
+			},
+			"rate_limit_registration_request_count": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The number of registration requests allowed per interval.",
+			},
+			"rateLimitRegistrationPeriodInSeconds": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The time period in seconds for the rate limit.",
 			},
 			"rotate_device_secret": {
 				Type:        schema.TypeBool,
@@ -2156,6 +2172,7 @@ func resourceAppConfiguration() *schema.Resource {
 							"STAT",
 							"PAR",
 							"ACCESS_EVALUATION",
+							"RATE_LIMIT",
 							"SSA",
 						}
 						return validateEnum(i, enums)
@@ -2223,9 +2240,12 @@ func resourceAppConfiguration() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"bridge_script_page": {
-							Type:     schema.TypeString,
+						"start_end_url_mapping": {
+							Type:     schema.TypeMap,
 							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 						// TODO: The serialize rules currently don't work because terraform
 						// doesn't support nested lists in maps.

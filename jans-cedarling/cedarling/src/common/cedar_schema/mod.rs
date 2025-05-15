@@ -3,6 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use cedar_policy_core::extensions::Extensions;
+use cedar_policy_validator::ValidatorSchema;
+
 pub(crate) mod cedar_json;
 pub(crate) const CEDAR_NAMESPACE_SEPARATOR: &str = "::";
 
@@ -36,6 +39,7 @@ enum MaybeEncoded {
 pub struct CedarSchema {
     pub schema: cedar_policy::Schema,
     pub json: cedar_json::CedarSchemaJson,
+    pub validator_schema: ValidatorSchema,
 }
 
 impl PartialEq for CedarSchema {
@@ -175,7 +179,22 @@ impl<'de> serde::Deserialize<'de> for CedarSchema {
             ))
         })?;
 
-        Ok(CedarSchema { schema, json })
+        let validator_schema =
+            ValidatorSchema::from_json_str(&json_string, Extensions::all_available()).map_err(
+                |err| {
+                    serde::de::Error::custom(format!(
+                        "{}: {}",
+                        deserialize::ParseCedarSchemaSetMessage::ParseCedarSchemaJson,
+                        err
+                    ))
+                },
+            )?;
+
+        Ok(CedarSchema {
+            schema,
+            json,
+            validator_schema,
+        })
     }
 }
 
@@ -190,6 +209,8 @@ mod deserialize {
         Parse,
         #[error("invalid utf8 detected while decoding cedar policy")]
         Utf8,
+        #[error("failed to parse cedar schema from JSON")]
+        ParseCedarSchemaJson,
     }
 
     #[cfg(test)]

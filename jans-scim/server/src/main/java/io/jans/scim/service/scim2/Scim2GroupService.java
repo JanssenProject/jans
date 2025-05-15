@@ -107,7 +107,7 @@ public class Scim2GroupService implements Serializable {
     }
 
     private void transferAttributesToGroup(GroupResource res, JansGroup group,
-            boolean skipMembersValidation, boolean fillMembersDisplay, String usersUrl) {
+            boolean skipMembersValidation, boolean fillMembersDisplay, String usersUrl) throws Exception {
 
         // externalId (so jansExtId) not part of LDAP schema
         group.setAttribute("jansMetaCreated", res.getMeta().getCreated());

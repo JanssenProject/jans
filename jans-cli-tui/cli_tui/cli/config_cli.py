@@ -262,6 +262,10 @@ debug = get_bool(debug)
 
 class JCA_CLI:
 
+    cli_logger = logging.getLogger('jans-cli-logger')
+    cli_logger.setLevel(logging.DEBUG)
+    cli_logger.propagate = True
+
     def __init__(self, host, client_id, client_secret, access_token, test_client=False, op_mode=None, wrapped=None):
         self.host = self.idp_host = host
         self.client_id = client_id
@@ -337,17 +341,15 @@ class JCA_CLI:
 
 
     def set_logging(self):
-        self.cli_logger = logging.getLogger("urllib3")
-        self.cli_logger.setLevel(logging.DEBUG)
-        self.cli_logger.propagate = True
-        HTTPConnection.debuglevel = 1
-        file_handler = RotatingFileHandler(os.path.join(log_dir, 'cli_debug.log'), maxBytes=10*1024*1024, backupCount=10)
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s"))
-        self.cli_logger.addHandler(file_handler)
-        def print_to_log(*args):
-            self.cli_logger.debug(" ".join(args))
-        http.client.print = print_to_log
+        if not self.cli_logger.handlers:
+            HTTPConnection.debuglevel = 1
+            file_handler = RotatingFileHandler(os.path.join(log_dir, 'cli_debug.log'), maxBytes=10*1024*1024, backupCount=10)
+            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s"))
+            self.cli_logger.addHandler(file_handler)
+            def print_to_log(*args):
+                self.cli_logger.debug(" ".join(args))
+            http.client.print = print_to_log
 
 
     def log_response(self, response):
@@ -790,7 +792,7 @@ class JCA_CLI:
 
     def get_url_param(self, url):
         if url.endswith('}'):
-            pname = re.findall('/\{(.*?)\}$', url)[0]
+            pname = re.findall(r'/\{(.*?)\}$', url)[0]
             return pname
 
     def get_endpiont_url_param(self, endpoint):

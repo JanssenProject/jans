@@ -1,4 +1,4 @@
-
+---
 tags:
   - administration
   - recipes
@@ -7,6 +7,9 @@ tags:
   - modify access token
   - scope
 ---
+
+# Stepped-up Authentication Recipe
+
 ### What is Stepped Up Authentication ? 
 While navigating through an application, a user is challenged to produce an additional authentication when a certain API (of higher criticality) accessed by the client, does not have the needed scope.
 

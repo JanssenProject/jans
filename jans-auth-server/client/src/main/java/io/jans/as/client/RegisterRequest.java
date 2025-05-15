@@ -97,6 +97,7 @@ public class RegisterRequest extends BaseRequest {
     private String subjectIdentifierAttribute;
     private Boolean rptAsJwt;
     private Boolean accessTokenAsJwt;
+    private Boolean requirePkce;
     private SignatureAlgorithm accessTokenSigningAlg;
     private SignatureAlgorithm authorizationSignedResponseAlg;
     private KeyEncryptionAlgorithm authorizationEncryptedResponseAlg;
@@ -849,6 +850,14 @@ public class RegisterRequest extends BaseRequest {
 
     public void setAccessTokenAsJwt(Boolean accessTokenAsJwt) {
         this.accessTokenAsJwt = accessTokenAsJwt;
+    }
+
+    public Boolean getRequirePkce() {
+        return requirePkce;
+    }
+
+    public void setRequirePkce(Boolean requirePkce) {
+        this.requirePkce = requirePkce;
     }
 
     public SignatureAlgorithm getAccessTokenSigningAlg() {
@@ -1885,6 +1894,7 @@ public class RegisterRequest extends BaseRequest {
         result.setKeepClientAuthorizationAfterExpiration(requestObject.optBoolean(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString()));
         result.setRptAsJwt(requestObject.optBoolean(RPT_AS_JWT.toString()));
         result.setAccessTokenAsJwt(requestObject.optBoolean(ACCESS_TOKEN_AS_JWT.toString()));
+        result.setRequirePkce(requestObject.optBoolean(REQUIRE_PKCE.toString()));
         result.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(ACCESS_TOKEN_SIGNING_ALG.toString())));
         result.setAuthorizationSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString())));
         result.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString())));
@@ -2038,6 +2048,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (accessTokenAsJwt != null) {
             function.apply(ACCESS_TOKEN_AS_JWT.toString(), accessTokenAsJwt.toString());
+        }
+        if (requirePkce != null) {
+            function.apply(REQUIRE_PKCE.toString(), requirePkce.toString());
         }
         if (accessTokenSigningAlg != null) {
             function.apply(ACCESS_TOKEN_SIGNING_ALG.toString(), accessTokenSigningAlg.toString());

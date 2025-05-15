@@ -3,7 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 
-	<description>Jans cache refresh server</description>
+	<description>Jans Link server</description>
 
 	<!-- RESTEasy -->
 	<context-param>
@@ -15,12 +15,6 @@
 	<context-param>
 		<param-name>org.eclipse.jetty.servlet.Default.dirAllowed</param-name>
 		<param-value>false</param-value>
-	</context-param>
-
-	<!-- Weld -->
-	<context-param>
-		<param-name>org.jboss.weld.development</param-name>
-		<param-value>${weld.debug}</param-value>
 	</context-param>
 
 	<listener>

@@ -1,6 +1,6 @@
 # Cedarling UniFFI binding
 
-This module is designed to build Cedarling UniFFI binding for iOS and android apps.
+This module is designed to build Cedarling UniFFI binding for iOS and android apps. The Kotlin binding can be Java Projects to run cedarling authz.
 
 ## iOS
 
@@ -16,15 +16,19 @@ Read [this article](https://medium.com/@arnab.bdutta/janssen-cedarling-uniffi-bi
 1. Build the library:
 
 ```bash
-cargo build
+cargo build --release
 ```
 
-In target/debug, you should find the libmobile.dylib file.
+In `target/release`, you should find the `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file, depending on the operating system you are using.
 
-2. Generate the bindings:
+- **.so** (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.
+- **.dylib** (Dynamic Library) – This is the shared library format for macOS.
+- **.dll** (Dynamic Link Library) - The shared library format used in Windows.
+
+2. Generate the bindings for Swift by running the command below. Replace `{build_file}` with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/release`.
 
 ```bash
-cargo run --bin uniffi-bindgen generate --library ./target/debug/libmobile.dylib --language swift --out-dir ./bindings/cedarling_uniffi/output
+cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language swift --out-dir ./bindings/cedarling_uniffi/output
 ```
 
 3. Building the iOS binaries and adding these targets to Rust.
@@ -59,4 +63,101 @@ xcodebuild -create-xcframework \
 
 ## Android
 
-- WIP
+### Prerequisites
+
+- Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
+- Android Studio: Download from [the official site](https://developer.android.com/studio).
+
+### Building
+
+1. Build the library:
+
+```bash
+cargo build --release
+```
+
+In `target/release`, you should find the `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file, depending on the operating system you are using.
+
+- **.so** (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.
+- **.dylib** (Dynamic Library) – This is the shared library format for macOS.
+- **.dll** (Dynamic Link Library) - The shared library format used in Windows.
+
+2. Set up cargo-ndk for cross-compiling:
+
+```
+cargo install cargo-ndk
+
+```
+
+3. Add targets for Android:
+
+```
+rustup target add \
+        aarch64-linux-android \
+        armv7-linux-androideabi \
+        i686-linux-android \
+        x86_64-linux-android
+```
+
+4. Compile the dynamic libraries in ./app/src/main/jniLibs (next to java and res directories) in the sample `androidApp` project.
+
+```
+cargo ndk -o ./bindings/cedarling_uniffi/androidApp/app/src/main/jniLibs \
+        --manifest-path ./Cargo.toml \
+        -t armeabi-v7a \
+        -t arm64-v8a \
+        -t x86 \
+        -t x86_64 \
+        build \
+        -p cedarling_uniffi --release
+```
+
+5. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/release`.
+
+
+```
+cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/androidApp/app/src/main/java/com/example/androidapp/cedarling/uniffi
+
+```
+
+6. Open the `androidApp` project on Android Studio and run the project on simulator. 
+
+## Kotlin Binding
+
+Here we delve into the process of generating the Kotlin binding for cedarling and use it in a sample Java Maven project to run the authorization.
+
+### Prerequisites
+
+- Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
+- Java Development Kit (JDK): version 21 or higher  
+- Apache Maven: Install it from [Apache Maven Website](https://maven.apache.org/download.cgi)
+
+### Building Kotlin binding
+
+1. Build Cedarling:
+
+```bash
+cargo build --release
+```
+In `target/release`, you should find the `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file, depending on the operating system you are using.
+
+2. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/release`.
+
+```bash
+cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/javaApp/src/main/kotlin/org/example
+```
+
+3. Copy the generated `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file to resource directory of the sample Java Maven project. Replace `{build_file}` in the below commad with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/release`.
+
+```bash
+cp ./target/release/{build_file} ./bindings/cedarling_uniffi/javaApp/src/main/resources
+```
+
+4. Change directory to sample Java project (`./bindings/cedarling_uniffi/javaApp`) and run below command to run the main method of a Maven project from the terminal.
+
+```bash
+ mvn clean install
+ mvn exec:java -Dexec.mainClass="org.example.Main"
+```
+
+The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization with sample tokens, resource and context inputs and call log interface to print authorization logs on console. The sample `tokens`, `resource` and `context` input files used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`. 
