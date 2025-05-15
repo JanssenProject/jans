@@ -490,6 +490,7 @@ jobs:
         gh release upload "${VERSION}" *.tar.gz *.sha256sum *.asc
   build_cedarling_krakend:
     if: github.repository == 'JanssenProject/jans'
+    needs: build_cedarling_go
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -531,12 +532,15 @@ jobs:
     - name: Build plugin for AMD64 
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
+        wget https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0_x86-64.so -O libcedarling_go.so
         docker run -i -v "$PWD:/app" -w /app krakend/"${{ matrix.krakend-builder-image }}" go build -buildmode=plugin -o cedarling-krakend-amd64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so .
+        rm libcedarling_go.so
     - name: Build plugin for ARM64
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
-
+        wget https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0_arm64.so -O libcedarling_go.so
         docker run -i -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=${{ env.CC }}" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}" go build -ldflags='-extldflags=-fuse-ld=bfd -extld=${{ env.CC }}' -buildmode=plugin -o  cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so .
+        rm libcedarling_go.so
     - name: Generate sha256sum and sign
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
@@ -552,10 +556,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ubuntu22, mac, windows]
+        name: [ubuntu22, ubuntu22-arm, mac, windows]
         include:
           - name: ubuntu22
             os: ubuntu-22.04
+          - name: ubuntu22-arm
+            os: ubuntu-22.04-arm
           - name: mac
             os: macos-15
           - name: windows
@@ -591,7 +597,20 @@ jobs:
             TAG="0.0.0"
           fi
           cargo build -r -p cedarling_go
-          cp ../../target/release/libcedarling_go.so libcedarling_go-${TAG}.so
+          cp ../../target/release/libcedarling_go.so libcedarling_go-${TAG}_x86-64.so
+      - name: Build rust artifacts for linux ARM64
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        if: matrix.name == 'ubuntu22-arm'
+        run: |
+          rustup update stable && rustup default stable
+          TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+          VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+          if [ "${TAG}" == "nightly" ]; then
+            VERSION=nightly
+            TAG="0.0.0"
+          fi
+          cargo build -r -p cedarling_go
+          cp ../../target/release/libcedarling_go.so libcedarling_go-${TAG}_arm64.so
       - name: Build rust artifacts mac
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
         if: matrix.name == 'mac'
@@ -636,7 +655,10 @@ jobs:
           
           case "${{ matrix.name }}" in
             ubuntu22)
-              FILE="libcedarling_go-${TAG}.so"
+              FILE="libcedarling_go-${TAG}_x86-64.so"
+              ;;
+            ubuntu22-arm)
+              FILE="libcedarling_go-${TAG}_arm64.so"
               ;;
             mac)
               FILE="libcedarling_go-${TAG}.dylib"
