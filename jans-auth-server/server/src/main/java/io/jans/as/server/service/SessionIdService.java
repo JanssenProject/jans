@@ -659,6 +659,9 @@ public class SessionIdService {
                 }
 
                 if (update) {
+                    if (sessionId.getState() == SessionIdState.AUTHENTICATED) {
+                        setSessionIndexIfNeeded(sessionId);
+                    }
                     mergeWithRetry(sessionId);
                 }
             }
