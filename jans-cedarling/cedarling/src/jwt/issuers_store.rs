@@ -25,7 +25,7 @@ impl TrustedIssuersStore {
     // NOTE: once this store is initialized, it is not expected that the source
     // will be updated. If ever Cedarling supports updating the Trusted Issuers in the
     // future, make sure this implementation is updated.
-    pub fn new(source: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>) -> Self {
+    pub fn new(source: Option<Arc<HashMap<IssuerId, TrustedIssuer>>>) -> Self {
         let issuers = match source.as_ref() {
             None => HashMap::new(),
             Some(issuers) => issuers

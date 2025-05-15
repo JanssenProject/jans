@@ -37,11 +37,11 @@ fn can_decode_jwt() {
             validate_exp: true,
             validate_nbf: true,
         },
-        None.into(),
+        None,
     )
     .expect("Should create validator");
 
-    let result = validator.decode(&token).expect("Should decode JWT");
+    let result = validator.decode_jwt(&token).expect("Should decode JWT");
 
     let expected = ProcessedJwt {
         claims,
@@ -83,12 +83,12 @@ fn can_decode_and_validate_jwt() {
             validate_exp: true,
             validate_nbf: true,
         },
-        Some(key_service).into(),
+        Some(key_service.into()),
     )
     .expect("Should create validator");
 
     let result = validator
-        .process_jwt(&token)
+        .validate_jwt(&token)
         .expect("Should successfully process JWT");
 
     let expected = ProcessedJwt {
@@ -133,11 +133,11 @@ fn errors_on_invalid_iss_scheme() {
             validate_exp: true,
             validate_nbf: true,
         },
-        Some(key_service).into(),
+        Some(key_service.into()),
     )
     .expect("Should create validator");
 
-    let result = validator.process_jwt(&token);
+    let result = validator.validate_jwt(&token);
 
     assert!(
         matches!(result, Err(JwtValidatorError::InvalidIssScheme(_))),
@@ -178,11 +178,11 @@ fn errors_on_expired_token() {
             validate_exp: true,
             validate_nbf: true,
         },
-        Some(key_service).into(),
+        Some(key_service.into()),
     )
     .expect("Should create validator");
 
-    let result = validator.process_jwt(&token);
+    let result = validator.validate_jwt(&token);
 
     assert!(
         matches!(result, Err(JwtValidatorError::ExpiredToken)),
@@ -223,11 +223,11 @@ fn errors_on_immature_token() {
             validate_exp: true,
             validate_nbf: true,
         },
-        Some(key_service).into(),
+        Some(key_service.into()),
     )
     .expect("Should create validator");
 
-    let result = validator.process_jwt(&token);
+    let result = validator.validate_jwt(&token);
 
     assert!(
         matches!(result, Err(JwtValidatorError::ImmatureToken)),
@@ -249,7 +249,7 @@ fn can_check_missing_claims() {
 
     // Prepare Key Service
     let jwks = generate_jwks(&vec![keys]);
-    let key_service: Arc<Option<KeyService>> = Some(
+    let key_service = Arc::new(
         KeyService::new_from_str(
             &json!({
                 "test_idp": jwks.keys,
@@ -257,8 +257,7 @@ fn can_check_missing_claims() {
             .to_string(),
         )
         .expect("Should create KeyService"),
-    )
-    .into();
+    );
 
     // Base case where all required claims are present
     let validator = JwtValidator::new(
@@ -271,11 +270,11 @@ fn can_check_missing_claims() {
             validate_exp: true,
             validate_nbf: true,
         },
-        key_service.clone(),
+        Some(key_service.clone()),
     )
     .expect("Should create validator");
     let result = validator
-        .process_jwt(&token)
+        .validate_jwt(&token)
         .expect("Should process JWT successfully");
 
     let expected = ProcessedJwt {
@@ -296,10 +295,10 @@ fn can_check_missing_claims() {
             validate_exp: true,
             validate_nbf: true,
         },
-        key_service.clone(),
+        Some(key_service.clone()),
     )
     .expect("Should create validator");
-    let result = validator.process_jwt(&token);
+    let result = validator.validate_jwt(&token);
     assert!(
         matches!(
             result,

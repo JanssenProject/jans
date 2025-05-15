@@ -30,7 +30,7 @@ pub struct JwtValidatorConfig {
     #[allow(dead_code)]
     pub status_validation: Arc<bool>,
     /// List of trusted issuers used to check the JWT status.
-    pub trusted_issuers: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
+    pub trusted_issuers: Option<Arc<HashMap<IssuerId, TrustedIssuer>>>,
     /// Algorithms supported as defined in the Bootstrap properties.
     ///
     /// Tokens not signed with an algorithm within this HashSet will immediately be invalid.

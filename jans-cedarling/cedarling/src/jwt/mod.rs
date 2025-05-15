@@ -15,7 +15,7 @@ mod issuers_store;
 mod jwk_store;
 mod key_service;
 mod log_entry;
-mod status_list;
+mod status_list_service;
 
 #[cfg(test)]
 mod test_utils;
@@ -94,31 +94,29 @@ impl JwtService {
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
-        let key_service: Arc<_> =
-            match (&config.jwt_sig_validation, &config.jwks, &trusted_issuers) {
-                // Case: no JWKS provided
-                (true, None, None) => Err(JwtServiceInitError::MissingJwksConfig)?,
-                // Case: Trusted issuers provided
-                (true, None, Some(issuers)) => Some(
-                    KeyService::new_from_trusted_issuers(issuers)
-                        .await
-                        .map_err(JwtServiceInitError::KeyService)?,
-                ),
-                // Case: Local JWKS provided
-                (true, Some(jwks), None) => {
-                    Some(KeyService::new_from_str(jwks).map_err(JwtServiceInitError::KeyService)?)
-                },
-                // Case: Both a local JWKS and trusted issuers were provided
-                (true, Some(_), Some(_)) => Err(JwtServiceInitError::ConflictingJwksConfig)?,
-                // Case: Signature validation is Off so no key service is needed.
-                _ => None,
-            }
-            .into();
+        let key_service = match (&config.jwt_sig_validation, &config.jwks, &trusted_issuers) {
+            // Case: no JWKS provided
+            (true, None, None) => Err(JwtServiceInitError::MissingJwksConfig)?,
+            // Case: Trusted issuers provided
+            (true, None, Some(issuers)) => Some(Arc::new(
+                KeyService::new_from_trusted_issuers(issuers)
+                    .await
+                    .map_err(JwtServiceInitError::KeyService)?,
+            )),
+            // Case: Local JWKS provided
+            (true, Some(jwks), None) => Some(Arc::new(
+                KeyService::new_from_str(jwks).map_err(JwtServiceInitError::KeyService)?,
+            )),
+            // Case: Both a local JWKS and trusted issuers were provided
+            (true, Some(_), Some(_)) => Err(JwtServiceInitError::ConflictingJwksConfig)?,
+            // Case: Signature validation is Off so no key service is needed.
+            _ => None,
+        };
 
         // prepare shared configs
         let sig_validation: Arc<_> = config.jwt_sig_validation.into();
         let status_validation: Arc<_> = config.jwt_status_validation.into();
-        let trusted_issuers: Arc<_> = trusted_issuers.clone().into();
+        let trusted_issuers = trusted_issuers.map(|iss| Arc::new(iss.clone()));
         let algs_supported: Arc<HashSet<Algorithm>> =
             config.signature_algorithms_supported.clone().into();
 
@@ -208,7 +206,7 @@ impl JwtService {
             };
 
             let validated_jwt = validator
-                .process_jwt(jwt)
+                .validate_jwt(jwt)
                 .map_err(|e| JwtProcessingError::InvalidToken(token_name.to_string(), e))?;
             let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
                 .map_err(JwtProcessingError::StringDeserialization)?;
