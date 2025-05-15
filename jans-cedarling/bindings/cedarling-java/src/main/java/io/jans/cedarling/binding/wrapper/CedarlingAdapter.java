@@ -1,6 +1,6 @@
-package io.jans.cedarling.kotlin.binding.wrapper;
+package io.jans.cedarling.binding.wrapper;
 
-import uniffi.mobile.*;
+import uniffi.cedarling_uniffi.*;
 import org.json.JSONObject;
 import java.util.List;
 import java.util.Map;

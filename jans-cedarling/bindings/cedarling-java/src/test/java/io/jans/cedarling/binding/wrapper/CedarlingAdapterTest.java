@@ -1,13 +1,13 @@
-package io.jans.cedarling.kotlin.binding.wrapper;
+package io.jans.cedarling.binding.wrapper;
 
-import io.jans.cedarling.kotlin.binding.wrapper.jwt.JWTCreator;
-import io.jans.cedarling.kotlin.binding.wrapper.utils.AppUtils;
+import io.jans.cedarling.binding.wrapper.jwt.JWTCreator;
+import io.jans.cedarling.binding.wrapper.utils.AppUtils;
 import org.testng.annotations.*;
 import org.json.JSONObject;
 
 import java.util.*;
 
-import uniffi.mobile.*;
+import uniffi.cedarling_uniffi.*;
 import static org.testng.Assert.*;
 
 public class CedarlingAdapterTest {

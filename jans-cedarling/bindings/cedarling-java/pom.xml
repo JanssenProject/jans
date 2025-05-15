@@ -124,14 +124,6 @@
     </dependencies>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <includes>
-                    <include>**/libmobile.so</include>
-                </includes>
-            </resource>
-        </resources>
         <plugins>
             <!-- Kotlin compiler plugin -->
             <plugin>
@@ -219,7 +211,7 @@
                                     </includes>
                                 </artifactSet>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>with-deps</shadedClassifierName>
+                            <shadedClassifierName>distribution</shadedClassifierName>
                         </configuration>
                     </execution>
                 </executions>

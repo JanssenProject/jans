@@ -1,4 +1,4 @@
-package io.jans.cedarling.kotlin.binding.wrapper.utils;
+package io.jans.cedarling.binding.wrapper.utils;
 
 import java.io.IOException;
 import java.nio.file.Files;

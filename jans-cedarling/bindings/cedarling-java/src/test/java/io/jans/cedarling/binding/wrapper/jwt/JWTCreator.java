@@ -1,4 +1,4 @@
-package io.jans.cedarling.kotlin.binding.wrapper.jwt;
+package io.jans.cedarling.binding.wrapper.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.*;
