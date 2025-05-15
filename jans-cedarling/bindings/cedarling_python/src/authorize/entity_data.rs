@@ -27,12 +27,12 @@ use serde_pyobject::from_pyobject;
 ///
 /// Methods
 /// -------
-/// .. method:: __init__(self, resource_type: str, id: str, **kwargs: dict)
+/// .. method:: __init__(self, entity_type: str, id: str, **kwargs: dict)
 ///     Initialize a new EntityData. In kwargs the payload is a dictionary of entity attributes.
 ///
 /// .. method:: from_dict(cls, value: dict) -> EntityData
 ///     Initialize a new EntityData from a dictionary.
-///     To pass `resource_type` you need to use `type` key.
+///     To pass `entity_type` you need to use `type` key.
 #[derive(Clone, serde::Deserialize)]
 #[pyclass]
 pub struct EntityData {
@@ -45,13 +45,13 @@ pub struct EntityData {
     pub id: String,
     /// entity attributes
     #[serde(flatten)]
-    pub payload: PayloadType,
+    pub attributes: EntityDataAttrs,
 }
 
-// type alias for the payload hash map
-type PayloadType = HashMap<String, serde_json::Value>;
+// type alias for the entity data attributes
+type EntityDataAttrs = HashMap<String, serde_json::Value>;
 
-fn get_payload(object: Bound<'_, PyDict>) -> PyResult<PayloadType> {
+fn get_payload(object: Bound<'_, PyDict>) -> PyResult<EntityDataAttrs> {
     from_pyobject(object).map_err(|err| {
         PyRuntimeError::new_err(format!(
             "Failed to convert to rust HashMap<String, serde_json::Value>: {}",
@@ -65,21 +65,21 @@ impl EntityData {
     #[new]
     #[pyo3(signature = (entity_type, id, **kwargs))]
     fn new(entity_type: String, id: String, kwargs: Option<Bound<'_, PyDict>>) -> PyResult<Self> {
-        let payload = kwargs
+        let attributes = kwargs
             .map(|dict| get_payload(dict))
             .unwrap_or(Ok(HashMap::new()))?;
 
         Ok(Self {
             entity_type,
             id,
-            payload,
+            attributes,
         })
     }
 
     /// setter for payload attribute
     #[setter]
     fn payload(&mut self, value: Bound<'_, PyDict>) -> PyResult<()> {
-        self.payload = get_payload(value)?;
+        self.attributes = get_payload(value)?;
         Ok(())
     }
 
@@ -95,7 +95,7 @@ impl From<EntityData> for cedarling::EntityData {
         Self {
             entity_type: value.entity_type,
             id: value.id,
-            payload: value.payload,
+            attributes: value.attributes,
         }
     }
 }

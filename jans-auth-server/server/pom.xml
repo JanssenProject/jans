@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.5.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<prerequisites>
@@ -801,18 +801,12 @@
 				</dependency> -->
 
 				<dependency>
-					<groupId>org.glassfish</groupId>
-					<artifactId>jakarta.el</artifactId>
-				</dependency>
-				<dependency>
 					<groupId>jakarta.el</groupId>
 					<artifactId>jakarta.el-api</artifactId>
-					<scope>test</scope>
 				</dependency>
 				<dependency>
 				    <groupId>jakarta.servlet.jsp</groupId>
 				    <artifactId>jakarta.servlet.jsp-api</artifactId>
-				    <scope>provided</scope>
 				</dependency>
 
 				<dependency>
@@ -831,7 +825,6 @@
     		        <groupId>jakarta.ejb</groupId>
                     <artifactId>jakarta.ejb-api</artifactId>
                 </dependency>
-
 
 				<!-- Test: Embedded Jetty -->
 				<dependency>

@@ -10,7 +10,9 @@ public class AccountsLinkingPlugin extends Plugin {
     private Logger logger = LoggerFactory.getLogger(getClass());
     
     public AccountsLinkingPlugin(PluginWrapper wrapper) throws Exception {
-        super(wrapper);        
+        super(wrapper);
+        // "initialize" service
+        AccountsLinkingService.getInstance(wrapper.getPluginId());
     }
 
     @Override

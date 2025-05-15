@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-fido2-parent</artifactId>
-		<version>1.5.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 	
     <build>
@@ -53,6 +53,7 @@
                 <configuration>
                     <failOnError>false</failOnError>
                 </configuration>
+                <version>3.8.0</version>
             </plugin>
         </plugins>
     </build>
@@ -71,6 +72,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.8.0</version>
             </plugin>
         </plugins>
     </reporting>

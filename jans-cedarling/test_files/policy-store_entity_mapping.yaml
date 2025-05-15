@@ -141,7 +141,7 @@ policy_stores:
         name: TestAgama
         description: TestAgama trusted issuer
         openid_configuration_endpoint: https://account.gluu.org/.well-known/openid-configuration
-        tokens_metadata:
+        token_metadata:
           access_token:
             entity_type_name: Jans::MappedAccess_token
             workload_id: client_id

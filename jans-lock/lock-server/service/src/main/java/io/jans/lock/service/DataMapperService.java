@@ -13,15 +13,11 @@ import java.io.InputStream;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -98,14 +94,7 @@ public class DataMapperService {
     }
 
     private ObjectMapper createJsonMapperWithJaxb() {
-        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector(TypeFactory.defaultInstance());
-        final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
-
-        final AnnotationIntrospector pair = AnnotationIntrospector.pair(jackson, jaxb);
-
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.getDeserializationConfig().with(pair);
-        mapper.getSerializationConfig().with(pair);
 
         return mapper;
     }

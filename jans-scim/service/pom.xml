@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-scim</artifactId>
-		<version>1.5.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<build>
@@ -40,6 +40,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.8.0</version>
 				<configuration>
 					<failOnError>false</failOnError>
 				</configuration>
@@ -123,10 +124,6 @@
 		<dependency>
             <groupId>jakarta.inject</groupId>
         	<artifactId>jakarta.inject-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>jakarta.faces</artifactId>
 		</dependency>
 		<dependency>
             <groupId>jakarta.validation</groupId>

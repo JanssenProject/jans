@@ -16,11 +16,11 @@ wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 web-sys = "0.3"
 serde-wasm-bindgen = "0.6"
+tokio = "1.42.0"
 
 
 [profile.release]
-strip = "symbols"
 debug-assertions = false
-lto = "thin"
-opt-level = "s"
+opt-level = "z"
 codegen-units = 1
+overflow-checks = false

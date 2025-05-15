@@ -24,9 +24,10 @@ impl EntityBuilder {
         let attrs_srcs: Vec<_> = USER_ATTR_SRC_TKNS
             .iter()
             .filter_map(|name| {
-                tokens
-                    .get(*name)
-                    .map(|tkn| (tkn.claims_value(), tkn.claim_mappings()))
+                tokens.get(*name).map(|tkn| AttrSrc::Token {
+                    claims: tkn.claims_value(),
+                    mappings: tkn.claim_mappings(),
+                })
             })
             .collect();
         if attrs_srcs.is_empty() {
@@ -83,7 +84,7 @@ impl UserIdSrcResolver {
                 // if a `user_id` is availble in the token's entity metadata
                 let claim =
                     if let Some(claim) = token.get_metadata().and_then(|m| m.user_id.as_ref()) {
-                        eid_srcs.push(EntityIdSrc { token, claim });
+                        eid_srcs.push(EntityIdSrc::Token { token, claim });
                         Some(claim)
                     } else {
                         None
@@ -93,7 +94,7 @@ impl UserIdSrcResolver {
                 if claim.map(|claim| claim == src.claim).unwrap_or(false) {
                     continue;
                 }
-                eid_srcs.push(EntityIdSrc {
+                eid_srcs.push(EntityIdSrc::Token {
                     token,
                     claim: src.claim,
                 });
@@ -194,7 +195,7 @@ mod test {
                 "attrs": {
                     "iss": {"__entity": {
                         "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
+                        "id": "https://test.jans.org",
                     }},
                     "sub": "some_sub",
                     "id_token": {"__entity": {
@@ -268,7 +269,7 @@ mod test {
                 "attrs": {
                     "iss": {"__entity": {
                         "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
+                        "id": "https://test.jans.org",
                     }},
                     "sub": "some_sub",
                     "userinfo_token": {"__entity": {
@@ -360,7 +361,7 @@ mod test {
                 "attrs": {
                     "iss": {"__entity": {
                         "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
+                        "id": "https://test.jans.org",
                     }},
                     "sub": "id_tkn_sub",
                     "from_id_tkn": "from_id_tkn",

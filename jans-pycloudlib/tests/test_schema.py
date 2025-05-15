@@ -78,7 +78,7 @@ def test_secret_validate_salt(value):
     from jans.pycloudlib.schema import SecretSchema
 
     with pytest.raises(ValidationError):
-        SecretSchema().validate_salt(value)
+        SecretSchema().validate_salt(value, "encoded_salt")
 
 
 def test_secret_validate_password():
@@ -87,7 +87,7 @@ def test_secret_validate_password():
 
     with pytest.raises(ValidationError):
         # no special chars
-        SecretSchema().validate_password("abcD3f")
+        SecretSchema().validate_password("abcD3f", "admin_password")
 
 
 def test_configmap_validate_fqdn():
@@ -96,7 +96,7 @@ def test_configmap_validate_fqdn():
 
     with pytest.raises(ValidationError):
         # no special chars
-        ConfigmapSchema().validate_fqdn("local")
+        ConfigmapSchema().validate_fqdn("local", "hostname")
 
 
 def test_configmap_transform_data():
@@ -145,7 +145,7 @@ def test_load_schema_from_file_invalid(tmpdir, value, retcode):
 
 def test_valid_optional_scopes():
     from jans.pycloudlib.schema import ConfigmapSchema
-    assert ConfigmapSchema().validate_optional_scopes('["redis", "sql"]') is None
+    assert ConfigmapSchema().validate_optional_scopes('["redis", "sql"]', "optional_scopes") is None
 
 
 @pytest.mark.parametrize("value", [
@@ -158,7 +158,7 @@ def test_random_optional_scopes(value):
     from jans.pycloudlib.schema import ConfigmapSchema
 
     with pytest.raises(ValidationError):
-        ConfigmapSchema().validate_optional_scopes(value)
+        ConfigmapSchema().validate_optional_scopes(value, "optional_scopes")
 
 
 def test_load_schema_key(tmpdir):

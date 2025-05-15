@@ -22,7 +22,7 @@ if [[ $JANS_PERSISTENCE != "MYSQL" ]] && [[ $JANS_PERSISTENCE != "PGSQL" ]]; the
   exit 1
 fi
 if [[ -z $JANS_VERSION ]]; then
-  JANS_VERSION="1.5.0-1"
+  JANS_VERSION="0.0.0-nightly"
 fi
 LOG_TARGET="FILE"
 LOG_LEVEL="TRACE"
@@ -36,9 +36,6 @@ if [[ -z $EXT_IP ]]; then
 fi
 
 sudo apt-get update
-sudo apt-get install python3-pip -y
-sudo pip3 install requests --upgrade
-sudo pip3 install shiv
 sudo snap install microk8s --classic
 sudo microk8s.status --wait-ready
 sudo microk8s.enable dns registry ingress hostpath-storage helm3

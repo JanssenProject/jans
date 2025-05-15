@@ -15,6 +15,7 @@
             <class name="io.jans.as.server.model.registration.RegisterParamsValidatorTest" />
             <class name="io.jans.as.server.model.common.ExecutionContextTest" />
             <class name="io.jans.as.server.model.common.TxTokenTest" />
+            <class name="io.jans.as.server.model.common.AuthorizationGrantTest" />
 
             <class name="io.jans.as.server.service.MTLSServiceTest" />
             <class name="io.jans.as.server.service.ScopeServiceTest" />
@@ -36,6 +37,7 @@
             <class name="io.jans.as.server.token.ws.rs.TxTokenServiceTest" />
             <class name="io.jans.as.server.token.ws.rs.TxTokenValidatorTest" />
             <class name="io.jans.as.server.token.ws.rs.TokenRestWebServiceValidatorTest" />
+            <class name="io.jans.as.server.token.ws.rs.TokenRestWebServiceImplTest" />
             <class name="io.jans.as.server.ws.rs.stat.MonthsTest" />
 
             <!-- AUTHORIZE -->

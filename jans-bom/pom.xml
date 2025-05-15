@@ -5,7 +5,7 @@
 	<artifactId>jans-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>jans-bom</name>
-	<version>1.5.0</version>
+	<version>0.0.0-nightly</version>
 
     <distributionManagement>
 	  <repository>
@@ -24,7 +24,7 @@
 		<httpcore.version>4.4.15</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 
-		<resteasy.version>6.0.3.Final</resteasy.version>
+		<resteasy.version>6.2.12.Final</resteasy.version>
 		<richfaces.version>4.5.19-gluu.Final</richfaces.version>
 		<weld.version>4.0.3.Final</weld.version>
 	
@@ -41,7 +41,9 @@
 		<jakarta.websocket.api.version>2.1.0</jakarta.websocket.api.version>
 		<jakarta.xml.bind.api.version>3.0.1</jakarta.xml.bind.api.version>
 		<org.glassfish.jakarta.el.api.version>5.0.0-M1</org.glassfish.jakarta.el.api.version>
-		<jakarta.el.api.version>5.0.0-RC1</jakarta.el.api.version>
+		<jakarta.el.api.version>6.0.1</jakarta.el.api.version>
+		<jakarta.servlet.jsp-api.version>4.0.0</jakarta.servlet.jsp-api.version>
+		
 
 		<jackson.bom.version>2.13.4.20221013</jackson.bom.version>
 		<jackson.version>2.13.4</jackson.version>
@@ -355,7 +357,12 @@
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>${jakarta.xml.bind.api.version}</version>
 			</dependency>
-
+			<dependency>
+			    <groupId>jakarta.ws.rs</groupId>
+			    <artifactId>jakarta.ws.rs-api</artifactId>
+			    <version>3.1.0</version>
+			</dependency>
+			
 		<!-- 	<dependency>
 				<groupId>javax.enterprise</groupId>
 				<artifactId>cdi-api</artifactId>
@@ -400,6 +407,11 @@
 				<artifactId>jakarta.el-api</artifactId>
 				<version>${jakarta.el.api.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>jakarta.servlet.jsp</groupId>
+				<artifactId>jakarta.servlet.jsp-api</artifactId>
+				<version>${jakarta.servlet.jsp-api.version}</version>
+			</dependency>
 			<!-- <dependency>
 				<groupId>org.glassfish</groupId>
 				<artifactId>jakarta.faces</artifactId>
@@ -415,7 +427,7 @@
 			    <version>${org.jboss.annotations.api.version}</version>
 				<scope>provided</scope>
 			</dependency>
-		<!-- 	<dependency>
+			<!-- 	<dependency>
 				<groupId>javax.websocket</groupId>
 				<artifactId>javax.websocket-api</artifactId>
 				<version>1.1</version>
@@ -424,7 +436,7 @@
 			<!-- <dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
-				<version>1.5.0</version>
+				<version>0.0.0-nightly</version>
 			</dependency> -->
 
 			<!-- hibernate -->
@@ -438,7 +450,7 @@
 			    <artifactId>hibernate-validator-cdi</artifactId>
 			    <version>${org.hibernate.validator.cdi.version}</version>
 			</dependency>
-			
+
 			<!-- omnifaces -->
 			<dependency>
 			    <groupId>org.omnifaces</groupId>
@@ -1025,7 +1037,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.6.3</version>
+					<version>3.8.0</version>
 					<configuration>
 						<failOnError>false</failOnError>
 						<additionalJOption>-Xdoclint:none</additionalJOption>

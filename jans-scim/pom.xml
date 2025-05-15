@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-scim</artifactId>
 	<packaging>pom</packaging>
-	<version>1.5.0</version>
+	<version>0.0.0-nightly</version>
 	<name>SCIM API</name>
 	<url>http://www.gluu.org</url>
 
@@ -176,7 +176,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.11.1</version>
+					<version>3.8.0</version>
 					<configuration>
 						<failOnError>false</failOnError>
 					</configuration>

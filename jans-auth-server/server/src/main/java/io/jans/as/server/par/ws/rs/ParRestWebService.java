@@ -125,6 +125,7 @@ public class ParRestWebService {
                             + "customRespHeaders = {}, claims = {}, tokenBindingHeader = {}, authorizationDetails = {}",
                     acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod, customResponseHeaders, claims, tokenBindingHeader, authorizationDetails);
 
+            parValidator.validateAuthentication(clientId, state);
             List<ResponseType> responseTypes = ResponseType.fromString(responseType, " ");
             ResponseMode responseModeObj = ResponseMode.getByValue(responseMode);
 

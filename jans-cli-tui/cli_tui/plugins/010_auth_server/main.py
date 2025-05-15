@@ -632,7 +632,7 @@ class Plugin(DialogUtils):
         # ------------------------------------------------------------------------------- #
 
         data =[]
-        
+
         if pattern:
             for k in self.app.app_configuration:
                 if pattern.lower() in k.lower():
@@ -719,6 +719,8 @@ class Plugin(DialogUtils):
         """
 
         selected_line_data = params['passed']    ##self.uma_result 
+
+        open("/tmp/property.json","w").write(json.dumps(selected_line_data))
 
         title = _("Edit property")
 

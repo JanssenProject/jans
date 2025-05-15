@@ -76,7 +76,7 @@ mod test {
             "name": "some_iss",
             "description": "some_desc",
             "openid_configuration_endpoint": "https://test.jans.org",
-            "tokens_metadata": {},
+            "token_metadata": {},
         }))
         .expect("should be a valid trusted issuer");
         let schema: MappingSchema = (&*CEDARLING_VALIDATOR_SCHEMA)
@@ -111,7 +111,7 @@ mod test {
             "name": "some_iss",
             "description": "some_desc",
             "openid_configuration_endpoint": "https://test.jans.org",
-            "tokens_metadata": {},
+            "token_metadata": {},
         }))
         .expect("should be a valid trusted issuer");
         let (origin, iss_entity) = build_iss_entity("TrustedIssuer", "some_iss", &iss, None)

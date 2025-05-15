@@ -31,15 +31,10 @@ func resourceFido2Configuration() *schema.Resource {
 				Description:      "The base URL for Fido2 endpoints. Example: https://server.example.com/fido2/restv1",
 				ValidateDiagFunc: validateURL,
 			},
-			"clean_service_interval": {
+			"user_info_lifetime": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Time interval for the Clean Service in seconds.",
-			},
-			"clean_service_batch_chunk_size": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: "Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.",
+				Description: "User info lifetime.",
 			},
 			"use_local_cache": {
 				Type:        schema.TypeBool,

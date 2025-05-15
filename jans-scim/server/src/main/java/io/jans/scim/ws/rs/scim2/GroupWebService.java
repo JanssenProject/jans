@@ -16,24 +16,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.function.Predicate;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import javax.management.InvalidAttributeValueException;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.DefaultValue;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
-import jakarta.ws.rs.HttpMethod;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -55,11 +38,30 @@ import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.scim.service.scim2.Scim2GroupService;
 import io.jans.scim.service.scim2.Scim2PatchService;
 import io.jans.scim.service.scim2.interceptor.RefAdjusted;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Implementation of /Groups endpoint. Methods here are intercepted.
  * Filter io.jans.scim.service.filter.AuthorizationProcessingFilter secures invocations
  */
+@Dependent
 @Named("scim2GroupEndpoint")
 @Path("/v2/Groups")
 public class GroupWebService extends BaseScimWebService implements IGroupWebService {
