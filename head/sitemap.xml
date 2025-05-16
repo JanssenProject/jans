@@ -149,6 +149,10 @@
          <lastmod>2025-05-16</lastmod>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/cedarling/cedarling-interfaces/</loc>
+         <lastmod>2025-05-16</lastmod>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/cedarling/cedarling-jwt-mapping/</loc>
          <lastmod>2025-05-16</lastmod>
     </url>
@@ -170,6 +174,10 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/cedarling/cedarling-policy-store/</loc>
+         <lastmod>2025-05-16</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/cedarling/cedarling-principal-boolean-operations/</loc>
          <lastmod>2025-05-16</lastmod>
     </url>
     <url>

@@ -7516,6 +7516,10 @@
         
           
         
+          
+        
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2_4">
@@ -7529,6 +7533,20 @@
           Reference
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-interfaces/" class="md-nav__link">
+        Interfaces
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -7552,6 +7570,20 @@
     <li class="md-nav__item">
       <a href="../../../cedarling/cedarling-properties/" class="md-nav__link">
         Properties
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-principal-boolean-operations/" class="md-nav__link">
+        Boolean Operations
       </a>
     </li>
   
@@ -9921,13 +9953,9 @@
 </ul>
 <h3 id="make-a-gama-archive">Make a <code>gama</code> archive<a class="headerlink" href="#make-a-gama-archive" title="Permanent link">#</a></h3>
 <p><a href="https://docs.jans.io/head/agama/gama-format/">gama files</a> are deployable units in the Agama engine. To create one, simply zip the contents of <a href="./project">project</a> subdirectory. The resulting archive must have three folders at top-level: <code>web</code>, <code>lib</code>, and <code>code</code>. The file extension does not matter in the end.</p>
-<p>To quickly collect the contents of <code>project</code>, you can do the following (requires <code>git</code> 2.25 or higher):</p>
-<div class="highlight"><pre><span></span><code>git clone --depth 1 --branch main --no-checkout https://github.com/JanssenProject/jans.git
-cd jans
-git sparse-checkout init --cone
-git sparse-checkout set docs/agama-catalog/jans/inboundID/project
-git checkout main
-cd docs/agama-catalog/jans/inboundID/project
+<p>To quickly collect the contents of <code>project</code>, you can do the following:</p>
+<div class="highlight"><pre><span></span><code>git clone --depth 1 https://github.com/JanssenProject/jans.git
+cd jans/docs/agama-catalog/jans/inboundID/project
 </code></pre></div>
 <h3 id="deploy-the-archive">Deploy the archive<a class="headerlink" href="#deploy-the-archive" title="Permanent link">#</a></h3>
 <p>Transfer the archive to your server, and then run <code>/opt/jans/jans-cli/jans_cli_tui.py</code>. Follow the prompts and then enter the Agama menu (<code>Alt + m</code>). Using you keyboard TAB key, highlight the button "Upload", and press ENTER. Browse and select the file. </p>
@@ -10228,7 +10256,7 @@ From there onwards, you only need to re-upload the file as many times as needed.
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-04-18T14:22:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-04-18</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-16T14:46:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-16</span>
       
         <br>
         Created:

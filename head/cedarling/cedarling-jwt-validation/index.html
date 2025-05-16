@@ -7522,6 +7522,10 @@
         
           
         
+          
+        
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2_4">
@@ -7535,6 +7539,20 @@
           Reference
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-interfaces/" class="md-nav__link">
+        Interfaces
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -7558,6 +7576,20 @@
     <li class="md-nav__item">
       <a href="../cedarling-properties/" class="md-nav__link">
         Properties
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-principal-boolean-operations/" class="md-nav__link">
+        Boolean Operations
       </a>
     </li>
   
@@ -7648,6 +7680,40 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#id-token-trust-mode" class="md-nav__link">
+    ID Token Trust Mode
+  </a>
+  
+    <nav class="md-nav" aria-label="ID Token Trust Mode">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#none-mode" class="md-nav__link">
+    None Mode
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strict-mode" class="md-nav__link">
+    Strict Mode
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-jwks" class="md-nav__link">
+    Local JWKS
+  </a>
   
 </li>
       
@@ -9769,6 +9835,40 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#id-token-trust-mode" class="md-nav__link">
+    ID Token Trust Mode
+  </a>
+  
+    <nav class="md-nav" aria-label="ID Token Trust Mode">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#none-mode" class="md-nav__link">
+    None Mode
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strict-mode" class="md-nav__link">
+    Strict Mode
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-jwks" class="md-nav__link">
+    Local JWKS
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -9827,11 +9927,12 @@
 
 
 <h1 id="cedarling-jwt-flow">Cedarling JWT Flow<a class="headerlink" href="#cedarling-jwt-flow" title="Permanent link">#</a></h1>
+<p>JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct the Principal entities. In order to verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status(active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.</p>
 <p><img alt="" src="../../assets/lock-cedarling-diagram-4.jpg" /></p>
 <h2 id="json-web-token-validation">Json Web Token Validation<a class="headerlink" href="#json-web-token-validation" title="Permanent link">#</a></h2>
 <p><strong>Note:</strong> Make sure you have specified at least one <a href="../cedarling-policy-store/#trusted-issuer-schema">Trusted Issuer</a> in your <a href="../cedarling-policy-store/">Policy Store</a>.</p>
 <h3 id="jwt-signature-validation">JWT Signature Validation<a class="headerlink" href="#jwt-signature-validation" title="Permanent link">#</a></h3>
-<p>To enable this feature, set the <code>CEDARLING_JWT_VALIDATION</code> bootstrap property to <code>True</code>. For development and testing purposes, you can set this property to <code>False</code> and submit an unsigned JWT, such as one generated from <a href="https://jwt.io">JWT.io</a>. On init, the Cedarling will fetch the latest public 
+<p>To enable this feature, set the <code>CEDARLING_JWT_VALIDATION</code> bootstrap property to <code>True</code>. For development and testing purposes, you can set this property to <code>False</code> and submit an unsigned JWT, such as one generated from <a href="https://jwt.io">jwt.io</a>. On initialization, the Cedarling will fetch the latest public 
 keys from the issuers specified in the Policy Store and cache them. The cedarling uses the JWT <code>iss</code> claim to select the appropriate keys for validation.</p>
 <h3 id="jwt-content-validation">JWT Content Validation<a class="headerlink" href="#jwt-content-validation" title="Permanent link">#</a></h3>
 <p>If timestamps are provided in the context, the Cedaring always verifies: </p>
@@ -9846,13 +9947,35 @@ keys from the issuers specified in the Policy Store and cache them. The cedarlin
 </ul>
 <h3 id="jwt-status-validation">JWT Status Validation<a class="headerlink" href="#jwt-status-validation" title="Permanent link">#</a></h3>
 <p>The Cedarling can also check for JWT revocation if you have the <code>CEDARLING_JWT_STATUS_VALIDATION</code> property <code>Enabled</code>. The Cedarling checks the status bit of the Status Token JWT, as described in the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">OAuth Status Lists</a> draft. Token status enforcement mitigates account takeover by enabling immediate revocation of all tokens issued to an attacker. </p>
+<h2 id="id-token-trust-mode">ID Token Trust Mode<a class="headerlink" href="#id-token-trust-mode" title="Permanent link">#</a></h2>
+<p>The level of validation for the ID Token JWT can be set to either <code>None</code> or <code>Strict</code>.</p>
+<h3 id="none-mode"><code>None</code> Mode<a class="headerlink" href="#none-mode" title="Permanent link">#</a></h3>
+<p>Setting the validation level to <code>None</code> will not check for the conditions outlined in <a href="#strict-mode">Strict Mode</a>.</p>
+<h3 id="strict-mode"><code>Strict</code> Mode<a class="headerlink" href="#strict-mode" title="Permanent link">#</a></h3>
+<p>Strict mode requires:</p>
+<ol>
+<li>The <code>id_token</code>'s <code>aud</code> matches the <code>access_token</code>'s <code>client_id</code>;</li>
+<li>if a Userinfo token is present, the <code>sub</code> matches the <code>id_token</code>, and that the <code>aud</code> matches the access token's <code>client_id</code>.</li>
+</ol>
+<h2 id="local-jwks">Local JWKS<a class="headerlink" href="#local-jwks" title="Permanent link">#</a></h2>
+<p>A local JWKS can be used by setting the <code>CEDARLING_LOCAL_JWKS</code> bootstrap property to a path to a local JSON file. When providing a local Json Web Key Store (JWKS), the file must follow the following schema:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;trusted_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span>
+<span class="w">    </span><span class="nt">&quot;another_trusted_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>Where keys are <code>Trusted Issuer IDs</code> assigned to each key store</li>
+<li>and the values contains the JSON Web Keys as defined in <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>.</li>
+<li>The <code>trusted_issuers_id</code> is used to tag a JWKS with a unique identifier and enables using multiple key stores.</li>
+</ul>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-06T12:50:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-06</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-16T15:29:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-16</span>
       
         <br>
         Created:
