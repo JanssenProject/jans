@@ -420,8 +420,10 @@ nav:
     - Kotlin: 'cedarling/getting-started/kotlin.md'
     - Swift: 'cedarling/getting-started/swift.md'
   - Reference:
+    - Interfaces: 'cedarling/cedarling-interfaces.md'
     - Policy Store: 'cedarling/cedarling-policy-store.md'
     - Properties: 'cedarling/cedarling-properties.md'
+    - Boolean Operations: 'cedarling/cedarling-principal-boolean-operations.md'
     - Logs: 'cedarling/cedarling-logs.md'
     - JWT Validation: 'cedarling/cedarling-jwt-validation.md'
     - JWT Mapping: 'cedarling/cedarling-jwt-mapping.md'
