@@ -95,20 +95,29 @@ public class IdentityProcessor {
         }
         
         if (update) {
-
+            logger.info("Preparing update for user {}...", uid);
+            
             if (provider.isSkipProfileUpdate()) {
-                logger.info("Skipping profile update");
-            } else {
-                logger.info("Updating user {}", uid);
-                user.setCustomAttributes(attributesForUpdate(
-                        user.getCustomAttributes(), profile2, provider.isCumulativeUpdate()));
+                List<Object> jansExtUids = profile2.get("jansExtUid");
+
+                if (jansExtUids == null) {
+                    profile2 = null;
+                    logger.info("No attributes will be updated");
+                } else {
+                    profile2 = Collections.singletonMap("jansExtUid", jansExtUids);
+                    logger.info("Only 'jansExtUid' will be updated");
+                }
             }
 
-            //ugly hack
-            Optional.ofNullable(user.getAttributeValues("jansExtUid"))
-                        .map(l -> l.toArray(new String[0])).ifPresent(user::setExternalUid);
-
-            userService.updateUser(user);
+            if (profile2 != null) {
+                user.setCustomAttributes(attributesForUpdate(
+                        user.getCustomAttributes(), profile2, provider.isCumulativeUpdate()));
+                //ugly hack
+                Optional.ofNullable(user.getAttributeValues("jansExtUid"))
+                            .map(l -> l.toArray(new String[0])).ifPresent(user::setExternalUid);
+    
+                userService.updateUser(user);
+            }
             
         } else {
             logger.info("Adding user {}", uid);
