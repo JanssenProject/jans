@@ -45,7 +45,7 @@ WIP
 
 ## Recipes
 
-### Using Cedarling java binding in Janssen Auth server (VM installation) custom scripts
+### Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
 
 1. Upload [bootstrap.json](./docs/bootstrap.json), [policy-store.json](./docs/policy-store.json), [action.txt](./docs/action.txt), [context.json](./docs/context.json), [principals.json](./docs/principals.json) and [resource.json](./docs/resource.json) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server.
 2. Upload the generate `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
