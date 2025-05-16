@@ -115,6 +115,7 @@ class Cedarling:
     def get_logs_by_request_id_and_tag(
         self, request_id: str, tag: str) -> List[Dict]: ...
 
+    def shut_down(self): ...
 
 @final
 class Request:
