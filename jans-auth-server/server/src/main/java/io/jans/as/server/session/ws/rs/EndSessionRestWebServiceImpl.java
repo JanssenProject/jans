@@ -6,6 +6,7 @@
 
 package io.jans.as.server.session.ws.rs;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
@@ -35,9 +36,11 @@ import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.external.ExternalEndSessionService;
 import io.jans.as.server.service.external.context.EndSessionContext;
+import io.jans.as.server.service.session.SessionStatusListIndexService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.security.Identity;
+import io.jans.model.tokenstatus.TokenStatus;
 import io.jans.util.Pair;
 import io.jans.util.StringHelper;
 import jakarta.inject.Inject;
@@ -57,6 +60,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -69,6 +73,13 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  */
 @Path("/")
 public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
+
+    private static final ExecutorService sessionStatusListPool = Executors.newFixedThreadPool(5, runnable -> {
+        Thread thread = new Thread(runnable);
+        thread.setName("session_status_list_pool");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     @Inject
     private Logger log;
@@ -99,6 +110,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     @Inject
     private GrantService grantService;
+
+    @Inject
+    private SessionStatusListIndexService sessionStatusListIndexService;
 
     @Inject
     private Identity identity;
@@ -555,6 +569,13 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         if (identity != null) {
             identity.logout();
         }
+
+        sessionStatusListPool.execute(() -> {
+            final SessionId session = pair.getFirst();
+            if (session != null && session.getPredefinedAttributes().getIndex() != null && session.getPredefinedAttributes().getIndex() >= 0) {
+                sessionStatusListIndexService.updateStatusAtIndexes(Lists.newArrayList(session.getPredefinedAttributes().getIndex()), TokenStatus.INVALID);
+            }
+        });
     }
 
     private Set<Client> getSsoClients(Pair<SessionId, AuthorizationGrant> pair) {

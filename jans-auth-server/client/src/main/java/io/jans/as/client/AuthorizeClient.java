@@ -241,6 +241,9 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
         addReqParam(AuthorizeRequestParam.CODE_CHALLENGE, getRequest().getCodeChallenge());
         addReqParam(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, getRequest().getCodeChallengeMethod());
 
+        if (getRequest().isRequestSessionJwt()) {
+            addReqParam(AuthorizeRequestParam.SESSION_JWT, Boolean.toString(getRequest().isRequestSessionJwt()));
+        }
         if (getRequest().isRequestSessionId()) {
             addReqParam(AuthorizeRequestParam.REQUEST_SESSION_ID, Boolean.toString(getRequest().isRequestSessionId()));
         }

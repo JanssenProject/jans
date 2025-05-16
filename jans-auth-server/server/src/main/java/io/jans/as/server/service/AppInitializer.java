@@ -689,7 +689,7 @@ public class AppInitializer {
             configuration = localPersistenceEntryManager.find(configurationDn, GluuConfiguration.class,
                     persistenceReturnAttributes);
         } catch (BasePersistenceException ex) {
-            log.error("Failed to load global configuration entry from Ldap", ex);
+            log.error("Failed to load global configuration entry from DB", ex);
             return null;
         }
 
