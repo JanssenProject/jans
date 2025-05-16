@@ -357,5 +357,64 @@ Steps:
          -d "grant_type=client_credentials&grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=YOUR_DEVICE_CODE&client_id=YOUR_CLIENT_ID" 
     ```
  
+## Using Janssen Config Api
+
+[Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) is a REST application that is developed using Weld 
+4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration 
+and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/main/jans-auth-server).
+
+### Authentication
+
+Janssen Config API endpoints are OAuth protected. It supports basic token as well as JWT token.
+
+### Invoking API using curl
+
+Janssen Config API has [REST endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) and can be invoked using curl.
+
+#### Prerequisites
+
+You will need:
+
+* **Jans endpoint URL:** https://<server.url>/jans-config-api/....
+* **Token:** The endpoints are OAuth protected and hence will require a token with appropriate scopes.
+
+#### Steps
+
+ * Refer to [API documentation]((https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml)) to know the endpoint path and required OAuth scopes to access that 
+ endpoint. Example: Attribute Endpoint.
+
+    ![image](../../../assets/jans-attribute.png)
 
 
+ * You will need a client that has the required scopes. The Jans TUI provides a default client named `jans-config-api-client`, whose `client ID` starts with `1800` and has required scopes. You can use this client to generate a token.
+
+ * Use the auth token to generate the basic token.
+
+    Syntax:
+    ```
+    curl -k  https://<my.jans.server.domian>/jans-auth/restv1/token -H "Accept: application/json" -u "<clientId>:<decryptedClientSecret>" -d "grant_type=client_credentials" -d "scope= <apce separated oAuth Scope List>"
+    ```
+
+    Example: generate token for attribute:
+
+    ```
+    curl -k  https://jans.server1/jans-auth/restv1/token -H "Accept: application/json" -u "1800.3687abff-770f-48fb-8130-97678d918adc:TUDvmnVINbKC" -d "grant_type=client_credentials" -d "scope=https://jans.io/oauth/config/attributes.readonly"
+    ```
+
+    ![image](../../../assets/jans-token-output1.png)
+
+* Invoke endpoint
+
+    Syntax:
+
+    ```
+    curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization:Bearer <accessToken>" -X GET https://< my.jans.server.domian >/jans-config-api/api/v1/attributes
+    ```
+
+    Example: Invoke attribute GET endpoint:
+
+    ```
+    curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization:Bearer 45e73488-da3f-4429-9072-e0833c703a0d" -X GET https://jans.server1/jans-config-api/api/v1/attributes
+    ```
+
+    ![image](../../../assets/jans-token-output2.png)
