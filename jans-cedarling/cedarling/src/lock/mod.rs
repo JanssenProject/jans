@@ -5,8 +5,28 @@
 
 //! # Lock Engine
 //!
-//! Janssen Lock (or just "Lock") provides a centralized control plane for domains to use Cedar to secure a network of distributed applications and audit the activity of both people and software.
-//! [link to the documentation](https://docs.jans.io/head/admin/lock/)
+//! [Janssen Lock](https://docs.jans.io/head/admin/lock/), or simply "Lock", provides a
+//! centralized control plane that enables domains to use Cedar for securing distributed
+//! applications and auditing the activities of both users and software.
+//!
+//! This module manages the communication between Cedarling and the Lock Server.
+//!
+//! ## Architecture
+//! - Collects logs from the currently initialized [`logger`]
+//! - Uses a [`background worker`] for collecting nad batching logs before sending it to
+//! the lock server.
+//! - Handles Dynamic Client Registration (DCR) through [`register_client`]
+//! - Sends the collected logs to the lock server.
+//!
+//! For configuration details, refer to the [Cedarling properties documentation](https://docs.jans.io/head/cedarling/cedarling-properties/)
+//!
+//! ## Usage Requirements
+//!
+//! - A logger must be initialize by setting the `CEDARLING_LOG_TYPE` bootstrap property.
+//! - This module is only active if the `CEDARLING_LOCK` property is set to `enabled`.
+//!
+//! [`background worker`]: LogWorker
+//! [`logger`]: LogStrategyLogger
 
 mod lock_config;
 mod log_entry;
