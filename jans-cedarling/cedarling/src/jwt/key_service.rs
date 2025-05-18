@@ -246,26 +246,32 @@ mod test {
             .create();
 
         let key_service = KeyService::new_from_trusted_issuers(&HashMap::from([
-            ("first".to_string(), TrustedIssuer {
-                name: "First IDP".to_string(),
-                description: "".to_string(),
-                oidc_endpoint: Url::parse(&format!(
-                    "{}/first/.well-known/openid-configuration",
-                    mock_server.url()
-                ))
-                .expect("should be a valid URL"),
-                ..Default::default()
-            }),
-            ("second".to_string(), TrustedIssuer {
-                name: "Second IDP".to_string(),
-                description: "".to_string(),
-                oidc_endpoint: Url::parse(&format!(
-                    "{}/second/.well-known/openid-configuration",
-                    mock_server.url()
-                ))
-                .expect("should be a valid URL"),
-                ..Default::default()
-            }),
+            (
+                "first".to_string(),
+                TrustedIssuer {
+                    name: "First IDP".to_string(),
+                    description: "".to_string(),
+                    oidc_endpoint: Url::parse(&format!(
+                        "{}/first/.well-known/openid-configuration",
+                        mock_server.url()
+                    ))
+                    .expect("should be a valid URL"),
+                    ..Default::default()
+                },
+            ),
+            (
+                "second".to_string(),
+                TrustedIssuer {
+                    name: "Second IDP".to_string(),
+                    description: "".to_string(),
+                    oidc_endpoint: Url::parse(&format!(
+                        "{}/second/.well-known/openid-configuration",
+                        mock_server.url()
+                    ))
+                    .expect("should be a valid URL"),
+                    ..Default::default()
+                },
+            ),
         ]))
         .await
         .expect("Should load KeyService from trusted issuers");

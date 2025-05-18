@@ -16,13 +16,13 @@ mod issuers_store;
 mod jwk_store;
 mod key_service;
 mod log_entry;
+mod new_key_service;
 mod status_list_service;
+mod token;
+mod validator;
 
 #[cfg(test)]
 mod test_utils;
-
-mod token;
-mod validator;
 
 use crate::JwtConfig;
 use crate::LogWriter;
@@ -33,6 +33,7 @@ use base64::Engine;
 use base64::prelude::*;
 use key_service::KeyService;
 use log_entry::*;
+use new_key_service::*;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use validator::{JwtValidator, JwtValidatorConfig};

@@ -143,9 +143,10 @@ impl MockEndpoints {
     }
 
     #[track_caller]
-    pub fn assert_endpoints(&self) {
+    pub fn assert(&self) {
         self.oidc.as_ref().map(|x| x.assert());
         self.jwks.as_ref().map(|x| x.assert());
+        self.status_list.as_ref().map(|x| x.assert());
     }
 }
 
@@ -246,7 +247,27 @@ impl MockServer {
         )
     }
 
+    pub fn openid_config_endpoint(&self) -> Option<Url> {
+        if self.endpoints.oidc.is_none() {
+            return None;
+        }
+
+        Some(
+            Url::parse(&(self.server.url() + MOCK_OIDC_ENDPOINT)).expect("invalid status list url"),
+        )
+    }
+
     pub fn jwt_decoding_key(&self) -> Result<DecodingKey, jsonwebtoken::errors::Error> {
         self.keys.decoding_key()
+    }
+
+    pub fn jwt_decoding_key_and_id(
+        &self,
+    ) -> Result<(DecodingKey, Option<String>), jsonwebtoken::errors::Error> {
+        Ok((self.keys.decoding_key()?, self.keys.kid.clone()))
+    }
+
+    pub fn issuer(&self) -> String {
+        self.server.url()
     }
 }
