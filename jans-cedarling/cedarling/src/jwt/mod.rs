@@ -11,6 +11,7 @@
 //! - Validating the signatures of JWTs to ensure their integrity and authenticity.
 //! - Verifying the validity of JWTs based on claims such as expiration time and audience.
 
+mod error;
 mod issuers_store;
 mod jwk_store;
 mod key_service;
@@ -30,12 +31,13 @@ use crate::log::Logger;
 use base64::DecodeError;
 use base64::Engine;
 use base64::prelude::*;
-use key_service::{KeyService, KeyServiceError};
+use key_service::KeyService;
 use log_entry::*;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
+use validator::{JwtValidator, JwtValidatorConfig};
 
+pub use error::*;
 pub use jsonwebtoken::Algorithm;
 pub use token::{Token, TokenClaimTypeError, TokenClaims};
 
@@ -44,38 +46,6 @@ type TrustedIssuerId = Arc<str>;
 
 /// Type alias for a Json Web Key ID (`kid`).
 type KeyId = Box<str>;
-
-#[derive(Debug, thiserror::Error)]
-pub enum JwtProcessingError {
-    #[error("Invalid token `{0}`: {1}")]
-    InvalidToken(String, JwtValidatorError),
-    #[error("Failed to deserialize from Value to String: {0}")]
-    StringDeserialization(#[from] serde_json::Error),
-    #[error("error while trying to parse issuer from token: {0}")]
-    GetIss(#[from] DecodeJwtError),
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum JwtServiceInitError {
-    #[error(
-        "Failed to initialize Key Service for JwtService due to a conflictig config: both a local \
-         JWKS and trusted issuers was provided."
-    )]
-    ConflictingJwksConfig,
-    #[error(
-        "Failed to initialize Key Service for JwtService due to a missing config: no local JWKS \
-         or trusted issuers was provided."
-    )]
-    MissingJwksConfig,
-    #[error("Failed to initialize Key Service: {0}")]
-    KeyService(#[from] KeyServiceError),
-    #[error("Encountered an unsupported algorithm in the config: {0}")]
-    UnsupportedAlgorithm(String),
-    #[error("Failed to initialize JwtValidator: {0}")]
-    InitJwtValidator(#[from] JwtValidatorError),
-    #[error("failed to parse the openid_configuration_endpoint for the trusted issuer `{0}`: {1}")]
-    ParseOidcUrl(String, url::ParseError),
-}
 
 pub struct JwtService {
     validators: HashMap<ValidatorId, JwtValidator>,
