@@ -73,8 +73,8 @@ def _transform_lock_dynamic_config(conf, manager):
         should_update = True
 
     # base endpoint is changed from jans-lock to jans-auth
-    if conf["baseEndpoint"] != f"https://{hostname}/jans-auth/v1":
-        conf["baseEndpoint"] = f"https://{hostname}/jans-auth/v1"
+    if conf["baseEndpoint"] != f"https://{hostname}/jans-auth/api/v1":
+        conf["baseEndpoint"] = f"https://{hostname}/jans-auth/api/v1"
         should_update = True
 
     # new audit endpoint groups

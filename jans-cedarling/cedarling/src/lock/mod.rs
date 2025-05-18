@@ -35,9 +35,8 @@ mod register_client;
 mod spawn_task;
 
 use crate::app_types::PdpID;
+use crate::log::LoggerWeak;
 use crate::log::interface::Loggable;
-use crate::log::log_strategy::LogStrategyLogger;
-use crate::log::{LogStrategy, LoggerWeak};
 use crate::{LockServiceConfig, LogWriter};
 use futures::channel::mpsc;
 use lock_config::*;
@@ -47,7 +46,7 @@ use register_client::*;
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
 use spawn_task::*;
-use std::sync::{Arc, RwLock, Weak};
+use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use thiserror::Error;
 use tokio_util::sync::CancellationToken;
@@ -217,48 +216,6 @@ pub enum InitLockServiceError {
     ClientRegistration(#[from] ClientRegistrationError),
     #[error("failed to initialize the Lock logger's HttpClient: {0}")]
     InitHttpClient(#[from] reqwest::Error),
-}
-
-/// DO NOT use this outside of the lock module.
-///
-/// This is used as a helper function in the lock module but this WILL NOT send logs to
-/// the lock server if used outside of the lock module.
-pub trait OptLogAny {
-    /// Logs the entry if the struct is [`Option::is_some`]
-    fn log_any<T: Loggable>(&self, entry: T);
-}
-
-impl OptLogAny for Option<Arc<LogStrategy>> {
-    fn log_any<T: Loggable>(&self, entry: T) {
-        if let Some(log_strategy) = self.as_ref() {
-            match log_strategy.logger() {
-                LogStrategyLogger::Off(log) => log.log_any(entry),
-                LogStrategyLogger::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
-                LogStrategyLogger::StdOut(std_out_logger) => std_out_logger.log_any(entry),
-            }
-            return;
-        }
-
-        // we log the error manually to stdout if the logger is gone
-        let log = match serde_json::to_value(&entry) {
-            Ok(json) => json.to_string(),
-            Err(err) => {
-                let err_msg = format!("failed to serialize log entry to JSON: {err}");
-                serde_json::to_value(LockLogEntry::error(&err_msg))
-                    .expect(&err_msg)
-                    .to_string()
-            },
-        };
-
-        println!("{log}");
-    }
-}
-
-impl OptLogAny for Option<Weak<LogStrategy>> {
-    fn log_any<T: Loggable>(&self, entry: T) {
-        let logger = self.as_ref().and_then(|logger| logger.upgrade());
-        logger.log_any(entry);
-    }
 }
 
 #[cfg(test)]

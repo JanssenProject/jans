@@ -6,9 +6,9 @@
 //! The [`LogWorker`] runs in the background and is responsible for collecting and sending
 //! logs to the lock server's `/audit/log` endpoint.
 
-use super::OptLogAny;
 use super::log_entry::LockLogEntry;
 use crate::log::{LogStrategy, LoggerWeak};
+use crate::LogWriter;
 
 use super::WORKER_HTTP_RETRY_DUR;
 use futures::StreamExt;
