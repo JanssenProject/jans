@@ -169,6 +169,10 @@
 			<groupId>com.fasterxml</groupId>
 			<artifactId>aalto-xml</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.angus</groupId>
+			<artifactId>angus-mail</artifactId>
+		</dependency>
 
 		<!-- Bouncycastle -->
 		<dependency>
