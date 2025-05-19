@@ -12,9 +12,9 @@ If you are using pre-built binaries from the [Jans releases page](https://github
 - Java Development Kit (JDK): version 17
 - Apache Maven: Install it from [Apache Maven Website](https://maven.apache.org/download.cgi)
 
-### Building Kotlin binding
+### Building from Kotlin binding
 
-1. Build Cedarling:
+1. Build Cedarling by executing below command from `./jans/jans-cedarling` of cloned jans project:
 
 ```bash
 cargo build --release

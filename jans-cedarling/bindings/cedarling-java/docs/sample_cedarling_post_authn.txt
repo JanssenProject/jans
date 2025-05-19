@@ -97,6 +97,7 @@ public class PostAuthn implements PostAuthnType {
             JSONObject contextJson = new JSONObject(contextStr);
 
             AuthorizeResult result = cedarlingAdapter.authorizeUnsigned(principalsJson, action, resourceJson, contextJson);
+            cedarlingAdapter.close();
             log.info("Cedarling Authz Response Decision: " + result.getDecision());
             //logic to to use the Cedarling authorization decision ...
         } catch(AuthorizeException | EntityException e) {
