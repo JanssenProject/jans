@@ -59,7 +59,7 @@ WIP
 |CONTEXT_FILE_PATH|./custom/static/context.json|
 |PRINCIPALS_FILE_PATH|./custom/static/principals.json|
 
-**Note:** The [Asset Sreen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
+**Note:** The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
 
 4. Map the script with client used to perform authentication.
 
