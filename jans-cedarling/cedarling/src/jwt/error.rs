@@ -4,20 +4,17 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::DecodeJwtError;
-use super::key_service::KeyServiceError;
-use super::new_key_service;
-use super::validator::{JwtValidatorError, ValidateJwtError};
+use super::key_service;
+use super::validator::ValidateJwtError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum JwtProcessingError {
-    #[error("Invalid token `{0}`: {1}")]
-    InvalidToken(String, JwtValidatorError),
     #[error("Failed to deserialize from Value to String: {0}")]
     StringDeserialization(#[from] serde_json::Error),
     #[error("error while trying to parse issuer from token: {0}")]
     GetIss(#[from] DecodeJwtError),
     #[error("failed to validate '{0}' token: {1}")]
-    JwtValidation(String, ValidateJwtError),
+    ValidateJwt(String, ValidateJwtError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -32,16 +29,12 @@ pub enum JwtServiceInitError {
          or trusted issuers was provided."
     )]
     MissingJwksConfig,
-    #[error("Failed to initialize Key Service: {0}")]
-    KeyService(#[from] KeyServiceError),
     #[error("Encountered an unsupported algorithm in the config: {0}")]
     UnsupportedAlgorithm(String),
-    #[error("Failed to initialize JwtValidator: {0}")]
-    InitJwtValidator(#[from] JwtValidatorError),
     #[error("failed to parse the openid_configuration_endpoint for the trusted issuer `{0}`: {1}")]
     ParseOidcUrl(String, url::ParseError),
     #[error("failed to prepare keys for the KeyService: {0}")]
-    PrepareKeys(#[from] new_key_service::KeyServiceError),
+    PrepareKeys(#[from] key_service::KeyServiceError),
     #[error(
         "the key service has no decoding keys. please provide a local JWKS or make sure your policy store has trustsed issuers"
     )]

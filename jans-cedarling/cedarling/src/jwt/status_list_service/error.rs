@@ -7,8 +7,6 @@ use reqwest::header::ToStrError;
 use thiserror::Error;
 use url::Url;
 
-use crate::jwt::validator::JwtValidatorError;
-
 #[derive(Debug, Error)]
 pub enum ParseStatusListError {
     #[error("invalid `bit` size in the status list. expected 1, 2, 4, or 8 but got: {0}")]
@@ -61,6 +59,4 @@ pub enum UpdateStatusListError {
     UnsupportedStatusListType(Url, String),
     #[error("failed to decode the response from {0}: {1}")]
     DecodeResponse(Url, reqwest::Error),
-    #[error("the status list token is not a valid JWT: {0}")]
-    InvalidJwt(#[from] JwtValidatorError),
 }

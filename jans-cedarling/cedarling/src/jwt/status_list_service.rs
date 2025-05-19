@@ -18,9 +18,6 @@ use super::validator::ValidatedJwt;
 use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
 use flate2::read::ZlibDecoder;
 use serde::Deserialize;
-use url::Url;
-
-pub type StatusListEndpoint = Url;
 
 #[derive(Debug, PartialEq)]
 pub struct StatusList {

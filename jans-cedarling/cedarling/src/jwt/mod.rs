@@ -13,10 +13,8 @@
 
 mod error;
 mod issuers_store;
-mod jwk_store;
 mod key_service;
 mod log_entry;
-mod new_key_service;
 mod status_list_service;
 mod token;
 mod validator;
@@ -32,8 +30,8 @@ use crate::log::Logger;
 use base64::DecodeError;
 use base64::Engine;
 use base64::prelude::*;
+use key_service::*;
 use log_entry::*;
-use new_key_service::*;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use validator::{JwtValidator, JwtValidatorConfig};
@@ -41,12 +39,6 @@ use validator::{JwtValidator, JwtValidatorConfig};
 pub use error::*;
 pub use jsonwebtoken::Algorithm;
 pub use token::{Token, TokenClaimTypeError, TokenClaims};
-
-/// Type alias for Trusted Issuers' ID.
-type TrustedIssuerId = Arc<str>;
-
-/// Type alias for a Json Web Key ID (`kid`).
-type KeyId = Box<str>;
 
 pub struct JwtService {
     validators: HashMap<ValidatorId, JwtValidator>,
@@ -65,7 +57,7 @@ impl JwtService {
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
-        let mut key_service = NewKeyService::new();
+        let mut key_service = KeyService::new();
 
         if config.jwt_sig_validation {
             if let Some(issuers) = trusted_issuers.as_ref() {
@@ -179,7 +171,7 @@ impl JwtService {
 
             let validated_jwt = validator
                 .validate_jwt(jwt)
-                .map_err(|e| JwtProcessingError::JwtValidation(token_name.to_string(), e))?;
+                .map_err(|e| JwtProcessingError::ValidateJwt(token_name.to_string(), e))?;
             let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
                 .map_err(JwtProcessingError::StringDeserialization)?;
             validated_tokens.insert(

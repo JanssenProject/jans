@@ -116,7 +116,10 @@ mod test {
         for (i, jwt) in cases.into_iter().enumerate() {
             let err = decode_jwt(jwt).expect_err("should error while decoding jwt");
 
-            assert!(matches!(err, DecodeJwtError::InvalidJwtFormat));
+            assert!(
+                matches!(err, DecodeJwtError::InvalidJwtFormat),
+                "failed assertion in case: {i}"
+            );
         }
     }
 }

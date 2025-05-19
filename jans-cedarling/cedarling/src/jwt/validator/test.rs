@@ -12,15 +12,15 @@ use test_utils::assert_eq;
 
 use super::super::test_utils::*;
 use super::{JwtValidator, JwtValidatorConfig};
-use crate::jwt::new_key_service::NewKeyService;
+use crate::jwt::key_service::KeyService;
 use crate::jwt::validator::{ValidateJwtError, ValidatedJwt};
 
 #[track_caller]
-fn prepare_key_service() -> (NewKeyService, String, KeyPair) {
+fn prepare_key_service() -> (KeyService, String, KeyPair) {
     let iss = "https://127.0.0.1".to_string();
     let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
     let jwks = generate_jwks(&vec![keys.clone()]);
-    let mut key_service = NewKeyService::new();
+    let mut key_service = KeyService::new();
     key_service
         .insert_keys_from_str(
             &json!({
@@ -42,6 +42,7 @@ fn can_decode_jwt_without_sig_validation() {
         "sub": "1234567890",
         "name": "John Doe",
         "iat": 1516239022,
+        "exp": 0,
     });
     let token =
         generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
@@ -56,10 +57,10 @@ fn can_decode_jwt_without_sig_validation() {
             validate_exp: true,
             validate_nbf: true,
         },
-        NewKeyService::default().into(),
+        KeyService::default().into(),
     );
 
-    let result = validator.decode_jwt(&token).expect("Should decode JWT");
+    let result = validator.validate_jwt(&token).expect("should validate JWT");
 
     let expected = ValidatedJwt {
         claims,
