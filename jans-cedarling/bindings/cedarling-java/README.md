@@ -30,6 +30,7 @@ cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} 
 3. Copy the generated `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file to resource directory of the `cedarling-java` Maven project. Replace `{build_file}` in the below commad with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
 
 ```bash
+mkdir ./bindings/cedarling-java/src/main/resources
 cp ./target/release/{build_file} ./bindings/cedarling-java/src/main/resources
 ```
 
