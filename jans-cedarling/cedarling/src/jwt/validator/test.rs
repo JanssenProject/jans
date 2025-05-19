@@ -11,25 +11,44 @@ use serde_json::json;
 use test_utils::assert_eq;
 
 use super::super::test_utils::*;
-use super::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
-use crate::jwt::key_service::KeyService;
-use crate::jwt::validator::ProcessedJwt;
+use super::{JwtValidator, JwtValidatorConfig};
+use crate::jwt::new_key_service::NewKeyService;
+use crate::jwt::validator::{ProcessedJwt, ValidateJwtError};
+
+#[track_caller]
+fn prepare_key_service() -> (NewKeyService, String, KeyPair) {
+    let iss = "https://127.0.0.1".to_string();
+    let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
+    let jwks = generate_jwks(&vec![keys.clone()]);
+    let mut key_service = NewKeyService::new();
+    key_service
+        .insert_keys_from_str(
+            &json!({
+                &iss: jwks.keys,
+            })
+            .to_string(),
+        )
+        .expect("insert JWKS using string");
+    (key_service, iss, keys)
+}
 
 #[test]
-fn can_decode_jwt() {
+fn can_decode_jwt_without_sig_validation() {
+    let (_key_service, iss, keys) = prepare_key_service();
+
     // Generate token
     let claims = json!({
+        "iss": iss,
         "sub": "1234567890",
         "name": "John Doe",
         "iat": 1516239022,
     });
-    let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
     let token =
         generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
 
     let validator = JwtValidator::new(
         JwtValidatorConfig {
-            sig_validation: false.into(),
+            sig_validation: false,
             status_validation: false.into(),
             trusted_issuers: None.into(),
             algs_supported: HashSet::from([Algorithm::HS256]).into(),
@@ -37,9 +56,8 @@ fn can_decode_jwt() {
             validate_exp: true,
             validate_nbf: true,
         },
-        None,
-    )
-    .expect("Should create validator");
+        NewKeyService::default().into(),
+    );
 
     let result = validator.decode_jwt(&token).expect("Should decode JWT");
 
@@ -53,25 +71,16 @@ fn can_decode_jwt() {
 
 #[test]
 fn can_decode_and_validate_jwt() {
-    // Generate token
-    let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
+    let (key_service, iss, keys) = prepare_key_service();
+
     let claims = json!({
+        "iss": iss,
         "sub": "1234567890",
         "name": "John Doe",
         "iat": 1516239022,
     });
     let token =
         generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
-
-    // Prepare Key Service
-    let jwks = generate_jwks(&vec![keys]);
-    let key_service = KeyService::new_from_str(
-        &json!({
-            "test_idp": jwks.keys,
-        })
-        .to_string(),
-    )
-    .expect("Should create KeyService");
 
     let validator = JwtValidator::new(
         JwtValidatorConfig {
@@ -83,9 +92,8 @@ fn can_decode_and_validate_jwt() {
             validate_exp: true,
             validate_nbf: true,
         },
-        Some(key_service.into()),
-    )
-    .expect("Should create validator");
+        key_service.into(),
+    );
 
     let result = validator
         .validate_jwt(&token)
@@ -100,56 +108,12 @@ fn can_decode_and_validate_jwt() {
 }
 
 #[test]
-fn errors_on_invalid_iss_scheme() {
-    // Generate token
-    let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
-    let claims = json!({
-        "iss": "http://account.gluu.org",
-        "sub": "1234567890",
-        "name": "John Doe",
-        "iat": 1516239022,
-        "exp": u64::MAX,
-    });
-    let token =
-        generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
-
-    // Prepare Key Service
-    let jwks = generate_jwks(&vec![keys]);
-    let key_service = KeyService::new_from_str(
-        &json!({
-            "test_idp": jwks.keys,
-        })
-        .to_string(),
-    )
-    .expect("Should create KeyService");
-
-    let validator = JwtValidator::new(
-        JwtValidatorConfig {
-            sig_validation: true.into(),
-            status_validation: false.into(),
-            trusted_issuers: None.into(),
-            algs_supported: HashSet::from([Algorithm::HS256]).into(),
-            required_claims: HashSet::from(["iss".into()]),
-            validate_exp: true,
-            validate_nbf: true,
-        },
-        Some(key_service.into()),
-    )
-    .expect("Should create validator");
-
-    let result = validator.validate_jwt(&token);
-
-    assert!(
-        matches!(result, Err(JwtValidatorError::InvalidIssScheme(_))),
-        "Expected validation to fail due to the scheme of the token's iss claim not being `https`."
-    );
-}
-
-#[test]
 fn errors_on_expired_token() {
+    let (key_service, iss, keys) = prepare_key_service();
+
     // Generate token
-    let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
     let claims = json!({
+        "iss": iss,
         "sub": "1234567890",
         "name": "John Doe",
         "iat": 1516239022,
@@ -158,19 +122,9 @@ fn errors_on_expired_token() {
     let token =
         generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
 
-    // Prepare Key Service
-    let jwks = generate_jwks(&vec![keys]);
-    let key_service = KeyService::new_from_str(
-        &json!({
-            "test_idp": jwks.keys,
-        })
-        .to_string(),
-    )
-    .expect("Should create KeyService");
-
     let validator = JwtValidator::new(
         JwtValidatorConfig {
-            sig_validation: true.into(),
+            sig_validation: true,
             status_validation: false.into(),
             trusted_issuers: None.into(),
             algs_supported: HashSet::from([Algorithm::HS256]).into(),
@@ -178,23 +132,30 @@ fn errors_on_expired_token() {
             validate_exp: true,
             validate_nbf: true,
         },
-        Some(key_service.into()),
-    )
-    .expect("Should create validator");
+        key_service.into(),
+    );
 
-    let result = validator.validate_jwt(&token);
+    let err = validator
+        .validate_jwt(&token)
+        .expect_err("should error when validating JWT");
 
     assert!(
-        matches!(result, Err(JwtValidatorError::ExpiredToken)),
-        "Expected validation to fail due to the token being expired."
+        matches!(
+            err,
+            ValidateJwtError::ValidateJwt(ref e)
+                if *e.kind() == jsonwebtoken::errors::ErrorKind::ExpiredSignature
+        ),
+        "expected validation to fail due to the token being expired."
     );
 }
 
 #[test]
 fn errors_on_immature_token() {
+    let (key_service, iss, keys) = prepare_key_service();
+
     // Generate token
-    let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
     let claims = json!({
+        "iss": iss,
         "sub": "1234567890",
         "name": "John Doe",
         "iat": 1516239022,
@@ -203,19 +164,9 @@ fn errors_on_immature_token() {
     let token =
         generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
 
-    // Prepare Key Service
-    let jwks = generate_jwks(&vec![keys]);
-    let key_service = KeyService::new_from_str(
-        &json!({
-            "test_idp": jwks.keys,
-        })
-        .to_string(),
-    )
-    .expect("Should create KeyService");
-
     let validator = JwtValidator::new(
         JwtValidatorConfig {
-            sig_validation: true.into(),
+            sig_validation: true,
             status_validation: false.into(),
             trusted_issuers: None.into(),
             algs_supported: HashSet::from([Algorithm::HS256]).into(),
@@ -223,23 +174,30 @@ fn errors_on_immature_token() {
             validate_exp: true,
             validate_nbf: true,
         },
-        Some(key_service.into()),
-    )
-    .expect("Should create validator");
+        key_service.into(),
+    );
 
-    let result = validator.validate_jwt(&token);
+    let err = validator
+        .validate_jwt(&token)
+        .expect_err("should error when validating JWT");
 
     assert!(
-        matches!(result, Err(JwtValidatorError::ImmatureToken)),
-        "Expected validation to fail due to the token being immature."
+        matches!(
+            err,
+            ValidateJwtError::ValidateJwt(ref e)
+                if *e.kind() == jsonwebtoken::errors::ErrorKind::ImmatureSignature
+        ),
+        "expected validation to fail due to the token being immature."
     );
 }
 
 #[test]
 fn can_check_missing_claims() {
+    let (key_service, iss, keys) = prepare_key_service();
+
     // Generate token
-    let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
     let claims = json!({
+        "iss": iss,
         "sub": "1234567890",
         "name": "John Doe",
         "iat": 1516239022,
@@ -247,22 +205,12 @@ fn can_check_missing_claims() {
     let token =
         generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
 
-    // Prepare Key Service
-    let jwks = generate_jwks(&vec![keys]);
-    let key_service = Arc::new(
-        KeyService::new_from_str(
-            &json!({
-                "test_idp": jwks.keys,
-            })
-            .to_string(),
-        )
-        .expect("Should create KeyService"),
-    );
+    let key_service = Arc::new(key_service);
 
     // Base case where all required claims are present
     let validator = JwtValidator::new(
         JwtValidatorConfig {
-            sig_validation: true.into(),
+            sig_validation: true,
             status_validation: false.into(),
             trusted_issuers: None.into(),
             algs_supported: HashSet::from([Algorithm::HS256]).into(),
@@ -270,9 +218,8 @@ fn can_check_missing_claims() {
             validate_exp: true,
             validate_nbf: true,
         },
-        Some(key_service.clone()),
-    )
-    .expect("Should create validator");
+        key_service.clone(),
+    );
     let result = validator
         .validate_jwt(&token)
         .expect("Should process JWT successfully");
@@ -287,7 +234,7 @@ fn can_check_missing_claims() {
     // Error case where `nbf` is missing from the token.
     let validator = JwtValidator::new(
         JwtValidatorConfig {
-            sig_validation: true.into(),
+            sig_validation: true,
             status_validation: false.into(),
             trusted_issuers: None.into(),
             algs_supported: HashSet::from([Algorithm::HS256]).into(),
@@ -295,16 +242,18 @@ fn can_check_missing_claims() {
             validate_exp: true,
             validate_nbf: true,
         },
-        Some(key_service.clone()),
-    )
-    .expect("Should create validator");
-    let result = validator.validate_jwt(&token);
+        key_service.clone(),
+    );
+    let err = validator
+        .validate_jwt(&token)
+        .expect_err("expected an error while validating the JWT");
+
     assert!(
         matches!(
-            result,
-            Err(JwtValidatorError::MissingClaims(missing_claims))
+        err,
+        ValidateJwtError::MissingClaims(missing_claims)
             if missing_claims == ["nbf"].map(|s| s.into())
         ),
-        "Expected an error due to missing `nbf` claim"
+        "expected an error due to missing `nbf` claim"
     );
 }

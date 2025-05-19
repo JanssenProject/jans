@@ -22,6 +22,7 @@ mod token;
 mod validator;
 
 #[cfg(test)]
+#[allow(dead_code)]
 mod test_utils;
 
 use crate::JwtConfig;
@@ -31,7 +32,6 @@ use crate::log::Logger;
 use base64::DecodeError;
 use base64::Engine;
 use base64::prelude::*;
-use key_service::KeyService;
 use log_entry::*;
 use new_key_service::*;
 use std::collections::{HashMap, HashSet};
@@ -65,27 +65,28 @@ impl JwtService {
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
-        let key_service = match (&config.jwt_sig_validation, &config.jwks, &trusted_issuers) {
-            // Case: no JWKS provided
-            (true, None, None) => Err(JwtServiceInitError::MissingJwksConfig)?,
-            // Case: Trusted issuers provided
-            (true, None, Some(issuers)) => Some(Arc::new(
-                KeyService::new_from_trusted_issuers(issuers)
-                    .await
-                    .map_err(JwtServiceInitError::KeyService)?,
-            )),
-            // Case: Local JWKS provided
-            (true, Some(jwks), None) => Some(Arc::new(
-                KeyService::new_from_str(jwks).map_err(JwtServiceInitError::KeyService)?,
-            )),
-            // Case: Both a local JWKS and trusted issuers were provided
-            (true, Some(_), Some(_)) => Err(JwtServiceInitError::ConflictingJwksConfig)?,
-            // Case: Signature validation is Off so no key service is needed.
-            _ => None,
-        };
+        let mut key_service = NewKeyService::new();
+
+        if config.jwt_sig_validation {
+            if let Some(issuers) = trusted_issuers.as_ref() {
+                for iss in issuers.values() {
+                    key_service.fetch_keys_for_iss(iss).await?;
+                }
+            }
+
+            if let Some(jwks) = config.jwks.as_ref() {
+                key_service.insert_keys_from_str(jwks)?;
+            }
+
+            if !key_service.has_keys() && config.jwt_sig_validation {
+                return Err(JwtServiceInitError::KeyServiceMissingKeys);
+            }
+        }
+
+        let key_service = Arc::new(key_service);
 
         // prepare shared configs
-        let sig_validation: Arc<_> = config.jwt_sig_validation.into();
+        let sig_validation = config.jwt_sig_validation;
         let status_validation: Arc<_> = config.jwt_status_validation.into();
         let trusted_issuers = trusted_issuers.map(|iss| Arc::new(iss.clone()));
         let algs_supported: Arc<HashSet<Algorithm>> =
@@ -110,7 +111,7 @@ impl JwtService {
                     let validate_nbf = required_claims.contains("nbf");
                     let validator = JwtValidator::new(
                         JwtValidatorConfig {
-                            sig_validation: sig_validation.clone(),
+                            sig_validation,
                             status_validation: status_validation.clone(),
                             trusted_issuers: trusted_issuers.clone(),
                             algs_supported: algs_supported.clone(),
@@ -122,7 +123,7 @@ impl JwtService {
                             validate_nbf,
                         },
                         key_service.clone(),
-                    )?;
+                    );
                     let id = ValidatorId {
                         iss: Some(origin.clone()),
                         token_name: tkn.clone(),
@@ -178,7 +179,7 @@ impl JwtService {
 
             let validated_jwt = validator
                 .validate_jwt(jwt)
-                .map_err(|e| JwtProcessingError::InvalidToken(token_name.to_string(), e))?;
+                .map_err(|e| JwtProcessingError::JwtValidation(token_name.to_string(), e))?;
             let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
                 .map_err(JwtProcessingError::StringDeserialization)?;
             validated_tokens.insert(

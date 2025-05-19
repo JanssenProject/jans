@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, hash_map};
 
 use jsonwebtoken::jwk::{Jwk, JwkSet, KeyAlgorithm};
 use jsonwebtoken::{Algorithm, DecodingKey};
@@ -14,10 +14,10 @@ use url::Url;
 use crate::common::policy_store::TrustedIssuer;
 
 #[derive(Debug, Hash, Eq, PartialEq)]
-struct DecodingKeyInfo {
-    issuer: String,
-    kid: Option<String>,
-    algorithm: Option<Algorithm>,
+pub struct DecodingKeyInfo {
+    pub issuer: Option<String>,
+    pub kid: Option<String>,
+    pub algorithm: Algorithm,
 }
 
 #[derive(Deserialize)]
@@ -46,6 +46,10 @@ pub struct NewKeyService {
 }
 
 impl NewKeyService {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
     /// Loads JWK stores from a string.
     ///
     /// This enables loading keystores via a local JSON file.
@@ -65,16 +69,19 @@ impl NewKeyService {
     /// - and the values contains the JSON Web Keys as defined in [`RFC 7517`].
     ///
     /// [`RFC 7517`]: https://datatracker.ietf.org/doc/html/rfc7517
-    pub fn insert_keys_from_str(&mut self, key_stores: &str) -> Result<(), InsertKeysError> {
-        let parsed_stores = serde_json::from_str::<HashMap<String, Vec<Jwk>>>(key_stores)?;
+    pub fn insert_keys_from_str(&mut self, key_stores: &str) -> Result<(), KeyServiceError> {
+        let parsed_stores = serde_json::from_str::<HashMap<String, Vec<Jwk>>>(key_stores)
+            .map_err(InsertKeysError::DeserializeJwkStores)?;
 
         for (issuer, keys) in parsed_stores.into_iter() {
             for jwk in keys.into_iter() {
-                let decoding_key = DecodingKey::from_jwk(&jwk)?;
-                let algorithm =
-                    get_algorithm(&jwk).map_err(InsertKeysError::UnsupportedKeyAlgorithm)?;
+                let decoding_key =
+                    DecodingKey::from_jwk(&jwk).map_err(InsertKeysError::BuildDecodingKey)?;
+                let algorithm = get_algorithm(&jwk)
+                    .map_err(InsertKeysError::UnsupportedKeyAlgorithm)?
+                    .ok_or(InsertKeysError::UnspecifiedAlgorithm)?;
                 let key_info = DecodingKeyInfo {
-                    issuer: issuer.clone(),
+                    issuer: Some(issuer.clone()),
                     kid: jwk.common.key_id,
                     algorithm,
                 };
@@ -85,7 +92,7 @@ impl NewKeyService {
         Ok(())
     }
 
-    pub async fn fetch_keys_for_iss(&mut self, iss: &TrustedIssuer) -> Result<(), FetchKeysError> {
+    pub async fn fetch_keys_for_iss(&mut self, iss: &TrustedIssuer) -> Result<(), KeyServiceError> {
         let client = Client::new();
 
         let openid_config = client
@@ -111,10 +118,12 @@ impl NewKeyService {
             .map_err(FetchKeysError::DeserializeJwks)?;
 
         for jwk in jwks.keys.into_iter() {
-            let key = DecodingKey::from_jwk(&jwk)?;
-            let algorithm = get_algorithm(&jwk).map_err(FetchKeysError::UnsupportedKeyAlgorithm)?;
+            let key = DecodingKey::from_jwk(&jwk).map_err(FetchKeysError::BuildDecodingKey)?;
+            let algorithm = get_algorithm(&jwk)
+                .map_err(FetchKeysError::UnsupportedKeyAlgorithm)?
+                .ok_or(FetchKeysError::UnspecifiedAlgorithm)?;
             let key_info = DecodingKeyInfo {
-                issuer: openid_config.issuer.clone(),
+                issuer: Some(openid_config.issuer.clone()),
                 kid: jwk.common.key_id,
                 algorithm,
             };
@@ -126,6 +135,15 @@ impl NewKeyService {
 
     pub fn get_key(&self, key_info: &DecodingKeyInfo) -> Option<&DecodingKey> {
         self.keys.get(key_info)
+    }
+
+    pub fn has_keys(&self) -> bool {
+        !self.keys.is_empty()
+    }
+
+    #[cfg(test)]
+    pub fn keys(&self) -> hash_map::Keys<'_, DecodingKeyInfo, DecodingKey> {
+        self.keys.keys()
     }
 }
 
@@ -154,6 +172,14 @@ fn get_algorithm(jwk: &Jwk) -> Result<Option<Algorithm>, KeyAlgorithm> {
     Ok(Some(algorithm))
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum KeyServiceError {
+    #[error("failed to insert keys into the KeyService: {0}")]
+    InsertKeys(#[from] InsertKeysError),
+    #[error("failed to fetch keys for the KeyService: {0}")]
+    FetchKeysError(#[from] FetchKeysError),
+}
+
 /// Errors encountered while inserting keys using strings
 #[derive(thiserror::Error, Debug)]
 pub enum InsertKeysError {
@@ -163,6 +189,8 @@ pub enum InsertKeysError {
     UnsupportedKeyAlgorithm(KeyAlgorithm),
     #[error("failed to build decoding key: {0}")]
     BuildDecodingKey(#[from] jsonwebtoken::errors::Error),
+    #[error("the key did not specify it's algorithm")]
+    UnspecifiedAlgorithm,
 }
 
 /// Errors encountered while fetching keys remotely
@@ -180,6 +208,8 @@ pub enum FetchKeysError {
     UnsupportedKeyAlgorithm(KeyAlgorithm),
     #[error("failed to build decoding key: {0}")]
     BuildDecodingKey(#[from] jsonwebtoken::errors::Error),
+    #[error("the key did not specify it's algorithm")]
+    UnspecifiedAlgorithm,
 }
 
 #[cfg(test)]
@@ -222,31 +252,42 @@ mod test {
         assert!(
             key_service
                 .get_key(&DecodingKeyInfo {
-                    issuer: iss1,
+                    issuer: Some(iss1),
+                    kid: Some(kid1.clone()),
+                    algorithm: Algorithm::RS256,
+                })
+                .is_some(),
+            "Expected to find a key"
+        );
+
+        assert!(
+            key_service
+                .get_key(&DecodingKeyInfo {
+                    issuer: Some(iss2),
+                    kid: Some(kid2.clone()),
+                    algorithm: Algorithm::RS256,
+                })
+                .is_some(),
+            "Expected to find a key"
+        );
+
+        assert!(
+            key_service
+                .get_key(&DecodingKeyInfo {
+                    issuer: Some("some_unknown_iss".to_string()),
                     kid: Some(kid1),
-                    algorithm: Some(Algorithm::RS256),
+                    algorithm: Algorithm::RS256,
                 })
-                .is_some(),
-            "Expected to find a key"
+                .is_none(),
+            "Expected to not find a key"
         );
 
         assert!(
             key_service
                 .get_key(&DecodingKeyInfo {
-                    issuer: iss2,
+                    issuer: None,
                     kid: Some(kid2),
-                    algorithm: Some(Algorithm::RS256),
-                })
-                .is_some(),
-            "Expected to find a key"
-        );
-
-        assert!(
-            key_service
-                .get_key(&DecodingKeyInfo {
-                    issuer: "some_unknown_iss".to_string(),
-                    kid: Some("abc123".to_string()),
-                    algorithm: Some(Algorithm::RS256),
+                    algorithm: Algorithm::HS256,
                 })
                 .is_none(),
             "Expected to not find a key"
@@ -277,9 +318,9 @@ mod test {
         assert!(
             key_service
                 .get_key(&DecodingKeyInfo {
-                    issuer: server1.issuer(),
+                    issuer: Some(server1.issuer()),
                     kid: kid1,
-                    algorithm: Some(Algorithm::HS256)
+                    algorithm: Algorithm::HS256,
                 })
                 .is_some(),
             "expected to find a key from issuer 1"
@@ -288,9 +329,9 @@ mod test {
         assert!(
             key_service
                 .get_key(&DecodingKeyInfo {
-                    issuer: server2.issuer(),
+                    issuer: Some(server2.issuer()),
                     kid: kid2.clone(),
-                    algorithm: Some(Algorithm::HS256)
+                    algorithm: Algorithm::HS256,
                 })
                 .is_some(),
             "expected to find a key from issuer 2"
@@ -299,9 +340,9 @@ mod test {
         assert!(
             key_service
                 .get_key(&DecodingKeyInfo {
-                    issuer: server2.issuer(),
+                    issuer: Some(server2.issuer()),
                     kid: kid2,
-                    algorithm: Some(Algorithm::RS256)
+                    algorithm: Algorithm::RS256,
                 })
                 .is_none(),
             "expected not to find a key with a different algorithm"
@@ -310,9 +351,9 @@ mod test {
         assert!(
             key_service
                 .get_key(&DecodingKeyInfo {
-                    issuer: "http://some_unknown_issuer.com".into(),
+                    issuer: Some("http://some_unknown_issuer.com".into()),
                     kid: None,
-                    algorithm: Some(Algorithm::HS256)
+                    algorithm: Algorithm::HS256,
                 })
                 .is_none(),
             "expected to not find a key from an unknown issuer"

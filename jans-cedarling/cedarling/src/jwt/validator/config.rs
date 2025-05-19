@@ -19,7 +19,7 @@ use std::sync::Arc;
 #[derive(Default)]
 pub struct JwtValidatorConfig {
     /// Validate the signature of the JWT.
-    pub sig_validation: Arc<bool>,
+    pub sig_validation: bool,
     /// Validate the status of the JWT.
     ///
     /// The JWT status could be obatained from the `.well-known/openid-configuration` via

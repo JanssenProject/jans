@@ -25,6 +25,7 @@ pub struct DecodingKeyWithIss<'a> {
 /// Manages Json Web Keys (JWK).
 // TODO: periodically update the key stores to ensure keys are valid.
 #[derive(Debug)]
+#[deprecated]
 pub struct KeyService {
     key_stores: HashMap<TrustedIssuerId, JwkStore>,
 }

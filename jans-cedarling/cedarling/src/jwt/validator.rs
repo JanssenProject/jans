@@ -4,22 +4,24 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 mod config;
+mod decode;
 #[cfg(test)]
 mod test;
+
+pub use config::*;
 
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use base64::prelude::*;
-pub use config::*;
-use jsonwebtoken::{self as jwt, Algorithm, Validation, decode_header};
-use serde_json::Value;
-use url::Url;
-
-use super::issuers_store::TrustedIssuersStore;
-use super::key_service::KeyService;
+use super::new_key_service::NewKeyService;
 use super::status_list_service::JwtStatusError;
+use super::{issuers_store::TrustedIssuersStore, new_key_service::DecodingKeyInfo};
 use crate::common::policy_store::TrustedIssuer;
+use base64::prelude::*;
+use decode::*;
+use jsonwebtoken::{self as jwt, Algorithm, Validation};
+use serde::Deserialize;
+use serde_json::Value;
 
 type IssuerId = String;
 type TokenClaims = Value;
@@ -27,26 +29,21 @@ type TokenClaims = Value;
 /// Validates Json Web Tokens.
 pub struct JwtValidator {
     config: JwtValidatorConfig,
-    key_service: Option<Arc<KeyService>>,
+    key_service: Arc<NewKeyService>,
     validators: HashMap<Algorithm, Validation>,
     iss_store: TrustedIssuersStore,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Deserialize)]
 pub struct ProcessedJwt<'a> {
+    #[serde(flatten)]
     pub claims: TokenClaims,
+    #[serde(skip)]
     pub trusted_iss: Option<&'a TrustedIssuer>,
 }
 
 impl JwtValidator {
-    pub fn new(
-        config: JwtValidatorConfig,
-        key_service: Option<Arc<KeyService>>,
-    ) -> Result<Self, JwtValidatorError> {
-        if *config.sig_validation && key_service.is_none() {
-            Err(JwtValidatorError::MissingKeyService)?;
-        }
-
+    pub fn new(config: JwtValidatorConfig, key_service: Arc<NewKeyService>) -> Self {
         // we define all the signature validators at startup so we can reuse them.
         let validators = config
             .algs_supported
@@ -68,60 +65,74 @@ impl JwtValidator {
 
         let iss_store = TrustedIssuersStore::new(config.trusted_issuers.clone());
 
-        Ok(Self {
+        Self {
             config,
             key_service,
             validators,
             iss_store,
-        })
+        }
     }
 
     /// Decodes the JWT and optionally validates it depending on the config.
-    pub fn validate_jwt<'a>(&'a self, jwt: &'a str) -> Result<ProcessedJwt<'a>, JwtValidatorError> {
-        let jwt = self.validate_jwt_sig(jwt)?;
-        self.validate_jwt_claims(&jwt)?;
-        // if !self.validate_jwt_status(&jwt)? {
-        //     todo!("add logic for invalid status")
-        // };
+    pub fn validate_jwt(&self, jwt: &str) -> Result<ProcessedJwt, ValidateJwtError> {
+        let decoded_jwt = decode_jwt(jwt)?;
 
-        Ok(jwt)
+        if self.config.sig_validation {
+            let mut sig_validated_jwt = self.validate_jwt_sig(jwt, &decoded_jwt)?;
+            self.validate_jwt_claims(&sig_validated_jwt)?;
+
+            // TODO: this stinks
+            sig_validated_jwt.trusted_iss =
+                decoded_jwt.iss().and_then(|iss| self.iss_store.get(iss));
+
+            return Ok(sig_validated_jwt);
+        }
+
+        // TODO: this stinks
+        let iss = decoded_jwt.iss().and_then(|iss| self.iss_store.get(iss));
+        let mut validated_jwt: ProcessedJwt = decoded_jwt.into();
+        validated_jwt.trusted_iss = iss;
+
+        Ok(validated_jwt)
     }
 
-    fn validate_jwt_sig<'a>(&'a self, jwt: &'a str) -> Result<ProcessedJwt<'a>, JwtValidatorError> {
-        let processed_jwt = match *self.config.sig_validation {
-            true => self.decode_and_validate_jwt(jwt)?,
-            false => self.decode_jwt(jwt)?,
-        };
+    fn validate_jwt_sig(
+        &self,
+        jwt_str: &str,
+        decoded_jwt: &DecodedJwt,
+    ) -> Result<ProcessedJwt, ValidateJwtError> {
+        dbg!(decoded_jwt);
+        let key_info = decoded_jwt.get_decoding_key_info();
+        dbg!(&key_info);
+        #[cfg(test)]
+        dbg!(self.key_service.keys());
+        let key = self
+            .key_service
+            .get_key(&key_info)
+            .ok_or(ValidateJwtError::MissingValidationKey)?;
+        let validation = self
+            .validators
+            .get(&decoded_jwt.header.alg)
+            .ok_or(ValidateJwtError::MissingValidator)?;
+        let validated_jwt = jwt::decode::<ProcessedJwt>(jwt_str, key, validation)?;
 
-        Ok(processed_jwt)
+        return Ok(validated_jwt.claims);
     }
 
-    fn validate_jwt_claims(&self, processed_jwt: &ProcessedJwt) -> Result<(), JwtValidatorError> {
+    fn validate_jwt_claims(
+        &self,
+        sig_validated_jwt: &ProcessedJwt,
+    ) -> Result<(), ValidateJwtError> {
         let missing_claims = self
             .config
             .required_claims
             .iter()
-            .filter(|claim| processed_jwt.claims.get(claim.as_ref()).is_none())
+            .filter(|claim| sig_validated_jwt.claims.get(claim.as_ref()).is_none())
             .cloned()
             .collect::<Vec<Box<str>>>();
 
         if !missing_claims.is_empty() {
-            Err(JwtValidatorError::MissingClaims(missing_claims))?
-        }
-
-        // Check if the `iss` claim's scheme is `https`
-        if self.config.required_claims.contains("iss") {
-            let iss = processed_jwt
-                .claims
-                .get("iss")
-                .map(|iss| serde_json::from_value::<String>(iss.clone()))
-                .transpose()
-                .map_err(JwtValidatorError::DeserializeJwt)?
-                .ok_or(JwtValidatorError::MissingClaims(vec!["iss".into()]))?;
-            let url = Url::parse(&iss)?;
-            if url.scheme() != "https" {
-                Err(JwtValidatorError::InvalidIssScheme(url.scheme().into()))?
-            }
+            Err(ValidateJwtError::MissingClaims(missing_claims))?
         }
 
         Ok(())
@@ -176,64 +187,50 @@ impl JwtValidator {
             trusted_iss,
         })
     }
+}
 
-    /// Decodes and validates the JWT's signature and optionally, the `exp` and `nbf` claims.
-    fn decode_and_validate_jwt(&self, jwt: &str) -> Result<ProcessedJwt, JwtValidatorError> {
-        let key_service = self
-            .key_service
-            .as_ref()
-            .ok_or(JwtValidatorError::MissingKeyService)?;
+impl DecodedJwt {
+    pub fn iss(&self) -> Option<&str> {
+        self.claims.claims.get("iss").and_then(|x| x.as_str())
+    }
 
-        let header = decode_header(jwt).map_err(JwtValidatorError::DecodeHeader)?;
+    pub fn get_decoding_key_info(&self) -> DecodingKeyInfo {
+        DecodingKeyInfo {
+            issuer: self.iss().map(|x| x.to_string()),
+            kid: self.header.kid.clone(),
+            algorithm: self.header.alg,
+        }
+    }
+}
 
-        // since we already initialized all the validators on startup, not finding one
-        // for a certain algorithm means it's unsupported.
-        let validation = self.validators.get(&header.alg).ok_or(
-            JwtValidatorError::JwtSignedWithUnsupportedAlgorithm(header.alg),
-        )?;
-
-        let decoding_key = match header.kid {
-            Some(kid) => key_service
-                .get_key(&kid)
-                .ok_or(JwtValidatorError::MissingDecodingKey(kid))?,
-            None => unimplemented!("Handling JWTs without `kid`s hasn't been implemented yet."),
-        };
-
-        let decode_result = jsonwebtoken::decode::<TokenClaims>(jwt, decoding_key.key, validation)
-            .map_err(|e| {
-                match e.kind() {
-                    jsonwebtoken::errors::ErrorKind::InvalidToken => {
-                        JwtValidatorError::InvalidShape
-                    },
-                    jsonwebtoken::errors::ErrorKind::InvalidSignature => {
-                        JwtValidatorError::InvalidSignature(e)
-                    },
-                    jsonwebtoken::errors::ErrorKind::ExpiredSignature => {
-                        JwtValidatorError::ExpiredToken
-                    },
-                    jsonwebtoken::errors::ErrorKind::ImmatureSignature => {
-                        JwtValidatorError::ImmatureToken
-                    },
-                    jsonwebtoken::errors::ErrorKind::Base64(decode_error) => {
-                        JwtValidatorError::DecodeJwt(decode_error.to_string())
-                    },
-                    // the jsonwebtoken crate placed all it's errors onto a single enum, even the errors
-                    // that wouldn't be returned when we call `decode`.
-                    _ => JwtValidatorError::Unexpected(e),
-                }
-            })?;
-
-        Ok(ProcessedJwt {
-            claims: decode_result.claims,
-            trusted_iss: decoding_key.key_iss,
-        })
+impl From<DecodedJwt> for ProcessedJwt<'_> {
+    fn from(decoded_jwt: DecodedJwt) -> Self {
+        Self {
+            claims: decoded_jwt.claims.claims,
+            trusted_iss: None,
+        }
     }
 }
 
 #[derive(Debug, thiserror::Error)]
+pub enum ValidateJwtError {
+    #[error("failed to decode the JWT: {0}")]
+    DecodeJwt(#[from] DecodeJwtError),
+    #[error("failed to validate the JWT since no key was available")]
+    MissingValidationKey,
+    #[error("failed to validate the JWT because no validator was initialized for its issuer")]
+    MissingValidator,
+    #[error("failed to validate the JWT: {0}")]
+    ValidateJwt(#[from] jwt::errors::Error),
+    #[error("validation failed since the JWT is missing the following required claims: {0:#?}")]
+    MissingClaims(Vec<Box<str>>),
+}
+
+#[deprecated]
+#[derive(Debug, thiserror::Error)]
 pub enum JwtValidatorError {
-    #[error("JWT signature validation is on but no key service was provided.")]
-    MissingKeyService,
+    #[error("JWT signature validation is on but the key service has no keys")]
+    KeyServiceIsMissingKeys,
     #[error("JWT status validation is on but no status list service was provided.")]
     MissingStatusListService,
     #[error("Invalid JWT format. The JWT must be in the shape: `header.payload.signature`")]
