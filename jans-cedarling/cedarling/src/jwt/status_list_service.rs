@@ -14,7 +14,7 @@ pub use error::*;
 
 use std::io::Read;
 
-use super::validator::ProcessedJwt;
+use super::validator::ValidatedJwt;
 use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
 use flate2::read::ZlibDecoder;
 use serde::Deserialize;
@@ -86,10 +86,10 @@ impl TryFrom<StatusListJwt> for StatusList {
     }
 }
 
-impl TryFrom<ProcessedJwt<'_>> for StatusList {
+impl TryFrom<ValidatedJwt<'_>> for StatusList {
     type Error = ParseStatusListError;
 
-    fn try_from(jwt: ProcessedJwt) -> Result<Self, Self::Error> {
+    fn try_from(jwt: ValidatedJwt) -> Result<Self, Self::Error> {
         let list = jwt
             .claims
             .get("lst")

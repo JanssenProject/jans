@@ -13,7 +13,7 @@ use test_utils::assert_eq;
 use super::super::test_utils::*;
 use super::{JwtValidator, JwtValidatorConfig};
 use crate::jwt::new_key_service::NewKeyService;
-use crate::jwt::validator::{ProcessedJwt, ValidateJwtError};
+use crate::jwt::validator::{ValidateJwtError, ValidatedJwt};
 
 #[track_caller]
 fn prepare_key_service() -> (NewKeyService, String, KeyPair) {
@@ -61,7 +61,7 @@ fn can_decode_jwt_without_sig_validation() {
 
     let result = validator.decode_jwt(&token).expect("Should decode JWT");
 
-    let expected = ProcessedJwt {
+    let expected = ValidatedJwt {
         claims,
         trusted_iss: None,
     };
@@ -99,7 +99,7 @@ fn can_decode_and_validate_jwt() {
         .validate_jwt(&token)
         .expect("Should successfully process JWT");
 
-    let expected = ProcessedJwt {
+    let expected = ValidatedJwt {
         claims,
         trusted_iss: None,
     };
@@ -224,7 +224,7 @@ fn can_check_missing_claims() {
         .validate_jwt(&token)
         .expect("Should process JWT successfully");
 
-    let expected = ProcessedJwt {
+    let expected = ValidatedJwt {
         claims,
         trusted_iss: None,
     };

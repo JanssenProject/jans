@@ -35,7 +35,7 @@ pub struct JwtValidator {
 }
 
 #[derive(Debug, PartialEq, Deserialize)]
-pub struct ProcessedJwt<'a> {
+pub struct ValidatedJwt<'a> {
     #[serde(flatten)]
     pub claims: TokenClaims,
     #[serde(skip)]
@@ -74,7 +74,7 @@ impl JwtValidator {
     }
 
     /// Decodes the JWT and optionally validates it depending on the config.
-    pub fn validate_jwt(&self, jwt: &str) -> Result<ProcessedJwt, ValidateJwtError> {
+    pub fn validate_jwt(&self, jwt: &str) -> Result<ValidatedJwt, ValidateJwtError> {
         let decoded_jwt = decode_jwt(jwt)?;
 
         if self.config.sig_validation {
@@ -90,7 +90,7 @@ impl JwtValidator {
 
         // TODO: this stinks
         let iss = decoded_jwt.iss().and_then(|iss| self.iss_store.get(iss));
-        let mut validated_jwt: ProcessedJwt = decoded_jwt.into();
+        let mut validated_jwt: ValidatedJwt = decoded_jwt.into();
         validated_jwt.trusted_iss = iss;
 
         Ok(validated_jwt)
@@ -100,7 +100,7 @@ impl JwtValidator {
         &self,
         jwt_str: &str,
         decoded_jwt: &DecodedJwt,
-    ) -> Result<ProcessedJwt, ValidateJwtError> {
+    ) -> Result<ValidatedJwt, ValidateJwtError> {
         dbg!(decoded_jwt);
         let key_info = decoded_jwt.get_decoding_key_info();
         dbg!(&key_info);
@@ -114,14 +114,14 @@ impl JwtValidator {
             .validators
             .get(&decoded_jwt.header.alg)
             .ok_or(ValidateJwtError::MissingValidator)?;
-        let validated_jwt = jwt::decode::<ProcessedJwt>(jwt_str, key, validation)?;
+        let validated_jwt = jwt::decode::<ValidatedJwt>(jwt_str, key, validation)?;
 
         return Ok(validated_jwt.claims);
     }
 
     fn validate_jwt_claims(
         &self,
-        sig_validated_jwt: &ProcessedJwt,
+        sig_validated_jwt: &ValidatedJwt,
     ) -> Result<(), ValidateJwtError> {
         let missing_claims = self
             .config
@@ -142,7 +142,7 @@ impl JwtValidator {
     ///
     /// TODO: application-specific statuses are always allowed since we do not have a
     /// way to map them yet.
-    fn validate_jwt_status(&self, _jwt: &ProcessedJwt) -> Result<bool, JwtValidatorError> {
+    fn validate_jwt_status(&self, _jwt: &ValidatedJwt) -> Result<bool, JwtValidatorError> {
         todo!()
         // let Some(status_list_service) = self.status_list_service.as_ref() else {
         //     return Ok(true);
@@ -158,7 +158,7 @@ impl JwtValidator {
     }
 
     /// Decodes a JWT without validating the signature.
-    fn decode_jwt(&self, jwt: &str) -> Result<ProcessedJwt, JwtValidatorError> {
+    fn decode_jwt(&self, jwt: &str) -> Result<ValidatedJwt, JwtValidatorError> {
         // Split the token into its three parts
         let parts = jwt.split('.').collect::<Vec<&str>>();
         if parts.len() != 3 {
@@ -182,7 +182,7 @@ impl JwtValidator {
             .map_err(JwtValidatorError::DeserializeJwt)?
             .and_then(|x| self.iss_store.get(&x));
 
-        Ok(ProcessedJwt {
+        Ok(ValidatedJwt {
             claims,
             trusted_iss,
         })
@@ -203,7 +203,7 @@ impl DecodedJwt {
     }
 }
 
-impl From<DecodedJwt> for ProcessedJwt<'_> {
+impl From<DecodedJwt> for ValidatedJwt<'_> {
     fn from(decoded_jwt: DecodedJwt) -> Self {
         Self {
             claims: decoded_jwt.claims.claims,
