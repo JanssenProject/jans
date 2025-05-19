@@ -33,7 +33,7 @@ cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} 
 cp ./target/release/{build_file} ./bindings/cedarling-java/src/main/resources
 ```
 
-4. Run below command to build `cedarling-java` jar file. This will generate `cedarling-java-{version}-distribution.jar` at `./bindings/cedarling-java/target/`.
+4. Change directory to `./bindings/cedarling-java` and run below command to build `cedarling-java` jar file. This will generate `cedarling-java-{version}-distribution.jar` at `./bindings/cedarling-java/target/`.
 
 ```bash
  mvn clean install
