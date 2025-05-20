@@ -28,8 +28,7 @@ type Fido2Configuration struct {
 type JansFido2DynConfiguration struct {
 	Issuer                      string             `schema:"issuer" json:"issuer,omitempty"`
 	BaseEndpoint                string             `schema:"base_endpoint" json:"baseEndpoint,omitempty"`
-	CleanServiceInterval        int                `schema:"clean_service_interval" json:"cleanServiceInterval,omitempty"`
-	CleanServiceBatchChunkSize  int                `schema:"clean_service_batch_chunk_size" json:"cleanServiceBatchChunkSize,omitempty"`
+	UserInfoLifetime            int                `schema:"user_info_lifetime" json:"userInfoLifetime,omitempty"`
 	UseLocalCache               bool               `schema:"use_local_cache" json:"useLocalCache,omitempty"`
 	DisableJdkLogger            bool               `schema:"disable_jdk_logger" json:"disableJdkLogger,omitempty"`
 	LoggingLevel                string             `schema:"logging_level" json:"loggingLevel,omitempty"`

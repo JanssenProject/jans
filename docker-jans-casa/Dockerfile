@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.24
+ARG JETTY_VERSION=12.0.19
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -30,20 +30,14 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ====
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-04-11 08:25'
+ENV CN_BUILD_DATE='2025-05-04 08:50'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
 
 # Install Casa
-COPY static/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
 RUN mkdir -p ${JETTY_BASE}/jans-casa/webapps \
-    && wget -q ${CN_SOURCE_URL} -O /tmp/jans-casa.war \
-    && cd /tmp \
-    && zip -d jans-casa.war WEB-INF/jetty-web.xml \
-    && zip -r jans-casa.war WEB-INF/jetty-env.xml \
-    && cp jans-casa.war ${JETTY_BASE}/jans-casa/webapps/jans-casa.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-casa --add-module=server,deploy,resources,http,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
-    && rm -rf /tmp/jans-casa.war /tmp/WEB-INF
+    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-casa/webapps/jans-casa.war \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-casa --add-modules=server,resources,http,forwarded,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
 
 # casa plugins
 RUN mkdir -p ${JETTY_BASE}/jans-casa/plugins \
@@ -60,7 +54,7 @@ RUN mkdir -p /usr/share/java \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=3377ed1cb1e82fd4f7f22842533913f6bd3a80a3
+ENV JANS_SOURCE_VERSION=137153d287ced23f04cd26037cdd3e783babdd95
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)

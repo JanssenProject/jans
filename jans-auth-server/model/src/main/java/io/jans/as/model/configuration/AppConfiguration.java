@@ -550,6 +550,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to include sessionId in response", defaultValue = "false")
     private Boolean includeSidInResponse = false;
 
+    @DocProperty(description = "Boolean value specifying whether to include refresh token lifetime in token response", defaultValue = "false")
+    private Boolean includeRefreshTokenLifetimeInTokenResponse = false;
+
     @DocProperty(description = "Boolean value specifying whether to disable prompt=login", defaultValue = "false")
     private Boolean disablePromptLogin = false;
 
@@ -1400,6 +1403,16 @@ public class AppConfiguration implements Configuration {
 
     public void setIncludeSidInResponse(Boolean includeSidInResponse) {
         this.includeSidInResponse = includeSidInResponse;
+    }
+
+    public Boolean getIncludeRefreshTokenLifetimeInTokenResponse() {
+        if (includeRefreshTokenLifetimeInTokenResponse == null) includeRefreshTokenLifetimeInTokenResponse = false;
+        return includeRefreshTokenLifetimeInTokenResponse;
+    }
+
+    public AppConfiguration setIncludeRefreshTokenLifetimeInTokenResponse(Boolean includeRefreshTokenLifetimeInTokenResponse) {
+        this.includeRefreshTokenLifetimeInTokenResponse = includeRefreshTokenLifetimeInTokenResponse;
+        return this;
     }
 
     public Boolean getSessionIdPersistInCache() {

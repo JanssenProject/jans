@@ -334,20 +334,23 @@ nav:
       - SSA Modify Response: script-catalog/ssa/ssa-modify-response.md
   - Reference Guide:
     - janssen-server/reference/README.md
+    - Cedarling Development Docs:
+        - Rust : https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
+        - Python:  https://janssenproject.github.io/developer-docs/cedarling-python/cedarling_python.html
     - Javadocs / OpenAPI:
       - janssen-server/reference/openapi.md
-      - agama: https://janssenproject.github.io/javadocs/agama/transpiler/index.html
-      - jans-auth-server: https://janssenproject.github.io/javadocs/jans-auth-server/server/index.html
-      - jans-casa: https://janssenproject.github.io/javadocs/jans-casa/config/index.html
-      - jans-config-api: https://janssenproject.github.io/javadocs/jans-config-api/server/index.html
-      - jans-core: https://janssenproject.github.io/javadocs/jans-core/server/io/jans/server/filters/package-summary.html
-      - jans-fido2: https://janssenproject.github.io/javadocs/jans-fido2/server/index.html
-      - jans-keycloak-integration: https://janssenproject.github.io/javadocs/jans-keycloak-integration/server/index.html
-      - jans-keycloak-link: https://janssenproject.github.io/javadocs/jans-keycloak-link/server/index.html
-      - jans-link: https://janssenproject.github.io/javadocs/jans-link/server/index.html
-      - jans-lock: https://janssenproject.github.io/javadocs/jans-lock/server/index.html
-      - jans-orm: https://janssenproject.github.io/javadocs/jans-orm/cdi/io/jans/orm/service/package-summary.html
-      - jans-scim: https://janssenproject.github.io/javadocs/jans-scim/server/index.html
+      - agama: https://janssenproject.github.io/developer-docs/agama/transpiler/index.html
+      - jans-auth-server: https://janssenproject.github.io/developer-docs/jans-auth-server/server/index.html
+      - jans-casa: https://janssenproject.github.io/developer-docs/jans-casa/config/index.html
+      - jans-config-api: https://janssenproject.github.io/developer-docs/jans-config-api/server/index.html
+      - jans-core: https://janssenproject.github.io/developer-docs/jans-core/server/io/jans/server/filters/package-summary.html
+      - jans-fido2: https://janssenproject.github.io/developer-docs/jans-fido2/server/index.html
+      - jans-keycloak-integration: https://janssenproject.github.io/developer-docs/jans-keycloak-integration/server/index.html
+      - jans-keycloak-link: https://janssenproject.github.io/developer-docs/jans-keycloak-link/server/index.html
+      - jans-link: https://janssenproject.github.io/developer-docs/jans-link/server/index.html
+      - jans-lock: https://janssenproject.github.io/developer-docs/jans-lock/server/index.html
+      - jans-orm: https://janssenproject.github.io/developer-docs/jans-orm/cdi/io/jans/orm/service/package-summary.html
+      - jans-scim: https://janssenproject.github.io/developer-docs/jans-scim/server/index.html
     - JSON Configuration/Properties:
       - janssen-server/reference/json/README.md
       - Properties:
@@ -403,15 +406,24 @@ nav:
       - Using SCIM: janssen-server/usermgmt/usermgmt-scim.md
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
-- Cedarling:
-  - Getting Started: 'cedarling/cedarling-getting-started.md'
-  - Overview: 'cedarling/cedarling-overview.md'
+- 'Cedarling':
+  - Overview: 'cedarling/README.md'
   - Quick Start:
     - Authorization Using Cedarling: 'cedarling/cedarling-quick-start-unsigned.md'
     - Implement TBAC Using Cedarling: 'cedarling/cedarling-quick-start-tbac.md'
+  - Tutorials: 
+    - 'cedarling/cedarling-getting-started.md'
+    - Javascript: 'cedarling/getting-started/javascript.md'
+    - Python: 'cedarling/getting-started/python.md'
+    - Rust: 'cedarling/getting-started/rust.md'
+    - Golang: 'cedarling/getting-started/go.md'
+    - Kotlin: 'cedarling/getting-started/kotlin.md'
+    - Swift: 'cedarling/getting-started/swift.md'
   - Reference:
+    - Interfaces: 'cedarling/cedarling-interfaces.md'
     - Policy Store: 'cedarling/cedarling-policy-store.md'
     - Properties: 'cedarling/cedarling-properties.md'
+    - Boolean Operations: 'cedarling/cedarling-principal-boolean-operations.md'
     - Logs: 'cedarling/cedarling-logs.md'
     - JWT Validation: 'cedarling/cedarling-jwt-validation.md'
     - JWT Mapping: 'cedarling/cedarling-jwt-mapping.md'
@@ -422,12 +434,14 @@ nav:
     - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
+    - Kotlin/ Java: 'cedarling/uniffi/cedarling-kotlin.md'
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
       - Android Apps: 'cedarling/uniffi/cedarling-android.md'
       - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'  
-    - Sidecar: 'cedarling/cedarling-sidecar-overview.md'
-    - Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
+    - Sidecar: 
+      - Sidecar: 'cedarling/cedarling-sidecar-overview.md'
+      - Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
   - Integrations:
     - Krakend: 'cedarling/cedarling-krakend.md'
 - Agama:
@@ -463,18 +477,46 @@ nav:
   - Code of Conduct: CODE_OF_CONDUCT.md
   - Design and Implementation:
     - contribute/implementation-design/README.md
-    - Agama: contribute/implementation-design/agama.md
-    - jans-auth-server: contribute/implementation-design/jans-auth-server.md
-    - jans-cli: contribute/implementation-design/jans-cli.md
-    - jans-config-api: contribute/implementation-design/jans-config-api.md
-    - jans-core: contribute/implementation-design/jans-core.md
-    - jans-fido2: contribute/implementation-design/jans-fido2.md
-    - jans-orm: contribute/implementation-design/jans-orm.md
-    - jans-scim: contribute/implementation-design/jans-scim.md
+    - Agama: 
+      - contribute/implementation-design/agama-design/README.md
+      - ADR: contribute/implementation-design/agama-design/adr/README.md
+    - jans-auth-server: 
+      - contribute/implementation-design/jans-auth-server-design/README.md
+      - ADR: contribute/implementation-design/jans-auth-server-design/adr/README.md
+    - jans-cli: 
+       - contribute/implementation-design/jans-cli-design/README.md
+       - ADR: contribute/implementation-design/jans-cli-design/adr/README.md
+    - jans-config-api: 
+       - contribute/implementation-design/jans-config-api-design/README.md
+       - OpenAPI Spec generation: contribute/implementation-design/jans-config-api-design/config-api-swagger-spec-generation.md
+       - ADR: contribute/implementation-design/jans-config-api-design/adr/README.md
+    - jans-core: 
+       - contribute/implementation-design/jans-core-design/README.md
+       - ADR: contribute/implementation-design/jans-core-design/adr/README.md
+    - jans-fido2: 
+       - contribute/implementation-design/jans-fido2-design/README.md
+       - ADR: contribute/implementation-design/jans-fido2-design/adr/README.md
+    - jans-orm: 
+      - contribute/implementation-design/jans-orm-design/README.md
+      - ADR: contribute/implementation-design/jans-orm-design/adr/README.md
+    - jans-scim: 
+      - contribute/implementation-design/jans-scim-design/README.md
+      - ADR: contribute/implementation-design/jans-scim-design/adr/README.md
+    - jans-casa: 
+      - contribute/implementation-design/jans-casa-design/README.md
+      - ADR: contribute/implementation-design/jans-casa-design/adr/README.md
+    - jans-cedarling:
+      - contribute/implementation-design/jans-cedarling-design/README.md
+      - ADR: contribute/implementation-design/jans-cedarling-design/adr/README.md
   - CI-CD:
     #- GitHub CI: contribute/ci-cd/github-ci.md
     - Release Process: contribute/ci-cd/release-process.md
-  - Development: contribute/development.md
+  - Development:
+    - contribute/development/development.md
+    - Remote Debugging: contribute/development/remote-debugging.md
+    - Run Integration Tests with a Janssen Server VM : contribute/development/run-integration-tests.md
+    - Local Run Under Eclipse: contribute/development/local-run-under-eclipse.md
+    - Useful Tools: contribute/development/useful-tools.md
   - Testing: contribute/testing.md
   - Developer FAQ: contribute/developer-faq.md
 - Governance:
