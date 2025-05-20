@@ -24,7 +24,6 @@ tags:
 - name: Configuration – Logging
 - name: Configuration – JWK - JSON Web Key (JWK)
 - name: Custom Scripts
-- name: Database - LDAP configuration
 - name: OAuth - OpenID Connect - Clients
 - name: OAuth - UMA Resources
 - name: OAuth - Scopes
@@ -5284,378 +5283,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/jwks.write
-  /api/v1/config/database/ldap:
-    get:
-      tags:
-      - Database - LDAP configuration
-      summary: Gets list of existing LDAP configurations.
-      description: Gets list of existing LDAP configurations.
-      operationId: get-config-database-ldap
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/GluuLdapConfiguration'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    [
-                        {
-                            "configId": "auth_ldap_server",
-                            "bindDN": "cn=directory manager",
-                            "bindPassword": "password==",
-                            "servers": [
-                                "jans.server:1636"
-                            ],
-                            "maxConnections": 1000,
-                            "useSSL": true,
-                            "baseDNs": [
-                                "ou=people,o=jans"
-                            ],
-                            "primaryKey": "uid",
-                            "localPrimaryKey": "uid",
-                            "useAnonymousBind": false,
-                            "enabled": false,
-                            "version": 0,
-                            "level": 0
-                        }
-                    ]
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/ldap.readonly
-    put:
-      tags:
-      - Database - LDAP configuration
-      summary: Updates LDAP configuration
-      description: Updates LDAP configuration
-      operationId: put-config-database-ldap
-      requestBody:
-        description: GluuLdapConfiguration object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GluuLdapConfiguration'
-            examples:
-              Request json example:
-                description: Request json example
-                value: |
-                  {
-                      "configId": "auth_ldap_server",
-                      "bindDN": "cn=directory manager",
-                      "bindPassword": "axby+nlegh9DhpQ==",
-                      "servers": [
-                          "jans.server2:1636"
-                      ],
-                      "maxConnections": 1000,
-                      "useSSL": true,
-                      "baseDNs": [
-                          "ou=people,o=jans"
-                      ],
-                      "primaryKey": "uid",
-                      "localPrimaryKey": "uid",
-                      "useAnonymousBind": false,
-                      "enabled": false,
-                      "version": 0,
-                      "level": 0
-                  }
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GluuLdapConfiguration'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "configId": "auth_ldap_server",
-                        "bindDN": "cn=directory manager",
-                        "bindPassword": "axby+nlegh9DhpQ==",
-                        "servers": [
-                            "jans.server2:1636"
-                        ],
-                        "maxConnections": 1000,
-                        "useSSL": true,
-                        "baseDNs": [
-                            "ou=people,o=jans"
-                        ],
-                        "primaryKey": "uid",
-                        "localPrimaryKey": "uid",
-                        "useAnonymousBind": false,
-                        "enabled": false,
-                        "version": 0,
-                        "level": 0
-                    }
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/ldap.write
-    post:
-      tags:
-      - Database - LDAP configuration
-      summary: Adds a new LDAP configuration
-      description: Adds a new LDAP configuration
-      operationId: post-config-database-ldap
-      requestBody:
-        description: GluuLdapConfiguration object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GluuLdapConfiguration'
-            examples:
-              Request json example:
-                description: Request json example
-                value: |
-                  {
-                      "configId": "auth_ldap_server",
-                      "bindDN": "cn=directory manager",
-                      "bindPassword": "axby+nlegh9DhpQ==",
-                      "servers": [
-                          "jans.server2:1636"
-                      ],
-                      "maxConnections": 1000,
-                      "useSSL": true,
-                      "baseDNs": [
-                          "ou=people,o=jans"
-                      ],
-                      "primaryKey": "uid",
-                      "localPrimaryKey": "uid",
-                      "useAnonymousBind": false,
-                      "enabled": false,
-                      "version": 0,
-                      "level": 0
-                  }
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GluuLdapConfiguration'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "configId": "auth_ldap_server",
-                        "bindDN": "cn=directory manager",
-                        "bindPassword": "axby+nlegh9DhpQ==",
-                        "servers": [
-                            "jans.server2:1636"
-                        ],
-                        "maxConnections": 1000,
-                        "useSSL": true,
-                        "baseDNs": [
-                            "ou=people,o=jans"
-                        ],
-                        "primaryKey": "uid",
-                        "localPrimaryKey": "uid",
-                        "useAnonymousBind": false,
-                        "enabled": false,
-                        "version": 0,
-                        "level": 0
-                    }
-        "401":
-          description: Unauthorized
-        "406":
-          description: Not Acceptable
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/ldap.write
-  /api/v1/config/database/ldap/{name}:
-    get:
-      tags:
-      - Database - LDAP configuration
-      summary: Gets an LDAP configuration by name.
-      description: Gets an LDAP configuration by name.
-      operationId: get-config-database-ldap-by-name
-      parameters:
-      - name: name
-        in: path
-        description: Name of LDAP configuration
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GluuLdapConfiguration'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "configId": "auth_ldap_server",
-                        "bindDN": "cn=directory manager",
-                        "bindPassword": "axby+nlegh9DhpQ==",
-                        "servers": [
-                            "jans.server2:1636"
-                        ],
-                        "maxConnections": 1000,
-                        "useSSL": true,
-                        "baseDNs": [
-                            "ou=people,o=jans"
-                        ],
-                        "primaryKey": "uid",
-                        "localPrimaryKey": "uid",
-                        "useAnonymousBind": false,
-                        "enabled": false,
-                        "version": 0,
-                        "level": 0
-                    }
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/ldap.readonly
-    delete:
-      tags:
-      - Database - LDAP configuration
-      summary: Deletes an LDAP configuration
-      description: Deletes an LDAP configuration
-      operationId: delete-config-database-ldap-by-name
-      parameters:
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          description: No Content
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GluuLdapConfiguration'
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/ldap.delete
-    patch:
-      tags:
-      - Database - LDAP configuration
-      summary: Patches a LDAP configuration by name
-      description: Patches a LDAP configuration by name
-      operationId: patch-config-database-ldap-by-name
-      parameters:
-      - name: name
-        in: path
-        description: Name of LDAP configuration
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: JsonPatch object
-        content:
-          application/json-patch+json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/JsonPatch'
-            examples:
-              Request json example:
-                description: Request json example
-                value: example/auth/database/ldap/ldap-patch
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GluuLdapConfiguration'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "configId": "auth_ldap_server",
-                        "bindDN": "cn=directory manager",
-                        "bindPassword": "axby+nlegh9DhpQ==",
-                        "servers": [
-                            "jans.server2:1636"
-                        ],
-                        "maxConnections": 1000,
-                        "useSSL": true,
-                        "baseDNs": [
-                            "ou=people,o=jans"
-                        ],
-                        "primaryKey": "uid",
-                        "localPrimaryKey": "uid",
-                        "useAnonymousBind": false,
-                        "enabled": false,
-                        "version": 0,
-                        "level": 0
-                    }
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/ldap.write
-  /api/v1/config/database/ldap/test:
-    post:
-      tags:
-      - Database - LDAP configuration
-      summary: Tests an LDAP configuration
-      description: Tests an LDAP configuration
-      operationId: post-config-database-ldap-test
-      requestBody:
-        description: GluuLdapConfiguration object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GluuLdapConfiguration'
-            examples:
-              Request json example:
-                description: Request json example
-                value: "[{ \"op\": \"replace\", \"path\": \"/maxConnections\", \"\
-                  value\":800}] \n"
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: boolean
-                description: boolean value true if successful
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/ldap.readonly
   /api/v1/logging:
     get:
       tags:
@@ -9336,9 +8963,9 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
@@ -9841,6 +9468,8 @@ components:
             type: string
         includeSidInResponse:
           type: boolean
+        includeRefreshTokenLifetimeInTokenResponse:
+          type: boolean
         disablePromptLogin:
           type: boolean
         disablePromptConsent:
@@ -10222,8 +9851,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10233,6 +9860,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11357,14 +10986,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11486,42 +11115,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/JSONWebKey'
-    GluuLdapConfiguration:
-      type: object
-      properties:
-        configId:
-          type: string
-        bindDN:
-          type: string
-        bindPassword:
-          type: string
-        servers:
-          type: array
-          items:
-            type: string
-        maxConnections:
-          type: integer
-          format: int32
-        useSSL:
-          type: boolean
-        baseDNs:
-          type: array
-          items:
-            type: string
-        primaryKey:
-          type: string
-        localPrimaryKey:
-          type: string
-        useAnonymousBind:
-          type: boolean
-        enabled:
-          type: boolean
-        version:
-          type: integer
-          format: int32
-        level:
-          type: integer
-          format: int32
     Logging:
       type: object
       properties:

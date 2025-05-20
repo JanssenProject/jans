@@ -44,7 +44,7 @@ import org.slf4j.Logger;
                 @Tag(name = "Cache Configuration – Native-Persistence"), @Tag(name = "Configuration – Properties"),
                 @Tag(name = "Configuration – SMTP"), @Tag(name = "Configuration – Logging"),
                 @Tag(name = "Configuration – JWK - JSON Web Key (JWK)"), @Tag(name = "Custom Scripts"),
-                @Tag(name = "Database - LDAP configuration"), @Tag(name = "OAuth - OpenID Connect - Clients"),
+                @Tag(name = "OAuth - OpenID Connect - Clients"),
                 @Tag(name = "OAuth - UMA Resources"), @Tag(name = "OAuth - Scopes"),
                 @Tag(name = "Agama - Configuration"), @Tag(name = "Agama"),
                 @Tag(name = "Statistics - User"), @Tag(name = "Health - Check"), @Tag(name = "Server Stats"),
@@ -149,7 +149,6 @@ public class ApiApplication extends BaseApiApplication {
         classes.add(ConfigSmtpResource.class);
         classes.add(CustomScriptResource.class);
         classes.add(JwksResource.class);
-        classes.add(LdapConfigurationResource.class);
         classes.add(LoggingResource.class);
         classes.add(ScopesResource.class);
         classes.add(UmaResourcesResource.class);
