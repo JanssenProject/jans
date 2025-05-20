@@ -11,10 +11,11 @@
 //! - Validating the signatures of JWTs to ensure their integrity and authenticity.
 //! - Verifying the validity of JWTs based on claims such as expiration time and audience.
 
+mod decode;
 mod error;
-mod issuers_store;
 mod key_service;
 mod log_entry;
+#[allow(dead_code)]
 mod status_list_service;
 mod token;
 mod validation;
@@ -27,28 +28,24 @@ use crate::JwtConfig;
 use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
-use base64::DecodeError;
-use base64::Engine;
-use base64::prelude::*;
+use decode::*;
+use jsonwebtoken::Algorithm;
 use key_service::*;
 use log_entry::*;
 use std::collections::HashMap;
-use validation::JwtValidationService;
-use validation::ValidateJwtError;
+use std::sync::Arc;
+use validation::*;
 
 pub use error::*;
 pub use token::{Token, TokenClaimTypeError, TokenClaims};
 
+/// Handles JWT validation
 pub struct JwtService {
-    // validators: HashMap<ValidatorId, JwtValidator>,
-    validation_service: JwtValidationService,
+    validators: HashMap<ValidatorKey, JwtValidator>,
+    key_service: Arc<KeyService>,
+    validate_jwt_signatures: bool,
+    trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
     logger: Option<Logger>,
-}
-
-#[derive(Eq, Hash, PartialEq, Debug)]
-struct ValidatorId {
-    iss: Option<String>,
-    token_name: String,
 }
 
 impl JwtService {
@@ -57,8 +54,30 @@ impl JwtService {
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
-        let mut key_service = KeyService::new();
+        // we make a map of <jwt_iss_claim, TrustedIssuer>
+        // where jwt_iss_claim is what we expect to find in the `iss` claim of the JWTs
+        // from the given issuer
+        let trusted_issuers = trusted_issuers.map(|issuers| {
+            issuers
+                .into_values()
+                .map(|iss| {
+                    // TODO: here, we are relying on the IDP to use it's own domain
+                    // for the issued tokens. We might need to fetch the openid config
+                    // in the future and use the `issuer` field to support more funky IDPs.
+                    let jwt_iss_claim = iss.oidc_endpoint.origin().ascii_serialization();
+                    (jwt_iss_claim, iss)
+                })
+                .collect::<HashMap<String, TrustedIssuer>>()
+        });
 
+        // Initialize JWT validators
+        let validators = trusted_issuers
+            .as_ref()
+            .map(|issuers| init_jwt_validators(config, issuers, logger.clone()))
+            .unwrap_or_default();
+
+        // Initialize Key Service to manage JWKs
+        let mut key_service = KeyService::new();
         if config.jwt_sig_validation {
             if let Some(issuers) = trusted_issuers.as_ref() {
                 for iss in issuers.values() {
@@ -74,12 +93,13 @@ impl JwtService {
                 return Err(JwtServiceInitError::KeyServiceMissingKeys);
             }
         }
-
-        let validation_service =
-            JwtValidationService::new(config, trusted_issuers, key_service, logger.clone());
+        let key_service = Arc::new(key_service);
 
         Ok(Self {
-            validation_service,
+            validators,
+            key_service,
+            validate_jwt_signatures: config.jwt_sig_validation,
+            trusted_issuers,
             logger,
         })
     }
@@ -96,11 +116,9 @@ impl JwtService {
         tokens: &'a HashMap<String, String>,
     ) -> Result<HashMap<String, Token<'a>>, JwtProcessingError> {
         let mut validated_tokens = HashMap::new();
-        for (token_name, jwt) in tokens.iter() {
-            let validation_result = self
-                .validation_service
-                .validate_jwt(token_name.clone(), jwt);
 
+        for (token_name, jwt) in tokens.iter() {
+            let validation_result = self.validate_jwt(token_name.clone(), jwt);
             let Ok(validated_jwt) = validation_result else {
                 match validation_result.unwrap_err() {
                     ValidateJwtError::MissingValidator(iss) => {
@@ -123,25 +141,106 @@ impl JwtService {
 
         Ok(validated_tokens)
     }
-}
 
-#[derive(Debug, thiserror::Error)]
-pub enum DecodeJwtError {
-    #[error("invalid JWT. the JWT must be of form: header.body.signature")]
-    InvalidJwt,
-    #[error("failed to decode JWT from base64 encoding: {0}")]
-    DecodeFromB64(#[from] DecodeError),
-    #[error("failed to deserialize JWT from base64 encoding: {0}")]
-    DeserializeJwt(#[from] serde_json::Error),
-}
+    fn validate_jwt(
+        &self,
+        token_name: String,
+        jwt: &str,
+    ) -> Result<ValidatedJwt, ValidateJwtError> {
+        let decoded_jwt = decode_jwt(jwt)?;
 
-fn decode_without_validation(jwt: &str) -> Result<TokenClaims, DecodeJwtError> {
-    let parts = jwt.split(".").collect::<Vec<&str>>();
-    if parts.len() != 3 {
-        return Err(DecodeJwtError::InvalidJwt);
+        if !self.validate_jwt_signatures {
+            // The users of the validated JWT will need a reference to the TrustedIssuer
+            // to do some processing so we include it here for convenience
+            let issuer_ref = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
+            return Ok(ValidatedJwt {
+                claims: decoded_jwt.claims.inner,
+                trusted_iss: issuer_ref,
+            });
+        }
+
+        // Get decoding key
+        let decoding_key_info = decoded_jwt.decoding_key_info();
+        let decoding_key = self
+            .key_service
+            .get_key(&decoding_key_info)
+            .ok_or(ValidateJwtError::MissingValidationKey)?;
+
+        // get validator
+        let validator_key = ValidatorKey {
+            iss: decoded_jwt.iss().map(|x| x.to_string()),
+            token_name,
+            algorithm: decoded_jwt.header.alg,
+        };
+        let validator =
+            self.validators
+                .get(&validator_key)
+                .ok_or(ValidateJwtError::MissingValidator(
+                    decoded_jwt.iss().map(|s| s.to_string()),
+                ))?;
+
+        // validate JWT
+        let mut validated_jwt = validator.validate_jwt(jwt, decoding_key)?;
+
+        // The users of the validated JWT will need a reference to the TrustedIssuer
+        // to do some processing so we include it here for convenience
+        validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
+
+        return Ok(validated_jwt);
     }
-    let decoded = &BASE64_STANDARD_NO_PAD.decode(parts[1])?;
-    Ok(serde_json::from_slice::<TokenClaims>(decoded)?)
+
+    /// Use the `iss` claim of a token to retrieve a reference to a [`TrustedIssuer`]
+    #[inline]
+    fn get_issuer_ref(&self, iss: &str) -> Option<&TrustedIssuer> {
+        self.trusted_issuers
+            .as_ref()
+            .and_then(|issuers| issuers.get(iss))
+    }
+}
+
+fn init_jwt_validators(
+    config: &JwtConfig,
+    issuers: &HashMap<String, TrustedIssuer>,
+    logger: Option<Logger>,
+) -> HashMap<ValidatorKey, JwtValidator> {
+    let mut validators = HashMap::default();
+
+    for iss in issuers.values() {
+        // TODO: it's better to get the OIDC and get the issuer there
+        let origin = iss.oidc_endpoint.origin().ascii_serialization();
+
+        for (token_name, metadata) in iss.token_metadata.iter() {
+            if !metadata.trusted {
+                if let Some(logger) = logger.as_ref() {
+                    logger.log_any(JwtLogEntry::system(format!(
+                    "skipping metadata for '{token_name}' from '{origin}' since `trusted == false`"
+                )));
+                }
+                continue;
+            }
+
+            for algorithm in config.signature_algorithms_supported.iter().copied() {
+                let (validator, key) = JwtValidator::new(
+                    Some(origin.clone()),
+                    token_name.clone(),
+                    metadata,
+                    algorithm,
+                );
+                validators.insert(key, validator);
+            }
+        }
+    }
+
+    validators
+}
+
+#[derive(Debug, Hash, Eq, PartialEq)]
+// TODO: using strings here that we need to clone might be expensive, 
+// we should find an alternative
+pub struct ValidatorKey {
+    iss: Option<String>,
+    token_name: String,
+    algorithm: Algorithm,
 }
 
 #[cfg(test)]

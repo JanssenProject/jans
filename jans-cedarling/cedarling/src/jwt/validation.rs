@@ -3,155 +3,33 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-mod config;
-mod decode;
-#[cfg(test)]
-mod test;
+use std::collections::HashSet;
 
-use std::collections::{HashMap, HashSet};
-use std::sync::Arc;
-
+use super::decode::*;
 use super::key_service::DecodingKeyInfo;
-use super::key_service::KeyService;
-use super::log_entry::JwtLogEntry;
+use super::*;
 use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
-use crate::log::Logger;
-use crate::{JwtConfig, LogWriter};
-use decode::*;
 use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
 use serde::Deserialize;
 use serde_json::Value;
 
-type IssuerId = String;
-type TokenClaims = Value;
-
-/// Manages initialized validators
-pub struct JwtValidationService {
-    validators: HashMap<ValidatorKey, JwtValidator>,
-    key_service: Arc<KeyService>,
-    validate_jwt_signatures: bool,
-    trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
-}
-
-#[derive(Debug, Hash, Eq, PartialEq)]
-pub struct ValidatorKey {
-    iss: Option<String>,
-    token_name: String,
-    algorithm: Algorithm,
-}
-
-impl JwtValidationService {
-    pub fn new(
-        config: &JwtConfig,
-        trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
-        key_service: KeyService,
-        logger: Option<Logger>,
-    ) -> Self {
-        // we make a map of <jwt_iss_claim, TrustedIssuer>
-        // where jwt_iss_claim is what we expect to find in the `iss` claim of the JWTs
-        // from the given issuer
-        let trusted_issuers = trusted_issuers.map(|issuers| {
-            issuers
-                .into_values()
-                .map(|iss| {
-                    // TODO: here, we are relying on the IDP to use it's own domain
-                    // for the issued tokens. We might need to fetch the openid config
-                    // in the future and use the `issuer` field to support more funky IDPs.
-                    let jwt_iss_claim = iss.oidc_endpoint.origin().ascii_serialization();
-                    (jwt_iss_claim, iss)
-                })
-                .collect::<HashMap<String, TrustedIssuer>>()
-        });
-        let key_service = Arc::new(key_service);
-
-        let mut validators = HashMap::default();
-        if let Some(issuers) = trusted_issuers.as_ref() {
-            for iss in issuers.values() {
-                init_validators_for_iss(&mut validators, config, iss, logger.clone());
-            }
-        }
-
-        Self {
-            validators,
-            key_service,
-            validate_jwt_signatures: config.jwt_sig_validation,
-            trusted_issuers,
-        }
-    }
-
-    pub fn validate_jwt(
-        &self,
-        token_name: String,
-        jwt: &str,
-    ) -> Result<ValidatedJwt, ValidateJwtError> {
-        let decoded_jwt = decode_jwt(jwt)?;
-
-        if !self.validate_jwt_signatures {
-            // The users of the validated JWT will need a reference to the TrustedIssuer
-            // to do some processing so we include it here for convenience
-            let issuer_ref = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
-            return Ok(ValidatedJwt {
-                claims: decoded_jwt.claims.inner,
-                trusted_iss: issuer_ref,
-            });
-        }
-
-        // Get decoding key
-        let decoding_key_info = decoded_jwt.decoding_key_info();
-        let decoding_key = self
-            .key_service
-            .get_key(&decoding_key_info)
-            .ok_or(ValidateJwtError::MissingValidationKey)?;
-
-        // get validator
-        let validator_key = ValidatorKey {
-            iss: decoded_jwt.iss().map(|x| x.to_string()),
-            token_name,
-            algorithm: decoded_jwt.header.alg,
-        };
-        let validator =
-            self.validators
-                .get(&validator_key)
-                .ok_or(ValidateJwtError::MissingValidator(
-                    decoded_jwt.iss().map(|s| s.to_string()),
-                ))?;
-
-        // validate JWT
-        let mut validated_jwt = validator.validate_jwt(jwt, decoding_key)?;
-
-        // The users of the validated JWT will need a reference to the TrustedIssuer
-        // to do some processing so we include it here for convenience
-        validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
-
-        return Ok(validated_jwt);
-    }
-
-    /// Uses the `iss` claim of a token to retrieve a reference to a [`TrustedIssuer`]
-    #[inline]
-    fn get_issuer_ref(&self, iss: &str) -> Option<&TrustedIssuer> {
-        self.trusted_issuers
-            .as_ref()
-            .and_then(|issuers| issuers.get(iss))
-    }
-}
-
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct ValidatedJwt<'a> {
     #[serde(flatten)]
-    pub claims: TokenClaims,
+    pub claims: Value,
     #[serde(skip)]
     pub trusted_iss: Option<&'a TrustedIssuer>,
 }
 
 /// This struct is a wrapper over [`jsonwebtoken::Validation`] which implements an
 /// additional check for requiring custom JWT claims.
-struct JwtValidator {
+pub struct JwtValidator {
     validation: Validation,
     required_claims: HashSet<Box<str>>,
 }
 
 impl JwtValidator {
-    fn new(
+    pub fn new(
         iss: Option<String>,
         token_name: String,
         token_metadata: &TokenEntityMetadata,
@@ -188,7 +66,7 @@ impl JwtValidator {
         (validator, key)
     }
 
-    fn validate_jwt(
+    pub fn validate_jwt(
         &self,
         jwt: &str,
         decoding_key: &DecodingKey,
@@ -208,38 +86,6 @@ impl JwtValidator {
         }
 
         return Ok(validated_jwt);
-    }
-}
-
-/// Initializes the necessary JWT validators for the given issuer
-fn init_validators_for_iss(
-    validators: &mut HashMap<ValidatorKey, JwtValidator>,
-    config: &JwtConfig,
-    iss: &TrustedIssuer,
-    logger: Option<Logger>,
-) {
-    // TODO: it's better to get the OIDC and get the issuer there
-    let origin = iss.oidc_endpoint.origin().ascii_serialization();
-
-    for (token_name, metadata) in iss.token_metadata.iter() {
-        if !metadata.trusted {
-            if let Some(logger) = logger.as_ref() {
-                logger.log_any(JwtLogEntry::system(format!(
-                    "skipping metadata for '{token_name}' from '{origin}' since `trusted == false`"
-                )));
-            }
-            continue;
-        }
-
-        for algorithm in config.signature_algorithms_supported.iter().copied() {
-            let (validator, key) = JwtValidator::new(
-                Some(origin.clone()),
-                token_name.clone(),
-                metadata,
-                algorithm,
-            );
-            validators.insert(key, validator);
-        }
     }
 }
 
@@ -278,4 +124,286 @@ pub enum ValidateJwtError {
     ValidateJwt(#[from] jwt::errors::Error),
     #[error("validation failed since the JWT is missing the following required claims: {0:#?}")]
     MissingClaims(Vec<Box<str>>),
+}
+
+#[cfg(test)]
+mod test {
+    use std::collections::HashSet;
+    use std::sync::LazyLock;
+
+    use jsonwebtoken::Algorithm;
+    use serde_json::json;
+    use test_utils::assert_eq;
+
+    use super::super::test_utils::*;
+    use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata};
+    use crate::jwt::validation::{JwtValidator, ValidateJwtError, ValidatedJwt};
+
+    #[track_caller]
+    fn generate_keys() -> KeyPair {
+        let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
+        keys
+    }
+
+    static TEST_TKN_ENTITY_METADATA: LazyLock<TokenEntityMetadata> =
+        LazyLock::new(|| TokenEntityMetadata {
+            trusted: true,
+            entity_type_name: "Jans::AccessToken".into(),
+            principal_mapping: HashSet::new(),
+            token_id: "jti".into(),
+            user_id: None,
+            role_mapping: None,
+            workload_id: None,
+            claim_mapping: ClaimMappings::default(),
+            required_claims: HashSet::from(["exp".into(), "nbf".into()]),
+        });
+
+    #[test]
+    fn can_decode_jwt_without_sig_validation() {
+        let keys = generate_keys();
+        let iss = "127.0.0.1".to_string();
+
+        // Generate token
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "name": "John Doe",
+            "iat": 1516239022,
+            "exp": u64::MAX,
+            "nbf": u64::MIN,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        let (validator, _) = JwtValidator::new(
+            Some(iss),
+            "access_token".into(),
+            &TEST_TKN_ENTITY_METADATA,
+            Algorithm::HS256,
+        );
+
+        let result = validator
+            .validate_jwt(&token, &decoding_key)
+            .expect("should validate JWT");
+
+        let expected = ValidatedJwt {
+            claims,
+            trusted_iss: None,
+        };
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn decoding_errors_if_token_is_expired_when_without_sig_validation() {
+        let iss = "127.0.0.1".to_string();
+        let keys = generate_keys();
+
+        // Generate token
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "name": "John Doe",
+            "iat": 1516239022,
+            "exp": 0,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
+        tkn_entity_metadata.required_claims = HashSet::from(["exp".into()]);
+        let (validator, _) = JwtValidator::new(
+            Some(iss),
+            "access_token".into(),
+            &TEST_TKN_ENTITY_METADATA,
+            Algorithm::HS256,
+        );
+
+        let err = validator
+            .validate_jwt(&token, &decoding_key)
+            .expect_err("should error due to expired JWT");
+
+        assert!(matches!(err, ValidateJwtError::ValidateJwt(ref e)
+            if *e.kind() == jsonwebtoken::errors::ErrorKind::ExpiredSignature
+        ));
+    }
+
+    #[test]
+    fn can_decode_and_validate_jwt() {
+        let iss = "127.0.0.1".to_string();
+        let keys = generate_keys();
+
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "name": "John Doe",
+            "iat": 0,
+            "nbf": 10,
+            "exp": u64::MAX,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        let (validator, _) = JwtValidator::new(
+            Some(iss),
+            "access_token".into(),
+            &TEST_TKN_ENTITY_METADATA,
+            Algorithm::HS256,
+        );
+
+        let result = validator
+            .validate_jwt(&token, &decoding_key)
+            .expect("Should successfully process JWT");
+
+        let expected = ValidatedJwt {
+            claims,
+            trusted_iss: None,
+        };
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn errors_on_expired_token() {
+        let iss = "127.0.0.1".to_string();
+        let keys = generate_keys();
+
+        // Generate token
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "name": "John Doe",
+            "iat": 1516239022,
+            "exp": 0,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
+        tkn_entity_metadata.required_claims = HashSet::from(["exp".into(), "nbf".into()]);
+        let (validator, _) = JwtValidator::new(
+            Some(iss),
+            "access_token".into(),
+            &TEST_TKN_ENTITY_METADATA,
+            Algorithm::HS256,
+        );
+
+        let err = validator
+            .validate_jwt(&token, &decoding_key)
+            .expect_err("should error when validating JWT");
+
+        assert!(
+            matches!(
+                err,
+                ValidateJwtError::ValidateJwt(ref e)
+                    if *e.kind() == jsonwebtoken::errors::ErrorKind::ExpiredSignature
+            ),
+            "expected validation to fail due to the token being expired."
+        );
+    }
+
+    #[test]
+    fn errors_on_immature_token() {
+        let iss = "127.0.0.1".to_string();
+        let keys = generate_keys();
+
+        // Generate token
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "name": "John Doe",
+            "iat": 1516239022,
+            "nbf": u64::MAX,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        let (validator, _) = JwtValidator::new(
+            Some(iss),
+            "access_token".into(),
+            &TEST_TKN_ENTITY_METADATA,
+            Algorithm::HS256,
+        );
+
+        let err = validator
+            .validate_jwt(&token, &decoding_key)
+            .expect_err("should error when validating JWT");
+
+        assert!(
+            matches!(
+                err,
+                ValidateJwtError::ValidateJwt(ref e)
+                    if *e.kind() == jsonwebtoken::errors::ErrorKind::ImmatureSignature
+            ),
+            "expected validation to fail due to the token being immature."
+        );
+    }
+
+    #[test]
+    fn can_check_missing_claims() {
+        let iss = "127.0.0.1".to_string();
+        let keys = generate_keys();
+
+        // Generate token
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "name": "John Doe",
+            "iat": 1516239022,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        // Base case where all required claims are present
+        let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
+        tkn_entity_metadata.required_claims =
+            HashSet::from(["sub", "name", "iat"].map(|x| x.into()));
+        let (validator, _) = JwtValidator::new(
+            Some(iss.clone()),
+            "access_token".into(),
+            &tkn_entity_metadata,
+            Algorithm::HS256,
+        );
+
+        let result = validator
+            .validate_jwt(&token, &decoding_key)
+            .expect("Should process JWT successfully");
+
+        let expected = ValidatedJwt {
+            claims,
+            trusted_iss: None,
+        };
+
+        assert_eq!(result, expected);
+
+        // Error case where `nbf` is missing from the token.
+        let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
+        tkn_entity_metadata.required_claims =
+            HashSet::from(["sub", "name", "iat", "nbf"].map(|x| x.into()));
+        let (validator, _) = JwtValidator::new(
+            Some(iss.clone()),
+            "access_token".into(),
+            &tkn_entity_metadata,
+            Algorithm::HS256,
+        );
+
+        let err = validator
+            .validate_jwt(&token, &decoding_key)
+            .expect_err("expected an error while validating the JWT");
+
+        assert!(
+            matches!(
+            err,
+            ValidateJwtError::MissingClaims(missing_claims)
+                if missing_claims == ["nbf"].map(|s| s.into())
+            ),
+            "expected an error due to missing `nbf` claim"
+        );
+    }
 }

@@ -38,8 +38,19 @@ where
 }
 
 /// Manages JSON Web Keys (JWKs) used for decoding JWTs.
-// TODO: some IDPs might rotate their keys so we need to figure out a way to keep
-// the keys updated.
+///
+/// ## TODO
+///
+/// We still need to figure out a reliable way to handle rotating out expired keys.
+///
+/// the Jans Auth Server adds a custom `exp` field to the JWK but it's not really
+/// a standard approach yet as per [`RFC 7517 v41`] so some IDPs will might not follow
+/// the same convention. Thus, we shouldn't rely on it yet for rotating keys.
+///
+/// A naive first solution might be to try fetching a new key if validation fails
+/// but this could be abused if someone just kept sending invalid JWTs.
+///
+/// [`RFC 7517 v41`]: https://datatracker.ietf.org/doc/html/draft-ietf-jose-json-web-key-41
 #[derive(Default)]
 pub struct KeyService {
     keys: HashMap<DecodingKeyInfo, DecodingKey>,

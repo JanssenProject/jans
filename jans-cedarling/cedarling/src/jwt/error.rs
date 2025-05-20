@@ -3,7 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::DecodeJwtError;
 use super::key_service;
 use super::validation::ValidateJwtError;
 
@@ -11,8 +10,6 @@ use super::validation::ValidateJwtError;
 pub enum JwtProcessingError {
     #[error("Failed to deserialize from Value to String: {0}")]
     StringDeserialization(#[from] serde_json::Error),
-    #[error("error while trying to parse issuer from token: {0}")]
-    GetIss(#[from] DecodeJwtError),
     #[error("failed to validate '{0}' token: {1}")]
     ValidateJwt(String, ValidateJwtError),
 }
