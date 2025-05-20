@@ -40,10 +40,6 @@ cp ./target/release/{build_file} ./bindings/cedarling-java/src/main/resources
  mvn clean install
 ```
 
-## Build  with dynamic linking
-
-WIP
-
 ## Recipes
 
 ### Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
