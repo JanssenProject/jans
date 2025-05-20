@@ -19,13 +19,13 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
    ```bash
    cargo build --release
    ```
-   In `target/release`, you should find the `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file, depending on the operating system you are using.
+   In `target/release`, you should find the `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file, depending on the operating system you are using.
 
    - **.so** (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.
    - **.dylib** (Dynamic Library) – This is the shared library format for macOS.
    - **.dll** (Dynamic Link Library) - The shared library format used in Windows.
 
-3. Generate the bindings for Swift by running the command below. Replace `{build_file}` with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/release`.
+3. Generate the bindings for Swift by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
    ```bash
    cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language swift --out-dir ./bindings/cedarling_uniffi/output
    ```
@@ -40,13 +40,13 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
    cargo build --release --target=aarch64-apple-ios-sim
    cargo build --release --target=aarch64-apple-ios
    ```
-   You should have two binaries `target/aarch64-apple-ios-sim/release/libmobile.a` and `target/aarch64-apple-ios/release/libmobile.a`.
+   You should have two binaries `target/aarch64-apple-ios-sim/release/libcedarling_uniffi.a` and `target/aarch64-apple-ios/release/libcedarling_uniffi.a`.
 
 6. The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/mobileFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap. Then, we can create the XCFramework:
    ```bash
    xcodebuild -create-xcframework \
-           -library ./target/aarch64-apple-ios-sim/release/libmobile.a -headers ./bindings/cedarling_uniffi/output \
-           -library ./target/aarch64-apple-ios/release/libmobile.a -headers ./bindings/cedarling_uniffi/output \
+           -library ./target/aarch64-apple-ios-sim/release/libcedarling_uniffi.a -headers ./bindings/cedarling_uniffi/output \
+           -library ./target/aarch64-apple-ios/release/libcedarling_uniffi.a -headers ./bindings/cedarling_uniffi/output \
            -output "ios/Mobile.xcframework"
    ```
 
