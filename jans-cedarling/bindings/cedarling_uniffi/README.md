@@ -16,7 +16,7 @@ Read [this article](https://medium.com/@arnab.bdutta/janssen-cedarling-uniffi-bi
 1. Build the library:
 
 ```bash
-cargo build --release
+cargo build -r -p cedarling_uniffi
 ```
 
 In `target/release`, you should find the `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file, depending on the operating system you are using.
@@ -46,7 +46,7 @@ cargo build --release --target=aarch64-apple-ios
 
 You should have two binaries target/aarch64-apple-ios-sim/release/libcedarling_uniffi.a and target/aarch64-apple-ios/release/libcedarling_uniffi.a.
 
-5. The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/mobileFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap.
+5. The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/cedarling_uniffiFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap.
 
 Then, we can create the XCFramework:
 
@@ -57,7 +57,7 @@ xcodebuild -create-xcframework \
         -output "ios/Mobile.xcframework"
 ```
 
-6. Open ./jans-cedarling/bindings/cedarling_uniffi/iOSApp in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings bindings/output/mobile.swift files into your project (drag and drop should work).
+6. Open ./jans-cedarling/bindings/cedarling_uniffi/iOSApp in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings bindings/output/cedarling_uniffi.swift files into your project (drag and drop should work).
 
 7. Run iOS project on simulator.
 
@@ -73,7 +73,7 @@ xcodebuild -create-xcframework \
 1. Build the library:
 
 ```bash
-cargo build --release
+cargo build -r -p cedarling_uniffi
 ```
 
 In `target/release`, you should find the `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file, depending on the operating system you are using.
@@ -137,7 +137,7 @@ Here we delve into the process of generating the Kotlin binding for cedarling an
 1. Build Cedarling:
 
 ```bash
-cargo build --release
+cargo build -r -p cedarling_uniffi
 ```
 In `target/release`, you should find the `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file, depending on the operating system you are using.
 

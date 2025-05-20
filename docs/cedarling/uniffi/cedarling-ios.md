@@ -17,7 +17,7 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
 
 2. Build the library:
    ```bash
-   cargo build --release
+   cargo build -r -p cedarling_uniffi
    ```
    In `target/release`, you should find the `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file, depending on the operating system you are using.
 
@@ -42,7 +42,7 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
    ```
    You should have two binaries `target/aarch64-apple-ios-sim/release/libcedarling_uniffi.a` and `target/aarch64-apple-ios/release/libcedarling_uniffi.a`.
 
-6. The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/mobileFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap. Then, we can create the XCFramework:
+6. The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/cedarling_uniffiFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap. Then, we can create the XCFramework:
    ```bash
    xcodebuild -create-xcframework \
            -library ./target/aarch64-apple-ios-sim/release/libcedarling_uniffi.a -headers ./bindings/cedarling_uniffi/output \
@@ -50,7 +50,7 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
            -output "ios/Mobile.xcframework"
    ```
 
-7. Open `./jans-cedarling/bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings `bindings/output/mobile.swift` files into your project (drag and drop should work).
+7. Open `./jans-cedarling/bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings `bindings/output/cedarling_uniffi.swift` files into your project (drag and drop should work).
 
 8. Run iOS project on simulator.
 

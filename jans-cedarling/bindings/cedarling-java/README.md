@@ -17,7 +17,7 @@ If you are using pre-built binaries from the [Jans releases page](https://github
 1. Build Cedarling by executing below command from `./jans/jans-cedarling` of cloned jans project:
 
 ```bash
-cargo build --release
+cargo build -r -p cedarling_uniffi
 ```
 In `target/release`, you should find the `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file, depending on the operating system you are using.
 
