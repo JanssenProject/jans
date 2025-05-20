@@ -15,8 +15,6 @@ mod decode;
 mod error;
 mod key_service;
 mod log_entry;
-#[allow(dead_code)]
-mod status_list_service;
 mod token;
 mod validation;
 mod validator_store;
