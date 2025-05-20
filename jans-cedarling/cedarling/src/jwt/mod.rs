@@ -19,29 +19,30 @@ mod log_entry;
 mod status_list_service;
 mod token;
 mod validation;
+mod validator_store;
 
 #[cfg(test)]
 #[allow(dead_code)]
 mod test_utils;
+
+pub use error::*;
+pub use token::{Token, TokenClaimTypeError, TokenClaims};
 
 use crate::JwtConfig;
 use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
 use decode::*;
-use jsonwebtoken::Algorithm;
 use key_service::*;
 use log_entry::*;
 use std::collections::HashMap;
 use std::sync::Arc;
 use validation::*;
-
-pub use error::*;
-pub use token::{Token, TokenClaimTypeError, TokenClaims};
+use validator_store::*;
 
 /// Handles JWT validation
 pub struct JwtService {
-    validators: HashMap<ValidatorKey, JwtValidator>,
+    validators: ValidatorStore,
     key_service: Arc<KeyService>,
     validate_jwt_signatures: bool,
     trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
@@ -167,9 +168,9 @@ impl JwtService {
             .ok_or(ValidateJwtError::MissingValidationKey)?;
 
         // get validator
-        let validator_key = ValidatorKey {
-            iss: decoded_jwt.iss().map(|x| x.to_string()),
-            token_name,
+        let validator_key = ValidatorInfo {
+            iss: decoded_jwt.iss(),
+            token_name: &token_name,
             algorithm: decoded_jwt.header.alg,
         };
         let validator =
@@ -202,8 +203,8 @@ fn init_jwt_validators(
     config: &JwtConfig,
     issuers: &HashMap<String, TrustedIssuer>,
     logger: Option<Logger>,
-) -> HashMap<ValidatorKey, JwtValidator> {
-    let mut validators = HashMap::default();
+) -> ValidatorStore {
+    let mut validators = ValidatorStore::default();
 
     for iss in issuers.values() {
         // TODO: it's better to get the OIDC and get the issuer there
@@ -220,27 +221,14 @@ fn init_jwt_validators(
             }
 
             for algorithm in config.signature_algorithms_supported.iter().copied() {
-                let (validator, key) = JwtValidator::new(
-                    Some(origin.clone()),
-                    token_name.clone(),
-                    metadata,
-                    algorithm,
-                );
+                let (validator, key) =
+                    JwtValidator::new(Some(&origin), &token_name, metadata, algorithm);
                 validators.insert(key, validator);
             }
         }
     }
 
     validators
-}
-
-#[derive(Debug, Hash, Eq, PartialEq)]
-// TODO: using strings here that we need to clone might be expensive, 
-// we should find an alternative
-pub struct ValidatorKey {
-    iss: Option<String>,
-    token_name: String,
-    algorithm: Algorithm,
 }
 
 #[cfg(test)]

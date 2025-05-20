@@ -23,18 +23,19 @@ pub struct ValidatedJwt<'a> {
 
 /// This struct is a wrapper over [`jsonwebtoken::Validation`] which implements an
 /// additional check for requiring custom JWT claims.
+#[derive(Debug, PartialEq, Clone)]
 pub struct JwtValidator {
     validation: Validation,
     required_claims: HashSet<Box<str>>,
 }
 
 impl JwtValidator {
-    pub fn new(
-        iss: Option<String>,
-        token_name: String,
+    pub fn new<'a>(
+        iss: Option<&'a str>,
+        token_name: &'a str,
         token_metadata: &TokenEntityMetadata,
         algorithm: Algorithm,
-    ) -> (Self, ValidatorKey) {
+    ) -> (Self, ValidatorInfo<'a>) {
         let mut validation = Validation::new(algorithm);
         validation.validate_exp = token_metadata.required_claims.contains("exp");
         validation.validate_nbf = token_metadata.required_claims.contains("nbf");
@@ -52,7 +53,7 @@ impl JwtValidator {
             .map(|s| s.into_boxed_str())
             .collect();
 
-        let key = ValidatorKey {
+        let key = ValidatorInfo {
             iss,
             token_name,
             algorithm,
@@ -161,7 +162,7 @@ mod test {
     #[test]
     fn can_decode_jwt_without_sig_validation() {
         let keys = generate_keys();
-        let iss = "127.0.0.1".to_string();
+        let iss = "127.0.0.1";
 
         // Generate token
         let claims = json!({
@@ -197,7 +198,7 @@ mod test {
 
     #[test]
     fn decoding_errors_if_token_is_expired_when_without_sig_validation() {
-        let iss = "127.0.0.1".to_string();
+        let iss = "127.0.0.1";
         let keys = generate_keys();
 
         // Generate token
@@ -232,7 +233,7 @@ mod test {
 
     #[test]
     fn can_decode_and_validate_jwt() {
-        let iss = "127.0.0.1".to_string();
+        let iss = "127.0.0.1";
         let keys = generate_keys();
 
         let claims = json!({
@@ -268,7 +269,7 @@ mod test {
 
     #[test]
     fn errors_on_expired_token() {
-        let iss = "127.0.0.1".to_string();
+        let iss = "127.0.0.1";
         let keys = generate_keys();
 
         // Generate token
@@ -308,7 +309,7 @@ mod test {
 
     #[test]
     fn errors_on_immature_token() {
-        let iss = "127.0.0.1".to_string();
+        let iss = "127.0.0.1";
         let keys = generate_keys();
 
         // Generate token
@@ -346,7 +347,7 @@ mod test {
 
     #[test]
     fn can_check_missing_claims() {
-        let iss = "127.0.0.1".to_string();
+        let iss = "127.0.0.1";
         let keys = generate_keys();
 
         // Generate token
@@ -365,7 +366,7 @@ mod test {
         tkn_entity_metadata.required_claims =
             HashSet::from(["sub", "name", "iat"].map(|x| x.into()));
         let (validator, _) = JwtValidator::new(
-            Some(iss.clone()),
+            Some(iss),
             "access_token".into(),
             &tkn_entity_metadata,
             Algorithm::HS256,
@@ -387,7 +388,7 @@ mod test {
         tkn_entity_metadata.required_claims =
             HashSet::from(["sub", "name", "iat", "nbf"].map(|x| x.into()));
         let (validator, _) = JwtValidator::new(
-            Some(iss.clone()),
+            Some(iss),
             "access_token".into(),
             &tkn_entity_metadata,
             Algorithm::HS256,
