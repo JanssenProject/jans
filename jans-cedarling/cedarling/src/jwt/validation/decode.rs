@@ -35,7 +35,7 @@ pub struct DecodedJwtHeader {
 #[derive(Debug, Deserialize, PartialEq)]
 pub struct DecodedJwtClaims {
     #[serde(flatten)]
-    pub claims: Value,
+    pub inner: Value,
 }
 
 pub fn decode_jwt(jwt: &str) -> Result<DecodedJwt, DecodeJwtError> {
@@ -95,7 +95,7 @@ mod test {
                     kid: None,
                 },
                 claims: DecodedJwtClaims {
-                    claims: json!({
+                    inner: json!({
                         "sub": "1234567890",
                         "name": "John Doe",
                         "iat": 1516239022,

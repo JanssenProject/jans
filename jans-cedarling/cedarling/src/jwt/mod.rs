@@ -17,7 +17,7 @@ mod key_service;
 mod log_entry;
 mod status_list_service;
 mod token;
-mod validator;
+mod validation;
 
 #[cfg(test)]
 #[allow(dead_code)]
@@ -32,16 +32,16 @@ use base64::Engine;
 use base64::prelude::*;
 use key_service::*;
 use log_entry::*;
-use std::collections::{HashMap, HashSet};
-use std::sync::Arc;
-use validator::{JwtValidator, JwtValidatorConfig};
+use std::collections::HashMap;
+use validation::JwtValidationService;
+use validation::ValidateJwtError;
 
 pub use error::*;
-pub use jsonwebtoken::Algorithm;
 pub use token::{Token, TokenClaimTypeError, TokenClaims};
 
 pub struct JwtService {
-    validators: HashMap<ValidatorId, JwtValidator>,
+    // validators: HashMap<ValidatorId, JwtValidator>,
+    validation_service: JwtValidationService,
     logger: Option<Logger>,
 }
 
@@ -75,57 +75,13 @@ impl JwtService {
             }
         }
 
-        let key_service = Arc::new(key_service);
+        let validation_service =
+            JwtValidationService::new(config, trusted_issuers, key_service, logger.clone());
 
-        // prepare shared configs
-        let sig_validation = config.jwt_sig_validation;
-        let status_validation: Arc<_> = config.jwt_status_validation.into();
-        let trusted_issuers = trusted_issuers.map(|iss| Arc::new(iss.clone()));
-        let algs_supported: Arc<HashSet<Algorithm>> =
-            config.signature_algorithms_supported.clone().into();
-
-        let mut validators = HashMap::new();
-        if let Some(issuers) = trusted_issuers.as_ref() {
-            for iss in issuers.values() {
-                let origin = iss.oidc_endpoint.origin().ascii_serialization();
-                for (tkn, metadata) in iss.token_metadata.iter() {
-                    if !metadata.trusted {
-                        if let Some(logger) = logger.as_ref() {
-                            logger.log_any(JwtLogEntry::system(format!(
-                                "skipping metadata for {tkn} since `trusted == false`"
-                            )));
-                        }
-                        continue;
-                    }
-
-                    let required_claims = metadata.required_claims.clone();
-                    let validate_exp = required_claims.contains("exp");
-                    let validate_nbf = required_claims.contains("nbf");
-                    let validator = JwtValidator::new(
-                        JwtValidatorConfig {
-                            sig_validation,
-                            status_validation: status_validation.clone(),
-                            trusted_issuers: trusted_issuers.clone(),
-                            algs_supported: algs_supported.clone(),
-                            required_claims: required_claims
-                                .into_iter()
-                                .map(|x| x.into_boxed_str())
-                                .collect(),
-                            validate_exp,
-                            validate_nbf,
-                        },
-                        key_service.clone(),
-                    );
-                    let id = ValidatorId {
-                        iss: Some(origin.clone()),
-                        token_name: tkn.clone(),
-                    };
-                    validators.insert(id, validator);
-                }
-            }
-        }
-
-        Ok(Self { validators, logger })
+        Ok(Self {
+            validation_service,
+            logger,
+        })
     }
 
     /// Helper for making [`crate::LogType::System`] logs.
@@ -141,37 +97,22 @@ impl JwtService {
     ) -> Result<HashMap<String, Token<'a>>, JwtProcessingError> {
         let mut validated_tokens = HashMap::new();
         for (token_name, jwt) in tokens.iter() {
-            // we do a deserialization here to get the issuer since we use
-            // it to store the validators but the validators do another
-            // deserialization so we are doing that operation twice,
-            //
-            // can't really easily fix this right now since the jsonwebtoken
-            // crate doesn't support validation without deserialization.
-            let claims = decode_without_validation(jwt)?;
-            let iss = claims
-                .get_claim("iss")
-                .and_then(|x| x.as_str().ok().map(|x| x.to_string()));
+            let validation_result = self
+                .validation_service
+                .validate_jwt(token_name.clone(), jwt);
 
-            let validator_id = ValidatorId {
-                iss: iss.clone(),
-                token_name: token_name.clone(),
-            };
-            let validator = if let Some(validator) = self.validators.get(&validator_id) {
-                validator
-            } else {
-                // we just ignore input tokens that are not defined
-                // in the policy store's tokens
-                if let Some(iss) = iss {
-                    self.system_log(format!(
-                        "ignoring {token_name} since it's from an untrusted issuer: '{iss}'"
-                    ));
+            let Ok(validated_jwt) = validation_result else {
+                match validation_result.unwrap_err() {
+                    ValidateJwtError::MissingValidator(iss) => {
+                        self.system_log(format!(
+                            "ignoring {token_name} since it's from an untrusted issuer: '{iss:?}'"
+                        ));
+                        continue;
+                    },
+                    err => return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err)),
                 }
-                continue;
             };
 
-            let validated_jwt = validator
-                .validate_jwt(jwt)
-                .map_err(|e| JwtProcessingError::ValidateJwt(token_name.to_string(), e))?;
             let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
                 .map_err(JwtProcessingError::StringDeserialization)?;
             validated_tokens.insert(

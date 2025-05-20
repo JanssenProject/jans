@@ -5,7 +5,7 @@
 
 use super::DecodeJwtError;
 use super::key_service;
-use super::validator::ValidateJwtError;
+use super::validation::ValidateJwtError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum JwtProcessingError {

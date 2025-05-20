@@ -14,7 +14,7 @@ pub use error::*;
 
 use std::io::Read;
 
-use super::validator::ValidatedJwt;
+use super::validation::ValidatedJwt;
 use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
 use flate2::read::ZlibDecoder;
 use serde::Deserialize;

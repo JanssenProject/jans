@@ -28,7 +28,7 @@ pub struct JwtValidatorConfig {
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
     // TODO: implement token status validation
     #[allow(dead_code)]
-    pub status_validation: Arc<bool>,
+    pub status_validation: bool,
     /// List of trusted issuers used to check the JWT status.
     pub trusted_issuers: Option<Arc<HashMap<IssuerId, TrustedIssuer>>>,
     /// Algorithms supported as defined in the Bootstrap properties.
