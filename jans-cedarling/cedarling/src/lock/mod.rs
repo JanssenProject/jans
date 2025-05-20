@@ -14,7 +14,7 @@
 //! ## Architecture
 //! - Collects logs from the currently initialized [`logger`]
 //! - Uses a [`background worker`] for collecting nad batching logs before sending it to
-//! the lock server.
+//!     the lock server.
 //! - Handles Dynamic Client Registration (DCR) through [`register_client`]
 //! - Sends the collected logs to the lock server.
 //!
