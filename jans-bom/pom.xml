@@ -36,7 +36,7 @@
 		
 		<jakarta.ejb.api.version>4.0.1</jakarta.ejb.api.version>
 		<jakarta.mail.api.version>2.1.2</jakarta.mail.api.version>
-		<jakarta.mail.version>1.6.7</jakarta.mail.version>
+		<jakarta.mail.version>2.0.1</jakarta.mail.version>
 
 		<jakarta.websocket.api.version>2.1.0</jakarta.websocket.api.version>
 		<jakarta.xml.bind.api.version>3.0.1</jakarta.xml.bind.api.version>
@@ -343,6 +343,11 @@
 				<version>${jakarta.mail.api.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.eclipse.angus</groupId>
+				<artifactId>angus-mail</artifactId>
+				<version>2.0.3</version>
+			</dependency>
+			<dependency>
 				<groupId>com.sun.mail</groupId>
 				<artifactId>jakarta.mail</artifactId>
 				<version>${jakarta.mail.version}</version>
@@ -362,8 +367,8 @@
 			    <artifactId>jakarta.ws.rs-api</artifactId>
 			    <version>3.1.0</version>
 			</dependency>
-			
-		<!-- 	<dependency>
+
+			<!-- 	<dependency>
 				<groupId>javax.enterprise</groupId>
 				<artifactId>cdi-api</artifactId>
 				<version>2.0.SP1</version>
@@ -395,7 +400,7 @@
 				<artifactId>jsf-api</artifactId>
 				<version>${jsf-api.version}</version>
 			</dependency> -->
-			
+
 			<!-- glassfish -->	
 			<dependency>
     			<groupId>org.glassfish</groupId>
@@ -1071,5 +1076,4 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-
 </project>
