@@ -27,6 +27,7 @@ pub use error::*;
 pub use token::{Token, TokenClaimTypeError, TokenClaims};
 
 use crate::JwtConfig;
+use crate::LogLevel;
 use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
@@ -103,13 +104,6 @@ impl JwtService {
         })
     }
 
-    /// Helper for making [`crate::LogType::System`] logs.
-    fn system_log(&self, msg: String) {
-        if let Some(logger) = self.logger.as_ref() {
-            logger.log_any(JwtLogEntry::system(msg));
-        }
-    }
-
     pub async fn validate_tokens<'a>(
         &'a self,
         tokens: &'a HashMap<String, String>,
@@ -121,8 +115,11 @@ impl JwtService {
             let Ok(validated_jwt) = validation_result else {
                 match validation_result.unwrap_err() {
                     ValidateJwtError::MissingValidator(iss) => {
-                        self.system_log(format!(
-                            "ignoring {token_name} since it's from an untrusted issuer: '{iss:?}'"
+                        self.logger.log_any(JwtLogEntry::new(
+                            format!(
+                                "ignoring {token_name} since it's from an untrusted issuer: '{iss:?}'"
+                            ),
+                            Some(LogLevel::WARN),
                         ));
                         continue;
                     },
@@ -131,7 +128,15 @@ impl JwtService {
             };
 
             let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
+                .map_err(|err| {
+                    self.logger.log_any(JwtLogEntry::new(
+                        format!("failed to deserialize token claims: {err}"),
+                        Some(LogLevel::ERROR),
+                    ));
+                    err
+                })
                 .map_err(JwtProcessingError::StringDeserialization)?;
+
             validated_tokens.insert(
                 token_name.to_string(),
                 Token::new(token_name, claims, validated_jwt.trusted_iss),
@@ -210,11 +215,12 @@ fn init_jwt_validators(
 
         for (token_name, metadata) in iss.token_metadata.iter() {
             if !metadata.trusted {
-                if let Some(logger) = logger.as_ref() {
-                    logger.log_any(JwtLogEntry::system(format!(
-                    "skipping metadata for '{token_name}' from '{origin}' since `trusted == false`"
-                )));
-                }
+                logger.log_any(JwtLogEntry::new(
+                    format!(
+                        "skipping metadata for '{token_name}' from '{origin}' since `trusted == false`"
+                    ),
+                    Some(LogLevel::WARN),
+                ));
                 continue;
             }
 
