@@ -20,8 +20,6 @@ jobs:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
     - name: Install Rust
       uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
-      with:
-        components: clippy
     - name: Run Tests
       working-directory: jans-cedarling
       run: |
@@ -29,6 +27,7 @@ jobs:
     - name: Run Clippy on native target
       working-directory: jans-cedarling
       run: |
+        rustup component add clippy
         cargo clippy -- -Dwarnings
   wasm_tests:
     runs-on: ubuntu-latest
@@ -40,8 +39,6 @@ jobs:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
     - name: Install Rust
       uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
-      with:
-        components: clippy
     - name: Install WASM dependencies
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
     - name: Run WASM tests using chrome
@@ -55,6 +52,7 @@ jobs:
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
       run: |
+        rustup component add clippy
         cargo clippy --target wasm32-unknown-unknown -- -Dwarnings
   python_tests:
     runs-on: ubuntu-latest
@@ -89,8 +87,6 @@ jobs:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
     - name: Install Rust
       uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
-      with:
-        components: clippy
     - name: Install Golang dependencies
       uses: actions/setup-go@v5
       with:
@@ -98,6 +94,7 @@ jobs:
     - name: Run build rust artifacts
       working-directory: jans-cedarling/bindings/cedarling_go
       run: |
+        rustup component add clippy
         cargo build -r -p cedarling_go
         cp "../../target/release/libcedarling_go.so" "."
     - name: Install Go dependencies
