@@ -378,7 +378,7 @@ questions:
 - variable: auth-server-key-rotation.image.repository
   required: true
   type: string
-  default: "janssenproject/certmanager"
+  default: "janssenproject/cloudtools"
   description: "The Auth Server KeyRotation Image repository"
   label: Auth Server KeyRotation image repo
   group: "Images"
