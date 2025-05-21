@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.7.0](https://github.com/JanssenProject/jans/compare/v1.6.0...v1.7.0) (2025-05-20)
+
+
+### Features
+
+* **jans-auth-server:** added refresh token lifetime to Token Endpoint response [#11400](https://github.com/JanssenProject/jans/issues/11400) ([#11414](https://github.com/JanssenProject/jans/issues/11414)) ([00d7c88](https://github.com/JanssenProject/jans/commit/00d7c887a764263f6fd5ffc64bd85d635ee17399))
+* **jans-cedarling:** update plugin to use binding ([#11356](https://github.com/JanssenProject/jans/issues/11356)) ([c61ef53](https://github.com/JanssenProject/jans/commit/c61ef53c8310af9ed06bc4b8ee8b05af69d088d8))
+* **jans-cli-tui:** ssa templates ([#11368](https://github.com/JanssenProject/jans/issues/11368)) ([ed18096](https://github.com/JanssenProject/jans/commit/ed180962ee7f336b5742ef723b0bd8b9c3f9f7cb))
+* **jans-core:** add jakarta.mail for TLS support ([#11428](https://github.com/JanssenProject/jans/issues/11428)) ([8cf6b68](https://github.com/JanssenProject/jans/commit/8cf6b68bbdfd73d69008fd98eb94cdb041e1a2aa))
+* **jans-lock:** try to reload /.well-known/openid-configuration on f… ([#11392](https://github.com/JanssenProject/jans/issues/11392)) ([00e2257](https://github.com/JanssenProject/jans/commit/00e225724193a1572192a34e396bb9348b52e815))
+* **jans-lock:** try to reload /.well-known/openid-configuration on failure ([00e2257](https://github.com/JanssenProject/jans/commit/00e225724193a1572192a34e396bb9348b52e815))
+* use cedarling uniffi kotlin binding in java project ([#11336](https://github.com/JanssenProject/jans/issues/11336)) ([067b3c1](https://github.com/JanssenProject/jans/commit/067b3c1833c0a0cab840b222434a331c2d085b98))
+
+
+### Bug Fixes
+
+* **docs:** add Config API OpenAPI Spec generation at build time ([#11407](https://github.com/JanssenProject/jans/issues/11407)) ([70277c5](https://github.com/JanssenProject/jans/commit/70277c5be676492f58c059aff50092d7b5aa9d46))
+* **docs:** add sections to place ADRs and design decisions ([#11380](https://github.com/JanssenProject/jans/issues/11380)) ([4c0db93](https://github.com/JanssenProject/jans/commit/4c0db934a0c15ec4544c9b26da500fb743a54715))
+* **docs:** refactor development docs to add content from Wiki ([#11409](https://github.com/JanssenProject/jans/issues/11409)) ([71d133f](https://github.com/JanssenProject/jans/commit/71d133f6f6f366039913220061879bf774358335))
+* **docs:** update curl instructions for jans config api ([#11415](https://github.com/JanssenProject/jans/issues/11415)) ([39b6b82](https://github.com/JanssenProject/jans/commit/39b6b8215b65dadc9ef9a61ecf0b5c2b5dcf0c86))
+* **jans-cedarling:** fix logs in jwt module not getting displayed correctly ([#11369](https://github.com/JanssenProject/jans/issues/11369)) ([e856545](https://github.com/JanssenProject/jans/commit/e856545e45f4b23d1d0f2c437fe661fb9eeaa1ef))
+* **jans-cli-tui:** array type in auth properties ([#11399](https://github.com/JanssenProject/jans/issues/11399)) ([6e4d7e4](https://github.com/JanssenProject/jans/commit/6e4d7e41f7fba94c0cc275ea29cef4d5e93afff8))
+* **jans-cli-tui:** object type configuration properties ([#11391](https://github.com/JanssenProject/jans/issues/11391)) ([7cf13a1](https://github.com/JanssenProject/jans/commit/7cf13a16f2c280b0edb7760e9313a61e6576da0d))
+* mail dependencies ([#11426](https://github.com/JanssenProject/jans/issues/11426)) ([58c02b0](https://github.com/JanssenProject/jans/commit/58c02b0a2cd048f959f347567673d11369be064f))
+* remove version_name attribute from manifest.json ([#11387](https://github.com/JanssenProject/jans/issues/11387)) ([0febbd9](https://github.com/JanssenProject/jans/commit/0febbd95aa58a517920e40d13095fa8b7c4695bc))
+
+
+### Miscellaneous Chores
+
+* prepare release 1.7.0 ([#11432](https://github.com/JanssenProject/jans/issues/11432)) ([13e4c41](https://github.com/JanssenProject/jans/commit/13e4c412034db6e642da456374a375e7726f46b2))
+
 ## [1.6.0](https://github.com/JanssenProject/jans/compare/v1.5.0...v1.6.0) (2025-05-08)
 
 
