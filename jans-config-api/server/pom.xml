@@ -156,7 +156,6 @@
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-multipart-provider</artifactId>
-			<version>${resteasy.version}</version>
 		</dependency>
 
 		<!-- Jakarta -->
@@ -181,6 +180,19 @@
 			<groupId>jakarta.ws.rs</groupId>
 			<artifactId>jakarta.ws.rs-api</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>jakarta.el</groupId>
+			<artifactId>jakarta.el-api</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>jakarta.servlet.jsp</groupId>
+		    <artifactId>jakarta.servlet.jsp-api</artifactId>
+		</dependency>
+        <dependency>
+    	    <groupId>org.glassfish</groupId>
+			<artifactId>jakarta.el</artifactId>
+	    </dependency>
 
 		<!-- Quartz -->
 		<dependency>
@@ -208,10 +220,6 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>jakarta.faces</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>
@@ -462,13 +470,11 @@
 				<dependency>
 					<groupId>org.glassfish</groupId>
 					<artifactId>jakarta.el</artifactId>
-					<scope>provided</scope>
 				</dependency>
 
 				<dependency>
 					<groupId>jakarta.el</groupId>
 					<artifactId>jakarta.el-api</artifactId>
-					<scope>test</scope>
 				</dependency>
 
 				<dependency>
@@ -652,5 +658,6 @@
 			</activation>
 		</profile>
 
+		
 	</profiles>
 </project>

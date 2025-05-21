@@ -6,15 +6,25 @@
 //! Log interface
 //! Contains the interface for logging. And getting log information from storage.
 
+use std::sync::Arc;
+
 use uuid7::Uuid;
 
-use super::LogLevel;
+use super::{LogLevel, LogStrategy};
 
 /// Log Writer
 /// interface for logging events
 pub(crate) trait LogWriter {
     /// log any serializable entry that not suitable for [`LogEntry`]
     fn log_any<T: Loggable>(&self, entry: T);
+}
+
+impl LogWriter for Option<Arc<LogStrategy>> {
+    fn log_any<T: Loggable>(&self, entry: T) {
+        if let Some(logger) = self.as_ref() {
+            logger.log_any(entry);
+        }
+    }
 }
 
 const SEPARATOR: &str = "__";

@@ -58,11 +58,6 @@ public class ConstantResolver extends ELResolver {
     }
 
     @Override
-    public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context, Object base) {
-        return null;
-    }
-
-    @Override
     public Class<?> getCommonPropertyType(ELContext context, Object base) {
         return null;
     }

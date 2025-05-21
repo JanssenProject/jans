@@ -14,17 +14,22 @@
 mod issuers_store;
 mod jwk_store;
 mod key_service;
+mod log_entry;
 #[cfg(test)]
 mod test_utils;
 mod token;
 mod validator;
 
 use crate::JwtConfig;
+use crate::LogLevel;
+use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
+use crate::log::Logger;
 use base64::DecodeError;
 use base64::Engine;
 use base64::prelude::*;
 use key_service::{KeyService, KeyServiceError};
+use log_entry::*;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
@@ -72,6 +77,7 @@ pub enum JwtServiceInitError {
 
 pub struct JwtService {
     validators: HashMap<ValidatorId, JwtValidator>,
+    logger: Option<Logger>,
 }
 
 #[derive(Eq, Hash, PartialEq, Debug)]
@@ -84,23 +90,47 @@ impl JwtService {
     pub async fn new(
         config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+        logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
         let key_service: Arc<_> =
             match (&config.jwt_sig_validation, &config.jwks, &trusted_issuers) {
                 // Case: no JWKS provided
-                (true, None, None) => Err(JwtServiceInitError::MissingJwksConfig)?,
+                (true, None, None) => {
+                    let err = JwtServiceInitError::MissingJwksConfig;
+                    logger.log_any(JwtLogEntry::new(format!("{err}"), Some(LogLevel::ERROR)));
+                    return Err(err);
+                },
                 // Case: Trusted issuers provided
-                (true, None, Some(issuers)) => Some(
-                    KeyService::new_from_trusted_issuers(issuers)
+                (true, None, Some(issuers)) => {
+                    let key_service = KeyService::new_from_trusted_issuers(issuers)
                         .await
-                        .map_err(JwtServiceInitError::KeyService)?,
-                ),
+                        .inspect_err(|e| {
+                            logger.log_any(JwtLogEntry::new(
+                                format!("failed to initialize the JWT validation service: {}", e),
+                                Some(LogLevel::ERROR),
+                            ))
+                        })
+                        .map_err(JwtServiceInitError::KeyService)?;
+                    Some(key_service)
+                },
                 // Case: Local JWKS provided
                 (true, Some(jwks), None) => {
-                    Some(KeyService::new_from_str(jwks).map_err(JwtServiceInitError::KeyService)?)
+                    let key_service = KeyService::new_from_str(jwks)
+                        .inspect_err(|e| {
+                            logger.log_any(JwtLogEntry::new(
+                                format!("failed to initialize the JWT validation service: {}", e),
+                                Some(LogLevel::ERROR),
+                            ))
+                        })
+                        .map_err(JwtServiceInitError::KeyService)?;
+                    Some(key_service)
                 },
                 // Case: Both a local JWKS and trusted issuers were provided
-                (true, Some(_), Some(_)) => Err(JwtServiceInitError::ConflictingJwksConfig)?,
+                (true, Some(_), Some(_)) => {
+                    let err = JwtServiceInitError::ConflictingJwksConfig;
+                    logger.log_any(JwtLogEntry::new(format!("{err}"), Some(LogLevel::ERROR)));
+                    return Err(err);
+                },
                 // Case: Signature validation is Off so no key service is needed.
                 _ => None,
             }
@@ -119,6 +149,10 @@ impl JwtService {
                 let origin = iss.oidc_endpoint.origin().ascii_serialization();
                 for (tkn, metadata) in iss.token_metadata.iter() {
                     if !metadata.trusted {
+                        logger.log_any(JwtLogEntry::new(
+                            format!("skipping metadata for {tkn} since `trusted == false`"),
+                            Some(LogLevel::WARN),
+                        ));
                         continue;
                     }
 
@@ -149,7 +183,7 @@ impl JwtService {
             }
         }
 
-        Ok(Self { validators })
+        Ok(Self { validators, logger })
     }
 
     pub async fn validate_tokens<'a>(
@@ -177,17 +211,36 @@ impl JwtService {
                 validator
             } else {
                 // we just ignore input tokens that are not defined
-                // in the token entity mapper bootstrap config
-                //
-                // TODO: should we log that we skip some tokens?
+                // in the policy store's tokens
+                if let Some(iss) = iss {
+                    self.logger.log_any(JwtLogEntry::new(
+                        format!(
+                            "ignoring {token_name} since it's from an untrusted issuer: '{iss}'"
+                        ),
+                        Some(LogLevel::WARN),
+                    ));
+                }
                 continue;
             };
 
-            let validated_jwt = validator
-                .process_jwt(jwt)
-                .map_err(|e| JwtProcessingError::InvalidToken(token_name.to_string(), e))?;
+            let validated_jwt = validator.process_jwt(jwt).map_err(|e| {
+                self.logger.log_any(JwtLogEntry::new(
+                    format!("failed to validate token: {e}"),
+                    Some(LogLevel::ERROR),
+                ));
+                JwtProcessingError::InvalidToken(token_name.to_string(), e)
+            })?;
+
             let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
+                .map_err(|err| {
+                    self.logger.log_any(JwtLogEntry::new(
+                        format!("failed to deserialize token claims: {err}"),
+                        Some(LogLevel::ERROR),
+                    ));
+                    err
+                })
                 .map_err(JwtProcessingError::StringDeserialization)?;
+
             validated_tokens.insert(
                 token_name.to_string(),
                 Token::new(token_name, claims, validated_jwt.trusted_iss),
@@ -304,6 +357,7 @@ mod test {
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
             Some(HashMap::from([("Jans".into(), iss.clone())])),
+            None,
         )
         .await
         .inspect_err(|e| eprintln!("error msg: {}", e))

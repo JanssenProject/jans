@@ -17,9 +17,8 @@ RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker \
 # Prevent prompt errors during package installation
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update \
-    && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc python3-psycopg2 git maven \
+    && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc python3-psycopg2 git maven libaugeas-dev \
     # install certbot
-    && apt-get -y install libaugeas0 \
     && pip install ruamel.yaml certbot certbot-apache \
     && apt-get clean \
     # Cleaning up package lists
@@ -42,7 +41,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=3377ed1cb1e82fd4f7f22842533913f6bd3a80a3
+ENV JANS_SOURCE_VERSION=137153d287ced23f04cd26037cdd3e783babdd95
 
 # cleanup
 RUN rm -rf /tmp/jans
