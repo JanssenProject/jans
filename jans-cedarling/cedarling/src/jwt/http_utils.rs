@@ -25,7 +25,7 @@ pub struct OpenIdConfig {
     pub issuer: String,
     #[serde(deserialize_with = "deserialize_url")]
     pub jwks_uri: Url,
-    #[serde(deserialize_with = "deserialize_opt_url")]
+    #[serde(deserialize_with = "deserialize_opt_url", default)]
     pub status_list_endpoint: Option<Url>,
 }
 

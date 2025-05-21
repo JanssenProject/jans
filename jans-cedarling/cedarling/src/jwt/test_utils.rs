@@ -119,7 +119,7 @@ impl MockEndpoints {
                 .with_body(
                     json!({
                         "issuer": server.url(),
-                        "jwks_uri": server.url() + "/jwks",
+                        "jwks_uri": server.url() + MOCK_JWKS_URI,
                     })
                     .to_string(),
                 )
@@ -156,12 +156,15 @@ impl MockEndpoints {
 pub enum TokenTypeHeader {
     /// "typ": "statuslist+jwt"
     StatusListJwt,
+    /// "typ": "JWT"
+    Jwt,
 }
 
 impl Into<&str> for TokenTypeHeader {
     fn into(self) -> &'static str {
         match self {
             TokenTypeHeader::StatusListJwt => "statuslist+jwt",
+            TokenTypeHeader::Jwt => "JWT",
         }
     }
 }
