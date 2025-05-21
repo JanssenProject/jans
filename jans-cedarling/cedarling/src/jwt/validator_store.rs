@@ -5,10 +5,8 @@
 
 use super::validation::JwtValidator;
 use jsonwebtoken::Algorithm;
-use std::{
-    collections::HashMap,
-    hash::{DefaultHasher, Hash, Hasher},
-};
+use std::collections::HashMap;
+use std::hash::{DefaultHasher, Hash, Hasher};
 
 /// Holds a collection of JWT validators keyed by a hash.
 ///

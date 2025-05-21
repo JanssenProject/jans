@@ -10,6 +10,8 @@ use serde::Serialize;
 use serde_json::{Value, json};
 use url::Url;
 
+use super::http_utils::OpenIdConfig;
+
 use {jsonwebkey as jwk, jsonwebtoken as jwt};
 
 /// A pair of encoding and decoding keys.
@@ -127,7 +129,7 @@ impl MockEndpoints {
 
         let jwks = Some(
             server
-                .mock("GET", "/jwks")
+                .mock("GET", MOCK_JWKS_URI)
                 .with_status(200)
                 .with_header("content-type", "application/json")
                 .with_body(json!({"keys": generate_jwks(&[keys.clone()]).keys}).to_string())
@@ -173,6 +175,7 @@ impl Into<Option<String>> for TokenTypeHeader {
 
 const MOCK_OIDC_ENDPOINT: &str = "/.well-known/openid-configuration";
 const MOCK_STATUS_LIST_ENDPOINT: &str = "/jans-auth/restv1/status_list";
+const MOCK_JWKS_URI: &str = "/jans-auth/restv1/jwks";
 
 impl MockServer {
     pub async fn new_with_defaults() -> Result<Self, KeyGenerationError> {
@@ -257,6 +260,14 @@ impl MockServer {
         )
     }
 
+    pub fn jwks_endpoint(&self) -> Option<Url> {
+        if self.endpoints.jwks.is_none() {
+            return None;
+        }
+
+        Some(Url::parse(&(self.server.url() + MOCK_JWKS_URI)).expect("invalid status list url"))
+    }
+
     pub fn jwt_decoding_key(&self) -> Result<DecodingKey, jsonwebtoken::errors::Error> {
         self.keys.decoding_key()
     }
@@ -269,5 +280,14 @@ impl MockServer {
 
     pub fn issuer(&self) -> String {
         self.server.url()
+    }
+
+    #[track_caller]
+    pub fn openid_config(&self) -> OpenIdConfig {
+        OpenIdConfig {
+            issuer: self.issuer(),
+            jwks_uri: self.jwks_endpoint().unwrap(),
+            status_list_endpoint: self.status_list_endpoint(),
+        }
     }
 }

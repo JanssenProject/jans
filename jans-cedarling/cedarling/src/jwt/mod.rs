@@ -13,6 +13,7 @@
 
 mod decode;
 mod error;
+mod http_utils;
 mod key_service;
 mod log_entry;
 #[allow(dead_code)]
@@ -33,6 +34,7 @@ use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
 use decode::*;
+use http_utils::*;
 use key_service::*;
 use log_entry::*;
 use std::collections::HashMap;
@@ -45,62 +47,61 @@ pub struct JwtService {
     validators: ValidatorStore,
     key_service: Arc<KeyService>,
     validate_jwt_signatures: bool,
-    trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+    issuer_configs: HashMap<String, IssuerConfig>,
     logger: Option<Logger>,
+}
+
+struct IssuerConfig {
+    issuer_id: String,
+    /// The [`TrustedIssuer`] config loaded from the policy store
+    policy: TrustedIssuer,
+    /// The [`OpenIdConfig`] loaded from the IDP's `/.well-known/openid-configuration` endpoint
+    openid_config: Option<OpenIdConfig>,
 }
 
 impl JwtService {
     pub async fn new(
-        config: &JwtConfig,
+        jwt_config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
-        // we make a map of <jwt_iss_claim, TrustedIssuer>
-        // where jwt_iss_claim is what we expect to find in the `iss` claim of the JWTs
-        // from the given issuer
-        let trusted_issuers = trusted_issuers.map(|issuers| {
-            issuers
-                .into_values()
-                .map(|iss| {
-                    // TODO: here, we are relying on the IDP to use it's own domain
-                    // for the issued tokens. We might need to fetch the openid config
-                    // in the future and use the `issuer` field to support more funky IDPs.
-                    let jwt_iss_claim = iss.oidc_endpoint.origin().ascii_serialization();
-                    (jwt_iss_claim, iss)
-                })
-                .collect::<HashMap<String, TrustedIssuer>>()
-        });
-
-        // Initialize JWT validators
-        let validators = trusted_issuers
-            .as_ref()
-            .map(|issuers| init_jwt_validators(config, issuers, logger.clone()))
-            .unwrap_or_default();
-
-        // Initialize Key Service to manage JWKs
+        let mut issuer_configs = HashMap::default();
+        let mut validators = ValidatorStore::default();
         let mut key_service = KeyService::new();
-        if config.jwt_sig_validation {
-            if let Some(issuers) = trusted_issuers.as_ref() {
-                for iss in issuers.values() {
-                    key_service.fetch_keys_for_iss(iss).await?;
-                }
+
+        for (issuer_id, iss) in trusted_issuers.unwrap_or_default().into_iter() {
+            // this is what we expect to find in the JWT `iss` claim
+            let mut iss_claim = iss.oidc_endpoint.origin().ascii_serialization();
+
+            let mut iss_config = IssuerConfig {
+                issuer_id,
+                policy: iss,
+                openid_config: None,
+            };
+
+            if jwt_config.jwt_sig_validation {
+                iss_claim = update_openid_config(&mut iss_config, &logger).await?;
             }
 
-            if let Some(jwks) = config.jwks.as_ref() {
-                key_service.insert_keys_from_str(jwks)?;
-            }
+            insert_keys(&mut key_service, jwt_config, &iss_config).await?;
 
-            if !key_service.has_keys() && config.jwt_sig_validation {
-                return Err(JwtServiceInitError::KeyServiceMissingKeys);
-            }
+            update_jwt_validators(&mut validators, jwt_config, &iss_config, &logger);
+
+            issuer_configs.insert(iss_claim, iss_config);
+        }
+
+        // quick check so we don't get surprised if the program runs but can't validate
+        // anything
+        if !key_service.has_keys() && jwt_config.jwt_sig_validation {
+            return Err(JwtServiceInitError::KeyServiceMissingKeys);
         }
         let key_service = Arc::new(key_service);
 
         Ok(Self {
             validators,
             key_service,
-            validate_jwt_signatures: config.jwt_sig_validation,
-            trusted_issuers,
+            validate_jwt_signatures: jwt_config.jwt_sig_validation,
+            issuer_configs,
             logger,
         })
     }
@@ -192,43 +193,88 @@ impl JwtService {
 
     /// Use the `iss` claim of a token to retrieve a reference to a [`TrustedIssuer`]
     #[inline]
-    fn get_issuer_ref(&self, iss: &str) -> Option<&TrustedIssuer> {
-        self.trusted_issuers
-            .as_ref()
-            .and_then(|issuers| issuers.get(iss))
+    fn get_issuer_ref(&self, iss_claim: &str) -> Option<&TrustedIssuer> {
+        self.issuer_configs
+            .get(iss_claim)
+            .map(|config| &config.policy)
     }
 }
 
-fn init_jwt_validators(
-    config: &JwtConfig,
-    issuers: &HashMap<String, TrustedIssuer>,
-    logger: Option<Logger>,
-) -> ValidatorStore {
-    let mut validators = ValidatorStore::default();
-
-    for iss in issuers.values() {
-        // TODO: it's better to get the OIDC and get the issuer there
-        let origin = iss.oidc_endpoint.origin().ascii_serialization();
-
-        for (token_name, metadata) in iss.token_metadata.iter() {
-            if !metadata.trusted {
-                if let Some(logger) = logger.as_ref() {
-                    logger.log_any(JwtLogEntry::system(format!(
-                    "skipping metadata for '{token_name}' from '{origin}' since `trusted == false`"
-                )));
-                }
-                continue;
+async fn update_openid_config(
+    iss_config: &mut IssuerConfig,
+    logger: &Option<Logger>,
+) -> Result<String, JwtServiceInitError> {
+    let openid_config = OpenIdConfig::get_from_url(&iss_config.policy.oidc_endpoint)
+        .await
+        .inspect_err(|e| {
+            if let Some(logger) = logger {
+                logger.log_any(JwtLogEntry::system(format!(
+                    "failed to get openid configuration for trusted issuer: '{}': {}",
+                    iss_config.issuer_id, e
+                )))
             }
+        })?;
 
-            for algorithm in config.signature_algorithms_supported.iter().copied() {
-                let (validator, key) =
-                    JwtValidator::new(Some(&origin), &token_name, metadata, algorithm);
-                validators.insert(key, validator);
-            }
-        }
+    let iss_claim = openid_config.issuer.clone();
+    iss_config.openid_config = Some(openid_config);
+
+    Ok(iss_claim)
+}
+
+async fn insert_keys(
+    key_service: &mut KeyService,
+    jwt_config: &JwtConfig,
+    iss_config: &IssuerConfig,
+) -> Result<(), KeyServiceError> {
+    if !jwt_config.jwt_sig_validation {
+        return Ok(());
     }
 
-    validators
+    if let Some(jwks) = jwt_config.jwks.as_ref() {
+        key_service.insert_keys_from_str(jwks)?;
+    }
+
+    if let Some(openid_config) = iss_config.openid_config.as_ref() {
+        key_service.get_keys(&openid_config).await?;
+    }
+
+    Ok(())
+}
+
+fn update_jwt_validators(
+    validators: &mut ValidatorStore,
+    jwt_config: &JwtConfig,
+    iss_config: &IssuerConfig,
+    logger: &Option<Logger>,
+) {
+    for (token_name, tkn_metadata) in iss_config.policy.token_metadata.iter() {
+        if !tkn_metadata.trusted {
+            if let Some(logger) = logger {
+                logger.log_any(JwtLogEntry::system(format!(
+                    "skipping metadata for '{}' from '{}' since `trusted == false`",
+                    token_name, iss_config.issuer_id,
+                )));
+            }
+            continue;
+        }
+
+        for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
+            let iss = iss_config
+                .openid_config
+                .as_ref()
+                .map(|oidc| oidc.issuer.clone())
+                .unwrap_or_else(|| {
+                    iss_config
+                        .policy
+                        .oidc_endpoint
+                        .origin()
+                        .ascii_serialization()
+                });
+            let (validator, key) =
+                JwtValidator::new(Some(&iss), &token_name, tkn_metadata, algorithm);
+            validators.insert(key, validator);
+        }
+    }
 }
 
 #[cfg(test)]
