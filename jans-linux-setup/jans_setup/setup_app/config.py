@@ -172,11 +172,9 @@ class Config:
         self.install_config_api = True
         self.install_casa = False
         self.install_jans_cli = True
-        self.install_link = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
         self.install_jans_saml = False
-        self.install_jans_keycloak_link = False
         self.install_jans_lock = False
         self.install_opa = False
 
