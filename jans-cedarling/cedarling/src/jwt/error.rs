@@ -3,6 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use super::http_utils::HttpError;
 use super::key_service;
 use super::validation::ValidateJwtError;
 
@@ -36,4 +37,6 @@ pub enum JwtServiceInitError {
         "the key service has no decoding keys. please provide a local JWKS or make sure your policy store has trustsed issuers"
     )]
     KeyServiceMissingKeys,
+    #[error("failed to GET the openid configuration for the trusted issuers: {0}")]
+    GetOpenidConfigurations(#[from] HttpError),
 }
