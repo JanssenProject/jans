@@ -86,7 +86,7 @@ impl JwtValidator {
             Err(ValidateJwtError::MissingClaims(missing_claims))?
         }
 
-        return Ok(validated_jwt);
+        Ok(validated_jwt)
     }
 }
 

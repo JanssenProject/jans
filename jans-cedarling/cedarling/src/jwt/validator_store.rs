@@ -57,7 +57,7 @@ impl ValidatorStore {
         self.0
             .entry(key)
             .or_default()
-            .push((validator_info.to_owned(), validator));
+            .push((validator_info.as_owned(), validator));
     }
 
     /// Retrieves a validator matching the given `ValidatorInfo`, if present.
@@ -80,8 +80,8 @@ impl ValidatorStore {
 }
 
 impl ValidatorInfo<'_> {
-    /// Converts the borrowed validator info into an owned version for storage.
-    fn to_owned(&self) -> OwnedValidatorInfo {
+    /// Creates an owned version for storage.
+    fn as_owned(&self) -> OwnedValidatorInfo {
         OwnedValidatorInfo {
             iss: self.iss.map(|s| s.to_string()),
             token_name: self.token_name.to_string(),
@@ -108,7 +108,7 @@ impl OwnedValidatorInfo {
             return false;
         }
 
-        if &self.token_name != other.token_name {
+        if self.token_name != other.token_name {
             return false;
         }
 

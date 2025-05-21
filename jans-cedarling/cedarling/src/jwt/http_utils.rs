@@ -11,7 +11,7 @@ use reqwest::Client;
 use serde::{Deserialize, Deserializer, de};
 use url::Url;
 
-static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(|| Client::new());
+static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 
 #[async_trait]
 pub trait GetFromUrl<T> {

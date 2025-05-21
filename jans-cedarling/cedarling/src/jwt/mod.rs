@@ -191,7 +191,7 @@ impl JwtService {
         // to do some processing so we include it here for convenience
         validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
 
-        return Ok(validated_jwt);
+        Ok(validated_jwt)
     }
 
     /// Use the `iss` claim of a token to retrieve a reference to a [`TrustedIssuer`]
@@ -239,7 +239,7 @@ async fn insert_keys(
     }
 
     if let Some(openid_config) = iss_config.openid_config.as_ref() {
-        key_service.get_keys(&openid_config).await?;
+        key_service.get_keys(openid_config).await?;
     }
 
     Ok(())
@@ -276,7 +276,7 @@ fn update_jwt_validators(
                         .ascii_serialization()
                 });
             let (validator, key) =
-                JwtValidator::new(Some(&iss), &token_name, tkn_metadata, algorithm);
+                JwtValidator::new(Some(&iss), token_name, tkn_metadata, algorithm);
             validators.insert(key, validator);
         }
     }
