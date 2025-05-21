@@ -17,13 +17,13 @@ annotations:
     - name: casa
       image: ghcr.io/janssenproject/jans/casa:0.0.0-nightly
     - name: scim
-      image: ghcr.io/janssenproject/jans/scim:1.7.0-1
+      image: ghcr.io/janssenproject/jans/scim:0.0.0-nightly
     - name: saml
       image: ghcr.io/janssenproject/jans/saml:0.0.0-nightly
     - name: kc-scheduler
       image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly
     - name: cleanup
-      image: ghcr.io/janssenproject/jans/cloudtools:1.7.0-1
+      image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
