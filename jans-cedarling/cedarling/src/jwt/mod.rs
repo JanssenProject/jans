@@ -282,79 +282,48 @@ mod test {
     use super::test_utils::*;
     use super::{JwtService, Token};
     use crate::JwtConfig;
-    use crate::common::policy_store::TrustedIssuer;
     use jsonwebtoken::Algorithm;
-    use mockito::Server;
     use serde_json::{Value, json};
     use std::collections::{HashMap, HashSet};
     use tokio::test;
-    use url::Url;
 
     #[test]
     pub async fn can_validate_token() {
-        let mut server = Server::new_async().await;
+        let mut server = MockServer::new_with_defaults().await.unwrap();
 
-        let oidc_endpoint = server
-            .mock("GET", "/.well-known/openid-configuration")
-            .with_status(200)
-            .with_header("content-type", "application/json")
-            .with_body(
-                json!({
-                    "issuer": server.url(),
-                    "jwks_uri": server.url() + "/jwks",
-                })
-                .to_string(),
-            )
-            .expect(1)
-            .create();
-
-        let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
+        // create tokens
         let access_tkn_claims = json!({
-            "iss": server.url(),
+            "iss": server.issuer(),
             "sub": "some_sub",
             "jti": 1231231231,
             "exp": u64::MAX,
             "client_id": "test123",
         });
-        let access_tkn = generate_token_using_claims(&access_tkn_claims, &keys)
-            .expect("Should generate access token");
+        let access_tkn = server
+            .generate_token_string_hs256(TokenTypeHeader::Jwt, &access_tkn_claims)
+            .unwrap();
         let id_tkn_claims = json!({
-            "iss": server.url(),
+            "iss": server.issuer(),
             "aud": "test123",
             "sub": "some_sub",
             "name": "John Doe",
             "exp": u64::MAX,
         });
-        let id_tkn =
-            generate_token_using_claims(&id_tkn_claims, &keys).expect("Should generate id token");
+        let id_tkn = server
+            .generate_token_string_hs256(TokenTypeHeader::Jwt, &id_tkn_claims)
+            .unwrap();
         let userinfo_tkn_claims = json!({
-            "iss": server.url(),
+            "iss": server.issuer(),
             "aud": "test123",
             "sub": "some_sub",
             "name": "John Doe",
             "exp": u64::MAX,
         });
-        let userinfo_tkn = generate_token_using_claims(&userinfo_tkn_claims, &keys)
-            .expect("Should generate userinfo token");
+        let userinfo_tkn = server
+            .generate_token_string_hs256(TokenTypeHeader::Jwt, &userinfo_tkn_claims)
+            .unwrap();
 
-        let jwks_endpoint = server
-            .mock("GET", "/jwks")
-            .with_status(200)
-            .with_header("content-type", "application/json")
-            .with_body(json!({"keys": generate_jwks(&vec![keys]).keys}).to_string())
-            .expect(1)
-            .create();
-
-        let mut iss = TrustedIssuer {
-            oidc_endpoint: Url::parse(&(server.url() + "/.well-known/openid-configuration"))
-                .expect("should be a valid url"),
-            ..Default::default()
-        };
-        // we remove the `iss` claims since mockito can't really create https
-        // endpoints and the validation requires the `iss` to be https.
-        for (_name, metadata) in iss.token_metadata.iter_mut() {
-            metadata.required_claims.remove("iss");
-        }
+        let iss = server.trusted_issuer();
 
         let jwt_service = JwtService::new(
             &JwtConfig {
@@ -412,8 +381,5 @@ mod test {
             token,
             &Token::new("userinfo_token", expected_claims.into(), Some(&iss))
         );
-
-        oidc_endpoint.assert();
-        jwks_endpoint.assert();
     }
 }
