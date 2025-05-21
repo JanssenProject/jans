@@ -120,7 +120,7 @@ cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} 
 
 ```
 
-6. Open the `androidApp` project on Android Studio and run the project on simulator. 
+6. Open the `androidApp` project on Android Studio and run the project on simulator.
 
 ## Kotlin Binding
 
@@ -129,17 +129,17 @@ Here we delve into the process of generating the Kotlin binding for cedarling an
 ### Prerequisites
 
 - Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
-- Java Development Kit (JDK): version 21 or higher  
+- Java Development Kit (JDK): version 17
 - Apache Maven: Install it from [Apache Maven Website](https://maven.apache.org/download.cgi)
 
-### Building Kotlin binding
+### Building and Testing
 
 1. Build Cedarling:
 
 ```bash
 cargo build -r -p cedarling_uniffi
 ```
-In `target/release`, you should find the `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file, depending on the operating system you are using.
+In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
 
 2. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
 
