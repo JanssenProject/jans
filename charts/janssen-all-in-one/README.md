@@ -183,7 +183,7 @@ Kubernetes: `>=v1.22.0-0`
 | config-api.ingress | object | `{"configApiAdditionalAnnotations":{},"configApiEnabled":true,"configApiLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | config-api.ingress.configApiAdditionalAnnotations | object | `{}` | ConfigAPI ingress resource additional annotations. |
 | config-api.ingress.configApiLabels | object | `{}` | configAPI ingress resource labels. key app is taken |
-| config-api.plugins | string | `"admin-ui,fido2,scim,user-mgt"` | Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","jans-link","kc-saml") |
+| config-api.plugins | string | `"admin-ui,fido2,scim,user-mgt"` | Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","kc-saml") |
 | config.enabled | bool | `true` | Boolean flag to enable/disable the configuration job. This normally should never be false |
 | configAdapterName | string | `"kubernetes"` | The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes |
 | configSecretAdapter | string | `"kubernetes"` | The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes |
@@ -323,40 +323,8 @@ Kubernetes: `>=v1.22.0-0`
 | kc-scheduler.usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |
 | kc-scheduler.volumeMounts | list | `[]` | Configure any additional volumesMounts that need to be attached to the containers |
 | kc-scheduler.volumes | list | `[]` | Configure any additional volumes that need to be attached to the pod |
-| keycloak-link.appLoggers | object | `{"enableStdoutLogPrefix":"true","keycloakLinkLogLevel":"INFO","keycloakLinkLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
-| keycloak-link.appLoggers.enableStdoutLogPrefix | string | `"true"` | Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e keycloak-link-persistence ===> 2022-12-20 17:49:55,744 INFO |
-| keycloak-link.appLoggers.keycloakLinkLogLevel | string | `"INFO"` | jans-keycloak-link.log level |
-| keycloak-link.appLoggers.keycloakLinkLogTarget | string | `"STDOUT"` | jans-keycloak-link.log target |
-| keycloak-link.appLoggers.persistenceDurationLogLevel | string | `"INFO"` | jans-keycloak-link_persistence_duration.log level |
-| keycloak-link.appLoggers.persistenceDurationLogTarget | string | `"FILE"` | jans-keycloak-link_persistence_duration.log target |
-| keycloak-link.appLoggers.persistenceLogLevel | string | `"INFO"` | jans-keycloak-link_persistence.log level |
-| keycloak-link.appLoggers.persistenceLogTarget | string | `"FILE"` | jans-keycloak-link_persistence.log target |
-| keycloak-link.appLoggers.scriptLogLevel | string | `"INFO"` | jans-keycloak-link_script.log level |
-| keycloak-link.appLoggers.scriptLogTarget | string | `"FILE"` | jans-keycloak-link_script.log target |
-| keycloak-link.cnCustomJavaOptions | string | `""` | passing custom java options to link. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
-| keycloak-link.enabled | bool | `false` | Boolean flag to enable/disable the link chart. |
-| keycloak-link.ingress | object | `{"keycloakLinkAdditionalAnnotations":{},"keycloakLinkEnabled":true,"keycloakLinkLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
-| keycloak-link.ingress.keycloakLinkAdditionalAnnotations | object | `{}` | keycloak-link ingress resource additional annotations. |
-| keycloak-link.ingress.keycloakLinkLabels | object | `{}` | keycloak-link ingress resource labels. key app is taken |
-| keycloak-link.keycloakLinkServiceName | string | `"keycloak-link"` | Name of the keycloak-link service. Please keep it as default. |
 | lbIp | string | `"22.22.22.22"` | The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `fqdn` is globally resolvable. |
 | lifecycle | object | `{}` |  |
-| link.appLoggers | object | `{"enableStdoutLogPrefix":"true","linkLogLevel":"INFO","linkLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
-| link.appLoggers.enableStdoutLogPrefix | string | `"true"` | Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e link-persistence ===> 2022-12-20 17:49:55,744 INFO |
-| link.appLoggers.linkLogLevel | string | `"INFO"` | jans-link.log level |
-| link.appLoggers.linkLogTarget | string | `"STDOUT"` | jans-link.log target |
-| link.appLoggers.persistenceDurationLogLevel | string | `"INFO"` | jans-link_persistence_duration.log level |
-| link.appLoggers.persistenceDurationLogTarget | string | `"FILE"` | jans-link_persistence_duration.log target |
-| link.appLoggers.persistenceLogLevel | string | `"INFO"` | jans-link_persistence.log level |
-| link.appLoggers.persistenceLogTarget | string | `"FILE"` | jans-link_persistence.log target |
-| link.appLoggers.scriptLogLevel | string | `"INFO"` | jans-link_script.log level |
-| link.appLoggers.scriptLogTarget | string | `"FILE"` | jans-link_script.log target |
-| link.cnCustomJavaOptions | string | `""` | passing custom java options to link. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
-| link.enabled | bool | `false` | Boolean flag to enable/disable the link chart. |
-| link.ingress | object | `{"linkAdditionalAnnotations":{},"linkEnabled":true,"linkLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
-| link.ingress.linkAdditionalAnnotations | object | `{}` | link ingress resource additional annotations. |
-| link.ingress.linkLabels | object | `{}` | link ingress resource labels. key app is taken |
-| link.linkServiceName | string | `"link"` | Name of the link service. Please keep it as default. |
 | livenessProbe | object | `{"exec":{"command":["python3","/app/jans_aio/jans_auth/healthcheck.py"]},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for the auth server if needed. |
 | livenessProbe.exec | object | `{"command":["python3","/app/jans_aio/jans_auth/healthcheck.py"]}` | Executes the python3 healthcheck. https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py |
 | nameOverride | string | `""` |  |

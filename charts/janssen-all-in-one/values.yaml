@@ -411,7 +411,7 @@ config-api:
     configApiLabels: { }
     # -- ConfigAPI ingress resource additional annotations.
     configApiAdditionalAnnotations: { }
-  # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","jans-link","kc-saml")
+  # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","kc-saml")
   plugins: "admin-ui,fido2,scim,user-mgt"
 fido2:
   # -- Name of the fido2 service. Please keep it as default.
@@ -501,41 +501,6 @@ scim:
     scimLabels: { }
     # -- SCIM ingress resource additional annotations.
     scimAdditionalAnnotations: { }
-link:
-  # -- Name of the link service. Please keep it as default.
-  linkServiceName: link
-  # -- Boolean flag to enable/disable the link chart.
-  enabled: false
-  # -- passing custom java options to link. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
-  cnCustomJavaOptions: ""
-  # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
-  appLoggers:
-    # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e link-persistence ===> 2022-12-20 17:49:55,744 INFO
-    enableStdoutLogPrefix: "true"
-    # -- jans-link.log target
-    linkLogTarget: "STDOUT"
-    # -- jans-link.log level
-    linkLogLevel: "INFO"
-    # -- jans-link_persistence.log target
-    persistenceLogTarget: "FILE"
-    # -- jans-link_persistence.log level
-    persistenceLogLevel: "INFO"
-    # -- jans-link_persistence_duration.log target
-    persistenceDurationLogTarget: "FILE"
-    # -- jans-link_persistence_duration.log level
-    persistenceDurationLogLevel: "INFO"
-    # -- jans-link_script.log target
-    scriptLogTarget: "FILE"
-    # -- jans-link_script.log level
-    scriptLogLevel: "INFO"
-  # -- Enable endpoints in either istio or nginx ingress depending on users choice
-  ingress:
-    # Enable link endpoints /jans-link
-    linkEnabled: true
-    # -- link ingress resource labels. key app is taken
-    linkLabels: { }
-    # -- link ingress resource additional annotations.
-    linkAdditionalAnnotations: { }
 saml:
   # -- Name of the saml service. Please keep it as default.
   samlServiceName: saml
@@ -881,39 +846,3 @@ cleanup:
   customCommand: []
   # -- Boolean flag to enable/disable the cleanup cronjob chart.
   enabled: true
-
-keycloak-link:
-  # -- Name of the keycloak-link service. Please keep it as default.
-  keycloakLinkServiceName: keycloak-link
-  # -- Boolean flag to enable/disable the link chart.
-  enabled: false
-  # -- passing custom java options to link. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
-  cnCustomJavaOptions: ""
-  # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
-  appLoggers:
-    # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e keycloak-link-persistence ===> 2022-12-20 17:49:55,744 INFO
-    enableStdoutLogPrefix: "true"
-    # -- jans-keycloak-link.log target
-    keycloakLinkLogTarget: "STDOUT"
-    # -- jans-keycloak-link.log level
-    keycloakLinkLogLevel: "INFO"
-    # -- jans-keycloak-link_persistence.log target
-    persistenceLogTarget: "FILE"
-    # -- jans-keycloak-link_persistence.log level
-    persistenceLogLevel: "INFO"
-    # -- jans-keycloak-link_persistence_duration.log target
-    persistenceDurationLogTarget: "FILE"
-    # -- jans-keycloak-link_persistence_duration.log level
-    persistenceDurationLogLevel: "INFO"
-    # -- jans-keycloak-link_script.log target
-    scriptLogTarget: "FILE"
-    # -- jans-keycloak-link_script.log level
-    scriptLogLevel: "INFO"
-  # -- Enable endpoints in either istio or nginx ingress depending on users choice
-  ingress:
-    # Enable keycloak-link endpoints /jans-keycloak-link
-    keycloakLinkEnabled: true
-    # -- keycloak-link ingress resource labels. key app is taken
-    keycloakLinkLabels: { }
-    # -- keycloak-link ingress resource additional annotations.
-    keycloakLinkAdditionalAnnotations: { }
