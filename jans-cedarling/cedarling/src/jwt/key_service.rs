@@ -5,36 +5,15 @@
 
 use std::collections::HashMap;
 
+use super::http_utils::*;
 use jsonwebtoken::jwk::{Jwk, JwkSet, KeyAlgorithm};
 use jsonwebtoken::{Algorithm, DecodingKey};
-use reqwest::Client;
-use serde::{Deserialize, Deserializer, de};
-use url::Url;
-
-use crate::common::policy_store::TrustedIssuer;
 
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub struct DecodingKeyInfo {
     pub issuer: Option<String>,
     pub kid: Option<String>,
     pub algorithm: Algorithm,
-}
-
-#[derive(Deserialize)]
-struct OpenIdConfig {
-    issuer: String,
-    #[serde(deserialize_with = "deserialize_url")]
-    jwks_uri: Url,
-}
-
-pub fn deserialize_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let url_str = String::deserialize(deserializer)?;
-    let url = Url::parse(&url_str)
-        .map_err(|e| de::Error::custom(format!("invalid url '{url_str}': {e}")))?;
-    Ok(url)
 }
 
 /// Manages JSON Web Keys (JWKs) used for decoding JWTs.
@@ -103,30 +82,10 @@ impl KeyService {
         Ok(())
     }
 
-    pub async fn fetch_keys_for_iss(&mut self, iss: &TrustedIssuer) -> Result<(), KeyServiceError> {
-        let client = Client::new();
-
-        let openid_config = client
-            .get(iss.oidc_endpoint.as_str())
-            .send()
+    pub async fn get_keys(&mut self, openid_config: &OpenIdConfig) -> Result<(), KeyServiceError> {
+        let jwks = JwkSet::get_from_url(&openid_config.jwks_uri)
             .await
-            .map_err(FetchKeysError::GetOpenIdConfig)?
-            .error_for_status()
-            .map_err(FetchKeysError::GetOpenIdConfig)?
-            .json::<OpenIdConfig>()
-            .await
-            .map_err(FetchKeysError::DeserializeOpenIdConfig)?;
-
-        let jwks = client
-            .get(openid_config.jwks_uri)
-            .send()
-            .await
-            .map_err(FetchKeysError::GetJwks)?
-            .error_for_status()
-            .map_err(FetchKeysError::GetJwks)?
-            .json::<JwkSet>()
-            .await
-            .map_err(FetchKeysError::DeserializeJwks)?;
+            .map_err(KeyServiceError::GetJwks)?;
 
         for jwk in jwks.keys.into_iter() {
             let key = DecodingKey::from_jwk(&jwk).map_err(FetchKeysError::BuildDecodingKey)?;
@@ -180,6 +139,10 @@ fn get_algorithm(jwk: &Jwk) -> Result<Option<Algorithm>, KeyAlgorithm> {
 
 #[derive(thiserror::Error, Debug)]
 pub enum KeyServiceError {
+    #[error("failed to retrieve openid configuration: {0}")]
+    GetOpenIdConfig(#[source] HttpError),
+    #[error("failed to retrieve the JWKS: {0}")]
+    GetJwks(#[source] HttpError),
     #[error("failed to insert keys into the KeyService: {0}")]
     InsertKeys(#[from] InsertKeysError),
     #[error("failed to fetch keys for the KeyService: {0}")]
@@ -303,21 +266,19 @@ mod test {
     #[tokio::test]
     async fn can_load_jwk_stores_from_multiple_trusted_issuers() {
         let server1 = MockServer::new_with_defaults().await.unwrap();
-        let iss1 = server1.trusted_issuer();
         let (_key1, kid1) = server1.jwt_decoding_key_and_id().unwrap();
 
         let server2 = MockServer::new_with_defaults().await.unwrap();
-        let iss2 = server2.trusted_issuer();
         let (_key2, kid2) = server2.jwt_decoding_key_and_id().unwrap();
 
         let mut key_service = KeyService::default();
 
         key_service
-            .fetch_keys_for_iss(&iss1)
+            .get_keys(&server1.openid_config())
             .await
             .expect("fetch keys for issuer 1");
         key_service
-            .fetch_keys_for_iss(&iss2)
+            .get_keys(&server2.openid_config())
             .await
             .expect("fetch keys for issuer 2");
 
