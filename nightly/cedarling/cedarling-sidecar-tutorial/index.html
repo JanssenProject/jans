@@ -10124,10 +10124,10 @@ when<span class="w"> </span><span class="o">{</span>
 </li>
 </ul>
 <p>Pull the Docker image:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/janssenproject/jans/cedarling-flask-sidecar:1.7.0-1
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
 </code></pre></div>
 <p>Run the Docker image, replacing <code>&lt;/absolute/path/to/bootstrap.json&gt;</code> with the absolute path to your bootstrap file:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span><span class="nv">APP_MODE</span><span class="o">=</span><span class="s1">&#39;development&#39;</span><span class="w"> </span>-e<span class="w"> </span><span class="nv">CEDARLING_BOOTSTRAP_CONFIG_FILE</span><span class="o">=</span>/bootstrap.json<span class="w"> </span>-e<span class="w"> </span><span class="nv">SIDECAR_DEBUG_RESPONSE</span><span class="o">=</span>True<span class="w"> </span>--mount<span class="w"> </span><span class="nv">type</span><span class="o">=</span>bind,src<span class="o">=</span>&lt;/absolute/path/to/bootstrap.json&gt;,dst<span class="o">=</span>/bootstrap.json<span class="w"> </span>-p<span class="w"> </span><span class="m">5000</span>:5000<span class="w"> </span>-d<span class="w"> </span>ghcr.io/janssenproject/jans/cedarling-flask-sidecar:1.7.0-1
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span><span class="nv">APP_MODE</span><span class="o">=</span><span class="s1">&#39;development&#39;</span><span class="w"> </span>-e<span class="w"> </span><span class="nv">CEDARLING_BOOTSTRAP_CONFIG_FILE</span><span class="o">=</span>/bootstrap.json<span class="w"> </span>-e<span class="w"> </span><span class="nv">SIDECAR_DEBUG_RESPONSE</span><span class="o">=</span>True<span class="w"> </span>--mount<span class="w"> </span><span class="nv">type</span><span class="o">=</span>bind,src<span class="o">=</span>&lt;/absolute/path/to/bootstrap.json&gt;,dst<span class="o">=</span>/bootstrap.json<span class="w"> </span>-p<span class="w"> </span><span class="m">5000</span>:5000<span class="w"> </span>-d<span class="w"> </span>ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
 </code></pre></div>
 <p>The sidecar is now running on <a href="http://127.0.0.1:5000">http://127.0.0.1:5000</a>. Keep track of the output of the previous command, 
 it is your Docker container ID.</p>
@@ -10363,7 +10363,7 @@ when {
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-20T10:32:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-21T13:24:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-21</span>
       
         <br>
         Created:
