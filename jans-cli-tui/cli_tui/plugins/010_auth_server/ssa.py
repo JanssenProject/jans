@@ -153,7 +153,7 @@ class SSA(DialogUtils):
                         str(ssa['ssa']['org_id']),
                         ','.join(ssa['ssa']['software_roles']),
                         ssa['status'],
-                        '{:02d}/{:02d}/{}'.format(dt_object.day, dt_object.month, str(dt_object.year)[2:])
+                        '{:02d}/{:02d}/{}'.format(dt_object.day, dt_object.month, str(dt_object.year))
                     ))
 
         if not data_display:
