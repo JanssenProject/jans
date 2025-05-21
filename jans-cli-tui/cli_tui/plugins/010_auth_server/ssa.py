@@ -233,7 +233,7 @@ class SSA(DialogUtils):
                 ssa = result.json()
                 dialog.future.set_result(True)
                 if 'ssa' in ssa:
-                    self.app.data_display_dialog(data=ssa, title=_("SSA Token"), message=_("Save and store it securely. This is the only time you see this token."))
+                    self.app.data_display_dialog(data=ssa, title=_("SSA Token"), message=_("You can save the token by using < Export > button."))
                     self.get_ssa()
                 else:
                     self.app.show_message(_(common_strings.error), _("Something not went good while creating SSA:" + "\n" + str(ssa)), tobefocused = self.main_container)
