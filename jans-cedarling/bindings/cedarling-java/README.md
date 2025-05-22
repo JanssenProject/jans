@@ -44,9 +44,11 @@ cp ./target/release/{build_file} ./bindings/cedarling-java/src/main/resources
 
 ### Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
 
+**Note:** This recipe is compatible with Jans version 1.4.0 and earlier.
+
 1. Upload [bootstrap.json](./docs/bootstrap.json), [policy-store.json](./docs/policy-store.json), [action.txt](./docs/action.txt), [context.json](./docs/context.json), [principals.json](./docs/principals.json) and [resource.json](./docs/resource.json) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server.
 2. Upload the generate `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
-3. The following Post Authn script has been created for calling Cedarling authorization. Add and enable the following [Post Authn custom script](./docs/sample_cedarling_post_authn.txt) (in Java) with following Custom Properties:
+3. The following Post Authn script has been created for calling Cedarling authorization. Add and enable the following [Post Authn custom script](./docs/sample_cedarling_post_authn.txt) (in Java) with following Custom Properties. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
 
 |Key|Values|
 |---|------|
@@ -55,8 +57,6 @@ cp ./target/release/{build_file} ./bindings/cedarling-java/src/main/resources
 |RESOURCE_FILE_PATH|./custom/static/resource.json|
 |CONTEXT_FILE_PATH|./custom/static/context.json|
 |PRINCIPALS_FILE_PATH|./custom/static/principals.json|
-
-**Note:** The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
 
 4. Map the script with client used to perform authentication.
 

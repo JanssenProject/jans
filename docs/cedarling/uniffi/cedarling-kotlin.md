@@ -36,7 +36,9 @@ Please refer to [this document](./cedarling-uniffi.md) for details on the struct
 
 ## Recipes
 
-### Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
+### **Recipe 1:** Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
+
+**Note:** This recipe is compatible with Jans version 1.4.0 and earlier.
 
 - Upload [bootstrap.json](./cedarling-sample-inputs.md/#bootstrapjson), [policy-store.json](./cedarling-sample-inputs.md/#policy-storejson), [action.txt](./cedarling-sample-inputs.md/#actiontxt), [context.json](./cedarling-sample-inputs.md/#contextjson), [principals.json](./cedarling-sample-inputs.md/#principalsjson) and [resource.json](./cedarling-sample-inputs.md/#resourcejson) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
 - Upload the generate `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
@@ -55,7 +57,7 @@ Please refer to [this document](./cedarling-uniffi.md) for details on the struct
 
 - The script runs after client authentication to invoke Cedarling authz.
 
-### Sample Java Maven project using the Kotlin binding
+### **Recipe 2:** Sample Java Maven project using the Kotlin binding
 
 1. Build Cedarling:
     ```bash
