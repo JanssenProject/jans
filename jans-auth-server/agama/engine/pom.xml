@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>jans-auth-server-parent</artifactId>
-        <version>0.0.0-yuriyz-nightly</version>
+        <version>0.0.0-nightly</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>agama-transpiler</artifactId>
-            <version>0.0.0-nightly</version>
+            <version>${project.version}</version>
         </dependency>
         
         <!-- SERVLET -->
