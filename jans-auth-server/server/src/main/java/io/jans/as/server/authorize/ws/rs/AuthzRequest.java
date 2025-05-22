@@ -71,6 +71,16 @@ public class AuthzRequest {
     private Client client;
     private OAuth2AuditLog auditLog;
     private boolean promptFromJwt;
+    private boolean shouldReturnSessionJwt;
+
+    public boolean getShouldReturnSessionJwt() {
+        return shouldReturnSessionJwt;
+    }
+
+    public AuthzRequest setShouldReturnSessionJwt(boolean shouldReturnSessionJwt) {
+        this.shouldReturnSessionJwt = shouldReturnSessionJwt;
+        return this;
+    }
 
     public String getAuthzDetailsString() {
         return authzDetailsString;
@@ -464,23 +474,34 @@ public class AuthzRequest {
                 ", idTokenHint='" + idTokenHint + '\'' +
                 ", loginHint='" + loginHint + '\'' +
                 ", acrValues='" + acrValues + '\'' +
-                ", authorizationChallengeSession='" + authorizationChallengeSession + '\'' +
                 ", amrValues='" + amrValues + '\'' +
                 ", request='" + request + '\'' +
                 ", requestUri='" + requestUri + '\'' +
-                ", authzDetailsString='" + authzDetailsString + '\'' +
-                ", authzDetails='" + authzDetails + '\'' +
                 ", sessionId='" + sessionId + '\'' +
                 ", originHeaders='" + originHeaders + '\'' +
                 ", codeChallenge='" + codeChallenge + '\'' +
                 ", codeChallengeMethod='" + codeChallengeMethod + '\'' +
                 ", customResponseHeaders='" + customResponseHeaders + '\'' +
-                ", customParameters='" + customParameters+ '\'' +
                 ", claims='" + claims + '\'' +
                 ", authReqId='" + authReqId + '\'' +
+                ", dpopJkt='" + dpopJkt + '\'' +
+                ", dpop='" + dpop + '\'' +
+                ", authzDetailsString='" + authzDetailsString + '\'' +
+                ", authzDetails=" + authzDetails +
+                ", httpMethod='" + httpMethod + '\'' +
+                ", authorizationChallengeSession='" + authorizationChallengeSession + '\'' +
+                ", authorizationChallengeSessionObject=" + authorizationChallengeSessionObject +
+                ", useAuthorizationChallengeSession=" + useAuthorizationChallengeSession +
                 ", httpRequest=" + httpRequest +
                 ", httpResponse=" + httpResponse +
                 ", securityContext=" + securityContext +
+                ", customParameters=" + customParameters +
+                ", jwtRequest=" + jwtRequest +
+                ", redirectUriResponse=" + redirectUriResponse +
+                ", client=" + client +
+                ", auditLog=" + auditLog +
+                ", promptFromJwt=" + promptFromJwt +
+                ", shouldReturnSessionJwt=" + shouldReturnSessionJwt +
                 '}';
     }
 }
