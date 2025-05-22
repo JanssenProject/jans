@@ -315,6 +315,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         # make scope offline_access as default
         self.dbUtils.set_configuration("jansDefScope", "true", "inum=C4F6,ou=scopes,o=jans")
+        # make scope revoke_session as default
+        self.dbUtils.set_configuration("jansDefScope", "true", "inum=7D90,ou=scopes,o=jans")
 
         self.create_test_client_keystore()
 
