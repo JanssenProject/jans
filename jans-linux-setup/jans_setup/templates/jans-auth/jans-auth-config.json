@@ -21,6 +21,7 @@
       "ssa",
       "global_token_revocation",
       "status_list",
+      "session_status_list",
       "rate_limit",
       "access_evaluation"
     ],
@@ -145,6 +146,21 @@
         "A256CBC+HS512",
         "A128GCM",
         "A256GCM"
+    ],
+    "sessionJwtSigningAlgValuesSupported":[
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
     ],
     "txTokenSigningAlgValuesSupported":[
         "HS256",

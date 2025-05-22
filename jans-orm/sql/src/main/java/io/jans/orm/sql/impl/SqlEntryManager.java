@@ -41,6 +41,7 @@ import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.PersistenceMetadata;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.reflect.property.PropertyAnnotation;
@@ -909,6 +910,11 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     @Override
 	public String getPersistenceType(String primaryKey) {
 		return SqlEntryManagerFactory.PERSISTENCE_TYPE;
+	}
+
+	@Override
+	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
+		return operationService.getPersistenceMetadata(primaryKey);
 	}
 
 	@Override
