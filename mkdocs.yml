@@ -198,6 +198,7 @@ nav:
       - Token Revocation: janssen-server/auth-server/endpoints/token-revocation.md
       - Global Token Revocation: janssen-server/auth-server/endpoints/global-token-revocation.md
       - Session Revocation: janssen-server/auth-server/endpoints/session-revocation.md
+      - Session Status List: janssen-server/auth-server/endpoints/session-status-list.md
       - End Session: janssen-server/auth-server/endpoints/end-session.md
       - Clientinfo: janssen-server/auth-server/endpoints/clientinfo.md
       - JWKS URI: janssen-server/auth-server/endpoints/jwks-uri.md
