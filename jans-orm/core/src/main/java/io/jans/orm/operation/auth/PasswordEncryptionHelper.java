@@ -6,7 +6,6 @@
 
 package io.jans.orm.operation.auth;
 
-import java.io.ByteArrayOutputStream;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -25,8 +24,6 @@ import org.bouncycastle.crypto.params.Argon2Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.mkammerer.argon2.Argon2;
-import de.mkammerer.argon2.Argon2Factory;
 import io.jans.orm.util.StringHelper;
 
 /**
@@ -38,11 +35,16 @@ public final class PasswordEncryptionHelper {
 
     private static final byte[] CRYPT_SALT_CHARS = StringHelper.getBytesUtf8("./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 
-    HashMap<String, String> config;
+    private static final HashMap<String, String> passwordEncryptionParameters = new HashMap<String, String>();
+
     private PasswordEncryptionHelper() {
     }
 
-    /**
+    public static void initPasswordencryptionparameters(HashMap<String, String> overrideParameters) {
+    	passwordEncryptionParameters.putAll(overrideParameters);
+	}
+
+	/**
      * Get the algorithm from the stored password
      */
     public static PasswordEncryptionMethod findAlgorithm(String credentials) {
@@ -484,7 +486,7 @@ public final class PasswordEncryptionHelper {
 	}
 
     /**
-     * Gets the credentials from a PKCS5S2 hash. The salt for PKCS5S2 hash is prepended to the password
+     * Gets the credentials from a Argon2 hash
      */
     private static PasswordDetails getArgon2Credentials(byte[] credentials, int algoLength, PasswordEncryptionMethod algorithm) {
         byte[] encodedHash = Base64.getDecoder().decode(StringHelper.utf8ToString(credentials, algoLength, credentials.length - algoLength));
@@ -540,45 +542,6 @@ public final class PasswordEncryptionHelper {
         byte[] password = Arrays.copyOfRange(credentials, pos + 1, credentials.length);
 
         return new PasswordDetails(algorithm, salt, password);
-    }
-    
-    public static void main(String[] args) {
-        Argon2 argon2 = Argon2Factory.create();
-    	PasswordEncryptionHelper peh = new PasswordEncryptionHelper();
-    	String storagePassword = peh.createStoragePassword("mySecurePassword123", PasswordEncryptionMethod.HASH_METHOD_ARGON2);
-    	System.out.println(storagePassword);
-    	boolean compared = peh.compareCredentials("mySecurePassword123", storagePassword);
-    	System.out.println(compared);
-    	PasswordDetails pd = peh.splitCredentials(StringHelper.getBytesUtf8(storagePassword));
-
-        char[] password = "mySecurePassword123".toCharArray();
-        try {
-        	byte[] hash0 = StringHelper.getBytesUtf8("{ARGON2}" + Base64.getEncoder().withoutPadding().encodeToString(StringHelper.getBytesUtf8("$argon2i$v=19$m=65536,t=2,p=1$XrdN88Mckc+nPmX5DkBhnA$gbHnVX3MXVmEkMgnyGj6nr+dBKZxh85Zfsd033uRLUo")));
-        	
-
-            // Проверка
-        	String hash = Argon2EncodingUtils.encode(pd.getPassword(), (Argon2Parameters) pd.getExtendedParameters());
-            boolean matches = argon2.verify(hash, password);
-            System.out.println("Password matches: " + matches);
-
-			/*
-			 * boolean matches2 = argon2.verify(hash1, password);
-			 * System.out.println("Password matches2: " + matches2);
-			 */            
-//            // Парсинг хеша
-//            Argon2Helper.Argon2Hash decoded = Argon2Helper.decode(hash);
-//
-//            // Извлечение параметров
-//            System.out.println("Algorithm: " + decoded.getAlgorithm()); // argon2i, argon2d, argon2id
-//            System.out.println("Version: " + decoded.getVersion());     // 19 (0x13)
-//            System.out.println("Memory (m): " + decoded.getMemory());  // 65536 (KB)
-//            System.out.println("Iterations (t): " + decoded.getIterations()); // 2
-//            System.out.println("Parallelism (p): " + decoded.getParallelism()); // 1
-//            System.out.println("Salt: " + decoded.getSaltAsHex());     // Соль в HEX
-//            System.out.println("Hash: " + decoded.getHashAsHex());     // Хеш в HEX
-        } finally {
-            argon2.wipeArray(password);
-        }
     }
 
 }
