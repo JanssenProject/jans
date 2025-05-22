@@ -6,6 +6,7 @@
 
 package io.jans.orm.operation.auth;
 
+import java.io.ByteArrayOutputStream;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,15 +14,20 @@ import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.apache.commons.codec.digest.Crypt;
-import io.jans.orm.util.StringHelper;
-
+import org.bouncycastle.crypto.generators.Argon2BytesGenerator;
+import org.bouncycastle.crypto.params.Argon2Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
+import io.jans.orm.util.StringHelper;
 
 /**
  * Perform authentication and password encryption
@@ -32,6 +38,7 @@ public final class PasswordEncryptionHelper {
 
     private static final byte[] CRYPT_SALT_CHARS = StringHelper.getBytesUtf8("./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 
+    HashMap<String, String> config;
     private PasswordEncryptionHelper() {
     }
 
@@ -105,12 +112,14 @@ public final class PasswordEncryptionHelper {
      * specified algorithm requires a salt then a random salt of 8 byte size is used
      */
     public static byte[] createStoragePassword(byte[] credentials, PasswordEncryptionMethod algorithm) {
+    	algorithm = algorithm;
         // Check plain text password
         if (algorithm == null) {
             return credentials;
         }
 
         byte[] salt;
+        Object extendedParameter = null;
 
         switch (algorithm) {
         case HASH_METHOD_SSHA:
@@ -144,11 +153,29 @@ public final class PasswordEncryptionHelper {
             salt = StringHelper.getBytesUtf8(BCrypt.genSalt());
             break;
 
+        case HASH_METHOD_ARGON2:
+            // Use 16 byte salt for ARGON2
+            salt = new byte[32];
+            new SecureRandom().nextBytes(salt);
+//            int version = config.get(VERSION_KEY, Argon2Parameters.DEFAULT_VERSION);
+//            int type = config.get(VERSION_KEY, Argon2Parameters.DEFAULT_TYPE);
+//            int hashLength = config.getInt(HASH_LENGTH_KEY, Argon2Parameters.DEFAULT_HASH_LENGTH);
+//            int memory = config.getInt(MEMORY_KEY, Argon2Parameters.DEFAULT_MEMORY);
+//            int iterations = config.getInt(ITERATIONS_KEY, Argon2Parameters.DEFAULT_ITERATIONS);
+//            int parallelism = config.getInt(PARALLELISM_KEY, Argon2Parameters.DEFAULT_PARALLELISM);
+            
+            Argon2Parameters.Builder paramsBuilder = new Argon2Parameters.Builder(Argon2Parameters.ARGON2_i).
+            		withVersion(Argon2Parameters.ARGON2_VERSION_13).
+            		withIterations(2).withMemoryAsKB(65536).withParallelism(1).withSalt(salt);
+
+            extendedParameter = paramsBuilder.build();
+            break;
+
         default:
             salt = null;
         }
 
-        byte[] hashedPassword = encryptPassword(credentials, algorithm, salt);
+        byte[] hashedPassword = encryptPassword(credentials, algorithm, extendedParameter, salt);
         StringBuilder sb = new StringBuilder();
 
         sb.append('{').append(StringHelper.toUpperCase(algorithm.getPrefix())).append('}');
@@ -162,6 +189,10 @@ public final class PasswordEncryptionHelper {
             sb.append(StringHelper.utf8ToString(salt));
             sb.append('$');
             sb.append(StringHelper.utf8ToString(hashedPassword));
+        } else if (algorithm == PasswordEncryptionMethod.HASH_METHOD_ARGON2) {
+        	String encodedHash = Argon2EncodingUtils.encode(hashedPassword, (Argon2Parameters) extendedParameter);
+        	
+            sb.append(Base64.getEncoder().encodeToString(StringHelper.getBytesUtf8(encodedHash)));
         } else if (salt != null) {
             byte[] hashedPasswordWithSaltBytes = new byte[hashedPassword.length + salt.length];
 
@@ -197,7 +228,7 @@ public final class PasswordEncryptionHelper {
             PasswordDetails passwordDetails = splitCredentials(storedCredentials);
 
             // Reuse the saltedPassword information to construct the encrypted password given by the user
-            byte[] userPassword = encryptPassword(receivedCredentials, passwordDetails.getAlgorithm(), passwordDetails.getSalt());
+            byte[] userPassword = encryptPassword(receivedCredentials, passwordDetails.getAlgorithm(), passwordDetails.getExtendedParameters(), passwordDetails.getSalt());
 
             return compareBytes(userPassword, passwordDetails.getPassword());
         } else {
@@ -240,7 +271,7 @@ public final class PasswordEncryptionHelper {
     /**
      * Encrypts the given credentials based on the algorithm name and optional salt
      */
-    private static byte[] encryptPassword(byte[] credentials, PasswordEncryptionMethod algorithm, byte[] salt) {
+    private static byte[] encryptPassword(byte[] credentials, PasswordEncryptionMethod algorithm, Object extendedParameters, byte[] salt) {
         switch (algorithm) {
         case HASH_METHOD_SHA:
         case HASH_METHOD_SSHA:
@@ -281,6 +312,16 @@ public final class PasswordEncryptionHelper {
 
         case HASH_METHOD_PKCS5S2:
             return generatePbkdf2Hash(credentials, algorithm, salt);
+
+        case HASH_METHOD_ARGON2:
+        	if (extendedParameters instanceof Argon2Parameters) {
+        		Argon2Parameters parameters = (Argon2Parameters) extendedParameters;
+
+        		byte[] argon2Hash = generateArgon2Hash(credentials, parameters, 32);
+        		return argon2Hash;
+        	}
+        	
+        	throw new IllegalArgumentException("Invalid Argon2Parameters specified");
 
         default:
             return credentials;
@@ -378,6 +419,9 @@ public final class PasswordEncryptionHelper {
             algoLength = algoLength + 3;
             return getCryptCredentials(credentials, algoLength, algorithm);
 
+        case HASH_METHOD_ARGON2:
+        	return getArgon2Credentials(credentials, algoLength, algorithm);
+
         default:
             // unknown method
             throw new IllegalArgumentException("Unknown hash algorithm " + algorithm);
@@ -429,8 +473,27 @@ public final class PasswordEncryptionHelper {
         }
     }
 
+	private static byte[] generateArgon2Hash(byte[] credentials, Argon2Parameters parameters, int hashLength) {
+		Argon2BytesGenerator generator = new Argon2BytesGenerator();
+		generator.init(parameters);
+
+		byte[] result = new byte[hashLength];
+		generator.generateBytes(credentials, result);
+
+		return result;
+	}
+
     /**
-     * Gets the credentials from a PKCS5S2 hash. The salt for PKCS5S2 hash is
+     * Gets the credentials from a PKCS5S2 hash. The salt for PKCS5S2 hash is prepended to the password
+     */
+    private static PasswordDetails getArgon2Credentials(byte[] credentials, int algoLength, PasswordEncryptionMethod algorithm) {
+        byte[] encodedHash = Base64.getDecoder().decode(StringHelper.utf8ToString(credentials, algoLength, credentials.length - algoLength));
+
+        return Argon2EncodingUtils.decode(algorithm, StringHelper.utf8ToString(encodedHash));
+    }
+
+    /**
+     * Gets the credentials from a ARGON2 hash. The salt for ARGON2 hash is
      * prepended to the password
      */
     private static PasswordDetails getPbkdf2Credentials(byte[] credentials, int algoLength, PasswordEncryptionMethod algorithm) {
@@ -477,6 +540,45 @@ public final class PasswordEncryptionHelper {
         byte[] password = Arrays.copyOfRange(credentials, pos + 1, credentials.length);
 
         return new PasswordDetails(algorithm, salt, password);
+    }
+    
+    public static void main(String[] args) {
+        Argon2 argon2 = Argon2Factory.create();
+    	PasswordEncryptionHelper peh = new PasswordEncryptionHelper();
+    	String storagePassword = peh.createStoragePassword("mySecurePassword123", PasswordEncryptionMethod.HASH_METHOD_ARGON2);
+    	System.out.println(storagePassword);
+    	boolean compared = peh.compareCredentials("mySecurePassword123", storagePassword);
+    	System.out.println(compared);
+    	PasswordDetails pd = peh.splitCredentials(StringHelper.getBytesUtf8(storagePassword));
+
+        char[] password = "mySecurePassword123".toCharArray();
+        try {
+        	byte[] hash0 = StringHelper.getBytesUtf8("{ARGON2}" + Base64.getEncoder().withoutPadding().encodeToString(StringHelper.getBytesUtf8("$argon2i$v=19$m=65536,t=2,p=1$XrdN88Mckc+nPmX5DkBhnA$gbHnVX3MXVmEkMgnyGj6nr+dBKZxh85Zfsd033uRLUo")));
+        	
+
+            // Проверка
+        	String hash = Argon2EncodingUtils.encode(pd.getPassword(), (Argon2Parameters) pd.getExtendedParameters());
+            boolean matches = argon2.verify(hash, password);
+            System.out.println("Password matches: " + matches);
+
+			/*
+			 * boolean matches2 = argon2.verify(hash1, password);
+			 * System.out.println("Password matches2: " + matches2);
+			 */            
+//            // Парсинг хеша
+//            Argon2Helper.Argon2Hash decoded = Argon2Helper.decode(hash);
+//
+//            // Извлечение параметров
+//            System.out.println("Algorithm: " + decoded.getAlgorithm()); // argon2i, argon2d, argon2id
+//            System.out.println("Version: " + decoded.getVersion());     // 19 (0x13)
+//            System.out.println("Memory (m): " + decoded.getMemory());  // 65536 (KB)
+//            System.out.println("Iterations (t): " + decoded.getIterations()); // 2
+//            System.out.println("Parallelism (p): " + decoded.getParallelism()); // 1
+//            System.out.println("Salt: " + decoded.getSaltAsHex());     // Соль в HEX
+//            System.out.println("Hash: " + decoded.getHashAsHex());     // Хеш в HEX
+        } finally {
+            argon2.wipeArray(password);
+        }
     }
 
 }
