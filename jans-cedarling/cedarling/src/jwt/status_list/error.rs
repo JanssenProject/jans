@@ -7,6 +7,8 @@ use reqwest::header::ToStrError;
 use thiserror::Error;
 use url::Url;
 
+use crate::jwt::{decode::DecodeJwtError, http_utils::HttpError, validation::ValidateJwtError};
+
 #[derive(Debug, Error)]
 pub enum ParseStatusListError {
     #[error("invalid `bit` size in the status list. expected 1, 2, 4, or 8 but got: {0}")]
@@ -41,6 +43,21 @@ pub enum JwtStatusError {
 
 #[derive(Debug, Error)]
 pub enum UpdateStatusListError {
+    #[error("the openid configuration does not include a 'status_list_endpoint'")]
+    MissingStatusListUri,
+    #[error("failed to decode the status list JWT: {0}")]
+    DecodeStatusListJwt(#[from] DecodeJwtError),
+    #[error("missing validation key for the statuslist JWT from '{0}'")]
+    MissingValidationKey(String),
+    #[error("missing validator for the statuslist JWT from '{0}'")]
+    MissingValidator(String),
+    #[error("failed to validate statuslist JWT: {0}")]
+    ValidateJwtError(#[from] ValidateJwtError),
+    #[error("failed to parse status list: {0}")]
+    ParseStatusList(#[from] ParseStatusListError),
+
+    #[error("failed to get status list JWT: {0}")]
+    GetStatusListJwt(#[from] HttpError),
     #[error("failed to get status list endpoint from {0}: {1}")]
     GetStatusListEndpoint(Url, reqwest::Error),
     #[error("failed to deserialize the openid configuration for {0}: {1}")]
@@ -49,8 +66,6 @@ pub enum UpdateStatusListError {
     InvalidStatusListUri(Url, url::ParseError),
     #[error("failed to get status list from {0}: {1}")]
     GetStatusList(Url, reqwest::Error),
-    #[error("failed to parse fetched status list from {0}: {1}")]
-    ParseStatusList(Url, ParseStatusListError),
     #[error("the Content-Type of response from {0} is invalid: {1}")]
     InvalidContentType(Url, ToStrError),
     #[error(

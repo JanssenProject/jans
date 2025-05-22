@@ -6,6 +6,7 @@
 use super::validation::JwtValidator;
 use jsonwebtoken::Algorithm;
 use std::collections::HashMap;
+use std::fmt::Display;
 use std::hash::{DefaultHasher, Hash, Hasher};
 
 /// Holds a collection of JWT validators keyed by a hash.
@@ -28,17 +29,71 @@ pub struct ValidatorInfo<'a> {
     /// Optional issuer string (typically from a JWT "iss" claim).
     pub iss: Option<&'a str>,
     /// The token name (e.g., audience or application-specific).
-    pub token_name: &'a str,
+    pub token_kind: TokenKind<'a>,
     /// The algorithm used to sign the token.
     pub algorithm: Algorithm,
+}
+
+#[derive(Hash, Clone, Copy, PartialEq)]
+pub enum TokenKind<'a> {
+    /// A token that's provided by the user through the [`authorize`] function.
+    ///
+    /// [`authorize`]: crate::Cedarling::authorize
+    AuthzRequestInput(&'a str),
+    /// A statuslist JWT.
+    StatusList,
+}
+
+impl Display for TokenKind<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TokenKind::AuthzRequestInput(tkn_name) => write!(f, "{tkn_name}"),
+            TokenKind::StatusList => write!(f, "statuslist+jwt"),
+        }
+    }
 }
 
 /// Owned version of [`ValidatorInfo`] used to store entries inside `ValidatorStore`.
 #[derive(Debug)]
 struct OwnedValidatorInfo {
     iss: Option<String>,
-    token_name: String,
+    token_kind: OwnedTokenKind,
     algorithm: Algorithm,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum OwnedTokenKind {
+    /// A token that's provided by the user through the [`authorize`] function.
+    ///
+    /// [`authorize`]: crate::Cedarling::authorize
+    AuthzRequestInput(String),
+    /// A statuslist JWT.
+    StatusList,
+}
+
+impl From<TokenKind<'_>> for OwnedTokenKind {
+    fn from(tkn_kind: TokenKind<'_>) -> Self {
+        match tkn_kind {
+            TokenKind::AuthzRequestInput(tkn_name) => Self::AuthzRequestInput(tkn_name.to_string()),
+            TokenKind::StatusList => Self::StatusList,
+        }
+    }
+}
+
+impl OwnedTokenKind {
+    /// Checks for full equality with a [`TokenKind`].
+    ///
+    /// Used to resolve hash collisions in the store.
+    fn is_equal_to(&self, other: &TokenKind<'_>) -> bool {
+        match (self, other) {
+            (
+                OwnedTokenKind::AuthzRequestInput(tkn_name_string),
+                TokenKind::AuthzRequestInput(tkn_name_str),
+            ) => tkn_name_string.as_str() == *tkn_name_str,
+            (OwnedTokenKind::StatusList, TokenKind::StatusList) => true,
+            _ => false,
+        }
+    }
 }
 
 /// Hash wrapper used as a key in the internal `HashMap`.
@@ -57,7 +112,7 @@ impl ValidatorStore {
         self.0
             .entry(key)
             .or_default()
-            .push((validator_info.to_owned(), validator));
+            .push((validator_info.as_owned(), validator));
     }
 
     /// Retrieves a validator matching the given `ValidatorInfo`, if present.
@@ -81,10 +136,10 @@ impl ValidatorStore {
 
 impl ValidatorInfo<'_> {
     /// Converts the borrowed validator info into an owned version for storage.
-    fn to_owned(&self) -> OwnedValidatorInfo {
+    fn as_owned(&self) -> OwnedValidatorInfo {
         OwnedValidatorInfo {
             iss: self.iss.map(|s| s.to_string()),
-            token_name: self.token_name.to_string(),
+            token_kind: self.token_kind.into(),
             algorithm: self.algorithm,
         }
     }
@@ -108,7 +163,7 @@ impl OwnedValidatorInfo {
             return false;
         }
 
-        if &self.token_name != other.token_name {
+        if self.token_kind.is_equal_to(&other.token_kind) {
             return false;
         }
 
@@ -122,18 +177,17 @@ impl OwnedValidatorInfo {
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashSet;
-
     use super::*;
     use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata};
     use crate::jwt::validation::JwtValidator;
+    use std::collections::HashSet;
 
     #[test]
     fn test_insert_and_retrieve() {
         let mut store = ValidatorStore::default();
-        let (validator, info) = JwtValidator::new(
+        let (validator, info) = JwtValidator::new_input_tkn_validator(
             Some("test"),
-            "access_tkn",
+            "access_tkn".into(),
             &TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "AccessToken".into(),
@@ -146,6 +200,7 @@ mod test {
                 required_claims: HashSet::new(),
             },
             jsonwebtoken::Algorithm::HS256,
+            None,
         );
 
         store.insert(info, validator.clone());
