@@ -7,12 +7,14 @@ on:
       - 'v**'
       - 'nightly'
 permissions:
-    contents: read
+    contents: write
 jobs:
   enrich_and_upload_sbom:
     if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
     - name: Fetch Jans SBOM from Github
       run: |
             curl -H "Accept: application/vnd.github.v3.raw" \
