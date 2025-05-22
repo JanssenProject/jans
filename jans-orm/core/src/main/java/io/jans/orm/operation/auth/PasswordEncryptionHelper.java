@@ -19,8 +19,6 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.apache.commons.codec.digest.Crypt;
-import org.bouncycastle.crypto.generators.Argon2BytesGenerator;
-import org.bouncycastle.crypto.params.Argon2Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,9 +164,10 @@ public final class PasswordEncryptionHelper {
 //            int iterations = config.getInt(ITERATIONS_KEY, Argon2Parameters.DEFAULT_ITERATIONS);
 //            int parallelism = config.getInt(PARALLELISM_KEY, Argon2Parameters.DEFAULT_PARALLELISM);
             
-            Argon2Parameters.Builder paramsBuilder = new Argon2Parameters.Builder(Argon2Parameters.ARGON2_i).
-            		withVersion(Argon2Parameters.ARGON2_VERSION_13).
-            		withIterations(2).withMemoryAsKB(65536).withParallelism(1).withSalt(salt);
+			org.bouncycastle.crypto.params.Argon2Parameters.Builder paramsBuilder = new org.bouncycastle.crypto.params.Argon2Parameters.Builder(
+					org.bouncycastle.crypto.params.Argon2Parameters.ARGON2_i)
+					.withVersion(org.bouncycastle.crypto.params.Argon2Parameters.ARGON2_VERSION_13).withIterations(2)
+					.withMemoryAsKB(65536).withParallelism(1).withSalt(salt);
 
             extendedParameter = paramsBuilder.build();
             break;
@@ -192,7 +191,7 @@ public final class PasswordEncryptionHelper {
             sb.append('$');
             sb.append(StringHelper.utf8ToString(hashedPassword));
         } else if (algorithm == PasswordEncryptionMethod.HASH_METHOD_ARGON2) {
-        	String encodedHash = Argon2EncodingUtils.encode(hashedPassword, (Argon2Parameters) extendedParameter);
+        	String encodedHash = Argon2EncodingUtils.encode(hashedPassword, (org.bouncycastle.crypto.params.Argon2Parameters) extendedParameter);
         	
             sb.append(Base64.getEncoder().encodeToString(StringHelper.getBytesUtf8(encodedHash)));
         } else if (salt != null) {
@@ -316,8 +315,8 @@ public final class PasswordEncryptionHelper {
             return generatePbkdf2Hash(credentials, algorithm, salt);
 
         case HASH_METHOD_ARGON2:
-        	if (extendedParameters instanceof Argon2Parameters) {
-        		Argon2Parameters parameters = (Argon2Parameters) extendedParameters;
+        	if (extendedParameters instanceof org.bouncycastle.crypto.params.Argon2Parameters) {
+        		org.bouncycastle.crypto.params.Argon2Parameters parameters = (org.bouncycastle.crypto.params.Argon2Parameters) extendedParameters;
 
         		byte[] argon2Hash = generateArgon2Hash(credentials, parameters, 32);
         		return argon2Hash;
@@ -475,8 +474,8 @@ public final class PasswordEncryptionHelper {
         }
     }
 
-	private static byte[] generateArgon2Hash(byte[] credentials, Argon2Parameters parameters, int hashLength) {
-		Argon2BytesGenerator generator = new Argon2BytesGenerator();
+	private static byte[] generateArgon2Hash(byte[] credentials, org.bouncycastle.crypto.params.Argon2Parameters parameters, int hashLength) {
+		org.bouncycastle.crypto.generators.Argon2BytesGenerator generator = new org.bouncycastle.crypto.generators.Argon2BytesGenerator();
 		generator.init(parameters);
 
 		byte[] result = new byte[hashLength];
@@ -495,7 +494,7 @@ public final class PasswordEncryptionHelper {
     }
 
     /**
-     * Gets the credentials from a ARGON2 hash. The salt for ARGON2 hash is
+     * Gets the credentials from a PKCS5S2  hash. The salt for PKCS5S2  hash is
      * prepended to the password
      */
     private static PasswordDetails getPbkdf2Credentials(byte[] credentials, int algoLength, PasswordEncryptionMethod algorithm) {
