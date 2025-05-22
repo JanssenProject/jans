@@ -20,7 +20,6 @@ HEALTH_ENDPOINTS = {
             'jans-casa': ['http://localhost:8080/jans-casa/health-check', []],
             'jans-fido2': ['http://localhost:8073/jans-fido2/sys/health-check', []],
             'jans-scim': ['http://localhost:8087/jans-scim/sys/health-check', []],
-            'jans-link': ['http://localhost:9091/jans-link/sys/health-check', []],
         }
 
 services_status = {}
