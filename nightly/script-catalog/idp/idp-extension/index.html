@@ -3233,6 +3233,8 @@
         
           
         
+          
+        
       
       
         
@@ -3417,6 +3419,20 @@
     <li class="md-nav__item">
       <a href="../../../janssen-server/auth-server/endpoints/session-revocation/" class="md-nav__link">
         Session Revocation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../janssen-server/auth-server/endpoints/session-status-list/" class="md-nav__link">
+        Session Status List
       </a>
     </li>
   
@@ -10056,7 +10072,7 @@
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="c1"># Update attributes before releasing them</span>
-    <span class="c1">#   context is io.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenProject/shib-oxauth-authn3/blob/nightly/src/main/java/io.jans.idp/consent/processor/PostProcessAttributesContext.java)</span>
+    <span class="c1">#   context is io.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenProject/shib-oxauth-authn3/blob/vreplace-janssen-version/src/main/java/io.jans.idp/consent/processor/PostProcessAttributesContext.java)</span>
     <span class="c1">#   configurationAttributes is java.util.Map&lt;String, SimpleCustomProperty&gt;</span>
     <span class="k">def</span> <span class="nf">updateAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s2">&quot;Idp extension. Method: updateAttributes&quot;</span>
