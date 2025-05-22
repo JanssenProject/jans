@@ -143,15 +143,6 @@
       "title-prefixes": []
     }
   },
-  "comp-docker-jans-link": {
-    "color": "0052CC",
-    "description": "Touching folder /docker-jans-link",
-    "auto-label": {
-      "branch": "",
-      "paths": ["docker-jans-link"],
-      "title-prefixes": []
-    }
-  },
   "comp-docker-jans-monolith": {
     "color": "0052CC",
     "description": "Touching folder /docker-jans-monolith",
@@ -275,24 +266,6 @@
     "auto-label": {
       "branch": "",
       "paths": ["jans-keycloak-integartion"],
-      "title-prefixes": []
-    }
-  },
-  "comp-jans-keycloak-link": {
-    "color": "0052CC",
-    "description": "Touching folder /jans-keycloak-link",
-    "auto-label": {
-      "branch": "",
-      "paths": ["jans-keycloak-link"],
-      "title-prefixes": []
-    }
-  },
-  "comp-jans-link": {
-    "color": "0052CC",
-    "description": "Touching folder /jans-link",
-    "auto-label": {
-      "branch": "",
-      "paths": ["jans-link"],
       "title-prefixes": []
     }
   },

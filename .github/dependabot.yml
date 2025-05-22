@@ -98,26 +98,6 @@ updates:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /docker-jans-keycloak-link
-    schedule:
-      interval: daily
-
-  - package-ecosystem: pip
-    directory: /docker-jans-keycloak-link
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
-    directory: /docker-jans-link
-    schedule:
-      interval: daily
-
-  - package-ecosystem: pip
-    directory: /docker-jans-link
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
     directory: /docker-jans-monolith
     schedule:
       interval: daily
@@ -213,16 +193,6 @@ updates:
       interval: daily
 
   - package-ecosystem: maven
-    directory: /jans-keycloak-link
-    schedule:
-      interval: daily
-
-  - package-ecosystem: maven
-    directory: /jans-link
-    schedule:
-      interval: daily
-
-  - package-ecosystem: maven
     directory: /jans-orm
     schedule:
       interval: daily
@@ -234,10 +204,5 @@ updates:
 
   - package-ecosystem: maven
     directory: /jans-scim
-    schedule:
-      interval: daily
-
-  - package-ecosystem: maven
-    directory: /jans-linux-setup/jans_setup/templates/jans-keycloak-link/idp-broker-api
     schedule:
       interval: daily
