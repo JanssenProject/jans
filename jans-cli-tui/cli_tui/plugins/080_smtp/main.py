@@ -12,7 +12,6 @@ from prompt_toolkit.widgets import Frame, Button, Label, Box, Dialog
 from prompt_toolkit.application import Application
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_drop_down import DropDownWidget
-from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
 from utils.multi_lang import _
 from utils.utils import DialogUtils
