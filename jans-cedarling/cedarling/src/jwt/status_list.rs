@@ -3,21 +3,27 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::io::Read;
+//! The JWT status list validation is implemented as described in this [IETF spec](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-02.html#name-referenced-token).
 
-use crate::jwt::validator::ProcessedJwt;
+mod error;
+#[cfg(test)]
+mod ietf_test_samples;
 
-use super::ParseStatusListError;
+pub use error::*;
+
+use super::validation::ValidatedJwt;
 use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
 use flate2::read::ZlibDecoder;
 use serde::Deserialize;
+use std::fmt::Display;
+use std::io::Read;
 
 #[derive(Debug, PartialEq)]
 pub struct StatusList {
     /// The number of bits used to encode a single status
-    bit_size: StatusBitSize,
+    pub bit_size: StatusBitSize,
     /// The status list
-    list: Vec<u8>,
+    pub list: Vec<u8>,
 }
 
 impl StatusList {
@@ -32,18 +38,35 @@ impl StatusList {
         })
     }
 
-    // TODO: check for out of bounds
-    pub fn get_status(&self, index: usize) -> JwtStatus {
+    /// Returns the status of the jwt at the given index (`idx`)
+    ///
+    /// Validation rules can be found in [`IETF Status List Spec. sec. 8.3 v10`]
+    ///
+    /// [`IETF Status List Spec. sec. 8.3 v10`]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#section-8.3
+    pub fn get_status(&self, index: usize) -> Result<JwtStatus, JwtStatusError> {
         let scale = (8 / self.bit_size.0) as usize;
 
         let byte_idx = index / scale;
-        let byte = self.list.get(byte_idx).unwrap();
+        let byte = self
+            .list
+            .get(byte_idx)
+            .ok_or(JwtStatusError::StatusListIdxOutOfBounds)?;
 
         let bit_idx = (index % scale) as u8;
 
-        let status = get_status_from_byte(*byte, self.bit_size.0, bit_idx);
+        let status = get_status_from_byte(*byte, self.bit_size, bit_idx);
 
-        status.into()
+        Ok(status.into())
+    }
+}
+
+/// Status list JWT from an IDP's status list endpoint
+#[derive(Debug, Deserialize, PartialEq)]
+pub struct StatusListJwtStr(pub String);
+
+impl StatusListJwtStr {
+    pub fn new(jwt_str: String) -> Self {
+        Self(jwt_str)
     }
 }
 
@@ -76,10 +99,10 @@ impl TryFrom<StatusListJwt> for StatusList {
     }
 }
 
-impl TryFrom<ProcessedJwt<'_>> for StatusList {
+impl TryFrom<ValidatedJwt<'_>> for StatusList {
     type Error = ParseStatusListError;
 
-    fn try_from(jwt: ProcessedJwt) -> Result<Self, Self::Error> {
+    fn try_from(jwt: ValidatedJwt) -> Result<Self, Self::Error> {
         let list = jwt
             .claims
             .get("lst")
@@ -98,7 +121,14 @@ impl TryFrom<ProcessedJwt<'_>> for StatusList {
     }
 }
 
-fn get_status_from_byte(byte: u8, bit_size: u8, bit_idx: u8) -> u8 {
+/// Retrieves the status byte from the given byte
+///
+/// # Panics
+///
+/// This function panics if the `bit_size` is invalid... though that shouldn't happen
+/// if [`StatusBitSize`] is initialized properly.
+fn get_status_from_byte(byte: u8, bit_size: StatusBitSize, bit_idx: u8) -> u8 {
+    let bit_size = bit_size.0;
     let mask = match bit_size {
         1 => 0b0000_0001,
         2 => 0b0000_0011,
@@ -110,10 +140,8 @@ fn get_status_from_byte(byte: u8, bit_size: u8, bit_idx: u8) -> u8 {
     };
 
     let offset = bit_idx * bit_size;
-    println!("offset: {offset}");
-    let status = (byte >> offset) & mask;
-
-    status
+     
+    (byte >> offset) & mask
 }
 
 /// See: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-status-types
@@ -127,6 +155,27 @@ pub enum JwtStatus {
     ///
     /// For Cedarling's, use-case we simply ignore these.
     Custom(u8),
+}
+
+impl JwtStatus {
+    /// Helper function to figure out if the JWT is stull valid based on it's status
+    pub fn is_valid(&self) -> bool {
+        match self {
+            JwtStatus::Valid | JwtStatus::Custom(_) => true,
+            JwtStatus::Invalid | JwtStatus::Suspended => false,
+        }
+    }
+}
+
+impl Display for JwtStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            JwtStatus::Valid => write!(f, "valid"),
+            JwtStatus::Invalid => write!(f, "invalid"),
+            JwtStatus::Suspended => write!(f, "suspended"),
+            JwtStatus::Custom(status) => write!(f, "custom ({status})"),
+        }
+    }
 }
 
 impl From<u8> for JwtStatus {
@@ -144,7 +193,13 @@ impl From<u8> for JwtStatus {
 ///
 /// Use [`StatusBitSize::try_from<u8>`] to initialize.
 #[derive(Debug, PartialEq, Clone, Copy)]
-struct StatusBitSize(u8);
+pub struct StatusBitSize(u8);
+
+impl From<StatusBitSize> for u8 {
+    fn from(value: StatusBitSize) -> Self {
+        value.0
+    }
+}
 
 impl TryFrom<u8> for StatusBitSize {
     type Error = ParseStatusListError;
@@ -157,24 +212,27 @@ impl TryFrom<u8> for StatusBitSize {
     }
 }
 
+/// compresses and encodes a status list into a string you would expect to find
+/// in the statuslist JWT's `lst` claim. See example in the [`status list spec sec. 5.1 v10`]
+///
+/// [`status list spec sec. 5.1 v10`]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#section-5.1
 #[cfg(test)]
-mod test {
+pub fn compress_and_encode(status_list: &[u8]) -> String {
+    use flate2::{Compression, write::ZlibEncoder};
     use std::io::Write;
 
-    use crate::jwt::test_utils::{MockServer, TokenTypeHeader};
+    let mut encoder = ZlibEncoder::new(Vec::new(), Compression::best());
+    encoder.write_all(status_list).expect("compress data");
+    let compressed = encoder.finish().expect("finish compression");
+    BASE64_URL_SAFE_NO_PAD.encode(compressed)
+}
 
+#[cfg(test)]
+mod test {
     use super::*;
-    use flate2::{Compression, write::ZlibEncoder};
+    use crate::jwt::test_utils::MockServer;
     use jsonwebtoken::{Algorithm, Validation, decode};
-    use serde_json::json;
     use test_utils::assert_eq;
-
-    fn compress_and_encode(data: &[u8]) -> String {
-        let mut encoder = ZlibEncoder::new(Vec::new(), Compression::best());
-        encoder.write_all(data).expect("compress data");
-        let compressed = encoder.finish().expect("finish compression");
-        BASE64_URL_SAFE_NO_PAD.encode(compressed)
-    }
 
     #[test]
     fn test_status_list_decompression() {
@@ -213,29 +271,36 @@ mod test {
         }
     }
 
+    #[test]
+    fn errors_on_out_of_bounds() {
+        let list_with_4_statuses = StatusList {
+            bit_size: 2.try_into().unwrap(),
+            list: [0b1000_0000].to_vec(),
+        };
+
+        // base case
+        let result = list_with_4_statuses
+            .get_status(3)
+            .expect("shouldn't error when getting the last status");
+        assert_eq!(result, JwtStatus::Suspended);
+
+        // error case
+        list_with_4_statuses
+            .get_status(4)
+            .expect_err("should error when getting the last status");
+    }
+
     #[tokio::test]
-    async fn test_status_list_jwt_deserialization() {
+    async fn deserialize_status_list_from_jwt() {
+        let bits = StatusBitSize::try_from(2).unwrap();
+        let lst = [0b0110_0011];
+
         let mut server = MockServer::new_with_defaults()
             .await
             .expect("initialize mock server");
+        server.generate_status_list_endpoint(bits, &lst);
 
-        let status_list_jwt = server
-            .generate_token_string_hs256(
-                TokenTypeHeader::StatusListJwt,
-                &json!({
-                    "sub": "https://demoexample.jans.io/jans-auth/restv1/status_list",
-                    "nbf": 1745295186,
-                    "status_list": {
-                      "bits": 2,
-                      "lst": "eNoDAAAAAAE"
-                    },
-                    "iss": "https://demoexample.jans.io",
-                    "exp": 1745295786,
-                    "iat": 1745295186,
-                    "ttl": 600
-                }),
-            )
-            .expect("create status list jwt");
+        let status_list_jwt = server.status_list_jwt().await.unwrap();
 
         let mut validation = Validation::new(Algorithm::HS256);
         validation.validate_exp = false;
@@ -245,16 +310,17 @@ mod test {
             .expect("decode status list JWT")
             .claims;
 
-        assert_eq!(status_list, StatusListJwt {
-            sub: "https://demoexample.jans.io/jans-auth/restv1/status_list".into(),
-            iat: 1745295186,
-            exp: Some(1745295786),
-            ttl: Some(600),
-            status_list: StatusListClaim {
-                bits: 2,
-                list: "eNoDAAAAAAE".into(),
-            },
-            aggregation_uri: None,
-        });
+        assert_eq!(
+            status_list.sub,
+            server.status_list_endpoint().unwrap().to_string()
+        );
+        assert_eq!(status_list.ttl, Some(600));
+        assert_eq!(
+            status_list.status_list,
+            StatusListClaim {
+                bits: bits.into(),
+                list: compress_and_encode(&lst)
+            }
+        );
     }
 }

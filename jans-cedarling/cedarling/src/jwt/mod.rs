@@ -16,8 +16,7 @@ mod error;
 mod http_utils;
 mod key_service;
 mod log_entry;
-#[allow(dead_code)]
-mod status_list_service;
+mod status_list;
 mod token;
 mod validation;
 mod validator_store;
@@ -37,17 +36,24 @@ use decode::*;
 use http_utils::*;
 use key_service::*;
 use log_entry::*;
+use status_list::*;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::RwLock;
 use validation::*;
 use validator_store::*;
+
+/// The value of the `iss` claim from a JWT
+type IssClaim = String;
+type StatusListUri = String;
+type ArcRwLockStatusList = Arc<RwLock<HashMap<StatusListUri, StatusList>>>;
 
 /// Handles JWT validation
 pub struct JwtService {
     validators: ValidatorStore,
     key_service: Arc<KeyService>,
     validate_jwt_signatures: bool,
-    issuer_configs: HashMap<String, IssuerConfig>,
+    issuer_configs: HashMap<IssClaim, IssuerConfig>,
     logger: Option<Logger>,
 }
 
@@ -65,6 +71,9 @@ impl JwtService {
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
+        let status_lists = jwt_config
+            .jwt_status_validation
+            .then(|| Arc::new(RwLock::new(HashMap::default())));
         let mut issuer_configs = HashMap::default();
         let mut validators = ValidatorStore::default();
         let mut key_service = KeyService::new();
@@ -85,7 +94,18 @@ impl JwtService {
 
             insert_keys(&mut key_service, jwt_config, &iss_config).await?;
 
-            update_jwt_validators(&mut validators, jwt_config, &iss_config, &logger);
+            init_jwt_validators(
+                &mut validators,
+                jwt_config,
+                &iss_config,
+                &logger,
+                status_lists.clone(),
+            );
+
+            if let Some(status_lists) = status_lists.as_ref() {
+                init_status_lists(status_lists.clone(), &iss_config, &validators, &key_service)
+                    .await?;
+            }
 
             issuer_configs.insert(iss_claim, iss_config);
         }
@@ -144,51 +164,57 @@ impl JwtService {
         Ok(validated_tokens)
     }
 
-    fn validate_jwt(
+    pub fn validate_jwt(
         &self,
         token_name: String,
         jwt: &str,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
         let decoded_jwt = decode_jwt(jwt)?;
 
-        if !self.validate_jwt_signatures {
+        if self.validate_jwt_signatures {
+            // Get decoding key
+            let decoding_key_info = decoded_jwt.decoding_key_info();
+            let decoding_key = self
+                .key_service
+                .get_key(&decoding_key_info)
+                .ok_or(ValidateJwtError::MissingValidationKey)?;
+
+            // get validator
+            let validator_key = ValidatorInfo {
+                iss: decoded_jwt.iss(),
+                token_kind: TokenKind::AuthzRequestInput(&token_name),
+                algorithm: decoded_jwt.header.alg,
+            };
+            let validator =
+                self.validators
+                    .get(&validator_key)
+                    .ok_or(ValidateJwtError::MissingValidator(
+                        decoded_jwt.iss().map(|s| s.to_string()),
+                    ))?;
+
+            // validate JWT
+            let mut validated_jwt = validator.validate_jwt(jwt, decoding_key)?;
+
+            // The users of the validated JWT will need a reference to the TrustedIssuer
+            // to do some processing so we include it here for convenience
+            validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
+
+            Ok(validated_jwt)
+        }
+        // signature validation is disabled, we skip the expensive validation step
+        //
+        // TODO: this doesn't validate the custom claims
+        else {
             // The users of the validated JWT will need a reference to the TrustedIssuer
             // to do some processing so we include it here for convenience
             let issuer_ref = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
-            return Ok(ValidatedJwt {
+
+            Ok(ValidatedJwt {
                 claims: decoded_jwt.claims.inner,
                 trusted_iss: issuer_ref,
-            });
+                status: None,
+            })
         }
-
-        // Get decoding key
-        let decoding_key_info = decoded_jwt.decoding_key_info();
-        let decoding_key = self
-            .key_service
-            .get_key(&decoding_key_info)
-            .ok_or(ValidateJwtError::MissingValidationKey)?;
-
-        // get validator
-        let validator_key = ValidatorInfo {
-            iss: decoded_jwt.iss(),
-            token_name: &token_name,
-            algorithm: decoded_jwt.header.alg,
-        };
-        let validator =
-            self.validators
-                .get(&validator_key)
-                .ok_or(ValidateJwtError::MissingValidator(
-                    decoded_jwt.iss().map(|s| s.to_string()),
-                ))?;
-
-        // validate JWT
-        let mut validated_jwt = validator.validate_jwt(jwt, decoding_key)?;
-
-        // The users of the validated JWT will need a reference to the TrustedIssuer
-        // to do some processing so we include it here for convenience
-        validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
-
-        return Ok(validated_jwt);
     }
 
     /// Use the `iss` claim of a token to retrieve a reference to a [`TrustedIssuer`]
@@ -235,18 +261,31 @@ async fn insert_keys(
     }
 
     if let Some(openid_config) = iss_config.openid_config.as_ref() {
-        key_service.get_keys(&openid_config).await?;
+        key_service.get_keys(openid_config).await?;
     }
 
     Ok(())
 }
 
-fn update_jwt_validators(
+fn init_jwt_validators(
     validators: &mut ValidatorStore,
     jwt_config: &JwtConfig,
     iss_config: &IssuerConfig,
     logger: &Option<Logger>,
+    status_lists: Option<ArcRwLockStatusList>,
 ) {
+    let iss = iss_config
+        .openid_config
+        .as_ref()
+        .map(|oidc| oidc.issuer.clone())
+        .unwrap_or_else(|| {
+            iss_config
+                .policy
+                .oidc_endpoint
+                .origin()
+                .ascii_serialization()
+        });
+
     for (token_name, tkn_metadata) in iss_config.policy.token_metadata.iter() {
         if !tkn_metadata.trusted {
             if let Some(logger) = logger {
@@ -259,22 +298,78 @@ fn update_jwt_validators(
         }
 
         for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
-            let iss = iss_config
-                .openid_config
-                .as_ref()
-                .map(|oidc| oidc.issuer.clone())
-                .unwrap_or_else(|| {
-                    iss_config
-                        .policy
-                        .oidc_endpoint
-                        .origin()
-                        .ascii_serialization()
-                });
-            let (validator, key) =
-                JwtValidator::new(Some(&iss), &token_name, tkn_metadata, algorithm);
+            let (validator, key) = JwtValidator::new_input_tkn_validator(
+                Some(&iss),
+                token_name,
+                tkn_metadata,
+                algorithm,
+                status_lists.clone(),
+            );
             validators.insert(key, validator);
         }
     }
+
+    if jwt_config.jwt_status_validation {
+        for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
+            let status_list_uri = iss_config
+                .openid_config
+                .as_ref()
+                .and_then(|conf| conf.status_list_endpoint.as_ref())
+                .map(|uri| uri.to_string());
+            let (validator, key) =
+                JwtValidator::new_status_list_tkn_validator(Some(&iss), status_list_uri, algorithm);
+            validators.insert(key, validator);
+        }
+    }
+}
+
+async fn init_status_lists(
+    status_lists: Arc<RwLock<HashMap<IssClaim, StatusList>>>,
+    iss_config: &IssuerConfig,
+    validators: &ValidatorStore,
+    key_service: &KeyService,
+) -> Result<(), UpdateStatusListError> {
+    let openid_config = iss_config
+        .openid_config
+        .as_ref()
+        .expect("TODO: handle this error");
+    let status_list_url = openid_config
+        .status_list_endpoint
+        .as_ref()
+        .ok_or(UpdateStatusListError::MissingStatusListUri)?;
+    let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url).await?;
+
+    let decoded_jwt = decode_jwt(&status_list_jwt.0)?;
+
+    // Get decoding key
+    let decoding_key_info = decoded_jwt.decoding_key_info();
+    let decoding_key = key_service.get_key(&decoding_key_info).ok_or(
+        UpdateStatusListError::MissingValidationKey(status_list_url.to_string()),
+    )?;
+
+    // get validator
+    let validator_key = ValidatorInfo {
+        iss: decoded_jwt.iss(),
+        token_kind: TokenKind::StatusList,
+        algorithm: decoded_jwt.header.alg,
+    };
+    let validator =
+        validators
+            .get(&validator_key)
+            .ok_or(UpdateStatusListError::MissingValidator(
+                status_list_url.to_string(),
+            ))?;
+
+    let status_list_jwt = validator.validate_jwt(&status_list_jwt.0, decoding_key)?;
+    let status_list: StatusList = status_list_jwt.try_into()?;
+
+    status_lists
+        .write()
+        .as_mut()
+        .expect("acquire status lists write lock")
+        .insert(status_list_url.to_string(), status_list);
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -292,7 +387,7 @@ mod test {
         let mut server = MockServer::new_with_defaults().await.unwrap();
 
         // create tokens
-        let access_tkn_claims = json!({
+        let mut access_tkn_claims = json!({
             "iss": server.issuer(),
             "sub": "some_sub",
             "jti": 1231231231,
@@ -300,9 +395,9 @@ mod test {
             "client_id": "test123",
         });
         let access_tkn = server
-            .generate_token_string_hs256(TokenTypeHeader::Jwt, &access_tkn_claims)
+            .generate_token_with_hs256sig(&mut access_tkn_claims, None)
             .unwrap();
-        let id_tkn_claims = json!({
+        let mut id_tkn_claims = json!({
             "iss": server.issuer(),
             "aud": "test123",
             "sub": "some_sub",
@@ -310,9 +405,9 @@ mod test {
             "exp": u64::MAX,
         });
         let id_tkn = server
-            .generate_token_string_hs256(TokenTypeHeader::Jwt, &id_tkn_claims)
+            .generate_token_with_hs256sig(&mut id_tkn_claims, None)
             .unwrap();
-        let userinfo_tkn_claims = json!({
+        let mut userinfo_tkn_claims = json!({
             "iss": server.issuer(),
             "aud": "test123",
             "sub": "some_sub",
@@ -320,7 +415,7 @@ mod test {
             "exp": u64::MAX,
         });
         let userinfo_tkn = server
-            .generate_token_string_hs256(TokenTypeHeader::Jwt, &userinfo_tkn_claims)
+            .generate_token_with_hs256sig(&mut userinfo_tkn_claims, None)
             .unwrap();
 
         let iss = server.trusted_issuer();

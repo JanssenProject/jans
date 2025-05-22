@@ -5,10 +5,10 @@
 
 use std::sync::LazyLock;
 
-use super::status_list_service::StatusListJwt;
+use super::status_list::StatusListJwtStr;
 use async_trait::async_trait;
 use jsonwebtoken::jwk::JwkSet;
-use reqwest::Client;
+use reqwest::{Client, header::ToStrError};
 use serde::{Deserialize, Deserializer, de};
 use url::Url;
 
@@ -91,20 +91,33 @@ impl GetFromUrl<JwkSet> for JwkSet {
 }
 
 #[async_trait]
-impl GetFromUrl<StatusListJwt> for StatusListJwt {
+impl GetFromUrl<StatusListJwtStr> for StatusListJwtStr {
     async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
-        let status_list_jwt = HTTP_CLIENT
+        let response = HTTP_CLIENT
             .get(url.as_str())
+            .header("Content-Type", "statuslist+jwt")
             .send()
             .await
             .map_err(HttpError::GetRequest)?
             .error_for_status()
-            .map_err(HttpError::ErrorCode)?
-            .json::<StatusListJwt>()
-            .await
-            .map_err(HttpError::JsonDeserializeResponse)?;
+            .map_err(HttpError::ErrorCode)?;
 
-        Ok(status_list_jwt)
+        if let Some(content_type) = response.headers().get("Content-Type") {
+            let content_type = content_type
+                .to_str()
+                .map_err(|e| HttpError::InvalidHeader("Content-Type".to_string(), e))?;
+            if content_type != "application/statuslist+jwt" {
+                return Err(HttpError::Unsupported(format!(
+                    "got unsupported status list type, '{0}', from '{1}'. Cedarling currently only supports 'application/statuslist+jwt'",
+                    content_type,
+                    url.as_str(),
+                )));
+            }
+        }
+
+        let status_list_jwt = response.text().await.map_err(HttpError::ReadTextResponse)?;
+
+        Ok(StatusListJwtStr::new(status_list_jwt))
     }
 }
 
@@ -116,4 +129,10 @@ pub enum HttpError {
     ErrorCode(#[source] reqwest::Error),
     #[error("failed to deserialize respose from JSON: {0}")]
     JsonDeserializeResponse(#[source] reqwest::Error),
+    #[error("failed to read the respose text: {0}")]
+    ReadTextResponse(#[source] reqwest::Error),
+    #[error("the value of the '{0}' header is invalid: {1}")]
+    InvalidHeader(String, ToStrError),
+    #[error("{0}")]
+    Unsupported(String),
 }
