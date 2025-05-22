@@ -33,7 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let log_type = match log_type_arg.as_str() {
         "off" => LogTypeConfig::Off,
         "stdout" => LogTypeConfig::StdOut,
-        "lock" => LogTypeConfig::Lock,
+        "lock" => unimplemented!(),
         "memory" => extract_memory_config(args),
         _ => {
             eprintln!("Invalid log type, defaulting to StdOut.");
@@ -59,6 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ..Default::default()
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+        lock_config: None,
     })
     .await?;
 
