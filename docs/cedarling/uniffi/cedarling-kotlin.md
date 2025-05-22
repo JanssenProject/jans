@@ -13,81 +13,71 @@ Please refer to [this document](./cedarling-uniffi.md) for details on the struct
 ## Building from Source
 
 1. Build Cedarling by executing below command from `./jans/jans-cedarling` of cloned jans project:
+   ```bash
+   cargo build -r -p cedarling_uniffi
+   ```
+   In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
 
-```bash
-cargo build -r -p cedarling_uniffi
-```
-In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
 2. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
-
-```bash
-cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling-java/src/main/kotlin/io/jans/cedarling
-```
+   ```bash
+   cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling-java/src/main/kotlin/io/jans/cedarling
+   ```
 
 3. Copy the generated `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file to resource directory of the `cedarling-java` Maven project. Replace `{build_file}` in the below commad with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
-
-```bash
-mkdir ./bindings/cedarling-java/src/main/resources
-cp ./target/release/{build_file} ./bindings/cedarling-java/src/main/resources
-```
+   ```bash
+   mkdir ./bindings/cedarling-java/src/main/resources
+   cp ./target/release/{build_file} ./bindings/cedarling-java/src/main/resources
+   ```
 
 4. Change directory to `./bindings/cedarling-java` and run below command to build `cedarling-java` jar file. This will generate `cedarling-java-{version}-distribution.jar` at `./bindings/cedarling-java/target/`.
-
-```bash
- mvn clean install
-```
+   ```bash
+    mvn clean install
+   ```
 
 ## Recipes
 
 ### Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
 
-1. Upload [bootstrap.json](./cedarling-uniffi.md/#bootstrap.json), [policy-store.json](./cedarling-uniffi.md/#policy-store.json), [action.txt](./cedarling-uniffi.md/#action.txt), [context.json](./cedarling-uniffi.md/#context.json), [principals.json](./cedarling-uniffi.md/#principals.json) and [resource.json](./cedarling-uniffi.md/#resource.json) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server.
-2. Upload the generate `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
-3. The following Post Authn script has been created for calling Cedarling authorization. Add and enable the following [Post Authn custom script](./cedarling-uniffi.md/#sample_cedarling_post_authn.txt) (in Java) with following Custom Properties:
+- Upload [bootstrap.json](./cedarling-sample-inputs.md/#bootstrapjson), [policy-store.json](./cedarling-sample-inputs.md/#policy-storejson), [action.txt](./cedarling-sample-inputs.md/#actiontxt), [context.json](./cedarling-sample-inputs.md/#contextjson), [principals.json](./cedarling-sample-inputs.md/#principalsjson) and [resource.json](./cedarling-sample-inputs.md/#resourcejson) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
+- Upload the generate `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
+- The following Post Authn script has been created for calling Cedarling authorization. Add and enable the [Post Authn custom script](./cedarling-sample-inputs.md/#sample_cedarling_post_authntxt) (in Java) with following Custom Properties:
+   
+   |Key|Values|
+   |---|------|
+   |BOOTSTRAP_JSON_PATH|./custom/static/bootstrap.json|
+   |ACTION_FILE_PATH|./custom/static/action.txt|
+   |RESOURCE_FILE_PATH|./custom/static/resource.json|
+   |CONTEXT_FILE_PATH|./custom/static/context.json|
+   |PRINCIPALS_FILE_PATH|./custom/static/principals.json|
 
-|Key|Values|
-|---|------|
-|BOOTSTRAP_JSON_PATH|./custom/static/bootstrap.json|
-|ACTION_FILE_PATH|./custom/static/action.txt|
-|RESOURCE_FILE_PATH|./custom/static/resource.json|
-|CONTEXT_FILE_PATH|./custom/static/context.json|
-|PRINCIPALS_FILE_PATH|./custom/static/principals.json|
+- Map the script with client used to perform authentication.
+   ![](../../assets/cedarling-adding-client-script.png)
 
-**Note:** The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
-
-4. Map the script with client used to perform authentication.
-
-![](./docs/mapping_post_authn_script_with_client.png)
-
-5. The script runs after client authentication to invoke Cedarling authz.
+- The script runs after client authentication to invoke Cedarling authz.
 
 ### Sample Java Maven project using the Kotlin binding
 
 1. Build Cedarling:
-
     ```bash
     cargo build -r -p cedarling_uniffi
     ```
-In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
-2. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
+   In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
 
+2. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
     ```bash
     cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/javaApp/src/main/kotlin/org/example
     ```
 
 3. Copy the generated `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file to resource directory of the sample Java Maven project. Replace `{build_file}` in the below commad with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
-
     ```bash
     cp ./target/release/{build_file} ./bindings/cedarling_uniffi/javaApp/src/main/resources
     ```
 
 4. Change directory to sample Java project (`./bindings/cedarling_uniffi/javaApp`) and run below command to run the main method of a Maven project from the terminal.
-
     ```bash
      mvn clean install
      mvn exec:java -Dexec.mainClass="org.example.Main"
     ```
-
 The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization with sample tokens, resource and context inputs and call log interface to print authorization logs on console.
 
 #### Sample Java Maven Project
