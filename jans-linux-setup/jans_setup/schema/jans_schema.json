@@ -4637,7 +4637,8 @@
         "jansPermissionGrantedMap",
         "jansInvolvedClnts",
         "deviceSecret",
-        "jansSessAttr"
+        "jansSessAttr",
+        "jansAttrs"
       ],
       "must": [
         "objectclass"
@@ -5641,6 +5642,28 @@
       ],
       "names": [
         "jansStatusIdxPool"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansNum",
+        "jansNodeId",
+        "dat",
+        "jansLastUpd",
+        "exp",
+        "lockKey"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansSessionStatusIdxPool"
       ],
       "oid": "jansObjClass",
       "sup": [

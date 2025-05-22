@@ -88,8 +88,8 @@ usage: jans_setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [
                      [-setup-branch SETUP_BRANCH] [--disable-config-api-security] [--cli-test-client]
                      [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT] [-disable-script DISABLE_SCRIPT]
                      [-java-version {11,17}] [-stm] [-w] [-t] [-x] [--allow-pre-released-features] [--no-data]
-                     [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-link]
-                     [--install-jans-keycloak-link] [--with-casa] [--install-jans-saml] [--install-jans-lock]
+                     [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2]
+                     [--with-casa] [--install-jans-saml] [--install-jans-lock]
                      [--install-opa] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
                      [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
                      [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
@@ -155,7 +155,6 @@ Below are the optional arguments:
 | --no-fido2 | Do not install Fido2 Server |
 | --with-casa | Install Gluu/Flex Casa Server |
 | --load-config-api-test | Load Config Api Test Data |
-| --install-link | Install Link Server |
 | -config-patch-creds CONFIG_PATCH_CREDS | password:username for downloading auto test ciba password |
 | -test-client-id TEST_CLIENT_ID | ID of test client which has all available scopes. Must be in UUID format. |
 | -test-client-pw TEST_CLIENT_PW | Secret for test client |

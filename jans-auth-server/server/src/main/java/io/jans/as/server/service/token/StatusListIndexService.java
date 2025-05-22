@@ -10,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +96,7 @@ public class StatusListIndexService {
         }
     }
 
-    public Pair<Integer, StatusIndexPool> nextIndex() {
+    public Pair<Integer, StatusIndexPool> nextIndex() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
     	// Create copy of variable to make sure that another Thread not changed it
     	StatusIndexPool localTokenPool = tokenPool;
     	int newIndex = -1;
