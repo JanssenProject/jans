@@ -16,7 +16,9 @@ import io.jans.as.server.jans.ws.rs.JansConfigurationWS;
 import io.jans.as.server.jwk.ws.rs.ArchivedJwksWebServiceImpl;
 import io.jans.as.server.jwk.ws.rs.JwkRestWebServiceImpl;
 import io.jans.as.server.register.ws.rs.RegisterRestWebServiceImpl;
+import io.jans.as.server.service.session.SessionStatusListRestWebService;
 import io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImpl;
+import io.jans.as.server.status.ws.rs.StatusListRestWebService;
 import io.jans.as.server.token.ws.rs.TokenRestWebServiceImpl;
 import io.jans.as.server.uma.ws.rs.*;
 import io.jans.as.server.userinfo.ws.rs.UserInfoRestWebServiceImpl;
@@ -53,6 +55,9 @@ public class TestResteasyInitializer extends Application {
         classes.add(JwkRestWebServiceImpl.class);
         classes.add(ArchivedJwksWebServiceImpl.class);
         classes.add(EndSessionRestWebServiceImpl.class);
+
+        classes.add(StatusListRestWebService.class);
+        classes.add(SessionStatusListRestWebService.class);
 
         classes.add(UmaPermissionRegistrationWS.class);
         classes.add(UmaResourceRegistrationWS.class);

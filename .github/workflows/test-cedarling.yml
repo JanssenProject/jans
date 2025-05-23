@@ -27,6 +27,7 @@ jobs:
     - name: Run Clippy on native target
       working-directory: jans-cedarling
       run: |
+        rustup component add clippy
         cargo clippy -- -Dwarnings
   wasm_tests:
     runs-on: ubuntu-latest
@@ -51,6 +52,7 @@ jobs:
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
       run: |
+        rustup component add clippy
         cargo clippy --target wasm32-unknown-unknown -- -Dwarnings
   python_tests:
     runs-on: ubuntu-latest
@@ -92,6 +94,7 @@ jobs:
     - name: Run build rust artifacts
       working-directory: jans-cedarling/bindings/cedarling_go
       run: |
+        rustup component add clippy
         cargo build -r -p cedarling_go
         cp "../../target/release/libcedarling_go.so" "."
     - name: Install Go dependencies
