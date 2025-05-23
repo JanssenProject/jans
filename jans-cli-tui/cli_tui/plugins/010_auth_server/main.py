@@ -108,6 +108,7 @@ class Plugin(DialogUtils):
             return
 
         self.app.app_configuration = response.json()
+        self.ssa.ssa_custom_attributes = self.app.app_configuration.get('ssaConfiguration', {}).get('ssaCustomAttributes', [])
         self.oauth_logging()
 
     def help(self):
@@ -329,6 +330,7 @@ class Plugin(DialogUtils):
     def on_page_enter(self):
         self.nav_bar.cur_navbar_selection = 0
         self.oauth_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
+
 
     def save_client_summary(self, event):
 

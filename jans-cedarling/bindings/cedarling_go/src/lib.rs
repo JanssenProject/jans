@@ -205,4 +205,9 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
             .map(|v| v.to_string())
             .collect()
     }
+
+    fn shut_down(instance_id: usize) {
+        let instance = get_instance_or_return!(instance_id);
+        BINDINGS_RUNTIME.runtime.block_on(instance.shut_down());
+    }
 }
