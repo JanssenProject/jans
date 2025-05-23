@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#integrate-cedarling-with-lock-server" class="md-skip">
+        <a href="#cedarling-lock-integration-setup-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -3231,6 +3231,8 @@
         
           
         
+          
+        
       
       
         
@@ -3415,6 +3417,20 @@
     <li class="md-nav__item">
       <a href="../../janssen-server/auth-server/endpoints/session-revocation/" class="md-nav__link">
         Session Revocation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../janssen-server/auth-server/endpoints/session-status-list/" class="md-nav__link">
+        Session Status List
       </a>
     </li>
   
@@ -7678,22 +7694,42 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#auth-server-setup" class="md-nav__link">
+    Auth Server Setup
   </a>
+  
+    <nav class="md-nav" aria-label="Auth Server Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-creating-an-ssa-jwt" class="md-nav__link">
+    1. Creating an SSA JWT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-setting-up-the-interception-script" class="md-nav__link">
+    2. Setting up the Interception Script
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-testing-the-setup" class="md-nav__link">
+    3. Testing the Setup
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#client-setup" class="md-nav__link">
+    Client Setup
   </a>
   
 </li>
@@ -9755,22 +9791,42 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#auth-server-setup" class="md-nav__link">
+    Auth Server Setup
   </a>
+  
+    <nav class="md-nav" aria-label="Auth Server Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-creating-an-ssa-jwt" class="md-nav__link">
+    1. Creating an SSA JWT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-setting-up-the-interception-script" class="md-nav__link">
+    2. Setting up the Interception Script
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-testing-the-setup" class="md-nav__link">
+    3. Testing the Setup
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#client-setup" class="md-nav__link">
+    Client Setup
   </a>
   
 </li>
@@ -9812,20 +9868,293 @@
   </a>
 
 
-<h1 id="integrate-cedarling-with-lock-server">Integrate Cedarling With Lock Server<a class="headerlink" href="#integrate-cedarling-with-lock-server" title="Permanent link">#</a></h1>
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h1 id="cedarling-lock-integration-setup-guide">Cedarling Lock Integration Setup Guide<a class="headerlink" href="#cedarling-lock-integration-setup-guide" title="Permanent link">#</a></h1>
+<p>For a Cedarling client to communicate with the Lock Server, it has to perform <a href="https://datatracker.ietf.org/doc/html/rfc7591">Dynamic Client Registration <strong>(DCR)</strong></a> with the Jans Auth Server.</p>
+<p>By default, clients cannot obtain the necessary scopes to interact with the lock server. Additional configuration is required on both the Auth Server and the client. </p>
+<p>This guide will walk you through the following setup processes:</p>
+<ul>
+<li><a href="#auth-server-setup">Auth Server Setup</a></li>
+<li><a href="#client-setup">Client Setup</a></li>
+</ul>
+<hr />
+<h2 id="auth-server-setup">Auth Server Setup<a class="headerlink" href="#auth-server-setup" title="Permanent link">#</a></h2>
+<h3 id="1-creating-an-ssa-jwt">1. Creating an SSA JWT<a class="headerlink" href="#1-creating-an-ssa-jwt" title="Permanent link">#</a></h3>
+<p>First, create a Software Statement Assertion (SSA) for your Cedarling client.</p>
+<p>The easiest way to do this is to use the Jans TUI:</p>
+<div class="highlight"><pre><span></span><code>jans<span class="w"> </span>tui
+</code></pre></div>
+<p>Navigate to:
+    <code>Auth Server</code> &gt; <code>SSA</code> &gt; <code>Add SSA</code></p>
+<p><img alt="SSA Creation using the Jans TUI!" src="../../assets/cedarling/ssa_creation_tui.png" title="SSA Creation using the Jans TUI" /></p>
+<p>When creating the SSA, ensure you:</p>
+<ul>
+<li>Add the <code>Client Credentials</code> grant type</li>
+<li>Include the following software roles:<ul>
+<li><code>https://jans.io/oauth/lock/log.write</code></li>
+<li><code>https://jans.io/oauth/lock/health.write</code></li>
+<li><code>https://jans.io/oauth/lock/telemetry.write</code></li>
+</ul>
+</li>
+</ul>
+<p>After creation, <strong>export the SSA token</strong> and save it securely.</p>
+<h3 id="2-setting-up-the-interception-script">2. Setting up the Interception Script<a class="headerlink" href="#2-setting-up-the-interception-script" title="Permanent link">#</a></h3>
+<p>Next, configure an <a href="../../janssen-server/developer/interception-scripts/"><em>interception script</em></a> to automatically add the required scopes when a Cedarling client registers.</p>
+<p>In your server, create a script file at <code>/opt/jans/jetty/jans-auth/custom/script/add_cedarling_scopes.py</code> with the following content:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">io.jans.model.custom.script.type.client</span> <span class="kn">import</span> <span class="n">ClientRegistrationType</span>
+<span class="kn">from</span> <span class="nn">io.jans.service.cdi.util</span> <span class="kn">import</span> <span class="n">CdiUtil</span>
+<span class="kn">from</span> <span class="nn">io.jans.orm.util</span> <span class="kn">import</span> <span class="n">ArrayHelper</span>
+<span class="kn">from</span> <span class="nn">io.jans.as.server.service</span> <span class="kn">import</span> <span class="n">ScopeService</span>
+<span class="kn">from</span> <span class="nn">io.jans.as.model.util</span> <span class="kn">import</span> <span class="n">JwtUtil</span>
+
+<span class="k">class</span> <span class="nc">ClientRegistration</span><span class="p">(</span><span class="n">ClientRegistrationType</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Initialization&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">containsKey</span><span class="p">(</span><span class="s2">&quot;jwks_uri&quot;</span><span class="p">)):</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Initialization failed. Property jwks_uri is not specified&quot;</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">jwks_uri</span> <span class="o">=</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;jwks_uri&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue2</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">containsKey</span><span class="p">(</span><span class="s2">&quot;scope_list&quot;</span><span class="p">)):</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Initialization failed. Property scope_list is not specified&quot;</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scope_list</span> <span class="o">=</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scope_list&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue2</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">containsKey</span><span class="p">(</span><span class="s2">&quot;trigger_scope&quot;</span><span class="p">)):</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Initialization failed. Property trigger_scope is not specified&quot;</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trigger_scope</span> <span class="o">=</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;trigger_scope&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue2</span><span class="p">()</span>
+
+        <span class="c1"># used to check if the scopes we&#39;re adding exists in the AS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scopeService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">ScopeService</span><span class="p">)</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Initialized successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>   
+
+    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Destroy&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>   
+
+    <span class="k">def</span> <span class="nf">createClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. createClient&quot;</span>
+
+        <span class="c1"># Check if the request has an SSA</span>
+        <span class="n">registerRequest</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getRegisterRequest</span><span class="p">()</span>
+        <span class="n">ssa</span> <span class="o">=</span> <span class="n">registerRequest</span><span class="o">.</span><span class="n">getSoftwareStatement</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ssa</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. No SSA provided, defaulting&quot;</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># Check if the request has a trigger_scope (this is set as &#39;cedarling&#39; by default) in the request.</span>
+        <span class="c1"># The trigger_scope is used to determine if we should add the scopes needed by Cedarling to the</span>
+        <span class="c1"># registering client.</span>
+        <span class="c1"># request_scopes = ArrayHelper.toString(registerRequest.getScope())</span>
+        <span class="n">request_scopes</span> <span class="o">=</span> <span class="n">registerRequest</span><span class="o">.</span><span class="n">getScope</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_scope</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">request_scopes</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. the scope &#39;</span><span class="si">%s</span><span class="s2">&#39; was not included in the request, defaulting&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_scope</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># add cedarling scopes</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getClient</span><span class="p">()</span>
+        <span class="n">scopes</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getScopes</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">scope</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scope_list</span><span class="p">:</span>
+            <span class="n">foundScope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scopeService</span><span class="o">.</span><span class="n">getScopeById</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">foundScope</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;did not find scope &#39;</span><span class="si">%s</span><span class="s2">&#39; in the AS&quot;</span> <span class="o">%</span> <span class="n">scope</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scopes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">scopes</span> <span class="o">=</span> <span class="p">[</span><span class="n">foundScope</span><span class="o">.</span><span class="n">getDn</span><span class="p">()]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">scopes</span> <span class="o">=</span> <span class="n">ArrayHelper</span><span class="o">.</span><span class="n">addItemToStringArray</span><span class="p">(</span><span class="n">scopes</span><span class="p">,</span> <span class="n">foundScope</span><span class="o">.</span><span class="n">getDn</span><span class="p">())</span>
+
+        <span class="n">client</span><span class="o">.</span><span class="n">setScopes</span><span class="p">(</span><span class="n">scopes</span><span class="p">)</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. added Cedarling scopes&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">updateClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. UpdateClient method&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="k">def</span> <span class="nf">getSoftwareStatementHmacSecret</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">getSoftwareStatementJwks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;SSA Cedarling Client registration. getting jwks from &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span>  <span class="bp">self</span><span class="o">.</span><span class="n">jwks_uri</span>
+        <span class="n">jwks</span> <span class="o">=</span> <span class="n">JwtUtil</span><span class="o">.</span><span class="n">getJSONWebKeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jwks_uri</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">jwks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;SSA Cedarling Client registration. jwks not found&quot;</span>
+        <span class="k">return</span> <span class="n">jwks</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">modifyPutResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">executionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">modifyReadResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">executionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">modifyPostResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">executionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div>
+<ul>
+<li><em>you can also find a copy of this script in <a href="../../jans-cedarling/lock-server-script/add_cedarling_scopes.py">jans/jans-cedarling/lock-server-script/add_cedarling_scopes.py</a></em>.</li>
+</ul>
+<p>Next, create a JSON file named <code>script_schema.json</code> with the following content: </p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_cedarling_scopes&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;aliases&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A DCR script that adds the required scopes by a client to interact with the lock server&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scriptType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_registration&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;programmingLanguage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;python&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;moduleProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;configurationProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwks_uri&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://demoexample.jans.io/jans-auth/restv1/jwks&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;JWKS URI used for the SSA validation&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scope_list&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;space-separated scopes that will be added by the script&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;trigger_scope&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;the scope that must be present for the script to run&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;revision&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scriptError&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;modified&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;internal&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;locationType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;file&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;locationPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_cedarling_scopes.py&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><em>you can also find a copy of this schema in <a href="../../jans-cedarling/lock-server-script/script_schema.json">jans/jans-cedarling/lock-server-script/script_schema.json</a></em>.</li>
+</ul>
+<blockquote>
+<p>Note:</p>
+<p>Do not change the field ordering; The Jans server expects a specific structure.</p>
+</blockquote>
+<p>Finally, register the script with the Auth Server:</p>
+<div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>post-config-scripts<span class="w"> </span>--data<span class="w"> </span>./script_schema.json
+</code></pre></div>
+<h3 id="3-testing-the-setup">3. Testing the Setup<a class="headerlink" href="#3-testing-the-setup" title="Permanent link">#</a></h3>
+<p>You can verify the setup by initializing a client registration with your SSA:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-kX<span class="w"> </span>POST<span class="w"> </span>https://demoexample.jans.io/jans-auth/restv1/register<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">    &quot;token_endpoint_auth_method&quot;: &quot;client_secret_basic&quot;,</span>
+<span class="s1">    &quot;grant_types&quot;: [&quot;client_credentials&quot;],</span>
+<span class="s1">    &quot;client_name&quot;: &quot;cedarling-test&quot;,</span>
+<span class="s1">    &quot;access_token_as_jwt&quot;: true,</span>
+<span class="s1">    &quot;scope&quot;: &quot;cedarling&quot;,</span>
+<span class="s1">    &quot;software_statement&quot;: &quot;&lt;YOUR_SSA_HERE&gt;&quot;</span>
+<span class="s1">}&#39;</span>
+</code></pre></div>
+<p>A successful response will contain the following scopes:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p>Note:</p>
+<p>If you want to learn more about configuring the example interception script, see the <a href="../../janssen-server/developer/interception-scripts/">reference</a>.</p>
+</blockquote>
+<hr />
+<h2 id="client-setup">Client Setup<a class="headerlink" href="#client-setup" title="Permanent link">#</a></h2>
+<p>To enable Lock Server integration in the Cedarling client, configure the appropriate <a href="../cedarling-properties/">bootstrap properties</a>.</p>
+<p>Here's a table of the available properties:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Allowed Values</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CEDARLING_LOCK</code></td>
+<td>Toggles the all the Lock Server integration features.</td>
+<td><code>enabled</code>, <code>disabled</code></td>
+<td><code>disabled</code></td>
+</tr>
+<tr>
+<td><code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code></td>
+<td>URI to fetch Lock Server metadata (<code>.well-known/lock-master-configuration</code>). Required if <code>CEDARLING_LOCK</code> is <code>enabled</code>.</td>
+<td>String</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>CEDARLING_LOCK_DYNAMIC_CONFIGURATION</code> (WIP)</td>
+<td>Toggles listening for Server-Sent Events (SSE) config updates.</td>
+<td><code>enabled</code>, <code>disabled</code></td>
+<td><code>disabled</code></td>
+</tr>
+<tr>
+<td><code>CEDARLING_LOCK_SSA_JWT</code></td>
+<td>SSA JWT used for DCR. This is required if you followed the <a href="#auth-server-setup">auth server setup</a>.</td>
+<td>String</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>CEDARLING_LOCK_LOG_INTERVAL</code></td>
+<td>Frequency (in seconds) of sending log messages to the Lock Server. <code>0</code> disables transmission.</td>
+<td>uint</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>CEDARLING_LOCK_HEALTH_INTERVAL</code> (WIP)</td>
+<td>Frequency (in seconds) of sending health messages to the Lock Server. <code>0</code> disables transmission.</td>
+<td>uint</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>CEDARLING_LOCK_TELEMETRY_INTERVAL</code> (WIP)</td>
+<td>Frequency (in seconds) of sending telemetry messages to the Lock Server. <code>0</code> disables transmission.</td>
+<td>uint</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>CEDARLING_LOCK_LISTEN_SSE</code> (WIP)</td>
+<td>Toggles listening for updates from the Lock Server via SSE.</td>
+<td><code>enabled</code>, <code>disabled</code></td>
+<td><code>disabled</code></td>
+</tr>
+<tr>
+<td><code>CEDARLING_LOCK_ACCEPT_INVALID_CERTS</code></td>
+<td>Allows connection to servers with invalid certificates (for testing purposes only; not available for WASM builds).</td>
+<td><code>enabled</code>, <code>disabled</code></td>
+<td><code>disabled</code></td>
+</tr>
+</tbody>
+</table>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-20T10:17:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-22T17:51:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-22</span>
       
         <br>
         Created:

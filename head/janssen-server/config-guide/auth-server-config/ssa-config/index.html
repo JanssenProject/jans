@@ -3339,6 +3339,8 @@
         
           
         
+          
+        
       
       
         
@@ -3523,6 +3525,20 @@
     <li class="md-nav__item">
       <a href="../../../auth-server/endpoints/session-revocation/" class="md-nav__link">
         Session Revocation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../auth-server/endpoints/session-status-list/" class="md-nav__link">
+        Session Status List
       </a>
     </li>
   
@@ -10147,12 +10163,13 @@ SSA with matching names.</p>
 <p>Please see description of fields at <a href="../../../auth-server/endpoints/ssa/#request-body-description">SSA field descriptions</a></p>
 <p>If you are going to create similar SSA, you can save as template by enabling checkbox <strong>Save as Template</strong> and write a template name.</p>
 <p>Once you hit <strong>&lt;   Save   &gt;</strong> button, you will have a dialog which displays created SSA as jwt. Please save it by
-using button <strong>&lt;  Export  &gt;</strong>. <em>This is the only time you see the token.</em></p>
+using button <strong>&lt;  Export  &gt;</strong>.</p>
 <p><img alt="TUI SSA Export" src="../../../../assets/tui-ssa-export.png" /></p>
 <p>If you saved as template, you can re-use it by hitting button <strong>&lt; Templates &gt;</strong> which opens a dialog that lists saved
 SSA templates.</p>
-<p>To get the detail of any SSA, bring the control on that SSA (using the tab key), and press <code>v</code>. Also can export the detail.</p>
-<p><img alt="image" src="../../../../assets/tui-ssa-detail.png" /></p>
+<p>To get the detail of any SSA, bring the control on that SSA (using the up-down arrows), and press <strong>Enter</strong>, you will have
+the following dialog, so that you can display SSA token, revoke (delete) and also edit details and recreate.</p>
+<p><img alt="TUI SSA Details" src="../../../../assets/tui-ssa-detail.png" /></p>
 <h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
 <p>Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring SSA. Endpoint details are published in the <a href="../../../reference/openapi/">Swagger
@@ -10163,7 +10180,7 @@ document</a>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-12T12:26:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-23T16:15:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-23</span>
       
         <br>
         Created:

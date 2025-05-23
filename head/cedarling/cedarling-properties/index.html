@@ -3231,6 +3231,8 @@
         
           
         
+          
+        
       
       
         
@@ -3415,6 +3417,20 @@
     <li class="md-nav__item">
       <a href="../../janssen-server/auth-server/endpoints/session-revocation/" class="md-nav__link">
         Session Revocation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../janssen-server/auth-server/endpoints/session-status-list/" class="md-nav__link">
+        Session Status List
       </a>
     </li>
   
@@ -9809,7 +9825,7 @@
 <ul>
 <li><strong><code>CEDARLING_APPLICATION_NAME</code></strong> : Human friendly identifier for this application</li>
 <li><strong><code>CEDARLING_POLICY_STORE_URI</code></strong> : Location of policy store JSON, used if policy store is not local.</li>
-<li><strong><code>CEDARLING_POLICY_STORE_ID</code></strong> : The identifier of the policy store in case there is more then one policy_store_id in the policy store.</li>
+<li><strong><code>CEDARLING_POLICY_STORE_ID</code></strong> : The identifier of the policy store in case there is more than one policy_store_id in the policy store.</li>
 <li><strong><code>CEDARLING_USER_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a User principal.</li>
 <li><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a Workload principal.</li>
 <li><strong><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code></strong> : property specifies what boolean operation to use for the <code>USER</code> and <code>WORKLOAD</code> when making authz (authorization) decisions. <a href="#user-workload-boolean-operation">See here</a>.</li>
@@ -9834,23 +9850,25 @@
 <li><strong><code>CEDARLING_LOCAL_JWKS</code></strong> : JWKS file with public keys</li>
 <li><strong><code>CEDARLING_POLICY_STORE_LOCAL</code></strong> : JSON object as string with policy store. You can use <a href="https://jsontostring.com/">this</a> converter.</li>
 <li><strong><code>CEDARLING_POLICY_STORE_LOCAL_FN</code></strong> : Local file with JSON object with policy store</li>
-<li><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the signature  of all JWT tokens. This requires an <code>iss</code> is present.</li>
+<li><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the signature of all JWT tokens. This requires an <code>iss</code> is present.</li>
 <li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the <code>.well-known/openid-configuration</code> via the <code>status_list_endpoint</code> claim and cache it. See the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">IETF Draft</a> for more info.</li>
 <li><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong> : Only tokens signed with these algorithms are acceptable to the Cedarling.</li>
-<li><strong><code>CEDARLING_ID_TOKEN_TRUST_MODE</code></strong> :  <code>Strict</code> | <code>None</code>. Varying levels of validations based on the preference of the developer.
+<li><strong><code>CEDARLING_ID_TOKEN_TRUST_MODE</code></strong> : <code>Strict</code> | <code>None</code>. Varying levels of validations based on the preference of the developer.
 <code>Strict</code> mode requires (1) id_token <code>aud</code> matches the access_token <code>client_id</code>; (2) if a Userinfo token is present, the <code>sub</code> matches the id_token, and that the <code>aud</code> matches the access token client_id.</li>
 </ul>
-<p><strong>The following bootstrap properties are only needed for enterprise deployments.</strong></p>
+<p><strong>The following bootstrap properties are only needed for the Lock Server Integration.</strong></p>
 <ul>
 <li><strong><code>CEDARLING_LOCK</code></strong> : <code>enabled</code> | <code>disabled</code>. If <code>enabled</code>, the Cedarling will connect to the Lock Server for policies, and subscribe for SSE events.</li>
 <li><strong><code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code></strong> : Required if <code>LOCK</code> == <code>enabled</code>. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. <code>.well-known/lock-master-configuration</code>.</li>
 <li><strong><code>CEDARLING_LOCK_DYNAMIC_CONFIGURATION</code></strong> : <code>enabled</code> | <code>disabled</code>, controls whether Cedarling should listen for SSE config updates.</li>
 <li><strong><code>CEDARLING_LOCK_SSA_JWT</code></strong> : SSA for DCR in a Lock Server deployment. The Cedarling will validate this SSA JWT prior to DCR.</li>
-<li><strong><code>CEDARLING_LOCK_LOG_INTERVAL</code></strong> : How often to send log messages to Lock Server (0 to turn off trasmission).</li>
+<li><strong><code>CEDARLING_LOCK_LOG_INTERVAL</code></strong> : How often to send log messages to Lock Server (0 to turn off transmission).</li>
 <li><strong><code>CEDARLING_LOCK_HEALTH_INTERVAL</code></strong> : How often to send health messages to Lock Server (0 to turn off transmission).</li>
 <li><strong><code>CEDARLING_LOCK_TELEMETRY_INTERVAL</code></strong> : How often to send telemetry messages to Lock Server (0 to turn off transmission).</li>
-<li><strong><code>CEDARLING_LOCK_LISTEN_SSE</code></strong> :  <code>enabled</code> | <code>disabled</code>: controls whether Cedarling should listen for updates from the Lock Server.</li>
+<li><strong><code>CEDARLING_LOCK_LISTEN_SSE</code></strong> : <code>enabled</code> | <code>disabled</code>: controls whether Cedarling should listen for updates from the Lock Server.</li>
+<li><strong><code>CEDARLING_LOCK_ACCEPT_INVALID_CERTS</code></strong> : <code>enabled</code> | <code>disabled</code>: Allows interaction with a Lock server with invalid certificates. Mainly used for testing. Doesn't work for WASM builds.</li>
 </ul>
+<p>controls whether Cedarling should listen for updates from the Lock Server.</p>
 <h2 id="required-properties-for-startup">Required properties for startup<a class="headerlink" href="#required-properties-for-startup" title="Permanent link">#</a></h2>
 <ul>
 <li><strong><code>CEDARLING_APPLICATION_NAME</code></strong></li>
@@ -9873,7 +9891,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-16T15:29:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-16</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-22T17:51:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-22</span>
       
         <br>
         Created:
