@@ -5,11 +5,65 @@
 
 //! # `JwtEngine`
 //!
-//! The `JwtEngine` is designed for managing JSON Web Tokens (JWTs) and provides the following functionalities:
-//! - Fetching decoding keys from a JSON Web Key Set (JWKS) provided by Identity Providers (IDPs) and storing these keys.
-//! - Extracting claims from JWTs for further processing and validation.
-//! - Validating the signatures of JWTs to ensure their integrity and authenticity.
-//! - Verifying the validity of JWTs based on claims such as expiration time and audience.
+//! The `JwtEngine` is responsible for handling JSON Web Tokens (JWTs). It provides
+//! robust functionality to support authentication and authorization flows, including:
+//!
+//! - Fetching and storing decoding keys from a JSON Web Key Set (JWKS) provided by
+//!     Identity Providers (IDPs).
+//! - Extracting and processing claims from JWTs.
+//! - Validating JWT signatures to ensure token integrity and authenticity.
+//! - Verifying token validity based on standard claims such as expiration (`exp`) and
+//!     audience (`aud`).
+//!
+//! ## Initialization
+//!
+//! The behavior of the `JwtEngine` is determined by parameters passed to [`JwtService::new`].
+//! These parameters are primarily configured via the [`jwt_config`] argument:
+//!
+//! - **JWKS (Optional)**: A JWKS string can be provided through the
+//!     `CEDARLING_LOCAL_JWKS` bootstrap property.
+//! - **Signature Validation**: JWT signature verification is supported using a wrapper
+//!     around the [`jsonwebtoken`] crate.
+//! - **Status Validation (WIP)**: Support for token status validation is being
+//!     developed in accordance with the [`IETF draft spec`].
+//! - **Algorithm Restrictions**: Only tokens signed using supported algorithms will
+//!     be validated. Tokens with unsupported algorithms will trigger a warning.
+//!
+//! Additionally, you can provide a list of **trusted issuers** during initialization.
+//! Only tokens issued by these trusted issuers, as defined in the [`policy store`],
+//! should be validated.
+//!
+//! [`jwt_config`]: JwtConfig
+//! [`policy store`]: crate::common::policy_store::PolicyStore
+//! [`IETF draft spec`]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html
+//!
+//! ## Usage
+//!
+//! The primary interface for token validation is [`JwtService::validate_tokens`].
+//!
+//! This method accepts a [`HashMap<String, String>`] representing the tokens, typically
+//! passed in through [`Cedarling::authorize`]. Each entry in the map is a
+//! `(token_name, jwt_string)` pair.
+//!
+//! Only tokens that:
+//! - match a trusted issuer defined in the [`policy store`], and
+//! - have a matching token name,
+//!
+//! will be processed. Untrusted tokens are ignored with a warning.
+//!
+//! If any token is invalid (e.g., malformed, expired, or fails validation), the
+//! method returns an error. Successfully validated tokens are returned in a `HashMap`
+//! keyed by token name.
+//!
+//! [`Cedarling::authorize`]: crate::Cedarling::authorize
+//!
+//! ## Security Features
+//!
+//! - [x] Only Accept tokens defined from the policy store
+//! - [ ] JWK rotation (WIP): The service should automatically fetch new keys if the old
+//!     ones expire.
+//! - [ ] Statuslist Check (WIP): The `status` claim of a JWT should be validated if 
+//!     present
 
 mod decode;
 mod error;
