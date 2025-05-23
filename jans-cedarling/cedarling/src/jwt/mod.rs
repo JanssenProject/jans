@@ -112,7 +112,7 @@ impl JwtService {
         let mut validated_tokens = HashMap::new();
 
         for (token_name, jwt) in tokens.iter() {
-            let validation_result = self.validate_jwt(token_name.clone(), jwt);
+            let validation_result = self.validate_single_token(token_name.clone(), jwt);
             let Ok(validated_jwt) = validation_result else {
                 match validation_result.unwrap_err() {
                     ValidateJwtError::MissingValidator(iss) => {
@@ -147,7 +147,7 @@ impl JwtService {
         Ok(validated_tokens)
     }
 
-    fn validate_jwt(
+    fn validate_single_token(
         &self,
         token_name: String,
         jwt: &str,
