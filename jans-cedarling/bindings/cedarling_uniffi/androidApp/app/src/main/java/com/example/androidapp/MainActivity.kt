@@ -29,12 +29,9 @@ import com.example.androidapp.utils.readJsonFromAssets
 import com.example.androidapp.widgets.DataCard
 import com.example.androidapp.widgets.RadioButtonGroup
 import com.example.androidapp.widgets.StateDialog
-import uniffi.mobile.AuthorizeResult
-import uniffi.mobile.Cedarling
+import uniffi.cedarling_uniffi.*;
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import uniffi.mobile.EntityData
-import uniffi.mobile.JsonValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -4,16 +4,60 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
-    <artifactId>javaApp</artifactId>
-    <version>1.0-SNAPSHOT</version>
-
+    <groupId>io.jans</groupId>
+    <artifactId>cedarling-java</artifactId>
+    <version>0.0.0-nightly</version>
+    <name>Cedarling Java binding</name>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>2.1.20</kotlin.version>
+        <jans.bom.version>${project.version}</jans.bom.version>
     </properties>
+    <scm>
+        <url>https://github.com/JanssenProject/jans</url>
+        <connection>scm:git:git://github.com/JanssenProject/jans.git</connection>
+        <developerConnection>scm:git:git@github.com:JanssenProject/jans.git</developerConnection>
+    </scm>
+    <repositories>
+        <repository>
+            <id>mavencentral</id>
+            <name>maven central</name>
+            <url>https://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+        </repository>
+        <repository>
+            <id>jans</id>
+            <name>Janssen project repository</name>
+            <url>https://maven.jans.io/maven</url>
+        </repository>
+        <repository>
+            <id>bouncycastle</id>
+            <name>Bouncy Castle</name>
+            <url>https://repo1.maven.org/maven2/org/bouncycastle</url>
+        </repository>
+        <repository>
+            <id>repository.jboss.org</id>
+            <name>JBoss Repository</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+        </repository>
+    </repositories>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-bom</artifactId>
+                <version>${jans.bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <!-- Kotlin dependencies -->
         <dependency>
@@ -37,7 +81,6 @@
             <artifactId>kotlinx-coroutines-core</artifactId>
             <version>1.6.4</version>
         </dependency>
-
         <!-- Third-party dependencies -->
         <dependency>
             <groupId>net.java.dev.jna</groupId>
@@ -48,17 +91,41 @@
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
             <version>9.37.3</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+        <!-- TestNG -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- For mocking static methods -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <!-- Kotlin compiler plugin -->
-          
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -94,7 +161,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.11.0</version>
                 <executions>
                     <!-- Replacing default-compile as it is treated specially by Maven -->
                     <execution>
@@ -122,21 +189,32 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Plugin to run the app -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
+                        <phase>package</phase>
                         <goals>
-                            <goal>java</goal>
+                            <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <!-- No mainClass transformer needed -->
+                                <!-- Include kotlin-stdlib -->
+                                <artifactSet>
+                                    <includes>
+                                        <include>org.jetbrains.kotlin:kotlin-stdlib</include>
+                                        <include>org.jetbrains.kotlin:kotlin-stdlib-jdk8</include>
+                                        <include>org.jetbrains.kotlinx:kotlinx-coroutines-core</include>
+                                        <include>net.java.dev.jna:jna</include>
+                                    </includes>
+                                </artifactSet>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>distribution</shadedClassifierName>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <mainClass>org.example.Main</mainClass>
-                </configuration>
             </plugin>
         </plugins>
     </build>

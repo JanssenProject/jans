@@ -1,0 +1,28 @@
+{
+  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+  "code": "3e2a2012-099c-464f-890b-448160c2ab25",
+  "iss": "https://account.gluu.org",
+  "token_type": "Bearer",
+  "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
+  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
+  "acr": "simple_password_auth",
+  "x5t#S256": "",
+  "nbf": 1731953030,
+  "scope": [
+    "role",
+    "openid",
+    "profile",
+    "email"
+  ],
+  "auth_time": 1731953027,
+  "exp": 1732121460,
+  "iat": 1731953030,
+  "jti": "uZUh1hDUQo6PFkBPnwpGzg",
+  "username": "Default Admin User",
+  "status": {
+    "status_list": {
+      "idx": 306,
+      "uri": "https://jans.test/jans-auth/restv1/status_list"
+    }
+  }
+}

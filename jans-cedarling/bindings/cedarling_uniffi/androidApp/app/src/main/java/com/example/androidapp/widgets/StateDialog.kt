@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.androidapp.utils.toJsonString
 import com.example.androidapp.views.JsonTreeView
-import uniffi.mobile.AuthorizeResult
+import uniffi.cedarling_uniffi.AuthorizeResult
 
 
 @Composable

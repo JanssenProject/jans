@@ -3,10 +3,7 @@ package org.example;
 import org.example.jwt.JWTCreator;
 import org.example.utils.AppUtils;
 import org.example.utils.JsonUtil;
-import uniffi.mobile.AuthorizeResult;
-import uniffi.mobile.Cedarling;
-import uniffi.mobile.CedarlingException;
-import uniffi.mobile.EntityData;
+import uniffi.cedarling_uniffi.*;
 
 import java.util.List;
 import java.util.Map;
