@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.bouncycastle.crypto.params.Argon2Parameters;
-
 /**
  * Base interface for persistence script
  *
@@ -26,9 +24,9 @@ final class Argon2EncodingUtils {
 	private static Map<Integer, String> TYPE_MAP = new HashMap<Integer, String>();
 
     static {
-    	TYPE_MAP.put(Argon2Parameters.ARGON2_d, "argon2d");
-    	TYPE_MAP.put(Argon2Parameters.ARGON2_i, "argon2i");
-    	TYPE_MAP.put(Argon2Parameters.ARGON2_id, "argon2id");
+    	TYPE_MAP.put(org.bouncycastle.crypto.params.Argon2Parameters.ARGON2_d, "argon2d");
+    	TYPE_MAP.put(org.bouncycastle.crypto.params.Argon2Parameters.ARGON2_i, "argon2i");
+    	TYPE_MAP.put(org.bouncycastle.crypto.params.Argon2Parameters.ARGON2_id, "argon2id");
     }
 
 	private Argon2EncodingUtils() {
