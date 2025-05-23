@@ -127,6 +127,6 @@ public class ConfigurationService {
     }
     
     public PersistenceMetadata getPersistenceMetadata() {
-        return persistenceManager.getPersistenceMetadata(getPersistenceType());
+        return persistenceManager.getPersistenceMetadata("o=jans");
     }
 }
