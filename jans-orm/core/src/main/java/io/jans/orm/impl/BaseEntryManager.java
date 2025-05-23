@@ -56,6 +56,7 @@ import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
 import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.model.AttributeType;
+import io.jans.orm.model.PersistenceMetadata;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.LocalizedString;
 import io.jans.orm.operation.PersistenceOperationService;
@@ -2537,5 +2538,10 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		sb.append(']');
 
 		return sb.toString();
+	}
+    
+	@Override
+	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
+        throw new UnsupportedOperationException("Method not implemented.");
 	}
 }

@@ -20,8 +20,6 @@ pub enum LoggerType {
     /// Logger that print logs to stdout
     #[serde(rename = "std_out")]
     StdOut,
-    /// Logger send log messages to `Lock` server
-    Lock,
 }
 
 impl FromStr for LoggerType {
@@ -33,7 +31,6 @@ impl FromStr for LoggerType {
         match s.as_str() {
             "memory" => Ok(Self::Memory),
             "std_out" => Ok(Self::StdOut),
-            "lock" => Ok(Self::Lock),
             "off" => Ok(Self::Off),
             _ => Err(Self::Err { logger_type: s }),
         }
@@ -47,7 +44,6 @@ impl Display for LoggerType {
             LoggerType::Off => write!(f, "off"),
             LoggerType::Memory => write!(f, "memory"),
             LoggerType::StdOut => write!(f, "stdout"),
-            LoggerType::Lock => write!(f, "lock"),
         }
     }
 }

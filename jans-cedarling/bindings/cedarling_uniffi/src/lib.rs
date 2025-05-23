@@ -303,4 +303,10 @@ impl Cedarling {
 
         Ok(result)
     }
+
+    /// Closes the connections to the Lock Server and pushes all available logs.
+    #[uniffi::method]
+    pub fn shut_down(&self) {
+        self.inner.shut_down();
+    }
 }

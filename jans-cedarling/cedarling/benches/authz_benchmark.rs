@@ -110,6 +110,7 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
             ..Default::default()
         },
         entity_builder_config: EntityBuilderConfig::default().with_workload().with_user(),
+        lock_config: None,
     };
 
     Cedarling::new(&bootstrap_config).await
@@ -151,6 +152,7 @@ async fn prepare_cedarling_with_jwt_validation(
             ..Default::default()
         },
         entity_builder_config: EntityBuilderConfig::default().with_workload().with_user(),
+        lock_config: None,
     };
 
     Cedarling::new(&bootstrap_config).await

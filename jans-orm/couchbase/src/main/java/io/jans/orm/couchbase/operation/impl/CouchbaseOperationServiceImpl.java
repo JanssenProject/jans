@@ -34,6 +34,7 @@ import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.PersistenceMetadata;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.Sort;
 import io.jans.orm.model.SortOrder;
@@ -818,4 +819,8 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         }
     }
 
+	@Override
+	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
 }

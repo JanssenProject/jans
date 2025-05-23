@@ -7,7 +7,7 @@ use crate::log::interface::{Indexed, Loggable};
 use crate::log::{BaseLogEntry, LogLevel, LogType};
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct JwtLogEntry {
     #[serde(flatten)]
     base: BaseLogEntry,
