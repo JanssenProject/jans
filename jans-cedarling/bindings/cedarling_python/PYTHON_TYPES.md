@@ -185,12 +185,12 @@ Attributes
 
 Methods
 -------
-.. method:: __init__(self, entity_type: str, id: str, **kwargs: dict)
+.. method:: __init__(self, resource_type: str, id: str, **kwargs: dict)
     Initialize a new EntityData. In kwargs the payload is a dictionary of entity attributes.
 
 .. method:: from_dict(cls, value: dict) -> EntityData
     Initialize a new EntityData from a dictionary.
-    To pass `entity_type` you need to use `type` key.
+    To pass `resource_type` you need to use `type` key.
 ___
 
 PolicyEvaluationError
@@ -263,10 +263,6 @@ ___
 
 # authorize_errors.BuildEntityError
 Error encountered while running on strict id token trust mode
-___
-
-# authorize_errors.BuildUnsignedRoleEntityError
-Error building Role entity for unsigned request
 ___
 
 # authorize_errors.CreateContextError

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["bindings/*", "cedarling", "sparkv", "test_utils"]
+members = ["bindings/*", "cedarling", "http_utils", "sparkv", "test_utils"]
 exclude = ["bindings/cedarling-java"]
 
 [workspace.dependencies]
@@ -11,6 +11,7 @@ sparkv = { path = "sparkv" }
 jsonwebtoken = "9.3.0"
 jsonwebkey = "0.3.5"
 chrono = "0.4"
+http_utils = { path = "http_utils" }
 cedarling = { path = "cedarling" }
 test_utils = { path = "test_utils" }
 wasm-bindgen = "0.2"
@@ -18,6 +19,7 @@ wasm-bindgen-futures = "0.4"
 web-sys = "0.3"
 serde-wasm-bindgen = "0.6"
 tokio = "1.42.0"
+tokio-util = "0.7.15"
 
 
 [profile.release]

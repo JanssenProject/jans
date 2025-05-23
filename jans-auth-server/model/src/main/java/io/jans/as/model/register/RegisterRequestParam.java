@@ -227,6 +227,11 @@ public enum RegisterRequestParam {
     TX_TOKEN_ENCRYPTED_RESPONSE_ENC("tx_token_encrypted_response_enc"),
 
     /**
+     * JWS alg algorithm (JWA) required for Session JWT.
+     */
+    SESSION_JWT_SIGNED_RESPONSE_ALG("session_jwt_signed_response_alg"),
+
+    /**
      * JWS alg algorithm (JWA) that must be required by the Authorization Server.
      */
     REQUEST_OBJECT_SIGNING_ALG("request_object_signing_alg"),
