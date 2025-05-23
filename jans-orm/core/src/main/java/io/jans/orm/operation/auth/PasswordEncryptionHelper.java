@@ -33,13 +33,21 @@ public final class PasswordEncryptionHelper {
 
     private static final byte[] CRYPT_SALT_CHARS = StringHelper.getBytesUtf8("./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 
-    private static final HashMap<String, String> passwordEncryptionParameters = new HashMap<String, String>();
+    private static final HashMap<String, String> overrideParameters = new HashMap<String, String>();
+
+    public static final String ARGON2_TYPE_KEY = "argon2.type";
+    public static final String ARGON2_VERSION_KEY = "argon2.version";
+    public static final String ARGON2_SALT_LENGTH_KEY = "argon2.salt-length";
+    public static final String ARGON2_MEMORY_KEY = "argon2.memory";
+    public static final String ARGON2_ITERATIONS_KEY = "argon2.iterations";
+    public static final String ARGON2_PARALLELISM_KEY = "argon2.parallelism";
+    public static final String ARGON2_HASH_LENGTH_KEY = "argon2.hash-kength";
 
     private PasswordEncryptionHelper() {
     }
 
-    public static void initPasswordencryptionparameters(HashMap<String, String> overrideParameters) {
-    	passwordEncryptionParameters.putAll(overrideParameters);
+    public static void configureParameters(HashMap<String, String> customOverrideParameters) {
+    	overrideParameters.putAll(customOverrideParameters);
 	}
 
 	/**
@@ -112,7 +120,6 @@ public final class PasswordEncryptionHelper {
      * specified algorithm requires a salt then a random salt of 8 byte size is used
      */
     public static byte[] createStoragePassword(byte[] credentials, PasswordEncryptionMethod algorithm) {
-    	algorithm = algorithm;
         // Check plain text password
         if (algorithm == null) {
             return credentials;
@@ -154,20 +161,19 @@ public final class PasswordEncryptionHelper {
             break;
 
         case HASH_METHOD_ARGON2:
-            // Use 16 byte salt for ARGON2
-            salt = new byte[32];
+        	int type = getParameterInteger(ARGON2_TYPE_KEY, org.bouncycastle.crypto.params.Argon2Parameters.ARGON2_id);
+        	int version = getParameterInteger(ARGON2_VERSION_KEY, org.bouncycastle.crypto.params.Argon2Parameters.ARGON2_VERSION_13);
+        	int saltLength = getParameterInteger(ARGON2_SALT_LENGTH_KEY, 16);
+        	int memory = getParameterInteger(ARGON2_MEMORY_KEY, 7168);
+        	int iterations = getParameterInteger(ARGON2_ITERATIONS_KEY, 5);
+        	int parallelism = getParameterInteger(ARGON2_PARALLELISM_KEY, 1);
+
+        	salt = new byte[saltLength];
             new SecureRandom().nextBytes(salt);
-//            int version = config.get(VERSION_KEY, Argon2Parameters.DEFAULT_VERSION);
-//            int type = config.get(VERSION_KEY, Argon2Parameters.DEFAULT_TYPE);
-//            int hashLength = config.getInt(HASH_LENGTH_KEY, Argon2Parameters.DEFAULT_HASH_LENGTH);
-//            int memory = config.getInt(MEMORY_KEY, Argon2Parameters.DEFAULT_MEMORY);
-//            int iterations = config.getInt(ITERATIONS_KEY, Argon2Parameters.DEFAULT_ITERATIONS);
-//            int parallelism = config.getInt(PARALLELISM_KEY, Argon2Parameters.DEFAULT_PARALLELISM);
-            
+        
 			org.bouncycastle.crypto.params.Argon2Parameters.Builder paramsBuilder = new org.bouncycastle.crypto.params.Argon2Parameters.Builder(
-					org.bouncycastle.crypto.params.Argon2Parameters.ARGON2_i)
-					.withVersion(org.bouncycastle.crypto.params.Argon2Parameters.ARGON2_VERSION_13).withIterations(2)
-					.withMemoryAsKB(65536).withParallelism(1).withSalt(salt);
+					type).withVersion(version).withIterations(iterations).withMemoryAsKB(memory)
+					.withParallelism(parallelism).withSalt(salt);
 
             extendedParameter = paramsBuilder.build();
             break;
@@ -316,9 +322,18 @@ public final class PasswordEncryptionHelper {
 
         case HASH_METHOD_ARGON2:
         	if (extendedParameters instanceof org.bouncycastle.crypto.params.Argon2Parameters) {
-        		org.bouncycastle.crypto.params.Argon2Parameters parameters = (org.bouncycastle.crypto.params.Argon2Parameters) extendedParameters;
+        		org.bouncycastle.crypto.params.Argon2Parameters argon2Parameters = (org.bouncycastle.crypto.params.Argon2Parameters) extendedParameters;
+        		org.bouncycastle.crypto.params.Argon2Parameters parameters = argon2Parameters;
+        		int hashLength = 32;
+        		if (argon2Parameters.getSecret() != null) {
+        			// Verify password hash
+        			hashLength = argon2Parameters.getSecret().length;
+        		} else {
+        			// Generate hash for password
+        			hashLength = getParameterInteger(ARGON2_HASH_LENGTH_KEY, hashLength);
+        		}
 
-        		byte[] argon2Hash = generateArgon2Hash(credentials, parameters, 32);
+        		byte[] argon2Hash = generateArgon2Hash(credentials, parameters, hashLength);
         		return argon2Hash;
         	}
         	
@@ -494,7 +509,7 @@ public final class PasswordEncryptionHelper {
     }
 
     /**
-     * Gets the credentials from a PKCS5S2  hash. The salt for PKCS5S2  hash is
+     * Gets the credentials from a PKCS5S2 hash. The salt for PKCS5S2  hash is
      * prepended to the password
      */
     private static PasswordDetails getPbkdf2Credentials(byte[] credentials, int algoLength, PasswordEncryptionMethod algorithm) {
@@ -541,6 +556,16 @@ public final class PasswordEncryptionHelper {
         byte[] password = Arrays.copyOfRange(credentials, pos + 1, credentials.length);
 
         return new PasswordDetails(algorithm, salt, password);
+    }
+    
+    private static int getParameterInteger(String name, int defaultValue) {
+    	if (!overrideParameters.containsKey(name)) {
+        	return defaultValue;
+    	}
+    	
+    	String value = overrideParameters.get(name);
+
+    	return StringHelper.toInteger(value, defaultValue);
     }
 
 }
