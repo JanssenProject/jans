@@ -59,7 +59,10 @@ public enum PasswordEncryptionMethod {
     HASH_METHOD_CRYPT_BCRYPT_B("CRYPT-BCRYPT", "BCRYPT", "bcrypt", "$2b$", 31),
 
     /** The PBKDF2-based encryption method */
-    HASH_METHOD_PKCS5S2("PKCS5S2", "PBKDF2WithHmacSHA1", "PKCS5S2", 32);
+    HASH_METHOD_PKCS5S2("PKCS5S2", "PBKDF2WithHmacSHA1", "PKCS5S2", 32),
+
+    /** The ARGON2i encryption method */
+    HASH_METHOD_ARGON2("ARGON2", "ARGON2", "argon2", 32);
 
     /** The associated name */
     private final String name;
@@ -177,6 +180,10 @@ public enum PasswordEncryptionMethod {
 
         if (matches(algorithm, HASH_METHOD_PKCS5S2)) {
             return HASH_METHOD_PKCS5S2;
+        }
+
+        if (matches(algorithm, HASH_METHOD_ARGON2)) {
+            return HASH_METHOD_ARGON2;
         }
 
         return null;

@@ -155,6 +155,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("txTokenEncryptedResponseEnc")
     private String txTokenEncryptedResponseEnc;
 
+    @JsonProperty("sessionJwtSignedResponseAlg")
+    private String sessionJwtSignedResponseAlg;
+
     @JsonProperty("authorizationDetailsTypes")
     private List<String> authorizationDetailsTypes;
 
@@ -184,6 +187,15 @@ public class ClientAttributes implements Serializable {
 
     public void setTxTokenSignedResponseAlg(String txTokenSignedResponseAlg) {
         this.txTokenSignedResponseAlg = txTokenSignedResponseAlg;
+    }
+
+    public String getSessionJwtSignedResponseAlg() {
+        return sessionJwtSignedResponseAlg;
+    }
+
+    public ClientAttributes setSessionJwtSignedResponseAlg(String sessionJwtSignedResponseAlg) {
+        this.sessionJwtSignedResponseAlg = sessionJwtSignedResponseAlg;
+        return this;
     }
 
     public String getTxTokenEncryptedResponseAlg() {
@@ -593,6 +605,7 @@ public class ClientAttributes implements Serializable {
                 ", txTokenSignedResponseAlg=" + txTokenSignedResponseAlg +
                 ", txTokenEncryptedResponseAlg=" + txTokenEncryptedResponseAlg +
                 ", txTokenEncryptedResponseEnc=" + txTokenEncryptedResponseEnc +
+                ", sessionJwtSignedResponseAlg=" + sessionJwtSignedResponseAlg +
                 ", authorizationDetailsTypes=" + authorizationDetailsTypes +
                 '}';
     }

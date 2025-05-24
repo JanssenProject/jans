@@ -62,6 +62,7 @@ import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.PersistenceMetadata;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.operation.auth.PasswordEncryptionHelper;
 import io.jans.orm.sql.impl.SqlBatchOperationWraper;
@@ -1071,6 +1072,29 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private AttributeType getAttributeType(Map<String, AttributeType> columTypes, AttributeData attribute) {
 		return columTypes.get(attribute.getName().toLowerCase());
+	}
+
+	@Override
+	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
+		try {
+			DatabaseMetaData databaseMetaData = getMetadata();
+
+			String schemaName  = connectionProvider.getSchemaName();
+			String productName = databaseMetaData.getDatabaseProductName();
+			String productVersion = databaseMetaData.getDatabaseProductVersion();
+			
+			String driverName  = databaseMetaData.getDriverName();
+			String driverVersion  = databaseMetaData.getDriverVersion();
+
+
+			PersistenceMetadata metadata = new PersistenceMetadata(schemaName, productName, productVersion, driverName, driverVersion);
+
+			return metadata;
+		} catch (SQLException ex) {
+			LOG.error("Failed to collect database metadata", ex);
+		}
+
+		return null;
 	}
 
 }

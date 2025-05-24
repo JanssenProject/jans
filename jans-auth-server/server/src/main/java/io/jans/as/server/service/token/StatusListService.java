@@ -13,6 +13,7 @@ import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.token.JwtSigner;
 import io.jans.as.server.service.DiscoveryService;
 import io.jans.as.server.service.cluster.StatusIndexPoolService;
+import io.jans.model.token.AbstractIndexPool;
 import io.jans.model.token.StatusIndexPool;
 import io.jans.model.tokenstatus.StatusList;
 import io.jans.model.tokenstatus.TokenStatus;
@@ -63,7 +64,7 @@ public class StatusListService {
 
         try {
             final List<StatusIndexPool> pools = statusTokenPoolService.getAllPools();
-            final StatusList statusList = join(pools);
+            final StatusList statusList = join(pools, appConfiguration.getStatusListBitSize(), log);
 
             final boolean isJsonRequested = CONTENT_TYPE_STATUSLIST_JSON.equalsIgnoreCase(acceptHeader);
 
@@ -96,11 +97,9 @@ public class StatusListService {
         return createResponseJwt(jsonObject);
     }
 
-    public StatusList join(List<StatusIndexPool> pools) {
-        final int bitSize = appConfiguration.getStatusListBitSize();
-
+    public static StatusList join(List<? extends AbstractIndexPool> pools, int bitSize, Logger log) {
         StatusList result = new StatusList(bitSize);
-        for (StatusIndexPool pool : pools) {
+        for (AbstractIndexPool pool : pools) {
             try {
                 final String data = pool.getData();
                 if (StringUtils.isBlank(data)) {
