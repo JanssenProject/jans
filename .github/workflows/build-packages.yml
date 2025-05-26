@@ -241,13 +241,54 @@ jobs:
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
         key: ${{ github.sha }}
+  build_macos_packages:
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: macos-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      with:
+        python-version: 3.8
+
+    - name: Build with macOS
+      continue-on-error: true
+      run: |
+        python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
+        pip3 install shiv wheel setuptools
+        echo "Building jans-linux-setup package for macOS"
+        cd jans-linux-setup
+        make zipapp || echo "Creating linux setup failed for macOS"
+        mv jans-linux-setup.pyz jans-linux-macos-setup.pyz || echo "Failed"
+        shasum -a 256 jans-linux-macos-setup.pyz > jans-linux-macos-setup.pyz.sha256sum || echo "Failed"
+        cd ../jans-cli-tui
+        make zipapp 
+        mv jans-cli-tui.pyz jans-cli-tui-macos.pyz
+        shasum -a 256 jans-cli-tui-macos.pyz > jans-cli-tui-macos.pyz.sha256sum
+
+    - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+      id: cache-installers-macos
+      with:
+        path: |
+          ${{github.workspace}}/jans-linux-setup/jans-linux-macos-setup.pyz
+          ${{github.workspace}}/jans-linux-setup/jans-linux-macos-setup.pyz.sha256sum
+          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-macos.pyz
+          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-macos.pyz.sha256sum
+        key: macos-${{ github.sha }}
   upload_python_packages:
     if: github.repository == 'JanssenProject/jans'
-    needs: build_python_packages
+    needs: [build_python_packages, build_macos_packages]
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [ubuntu, suse]
+        name: [ubuntu, suse, macos]
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
@@ -268,12 +309,19 @@ jobs:
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
-        key: ${{ github.sha }}
+          ${{github.workspace}}/jans-linux-setup/jans-linux-macos-setup.pyz
+          ${{github.workspace}}/jans-linux-setup/jans-linux-macos-setup.pyz.sha256sum
+          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-macos.pyz
+          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-macos.pyz.sha256sum
+        key: ${{ matrix.name == 'macos' && format('macos-{0}', github.sha) || github.sha }}
     - name: Get latest tag
       id: previoustag
       run: |
-        
-        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        if [[ ${{ github.event.ref }} == 'refs/tags/nightly' ]]; then
+          echo "version=0.0.0-nightly" >> $GITHUB_OUTPUT
+        else
+          echo "version=$(echo ${{ github.event.ref }} | cut -d 'v' -f 2)-stable" >> $GITHUB_OUTPUT
+        fi
         echo "tag=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
         echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
         echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
@@ -289,8 +337,8 @@ jobs:
       uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-X86-64-setup.pyz
-        asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-X86-64-setup.pyz
+        file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name == 'macos' && 'macos-setup' || format('{0}-X86-64-setup', matrix.name) }}.pyz
+        asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name == 'macos' && 'macos-setup' || format('{0}-X86-64-setup', matrix.name) }}.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
     - name: Upload checksum to release
@@ -299,8 +347,8 @@ jobs:
       uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
-        asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
+        file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name == 'macos' && 'macos-setup' || format('{0}-X86-64-setup', matrix.name) }}.pyz.sha256sum
+        asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name == 'macos' && 'macos-setup' || format('{0}-X86-64-setup', matrix.name) }}.pyz.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
     - name: Upload binaries to release
@@ -309,8 +357,8 @@ jobs:
       uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz
-        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name }}-X86-64.pyz
+        file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz
+        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name == 'macos' && 'macos' || format('{0}-X86-64', matrix.name) }}.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
     - name: Upload checksum to release
@@ -319,10 +367,11 @@ jobs:
       uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz.sha256sum
-        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name }}-X86-64.pyz.sha256sum
+        file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz.sha256sum
+        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name == 'macos' && 'macos' || format('{0}-X86-64', matrix.name) }}.pyz.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
+
   build_demo_packages:
     if: github.repository == 'JanssenProject/jans'
     # Needs cedarling wasm as jans-tarp uses the wasm package
