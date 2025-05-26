@@ -151,6 +151,7 @@ nav:
       - SCIM Group Management: janssen-server/config-guide/scim-config/scim-group-config.md
     - Custom Scripts: janssen-server/config-guide/custom-scripts-config.md
     - SMTP Configuration: janssen-server/config-guide/smtp-configuration.md
+    - HASH Passwords: janssen-server/config-guide/hash-passowrd.md
     - Link Configuration: janssen-server/config-guide/link-configuration.md
     - Custom Assets Configuration: janssen-server/config-guide/custom-assets-configuration.md
   - Database Guide:

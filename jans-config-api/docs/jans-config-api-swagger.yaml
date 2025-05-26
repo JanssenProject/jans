@@ -9338,15 +9338,15 @@ components:
           type: boolean
         adminCanView:
           type: boolean
+        adminCanAccess:
+          type: boolean
         adminCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
         userCanEdit:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -9604,6 +9604,9 @@ components:
           type: array
           items:
             type: string
+        sessionStatusListBitSize:
+          type: integer
+          format: int32
         txTokenSigningAlgValuesSupported:
           type: array
           items:
@@ -9844,6 +9847,8 @@ components:
           items:
             type: string
         includeSidInResponse:
+          type: boolean
+        includeRefreshTokenLifetimeInTokenResponse:
           type: boolean
         disablePromptLogin:
           type: boolean
@@ -10179,6 +10184,7 @@ components:
             - REVOKE_SESSION
             - GLOBAL_TOKEN_REVOCATION
             - STATUS_LIST
+            - SESSION_STATUS_LIST
             - ACTIVE_SESSION
             - END_SESSION
             - STATUS_SESSION
@@ -11002,6 +11008,8 @@ components:
           type: string
         txTokenEncryptedResponseEnc:
           type: string
+        sessionJwtSignedResponseAlg:
+          type: string
         authorizationDetailsTypes:
           type: array
           items:
@@ -11780,6 +11788,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        predefinedAttributes:
+          $ref: '#/components/schemas/SessionIdPredefinedAttributes'
         deviceSecrets:
           type: array
           items:
@@ -11797,10 +11807,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -11810,6 +11820,12 @@ components:
             type: boolean
           xml:
             name: map
+    SessionIdPredefinedAttributes:
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
     SessionPagedResult:
       type: object
       properties:
