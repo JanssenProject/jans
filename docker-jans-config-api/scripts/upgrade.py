@@ -115,7 +115,7 @@ def _transform_api_dynamic_config(conf):
         match dir_mapping["directory"]:
             # add missing service module for `/opt/jans/jetty/%s/custom/libs` dir mapping
             case "/opt/jans/jetty/%s/custom/libs":
-                for svc_module in ["jans-lock", "jans-link"]:
+                for svc_module in ["jans-lock"]:
                     if svc_module in dir_mapping["jansServiceModule"]:
                         continue
 
