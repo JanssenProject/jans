@@ -20,7 +20,7 @@ use serde::Deserialize;
 use std::fmt::Display;
 use std::io::Read;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct StatusList {
     /// The number of bits used to encode a single status
     pub bit_size: StatusBitSize,

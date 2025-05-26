@@ -9,7 +9,11 @@ use std::{
 };
 
 use crate::jwt::{
-    decode::decode_jwt, http_utils::GetFromUrl, key_service::KeyService, validation::{JwtValidatorCache, TokenKind, ValidatorInfo}, IssuerConfig
+    IssuerConfig,
+    decode::decode_jwt,
+    http_utils::GetFromUrl,
+    key_service::KeyService,
+    validation::{JwtValidatorCache, TokenKind, ValidatorInfo},
 };
 
 use super::{StatusList, StatusListJwtStr, UpdateStatusListError};
@@ -20,13 +24,7 @@ pub type StatusListUri = String;
 /// Contains an Arc<RwLock<_>> internally so clone should be fine
 #[derive(Debug, Default, Clone)]
 pub struct StatusListCache {
-    status_lists: Arc<RwLock<HashMap<StatusListUri, StatusList>>>,
-}
-
-impl StatusListCache {
-    pub fn lists(&self) -> Arc<RwLock<HashMap<StatusListUri, StatusList>>> {
-        self.status_lists.clone()
-    }
+    status_lists: HashMap<StatusListUri, Arc<RwLock<StatusList>>>,
 }
 
 impl StatusListCache {
@@ -76,20 +74,53 @@ impl StatusListCache {
         };
         let status_list: StatusList = status_list_jwt.try_into()?;
 
-        self.status_lists
-            .write()
-            .as_mut()
-            .expect("acquire status lists write lock")
-            .insert(status_list_url.to_string(), status_list);
+        self.status_lists.insert(
+            status_list_url.to_string(),
+            Arc::new(RwLock::new(status_list)),
+        );
 
         Ok(())
+    }
+
+    /// Returns the statuslist for the Given URI
+    pub fn get(&self, uri: &str) -> Option<Arc<RwLock<StatusList>>> {
+        self.status_lists.get(uri).cloned()
     }
 }
 
 impl From<HashMap<String, StatusList>> for StatusListCache {
     fn from(status_lists: HashMap<String, StatusList>) -> Self {
         Self {
-            status_lists: Arc::new(RwLock::new(status_lists)),
+            status_lists: status_lists
+                .into_iter()
+                .map(|(uri, status_list)| (uri, Arc::new(RwLock::new(status_list))))
+                .collect(),
         }
+    }
+}
+
+// we cannot derive PartialEqAutomaticall because of the Arc<RwLock<_>> in the
+// `status_lists` so we implement it manually.
+impl PartialEq for StatusListCache {
+    fn eq(&self, other: &Self) -> bool {
+        let self_status_lists = self
+            .status_lists
+            .clone()
+            .into_iter()
+            .map(|(uri, status_list)| {
+                let status_list = status_list.read().unwrap();
+                (uri, status_list.clone())
+            })
+            .collect::<HashMap<String, StatusList>>();
+        let other_status_lists = other
+            .status_lists
+            .clone()
+            .into_iter()
+            .map(|(uri, status_list)| {
+                let status_list = status_list.read().unwrap();
+                (uri, status_list.clone())
+            })
+            .collect::<HashMap<String, StatusList>>();
+        self_status_lists == other_status_lists
     }
 }

@@ -49,23 +49,12 @@ impl ValidatedJwt {
 
 /// This struct is a wrapper over [`jsonwebtoken::Validation`] which implements an
 /// additional check for requiring custom JWT claims.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct JwtValidator {
     validation: Validation,
     required_claims: HashSet<Box<str>>,
     validate_status_list: bool,
     status_list_cache: StatusListCache,
-}
-
-// we cannot derive this because of the Arc<RwLock<_>> in the statuslist cache so we
-// implement it manually.
-impl PartialEq for JwtValidator {
-    fn eq(&self, other: &Self) -> bool {
-        self.validation == other.validation
-            && self.required_claims == other.required_claims
-            // multiple read locks for an RwLock should be fine
-            && *self.status_list_cache.lists().read().unwrap() == *other.status_list_cache.lists().read().unwrap()
-    }
 }
 
 impl JwtValidator {
@@ -194,15 +183,15 @@ impl JwtValidator {
                 return Ok(validated_jwt);
             };
 
-            let status_list_cache = self.status_list_cache.lists();
-            let read_lock = status_list_cache
-                .read()
-                .expect("acquire status list read lock");
-            let status_list = read_lock
-                .get(&ref_status_list.uri)
-                .ok_or(ValidateJwtError::MissingStatusList)?;
+            let jwt_status = {
+                self.status_list_cache
+                    .get(&ref_status_list.uri)
+                    .ok_or(ValidateJwtError::MissingStatusList)?
+                    .read()
+                    .expect("obtain status list read lock")
+                    .get_status(ref_status_list.idx)?
+            };
 
-            let jwt_status = status_list.get_status(ref_status_list.idx)?;
             if !jwt_status.is_valid() {
                 return Err(ValidateJwtError::RejectJwtStatus(jwt_status));
             }
