@@ -34,7 +34,7 @@ spec:
       annotations:
       {{- if .Values.global.istio.ingress }}
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
-      {{- end }}  
+      {{- end }}
       {{- if .Values.global.casa.customAnnotations.pod }}
       {{ toYaml .Values.global.casa.customAnnotations.pod | indent 8 }}
       {{- end }}
@@ -86,7 +86,7 @@ spec:
                 /usr/bin/python3 /scripts/updatelbip.py &
                 {{- end}}
                 /app/scripts/entrypoint.sh
-            {{- end}}    
+            {{- end}}
           {{- end}}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -148,4 +148,8 @@ spec:
        - ip: {{ .Values.global.lbIp }}
          hostnames:
          - {{ .Values.global.fqdn }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{- toYaml .Values.nodeSelector | nindent 8 }}
       {{- end }}
