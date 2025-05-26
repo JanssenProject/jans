@@ -53,18 +53,18 @@ impl ValidatedJwt {
 pub struct JwtValidator {
     validation: Validation,
     required_claims: HashSet<Box<str>>,
-    /// If this is [`Some`], the status list will be validated if a JWT has a status
-    /// claim. Otherwise, it will not require the status list.
-    status_lists: Option<ArcRwLockStatusList>,
+    validate_status_list: bool,
+    status_list_cache: StatusListCache,
 }
 
-// we cannot derive this because of the `status_lists_ref` but the content of the referene
-// doesn't matter too much and this is only used for testing so this should be fine for now
+// we cannot derive this because of the Arc<RwLock<_>> in the statuslist cache so we
+// implement it manually.
 impl PartialEq for JwtValidator {
     fn eq(&self, other: &Self) -> bool {
         self.validation == other.validation
             && self.required_claims == other.required_claims
-            && self.status_lists.is_some() == self.status_lists.is_some()
+            // multiple read locks for an RwLock should be fine
+            && *self.status_list_cache.lists().read().unwrap() == *other.status_list_cache.lists().read().unwrap()
     }
 }
 
@@ -75,7 +75,8 @@ impl JwtValidator {
         tkn_name: &'a str,
         token_metadata: &TokenEntityMetadata,
         algorithm: Algorithm,
-        status_lists: Option<ArcRwLockStatusList>,
+        status_lists: StatusListCache,
+        validate_status_list: bool,
     ) -> (Self, ValidatorInfo<'a>) {
         let token_kind = TokenKind::AuthzRequestInput(tkn_name);
 
@@ -108,7 +109,8 @@ impl JwtValidator {
         let validator = JwtValidator {
             validation,
             required_claims,
-            status_lists,
+            status_list_cache: status_lists,
+            validate_status_list,
         };
 
         (validator, key)
@@ -151,7 +153,8 @@ impl JwtValidator {
         let validator = JwtValidator {
             validation,
             required_claims,
-            status_lists: None,
+            status_list_cache: StatusListCache::default(),
+            validate_status_list: false,
         };
 
         (validator, key)
@@ -183,12 +186,18 @@ impl JwtValidator {
             Err(ValidateJwtError::MissingClaims(missing_claims))?
         }
 
-        if let Some(status_lists) = self.status_lists.as_ref() {
+        if self.validate_status_list {
+            // Check if the JWT has a status claim
             let Some(ref_status_list) = validated_jwt.status() else {
+                // status validation is not required if the JWT does not
+                // have a status claim
                 return Ok(validated_jwt);
             };
 
-            let read_lock = status_lists.read().expect("acquire status list read lock");
+            let status_list_cache = self.status_list_cache.lists();
+            let read_lock = status_list_cache
+                .read()
+                .expect("acquire status list read lock");
             let status_list = read_lock
                 .get(&ref_status_list.uri)
                 .ok_or(ValidateJwtError::MissingStatusList)?;
@@ -258,12 +267,12 @@ pub enum ValidateJwtError {
 #[cfg(test)]
 mod test {
     use std::collections::{HashMap, HashSet};
-    use std::sync::{Arc, LazyLock, RwLock};
+    use std::sync::LazyLock;
 
     use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata};
     use crate::jwt::status_list::{JwtStatus, StatusBitSize, StatusList};
-    use crate::jwt::test_utils::*;
     use crate::jwt::validation::{JwtValidator, ValidateJwtError, ValidatedJwt};
+    use crate::jwt::{StatusListCache, test_utils::*};
     use jsonwebtoken::Algorithm;
     use serde_json::json;
     use test_utils::assert_eq;
@@ -310,7 +319,8 @@ mod test {
             "access_token".into(),
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            None,
+            StatusListCache::default(),
+            false,
         );
 
         let result = validator
@@ -350,7 +360,8 @@ mod test {
             "access_token".into(),
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            None,
+            StatusListCache::default(),
+            false,
         );
 
         let err = validator
@@ -384,7 +395,8 @@ mod test {
             "access_token".into(),
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            None,
+            StatusListCache::default(),
+            false,
         );
 
         let result = validator
@@ -424,7 +436,8 @@ mod test {
             "access_token".into(),
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            None,
+            StatusListCache::default(),
+            false,
         );
 
         let err = validator
@@ -463,7 +476,8 @@ mod test {
             "access_token".into(),
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            None,
+            StatusListCache::default(),
+            false,
         );
 
         let err = validator
@@ -505,7 +519,8 @@ mod test {
             "access_token".into(),
             &tkn_entity_metadata,
             Algorithm::HS256,
-            None,
+            StatusListCache::default(),
+            false,
         );
 
         let result = validator
@@ -529,7 +544,8 @@ mod test {
             "access_token".into(),
             &tkn_entity_metadata,
             Algorithm::HS256,
-            None,
+            StatusListCache::default(),
+            false,
         );
 
         let err = validator
@@ -567,20 +583,22 @@ mod test {
             .generate_token_with_hs256sig(&mut claims, Some(0))
             .unwrap();
 
-        let status_lists = Arc::new(RwLock::new(HashMap::from([(
+        let status_lists: StatusListCache = HashMap::from([(
             server.status_list_endpoint().unwrap().to_string(),
             StatusList {
                 bit_size,
                 list: status_list.to_vec(),
             },
-        )])));
+        )])
+        .into();
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(&iss),
             "access_token".into(),
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            Some(status_lists),
+            status_lists,
+            true,
         );
 
         let err = validator
@@ -620,20 +638,22 @@ mod test {
             .generate_token_with_hs256sig(&mut claims, Some(0))
             .unwrap();
 
-        let status_lists = Arc::new(RwLock::new(HashMap::from([(
+        let status_lists: StatusListCache = HashMap::from([(
             server.status_list_endpoint().unwrap().to_string(),
             StatusList {
                 bit_size: 2u8.try_into().unwrap(),
                 list: vec![0b1010_1010],
             },
-        )])));
+        )])
+        .into();
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(&iss),
             "access_token".into(),
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            Some(status_lists),
+            status_lists,
+            true,
         );
 
         let err = validator

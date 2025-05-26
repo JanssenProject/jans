@@ -38,13 +38,10 @@ use log_entry::*;
 use status_list::*;
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::sync::RwLock;
 use validation::*;
 
 /// The value of the `iss` claim from a JWT
 type IssClaim = String;
-type StatusListUri = String;
-type ArcRwLockStatusList = Arc<RwLock<HashMap<StatusListUri, StatusList>>>;
 
 /// Handles JWT validation
 pub struct JwtService {
@@ -69,9 +66,7 @@ impl JwtService {
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
-        let status_lists = jwt_config
-            .jwt_status_validation
-            .then(|| Arc::new(RwLock::new(HashMap::default())));
+        let mut status_lists = StatusListCache::default();
         let mut issuer_configs = HashMap::default();
         let mut validators = JwtValidatorCache::default();
         let mut key_service = KeyService::new();
@@ -92,16 +87,11 @@ impl JwtService {
 
             insert_keys(&mut key_service, jwt_config, &iss_config).await?;
 
-            init_jwt_validators(
-                &mut validators,
-                jwt_config,
-                &iss_config,
-                &logger,
-                status_lists.clone(),
-            );
+            validators.init_for_iss(&iss_config, jwt_config, status_lists.clone(), &logger);
 
-            if let Some(status_lists) = status_lists.as_ref() {
-                init_status_lists(status_lists.clone(), &iss_config, &validators, &key_service)
+            if jwt_config.jwt_status_validation {
+                status_lists
+                    .init_for_iss(&iss_config, &validators, &key_service)
                     .await?;
             }
 
@@ -267,116 +257,6 @@ async fn insert_keys(
     if let Some(openid_config) = iss_config.openid_config.as_ref() {
         key_service.get_keys(openid_config).await?;
     }
-
-    Ok(())
-}
-
-fn init_jwt_validators(
-    validators: &mut JwtValidatorCache,
-    jwt_config: &JwtConfig,
-    iss_config: &IssuerConfig,
-    logger: &Option<Logger>,
-    status_lists: Option<ArcRwLockStatusList>,
-) {
-    let iss = iss_config
-        .openid_config
-        .as_ref()
-        .map(|oidc| oidc.issuer.clone())
-        .unwrap_or_else(|| {
-            iss_config
-                .policy
-                .oidc_endpoint
-                .origin()
-                .ascii_serialization()
-        });
-
-    for (token_name, tkn_metadata) in iss_config.policy.token_metadata.iter() {
-        if !tkn_metadata.trusted {
-            if let Some(logger) = logger {
-                logger.log_any(JwtLogEntry::system(format!(
-                    "skipping metadata for '{}' from '{}' since `trusted == false`",
-                    token_name, iss_config.issuer_id,
-                )));
-            }
-            continue;
-        }
-
-        for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
-            let (validator, key) = JwtValidator::new_input_tkn_validator(
-                Some(&iss),
-                token_name,
-                tkn_metadata,
-                algorithm,
-                status_lists.clone(),
-            );
-            validators.insert(key, validator);
-        }
-    }
-
-    if jwt_config.jwt_status_validation {
-        for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
-            let status_list_uri = iss_config
-                .openid_config
-                .as_ref()
-                .and_then(|conf| conf.status_list_endpoint.as_ref())
-                .map(|uri| uri.to_string());
-            let (validator, key) =
-                JwtValidator::new_status_list_tkn_validator(Some(&iss), status_list_uri, algorithm);
-            validators.insert(key, validator);
-        }
-    }
-}
-
-async fn init_status_lists(
-    status_lists: Arc<RwLock<HashMap<IssClaim, StatusList>>>,
-    iss_config: &IssuerConfig,
-    validators: &JwtValidatorCache,
-    key_service: &KeyService,
-) -> Result<(), UpdateStatusListError> {
-    let openid_config = iss_config
-        .openid_config
-        .as_ref()
-        .expect("TODO: handle this error");
-    let status_list_url = openid_config
-        .status_list_endpoint
-        .as_ref()
-        .ok_or(UpdateStatusListError::MissingStatusListUri)?;
-    let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url).await?;
-
-    let decoded_jwt = decode_jwt(&status_list_jwt.0)?;
-
-    // Get decoding key
-    let decoding_key_info = decoded_jwt.decoding_key_info();
-    let decoding_key = key_service.get_key(&decoding_key_info).ok_or(
-        UpdateStatusListError::MissingValidationKey(status_list_url.to_string()),
-    )?;
-
-    // get validator
-    let validator_key = ValidatorInfo {
-        iss: decoded_jwt.iss(),
-        token_kind: TokenKind::StatusList,
-        algorithm: decoded_jwt.header.alg,
-    };
-    let validator =
-        validators
-            .get(&validator_key)
-            .ok_or(UpdateStatusListError::MissingValidator(
-                status_list_url.to_string(),
-            ))?;
-
-    let status_list_jwt = {
-        validator
-            .read()
-            .expect("acquire JwtValidator read lock")
-            .validate_jwt(&status_list_jwt.0, decoding_key)?
-    };
-    let status_list: StatusList = status_list_jwt.try_into()?;
-
-    status_lists
-        .write()
-        .as_mut()
-        .expect("acquire status lists write lock")
-        .insert(status_list_url.to_string(), status_list);
 
     Ok(())
 }

@@ -3,6 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use crate::jwt::log_entry::JwtLogEntry;
+use crate::jwt::{IssuerConfig, StatusListCache};
+use crate::log::Logger;
+use crate::{JwtConfig, LogWriter};
+
 use super::*;
 use jsonwebtoken::Algorithm;
 use std::collections::HashMap;
@@ -24,6 +29,102 @@ pub type CachedValidator = Arc<RwLock<JwtValidator>>;
 #[derive(Default)]
 pub struct JwtValidatorCache {
     validators: HashMap<ValidatorKeyHash, Vec<(OwnedValidatorInfo, CachedValidator)>>,
+}
+
+impl JwtValidatorCache {
+    /// Initializes the validators for the given [`IssuerConfig`] and the global settings
+    /// from [`JwtConfig`].
+    pub fn init_for_iss(
+        &mut self,
+        iss_config: &IssuerConfig,
+        jwt_config: &JwtConfig,
+        status_lists: StatusListCache,
+        logger: &Option<Logger>,
+    ) {
+        let iss = iss_config
+            .openid_config
+            .as_ref()
+            .map(|oidc| oidc.issuer.clone())
+            .unwrap_or_else(|| {
+                iss_config
+                    .policy
+                    .oidc_endpoint
+                    .origin()
+                    .ascii_serialization()
+            });
+
+        for (token_name, tkn_metadata) in iss_config.policy.token_metadata.iter() {
+            if !tkn_metadata.trusted {
+                if let Some(logger) = logger {
+                    logger.log_any(JwtLogEntry::system(format!(
+                        "skipping metadata for '{}' from '{}' since `trusted == false`",
+                        token_name, iss_config.issuer_id,
+                    )));
+                }
+                continue;
+            }
+
+            for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
+                let (validator, key) = JwtValidator::new_input_tkn_validator(
+                    Some(&iss),
+                    token_name,
+                    tkn_metadata,
+                    algorithm,
+                    status_lists.clone(),
+                    jwt_config.jwt_status_validation,
+                );
+
+                self.insert(key, validator);
+            }
+        }
+
+        if jwt_config.jwt_status_validation {
+            for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
+                let status_list_uri = iss_config
+                    .openid_config
+                    .as_ref()
+                    .and_then(|conf| conf.status_list_endpoint.as_ref())
+                    .map(|uri| uri.to_string());
+                let (validator, key) = JwtValidator::new_status_list_tkn_validator(
+                    Some(&iss),
+                    status_list_uri,
+                    algorithm,
+                );
+
+                self.insert(key, validator);
+            }
+        }
+    }
+
+    /// Inserts a new validator into the store.
+    ///
+    /// If a validator with the same `ValidatorKeyHash` already exists, it is
+    /// appended to the vector. Exact match resolution is deferred to lookup time.
+    fn insert(&mut self, validator_info: ValidatorInfo<'_>, validator: JwtValidator) {
+        let key = validator_info.key_hash();
+        self.validators
+            .entry(key)
+            .or_default()
+            .push((validator_info.as_owned(), Arc::new(RwLock::new(validator))));
+    }
+
+    /// Retrieves a validator matching the given `ValidatorInfo`, if present.
+    ///
+    /// Performs a fast hash-based lookup. If multiple entries are found under
+    /// the same hash (due to collisions), performs full field comparisons to
+    /// find an exact match.
+    pub fn get(&self, validator_info: &ValidatorInfo<'_>) -> Option<Arc<RwLock<JwtValidator>>> {
+        let validators = self.validators.get(&validator_info.key_hash())?;
+
+        match validators.len() {
+            0 => None,
+            1 => Some(validators[0].1.clone()),
+            _ => validators
+                .iter()
+                .find(|(info, _)| info.is_equal_to(validator_info))
+                .map(|(_, validator)| validator.clone()),
+        }
+    }
 }
 
 /// Lightweight view of validator identity used for lookup and insertion.
@@ -107,38 +208,6 @@ impl OwnedTokenKind {
 #[derive(Hash, Eq, PartialEq)]
 struct ValidatorKeyHash(u64);
 
-impl JwtValidatorCache {
-    /// Inserts a new validator into the store.
-    ///
-    /// If a validator with the same `ValidatorKeyHash` already exists, it is
-    /// appended to the vector. Exact match resolution is deferred to lookup time.
-    pub fn insert(&mut self, validator_info: ValidatorInfo<'_>, validator: JwtValidator) {
-        let key = validator_info.key_hash();
-        self.validators
-            .entry(key)
-            .or_default()
-            .push((validator_info.as_owned(), Arc::new(RwLock::new(validator))));
-    }
-
-    /// Retrieves a validator matching the given `ValidatorInfo`, if present.
-    ///
-    /// Performs a fast hash-based lookup. If multiple entries are found under
-    /// the same hash (due to collisions), performs full field comparisons to
-    /// find an exact match.
-    pub fn get(&self, validator_info: &ValidatorInfo<'_>) -> Option<Arc<RwLock<JwtValidator>>> {
-        let validators = self.validators.get(&validator_info.key_hash())?;
-
-        match validators.len() {
-            0 => None,
-            1 => Some(validators[0].1.clone()),
-            _ => validators
-                .iter()
-                .find(|(info, _)| info.is_equal_to(validator_info))
-                .map(|(_, validator)| validator.clone()),
-        }
-    }
-}
-
 impl ValidatorInfo<'_> {
     /// Converts the borrowed validator info into an owned version for storage.
     fn as_owned(&self) -> OwnedValidatorInfo {
@@ -205,7 +274,8 @@ mod test {
                 required_claims: HashSet::new(),
             },
             jsonwebtoken::Algorithm::HS256,
-            None,
+            StatusListCache::default(),
+            false,
         );
 
         store.insert(info, validator.clone());

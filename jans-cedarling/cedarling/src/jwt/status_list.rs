@@ -8,8 +8,10 @@
 mod error;
 #[cfg(test)]
 mod ietf_test_samples;
+mod status_list_cache;
 
 pub use error::*;
+pub use status_list_cache::*;
 
 use super::validation::ValidatedJwt;
 use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
