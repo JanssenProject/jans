@@ -9,9 +9,9 @@ tags:
 # Ubuntu Janssen Installation
 
 ## Supported Versions
-- Ubuntu 20.04
-- Ubuntu 22.04
 - Ubuntu 24.04
+- Ubuntu 22.04
+- Ubuntu 20.04
 
 Before you install, check the [VM system requirements](vm-requirements.md).
 
