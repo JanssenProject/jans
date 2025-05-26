@@ -99,7 +99,7 @@ impl TryFrom<StatusListJwt> for StatusList {
     }
 }
 
-impl TryFrom<ValidatedJwt<'_>> for StatusList {
+impl TryFrom<ValidatedJwt> for StatusList {
     type Error = ParseStatusListError;
 
     fn try_from(jwt: ValidatedJwt) -> Result<Self, Self::Error> {
@@ -140,7 +140,7 @@ fn get_status_from_byte(byte: u8, bit_size: StatusBitSize, bit_idx: u8) -> u8 {
     };
 
     let offset = bit_idx * bit_size;
-     
+
     (byte >> offset) & mask
 }
 

@@ -3,11 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::validation::JwtValidator;
+use super::*;
 use jsonwebtoken::Algorithm;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::{DefaultHasher, Hash, Hasher};
+use std::sync::{Arc, RwLock};
+
+pub type CachedValidator = Arc<RwLock<JwtValidator>>;
 
 /// Holds a collection of JWT validators keyed by a hash.
 ///
@@ -19,7 +22,9 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 /// If multiple validators share the same hash (i.e., hash collision),
 /// we perform an additional full comparison via [`OwnedValidatorInfo::is_equal_to`].
 #[derive(Default)]
-pub struct ValidatorStore(HashMap<ValidatorKeyHash, Vec<(OwnedValidatorInfo, JwtValidator)>>);
+pub struct JwtValidatorCache {
+    validators: HashMap<ValidatorKeyHash, Vec<(OwnedValidatorInfo, CachedValidator)>>,
+}
 
 /// Lightweight view of validator identity used for lookup and insertion.
 ///
@@ -102,17 +107,17 @@ impl OwnedTokenKind {
 #[derive(Hash, Eq, PartialEq)]
 struct ValidatorKeyHash(u64);
 
-impl ValidatorStore {
+impl JwtValidatorCache {
     /// Inserts a new validator into the store.
     ///
     /// If a validator with the same `ValidatorKeyHash` already exists, it is
     /// appended to the vector. Exact match resolution is deferred to lookup time.
     pub fn insert(&mut self, validator_info: ValidatorInfo<'_>, validator: JwtValidator) {
         let key = validator_info.key_hash();
-        self.0
+        self.validators
             .entry(key)
             .or_default()
-            .push((validator_info.as_owned(), validator));
+            .push((validator_info.as_owned(), Arc::new(RwLock::new(validator))));
     }
 
     /// Retrieves a validator matching the given `ValidatorInfo`, if present.
@@ -120,16 +125,16 @@ impl ValidatorStore {
     /// Performs a fast hash-based lookup. If multiple entries are found under
     /// the same hash (due to collisions), performs full field comparisons to
     /// find an exact match.
-    pub fn get(&self, validator_info: &ValidatorInfo<'_>) -> Option<&JwtValidator> {
-        let validators = self.0.get(&validator_info.key_hash())?;
+    pub fn get(&self, validator_info: &ValidatorInfo<'_>) -> Option<Arc<RwLock<JwtValidator>>> {
+        let validators = self.validators.get(&validator_info.key_hash())?;
 
         match validators.len() {
             0 => None,
-            1 => Some(&validators[0].1),
+            1 => Some(validators[0].1.clone()),
             _ => validators
                 .iter()
                 .find(|(info, _)| info.is_equal_to(validator_info))
-                .map(|(_, validator)| validator),
+                .map(|(_, validator)| validator.clone()),
         }
     }
 }
@@ -184,7 +189,7 @@ mod test {
 
     #[test]
     fn test_insert_and_retrieve() {
-        let mut store = ValidatorStore::default();
+        let mut store = JwtValidatorCache::default();
         let (validator, info) = JwtValidator::new_input_tkn_validator(
             Some("test"),
             "access_tkn".into(),
@@ -205,6 +210,7 @@ mod test {
 
         store.insert(info, validator.clone());
 
-        assert_eq!(store.get(&info), Some(&validator));
+        let stored_validator = store.get(&info).unwrap();
+        assert_eq!(*stored_validator.read().unwrap(), validator);
     }
 }

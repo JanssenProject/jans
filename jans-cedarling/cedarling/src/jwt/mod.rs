@@ -19,7 +19,6 @@ mod log_entry;
 mod status_list;
 mod token;
 mod validation;
-mod validator_store;
 
 #[cfg(test)]
 #[allow(dead_code)]
@@ -41,7 +40,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::RwLock;
 use validation::*;
-use validator_store::*;
 
 /// The value of the `iss` claim from a JWT
 type IssClaim = String;
@@ -50,7 +48,7 @@ type ArcRwLockStatusList = Arc<RwLock<HashMap<StatusListUri, StatusList>>>;
 
 /// Handles JWT validation
 pub struct JwtService {
-    validators: ValidatorStore,
+    validators: JwtValidatorCache,
     key_service: Arc<KeyService>,
     validate_jwt_signatures: bool,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
@@ -60,7 +58,7 @@ pub struct JwtService {
 struct IssuerConfig {
     issuer_id: String,
     /// The [`TrustedIssuer`] config loaded from the policy store
-    policy: TrustedIssuer,
+    policy: Arc<TrustedIssuer>,
     /// The [`OpenIdConfig`] loaded from the IDP's `/.well-known/openid-configuration` endpoint
     openid_config: Option<OpenIdConfig>,
 }
@@ -75,7 +73,7 @@ impl JwtService {
             .jwt_status_validation
             .then(|| Arc::new(RwLock::new(HashMap::default())));
         let mut issuer_configs = HashMap::default();
-        let mut validators = ValidatorStore::default();
+        let mut validators = JwtValidatorCache::default();
         let mut key_service = KeyService::new();
 
         for (issuer_id, iss) in trusted_issuers.unwrap_or_default().into_iter() {
@@ -84,7 +82,7 @@ impl JwtService {
 
             let mut iss_config = IssuerConfig {
                 issuer_id,
-                policy: iss,
+                policy: Arc::new(iss),
                 openid_config: None,
             };
 
@@ -136,7 +134,7 @@ impl JwtService {
     pub async fn validate_tokens<'a>(
         &'a self,
         tokens: &'a HashMap<String, String>,
-    ) -> Result<HashMap<String, Token<'a>>, JwtProcessingError> {
+    ) -> Result<HashMap<String, Token>, JwtProcessingError> {
         let mut validated_tokens = HashMap::new();
 
         for (token_name, jwt) in tokens.iter() {
@@ -193,7 +191,12 @@ impl JwtService {
                     ))?;
 
             // validate JWT
-            let mut validated_jwt = validator.validate_jwt(jwt, decoding_key)?;
+            let mut validated_jwt = {
+                validator
+                    .read()
+                    .expect("acquire JwtValidator read lock")
+                    .validate_jwt(jwt, decoding_key)?
+            };
 
             // The users of the validated JWT will need a reference to the TrustedIssuer
             // to do some processing so we include it here for convenience
@@ -219,10 +222,11 @@ impl JwtService {
 
     /// Use the `iss` claim of a token to retrieve a reference to a [`TrustedIssuer`]
     #[inline]
-    fn get_issuer_ref(&self, iss_claim: &str) -> Option<&TrustedIssuer> {
+    fn get_issuer_ref(&self, iss_claim: &str) -> Option<Arc<TrustedIssuer>> {
         self.issuer_configs
             .get(iss_claim)
             .map(|config| &config.policy)
+            .cloned()
     }
 }
 
@@ -268,7 +272,7 @@ async fn insert_keys(
 }
 
 fn init_jwt_validators(
-    validators: &mut ValidatorStore,
+    validators: &mut JwtValidatorCache,
     jwt_config: &JwtConfig,
     iss_config: &IssuerConfig,
     logger: &Option<Logger>,
@@ -326,7 +330,7 @@ fn init_jwt_validators(
 async fn init_status_lists(
     status_lists: Arc<RwLock<HashMap<IssClaim, StatusList>>>,
     iss_config: &IssuerConfig,
-    validators: &ValidatorStore,
+    validators: &JwtValidatorCache,
     key_service: &KeyService,
 ) -> Result<(), UpdateStatusListError> {
     let openid_config = iss_config
@@ -360,7 +364,12 @@ async fn init_status_lists(
                 status_list_url.to_string(),
             ))?;
 
-    let status_list_jwt = validator.validate_jwt(&status_list_jwt.0, decoding_key)?;
+    let status_list_jwt = {
+        validator
+            .read()
+            .expect("acquire JwtValidator read lock")
+            .validate_jwt(&status_list_jwt.0, decoding_key)?
+    };
     let status_list: StatusList = status_list_jwt.try_into()?;
 
     status_lists
@@ -380,6 +389,7 @@ mod test {
     use jsonwebtoken::Algorithm;
     use serde_json::{Value, json};
     use std::collections::{HashMap, HashSet};
+    use std::sync::Arc;
     use tokio::test;
 
     #[test]
@@ -433,6 +443,7 @@ mod test {
         .await
         .inspect_err(|e| eprintln!("error msg: {}", e))
         .expect("Should create JwtService");
+        let iss = Arc::new(iss);
 
         let tokens = HashMap::from([
             ("access_token".to_string(), access_tkn),
@@ -452,7 +463,7 @@ mod test {
             .expect("Should create expected access_token claims");
         assert_eq!(
             token,
-            &Token::new("access_token", expected_claims.into(), Some(&iss))
+            &Token::new("access_token", expected_claims.into(), Some(iss.clone()))
         );
 
         // Test id_token
@@ -463,7 +474,7 @@ mod test {
             .expect("Should create expected id_token claims");
         assert_eq!(
             token,
-            &Token::new("id_token", expected_claims.into(), Some(&iss))
+            &Token::new("id_token", expected_claims.into(), Some(iss.clone()))
         );
 
         // Test userinfo_token
@@ -474,7 +485,7 @@ mod test {
             .expect("Should create expected userinfo_token claims");
         assert_eq!(
             token,
-            &Token::new("userinfo_token", expected_claims.into(), Some(&iss))
+            &Token::new("userinfo_token", expected_claims.into(), Some(iss))
         );
     }
 }
