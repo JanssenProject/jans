@@ -225,6 +225,7 @@ impl MockServer {
                     .status_list_endpoint()
                     .expect("the status list endpoint hasn't been generated yet. call `generate_status_list_endpoint` first")
                     .to_string(),
+                ttl: None,
             }});
         }
 

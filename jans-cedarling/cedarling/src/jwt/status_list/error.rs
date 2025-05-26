@@ -43,6 +43,8 @@ pub enum JwtStatusError {
 
 #[derive(Debug, Error)]
 pub enum UpdateStatusListError {
+    #[error("the issuer config is missing an OptnieConfig")]
+    MissingOpenIdConfig,
     #[error("the openid configuration does not include a 'status_list_endpoint'")]
     MissingStatusListUri,
     #[error("failed to decode the status list JWT: {0}")]
@@ -56,6 +58,7 @@ pub enum UpdateStatusListError {
     #[error("failed to parse status list: {0}")]
     ParseStatusList(#[from] ParseStatusListError),
 
+    // TODO: we might be able to remove these
     #[error("failed to get status list JWT: {0}")]
     GetStatusListJwt(#[from] HttpError),
     #[error("failed to get status list endpoint from {0}: {1}")]

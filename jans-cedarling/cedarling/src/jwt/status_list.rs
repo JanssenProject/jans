@@ -5,13 +5,13 @@
 
 //! The JWT status list validation is implemented as described in this [IETF spec](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-02.html#name-referenced-token).
 
+mod cache;
 mod error;
 #[cfg(test)]
 mod ietf_test_samples;
-mod status_list_cache;
 
+pub use cache::*;
 pub use error::*;
-pub use status_list_cache::*;
 
 use super::validation::ValidatedJwt;
 use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
@@ -78,11 +78,20 @@ pub struct StatusListJwt {
     sub: String,
     iat: u32,
     #[serde(default)]
-    exp: Option<u32>,
+    exp: Option<u64>,
     #[serde(default)]
-    ttl: Option<u32>,
+    ttl: Option<u64>,
     status_list: StatusListClaim,
     aggregation_uri: Option<String>,
+}
+
+impl TryFrom<ValidatedJwt> for StatusListJwt {
+    type Error = serde_json::Error;
+
+    fn try_from(jwt: ValidatedJwt) -> Result<Self, Self::Error> {
+        let status_list_jwt = serde_json::from_value::<Self>(jwt.claims)?;
+        Ok(status_list_jwt)
+    }
 }
 
 /// The `status_list` claim of the [`StatusListJwt`]

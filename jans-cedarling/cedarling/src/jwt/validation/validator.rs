@@ -17,10 +17,23 @@ use serde_json::Value;
 pub struct ValidatedJwt {
     #[serde(flatten)]
     pub claims: Value,
-    #[serde(default)]
-    pub status: Option<RefJwtStatusListClaim>,
     #[serde(skip)]
     pub trusted_iss: Option<Arc<TrustedIssuer>>,
+}
+
+impl ValidatedJwt {
+    /// Gets the value of the status list claim in the [`referenced token`]
+    ///
+    /// [`referenced token`]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-referenced-token
+    pub fn get_ref_status(&self) -> Result<Option<RefJwtStatusList>, serde_json::Error> {
+        let Some(status) = self.claims.get("status") else {
+            return Ok(None);
+        };
+
+        let status_list = serde_json::from_value::<RefJwtStatusListClaim>(status.clone())?;
+
+        Ok(Some(status_list.status_list))
+    }
 }
 
 /// Struct for deserializing the status list of the [`referenced token`]
@@ -38,13 +51,10 @@ pub struct RefJwtStatusListClaim {
 pub struct RefJwtStatusList {
     pub idx: usize,
     pub uri: String,
-}
-
-impl ValidatedJwt {
-    /// returns the value of the `status` claim
-    pub fn status(&self) -> Option<&RefJwtStatusList> {
-        self.status.as_ref().map(|x| &x.status_list)
-    }
+    /// Maximum amount of time, in seconds, that the Status List Token can be cached
+    /// before a fresh copy SHOULD be retrieved.
+    #[serde(default)]
+    pub ttl: Option<u64>,
 }
 
 /// This struct is a wrapper over [`jsonwebtoken::Validation`] which implements an
@@ -177,7 +187,7 @@ impl JwtValidator {
 
         if self.validate_status_list {
             // Check if the JWT has a status claim
-            let Some(ref_status_list) = validated_jwt.status() else {
+            let Some(ref_status_list) = validated_jwt.get_ref_status()? else {
                 // status validation is not required if the JWT does not
                 // have a status claim
                 return Ok(validated_jwt);
@@ -218,17 +228,10 @@ impl DecodedJwt {
 impl TryFrom<DecodedJwt> for ValidatedJwt {
     type Error = serde_json::Error;
 
-    fn try_from(mut decoded_jwt: DecodedJwt) -> Result<Self, Self::Error> {
-        let status = decoded_jwt.claims.inner["status"].take();
-        let status = if !matches!(status, Value::Null) {
-            Some(serde_json::from_value::<RefJwtStatusListClaim>(status)?)
-        } else {
-            None
-        };
+    fn try_from(decoded_jwt: DecodedJwt) -> Result<Self, Self::Error> {
         Ok(Self {
             claims: decoded_jwt.claims.inner,
             trusted_iss: None,
-            status,
         })
     }
 }
@@ -251,6 +254,8 @@ pub enum ValidateJwtError {
     RejectJwtStatus(JwtStatus),
     #[error("there isn't a status list available for the token")]
     MissingStatusList,
+    #[error("failed to deserialize the JWT's status claim: {0}")]
+    DeserializeStatusClaim(#[from] serde_json::Error),
 }
 
 #[cfg(test)]
@@ -318,7 +323,6 @@ mod test {
 
         let expected = ValidatedJwt {
             claims,
-            status: None,
             trusted_iss: None,
         };
 
@@ -394,7 +398,6 @@ mod test {
 
         let expected = ValidatedJwt {
             claims,
-            status: None,
             trusted_iss: None,
         };
 
@@ -518,7 +521,6 @@ mod test {
 
         let expected = ValidatedJwt {
             claims,
-            status: None,
             trusted_iss: None,
         };
 

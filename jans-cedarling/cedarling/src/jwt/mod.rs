@@ -91,7 +91,7 @@ impl JwtService {
 
             if jwt_config.jwt_status_validation {
                 status_lists
-                    .init_for_iss(&iss_config, &validators, &key_service)
+                    .init_for_iss(&iss_config, &validators, &key_service, logger.clone())
                     .await?;
             }
 
@@ -205,7 +205,6 @@ impl JwtService {
             Ok(ValidatedJwt {
                 claims: decoded_jwt.claims.inner,
                 trusted_iss: issuer_ref,
-                status: None,
             })
         }
     }
@@ -273,7 +272,7 @@ mod test {
     use tokio::test;
 
     #[test]
-    pub async fn can_validate_token() {
+    async fn can_validate_token() {
         let mut server = MockServer::new_with_defaults().await.unwrap();
 
         // create tokens
