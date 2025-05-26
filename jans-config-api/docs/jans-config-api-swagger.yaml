@@ -1716,7 +1716,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PersistenceMetadata'
+                $ref: '#/components/schemas/PersistenceConfiguration'
               examples:
                 Response json example:
                   description: Response json example
@@ -9340,13 +9340,13 @@ components:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
         adminCanEdit:
           type: boolean
         userCanAccess:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -10457,18 +10457,10 @@ components:
           type: array
           items:
             type: string
-    PersistenceMetadata:
+    PersistenceConfiguration:
       type: object
       properties:
-        schemaName:
-          type: string
-        productName:
-          type: string
-        productVersion:
-          type: string
-        driverName:
-          type: string
-        driverVersion:
+        persistenceType:
           type: string
     JsonPatch:
       type: object

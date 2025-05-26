@@ -29,6 +29,7 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
             ..Default::default()
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+        lock_config: None,
     }
 }
 
@@ -71,6 +72,7 @@ pub async fn get_cedarling_with_authorization_conf(
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: auth_conf,
         entity_builder_config: entity_builder_conf,
+        lock_config: None,
     })
     .await
     .expect("bootstrap config should initialize correctly")
