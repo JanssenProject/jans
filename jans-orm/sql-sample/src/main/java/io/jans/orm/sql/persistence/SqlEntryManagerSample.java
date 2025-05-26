@@ -24,7 +24,7 @@ public class SqlEntryManagerSample {
         Properties connectionProperties = new Properties();
 
 
-        boolean mysql = false;
+        boolean mysql = true;
     	if (mysql) {
             connectionProperties.put("sql#db.schema.name", "jansdb");
             connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/jansdb?profileSQL=true");
@@ -45,7 +45,7 @@ public class SqlEntryManagerSample {
         connectionProperties.put("sql#connection.pool.test-on-return", "true");
 
         connectionProperties.put("sql#auth.userName", "jans");
-        connectionProperties.put("sql#auth.userPassword", "63_84MVEJFkoBfd");
+        connectionProperties.put("sql#auth.userPassword", "Secret1!");
         
         // Password hash method
         connectionProperties.put("sql#password.encryption.method", "SSHA-256");

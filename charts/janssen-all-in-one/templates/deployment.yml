@@ -74,8 +74,6 @@ spec:
             value: {{ include "saml.customJavaOptions" . | trim }}
           - name: CN_SCIM_JAVA_OPTIONS
             value: {{ include "scim.customJavaOptions" . | trim }}
-          - name: CN_LINK_JAVA_OPTIONS
-            value: {{ include "link.customJavaOptions" . | trim }}
           {{- include "janssen-all-in-one.usr-envs" . | indent 12 }}
           {{- include "janssen-all-in-one.usr-secret-envs" . | indent 12 }}
         securityContext:

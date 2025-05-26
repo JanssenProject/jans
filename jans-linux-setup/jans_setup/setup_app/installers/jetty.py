@@ -128,8 +128,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         jetty_archive = max(jetty_archive_list)
 
         jetty_archive_fn = os.path.basename(jetty_archive)
-        jetty_regex = re.search(f'{self.jetty_dist_string}-(\d*\.\d*)', jetty_archive_fn)
-        jetty_exact_version_regex = re.search(f'{self.jetty_dist_string}-(\d*\.\d*.\d*)', jetty_archive_fn)
+        jetty_regex = re.search(rf'{self.jetty_dist_string}-(\d*\.\d*)', jetty_archive_fn)
+        jetty_exact_version_regex = re.search(rf'{self.jetty_dist_string}-(\d*\.\d*.\d*)', jetty_archive_fn)
         if not jetty_regex:
             self.logIt("Can't determine Jetty version", True, True)
 
@@ -465,7 +465,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini')) or os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.d/server.ini'))
 
     def configure_extra_libs(self, target_war_fn):
-        version_rec = re.compile('-(\d+)?\.')
+        version_rec = re.compile(r'-(\d+)?\.')
 
         builtin_libs = []
         war_zip = zipfile.ZipFile(target_war_fn)

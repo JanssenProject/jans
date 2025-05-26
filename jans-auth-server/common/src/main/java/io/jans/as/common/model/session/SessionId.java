@@ -73,6 +73,10 @@ public class SessionId implements Deletable, Serializable {
     @AttributeName(name = "jansSessAttr")
     private Map<String, String> sessionAttributes;
 
+    @JsonObject
+    @AttributeName(name = "jansAttrs")
+    private SessionIdPredefinedAttributes predefinedAttributes;
+
     @AttributeName(name = "deviceSecret")
     private List<String> deviceSecrets;
 
@@ -93,6 +97,18 @@ public class SessionId implements Deletable, Serializable {
 
     @Expiration
     private int ttl;
+
+    public SessionIdPredefinedAttributes getPredefinedAttributes() {
+        if (predefinedAttributes == null) {
+            return new SessionIdPredefinedAttributes();
+        }
+        return predefinedAttributes;
+    }
+
+    public SessionId setPredefinedAttributes(SessionIdPredefinedAttributes predefinedAttributes) {
+        this.predefinedAttributes = predefinedAttributes;
+        return this;
+    }
 
     @NotNull
     public List<String> getDeviceSecrets() {
