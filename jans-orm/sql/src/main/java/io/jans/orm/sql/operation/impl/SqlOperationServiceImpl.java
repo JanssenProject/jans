@@ -1079,6 +1079,11 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		try {
 			DatabaseMetaData databaseMetaData = getMetadata();
 
+			String databaseName = null;
+			try (Connection con = connectionProvider.getConnection()) {
+				databaseName = con.getCatalog();
+			}
+			
 			String schemaName  = connectionProvider.getSchemaName();
 			String productName = databaseMetaData.getDatabaseProductName();
 			String productVersion = databaseMetaData.getDatabaseProductVersion();
@@ -1087,7 +1092,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			String driverVersion  = databaseMetaData.getDriverVersion();
 
 
-			PersistenceMetadata metadata = new PersistenceMetadata(schemaName, productName, productVersion, driverName, driverVersion);
+			PersistenceMetadata metadata = new PersistenceMetadata(databaseName, schemaName, productName, productVersion, driverName, driverVersion);
 
 			return metadata;
 		} catch (SQLException ex) {
