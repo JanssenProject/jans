@@ -299,16 +299,17 @@ Please see description of fields at [SSA field descriptions](./../../auth-server
 If you are going to create similar SSA, you can save as template by enabling checkbox **Save as Template** and write a template name.
 
 Once you hit **<   Save   >** button, you will have a dialog which displays created SSA as jwt. Please save it by
-using button **<  Export  >**. _This is the only time you see the token._
+using button **<  Export  >**.
 
 ![TUI SSA Export](../../../assets/tui-ssa-export.png)
 
 If you saved as template, you can re-use it by hitting button **< Templates >** which opens a dialog that lists saved
 SSA templates.
 
-To get the detail of any SSA, bring the control on that SSA (using the tab key), and press `v`. Also can export the detail.
+To get the detail of any SSA, bring the control on that SSA (using the up-down arrows), and press **Enter**, you will have
+the following dialog, so that you can display SSA token, revoke (delete) and also edit details and recreate.
 
-![image](../../../assets/tui-ssa-detail.png)
+![TUI SSA Details](../../../assets/tui-ssa-detail.png)
 
 
 ## Using Configuration REST API

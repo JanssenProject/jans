@@ -30,13 +30,13 @@ spec:
         APP_NAME: saml
         app: {{ .Release.Name }}-{{ include "saml.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-      {{- if or (.Values.global.istio.ingress) (.Values.global.link.customAnnotations.pod) }}
+      {{- if or (.Values.global.istio.ingress) (.Values.global.saml.customAnnotations.pod) }}
       annotations:
       {{- if .Values.global.istio.ingress }}
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       {{- end }}
-      {{- if .Values.global.link.customAnnotations.pod }}
-      {{ toYaml .Values.global.link.customAnnotations.pod | indent 4 }}
+      {{- if .Values.global.saml.customAnnotations.pod }}
+      {{ toYaml .Values.global.saml.customAnnotations.pod | indent 4 }}
       {{- end }}
       {{- end }}
     spec:
