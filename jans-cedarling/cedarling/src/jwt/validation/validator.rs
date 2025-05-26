@@ -559,7 +559,7 @@ mod test {
         let status_list = [0b1111_1111];
 
         let mut server = MockServer::new_with_defaults().await.unwrap();
-        server.generate_status_list_endpoint(bit_size, &status_list);
+        server.generate_status_list_endpoint(bit_size, &status_list, None);
         let iss = server.issuer();
         let decoding_key = server.jwt_decoding_key().unwrap();
         let mut claims = json!({
@@ -614,7 +614,7 @@ mod test {
         let status_list = [0b1111_1111];
 
         let mut server = MockServer::new_with_defaults().await.unwrap();
-        server.generate_status_list_endpoint(bit_size, &status_list);
+        server.generate_status_list_endpoint(bit_size, &status_list, None);
         let iss = server.issuer();
         let decoding_key = server.jwt_decoding_key().unwrap();
         let mut claims = json!({

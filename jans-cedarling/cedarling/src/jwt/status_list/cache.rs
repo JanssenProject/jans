@@ -85,7 +85,7 @@ impl StatusListCache {
         .try_into()
         .map_err(DecodeJwtError::DeserializeClaims)?;
 
-        let ttl = status_list_jwt.ttl.clone();
+        let ttl = status_list_jwt.ttl;
         let status_list: StatusList = status_list_jwt.try_into()?;
         let status_list = Arc::new(RwLock::new(status_list));
 
@@ -141,12 +141,13 @@ async fn keep_status_list_updated(
             },
         };
 
-        let validated_jwt = match {
+        let result = {
             validator
                 .read()
                 .expect("acquire JwtValidator read lock")
                 .validate_jwt(&status_list_jwt.0, &decoding_key)
-        } {
+        };
+        let validated_jwt = match result {
             Ok(validated_jwt) => validated_jwt,
             Err(e) => {
                 logger.log_any(JwtLogEntry::new(
@@ -240,8 +241,89 @@ impl PartialEq for StatusListCache {
 
 #[cfg(test)]
 mod test {
-    #[test]
-    fn keep_status_list_updated() {
-        todo!()
+    use jsonwebtoken::Algorithm;
+
+    use super::*;
+    use crate::JwtConfig;
+    use crate::common::policy_store::TrustedIssuer;
+    use crate::jwt::test_utils::MockServer;
+    use std::collections::HashSet;
+    use std::time::Duration;
+
+    #[tokio::test]
+    async fn keep_status_list_updated() {
+        // Setup
+        let mut validators = JwtValidatorCache::default();
+        let mut key_service = KeyService::default();
+        let mut mock_server = MockServer::new_with_defaults().await.unwrap();
+        key_service
+            .get_keys(&mock_server.openid_config())
+            .await
+            .unwrap();
+        // we initialize the status list with a 1 sec ttl
+        mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b1111_1110], Some(1));
+        let mut status_list = StatusListCache::default();
+        let iss_config = IssuerConfig {
+            issuer_id: "some_iss_id".into(),
+            policy: Arc::new(TrustedIssuer {
+                name: "some_iss".into(),
+                description: "is a trusted issuer".into(),
+                oidc_endpoint: mock_server.openid_config_endpoint().unwrap(),
+                token_metadata: Default::default(),
+            }),
+            openid_config: Some(mock_server.openid_config()),
+        };
+        validators.init_for_iss(
+            &iss_config,
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: false,
+                jwt_status_validation: true,
+                signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
+            },
+            &status_list,
+            None,
+        );
+        status_list
+            .init_for_iss(&iss_config, &validators, &key_service, None)
+            .await
+            .unwrap();
+
+        let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
+        let status_list = status_list
+            .get(&status_list_uri)
+            .expect("should have a status list");
+
+        // Check if the status list is the same as we first generated
+        {
+            let status_list = status_list.read().unwrap();
+            assert_eq!(
+                *status_list,
+                StatusList {
+                    bit_size: 1u8.try_into().unwrap(),
+                    list: vec![0b1111_1110],
+                },
+                "the status list is wrong",
+            );
+        }
+
+        // Update the status in the server
+        mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b0000_0001], None);
+
+        // Wait for the token to expire
+        tokio::time::sleep(Duration::from_secs(3)).await;
+
+        // Check if the status list got updated
+        {
+            let status_list = status_list.read().unwrap();
+            assert_eq!(
+                *status_list,
+                StatusList {
+                    bit_size: 1u8.try_into().unwrap(),
+                    list: vec![0b0000_0001],
+                },
+                "the status list was not updated",
+            );
+        }
     }
 }

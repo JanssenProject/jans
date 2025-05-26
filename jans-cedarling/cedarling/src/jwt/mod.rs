@@ -87,7 +87,7 @@ impl JwtService {
 
             insert_keys(&mut key_service, jwt_config, &iss_config).await?;
 
-            validators.init_for_iss(&iss_config, jwt_config, status_lists.clone(), &logger);
+            validators.init_for_iss(&iss_config, jwt_config, &status_lists, logger.clone());
 
             if jwt_config.jwt_status_validation {
                 status_lists

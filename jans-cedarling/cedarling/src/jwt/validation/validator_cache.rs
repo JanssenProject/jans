@@ -38,8 +38,8 @@ impl JwtValidatorCache {
         &mut self,
         iss_config: &IssuerConfig,
         jwt_config: &JwtConfig,
-        status_lists: StatusListCache,
-        logger: &Option<Logger>,
+        status_lists: &StatusListCache,
+        logger: Option<Logger>,
     ) {
         let iss = iss_config
             .openid_config

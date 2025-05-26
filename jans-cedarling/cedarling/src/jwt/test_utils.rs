@@ -250,6 +250,7 @@ impl MockServer {
         &mut self,
         status_list_bits: StatusBitSize,
         status_list: &[u8],
+        ttl: Option<u64>,
     ) {
         // building the status list JWT
         let bits: u8 = status_list_bits.into();
@@ -265,8 +266,13 @@ impl MockServer {
         let encoding_key = self.keys.encoding_key.clone();
         let build_jwt_claims = move || {
             let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-            let exp = iat + Duration::from_secs(3600); // one hour
-            let ttl = Duration::from_secs(600); // 5 mins
+            let exp = iat + Duration::from_secs(3600); // defaults to 1 hour
+            let ttl = ttl
+                .map(|x| Duration::from_secs(x))
+                .unwrap_or_else(|| 
+                    // defaults to 5 mins if the ttl is None
+                    Duration::from_secs(600)
+                );
             let claims = json!({
                 "sub": sub,
                 "status_list": {
@@ -289,7 +295,7 @@ impl MockServer {
             self.server
                 .mock("GET", MOCK_STATUS_LIST_ENDPOINT)
                 .with_status(200)
-                .with_header("content-type", "application/json")
+                .with_header("content-type", "application/statuslist+jwt")
                 .with_body_from_request(move |_| build_jwt_claims())
                 .expect(1)
                 .create(),

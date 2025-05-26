@@ -309,7 +309,7 @@ mod test {
         let mut server = MockServer::new_with_defaults()
             .await
             .expect("initialize mock server");
-        server.generate_status_list_endpoint(bits, &lst);
+        server.generate_status_list_endpoint(bits, &lst, None);
 
         let status_list_jwt = server.status_list_jwt().await.unwrap();
 
