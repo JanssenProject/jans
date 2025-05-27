@@ -106,5 +106,9 @@ spec:
               {{- if .Values.global.istio.enabled }}
               curl -X POST http://localhost:15020/quitquitquit
               {{- end }}
-          {{- end}}     
+          {{- end}}
       restartPolicy: Never
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}

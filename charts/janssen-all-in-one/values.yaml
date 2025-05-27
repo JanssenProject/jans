@@ -164,10 +164,6 @@ config:
 persistence:
   # -- Boolean flag to enable/disable the persistence job.
   enabled: true
-
-
-
-
 alb:
   # -- switches the service to Nodeport for ALB ingress
   ingress: false
@@ -349,6 +345,8 @@ auth-server-key-rotation:
   customScripts: [ ]
   # -- Add custom jobs's command. If passed, it will override the default conditional command.
   customCommand: []
+  # -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
+  nodeSelector: {}
 casa:
   # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
   appLoggers:
@@ -722,6 +720,8 @@ additionalAnnotations: { }
 customScripts: [ ]
 # -- Add custom pod's command. If passed, it will override the default conditional command.
 customCommand: []
+# -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
+nodeSelector: {}
 
 # -- Responsible for synchronizing Keycloak SAML clients
 kc-scheduler:
@@ -783,6 +783,8 @@ kc-scheduler:
   customCommand: []
   # -- Boolean flag to enable/disable the kc-scheduler cronjob chart.
   enabled: false
+  # -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
+  nodeSelector: {}
 
 # -- Cleanup expired entries in persistence
 cleanup:
@@ -846,3 +848,5 @@ cleanup:
   customCommand: []
   # -- Boolean flag to enable/disable the cleanup cronjob chart.
   enabled: true
+  # -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
+  nodeSelector: {}
