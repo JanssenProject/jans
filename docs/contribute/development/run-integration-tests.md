@@ -128,7 +128,7 @@ tests.
 
 Get Janssen server code from [Janssen GitHub repository](https://github.com/JanssenProject/jans). Note the path to this location, we will refer to it as `source-base`.
 
-Janssen Server is composed of multiple modules. For example `source-base/jans-auth-server`, `source-base/jans-link` etc. 
+Janssen Server is composed of multiple modules. For example `source-base/jans-auth-server` etc. 
 
 Each module has its own set of 
 tests.
@@ -202,15 +202,6 @@ following maven command at the directory level:
 
 This module does not require a profile setup. It can be built with below maven
 command.
-
-```shell
-mvn clean compile install
-```
-
-### Configuring the jans-link module
-
-This module does not require a profile setup. It can be built with the below 
-maven command.
 
 ```shell
 mvn clean compile install
