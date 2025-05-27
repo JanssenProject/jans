@@ -13,18 +13,24 @@ package io.jans.orm.model;
  */
 public class PersistenceMetadata {
 
+	private final String databaseName;
 	private final String schemaName;
 	private final String productName;
 	private final String productVersion;
 	private final String driverName;
 	private final String driverVersion;
 
-	public PersistenceMetadata(String schemaName, String productName, String productVersion, String driverName, String driverVersion) {
+	public PersistenceMetadata(String databaseName, String schemaName, String productName, String productVersion, String driverName, String driverVersion) {
+		this.databaseName = databaseName;
 		this.schemaName = schemaName;
 		this.productName = productName;
 		this.productVersion = productVersion;
 		this.driverName = driverName;
 		this.driverVersion = driverVersion;
+	}
+
+	public String getDatabaseName() {
+		return databaseName;
 	}
 
 	public String getSchemaName() {
@@ -49,8 +55,9 @@ public class PersistenceMetadata {
 
 	@Override
 	public String toString() {
-		return "PersistenceMetadata [schemaName=" + schemaName + ", productName=" + productName + ", productVersion="
-				+ productVersion + ", driverName=" + driverName + ", driverVersion=" + driverVersion + "]";
+		return "PersistenceMetadata [databaseName=" + databaseName + ", schemaName=" + schemaName + ", productName="
+				+ productName + ", productVersion=" + productVersion + ", driverName=" + driverName + ", driverVersion="
+				+ driverVersion + "]";
 	}
 
 }
