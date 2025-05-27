@@ -160,3 +160,7 @@ spec:
           configMap:
             name: {{ .Release.Name }}-updatelbip
       {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
