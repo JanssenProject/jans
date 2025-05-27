@@ -41,7 +41,7 @@ public final class PasswordEncryptionHelper {
     public static final String ARGON2_MEMORY_KEY = "argon2.memory";
     public static final String ARGON2_ITERATIONS_KEY = "argon2.iterations";
     public static final String ARGON2_PARALLELISM_KEY = "argon2.parallelism";
-    public static final String ARGON2_HASH_LENGTH_KEY = "argon2.hash-kength";
+    public static final String ARGON2_HASH_LENGTH_KEY = "argon2.hash-length";
 
     private PasswordEncryptionHelper() {
     }
