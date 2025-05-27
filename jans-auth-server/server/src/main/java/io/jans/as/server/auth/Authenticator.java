@@ -314,6 +314,7 @@ public class Authenticator {
         initCustomAuthenticatorVariables(sessionIdAttributes);
         boolean useExternalAuthenticator = externalAuthenticationService
                 .isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
+        final String sanitizedUsername = sanitizeUsernameForLog(credentials.getUsername());
         if (useExternalAuthenticator && !StringHelper.isEmpty(this.authAcr) &&
                 !OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME.equalsIgnoreCase(authAcr)) {
             initCustomAuthenticatorVariables(sessionIdAttributes);
@@ -446,10 +447,10 @@ public class Authenticator {
                 authenticationService.quietLogin(credentials.getUsername());
 
                 // Redirect to authorization workflow
-                logger.debug("Sending event to trigger user redirection: '{}'", sanitizeUsernameForLog(credentials.getUsername()));
+                logger.debug("Sending event to trigger user redirection: '{}'", sanitizedUsername);
                 authenticationService.onSuccessfulLogin(eventSessionId);
 
-                logger.info(AUTHENTICATION_SUCCESS_FOR_USER, sanitizeUsernameForLog(credentials.getUsername()));
+                logger.info(AUTHENTICATION_SUCCESS_FOR_USER, sanitizedUsername);
                 return Constants.RESULT_SUCCESS;
             }
         } else {
@@ -461,15 +462,15 @@ public class Authenticator {
                             sessionIdAttributes);
 
                     // Redirect to authorization workflow
-                    logger.debug("Sending event to trigger user redirection: '{}'", sanitizeUsernameForLog(credentials.getUsername()));
+                    logger.info("Sending event to trigger user redirection: '{}'", sanitizedUsername);
                     authenticationService.onSuccessfulLogin(eventSessionId);
+                    logger.info(AUTHENTICATION_SUCCESS_FOR_USER, sanitizedUsername);
+                    return Constants.RESULT_SUCCESS;
                 } else {
                     // Force session lastUsedAt update if authentication attempt is failed
                     sessionIdService.updateSessionId(sessionId);
+                    logger.info("Authentication failed for user: {}", sanitizedUsername);
                 }
-
-                logger.info(AUTHENTICATION_SUCCESS_FOR_USER, sanitizeUsernameForLog(credentials.getUsername()));
-                return Constants.RESULT_SUCCESS;
             }
         }
 
