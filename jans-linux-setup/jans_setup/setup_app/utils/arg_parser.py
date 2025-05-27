@@ -43,6 +43,8 @@ parser.add_argument('-rdbm-password', help="RDBM password")
 parser.add_argument('-rdbm-port', help="RDBM port")
 parser.add_argument('-rdbm-db', help="RDBM database")
 parser.add_argument('-rdbm-host', help="RDBM host")
+parser.add_argument('-rdbm-schema', help="RDBM Schema")
+
 parser.add_argument('--reset-rdbm-db', help="Deletes all tables on target database. Warning! You will lose all data on target database.", action='store_true')
 
 parser.add_argument('--shell', help="Drop into interactive shell before starting installation", action='store_true')
