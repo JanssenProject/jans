@@ -27,7 +27,7 @@ password.method.argon2.salt-length=16
 password.method.argon2.memory=7168
 password.method.argon2.iterations=5
 password.method.argon2.parallelism=1
-password.method.argon2.hash-kength=32
+password.method.argon2.hash-length=32
 ```
 
 After thess properties update `jans-auth` requires restart.
@@ -59,7 +59,7 @@ password.method.argon2.salt-length=16
 password.method.argon2.memory=32768
 password.method.argon2.iterations=10
 password.method.argon2.parallelism=1
-password.method.argon2.hash-kength=32
+password.method.argon2.hash-length=32
 ```
 
 ```
