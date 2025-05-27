@@ -310,8 +310,8 @@ Obfuscate configuration schema (only if configuration key is available)
 {{- $_ := set $secretSchema "google_credentials" .Values.configmap.cnGoogleSecretManagerServiceAccount }}
 {{- end }}
 {{- if or (eq .Values.configAdapterName "aws") (eq .Values.configSecretAdapter "aws") }}
-{{- $_ := set $secretSchema "aws_credentials" (include "config.aws-shared-credentials" . | b64enc) }}
-{{- $_ := set $secretSchema "aws_config" (include "config.aws-config" . | b64enc) }}
+{{- $_ := set $secretSchema "aws_credentials" (include "janssen-all-in-one.aws-shared-credentials" . | b64enc) }}
+{{- $_ := set $secretSchema "aws_config" (include "janssen-all-in-one.aws-config" . | b64enc) }}
 {{- $_ := set $secretSchema "aws_replica_regions" (toJson .Values.configmap.cnAwsSecretsReplicaRegions | b64enc) }}
 {{- end }}
 {{- if .Values.saml.enabled }}

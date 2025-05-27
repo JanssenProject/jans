@@ -40,7 +40,7 @@ Kubernetes: `>=v1.22.0-0`
 | keysPushStrategy | string | `"NEWER"` | Set key selection strategy after pushing private keys to Auth server (only takes effect when keysPushDelay value is greater than 0) |
 | keysStrategy | string | `"NEWER"` | Set key selection strategy used by Auth server |
 | lifecycle | object | `{}` |  |
-| nodeSelector | object | `{}` |  |
+| nodeSelector | object | `{}` | Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) |
 | resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
 | tolerations | list | `[]` |  |
 | usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service |

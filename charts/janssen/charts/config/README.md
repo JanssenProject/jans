@@ -97,6 +97,7 @@ Kubernetes: `>=v1.22.0-0`
 | migration.migrationDataFormat | string | `"ldif"` | migration data-format depending on persistence backend. Supported data formats are ldif, postgresql+json, and mysql+json. |
 | migration.migrationDir | string | `"/ce-migration"` | Directory holding all migration files |
 | nameOverride | string | `""` |  |
+| nodeSelector | object | `{}` | Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) |
 | orgName | string | `"Janssen"` | Organization name. Used for certificate creation. |
 | redisPassword | string | `"P@assw0rd"` | Redis admin password if `config.configmap.cnCacheType` is set to `REDIS`. |
 | resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
