@@ -16,6 +16,9 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.util.StringHelper;
 
+import io.jans.orm.model.PersistenceMetadata;
+
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -121,5 +124,9 @@ public class ConfigurationService {
     
     public String getRevokeUrl() {
         return configurationFactory.getApiAppConfiguration().getAuthOpenidRevokeUrl();
+    }
+    
+    public PersistenceMetadata getPersistenceMetadata() {
+        return persistenceManager.getPersistenceMetadata("o=jans");
     }
 }
