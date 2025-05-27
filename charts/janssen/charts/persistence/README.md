@@ -38,6 +38,7 @@ Kubernetes: `>=v1.22.0-0`
 | imagePullSecrets | list | `[]` |  |
 | lifecycle | object | `{}` |  |
 | nameOverride | string | `""` |  |
+| nodeSelector | object | `{}` | Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) |
 | resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
 | resources.limits.cpu | string | `"300m"` | CPU limit |
 | resources.limits.memory | string | `"300Mi"` | Memory limit. |
