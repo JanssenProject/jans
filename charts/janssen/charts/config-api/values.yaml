@@ -75,9 +75,6 @@ readinessProbe:
   periodSeconds: 25
   timeoutSeconds: 5
 
-
-nodeSelector: {}
-
 tolerations: []
 
 affinity: {}
@@ -102,3 +99,5 @@ additionalAnnotations: { }
 customScripts: [ ]
 # -- Add custom pod's command. If passed, it will override the default conditional command.
 customCommand: []
+# -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
+nodeSelector: {}

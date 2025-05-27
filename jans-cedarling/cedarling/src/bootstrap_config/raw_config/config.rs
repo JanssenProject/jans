@@ -231,11 +231,15 @@ pub struct BootstrapConfigRaw {
     /// How often to send telemetry messages to Lock Master (0 to turn off transmission).
     #[serde(rename = "CEDARLING_LOCK_TELEMETRY_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub audit_health_telemetry_interval: u64,
+    pub audit_telemetry_interval: u64,
 
     /// Controls whether Cedarling should listen for updates from the Lock Server.
     #[serde(rename = "CEDARLING_LOCK_LISTEN_SSE", default)]
     pub listen_sse: FeatureToggle,
+
+    /// Allow interaction with a Lock server with invalid certificates. Used for testing.
+    #[serde(rename = "CEDARLING_LOCK_ACCEPT_INVALID_CERTS", default)]
+    pub accept_invalid_certs: FeatureToggle,
 }
 
 impl BootstrapConfigRaw {

@@ -9,8 +9,6 @@ import shutil
 import time
 import ssl
 import json
-import re
-import json
 
 from urllib import request
 from urllib.parse import urljoin, urlparse

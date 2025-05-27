@@ -355,7 +355,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         else:
             title = _("Enter Configuration Properties")
 
-        prop_data = kwargs.get('data', ('',''))
+        prop_data = kwargs.get('passed', ('',''))
         key_widget = self.myparent.getTitledText(_("Key"), name='property_key', value=prop_data[0], style='class:script-titledtext', jans_help=_("Script propery Key"))
         val_widget = self.myparent.getTitledText(_("Value"), name='property_val', value=prop_data[1], style='class:script-titledtext', jans_help=_("Script property Value"))
 
