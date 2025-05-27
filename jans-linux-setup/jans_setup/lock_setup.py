@@ -184,12 +184,12 @@ def clean_httpd_config():
     if not os.path.exists(httpd_conf_temp_org_fn):
         shutil.copy(httpd_conf_temp_fn, httpd_conf_temp_org_fn)
     apache_config_str = httpdinstaller.readFile(httpd_conf_temp_org_fn)
-    re_search_result = re.search("<Location /jans-lock>(.+?)</Location>", apache_config_str, flags=re.DOTALL)
+    re_search_result = re.search(r"<Location /jans-lock>(.+?)</Location>", apache_config_str, flags=re.DOTALL)
     jans_lock_config = re_search_result.group()
-    apache_config_lock_str = re.sub("<Location (.+?)>(.+?)</Location>", '', apache_config_str, flags=re.DOTALL)
-    apache_config_lock_str = re.sub("<LocationMatch (.+?)>(.+?)</LocationMatch>", '', apache_config_lock_str, flags=re.DOTALL)
-    apache_config_lock_str = re.sub("ProxyPass (.+?)\n", '', apache_config_lock_str)
-    apache_config_lock_str = re.sub("<If (.+?)>(.+?)</If>", jans_lock_config, apache_config_lock_str, flags=re.DOTALL)
+    apache_config_lock_str = re.sub(r"<Location (.+?)>(.+?)</Location>", '', apache_config_str, flags=re.DOTALL)
+    apache_config_lock_str = re.sub(r"<LocationMatch (.+?)>(.+?)</LocationMatch>", '', apache_config_lock_str, flags=re.DOTALL)
+    apache_config_lock_str = re.sub(r"ProxyPass (.+?)\n", '', apache_config_lock_str)
+    apache_config_lock_str = re.sub(r"<If (.+?)>(.+?)</If>", jans_lock_config, apache_config_lock_str, flags=re.DOTALL)
     httpdinstaller.writeFile(httpd_conf_temp_fn, apache_config_lock_str)
 
 clean_httpd_config()
