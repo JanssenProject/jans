@@ -67,7 +67,7 @@ public class SqlConnectionProvider {
 	private static final String MYSQL_QUERY_CONSTRAINT_CHECK = "SELECT CONSTRAINT_SCHEMA AS TABLE_SCHEMA, TABLE_NAME, CONSTRAINT_NAME, CHECK_CLAUSE AS DEFINITION FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = ? ORDER BY TABLE_SCHEMA, TABLE_NAME";
 
 	private static final String DRIVER_PROPERTIES_PREFIX = "connection.driver-property";
-	private static final String PASSWORD_METHOD_PREFIX = "pasword.method";
+	private static final String PASSWORD_METHOD_PREFIX = "password.method";
 
 	private Properties props;
 
