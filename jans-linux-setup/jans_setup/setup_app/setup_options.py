@@ -50,6 +50,8 @@ def get_setup_options():
         setupOptions['rdbm_user'] = base.argsp.rdbm_user
     if base.argsp.rdbm_password:
         setupOptions['rdbm_password'] = base.argsp.rdbm_password
+    if base.argsp.rdbm_schema:
+        setupOptions['rdbm_schema'] = base.argsp.rdbm_schema
 
     if base.current_app.profile == 'jans':
 
