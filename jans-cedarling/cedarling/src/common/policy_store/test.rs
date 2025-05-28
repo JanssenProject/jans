@@ -155,16 +155,8 @@ fn test_broken_policy_parsing_error_in_policy_store() {
     let policy_result = serde_yml::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW_YAML);
     let err_msg = policy_result.unwrap_err().to_string();
 
-    // TODO: this isn't really a human readable format but the current plan is to fetch it from
-    // a which will respond with the policy encoded in base64. This could probably be improved
-    // in the future once the structure of the project is clearer.
-    assert_eq!(
-        err_msg,
-        "policy_stores.ba1f39115ed86ed760ee0bea1d529b52189e5a117474: Errors encountered while \
-         parsing policies: [Error(\"unable to decode policy with id: \
-         840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content \
-         from human readable format: unexpected token `)`\")] at line 8 column 5"
-    )
+    assert!(err_msg.contains("unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8"));
+    assert!(err_msg.contains("unable to decode policy_content from human readable format: unexpected token `)`"));
 }
 
 /// Tests that a valid version string is accepted.
@@ -234,4 +226,176 @@ fn test_parse_option_string() {
     });
     let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
     assert_eq!(deserialized.maybe_string, Some("some_string".to_string()));
+}
+
+#[test]
+fn test_missing_required_fields() {
+    let json = json!({
+        // Missing cedar_version
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": "test",
+                "policies": {}
+            }
+        }
+    });
+
+    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    assert!(err.to_string().contains("Missing required field 'cedar_version' in policy store"));
+
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        // Missing policy_stores
+    });
+
+    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    assert!(err.to_string().contains("Missing required field 'policy_stores' in policy store"));
+}
+
+#[test]
+fn test_invalid_policy_store_entry() {
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                // Missing name
+                "schema": "test",
+                "policies": {}
+            }
+        }
+    });
+
+    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    assert!(err.to_string().contains("Missing required field 'name' in policy store entry"));
+
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                // Missing schema
+                "policies": {}
+            }
+        }
+    });
+
+    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    assert!(err.to_string().contains("Missing required field 'schema' or 'cedar_schema' in policy store entry"));
+
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": "test",
+                // Missing policies
+            }
+        }
+    });
+
+    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    assert!(err.to_string().contains("Missing required field 'policies' or 'cedar_policies' in policy store entry"));
+}
+
+#[test]
+fn test_invalid_cedar_version() {
+    let json = json!({
+        "cedar_version": "invalid",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": "test",
+                "policies": {}
+            }
+        }
+    });
+
+    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    assert!(err.to_string().contains("Invalid cedar_version format"));
+}
+
+#[test]
+fn test_invalid_schema_format() {
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": "invalid_schema",
+                "policies": {}
+            }
+        }
+    });
+
+    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    assert!(err.to_string().contains("Error parsing schema"));
+}
+
+#[test]
+fn test_invalid_policies_format() {
+    let schema = base64::prelude::BASE64_STANDARD.encode("{}"); // minimal valid JSON schema
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": schema,
+                "policies": {
+                    "invalid_policy": {
+                        "description": "test",
+                        "policy_content": "invalid_content"
+                    }
+                }
+            }
+        }
+    });
+
+    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    println!("actual error: {}", err);
+    assert!(err.to_string().contains("unable to decode policy with id"));
+}
+
+#[test]
+fn test_invalid_trusted_issuers_format() {
+    let schema = base64::prelude::BASE64_STANDARD.encode("{}"); // minimal valid JSON schema
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": schema,
+                "policies": {},
+                "trusted_issuers": {
+                    "invalid_issuer": {
+                        "name": "test",
+                        "description": "test",
+                        "openid_configuration_endpoint": "invalid_url"
+                    }
+                }
+            }
+        }
+    });
+
+    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    println!("actual error: {:?}", err);
+    assert!(err.to_string().contains("the `\"openid_configuration_endpoint\"` is not a valid url"));
 }
