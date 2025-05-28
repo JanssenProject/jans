@@ -39,13 +39,17 @@ public class ExternalScriptContext {
         this.httpResponse = httpResponse;
 
         if (this.httpRequest == null) {
-        	jakarta.faces.context.FacesContext facesContext = jakarta.faces.context.FacesContext.getCurrentInstance();
-            if (facesContext != null) {
-            	jakarta.faces.context.ExternalContext extCtx = facesContext.getExternalContext();
-                if (extCtx != null) {
-                    this.httpRequest = (HttpServletRequest) extCtx.getRequest();
-                }
-            }
+        	try {
+	        	jakarta.faces.context.FacesContext facesContext = jakarta.faces.context.FacesContext.getCurrentInstance();
+	            if (facesContext != null) {
+	            	jakarta.faces.context.ExternalContext extCtx = facesContext.getExternalContext();
+	                if (extCtx != null) {
+	                    this.httpRequest = (HttpServletRequest) extCtx.getRequest();
+	                }
+	            }
+        	} catch (java.lang.NoClassDefFoundError e) {
+				log.debug("Application not uses jakarta faces");
+			}
         }
     }
 
