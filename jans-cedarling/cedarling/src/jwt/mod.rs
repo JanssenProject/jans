@@ -9,11 +9,11 @@
 //! robust functionality to support authentication and authorization flows, including:
 //!
 //! - Fetching and storing decoding keys from a JSON Web Key Set (JWKS) provided by
-//!     Identity Providers (IDPs).
+//!   Identity Providers (IDPs).
 //! - Extracting and processing claims from JWTs.
 //! - Validating JWT signatures to ensure token integrity and authenticity.
 //! - Verifying token validity based on standard claims such as expiration (`exp`) and
-//!     audience (`aud`).
+//!   audience (`aud`).
 //!
 //! ## Initialization
 //!
@@ -21,13 +21,13 @@
 //! These parameters are primarily configured via the [`jwt_config`] argument:
 //!
 //! - **JWKS (Optional)**: A JWKS string can be provided through the
-//!     `CEDARLING_LOCAL_JWKS` bootstrap property.
+//!   `CEDARLING_LOCAL_JWKS` bootstrap property.
 //! - **Signature Validation**: JWT signature verification is supported using a wrapper
-//!     around the [`jsonwebtoken`] crate.
+//!   around the [`jsonwebtoken`] crate.
 //! - **Status Validation (WIP)**: Support for token status validation is being
-//!     developed in accordance with the [`IETF draft spec`].
+//!   developed in accordance with the [`IETF draft spec`].
 //! - **Algorithm Restrictions**: Only tokens signed using supported algorithms will
-//!     be validated. Tokens with unsupported algorithms will trigger a warning.
+//!   be validated. Tokens with unsupported algorithms will trigger a warning.
 //!
 //! Additionally, you can provide a list of **trusted issuers** during initialization.
 //! Only tokens issued by these trusted issuers, as defined in the [`policy store`],
@@ -61,9 +61,9 @@
 //!
 //! - [x] Only Accept tokens defined from the policy store
 //! - [ ] JWK rotation (WIP): The service should automatically fetch new keys if the old
-//!     ones expire.
-//! - [ ] Statuslist Check (WIP): The `status` claim of a JWT should be validated if 
-//!     present
+//!   ones expire.
+//! - [ ] Statuslist Check (WIP): The `status` claim of a JWT should be validated if
+//!   present
 
 mod decode;
 mod error;
@@ -136,7 +136,7 @@ impl JwtService {
                 iss_claim = update_openid_config(&mut iss_config, &logger).await?;
             }
 
-            insert_keys(&mut key_service, jwt_config, &iss_config).await?;
+            insert_keys(&mut key_service, jwt_config, &iss_config, &logger).await?;
 
             update_jwt_validators(&mut validators, jwt_config, &iss_config, &logger);
 
@@ -283,6 +283,7 @@ async fn insert_keys(
     key_service: &mut KeyService,
     jwt_config: &JwtConfig,
     iss_config: &IssuerConfig,
+    logger: &Option<Logger>,
 ) -> Result<(), KeyServiceError> {
     if !jwt_config.jwt_sig_validation {
         return Ok(());
@@ -293,7 +294,9 @@ async fn insert_keys(
     }
 
     if let Some(openid_config) = iss_config.openid_config.as_ref() {
-        key_service.get_keys(openid_config).await?;
+        key_service
+            .get_keys_using_oidc(openid_config, logger)
+            .await?;
     }
 
     Ok(())

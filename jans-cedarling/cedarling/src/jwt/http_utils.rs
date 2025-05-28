@@ -6,14 +6,20 @@
 use std::sync::LazyLock;
 
 use async_trait::async_trait;
-use jsonwebtoken::jwk::JwkSet;
 use reqwest::Client;
 use serde::{Deserialize, Deserializer, de};
 use url::Url;
 
-static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
+use super::key_service::JwkSet;
 
-// async_traits are Send by default but wasm-bindgen doesn't support those 
+static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(|| {
+    Client::builder()
+        .danger_accept_invalid_certs(true)
+        .build()
+        .unwrap()
+});
+
+// async_traits are Send by default but wasm-bindgen doesn't support those
 // so we opt out of it for the wasm bindings to compile.
 //
 // see this relevant discussion: https://github.com/rustwasm/wasm-bindgen/issues/2409
