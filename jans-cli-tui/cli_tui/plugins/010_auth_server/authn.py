@@ -159,7 +159,7 @@ class Authn(DialogUtils):
             acr_values = [(BUILTIN_AUTHN, BUILTIN_AUTHN + ' [builtin]')]
 
             # LDAP Servers
-            if common_data.server_persistence_type == 'ldap':
+            if 'ladp' in common_data.server_persistence_type.get('driverVersion', '').lower():
                 self.ldap_servers_container.clear()
                 for i, ldap_server in enumerate(self.ldap_servers):
                     acr_values.append((ldap_server['configId'], ldap_server['configId'] + ' [ldap]'))

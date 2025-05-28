@@ -96,8 +96,8 @@ async def get_persistence_type() -> None:
             tobefocused=common_data.app.center_frame
         )
         return
-    result = response.json()
-    common_data.server_persistence_type = result['persistenceType']
+
+    common_data.server_persistence_type = response.json()
 
 
 async def get_asset_services() -> None:
