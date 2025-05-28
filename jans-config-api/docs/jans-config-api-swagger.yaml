@@ -1716,7 +1716,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PersistenceMetadata'
+                $ref: '#/components/schemas/PersistenceConfiguration'
               examples:
                 Response json example:
                   description: Response json example
@@ -9336,19 +9336,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanView:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        whitePagesCanView:
+        adminCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -10232,8 +10232,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10243,6 +10241,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10457,19 +10457,27 @@ components:
           type: array
           items:
             type: string
-    PersistenceMetadata:
+    PersistenceConfiguration:
       type: object
       properties:
+        databaseName:
+          type: string
+          description: Connection object's current catalog name.
         schemaName:
           type: string
+          description: Schema name.
         productName:
           type: string
+          description: Name of database product.
         productVersion:
           type: string
+          description: Version number of this database product.
         driverName:
           type: string
+          description: Name of this JDBC driver.
         driverVersion:
           type: string
+          description: JDBC driver version number.
     JsonPatch:
       type: object
     CacheConfiguration:
@@ -11815,10 +11823,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
