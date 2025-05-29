@@ -9716,9 +9716,9 @@
 <ol>
 <li>
 <p>Build the library:
-    <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>--release
+    <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span>cedarling_uniffi
 </code></pre></div>
-   In <code>target/release</code>, you should find the <code>libmobile.dylib</code>, <code>libmobile.so</code>, or <code>libmobile.dll</code> file, depending on the operating system you are using.</p>
+   In <code>target/release</code>, you should find the <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code> file, depending on the operating system you are using.</p>
 </li>
 <li>
 <p><strong>.so</strong> (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.</p>
@@ -9754,7 +9754,7 @@
 </code></pre></div></p>
 </li>
 <li>
-<p>Generate the bindings for Kotlin by running the command below. Replace <code>{build_file}</code> with <code>libmobile.dylib</code>, <code>libmobile.so</code>, or <code>libmobile.dll</code>, depending on which file is generated in <code>target/release</code>.
+<p>Generate the bindings for Kotlin by running the command below. Replace <code>{build_file}</code> with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
     <div class="highlight"><pre><span></span><code>cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/androidApp/app/src/main/java/com/example/androidapp/cedarling/uniffi
 </code></pre></div></p>
 </li>
@@ -9769,7 +9769,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-24T05:53:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-24</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-29T09:16:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-29</span>
       
         <br>
         Created:

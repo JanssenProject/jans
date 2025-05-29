@@ -9722,9 +9722,9 @@
 </li>
 <li>
 <p>Build the library:
-   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>--release
+   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span>cedarling_uniffi
 </code></pre></div>
-   In <code>target/release</code>, you should find the <code>libmobile.dylib</code>, <code>libmobile.so</code>, or <code>libmobile.dll</code> file, depending on the operating system you are using.</p>
+   In <code>target/release</code>, you should find the <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code> file, depending on the operating system you are using.</p>
 </li>
 <li>
 <p><strong>.so</strong> (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.</p>
@@ -9734,7 +9734,7 @@
 <p><strong>.dll</strong> (Dynamic Link Library) - The shared library format used in Windows.</p>
 </li>
 <li>
-<p>Generate the bindings for Swift by running the command below. Replace <code>{build_file}</code> with <code>libmobile.dylib</code>, <code>libmobile.so</code>, or <code>libmobile.dll</code>, depending on which file is generated in <code>target/release</code>.
+<p>Generate the bindings for Swift by running the command below. Replace <code>{build_file}</code> with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
    <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>run<span class="w"> </span>--bin<span class="w"> </span>uniffi-bindgen<span class="w"> </span>generate<span class="w"> </span>--library<span class="w"> </span>./target/release/<span class="o">{</span>build_file<span class="o">}</span><span class="w"> </span>--language<span class="w"> </span>swift<span class="w"> </span>--out-dir<span class="w"> </span>./bindings/cedarling_uniffi/output
 </code></pre></div></p>
 </li>
@@ -9748,18 +9748,18 @@
    <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--target<span class="o">=</span>aarch64-apple-ios-sim
 cargo<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--target<span class="o">=</span>aarch64-apple-ios
 </code></pre></div>
-   You should have two binaries <code>target/aarch64-apple-ios-sim/release/libmobile.a</code> and <code>target/aarch64-apple-ios/release/libmobile.a</code>.</p>
+   You should have two binaries <code>target/aarch64-apple-ios-sim/release/libcedarling_uniffi.a</code> and <code>target/aarch64-apple-ios/release/libcedarling_uniffi.a</code>.</p>
 </li>
 <li>
-<p>The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/mobileFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap. Then, we can create the XCFramework:
+<p>The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/cedarling_uniffiFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap. Then, we can create the XCFramework:
    <div class="highlight"><pre><span></span><code>xcodebuild<span class="w"> </span>-create-xcframework<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>-library<span class="w"> </span>./target/aarch64-apple-ios-sim/release/libmobile.a<span class="w"> </span>-headers<span class="w"> </span>./bindings/cedarling_uniffi/output<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>-library<span class="w"> </span>./target/aarch64-apple-ios/release/libmobile.a<span class="w"> </span>-headers<span class="w"> </span>./bindings/cedarling_uniffi/output<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>-library<span class="w"> </span>./target/aarch64-apple-ios-sim/release/libcedarling_uniffi.a<span class="w"> </span>-headers<span class="w"> </span>./bindings/cedarling_uniffi/output<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>-library<span class="w"> </span>./target/aarch64-apple-ios/release/libcedarling_uniffi.a<span class="w"> </span>-headers<span class="w"> </span>./bindings/cedarling_uniffi/output<span class="w"> </span><span class="se">\</span>
 <span class="w">        </span>-output<span class="w"> </span><span class="s2">&quot;ios/Mobile.xcframework&quot;</span>
 </code></pre></div></p>
 </li>
 <li>
-<p>Open <code>./jans-cedarling/bindings/cedarling_uniffi/iOSApp</code> in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings <code>bindings/output/mobile.swift</code> files into your project (drag and drop should work).</p>
+<p>Open <code>./jans-cedarling/bindings/cedarling_uniffi/iOSApp</code> in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings <code>bindings/output/cedarling_uniffi.swift</code> files into your project (drag and drop should work).</p>
 </li>
 <li>
 <p>Run iOS project on simulator.</p>
@@ -9773,7 +9773,7 @@ cargo<span class="w"> </span>build<span class="w"> </span>--release<span class="
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-24T05:53:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-24</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-29T09:16:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-29</span>
       
         <br>
         Created:
