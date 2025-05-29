@@ -380,7 +380,7 @@ You will need:
 
 #### Steps
 
- * Refer to [API documentation]((https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml)) to know the endpoint path and required OAuth scopes to access that 
+ * Refer to [API documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) to know the endpoint path and required OAuth scopes to access that 
  endpoint. Example: Attribute Endpoint.
 
     ![image](../../../assets/jans-attribute.png)
@@ -392,7 +392,7 @@ You will need:
 
     Syntax:
     ```
-    curl -k  https://<my.jans.server.domian>/jans-auth/restv1/token -H "Accept: application/json" -u "<clientId>:<decryptedClientSecret>" -d "grant_type=client_credentials" -d "scope= <apce separated oAuth Scope List>"
+    curl -k  https://<my.jans.server.domain>/jans-auth/restv1/token -H "Accept: application/json" -u "<clientId>:<decryptedClientSecret>" -d "grant_type=client_credentials" -d "scope= <apce separated oAuth Scope List>"
     ```
 
     Example: generate token for attribute:
@@ -408,7 +408,7 @@ You will need:
     Syntax:
 
     ```
-    curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization:Bearer <accessToken>" -X GET https://< my.jans.server.domian >/jans-config-api/api/v1/attributes
+    curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization:Bearer <accessToken>" -X GET https://< my.jans.server.domain >/jans-config-api/api/v1/attributes
     ```
 
     Example: Invoke attribute GET endpoint:
