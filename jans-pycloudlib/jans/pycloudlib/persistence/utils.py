@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import typing as _t
 from collections import defaultdict
 
@@ -45,11 +46,13 @@ def render_base_properties(src: str, dest: str) -> None:
         dest: Absolute path where generated file is located.
     """
     with open(src) as f:
-        txt = f.read()
+        txt = re.sub(r'(pythonModulesDir=%\(jansOptPythonFolder\)s/libs)', r"\1:/opt/jython/Lib/site-packages", f.read())
 
     with open(dest, "w") as f:
         rendered_txt = txt % {
             "persistence_type": os.environ.get("CN_PERSISTENCE_TYPE", "sql"),
+            "certFolder": "/etc/certs",
+            "jansOptPythonFolder": "/opt/jans/python",
         }
         f.write(rendered_txt)
 
