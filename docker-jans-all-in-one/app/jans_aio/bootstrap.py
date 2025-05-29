@@ -229,6 +229,14 @@ class App:
                 "mem_ratio": 0.10,
                 "java_opts_env": "CN_SAML_JAVA_OPTIONS",
             },
+            "jans-link": {
+                "mem_ratio": 0.08,
+                "java_opts_env": "CN_LINK_JAVA_OPTIONS",
+            },
+            "jans-keycloak-link": {
+                "mem_ratio": 0.08,
+                "java_opts_env": "CN_KEYCLOAK_LINK_JAVA_OPTIONS",
+            },
         }
 
         plugin_programs = self.plugin_manager.hook.add_supervisor_programs()

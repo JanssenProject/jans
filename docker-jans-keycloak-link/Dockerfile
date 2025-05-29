@@ -36,37 +36,27 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython -e ensurepip \
     && rm -f /tmp/jython-installer.jar /tmp/*.properties
 
-# ==========
-# Config API
-# ==========
-
-ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-05-22 12:22'
-
-ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
-
-# Install Jans Config API
-RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
-    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-config-api --add-modules=server,resources,http,forwarded,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
-
 # =======
-# Plugins
+# KC Link
 # =======
 
-RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
-    && for plugin in scim admin-ui fido2 user-mgt kc-saml lock jans-link kc-link; \
-    do \
-        wget -nv "https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/${plugin}-plugin/${CN_VERSION}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
-    done
+
+ENV CN_VERSION=1.7.0
+ENV CN_BUILD_DATE='2025-05-20 10:12'
+
+ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-keycloak-link-server/${CN_VERSION}/jans-keycloak-link-server-${CN_VERSION}.war
+
+# Install KC Link
+RUN mkdir -p ${JETTY_BASE}/jans-keycloak-link/webapps \
+    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-keycloak-link/webapps/jans-keycloak-link.war \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-keycloak-link --add-modules=server,resources,http,forwarded,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
 
 # ===========
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=6b45f516a7951d029f84eb5db491f45c1c181260
+ENV JANS_SOURCE_VERSION=8cf6b68bbdfd73d69008fd98eb94cdb041e1a2aa
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
-ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -76,15 +66,12 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
-    && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES} \
     && git sparse-checkout add jans-pycloudlib
 
 RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
     /app/schema \
-    /app/templates/jans-config-api \
-    /usr/share/java \
-    /opt/jans/bin
+    /app/templates/jans-keycloak-link
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
@@ -94,19 +81,12 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
-    && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/ \
-    && cp ${JANS_SETUP_DIR}/templates/jans-config-api/dynamic-conf.json /app/templates/jans-config-api/ \
-    && cp ${JANS_SETUP_DIR}/setup_app/utils/printVersion.py /opt/jans/bin/printVersion.py \
-    && chmod +x /opt/jans/bin/printVersion.py \
-    && ln -s /opt/jans/bin/printVersion.py /opt/jans/bin/show_version.py \
-    && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/templates/jans-config-api/ \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-keycloak-link/configuration.ldif /app/templates/jans-keycloak-link/ \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-keycloak-link/jans-keycloak-link-config.json /app/templates/jans-keycloak-link/ \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-keycloak-link/jans-keycloak-link-static-config.json /app/templates/jans-keycloak-link/ \
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
-    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico \
-    && cp ${JANS_SETUP_DIR}/static/scripts/facter /usr/bin/facter \
-    && chmod +x /usr/bin/facter \
-    && cp ${JANS_SETUP_DIR}/static/scripts/get_agama_lab_projects.py /opt/jans/bin/get_agama_lab_projects.py \
-    && chmod +x /opt/jans/bin/get_agama_lab_projects.py
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # ======
 # Python
@@ -193,7 +173,7 @@ ENV CN_PERSISTENCE_TYPE=sql \
 ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
-    CN_CONFIG_API_JAVA_OPTIONS="" \
+    CN_KEYCLOAK_LINK_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
@@ -202,9 +182,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
     CN_AWS_SECRETS_REPLICA_FILE="" \
-    CN_CONFIG_API_CREATE_SCOPES=true \
-    CN_CONFIG_API_JETTY_PORT=8074 \
-    CN_CONFIG_API_JETTY_HOST=0.0.0.0 \
+    CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
+    CN_KEYCLOAK_LINK_JETTY_HOST=0.0.0.0 \
     CN_JETTY_ARGS="" \
     CN_SSL_CERT_FROM_SECRETS=true
 
@@ -212,40 +191,29 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 # misc stuff
 # ==========
 
-EXPOSE $CN_CONFIG_API_JETTY_PORT
+EXPOSE $CN_KEYCLOAK_LINK_JETTY_PORT
 
-LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/keycloak-link" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
     org.opencontainers.image.version="0.0.0-nightly" \
-    org.opencontainers.image.title="Janssen Config API" \
+    org.opencontainers.image.title="Janssen Keycloak Link" \
     org.opencontainers.image.description=""
 
 RUN mkdir -p /etc/certs \
-    ${JETTY_BASE}/jans-config-api/custom/libs \
-    ${JETTY_BASE}/jans-config-api/custom/config \
-    ${JETTY_BASE}/jans-config-api/logs \
+    ${JETTY_BASE}/jans-keycloak-link/logs \
+    ${JETTY_BASE}/jans-keycloak-link/custom/libs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java \
-    /var/log/adminui
+    /var/jans/keycloak-link-snapshots
 
-RUN touch /etc/hosts.back
 COPY templates /app/templates/
-RUN cp /app/templates/jans-config-api/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
+RUN cp /app/templates/jans-keycloak-link/jans-keycloak-link.xml ${JETTY_BASE}/jans-keycloak-link/webapps/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
-# drop-replacement for jans-linux-setup jans_services_status.py script
-COPY contrib/external_healthcheck.py /opt/jans/bin/jans_services_status.py
-RUN chmod +x /opt/jans/bin/jans_services_status.py
-
-# unquote apiApprovedIssuer
-RUN sed -i 's/"${apiApprovedIssuer}"/${apiApprovedIssuer}/g' /app/templates/jans-config-api/dynamic-conf.json
-
 RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"\)\/\(>\)/\1\2<Set name="showContexts">false<\/Set><\/New>/' /opt/jetty/etc/jetty.xml
-
-RUN sed -i 's/\${sys:log.base}\/logs/\/var\/log\/adminui/g' /app/templates/jans-config-api/log4j2-adminui.xml
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
 
@@ -253,21 +221,18 @@ RUN ln -sf /usr/lib/jvm/jre /opt/java
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
 # adjust ownership and permission
-RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
-    && chmod 664 ${JETTY_BASE}/jans-config-api/resources/log4j2.xml \
-    && chmod -R g=u ${JETTY_BASE}/jans-config-api/logs \
+RUN chmod 664 ${JETTY_BASE}/jans-keycloak-link/resources/log4j2.xml \
+    && chmod -R g=u ${JETTY_BASE}/jans-keycloak-link/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
-    && chmod 664 /etc/hosts.back \
     && chmod 664 /opt/java/lib/security/cacerts \
-    && chmod -R g=u /app/templates/jans-config-api \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
-    && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/_plugins \
-    && chown 1000:0 ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.xml \
+    && chown 1000:0 ${JETTY_BASE}/jans-keycloak-link/webapps/jans-keycloak-link.xml \
+    && chown -R 1000:0 /var/jans/keycloak-link-snapshots \
     && chown -R 1000:0 ${JETTY_HOME}/temp \
-    && chown -R 1000:0 /var/log/adminui
+    && chown -R 1000:0 /app/templates
 
 USER 1000
 
