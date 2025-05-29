@@ -198,7 +198,7 @@ def determineApacheVersion(full=False):
             break
     cmd = httpd_cmd + " -v | egrep '^Server version'"
     output = run(cmd, shell=True)
-    apache_version_re = re.search('Apache/(\d).(\d).(\d)', output.strip())
+    apache_version_re = re.search(r'Apache/(\d).(\d).(\d)', output.strip())
     if apache_version_re:
         (major, minor, pathc) =  apache_version_re.groups()
         if full:
@@ -329,7 +329,7 @@ def read_yaml_file(yaml_fn):
 
 def find_script_names(ldif_file):
     name_list = []
-    rec = re.compile('\%\(((?s).*)\)s')
+    rec = re.compile(r'\%\((.+?)\)s')
     with open(ldif_file) as f:
         for l in f:
             if l.startswith('oxScript::'):

@@ -128,9 +128,6 @@ Create aio enabled list
 {{- if index .Values "config-api" "enabled" }}
 {{ $newList = append $newList ("jans-config-api") }}
 {{- end}}
-{{- if .Values.link.enabled}}
-{{ $newList = append $newList ("jans-link") }}
-{{- end}}
 {{- if .Values.fido2.enabled}}
 {{ $newList = append $newList ("jans-fido2") }}
 {{- end}}
@@ -143,9 +140,6 @@ Create aio enabled list
 {{- if .Values.saml.enabled}}
 {{ $newList = append $newList ("jans-saml") }}
 {{- end}}
-{{- if index .Values "keycloak-link" "enabled" }}
-{{ $newList = append $newList ("jans-keycloak-link") }}
-{{- end }}
 {{ toJson $newList }}
 {{- end }}
 
@@ -272,19 +266,6 @@ Create JAVA_OPTIONS ENV for passing custom work and detailed logs
 {{/*
 Create JAVA_OPTIONS ENV for passing custom work and detailed logs
 */}}
-{{- define "link.customJavaOptions"}}
-{{ $custom := "" }}
-{{ $custom = printf "%s" .Values.link.cnCustomJavaOptions }}
-{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
-{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.08) 1 ) -}}
-{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
-{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
-{{ $customJavaOptions | trim | quote }}
-{{- end }}
-
-{{/*
-Create JAVA_OPTIONS ENV for passing custom work and detailed logs
-*/}}
 {{- define "saml.customJavaOptions"}}
 {{ $custom := "" }}
 {{ $custom = printf "%s" .Values.saml.cnCustomJavaOptions }}
@@ -329,8 +310,8 @@ Obfuscate configuration schema (only if configuration key is available)
 {{- $_ := set $secretSchema "google_credentials" .Values.configmap.cnGoogleSecretManagerServiceAccount }}
 {{- end }}
 {{- if or (eq .Values.configAdapterName "aws") (eq .Values.configSecretAdapter "aws") }}
-{{- $_ := set $secretSchema "aws_credentials" (include "config.aws-shared-credentials" . | b64enc) }}
-{{- $_ := set $secretSchema "aws_config" (include "config.aws-config" . | b64enc) }}
+{{- $_ := set $secretSchema "aws_credentials" (include "janssen-all-in-one.aws-shared-credentials" . | b64enc) }}
+{{- $_ := set $secretSchema "aws_config" (include "janssen-all-in-one.aws-config" . | b64enc) }}
 {{- $_ := set $secretSchema "aws_replica_regions" (toJson .Values.configmap.cnAwsSecretsReplicaRegions | b64enc) }}
 {{- end }}
 {{- if .Values.saml.enabled }}

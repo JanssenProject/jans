@@ -14,8 +14,6 @@ ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${BASE_VERSION}
 ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${BASE_VERSION}
 ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${BASE_VERSION}
 ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${BASE_VERSION}
-ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${BASE_VERSION}
-ARG JANS_KEYCLOAK_LINK_IMAGE=ghcr.io/janssenproject/jans/keycloak-link:${BASE_VERSION}
 ARG JANS_SAML_IMAGE=ghcr.io/janssenproject/jans/saml:${BASE_VERSION}
 
 # -----------
@@ -36,10 +34,6 @@ FROM ${JANS_SCIM_IMAGE} AS jans-scim-src
 
 FROM ${JANS_CASA_IMAGE} AS jans-casa-src
 
-FROM ${JANS_LINK_IMAGE} AS jans-link-src
-
-FROM ${JANS_KEYCLOAK_LINK_IMAGE} AS jans-keycloak-link-src
-
 FROM ${JANS_SAML_IMAGE} AS jans-saml-src
 
 # ===
@@ -58,7 +52,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=137153d287ced23f04cd26037cdd3e783babdd95
+ENV JANS_SOURCE_VERSION=6b45f516a7951d029f84eb5db491f45c1c181260
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -148,17 +142,6 @@ COPY --from=jans-casa-src /app/scripts /app/jans_aio/jans_casa
 COPY --from=jans-casa-src /usr/share/java/casa-agama-project.zip /usr/share/java
 RUN ln -sf /app/jans_aio/jans_casa/entrypoint.sh /app/bin/jans-casa-entrypoint.sh
 
-COPY --from=jans-link-src /opt/jans/jetty/jans-link /opt/jans/jetty/jans-link
-COPY --from=jans-link-src /app/templates/jans-link /app/templates/jans-link
-COPY --from=jans-link-src /app/scripts /app/jans_aio/jans_link
-RUN ln -sf /app/jans_aio/jans_link/entrypoint.sh /app/bin/jans-link-entrypoint.sh
-
-COPY --from=jans-keycloak-link-src /opt/jans/jetty/jans-keycloak-link /opt/jans/jetty/jans-keycloak-link
-COPY --from=jans-keycloak-link-src /app/templates/jans-keycloak-link /app/templates/jans-keycloak-link
-COPY --from=jans-keycloak-link-src /app/scripts /app/jans_aio/jans_keycloak_link
-COPY --from=jans-keycloak-link-src /var/jans/cr-snapshots /var/jans/cr-snapshots
-RUN ln -sf /app/jans_aio/jans_keycloak_link/entrypoint.sh /app/bin/jans-keycloak-link-entrypoint.sh
-
 COPY --from=jans-saml-src /app/templates/jans-saml /app/templates/jans-saml
 COPY --from=jans-saml-src /app/scripts /app/jans_aio/jans_saml
 COPY --from=jans-saml-src /opt/idp /opt/idp
@@ -210,14 +193,8 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_CASA_ADMIN_LOCK_FILE=/opt/jans/jetty/jans-casa/resources/.administrable \
     CN_CASA_JWKS_SIZE_LIMIT=100000 \
     CN_CASA_JAVA_OPTIONS="" \
-    CN_LINK_JETTY_HOST=127.0.0.1 \
-    CN_LINK_JETTY_PORT=9091 \
-    CN_LINK_JAVA_OPTIONS="" \
     CN_SHARE_AUTH_CONF=false \
     CN_SQL_PASSWORD_FILE=/etc/jans/conf/sql_password \
-    CN_KEYCLOAK_LINK_JETTY_HOST=127.0.0.1 \
-    CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
-    CN_KEYCLOAK_LINK_JAVA_OPTIONS="" \
     CN_SAML_HTTP_HOST=127.0.0.1 \
     CN_SAML_HTTP_PORT=8083 \
     CN_SAML_JAVA_OPTIONS="" \
@@ -276,10 +253,6 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     ${JETTY_BASE}/jans-casa/plugins \
     ${JETTY_BASE}/jans-casa/resources \
     ${JETTY_BASE}/jans-casa/logs \
-    ${JETTY_BASE}/jans-link/resources \
-    ${JETTY_BASE}/jans-link/logs \
-    ${JETTY_BASE}/jans-keycloak-link/resources \
-    ${JETTY_BASE}/jans-keycloak-link/logs \
     /etc/certs \
     /etc/jans \
     /opt/jans/python/libs \
@@ -291,7 +264,6 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     /var/log/adminui \
     /etc/nginx/jans-aio \
     /usr/share/java \
-    /var/jans/cr-snapshots \
     /opt/idp \
     /opt/keycloak/logs \
     /opt/keycloak/conf
@@ -316,10 +288,6 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/jans-casa/plugins \
     ${JETTY_BASE}/jans-casa/resources \
     ${JETTY_BASE}/jans-casa/logs \
-    ${JETTY_BASE}/jans-link/resources \
-    ${JETTY_BASE}/jans-link/logs \
-    ${JETTY_BASE}/jans-keycloak-link/resources \
-    ${JETTY_BASE}/jans-keycloak-link/logs \
     /etc/certs \
     /etc/jans \
     /opt/jans/python/libs \
@@ -331,7 +299,6 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     /var/log/adminui \
     /etc/nginx/jans-aio \
     /usr/share/java \
-    /var/jans/cr-snapshots \
     /opt/idp \
     /opt/keycloak/logs \
     /opt/keycloak/conf

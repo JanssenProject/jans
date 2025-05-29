@@ -131,6 +131,21 @@ def transform_auth_dynamic_config_hook(conf, manager):
         ("sessionIdCookieLifetime", 86400),
         ("tokenIndexAllocationBlockSize", 10),
         ("tokenIndexLimit", 10000000),
+        ("sessionJwtSigningAlgValuesSupported", [
+            "HS256",
+            "HS384",
+            "HS512",
+            "RS256",
+            "RS384",
+            "RS512",
+            "ES256",
+            "ES384",
+            "ES512",
+            "ES512",
+            "PS256",
+            "PS384",
+            "PS512"
+        ]),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -297,6 +312,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
         "status_list",
         "rate_limit",
         "access_evaluation",
+        "session_status_list",
     ]:
         if flag not in conf["featureFlags"]:
             conf["featureFlags"].append(flag)
