@@ -36,7 +36,7 @@ class JythonInstaller(BaseInstaller, SetupUtils):
             self.logIt("Jython installer not found in. Exiting...", True, True)
 
         jython_installer = max(jython_installer_list)
-        jython_version_regex = re.search('jython-installer-(.*)\.jar', jython_installer)
+        jython_version_regex = re.search(r'jython-installer-(.*)\.jar', jython_installer)
         
         if not jython_version_regex:
             self.logIt("Jython installer not found in. Exiting...", True, True)

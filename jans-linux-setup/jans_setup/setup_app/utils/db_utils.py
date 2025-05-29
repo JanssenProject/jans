@@ -232,13 +232,13 @@ class DBUtils:
             search_list = []
 
             if '&' in search_filter:
-                re_match = re.match('\(&\((.*?)=(.*?)\)\((.*?)=(.*?)\)', search_filter)
+                re_match = re.match(r'\(&\((.*?)=(.*?)\)\((.*?)=(.*?)\)', search_filter)
                 if re_match:
                     re_list = re_match.groups()
                     search_list.append((re_list[0], re_list[1]))
                     search_list.append((re_list[2], re_list[3]))
             else:
-                re_match = re.match('\((.*?)=(.*?)\)', search_filter)
+                re_match = re.match(r'\((.*?)=(.*?)\)', search_filter)
 
                 if re_match:
                     re_list = re_match.groups()
