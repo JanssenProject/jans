@@ -12,7 +12,7 @@ use url::Url;
 
 use super::key_service::JwkSet;
 
-static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(|| Client::new());
+static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 
 // async_traits are Send by default but wasm-bindgen doesn't support those
 // so we opt out of it for the wasm bindings to compile.
