@@ -1056,8 +1056,8 @@ class JansCliApp(Application):
 
     def show_message(
             self, 
-            title: AnyFormattedText,  
-            message: AnyFormattedText,  
+            title: AnyFormattedText,
+            message: AnyFormattedText,
             buttons:Optional[Sequence[Button]] = [],
             tobefocused: AnyContainer= None
             ) -> None:
