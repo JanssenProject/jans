@@ -129,14 +129,13 @@ async fn keep_status_list_updated(
         let status_list_jwt = match StatusListJwtStr::get_from_url(&status_list_url).await {
             Ok(jwt) => jwt,
             Err(e) => {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
+                if let Some(logger) = logger.as_ref() {
+                    logger.log_any(JwtLogEntry::system(format!(
                         "failed to fetch an updated the status list from '{0}': {1}",
                         status_list_url.as_str(),
                         e
-                    ),
-                    Some(crate::LogLevel::ERROR),
-                ));
+                    )));
+                }
                 continue;
             },
         };
@@ -150,14 +149,14 @@ async fn keep_status_list_updated(
         let validated_jwt = match result {
             Ok(validated_jwt) => validated_jwt,
             Err(e) => {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
+                if let Some(logger) = logger.as_ref() {
+                    logger.log_any(JwtLogEntry::system(format!(
                         "failed to validate an updated the status list JWT from '{0}': {1}",
                         status_list_url.as_str(),
                         e
-                    ),
-                    Some(crate::LogLevel::ERROR),
-                ));
+                    )));
+                }
+
                 continue;
             },
         };
@@ -165,14 +164,14 @@ async fn keep_status_list_updated(
         let status_list_jwt: StatusListJwt = match validated_jwt.try_into() {
             Ok(jwt) => jwt,
             Err(e) => {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
+                if let Some(logger) = logger.as_ref() {
+                    logger.log_any(JwtLogEntry::system(format!(
                         "failed to deserialize an updated the status list JWT from '{0}': {1}",
                         status_list_url.as_str(),
                         e
-                    ),
-                    Some(crate::LogLevel::ERROR),
-                ));
+                    )));
+                }
+
                 continue;
             },
         };
@@ -183,14 +182,13 @@ async fn keep_status_list_updated(
         let updated_status_list: StatusList = match status_list_jwt.try_into() {
             Ok(status_list) => status_list,
             Err(e) => {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
+                if let Some(logger) = logger.as_ref() {
+                    logger.log_any(JwtLogEntry::system(format!(
                         "failed to parse the updated the status list JWT from '{0}': {1}",
                         status_list_url.as_str(),
                         e
-                    ),
-                    Some(crate::LogLevel::ERROR),
-                ));
+                    )));
+                }
                 continue;
             },
         };

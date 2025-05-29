@@ -55,7 +55,7 @@ impl JwtValidatorCache {
 
         for (token_name, tkn_metadata) in iss_config.policy.token_metadata.iter() {
             if !tkn_metadata.trusted {
-                if let Some(logger) = logger {
+                if let Some(logger) = logger.as_ref() {
                     logger.log_any(JwtLogEntry::system(format!(
                         "skipping metadata for '{}' from '{}' since `trusted == false`",
                         token_name, iss_config.issuer_id,
