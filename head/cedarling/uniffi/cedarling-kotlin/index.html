@@ -7754,13 +7754,36 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#building-kotlin-binding" class="md-nav__link">
-    Building Kotlin binding
+  <a href="#building-from-source" class="md-nav__link">
+    Building from Source
   </a>
   
 </li>
       
         <li class="md-nav__item">
+  <a href="#recipes" class="md-nav__link">
+    Recipes
+  </a>
+  
+    <nav class="md-nav" aria-label="Recipes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recipe-1-using-the-cedarling-java-binding-in-custom-scripts-on-the-janssen-auth-server-vm-installation" class="md-nav__link">
+    Recipe 1: Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recipe-2-sample-java-maven-project-using-the-kotlin-binding" class="md-nav__link">
+    Recipe 2: Sample Java Maven project using the Kotlin binding
+  </a>
+  
+    <nav class="md-nav" aria-label="Recipe 2: Sample Java Maven project using the Kotlin binding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#sample-java-maven-project" class="md-nav__link">
     Sample Java Maven Project
   </a>
@@ -7772,6 +7795,16 @@
   <a href="#added-dependencies-in-pomxml" class="md-nav__link">
     Added dependencies in pom.xml:
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -9694,13 +9727,36 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#building-kotlin-binding" class="md-nav__link">
-    Building Kotlin binding
+  <a href="#building-from-source" class="md-nav__link">
+    Building from Source
   </a>
   
 </li>
       
         <li class="md-nav__item">
+  <a href="#recipes" class="md-nav__link">
+    Recipes
+  </a>
+  
+    <nav class="md-nav" aria-label="Recipes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recipe-1-using-the-cedarling-java-binding-in-custom-scripts-on-the-janssen-auth-server-vm-installation" class="md-nav__link">
+    Recipe 1: Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recipe-2-sample-java-maven-project-using-the-kotlin-binding" class="md-nav__link">
+    Recipe 2: Sample Java Maven project using the Kotlin binding
+  </a>
+  
+    <nav class="md-nav" aria-label="Recipe 2: Sample Java Maven project using the Kotlin binding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#sample-java-maven-project" class="md-nav__link">
     Sample Java Maven Project
   </a>
@@ -9712,6 +9768,16 @@
   <a href="#added-dependencies-in-pomxml" class="md-nav__link">
     Added dependencies in pom.xml:
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -9745,49 +9811,121 @@
 
 <h1 id="cedarling-kotlin-binding">Cedarling Kotlin binding<a class="headerlink" href="#cedarling-kotlin-binding" title="Permanent link">#</a></h1>
 <p><a href="https://mozilla.github.io/uniffi-rs/latest/">UniFFI</a> (Universal Foreign Function Interface) is a tool developed by Mozilla to simplify cross-language bindings, primarily between Rust and other languages like Kotlin, Swift, and Python. It allows Rust libraries to be used in these languages without manually writing complex foreign function interface (FFI) bindings.</p>
-<p>Please refer to <a href="../cedarling-uniffi/">this document</a> for details on the structs, enums, and functions exposed by UniFFI bindings. This section outlines the steps to generate the Cedarling Kotlin binding and use it in a sample Java Maven project.</p>
+<p>Please refer to <a href="../cedarling-uniffi/">this document</a> for details on the structs, enums, and functions exposed by UniFFI bindings. This section outlines the process of generating the Kotlin binding for Cedarling using Cedarling UniFFI. The Kotlin binding is then wrapped in a Java class to enable convenient use in Java applications.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
 <li>Rust: Install it from <a href="https://www.rust-lang.org/tools/install">the official Rust website</a>.</li>
 <li>Java Development Kit (JDK): version 21 or higher</li>
 <li>Apache Maven: Install it from <a href="https://maven.apache.org/download.cgi">Apache Maven Website</a></li>
 </ul>
-<h2 id="building-kotlin-binding">Building Kotlin binding<a class="headerlink" href="#building-kotlin-binding" title="Permanent link">#</a></h2>
+<h2 id="building-from-source">Building from Source<a class="headerlink" href="#building-from-source" title="Permanent link">#</a></h2>
 <ol>
 <li>
-<p>Build Cedarling:</p>
-<p><div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>--release
+<p>Build Cedarling by executing below command from <code>./jans/jans-cedarling</code> of cloned jans project:
+   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span>cedarling_uniffi
 </code></pre></div>
-In <code>target/release</code>, you should find the <code>libmobile.dylib</code>, <code>libmobile.so</code>, or <code>libmobile.dll</code> file, depending on the operating system you are using.</p>
+   In <code>target/release</code>, you should find the <code>libcedarling_uniffi.dylib</code> (if Mac OS), <code>libcedarling_uniffi.so</code> (if Linux OS), or <code>libcedarling_uniffi.dll</code> (if Windows OS) file, depending on the operating system you are using.</p>
 </li>
 <li>
-<p>Generate the bindings for Kotlin by running the command below. Replace <code>{build_file}</code> with <code>libmobile.dylib</code>, <code>libmobile.so</code>, or <code>libmobile.dll</code>, depending on which file is generated in <code>target/release</code>.</p>
-<div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>run<span class="w"> </span>--bin<span class="w"> </span>uniffi-bindgen<span class="w"> </span>generate<span class="w"> </span>--library<span class="w"> </span>./target/release/<span class="o">{</span>build_file<span class="o">}</span><span class="w"> </span>--language<span class="w"> </span>kotlin<span class="w"> </span>--out-dir<span class="w"> </span>./bindings/cedarling_uniffi/javaApp/src/main/kotlin/org/example
-</code></pre></div>
+<p>Generate the bindings for Kotlin by running the command below. Replace <code>{build_file}</code> with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
+   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>run<span class="w"> </span>--bin<span class="w"> </span>uniffi-bindgen<span class="w"> </span>generate<span class="w"> </span>--library<span class="w"> </span>./target/release/<span class="o">{</span>build_file<span class="o">}</span><span class="w"> </span>--language<span class="w"> </span>kotlin<span class="w"> </span>--out-dir<span class="w"> </span>./bindings/cedarling-java/src/main/kotlin/io/jans/cedarling
+</code></pre></div></p>
 </li>
 <li>
-<p>Copy the generated <code>libmobile.dylib</code>, <code>libmobile.so</code>, or <code>libmobile.dll</code> file to resource directory of the sample Java Maven project. Replace <code>{build_file}</code> in the below commad with <code>libmobile.dylib</code>, <code>libmobile.so</code>, or <code>libmobile.dll</code>, depending on which file is generated in <code>target/release</code>.</p>
-<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>./target/release/<span class="o">{</span>build_file<span class="o">}</span><span class="w"> </span>./bindings/cedarling_uniffi/javaApp/src/main/resources
-</code></pre></div>
+<p>Copy the generated <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code> file to resource directory of the <code>cedarling-java</code> Maven project. Replace <code>{build_file}</code> in the below commad with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
+   <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>./bindings/cedarling-java/src/main/resources
+cp<span class="w"> </span>./target/release/<span class="o">{</span>build_file<span class="o">}</span><span class="w"> </span>./bindings/cedarling-java/src/main/resources
+</code></pre></div></p>
 </li>
 <li>
-<p>Change directory to sample Java project (<code>./bindings/cedarling_uniffi/javaApp</code>) and run below command to run the main method of a Maven project from the terminal.</p>
-<div class="highlight"><pre><span></span><code><span class="w"> </span>mvn<span class="w"> </span>clean<span class="w"> </span>install
-<span class="w"> </span>mvn<span class="w"> </span>exec:java<span class="w"> </span>-Dexec.mainClass<span class="o">=</span><span class="s2">&quot;org.example.Main&quot;</span>
-</code></pre></div>
+<p>Change directory to <code>./bindings/cedarling-java</code> and run below command to build <code>cedarling-java</code> jar file. This will generate <code>cedarling-java-{version}-distribution.jar</code> at <code>./bindings/cedarling-java/target/</code>.
+   <div class="highlight"><pre><span></span><code><span class="w"> </span>mvn<span class="w"> </span>clean<span class="w"> </span>install
+</code></pre></div></p>
 </li>
 </ol>
-<p>The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization with sample tokens, resource and context inputs and call log interface to print authorization logs on console. </p>
-<h2 id="sample-java-maven-project">Sample Java Maven Project<a class="headerlink" href="#sample-java-maven-project" title="Permanent link">#</a></h2>
+<h2 id="recipes">Recipes<a class="headerlink" href="#recipes" title="Permanent link">#</a></h2>
+<h3 id="recipe-1-using-the-cedarling-java-binding-in-custom-scripts-on-the-janssen-auth-server-vm-installation"><strong>Recipe 1:</strong> Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).<a class="headerlink" href="#recipe-1-using-the-cedarling-java-binding-in-custom-scripts-on-the-janssen-auth-server-vm-installation" title="Permanent link">#</a></h3>
+<p><strong>Note:</strong> This recipe is compatible with Jans version 1.4.0 and earlier.</p>
+<ul>
+<li>Upload <a href="../cedarling-sample-inputs/#bootstrapjson">bootstrap.json</a>, <a href="../cedarling-sample-inputs/#policy-storejson">policy-store.json</a>, <a href="../cedarling-sample-inputs/#actiontxt">action.txt</a>, <a href="../cedarling-sample-inputs/#contextjson">context.json</a>, <a href="../cedarling-sample-inputs/#principalsjson">principals.json</a> and <a href="../cedarling-sample-inputs/#resourcejson">resource.json</a> at <code>/opt/jans/jetty/jans-auth/custom/static</code> location of the auth server. The <a href="https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen">Asset Screen</a> can be used to upload assets.</li>
+<li>Upload the generate <code>cedarling-java-{version}-distribution.jar</code> at <code>/opt/jans/jetty/jans-auth/custom/libs</code> location of the auth server.</li>
+<li>The following Post Authn script has been created for calling Cedarling authorization. Add and enable the <a href="../cedarling-sample-inputs/#sample_cedarling_post_authntxt">Post Authn custom script</a> (in Java) with following Custom Properties:</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BOOTSTRAP_JSON_PATH</td>
+<td>./custom/static/bootstrap.json</td>
+</tr>
+<tr>
+<td>ACTION_FILE_PATH</td>
+<td>./custom/static/action.txt</td>
+</tr>
+<tr>
+<td>RESOURCE_FILE_PATH</td>
+<td>./custom/static/resource.json</td>
+</tr>
+<tr>
+<td>CONTEXT_FILE_PATH</td>
+<td>./custom/static/context.json</td>
+</tr>
+<tr>
+<td>PRINCIPALS_FILE_PATH</td>
+<td>./custom/static/principals.json</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p>Map the script with client used to perform authentication.
+   <img alt="" src="../../../assets/cedarling-adding-client-script.png" /></p>
+</li>
+<li>
+<p>The script runs after client authentication to invoke Cedarling authz.</p>
+</li>
+</ul>
+<h3 id="recipe-2-sample-java-maven-project-using-the-kotlin-binding"><strong>Recipe 2:</strong> Sample Java Maven project using the Kotlin binding<a class="headerlink" href="#recipe-2-sample-java-maven-project-using-the-kotlin-binding" title="Permanent link">#</a></h3>
+<ol>
+<li>
+<p>Build Cedarling:
+    <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span>cedarling_uniffi
+</code></pre></div>
+   In <code>target/release</code>, you should find the <code>libcedarling_uniffi.dylib</code> (if Mac OS), <code>libcedarling_uniffi.so</code> (if Linux OS), or <code>libcedarling_uniffi.dll</code> (if Windows OS) file, depending on the operating system you are using.</p>
+</li>
+<li>
+<p>Generate the bindings for Kotlin by running the command below. Replace <code>{build_file}</code> with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
+    <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>run<span class="w"> </span>--bin<span class="w"> </span>uniffi-bindgen<span class="w"> </span>generate<span class="w"> </span>--library<span class="w"> </span>./target/release/<span class="o">{</span>build_file<span class="o">}</span><span class="w"> </span>--language<span class="w"> </span>kotlin<span class="w"> </span>--out-dir<span class="w"> </span>./bindings/cedarling_uniffi/javaApp/src/main/kotlin/org/example
+</code></pre></div></p>
+</li>
+<li>
+<p>Copy the generated <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code> file to resource directory of the sample Java Maven project. Replace <code>{build_file}</code> in the below commad with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
+    <div class="highlight"><pre><span></span><code>cp<span class="w"> </span>./target/release/<span class="o">{</span>build_file<span class="o">}</span><span class="w"> </span>./bindings/cedarling_uniffi/javaApp/src/main/resources
+</code></pre></div></p>
+</li>
+<li>
+<p>Change directory to sample Java project (<code>./bindings/cedarling_uniffi/javaApp</code>) and run below command to run the main method of a Maven project from the terminal.
+    <div class="highlight"><pre><span></span><code><span class="w"> </span>mvn<span class="w"> </span>clean<span class="w"> </span>install
+<span class="w"> </span>mvn<span class="w"> </span>exec:java<span class="w"> </span>-Dexec.mainClass<span class="o">=</span><span class="s2">&quot;org.example.Main&quot;</span>
+</code></pre></div>
+The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization with sample tokens, resource and context inputs and call log interface to print authorization logs on console.</p>
+</li>
+</ol>
+<h4 id="sample-java-maven-project">Sample Java Maven Project<a class="headerlink" href="#sample-java-maven-project" title="Permanent link">#</a></h4>
 <p>Note the following points in the sample Java Maven project to understand the changes required for using the Kotlin binding in other Java projects.</p>
 <ul>
 <li>The sample <code>tokens</code>, <code>resource</code> and <code>context</code> input files along with files containing <code>bootstrap configuration</code> and <code>policy- store</code> used by the sample application are present at <code>./bindings/cedarling_uniffi/javaApp/src/main/resources/config</code>.</li>
 <li>Refer to the Java code in org.example.Main to see how Cedarling's <code>init</code>, <code>authz</code>, and <code>log</code> interfaces are called using the Kotlin binding.</li>
 </ul>
-<h4 id="added-dependencies-in-pomxml">Added dependencies in pom.xml:<a class="headerlink" href="#added-dependencies-in-pomxml" title="Permanent link">#</a></h4>
+<h5 id="added-dependencies-in-pomxml">Added dependencies in pom.xml:<a class="headerlink" href="#added-dependencies-in-pomxml" title="Permanent link">#</a></h5>
 <ul>
 <li>
-<p><strong>Java Native Access (JNA):</strong> A Java library that allows Java code to call native shared libraries (like .so on Linux, .dll on Windows, or .dylib on macOS) without writing JNI (Java Native Interface) code. </p>
+<p><strong>Java Native Access (JNA):</strong> A Java library that allows Java code to call native shared libraries (like .so on Linux, .dll on Windows, or .dylib on macOS) without writing JNI (Java Native Interface) code.</p>
 </li>
 <li>
 <p><strong>kotlinx.coroutines:</strong> Adds support for asynchronous programming using coroutines.</p>
@@ -9808,7 +9946,7 @@ In <code>target/release</code>, you should find the <code>libmobile.dylib</code>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-13T19:07:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-29T09:16:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-29</span>
       
         <br>
         Created:
