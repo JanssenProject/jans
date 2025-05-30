@@ -53,39 +53,75 @@ Installation depends on the set of environment variables shown below. These envi
 
 ## How to run
 
-Download the compose file of your chosen persistence from mysql or postgres
+Download the compose file of your chosen persistence from mysql or postgres.
 
-```bash
+=== "MySQL"
 
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml 
-```
+    ```bash
+    wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
+    ```
+
+=== "PgSQL"
+
+    ```bash 
+    wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml 
+    ```
 
 Download the script files 
 
 ```bash
-
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/up.sh
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/down.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/up.sh /
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/down.sh /
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/clean.sh
 ```
 
 Give execute permission to the scripts
 `chmod u+x up.sh down.sh clean.sh`
 
-This docker compose file runs two containers, the janssen monolith container and mysql container.
-To start the containers.
+## Create and Start Containers
 
-```bash
-./up.sh #You can pass mysql|postgres as an argument to the script. If you don't pass any, it will default to mysql.
-```
+`up.sh` script invokes the appropriate compose file based on parameter passed. 
+You can pass `mysql` or `postgres` as an argument to the script. If you don't pass any, it will default to mysql.
+
+It creates two containers, a janssen monolith container and a container for 
+persistence.
+
+!!! Troubleshooting Tip
+    Sometimes the command below runs into an error regarding TLS handshake 
+    timeout while trying to connect
+    to docker registry. Try restarting docker services. Root-cause of this error
+    is not known.
+
+    ```bash
+    service docker restart
+    ```
+=== "MySQL"
+
+    ```bash
+    ./up.sh mysql 
+    ```
+
+=== "PgSQL"
+
+    ```bash
+    ./up.sh pgsql
+    ```
+
+
 
 To view the containers running
 
-```bash
+=== "MySQL"
 
-docker compose -f jans-mysql-compose.yml ps
-```
+    ```bash
+    docker compose -f jans-mysql-compose.yml ps
+    ```
+
+=== "PgSQL"
+
+    ```bash
+    docker compose -f jans-postgres-compose.yml ps
+    ```
 
 To stop the containers.
 
