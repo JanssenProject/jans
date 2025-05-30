@@ -261,8 +261,10 @@ pub enum ValidateJwtError {
     DecodeJwt(#[from] DecodeJwtError),
     #[error("failed to validate the JWT since no key was available")]
     MissingValidationKey,
-    #[error("failed to validate the JWT from '{0:?}' since it's not a trusted issuer")]
-    MissingValidator(Option<String>),
+    #[error(
+        "failed to validate JWT {0:?}: no validator was initialized. this may be due to an untrusted issuer or an unsupported algorithm"
+    )]
+    MissingValidator(OwnedValidatorInfo),
     #[error("failed to validate the JWT: {0}")]
     ValidateJwt(#[from] jwt::errors::Error),
     #[error("validation failed since the JWT is missing the following required claims: {0:#?}")]

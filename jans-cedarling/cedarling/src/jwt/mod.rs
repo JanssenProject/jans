@@ -174,20 +174,17 @@ impl JwtService {
         let mut validated_tokens = HashMap::new();
 
         for (token_name, jwt) in tokens.iter() {
-            let validation_result = self.validate_single_token(token_name.clone(), jwt);
-            let Ok(validated_jwt) = validation_result else {
-                match validation_result.unwrap_err() {
-                    ValidateJwtError::MissingValidator(iss) => {
-                        self.logger.log_any(JwtLogEntry::new(
-                            format!(
-                                "ignoring {token_name} since it's from an untrusted issuer: '{iss:?}'"
-                            ),
-                            Some(LogLevel::WARN),
-                        ));
+            let validated_jwt = match self.validate_single_token(token_name.clone(), jwt) {
+                Ok(jwt) => jwt,
+                Err(err) => {
+                    if matches!(err, ValidateJwtError::MissingValidator(_)) {
+                        self.logger
+                            .log_any(JwtLogEntry::new(err.to_string(), Some(LogLevel::WARN)));
                         continue;
-                    },
-                    err => return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err)),
-                }
+                    } else {
+                        return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err));
+                    }
+                },
             };
 
             let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
@@ -230,7 +227,7 @@ impl JwtService {
             self.validators
                 .get(&validator_key)
                 .ok_or(ValidateJwtError::MissingValidator(
-                    decoded_jwt.iss().map(|s| s.to_string()),
+                    validator_key.owned(),
                 ))?;
 
         // validate JWT

@@ -18,7 +18,7 @@
     "CEDARLING_LOCK_SSA_JWT": null,
     "CEDARLING_LOG_LEVEL": "DEBUG",
     "CEDARLING_LOG_TTL": 120,
-    "CEDARLING_LOG_TYPE": "memory",
+    "CEDARLING_LOG_TYPE": "std_out",
     "CEDARLING_POLICY_STORE_ID": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
     "CEDARLING_POLICY_STORE_LOCAL_FN": "../../bindings/cedarling_uniffi/test_files/policy-store.json",
     "CEDARLING_POLICY_STORE_URI": "",

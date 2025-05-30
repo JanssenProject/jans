@@ -105,10 +105,10 @@ impl JwtValidatorCache {
     /// appended to the vector. Exact match resolution is deferred to lookup time.
     fn insert(&mut self, validator_info: ValidatorInfo<'_>, validator: JwtValidator) {
         let key = validator_info.key_hash();
-        self.validators
-            .entry(key)
-            .or_default()
-            .push((validator_info.as_owned(), Arc::new(RwLock::new(validator))));
+        self.validators.entry(key).or_default().push((
+            validator_info.owned(),
+            Arc::new(RwLock::new(validator)),
+        ));
     }
 
     /// Retrieves a validator matching the given `ValidatorInfo`, if present.
@@ -164,7 +164,7 @@ impl Display for TokenKind<'_> {
 
 /// Owned version of [`ValidatorInfo`] used to store entries inside `ValidatorStore`.
 #[derive(Debug)]
-struct OwnedValidatorInfo {
+pub struct OwnedValidatorInfo {
     iss: Option<String>,
     token_kind: OwnedTokenKind,
     algorithm: Algorithm,
@@ -212,8 +212,8 @@ impl OwnedTokenKind {
 struct ValidatorKeyHash(u64);
 
 impl ValidatorInfo<'_> {
-    /// Converts the borrowed validator info into an owned version for storage.
-    fn as_owned(&self) -> OwnedValidatorInfo {
+    /// Creates an [`OwnedValidatorInfo`] for storage.
+    pub fn owned(&self) -> OwnedValidatorInfo {
         OwnedValidatorInfo {
             iss: self.iss.map(|s| s.to_string()),
             token_kind: self.token_kind.into(),
