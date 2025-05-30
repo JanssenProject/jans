@@ -32,7 +32,6 @@ mod lock_config;
 mod log_entry;
 mod log_worker;
 mod register_client;
-mod spawn_task;
 
 use crate::app_types::PdpID;
 use crate::log::LoggerWeak;
@@ -45,7 +44,6 @@ use log_worker::*;
 use register_client::*;
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
-use spawn_task::*;
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use thiserror::Error;
@@ -56,7 +54,7 @@ pub const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
 
 struct WorkerSenderAndHandle {
     tx: RwLock<mpsc::Sender<SerializedLogEntry>>,
-    handle: JoinHandle<()>,
+    handle: crate::http::JoinHandle<()>,
 }
 
 /// Stores logs in a buffer then sends them to the lock server in the background
@@ -148,7 +146,10 @@ impl LockService {
 
                 let cancel_tkn = cancel_tkn.clone();
 
-                let handle = spawn_task(async move { log_worker.run(log_rx, cancel_tkn).await });
+                let handle =
+                    crate::http::spawn_task(
+                        async move { log_worker.run(log_rx, cancel_tkn).await },
+                    );
 
                 Some(WorkerSenderAndHandle {
                     tx: log_tx.into(),

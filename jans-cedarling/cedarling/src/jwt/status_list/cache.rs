@@ -88,9 +88,8 @@ impl StatusListCache {
 
         // spawn a backgroud task to handle updating the statuslist if the JWT has a TTL
         // claim
-        // TODO: make this WASM-compatible
         if let Some(ttl) = ttl {
-            tokio::spawn(keep_status_list_updated(
+            crate::http::spawn_task(keep_status_list_updated(
                 ttl,
                 status_list_url.clone(),
                 decoding_key.cloned(),
