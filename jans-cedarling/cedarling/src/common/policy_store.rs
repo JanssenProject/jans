@@ -507,7 +507,7 @@ impl<'de> Deserialize<'de> for PolicyStore {
                 .and_then(|v| v.as_str())
                 .map(|s| s.to_string()),
             cedar_version: obj.get("cedar_version")
-                .map(|v| parse_maybe_cedar_version(v))
+                .map(parse_maybe_cedar_version)
                 .transpose()
                 .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {}", e)))?
                 .flatten(),
