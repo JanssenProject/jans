@@ -6,7 +6,8 @@
     "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
     "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
         "HS256",
-        "RS256"
+        "RS256",
+        "ES256"
     ],
     "CEDARLING_JWT_SIG_VALIDATION": "disabled",
     "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
