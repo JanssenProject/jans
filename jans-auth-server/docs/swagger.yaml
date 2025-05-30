@@ -340,6 +340,12 @@ paths:
           description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
           schema:
             type: string
+        - name: logout_status_jwt
+          in: query
+          required: false
+          description: Possible values are true or false. Returns back Logout Status JWT if send logout_status_jwt=true and authorization is successful.
+          schema:
+            type: string
         - name: authorization_details
           in: query
           required: false
@@ -493,6 +499,9 @@ paths:
                 dpop_jkt:
                   type: string
                   description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
+                logout_status_jwt:
+                  type: string
+                  description: Possible values are true or false. Returns back Logout Status JWT if send logout_status_jwt=true and authorization is successful.
                 authorization_details:
                   type: string
                   description: The request parameter authorization_details contains, in JSON notation, an array of objects. Each JSON object contains the data to specify the authorization requirements for a certain type of resource. The type of resource or access requirement is determined by the type field.
@@ -1500,9 +1509,9 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
-                session_jwt_signed_response_alg:
+                logout_status_jwt_signed_response_alg:
                   type: string
-                  description: JWS alg algorithm (JWA) required for signing Session JWT.
+                  description: JWS alg algorithm (JWA) required for signing Logout Status JWT.
                 tx_token_signed_response_alg:
                   type: string
                   description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -1956,9 +1965,9 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
-                session_jwt_signed_response_alg:
+                logout_status_jwt_signed_response_alg:
                   type: string
-                  description: JWS alg algorithm (JWA) required for signing Session JWT.
+                  description: JWS alg algorithm (JWA) required for signing Logout Status JWT.
                 tx_token_signed_response_alg:
                   type: string
                   description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -2392,9 +2401,9 @@ paths:
                   introspection_encrypted_response_enc:
                     type: string
                     description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
-                  session_jwt_signed_response_alg:
+                  logout_status_jwt_signed_response_alg:
                     type: string
-                    description: JWS alg algorithm (JWA) required for signing Session JWT.
+                    description: JWS alg algorithm (JWA) required for signing Logout Status JWT.
                   tx_token_signed_response_alg:
                     type: string
                     description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -2778,52 +2787,6 @@ paths:
       responses:
         200:
           description: OK - Returned if request was processed successfully. Means it will return in case sessions are found as well as in case sessions are not found (error is not returned to not disclose internal information).
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/InternalServerError'
-
-  /session_status_list:
-    get:
-      tags:
-        - Session Management
-      summary: The Session Status List Endpoint.
-      description: The Session Status List Endpoint.
-      operationId: get-session-status-list
-      parameters:
-        - name: Accept
-          in: header
-          required: true
-          description: Indicates the requested response type. Possible values are application/statuslist+json and application/statuslist+jwt. Defaults to application/statuslist+jwt if not specified.
-          schema:
-            type: string
-          example: application/statuslist+jwt or application/statuslist+json
-      responses:
-        200:
-          description: OK
-          content:
-            application/statuslist+json:
-              schema:
-                title: SessionStatusListResponseJson
-                description: Session Status list response as JSON (depending on request's "Accept" header value).
-                type: object
-                required:
-                  - bits
-                  - lst
-                properties:
-                  bits:
-                    type: integer
-                    description: JSON Integer specifying the number of bits per Referenced Session in the Status List (lst). The allowed values for bits are 1,2,4 and 8.
-                    example: 2
-                  lst:
-                    type: string
-                    description:  JSON String that contains the status values for all the Referenced Sessions it conveys statuses for. The value MUST be the base64url-encoded
-                    example: eNrbuRgAAhcBXQ
-            application/statuslist+jwt:
-              schema:
-                title: SessionStatusListResponseJwt
-                description: Session Status list response as JWT.
-                type: object
         401:
           $ref: '#/components/responses/Unauthorized'
         500:
