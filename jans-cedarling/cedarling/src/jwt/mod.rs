@@ -102,7 +102,6 @@ type IssClaim = String;
 pub struct JwtService {
     validators: JwtValidatorCache,
     key_service: Arc<KeyService>,
-    validate_jwt_signatures: bool,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
     logger: Option<Logger>,
 }
@@ -163,7 +162,6 @@ impl JwtService {
         Ok(Self {
             validators,
             key_service,
-            validate_jwt_signatures: jwt_config.jwt_sig_validation,
             issuer_configs,
             logger,
         })
@@ -218,54 +216,41 @@ impl JwtService {
     ) -> Result<ValidatedJwt, ValidateJwtError> {
         let decoded_jwt = decode_jwt(jwt)?;
 
-        if self.validate_jwt_signatures {
-            // Get decoding key
-            let decoding_key_info = decoded_jwt.decoding_key_info();
-            let decoding_key = self
-                .key_service
-                .get_key(&decoding_key_info)
-                .ok_or(ValidateJwtError::MissingValidationKey)?;
+        // Get decoding key
+        let decoding_key_info = decoded_jwt.decoding_key_info();
+        let decoding_key = self
+            .key_service
+            .get_key(&decoding_key_info)
+            .ok_or(ValidateJwtError::MissingValidationKey)?;
 
-            // get validator
-            let validator_key = ValidatorInfo {
-                iss: decoded_jwt.iss(),
-                token_kind: TokenKind::AuthzRequestInput(&token_name),
-                algorithm: decoded_jwt.header.alg,
-            };
-            let validator =
-                self.validators
-                    .get(&validator_key)
-                    .ok_or(ValidateJwtError::MissingValidator(
-                        decoded_jwt.iss().map(|s| s.to_string()),
-                    ))?;
+        // get validator
+        let validator_key = ValidatorInfo {
+            iss: decoded_jwt.iss(),
+            token_kind: TokenKind::AuthzRequestInput(&token_name),
+            algorithm: decoded_jwt.header.alg,
+        };
+        let validator =
+            self.validators
+                .get(&validator_key)
+                .ok_or(ValidateJwtError::MissingValidator(
+                    decoded_jwt.iss().map(|s| s.to_string()),
+                ))?;
 
-            // validate JWT
-            let mut validated_jwt = {
-                validator
-                    .read()
-                    .expect("acquire JwtValidator read lock")
-                    .validate_jwt(jwt, decoding_key)?
-            };
+        // validate JWT
+        // NOTE: the JWT will be validated depending on the validator's settings that
+        // was set on initialization
+        let mut validated_jwt = {
+            validator
+                .read()
+                .expect("acquire JwtValidator read lock")
+                .validate_jwt(jwt, decoding_key)?
+        };
 
-            // The users of the validated JWT will need a reference to the TrustedIssuer
-            // to do some processing so we include it here for convenience
-            validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
+        // The users of the validated JWT will need a reference to the TrustedIssuer
+        // to do some processing so we include it here for convenience
+        validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
 
-            Ok(validated_jwt)
-        }
-        // signature validation is disabled, we skip the expensive validation step
-        //
-        // TODO: this doesn't validate the custom claims
-        else {
-            // The users of the validated JWT will need a reference to the TrustedIssuer
-            // to do some processing so we include it here for convenience
-            let issuer_ref = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
-
-            Ok(ValidatedJwt {
-                claims: decoded_jwt.claims.inner,
-                trusted_iss: issuer_ref,
-            })
-        }
+        Ok(validated_jwt)
     }
 
     /// Use the `iss` claim of a token to retrieve a reference to a [`TrustedIssuer`]
