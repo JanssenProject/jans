@@ -58,9 +58,7 @@ impl StatusListCache {
 
         // Get decoding key
         let decoding_key_info = decoded_jwt.decoding_key_info();
-        let decoding_key = key_service.get_key(&decoding_key_info).ok_or(
-            UpdateStatusListError::MissingValidationKey(status_list_url.to_string()),
-        )?;
+        let decoding_key = key_service.get_key(&decoding_key_info);
 
         // get validator
         let validator_key = ValidatorInfo {
@@ -90,11 +88,12 @@ impl StatusListCache {
 
         // spawn a backgroud task to handle updating the statuslist if the JWT has a TTL
         // claim
+        // TODO: make this WASM-compatible
         if let Some(ttl) = ttl {
             tokio::spawn(keep_status_list_updated(
                 ttl,
                 status_list_url.clone(),
-                decoding_key.clone(),
+                decoding_key.cloned(),
                 validator,
                 status_list.clone(),
                 logger,
@@ -117,7 +116,7 @@ impl StatusListCache {
 async fn keep_status_list_updated(
     mut ttl: u64,
     status_list_url: Url,
-    decoding_key: DecodingKey,
+    decoding_key: Option<DecodingKey>,
     validator: Arc<RwLock<JwtValidator>>,
     status_list: Arc<RwLock<StatusList>>,
     logger: Option<Logger>,
@@ -144,7 +143,7 @@ async fn keep_status_list_updated(
             validator
                 .read()
                 .expect("acquire JwtValidator read lock")
-                .validate_jwt(&status_list_jwt.0, &decoding_key)
+                .validate_jwt(&status_list_jwt.0, decoding_key.as_ref())
         };
         let validated_jwt = match result {
             Ok(validated_jwt) => validated_jwt,

@@ -218,10 +218,7 @@ impl JwtService {
 
         // Get decoding key
         let decoding_key_info = decoded_jwt.decoding_key_info();
-        let decoding_key = self
-            .key_service
-            .get_key(&decoding_key_info)
-            .ok_or(ValidateJwtError::MissingValidationKey)?;
+        let decoding_key = self.key_service.get_key(&decoding_key_info);
 
         // get validator
         let validator_key = ValidatorInfo {

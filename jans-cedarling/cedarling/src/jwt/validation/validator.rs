@@ -63,6 +63,7 @@ pub struct RefJwtStatusList {
 pub struct JwtValidator {
     validation: Validation,
     required_claims: HashSet<Box<str>>,
+    validate_signature: bool,
     validate_status_list: bool,
     status_list_cache: StatusListCache,
 }
@@ -75,6 +76,7 @@ impl JwtValidator {
         token_metadata: &TokenEntityMetadata,
         algorithm: Algorithm,
         status_lists: StatusListCache,
+        validate_signature: bool,
         validate_status_list: bool,
     ) -> (Self, ValidatorInfo<'a>) {
         let token_kind = TokenKind::AuthzRequestInput(tkn_name);
@@ -92,6 +94,10 @@ impl JwtValidator {
         validation.required_spec_claims.clear();
         validation.validate_aud = false;
 
+        if !validate_signature {
+            validation.insecure_disable_signature_validation();
+        }
+
         let required_claims = token_metadata
             .required_claims
             .iter()
@@ -108,8 +114,9 @@ impl JwtValidator {
         let validator = JwtValidator {
             validation,
             required_claims,
-            status_list_cache: status_lists,
+            validate_signature,
             validate_status_list,
+            status_list_cache: status_lists,
         };
 
         (validator, key)
@@ -120,6 +127,7 @@ impl JwtValidator {
         iss: Option<&str>,
         status_list_uri: Option<String>,
         algorithm: Algorithm,
+        validate_signature: bool,
     ) -> (Self, ValidatorInfo) {
         let token_kind = TokenKind::StatusList;
 
@@ -152,8 +160,9 @@ impl JwtValidator {
         let validator = JwtValidator {
             validation,
             required_claims,
-            status_list_cache: StatusListCache::default(),
+            validate_signature,
             validate_status_list: false,
+            status_list_cache: StatusListCache::default(),
         };
 
         (validator, key)
@@ -169,10 +178,20 @@ impl JwtValidator {
     pub fn validate_jwt(
         &self,
         jwt: &str,
-        decoding_key: &DecodingKey,
+        decoding_key: Option<&DecodingKey>,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
-        let validated_jwt =
-            jwt::decode::<ValidatedJwt>(jwt, decoding_key, &self.validation)?.claims;
+        let validated_jwt = match decoding_key {
+            Some(decoding_key) => {
+                jwt::decode::<ValidatedJwt>(jwt, decoding_key, &self.validation)?.claims
+            },
+            None => {
+                if self.validate_signature {
+                    return Err(ValidateJwtError::MissingValidationKey);
+                } else {
+                    decode_jwt(jwt)?.try_into()?
+                }
+            },
+        };
 
         // Custom implementation of requiring custom claims
         let missing_claims = self
@@ -315,10 +334,11 @@ mod test {
             Algorithm::HS256,
             StatusListCache::default(),
             false,
+            false,
         );
 
         let result = validator
-            .validate_jwt(&token, &decoding_key)
+            .validate_jwt(&token, Some(&decoding_key))
             .expect("should validate JWT");
 
         let expected = ValidatedJwt {
@@ -355,10 +375,11 @@ mod test {
             Algorithm::HS256,
             StatusListCache::default(),
             false,
+            false,
         );
 
         let err = validator
-            .validate_jwt(&token, &decoding_key)
+            .validate_jwt(&token, Some(&decoding_key))
             .expect_err("should error due to expired JWT");
 
         assert!(matches!(err, ValidateJwtError::ValidateJwt(ref e)
@@ -389,11 +410,12 @@ mod test {
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
+            true,
             false,
         );
 
         let result = validator
-            .validate_jwt(&token, &decoding_key)
+            .validate_jwt(&token, Some(&decoding_key))
             .expect("Should successfully process JWT");
 
         let expected = ValidatedJwt {
@@ -429,11 +451,12 @@ mod test {
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
+            true,
             false,
         );
 
         let err = validator
-            .validate_jwt(&token, &decoding_key)
+            .validate_jwt(&token, Some(&decoding_key))
             .expect_err("should error when validating JWT");
 
         assert!(
@@ -469,11 +492,12 @@ mod test {
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
+            true,
             false,
         );
 
         let err = validator
-            .validate_jwt(&token, &decoding_key)
+            .validate_jwt(&token, Some(&decoding_key))
             .expect_err("should error when validating JWT");
 
         assert!(
@@ -512,11 +536,12 @@ mod test {
             &tkn_entity_metadata,
             Algorithm::HS256,
             StatusListCache::default(),
+            true,
             false,
         );
 
         let result = validator
-            .validate_jwt(&token, &decoding_key)
+            .validate_jwt(&token, Some(&decoding_key))
             .expect("Should process JWT successfully");
 
         let expected = ValidatedJwt {
@@ -536,11 +561,12 @@ mod test {
             &tkn_entity_metadata,
             Algorithm::HS256,
             StatusListCache::default(),
+            true,
             false,
         );
 
         let err = validator
-            .validate_jwt(&token, &decoding_key)
+            .validate_jwt(&token, Some(&decoding_key))
             .expect_err("expected an error while validating the JWT");
 
         assert!(
@@ -590,10 +616,11 @@ mod test {
             Algorithm::HS256,
             status_lists,
             true,
+            true,
         );
 
         let err = validator
-            .validate_jwt(&token, &decoding_key)
+            .validate_jwt(&token, Some(&decoding_key))
             .expect_err("should error because the status of the token is JwtStatus::Invalid");
 
         assert!(
@@ -645,10 +672,11 @@ mod test {
             Algorithm::HS256,
             status_lists,
             true,
+            true,
         );
 
         let err = validator
-            .validate_jwt(&token, &decoding_key)
+            .validate_jwt(&token, Some(&decoding_key))
             .expect_err("should error because the status of the token is JwtStatus::Suspended");
 
         assert!(

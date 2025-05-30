@@ -72,6 +72,7 @@ impl JwtValidatorCache {
                     tkn_metadata,
                     algorithm,
                     status_lists.clone(),
+                    jwt_config.jwt_sig_validation,
                     jwt_config.jwt_status_validation,
                 );
 
@@ -90,6 +91,7 @@ impl JwtValidatorCache {
                     Some(&iss),
                     status_list_uri,
                     algorithm,
+                    jwt_config.jwt_sig_validation,
                 );
 
                 self.insert(key, validator);
@@ -276,6 +278,7 @@ mod test {
             },
             jsonwebtoken::Algorithm::HS256,
             StatusListCache::default(),
+            true,
             false,
         );
 
