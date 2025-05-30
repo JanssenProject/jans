@@ -64,4 +64,5 @@ pub trait G2RCall {
     fn get_logs_by_tag(instance_id: usize, tag: String) -> Vec<String>;
     fn get_logs_by_request_id(instance_id: usize, request_id: String) -> Vec<String>;
     fn get_logs_by_request_id_and_tag(instance_id: usize, id: String, tag: String) -> Vec<String>;
+    fn shut_down(instance_id: usize);
 }

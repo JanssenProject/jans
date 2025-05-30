@@ -13,11 +13,10 @@ use jsonwebtoken::DecodingKey;
 use url::Url;
 
 use crate::{
-    LogWriter,
+    LogLevel, LogWriter,
     jwt::{
         IssuerConfig,
         decode::{DecodeJwtError, decode_jwt},
-        http_utils::GetFromUrl,
         key_service::KeyService,
         log_entry::JwtLogEntry,
         validation::{JwtValidator, JwtValidatorCache, TokenKind, ValidatorInfo},
@@ -129,13 +128,14 @@ async fn keep_status_list_updated(
         let status_list_jwt = match StatusListJwtStr::get_from_url(&status_list_url).await {
             Ok(jwt) => jwt,
             Err(e) => {
-                if let Some(logger) = logger.as_ref() {
-                    logger.log_any(JwtLogEntry::system(format!(
+                logger.log_any(JwtLogEntry::new(
+                    format!(
                         "failed to fetch an updated the status list from '{0}': {1}",
                         status_list_url.as_str(),
                         e
-                    )));
-                }
+                    ),
+                    Some(LogLevel::ERROR),
+                ));
                 continue;
             },
         };
@@ -149,14 +149,14 @@ async fn keep_status_list_updated(
         let validated_jwt = match result {
             Ok(validated_jwt) => validated_jwt,
             Err(e) => {
-                if let Some(logger) = logger.as_ref() {
-                    logger.log_any(JwtLogEntry::system(format!(
+                logger.log_any(JwtLogEntry::new(
+                    format!(
                         "failed to validate an updated the status list JWT from '{0}': {1}",
                         status_list_url.as_str(),
                         e
-                    )));
-                }
-
+                    ),
+                    Some(LogLevel::ERROR),
+                ));
                 continue;
             },
         };
@@ -164,14 +164,14 @@ async fn keep_status_list_updated(
         let status_list_jwt: StatusListJwt = match validated_jwt.try_into() {
             Ok(jwt) => jwt,
             Err(e) => {
-                if let Some(logger) = logger.as_ref() {
-                    logger.log_any(JwtLogEntry::system(format!(
+                logger.log_any(JwtLogEntry::new(
+                    format!(
                         "failed to deserialize an updated the status list JWT from '{0}': {1}",
                         status_list_url.as_str(),
                         e
-                    )));
-                }
-
+                    ),
+                    Some(LogLevel::ERROR),
+                ));
                 continue;
             },
         };
@@ -182,13 +182,14 @@ async fn keep_status_list_updated(
         let updated_status_list: StatusList = match status_list_jwt.try_into() {
             Ok(status_list) => status_list,
             Err(e) => {
-                if let Some(logger) = logger.as_ref() {
-                    logger.log_any(JwtLogEntry::system(format!(
+                logger.log_any(JwtLogEntry::new(
+                    format!(
                         "failed to parse the updated the status list JWT from '{0}': {1}",
                         status_list_url.as_str(),
                         e
-                    )));
-                }
+                    ),
+                    Some(LogLevel::ERROR),
+                ));
                 continue;
             },
         };
@@ -255,7 +256,7 @@ mod test {
         let mut key_service = KeyService::default();
         let mut mock_server = MockServer::new_with_defaults().await.unwrap();
         key_service
-            .get_keys(&mock_server.openid_config())
+            .get_keys_using_oidc(&mock_server.openid_config(), &None)
             .await
             .unwrap();
         // we initialize the status list with a 1 sec ttl

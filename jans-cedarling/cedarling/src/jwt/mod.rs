@@ -5,11 +5,65 @@
 
 //! # `JwtEngine`
 //!
-//! The `JwtEngine` is designed for managing JSON Web Tokens (JWTs) and provides the following functionalities:
-//! - Fetching decoding keys from a JSON Web Key Set (JWKS) provided by Identity Providers (IDPs) and storing these keys.
-//! - Extracting claims from JWTs for further processing and validation.
-//! - Validating the signatures of JWTs to ensure their integrity and authenticity.
-//! - Verifying the validity of JWTs based on claims such as expiration time and audience.
+//! The `JwtEngine` is responsible for handling JSON Web Tokens (JWTs). It provides
+//! robust functionality to support authentication and authorization flows, including:
+//!
+//! - Fetching and storing decoding keys from a JSON Web Key Set (JWKS) provided by
+//!   Identity Providers (IDPs).
+//! - Extracting and processing claims from JWTs.
+//! - Validating JWT signatures to ensure token integrity and authenticity.
+//! - Verifying token validity based on standard claims such as expiration (`exp`) and
+//!   audience (`aud`).
+//!
+//! ## Initialization
+//!
+//! The behavior of the `JwtEngine` is determined by parameters passed to [`JwtService::new`].
+//! These parameters are primarily configured via the [`jwt_config`] argument:
+//!
+//! - **JWKS (Optional)**: A JWKS string can be provided through the
+//!   `CEDARLING_LOCAL_JWKS` bootstrap property.
+//! - **Signature Validation**: JWT signature verification is supported using a wrapper
+//!   around the [`jsonwebtoken`] crate.
+//! - **Status Validation (WIP)**: Support for token status validation is being
+//!   developed in accordance with the [`IETF draft spec`].
+//! - **Algorithm Restrictions**: Only tokens signed using supported algorithms will
+//!   be validated. Tokens with unsupported algorithms will trigger a warning.
+//!
+//! Additionally, you can provide a list of **trusted issuers** during initialization.
+//! Only tokens issued by these trusted issuers, as defined in the [`policy store`],
+//! should be validated.
+//!
+//! [`jwt_config`]: JwtConfig
+//! [`policy store`]: crate::common::policy_store::PolicyStore
+//! [`IETF draft spec`]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html
+//!
+//! ## Usage
+//!
+//! The primary interface for token validation is [`JwtService::validate_tokens`].
+//!
+//! This method accepts a [`HashMap<String, String>`] representing the tokens, typically
+//! passed in through [`Cedarling::authorize`]. Each entry in the map is a
+//! `(token_name, jwt_string)` pair.
+//!
+//! Only tokens that:
+//! - match a trusted issuer defined in the [`policy store`], and
+//! - have a matching token name,
+//!
+//! will be processed. Untrusted tokens are ignored with a warning.
+//!
+//! If any token is invalid (e.g., malformed, expired, or fails validation), the
+//! method returns an error. Successfully validated tokens are returned in a `HashMap`
+//! keyed by token name.
+//!
+//! [`Cedarling::authorize`]: crate::Cedarling::authorize
+//!
+//! ## Security Features
+//!
+//! - [x] Only Accept tokens defined from the policy store
+//! - [ ] JWK rotation (WIP): The service should automatically fetch new keys if the old
+//!   ones expire.
+//! - [ ] Statuslist Check (WIP): The `status` claim of a JWT should be validated if
+//!   present
 
 mod decode;
 mod error;
@@ -28,6 +82,7 @@ pub use error::*;
 pub use token::{Token, TokenClaimTypeError, TokenClaims};
 
 use crate::JwtConfig;
+use crate::LogLevel;
 use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
@@ -85,7 +140,7 @@ impl JwtService {
                 iss_claim = update_openid_config(&mut iss_config, &logger).await?;
             }
 
-            insert_keys(&mut key_service, jwt_config, &iss_config).await?;
+            insert_keys(&mut key_service, jwt_config, &iss_config, &logger).await?;
 
             validators.init_for_iss(&iss_config, jwt_config, &status_lists, logger.clone());
 
@@ -114,13 +169,6 @@ impl JwtService {
         })
     }
 
-    /// Helper for making [`crate::LogType::System`] logs.
-    fn system_log(&self, msg: String) {
-        if let Some(logger) = self.logger.as_ref() {
-            logger.log_any(JwtLogEntry::system(msg));
-        }
-    }
-
     pub async fn validate_tokens<'a>(
         &'a self,
         tokens: &'a HashMap<String, String>,
@@ -128,12 +176,15 @@ impl JwtService {
         let mut validated_tokens = HashMap::new();
 
         for (token_name, jwt) in tokens.iter() {
-            let validation_result = self.validate_jwt(token_name.clone(), jwt);
+            let validation_result = self.validate_single_token(token_name.clone(), jwt);
             let Ok(validated_jwt) = validation_result else {
                 match validation_result.unwrap_err() {
                     ValidateJwtError::MissingValidator(iss) => {
-                        self.system_log(format!(
-                            "ignoring {token_name} since it's from an untrusted issuer: '{iss:?}'"
+                        self.logger.log_any(JwtLogEntry::new(
+                            format!(
+                                "ignoring {token_name} since it's from an untrusted issuer: '{iss:?}'"
+                            ),
+                            Some(LogLevel::WARN),
                         ));
                         continue;
                     },
@@ -142,7 +193,15 @@ impl JwtService {
             };
 
             let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
+                .map_err(|err| {
+                    self.logger.log_any(JwtLogEntry::new(
+                        format!("failed to deserialize token claims: {err}"),
+                        Some(LogLevel::ERROR),
+                    ));
+                    err
+                })
                 .map_err(JwtProcessingError::StringDeserialization)?;
+
             validated_tokens.insert(
                 token_name.to_string(),
                 Token::new(token_name, claims, validated_jwt.trusted_iss),
@@ -152,7 +211,7 @@ impl JwtService {
         Ok(validated_tokens)
     }
 
-    pub fn validate_jwt(
+    fn validate_single_token(
         &self,
         token_name: String,
         jwt: &str,
@@ -226,12 +285,13 @@ async fn update_openid_config(
     let openid_config = OpenIdConfig::get_from_url(&iss_config.policy.oidc_endpoint)
         .await
         .inspect_err(|e| {
-            if let Some(logger) = logger {
-                logger.log_any(JwtLogEntry::system(format!(
+            logger.log_any(JwtLogEntry::new(
+                format!(
                     "failed to get openid configuration for trusted issuer: '{}': {}",
                     iss_config.issuer_id, e
-                )))
-            }
+                ),
+                Some(LogLevel::ERROR),
+            ));
         })?;
 
     let iss_claim = openid_config.issuer.clone();
@@ -244,6 +304,7 @@ async fn insert_keys(
     key_service: &mut KeyService,
     jwt_config: &JwtConfig,
     iss_config: &IssuerConfig,
+    logger: &Option<Logger>,
 ) -> Result<(), KeyServiceError> {
     if !jwt_config.jwt_sig_validation {
         return Ok(());
@@ -254,7 +315,9 @@ async fn insert_keys(
     }
 
     if let Some(openid_config) = iss_config.openid_config.as_ref() {
-        key_service.get_keys(openid_config).await?;
+        key_service
+            .get_keys_using_oidc(openid_config, logger)
+            .await?;
     }
 
     Ok(())

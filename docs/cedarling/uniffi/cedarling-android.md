@@ -12,9 +12,9 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
 
 1. Build the library:
     ```bash
-    cargo build --release
+    cargo build -r -p cedarling_uniffi
     ```
-   In `target/release`, you should find the `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file, depending on the operating system you are using.
+   In `target/release`, you should find the `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file, depending on the operating system you are using.
 
    - **.so** (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.
    - **.dylib** (Dynamic Library) – This is the shared library format for macOS.
@@ -46,7 +46,7 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
             -p cedarling_uniffi --release
     ```
 
-5. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/release`.
+5. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
     ```
     cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/androidApp/app/src/main/java/com/example/androidapp/cedarling/uniffi
     ```

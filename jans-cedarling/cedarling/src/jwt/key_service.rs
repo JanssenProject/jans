@@ -5,9 +5,14 @@
 
 use std::collections::HashMap;
 
+use crate::LogWriter;
+use crate::jwt::log_entry::JwtLogEntry;
+use crate::log::Logger;
+
 use super::http_utils::*;
-use jsonwebtoken::jwk::{Jwk, JwkSet, KeyAlgorithm};
+use jsonwebtoken::jwk::{Jwk, KeyAlgorithm};
 use jsonwebtoken::{Algorithm, DecodingKey};
+use serde::Deserialize;
 
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub struct DecodingKeyInfo {
@@ -67,8 +72,13 @@ impl KeyService {
             for jwk in keys.into_iter() {
                 let decoding_key =
                     DecodingKey::from_jwk(&jwk).map_err(InsertKeysError::BuildDecodingKey)?;
-                let algorithm = get_algorithm(&jwk)
-                    .map_err(InsertKeysError::UnsupportedKeyAlgorithm)?
+                let algorithm = jwk
+                    .common
+                    .key_algorithm
+                    .map(|alg| {
+                        cast_to_algorithm(alg).map_err(InsertKeysError::UnsupportedKeyAlgorithm)
+                    })
+                    .transpose()?
                     .ok_or(InsertKeysError::UnspecifiedAlgorithm)?;
                 let key_info = DecodingKeyInfo {
                     issuer: Some(issuer.clone()),
@@ -82,22 +92,59 @@ impl KeyService {
         Ok(())
     }
 
-    pub async fn get_keys(&mut self, openid_config: &OpenIdConfig) -> Result<(), KeyServiceError> {
+    pub async fn get_keys_using_oidc(
+        &mut self,
+        openid_config: &OpenIdConfig,
+        logger: &Option<Logger>,
+    ) -> Result<(), KeyServiceError> {
         let jwks = JwkSet::get_from_url(&openid_config.jwks_uri)
             .await
             .map_err(KeyServiceError::GetJwks)?;
 
-        for jwk in jwks.keys.into_iter() {
-            let key = DecodingKey::from_jwk(&jwk).map_err(FetchKeysError::BuildDecodingKey)?;
-            let algorithm = get_algorithm(&jwk)
-                .map_err(FetchKeysError::UnsupportedKeyAlgorithm)?
-                .ok_or(FetchKeysError::UnspecifiedAlgorithm)?;
+        let (keys, errs) = jwks.unwrap_keys();
+        for err in errs.into_iter() {
+            let err_msg = format!(
+                "failed to deserialize a JWK from '{}': {}",
+                openid_config.issuer, err,
+            );
+            logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
+            continue;
+        }
+
+        for key in keys.into_iter() {
+            // We will no support keys with unspecified algorithms
+            let Some(key_algorithm) = key.common.key_algorithm else {
+                let err_msg = format!(
+                    "skipping a JWK with a missing algorithm specifier from '{}'",
+                    openid_config.issuer,
+                );
+                logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::ERROR)));
+                continue;
+            };
+
+            // We need to cast from `jsonwebtoken::jwk::KeyAlgorithm` into
+            // `jsonwebtoken::Algorithm`
+            let algorithm = match cast_to_algorithm(key_algorithm) {
+                Ok(alg) => alg,
+                Err(alg) => {
+                    let err_msg = format!(
+                        "skipping building a validation key for unsupported algorithm from '{}': {}",
+                        openid_config.issuer, alg,
+                    );
+                    logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
+                    continue;
+                },
+            };
+
+            let decoding_key =
+                DecodingKey::from_jwk(&key).map_err(FetchKeysError::BuildDecodingKey)?;
+
             let key_info = DecodingKeyInfo {
                 issuer: Some(openid_config.issuer.clone()),
-                kid: jwk.common.key_id,
+                kid: key.common.key_id,
                 algorithm,
             };
-            self.keys.insert(key_info, key);
+            self.keys.insert(key_info, decoding_key);
         }
 
         Ok(())
@@ -112,29 +159,52 @@ impl KeyService {
     }
 }
 
+/// An alternative implementation of [`jsonwebtoken::jwk::JwkSet`].
+///
+/// This struct allows us to iterate over each in in the JwkSet and handle deserializing
+/// each one independently.
+#[derive(Deserialize)]
+pub struct JwkSet {
+    keys: Vec<serde_json::Value>,
+}
+
+impl JwkSet {
+    pub fn unwrap_keys(self) -> (Vec<Jwk>, Vec<serde_json::Error>) {
+        let mut keys = Vec::new();
+        let mut errs = Vec::new();
+
+        for key in self.keys.into_iter() {
+            let result = serde_json::from_value::<Jwk>(key);
+            match result {
+                Ok(jwk) => keys.push(jwk),
+                Err(err) => errs.push(err),
+            }
+        }
+
+        (keys, errs)
+    }
+}
+
+/// Tries to Casts a [`jsonwebtoken::jwk::KeyAlgorithm`] into a [`jsonwebtoken::Algorithm`].
 #[inline]
-fn get_algorithm(jwk: &Jwk) -> Result<Option<Algorithm>, KeyAlgorithm> {
-    let Some(algorithm) = jwk.common.key_algorithm else {
-        return Ok(None);
-    };
-
-    let algorithm = match algorithm {
-        KeyAlgorithm::HS256 => Algorithm::HS256,
-        KeyAlgorithm::HS384 => Algorithm::HS384,
-        KeyAlgorithm::HS512 => Algorithm::HS512,
-        KeyAlgorithm::ES256 => Algorithm::ES256,
-        KeyAlgorithm::ES384 => Algorithm::ES384,
-        KeyAlgorithm::RS256 => Algorithm::RS256,
-        KeyAlgorithm::RS384 => Algorithm::RS384,
-        KeyAlgorithm::RS512 => Algorithm::RS512,
-        KeyAlgorithm::PS256 => Algorithm::PS256,
-        KeyAlgorithm::PS384 => Algorithm::PS384,
-        KeyAlgorithm::PS512 => Algorithm::PS512,
-        KeyAlgorithm::EdDSA => Algorithm::EdDSA,
-        alg => return Err(alg),
-    };
-
-    Ok(Some(algorithm))
+fn cast_to_algorithm(
+    key_alg: jsonwebtoken::jwk::KeyAlgorithm,
+) -> Result<jsonwebtoken::Algorithm, jsonwebtoken::jwk::KeyAlgorithm> {
+    match key_alg {
+        KeyAlgorithm::HS256 => Ok(Algorithm::HS256),
+        KeyAlgorithm::HS384 => Ok(Algorithm::HS384),
+        KeyAlgorithm::HS512 => Ok(Algorithm::HS512),
+        KeyAlgorithm::ES256 => Ok(Algorithm::ES256),
+        KeyAlgorithm::ES384 => Ok(Algorithm::ES384),
+        KeyAlgorithm::RS256 => Ok(Algorithm::RS256),
+        KeyAlgorithm::RS384 => Ok(Algorithm::RS384),
+        KeyAlgorithm::RS512 => Ok(Algorithm::RS512),
+        KeyAlgorithm::PS256 => Ok(Algorithm::PS256),
+        KeyAlgorithm::PS384 => Ok(Algorithm::PS384),
+        KeyAlgorithm::PS512 => Ok(Algorithm::PS512),
+        KeyAlgorithm::EdDSA => Ok(Algorithm::EdDSA),
+        key_alg => Err(key_alg),
+    }
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -274,11 +344,11 @@ mod test {
         let mut key_service = KeyService::default();
 
         key_service
-            .get_keys(&server1.openid_config())
+            .get_keys_using_oidc(&server1.openid_config(), &None)
             .await
             .expect("fetch keys for issuer 1");
         key_service
-            .get_keys(&server2.openid_config())
+            .get_keys_using_oidc(&server2.openid_config(), &None)
             .await
             .expect("fetch keys for issuer 2");
 

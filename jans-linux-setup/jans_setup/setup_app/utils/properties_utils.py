@@ -267,6 +267,7 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_scim_server:
             Config.addPostSetupService.append('install_scim_server')
 
+
     def promptForFido2Server(self):
         if Config.installed_instance and Config.install_fido2:
             return
@@ -279,33 +280,6 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_fido2:
             Config.addPostSetupService.append('install_fido2')
 
-
-    def prompt_for_jans_link(self):
-        if Config.installed_instance and Config.install_link:
-            return
-
-        prompt_jans_link = self.getPrompt("Install Jans LDAP Link Server?",
-                                            self.getDefaultOption(Config.install_link)
-                                            )[0].lower()
-
-        Config.install_link = prompt_jans_link == 'y'
-
-        if Config.installed_instance and Config.install_link:
-            Config.addPostSetupService.append('install_link')
-
-
-    def prompt_for_jans_keycloak_link(self):
-        if Config.installed_instance and Config.install_jans_keycloak_link:
-            return
-
-        prompt_to_install = self.getPrompt("Install Jans KC Link Server?",
-                                            self.getDefaultOption(Config.install_jans_keycloak_link)
-                                            )[0].lower()
-
-        Config.install_jans_keycloak_link = prompt_to_install == 'y'
-
-        if Config.installed_instance and Config.install_jans_keycloak_link:
-            Config.addPostSetupService.append('install_jans_keycloak_link')
 
     def prompt_for_casa(self):
         if Config.installed_instance and Config.install_casa:
@@ -412,6 +386,8 @@ class PropertiesUtils(SetupUtils):
                 Config.rdbm_db = self.getPrompt("  Jnas Database", Config.rdbm_db)
                 Config.rdbm_user = self.getPrompt("  Jans Database Username", Config.rdbm_user)
                 Config.rdbm_password = self.getPrompt("  Jans Database Password", Config.rdbm_password)
+                Config.set_rdbm_schema()
+                Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
 
                 result = dbUtils.sqlconnection()
 
@@ -486,6 +462,8 @@ class PropertiesUtils(SetupUtils):
                 Config.rdbm_user = self.getPrompt("  {} user".format(Config.rdbm_type.upper()), Config.get('rdbm_user'))
                 Config.rdbm_password = self.getPrompt("  {} password".format(Config.rdbm_type.upper()))
                 Config.rdbm_db = self.getPrompt("  {} database".format(Config.rdbm_type.upper()), Config.get('rdbm_db'))
+                Config.set_rdbm_schema()
+                Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
 
                 try:
                     if Config.rdbm_type == 'mysql':
@@ -613,8 +591,6 @@ class PropertiesUtils(SetupUtils):
             self.promptForConfigApi()
             self.promptForScimServer()
             self.promptForFido2Server()
-            #self.prompt_for_jans_link()
-            self.prompt_for_jans_keycloak_link()
             self.prompt_for_casa()
             self.pompt_for_jans_lock()
             self.prompt_for_jans_saml()

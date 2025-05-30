@@ -6,7 +6,7 @@
 use crate::jwt::log_entry::JwtLogEntry;
 use crate::jwt::{IssuerConfig, StatusListCache};
 use crate::log::Logger;
-use crate::{JwtConfig, LogWriter};
+use crate::{JwtConfig, LogLevel, LogWriter};
 
 use super::*;
 use jsonwebtoken::Algorithm;
@@ -55,12 +55,13 @@ impl JwtValidatorCache {
 
         for (token_name, tkn_metadata) in iss_config.policy.token_metadata.iter() {
             if !tkn_metadata.trusted {
-                if let Some(logger) = logger.as_ref() {
-                    logger.log_any(JwtLogEntry::system(format!(
+                logger.log_any(JwtLogEntry::new(
+                    format!(
                         "skipping metadata for '{}' from '{}' since `trusted == false`",
                         token_name, iss_config.issuer_id,
-                    )));
-                }
+                    ),
+                    Some(LogLevel::INFO),
+                ));
                 continue;
             }
 

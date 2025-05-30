@@ -32,6 +32,7 @@ import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.PersistenceMetadata;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.operation.PersistenceOperationService;
@@ -113,6 +114,7 @@ public interface PersistenceEntryManager extends EntityManager {
     boolean hasExpirationSupport(String primaryKey);
 	String getPersistenceType();
     String getPersistenceType(String primaryKey);
+    PersistenceMetadata getPersistenceMetadata(String primaryKey);
 
     Date decodeTime(String primaryKey, String date);
     String encodeTime(String primaryKey, Date date);

@@ -5,16 +5,20 @@
 
 use std::sync::LazyLock;
 
+use super::key_service::JwkSet;
 use super::status_list::StatusListJwtStr;
 use async_trait::async_trait;
-use jsonwebtoken::jwk::JwkSet;
 use reqwest::{Client, header::ToStrError};
 use serde::{Deserialize, Deserializer, de};
 use url::Url;
 
 static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 
-#[async_trait]
+// async_traits are Send by default but wasm-bindgen doesn't support those
+// so we opt out of it for the wasm bindings to compile.
+//
+// see this relevant discussion: https://github.com/rustwasm/wasm-bindgen/issues/2409
+#[async_trait(?Send)]
 pub trait GetFromUrl<T> {
     /// Send a get request to receive the resource from a URL
     async fn get_from_url(url: &Url) -> Result<T, HttpError>;
@@ -54,7 +58,7 @@ where
     Ok(url)
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
     async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
         let openid_config = HTTP_CLIENT
@@ -72,7 +76,7 @@ impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl GetFromUrl<JwkSet> for JwkSet {
     async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
         let jwk_set = HTTP_CLIENT
@@ -90,9 +94,10 @@ impl GetFromUrl<JwkSet> for JwkSet {
     }
 }
 
-#[async_trait]
-impl GetFromUrl<StatusListJwtStr> for StatusListJwtStr {
-    async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
+// NOTE: we cant use the async_trait here since this is called from another aysnc 
+// function which requires this to be Send.
+impl StatusListJwtStr {
+    pub async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
         let response = HTTP_CLIENT
             .get(url.as_str())
             .header("Content-Type", "statuslist+jwt")

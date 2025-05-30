@@ -41,6 +41,7 @@ public class AppConfiguration implements Configuration {
 
     public static final int DEFAULT_STATUS_LIST_RESPONSE_JWT_LIFETIME = 600; // 10min
     public static final int DEFAULT_STATUS_LIST_BIT_SIZE = 2;
+    public static final int DEFAULT_SESSION_STATUS_LIST_BIT_SIZE = 2;
     public static final int DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
     public static final XFrameOptions DEFAULT_X_FRAME_ORIGINS_VALUE = XFrameOptions.SAMEORIGIN;
     public static final int DEFAULT_USER_INFO_LIFETIME = 3600;
@@ -287,6 +288,12 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
     private List<String> introspectionEncryptionEncValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Session JWT at Authorization Endpoint to encode the claims in a JWT")
+    private List<String> sessionJwtSigningAlgValuesSupported;
+
+    @DocProperty(description = "Specifies session status list bit size. (2 bits - 4 statuses, 4 bits - 16 statuses). Defaults to 2.")
+    private int sessionStatusListBitSize = DEFAULT_SESSION_STATUS_LIST_BIT_SIZE;
 
     @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
     private List<String> txTokenSigningAlgValuesSupported;
@@ -542,6 +549,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Boolean value specifying whether to include sessionId in response", defaultValue = "false")
     private Boolean includeSidInResponse = false;
+
+    @DocProperty(description = "Boolean value specifying whether to include refresh token lifetime in token response", defaultValue = "false")
+    private Boolean includeRefreshTokenLifetimeInTokenResponse = false;
 
     @DocProperty(description = "Boolean value specifying whether to disable prompt=login", defaultValue = "false")
     private Boolean disablePromptLogin = false;
@@ -1395,6 +1405,16 @@ public class AppConfiguration implements Configuration {
         this.includeSidInResponse = includeSidInResponse;
     }
 
+    public Boolean getIncludeRefreshTokenLifetimeInTokenResponse() {
+        if (includeRefreshTokenLifetimeInTokenResponse == null) includeRefreshTokenLifetimeInTokenResponse = false;
+        return includeRefreshTokenLifetimeInTokenResponse;
+    }
+
+    public AppConfiguration setIncludeRefreshTokenLifetimeInTokenResponse(Boolean includeRefreshTokenLifetimeInTokenResponse) {
+        this.includeRefreshTokenLifetimeInTokenResponse = includeRefreshTokenLifetimeInTokenResponse;
+        return this;
+    }
+
     public Boolean getSessionIdPersistInCache() {
         if (sessionIdPersistInCache == null) sessionIdPersistInCache = false;
         return sessionIdPersistInCache;
@@ -2125,6 +2145,15 @@ public class AppConfiguration implements Configuration {
         this.introspectionEncryptionEncValuesSupported = introspectionEncryptionEncValuesSupported;
     }
 
+    public List<String> getSessionJwtSigningAlgValuesSupported() {
+        return sessionJwtSigningAlgValuesSupported;
+    }
+
+    public AppConfiguration setSessionJwtSigningAlgValuesSupported(List<String> sessionJwtSigningAlgValuesSupported) {
+        this.sessionJwtSigningAlgValuesSupported = sessionJwtSigningAlgValuesSupported;
+        return this;
+    }
+
     public List<String> getTxTokenSigningAlgValuesSupported() {
         return txTokenSigningAlgValuesSupported;
     }
@@ -2543,6 +2572,15 @@ public class AppConfiguration implements Configuration {
 
     public void setStatusListResponseJwtSignatureAlgorithm(String statusListResponseJwtSignatureAlgorithm) {
         this.statusListResponseJwtSignatureAlgorithm = statusListResponseJwtSignatureAlgorithm;
+    }
+
+    public int getSessionStatusListBitSize() {
+        return sessionStatusListBitSize;
+    }
+
+    public AppConfiguration setSessionStatusListBitSize(int sessionStatusListBitSize) {
+        this.sessionStatusListBitSize = sessionStatusListBitSize;
+        return this;
     }
 
     public int getStatusListBitSize() {

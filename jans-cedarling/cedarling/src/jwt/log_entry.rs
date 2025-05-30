@@ -4,10 +4,10 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::log::interface::{Indexed, Loggable};
-use crate::log::{BaseLogEntry, LogType};
+use crate::log::{BaseLogEntry, LogLevel, LogType};
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct JwtLogEntry {
     #[serde(flatten)]
     base: BaseLogEntry,
@@ -15,15 +15,19 @@ pub struct JwtLogEntry {
 }
 
 impl JwtLogEntry {
-    /// Shorthand for creating a [`LogType::System`] log.
-    pub fn system(msg: String) -> Self {
-        let base = BaseLogEntry::new_opt_request_id(LogType::System, None);
-        Self { base, msg }
+    /// Helper function for creating log messages
+    pub fn new(msg: String, level: Option<LogLevel>) -> Self {
+        let mut base = BaseLogEntry::new_opt_request_id(LogType::System, None);
+        base.level = level;
+        Self {
+            base,
+            msg,
+        }
     }
 }
 
 impl Loggable for JwtLogEntry {
-    fn get_log_level(&self) -> Option<crate::LogLevel> {
+    fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
 }
@@ -39,5 +43,44 @@ impl Indexed for JwtLogEntry {
 
     fn get_tags(&self) -> Vec<&str> {
         self.base.get_tags()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::log::LogLevel;
+
+    #[test]
+    fn test_new_with_level() {
+        let msg = "Test message".to_string();
+        let level = Some(LogLevel::ERROR);
+        let entry = JwtLogEntry::new(msg.clone(), level);
+
+        assert_eq!(entry.msg, msg);
+        assert_eq!(entry.get_log_level(), level);
+    }
+
+    #[test]
+    fn test_new_without_level() {
+        let msg = "Test message".to_string();
+        let entry = JwtLogEntry::new(msg.clone(), None);
+
+        assert_eq!(entry.msg, msg);
+        assert_eq!(entry.get_log_level(), None);
+    }
+
+    #[test]
+    fn test_new_with_different_levels() {
+        let msg = "Test message".to_string();
+        
+        let entry = JwtLogEntry::new(msg.clone(), Some(LogLevel::INFO));
+        assert_eq!(entry.get_log_level(), Some(LogLevel::INFO));
+
+        let entry = JwtLogEntry::new(msg.clone(), Some(LogLevel::WARN));
+        assert_eq!(entry.get_log_level(), Some(LogLevel::WARN));
+
+        let entry = JwtLogEntry::new(msg.clone(), Some(LogLevel::ERROR));
+        assert_eq!(entry.get_log_level(), Some(LogLevel::ERROR));
     }
 }

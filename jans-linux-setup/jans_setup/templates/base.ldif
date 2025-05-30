@@ -157,6 +157,11 @@ objectClass: top
 objectClass: organizationalUnit
 ou: status_index_pool
 
+dn: ou=session_status_index_pool,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: session_status_index_pool
+
 dn: ou=document,o=jans
 objectClass: top
 objectClass: organizationalUnit
