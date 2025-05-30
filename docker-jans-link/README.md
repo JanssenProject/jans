@@ -8,17 +8,17 @@ tags:
 
 # Overview
 
-Docker image packaging for config-api.
+Docker image packaging for Link.
 
 ## Versions
 
-See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fconfig-api) for available versions.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Flink) for available versions.
 
 ## Environment Variables
 
 The following environment variables are supported by the container:
 
-- `CN_CONFIG_ADAPTER`: The config backend adapter, can be `consul` (default), `kubernetes`, `google`, or `aws`.
+- `CN_CONFIG_ADAPTER`: The config backend adapter, can be `consul` (default) or `kubernetes`.
 - `CN_CONFIG_CONSUL_HOST`: hostname or IP of Consul (default to `localhost`).
 - `CN_CONFIG_CONSUL_PORT`: port of Consul (default to `8500`).
 - `CN_CONFIG_CONSUL_CONSISTENCY`: Consul consistency mode (choose one of `default`, `consistent`, or `stale`). Default to `stale` mode.
@@ -31,7 +31,7 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
 - `CN_CONFIG_KUBERNETES_CONFIGMAP`: Kubernetes configmaps name (default to `jans`).
 - `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
-- `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault`, `kubernetes`, `google`, or `aws`.
+- `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault` (default), `kubernetes`, or `google`.
 - `CN_SECRET_VAULT_VERIFY`: whether to verify cert or not (default to `false`).
 - `CN_SECRET_VAULT_ROLE_ID_FILE`: path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
 - `CN_SECRET_VAULT_SECRET_ID_FILE`: path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
@@ -51,19 +51,13 @@ The following environment variables are supported by the container:
 - `CN_MAX_RAM_PERCENTAGE`: Value passed to Java option `-XX:MaxRAMPercentage`.
 - `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `sql` or `hybrid`; default to `sql`).
 - `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
-- `CN_CONFIG_API_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
-- `CN_CONFIG_API_LOG_LEVEL`: Log level for config api. Options include `OFF`, `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`.  and `ALL`. This defaults to `INFO`
-- `CN_AUTH_SERVER_URL`: Base URL of Janssen Auth server, i.e. `auth-server:8080` (default to empty string).
+- `CN_LINK_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
 - `GOOGLE_APPLICATION_CREDENTIALS`: Optional JSON file (contains Google credentials) that can be injected into container for authentication. Refer to https://cloud.google.com/docs/authentication/provide-credentials-adc#how-to for supported credentials.
 - `GOOGLE_PROJECT_ID`: ID of Google project.
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
 - `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
-- `CN_CONFIG_API_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
-- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, `user-mgt`, `kc-saml`, `lock`, `jans-link`, `kc-link`). Note that unknown plugin name will be ignored.
-- `CN_TOKEN_SERVER_BASE_URL`: Base URL of token server (default to empty).
-- `CN_TOKEN_SERVER_CERT_FILE`: Path to token server certificate (default to `/etc/certs/token_server.crt`).
-- `CN_ADMIN_UI_PLUGIN_LOGGERS`: Custom logging configuration for AdminUI plugin in JSON-string format with hash type (see [Configure plugin loggers](#configure-plugin-loggers) section for details).
+- `CN_LINK_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
 - `CN_PROMETHEUS_PORT`: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See [Exposing metrics](#exposing-metrics) for details.
 - `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).
 - `CN_SQL_DB_PORT`: Port of the SQL database (default to `3306` for MySQL).
@@ -103,58 +97,21 @@ The following key-value pairs are the defaults:
 
 ```json
 {
-    "config_api_log_target": "STDOUT",
-    "config_api_log_level": "INFO",
+    "link_log_target": "STDOUT",
+    "link_log_level": "INFO",
     "persistence_log_target": "FILE",
     "persistence_log_level": "INFO",
     "persistence_duration_log_target": "FILE",
     "persistence_duration_log_level": "INFO",
     "script_log_target": "FILE",
-    "script_log_level": "INFO",
-    "audit_log_target": "FILE",
-    "audit_log_level": "INFO"
+    "script_log_level": "INFO"
 }
 ```
 
 To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Example:
 
 ```
-{"config_api_log_target":"STDOUT","script_log_target":"STDOUT","enable_stdout_log_prefix":true}
-```
-
-### Configure plugin loggers
-
-Plugin loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.
-
-Supported redirect target:
-
-- `STDOUT`
-- `FILE`
-
-Supported level:
-
-- `FATAL`
-- `ERROR`
-- `WARN`
-- `INFO`
-- `DEBUG`
-- `TRACE`
-
-The following key-value pairs are the defaults:
-
-```json
-{
-    "admin_ui_log_target": "FILE",
-    "admin_ui_log_level": "INFO",
-    "admin_ui_audit_log_target": "FILE",
-    "admin_ui_audit_log_level": "INFO"
-}
-```
-
-To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Example:
-
-```
-{"admin_ui_log_target":"STDOUT","enable_stdout_log_prefix":true}
+{"link_log_target":"STDOUT","persistence_log_target":"STDOUT","enable_stdout_log_prefix":true}
 ```
 
 ### Hybrid mapping
@@ -198,3 +155,4 @@ i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
 To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
+

@@ -22,6 +22,7 @@ def poll_healthchecks(manager):
         # healthcheck endpoint for KC is bind to internal port 9000,
         # hence we poll the public endpoint instead
         ("keycloak", "/kc", True),
+        ("jans-link", "/jans-link/sys/health-check", False),
     ]:
         # default component status
         status = "Down"
