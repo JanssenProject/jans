@@ -36,23 +36,23 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
         
         // Check for required fields
         let obj = value.as_object().ok_or_else(|| {
-            de::Error::custom("Policy store must be a JSON object")
+            de::Error::custom("policy store must be a JSON object")
         })?;
 
         // Check cedar_version field
         let cedar_version = obj.get("cedar_version").ok_or_else(|| {
-            de::Error::custom("Missing required field 'cedar_version' in policy store")
+            de::Error::custom("missing required field 'cedar_version' in policy store")
         })?;
 
         // Check policy_stores field
         let policy_stores = obj.get("policy_stores").ok_or_else(|| {
-            de::Error::custom("Missing required field 'policy_stores' in policy store")
+            de::Error::custom("missing required field 'policy_stores' in policy store")
         })?;
 
         // Now deserialize the actual struct
         let mut store = AgamaPolicyStore {
             cedar_version: parse_cedar_version(cedar_version).map_err(|e| {
-                de::Error::custom(format!("Invalid cedar_version format: {}", e))
+                de::Error::custom(format!("invalid cedar_version format: {}", e))
             })?,
             policy_stores: HashMap::new(),
         };
@@ -65,7 +65,7 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
         for (key, value) in stores_obj {
             let policy_store = PolicyStore::deserialize(value).map_err(|e| {
                 de::Error::custom(format!(
-                    "Error parsing policy store '{}': {}",
+                    "error parsing policy store '{}': {}",
                     key, e
                 ))
             })?;
@@ -475,12 +475,12 @@ impl<'de> Deserialize<'de> for PolicyStore {
         
         // Check for required fields
         let obj = value.as_object().ok_or_else(|| {
-            de::Error::custom("Policy store entry must be a JSON object")
+            de::Error::custom("policy store entry must be a JSON object")
         })?;
 
         // Check name field
         let name = obj.get("name").ok_or_else(|| {
-            de::Error::custom("Missing required field 'name' in policy store entry")
+            de::Error::custom("missing required field 'name' in policy store entry")
         })?;
         let name = name.as_str().ok_or_else(|| {
             de::Error::custom("'name' must be a string")
@@ -488,12 +488,12 @@ impl<'de> Deserialize<'de> for PolicyStore {
 
         // Check schema field
         let schema = obj.get("schema").or_else(|| obj.get("cedar_schema")).ok_or_else(|| {
-            de::Error::custom("Missing required field 'schema' or 'cedar_schema' in policy store entry")
+            de::Error::custom("missing required field 'schema' or 'cedar_schema' in policy store entry")
         })?;
 
         // Check policies field
         let policies = obj.get("policies").or_else(|| obj.get("cedar_policies")).ok_or_else(|| {
-            de::Error::custom("Missing required field 'policies' or 'cedar_policies' in policy store entry")
+            de::Error::custom("missing required field 'policies' or 'cedar_policies' in policy store entry")
         })?;
 
         // Now deserialize the actual struct
@@ -509,18 +509,18 @@ impl<'de> Deserialize<'de> for PolicyStore {
             cedar_version: obj.get("cedar_version")
                 .map(|v| parse_maybe_cedar_version(v))
                 .transpose()
-                .map_err(|e| de::Error::custom(format!("Invalid cedar_version format: {}", e)))?
+                .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {}", e)))?
                 .flatten(),
             schema: CedarSchema::deserialize(schema).map_err(|e| {
-                de::Error::custom(format!("Error parsing schema: {}", e))
+                de::Error::custom(format!("error parsing schema: {}", e))
             })?,
             policies: PoliciesContainer::deserialize(policies).map_err(|e| {
-                de::Error::custom(format!("Error parsing policies: {}", e))
+                de::Error::custom(format!("error parsing policies: {}", e))
             })?,
             trusted_issuers: obj.get("trusted_issuers")
                 .map(|v| {
                     HashMap::<String, TrustedIssuer>::deserialize(v)
-                        .map_err(|e| de::Error::custom(format!("Error parsing trusted issuers: {}", e)))
+                        .map_err(|e| de::Error::custom(format!("error parsing trusted issuers: {}", e)))
                 })
                 .transpose()?,
         };

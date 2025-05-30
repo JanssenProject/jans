@@ -280,7 +280,7 @@ mod deserialize {
             let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
             let err = policy_result.unwrap_err();
             let msg = err.to_string();
-            assert!(msg.contains("Missing required field 'name' in policy store entry"));
+            assert!(msg.contains("missing required field 'name' in policy store entry"));
         }
 
         #[test]
@@ -291,7 +291,7 @@ mod deserialize {
             let policy_result = serde_json::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW);
             let err = policy_result.unwrap_err();
             let msg = err.to_string();
-            assert!(msg.contains("Missing required field 'name' in policy store entry"));
+            assert!(msg.contains("missing required field 'name' in policy store entry"));
         }
 
         #[test]
@@ -302,7 +302,7 @@ mod deserialize {
             let policy_result = serde_yml::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW_YAML);
             let err = policy_result.unwrap_err();
             let msg = err.to_string();
-            assert!(msg.contains("Missing required field 'name' in policy store entry"));
+            assert!(msg.contains("missing required field 'name' in policy store entry"));
         }
 
         #[test]
@@ -314,7 +314,7 @@ mod deserialize {
             let err_msg = policy_result.unwrap_err().to_string();
             assert_eq!(
                 err_msg,
-                "Error parsing policy store 'a1bf93115de86de760ee0bea1d529b521489e5a11747': Missing required field 'name' in policy store entry"
+                "error parsing policy store 'a1bf93115de86de760ee0bea1d529b521489e5a11747': missing required field 'name' in policy store entry"
             );
         }
     }

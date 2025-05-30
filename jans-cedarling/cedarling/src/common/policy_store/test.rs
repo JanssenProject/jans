@@ -244,7 +244,7 @@ fn test_missing_required_fields() {
     let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
     assert!(result.is_err());
     let err = result.unwrap_err();
-    assert!(err.to_string().contains("Missing required field 'cedar_version' in policy store"));
+    assert!(err.to_string().contains("missing required field 'cedar_version' in policy store"));
 
     let json = json!({
         "cedar_version": "v4.0.0",
@@ -254,7 +254,7 @@ fn test_missing_required_fields() {
     let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
     assert!(result.is_err());
     let err = result.unwrap_err();
-    assert!(err.to_string().contains("Missing required field 'policy_stores' in policy store"));
+    assert!(err.to_string().contains("missing required field 'policy_stores' in policy store"));
 }
 
 #[test]
@@ -273,7 +273,7 @@ fn test_invalid_policy_store_entry() {
     let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
     assert!(result.is_err());
     let err = result.unwrap_err();
-    assert!(err.to_string().contains("Missing required field 'name' in policy store entry"));
+    assert!(err.to_string().contains("missing required field 'name' in policy store entry"));
 
     let json = json!({
         "cedar_version": "v4.0.0",
@@ -289,7 +289,7 @@ fn test_invalid_policy_store_entry() {
     let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
     assert!(result.is_err());
     let err = result.unwrap_err();
-    assert!(err.to_string().contains("Missing required field 'schema' or 'cedar_schema' in policy store entry"));
+    assert!(err.to_string().contains("missing required field 'schema' or 'cedar_schema' in policy store entry"));
 
     let json = json!({
         "cedar_version": "v4.0.0",
@@ -305,7 +305,7 @@ fn test_invalid_policy_store_entry() {
     let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
     assert!(result.is_err());
     let err = result.unwrap_err();
-    assert!(err.to_string().contains("Missing required field 'policies' or 'cedar_policies' in policy store entry"));
+    assert!(err.to_string().contains("missing required field 'policies' or 'cedar_policies' in policy store entry"));
 }
 
 #[test]
@@ -324,7 +324,7 @@ fn test_invalid_cedar_version() {
     let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
     assert!(result.is_err());
     let err = result.unwrap_err();
-    assert!(err.to_string().contains("Invalid cedar_version format"));
+    assert!(err.to_string().contains("invalid cedar_version format"));
 }
 
 #[test]
@@ -343,7 +343,7 @@ fn test_invalid_schema_format() {
     let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
     assert!(result.is_err());
     let err = result.unwrap_err();
-    assert!(err.to_string().contains("Error parsing schema"));
+    assert!(err.to_string().contains("error parsing schema"));
 }
 
 #[test]
