@@ -17,7 +17,7 @@ import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
-import io.jans.orm.model.PersistenceMetadata;
+import io.jans.configapi.core.model.PersistenceConfiguration;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -106,7 +106,7 @@ public class AuthConfigResource extends ConfigBaseResource {
             "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Jans Authorization Server persistence type", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersistenceMetadata.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/config/auth-config-persistence.json"))),
+            @ApiResponse(responseCode = "200", description = "Jans Authorization Server persistence type", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersistenceConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/config/auth-config-persistence.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -115,9 +115,9 @@ public class AuthConfigResource extends ConfigBaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.PERSISTENCE)
     public Response getPersistenceDetails() {
-        PersistenceMetadata persistenceMetadata = configurationService.getPersistenceMetadata();
-        log.debug("AuthConfigResource::getPersistenceDetails() - persistenceMetadata:{}", persistenceMetadata);
-        return Response.ok(persistenceMetadata).build();
+        PersistenceConfiguration persistenceConfiguration = configurationService.getPersistenceMetadata();
+        log.debug("AuthConfigResource::getPersistenceDetails() - persistenceConfiguration:{}", persistenceConfiguration);
+        return Response.ok(persistenceConfiguration).build();
     }
     
     
