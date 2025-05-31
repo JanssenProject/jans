@@ -135,14 +135,15 @@ public class ConfigurationService {
     private PersistenceConfiguration getPersistenceConfiguration(PersistenceMetadata persistenceMetadata) {
         PersistenceConfiguration persistenceConfiguration = new PersistenceConfiguration();
         if(persistenceMetadata == null) {
-            persistenceConfiguration.setDatabaseName(persistenceMetadata.getDatabaseName());
-            persistenceConfiguration.setSchemaName(persistenceMetadata.getSchemaName());
-            persistenceConfiguration.setProductName(persistenceMetadata.getProductName());
-            persistenceConfiguration.setProductVersion(persistenceMetadata.getProductVersion());
-            persistenceConfiguration.setDriverName(persistenceMetadata.getDriverName());
-            persistenceConfiguration.setDriverVersion(persistenceMetadata.getDriverVersion());
+            return persistenceConfiguration;
+
         }
-        
+        persistenceConfiguration.setDatabaseName(persistenceMetadata.getDatabaseName());
+        persistenceConfiguration.setSchemaName(persistenceMetadata.getSchemaName());
+        persistenceConfiguration.setProductName(persistenceMetadata.getProductName());
+        persistenceConfiguration.setProductVersion(persistenceMetadata.getProductVersion());
+        persistenceConfiguration.setDriverName(persistenceMetadata.getDriverName());
+        persistenceConfiguration.setDriverVersion(persistenceMetadata.getDriverVersion());
         return persistenceConfiguration;
     }
 }
