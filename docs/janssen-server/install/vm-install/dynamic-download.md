@@ -57,7 +57,7 @@ curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-vers
    installation. For example, see the command below:
 
    ```bash
-   python3 install.py --args="-n -ip-address 10.229.38.28 -host-name jans-opensuse -city ah -state gj -country in -org-name gluu -email dhaval@gluu.org -jans-max-mem 26349 -admin-password admin --with-casa -t"
+   python3 install.py --args="-n -ip-address 10.229.38.28 -host-name jans-opensuse -city ah -state gj -country in -org-name gluu -email dhaval@gluu.org -jans-max-mem 26349 -admin-password admin --with-casa --install-jans-keycloak-link -t"
    ```
 
 

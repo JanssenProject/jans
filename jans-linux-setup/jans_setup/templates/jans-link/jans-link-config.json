@@ -1,0 +1,99 @@
+{
+  "sourceConfigs": [
+  ],
+  "inumConfig": {
+    "configId": "local_inum",
+    "bindDN": "@ldap_binddn@",
+    "bindPassword": "@ldap_bind_encoded_pw@",
+    "servers": [
+      "@ldap_hostname@:@ldaps_port@"
+    ],
+    "maxConnections": 10,
+    "useSSL": true,
+    "baseDNs": [
+      "ou=link,o=site"
+    ],
+    "primaryKey": null,
+    "localPrimaryKey": null,
+    "useAnonymousBind": false,
+    "enabled": true,
+    "version": 0,
+    "level": 0
+  },
+  "targetConfig": {
+    "configId": null,
+    "bindDN": null,
+    "bindPassword": null,
+    "servers": [],
+    "maxConnections": 2,
+    "useSSL": false,
+    "baseDNs": [],
+    "primaryKey": null,
+    "localPrimaryKey": null,
+    "useAnonymousBind": false,
+    "enabled": false,
+    "version": 0,
+    "level": 0
+  },
+  "ldapSearchSizeLimit": 1000,
+  "keyAttributes": [
+    "uid"
+  ],
+  "keyObjectClasses": [
+    "gluuPerson"
+  ],
+  "sourceAttributes": [
+    "mail",
+    "cn",
+    "sn"
+  ],
+  "customLdapFilter": "",
+  "updateMethod": "copy",
+  "defaultInumServer": true,
+  "keepExternalPerson": true,
+  "useSearchLimit": false,
+  "attributeMapping": [
+    {
+      "source": "uid",
+      "destination": "uid"
+    },
+    {
+      "source": "cn",
+      "destination": "cn"
+    },
+    {
+      "source": "sn",
+      "destination": "sn"
+    }
+  ],
+  "snapshotFolder": "%(snapshots_dir)s",
+  "snapshotMaxCount": 10,
+  "baseDN": "o=jans",
+  "personObjectClassTypes": [
+    "jansCustomPerson",
+    "jansPerson",
+    "eduPerson"
+  ],
+  "personCustomObjectClass": "jansCustomPerson",
+  "contactObjectClassTypes": [],
+  "allowPersonModification": false,
+  "supportedUserStatus": [
+    "active",
+    "inactive"
+  ],
+  "loggingLevel": null,
+  "loggingLayout": null,
+  "externalLoggerConfiguration": null,
+  "metricReporterInterval": 0,
+  "metricReporterKeepDataDays": 0,
+  "metricReporterEnabled": null,
+  "disableJdkLogger": true,
+  "cleanServiceInterval": 0,
+  "linkEnabled": false,
+  "serverIpAddress": "255.255.255.255",
+  "pollingInterval": null,
+  "lastUpdate": 1688581648776,
+  "lastUpdateCount": "0",
+  "problemCount": "3",
+  "useLocalCache": false
+}
