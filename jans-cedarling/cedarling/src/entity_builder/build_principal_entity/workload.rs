@@ -70,7 +70,7 @@ impl WorkloadIdSrcResolver {
     /// - `access_token.aud`
     /// - `access_token.client_id`
     /// - `id_token.aud`
-    pub fn resolve<'a>(tokens: &'a HashMap<String, Token>) -> Vec<EntityIdSrc<'a>> {
+    pub fn resolve(tokens: &HashMap<String, Token>) -> Vec<EntityIdSrc> {
         const DEFAULT_WORKLOAD_ID_SRCS: &[PrincipalIdSrc] = &[
             PrincipalIdSrc {
                 token: "access_token",
@@ -123,6 +123,7 @@ mod test {
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     #[track_caller]
     fn test_build_workload(
@@ -169,6 +170,8 @@ mod test {
             Some(&validator_schema),
         )
         .expect("should init entity builder");
+        let iss = Arc::new(iss);
+
         let tkn_principal_mappings = TokenPrincipalMappings::from(
             [TokenPrincipalMapping {
                 principal: "Jans::Workload".into(),
@@ -189,7 +192,7 @@ mod test {
                 ("jti".to_string(), json!("some_jti")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss),
         );
 
         test_build_workload(
@@ -240,6 +243,8 @@ mod test {
             Some(&validator_schema),
         )
         .expect("should init entity builder");
+        let iss = Arc::new(iss);
+
         let tkn_principal_mappings = TokenPrincipalMappings::from(
             [TokenPrincipalMapping {
                 principal: "Jans::Workload".into(),
@@ -260,7 +265,7 @@ mod test {
                 ("jti".to_string(), json!("some_jti")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss),
         );
 
         test_build_workload(
@@ -296,6 +301,8 @@ mod test {
             None,
         )
         .expect("should init entity builder");
+        let iss = Arc::new(iss);
+
         let tkn_principal_mappings = TokenPrincipalMappings::from(
             [TokenPrincipalMapping {
                 principal: "Jans::Workload".into(),
@@ -316,7 +323,7 @@ mod test {
                 ("jti".to_string(), json!("some_jti")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss),
         );
         test_build_workload(
             access_token,
