@@ -189,6 +189,14 @@ ENV CN_VERSION=0.0.0-nightly
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app
 
+# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# CN_LINK_JETTY_HOST=127.0.0.1 \
+# CN_LINK_JETTY_PORT=9091 \
+# CN_LINK_JAVA_OPTIONS="" \
+# CN_KEYCLOAK_LINK_JETTY_HOST=127.0.0.1 \
+# CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
+# CN_KEYCLOAK_LINK_JAVA_OPTIONS="" \
+
 ENV JETTY_BASE=/opt/jans/jetty \
     JETTY_HOME=/opt/jetty \
     CN_AIO_COMPONENTS="configurator,persistence-loader,jans-auth,jans-config-api,jans-fido2,jans-scim,jans-casa" \
@@ -222,12 +230,6 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_SAML_JAVA_OPTIONS="" \
     CN_SAML_KC_ADMIN_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
     CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
-    CN_LINK_JETTY_HOST=127.0.0.1 \
-    CN_LINK_JETTY_PORT=9091 \
-    CN_LINK_JAVA_OPTIONS="" \
-    CN_KEYCLOAK_LINK_JETTY_HOST=127.0.0.1 \
-    CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
-    CN_KEYCLOAK_LINK_JAVA_OPTIONS="" \
     KC_LOG_LEVEL=INFO \
     KC_DB=mysql \
     KC_DB_USERNAME=keycloak \
