@@ -229,7 +229,7 @@ class App:
                 "mem_ratio": 0.10,
                 "java_opts_env": "CN_SAML_JAVA_OPTIONS",
             },
-            # jans-link and jans-keycloak-link support is temporarily disabled
+            # #@NOTE: jans-link and jans-keycloak-link support is temporarily disabled
             # "jans-link": {
             #     "mem_ratio": 0.08,
             #     "java_opts_env": "CN_LINK_JAVA_OPTIONS",
@@ -255,7 +255,7 @@ class App:
             "jans-scim": ["upstream", "location"],
             "jans-casa": ["upstream", "location"],
             "jans-saml": ["upstream", "location"],
-            # jans-link and jans-keycloak-link support is temporarily disabled
+            # @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
             # "jans-link": ["upstream", "location"],
             # "jans-keycloak-link": ["upstream", "location"],
         }
