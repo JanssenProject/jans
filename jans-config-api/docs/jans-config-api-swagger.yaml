@@ -9336,7 +9336,7 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
@@ -9344,11 +9344,11 @@ components:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanView:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9600,6 +9600,13 @@ components:
           type: array
           items:
             type: string
+        sessionJwtSigningAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        sessionStatusListBitSize:
+          type: integer
+          format: int32
         txTokenSigningAlgValuesSupported:
           type: array
           items:
@@ -9840,6 +9847,8 @@ components:
           items:
             type: string
         includeSidInResponse:
+          type: boolean
+        includeRefreshTokenLifetimeInTokenResponse:
           type: boolean
         disablePromptLogin:
           type: boolean
@@ -10175,6 +10184,7 @@ components:
             - REVOKE_SESSION
             - GLOBAL_TOKEN_REVOCATION
             - STATUS_LIST
+            - SESSION_STATUS_LIST
             - ACTIVE_SESSION
             - END_SESSION
             - STATUS_SESSION
@@ -10222,8 +10232,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10233,6 +10241,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10450,8 +10460,24 @@ components:
     PersistenceConfiguration:
       type: object
       properties:
-        persistenceType:
+        databaseName:
           type: string
+          description: Connection object's current catalog name.
+        schemaName:
+          type: string
+          description: Schema name.
+        productName:
+          type: string
+          description: Name of database product.
+        productVersion:
+          type: string
+          description: Version number of this database product.
+        driverName:
+          type: string
+          description: Name of this JDBC driver.
+        driverVersion:
+          type: string
+          description: JDBC driver version number.
     JsonPatch:
       type: object
     CacheConfiguration:
@@ -10997,6 +11023,8 @@ components:
         txTokenEncryptedResponseAlg:
           type: string
         txTokenEncryptedResponseEnc:
+          type: string
+        sessionJwtSignedResponseAlg:
           type: string
         authorizationDetailsTypes:
           type: array
@@ -11776,6 +11804,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        predefinedAttributes:
+          $ref: '#/components/schemas/SessionIdPredefinedAttributes'
         deviceSecrets:
           type: array
           items:
@@ -11793,10 +11823,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -11806,6 +11836,12 @@ components:
             type: boolean
           xml:
             name: map
+    SessionIdPredefinedAttributes:
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
     SessionPagedResult:
       type: object
       properties:

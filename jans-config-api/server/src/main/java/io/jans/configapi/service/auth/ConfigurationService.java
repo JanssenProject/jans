@@ -11,10 +11,14 @@ import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.config.GluuConfiguration;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.core.model.PersistenceConfiguration;
 import io.jans.configapi.model.status.StatsData;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.util.StringHelper;
+
+import io.jans.orm.model.PersistenceMetadata;
+
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -121,5 +125,24 @@ public class ConfigurationService {
     
     public String getRevokeUrl() {
         return configurationFactory.getApiAppConfiguration().getAuthOpenidRevokeUrl();
+    }
+    
+    public PersistenceConfiguration getPersistenceMetadata() {
+         PersistenceMetadata persistenceMetadata  = persistenceManager.getPersistenceMetadata("o=jans");
+         return getPersistenceConfiguration(persistenceMetadata);
+    }
+    
+    private PersistenceConfiguration getPersistenceConfiguration(PersistenceMetadata persistenceMetadata) {
+        PersistenceConfiguration persistenceConfiguration = new PersistenceConfiguration();
+        if(persistenceMetadata == null) {
+            persistenceConfiguration.setDatabaseName(persistenceMetadata.getDatabaseName());
+            persistenceConfiguration.setSchemaName(persistenceMetadata.getSchemaName());
+            persistenceConfiguration.setProductName(persistenceMetadata.getProductName());
+            persistenceConfiguration.setProductVersion(persistenceMetadata.getProductVersion());
+            persistenceConfiguration.setDriverName(persistenceMetadata.getDriverName());
+            persistenceConfiguration.setDriverVersion(persistenceMetadata.getDriverVersion());
+        }
+        
+        return persistenceConfiguration;
     }
 }

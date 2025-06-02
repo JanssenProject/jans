@@ -411,3 +411,7 @@ The `<f:viewAction action="#{authenticator.authenticateWithOutcome}" />` in step
  - perform the `state` check (state : Opaque value used to maintain state between the request and the callback.)
 
  - finally, return true or false from this method.
+
+### 3. Why is the browser taken to the redirect URI even if the authentication was not successful?
+
+By default, regardless of the authentication outcome, the redirect URI will be hit. You can control this behavior through the Authentication Server property [errorHandlingMethod](../../janssen-server/reference/json/properties/janssenauthserver-properties.md#errorHandlingMethod). Set its value to `internal` for the default error page to be shown instead.

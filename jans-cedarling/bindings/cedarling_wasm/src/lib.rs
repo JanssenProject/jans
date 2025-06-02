@@ -167,6 +167,11 @@ impl Cedarling {
             .map(convert_json_to_object)
             .collect()
     }
+
+    /// Closes the connections to the Lock Server and pushes all available logs.
+    pub async fn shut_down(&self) {
+        self.instance.shut_down().await;
+    }
 }
 
 /// convert json to js object

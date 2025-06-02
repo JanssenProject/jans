@@ -14,6 +14,7 @@ import io.jans.as.server.model.common.SimpleAuthorizationGrant;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.external.ExternalEndSessionService;
+import io.jans.as.server.service.session.SessionStatusListIndexService;
 import io.jans.model.security.Identity;
 import io.jans.util.Pair;
 import jakarta.ws.rs.WebApplicationException;
@@ -91,6 +92,9 @@ public class EndSessionRestWebServiceImplTest {
 
     @Mock
     private AbstractCryptoProvider cryptoProvider;
+
+    @Mock
+    private SessionStatusListIndexService sessionStatusListIndexService;
 
     @Test
     public void validatePostLogoutRedirectUri_whenValidClientIdIsPassed_shouldValidateSuccessfully() {

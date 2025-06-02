@@ -18,6 +18,7 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.core.model.PersistenceConfiguration;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -114,10 +115,7 @@ public class AuthConfigResource extends ConfigBaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.PERSISTENCE)
     public Response getPersistenceDetails() {
-        String persistenceType = configurationService.getPersistenceType();
-        log.debug("AuthConfigResource::getPersistenceDetails() - persistenceType:{}", persistenceType);
-        PersistenceConfiguration persistenceConfiguration = new PersistenceConfiguration();
-        persistenceConfiguration.setPersistenceType(persistenceType);
+        PersistenceConfiguration persistenceConfiguration = configurationService.getPersistenceMetadata();
         log.debug("AuthConfigResource::getPersistenceDetails() - persistenceConfiguration:{}", persistenceConfiguration);
         return Response.ok(persistenceConfiguration).build();
     }
