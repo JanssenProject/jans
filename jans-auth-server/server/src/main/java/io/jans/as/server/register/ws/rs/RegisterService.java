@@ -328,6 +328,9 @@ public class RegisterService {
         if (requestObject.getTxTokenEncryptedResponseEnc() != null) {
             client.getAttributes().setTxTokenEncryptedResponseEnc(requestObject.getTxTokenEncryptedResponseEnc().toString());
         }
+        if (requestObject.getSessionJwtSignedResponseAlg() != null) {
+            client.getAttributes().setSessionJwtSignedResponseAlg(requestObject.getSessionJwtSignedResponseAlg().toString());
+        }
         if (requestObject.getRequestObjectSigningAlg() != null) {
             client.setRequestObjectSigningAlg(requestObject.getRequestObjectSigningAlg().toString());
         }

@@ -43,6 +43,8 @@ parser.add_argument('-rdbm-password', help="RDBM password")
 parser.add_argument('-rdbm-port', help="RDBM port")
 parser.add_argument('-rdbm-db', help="RDBM database")
 parser.add_argument('-rdbm-host', help="RDBM host")
+parser.add_argument('-rdbm-schema', help="Jans Database Schema")
+
 parser.add_argument('--reset-rdbm-db', help="Deletes all tables on target database. Warning! You will lose all data on target database.", action='store_true')
 
 parser.add_argument('--shell', help="Drop into interactive shell before starting installation", action='store_true')
@@ -84,8 +86,6 @@ if PROFILE != OPENBANKING_PROFILE:
 
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
-    parser.add_argument('--install-link', help="Install Link Server", action='store_true')
-    parser.add_argument('--install-jans-keycloak-link', help="Install Keycloak Link Server", action='store_true')
 
     parser.add_argument('--with-casa', help="Install Jans Casa", action='store_true')
     parser.add_argument('--install-jans-saml', help="Install Jans KC", action='store_true')

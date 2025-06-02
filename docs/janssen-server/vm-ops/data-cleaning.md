@@ -84,4 +84,3 @@ the client is deleted.
 The data cleaning script logs all its operations as well as SQL queries and query outputs to `/opt/jans/data-cleaner/logs/data-clean.log`
 
 You can safely execute `clean-data.py` script manually whenever you need cleaning data.
-

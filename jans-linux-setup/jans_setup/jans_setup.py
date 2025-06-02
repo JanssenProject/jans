@@ -140,8 +140,6 @@ from setup_app.installers.jans_auth import JansAuthInstaller
 if base.current_app.profile == 'jans':
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
-    from setup_app.installers.jans_link import JansLinkInstaller
-    from setup_app.installers.jans_keycloak_link import JansKCLinkInstaller
     from setup_app.installers.jans_casa import CasaInstaller
 
     from setup_app.installers.jans_saml import JansSamlInstaller
@@ -257,8 +255,6 @@ if Config.profile == 'jans':
     fidoInstaller = FidoInstaller()
     scimInstaller = ScimInstaller()
     casa_installer = CasaInstaller()
-    jans_link_installer = JansLinkInstaller()
-    jans_keycloak_link_installer = JansKCLinkInstaller()
     jans_saml_installer = JansSamlInstaller()
     jans_lock_installer = JansLockInstaller()
 
@@ -415,15 +411,6 @@ def main():
                 if (Config.installed_instance and casa_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(casa_installer.install_var)):
                     casa_installer.start_installation()
-
-
-                if (Config.installed_instance and jans_link_installer.install_var in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.get(jans_link_installer.install_var)):
-                    jans_link_installer.start_installation()
-
-                if (Config.installed_instance and jans_keycloak_link_installer.install_var in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.get(jans_keycloak_link_installer.install_var)):
-                    jans_keycloak_link_installer.start_installation()
 
                 if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
                             not Config.installed_instance and Config.get(jansCliInstaller.install_var)):

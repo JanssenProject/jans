@@ -61,7 +61,6 @@ def authorize_with_token():
 
     # or we can init resource using dict
     resource = EntityData.from_dict({
-        "entity_type": "resource",
         "type": "Jans::Application",
         "id": "some_id",
         "app_id": "application_id",
@@ -256,7 +255,6 @@ def authorize_with_token():
         print(diagnostic)
 
     print()
-
 
 def authorize_without_token():
     # //// Execute authentication request without token ////

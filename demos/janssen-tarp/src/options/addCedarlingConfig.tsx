@@ -182,7 +182,7 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
             {(!!errorMessage || errorMessage !== '') ?
               <Alert severity="error">{errorMessage}</Alert> : ''
             }
-            <div style={{ display: 'flex', justifyContent: 'space-between', minWidth: '250px', maxWidth: 'min(600px, 90vw)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', maxWidth: 'min(600px, 90vw)' }}>
               <RadioGroup
                 row
                 aria-labelledby="demo-row-radio-buttons-group-label"

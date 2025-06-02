@@ -26,6 +26,8 @@ to register client dynamically.
 
 Janssen Server also provides [SSA endpoint](../../auth-server/endpoints/ssa.md) to create and manage SSAs on the server.
 
+Please see SSA Creation with TUI at [Create SSA with TUI](./../../config-guide/auth-server-config/ssa-config/#ssa-screen)
+
 ## Want to contribute?
 
 If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).

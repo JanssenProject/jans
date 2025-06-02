@@ -612,10 +612,8 @@ components:
       properties:
         url:
           type: string
-        certificateDocumentInum:
-          type: array
-          items:
-            type: string
+        rootCert:
+          type: string
     RequestedParty:
       type: object
       properties:

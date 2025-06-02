@@ -18,8 +18,6 @@ annotations:
       image: ghcr.io/janssenproject/jans/casa:0.0.0-nightly
     - name: scim
       image: ghcr.io/janssenproject/jans/scim:0.0.0-nightly
-    - name: link
-      image: ghcr.io/janssenproject/jans/link:0.0.0-nightly
     - name: saml
       image: ghcr.io/janssenproject/jans/saml:0.0.0-nightly
     - name: kc-scheduler
@@ -80,10 +78,6 @@ dependencies:
 
     - name: persistence
       condition: global.persistence.enabled
-      version: 0.0.0-nightly
-
-    - name: link
-      condition: global.link.enabled
       version: 0.0.0-nightly
 
     - name: saml

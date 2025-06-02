@@ -417,6 +417,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.dbUtils.import_ldif(ldif_files)
 
     def rdbmProperties(self):
+        Config.set_rdbm_schema()
         if Config.rdbm_type in ('pgsql', 'mysql'):
             Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
             src_temp_fn = os.path.join(Config.templateFolder, 'jans-{}.properties'.format(Config.rdbm_type))

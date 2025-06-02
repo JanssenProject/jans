@@ -19,6 +19,7 @@ public final class ConfigurationResponseClaim {
     public static final String AUTHORIZATION_ENDPOINT = "authorization_endpoint";
     public static final String AUTHORIZATION_CHALLENGE_ENDPOINT = "authorization_challenge_endpoint";
     public static final String STATUS_LIST_ENDPOINT = "status_list_endpoint";
+    public static final String SESSION_STATUS_LIST_ENDPOINT = "session_status_list_endpoint";
     public static final String ACCESS_EVALUATION_V1_ENDPOINT = "access_evaluation_v1_endpoint";
     public static final String TOKEN_ENDPOINT = "token_endpoint";
     public static final String REVOCATION_ENDPOINT = "revocation_endpoint";
@@ -54,6 +55,7 @@ public final class ConfigurationResponseClaim {
     public static final String INTROSPECTION_SIGNING_ALG_VALUES_SUPPORTED = "introspection_signing_alg_values_supported";
     public static final String INTROSPECTION_ENCRYPTION_ALG_VALUES_SUPPORTED = "introspection_encryption_alg_values_supported";
     public static final String INTROSPECTION_ENCRYPTION_ENC_VALUES_SUPPORTED = "introspection_encryption_enc_values_supported";
+    public static final String SESSION_JWT_SIGNING_ALG_VALUES_SUPPORTED = "session_jwt_signing_alg_values_supported";
     public static final String TX_TOKEN_SIGNING_ALG_VALUES_SUPPORTED = "tx_token_signing_alg_values_supported";
     public static final String TX_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED = "tx_token_encryption_alg_values_supported";
     public static final String TX_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED = "tx_token_encryption_enc_values_supported";
