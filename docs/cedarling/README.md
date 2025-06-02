@@ -7,101 +7,95 @@ tags:
   - Cedarling
 ---
 
-# Cedarling Overview
+# An Overview of The Cedarling
 
-Modern applications require fine-grained access control, but traditional approaches relying on 
-centralized authorization services introduce latency, availability concerns, and operational 
-complexity. The Cedarling provides a fast, embeddable, and self-contained solution for policy-based 
-authorization, designed for both client-side and server-side enforcement. This makes it 
-particularly well-suited for latency-sensitive environments like mobile apps, API gateways, and 
-embedded devices. Cedarling is designed for maximum deployment flexibility:
+The Cedarling, powered by the Rust Cedar engine, provides a fast, embeddable, and 
+self-contained solution for policy-based authorization, designed for both client-side 
+and server-side enforcement. This makes it particularly well-suited for latency-sensitive 
+environments like databases, browser based applications, mobile apps, API gateways, and 
+embedded devices. At less then 2M in size, it's small enough to load into your browser or mobile application. Critically, the Cedarling always avoids costly cloud round-trips for authorization 
+decisions, ensuring predictable sub millisecond performance. The Cedarling never fetches data
+to make a decision--this is a perfomance killer and would make the PDP unreliable.
 
-* Embedded in browsers or mobile apps for client-side authorization
-* Integrated into backend services using Java or Python SDKs
-* Deployed as a sidecar or serverless function in cloud-native environments
-* Used within databases and API gateways to enforce fine-grained authorization at multiple layers
+The Cedarling is designed for maximum deployment flexibility. It can be:
 
-![](../assets/lock-cedarling-diagram-1.jpg)
+* Embedded in browsers using the WebAssembly (WASM) npm package
+* Embedded in mobile apps using the iOS or Android SDKs
+* Integrated into backend services using the Java, Go, Rust or Python SDKs
+* Deployed as a sidecar 
+* Deployed as a serverless function
 
-The Cedarling is an embeddable Policy Decision Point (PDP), which includes an in-memory cache 
-for performance optimization, enabling low-latency access control and efficient logging. The 
-Cedarling is built on the Rust Cedar engine, but unlike the standalone Cedar engine, it is a 
-full-featured PDP that includes logging, JWT validation, and claims mapping, making it 
-more adaptable for real-world applications. It also has optional features to connect 
-to enterprise plumbing.
+![](../assets/cedarling/lock-cedarling-diagram-1.jpg)
+
+The Cedarling is not merely a library--it is an embeddable Policy Decision Point (PDP), 
+which includes an in-memory cache to enable efficient logging. It connects to a Policy 
+Administration Point to obtain its policies and to send its audit log--a log of every 
+decision to allow or deny access to a resource. Finally, it performs JWT validation, 
+and claims mapping. In todays architectures, JWTs provide essential information about the 
+provenance of the principal performing the action on the resource. The payload of a JWT token 
+is a JSON document, and frequently a complex string, like a URI. Through the use of regular 
+expressions, developers can parse strings and map them to Cedar entities. This 
+provides a formal way to map trusted information from the enterprise to policies. 
 
 !!! tip "About Cedar"
 
       [Cedar](https://www.cedarpolicy.com/en) is a policy syntax invented by Amazon and used by their 
       [Verified Permission](https://aws.amazon.com/verified-permissions/) service. Cedar policies
-      enable developers to implement fine-grain access control and externalize policies. To learn more
-      about why the design of Cedar is **intuitive**, **fast** and **safe**, read this 
+      enable developers to implement fine-grain access control and externalize policies. Cedar is a 
+      CNCF candidate project. To learn more about why the design of Cedar is **intuitive**, **fast** and **safe**, check out this 
       [article](https://aws.amazon.com/blogs/security/how-we-designed-cedar-to-be-intuitive-to-use-fast-and-safe/) 
       or watch this [video](https://www.youtube.com/watch?v=k6pPcnLuOXY&t=1779s)
 
+      If you're wondering how Cedar compares to Rego or OpenFGA, read this [white paper](https://arxiv.org/pdf/2403.04651).
+
       These Cedarling docs assume you have a basic understanding of Cedar policy syntax and language features.
 
-The Cedarling is written in Rust with bindings to WASM, iOS, Android, Python and Java. 
-This means that web, mobile, and cloud developers can use the Cedarling  to load a 
-"policy store"--a set of policies, a schema, and a list of trusted token issuers. 
-Policy stores are application specific, meaning each store 
+
+On initalization, the Cedarling loads a "policy store"--a set of policies, a schema, and a list of trusted token issuers. Policy stores are application specific, meaning each store 
 does **not** contain all policies and schema for all applications in your domain. Each policy 
 store has the unique policies and schema needed only for one specific application.
 
-The Cedarling is useful for both frontend and backend security. At less then 2M in size, 
-it's small enough to load into your browser or mobile application. Backend
-applications can use the sidecar via a REST API, deploy the Cedarling in the cloud as a 
-serverless component (e.g. cloud WASM), or integrate directly via the Java or Python SDKs. 
+## Token Based Access Control (TBAC) v. Application Asserted identity 
 
-The Cedarling is optimized for speed, typically returning authorization decisions in sub-millisecond time. By 
-keeping all necessary data locally available, it avoids costly cloud round-trips, ensuring predictable performance.
+The Cedarling has two different authorization interfaces. One requires the developer to provide
+JWTs to prove the identity of the principal: "It's Bob, and here's the token to prove it!" 
+The other allows the application to assert the identity of the principal: "It's Bob, trust me, 
+I authenticated him." 
 
-## Token Based Access Control (TBAC)
+It's actually a little more complex then that. The Cedarling allows the developer to pass not 
+one token, but a bundle of tokens. This enables the developer to assert not only the human 
+identity, but the software identities that were involved in the issuance of the token. Token 
+Based Access Control (TBAC), answers the question: _"Given this bundle of tokens, is this action on this resource allowed in this context?"_ Or you could say more simply, _"Does this bundle of tokens authorize this capability?"_  TBAC diverges from RBAC/ABAC because it is not human-identity-centric, it is capabilities centric. 
 
-Cedarling evaluates authorization requests based on Token-Based Access Control (TBAC), 
-answering the question: _"Given this bundle of tokens, is this action on this resource allowed 
-in this context?"_ TBAC helps developers implement security based on JWTs from trusted issuers 
-like identity providers, hardware platforms, and federations. 
+TBAC helps developers implement security based on JWTs from trusted issuers like identity providers, 
+hardware platforms, and federations. Who is the principal in a TBAC request? A TBAC authorization request may pertain to multiple principals, derived from the JWT tokens. For example, let's say a 
+person uses a mobile application to request data from a service provider. In this case, there are two 
+principals: the person and the mobile application--both of which have unique identities. In our 
+hypothetical case, a business may prevent access to content from a third party mobile application, although allow it for the same User from the company's website. So the User's identity by itself is 
+not sufficient to grant access to a capablity. 
 
-Who is the principal in a TBAC request? A TBAC authorization request may pertain to multiple 
-principals, derived from the JWT tokens. For example, let's say a person uses a mobile application 
-to request data from a service provider. In this case, there are two principals: the person and 
-the mobile application--both of which have unique identities. A business may prevent access to 
-content from a mobile application, although allow it for the same User from the company's website.
-
-Don't forget about the "Workload" identity--the software acting on behalf of the "User". Humans don't 
-speak tcp/ip! People need digital intermediaries, which need increasing amounts of agency.
+Generically, we call the software acting on behalf of the person the "Workload" identity. Humans don't speak tcp/ip! People need digital intermediaries, which need increasing amounts of agency. And 
+software agents are becoming an increasingly important entities in our increasingly AI-centric world. 
 
 ### Cedarling Interfaces
 
-Developers interact with Cedarling using three core interfaces:
+At a high level, developers interact with the Cedarling using four core interfaces:
 
 * **Initialization** (`init`) – Loads the policy store and retrieves configuration settings.
-* **Authorization** (`authz`) – Evaluates policies and JWTs to determine access.
+* **Authorization** (`authz`) – Evaluates policies by sending a bundle of JWTs to specify the principal.
+* **Authorization** (`authz_unsigned`) – Evaluates policies with an applciation asserted principal.
 * **Logging** (`log`) – Retrieves decision and system logs for auditing. 
 
 Developers call the `init` interface on startup of their application, causing the Cedarling to read
-its [bootstrap properties](./cedarling-properties) and load its [policy store](./cedarling-policy-store).
-If configured for JWT validation, the Cedarling will fetch the most recent IDP public keys and status 
-list JWT.
+its [bootstrap properties](./cedarling-properties) and load its [policy store](./cedarling-policy-store). If configured for JWT validation, the Cedarling will fetch the most 
+recent issuer public keys and metadata.
 
-The `authz` interface provides the main functionality of the Cedarling: to authorize a request from the 
-application by mapping the data and JWTs sent in the request, and evaluating it against the policies using 
-the [Rust Cedar Engine](https://github.com/cedar-policy/cedar). 
-
-The authz interface has two variants:
-
-1. `authorize` - Check signature of JWT tokens before making authorization decisions
-2. `authorize_unsigned` - Makes authorization decisions by passing a set of principals directly.
-
-The standard `authorize` method answers the question: "Is this action, on this resource, given this context, 
-allowed with these JWTs?". The Cedarling returns the decision--*allow* or *deny*. If denied, the 
-Cedarling returns "diagnostics"--additional context to clarify why the decision was not allowed. 
+The standard `authorize` method answers the question: "Is this action, on this resource, given this context, allowed with these JWTs?". The Cedarling returns the decision--*allow* or *deny*. If denied, the Cedarling returns "diagnostics"--additional context to clarify why the decision was not allowed. 
 During `authz`, the Cedarling can perform two more important jobs: (1) validate JWT tokens; (2) log 
 the resulting decision. 
 
-The `authorize_unsigned` variant is used when JWTs have already been validated or when working with 
-non-token based principals. It follows the same evaluation logic but skips JWT validation steps.
+The `authorize_unsigned` variant is used when JWTs have already been validated by the application, 
+or when working with non-token based principals. It follows the same evaluation logic but skips JWT validation steps.
 
 The `log` interface enables developers to retrieve decision and system logs from the Cedarling's 
 in-memory cache. See the Cedarling [log](./cedarling-logs) documentation for more information. 
@@ -110,14 +104,13 @@ in-memory cache. See the Cedarling [log](./cedarling-logs) documentation for mor
 
 The following diagram is a high level picture of the Cedarling components:
 
-![](../assets/lock-cedarling-rust-core-components.jpg)
+![](../assets/cedarling/lock-cedarling-rust-core-components.jpg)
 
 * **Cedar Engine** a recent release of the Rust Cedar Engine thanks to Amazon.
 * **SparKV** is an in-memory key-value store that support automatic expiration of data.
-* **Init, Authz, and Log Engines** perform actions similar to those described in the interfaces 
-above.
-* **JWT Engine** is used to validate JWT signatures, JWT content (i.e. `exp`) and to check if the JWT token is revoked (using the Status List JWT) 
-* **Lock Engine** is used for enterprise deployments to load the Policy Store from a trusted source and send to store logs for central storage. 
+* **Interfaces** perform actions described above
+* **JWT Engine** is used to validate JWT signatures, JWT content (e.g. `exp`) and to check if the JWT token is revoked (using the Status List JWT) 
+* **Lock Engine** is used for enterprise deployments to load the Policy Store from a trusted source and send logs for central storage. 
 
 ## Cedarling and Zero Trust
 
@@ -126,7 +119,7 @@ Zero Trust is a modern security model that assumes no implicit trust—every req
 ### End-to-End Authorization Enforcement
 The Cedarling can be deployed **at every layer** to ensure that access decisions are consistently enforced. The diagram below illustrates how the Cedarling operates in a hypothetical mobile application architecture:
 
-![](../assets/lock-cedarling-mobile-generic.jpg)
+![](../assets/cedarling/lock-cedarling-mobile-generic.jpg)
 
 1. **Identity Provider (IDP) Enforcement**  
   - The IDP can use the Cedarling to determine if a mobile application should be allowed to register.  
@@ -163,3 +156,7 @@ Beyond enforcing policies, the Cedarling plays a role in intrusion detection by 
 
 ### Zero Trust Conclusion
 By embedding the Cedarling across multiple layers of the application stack, organizations can enforce Zero Trust security, reduce unauthorized access, and gain visibility into access patterns. Whether it's protecting frontend applications, securing API gateways, or enforcing access policies at the database level, the Cedarling ensures every request is explicitly authorized—-verywhere.
+
+!!! tip: Why is it "The Cedarling"
+    In every system where it runs, the Cedarling becomes the guardian of policy, the gatekeeper of decisions. It’s lightweight, fast, and embedded close to the action—evaluating access at the speed of the web. Like the kernel, the compiler, or the firewall, it earns the definite article because it does something definite. It stands in your stack, quiet but crucial, deciding who gets through. The Cedarling isn’t a library. It’s a presence.
+  
