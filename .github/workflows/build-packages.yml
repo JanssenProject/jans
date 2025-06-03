@@ -445,10 +445,9 @@ jobs:
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       run: |
         rustup update stable && rustup default stable
+        cargo install wasm-pack
         TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
         NPM_TAG=latest
-        TIMESTAMP=$(date +%Y%m%d%H%M%S)
-
         if [ "${TAG}" == "nightly" ]; then
           NPM_TAG=nightly
           TAG="0.0.0"
@@ -458,10 +457,6 @@ jobs:
         else
           BASE_VERSION="${TAG}"
         fi
-
-        # Create unique versions for web and Node.js builds
-        WEB_VERSION="${BASE_VERSION}-web.${TIMESTAMP}"
-        NODEJS_VERSION="${BASE_VERSION}-nodejs.${TIMESTAMP}"
         echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
         npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
 
@@ -473,7 +468,6 @@ jobs:
 
         # Build for Node.js target in parallel directory structure
         cd ..
-        sed -i "s/^version = \".*\"/version = \"${NODEJS_VERSION}\"/" Cargo.toml
         wasm-pack build --release --target nodejs --scope janssenproject --out-dir pkg-nodejs
         cd pkg-nodejs
         # Update description for Node.js version but keep same package name
