@@ -74,6 +74,12 @@
 			<groupId>io.jans</groupId>
 			<artifactId>agama-transpiler</artifactId>
 		</dependency>
+		<dependency>
+	            <groupId>io.jans</groupId>
+	            <artifactId>cedarling-java</artifactId>
+	            <scope>system</scope>
+	            <systemPath>${project.basedir}/libs/cedarling-java.jar</systemPath>
+        </dependency>
 
 		<!-- Weld -->
 		<dependency>

@@ -7,6 +7,9 @@
 package io.jans.configapi.security.service;
 
 import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.cedarling.binding.wrapper.jwt.JWTCreator;
+import io.jans.cedarling.binding.wrapper.utils.AppUtils;
+
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
@@ -31,9 +34,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+
 
 @ApplicationScoped
 @Named("cedarAuthorizationService")
@@ -43,7 +52,8 @@ public class CedarAuthorizationService extends AuthorizationService implements S
 
     private static final long serialVersionUID = 1L;
     private static final String AUTHENTICATION_SCHEME = "Bearer ";
-
+    public static final String BOOTSTRAP_JSON_PATH = "./src/test/resources/config/bootstrap.json";
+    
     @Inject
     transient Logger logger;
 
@@ -64,7 +74,17 @@ public class CedarAuthorizationService extends AuthorizationService implements S
 
     @Inject
     ExternalInterceptionService externalInterceptionService;
+    
+    @Injet 
+    private CedarlingAdapter adapter;
 
+    public void setUp() throws Exception {
+        adapter = new CedarlingAdapter();
+          // Load Cedarling bootstrap configuration from file
+        String bootstrapJson = this.readFile(BOOTSTRAP_JSON_PATH);
+        adapter.loadFromJson(bootstrapJson);
+        assertNotNull(adapter.getCedarling());
+    }
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path) throws WebApplicationException, Exception {
         logger.debug("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
@@ -283,5 +303,14 @@ public class CedarAuthorizationService extends AuthorizationService implements S
             return this.getCedarConfig().getApplicationName();
         }
         return appName;
+    }
+    
+    public static String readFile(String filePath) {
+        Path path = Paths.get(filePath).toAbsolutePath();
+        try {
+            return Files.readString(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
