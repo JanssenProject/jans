@@ -421,6 +421,18 @@
       "tag": "authorizations"
     },
     {
+      "permission":"https://jans.io/oauth/config/jans-link.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "jans-link"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/jans-link.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "jans-link"
+    },
+    {
       "permission": "https://jans.io/oauth/config/saml-config.readonly",
       "description": "",
       "defaultPermissionInToken": false,

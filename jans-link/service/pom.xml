@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>jans-link-server-parent</artifactId>
+        <groupId>io.jans</groupId>
+        <version>0.0.0-nightly</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>jans-link-service</artifactId>
+    <packaging>jar</packaging>
+    <name>jans link service</name>
+    <url>http://maven.apache.org</url>
+
+	<distributionManagement>
+ 		<repository>
+ 		<id>github</id>
+ 		<name>Github Packages</name>
+ 		<url>https://maven.pkg.github.com/JanssenProject/jans</url>
+ 		</repository>
+   	</distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-link-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
