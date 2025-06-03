@@ -231,7 +231,11 @@
 				<artifactId>agama-transpiler</artifactId>
 				<version>${jans.version}</version>
 			</dependency>
-
+			<dependency>
+	            <groupId>io.jans</groupId>
+	            <artifactId>cedarling-java</artifactId>
+	            <version>${jans.version}</version>
+        </dependency>
 
 			<!-- Security -->
 			<dependency>
