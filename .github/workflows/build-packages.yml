@@ -468,10 +468,11 @@ jobs:
         cd ..
         wasm-pack build --release --target nodejs --scope janssenproject --out-dir pkg-nodejs
         cd pkg-nodejs
-        # Update package name and description for Node.js version
-        sed -i 's/"name": "@janssenproject\/cedarling_wasm"/"name": "@janssenproject\/cedarling_wasm_nodejs"/' package.json
-        sed -i 's/"description": ".*"/"description": "Cedarling WASM bindings for Node.js"/' package.json
-        npm publish --provenance --access=public --tag "${NPM_TAG}" || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
+        # Update description for Node.js version but keep same package name
+        sed -i 's/"description": ".*"/"description": "Cedarling WASM bindings for both web and Node.js environments"/' package.json
+        # Add additional keywords to indicate Node.js support
+        sed -i 's/"keywords": \[/"keywords": ["nodejs", "web", /' package.json || echo "No keywords field to update"
+        npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs" || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
 
     - name: Archive and sign pkg contents
       id: archive_pkg
