@@ -226,7 +226,7 @@ jobs:
           # add to platforms comma seperated ,linux/s390x: All images with openjdk hav an issue with linux/s390x Problematic frame: J 6 c1 java.lang.String.hashCode()I java.base@11.0.9 (49 bytes) : Issue: openjdk11-jre-headles
           # add to platforms comma seperated ,linux/arm64:  : PyDev issue only
 
-          platforms: linux/amd64
+          platforms: linux/amd64, linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
       - name: Image digest
