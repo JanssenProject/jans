@@ -7,7 +7,12 @@ Content-Type: application/json
 Accept: application/json
 Authorization: Basic OTIyMzY1NmEtYjk1Ni00MWM3LTg1NmMtYWZkZGJmZjE4Y2Y5OmM5YWFhN2VkLTFlOGMtNDJkMi05OTY2LTgwYzY4ODI0MGE1ZQ==
 
-format=uid&id=test_user
+{
+  "sub_id": {
+    "format": "uid",
+    "id": "breakfast"
+  }
+}
 
 -------------------------------------------------------
 RESPONSE:
