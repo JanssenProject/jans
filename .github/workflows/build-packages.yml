@@ -445,27 +445,35 @@ jobs:
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       run: |
         rustup update stable && rustup default stable
-        cargo install wasm-pack
         TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
         NPM_TAG=latest
+        TIMESTAMP=$(date +%Y%m%d%H%M%S)
+
         if [ "${TAG}" == "nightly" ]; then
           NPM_TAG=nightly
           TAG="0.0.0"
           LAST_NIGHTLY_NPM_VERSION=$(npm dist-tag ls @janssenproject/cedarling_wasm | grep nightly | awk '{print $2}' | sort -V | tail -n 1) || echo "Failed to get last nightly version"
           NEW_NPM_VERSION=$(echo $LAST_NIGHTLY_NPM_VERSION | awk -F. '{print $1"."$2"."$3+1}')
-          sed -i "s/^version = \".*\"/version = \"${NEW_NPM_VERSION}\"/" Cargo.toml
-          echo "Replaced  $NEW_NPM_VERSION in Cargo.toml"
+          BASE_VERSION="${NEW_NPM_VERSION}"
+        else
+          BASE_VERSION="${TAG}"
         fi
+
+        # Create unique versions for web and Node.js builds
+        WEB_VERSION="${BASE_VERSION}-web.${TIMESTAMP}"
+        NODEJS_VERSION="${BASE_VERSION}-nodejs.${TIMESTAMP}"
         echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
         npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
 
-        # Build for web target
+        # Build for web target with unique version
+        sed -i "s/^version = \".*\"/version = \"${WEB_VERSION}\"/" Cargo.toml
         wasm-pack build --release --target web --scope janssenproject
         cd pkg
         npm publish --provenance --access=public --tag "${NPM_TAG}" || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
 
         # Build for Node.js target in parallel directory structure
         cd ..
+        sed -i "s/^version = \".*\"/version = \"${NODEJS_VERSION}\"/" Cargo.toml
         wasm-pack build --release --target nodejs --scope janssenproject --out-dir pkg-nodejs
         cd pkg-nodejs
         # Update description for Node.js version but keep same package name
