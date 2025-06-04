@@ -185,33 +185,6 @@ const CedarlingSignedAuthz = ({ data }) => {
                         </div>
                     </AccordionDetails>
                 </Accordion> : ''}
-            {!!authzResult ?
-                <Accordion defaultExpanded>
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1-content"
-                        id="panel1-header"
-                    >
-                        <Typography component="span">Cedarling Authz Result</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="authzResult"
-                            name="authzResult"
-                            label="Authz Result"
-                            rows={12}
-                            multiline
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                            value={authzResult}
-                        />
-                        <Button variant="text" color="success" onClick={() => setAuthzResult('')}>Reset</Button>
-                    </AccordionDetails>
-                </Accordion> : ''}
                 {!!authzResult ?
                         <Accordion defaultExpanded>
                             <AccordionSummary
