@@ -192,9 +192,18 @@ export default function CedarlingUnsignedAuthz({ data }) {
                             </AccordionSummary>
                             <AccordionDetails>
                                 {Utils.isJSON(authzResult) ?
+                                    <>
+                                    <Box sx={{ p: 2 }}>
+                                    <Typography component="span">Decision</Typography>
+                                    { JSON.parse(authzResult).decision ?
+                                        <Typography variant="h5" sx={{ color: 'green' }}>True</Typography> :
+                                        <Typography variant="h5" sx={{ color: 'red' }}>False</Typography>
+                                    }
+                                    </Box>
                                     <Box>
                                         <JsonEditor data={JSON.parse(authzResult)} rootName="result" viewOnly={true} />
-                                    </Box> :
+                                    </Box>
+                                    </> :
                                     <TextField
                                         autoFocus
                                         required

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import './options.css'
 import './alerts.css';
 import { JsonEditor } from 'json-edit-react'
+import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -211,6 +212,49 @@ const CedarlingSignedAuthz = ({ data }) => {
                         <Button variant="text" color="success" onClick={() => setAuthzResult('')}>Reset</Button>
                     </AccordionDetails>
                 </Accordion> : ''}
+                {!!authzResult ?
+                        <Accordion defaultExpanded>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1-content"
+                                id="panel1-header"
+                            >
+                                <Typography component="span">Cedarling Authz Result</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                {Utils.isJSON(authzResult) ?
+                                    <>
+                                    <Box sx={{ p: 2 }}>
+                                    <Typography component="span">Decision</Typography>
+                                    { JSON.parse(authzResult).decision ?
+                                        <Typography variant="h5" sx={{ color: 'green' }}>True</Typography> :
+                                        <Typography variant="h5" sx={{ color: 'red' }}>False</Typography>
+                                    }
+                                    </Box>
+                                    <Box>
+                                        <JsonEditor data={JSON.parse(authzResult)} rootName="result" viewOnly={true} />
+                                    </Box>
+                                    </> :
+                                    <TextField
+                                        autoFocus
+                                        required
+                                        margin="dense"
+                                        id="authzResult"
+                                        name="authzResult"
+                                        label="Authz Result"
+                                        rows={12}
+                                        multiline
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        value={authzResult}
+                                    />}
+                                <div>
+                                    <Button variant="text" color="success" onClick={() => setAuthzResult('')}>Reset</Button>
+                                </div>
+                            </AccordionDetails>
+                        </Accordion> :
+                        ''}
             {!!authzLogs ?
                 <Accordion>
                     <AccordionSummary
