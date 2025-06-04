@@ -235,7 +235,8 @@ def get_server_certificate(
     server_hostname = server_hostname or host
 
     with socket.create_connection((host, port)) as conn:
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        # create client-side socket context
+        context = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
         # we don't need to validate cert at the moment
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
