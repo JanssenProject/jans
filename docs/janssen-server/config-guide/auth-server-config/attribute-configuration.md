@@ -46,12 +46,12 @@ the command below:
 
 
 First thing, let's get the information for `Attribute`:
-```shell
+```shell title="Command"
 jans cli --info Attribute
 ```
 In return, we get a list of operations IDs as below:
 
-```text
+```text title="Sample Output" linenums="1"
 Operation ID: get-attributes
   Description: Gets a list of Gluu attributes.
   Parameters:
@@ -119,7 +119,7 @@ jans cli --operation-id get-attributes --endpoint-args limit:1
 ```
 
 It will return only one user claim details randomly:
-```json title="Output"
+```json title="Sample Output" linenums="1"
 {
   "start": 0,
   "totalEntriesCount": 72,
@@ -163,11 +163,12 @@ It will return only one user claim details randomly:
 To get user claim with `pattern & status`:
 
 ```bash title="Command"
-jans cli --operation-id get-attributes --endpoint-args limit:3,pattern:profile,status:ACTIVE
+jans cli --operation-id get-attributes \
+--endpoint-args limit:3,pattern:profile,status:ACTIVE
 ```
 In return, we get a list of claims that are matched with the given `pattern` and `status`:
 
-```json title="Output"
+```json title="Sample Output" linenums="1"
 {
   "start": 0,
   "totalEntriesCount": 2,
@@ -339,7 +340,7 @@ jans cli --schema-sample JansAttribute
 
 Using the schema and the example above, we have added the below data to the file /tmp/custom-claim.json.
 
-```json title="Input"
+```json title="Input" linenums="1"  
 {
   "dn": "string",
   "inum": "string",
@@ -390,11 +391,11 @@ Using the schema and the example above, we have added the below data to the file
 
 To add a new `Custom user claim` configuration, run the following command:
 
-```commandline
+```bash title="Command"
 jans cli --operation-id post-attributes --data /tmp/custom-claim.json
 ```
 
-```json title="Sample Output"
+```json title="Sample Output" linenums="1"
 {
   "dn": "inum=bc50c4c4-64c8-45b3-9f38-e8527ddbf833,ou=attributes,o=jans",
   "selected": false,
