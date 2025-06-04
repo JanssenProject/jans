@@ -159,6 +159,22 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
         }
         return isValidAttribute;
     }
+    
+    public List<JansAttribute> getRequiredAttributes() {
+        List<JansAttribute> jansAttributes = null;
+        try {
+            Filter requiredFilter = Filter.createEqualityFilter("required", true);
+            log.info("requiredFilter:{}", requiredFilter);
+            jansAttributes = persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
+                    requiredFilter);
+            log.info("Required JansAttribute jansAttributes:{}", jansAttributes);
+
+        } catch (Exception ex) {
+            log.error("Failed to load required attribute, ex:{}", ex);
+        }
+        return jansAttributes;
+    }
+    
 
     private String getPersistenceType() {
         return configurationService.getPersistenceType();

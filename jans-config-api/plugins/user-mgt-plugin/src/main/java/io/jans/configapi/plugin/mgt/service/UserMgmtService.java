@@ -40,6 +40,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
@@ -504,10 +505,50 @@ public class UserMgmtService {
         }
         return customAttributes;
     }
+    public List<JansAttribute> getJansAttributes(List<CustomObjectAttribute> customAttributes) {
+        List<JansAttribute> jansAttributeList = null;
+        if(customAttributes==null || customAttributes.isEmpty()) {
+        return jansAttributeList;
+        }
+        jansAttributeList = new ArrayList<>();
+
+        for (Iterator<CustomObjectAttribute> it = customAttributes.iterator(); it.hasNext();) {
+            String attributeName = it.next().getName();
+            logger.debug("Verify status of attributeName: {}", attributeName);
+            List<JansAttribute> attList = findAttributeByName(attributeName);
+            logger.debug("attributeName:{} data is attList: {}", attributeName, attList);
+            if(attList!=null && !attList.isEmpty()) {
+                jansAttributeList.addAll(attList);
+            }
+        }
+        return jansAttributeList;
+    }
+    
+    public List<JansAttribute> findMissingAttribute(List<JansAttribute> customAttributes, List<JansAttribute> requiredAttributes){
+        if (customAttributes == null || customAttributes.isEmpty() || requiredAttributes == null || requiredAttributes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return customAttributes.stream().filter(e -> !requiredAttributes.contains(e)).collect(Collectors.toList());
+    }
 
     public List<JansAttribute> findAttributeByName(String name) {
         return persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                 Filter.createEqualityFilter(AttributeConstants.JANS_ATTR_NAME, name));
+    }
+    
+    public List<JansAttribute> getRequiredAttributes() {
+        List<JansAttribute> jansAttributes = null;
+        try {
+            Filter requiredFilter = Filter.createEqualityFilter("required", true);
+            logger.info("requiredFilter:{}", requiredFilter);
+            jansAttributes = persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
+                    requiredFilter);
+            logger.info("Required JansAttribute jansAttributes:{}", jansAttributes);
+
+        } catch (Exception ex) {
+            logger.error("Failed to load required attribute, ex:{}", ex);
+        }
+        return jansAttributes;
     }
 
     private String getDnForAttribute(String inum) {
