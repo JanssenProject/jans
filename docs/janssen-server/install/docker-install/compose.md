@@ -61,7 +61,7 @@ Download the compose file of your chosen persistence from mysql or postgres.
     wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
     ```
 
-=== "PgSQL"
+=== "PostgreSQL"
 
     ```bash 
     wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml 
@@ -101,7 +101,7 @@ persistence.
     ./up.sh mysql 
     ```
 
-=== "PgSQL"
+=== "PostgreSQL"
 
     ```bash
     ./up.sh pgsql
@@ -117,7 +117,7 @@ To view the containers running
     docker compose -f jans-mysql-compose.yml ps
     ```
 
-=== "PgSQL"
+=== "PostgreSQL"
 
     ```bash
     docker compose -f jans-postgres-compose.yml ps
