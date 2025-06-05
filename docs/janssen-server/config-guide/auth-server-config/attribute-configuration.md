@@ -7,12 +7,16 @@ tags:
 ---
 
 !!! Note
-    Attributes and Custom User Claims refer to the same user data fields in Janssen Server.
+    `Attribute` and `User Claims` refer to the same user data fields in 
+    the Janssen Server.
 
 
 # Attribute
 
-The Janssen Server provides multiple configuration tools to perform these tasks.
+User claims are individual pieces of user data, like `uid` or `email`, that are required 
+by applications in order to identify a user and grant access to protect resources. 
+
+Janssen server's default configuration comes with certain user claims already configured. In addition to these, custom user claims can be added as required. The Janssen Server provides multiple configuration tools to perform these tasks.
 
 
 === "Use Command-line"
@@ -38,10 +42,7 @@ The Janssen Server provides multiple configuration tools to perform these tasks.
 ##  Using Command Line
 
 
-
-In the Janssen Server, you can deploy and customize the custom user claims using the 
-command line. To get the details of Janssen command line operations relevant to custom 
-user claims configuration, you can check the operations under `Attribute` task using 
+To get the details of Janssen command line operations relevant to user claims configuration, you can check the operations under `Attribute` task using 
 the command below:
 
 
@@ -89,8 +90,7 @@ To get sample schema type jans cli --schema <schma>, for example jans cli --sche
 ### Get Custom User Claims
 
 
-As we know, user claims are individual pieces of user data, like `uid` or `email`, that are required 
-by applications in order to identify a user and grant access to protect resources. The user claims 
+The user claims 
 that the available in your Janssen Server can be found by using this operation-ID. If we look at 
 the description below:
 
@@ -245,83 +245,25 @@ In return, we get a list of claims that are matched with the given `pattern` and
 
 ```
 
-### Creating a User Claims 
+### Creating a Custom User Claims 
 
-User claims provide the flexibility to include application-specific or user-specific 
-information in the authentication process. User claims serve to enrich the information 
-available to the relying party (RP), which is the application or service that relies 
-on the identity provided by the OIDC provider. While standard claims provide basic user 
+While standard claims provide basic user 
 information, custom user claims allow for the inclusion of domain-specific attributes or 
 application-specific data that might be required for user personalization, authorization, 
-or other business logic. User claims should be unique and non-null or empty.
+or other business logic. A user claim should be unique and non-null or empty. Follow the steps below to add a custom user claim to the Janssen Server.
 
-#### Make entry of the claim in the `MySQL` or `PostgreSQL` schema
+#### Add entry into persistence
 
-Add a column to table `jansPerson` in `PostgreSQL` or `MySQL`. 
+In order to support the new custom claim, add a column to table `jansPerson` in the persistence backend. 
 
-Command will be:
+Command will be similart to the one below:
 ```
 ALTER TABLE  jansPerson  ADD COLUMN <claimName> <dataType>
 ```
 
-**Connect to `PostgreSQL` or `MySQL`:**
+#### Configure user claim in the Janssen Server
 
-=== "PgSQL"
-
-    ```bash
-    sudo -u postgres psql
-    ```
-=== "MySQL"
-
-    ```bash
-    mysql -u root -p
-    ```
-
-
-**Check for `jansdb`:**
-
-=== "PgSQL"
-
-    ```sql
-    \l
-    ```
-=== "MySQL"
-
-    ```sql
-    SHOW DATABASES;
-
-    ```
-
-
-Connect to `jansdb`:
-=== "PgSQL"
-
-    ```sql
-    \c jansdb
-
-    ```
-=== "MySQL"
-
-    ```
-    USE jansdb;
-    ```
-List tables: Look for `jansPerson` or similar.
-    ```sql
-    \dt
-    ```
-
-
-Add the column
-
-  ```sql
-  ALTER TABLE jansPerson ADD COLUMN newClaim VARCHAR(100);
-  ```
-
-#### Add User Claim in the Janssen Server
-
-To create SSO for certain applications, you may need to add custom user claims to your 
-Janssen Server. After the column is added to the `jansPerson` table, custom attributes 
-can be added by using `post-attributes` operation-ID. As shown in the [output](#using-command-line) 
+Add and configure the custom claim using `post-attributes` operation-ID. As shown in the [output](#using-command-line) 
 for the `--info` command, the `post-attributes` operation requires data to be sent 
 according to the `JansAttribute` schema. 
 
@@ -338,7 +280,7 @@ To fetch the example, use the command below.
 jans cli --schema-sample JansAttribute
 ```
 
-Using the schema and the example above, we have added the below data to the file /tmp/custom-claim.json.
+Using the schema and the example above, add the below data to the file /tmp/custom-claim.json.
 
 ```json title="Input" linenums="1"  
 {
@@ -389,7 +331,7 @@ Using the schema and the example above, we have added the below data to the file
 
 ```
 
-To add a new `Custom user claim` configuration, run the following command:
+Run the following command to add the custom claim:
 
 ```bash title="Command"
 jans cli --operation-id post-attributes --data /tmp/custom-claim.json
@@ -444,28 +386,27 @@ jans cli --operation-id post-attributes --data /tmp/custom-claim.json
 
 ```
 
-## Updating a Custom User Claim
+## Updating a User Claim
 
 To update the configuration, follow the steps below.
 
-1. Get the [existing custom user claim](#get-attribute-by-inum) and store it into a file for editing. 
-The following command will retrieve the existing custom user claim in the schema file.
+1. Get the [user claim](#get-attribute-by-inum) and store it into a file for editing. 
+The following command will retrieve the existing user claim in the required schema file.
   ```bash title="command"
    jans cli -no-color --operation-id get-attributes-by-inum \
    --url-suffix inum:bc50c4c4-64c8-45b3-9f38-e8527ddbf833  \
    > /tmp/update-claim.json
   ```
-2. Edit and update the desired configuration values in the file while keeping other properties 
-and values unchanged. Updates must adhere to the `JansAttribute` schema as mentioned [here](#using-command-line).
-3. We have changed in `status` only the `active` to `inactive`. Use the updated file to send the update to the Janssen Server using the command below.
+2. Update values as desired. Updates must adhere to the `JansAttribute` schema as mentioned [here](#using-command-line).
+3. Use the updated file to send the update to the Janssen Server using the command below.
 ```bash title="Command"
 jans cli --operation-id put-attributes --data /tmp/update-claim.json
 ```
 Upon successful execution of the update, the Janssen Server responds with updated configuration.
 
-## Get Custom User Claim by `inum`
+## Get User Claim by `inum`
 
-With the `get-attributes-by-inum` operation-id, we can get any specific custom user claim matched with `Inum`. If we know the `inum`, we can use the below command:
+With the `get-attributes-by-inum` operation-id, we can get any specific user claim matched with `Inum`. If we know the `inum`, we can use the below command:
 
 ```bash title="Command"
 jans cli --operation-id get-attributes-by-inum \
@@ -473,7 +414,7 @@ jans cli --operation-id get-attributes-by-inum \
 ```
 ## Delete Custom Claim
 
-Delete the custom user claim using its `inum`. The command line is:
+Delete a user claim using its `inum`. 
 
 ```bash title="Command"
 jans cli --operation-id delete-attributes-by-inum --url-suffix inum:EC3A 
@@ -484,7 +425,7 @@ jans cli --operation-id delete-attributes-by-inum --url-suffix inum:EC3A
 Using `operation-id patch-attributes-by-inum`, we can modify a custom user claim partially for its properties.
 
 
-To use this operation, specify the `inum` of the Custom Claim that needs to be updated using the `--url-suffix` and the property and the new value using the [JSON Patch](https://jsonpatch.com/#the-patch). Refer [here](../../config-guide/config-tools/jans-cli/README.md#patch-request-schema) to know more about schema.
+To use this operation, specify the `inum` of the claim that needs to be updated using the `--url-suffix` and the property and the new value using the [JSON Patch](https://jsonpatch.com/#the-patch). Refer [here](../../config-guide/config-tools/jans-cli/README.md#patch-request-schema) to know more about schema.
 
 In this example, we will add the `jansHideOnDiscovery` and its value is `true`.
 
@@ -552,5 +493,5 @@ Enter key, then it will show the edit screen.
 ## Using Configuration REST API
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing
-and configuring the Custom User Claim. Endpoint details are published in the [Swagger
+and configuring the user claim. Endpoint details are published in the [Swagger
 document](../../reference/openapi.md).
