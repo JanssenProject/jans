@@ -60,10 +60,10 @@
 //! ## Security Features
 //!
 //! - [x] Only Accept tokens defined from the policy store
-//! - [ ] JWK rotation (WIP): The service should automatically fetch new keys if the old
 //!   ones expire.
-//! - [ ] Statuslist Check (WIP): The `status` claim of a JWT should be validated if
-//!   present
+//! - [x] Statuslist Check: The `status` claim of a JWT should be validated if present.
+//!   This is done through the [`status_list`] crate for the implementation.
+//! - [ ] JWK rotation (WIP): The service should automatically fetch new keys if the old
 
 mod decode;
 mod error;
@@ -223,12 +223,10 @@ impl JwtService {
             token_kind: TokenKind::AuthzRequestInput(&token_name),
             algorithm: decoded_jwt.header.alg,
         };
-        let validator =
-            self.validators
-                .get(&validator_key)
-                .ok_or(ValidateJwtError::MissingValidator(
-                    validator_key.owned(),
-                ))?;
+        let validator = self
+            .validators
+            .get(&validator_key)
+            .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
 
         // validate JWT
         // NOTE: the JWT will be validated depending on the validator's settings that

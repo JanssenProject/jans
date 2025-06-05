@@ -4,6 +4,12 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 //! The JWT status list validation is implemented as described in this [IETF spec](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-02.html#name-referenced-token).
+//!
+//! Status lists are stored on the [`StatusList`] struct and initialized using the 
+//! [`StatusList::parse`] function.
+//!
+//! To retrieve a status of a JWT, use the [`StatusList::get_status`] function and pass
+//! in the JWT's status index (`idx`). 
 
 mod cache;
 mod error;
