@@ -542,6 +542,7 @@ theme:
   - navigation.tabs
   - navigation.tabs.sticky
   - navigation.indexes
+  - content.tabs.link
   font:
     code: Roboto Mono
     text: Roboto

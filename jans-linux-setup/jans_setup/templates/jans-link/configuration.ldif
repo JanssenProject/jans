@@ -1,0 +1,8 @@
+dn: ou=jans-link,ou=configuration,o=jans
+jansConfDyn::%(jans_link_config_base64)s
+jansConfStatic::%(jans_link_static_conf_base64)s
+jansRevision: 1
+objectClass: top
+objectClass: jansAppConf
+ou: jans-link
+
