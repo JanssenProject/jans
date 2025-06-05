@@ -40,7 +40,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
@@ -335,6 +334,13 @@ public class UserMgmtService {
         List<String> mandatoryAttributes = authUtil.getUserMandatoryAttributes();
         logger.debug("mandatoryAttributess :{}, excludeAttributes:{} ", mandatoryAttributes, excludeAttributes);
 
+        List<String> requiredAttributes =  getJansAttributeName(this.getRequiredAttributes());
+        logger.debug("requiredAttributes:{} ", requiredAttributes);
+  
+        mandatoryAttributes.addAll(requiredAttributes);
+        logger.debug("Final mandatoryAttributes after adding requiredAttributes is {} ", mandatoryAttributes);
+        
+        
         StringBuilder missingAttributes = new StringBuilder();
 
         if (mandatoryAttributes == null || mandatoryAttributes.isEmpty()) {
@@ -505,33 +511,8 @@ public class UserMgmtService {
         }
         return customAttributes;
     }
-    public List<JansAttribute> getJansAttributes(List<CustomObjectAttribute> customAttributes) {
-        List<JansAttribute> jansAttributeList = null;
-        if(customAttributes==null || customAttributes.isEmpty()) {
-        return jansAttributeList;
-        }
-        jansAttributeList = new ArrayList<>();
-
-        for (Iterator<CustomObjectAttribute> it = customAttributes.iterator(); it.hasNext();) {
-            String attributeName = it.next().getName();
-            logger.debug("Verify status of attributeName: {}", attributeName);
-            List<JansAttribute> attList = findAttributeByName(attributeName);
-            logger.debug("attributeName:{} data is attList: {}", attributeName, attList);
-            if(attList!=null && !attList.isEmpty()) {
-                jansAttributeList.addAll(attList);
-            }
-        }
-        return jansAttributeList;
-    }
-    
-    public List<JansAttribute> findMissingAttribute(List<JansAttribute> customAttributes, List<JansAttribute> requiredAttributes){
-        if (customAttributes == null || customAttributes.isEmpty() || requiredAttributes == null || requiredAttributes.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return customAttributes.stream().filter(e -> !requiredAttributes.contains(e)).collect(Collectors.toList());
-    }
-
-    public List<JansAttribute> findAttributeByName(String name) {
+        
+   public List<JansAttribute> findAttributeByName(String name) {
         return persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                 Filter.createEqualityFilter(AttributeConstants.JANS_ATTR_NAME, name));
     }
@@ -550,6 +531,23 @@ public class UserMgmtService {
         }
         return jansAttributes;
     }
+    
+    
+    public List<String> getJansAttributeName(List<JansAttribute> jansAttributeList) {
+        List<String> jansAttributeNameList = null;
+
+        if (jansAttributeList == null || jansAttributeList.isEmpty()) {
+            return jansAttributeNameList;
+        }
+        
+        jansAttributeNameList = new ArrayList<>();
+
+        for (JansAttribute attribute : jansAttributeList) {
+            jansAttributeNameList.add(attribute.getName());
+        }
+        return jansAttributeNameList;
+    }
+
 
     private String getDnForAttribute(String inum) {
         String attributesDn = staticConfiguration.getBaseDn().getAttributes();

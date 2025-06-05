@@ -56,7 +56,7 @@ import org.slf4j.Logger;
 public class AttributesResource extends ConfigBaseResource {
 
     private static final String JANS_ATTRIBUTE = "jans attribute";
-	private static final String NAME_CONFLICT = "NAME_CONFLICT";
+	    private static final String NAME_CONFLICT = "NAME_CONFLICT";
     private static final String NAME_CONFLICT_MSG = "Attribute with same name `%s` already exists!";
 
     @Inject

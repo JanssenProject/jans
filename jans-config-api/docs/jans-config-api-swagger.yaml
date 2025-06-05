@@ -9328,6 +9328,8 @@ components:
           type: boolean
         jansHideOnDiscovery:
           type: boolean
+        required:
+          type: boolean
         custom:
           type: boolean
         attributeValidation:
@@ -9338,17 +9340,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanAccess:
+        adminCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -10232,6 +10234,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10241,8 +10245,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11823,10 +11825,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -11995,8 +11997,6 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -12006,6 +12006,8 @@ components:
           - REFRESH_TOKEN
           - AUTHORIZATION_CODE
           - TX_TOKEN
+        accessToken:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
