@@ -3708,6 +3708,8 @@
           
         
           
+            
+          
         
           
         
@@ -3931,75 +3933,69 @@
     
   
   
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_9_9_11" type="checkbox" id="__nav_1_9_9_11" checked>
-      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
         
-          
-            
-          
-        
-          
-        
-          
-        
       
       
-        
-        
-        <div class="md-nav__link md-nav__link--index md-nav__link--active">
-          <a href="./">User Claims</a>
-          
-            <label for="__nav_1_9_9_11">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
-      
-      <nav class="md-nav" aria-label="User Claims" data-md-level="4">
-        <label class="md-nav__title" for="__nav_1_9_9_11">
-          <span class="md-nav__icon md-icon"></span>
+        <label class="md-nav__link md-nav__link--active" for="__toc">
           User Claims
+          <span class="md-nav__icon md-icon"></span>
         </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="built-in-claims/" class="md-nav__link">
-        Built-in Claims
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        User Claims
       </a>
-    </li>
-  
+      
+        
 
-            
-          
-            
-              
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
-    <li class="md-nav__item">
-      <a href="custom-claims/" class="md-nav__link">
-        Adding Custom Claims
-      </a>
-    </li>
+    
   
-
-            
-          
-        </ul>
-      </nav>
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#types-of-user-claims" class="md-nav__link">
+    Types of User Claims
+  </a>
+  
+    <nav class="md-nav" aria-label="Types of User Claims">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standard-claims" class="md-nav__link">
+    Standard Claims
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-claims" class="md-nav__link">
+    Custom Claims
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -9691,6 +9687,16 @@
         <span class="md-tag">claims</span>
       
     
+      
+      
+        <span class="md-tag">attributes</span>
+      
+    
+      
+      
+        <span class="md-tag">custom claims</span>
+      
+    
   </nav>
 
 
@@ -9704,25 +9710,199 @@
 <h1 id="user-claims">User Claims<a class="headerlink" href="#user-claims" title="Permanent link">#</a></h1>
 <p>Claim is a piece of information asserted about an Entity. User claims refer to pieces of information about the authenticated user, such as their name, email address, date of birth, and more. These claims provide the RP with specific attributes or characteristics associated with the user. The claims are issued by the IDP after successful authentication and are included in the ID Token (which is a JSON Web Token (JWT) that contains user-related information) and are also available through the
 <code>/userinfo</code> endpoint. </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>Attribute</code> and <code>User Claims</code> refer to the same user data fields in 
+the Janssen Server.</p>
+</div>
 <h2 id="types-of-user-claims">Types of User Claims<a class="headerlink" href="#types-of-user-claims" title="Permanent link">#</a></h2>
 <h3 id="standard-claims">Standard Claims<a class="headerlink" href="#standard-claims" title="Permanent link">#</a></h3>
-<p>These are predefined and standardized claims that provide basic user information. Some examples of standard claims include:</p>
-<ul>
-<li><code>sub</code>: Subject identifier, a unique ID for the user.</li>
-<li><code>name</code>: User's full name.</li>
-<li><code>email</code>: User's email address.</li>
-<li><code>birthdate</code>: User's date of birth.</li>
-<li><code>preferred_username</code>: User's preferred username or nickname.</li>
-</ul>
+<p>The Janssen Server includes all standard claims defined in <a href="https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims">OpenID Connect specifications</a>. Built-in claims defines a standard set of pre-defined claims available to use after installation for sharing of user attributes between identity providers and relying parties. </p>
+<p>The built-in user claims in Janssen are listed in below table</p>
+<table>
+<thead>
+<tr>
+<th>Display Name</th>
+<th>Claim Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Username</td>
+<td>user_name</td>
+<td>Username of user</td>
+</tr>
+<tr>
+<td>Password</td>
+<td>user_password</td>
+<td>Password of user</td>
+</tr>
+<tr>
+<td>First Name</td>
+<td>given_name</td>
+<td>First name of user</td>
+</tr>
+<tr>
+<td>Middle Name</td>
+<td>middle_name</td>
+<td>Middle name of user</td>
+</tr>
+<tr>
+<td>Last Name</td>
+<td>family_name</td>
+<td>Last name of user</td>
+</tr>
+<tr>
+<td>Display Name</td>
+<td>name</td>
+<td>Display name of user</td>
+</tr>
+<tr>
+<td>Email</td>
+<td>email</td>
+<td>Email address of user</td>
+</tr>
+<tr>
+<td>Nickname</td>
+<td>nickname</td>
+<td>Nickname used for user</td>
+</tr>
+<tr>
+<td>CIBA Device Registration Token</td>
+<td>jans_backchannel_device_registration_tkn</td>
+<td>CIBA Device Registration Token</td>
+</tr>
+<tr>
+<td>CIBA User code</td>
+<td>jans_backchannel_usr_code</td>
+<td>CIBA User code</td>
+</tr>
+<tr>
+<td>Locale</td>
+<td>locale</td>
+<td>End-User's locale, represented as a BCP47 (RFC5646) language tag</td>
+</tr>
+<tr>
+<td>Website URL</td>
+<td>website</td>
+<td>URL of the End-User's Web page or blog</td>
+</tr>
+<tr>
+<td>IMAP Data</td>
+<td>imap_data</td>
+<td>IMAP data</td>
+</tr>
+<tr>
+<td>jansAdminUIRole</td>
+<td>jansAdminUIRole</td>
+<td>Gluu Flex Admin UI role</td>
+</tr>
+<tr>
+<td>Enrollment code</td>
+<td>jans_enrollment_code</td>
+<td>Enrollment code</td>
+</tr>
+<tr>
+<td>User Permission</td>
+<td>user_permission</td>
+<td>User permission</td>
+</tr>
+<tr>
+<td>Preferred Language</td>
+<td>preferred_language</td>
+<td>Preferred language</td>
+</tr>
+<tr>
+<td>Profile URL</td>
+<td>profile</td>
+<td>Profile URL</td>
+</tr>
+<tr>
+<td>Secret Question</td>
+<td>secret_question</td>
+<td>Secret question used to verify user identity</td>
+</tr>
+<tr>
+<td>Email Verified</td>
+<td>email_verified</td>
+<td>Is user's email verified?</td>
+</tr>
+<tr>
+<td>Birthdate</td>
+<td>birthdate</td>
+<td>Baithdate of user</td>
+</tr>
+<tr>
+<td>Time zone info</td>
+<td>zoneinfo</td>
+<td>The End-User's time zone</td>
+</tr>
+<tr>
+<td>Phone Number verified</td>
+<td>phone_number_verified</td>
+<td>Is user's phone number verified?</td>
+</tr>
+<tr>
+<td>Preferred Username</td>
+<td>preferred_username</td>
+<td>A domain issued and managed identifier for the person</td>
+</tr>
+<tr>
+<td>TransientId</td>
+<td>transient_id</td>
+<td>...</td>
+</tr>
+<tr>
+<td>PersistentId</td>
+<td>persistent_id</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Country</td>
+<td>country</td>
+<td>User's country</td>
+</tr>
+<tr>
+<td>Secret Answer</td>
+<td>secret_answer</td>
+<td>Secret answer used to verify user identity</td>
+</tr>
+<tr>
+<td>OpenID Connect JSON formatted address</td>
+<td>address</td>
+<td>End-User's preferred postal address. The value of the address member is a JSON structure containing some or all of the members defined in OpenID Connect 1.0 Core Standard Section 5.1.1</td>
+</tr>
+<tr>
+<td>User certificate</td>
+<td>user_certificate</td>
+<td>User certificate</td>
+</tr>
+<tr>
+<td>Organization</td>
+<td>o</td>
+<td>Organization</td>
+</tr>
+<tr>
+<td>Picture URL</td>
+<td>picture</td>
+<td>User's picture url</td>
+</tr>
+</tbody>
+</table>
 <h3 id="custom-claims">Custom Claims<a class="headerlink" href="#custom-claims" title="Permanent link">#</a></h3>
-<p>In addition to standard claims, custom claims are also allowed to be defined by the IDP. These claims provide flexibility to include application-specific user attributes that are not covered by the standard claims. Custom claims can provide additional context or information needed by the RP.</p>
+<p>In addition to standard claims, custom claims are also allowed to be defined by the 
+Janssen Server. These claims provide flexibility to include application-specific
+ user attributes that are not covered by the standard claims. 
+ Custom claims can provide additional context or information needed by the RP.</p>
+<p>Refer to <a href="../../../config-guide/auth-server-config/attribute-configuration/">claims configuration document</a> for more details on custom claims configuration.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-06-05T19:38:02+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-06-05</span>
       
         <br>
         Created:
@@ -9741,6 +9921,8 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -9767,13 +9949,13 @@
       
       
         
-        <a href="built-in-claims/" class="md-footer__link md-footer__link--next" aria-label="Next: Built-in Claims" rel="next">
+        <a href="../logout/" class="md-footer__link md-footer__link--next" aria-label="Next: Logout" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Built-in Claims
+              Logout
             </div>
           </div>
           <div class="md-footer__button md-icon">
@@ -9819,7 +10001,7 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes"], "search": "../../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link"], "search": "../../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 

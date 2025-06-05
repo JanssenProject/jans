@@ -1346,6 +1346,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#create-and-start-containers" class="md-nav__link">
+    Create and Start Containers
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configure-janssen-server" class="md-nav__link">
     Configure Janssen Server
   </a>
@@ -3791,6 +3798,8 @@
           
         
           
+            
+          
         
           
         
@@ -4012,75 +4021,10 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_9_9_11" type="checkbox" id="__nav_1_9_9_11" >
-      
-      
-      
-        
-          
-            
-          
-        
-          
-        
-          
-        
-      
-      
-        
-        
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../auth-server/openid-features/user-claims/">User Claims</a>
-          
-            <label for="__nav_1_9_9_11">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
-      
-      <nav class="md-nav" aria-label="User Claims" data-md-level="4">
-        <label class="md-nav__title" for="__nav_1_9_9_11">
-          <span class="md-nav__icon md-icon"></span>
-          User Claims
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../../auth-server/openid-features/user-claims/built-in-claims/" class="md-nav__link">
-        Built-in Claims
+      <a href="../../../auth-server/openid-features/user-claims/" class="md-nav__link">
+        User Claims
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../auth-server/openid-features/user-claims/custom-claims/" class="md-nav__link">
-        Adding Custom Claims
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -9732,6 +9676,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#create-and-start-containers" class="md-nav__link">
+    Create and Start Containers
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configure-janssen-server" class="md-nav__link">
     Configure Janssen Server
   </a>
@@ -9930,24 +9881,65 @@ This image is for testing and development purposes only. Use Janssen <a href="ht
 </tbody>
 </table>
 <h2 id="how-to-run">How to run<a class="headerlink" href="#how-to-run" title="Permanent link">#</a></h2>
-<p>Download the compose file of your chosen persistence from mysql or postgres</p>
+<p>Download the compose file of your chosen persistence from mysql or postgres.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">MySQL</label><label for="__tabbed_1_2">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml<span class="w"> </span>
-wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml<span class="w"> </span>
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml<span class="w"> </span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <p>Download the script files </p>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/up.sh
-wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/down.sh
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/up.sh<span class="w"> </span>/
+wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/down.sh<span class="w"> </span>/
 wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/clean.sh
 </code></pre></div>
 <p>Give execute permission to the scripts
 <code>chmod u+x up.sh down.sh clean.sh</code></p>
-<p>This docker compose file runs two containers, the janssen monolith container and mysql container.
-To start the containers.</p>
-<div class="highlight"><pre><span></span><code>./up.sh<span class="w"> </span><span class="c1">#You can pass mysql|postgres as an argument to the script. If you don&#39;t pass any, it will default to mysql.</span>
+<h2 id="create-and-start-containers">Create and Start Containers<a class="headerlink" href="#create-and-start-containers" title="Permanent link">#</a></h2>
+<p><code>up.sh</code> script invokes the appropriate compose file based on parameter passed. 
+You can pass <code>mysql</code> or <code>postgres</code> as an argument to the script. If you don't pass any, it will default to mysql.</p>
+<p>It creates two containers, a janssen monolith container and a container for 
+persistence.</p>
+<div class="admonition troubleshooting tip">
+<p class="admonition-title">Troubleshooting</p>
+<p>Sometimes the command below runs into an error regarding TLS handshake 
+timeout while trying to connect
+to docker registry. Try restarting docker services. Root-cause of this error
+is not known.</p>
+<div class="highlight"><pre><span></span><code>service<span class="w"> </span>docker<span class="w"> </span>restart
 </code></pre></div>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">MySQL</label><label for="__tabbed_2_2">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>./up.sh<span class="w"> </span>mysql<span class="w"> </span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>./up.sh<span class="w"> </span>pgsql
+</code></pre></div>
+</div>
+</div>
+</div>
 <p>To view the containers running</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">MySQL</label><label for="__tabbed_3_2">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>jans-mysql-compose.yml<span class="w"> </span>ps
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>jans-postgres-compose.yml<span class="w"> </span>ps
+</code></pre></div>
+</div>
+</div>
+</div>
 <p>To stop the containers.</p>
 <div class="highlight"><pre><span></span><code>./down.sh<span class="w"> </span><span class="c1">#You can pass mysql|postgres as an argument to the script. If you don&#39;t pass any, it will default to mysql.</span>
 </code></pre></div>
@@ -9981,7 +9973,7 @@ To start the containers.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-25T11:50:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-06-05T07:27:57+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-06-05</span>
       
         <br>
         Created:
@@ -10000,6 +9992,8 @@ To start the containers.</p>
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -10078,7 +10072,7 @@ To start the containers.</p>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes"], "search": "../../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link"], "search": "../../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 
