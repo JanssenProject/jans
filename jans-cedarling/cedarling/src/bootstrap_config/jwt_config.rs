@@ -6,9 +6,10 @@
 
 use jsonwebtoken::Algorithm;
 use std::collections::HashSet;
+use serde::{Deserialize, Serialize};
 
 /// The set of Bootstrap properties related to JWT validation.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct JwtConfig {
     /// A Json Web Key Store (JWKS) with public keys.
     ///
@@ -193,5 +194,41 @@ impl JwtConfig {
             Algorithm::EdDSA,
         ]);
         self
+    }
+}
+
+/// Raw JWT config
+pub struct JwtConfigRaw {
+    /// JWKS
+    pub jwks: Option<String>,
+    /// JWT signature validation
+    pub jwt_sig_validation: bool,
+    /// JWT status validation
+    pub jwt_status_validation: bool,
+    /// Supported signature algorithms
+    pub signature_algorithms_supported: Vec<String>,
+}
+
+impl From<JwtConfigRaw> for JwtConfig {
+    fn from(raw: JwtConfigRaw) -> Self {
+        Self {
+            jwks: raw.jwks,
+            jwt_sig_validation: raw.jwt_sig_validation,
+            jwt_status_validation: raw.jwt_status_validation,
+            signature_algorithms_supported: raw.signature_algorithms_supported
+                .into_iter()
+                .filter_map(|alg| match alg.as_str() {
+                    "HS256" => Some(Algorithm::HS256),
+                    "HS384" => Some(Algorithm::HS384),
+                    "HS512" => Some(Algorithm::HS512),
+                    "RS256" => Some(Algorithm::RS256),
+                    "RS384" => Some(Algorithm::RS384),
+                    "RS512" => Some(Algorithm::RS512),
+                    "ES256" => Some(Algorithm::ES256),
+                    "ES384" => Some(Algorithm::ES384),
+                    _ => None,
+                })
+                .collect(),
+        }
     }
 }

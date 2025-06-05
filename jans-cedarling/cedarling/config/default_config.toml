@@ -1,0 +1,29 @@
+# Application settings
+application_name = "cedarling"
+
+# Logging configuration
+[log]
+type = "stdout"  # off, memory, stdout
+level = "INFO"   # TRACE, DEBUG, INFO, WARN, ERROR
+
+# Policy store configuration
+[policy_store]
+source = "file_yaml"  # json, yaml, lock_server, file_json, file_yaml
+path = "policy-store.yaml"
+
+# JWT configuration
+[jwt]
+jwt_sig_validation = true
+jwt_status_validation = false
+signature_algorithms_supported = ["HS256", "RS256"]
+
+# Authorization configuration
+[authorization]
+use_user_principal = true
+use_workload_principal = true
+decision_log_default_jwt_id = "jti"
+
+# Entity builder configuration
+[entity_builder]
+user = true
+workload = true 

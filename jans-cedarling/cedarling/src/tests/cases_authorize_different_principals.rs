@@ -133,7 +133,7 @@ async fn success_test_for_principal_workload() {
             use_user_principal: false,
             use_workload_principal: true,
             principal_bool_operator: OPERATOR_WORKLOAD.to_owned(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         crate::EntityBuilderConfig::default().with_workload(),
@@ -173,7 +173,7 @@ async fn success_test_for_principal_user() {
             use_user_principal: true,
             use_workload_principal: false,
             principal_bool_operator: OPERATOR_USER.to_owned(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         crate::EntityBuilderConfig::default().with_user(),
@@ -217,7 +217,7 @@ async fn success_test_for_principal_person_role() {
             use_user_principal: true,
             use_workload_principal: false,
             principal_bool_operator: OPERATOR_USER.to_owned(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         crate::EntityBuilderConfig::default().with_user(),
@@ -261,7 +261,7 @@ async fn success_test_for_principal_workload_role() {
             use_user_principal: true,
             use_workload_principal: true,
             principal_bool_operator: OPERATOR_AND.to_owned(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         crate::EntityBuilderConfig::default()
@@ -313,7 +313,7 @@ async fn success_test_for_principal_workload_true_or_user_false() {
             use_user_principal: true,
             use_workload_principal: true,
             principal_bool_operator: OPERATOR_OR.to_owned(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         crate::EntityBuilderConfig::default()
@@ -365,7 +365,7 @@ async fn success_test_for_principal_workload_false_or_user_true() {
             use_user_principal: true,
             use_workload_principal: true,
             principal_bool_operator: OPERATOR_OR.to_owned(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         crate::EntityBuilderConfig::default()
@@ -417,7 +417,7 @@ async fn success_test_for_principal_workload_false_or_user_false() {
             use_user_principal: true,
             use_workload_principal: true,
             principal_bool_operator: OPERATOR_OR.to_owned(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         crate::EntityBuilderConfig::default()
@@ -468,7 +468,7 @@ async fn test_where_principal_workload_cant_be_applied() {
             use_user_principal: true,
             use_workload_principal: true,
             principal_bool_operator: Default::default(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         crate::EntityBuilderConfig::default()
@@ -497,7 +497,7 @@ async fn test_where_principal_user_cant_be_applied() {
             use_user_principal: true,
             use_workload_principal: false,
             principal_bool_operator: JsonRule::default(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         crate::EntityBuilderConfig::default().with_user(),

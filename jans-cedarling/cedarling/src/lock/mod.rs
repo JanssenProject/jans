@@ -42,14 +42,14 @@ use futures::channel::mpsc;
 use lock_config::*;
 use log_entry::LockLogEntry;
 use log_worker::*;
-use register_client::*;
+use register_client::{register_client, ClientRegistrationError};
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
 use spawn_task::*;
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
-use thiserror::Error;
 use tokio_util::sync::CancellationToken;
+use url;
 
 /// The base duration to wait for if an http request fails for workers.
 pub const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
@@ -204,24 +204,34 @@ impl LogWriter for LockService {
     }
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum InitLockServiceError {
-    #[error("the provided CEDARLING_LOCK_SSA_JWT is either malformed or expired")]
-    InvalidSsaJwt,
-    #[error(
-        "failed to GET lock server config from the `.well-known/lock-server-configuration` endpoint: {0}"
-    )]
-    GetLockConfig(#[from] http_utils::HttpRequestError),
-    #[error("failed to dynamically register client for the Lock server's auth: {0}")]
-    ClientRegistration(#[from] ClientRegistrationError),
-    #[error("failed to initialize the Lock logger's HttpClient: {0}")]
+    #[error("HTTP request error: {0}")]
+    HttpRequestError(#[from] HttpRequestError),
+    #[error("Client registration error: {0}")]
+    ClientRegistrationError(#[from] ClientRegistrationError),
+    #[error("HTTP client initialization error: {0}")]
     InitHttpClient(#[from] reqwest::Error),
+    #[error("URL parse error: {0}")]
+    UrlParseError(#[from] url::ParseError),
+    #[error("HTTP request error: {0}")]
+    HttpUtilsError(#[from] http_utils::HttpRequestError),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum HttpRequestError {
+    #[error("Invalid URL: {0}")]
+    InvalidUrl(String),
+    #[error("HTTP request failed: {0}")]
+    RequestFailed(String),
+    #[error("Failed to initialize HTTP client: {0}")]
+    InitializeHttpClient(#[from] reqwest::Error),
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::LogLevel;
+    use crate::{lock::register_client::DCR_SCOPE, LogLevel};
     use crate::log::interface::Indexed;
     use mockito::{Mock, Server, ServerGuard};
     use serde::Serialize;
