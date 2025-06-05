@@ -228,9 +228,7 @@ nav:
       - CIBA: janssen-server/auth-server/openid-features/ciba.md
       - JARM: janssen-server/auth-server/openid-features/jarm.md
       - Native SSO: janssen-server/auth-server/openid-features/native-sso.md
-      - User Claims:
-        - janssen-server/auth-server/openid-features/user-claims/README.md
-        - Built-in Claims: janssen-server/auth-server/openid-features/user-claims/built-in-claims.md
+      - User Claims: janssen-server/auth-server/openid-features/user-claims/README.md
       - Logout:
         - janssen-server/auth-server/openid-features/logout/README.md
         - Front Channel: janssen-server/auth-server/openid-features/logout/front-channel.md
