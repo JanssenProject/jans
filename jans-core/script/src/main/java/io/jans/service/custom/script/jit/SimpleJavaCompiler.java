@@ -1,6 +1,8 @@
 package io.jans.service.custom.script.jit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.tools.*;
 import java.io.*;
@@ -10,16 +12,15 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
  * @author Yuriy Z
  */
 public class SimpleJavaCompiler {
+
+    private static final Logger log = LoggerFactory.getLogger(SimpleJavaCompiler.class);
 
     /**
      * A javac instance
@@ -29,6 +30,7 @@ public class SimpleJavaCompiler {
      * The Standard file manager for the compiler
      */
     private final StandardJavaFileManager standardJavaFileManager;
+    private final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
 
     /**
      * We keep an initialized copy for each thread.
@@ -45,7 +47,7 @@ public class SimpleJavaCompiler {
      */
     private SimpleJavaCompiler() {
         compiler = ToolProvider.getSystemJavaCompiler();
-        standardJavaFileManager = compiler.getStandardFileManager(null, null, null);
+        standardJavaFileManager = compiler.getStandardFileManager(diagnostics, null, null);
     }
 
     /**
@@ -130,9 +132,14 @@ public class SimpleJavaCompiler {
         final List<JavaFileObject> compilationUnits = Collections.singletonList(new SourceFile(toUri("Generated"), source));
         final FileManager fileManager = new FileManager(standardJavaFileManager);
         final StringWriter output = new StringWriter();
-        final JavaCompiler.CompilationTask task = compiler.getTask(output, fileManager, null, Arrays.asList("-g", "-proc:none", "-classpath", getClasspath()), null, compilationUnits);
+        final JavaCompiler.CompilationTask task = compiler.getTask(output, fileManager, diagnostics, Arrays.asList("-g", "-proc:none", "-classpath", getClasspath()), null, compilationUnits);
 
         if (!task.call()) {
+            log.error("Compilation diagnostics:");
+            for (Diagnostic<? extends JavaFileObject> diag : diagnostics.getDiagnostics()) {
+               log.error(diag.getMessage(Locale.getDefault()));
+            }
+
             throw new IllegalArgumentException("Compilation failed:\n" + output + "\n Source code: \n" + source);
         }
 
