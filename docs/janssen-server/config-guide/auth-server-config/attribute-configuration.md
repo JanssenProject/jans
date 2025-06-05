@@ -256,12 +256,23 @@ or other business logic. A user claim should be unique and non-null or empty. Fo
 
 In order to support the new custom claim, add a column to table `jansPerson` in the persistence backend. 
 
-Command will be similart to the one below:
-```
+Command will be similar to the one below:
+
+```sql title="MySQL"
 ALTER TABLE  jansPerson  ADD COLUMN <claimName> <dataType>
 ```
 
-#### Configure user claim in the Janssen Server
+[Restart](https://docs.jans.io/vreplace-janssen-version/janssen-server/vm-ops/jans-command/#restart) the Janssen services below in order to make this change effective:
+
+```
+jans-auth.service
+```
+
+```
+jans-config-api.service
+```
+
+#### Configure custom user claim in the Janssen Server
 
 Add and configure the custom claim using `post-attributes` operation-ID. As shown in the [output](#using-command-line) 
 for the `--info` command, the `post-attributes` operation requires data to be sent 
@@ -281,6 +292,28 @@ jans cli --schema-sample JansAttribute
 ```
 
 Using the schema and the example above, add the below data to the file /tmp/custom-claim.json.
+
+??? note "About datatypes"
+
+    `JansAttribute` schema requires to specify a datatype. This datatype should map
+    correctly to the datatype of the persistence column added above. 
+
+    Use the mapping table to below to correctly specify the datatype in the 
+    Janssen Server configuration. 
+
+    |Janssen dataType|SQL dataType|
+    |---|---|
+    |Text|VARCHAR() string value to be kept, SIZE is an integer for max string size|
+    |Numeric|INT|
+    |Boolean|SMALLINT|
+    |Binary|BINARY|
+    |Certificate|TEXT|
+    |Date|DATETIME(3)|
+    |Numeric|INT|
+    |Multivalued|JSON|
+
+
+Example:
 
 ```json title="Input" linenums="1"  
 {
@@ -472,23 +505,31 @@ for the user claim with the matching claim name.
 
 ### Add-Update Attribute/User Claims screen
 
+* [Add a new column](#add-entry-into-persistence) in the persistence
 * Use the `Add Attributes` button to create a new user claim.
 * After adding the valid data using the `Save` button, add a new user claim.
 * Update the user claim as well.
 * To update the user claim, bring the control to the specific `User Claim` row and press the 
 Enter key, then it will show the edit screen. 
 
+!!!warning 
+    If the attribute is `Multivalued` enabled in TUI, datatype should be JSON.
+
 ![image](../../../assets/tui-edit-attribute.png)
 
+Close and reopen the TUI. The new custom user claim can now be added to any user 
+from [user management](../../usermgmt/usermgmt-cli-tui.md).
+
+![](../../../assets/image-tui-user-claim.png)
 
 ### Delete Screen
-
 
 * To delete the user claim, bring the control to the specific `Claim` row and press the 
 `Delete` key. Then it will show the Delete confirmation box.
 
  ![image](../../../assets/tui-delete-attribute.png) 
 
+Close and reopen TUI before proceeding with further configuration.
 
 ## Using Configuration REST API
 
