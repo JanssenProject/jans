@@ -3702,6 +3702,8 @@
           
         
           
+            
+          
         
           
         
@@ -3923,75 +3925,10 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_9_9_11" type="checkbox" id="__nav_1_9_9_11" >
-      
-      
-      
-        
-          
-            
-          
-        
-          
-        
-          
-        
-      
-      
-        
-        
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../janssen-server/auth-server/openid-features/user-claims/">User Claims</a>
-          
-            <label for="__nav_1_9_9_11">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
-      
-      <nav class="md-nav" aria-label="User Claims" data-md-level="4">
-        <label class="md-nav__title" for="__nav_1_9_9_11">
-          <span class="md-nav__icon md-icon"></span>
-          User Claims
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../../janssen-server/auth-server/openid-features/user-claims/built-in-claims/" class="md-nav__link">
-        Built-in Claims
+      <a href="../../../janssen-server/auth-server/openid-features/user-claims/" class="md-nav__link">
+        User Claims
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/auth-server/openid-features/user-claims/custom-claims/" class="md-nav__link">
-        Adding Custom Claims
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -9772,7 +9709,7 @@
 </ul>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
 <ol>
-<li><a href="https://maven.jans.io/maven/io/jans/casa/plugins/bioid-plugin/0.0.0-nightly/bioid-plugin-0.0.0-nightly-jar-with-dependencies.jar">Download</a> the plugin jar.</li>
+<li><a href="https://maven.jans.io/maven/io/jans/casa/plugins/bioid-plugin/replace-janssen-version/bioid-plugin-replace-janssen-version-jar-with-dependencies.jar">Download</a> the plugin jar.</li>
 <li>Log into Casa as an administrator, navigate to <code>Administration Console &gt; Casa plugins</code> and add the plugin jar</li>
 <li>Restart the casa service: <code>sudo systemctl restart jans-casa</code></li>
 <li>Using the TUI, navigate to <code>Auth Server</code> &gt; <code>Clients</code>, open the details for <code>Client for Casa</code>, and add the following redirect URI: <code>https://&lt;hostname&gt;/jans-casa/pl/bioid-plugin/user/interlude.zul</code>. Replace <code>&lt;hostname&gt;</code> with the hostname of your server, and save the client.</li>
@@ -9831,6 +9768,8 @@ zip -r casa-bioid.gama ./*
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -9909,7 +9848,7 @@ zip -r casa-bioid.gama ./*
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes"], "search": "../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 

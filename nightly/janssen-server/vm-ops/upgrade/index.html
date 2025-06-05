@@ -3709,6 +3709,8 @@
           
         
           
+            
+          
         
           
         
@@ -3930,75 +3932,10 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_9_9_11" type="checkbox" id="__nav_1_9_9_11" >
-      
-      
-      
-        
-          
-            
-          
-        
-          
-        
-          
-        
-      
-      
-        
-        
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../../auth-server/openid-features/user-claims/">User Claims</a>
-          
-            <label for="__nav_1_9_9_11">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
-      
-      <nav class="md-nav" aria-label="User Claims" data-md-level="4">
-        <label class="md-nav__title" for="__nav_1_9_9_11">
-          <span class="md-nav__icon md-icon"></span>
-          User Claims
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../auth-server/openid-features/user-claims/built-in-claims/" class="md-nav__link">
-        Built-in Claims
+      <a href="../../auth-server/openid-features/user-claims/" class="md-nav__link">
+        User Claims
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../auth-server/openid-features/user-claims/custom-claims/" class="md-nav__link">
-        Adding Custom Claims
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -9668,26 +9605,26 @@ Uninstalling and re-installing with newer binaries is the only option that requi
 Though this is made easy using <a href="../../terraform/">Terraform</a>. 
 We recommend using Kubernetes installations over VM, to avail smooth upgrades and better HA support.</p>
 </div>
-<p>Let's assume we are upgrading Jans VM installation from <code>current version</code> to <code>nightly</code></p>
+<p>Let's assume we are upgrading Jans VM installation from <code>current version</code> to <code>vreplace-janssen-version</code></p>
 <ol>
 <li>
 <p>Keep the old VM installation running.</p>
 </li>
 <li>
-<p><a href="../../install/vm-install/">Install</a> on a separate VM the target new Jans installation, i.e. <code>nightly</code>.</p>
+<p><a href="../../install/vm-install/">Install</a> on a separate VM the target new Jans installation, i.e. <code>vreplace-janssen-version</code>.</p>
 <p>You can install with a test client. For example:</p>
 <p><code>sudo python3 /opt/jans/jans-setup/setup.py -test-client-id 6382c9da-f25d-435f-ac63-6acde36f4859 -test-client-pw secret1172023</code></p>
 <p>This <code>client-id</code> and <code>client-pw</code> will then be used to import Terraform configurations</p>
 </li>
 <li>
-<p>Use our Terraform <a href="../../terraform/">docs</a> on the new installation, i.e. <code>nightly</code> to:</p>
+<p>Use our Terraform <a href="../../terraform/">docs</a> on the new installation, i.e. <code>vreplace-janssen-version</code> to:</p>
 <ul>
 <li>import all the global configurations from the new installation using <code>terraform import</code></li>
 <li>define all the custom IDP configurations and apply them using <code>terraform apply</code></li>
 </ul>
 </li>
 <li>
-<p>At this point there should be two versions up, <code>old version</code> and <code>nightly</code>.</p>
+<p>At this point there should be two versions up, <code>old version</code> and <code>vreplace-janssen-version</code>.</p>
 </li>
 <li>
 <p>Traffic should be switched gradually from the old setup to the new setup.
@@ -9719,6 +9656,8 @@ We recommend using Kubernetes installations over VM, to avail smooth upgrades an
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -9797,7 +9736,7 @@ We recommend using Kubernetes installations over VM, to avail smooth upgrades an
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes"], "search": "../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 

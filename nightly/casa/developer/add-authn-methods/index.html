@@ -3702,6 +3702,8 @@
           
         
           
+            
+          
         
           
         
@@ -3923,75 +3925,10 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_9_9_11" type="checkbox" id="__nav_1_9_9_11" >
-      
-      
-      
-        
-          
-            
-          
-        
-          
-        
-          
-        
-      
-      
-        
-        
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../janssen-server/auth-server/openid-features/user-claims/">User Claims</a>
-          
-            <label for="__nav_1_9_9_11">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
-      
-      <nav class="md-nav" aria-label="User Claims" data-md-level="4">
-        <label class="md-nav__title" for="__nav_1_9_9_11">
-          <span class="md-nav__icon md-icon"></span>
-          User Claims
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../../janssen-server/auth-server/openid-features/user-claims/built-in-claims/" class="md-nav__link">
-        Built-in Claims
+      <a href="../../../janssen-server/auth-server/openid-features/user-claims/" class="md-nav__link">
+        User Claims
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/auth-server/openid-features/user-claims/custom-claims/" class="md-nav__link">
-        Adding Custom Claims
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -9945,7 +9882,7 @@
 <p>Authentication in Casa is implemented through an Agama project called <em>casa</em> - in TUI you can see it listed in the Agama management screen. As a first step, the user is requested to enter the username and password combination, then depending on how the application is configured, personal user settings,  and access policies defined, a second factor may be requested.</p>
 <p>The <em>casa</em> project allows to onboard new types of second factors (authentication mechanisms) and also provides a user experience that supports backtracking: if a user is asked to present a specific credential and that credential is not currently available or is not working, he can choose an alternative method for authentication where a different type of credential will be prompted. Users can backtrack several times.</p>
 <h3 id="flow-requisites">Flow requisites<a class="headerlink" href="#flow-requisites" title="Permanent link">#</a></h3>
-<p>To code the flow corresponding to the authentication method to add, you can use the Agama project found  <a href="https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred/agama#readme">here</a> as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:</p>
+<p>To code the flow corresponding to the authentication method to add, you can use the Agama project found  <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred/agama#readme">here</a> as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:</p>
 <p>The flow will be passed an Agama <em>map</em> containing information of the person attempting the authentication. This input parameter will contain at least three keys: <code>uid</code>, <code>inum</code>, and <code>name</code>. <code>uid</code> and <code>inum</code> map directly to attributes stored in the user's profile and are never empty, <code>name</code> is a displayable name which may come from attribute <code>givenName</code> or <code>displayName</code>. All values are <em>strings</em>.</p>
 <p>The flow should terminate with a <code>true</code> outcome if the user successfully passes the challenge, presents the expected credential, etc. In any other case, <code>false</code> must be returned and an optional error message can be included for the caller flow (<code>io.jans.casa.authn.main</code>) to show it in the screen. Any additional data attached in the <code>Finish</code> instruction will not be processed. </p>
 <p>If for some reason your flow crashes, the corresponding exception will be printed to the logs, the caller will continue running, and the browser taken to the <a href="#the-selector-page">selector page</a> where an error message will be displayed.</p>
@@ -10024,7 +9961,7 @@ JSONObject p = ips.getAgamaFlowConfigProperties(&quot;flow qname&quot;);
 </ul>
 <p>Depending on the answers, you may like to start instead with plugin development first. This is not always the case though, however, getting your hands on the plugin might help unclutter the path.</p>
 <h2 id="enrollment-plugin">Enrollment plugin<a class="headerlink" href="#enrollment-plugin" title="Permanent link">#</a></h2>
-<p>Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" <a href="https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred#readme">plugin</a> as a template to start the work. Ensure you have:</p>
+<p>Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred#readme">plugin</a> as a template to start the work. Ensure you have:</p>
 <ul>
 <li>
 <p>A Jans Server installation that includes Jans Casa - prefer a VM environment over the CN edition for development purposes. Also, you'll need a way to connect to your server via SSH</p>
@@ -10094,6 +10031,8 @@ JSONObject p = ips.getAgamaFlowConfigProperties(&quot;flow qname&quot;);
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -10172,7 +10111,7 @@ JSONObject p = ips.getAgamaFlowConfigProperties(&quot;flow qname&quot;);
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes"], "search": "../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 

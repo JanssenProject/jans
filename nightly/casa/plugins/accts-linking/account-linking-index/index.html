@@ -3702,6 +3702,8 @@
           
         
           
+            
+          
         
           
         
@@ -3923,75 +3925,10 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_9_9_11" type="checkbox" id="__nav_1_9_9_11" >
-      
-      
-      
-        
-          
-            
-          
-        
-          
-        
-          
-        
-      
-      
-        
-        
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../../janssen-server/auth-server/openid-features/user-claims/">User Claims</a>
-          
-            <label for="__nav_1_9_9_11">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
-      
-      <nav class="md-nav" aria-label="User Claims" data-md-level="4">
-        <label class="md-nav__title" for="__nav_1_9_9_11">
-          <span class="md-nav__icon md-icon"></span>
-          User Claims
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../../../janssen-server/auth-server/openid-features/user-claims/built-in-claims/" class="md-nav__link">
-        Built-in Claims
+      <a href="../../../../janssen-server/auth-server/openid-features/user-claims/" class="md-nav__link">
+        User Claims
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../janssen-server/auth-server/openid-features/user-claims/custom-claims/" class="md-nav__link">
-        Adding Custom Claims
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -9764,10 +9701,10 @@
 <p>In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and <code>git</code> installed. </p>
 <ol>
 <li>
-<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/0.0.0-nightly/acct-linking-0.0.0-nightly-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
+<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/replace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
 </li>
 <li>
-<p>Download the utility jar file <code>https://maven.jans.io/maven/io/jans/agama-inbound/0.0.0-nightly/agama-inbound-0.0.0-nightly.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
+<p>Download the utility jar file <code>https://maven.jans.io/maven/io/jans/agama-inbound/replace-janssen-version/agama-inbound-replace-janssen-version.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
 </li>
 <li>
 <p>In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: <code>https://&lt;your-jans-host&gt;/jans-casa/pl/acct-linking/user/interlude.zul</code>. Replace the name of your Jans server accordingly </p>
@@ -9784,7 +9721,7 @@ zip -r inbound.zip *
 </code></pre></div>
 </li>
 <li>
-<p>Download the Casa accounts linking Agama project <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/0.0.0-nightly/acct-linking-agama-0.0.0-nightly-project.zip</code></p>
+<p>Download the Casa accounts linking Agama project <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/replace-janssen-version/acct-linking-agama-replace-janssen-version-project.zip</code></p>
 </li>
 <li>
 <p>Transfer the two zip files to a location in the server, deploy both archives using TUI (Agama menu)</p>
@@ -9849,6 +9786,8 @@ zip -r inbound.zip *
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -9927,7 +9866,7 @@ zip -r inbound.zip *
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes"], "search": "../../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link"], "search": "../../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 

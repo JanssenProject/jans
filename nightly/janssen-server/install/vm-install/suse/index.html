@@ -3791,6 +3791,8 @@
           
         
           
+            
+          
         
           
         
@@ -4012,75 +4014,10 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_9_9_11" type="checkbox" id="__nav_1_9_9_11" >
-      
-      
-      
-        
-          
-            
-          
-        
-          
-        
-          
-        
-      
-      
-        
-        
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../auth-server/openid-features/user-claims/">User Claims</a>
-          
-            <label for="__nav_1_9_9_11">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
-      
-      <nav class="md-nav" aria-label="User Claims" data-md-level="4">
-        <label class="md-nav__title" for="__nav_1_9_9_11">
-          <span class="md-nav__icon md-icon"></span>
-          User Claims
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../../auth-server/openid-features/user-claims/built-in-claims/" class="md-nav__link">
-        Built-in Claims
+      <a href="../../../auth-server/openid-features/user-claims/" class="md-nav__link">
+        User Claims
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../auth-server/openid-features/user-claims/custom-claims/" class="md-nav__link">
-        Adding Custom Claims
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -9841,17 +9778,17 @@ needed for OpenID and FIDO.</li>
 <li>Download the release package from the GitHub Janssen Project
   <a href="https://github.com/JanssenProject/jans/releases">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.suse15.x86_64.rpm
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse15.x86_64.rpm
 </code></pre></div>
 <ul>
 <li>Verify integrity of the downloaded package using published <code>sha256sum</code>.</li>
 </ul>
 <p>Download <code>sha256sum</code> file for the package</p>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.suse15.x86_64.rpm.sha256sum
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse15.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Check the hash if it is matching. You may need to change your working directory
 to where both the rpm and sha256sum file are located.</p>
-<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-0.0.0-nightly.suse15.x86_64.rpm.sha256sum
+<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-replace-janssen-version-stable.suse15.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
 <div class="highlight"><pre><span></span><code>&lt;package-name&gt;: OK
@@ -9859,7 +9796,7 @@ to where both the rpm and sha256sum file are located.</p>
 <ul>
 <li>Install the package</li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo zypper install ~/jans-0.0.0-nightly.suse15.x86_64.rpm
+<div class="highlight"><pre><span></span><code>sudo zypper install ~/jans-replace-janssen-version-stable.suse15.x86_64.rpm
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
@@ -9983,6 +9920,8 @@ Removing /etc/apache2/sites-available/https_jans.conf
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -10061,7 +10000,7 @@ Removing /etc/apache2/sites-available/https_jans.conf
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes"], "search": "../../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link"], "search": "../../../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 
