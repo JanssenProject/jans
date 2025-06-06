@@ -56,3 +56,5 @@ customScripts: []
 customCommand: []
 # -- Add tolerations for the pods
 tolerations: []
+# -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
+nodeSelector: {}

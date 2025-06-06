@@ -1,0 +1,11 @@
+<?xml version="1.0"  encoding="ISO-8859-1"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_10_0.dtd">
+
+<Configure class="org.eclipse.jetty.ee9.webapp.WebAppContext">
+    <Set name="contextPath">/jans-link</Set>
+    <Set name="war">
+        <Property name="jetty.webapps" default="." />/jans-link.war
+    </Set>
+    <Set name="extractWAR">true</Set>
+    <Set name="extraClasspath">%(extra_classpath)s</Set>
+</Configure>

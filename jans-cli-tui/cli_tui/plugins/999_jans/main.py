@@ -3,6 +3,8 @@ from prompt_toolkit.application import Application
 from prompt_toolkit.layout.containers import HSplit
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Frame
+from prompt_toolkit.formatted_text import HTML, merge_formatted_text
+
 from utils.multi_lang import _
 from cli import config_cli
 
@@ -89,9 +91,17 @@ class Plugin:
                 self.app.show_message(_("Error application versions"), str(e), tobefocused=self.app.center_container)
                 return
 
+            version_msgs = []
+            for app in app_status:
+                version_msgs.append(HTML(f"<b>{app['title']}</b>\n"))
+                version_msgs.append(HTML(f"<b>Version:</b> {app['version']}\n"))
+                version_msgs.append(HTML(f"<b>Build Date:</b> {app['buildDate']}\n"))
+                version_msgs.append(HTML(f"<b>Build Version:</b> {app['build']}\n"))
+                version_msgs.append(HTML("\n"))
+
             self.app.show_message(
                 _("Jannsen Application Versions"),
-                '\n'.join([f"{app['title']} {app['version']}" for app in app_status]),
+                merge_formatted_text(version_msgs),
                 tobefocused=self.app.center_container
                 )
 

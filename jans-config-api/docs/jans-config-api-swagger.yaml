@@ -9336,7 +9336,7 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
+        whitePagesCanView:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -9344,11 +9344,11 @@ components:
           type: boolean
         userCanAccess:
           type: boolean
+        adminCanView:
+          type: boolean
         userCanView:
           type: boolean
         userCanEdit:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -10232,8 +10232,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10243,6 +10241,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10460,8 +10460,24 @@ components:
     PersistenceConfiguration:
       type: object
       properties:
-        persistenceType:
+        databaseName:
           type: string
+          description: Connection object's current catalog name.
+        schemaName:
+          type: string
+          description: Schema name.
+        productName:
+          type: string
+          description: Name of database product.
+        productVersion:
+          type: string
+          description: Version number of this database product.
+        driverName:
+          type: string
+          description: Name of this JDBC driver.
+        driverVersion:
+          type: string
+          description: JDBC driver version number.
     JsonPatch:
       type: object
     CacheConfiguration:
@@ -11369,14 +11385,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11807,10 +11823,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -11979,6 +11995,8 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
+        accessToken:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -11988,8 +12006,6 @@ components:
           - REFRESH_TOKEN
           - AUTHORIZATION_CODE
           - TX_TOKEN
-        accessToken:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

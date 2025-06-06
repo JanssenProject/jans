@@ -7,8 +7,8 @@
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.model.custom.script.type.persistence import PersistenceType
 from io.jans.util import StringHelper
-from io.jans.persist.operation.auth import PasswordEncryptionHelper
-from io.jans.persist.operation.auth import PasswordEncryptionMethod
+from io.jans.orm.operation.auth import PasswordEncryptionHelper
+from io.jans.orm.operation.auth import PasswordEncryptionMethod
 
 import java
 

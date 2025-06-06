@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.bouncycastle.crypto.params.Argon2Parameters;
+
 /**
  * Base interface for persistence script
  *

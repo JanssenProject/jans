@@ -32,6 +32,7 @@ markdown_extensions:
 - pymdownx.emoji:
     emoji_generator: !!python/name:materialx.emoji.to_svg
     emoji_index: !!python/name:materialx.emoji.twemoji
+- pymdownx.details
 nav:
 - 'Janssen Server':
   - Introduction: janssen-server/README.md
@@ -151,7 +152,7 @@ nav:
       - SCIM Group Management: janssen-server/config-guide/scim-config/scim-group-config.md
     - Custom Scripts: janssen-server/config-guide/custom-scripts-config.md
     - SMTP Configuration: janssen-server/config-guide/smtp-configuration.md
-    - HASH Passwords: janssen-server/config-guide/hash-passowrd.md
+    - HASH Passwords: janssen-server/config-guide/hash-password.md
     - Link Configuration: janssen-server/config-guide/link-configuration.md
     - Custom Assets Configuration: janssen-server/config-guide/custom-assets-configuration.md
   - Database Guide:
@@ -227,10 +228,7 @@ nav:
       - CIBA: janssen-server/auth-server/openid-features/ciba.md
       - JARM: janssen-server/auth-server/openid-features/jarm.md
       - Native SSO: janssen-server/auth-server/openid-features/native-sso.md
-      - User Claims:
-        - janssen-server/auth-server/openid-features/user-claims/README.md
-        - Built-in Claims: janssen-server/auth-server/openid-features/user-claims/built-in-claims.md
-        - Adding Custom Claims: janssen-server/auth-server/openid-features/user-claims/custom-claims.md
+      - User Claims: janssen-server/auth-server/openid-features/user-claims/README.md
       - Logout:
         - janssen-server/auth-server/openid-features/logout/README.md
         - Front Channel: janssen-server/auth-server/openid-features/logout/front-channel.md
@@ -332,7 +330,6 @@ nav:
       - UMA Claims Gathering (Web Flow): script-catalog/uma_claims_gathering/uma-claims-web.md
       - UMA RPT Policies: script-catalog/uma_rpt_policy/uma-rpt.md
       - Update Token: script-catalog/update_token/update-token.md
-      - Link interception: script-catalog/link_interception/link-interception.md
       - SSA Modify Response: script-catalog/ssa/ssa-modify-response.md
   - Reference Guide:
     - janssen-server/reference/README.md
@@ -384,10 +381,6 @@ nav:
     - Security Considerations: janssen-server/scim/security.md
     - Bulk Adding Users: janssen-server/scim/bulk-users.md
     - Adding Custom Attributes: janssen-server/scim/custom-attributes.md
-  - Link Guide:
-    - janssen-server/link/README.md
-    - Jans LDAP Link: janssen-server/link/jans-link.md
-    - Jans Keycloak Link: janssen-server/link/jans-keycloak-link.md
   - Lock Guide:
       - janssen-server/lock/README.md
       - Lock Server: janssen-server/lock/lock-server.md
@@ -407,7 +400,6 @@ nav:
       - janssen-server/usermgmt/README.md
       - Using SCIM: janssen-server/usermgmt/usermgmt-scim.md
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
-      - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - 'Cedarling':
   - Overview: 'cedarling/README.md'
   - Quick Start:
@@ -550,6 +542,7 @@ theme:
   - navigation.tabs
   - navigation.tabs.sticky
   - navigation.indexes
+  - content.tabs.link
   font:
     code: Roboto Mono
     text: Roboto

@@ -37,6 +37,7 @@ Kubernetes: `>=v1.22.0-0`
 | interval | int | `60` | Interval of running the cleanup process (in minutes) |
 | lifecycle | object | `{}` |  |
 | limit | int | `1000` | Max. numbers of entries to cleanup |
+| nodeSelector | object | `{}` | Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) |
 | resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
 | resources.limits.cpu | string | `"300m"` | CPU limit. |
 | resources.limits.memory | string | `"300Mi"` | Memory limit. |

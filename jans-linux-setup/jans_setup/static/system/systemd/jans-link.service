@@ -1,0 +1,13 @@
+[Unit]
+Description=Janssen Link Server
+After=%(order_jans_link_service)s
+
+[Service]
+Type=forking
+ExecStart=%(jans_scripts_dir)s/jans-link start
+ExecStop=%(jans_scripts_dir)s/jans-link stop
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target
