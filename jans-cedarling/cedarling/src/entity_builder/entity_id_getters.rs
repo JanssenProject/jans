@@ -10,10 +10,7 @@ use smol_str::{SmolStr, ToSmolStr};
 use std::fmt::Display;
 
 pub enum EntityIdSrc<'a> {
-    Token {
-        token: &'a Token<'a>,
-        claim: &'a str,
-    },
+    Token { token: &'a Token, claim: &'a str },
     String(&'a str),
 }
 

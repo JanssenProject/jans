@@ -129,7 +129,7 @@ mod test {
                 ("not_in_schema".to_string(), json!("not_in_schema")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss.into()),
         );
         let parents = HashSet::from(["Jans::Role::\"some_role\""
             .parse()
@@ -175,7 +175,7 @@ mod test {
                 ("not_in_schema".to_string(), json!("not_in_schema")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss.into()),
         );
         let parents = HashSet::from(["Jans::Role::\"some_role\""
             .parse()
