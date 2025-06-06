@@ -173,28 +173,19 @@ public class SimpleJavaCompiler {
 
         String cp = rawClasspath;
 
-        // 1) Remove leading and trailing single quotes, if present
-        if (cp.startsWith("'") && cp.endsWith("'") && cp.length() > 1) {
-            cp = cp.substring(1, cp.length() - 1);
-        }
-
-        // 2) Remove any newline or carriage‐return characters
-        //    (we only want one long line with proper path separators)
+        // Remove any newline or carriage‐return characters
+        // (we only want one long line with proper path separators)
         cp = cp.replaceAll("[\\r\\n]", "");
 
-        // 3) Remove “jar:file:///” prefixes
-        //    We target exactly “jar:file:///” (three slashes) to get "/opt/…"
-        cp = cp.replaceAll("jar:file:///", "");
+        // Remove “!/jar:file://”
+        cp = cp.replaceAll("!/:jar", "");
+        cp = cp.replaceAll(":jar:", ":");
 
-        // 4) Remove “file:/” prefixes
-        //    This turns "file:/opt/jetty/…" into "/opt/jetty/…"
+        // Remove “file:/” prefixes
+        // This turns "file:/opt/jetty/…" into "/opt/jetty/…"
         cp = cp.replaceAll("file:/+", "/");
 
-        // 5) Remove the “!/” suffix that often appears in "jar:file://…!/…"
-        //    We replace any literal "!/" with an empty string
-        cp = cp.replace("!/", "");
-
-        // 6) (Optional) If there are any accidental duplicate path‐separators,
+        // If there are any accidental duplicate path‐separators,
         //    collapse them. For Unix/Linux, File.pathSeparator is ":"
         String sep = File.pathSeparator;
         String doubleSep = sep + sep;
@@ -202,23 +193,8 @@ public class SimpleJavaCompiler {
             cp = cp.replace(doubleSep, sep);
         }
 
-        // 7) Trim any accidental whitespace around each entry
-        //    Split by the path separator and re‐join, trimming each segment.
-        String[] parts = cp.split(sep);
-        StringBuilder cleaned = new StringBuilder();
-        for (int i = 0; i < parts.length; i++) {
-            String part = parts[i].trim();
-            if (!part.isEmpty()) {
-                cleaned.append(part);
-                if (i < parts.length - 1) {
-                    cleaned.append(sep);
-                }
-            }
-        }
-
-        return cleaned.toString();
+        return cp;
     }
-
 
     /**
      * Represents a source file whose contents is loaded from a String
