@@ -194,6 +194,13 @@
     },
 
     {
+        "attribute": "jti",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
         "attribute": "sid",
         "type": "string",
         "index": ["equality"],
