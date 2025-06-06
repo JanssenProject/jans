@@ -7,6 +7,7 @@ tags:
   - claims
   - attributes
   - custom claims
+  - user claims
 ---
 
 # User Claims
