@@ -41,6 +41,8 @@ public interface IAuthorizationGrant {
 
     String getSub();
 
+    LogoutStatusJwt createLogoutStatusJwt(ExecutionContext executionContext);
+
     AccessToken createAccessToken(ExecutionContext executionContext);
 
     RefreshToken createRefreshToken(ExecutionContext executionContext);
@@ -81,9 +83,17 @@ public interface IAuthorizationGrant {
 
     Set<String> getRefreshTokensCodes();
 
+    Set<String> getLogoutStatusJwtsCodes();
+
     Set<String> getAccessTokensCodes();
 
+    List<LogoutStatusJwt> getLogoutStatusJwts();
+
     List<RefreshToken> getRefreshTokens();
+
+    void setLogoutStatusJwts(List<LogoutStatusJwt> tokens);
+
+    LogoutStatusJwt getLogoutStatusJwt(String logoutStatusJwtCode);
 
     void setRefreshTokens(List<RefreshToken> refreshTokens);
 
