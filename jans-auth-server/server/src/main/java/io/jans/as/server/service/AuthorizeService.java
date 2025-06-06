@@ -177,7 +177,6 @@ public class AuthorizeService {
                 clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopeSet, authorizationDetails);
             }
             session.addPermission(clientId, true, scopeSet);
-            sessionIdService.setSessionIndexIfNeeded(session);
             sessionIdService.updateSessionId(session);
             identity.setSessionId(session);
 

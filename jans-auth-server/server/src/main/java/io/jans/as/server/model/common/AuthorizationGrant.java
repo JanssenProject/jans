@@ -236,7 +236,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             context.setLogoutStatusJwtEntity(tokenEntity);
 
             persist(tokenEntity);
-            statService.reportAccessToken(getGrantType());
+            statService.reportLogoutStatusJwt(getGrantType());
             metricService.incCounter(MetricType.TOKEN_LOGOUT_STATUS_JWT_COUNT);
 
             log.debug("Logout Status JWT is successfully persisted, jti: {}", logoutStatusJwt.getJti());

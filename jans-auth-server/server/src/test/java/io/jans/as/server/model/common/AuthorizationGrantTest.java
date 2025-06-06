@@ -14,6 +14,7 @@ import io.jans.as.server.model.token.IdTokenFactory;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalIntrospectionService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
+import io.jans.as.server.service.logout.LogoutStatusJwtService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.service.token.StatusListIndexService;
 import io.jans.as.server.service.token.StatusListService;
@@ -79,6 +80,9 @@ public class AuthorizationGrantTest {
 
     @Mock
     private StatusListIndexService statusListIndexService;
+
+    @Mock
+    private LogoutStatusJwtService logoutStatusJwtService;
 
     @Mock
     protected AppConfiguration appConfiguration;

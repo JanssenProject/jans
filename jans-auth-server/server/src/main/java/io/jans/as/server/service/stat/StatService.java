@@ -40,6 +40,7 @@ public class StatService {
     public static final String ID_TOKEN_KEY = "id_token";
     public static final String REFRESH_TOKEN_KEY = "refresh_token";
     public static final String UMA_TOKEN_KEY = "uma_token";
+    public static final String LOGOUT_STATUS_TOKEN_KEY = "logout_status_jwt";
 
     @Inject
     private Logger log;
@@ -263,6 +264,10 @@ public class StatService {
 
     public void reportAccessToken(GrantType grantType) {
         reportToken(grantType, ACCESS_TOKEN_KEY);
+    }
+
+    public void reportLogoutStatusJwt(GrantType grantType) {
+        reportToken(grantType, LOGOUT_STATUS_TOKEN_KEY);
     }
 
     public void reportIdToken(GrantType grantType) {

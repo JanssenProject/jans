@@ -71,8 +71,6 @@ public class BaseDnConfiguration {
     private String node;
     @XmlElement(name = "statusIndexPool")
     private String statusIndexPool;
-    @XmlElement(name = "sessionStatusIndexPool")
-    private String sessionStatusIndexPool;
 
     public String getArchivedJwks() {
         return archivedJwks;
@@ -264,14 +262,5 @@ public class BaseDnConfiguration {
 
     public void setStatusIndexPool(String statusIndexPool) {
         this.statusIndexPool = statusIndexPool;
-    }
-
-    public String getSessionStatusIndexPool() {
-        return sessionStatusIndexPool;
-    }
-
-    public BaseDnConfiguration setSessionStatusIndexPool(String sessionStatusIndexPool) {
-        this.sessionStatusIndexPool = sessionStatusIndexPool;
-        return this;
     }
 }

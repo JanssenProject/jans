@@ -80,6 +80,12 @@ public class StatWS {
                 .help("Access Token")
                 .register(registry);
 
+        final Counter logoutStatusJwtCounter = Counter.build()
+                .name(StatService.LOGOUT_STATUS_TOKEN_KEY)
+                .labelNames(Constants.MONTH, Constants.GRANTTYPE)
+                .help("Logout Status JWT")
+                .register(registry);
+
         final Counter idTokenCounter = Counter.build()
                 .name(StatService.ID_TOKEN_KEY)
                 .labelNames(Constants.MONTH, Constants.GRANTTYPE)
@@ -125,6 +131,10 @@ public class StatWS {
                 umaTokenCounter
                         .labels(month, grantType)
                         .inc(getToken(tokenMap, StatService.UMA_TOKEN_KEY));
+
+                logoutStatusJwtCounter
+                        .labels(month, grantType)
+                        .inc(getToken(tokenMap, StatService.LOGOUT_STATUS_TOKEN_KEY));
             }
         }
 

@@ -10,7 +10,6 @@ import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
-import io.jans.as.server.service.session.SessionStatusListIndexService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.CacheService;
@@ -86,9 +85,6 @@ public class SessionIdServiceTest {
 
     @Mock
     private AttributeService attributeService;
-
-    @Mock
-    private SessionStatusListIndexService sessionStatusListIndexService;
 
     @Test
     public void isAgamaInSessionAndRequest_forAgama_shouldReturnTrue() {

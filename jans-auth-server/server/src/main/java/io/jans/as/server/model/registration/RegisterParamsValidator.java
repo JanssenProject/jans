@@ -188,12 +188,12 @@ public class RegisterParamsValidator {
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter introspection_encrypted_response_enc is not valid.");
         }
 
-        if (registerRequest.getSessionJwtSignedResponseAlg() != null &&
-                !appConfiguration.getSessionJwtSigningAlgValuesSupported().contains(
-                        registerRequest.getSessionJwtSignedResponseAlg().toString())) {
-            log.debug("Parameter session_jwt_signed_response_alg is not valid.");
+        if (registerRequest.getLogoutStatusJwtSignedResponseAlg() != null &&
+                !appConfiguration.getLogoutStatusJwtSigningAlgValuesSupported().contains(
+                        registerRequest.getLogoutStatusJwtSignedResponseAlg().toString())) {
+            log.debug("Parameter logout_status_jwt_signed_response_alg is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
-                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter session_jwt_signed_response_alg is not valid.");
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter logout_status_jwt_signed_response_alg is not valid.");
         }
 
         if (registerRequest.getTxTokenSignedResponseAlg() != null &&

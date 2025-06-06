@@ -9600,7 +9600,7 @@ components:
           type: array
           items:
             type: string
-        sessionJwtSigningAlgValuesSupported:
+        logoutStatusJwtSigningAlgValuesSupported:
           type: array
           items:
             type: string
@@ -11024,7 +11024,7 @@ components:
           type: string
         txTokenEncryptedResponseEnc:
           type: string
-        sessionJwtSignedResponseAlg:
+        logoutStatusJwtSignedResponseAlg:
           type: string
         authorizationDetailsTypes:
           type: array
