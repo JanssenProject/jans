@@ -18,7 +18,7 @@ This is a [KrakenD HTTP server plugin](https://www.krakend.io/docs/extending/htt
 
 ## Downloading
 
-The cedarling-krakend plugin builds are available via [Janssen](https://github.com/JanssenProject/jans/releases) releases. Please note that builds are architecture, platform, and KrakenD version specific. This means that builds compiled against KrakenD version `2.9.0` for Windows will not work on other versions or operating systems. The build tags are formatted as follows:
+The cedarling-krakend plugin builds are available via [Janssen releases](https://github.com/JanssenProject/jans/releases/latest). Please note that builds are architecture, platform, and KrakenD version specific. This means that builds compiled against KrakenD version `2.9.0` for Windows will not work on other versions or operating systems. The build tags are formatted as follows:
 
 ```
 cedarling-krakend-<architecture>-<krakend version and platform>-<Janssen version>.so 

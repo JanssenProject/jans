@@ -36,7 +36,7 @@ sudo gpg --import automation-jans-public-gpg.asc;
 ### Ubuntu 24.04
 
 - Download the release package from the Github Janssen Project
-[Releases](https://github.com/JanssenProject/jans/releases)
+[Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
 wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
@@ -72,7 +72,7 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 ### Ubuntu 22.04
 
 - Download the release package from the Github Janssen Project
-[Releases](https://github.com/JanssenProject/jans/releases)
+[Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
 wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
@@ -108,7 +108,7 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 ### Ubuntu 20.04
 
 - Download the release package from the Github Janssen Project
-[Releases](https://github.com/JanssenProject/jans/releases)
+[Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
 wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb -P /tmp
