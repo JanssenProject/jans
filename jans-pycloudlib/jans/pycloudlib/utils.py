@@ -17,7 +17,13 @@ import typing as _t
 
 from cryptography import x509
 from cryptography.hazmat.primitives.ciphers import Cipher
-from cryptography.hazmat.primitives.ciphers import algorithms
+
+try:
+    from cryptography.hazmat.decrepit.ciphers import algorithms
+except ImportError:
+    # deprecated and only available until cryptography v47
+    from cryptography.hazmat.primitives.ciphers import algorithms
+
 from cryptography.hazmat.primitives.ciphers import modes
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
@@ -229,12 +235,11 @@ def get_server_certificate(
     server_hostname = server_hostname or host
 
     with socket.create_connection((host, port)) as conn:
-        # use the default `PROTOCOL_TLS` constant
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS)
-
-        # by default, `SSLContext.options` only excludes insecure protocols
-        # SSLv2 and SSLv3; hence we need to exclude TLSv1 as well
-        context.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
+        # create client-side socket context
+        context = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
+        # we don't need to validate cert at the moment
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
 
         with context.wrap_socket(conn, server_hostname=server_hostname) as sock:
             # getpeercert may returns `None` if there's no certificate
