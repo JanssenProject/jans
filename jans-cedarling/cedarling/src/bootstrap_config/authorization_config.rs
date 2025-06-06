@@ -76,6 +76,7 @@ pub struct AuthorizationConfigRaw {
 
 /// ID token trust mode
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum IdTokenTrustMode {
     /// Always
     Always,

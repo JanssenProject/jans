@@ -7,11 +7,11 @@ use derive_more::Deref;
 use serde::{Deserialize, Serialize};
 use crate::BootstrapConfigRaw;
 
-const DEFAULT_USER_ENTITY_NAME: &str = "User";
-const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Workload";
-const DEFAULT_ROLE_ENTITY_NAME: &str = "Role";
-const DEFAULT_ISS_ENTITY_NAME: &str = "Iss";
-const DEFAULT_UNSIGNED_ROLE_ID_SRC: &str = "sub";
+const DEFAULT_USER_ENTITY_NAME: &str = "Jans::User";
+const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Jans::Workload";
+const DEFAULT_ROLE_ENTITY_NAME: &str = "Jans::Role";
+const DEFAULT_ISS_ENTITY_NAME: &str = "Jans::TrustedIssuer";
+const DEFAULT_UNSIGNED_ROLE_ID_SRC: &str = "role";
 
 pub(crate) const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Jans::Access_token";
 pub(crate) const DEFAULT_ID_TKN_ENTITY_NAME: &str = "Jans::Id_token";

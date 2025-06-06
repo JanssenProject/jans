@@ -120,15 +120,15 @@ impl BootstrapConfig {
     /// let config = BootstrapConfig::load_default().unwrap();
     /// ```
     pub fn load_default() -> Result<Self, BootstrapConfigLoadingError> {
-        const DEFAULT_CONFIG: &str = include_str!("../../config/default_config.toml");
+        const DEFAULT_CONFIG: &str = include_str!("../../config/default_config.yaml");
         
         let config = Config::builder()
-            .add_source(File::from_str(DEFAULT_CONFIG, config::FileFormat::Toml))
+            .add_source(File::from_str(DEFAULT_CONFIG, config::FileFormat::Yaml))
             .build()
-            .map_err(|e| BootstrapConfigLoadingError::DecodingTOML(e.to_string()))?;
+            .map_err(|e| BootstrapConfigLoadingError::DecodingYAML(e.to_string()))?;
 
         let raw: BootstrapConfigRaw = config.try_deserialize()
-            .map_err(|e| BootstrapConfigLoadingError::DecodingTOML(e.to_string()))?;
+            .map_err(|e| BootstrapConfigLoadingError::DecodingYAML(e.to_string()))?;
         
         Ok(raw.into())
     }
@@ -250,14 +250,14 @@ mod tests {
         let config = BootstrapConfig::load_default().unwrap();
         
         // Verify basic configuration
-        assert_eq!(config.application_name, "cedarling");
+        assert_eq!(config.application_name, "My App");
         
         // Verify log configuration
-        assert!(matches!(config.log_config.log_type, LogTypeConfig::StdOut));
-        assert_eq!(config.log_config.log_level, LogLevel::INFO);
+        assert!(matches!(config.log_config.log_type, LogTypeConfig::Memory(_)));
+        assert_eq!(config.log_config.log_level, LogLevel::DEBUG);
         
         // Verify policy store configuration
-        assert!(matches!(config.policy_store_config.source, PolicyStoreSource::FileYaml(_)));
+        assert!(matches!(config.policy_store_config.source, PolicyStoreSource::FileJson(_)));
         
         // Verify JWT configuration
         assert!(config.jwt_config.jwt_sig_validation);

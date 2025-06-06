@@ -49,7 +49,6 @@ use spawn_task::*;
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio_util::sync::CancellationToken;
-use url;
 
 /// The base duration to wait for if an http request fails for workers.
 pub const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
