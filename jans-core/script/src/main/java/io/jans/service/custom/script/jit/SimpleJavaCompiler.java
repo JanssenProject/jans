@@ -132,13 +132,16 @@ public class SimpleJavaCompiler {
         final List<JavaFileObject> compilationUnits = Collections.singletonList(new SourceFile(toUri("Generated"), source));
         final FileManager fileManager = new FileManager(standardJavaFileManager);
         final StringWriter output = new StringWriter();
-        final JavaCompiler.CompilationTask task = compiler.getTask(output, fileManager, diagnostics, Arrays.asList("-g", "-proc:none", "-classpath", getClasspath()), null, compilationUnits);
+        final String localClasspath = getClasspath();
+        final JavaCompiler.CompilationTask task = compiler.getTask(output, fileManager, diagnostics, Arrays.asList("-g", "-verbose", "-proc:none", "-localClasspath", localClasspath), null, compilationUnits);
 
         if (!task.call()) {
             log.error("Compilation diagnostics:");
             for (Diagnostic<? extends JavaFileObject> diag : diagnostics.getDiagnostics()) {
                log.error(diag.getMessage(Locale.getDefault()));
             }
+
+            log.error("Full classpath: {}", localClasspath);
 
             throw new IllegalArgumentException("Compilation failed:\n" + output + "\n Source code: \n" + source);
         }
