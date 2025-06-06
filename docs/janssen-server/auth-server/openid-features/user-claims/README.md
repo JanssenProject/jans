@@ -29,6 +29,7 @@ The built-in user claims in Janssen are listed in below table
 
 |Display Name|Claim Name|Description|
 |---|---|---|
+|sub|sub|	Subject - Identifier for the End-User at the Issuer.This is a special claim the authorization server can always send.|
 |Username|user_name|Username of user| 
 |Password|user_password|Password of user|
 |First Name|given_name|First name of user|
@@ -63,6 +64,7 @@ The built-in user claims in Janssen are listed in below table
 |Picture URL|picture|User's picture url| 
 |gender, male or female|gender|	End-User's gender. Values defined by this specification are female and male. Other values MAY be used when neither of the defined values are applicable.|
 |Last Updated|updated_at|Time the End-User's information was last updated. Its value is a JSON number representing the number of seconds from 1970-01-01T00:00:00Z as measured in UTC until the date/time.|
+
 
 ### Custom Claims
 
