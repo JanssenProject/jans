@@ -726,8 +726,8 @@ jobs:
         fi
         cargo build -r -p cedarling_uniffi
         cargo run --bin uniffi-bindgen generate --library ${{ github.workspace }}/jans-cedarling/target/release/libcedarling_uniffi.so --language kotlin --out-dir ./
-        mv cedarling_uniffi.kt cedarling_uniffi-${TAG}.kt
-        FILE="cedarling_uniffi-${TAG}.kt"
+        zip -r cedarling_uniffi-kotlin-${TAG}.zip uniffi
+        FILE="cedarling_uniffi-kotlin-${TAG}.zip"
         sha256sum $FILE >> $FILE.sha256sum
         gpg --armor --detach-sign $FILE || echo "Failed to sign"
         gpg --armor --detach-sign $FILE.sha256sum || echo "Failed to sign"
