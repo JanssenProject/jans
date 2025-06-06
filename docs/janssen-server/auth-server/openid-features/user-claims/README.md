@@ -29,7 +29,7 @@ The built-in user claims in Janssen are listed in below table
 
 |Display Name|Claim Name|Description|
 |---|---|---|
-|sub|sub|	Subject - Identifier for the End-User at the Issuer.This is a special claim the authorization server can always send.|
+|sub|sub|	Subject - Identifier for the End-User at the Issuer.The authorization server will always send this claim.|
 |Username|user_name|Username of user| 
 |Password|user_password|Password of user|
 |First Name|given_name|First name of user|
