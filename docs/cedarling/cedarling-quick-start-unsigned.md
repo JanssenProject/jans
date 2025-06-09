@@ -29,11 +29,14 @@ For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/ja
 
 The Cedarling needs policies and a schema to authorize access. These are bundled in a *policy store* (a JSON file). A demo repository is provided for this quickstart which contains two policy stores. We will be using the `tarpUnsignedDemo` store for this demo. 
 
-- Go to `https://github.com/SafinWasi/lock-testing`
+- Go to the [Lock testing repository](https://github.com/SafinWasi/lock-testing)
 - Click on `Fork`
-  - Make sure the `Copy the master branch only` option is **unchecked**
+     * Make sure the `Copy the master branch only` option is **unchecked**
 - Fork the repository
-- Open the [Agama Lab policy designer](https://cloud.gluu.org/agama-lab/dashboard/policy_store) and select your fork.
+     * Open the [Agama Lab policy designer](https://cloud.gluu.org/agama-lab/dashboard/policy_store).
+     * Click on `Change Repository`.
+     * Select the option `Manually Type Repository URL`.
+     * Paste the URL of your forked repository, then click the `Select` button.
 - Open the policy store named `tarpUnsignedDemo`
 - Click on the button named `Copy Link`. You will need this link in the next section.
 
