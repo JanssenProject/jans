@@ -49,30 +49,30 @@ use the policy stored in this store to evaluate the authorization result.
 1. Open Tarp installed in the browser 
 2. Navigate to the `Cedarling` tab and click on `Add Configurations`
 3. Paste the following configuration parameters as JSON. Make sure to update the `<Policy Store URI>` value to point to your policy store
-
-  ```
-  {
-      "CEDARLING_APPLICATION_NAME": "My App",
-      "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
-      "CEDARLING_LOG_TYPE": "std_out",
-      "CEDARLING_LOG_LEVEL": "INFO",
-      "CEDARLING_USER_AUTHZ": "enabled",
-      "CEDARLING_WORKLOAD_AUTHZ": "disabled",
-      "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-        "===": [{"var": "Jans::User"}, "ALLOW"]
-      },
-      "CEDARLING_JWT_SIG_VALIDATION": "enabled",
-      "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-      "CEDARLING_MAPPING_USER": "Jans::User",
-      "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
-      "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
-        "HS256", "RS256"
-      ],
-      "CEDARLING_ID_TOKEN_TRUST_MODE": "none"
-  }
-  ```
-
-Click `Save` to initialize Cedarling. This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User. 
+      ```
+      {
+          "CEDARLING_APPLICATION_NAME": "My App",
+          "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
+          "CEDARLING_LOG_TYPE": "std_out",
+          "CEDARLING_LOG_LEVEL": "INFO",
+          "CEDARLING_USER_AUTHZ": "enabled",
+          "CEDARLING_WORKLOAD_AUTHZ": "disabled",
+          "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+            "===": [{"var": "Jans::User"}, "ALLOW"]
+          },
+          "CEDARLING_JWT_SIG_VALIDATION": "enabled",
+          "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+          "CEDARLING_MAPPING_USER": "Jans::User",
+          "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
+          "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+            "HS256", "RS256"
+          ],
+          "CEDARLING_ID_TOKEN_TRUST_MODE": "none"
+      }
+      ```
+ 4. Click `Save` to initialize Cedarling. 
+ 
+ This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User. 
 
 ## Step-3: Test the policy using cedarling 
 
@@ -82,29 +82,28 @@ https://streamable.com/25wcb7
 
 1. Go to Tarp, under `Cedarling` tab, click on `Cedarling Unsigned Authz Form`
 2. Input the following:
+      ```JSON title="Principal"
+          [
+            {
+              "type": "Jans::User",
+              "id": "some_id",
+              "sub": "some_sub",
+              "role": ["SupremeRuler"]
+            }
+          ]
+      ```
 
-```JSON title="Principal"
-    [
-      {
-        "type": "Jans::User",
-        "id": "some_id",
-        "sub": "some_sub",
-        "role": ["SupremeRuler"]
-      }
-    ]
-```
+      ```JSON title="Actions"
+      Jans::Action::"Read"
+      ```
 
-```JSON title="Actions"
-Jans::Action::"Read"
-```
-
-```JSON title="Resource"
-    {
-      "entity_type": "resource",
-      "type": "Jans::SecretDocument",
-      "id": "some_id"
-    }
-```
+      ```JSON title="Resource"
+          {
+            "entity_type": "resource",
+            "type": "Jans::SecretDocument",
+            "id": "some_id"
+          }
+      ```
 
 The request is ready to be sent. To send the request to the Cedarling, 
 click on `Cedarling Authz Request`
