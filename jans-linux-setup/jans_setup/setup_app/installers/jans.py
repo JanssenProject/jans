@@ -67,10 +67,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 for prompt_str, install_var in (
                         ('Install Fido2 Server', 'install_fido2'),
                         ('Install Scim Server', 'install_scim_server'),
+                        ('Install Jans KC Link Server', 'install_jans_keycloak_link'),
                         ('Install Jans Casa', 'install_casa'),
                         ('Install Jans Lock', 'install_jans_lock'),
                         ('Install Jans KC', 'install_jans_saml')):
                     txt += get_install_string(prompt_str, install_var)
+
+                if base.argsp.install_link:
+                    txt += get_install_string('Install Link Server', 'install_link')
 
             if base.argsp.t:
                 txt += 'Load Test Data '.ljust(name_sep) + repr( base.argsp.t).rjust(state_sep) + "\n"
@@ -629,10 +633,12 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-config-api', 'install_config_api'),
                         ('jans-casa', 'install_casa'),
                         ('jans-fido2', 'install_fido2'),
+                        ('jans-link', 'install_link'),
                         ('jans-scim', 'install_scim_server'),
                         ('jans-lock', 'install_jans_lock_as_server'),
                         ('opa', 'install_opa'),
                         ('saml', 'install_jans_saml'),
+                        ('jans-keycloak-link', 'install_jans_keycloak_link'),
                         ('kc-scheduler', 'install_jans_saml'),
                         ]
         service_listr = service_list[:]
