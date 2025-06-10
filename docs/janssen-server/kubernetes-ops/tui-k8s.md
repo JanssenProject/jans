@@ -8,7 +8,6 @@ tags:
 
 # TUI K8s
 
-## Overview 
 
 
   <div>

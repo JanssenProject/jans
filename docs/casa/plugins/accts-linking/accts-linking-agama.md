@@ -7,7 +7,6 @@ tags:
 
 # Accounts linking project configuration
 
-## Overview
 
 The accounts linking Agama project must be configured in order to integrate third-party identity providers. The configuration of this project is supplied in a JSON file whose structure is like:
 

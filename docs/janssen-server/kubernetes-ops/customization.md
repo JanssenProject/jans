@@ -12,7 +12,7 @@ tags:
 Most organizations will want to edit and customize the look and feel of public-facing `jans` server pages to match their own corporate branding. 
 The following documentation provides the file locations of public facing pages, as well as instructions for adding custom HTML, CSS, and Javascript files to your `jans` server.
 
-## Overview
+
 All web pages are **xhtml** files.
 
 ## Default pages bundled in the `jans-auth.war` are:
