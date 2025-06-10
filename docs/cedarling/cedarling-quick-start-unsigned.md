@@ -29,7 +29,7 @@ For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/ja
 
 The Cedarling needs policies and a schema to authorize access. These are bundled in a *policy store* (a JSON file). A demo repository is provided for this quickstart which contains two policy stores. We will be using the `tarpUnsignedDemo` store for this demo. 
 
-- Go to the [Lock testing repository](https://github.com/SafinWasi/lock-testing)
+- Go to the [Lock testing repository](https://github.com/JanssenProject/CedarlingQuickstart)
 - Click on `Fork`
      * Make sure the `Copy the master branch only` option is **unchecked**
 - Fork the repository
