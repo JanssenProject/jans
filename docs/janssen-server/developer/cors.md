@@ -6,7 +6,7 @@ tags:
 
 # CORS Filter
 
-## Overview
+
 
 CORS Filter is an implementation of the [W3C's Cross-Origin Resource Sharing (CORS) specification](https://fetch.spec.whatwg.org/).
 

@@ -7,7 +7,6 @@ tags:
 
 # E-mail OTP Plugin
 
-## Overview 
 
 With this plugin, administrators can onboard a new type of authentication factor consisting of one-time passcodes (OTP) delivered to the user's inbox.
 

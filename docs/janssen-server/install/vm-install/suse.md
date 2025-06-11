@@ -50,7 +50,7 @@ sudo rpm -import automation-jans-public-gpg.asc
 ```
 
 - Download the release package from the GitHub Janssen Project
-  [Releases](https://github.com/JanssenProject/jans/releases)
+  [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```shell
 wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse15.x86_64.rpm

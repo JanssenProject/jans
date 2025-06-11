@@ -7,7 +7,7 @@ tags:
 
 # Client Registration scripts
 
-## Overview
+
 The Jans-Auth server implements the OpenID Connect [Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html) specification. This allows developers to register a client with the Authorization Server (AS) without any intervention from the administrator. By default, all clients are given the same default scopes and attributes. Through the use of an interception script, this behavior can be modified. These scripts can be used to analyze the registration request and apply customizations to the registered client. For example, a client can be given specific scopes by analyzing the [Software Statement](https://www.rfc-editor.org/rfc/rfc7591.html#section-2.3) that is sent with the registration request.
 
 ## Behavior

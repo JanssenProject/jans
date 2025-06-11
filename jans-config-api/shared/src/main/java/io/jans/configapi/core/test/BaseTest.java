@@ -72,6 +72,18 @@ public class BaseTest {
         log.info("accessToken:{}", accessToken);
     }
 
+    public String getAccessTokenForGivenScope(String scopes) {
+        log.info("getAccessToken - propertiesMap:{}", propertiesMap);
+        String tokenUrl = propertiesMap.get("token.endpoint");
+        String strGrantType = propertiesMap.get("token.grant.type");
+        String clientId = propertiesMap.get("test.client.id");
+        String clientSecret = propertiesMap.get("test.client.secret");
+        GrantType grantType = GrantType.fromString(strGrantType);
+        String token = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
+        log.info("token:{}", token);
+        return token;
+    }
+    
     protected String getToken(final String tokenUrl, final String clientId, final String clientSecret,
             GrantType grantType, final String scopes) {
         return getTokenService().getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
