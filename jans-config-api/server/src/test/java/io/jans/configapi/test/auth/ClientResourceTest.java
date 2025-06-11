@@ -32,6 +32,22 @@ public class ClientResourceTest extends ConfigServerBaseTest {
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
 
     }
+    
+    @Parameters({ "test.issuer", "openidClientsUrl" })
+    @Test
+    public void getClientsWithInvalidToken(final String issuer, final String openidClientsUrl) {
+        log.info("getAllClient() - issuer:{}, openidClientsUrl:{}", issuer, openidClientsUrl);
+        String invalidToken = this.getAccessTokenForGivenScope("https://jans.io/oauth/config/attributes.readonly");
+        log.info("getAllClient() - invalidToken:{}, issuer:{}, openidClientsUrl:{}", invalidToken, issuer, openidClientsUrl);
+        Builder request = getResteasyService().getClientBuilder(issuer + openidClientsUrl);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + invalidToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+
+        Response response = request.get();
+        log.info("Response for getClientsWithInvalidToken -  response:{}, response.getStatus():{}", response, response.getStatus());
+        assertEquals(response.getStatus(), Status.UNAUTHORIZED.getStatusCode());
+
+    }
 
     @Parameters({ "test.issuer", "openidClientsUrl", "openid_client_1" })
     @Test
