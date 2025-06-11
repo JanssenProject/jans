@@ -27,7 +27,6 @@ pub mod lock_config;
 use std::{io, path::Path};
 
 use config::{Config, File};
-use serde::{Deserialize, Serialize};
 
 // Re-export types that need to be public
 pub use authorization_config::{AuthorizationConfig, AuthorizationConfigRaw, IdTokenTrustMode};
@@ -41,7 +40,7 @@ pub use lock_config::{LockServiceConfig, LockServiceConfigRaw};
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
 /// [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) to the documentation.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BootstrapConfig {
     /// `CEDARLING_APPLICATION_NAME` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub application_name: String,

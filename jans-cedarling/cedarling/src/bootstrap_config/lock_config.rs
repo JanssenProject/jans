@@ -1,11 +1,10 @@
-use serde::{Deserialize, Serialize};
 use crate::{BootstrapConfigRaw, BootstrapConfigLoadingError};
 use crate::log::LogLevel;
 use url::Url;
 use std::time::Duration;
 
 /// Lock service config
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LockServiceConfig {
     /// The logging level
     pub log_level: LogLevel,
@@ -33,7 +32,7 @@ pub struct LockServiceConfig {
 }
 
 /// Raw lock service config
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LockServiceConfigRaw {
     /// The logging level
     pub log_level: LogLevel,
