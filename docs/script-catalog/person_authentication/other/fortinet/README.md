@@ -1,6 +1,5 @@
 # Fortinet - RADIUS server Authentication
 
-## Overview 
 This document explains how to configure the Gluu Server so that when a user logs in, an authentication request is made to Fortinet's remote RADIUS (Remote Authentication Dial-In User Service) server which then validates the user name and password. 
 
 ## Prerequisites 

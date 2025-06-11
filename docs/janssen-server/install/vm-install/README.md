@@ -5,7 +5,7 @@ tags:
   - vm
 ---
 
-# Overview
+# VM Installation
 
 Installing the Janssen software on a VM is a three step process:
 

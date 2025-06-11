@@ -7,7 +7,7 @@ tags:
 
 # Discovery Script 
 
-## Overview
+
 
 This script is used to modify the response of the OpenID well-known discovery endpoint, `/.well-known/openid-configuration`. The specification for this endpoint is defined in the [OpenID Connect documentation](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfigurationResponse).
 

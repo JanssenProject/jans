@@ -14,6 +14,8 @@ tags:
 Claim is a piece of information asserted about an Entity. User claims refer to pieces of information about the authenticated user, such as their name, email address, date of birth, and more. These claims provide the RP with specific attributes or characteristics associated with the user. The claims are issued by the IDP after successful authentication and are included in the ID Token (which is a JSON Web Token (JWT) that contains user-related information) and are also available through the
 `/userinfo` endpoint. 
 
+
+
 !!! Note
     `Attribute` and `User Claims` refer to the same user data fields in 
     the Janssen Server.
