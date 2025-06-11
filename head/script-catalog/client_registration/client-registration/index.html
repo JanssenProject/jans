@@ -5382,13 +5382,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    Overview
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#behavior" class="md-nav__link">
     Behavior
   </a>
@@ -9687,13 +9680,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    Overview
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#behavior" class="md-nav__link">
     Behavior
   </a>
@@ -9824,7 +9810,6 @@
 
 
 <h1 id="client-registration-scripts">Client Registration scripts<a class="headerlink" href="#client-registration-scripts" title="Permanent link">#</a></h1>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
 <p>The Jans-Auth server implements the OpenID Connect <a href="https://openid.net/specs/openid-connect-registration-1_0.html">Dynamic Client Registration</a> specification. This allows developers to register a client with the Authorization Server (AS) without any intervention from the administrator. By default, all clients are given the same default scopes and attributes. Through the use of an interception script, this behavior can be modified. These scripts can be used to analyze the registration request and apply customizations to the registered client. For example, a client can be given specific scopes by analyzing the <a href="https://www.rfc-editor.org/rfc/rfc7591.html#section-2.3">Software Statement</a> that is sent with the registration request.</p>
 <h2 id="behavior">Behavior<a class="headerlink" href="#behavior" title="Permanent link">#</a></h2>
 <p>By default, Jans server has no dynamic client registration scripts enabled, and all clients are given the same attributes. When a script is added and enabled, the script will run and return a <code>boolean</code> after applying logic to the registration request. If <code>true</code>, the client is registered and client credentials are returned. Generally, the script is global for all registration requests, and only one script is enabled at a time.</p>
@@ -10144,7 +10129,7 @@ Jans AS-&gt;&gt;RP: return client credentials</code></pre>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-21T08:21:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-21</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-06-11T10:24:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-06-11</span>
       
         <br>
         Created:
