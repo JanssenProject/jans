@@ -3441,13 +3441,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    Overview
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
     Disabling The Endpoint Using Feature Flag
   </a>
@@ -9634,13 +9627,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    Overview
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
     Disabling The Endpoint Using Feature Flag
   </a>
@@ -9723,7 +9709,6 @@
 
 
 <h1 id="token-revocation">Token Revocation<a class="headerlink" href="#token-revocation" title="Permanent link">#</a></h1>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
 <p>Janssen Server supports token revocation endpoint enables a client to notify the server that previously obtained 
 refresh or access token is no longer needed, allowing the server to clean up security credentials. Implementation 
 conforms with <a href="https://datatracker.ietf.org/doc/html/rfc7009">token revocation specification</a>.</p>
@@ -9739,7 +9724,7 @@ looks like below:</p>
 <div class="highlight"><pre><span></span><code>https://jans-dynamic-mysql/jans-auth/restv1/revoke
 </code></pre></div>
 <p>More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/revoke">jans-auth-server module</a>.</p>
+the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/revoke">jans-auth-server module</a>.</p>
 <h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
 <p><code>Token revocation</code> endpoint can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#revoke_token">REVOKE_TOKEN feature flag</a>.
 Use <a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/config-tools/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
@@ -9774,7 +9759,7 @@ However it is possible to allow revoking of any token (which is issued with othe
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-25T11:50:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-06-11T10:24:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-06-11</span>
       
         <br>
         Created:
