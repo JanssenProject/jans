@@ -7,7 +7,10 @@ tags:
   - Fido2Interception
 ---
 
-## Overview
+
+# Fido2 Extension
+
+
 FIDO2 implements attestation and assertion with next endpoints:  
 
 ```

@@ -7,7 +7,7 @@ tags:
 
 # Create User Custom Script
 
-## Overview
+
 "HealthCheck" custom script is used when Health Check Endpoint is called.
 Custom script allows inject/modify response from Health Check Endpoint.
 

@@ -11,7 +11,7 @@ tags:
 !!! Warning 
     **This image is for testing and development purposes only. Use Janssen [helm charts](https://github.com/JanssenProject/jans/tree/main/charts/janssen) for production setups.**
 
-## Overview
+
 
 The quickest way to get a Janssen Server up and running is to install a Docker container-based fully featured Janssen Server.
 

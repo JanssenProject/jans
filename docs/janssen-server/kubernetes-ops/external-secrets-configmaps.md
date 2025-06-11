@@ -8,7 +8,7 @@ tags:
 
 # External Secrets and Configmaps
 
-## Overview
+
    This guide shows how to store and retrieve jans `configmaps` and `secrets` externally in `AWS Secrets Manager`, `GCP Secret Manager` and `Vault`.  
 
 !!! Note
