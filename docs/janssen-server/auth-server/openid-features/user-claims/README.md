@@ -7,6 +7,7 @@ tags:
   - claims
   - attributes
   - custom claims
+  - user claims
 ---
 
 # User Claims
@@ -30,6 +31,7 @@ The built-in user claims in Janssen are listed in below table
 
 |Display Name|Claim Name|Description|
 |---|---|---|
+|sub|sub|	Subject - Identifier for the End-User at the Issuer.The authorization server will always send this claim.|
 |Username|user_name|Username of user| 
 |Password|user_password|Password of user|
 |First Name|given_name|First name of user|
@@ -45,7 +47,6 @@ The built-in user claims in Janssen are listed in below table
 |IMAP Data|imap_data|IMAP data|   
 |jansAdminUIRole|jansAdminUIRole|Gluu Flex Admin UI role|
 |Enrollment code|jans_enrollment_code|Enrollment code|
-|User Permission|user_permission|User permission|
 |Preferred Language|preferred_language|Preferred language|
 |Profile URL|profile|Profile URL|
 |Secret Question|secret_question|Secret question used to verify user identity|
@@ -53,6 +54,7 @@ The built-in user claims in Janssen are listed in below table
 |Birthdate|birthdate|Baithdate of user|   
 |Time zone info|zoneinfo|The End-User's time zone|
 |Phone Number verified|phone_number_verified|Is user's phone number verified?|
+|Home Telephone Number|phone_number|User's phone number|
 |Preferred Username|preferred_username|A domain issued and managed identifier for the person|
 |TransientId|transient_id|...| 
 |PersistentId|persistent_id|...|
@@ -62,6 +64,9 @@ The built-in user claims in Janssen are listed in below table
 |User certificate|user_certificate|User certificate|
 |Organization|o|Organization|
 |Picture URL|picture|User's picture url| 
+|gender, male or female|gender|	End-User's gender. Values defined by this specification are female and male. Other values MAY be used when neither of the defined values are applicable.|
+|Last Updated|updated_at|Time the End-User's information was last updated. Its value is a JSON number representing the number of seconds from 1970-01-01T00:00:00Z as measured in UTC until the date/time.|
+
 
 ### Custom Claims
 
