@@ -80,10 +80,6 @@ pub struct Response {
 }
 
 impl Response {
-    pub fn text(&self) -> &str {
-        &self.text
-    }
-
     pub fn json<'a, T>(&'a self) -> Result<T, serde_json::Error>
     where
         T: Deserialize<'a>,

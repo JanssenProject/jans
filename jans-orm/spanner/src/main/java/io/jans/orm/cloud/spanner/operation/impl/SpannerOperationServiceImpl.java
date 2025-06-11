@@ -65,6 +65,7 @@ import io.jans.orm.model.AttributeDataModification;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.PersistenceMetadata;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.Sort;
 import io.jans.orm.model.SortOrder;
@@ -1308,6 +1309,11 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 		}
 
 		return messageDigest;
+	}
+
+	@Override
+	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
+        throw new UnsupportedOperationException("Method not implemented.");
 	}
 
 }

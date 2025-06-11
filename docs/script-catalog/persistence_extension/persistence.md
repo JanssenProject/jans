@@ -34,7 +34,7 @@ The ORM module of the Janssen server does the following:
 
 1. When User entry is persisted and `userPassword` is specified, ORM calls `createHashedPassword`
 2. User authenticates and the password is checked, the ORM module invokes `compareHashedPasswords` 
-3. We need to specify which one to use in `/etc/gluu/conf/jans-couchbase.properties`
+3. We need to specify which one to use in `/etc/gluu/conf/jans-sql.properties`
     ```text
     password.encryption.method: SSHA-256
     ```

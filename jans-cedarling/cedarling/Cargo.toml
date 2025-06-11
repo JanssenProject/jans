@@ -20,6 +20,7 @@ cedar-policy = { version = "4.3.2", features = ["partial-eval"] }
 base64 = "0.22.1"
 url = "2.5.2"
 lazy_static = "1.5.0"
+http_utils = { workspace = true }
 jsonwebtoken = { workspace = true }
 reqwest = { version = "0.12.8", features = ["json"] }
 typed-builder = "0.20.0"
@@ -34,12 +35,16 @@ time = { version = "0.3.36", features = ["wasm-bindgen"] }
 regex = "1.11.1"
 chrono = { workspace = true }
 tokio = { workspace = true, features = ["macros", "time"] }
+tokio-util = { workspace = true }
 rand = "0.8.5"
 smol_str = "0.3.2"
 strum = { version = "0.26", features = ["derive"] }
 cedar-policy-validator = "4.3.3"
 cedar-policy-core = "4.3.3"
 datalogic-rs = "2.1.2"
+async-trait = "0.1.88"
+futures = "0.3.31"
+wasm-bindgen-futures = { workspace = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }
@@ -52,7 +57,7 @@ rand = "0.8.5"
 jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = "1.5.0"
 criterion = { version = "0.5.1", features = ["async_tokio"] }
-tokio = { version = "1.42.0", features = ["rt-multi-thread"] }
+tokio = { workspace = true, features = ["rt-multi-thread"] }
 
 [target.'cfg(not(any(target_arch = "wasm32", target_os = "windows")))'.dev-dependencies]
 pprof = { version = "0.14.0", features = ["flamegraph"] }

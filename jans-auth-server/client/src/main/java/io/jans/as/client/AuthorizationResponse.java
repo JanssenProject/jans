@@ -51,6 +51,7 @@ public class AuthorizationResponse extends BaseResponse {
     private String idToken;
     private String state;
     private String sessionId;
+    private String sessionJwt;
     private String sid;
     private String deviceSecret;
     private Map<String, String> customParams;
@@ -207,6 +208,10 @@ public class AuthorizationResponse extends BaseResponse {
             sessionId = params.get(SESSION_ID);
             params.remove(SESSION_ID);
         }
+        if (params.containsKey(SESSION_JWT)) {
+            sessionJwt = params.get(SESSION_JWT);
+            params.remove(SESSION_JWT);
+        }
         if (params.containsKey(SID)) {
             sid = params.get(SID);
             params.remove(SID);
@@ -349,6 +354,26 @@ public class AuthorizationResponse extends BaseResponse {
      */
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    /**
+     * Session jwt
+     *
+     * @return session jwt
+     */
+    public String getSessionJwt() {
+        return sessionJwt;
+    }
+
+    /**
+     * Session jwt
+     *
+     * @param sessionJwt session jwt
+     * @return response
+     */
+    public AuthorizationResponse setSessionJwt(String sessionJwt) {
+        this.sessionJwt = sessionJwt;
+        return this;
     }
 
     public Map<String, String> getCustomParams() {
