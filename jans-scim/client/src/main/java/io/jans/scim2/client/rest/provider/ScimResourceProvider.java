@@ -6,9 +6,9 @@
 
 package io.jans.scim2.client.rest.provider;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-
 import static io.jans.scim.model.scim2.Constants.MEDIA_TYPE_SCIM_JSON;
+
+import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Produces;

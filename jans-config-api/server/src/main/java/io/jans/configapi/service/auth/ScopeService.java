@@ -346,6 +346,24 @@ public class ScopeService {
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
                     Filter.createEqualityFilter(JANS_SCOPE_TYP, scopeType));
         }
+        
+        logger.trace("Scope pattern searchFilter:{}", searchFilter);
+        List<Filter> fieldValueFilters = new ArrayList<>();
+        Filter dataFilter = null;
+        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
+            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
+                logger.trace("Scope entry.getKey():{}, entry.getValue():{}",
+                        entry.getKey(), entry.getValue());
+                if( StringUtils.isNotBlank(entry.getKey()) ) {
+                    dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
+                    fieldValueFilters.add(Filter.createANDFilter(dataFilter));
+                }
+            }
+            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                    Filter.createANDFilter(fieldValueFilters));
+        }
+
+        logger.trace("Scope pattern and field searchFilter:{}", searchFilter);
 
         logger.debug("Final Scope searchFilter:{}", searchFilter);
 
@@ -369,4 +387,6 @@ public class ScopeService {
         }
         return pagedResult;
     }
+    
+    
 }

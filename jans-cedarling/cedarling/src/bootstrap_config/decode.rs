@@ -13,13 +13,13 @@ use std::fs;
 use std::path::Path;
 use std::str::FromStr;
 
-use super::BootstrapConfigRaw;
 use super::authorization_config::{AuthorizationConfig, IdTokenTrustMode};
 use super::raw_config::LoggerType;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
+use super::{BootstrapConfigRaw, LockServiceConfig};
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -44,6 +44,8 @@ impl BootstrapConfig {
             return Err(BootstrapConfigLoadingError::BothPrincipalsDisabled);
         }
 
+        let lock_config = raw.lock.is_enabled().then(|| raw.try_into()).transpose()?;
+
         // Decode LogCofig
         let log_type = match raw.log_type {
             LoggerType::Off => LogTypeConfig::Off,
@@ -55,7 +57,6 @@ impl BootstrapConfig {
                 max_items: raw.log_max_items,
             }),
             LoggerType::StdOut => LogTypeConfig::StdOut,
-            LoggerType::Lock => LogTypeConfig::Lock,
         };
         let log_config = LogConfig {
             log_type,
@@ -116,20 +117,15 @@ impl BootstrapConfig {
             jwt_sig_validation: raw.jwt_sig_validation.into(),
             jwt_status_validation: raw.jwt_status_validation.into(),
             signature_algorithms_supported: raw.jwt_signature_algorithms_supported.clone(),
-            token_validation_settings: raw.token_configs.clone().into(),
         };
 
         let authorization_config = AuthorizationConfig {
             use_user_principal: raw.user_authz.is_enabled(),
             use_workload_principal: raw.workload_authz.is_enabled(),
-            user_workload_operator: raw.usr_workload_bool_op,
+            principal_bool_operator: raw.principal_bool_operation.clone(),
             decision_log_user_claims: raw.decision_log_user_claims.clone(),
             decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
-            mapping_user: raw.mapping_user.clone(),
-            mapping_workload: raw.mapping_workload.clone(),
-            mapping_role: raw.mapping_role.clone(),
-            mapping_tokens: raw.token_configs.clone().into(),
             id_token_trust_mode: raw.id_token_trust_mode,
         };
 
@@ -139,6 +135,8 @@ impl BootstrapConfig {
             policy_store_config,
             jwt_config,
             authorization_config,
+            entity_builder_config: raw.into(),
+            lock_config,
         })
     }
 }

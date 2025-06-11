@@ -1500,6 +1500,9 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                session_jwt_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Session JWT.
                 tx_token_signed_response_alg:
                   type: string
                   description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -1534,6 +1537,9 @@ paths:
                   type: integer
                   description: Specifies the Default Maximum Authentication Age.
                   example: 1000000
+                require_pkce:
+                  type: boolean
+                  description: Boolean specifying whether PKCE is required by client. Defalut value is false.
                 require_auth_time:
                   type: boolean
                   description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
@@ -1950,6 +1956,9 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                session_jwt_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Session JWT.
                 tx_token_signed_response_alg:
                   type: string
                   description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -1984,6 +1993,9 @@ paths:
                   type: integer
                   description: Specifies the Default Maximum Authentication Age.
                   example: 1000000
+                require_pkce:
+                  type: boolean
+                  description: Boolean specifying whether PKCE is required by client. Defalut value is false.
                 require_auth_time:
                   type: boolean
                   description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
@@ -2380,6 +2392,9 @@ paths:
                   introspection_encrypted_response_enc:
                     type: string
                     description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                  session_jwt_signed_response_alg:
+                    type: string
+                    description: JWS alg algorithm (JWA) required for signing Session JWT.
                   tx_token_signed_response_alg:
                     type: string
                     description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -2715,8 +2730,8 @@ paths:
     get:
       tags:
         - Session Management
-      summary: Determine current sesion status.
-      description: Determine current sesion status.
+      summary: Determine current session status.
+      description: Determine current session status.
       operationId: session_status
       responses:
         200:
@@ -2763,6 +2778,52 @@ paths:
       responses:
         200:
           description: OK - Returned if request was processed successfully. Means it will return in case sessions are found as well as in case sessions are not found (error is not returned to not disclose internal information).
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /session_status_list:
+    get:
+      tags:
+        - Session Management
+      summary: The Session Status List Endpoint.
+      description: The Session Status List Endpoint.
+      operationId: get-session-status-list
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          description: Indicates the requested response type. Possible values are application/statuslist+json and application/statuslist+jwt. Defaults to application/statuslist+jwt if not specified.
+          schema:
+            type: string
+          example: application/statuslist+jwt or application/statuslist+json
+      responses:
+        200:
+          description: OK
+          content:
+            application/statuslist+json:
+              schema:
+                title: SessionStatusListResponseJson
+                description: Session Status list response as JSON (depending on request's "Accept" header value).
+                type: object
+                required:
+                  - bits
+                  - lst
+                properties:
+                  bits:
+                    type: integer
+                    description: JSON Integer specifying the number of bits per Referenced Session in the Status List (lst). The allowed values for bits are 1,2,4 and 8.
+                    example: 2
+                  lst:
+                    type: string
+                    description:  JSON String that contains the status values for all the Referenced Sessions it conveys statuses for. The value MUST be the base64url-encoded
+                    example: eNrbuRgAAhcBXQ
+            application/statuslist+jwt:
+              schema:
+                title: SessionStatusListResponseJwt
+                description: Session Status list response as JWT.
+                type: object
         401:
           $ref: '#/components/responses/Unauthorized'
         500:

@@ -34,8 +34,10 @@ import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.as.server.service.external.session.SessionEventType;
+import io.jans.as.server.service.session.SessionStatusListIndexService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.model.JansAttribute;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.search.filter.Filter;
@@ -126,6 +128,12 @@ public class SessionIdService {
 
     @Inject
     private StatService statService;
+
+    @Inject
+    private AttributeService attributeService;
+
+    @Inject
+    private SessionStatusListIndexService sessionStatusListIndexService;
 
     private String buildDn(String sessionId) {
         return String.format("jansId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
@@ -390,12 +398,15 @@ public class SessionIdService {
     }
 
     public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, Map<String, String> sessionIdAttributes) throws InvalidSessionStateException {
+
+        final User user = userService.getUserByDnSilently(userDn);
+        updateAttributesWithUserClaims(sessionIdAttributes, user);
         SessionId sessionId = generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
         if (sessionId == null) {
             throw new InvalidSessionStateException("Failed to generate authenticated session.");
         }
 
-        reportActiveUser(sessionId);
+        reportActiveUser(user);
 
         if (externalApplicationSessionService.isEnabled()) {
             String userName = sessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
@@ -413,9 +424,8 @@ public class SessionIdService {
         return sessionId;
     }
 
-    private void reportActiveUser(SessionId sessionId) {
+    private void reportActiveUser(User user) {
         try {
-            final User user = getUser(sessionId);
             if (user != null) {
                 statService.reportActiveUser(user.getUserId());
             }
@@ -452,6 +462,12 @@ public class SessionIdService {
             if (log.isErrorEnabled())
                 log.error("Failed generating session state! " + e.getMessage(), e);
             throw new FailedComputeSessionStateException(e.getMessage(), e);
+        }
+    }
+
+    public void setSessionIndexIfNeeded(SessionId session) {
+        if (session.getPredefinedAttributes().getIndex() == null) {
+            session.getPredefinedAttributes().setIndex(sessionStatusListIndexService.next());
         }
     }
 
@@ -643,6 +659,9 @@ public class SessionIdService {
                 }
 
                 if (update) {
+                    if (sessionId.getState() == SessionIdState.AUTHENTICATED) {
+                        setSessionIndexIfNeeded(sessionId);
+                    }
                     mergeWithRetry(sessionId);
                 }
             }
@@ -1015,5 +1034,31 @@ public class SessionIdService {
 
     public void externalEvent(SessionEvent event) {
         externalApplicationSessionService.externalEvent(event);
+    }
+
+    public void updateAttributesWithUserClaims(Map<String, String> sessionAttributes, User user) {
+        final List<String> userClaims = appConfiguration.getSessionIdUserClaimsInAttributes();
+        if (userClaims == null || userClaims.isEmpty() || user == null || sessionAttributes == null) {
+            return;
+        }
+
+        for (String claim : userClaims) {
+            try {
+                if (sessionAttributes.containsKey(claim)) {
+                    continue;
+                }
+
+                JansAttribute jansAttribute = attributeService.getByClaimName(claim);
+                if (jansAttribute != null) {
+                    String dbName = jansAttribute.getName();
+                    Object value = user.getAttribute(dbName, true, jansAttribute.getOxMultiValuedAttribute());
+                    if (value != null) {
+                        sessionAttributes.put(claim, String.valueOf(value));
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to get user's claim by name " + claim, e);
+            }
+        }
     }
 }

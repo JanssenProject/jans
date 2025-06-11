@@ -14,11 +14,13 @@ from utils.static import cli_style
 
 
 class JansLabelWidget:
-    def __init__(self, title, values, data, label_width=None, add_handler=None):
+    def __init__(self, title, values, data, label_width=None, add_handler=None, jans_name=''):
 
         if not label_width:
             label_width = int(common_data.app.dialog_width*1.1) - 26
 
+        self.title = title
+        self.jans_name = jans_name
         self.data = data
         self.values = values
         if add_handler:

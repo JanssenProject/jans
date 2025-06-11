@@ -27,7 +27,7 @@ impl StdOutLogger {
 
     // Create a new StdOutLogger with custom writer.
     // is used in tests.
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) fn new_with(writer: Box<dyn Write + Send + Sync>, log_level: LogLevel) -> Self {
         Self {
             writer: Mutex::new(Box::new(writer)),
@@ -132,11 +132,8 @@ mod tests {
             cedar_lang_version: None,
             cedar_sdk_version: None,
         };
-        let log_entry = LogEntryWithClientInfo::from_loggable(
-            log_entry.clone(),
-            pdp_id.clone(),
-            app_name.clone(),
-        );
+        let log_entry =
+            LogEntryWithClientInfo::from_loggable(log_entry.clone(), pdp_id, app_name.clone());
 
         // Serialize the log entry to JSON
         let json_str = json!(log_entry).to_string();

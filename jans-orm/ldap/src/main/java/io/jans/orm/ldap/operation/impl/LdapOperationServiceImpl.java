@@ -69,6 +69,7 @@ import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.PersistenceMetadata;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.operation.auth.PasswordEncryptionHelper;
 import io.jans.orm.operation.auth.PasswordEncryptionMethod;
@@ -1253,6 +1254,11 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 	@Override
 	public boolean isSupportObjectClass(String objectClass) {
 		return true;
+	}
+
+	@Override
+	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
+        throw new UnsupportedOperationException("Method not implemented.");
 	}
 
     private class SimplePagedResponse {

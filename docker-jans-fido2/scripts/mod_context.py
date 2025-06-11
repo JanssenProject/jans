@@ -8,7 +8,6 @@ import sys
 import zipfile
 from collections import namedtuple
 
-from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import exec_cmd
 
 from settings import LOGGING_CONFIG
@@ -66,8 +65,7 @@ def get_persistence_common_libs(dirpath):
 
 
 def get_default_custom_libs(app_name):
-    root = f"/opt/jans/jetty/{app_name}"
-    return [jar.replace(root, ".") for jar in glob.iglob(f"{root}/custom/libs/*.jar")]
+    return [f"/opt/jans/jetty/{app_name}/custom/libs/*"]
 
 
 def get_registered_common_libs(app_name, persistence_type):
@@ -83,9 +81,6 @@ def get_registered_common_libs(app_name, persistence_type):
 
 def modify_app_xml(app_name):
     custom_libs = get_default_custom_libs(app_name)
-
-    mapper = PersistenceMapper()
-    persistence_groups = mapper.groups().keys()
 
     # render custom xml
     fn = f"/opt/jans/jetty/{app_name}/webapps/{app_name}.xml"

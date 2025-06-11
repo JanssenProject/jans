@@ -24,4 +24,6 @@ public interface AppConstants {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_JSON = "application/json";
 
+    public static final int LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS = 30;
+
 }

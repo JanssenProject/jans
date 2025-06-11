@@ -8,54 +8,98 @@ mod claim_mapping;
 mod test;
 mod token_entity_metadata;
 
-use super::cedar_schema::CedarSchema;
-use cedar_policy::PolicyId;
+use super::{PartitionResult, cedar_schema::CedarSchema};
+use cedar_policy::{Policy, PolicyId};
 use semver::Version;
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, de};
 use std::collections::HashMap;
-use std::sync::LazyLock;
+use url::Url;
 
-pub use token_entity_metadata::{ClaimMappings, TokenEntityMetadata};
+pub(crate) use claim_mapping::ClaimMappings;
+pub use token_entity_metadata::TokenEntityMetadata;
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
-#[derive(Debug, Clone, serde::Deserialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AgamaPolicyStore {
     /// The cedar version to use when parsing the schema and policies.
-    #[serde(deserialize_with = "parse_cedar_version")]
     pub cedar_version: Version,
-
     pub policy_stores: HashMap<String, PolicyStore>,
+}
+
+impl<'de> Deserialize<'de> for AgamaPolicyStore {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        // First try to deserialize into a Value to get better error messages
+        let value = serde_json::Value::deserialize(deserializer)?;
+        
+        // Check for required fields
+        let obj = value.as_object().ok_or_else(|| {
+            de::Error::custom("policy store must be a JSON object")
+        })?;
+
+        // Check cedar_version field
+        let cedar_version = obj.get("cedar_version").ok_or_else(|| {
+            de::Error::custom("missing required field 'cedar_version' in policy store")
+        })?;
+
+        // Check policy_stores field
+        let policy_stores = obj.get("policy_stores").ok_or_else(|| {
+            de::Error::custom("missing required field 'policy_stores' in policy store")
+        })?;
+
+        // Now deserialize the actual struct
+        let mut store = AgamaPolicyStore {
+            cedar_version: parse_cedar_version(cedar_version).map_err(|e| {
+                de::Error::custom(format!("invalid cedar_version format: {}", e))
+            })?,
+            policy_stores: HashMap::new(),
+        };
+
+        // Deserialize policy stores
+        let stores_obj = policy_stores.as_object().ok_or_else(|| {
+            de::Error::custom("'policy_stores' must be a JSON object")
+        })?;
+
+        for (key, value) in stores_obj {
+            let policy_store = PolicyStore::deserialize(value).map_err(|e| {
+                de::Error::custom(format!(
+                    "error parsing policy store '{}': {}",
+                    key, e
+                ))
+            })?;
+            store.policy_stores.insert(key.clone(), policy_store);
+        }
+
+        Ok(store)
+    }
 }
 
 /// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
 ///
 /// The `PolicyStore` contains the schema and a set of policies encoded in base64,
 /// which are parsed during deserialization.
-#[derive(Debug, Clone, serde::Deserialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PolicyStore {
     /// version of policy store
     //
     // alias to support Agama lab format
-    #[serde(alias = "policy_store_version")]
     pub version: Option<String>,
 
     /// Name is also name of namespace in `cedar-policy`
     pub name: String,
 
     /// Description comment to policy store
-    #[serde(default)]
     pub description: Option<String>,
 
     /// The cedar version to use when parsing the schema and policies.
-    #[serde(deserialize_with = "parse_maybe_cedar_version", default)]
     pub cedar_version: Option<Version>,
 
     /// Cedar schema
-    #[serde(alias = "cedar_schema")]
     pub schema: CedarSchema,
 
     /// Cedar policy set
-    #[serde(alias = "cedar_policies")]
     pub policies: PoliciesContainer,
 
     /// An optional HashMap of trusted issuers.
@@ -66,10 +110,6 @@ pub struct PolicyStore {
 }
 
 impl PolicyStore {
-    pub(crate) fn namespace(&self) -> &str {
-        &self.name
-    }
-
     pub(crate) fn get_store_version(&self) -> &str {
         self.version.as_deref().unwrap_or("undefined")
     }
@@ -93,34 +133,58 @@ pub struct PolicyStoreWithID {
 pub struct TrustedIssuer {
     /// The name of the trusted issuer.
     pub name: String,
-
     /// A brief description of the trusted issuer.
     pub description: String,
-
     /// The OpenID configuration endpoint for the issuer.
     ///
     /// This endpoint is used to obtain information about the issuer's capabilities.
-    pub openid_configuration_endpoint: String,
-
+    #[serde(
+        rename = "openid_configuration_endpoint",
+        deserialize_with = "de_oidc_endpoint_url"
+    )]
+    pub oidc_endpoint: Url,
     /// Metadata for tokens issued by the trusted issuer.
     #[serde(default)]
-    pub tokens_metadata: HashMap<String, TokenEntityMetadata>,
+    pub token_metadata: HashMap<String, TokenEntityMetadata>,
 }
 
+fn de_oidc_endpoint_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let url_str = String::deserialize(deserializer)?;
+    let url = Url::parse(&url_str).map_err(|_| {
+        de::Error::custom("the `\"openid_configuration_endpoint\"` is not a valid url")
+    })?;
+    Ok(url)
+}
+
+#[cfg(test)]
 impl Default for TrustedIssuer {
     fn default() -> Self {
         Self {
             name: "Jans".to_string(),
             description: Default::default(),
-            openid_configuration_endpoint: Default::default(),
-            tokens_metadata: Default::default(),
+            // This will only really be called during testing so we just put this test value
+            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+                .unwrap(),
+            token_metadata: HashMap::from([
+                ("access_token".into(), TokenEntityMetadata::access_token()),
+                ("id_token".into(), TokenEntityMetadata::id_token()),
+                (
+                    "userinfo_token".into(),
+                    TokenEntityMetadata::userinfo_token(),
+                ),
+            ]),
         }
     }
 }
 
+#[cfg(test)]
 impl Default for &TrustedIssuer {
     fn default() -> Self {
-        static DEFAULT: LazyLock<TrustedIssuer> = LazyLock::new(TrustedIssuer::default);
+        static DEFAULT: std::sync::LazyLock<TrustedIssuer> =
+            std::sync::LazyLock::new(TrustedIssuer::default);
         &DEFAULT
     }
 }
@@ -128,26 +192,26 @@ impl Default for &TrustedIssuer {
 impl TrustedIssuer {
     /// Retrieves the claim that defines the `Role` for a given token type.
     pub fn get_role_mapping(&self, token_name: &str) -> Option<&str> {
-        self.tokens_metadata
+        self.token_metadata
             .get(token_name)
             .and_then(|x| x.role_mapping.as_deref())
     }
 
     /// Retrieves the claim that defines the `User` for a given token type.
     pub fn get_user_mapping(&self, token_name: &str) -> Option<&str> {
-        self.tokens_metadata
+        self.token_metadata
             .get(token_name)
             .and_then(|x| x.user_id.as_deref())
     }
 
     pub fn get_claim_mapping(&self, token_name: &str) -> Option<&ClaimMappings> {
-        self.tokens_metadata
+        self.token_metadata
             .get(token_name)
             .map(|x| &x.claim_mapping)
     }
 
     pub fn get_token_metadata(&self, token_name: &str) -> Option<&TokenEntityMetadata> {
-        self.tokens_metadata.get(token_name)
+        self.token_metadata.get(token_name)
     }
 }
 
@@ -307,35 +371,28 @@ impl<'de> serde::Deserialize<'de> for PoliciesContainer {
         let policies =
             <HashMap<String, RawPolicy> as serde::Deserialize>::deserialize(deserializer)?;
 
-        let results: Vec<Result<cedar_policy::Policy, D::Error>> = policies
+        let (policy_vec, errs): (Vec<_>, Vec<_>) = policies
             .iter()
             .map(|(id, policy_raw)| {
-                parse_single_policy::<D>(id, policy_raw).map_err(|err| {
-                    serde::de::Error::custom(format!(
-                        "unable to decode policy with id: {id}, error: {err}"
-                    ))
-                })
+                let policy: Result<Policy, D::Error> = parse_single_policy::<D>(id, policy_raw)
+                    .map_err(|err| {
+                        de::Error::custom(format!(
+                            "unable to decode policy with id: {id}, error: {err}"
+                        ))
+                    });
+                policy
             })
-            .collect();
-
-        let (successful_policies, errors): (Vec<_>, Vec<_>) =
-            results.into_iter().partition(Result::is_ok);
+            .partition_result();
 
         // Collect all errors into a single error message or return them as a vector.
-        if !errors.is_empty() {
-            let error_messages: Vec<D::Error> =
-                errors.into_iter().filter_map(Result::err).collect();
+        if !errs.is_empty() {
+            let error_messages: Vec<D::Error> = errs.into_iter().collect();
 
             return Err(serde::de::Error::custom(format!(
                 "Errors encountered while parsing policies: {:?}",
                 error_messages
             )));
         }
-
-        let policy_vec = successful_policies
-            .into_iter()
-            .filter_map(Result::ok)
-            .collect::<Vec<_>>();
 
         let policy_set = cedar_policy::PolicySet::from_policies(policy_vec).map_err(|err| {
             serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
@@ -405,4 +462,69 @@ where
     let value = Option::<String>::deserialize(deserializer)?;
 
     Ok(value.filter(|s| !s.is_empty()))
+}
+
+/// Custom deserializer for PolicyStore that provides better error messages
+impl<'de> Deserialize<'de> for PolicyStore {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        // First try to deserialize into a Value to get better error messages
+        let value = serde_json::Value::deserialize(deserializer)?;
+        
+        // Check for required fields
+        let obj = value.as_object().ok_or_else(|| {
+            de::Error::custom("policy store entry must be a JSON object")
+        })?;
+
+        // Check name field
+        let name = obj.get("name").ok_or_else(|| {
+            de::Error::custom("missing required field 'name' in policy store entry")
+        })?;
+        let name = name.as_str().ok_or_else(|| {
+            de::Error::custom("'name' must be a string")
+        })?;
+
+        // Check schema field
+        let schema = obj.get("schema").or_else(|| obj.get("cedar_schema")).ok_or_else(|| {
+            de::Error::custom("missing required field 'schema' or 'cedar_schema' in policy store entry")
+        })?;
+
+        // Check policies field
+        let policies = obj.get("policies").or_else(|| obj.get("cedar_policies")).ok_or_else(|| {
+            de::Error::custom("missing required field 'policies' or 'cedar_policies' in policy store entry")
+        })?;
+
+        // Now deserialize the actual struct
+        let store = PolicyStore {
+            version: obj.get("version")
+                .or_else(|| obj.get("policy_store_version"))
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string()),
+            name: name.to_string(),
+            description: obj.get("description")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string()),
+            cedar_version: obj.get("cedar_version")
+                .map(parse_maybe_cedar_version)
+                .transpose()
+                .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {}", e)))?
+                .flatten(),
+            schema: CedarSchema::deserialize(schema).map_err(|e| {
+                de::Error::custom(format!("error parsing schema: {}", e))
+            })?,
+            policies: PoliciesContainer::deserialize(policies).map_err(|e| {
+                de::Error::custom(format!("error parsing policies: {}", e))
+            })?,
+            trusted_issuers: obj.get("trusted_issuers")
+                .map(|v| {
+                    HashMap::<String, TrustedIssuer>::deserialize(v)
+                        .map_err(|e| de::Error::custom(format!("error parsing trusted issuers: {}", e)))
+                })
+                .transpose()?,
+        };
+
+        Ok(store)
+    }
 }

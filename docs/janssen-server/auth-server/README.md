@@ -4,7 +4,7 @@ tags:
   - auth-server
 ---
 
-# Overview
+# Auth Server
 
 Auth Server provides the federated identity functionality of the Janssen Platform.
 The server is a fork of [oxAuth](https://github.com/GluuFederation/oxAuth/),

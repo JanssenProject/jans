@@ -1096,7 +1096,7 @@ paths:
                   : \"Config api pligin\",\n    \"document\":\"\",\n    \"jansModuleProperty\"\
                   : [\n\t\t\"config-api\",\n\t\t\"jar\",\n\t\t\"/opt/jans/jetty/jans-config-api/custom/lib\"\
                   \n\t],\t\n    \"jansLevel\": \"1\",\n    \"jansRevision\": \"1\"\
-                  ,\n    \"jansEnabled\": true,\n    \"jansAlias\": \"\"\n}\n"
+                  ,\n    \"jansEnabled\": true\n}\n"
       responses:
         "201":
           description: Newly created Asset
@@ -1112,7 +1112,7 @@ paths:
                     \    \"jansModuleProperty\": [\n\t\t\"config-api\",\n\t\t\"jar\"\
                     ,\n\t\t\"/opt/jans/jetty/jans-config-api/custom/lib\"\n\t],\t\n\
                     \    \"jansLevel\": \"1\",\n    \"jansRevision\": \"1\",\n   \
-                    \ \"jansEnabled\": true,\n    \"jansAlias\": \"\"\n}\n"
+                    \ \"jansEnabled\": true\n}\n"
         "400":
           description: Bad Request
           content:
@@ -4451,7 +4451,7 @@ paths:
                         "moduleProperties": [
                             {
                                 "value1": "location_type",
-                                "value2": "ldap"
+                                "value2": "db"
                             }
                         ],
                         "level": 800,
@@ -4576,7 +4576,7 @@ paths:
                         "moduleProperties": [
                             {
                                 "value1": "location_type",
-                                "value2": "ldap"
+                                "value2": "db"
                             }
                         ],
                         "level": 1,
@@ -4632,7 +4632,7 @@ paths:
                         "moduleProperties": [
                             {
                                 "value1": "location_type",
-                                "value2": "ldap"
+                                "value2": "db"
                             }
                         ],
                         "level": 1,
@@ -4640,7 +4640,7 @@ paths:
                         "enabled": true,
                         "modified": false,
                         "internal": false,
-                        "locationType": "ldap",
+                        "locationType": "db",
                         "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
                     }
         "401":
@@ -4674,7 +4674,7 @@ paths:
                   - introspection
                   - resource_owner_password_credentials
                   - application_session
-                  - cache_refresh
+                  - link_interception
                   - client_registration
                   - id_generator
                   - uma_rpt_policy
@@ -4682,6 +4682,7 @@ paths:
                   - uma_claims_gathering
                   - access_evaluation
                   - access_evaluation_discovery
+                  - token_exchange
                   - consent_gathering
                   - dynamic_scope
                   - spontaneous_scope
@@ -4715,7 +4716,7 @@ paths:
                         "idp",
                         "introspection",
                         "persistence_extension",
-                        "cache_refresh",
+                        "link_interception",
                         "uma_rpt_policy",
                         "update_token",
                         "scim",
@@ -4766,7 +4767,7 @@ paths:
                         "idp",
                         "introspection",
                         "persistence_extension",
-                        "cache_refresh",
+                        "link_interception",
                         "uma_rpt_policy",
                         "update_token",
                         "scim",
@@ -4873,7 +4874,7 @@ paths:
                                 "moduleProperties": [
                                     {
                                         "value1": "location_type",
-                                        "value2": "ldap"
+                                        "value2": "db"
                                     }
                                 ],
                                 "level": 1,
@@ -4881,7 +4882,7 @@ paths:
                                 "enabled": true,
                                 "modified": false,
                                 "internal": false,
-                                "locationType": "ldap",
+                                "locationType": "db",
                                 "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
                             }
                         ]
@@ -9173,8 +9174,6 @@ components:
           format: int32
         enabled:
           type: boolean
-        alias:
-          type: string
         baseDn:
           type: string
     DocumentPagedResult:
@@ -9335,19 +9334,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
+        selected:
           type: boolean
         userCanView:
           type: boolean
+        userCanEdit:
+          type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
-          type: boolean
-        selected:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -9402,6 +9401,8 @@ components:
         parEndpoint:
           type: string
         requirePar:
+          type: boolean
+        parForbidPublicClient:
           type: boolean
         deviceAuthzEndpoint:
           type: string
@@ -9599,6 +9600,13 @@ components:
           type: array
           items:
             type: string
+        sessionJwtSigningAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        sessionStatusListBitSize:
+          type: integer
+          format: int32
         txTokenSigningAlgValuesSupported:
           type: array
           items:
@@ -9699,9 +9707,6 @@ components:
           type: string
         opTosUri:
           type: string
-        cleanUpInactiveClientAfterHoursOfInactivity:
-          type: integer
-          format: int32
         clientPeriodicUpdateTimerInterval:
           type: integer
           format: int32
@@ -9727,12 +9732,6 @@ components:
           type: integer
           format: int32
         userInfoLifetime:
-          type: integer
-          format: int32
-        cleanServiceInterval:
-          type: integer
-          format: int32
-        cleanServiceBatchChunkSize:
           type: integer
           format: int32
         keyRegenerationEnabled:
@@ -9801,6 +9800,14 @@ components:
           type: object
           additionalProperties:
             type: string
+        acrToConsentScriptNameMapping:
+          type: object
+          additionalProperties:
+            type: string
+        acrToAgamaConsentFlowMapping:
+          type: object
+          additionalProperties:
+            type: string
         authenticationFiltersEnabled:
           type: boolean
         clientAuthenticationFiltersEnabled:
@@ -9835,7 +9842,13 @@ components:
           type: boolean
         sessionIdPersistInCache:
           type: boolean
+        sessionIdUserClaimsInAttributes:
+          type: array
+          items:
+            type: string
         includeSidInResponse:
+          type: boolean
+        includeRefreshTokenLifetimeInTokenResponse:
           type: boolean
         disablePromptLogin:
           type: boolean
@@ -9988,6 +10001,12 @@ components:
         disableU2fEndpoint:
           type: boolean
         authorizationChallengeSessionLifetimeInSeconds:
+          type: integer
+          format: int32
+        rateLimitRegistrationRequestCount:
+          type: integer
+          format: int32
+        rateLimitRegistrationPeriodInSeconds:
           type: integer
           format: int32
         rotateDeviceSecret:
@@ -10165,6 +10184,7 @@ components:
             - REVOKE_SESSION
             - GLOBAL_TOKEN_REVOCATION
             - STATUS_LIST
+            - SESSION_STATUS_LIST
             - ACTIVE_SESSION
             - END_SESSION
             - STATUS_SESSION
@@ -10177,6 +10197,7 @@ components:
             - STAT
             - PAR
             - ACCESS_EVALUATION
+            - RATE_LIMIT
             - SSA
         httpLoggingEnabled:
           type: boolean
@@ -10211,6 +10232,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10220,8 +10243,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10386,6 +10407,12 @@ components:
         ssaExpirationInDays:
           type: integer
           format: int32
+        ssaMapSoftwareRolesToScopes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
     SsaValidationConfig:
       type: object
       properties:
@@ -10433,8 +10460,24 @@ components:
     PersistenceConfiguration:
       type: object
       properties:
-        persistenceType:
+        databaseName:
           type: string
+          description: Connection object's current catalog name.
+        schemaName:
+          type: string
+          description: Schema name.
+        productName:
+          type: string
+          description: Name of database product.
+        productVersion:
+          type: string
+          description: Version number of this database product.
+        driverName:
+          type: string
+          description: Name of this JDBC driver.
+        driverVersion:
+          type: string
+          description: JDBC driver version number.
     JsonPatch:
       type: object
     CacheConfiguration:
@@ -10898,6 +10941,10 @@ components:
           type: array
           items:
             type: string
+        tokenExchangeScripts:
+          type: array
+          items:
+            type: string
         consentGatheringScripts:
           type: array
           items:
@@ -10945,6 +10992,8 @@ components:
           format: int32
         allowOfflineAccessWithoutConsent:
           type: boolean
+        requirePkce:
+          type: boolean
         minimumAcrLevel:
           type: integer
           format: int32
@@ -10974,6 +11023,8 @@ components:
         txTokenEncryptedResponseAlg:
           type: string
         txTokenEncryptedResponseEnc:
+          type: string
+        sessionJwtSignedResponseAlg:
           type: string
         authorizationDetailsTypes:
           type: array
@@ -11277,7 +11328,7 @@ components:
           - introspection
           - resource_owner_password_credentials
           - application_session
-          - cache_refresh
+          - link_interception
           - client_registration
           - id_generator
           - uma_rpt_policy
@@ -11285,6 +11336,7 @@ components:
           - uma_claims_gathering
           - access_evaluation
           - access_evaluation_discovery
+          - token_exchange
           - consent_gathering
           - dynamic_scope
           - spontaneous_scope
@@ -11333,14 +11385,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11752,6 +11804,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        predefinedAttributes:
+          $ref: '#/components/schemas/SessionIdPredefinedAttributes'
         deviceSecrets:
           type: array
           items:
@@ -11769,10 +11823,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -11782,6 +11836,12 @@ components:
             type: boolean
           xml:
             name: map
+    SessionIdPredefinedAttributes:
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
     SessionPagedResult:
       type: object
       properties:
@@ -11944,6 +12004,8 @@ components:
           - REFRESH_TOKEN
           - AUTHORIZATION_CODE
           - TX_TOKEN
+        accessToken:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

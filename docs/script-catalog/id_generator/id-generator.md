@@ -6,7 +6,7 @@ tags:
   - IdGenerator
 ---
 
-## Overview
+# ID Generator
 By default Janssen Auth Server uses an internal method to generate unique identifiers for new person/client, etc. entries. In most cases the format of the ID is:
 
 `'!' + idType.getInum() + '!' + four_random_HEX_characters + '.' + four_random_HEX_characters.`

@@ -8,21 +8,13 @@ package io.jans.fido2.model.conf;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * Supported MetadataServer
- *
- * @author Shekhar L. on 06/08/2024
- */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MetadataServer {
 
     private String url;
-
-	private List<String> certificateDocumentInum = new ArrayList<String>();;
-
+    
+    private String rootCert;
 
 	public String getUrl() {
 		return url;
@@ -32,12 +24,13 @@ public class MetadataServer {
 		this.url = url;
 	}
 
-
-	public List<String> getCertificateDocumentInum() {
-		return certificateDocumentInum;
+	public String getRootCert() {
+		return rootCert;
 	}
 
-	public void setCertificateDocumentInum(List<String> certificateDocumentInum) {
-		this.certificateDocumentInum = certificateDocumentInum;
+	public void setRootCert(String rootCert) {
+		this.rootCert = rootCert;
 	}
+
+	
 }

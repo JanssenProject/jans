@@ -65,9 +65,11 @@ impl MemoryLogger {
 mod fallback {
     use crate::LogLevel;
     use crate::app_types::{ApplicationName, PdpID};
+    use crate::log::log_strategy::LogStrategyLogger;
+    use crate::log::stdout_logger::StdOutLogger;
 
     /// conform to Loggable requirement imposed by LogStrategy
-    #[derive(serde::Serialize)]
+    #[derive(serde::Serialize, Clone)]
     struct StrWrap<'a>(&'a str);
 
     impl crate::log::interface::Indexed for StrWrap<'_> {
@@ -95,14 +97,24 @@ mod fallback {
     /// call. But this is a fallback logger, so it is not intended to be used
     /// often, and in this case correctness and non-fallibility are far more
     /// important than performance.
+    ///
+    /// # Panics
+    ///
+    /// Panics when:
+    /// - A runtime to initialize a new LogStrategy could not be built.
+    /// - A fallback logger could not be initialized.
     pub fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
-        let log_config = crate::bootstrap_config::LogConfig {
-            log_type: crate::bootstrap_config::log_config::LogTypeConfig::StdOut,
-            // level is so that all messages passed here are logged.
-            log_level: LogLevel::TRACE,
-        };
+        // level is so that all messages passed here are logged.
+        let logger = StdOutLogger::new(LogLevel::TRACE);
+
         // This should always be a LogStrategy::StdOut(StdOutLogger)
-        let log_strategy = crate::log::LogStrategy::new(&log_config, *pdp_id, app_name.clone());
+        let log_strategy = crate::log::LogStrategy::new_with_logger(
+            LogStrategyLogger::StdOut(logger),
+            *pdp_id,
+            app_name.clone(),
+            None,
+        );
+
         use crate::log::interface::LogWriter;
         // a string is always serializable
         log_strategy.log_any(StrWrap(msg))
@@ -254,7 +266,7 @@ mod tests {
     fn test_log_and_get_logs() {
         let pdp_id = PdpID::new();
         let app_name = None;
-        let logger = create_memory_logger(pdp_id.clone(), app_name.clone());
+        let logger = create_memory_logger(pdp_id, app_name.clone());
 
         // create log entries
         let entry1 = LogEntry::new_with_data(LogType::Decision, None)
@@ -263,8 +275,7 @@ mod tests {
                 action: "test_action".to_string(),
                 resource: "test_resource".to_string(),
                 context: serde_json::json!({}),
-                person_authorize_info: Default::default(),
-                workload_authorize_info: Default::default(),
+                authorize_info: Default::default(),
                 authorized: true,
                 entities: serde_json::json!({}),
             });
@@ -313,7 +324,7 @@ mod tests {
     fn test_pop_logs() {
         let pdp_id = PdpID::new();
         let app_name = None;
-        let logger = create_memory_logger(pdp_id.clone(), app_name.clone());
+        let logger = create_memory_logger(pdp_id, app_name.clone());
 
         // create log entries
         let entry1 = LogEntry::new_with_data(LogType::Decision, None);

@@ -27,11 +27,7 @@ fn to_json(s: &str) -> Option<Value> {
     }
 
     // Validate that the result is valid JSON
-    if let Ok(value) = serde_json::from_str::<Value>(json_string.as_str()) {
-        Some(value)
-    } else {
-        None
-    }
+    serde_json::from_str::<Value>(json_string.as_str()).ok()
 }
 
 /// Attempts to deserialize a value, falling back to JSON parsing if the value is a string.
@@ -130,12 +126,15 @@ mod tests {
                     vector_str: vec![],
                 },
             ),
-            (r#"{"value": 42, "vector_int": []}"#, TestStruct {
-                value: 42,
-                optional: None,
-                vector_int: vec![],
-                vector_str: vec![],
-            }),
+            (
+                r#"{"value": 42, "vector_int": []}"#,
+                TestStruct {
+                    value: 42,
+                    optional: None,
+                    vector_int: vec![],
+                    vector_str: vec![],
+                },
+            ),
             (
                 r#"{"value": 42, "optional": "test", "vector_int": []}"#,
                 TestStruct {
@@ -164,15 +163,18 @@ mod tests {
                 r#"{"value": 42, "optional": null, "vector_str": "[\"a\", \"b\", \"c\"]"}"#,
                 vec!["a".to_string(), "b".to_string(), "c".to_string()],
             ),
-            (r#"{"vector_str": "['sub', 'email']"}"#, vec![
-                "sub".to_string(),
-                "email".to_string(),
-            ]),
-            (r#"{"vector_str": "['sub', 'email', 'username']"}"#, vec![
-                "sub".to_string(),
-                "email".to_string(),
-                "username".to_string(),
-            ]),
+            (
+                r#"{"vector_str": "['sub', 'email']"}"#,
+                vec!["sub".to_string(), "email".to_string()],
+            ),
+            (
+                r#"{"vector_str": "['sub', 'email', 'username']"}"#,
+                vec![
+                    "sub".to_string(),
+                    "email".to_string(),
+                    "username".to_string(),
+                ],
+            ),
             (
                 r#"{"value": 42, "optional": null, "vector_str": []}"#,
                 vec![],
@@ -186,6 +188,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::approx_constant)]
     fn test_fallback_deserialize_complex_types() {
         let test_cases = vec![
             (

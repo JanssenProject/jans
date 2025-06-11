@@ -223,8 +223,7 @@ public class AppInitializer {
 
     private void initCustomScripts() {
         List<CustomScriptType> supportedCustomScriptTypes = new ArrayList<>();
-        supportedCustomScriptTypes.add(CustomScriptType.CONFIG_API);
-        customScriptManager.initTimer(supportedCustomScriptTypes);
+        customScriptManager.initTimer(Arrays.asList(CustomScriptType.CONFIG_API, CustomScriptType.PERSISTENCE_EXTENSION));
         log.info("Initialized Custom Scripts!");
     }
 

@@ -14,7 +14,7 @@ import io.jans.orm.model.fido2.UserVerification;
 public class AssertionOptions  {
     private String username;
     private UserVerification userVerification;
-    private String origin;
+    private String rpId;
     private JsonNode extensions;
     private Long timeout;
     @JsonProperty(value = "session_id")
@@ -42,12 +42,12 @@ public class AssertionOptions  {
         this.userVerification = userVerification;
     }
 
-    public String getOrigin() {
-        return origin;
+    public String getRpId() {
+        return rpId;
     }
 
-    public void setOrigin(String origin) {
-        this.origin = origin;
+    public void setRpId(String rpId) {
+        this.rpId = rpId;
     }
 
     public JsonNode getExtensions() {
@@ -92,8 +92,8 @@ public class AssertionOptions  {
 
 	@Override
 	public String toString() {
-		return "AssertionOptions [username=" + username + ", userVerification=" + userVerification + ", origin="
-				+ origin + ", extensions=" + extensions + ", timeout=" + timeout + ", sessionId=" + sessionId
+		return "AssertionOptions [username=" + username + ", userVerification=" + userVerification + ", rpId="
+				+ rpId + ", extensions=" + extensions + ", timeout=" + timeout + ", sessionId=" + sessionId
 				+ ", allowCredentials=" + allowCredentials.toString() + ", credentialId=" + credentialId + "]";
 	}
 

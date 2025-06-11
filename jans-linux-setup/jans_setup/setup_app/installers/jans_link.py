@@ -23,7 +23,7 @@ class JansLinkInstaller(JettyInstaller):
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.install_var = 'install_jans_ldap_link'
+        self.install_var = 'install_link'
         self.register_progess()
 
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
@@ -36,8 +36,6 @@ class JansLinkInstaller(JettyInstaller):
 
     def install(self):
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
-        self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
-
         self.enable()
 
 

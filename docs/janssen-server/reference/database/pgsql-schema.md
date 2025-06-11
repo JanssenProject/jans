@@ -381,7 +381,8 @@ tags:
 | jansPermissionGrantedMap | text                        | None                     | YES  | None    | jans Permission Granted Map                                                  |
 | jansInvolvedClnts        | text                        | None                     | YES  | None    | Involved clients                                                             |
 | deviceSecret             | character varying           | 64                       | YES  | None    | deviceSecret                                                                 |
-| jansSessAttr             | text                        | None                     | YES  | None    | jansSessAttr                                                                 |
+| jansSessAttr             | text                        | None                     | YES  | None    | jansSessAttr - generic attributes in form of key-value                       |
+| jansAttrs                | text                        | None                     | YES  | None    | jansAttrs - predefined attributes (e.g. index in status list)                |
 
 ### jansUmaRPT
 | Field             | Type                        | Character Maximum Length | Null | Default | Comment                        |
@@ -671,4 +672,3 @@ tags:
 | jansLevel          | integer                     | None                     | YES  | None    | Level                                                         |
 | jansRevision       | integer                     | None                     | YES  | None    | Revision                                                      |
 | jansEnabled        | boolean                     | None                     | YES  | None    | Status of the entry, used by many objectclasses               |
-| jansAlias          | jsonb                       | None                     | YES  | None    | jansAlias                                                     |

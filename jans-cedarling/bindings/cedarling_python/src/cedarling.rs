@@ -12,6 +12,7 @@ use pyo3::prelude::*;
 use crate::authorize::authorize_result::AuthorizeResult;
 use crate::authorize::errors::authorize_error_to_py;
 use crate::authorize::request::Request;
+use crate::authorize::request_unsigned::RequestUnsigned;
 use crate::config::bootstrap_config::BootstrapConfig;
 use serde_pyobject::to_pyobject;
 
@@ -81,6 +82,9 @@ use serde_pyobject::to_pyobject;
 ///
 ///     :returns: A list of log entries matching both the request ID and tag, each converted to a Python dictionary.
 ///
+/// .. method:: shut_down(self)
+///
+///     Closes the connections to the Lock Server and pushes all available logs.
 #[derive(Clone)]
 #[pyclass]
 pub struct Cedarling {
@@ -101,6 +105,18 @@ impl Cedarling {
         let cedarling_instance = self
             .inner
             .authorize(request.borrow().to_cedarling()?)
+            .map_err(authorize_error_to_py)?;
+        Ok(cedarling_instance.into())
+    }
+
+    /// Authorize request with unsigned data.
+    fn authorize_unsigned(
+        &self,
+        request: Bound<'_, RequestUnsigned>,
+    ) -> Result<AuthorizeResult, PyErr> {
+        let cedarling_instance = self
+            .inner
+            .authorize_unsigned(request.borrow().to_cedarling()?)
             .map_err(authorize_error_to_py)?;
         Ok(cedarling_instance.into())
     }
@@ -165,6 +181,11 @@ impl Cedarling {
                 .map(|entry| log_entry_to_py(py, entry))
                 .collect::<PyResult<Vec<PyObject>>>()
         })
+    }
+
+    /// Closes the connections to the Lock Server and pushes all available logs.
+    fn shut_down(&self) {
+        self.inner.shut_down();
     }
 }
 

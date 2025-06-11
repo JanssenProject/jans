@@ -107,12 +107,12 @@
       "title-prefixes": []
     }
   },
-  "comp-docker-jans-certmanager": {
+  "comp-docker-jans-cloudtools": {
     "color": "0052CC",
-    "description": "Touching folder /docker-jans-certmanager",
+    "description": "Touching folder /docker-jans-cloudtools",
     "auto-label": {
       "branch": "",
-      "paths": ["docker-jans-certmanager"],
+      "paths": ["docker-jans-cloudtools"],
       "title-prefixes": []
     }
   },
@@ -140,24 +140,6 @@
     "auto-label": {
       "branch": "",
       "paths": ["docker-jans-fido2"],
-      "title-prefixes": []
-    }
-  },
-  "comp-docker-jans-kc-scheduler": {
-    "color": "0052CC",
-    "description": "Touching folder /docker-jans-kc-scheduler",
-    "auto-label": {
-      "branch": "",
-      "paths": ["docker-jans-kc-scheduler"],
-      "title-prefixes": []
-    }
-  },
-  "comp-docker-jans-link": {
-    "color": "0052CC",
-    "description": "Touching folder /docker-jans-link",
-    "auto-label": {
-      "branch": "",
-      "paths": ["docker-jans-link"],
       "title-prefixes": []
     }
   },
@@ -284,24 +266,6 @@
     "auto-label": {
       "branch": "",
       "paths": ["jans-keycloak-integartion"],
-      "title-prefixes": []
-    }
-  },
-  "comp-jans-keycloak-link": {
-    "color": "0052CC",
-    "description": "Touching folder /jans-keycloak-link",
-    "auto-label": {
-      "branch": "",
-      "paths": ["jans-keycloak-link"],
-      "title-prefixes": []
-    }
-  },
-  "comp-jans-link": {
-    "color": "0052CC",
-    "description": "Touching folder /jans-link",
-    "auto-label": {
-      "branch": "",
-      "paths": ["jans-link"],
       "title-prefixes": []
     }
   },

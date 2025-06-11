@@ -379,8 +379,9 @@ class JansVerticalNav():
                 return
             size = self.myparent.output.get_size()
             if self.on_enter:
+                data = self.all_data[self.selectes] if self.all_data else {}
                 self.on_enter(passed=self.data[self.selectes], event=event, size=size,
-                              data=self.all_data[self.selectes], selected=self.selectes, jans_name=self.jans_name)
+                              data=data, selected=self.selectes, jans_name=self.jans_name)
 
         @kb.add('p')
         def _(event):

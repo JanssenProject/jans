@@ -8,7 +8,7 @@ tags:
 
 # Overview
 
-Docker image packaging for Cache Refresh.
+Docker image packaging for Keycloak Link.
 
 ## Versions
 
@@ -97,8 +97,8 @@ The following key-value pairs are the defaults:
 
 ```json
 {
-    "link_log_target": "STDOUT",
-    "link_log_level": "INFO",
+    "keycloak_link_log_target": "STDOUT",
+    "keycloak_link_log_level": "INFO",
     "persistence_log_target": "FILE",
     "persistence_log_level": "INFO",
     "persistence_duration_log_target": "FILE",
@@ -111,7 +111,7 @@ The following key-value pairs are the defaults:
 To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Example:
 
 ```
-{"link_log_target":"STDOUT","persistence_log_target":"STDOUT","enable_stdout_log_prefix":true}
+{"keycloak_link_log_target":"STDOUT","persistence_log_target":"STDOUT","enable_stdout_log_prefix":true}
 ```
 
 ### Hybrid mapping

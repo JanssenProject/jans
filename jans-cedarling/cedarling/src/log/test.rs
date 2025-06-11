@@ -20,8 +20,8 @@ use crate::bootstrap_config::log_config;
 use crate::log::log_strategy::{LogEntryWithClientInfo, LogStrategyLogger};
 use crate::log::stdout_logger::TestWriter;
 
-#[test]
-fn test_new_log_strategy_off() {
+#[tokio::test]
+async fn test_new_log_strategy_off() {
     // Arrange
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::Off,
@@ -29,14 +29,16 @@ fn test_new_log_strategy_off() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config, PdpID::new(), None);
+    let strategy = LogStrategy::new(&config, PdpID::new(), None)
+        .await
+        .expect("build log strategy");
 
     // Assert
     assert!(matches!(strategy.logger(), LogStrategyLogger::Off(_)));
 }
 
-#[test]
-fn test_new_log_strategy_memory() {
+#[tokio::test]
+async fn test_new_log_strategy_memory() {
     // Arrange
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig {
@@ -48,7 +50,9 @@ fn test_new_log_strategy_memory() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config, PdpID::new(), None);
+    let strategy = LogStrategy::new(&config, PdpID::new(), None)
+        .await
+        .expect("build log strategy");
 
     // Assert
     assert!(matches!(
@@ -57,8 +61,8 @@ fn test_new_log_strategy_memory() {
     ));
 }
 
-#[test]
-fn test_new_logstrategy_stdout() {
+#[tokio::test]
+async fn test_new_logstrategy_stdout() {
     // Arrange
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::StdOut,
@@ -66,14 +70,16 @@ fn test_new_logstrategy_stdout() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config, PdpID::new(), None);
+    let strategy = LogStrategy::new(&config, PdpID::new(), None)
+        .await
+        .expect("build log strategy");
 
     // Assert
     assert!(matches!(strategy.logger(), LogStrategyLogger::StdOut(_)));
 }
 
-#[test]
-fn test_log_memory_logger() {
+#[tokio::test]
+async fn test_log_memory_logger() {
     let pdp_id = PdpID::new();
     let app_name = None;
     // Arrange
@@ -85,7 +91,9 @@ fn test_log_memory_logger() {
         }),
         log_level: crate::LogLevel::TRACE,
     };
-    let strategy = LogStrategy::new(&config, pdp_id.clone(), app_name.clone());
+    let strategy = LogStrategy::new(&config, pdp_id, app_name.clone())
+        .await
+        .expect("build LogStrategy");
     let entry = LogEntry {
         base: BaseLogEntry::new(LogType::Decision, gen_uuid7()),
         auth_info: None,
@@ -123,12 +131,12 @@ fn test_log_memory_logger() {
 
     let entry1_json = json!(LogEntryWithClientInfo::from_loggable(
         entry1.clone(),
-        pdp_id.clone(),
+        pdp_id,
         app_name.clone()
     ));
     let entry2_json = json!(LogEntryWithClientInfo::from_loggable(
         entry2.clone(),
-        pdp_id.clone(),
+        pdp_id,
         app_name.clone()
     ));
 
@@ -178,7 +186,7 @@ fn test_log_stdout_logger() {
     // Serialize the log entry to JSON
     let json_str = json!(LogEntryWithClientInfo::from_loggable(
         log_entry.clone(),
-        pdp_id.clone(),
+        pdp_id,
         app_name.clone()
     ))
     .to_string();
@@ -187,7 +195,7 @@ fn test_log_stdout_logger() {
     let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
     let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
     let strategy =
-        LogStrategy::new_with_logger(LogStrategyLogger::StdOut(logger), pdp_id.clone(), app_name);
+        LogStrategy::new_with_logger(LogStrategyLogger::StdOut(logger), pdp_id, app_name, None);
 
     // Act
     strategy.log_any(log_entry);
@@ -200,7 +208,7 @@ fn test_log_stdout_logger() {
 #[test]
 fn test_log_storage_for_only_writer() {
     let logger = LogStrategyLogger::Off(NopLogger);
-    let strategy = LogStrategy::new_with_logger(logger, PdpID::new(), None);
+    let strategy = LogStrategy::new_with_logger(logger, PdpID::new(), None, None);
 
     // make same test as for the memory logger
     // create log entries
