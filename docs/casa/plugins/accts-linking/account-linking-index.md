@@ -61,7 +61,7 @@ In the following, it is assumed you have a VM-based installation of Jans Server 
     
 1. Download the Casa accounts linking Agama project `https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/replace-janssen-version/acct-linking-agama-replace-janssen-version-project.zip`
 
-1. Transfer the two zip files to a location in the server, deploy both archives using TUI (Agama menu)
+1. Transfer the two zip files to a location in the server, deploy both archives separately using TUI (Agama menu -> "Add a New Project" ). So, there will be two projects: `casa-account-linking` and `agama-inbound-oauth`. 
 
 1. Finally restart the authentication server
 
