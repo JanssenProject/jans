@@ -9336,6 +9336,8 @@ components:
           type: string
         selected:
           type: boolean
+        whitePagesCanView:
+          type: boolean
         userCanView:
           type: boolean
         userCanEdit:
@@ -9344,11 +9346,9 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string

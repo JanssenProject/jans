@@ -106,7 +106,7 @@ public class JansAttribute extends Entry implements Serializable {
     @AttributeName(name = "jansHideOnDiscovery")
     private Boolean jansHideOnDiscovery;
     
-    @AttributeName(name = "required")
+    @AttributeName(name = "jansRequired")
     private Boolean required;
 
 	@Transient
