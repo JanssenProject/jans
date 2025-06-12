@@ -20,6 +20,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import javax.net.ssl.SSLContext;
 
@@ -65,6 +66,10 @@ public abstract class BaseHttpService implements Serializable {
 
 	private static final long serialVersionUID = -2398422090669045605L;
 
+	public static final String HTTPCLIENT_MAX_TOTAL = "httpclient.maxTotal";
+	public static final String HTTPCLIENT_MAX_PER_ROUTE = "httpclient.maxPerRoute";
+	public static final String HTTPCLIENT_VALIDATE_AFTER_INACTIVITY = "httpclient.validateAfterInactivity";
+
 	@Inject
 	private Logger log;
 
@@ -78,6 +83,14 @@ public abstract class BaseHttpService implements Serializable {
         connectionManager.setMaxTotal(200); // Increase max total connection to 200
         connectionManager.setDefaultMaxPerRoute(50); // Increase default max connection per route to 50
 
+        // Change defaults if supplied
+        getIntegerConnectionProperty(HTTPCLIENT_MAX_TOTAL).ifPresent(connectionManager::setMaxTotal);
+        getIntegerConnectionProperty(HTTPCLIENT_MAX_PER_ROUTE).ifPresent(connectionManager::setDefaultMaxPerRoute);
+        getIntegerConnectionProperty(HTTPCLIENT_VALIDATE_AFTER_INACTIVITY).ifPresent(connectionManager::setValidateAfterInactivity);
+
+        log.debug("Using connection properties: maxTotalConnections={}, maxPerRoutConnections={}, validateafterinactivity={}",
+        		connectionManager.getMaxTotal(), connectionManager.getDefaultMaxPerRoute(), connectionManager.getValidateAfterInactivity());
+        
         this.base64 = new Base64();
 	}
 
@@ -342,4 +355,35 @@ public abstract class BaseHttpService implements Serializable {
 		return buildDefaultRoutePlanner(proxy, -1, null);
     }
 
+	public Map<String, Integer> getApplicationConnectionProperties() {
+		return null;
+	}
+
+	private Optional<Integer> getIntegerConnectionProperty(String name) {
+		// Get value from java parameters first
+		Optional<Integer> value = Optional.ofNullable(System.getProperty(name)).map(prop -> {
+			try {
+				return Integer.parseInt(prop);
+			} catch (Exception e) {
+				log.error("Failed to parse '{}' to integer value", prop);
+				return null;
+			}
+		});
+
+		if (value.isPresent()) {
+			return value;
+		}
+
+		// Try to get value from java parameters
+		Map<String, Integer> appProps = getApplicationConnectionProperties();
+		if (appProps == null) {
+			return Optional.empty();
+		}
+
+		if (appProps.containsKey(name) && (appProps.get(name) != 0)) {
+			value = Optional.ofNullable(appProps.get(name));
+		}
+
+		return value;
+	}
 }
