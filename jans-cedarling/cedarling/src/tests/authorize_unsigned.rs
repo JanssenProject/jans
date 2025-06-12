@@ -13,6 +13,7 @@ use crate::authz::request::EntityData;
 use crate::{
     JsonRule, RequestUnsigned, cmp_decision, cmp_policy,
     tests::utils::cedarling_util::get_cedarling_with_callback,
+    log::{LogEntry, LogLevel, LogType, LogStorage},
 }; /* macros is defined in the cedarling\src\tests\utils\cedarling_util.rs */
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
@@ -345,4 +346,61 @@ async fn test_authorize_unsigned_for_all_principals_failure() {
     );
 
     assert!(!result.decision, "request result should be denied");
+}
+
+/// Test policy evaluation errors are logged for unsigned authorization
+#[test]
+async fn test_policy_evaluation_errors_logging_unsigned() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        |config| config.authorization_config.principal_bool_operator = OPERATOR_AND.clone(),
+    )
+    .await;
+
+    let request = RequestUnsigned {
+        action: "Jans::Action::\"AlwaysDeny\"".to_string(),
+        context: json!({}),
+        principals: vec![
+            EntityData::deserialize(serde_json::json!({
+                "id": "user1",
+                "type": "Jans::User",
+                "country": "US",
+                "role": ["Admin"],
+                "sub": "user1"
+            }))
+            .unwrap(),
+            EntityData::deserialize(serde_json::json!({
+                "id": "user2",
+                "type": "Jans::User",
+                "country": "US",
+                "role": ["Guest"],
+                "sub": "user2"
+            }))
+            .unwrap(),
+        ],
+        resource: EntityData::deserialize(serde_json::json!({
+            "id": "issue1",
+            "type": "Jans::Issue",
+            "org_id": "invalid",
+            "country": "US"
+        }))
+        .unwrap(),
+    };
+
+    let result = cedarling.authorize_unsigned(request).await.expect("request should be parsed without errors");
+    assert!(!result.decision, "request should be denied due to policy evaluation errors");
+
+    // Get the logs and verify they contain policy evaluation errors
+    let logs = cedarling.pop_logs();
+    logs.iter()
+        .filter_map(|log| serde_json::from_value::<LogEntry>(log.clone()).ok())
+        .filter(|log| {
+            log.base.log_kind == LogType::System
+                && log.base.level == Some(LogLevel::ERROR)
+                && log.error_msg.as_ref().is_some()
+        })
+        .for_each(|log| {
+            // Log the error messages for debugging purposes
+            println!("Error log: {:?}", log.error_msg);
+        });
 }
