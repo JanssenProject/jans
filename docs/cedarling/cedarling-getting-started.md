@@ -18,6 +18,7 @@ You can integrate Cedarling into your application using the following language l
 - [Rust](./getting-started/rust.md)
 - [Kotlin](./getting-started/kotlin.md)
 - [Swift](./getting-started/swift.md)
+- [Golang](./getting-started/go.md)
 
 Alternatively, you can use the [Cedarling Sidecar](./cedarling-overview.md) for a drop-in deployment.
 
@@ -95,6 +96,19 @@ The bootstrap configuration and policy store directly influence how Cedarling pe
     """
 
     let cedarling = try Cedarling.loadFromJson(config: bootstrapConfig)
+    ```
+
+=== "Go"
+
+    ```go
+
+    config := map[string]any{
+        "CEDARLING_APPLICATION_NAME": "My App",
+    }
+    instance, err := cedarling_go.NewCedarling(config)
+    if err != nil {
+        panic!("Error during init: %s", err)
+    }
     ```
 
 ### Authorization
@@ -327,6 +341,49 @@ Cedarling currently provides two modes of authorization:
     )
     ```
 
+=== "Go"
+
+    ```go
+
+    tokens := map[string]string {
+        "access_token": "<access_token>",
+        "id_token": "<id_token>",
+        "userinfo_token": "<userinfo_token>"
+    }
+    action := "Jans::Action::\"Read\""
+    resource := cedarling_go.EntityData{
+        EntityType: "Jans::Application",
+        ID: "app_id_001",
+        Payload: map[string]any{
+            "name": "Some Application",
+            "url": map[string]string{
+                "host": "example.com",
+                "path": "/admin-dashboard",
+                "protocol": "https",
+            },
+        },
+    }
+    context := map[string]any{
+        "current_time": time.Now().Unix(),
+        "device_health": ["Healthy"],
+        "fraud_indicators": ["Allowed"],
+        "geolocation": ["America"],
+        "network": "127.0.0.1",
+        "network_type": "Local",
+        "operating_system": "Linux",
+    }
+    request := cedarling_go.Request{
+        Tokens: tokens,
+        Action: action,
+        Resource: resource,
+        Context: context,
+    }
+	result, err := cedarling_instance.Authorize(request)
+    if err != nil {
+        panic!(err)
+    }
+    ```
+
 **Unsigned Authorization**
 - Accepts the **Principal** directly without requiring a JWT.
 - This makes authorization decisions by passing a set of **Principals** directly.
@@ -342,8 +399,7 @@ Cedarling supports logging of both **decision** and **system** events, useful fo
 
 You're now ready to dive deeper into Cedarling. From here, you could either:
 
-- [Pick a language](#getting-started-with-cedarling) and get familiar with Cedarling through the language of your choice.
 - See how you can use [TBAC with Cedarling](./cedarling-quick-start-tbac.md).
 - Explore how to use [Cedarling's Unsigned interface](./cedarling-quick-start-unsigned.md).
 - Use the [Cedarling Sidecar](./cedarling-sidecar-overview.md) for a quick, zero-code deployment.
-- Learn more about [why Cedarling exists](./cedarling-overview.md) and the problems it solves.
+- Learn more about [why Cedarling exists](./README.md#why-zero-trust-needs-cedarlings) and the problems it solves.
