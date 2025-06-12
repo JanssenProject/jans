@@ -31,7 +31,9 @@ commercial distribution of Janssen Project Components called
 
 **Contribute**: [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/) | [Community Docs](https://docs.jans.io/head/governance/charter/) | [Developer Guides](https://docs.jans.io/head/CODE_OF_CONDUCT/)
 
-**Social**: [Linkedin](https://www.linkedin.com/company/janssen-project)
+**Social**: [Linkedin](https://www.linkedin.com/company/janssen-project) | [YouTube](https://www.youtube.com/@JanssenProject)
+
+**Learn**: [Gluu Academy](https://learn.gluu.org/)
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/JanssenProject/jans/badge)](https://scorecard.dev/viewer/?uri=github.com/JanssenProject/jans)
@@ -76,12 +78,6 @@ A BIG thanks to all the amazing contributors!! 👏 👏
 Building a diverse and inclusive community is an important goal. Please let us know what we
 can do to make you feel more welcome, no matter what you want to contribute.
 
-There are many ways you can contribute. Join this amazing team!
-
-<a href="https://github.com/JanssenProject/jans/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=JanssenProject/jans" />
-</a>
-
 ### Code of Conduct / Contribution Guidelines / Security
 
 * [Janssen code of conduct](https://docs.jans.io/head/CODE_OF_CONDUCT/) ensures
@@ -117,41 +113,6 @@ Below is the list of current mega releases that hold information about every sin
 - [v1.7.0](https://github.com/JanssenProject/jans/releases/tag/v1.7.0)
 - [v1.6.0](https://github.com/JanssenProject/jans/releases/tag/v1.6.0)
 - [v1.5.0](https://github.com/JanssenProject/jans/releases/tag/v1.5.0)
-- [v1.4.0](https://github.com/JanssenProject/jans/releases/tag/v1.4.0)
-- [v1.3.0](https://github.com/JanssenProject/jans/releases/tag/v1.3.0)
-- [v1.2.0](https://github.com/JanssenProject/jans/releases/tag/v1.2.0)
-- [v1.1.6](https://github.com/JanssenProject/jans/releases/tag/v1.1.6)
-- [v1.1.5](https://github.com/JanssenProject/jans/releases/tag/v1.1.5)
-- [v1.1.4](https://github.com/JanssenProject/jans/releases/tag/v1.1.4)
-- [v1.1.3](https://github.com/JanssenProject/jans/releases/tag/v1.1.3)
-- [v1.1.2](https://github.com/JanssenProject/jans/releases/tag/v1.1.2)
-- [v1.1.1](https://github.com/JanssenProject/jans/releases/tag/v1.1.1)
-- [v1.1.0](https://github.com/JanssenProject/jans/releases/tag/v1.1.0)
-- [v1.0.22](https://github.com/JanssenProject/jans/releases/tag/v1.0.22)
-- [v1.0.21](https://github.com/JanssenProject/jans/releases/tag/v1.0.21)
-- [v1.0.20](https://github.com/JanssenProject/jans/releases/tag/v1.0.20)
-- [v1.0.19](https://github.com/JanssenProject/jans/releases/tag/v1.0.19)
-- [v1.0.18](https://github.com/JanssenProject/jans/releases/tag/v1.0.18)
-- [v1.0.17](https://github.com/JanssenProject/jans/releases/tag/v1.0.17)
-- [v1.0.16](https://github.com/JanssenProject/jans/releases/tag/v1.0.16)
-- [v1.0.15](https://github.com/JanssenProject/jans/releases/tag/v1.0.15)
-- [v1.0.14](https://github.com/JanssenProject/jans/releases/tag/v1.0.14)
-- [v1.0.13](https://github.com/JanssenProject/jans/releases/tag/v1.0.13)
-- [v1.0.12](https://github.com/JanssenProject/jans/releases/tag/v1.0.12)
-- [v1.0.11](https://github.com/JanssenProject/jans/releases/tag/v1.0.11)
-- [v1.0.10](https://github.com/JanssenProject/jans/releases/tag/v1.0.10)
-- [v1.0.9](https://github.com/JanssenProject/jans/releases/tag/v1.0.9)
-- [v1.0.8](https://github.com/JanssenProject/jans/releases/tag/v1.0.8)
-- [v1.0.7](https://github.com/JanssenProject/jans/releases/tag/v1.0.7)
-- [v1.0.6](https://github.com/JanssenProject/jans/releases/tag/v1.0.6)
-- [v1.0.5](https://github.com/JanssenProject/jans/releases/tag/v1.0.5)
-- [v1.0.4](https://github.com/JanssenProject/jans/releases/tag/v1.0.4)
-- [v1.0.3](https://github.com/JanssenProject/jans/releases/tag/v1.0.3)
-- [v1.0.2](https://github.com/JanssenProject/jans/releases/tag/v1.0.2)
-- [v1.0.1](https://github.com/JanssenProject/jans/releases/tag/v1.0.1)
-- [v1.0.0](https://github.com/JanssenProject/jans/releases/tag/v1.0.0)
-- [v1.0.0-beta.16](https://github.com/JanssenProject/jans/releases/tag/v1.0.0-beta.16)
-- [v1.0.0-beta.15](https://github.com/JanssenProject/jans/releases/tag/v1.0.0-beta.15)
 
 ### Janssen History
 
