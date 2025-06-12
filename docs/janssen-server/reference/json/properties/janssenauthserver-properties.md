@@ -271,7 +271,10 @@ tags:
 | userInfoEndpoint | The User Info endpoint URL | [Details](#userinfoendpoint) |
 | userInfoSigningAlgValuesSupported | This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT | [Details](#userinfosigningalgvaluessupported) |
 | webKeysStorage | Web Key Storage Type | [Details](#webkeysstorage) |
-
+| connectionServiceConfiguration | Group for HttpService2 network configuration | [Details](#connectionserviceconfiguration) |
+| - maxTotal | Set the maximum number of total open connections | [Details](#maxtotal) |
+| - maxPerRoute | Set the maximum number of concurrent connections per route | [Details](#maxperroute) |
+| - validateAfterInactivity | Defines period of inactivity in milliseconds after which persistent connections must be re-validated prior to being leased to the consumer | [Details] (#validateafterinactivity) |
 
 ### accessTokenLifetime
 
@@ -2621,4 +2624,39 @@ tags:
 
 - Default value: None
 
+
+### connectionserviceconfiguration
+
+- Description: Group for HttpService2 network configuration
+
+- Required: No
+
+- Default value: None
+
+
+### maxtotal
+
+- Description: Set the maximum number of total open connections
+
+- Required: No
+
+- Default value: 200
+
+
+### maxperroute
+
+- Description: Set the maximum number of concurrent connections per route
+
+- Required: No
+
+- Default value: 50
+
+
+### validateafterinactivity
+
+- Description: Defines period of inactivity in milliseconds after which persistent connections must be re-validated prior to being leased to the consumer
+
+- Required: No
+
+- Default value: 2000
 

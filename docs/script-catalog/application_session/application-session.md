@@ -7,8 +7,6 @@ tags:
 
 # Application Session Script Guide
 
-## Overview
-
 The **Jans-Auth** server allows you to modify the session flow through this script.
 
 ## Interface
