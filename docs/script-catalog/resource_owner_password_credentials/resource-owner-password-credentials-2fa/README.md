@@ -1,8 +1,7 @@
 # 2FA Resource Owner Password Script Using Twilio
 
-## Overview 
 
-  This resource owner password script implements two factor 
+This resource owner password script implements two factor 
 authentication using twilio. This could easily be adjusted 
 for other 2FA use cases (e.g. using a Yubikey or a magic link).
 

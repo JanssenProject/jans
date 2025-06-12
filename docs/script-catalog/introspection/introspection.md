@@ -8,7 +8,6 @@ tags:
 
 # Introspection Script Guide
 
-## Overview
 
 In OAuth 2.0 [RFC6749], the contents of tokens are opaque to clients. However, there is still a large amount of metadata that may be attached to a token, such as its current validity, approved scopes, and information about the context in which the token was issued. These pieces of information are often vital to protected resources making authorization decisions based on the tokens being presented. Token introspection allows a protected resource to query this information. Introspection scripts allows to modify response of Introspection Endpoint [spec](https://datatracker.ietf.org/doc/html/rfc7662) and present additional meta information surrounding the token.
 

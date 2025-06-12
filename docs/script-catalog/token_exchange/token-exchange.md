@@ -7,8 +7,6 @@ tags:
 
 # Token Exchange Custom Script
 
-## Overview
-
 The Jans-Auth server supports [OAuth 2.0 Token Exchange (RFC 8693)](https://tools.ietf.org/html/rfc8693), 
 which enables clients to exchange one type of token for another. 
 This capability allows scenarios such as delegation, constrained token issuance, and token transformation

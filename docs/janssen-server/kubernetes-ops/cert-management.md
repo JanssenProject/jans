@@ -8,7 +8,6 @@ tags:
 ---
 # Certificate Management
 
-## Overview
 
 Rotating Certificates and Keys in Kubernetes setup
 

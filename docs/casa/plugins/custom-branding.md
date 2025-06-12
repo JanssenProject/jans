@@ -7,7 +7,6 @@ tags:
 
 # Custom Branding Plugin
 
-## Overview
 This plugin allows admins to apply a design customization by choosing colors, favicon, logo, and footer text to match their company's look and feel. Alternatively, they can supply all assets (images and CSS files) externally to cover more demanding needs.
 
 ## Requirements

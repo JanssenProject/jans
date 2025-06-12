@@ -7,7 +7,7 @@ tags:
 
 # CIBA End User Notification Script (EndUserNotification)
 
-## Overview
+
 
 The Jans-Auth server implements [OAuth 2.0 Rich Authorization Requests](https://datatracker.ietf.org/doc/html/rfc9396).
 This script is used to control/customize CIBA notifications.
