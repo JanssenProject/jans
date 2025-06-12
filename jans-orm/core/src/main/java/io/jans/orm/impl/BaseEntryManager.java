@@ -47,6 +47,7 @@ import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.LanguageTag;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.Password;
 import io.jans.orm.annotation.SchemaEntry;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.InvalidArgumentException;
@@ -56,6 +57,7 @@ import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
 import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.model.AttributeType;
+import io.jans.orm.model.PasswordAttributeData;
 import io.jans.orm.model.PersistenceMetadata;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.LocalizedString;
@@ -1675,7 +1677,13 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		Annotation ldapJsonObject = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
 				JsonObject.class);
 		boolean jsonObject = ldapJsonObject != null;
+
 		AttributeData attribute = getAttributeData(propertyName, ldapAttributeName, getter, entry, multiValued, jsonObject);
+
+		Annotation passwordObject = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), Password.class);
+		if (passwordObject != null) {
+			attribute = new PasswordAttributeData(attribute, ((Password) passwordObject).skipHashed());
+		}
 
 		return attribute;
 	}

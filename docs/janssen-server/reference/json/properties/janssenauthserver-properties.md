@@ -274,7 +274,7 @@ tags:
 | connectionServiceConfiguration | Group for HttpService2 network configuration | [Details](#connectionserviceconfiguration) |
 | - maxTotal | Set the maximum number of total open connections | [Details](#maxtotal) |
 | - maxPerRoute | Set the maximum number of concurrent connections per route | [Details](#maxperroute) |
-| - validateAfterInactivity | Defines period of inactivity in milliseconds after which persistent connections must be re-validated prior to being leased to the consumer | [Details] (#validateafterinactivity) |
+| - validateAfterInactivity | Defines period of inactivity in milliseconds after which persistent connections must be re-validated prior to being leased to the consumer | [Details](#validateafterinactivity) |
 
 ### accessTokenLifetime
 
