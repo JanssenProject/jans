@@ -6,7 +6,6 @@ tags:
 
 # Accounts Linking Plugin
 
-## Overview
 
 This plugin allows users to "link" their local Jans account with existing accounts at third-party identity providers like OIDC OPs and social sites, e.g. Apple, Facebook, Google, etc.
 

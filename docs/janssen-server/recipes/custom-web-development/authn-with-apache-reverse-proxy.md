@@ -8,16 +8,18 @@ tags:
   - proxy
 ---
 
+# Auth With Apache Reverse Proxy
+
 ## Contents:
 
-- [Overview](#overview)
+
 - [Component Setup](#component-setup)
 - [Configure Janssen server](#configure-janssen-server)
 - [Configure Protected Resource](#configure-protected-resource)
 - [Configure openidc module](#configure-openidc-module)
 - [Test Complete Flow](#test-complete-flow)
 
-## Overview
+
 
 This guide describes steps to enable authentication for web applications using the Janssen server which is an OpenID Connect Provider (OP). 
 
