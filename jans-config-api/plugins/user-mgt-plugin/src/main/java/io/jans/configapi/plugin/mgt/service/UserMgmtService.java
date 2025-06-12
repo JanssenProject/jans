@@ -249,7 +249,7 @@ public class UserMgmtService {
         
         for (CustomObjectAttribute attribute : customAttributes) {
             CustomObjectAttribute existingAttribute = userService.getCustomAttribute(user, attribute.getName());
-            logger.debug("Existing CustomAttributes with existingAttribute.getName():{} ", existingAttribute.getName());
+            logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
 
             // add
             if (existingAttribute == null) {
@@ -334,13 +334,17 @@ public class UserMgmtService {
         List<String> mandatoryAttributes = authUtil.getUserMandatoryAttributes();
         logger.debug("mandatoryAttributess :{}, excludeAttributes:{} ", mandatoryAttributes, excludeAttributes);
 
-        List<String> requiredAttributes =  getJansAttributeName(this.getRequiredAttributes());
+        List<String> requiredAttributes = getJansAttributeName(this.getRequiredAttributes());
         logger.debug("requiredAttributes:{} ", requiredAttributes);
-  
-        mandatoryAttributes.addAll(requiredAttributes);
-        logger.debug("Final mandatoryAttributes after adding requiredAttributes is {} ", mandatoryAttributes);
-        
-        
+
+        if (requiredAttributes != null && !requiredAttributes.isEmpty()) {
+            if (mandatoryAttributes == null) {
+                mandatoryAttributes = new ArrayList<>();
+            }
+            mandatoryAttributes.addAll(requiredAttributes);
+        }
+        logger.info("Final mandatoryAttributes after adding requiredAttributes is {} ", mandatoryAttributes);
+
         StringBuilder missingAttributes = new StringBuilder();
 
         if (mandatoryAttributes == null || mandatoryAttributes.isEmpty()) {
@@ -520,14 +524,17 @@ public class UserMgmtService {
     public List<JansAttribute> getRequiredAttributes() {
         List<JansAttribute> jansAttributes = null;
         try {
-            Filter requiredFilter = Filter.createEqualityFilter("required", true);
-            logger.info("requiredFilter:{}", requiredFilter);
+            Filter requiredFilter = Filter.createANDFilter(
+                    Filter.createEqualityFilter("jansRequired", true),
+                    Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "active"));
+
+                    logger.info("requiredFilter:{}", requiredFilter);
             jansAttributes = persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                     requiredFilter);
             logger.info("Required JansAttribute jansAttributes:{}", jansAttributes);
 
         } catch (Exception ex) {
-            logger.error("Failed to load required attribute, ex:{}", ex);
+            logger.error("Failed to load required attribute", ex);
         }
         return jansAttributes;
     }
