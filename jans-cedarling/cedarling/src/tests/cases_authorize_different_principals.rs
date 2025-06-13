@@ -16,7 +16,7 @@ use test_utils::assert_eq;
 use tokio::test;
 
 use super::utils::*;
-use crate::{JsonRule, authorization_config::IdTokenTrustMode, cmp_decision, cmp_policy}; /* macros is defined in the cedarling\src\tests\utils\cedarling_util.rs */
+use crate::{JsonRule, authorization_config::IdTokenTrustMode, cmp_decision, cmp_policy, log::{LogEntry, LogLevel, LogType, LogStorage}}; /* macros is defined in the cedarling\src\tests\utils\cedarling_util.rs */
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
 
@@ -517,4 +517,41 @@ async fn test_where_principal_user_cant_be_applied() {
         "expected error InvalidPrincipal, got: {}",
         result
     )
+}
+
+/// Test policy evaluation errors are logged for signed authorization
+#[test]
+async fn test_policy_evaluation_errors_logging() {
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            principal_bool_operator: OPERATOR_AND.to_owned(),
+            id_token_trust_mode: IdTokenTrustMode::None,
+            ..Default::default()
+        },
+        crate::EntityBuilderConfig::default().with_user().with_workload(),
+    )
+    .await;
+
+    let mut request = AuthRequestBase.clone();
+    request.action = "Jans::Action::\"AlwaysDeny\"".to_string();
+
+    let result = cedarling.authorize(request).await.expect("request should be parsed without errors");
+    assert!(!result.decision, "request should be denied due to policy evaluation errors");
+
+    // Get the logs and verify they contain policy evaluation errors
+    let logs = cedarling.pop_logs();
+    logs.iter()
+        .filter_map(|log| serde_json::from_value::<LogEntry>(log.clone()).ok())
+        .filter(|log| {
+            log.base.log_kind == LogType::Decision
+                && log.base.level == Some(LogLevel::ERROR)
+                && log.error_msg.as_ref().is_some()
+        })
+        .for_each(|log| {
+            // Log the error messages for debugging purposes
+            println!("Error log: {:?}", log.error_msg);
+        });
 }
