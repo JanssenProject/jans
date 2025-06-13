@@ -52,6 +52,7 @@ We need to initialize Cedarling first.
         import uniffi.cedarling_uniffi.*;
         ...
         
+        //In production, bootstrap config should load dynamically.
         String bootstrapJsonStr = """
             {
             "CEDARLING_APPLICATION_NAME":   "MyApp",
