@@ -1,7 +1,7 @@
 ---
 tags:
   - cedarling
-  - python
+  - java
   - getting-started
 ---
 
