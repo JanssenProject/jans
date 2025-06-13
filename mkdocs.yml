@@ -502,6 +502,7 @@ nav:
     - jans-cedarling:
       - contribute/implementation-design/jans-cedarling-design/README.md
       - ADR: contribute/implementation-design/jans-cedarling-design/adr/README.md
+      - Cedarling Technical Overview: contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview.md
   - CI-CD:
     #- GitHub CI: contribute/ci-cd/github-ci.md
     - Release Process: contribute/ci-cd/release-process.md
