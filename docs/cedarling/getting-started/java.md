@@ -12,13 +12,13 @@ tags:
 
 ## Installation 
 
-## Building from Source
+### Building from Source
 
-Refer following [guide](../uniffi/cedarling-kotlin.md#building-from-source) for steps to build the Java binding from source.
+Refer to the following [guide](../uniffi/cedarling-kotlin.md#building-from-source) for steps to build the Java binding from source.
 
-## Using Cedarling-java Maven dependency
+### Using Cedarling-java Maven dependency
 
-### Prerequisites
+#### Prerequisites
 
 - Java Development Kit (JDK): version 11 or higher
 
@@ -50,7 +50,8 @@ We need to initialize Cedarling first.
 ```java
 
         import uniffi.cedarling_uniffi.*;
-
+        ...
+        
         String bootstrapJsonStr = """
             {
             "CEDARLING_APPLICATION_NAME":   "MyApp",
@@ -67,9 +68,9 @@ We need to initialize Cedarling first.
             CedarlingAdapter cedarlingAdapter = new CedarlingAdapter();
             cedarlingAdapter.loadFromJson(bootstrapJsonStr);
         } catch (CedarlingException e) {
-            log.error("Unable to initialize Cedarling" + e.getMessage());
+            System.out.println("Unable to initialize Cedarling" + e.getMessage());
         } catch (Exception e) {
-                log.error("Unable to initialize Cedarling" + e.getMessage());
+            System.out.println("Unable to initialize Cedarling" + e.getMessage());
         }
 
 ```
@@ -167,7 +168,7 @@ Finally, call the `authorize` function to check whether the principals are allow
         """;
 ```
 
-Similarly, create and initialize String variables with action, resource, context as done in [Token-Based Authorization](token-based-authorization).
+Similarly, create and initialize String variables with action, resource, context as done in [Token-Based Authorization](#token-based-authorization).
 
 **2. Authorize**
 
