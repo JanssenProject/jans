@@ -601,7 +601,12 @@ It returns all the information of the Jans Authorization server.
     "code",
     "id_token",
     "token"
-  ]
+  ],
+  "connectionServiceConfiguration": {
+    "maxTotal": 200,
+    "maxPerRoute": 50,
+    "validateAfterInactivity": 0
+  }  
 }
 
 ```

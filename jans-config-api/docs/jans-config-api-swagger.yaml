@@ -9328,6 +9328,8 @@ components:
           type: boolean
         jansHideOnDiscovery:
           type: boolean
+        required:
+          type: boolean
         custom:
           type: boolean
         attributeValidation:
@@ -9336,17 +9338,17 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
+        userCanAccess:
           type: boolean
-        userCanEdit:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
+        userCanView:
           type: boolean
-        adminCanAccess:
+        userCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -10232,6 +10234,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        connectionServiceConfiguration:
+          $ref: '#/components/schemas/ConnectionServiceConfiguration'
         fapi:
           type: boolean
         allResponseTypesSupported:
@@ -10323,6 +10327,18 @@ components:
           type: string
           xml:
             name: base-dn
+    ConnectionServiceConfiguration:
+      type: object
+      properties:
+        maxTotal:
+          type: integer
+          format: int32
+        maxPerRoute:
+          type: integer
+          format: int32
+        validateAfterInactivity:
+          type: integer
+          format: int32
     CorsConfigurationFilter:
       type: object
       properties:
@@ -11995,6 +12011,8 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
+        accessToken:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -12004,8 +12022,6 @@ components:
           - REFRESH_TOKEN
           - AUTHORIZATION_CODE
           - TX_TOKEN
-        accessToken:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
