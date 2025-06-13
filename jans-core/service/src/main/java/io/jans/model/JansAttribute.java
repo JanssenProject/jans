@@ -105,6 +105,9 @@ public class JansAttribute extends Entry implements Serializable {
 
     @AttributeName(name = "jansHideOnDiscovery")
     private Boolean jansHideOnDiscovery;
+    
+    @AttributeName(name = "jansRequired")
+    private Boolean required;
 
 	@Transient
 	private boolean custom;
@@ -343,8 +346,16 @@ public class JansAttribute extends Entry implements Serializable {
     public void setJansHideOnDiscovery(Boolean jansHideOnDiscovery) {
         this.jansHideOnDiscovery = jansHideOnDiscovery;
     }
+   
+    public Boolean getRequired() {
+        return required;
+    }
 
-	/*
+    public void setRequired(Boolean required) {
+        this.required = required;
+    }
+
+    /*
 	 * (non-Javadoc)
 	 * 
 	 * @see java.lang.Object#hashCode()
@@ -365,6 +376,7 @@ public class JansAttribute extends Entry implements Serializable {
 		result = prime * result + ((claimName == null) ? 0 : claimName.hashCode());
 		result = prime * result + ((oxMultiValuedAttribute == null) ? 0 : oxMultiValuedAttribute.hashCode());
 		result = prime * result + ((scimCustomAttr == null) ? 0 : scimCustomAttr.hashCode());
+	    result = prime * result + ((required == null) ? 0 : required.hashCode());
 		result = prime * result + ((saml1Uri == null) ? 0 : saml1Uri.hashCode());
 		result = prime * result + ((saml2Uri == null) ? 0 : saml2Uri.hashCode());
 		result = prime * result + ((seeAlso == null) ? 0 : seeAlso.hashCode());
