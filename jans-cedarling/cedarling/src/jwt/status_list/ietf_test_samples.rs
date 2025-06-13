@@ -1,0 +1,440 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+//! The tests contained here are the examples in the [Token Status List IETF draft v10](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-test-vectors-for-status-lis).
+//!
+//! In the event that there is a new RFC, the tests in the module should be checked and
+//! updated if necessary.
+
+use super::*;
+
+#[test]
+fn test_get_status_1_bit() {
+    let status_list_src = "eNrt3AENwCAMAEGogklACtKQPg9LugC9k_ACvreiogEAAKkeCQAAAAAAAAAAAAAAAAAAAIBylgQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAXG9IAAAAAAAAAPwsJAAAAAAAAAAAAAAAvhsSAAAAAAAAAAAA7KpLAAAAAAAAAAAAAAAAAAAAAJsLCQAAAAAAAAAAADjelAAAAAAAAAAAKjDMAQAAAACAZC8L2AEb";
+
+    let status_list = StatusList::parse(status_list_src, 1).unwrap();
+
+    let cases = [
+        (0, 1),
+        (1993, 1),
+        (25460, 1),
+        (159495, 1),
+        (495669, 1),
+        (554353, 1),
+        (645645, 1),
+        (723232, 1),
+        (854545, 1),
+        (934534, 1),
+        (1000345, 1),
+    ];
+
+    for (idx, expected_status) in cases.into_iter() {
+        let got_status = status_list
+            .get_status(idx)
+            .unwrap_or_else(|_| panic!("failed to get status for idx: {}", idx));
+        assert_eq!(
+            got_status,
+            expected_status.into(),
+            "assertion failed for idx: {}",
+            idx
+        );
+    }
+}
+
+#[test]
+fn test_get_status_2_bit() {
+    let status_list_src = "eNrt2zENACEQAEEuoaBABP5VIO01fCjIHTMStt9ovGVIAAAAAABAbiEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEB5WwIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAID0ugQAAAAAAAAAAAAAAAAAQG12SgAAAAAAAAAAAAAAAAAAAAAAAAAAAOCSIQEAAAAAAAAAAAAAAAAAAAAAAAD8ExIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwJEuAQAAAAAAAAAAAAAAAAAAAAAAAMB9SwIAAAAAAAAAAAAAAAAAAACoYUoAAAAAAAAAAAAAAEBqH81gAQw";
+
+    let status_list = StatusList::parse(status_list_src, 2).unwrap();
+
+    let cases = [
+        (0, 1),
+        (1993, 2),
+        (25460, 1),
+        (159495, 3),
+        (495669, 1),
+        (554353, 1),
+        (645645, 2),
+        (723232, 1),
+        (854545, 1),
+        (934534, 2),
+        (1000345, 3),
+    ];
+
+    for (idx, expected_status) in cases.into_iter() {
+        let got_status = status_list
+            .get_status(idx)
+            .unwrap_or_else(|_| panic!("failed to get status for idx: {}", idx));
+        assert_eq!(
+            got_status,
+            expected_status.into(),
+            "assertion failed for idx: {}",
+            idx
+        );
+    }
+}
+
+#[test]
+fn test_get_status_4_bit() {
+    let status_list_src = "eNrt0EENgDAQADAIHwImkIIEJEwCUpCEBBQRHOy35Li1EjoOQGabAgAAAAAAAAAAAAAAAAAAACC1SQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABADrsCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADoxaEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIIoCgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACArpwKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGhqVkAzlwIAAAAAiGVRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABx3AoAgLpVAQAAAAAAAAAAAAAAwM89rwMAAAAAAAAAAAjsA9xMBMA";
+
+    let status_list = StatusList::parse(status_list_src, 4).unwrap();
+
+    let cases = [
+        (0, 1),
+        (1993, 2),
+        (35460, 3),
+        (459495, 4),
+        (595669, 5),
+        (754353, 6),
+        (845645, 7),
+        (923232, 8),
+        (924445, 9),
+        (934534, 10),
+        (1004534, 11),
+        (1000345, 12),
+        (1030203, 13),
+        (1030204, 14),
+        (1030205, 15),
+    ];
+
+    for (idx, expected_status) in cases.into_iter() {
+        let got_status = status_list
+            .get_status(idx)
+            .unwrap_or_else(|_| panic!("failed to get status for idx: {}", idx));
+        assert_eq!(
+            got_status,
+            expected_status.into(),
+            "assertion failed for idx: {}",
+            idx
+        );
+    }
+}
+
+#[test]
+fn test_get_status_8_bit() {
+    let status_list_src = "eNrt0WOQM2kYhtGsbdu2bdu2bdu2bdu2bdu2jVnU1my-SWYm6U5enFPVf7ue97orFYAo7CQBAACQuuckAABStqUEAAAAAAAAtN6wEgAE71QJAAAAAIrwhwQAAAAAAdtAAgAAAAAAACLwkAQAAAAAAAAAAACUaFcJAACAeJwkAQAAAAAAAABQvL4kAAAAWmJwCQAAAAAAAAjAwBIAAAB06ywJoDKQBARpfgkAAAAAAAAAAAAAAAAAAACo50sJAAAAAAAAAOiRcSQAAAAAgAJNKgEAAG23mgQAAAAAAECw3pUAQvegBAAAAAAAAADduE4CAAAAyjSvBAAQiw8koHjvSABAb-wlARCONyVoxtMSZOd0CQAAAOjWDRKQmLckAAAAAACysLYEQGcnSAAAAAAQooUlAABI15kSAIH5RAIgLB9LABC4_SUgGZNIAABAmM6RoLbTJIASzCIBAEAhfpcAAAAAAABquk8CAAAAAAAAaJl9SvvzBOICAFWmkIBgfSgBAAAANOgrCQAAAAAAAADStK8EAAC03gASAAAAAAAAAADFWFUCAAAAMjOaBEADHpYAQjCIBADduFwCAAAAAGitMSSI3BUSAECOHpAA6IHrJQAAAAAAsjeVBAAAKRpVAorWvwQAAAAAAAAAkKRtJAAAAAAAgCbcLAF0bXUJAAAAoF02kYDg7CYBAAAAAEB6NpQAAAAAAAAAAAAAAEr1uQQAAF06VgIAAAAAAAAAqDaeBAAQqgMkAAAAAABogQMlAAAAAAAa87MEAAAQiwslAAAAAAAAAAAAAAAAMrOyBAAAiekv-hcsY0Sgne6QAAAAAAAgaUtJAAAAAAAAAAAAAAAAAAAAAAAAAADwt-07vjVkAAAAgDy8KgFAUEaSAAAAAJL3vgQAWdhcAgAAoBHDSUDo1pQAAACI2o4SAABZm14CALoyuwQAAPznGQkgZwdLAAAQukclAAAAAAAAAAAAgKbMKgEAAAAAAAAAAAAAAAAAAECftpYAAAAAAAAAAAAACnaXBAAAAADk7iMJAAAAAAAAAABqe00CAnGbBBG4TAIAgFDdKgFAXCaWAAAAAAAAAAAAAAAAAKAJQwR72XbGAQAAAKAhh0sAAAAAAABQgO8kAAAAAAAAAAAAACAaM0kAAAC5W0QCAIJ3mAQAxGwxCQAA6nhSAsjZBRIAANEbWQIAAAAAaJE3JACAwA0qAUBIVpKAlphbAiAPp0iQnKEkAAAAAAAgBP1KAAAAdOl4CQAAAAAAAPjLZBIAAG10RtrPm8_CAEBMTpYAAAAAAIjQYBL8z5QSAAAAAEDYPpUAACAsj0gAAADQkHMlAAjHDxIA0Lg9JQAAgHDsLQEAAABAQS6WAAAAgLjNFs2l_RgLAIAEfCEBlGZZCQAAaIHjJACgtlskAAAozb0SAAAAVFtfAgAAAAAAAAAAAAAAAAAAAAAAAKDDtxIAAAAAVZaTAKB5W0kAANCAsSUgJ0tL0GqHSNBbL0gAZflRAgCARG0kQXNmlgCABiwkAQAAAEB25pIAAAAAAAAAAAAAoFh9SwAAAAAAADWNmOSrpjFsEoaRgDKcF9Q1dxsEAAAAAAAAAAAAAAAAgPZ6SQIAAAAAAAAAgChMLgEAAAAAAAAAqZlQAsK2qQQAAAAAAAD06XUJAAAAqG9bCQAAgLD9IgEAAAAAAAAAAAAAAAAAAEBNe0gAAAAAAAAAAEBPHSEBAAAAlOZtCYA4fS8B0GFRCQAo0gISAOTgNwmC840EAAAAAAAAAAAAAAAAAAAAUJydJfjXPBIAAAAAAAAAAAAAAABk6WwJAAAAAAAAAAAAAAAAqG8UCQAAgPpOlAAAIA83SQAANWwc9HUjGAgAAAAAAACAusaSAAAAAAAAAAAAAAAAAAAAAAAAAAAAqHKVBACQjxklAAAAAAAAAKBHxpQAAAAAACBME0lAdlaUAACyt7sEAAAA0Nl0EgAAAAAAAAAAAABA-8wgAQAAAAAAAKU4SgKgUtlBAgAAAAAAAAAAgMCMLwEE51kJICdzSgCJGl2CsE0tAQAA0L11JQAAAAAAAAjUOhIAAAAAAAAAAAAAAGTqeQkAAAAAAAAAAAAAKM8SEjTrJwkAAAAAAACocqQEULgVJAAAACjDUxJUKgtKAAAAqbpRAgCA0n0mAQAAAABAGzwmAUCTLpUAAAAAAAAAAEjZNRIAAAAAAAAAAAAAAAAAAAAA8I-vJaAlhpQAAAAAAHrvzjJ-OqCuuVlLAojP8BJAr70sQZVDJYAgXS0BAAAAAAAAAAAAtMnyEgAAAAAAFONKCQAAAAAAAADorc0kAAAAAAAAgDqOlgAAAAAAAAAAAADIwv0SAAAAAAAAAAAAAADBuV0CIFVDSwAAAABAAI6RAAAAAGIwrQSEZAsJAABouRclAAAAAKDDrxIAAAA0bkkJgFiMKwEAAAAAAHQyhwRk7h4JAAAAAAAAAAAgatdKAACUYj0JAAAAAAAAAAAAQnORBLTFJRIAAAAAkIaDJAAAAJryngQAAAAAAAAAAAA98oQEAAAAAAAAAEC2zpcgWY9LQKL2kwAgGK9IAAAAAPHaRQIAAAAAAAAAAADIxyoSAAAAAAAAAAAAAADQFotLAECz_gQ1PX-B";
+
+    let status_list = StatusList::parse(status_list_src, 8).unwrap();
+
+    let cases = [
+        (233478, 0),
+        (52451, 1),
+        (576778, 2),
+        (513575, 3),
+        (468106, 4),
+        (292632, 5),
+        (214947, 6),
+        (182323, 7),
+        (884834, 8),
+        (66653, 9),
+        (62489, 10),
+        (196493, 11),
+        (458517, 12),
+        (487925, 13),
+        (55649, 14),
+        (416992, 15),
+        (879796, 16),
+        (462297, 17),
+        (942059, 18),
+        (583408, 19),
+        (13628, 20),
+        (334829, 21),
+        (886286, 22),
+        (713557, 23),
+        (582738, 24),
+        (326064, 25),
+        (451545, 26),
+        (705889, 27),
+        (214350, 28),
+        (194502, 29),
+        (796765, 30),
+        (202828, 31),
+        (752834, 32),
+        (721327, 33),
+        (554740, 34),
+        (91122, 35),
+        (963483, 36),
+        (261779, 37),
+        (793844, 38),
+        (165255, 39),
+        (614839, 40),
+        (758403, 41),
+        (403258, 42),
+        (145867, 43),
+        (96100, 44),
+        (477937, 45),
+        (606890, 46),
+        (167335, 47),
+        (488197, 48),
+        (211815, 49),
+        (797182, 50),
+        (582952, 51),
+        (950870, 52),
+        (765108, 53),
+        (341110, 54),
+        (776325, 55),
+        (745056, 56),
+        (439368, 57),
+        (559893, 58),
+        (149741, 59),
+        (358903, 60),
+        (513405, 61),
+        (342679, 62),
+        (969429, 63),
+        (795775, 64),
+        (566121, 65),
+        (460566, 66),
+        (680070, 67),
+        (117310, 68),
+        (480348, 69),
+        (67319, 70),
+        (661552, 71),
+        (841303, 72),
+        (561493, 73),
+        (138807, 74),
+        (442463, 75),
+        (659927, 76),
+        (445910, 77),
+        (1046963, 78),
+        (829700, 79),
+        (962282, 80),
+        (299623, 81),
+        (555493, 82),
+        (292826, 83),
+        (517215, 84),
+        (551009, 85),
+        (898490, 86),
+        (837603, 87),
+        (759161, 88),
+        (459948, 89),
+        (290102, 90),
+        (1034977, 91),
+        (190650, 92),
+        (98810, 93),
+        (229950, 94),
+        (320531, 95),
+        (335506, 96),
+        (885333, 97),
+        (133227, 98),
+        (806915, 99),
+        (800313, 100),
+        (981571, 101),
+        (341110, 54),
+        (776325, 55),
+        (745056, 56),
+        (439368, 57),
+        (559893, 58),
+        (149741, 59),
+        (358903, 60),
+        (513405, 61),
+        (342679, 62),
+        (969429, 63),
+        (795775, 64),
+        (566121, 65),
+        (460566, 66),
+        (680070, 67),
+        (117310, 68),
+        (480348, 69),
+        (67319, 70),
+        (661552, 71),
+        (841303, 72),
+        (561493, 73),
+        (138807, 74),
+        (442463, 75),
+        (659927, 76),
+        (445910, 77),
+        (1046963, 78),
+        (829700, 79),
+        (962282, 80),
+        (299623, 81),
+        (555493, 82),
+        (292826, 83),
+        (517215, 84),
+        (551009, 85),
+        (898490, 86),
+        (837603, 87),
+        (759161, 88),
+        (459948, 89),
+        (290102, 90),
+        (1034977, 91),
+        (190650, 92),
+        (98810, 93),
+        (229950, 94),
+        (320531, 95),
+        (335506, 96),
+        (885333, 97),
+        (133227, 98),
+        (806915, 99),
+        (800313, 100),
+        (981571, 101),
+        (527253, 102),
+        (24077, 103),
+        (240232, 104),
+        (559572, 105),
+        (713399, 106),
+        (233941, 107),
+        (615514, 108),
+        (911768, 109),
+        (331680, 110),
+        (951527, 111),
+        (6805, 112),
+        (552366, 113),
+        (374660, 114),
+        (223159, 115),
+        (625884, 116),
+        (417146, 117),
+        (320527, 118),
+        (784154, 119),
+        (338792, 120),
+        (1199, 121),
+        (679804, 122),
+        (1024680, 123),
+        (40845, 124),
+        (234603, 125),
+        (761225, 126),
+        (644903, 127),
+        (502167, 128),
+        (121477, 129),
+        (505144, 130),
+        (165165, 131),
+        (179628, 132),
+        (1019195, 133),
+        (145149, 134),
+        (263738, 135),
+        (269256, 136),
+        (996739, 137),
+        (346296, 138),
+        (555864, 139),
+        (887384, 140),
+        (444173, 141),
+        (421844, 142),
+        (653716, 143),
+        (836747, 144),
+        (783119, 145),
+        (918762, 146),
+        (946835, 147),
+        (253764, 148),
+        (519895, 149),
+        (471224, 150),
+        (134272, 151),
+        (709016, 152),
+        (44112, 153),
+        (482585, 154),
+        (461829, 155),
+        (15080, 156),
+        (148883, 157),
+        (123467, 158),
+        (480125, 159),
+        (141348, 160),
+        (65877, 161),
+        (692958, 162),
+        (148598, 163),
+        (499131, 164),
+        (584009, 165),
+        (1017987, 166),
+        (449287, 167),
+        (277478, 168),
+        (991262, 169),
+        (509602, 170),
+        (991896, 171),
+        (853666, 172),
+        (399318, 173),
+        (197815, 174),
+        (203278, 175),
+        (903979, 176),
+        (743015, 177),
+        (888308, 178),
+        (862143, 179),
+        (979421, 180),
+        (113605, 181),
+        (206397, 182),
+        (127113, 183),
+        (844358, 184),
+        (711569, 185),
+        (229153, 186),
+        (521470, 187),
+        (401793, 188),
+        (398896, 189),
+        (940810, 190),
+        (293983, 191),
+        (884749, 192),
+        (384802, 193),
+        (584151, 194),
+        (970201, 195),
+        (523882, 196),
+        (158093, 197),
+        (929312, 198),
+        (205329, 199),
+        (106091, 200),
+        (30949, 201),
+        (195586, 202),
+        (495723, 203),
+        (348779, 204),
+        (852312, 205),
+        (1018463, 206),
+        (1009481, 207),
+        (448260, 208),
+        (841042, 209),
+        (122967, 210),
+        (345269, 211),
+        (794764, 212),
+        (4520, 213),
+        (818773, 214),
+        (556171, 215),
+        (954221, 216),
+        (598210, 217),
+        (887110, 218),
+        (1020623, 219),
+        (324632, 220),
+        (398244, 221),
+        (622241, 222),
+        (456551, 223),
+        (122648, 224),
+        (127837, 225),
+        (657676, 226),
+        (119884, 227),
+        (105156, 228),
+        (999897, 229),
+        (330160, 230),
+        (119285, 231),
+        (168005, 232),
+        (389703, 233),
+        (143699, 234),
+        (142524, 235),
+        (493258, 236),
+        (846778, 237),
+        (251420, 238),
+        (516351, 239),
+        (83344, 240),
+        (171931, 241),
+        (879178, 242),
+        (663475, 243),
+        (546865, 244),
+        (428362, 245),
+        (658891, 246),
+        (500560, 247),
+        (557034, 248),
+        (830023, 249),
+        (274471, 250),
+        (629139, 251),
+        (958869, 252),
+        (663071, 253),
+        (152133, 254),
+        (19535, 255),
+    ];
+
+    for (idx, expected_status) in cases.into_iter() {
+        let got_status = status_list
+            .get_status(idx)
+            .unwrap_or_else(|_| panic!("failed to get status for idx: {}", idx));
+        assert_eq!(
+            got_status,
+            expected_status.into(),
+            "assertion failed for idx: {}",
+            idx
+        );
+    }
+}
