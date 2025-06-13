@@ -257,7 +257,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 							// It's RDBS case. We don't need to set null to already empty table cell
                 			continue;
                 		}
-                        modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, oldAttributeValues);
+                		modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, oldAttributeValues);
                     } else if ((AttributeModificationType.REPLACE == modificationType)) {
                         modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, attributeValues);
                     }

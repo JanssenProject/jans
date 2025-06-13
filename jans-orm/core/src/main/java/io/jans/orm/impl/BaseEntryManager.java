@@ -83,7 +83,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	private static final Class<?>[] LDAP_ENTRY_TYPE_ANNOTATIONS = { DataEntry.class, SchemaEntry.class,
 			ObjectClass.class };
 	private static final Class<?>[] LDAP_ENTRY_PROPERTY_ANNOTATIONS = { AttributeName.class, AttributesList.class,
-			JsonObject.class, LanguageTag.class };
+			JsonObject.class, LanguageTag.class, Password.class };
 	private static final Class<?>[] LDAP_CUSTOM_OBJECT_CLASS_PROPERTY_ANNOTATION = { CustomObjectClass.class };
 	private static final Class<?>[] LDAP_DN_PROPERTY_ANNOTATION = { DN.class };
 	private static final Class<?>[] LDAP_EXPIRATION_PROPERTY_ANNOTATION = { Expiration.class };
