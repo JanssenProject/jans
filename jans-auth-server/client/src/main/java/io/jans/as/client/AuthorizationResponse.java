@@ -51,7 +51,7 @@ public class AuthorizationResponse extends BaseResponse {
     private String idToken;
     private String state;
     private String sessionId;
-    private String sessionJwt;
+    private String logoutStatusJwt;
     private String sid;
     private String deviceSecret;
     private Map<String, String> customParams;
@@ -208,9 +208,9 @@ public class AuthorizationResponse extends BaseResponse {
             sessionId = params.get(SESSION_ID);
             params.remove(SESSION_ID);
         }
-        if (params.containsKey(SESSION_JWT)) {
-            sessionJwt = params.get(SESSION_JWT);
-            params.remove(SESSION_JWT);
+        if (params.containsKey(LOGOUT_STATUS_JWT)) {
+            logoutStatusJwt = params.get(LOGOUT_STATUS_JWT);
+            params.remove(LOGOUT_STATUS_JWT);
         }
         if (params.containsKey(SID)) {
             sid = params.get(SID);
@@ -357,22 +357,22 @@ public class AuthorizationResponse extends BaseResponse {
     }
 
     /**
-     * Session jwt
+     * Logout status jwt
      *
-     * @return session jwt
+     * @return logout status jwt
      */
-    public String getSessionJwt() {
-        return sessionJwt;
+    public String getLogoutStatusJwt() {
+        return logoutStatusJwt;
     }
 
     /**
-     * Session jwt
+     * Logout Status jwt
      *
-     * @param sessionJwt session jwt
+     * @param logoutStatusJwt logout status jwt
      * @return response
      */
-    public AuthorizationResponse setSessionJwt(String sessionJwt) {
-        this.sessionJwt = sessionJwt;
+    public AuthorizationResponse setLogoutStatusJwt(String logoutStatusJwt) {
+        this.logoutStatusJwt = logoutStatusJwt;
         return this;
     }
 
