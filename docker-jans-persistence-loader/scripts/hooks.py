@@ -146,6 +146,11 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "PS384",
             "PS512"
         ]),
+        ("connectionServiceConfiguration", {
+            "maxTotal": 200,
+            "maxPerRoute": 50,
+            "validateAfterInactivity": 0,
+        }),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
