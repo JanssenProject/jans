@@ -1,4 +1,4 @@
-# Cedarling Kotlin binding
+# Cedarling Java binding
 
 [UniFFI](https://mozilla.github.io/uniffi-rs/latest/) (Universal Foreign Function Interface) is a tool developed by Mozilla to simplify cross-language bindings, primarily between Rust and other languages like Kotlin, Swift, and Python. It allows Rust libraries to be used in these languages without manually writing complex foreign function interface (FFI) bindings.
 
@@ -7,7 +7,7 @@ Please refer to [this document](./cedarling-uniffi.md) for details on the struct
 ## Prerequisites
 
 - Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
-- Java Development Kit (JDK): version 17 or higher
+- Java Development Kit (JDK): version 11 or higher
 - Apache Maven: Install it from [Apache Maven Website](https://maven.apache.org/download.cgi)
 
 ## Building from Source
@@ -17,11 +17,13 @@ Please refer to [this document](./cedarling-uniffi.md) for details on the struct
    cargo build -r -p cedarling_uniffi
    ```
    In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
+   **Note:** You can use pre-built `libcedarling_uniffi.so` from the [Jans releases page](https://github.com/JanssenProject/jans/releases). Ref: `https://github.com/JanssenProject/jans/releases/download/{version}/libcedarling_uniffi-{version}.so`
 
 2. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
    ```bash
    cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling-java/src/main/kotlin/io/jans/cedarling
    ```
+   **Note:** You can use pre-built kotlin binding from the [Jans releases page](https://github.com/JanssenProject/jans/releases). Ref: `https://github.com/JanssenProject/jans/releases/download/{version}/cedarling_uniffi-kotlin-{version}.zip`
 
 3. Copy the generated `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file to resource directory of the `cedarling-java` Maven project. Replace `{build_file}` in the below commad with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
    ```bash
@@ -33,6 +35,27 @@ Please refer to [this document](./cedarling-uniffi.md) for details on the struct
    ```bash
     mvn clean install
    ```
+   
+### Using Cedarling-java Maven dependency
+
+If you are using pre-built binaries, add the following `repository` and `dependency` to the `pom.xml` of your Java Maven project to use Cedarling Java bindings.
+
+```declarative
+    <repositories>
+        <repository>
+            <id>jans</id>
+            <name>Janssen project repository</name>
+            <url>https://maven.jans.io/maven</url>
+        </repository>
+    </repositories>
+```
+```declarative
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>cedarling-java</artifactId>
+            <version>{latest-jans-stable-version}</version>
+        </dependency>
+```
 
 ## Recipes
 
@@ -59,21 +82,23 @@ Please refer to [this document](./cedarling-uniffi.md) for details on the struct
 
 ### **Recipe 2:** Sample Java Maven project using the Kotlin binding
 
-1. Build Cedarling:
+1. Build Cedarling by executing below command from `./jans/jans-cedarling` of cloned jans project:
     ```bash
     cargo build -r -p cedarling_uniffi
     ```
    In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
+   **Note:** You can use pre-built `libcedarling_uniffi.so` from the [Jans releases page](https://github.com/JanssenProject/jans/releases). Ref: `https://github.com/JanssenProject/jans/releases/download/{version}/libcedarling_uniffi-{version}.so`
 
 2. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
     ```bash
     cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/javaApp/src/main/kotlin/org/example
     ```
+   **Note:** You can use pre-built kotlin binding from the [Jans releases page](https://github.com/JanssenProject/jans/releases). Ref: `https://github.com/JanssenProject/jans/releases/download/{version}/cedarling_uniffi-kotlin-{version}.zip`
 
 3. Copy the generated `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file to resource directory of the sample Java Maven project. Replace `{build_file}` in the below commad with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
     ```bash
     cp ./target/release/{build_file} ./bindings/cedarling_uniffi/javaApp/src/main/resources
-    ```
+    ```git add 
 
 4. Change directory to sample Java project (`./bindings/cedarling_uniffi/javaApp`) and run below command to run the main method of a Maven project from the terminal.
     ```bash
