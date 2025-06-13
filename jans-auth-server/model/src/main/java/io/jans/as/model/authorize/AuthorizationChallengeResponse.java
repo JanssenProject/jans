@@ -11,6 +11,8 @@ public class AuthorizationChallengeResponse {
 
     @JsonProperty(value = "authorization_code")
     private String authorizationCode;
+    @JsonProperty(value = "logout_status_jwt")
+    private String logoutStatusJwt;
 
     /**
      * Gets authorization code
@@ -31,6 +33,26 @@ public class AuthorizationChallengeResponse {
     }
 
     /**
+     * Gets logout status jwt
+     *
+     * @return logout status jwt
+     */
+    public String getLogoutStatusJwt() {
+        return logoutStatusJwt;
+    }
+
+    /**
+     * Sets logout status jwt
+     *
+     * @param logoutStatusJwt logout status jwt
+     * @return authorization challenge response
+     */
+    public AuthorizationChallengeResponse setLogoutStatusJwt(String logoutStatusJwt) {
+        this.logoutStatusJwt = logoutStatusJwt;
+        return this;
+    }
+
+    /**
      * Returns string representation of authorization challenge response
      *
      * @return string representation of authorization challenge response
@@ -39,6 +61,7 @@ public class AuthorizationChallengeResponse {
     public String toString() {
         return "AuthorizationChallengeResponse{" +
                 "authorizationCode='" + authorizationCode + '\'' +
+                "logoutStatusJwt='" + logoutStatusJwt + '\'' +
                 '}';
     }
 }

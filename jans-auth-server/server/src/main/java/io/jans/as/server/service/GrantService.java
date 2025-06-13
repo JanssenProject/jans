@@ -112,7 +112,7 @@ public class GrantService {
 
     public void persist(TokenEntity token) {
         // always save access_token into persistence because we need to fetch it by session, see getGrantsBySessionDn
-        if (token.isAccessToken() || shouldPersist()) {
+        if (token.isAccessToken() || token.isLogoutStatusJwt() || shouldPersist()) {
             persistenceEntryManager.persist(token);
         }
 
@@ -133,7 +133,7 @@ public class GrantService {
 
     public void remove(TokenEntity token) {
         persistenceEntryManager.remove(token);
-        log.trace("Removed token from LDAP, code: {}", token.getTokenCode());
+        log.trace("Removed token from DB, code: {}", token.getTokenCode());
 
         if (TokenType.ACCESS_TOKEN == token.getTokenTypeEnum()) {
         	publishIdTokenLockMessage(token, "del");
@@ -271,6 +271,22 @@ public class GrantService {
     private TokenEntity load(String tokenDn) {
         try {
             return persistenceEntryManager.find(TokenEntity.class, tokenDn);
+        } catch (Exception e) {
+            logException(e);
+        }
+        return null;
+    }
+
+    public TokenEntity getGrantsByJti(String jti) {
+        try {
+            List<TokenEntity> grants =  persistenceEntryManager.findEntries(tokenBaseDn(), TokenEntity.class, Filter.createEqualityFilter("jti", jti));
+            if (grants.size() > 1) {
+                log.error("Found more then one tokens by jti {}", jti);
+                return null;
+            }
+            if (grants.size() == 1) {
+                return grants.get(0);
+            }
         } catch (Exception e) {
             logException(e);
         }

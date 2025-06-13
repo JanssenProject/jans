@@ -23,7 +23,6 @@ import io.jans.as.server.register.ws.rs.RegisterRestWebServiceImpl;
 import io.jans.as.server.revoke.GlobalTokenRevocationRestWebService;
 import io.jans.as.server.revoke.RevokeRestWebServiceImpl;
 import io.jans.as.server.revoke.RevokeSessionRestWebService;
-import io.jans.as.server.service.session.SessionStatusListRestWebService;
 import io.jans.as.server.session.ws.rs.CheckSessionStatusRestWebServiceImpl;
 import io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImpl;
 import io.jans.as.server.session.ws.rs.SessionRestWebService;
@@ -63,7 +62,6 @@ public class ResteasyInitializer extends Application {
         classes.add(RevokeSessionRestWebService.class);
         classes.add(GlobalTokenRevocationRestWebService.class);
         classes.add(StatusListRestWebService.class);
-        classes.add(SessionStatusListRestWebService.class);
         classes.add(JwkRestWebServiceImpl.class);
         classes.add(ArchivedJwksWebServiceImpl.class);
         classes.add(IntrospectionWebService.class);

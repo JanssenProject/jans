@@ -256,6 +256,15 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     @Override
+    public AuthorizationGrant getAuthorizationGrantByJti(String jti) {
+        final TokenEntity tokenEntity = grantService.getGrantsByJti(jti);
+        if (tokenEntity != null) {
+            return asGrant(tokenEntity);
+        }
+        return null;
+    }
+
+    @Override
     public AuthorizationGrant getAuthorizationGrantByIdToken(String idToken) {
         if (StringUtils.isBlank(idToken)) {
             return null;
@@ -385,6 +394,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                                 code.setX5ts256(g.getX5ts256());
                                 code.setReferenceId(tokenEntity.getReferenceId());
                                 code.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
+                                code.setJti(tokenEntity.getJti());
                                 g.setAuthorizationCode(code);
                             }
                             break;
@@ -393,6 +403,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                             refreshToken.setX5ts256(result.getX5ts256());
                             refreshToken.setReferenceId(tokenEntity.getReferenceId());
                             refreshToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
+                            refreshToken.setJti(tokenEntity.getJti());
                             result.setRefreshTokens(Collections.singletonList(refreshToken));
                             break;
                         case ACCESS_TOKEN:
@@ -401,6 +412,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                             accessToken.setX5ts256(result.getX5ts256());
                             accessToken.setReferenceId(tokenEntity.getReferenceId());
                             accessToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
+                            accessToken.setJti(tokenEntity.getJti());
                             result.setAccessTokens(Collections.singletonList(accessToken));
                             break;
                         case TX_TOKEN:
@@ -409,6 +421,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                             txToken.setX5ts256(result.getX5ts256());
                             txToken.setReferenceId(tokenEntity.getReferenceId());
                             txToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
+                            txToken.setJti(tokenEntity.getJti());
                             result.setTxTokens(Collections.singletonList(txToken));
                             break;
                         case ID_TOKEN:
@@ -416,6 +429,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                             idToken.setX5ts256(result.getX5ts256());
                             idToken.setReferenceId(tokenEntity.getReferenceId());
                             idToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
+                            idToken.setJti(tokenEntity.getJti());
                             result.setIdToken(idToken);
                             break;
                         case LONG_LIVED_ACCESS_TOKEN:
@@ -423,7 +437,17 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                             longLivedAccessToken.setX5ts256(result.getX5ts256());
                             longLivedAccessToken.setReferenceId(tokenEntity.getReferenceId());
                             longLivedAccessToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
+                            longLivedAccessToken.setJti(tokenEntity.getJti());
                             result.setLongLivedAccessToken(longLivedAccessToken);
+                            break;
+                        case LOGOUT_STATUS_JWT:
+                            LogoutStatusJwt logoutStatusJwt = new LogoutStatusJwt(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
+                            logoutStatusJwt.setDpop(tokenEntity.getDpop());
+                            logoutStatusJwt.setX5ts256(result.getX5ts256());
+                            logoutStatusJwt.setReferenceId(tokenEntity.getReferenceId());
+                            logoutStatusJwt.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
+                            logoutStatusJwt.setJti(tokenEntity.getJti());
+                            result.setLogoutStatusJwts(Collections.singletonList(logoutStatusJwt));
                             break;
                     }
                 }

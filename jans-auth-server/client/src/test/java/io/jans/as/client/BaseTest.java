@@ -91,7 +91,6 @@ public abstract class BaseTest {
     protected String tokenEndpoint;
     protected String tokenRevocationEndpoint;
     protected String statusListEndpoint;
-    protected String sessionStatusListEndpoint;
     protected String accessEvaluationV1Endpoint;
     protected String userInfoEndpoint;
     protected String clientInfoEndpoint;
@@ -309,15 +308,6 @@ public abstract class BaseTest {
 
     public void setStatusListEndpoint(String statusListEndpoint) {
         this.statusListEndpoint = statusListEndpoint;
-    }
-
-    public String getSessionStatusListEndpoint() {
-        return sessionStatusListEndpoint;
-    }
-
-    public BaseTest setSessionStatusListEndpoint(String sessionStatusListEndpoint) {
-        this.sessionStatusListEndpoint = sessionStatusListEndpoint;
-        return this;
     }
 
     public String getAccessEvaluationV1Endpoint() {
@@ -1032,7 +1022,6 @@ public abstract class BaseTest {
             authorizationEndpoint = response.getAuthorizationEndpoint();
             authorizationChallengeEndpoint = response.getAuthorizationChallengeEndpoint();
             statusListEndpoint = response.getStatusListEndpoint();
-            sessionStatusListEndpoint = response.getSessionStatusListEndpoint();
             accessEvaluationV1Endpoint = response.getAccessEvaluationV1Endpoint();
             tokenEndpoint = response.getTokenEndpoint();
             tokenRevocationEndpoint = response.getRevocationEndpoint();
@@ -1059,7 +1048,6 @@ public abstract class BaseTest {
             authorizationEndpoint = context.getCurrentXmlTest().getParameter("authorizationEndpoint");
             authorizationChallengeEndpoint = context.getCurrentXmlTest().getParameter("authorizationChallengeEndpoint");
             statusListEndpoint = context.getCurrentXmlTest().getParameter("statusListEndpoint");
-            sessionStatusListEndpoint = context.getCurrentXmlTest().getParameter("sessionStatusListEndpoint");
             accessEvaluationV1Endpoint = context.getCurrentXmlTest().getParameter("accessEvaluationV1Endpoint");
             tokenEndpoint = context.getCurrentXmlTest().getParameter("tokenEndpoint");
             tokenRevocationEndpoint = context.getCurrentXmlTest().getParameter("tokenRevocationEndpoint");

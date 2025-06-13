@@ -44,7 +44,7 @@ public final class AuthorizeRequestParam {
     public static final String AUTH_REQ_ID = "auth_req_id";
     public static final String SID = "sid";
     public static final String NBF = "nbf";
-    public static final String SESSION_JWT = "session_jwt";
+    public static final String LOGOUT_STATUS_JWT = "logout_status_jwt";
 
     /**
      * String that represents the End-User's login state at the OP.
