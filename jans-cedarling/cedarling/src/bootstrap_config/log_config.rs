@@ -7,9 +7,10 @@ use super::{BootstrapConfigLoadingError, BootstrapConfigRaw};
 use crate::log::LogLevel;
 use std::time::Duration;
 use url::Url;
+use serde::{Deserialize, Serialize};
 
 /// A set of properties used to configure logging in the `Cedarling` application.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LogConfig {
     /// `CEDARLING_LOG_TYPE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub log_type: LogTypeConfig,
@@ -22,7 +23,7 @@ pub struct LogConfig {
 ///  Log type configuration.
 ///  `CEDARLING_LOG_TYPE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
 ///   Current type represent this value.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum LogTypeConfig {
     /// Logger do nothing. It means that all logs will be ignored.
     Off,
@@ -33,7 +34,7 @@ pub enum LogTypeConfig {
 }
 
 /// Configuration for memory log.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MemoryLogConfig {
     /// `CEDARLING_LOG_TTL` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     /// The maximum time to live (in seconds) of the log entries.
@@ -126,5 +127,48 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             log_level: raw.log_level,
             accept_invalid_certs: raw.accept_invalid_certs.into(),
         })
+    }
+}
+
+/// Raw log config
+pub struct LogConfigRaw {
+    /// Log type
+    pub log_type: String,
+    /// Log level
+    pub log_level: String,
+}
+
+/// Raw memory log config
+pub struct MemoryLogConfigRaw {
+    /// Log TTL
+    pub log_ttl: u64,
+    /// Max item size
+    pub max_item_size: Option<usize>,
+    /// Max items
+    pub max_items: Option<usize>,
+}
+
+impl From<LogConfigRaw> for LogConfig {
+    fn from(raw: LogConfigRaw) -> Self {
+        Self {
+            log_type: match raw.log_type.as_str() {
+                "off" => LogTypeConfig::Off,
+                "memory" => LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_item_size: None,
+                    max_items: None,
+                }),
+                "stdout" => LogTypeConfig::StdOut,
+                _ => LogTypeConfig::StdOut,
+            },
+            log_level: match raw.log_level.as_str() {
+                "TRACE" => LogLevel::TRACE,
+                "DEBUG" => LogLevel::DEBUG,
+                "INFO" => LogLevel::INFO,
+                "WARN" => LogLevel::WARN,
+                "ERROR" => LogLevel::ERROR,
+                _ => LogLevel::INFO,
+            },
+        }
     }
 }
