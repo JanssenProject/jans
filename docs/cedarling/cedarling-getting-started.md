@@ -115,9 +115,14 @@ The bootstrap configuration and policy store directly influence how Cedarling pe
 === "Java"
 
     ```java
+
     import uniffi.cedarling_uniffi.*;
     ...
-        
+     /*
+    * In a production environment, the bootstrap configuration should not be hardcoded. 
+    * Instead, it should be loaded dynamically from external sources such as environment variables, 
+    * configuration files, or a centralized configuration service.
+    */
     String bootstrapJsonStr = """
         {
             "CEDARLING_APPLICATION_NAME":   "MyApp",
@@ -133,7 +138,7 @@ The bootstrap configuration and policy store directly influence how Cedarling pe
     } catch (Exception e) {
         System.out.println("Unable to initialize Cedarling" + e.getMessage());
     }
-    ````
+    ```
 
 ### Authorization
 
@@ -410,6 +415,7 @@ Cedarling currently provides two modes of authorization:
 === "Java"
 
     ```java
+
     String resource = """
         {
           "app_id": "app_id_001",

@@ -52,7 +52,11 @@ We need to initialize Cedarling first.
         import uniffi.cedarling_uniffi.*;
         ...
         
-        //In production, bootstrap config should load dynamically.
+        /*
+         * In a production environment, the bootstrap configuration should not be hardcoded. 
+         * Instead, it should be loaded dynamically from external sources such as environment variables, 
+         * configuration files, or a centralized configuration service.
+         */
         String bootstrapJsonStr = """
             {
             "CEDARLING_APPLICATION_NAME":   "MyApp",
