@@ -4,13 +4,14 @@
 
 Please refer to [this document](./cedarling-uniffi.md) for details on the structs, enums, and functions exposed by UniFFI bindings. This section outlines the process of generating the Kotlin binding for Cedarling using Cedarling UniFFI. The Kotlin binding is then wrapped in a Java class to enable convenient use in Java applications.
 
-## Prerequisites
-
-- Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
-- Java Development Kit (JDK): version 11 or higher
-- Apache Maven: Install it from [Apache Maven Website](https://maven.apache.org/download.cgi)
 
 ## Building from Source
+
+### Prerequisites
+
+- Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
+- Java Development Kit (JDK): version 11
+- Apache Maven: Install it from [Apache Maven Website](https://maven.apache.org/download.cgi)
 
 1. Build Cedarling by executing below command from `./jans/jans-cedarling` of cloned jans project:
    ```bash
