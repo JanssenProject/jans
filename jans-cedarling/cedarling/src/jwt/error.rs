@@ -5,6 +5,7 @@
 
 use super::http_utils::HttpError;
 use super::key_service;
+use super::status_list::UpdateStatusListError;
 use super::validation::ValidateJwtError;
 
 #[derive(Debug, thiserror::Error)]
@@ -39,4 +40,6 @@ pub enum JwtServiceInitError {
     KeyServiceMissingKeys,
     #[error("failed to GET the openid configuration for the trusted issuers: {0}")]
     GetOpenidConfigurations(#[from] HttpError),
+    #[error("failed to update JWT status list: {0}")]
+    UpdateStatusList(#[from] UpdateStatusListError),
 }
