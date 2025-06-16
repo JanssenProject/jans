@@ -43,7 +43,7 @@ permit(
 
 The Cedarling needs policies and a schema to authorize access. These are bundled in a *policy store* (a JSON file). A demo repository is provided for this quickstart which contains two policy stores. You will be modifying the `tarpDemo` store so that it uses your authorization server. When implementing TBAC, the Cedarling will validate the tokens with the IDP. To be able to this, we need to provide trusted issuer information to the Cedarling. We can do this by adding the trusted issuer information to the demo policy store.
 
-- Go to `https://github.com/SafinWasi/lock-testing`
+- Go to `https://github.com/JanssenProject/CedarlingQuickstart`
 - Click on `Fork`
   - Make sure the `Copy the master branch only` option is **unchecked**
 - Fork the repository

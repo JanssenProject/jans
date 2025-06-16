@@ -973,6 +973,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
     private LockMessageConfig lockMessageConfig;
 
+    @DocProperty(description = "Connection service Configuration")
+    private ConnectionServiceConfiguration connectionServiceConfiguration;
+
     public Boolean getUseOpenidSubAttributeValueForPairwiseLocalAccountId() {
         if (useOpenidSubAttributeValueForPairwiseLocalAccountId == null) useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
         return useOpenidSubAttributeValueForPairwiseLocalAccountId;
@@ -3765,4 +3768,11 @@ public class AppConfiguration implements Configuration {
 		this.lockMessageConfig = lockMessageConfig;
 	}
 
+	public ConnectionServiceConfiguration getConnectionServiceConfiguration() {
+		return connectionServiceConfiguration;
+	}
+
+	public void setConnectionServiceConfiguration(ConnectionServiceConfiguration connectionServiceConfiguration) {
+		this.connectionServiceConfiguration = connectionServiceConfiguration;
+	}
 }
