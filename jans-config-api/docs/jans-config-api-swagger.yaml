@@ -9338,10 +9338,6 @@ components:
           type: string
         selected:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
-          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
@@ -9349,6 +9345,10 @@ components:
         userCanView:
           type: boolean
         userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -11839,10 +11839,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -12011,8 +12011,6 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -12022,6 +12020,8 @@ components:
           - REFRESH_TOKEN
           - AUTHORIZATION_CODE
           - TX_TOKEN
+        accessToken:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

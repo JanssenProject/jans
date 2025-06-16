@@ -337,7 +337,8 @@ public class ScopeService {
                         targetArray, null);
                 Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.JANS_ID, null, targetArray, null);
                 Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter, inumFilter));
+                Filter scopeTypeFilter = Filter.createSubstringFilter(JANS_SCOPE_TYP, null, targetArray, null);
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter, inumFilter, scopeTypeFilter));
             }
             searchFilter = Filter.createORFilter(filters);
         }
