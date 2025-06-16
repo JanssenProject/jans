@@ -19,6 +19,7 @@ You can integrate Cedarling into your application using the following language l
 - [Kotlin](./getting-started/kotlin.md)
 - [Swift](./getting-started/swift.md)
 - [Golang](./getting-started/go.md)
+- [Java](./getting-started/java.md)
 
 Alternatively, you can use the [Cedarling Sidecar](./cedarling-overview.md) for a drop-in deployment.
 
@@ -108,6 +109,34 @@ The bootstrap configuration and policy store directly influence how Cedarling pe
     instance, err := cedarling_go.NewCedarling(config)
     if err != nil {
         panic!("Error during init: %s", err)
+    }
+    ```
+
+=== "Java"
+
+    ```java
+
+    import uniffi.cedarling_uniffi.*;
+    ...
+     /*
+    * In a production environment, the bootstrap configuration should not be hardcoded. 
+    * Instead, it should be loaded dynamically from external sources such as environment variables, 
+    * configuration files, or a centralized configuration service.
+    */
+    String bootstrapJsonStr = """
+        {
+            "CEDARLING_APPLICATION_NAME":   "MyApp",
+            ...
+        }
+    """;
+        
+    try {
+        CedarlingAdapter cedarlingAdapter = new CedarlingAdapter();
+        cedarlingAdapter.loadFromJson(bootstrapJsonStr);
+    } catch (CedarlingException e) {
+        System.out.println("Unable to initialize Cedarling" + e.getMessage());
+    } catch (Exception e) {
+        System.out.println("Unable to initialize Cedarling" + e.getMessage());
     }
     ```
 
@@ -382,6 +411,49 @@ Cedarling currently provides two modes of authorization:
     if err != nil {
         panic!(err)
     }
+    ```
+=== "Java"
+
+    ```java
+
+    String resource = """
+        {
+          "app_id": "app_id_001",
+          "id": "admin_ui_id",
+          "name": "App Name",
+          "permission": "view_clients",
+          "type": "Jans::Issue"
+        }
+    """;
+
+    String action = "Jans::Action::\"Update\"";
+
+    String context = """
+        {
+          "device_health": ["Healthy"],
+          "fraud_indicators": ["Allowed"],
+          "geolocation": ["America"],
+          "network": "127.0.0.1",
+          "network_type": "Local",
+          "operating_system": "Linux",
+          "user_agent": "Linux"
+        }
+    """;
+
+    Map<String, String> tokens = Map.of(
+        "access_token", "<access_token>",
+        "id_token", "<id_token>",
+        "userinfo_token", "<userinfo_token>"
+    );
+
+    // Perform authorization
+    AuthorizeResult result = adapter.authorize(tokens, action, new JSONObject(resource), new JSONObject(context));
+    if(result.getDecision()) {
+        System.out.println("Access granted");
+    } else {
+        System.out.println("Access denied");
+    }
+
     ```
 
 **Unsigned Authorization**
