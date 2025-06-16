@@ -2,17 +2,17 @@
 
 This guide explores the process of generating the Kotlin binding for Cedarling using [Cedarling UniFFI](https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_uniffi). The Kotlin binding is then wrapped in a Java class to enable convenient use in Java applications.
 
-## Building from Source
+## Installation
 
-If you are using pre-built binaries from the [Jans releases page](https://github.com/JanssenProject/jans/releases), you can skip this step. Otherwise, follow these instructions to build from source.
+### Building from Source
 
-### Prerequisites:
+#### Prerequisites:
 
 - Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
-- Java Development Kit (JDK): version 17
+- Java Development Kit (JDK): version 11 or higher
 - Apache Maven: Install it from [Apache Maven Website](https://maven.apache.org/download.cgi)
 
-### Building from Kotlin binding
+#### Building from Kotlin binding
 
 1. Build Cedarling by executing below command from `./jans/jans-cedarling` of cloned jans project:
 
@@ -38,6 +38,27 @@ cp ./target/release/{build_file} ./bindings/cedarling-java/src/main/resources
 
 ```bash
  mvn clean install
+```
+
+### Using Cedarling-java Maven dependency
+
+To use Cedarling Java bindings in Java Maven Project add following `repository` and `dependency` in pom.xml of the project
+
+```declarative
+    <repositories>
+        <repository>
+            <id>jans</id>
+            <name>Janssen project repository</name>
+            <url>https://maven.jans.io/maven</url>
+        </repository>
+    </repositories>
+```
+```declarative
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>cedarling-java</artifactId>
+            <version>{latest-jans-stable-version}</version>
+        </dependency>
 ```
 
 ## Recipes
