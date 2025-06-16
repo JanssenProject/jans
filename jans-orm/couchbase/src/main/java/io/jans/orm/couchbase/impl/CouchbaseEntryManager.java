@@ -191,7 +191,7 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
 
             	// Process userPassword 
                 if (StringHelper.equalsIgnoreCase(CouchbaseOperationService.USER_PASSWORD, attributeName)) {
-                    realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues));
+                    realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues), attribute);
                 }
 
                 escapeValues(realValues);
@@ -243,12 +243,12 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
 
                 MutateInSpec modification = null;
                 if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
-                    modification = createModification(SubdocCommandType.DICT_ADD, toInternalAttribute(attributeName), multiValued, attributeValues);
+                    modification = createModification(attribute, SubdocCommandType.DICT_ADD, toInternalAttribute(attributeName), multiValued, attributeValues);
                 } else {
                     if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(SubdocCommandType.DELETE, toInternalAttribute(oldAttributeName), multiValued, oldAttributeValues);
+                        modification = createModification(attribute, SubdocCommandType.DELETE, toInternalAttribute(oldAttributeName), multiValued, oldAttributeValues);
                     } else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(SubdocCommandType.REPLACE, toInternalAttribute(attributeName), multiValued, attributeValues);
+                        modification = createModification(attribute, SubdocCommandType.REPLACE, toInternalAttribute(attributeName), multiValued, attributeValues);
                     }
                 }
 
@@ -724,12 +724,12 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
         return searchResult.getTotalEntriesCount();
     }
 
-    private MutateInSpec createModification(final SubdocCommandType type, final String attributeName, final Boolean multiValued, final Object... attributeValues) {
+    private MutateInSpec createModification(final AttributeData attribute, final SubdocCommandType type, final String attributeName, final Boolean multiValued, final Object... attributeValues) {
         String realAttributeName = attributeName;
 
         Object[] realValues = attributeValues;
         if (StringHelper.equalsIgnoreCase(CouchbaseOperationService.USER_PASSWORD, realAttributeName)) {
-            realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues));
+            realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues), attribute);
         }
 
         escapeValues(realValues);
