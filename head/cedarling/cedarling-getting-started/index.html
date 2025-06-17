@@ -7231,6 +7231,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2_3">
@@ -7384,6 +7386,20 @@
     <li class="md-nav__item">
       <a href="../getting-started/go/" class="md-nav__link">
         Golang
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/java/" class="md-nav__link">
+        Java
       </a>
     </li>
   
@@ -9270,6 +9286,8 @@
             
           
         
+          
+        
       
       
         
@@ -9300,6 +9318,20 @@
     <li class="md-nav__item">
       <a href="../../contribute/implementation-design/jans-cedarling-design/adr/" class="md-nav__link">
         ADR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview/" class="md-nav__link">
+        Cedarling Technical Overview
       </a>
     </li>
   
@@ -9724,6 +9756,7 @@
 <li><a href="../getting-started/kotlin/">Kotlin</a></li>
 <li><a href="../getting-started/swift/">Swift</a></li>
 <li><a href="../getting-started/go/">Golang</a></li>
+<li><a href="../getting-started/java/">Java</a></li>
 </ul>
 <p>Alternatively, you can use the <a href="./cedarling-overview.md">Cedarling Sidecar</a> for a drop-in deployment.</p>
 <p>From here, you can either jump directly to the language-specific examples above or continue reading for a high-level overview of how Cedarling works.</p>
@@ -9744,7 +9777,7 @@
 - A JSON file containing the schema, policies, trusted issuers, and token metadata schema used for making authorization decisions.
 - Learn more in the <a href="../cedarling-policy-store/">policy store guide</a>.</p>
 <p>The bootstrap configuration and policy store directly influence how Cedarling performs <a href="#authorization">authorization</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">JavaScript</label><label for="__tabbed_1_2">Python</label><label for="__tabbed_1_3">Rust</label><label for="__tabbed_1_4">Kotlin</label><label for="__tabbed_1_5">Swift</label><label for="__tabbed_1_6">Go</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:7"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><input id="__tabbed_1_7" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">JavaScript</label><label for="__tabbed_1_2">Python</label><label for="__tabbed_1_3">Rust</label><label for="__tabbed_1_4">Kotlin</label><label for="__tabbed_1_5">Swift</label><label for="__tabbed_1_6">Go</label><label for="__tabbed_1_7">Java</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;/pkg/cedarling_wasm.js&quot;</span><span class="p">;</span>
@@ -9796,6 +9829,31 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <span class="p">}</span>
 </code></pre></div>
 </div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">uniffi.cedarling_uniffi.*</span><span class="p">;</span>
+<span class="p">...</span>
+<span class="w"> </span><span class="cm">/*</span>
+<span class="cm">* In a production environment, the bootstrap configuration should not be hardcoded. </span>
+<span class="cm">* Instead, it should be loaded dynamically from external sources such as environment variables, </span>
+<span class="cm">* configuration files, or a centralized configuration service.</span>
+<span class="cm">*/</span>
+<span class="n">String</span><span class="w"> </span><span class="n">bootstrapJsonStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">    {</span>
+<span class="s">        &quot;CEDARLING_APPLICATION_NAME&quot;:   &quot;MyApp&quot;,</span>
+<span class="s">        ...</span>
+<span class="s">    }</span>
+<span class="s">&quot;&quot;&quot;</span><span class="p">;</span>
+
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">CedarlingAdapter</span><span class="w"> </span><span class="n">cedarlingAdapter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CedarlingAdapter</span><span class="p">();</span>
+<span class="w">    </span><span class="n">cedarlingAdapter</span><span class="p">.</span><span class="na">loadFromJson</span><span class="p">(</span><span class="n">bootstrapJsonStr</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">CedarlingException</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Unable to initialize Cedarling&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+<span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Unable to initialize Cedarling&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
 </div>
 </div>
 <h3 id="authorization">Authorization<a class="headerlink" href="#authorization" title="Permanent link">#</a></h3>
@@ -9808,7 +9866,7 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <p><strong>Standard (Token-based) Interface</strong>
 - Extracts the <strong>Principal</strong> from a JWT.
 - Accepts the <strong>Context</strong> as a structured map.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:6"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">JavaScript</label><label for="__tabbed_2_2">Python</label><label for="__tabbed_2_3">Rust</label><label for="__tabbed_2_4">Kotlin</label><label for="__tabbed_2_5">Swift</label><label for="__tabbed_2_6">Go</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:7"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><input id="__tabbed_2_7" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">JavaScript</label><label for="__tabbed_2_2">Python</label><label for="__tabbed_2_3">Rust</label><label for="__tabbed_2_4">Kotlin</label><label for="__tabbed_2_5">Swift</label><label for="__tabbed_2_6">Go</label><label for="__tabbed_2_7">Java</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
@@ -10057,6 +10115,46 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <span class="p">}</span>
 </code></pre></div>
 </div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">String</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">    {</span>
+<span class="s">      &quot;app_id&quot;: &quot;app_id_001&quot;,</span>
+<span class="s">      &quot;id&quot;: &quot;admin_ui_id&quot;,</span>
+<span class="s">      &quot;name&quot;: &quot;App Name&quot;,</span>
+<span class="s">      &quot;permission&quot;: &quot;view_clients&quot;,</span>
+<span class="s">      &quot;type&quot;: &quot;Jans::Issue&quot;</span>
+<span class="s">    }</span>
+<span class="s">&quot;&quot;&quot;</span><span class="p">;</span>
+
+<span class="n">String</span><span class="w"> </span><span class="n">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Jans::Action::\&quot;Update\&quot;&quot;</span><span class="p">;</span>
+
+<span class="n">String</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">    {</span>
+<span class="s">      &quot;device_health&quot;: [&quot;Healthy&quot;],</span>
+<span class="s">      &quot;fraud_indicators&quot;: [&quot;Allowed&quot;],</span>
+<span class="s">      &quot;geolocation&quot;: [&quot;America&quot;],</span>
+<span class="s">      &quot;network&quot;: &quot;127.0.0.1&quot;,</span>
+<span class="s">      &quot;network_type&quot;: &quot;Local&quot;,</span>
+<span class="s">      &quot;operating_system&quot;: &quot;Linux&quot;,</span>
+<span class="s">      &quot;user_agent&quot;: &quot;Linux&quot;</span>
+<span class="s">    }</span>
+<span class="s">&quot;&quot;&quot;</span><span class="p">;</span>
+
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Map</span><span class="p">.</span><span class="na">of</span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;access_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&lt;access_token&gt;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;id_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&lt;id_token&gt;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;userinfo_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&lt;userinfo_token&gt;&quot;</span>
+<span class="p">);</span>
+
+<span class="c1">// Perform authorization</span>
+<span class="n">AuthorizeResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">adapter</span><span class="p">.</span><span class="na">authorize</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span><span class="w"> </span><span class="n">action</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">(</span><span class="n">resource</span><span class="p">),</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">(</span><span class="n">context</span><span class="p">));</span>
+<span class="k">if</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">getDecision</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Access granted&quot;</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Access denied&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
 </div>
 </div>
 <p><strong>Unsigned Authorization</strong>
@@ -10080,7 +10178,7 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-06-12T06:53:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-06-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-06-16T15:08:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-06-16</span>
       
         <br>
         Created:

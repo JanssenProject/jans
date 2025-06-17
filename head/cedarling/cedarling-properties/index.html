@@ -7229,6 +7229,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2_3">
@@ -7307,6 +7309,20 @@
     <li class="md-nav__item">
       <a href="../getting-started/go/" class="md-nav__link">
         Golang
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/java/" class="md-nav__link">
+        Java
       </a>
     </li>
   
@@ -9236,6 +9252,8 @@
             
           
         
+          
+        
       
       
         
@@ -9266,6 +9284,20 @@
     <li class="md-nav__item">
       <a href="../../contribute/implementation-design/jans-cedarling-design/adr/" class="md-nav__link">
         ADR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview/" class="md-nav__link">
+        Cedarling Technical Overview
       </a>
     </li>
   
@@ -9662,13 +9694,45 @@
 
 <h1 id="cedarling-properties">Cedarling Properties<a class="headerlink" href="#cedarling-properties" title="Permanent link">#</a></h1>
 <p>These Bootstrap Properties control default application level behavior.</p>
+<h2 id="required-properties-for-startup">Required properties for startup<a class="headerlink" href="#required-properties-for-startup" title="Permanent link">#</a></h2>
 <ul>
-<li><strong><code>CEDARLING_APPLICATION_NAME</code></strong> : Human friendly identifier for this application</li>
-<li><strong><code>CEDARLING_POLICY_STORE_URI</code></strong> : Location of policy store JSON, used if policy store is not local.</li>
-<li><strong><code>CEDARLING_POLICY_STORE_ID</code></strong> : The identifier of the policy store in case there is more than one policy_store_id in the policy store.</li>
-<li><strong><code>CEDARLING_USER_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a User principal.</li>
-<li><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a Workload principal.</li>
-<li><strong><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code></strong> : property specifies what boolean operation to use for the <code>USER</code> and <code>WORKLOAD</code> when making authz (authorization) decisions. <a href="#user-workload-boolean-operation">See here</a>.</li>
+<li><strong><code>CEDARLING_APPLICATION_NAME</code></strong> : Human friendly identifier for this Cedarling instance.</li>
+</ul>
+<p>To enable usage of principals at least one of the following keys must be provided:</p>
+<ul>
+<li>
+<p><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a Workload principal.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_USER_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a User principal.</p>
+</li>
+</ul>
+<p>To load policy store one of the following keys must be provided:</p>
+<ul>
+<li>
+<p><strong><code>CEDARLING_POLICY_STORE_LOCAL</code></strong> : JSON object as string with policy store. You can use <a href="https://jsontostring.com/">this</a> converter.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_POLICY_STORE_URI</code></strong> : Location of policy store JSON, used if policy store is not local.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_POLICY_STORE_LOCAL_FN</code></strong> : Local file with JSON object with policy store</p>
+</li>
+</ul>
+<p>[! NOTE]
+All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.</p>
+<p><strong>Auxilliary properties</strong></p>
+<ul>
+<li>
+<p><strong><code>CEDARLING_POLICY_STORE_ID</code></strong> : The identifier of the policy store in case there is more than one policy_store_id in the policy store.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code></strong> : property specifies whether to authorize the <code>USER</code>, <code>WORKLOAD</code> or both when making authorization decisions. 
+Use <code>"===": [{"var": "Jans::User"}, "ALLOW"]</code> if you only want user authorization. Use <code>"===": [{"var": "Jans::Workload"}, "ALLOW"]</code> if you only want workload authorization. <a href="#user-workload-boolean-operation">See here</a> if you want anything more complicated.</p>
+</li>
+</ul>
+<p><strong>Cedar Entity Mapping properties</strong> </p>
+<ul>
 <li><strong><code>CEDARLING_MAPPING_USER</code></strong> : Name of Cedar User schema entity if we don't want to use default. When specified Cedarling try build defined entity (from schema) as user instead of default <code>User</code> entity defined in <code>cedar</code> schema. Works in namespace defined in the policy store.</li>
 <li><strong><code>CEDARLING_MAPPING_WORKLOAD</code></strong> : Name of Cedar Workload schema entity</li>
 <li><strong><code>CEDARLING_MAPPING_ROLE</code></strong> : Name of Cedar Role schema entity</li>
@@ -9687,10 +9751,12 @@
 </ul>
 <p><strong>The following bootstrap properties are needed to configure JWT and cryptographic behavior:</strong></p>
 <ul>
-<li><strong><code>CEDARLING_LOCAL_JWKS</code></strong> : JWKS file with public keys</li>
-<li><strong><code>CEDARLING_POLICY_STORE_LOCAL</code></strong> : JSON object as string with policy store. You can use <a href="https://jsontostring.com/">this</a> converter.</li>
-<li><strong><code>CEDARLING_POLICY_STORE_LOCAL_FN</code></strong> : Local file with JSON object with policy store</li>
-<li><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the signature of all JWT tokens. This requires an <code>iss</code> is present.</li>
+<li>
+<p><strong><code>CEDARLING_LOCAL_JWKS</code></strong> : JWKS file with public keys</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the signature of all JWT tokens. This requires an <code>iss</code> is present.</p>
+</li>
 <li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the <code>.well-known/openid-configuration</code> via the <code>status_list_endpoint</code> claim and cache it. See the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">IETF Draft</a> for more info.</li>
 <li><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong> : Only tokens signed with these algorithms are acceptable to the Cedarling.</li>
 <li><strong><code>CEDARLING_ID_TOKEN_TRUST_MODE</code></strong> : <code>Strict</code> | <code>None</code>. Varying levels of validations based on the preference of the developer.
@@ -9708,30 +9774,13 @@
 <li><strong><code>CEDARLING_LOCK_LISTEN_SSE</code></strong> : <code>enabled</code> | <code>disabled</code>: controls whether Cedarling should listen for updates from the Lock Server.</li>
 <li><strong><code>CEDARLING_LOCK_ACCEPT_INVALID_CERTS</code></strong> : <code>enabled</code> | <code>disabled</code>: Allows interaction with a Lock server with invalid certificates. Mainly used for testing. Doesn't work for WASM builds.</li>
 </ul>
-<p>controls whether Cedarling should listen for updates from the Lock Server.</p>
-<h2 id="required-properties-for-startup">Required properties for startup<a class="headerlink" href="#required-properties-for-startup" title="Permanent link">#</a></h2>
-<ul>
-<li><strong><code>CEDARLING_APPLICATION_NAME</code></strong></li>
-</ul>
-<p>To enable usage of principals at least one of the following keys must be provided:</p>
-<ul>
-<li><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong></li>
-<li><strong><code>CEDARLING_USER_AUTHZ</code></strong></li>
-</ul>
-<p>To load policy store one of the following keys must be provided:</p>
-<ul>
-<li><strong><code>CEDARLING_POLICY_STORE_LOCAL</code></strong></li>
-<li><strong><code>CEDARLING_POLICY_STORE_URI</code></strong></li>
-<li><strong><code>CEDARLING_POLICY_STORE_LOCAL_FN</code></strong></li>
-</ul>
-<p>All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-22T17:51:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-06-17T06:34:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-06-17</span>
       
         <br>
         Created:
