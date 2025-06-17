@@ -411,6 +411,7 @@ nav:
     - Python: 'cedarling/getting-started/python.md'
     - Rust: 'cedarling/getting-started/rust.md'
     - Golang: 'cedarling/getting-started/go.md'
+    - Java: 'cedarling/getting-started/java.md'
     - Kotlin: 'cedarling/getting-started/kotlin.md'
     - Swift: 'cedarling/getting-started/swift.md'
   - Reference:
@@ -502,6 +503,7 @@ nav:
     - jans-cedarling:
       - contribute/implementation-design/jans-cedarling-design/README.md
       - ADR: contribute/implementation-design/jans-cedarling-design/adr/README.md
+      - Cedarling Technical Overview: contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview.md
   - CI-CD:
     #- GitHub CI: contribute/ci-cd/github-ci.md
     - Release Process: contribute/ci-cd/release-process.md
