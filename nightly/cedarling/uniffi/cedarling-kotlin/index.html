@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cedarling-kotlin-binding" class="md-skip">
+        <a href="#cedarling-java-binding" class="md-skip">
           Skip to content
         </a>
       
@@ -7229,6 +7229,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2_3">
@@ -7307,6 +7309,20 @@
     <li class="md-nav__item">
       <a href="../../getting-started/go/" class="md-nav__link">
         Golang
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/java/" class="md-nav__link">
+        Java
       </a>
     </li>
   
@@ -7693,6 +7709,13 @@
         <li class="md-nav__item">
   <a href="#building-from-source" class="md-nav__link">
     Building from Source
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-cedarling-java-maven-dependency" class="md-nav__link">
+    Using Cedarling-java Maven dependency
   </a>
   
 </li>
@@ -9671,6 +9694,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#using-cedarling-java-maven-dependency" class="md-nav__link">
+    Using Cedarling-java Maven dependency
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#recipes" class="md-nav__link">
     Recipes
   </a>
@@ -9746,13 +9776,13 @@
   </a>
 
 
-<h1 id="cedarling-kotlin-binding">Cedarling Kotlin binding<a class="headerlink" href="#cedarling-kotlin-binding" title="Permanent link">#</a></h1>
+<h1 id="cedarling-java-binding">Cedarling Java binding<a class="headerlink" href="#cedarling-java-binding" title="Permanent link">#</a></h1>
 <p><a href="https://mozilla.github.io/uniffi-rs/latest/">UniFFI</a> (Universal Foreign Function Interface) is a tool developed by Mozilla to simplify cross-language bindings, primarily between Rust and other languages like Kotlin, Swift, and Python. It allows Rust libraries to be used in these languages without manually writing complex foreign function interface (FFI) bindings.</p>
 <p>Please refer to <a href="../cedarling-uniffi/">this document</a> for details on the structs, enums, and functions exposed by UniFFI bindings. This section outlines the process of generating the Kotlin binding for Cedarling using Cedarling UniFFI. The Kotlin binding is then wrapped in a Java class to enable convenient use in Java applications.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
 <li>Rust: Install it from <a href="https://www.rust-lang.org/tools/install">the official Rust website</a>.</li>
-<li>Java Development Kit (JDK): version 17 or higher</li>
+<li>Java Development Kit (JDK): version 11 </li>
 <li>Apache Maven: Install it from <a href="https://maven.apache.org/download.cgi">Apache Maven Website</a></li>
 </ul>
 <h2 id="building-from-source">Building from Source<a class="headerlink" href="#building-from-source" title="Permanent link">#</a></h2>
@@ -9761,12 +9791,14 @@
 <p>Build Cedarling by executing below command from <code>./jans/jans-cedarling</code> of cloned jans project:
    <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span>cedarling_uniffi
 </code></pre></div>
-   In <code>target/release</code>, you should find the <code>libcedarling_uniffi.dylib</code> (if Mac OS), <code>libcedarling_uniffi.so</code> (if Linux OS), or <code>libcedarling_uniffi.dll</code> (if Windows OS) file, depending on the operating system you are using.</p>
+   In <code>target/release</code>, you should find the <code>libcedarling_uniffi.dylib</code> (if Mac OS), <code>libcedarling_uniffi.so</code> (if Linux OS), or <code>libcedarling_uniffi.dll</code> (if Windows OS) file, depending on the operating system you are using.
+   📦 You can use pre-built <code>libcedarling_uniffi.so</code> from the <a href="https://github.com/JanssenProject/jans/releases">Jans releases page</a>.</p>
 </li>
 <li>
 <p>Generate the bindings for Kotlin by running the command below. Replace <code>{build_file}</code> with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
    <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>run<span class="w"> </span>--bin<span class="w"> </span>uniffi-bindgen<span class="w"> </span>generate<span class="w"> </span>--library<span class="w"> </span>./target/release/<span class="o">{</span>build_file<span class="o">}</span><span class="w"> </span>--language<span class="w"> </span>kotlin<span class="w"> </span>--out-dir<span class="w"> </span>./bindings/cedarling-java/src/main/kotlin/io/jans/cedarling
-</code></pre></div></p>
+</code></pre></div>
+   📦 You can use pre-built kotlin binding (<code>cedarling_uniffi-kotlin-{version}.zip</code>) from the <a href="https://github.com/JanssenProject/jans/releases">Jans releases page</a>.</p>
 </li>
 <li>
 <p>Copy the generated <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code> file to resource directory of the <code>cedarling-java</code> Maven project. Replace <code>{build_file}</code> in the below commad with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
@@ -9780,6 +9812,22 @@ cp<span class="w"> </span>./target/release/<span class="o">{</span>build_file<sp
 </code></pre></div></p>
 </li>
 </ol>
+<h2 id="using-cedarling-java-maven-dependency">Using Cedarling-java Maven dependency<a class="headerlink" href="#using-cedarling-java-maven-dependency" title="Permanent link">#</a></h2>
+<p>If you are using pre-built binaries, add the following <code>repository</code> and <code>dependency</code> to the <code>pom.xml</code> of your Java Maven project to use Cedarling Java bindings.</p>
+<p><div class="highlight"><pre><span></span><code>    &lt;repositories&gt;
+        &lt;repository&gt;
+            &lt;id&gt;jans&lt;/id&gt;
+            &lt;name&gt;Janssen project repository&lt;/name&gt;
+            &lt;url&gt;https://maven.jans.io/maven&lt;/url&gt;
+        &lt;/repository&gt;
+    &lt;/repositories&gt;
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>        &lt;dependency&gt;
+            &lt;groupId&gt;io.jans&lt;/groupId&gt;
+            &lt;artifactId&gt;cedarling-java&lt;/artifactId&gt;
+            &lt;version&gt;{latest-jans-stable-version}&lt;/version&gt;
+        &lt;/dependency&gt;
+</code></pre></div></p>
 <h2 id="recipes">Recipes<a class="headerlink" href="#recipes" title="Permanent link">#</a></h2>
 <h3 id="recipe-1-using-the-cedarling-java-binding-in-custom-scripts-on-the-janssen-auth-server-vm-installation"><strong>Recipe 1:</strong> Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).<a class="headerlink" href="#recipe-1-using-the-cedarling-java-binding-in-custom-scripts-on-the-janssen-auth-server-vm-installation" title="Permanent link">#</a></h3>
 <p><strong>Note:</strong> This recipe is compatible with Jans version 1.4.0 and earlier.</p>
@@ -9830,7 +9878,7 @@ cp<span class="w"> </span>./target/release/<span class="o">{</span>build_file<sp
 <h3 id="recipe-2-sample-java-maven-project-using-the-kotlin-binding"><strong>Recipe 2:</strong> Sample Java Maven project using the Kotlin binding<a class="headerlink" href="#recipe-2-sample-java-maven-project-using-the-kotlin-binding" title="Permanent link">#</a></h3>
 <ol>
 <li>
-<p>Build Cedarling:
+<p>Build Cedarling by executing below command from <code>./jans/jans-cedarling</code> of cloned jans project:
     <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span>cedarling_uniffi
 </code></pre></div>
    In <code>target/release</code>, you should find the <code>libcedarling_uniffi.dylib</code> (if Mac OS), <code>libcedarling_uniffi.so</code> (if Linux OS), or <code>libcedarling_uniffi.dll</code> (if Windows OS) file, depending on the operating system you are using.</p>
@@ -9842,8 +9890,8 @@ cp<span class="w"> </span>./target/release/<span class="o">{</span>build_file<sp
 </li>
 <li>
 <p>Copy the generated <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code> file to resource directory of the sample Java Maven project. Replace <code>{build_file}</code> in the below commad with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
-    <div class="highlight"><pre><span></span><code>cp<span class="w"> </span>./target/release/<span class="o">{</span>build_file<span class="o">}</span><span class="w"> </span>./bindings/cedarling_uniffi/javaApp/src/main/resources
-</code></pre></div></p>
+    <code>bash
+    cp ./target/release/{build_file} ./bindings/cedarling_uniffi/javaApp/src/main/resources</code>git add </p>
 </li>
 <li>
 <p>Change directory to sample Java project (<code>./bindings/cedarling_uniffi/javaApp</code>) and run below command to run the main method of a Maven project from the terminal.
@@ -9883,7 +9931,7 @@ The method will execute the steps for Cedarling initialization with a sample boo
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-06-03T13:09:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-06-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-06-16T15:08:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-06-16</span>
       
         <br>
         Created:
