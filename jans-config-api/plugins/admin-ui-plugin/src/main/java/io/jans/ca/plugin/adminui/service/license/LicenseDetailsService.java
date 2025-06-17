@@ -832,6 +832,6 @@ public class LicenseDetailsService extends BaseService {
      * Handles API URL format
      */
     private String formatApiUrl(String scanApiHostname, String endpoint) {
-        return StringUtils.removeEnd(scanApiHostname, "/") + "/scan/license" + endpoint;
+        return StringUtils.removeEnd(scanApiHostname, "/") + "/v1/license" + endpoint;
     }
 }

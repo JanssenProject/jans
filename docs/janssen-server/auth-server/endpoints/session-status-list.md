@@ -8,7 +8,7 @@ tags:
 
 # Session Status List
 
-## Overview
+
 
 Janssen Server provides session status list endpoint to enable the client to query session status.
 Though not being part of any industry standard/specification, Janssen Server provides this endpoint to allow greater 

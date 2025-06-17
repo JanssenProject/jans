@@ -32,6 +32,7 @@ markdown_extensions:
 - pymdownx.emoji:
     emoji_generator: !!python/name:materialx.emoji.to_svg
     emoji_index: !!python/name:materialx.emoji.twemoji
+- pymdownx.details
 nav:
 - 'Janssen Server':
   - Introduction: janssen-server/README.md
@@ -227,10 +228,7 @@ nav:
       - CIBA: janssen-server/auth-server/openid-features/ciba.md
       - JARM: janssen-server/auth-server/openid-features/jarm.md
       - Native SSO: janssen-server/auth-server/openid-features/native-sso.md
-      - User Claims:
-        - janssen-server/auth-server/openid-features/user-claims/README.md
-        - Built-in Claims: janssen-server/auth-server/openid-features/user-claims/built-in-claims.md
-        - Adding Custom Claims: janssen-server/auth-server/openid-features/user-claims/custom-claims.md
+      - User Claims: janssen-server/auth-server/openid-features/user-claims/README.md
       - Logout:
         - janssen-server/auth-server/openid-features/logout/README.md
         - Front Channel: janssen-server/auth-server/openid-features/logout/front-channel.md
@@ -413,6 +411,7 @@ nav:
     - Python: 'cedarling/getting-started/python.md'
     - Rust: 'cedarling/getting-started/rust.md'
     - Golang: 'cedarling/getting-started/go.md'
+    - Java: 'cedarling/getting-started/java.md'
     - Kotlin: 'cedarling/getting-started/kotlin.md'
     - Swift: 'cedarling/getting-started/swift.md'
   - Reference:
@@ -504,6 +503,7 @@ nav:
     - jans-cedarling:
       - contribute/implementation-design/jans-cedarling-design/README.md
       - ADR: contribute/implementation-design/jans-cedarling-design/adr/README.md
+      - Cedarling Technical Overview: contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview.md
   - CI-CD:
     #- GitHub CI: contribute/ci-cd/github-ci.md
     - Release Process: contribute/ci-cd/release-process.md
@@ -544,6 +544,7 @@ theme:
   - navigation.tabs
   - navigation.tabs.sticky
   - navigation.indexes
+  - content.tabs.link
   font:
     code: Roboto Mono
     text: Roboto
