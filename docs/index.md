@@ -19,7 +19,7 @@ hide:
       <strong>Enterprise-grade authentication and authorization platform</strong> – Create robust identity management systems with OAuth 2.0, OpenID Connect, FIDO2, and modern security standards. Janssen provides everything you need to secure your applications and APIs.
     </p>
     <div class="hero-buttons">
-      <a href="janssen-server/README.md" class="md-button md-button--primary">Get Started</a>
+      <a href="janssen-server" class="md-button md-button--primary">Get Started</a>
       <a href="https://github.com/JanssenProject/jans" class="md-button">View on GitHub</a>
     </div>
   </div>
