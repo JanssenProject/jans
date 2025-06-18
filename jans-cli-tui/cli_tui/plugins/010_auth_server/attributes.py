@@ -195,6 +195,14 @@ class Attributes(DialogUtils):
                 ),
 
                 self.app.getTitledCheckBox(
+                            _("Required"), 
+                            name='required', 
+                            checked=data.get('required', False),
+                            jans_help=_("Check if this attibute is required"),
+                            style=cli_style.check_box
+                            ),
+
+                self.app.getTitledCheckBox(
                     _("Enable Custom Validation"),
                     name='enableCustomValidation',
                     checked=bool(data.get('attributeValidation')),
