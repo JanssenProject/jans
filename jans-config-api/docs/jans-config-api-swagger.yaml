@@ -9338,13 +9338,13 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
-          type: boolean
-        userCanEdit:
+        adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         adminCanAccess:
           type: boolean
