@@ -47,6 +47,7 @@ public class AuthorizationChallengeEndpoint {
             @FormParam("code_challenge") String codeChallenge,
             @FormParam("code_challenge_method") String codeChallengeMethod,
             @FormParam("authorization_details") String authorizationDetails,
+            @FormParam("logout_status_jwt") String shouldReturnLogoutStatusJwt,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse) {
 
@@ -67,6 +68,7 @@ public class AuthorizationChallengeEndpoint {
         authzRequest.setCodeChallengeMethod(codeChallengeMethod);
         authzRequest.setAuthzDetailsString(authorizationDetails);
         authzRequest.setDpop(httpRequest.getHeader(DpopService.DPOP));
+        authzRequest.setShouldReturnLogoutStatusJwt(Boolean.parseBoolean(shouldReturnLogoutStatusJwt));
 
         // backwards compatibilty: device_session (up to draft 02) vs auth_session (draft 02 and later)
         if (authorizationChallengeSession == null && deviceSession != null) {
