@@ -129,7 +129,7 @@ Here we delve into the process of generating the Kotlin binding for cedarling an
 ### Prerequisites
 
 - Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
-- Java Development Kit (JDK): version 17
+- Java Development Kit (JDK): version 11
 - Apache Maven: Install it from [Apache Maven Website](https://maven.apache.org/download.cgi)
 
 ### Building and Testing

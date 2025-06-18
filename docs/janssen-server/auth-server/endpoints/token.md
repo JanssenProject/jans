@@ -6,7 +6,7 @@ tags:
 - endpoint
 ---
 # Token
-## Overview
+
 
 Token endpoint is an OAuth2 protected endpoint that is used to grant tokens to client in response to valid request.
 Token endpoint is defined in the [OAuth 2.0 framework](https://datatracker.ietf.org/doc/html/rfc6749), 

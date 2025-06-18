@@ -12,7 +12,7 @@ tags:
 
 ## Installation
 
-At the moment, the Cedarling Python bindings are not available via package managers like PyPI. To use them, you can either download a pre-compiled `cedarling_python` wheel from the [releases page](https://github.com/JanssenProject/jans/releases) or [build it from the source](#building-from-source).
+At the moment, the Cedarling Python bindings are not available via package managers like PyPI. To use them, you can either download a pre-compiled `cedarling_python` wheel from the [releases page](https://github.com/JanssenProject/jans/releases/latest) or [build it from the source](#building-from-source).
 
 ### Building from source
 

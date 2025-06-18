@@ -7,7 +7,7 @@ tags:
 ---
 
 # Session Revocation
-## Overview
+
 
 Janssen Server provides session revocation endpoint to enable the client to revoke all sessions of a users.
 Though not being part of any industry standard/specification, Janssen Server provides this endpoint to allow greater 

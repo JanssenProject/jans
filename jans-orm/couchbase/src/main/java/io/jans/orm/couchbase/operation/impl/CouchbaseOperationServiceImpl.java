@@ -22,23 +22,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import io.jans.orm.util.ArrayHelper;
-import io.jans.orm.util.StringHelper;
-import io.jans.orm.exception.AuthenticationException;
-import io.jans.orm.exception.operation.ConnectionException;
-import io.jans.orm.exception.operation.DeleteException;
-import io.jans.orm.exception.operation.DuplicateEntryException;
-import io.jans.orm.exception.operation.EntryNotFoundException;
-import io.jans.orm.exception.operation.PersistenceException;
-import io.jans.orm.exception.operation.SearchException;
-import io.jans.orm.extension.PersistenceExtension;
-import io.jans.orm.model.BatchOperation;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.PersistenceMetadata;
-import io.jans.orm.model.SearchScope;
-import io.jans.orm.model.Sort;
-import io.jans.orm.model.SortOrder;
-import io.jans.orm.operation.auth.PasswordEncryptionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +47,25 @@ import io.jans.orm.couchbase.model.ConvertedExpression;
 import io.jans.orm.couchbase.model.SearchReturnDataType;
 import io.jans.orm.couchbase.operation.CouchbaseOperationService;
 import io.jans.orm.couchbase.operation.watch.OperationDurationUtil;
+import io.jans.orm.exception.AuthenticationException;
+import io.jans.orm.exception.operation.ConnectionException;
+import io.jans.orm.exception.operation.DeleteException;
+import io.jans.orm.exception.operation.DuplicateEntryException;
+import io.jans.orm.exception.operation.EntryNotFoundException;
+import io.jans.orm.exception.operation.PersistenceException;
+import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.extension.PersistenceExtension;
+import io.jans.orm.model.AttributeData;
+import io.jans.orm.model.BatchOperation;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.PasswordAttributeData;
+import io.jans.orm.model.PersistenceMetadata;
+import io.jans.orm.model.SearchScope;
+import io.jans.orm.model.Sort;
+import io.jans.orm.model.SortOrder;
+import io.jans.orm.operation.auth.PasswordEncryptionHelper;
+import io.jans.orm.util.ArrayHelper;
+import io.jans.orm.util.StringHelper;
 
 /**
  * Base service which performs all supported Couchbase operations
@@ -635,13 +637,21 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 		return resultAttributes;
 	}
 
-    public String[] createStoragePassword(String[] passwords) {
+    public String[] createStoragePassword(String[] passwords, AttributeData attributeData) {
         if (ArrayHelper.isEmpty(passwords)) {
             return passwords;
         }
+        
+        boolean isSkipHashed = (attributeData instanceof PasswordAttributeData) && ((PasswordAttributeData) attributeData).isSkipHashed();
 
         String[] results = new String[passwords.length];
         for (int i = 0; i < passwords.length; i++) {
+			if (isSkipHashed && (PasswordEncryptionHelper.findAlgorithmString(passwords[i]) != null)) {
+				// Skip password hashing only if password has prefix {alg} and defined with @Password(skipHashed = false)
+				results[i] = passwords[i];
+				continue;
+			}
+
 			if (persistenceExtension == null) {
 				results[i] = PasswordEncryptionHelper.createStoragePassword(passwords[i], connectionProvider.getPasswordEncryptionMethod());
 			} else {
@@ -823,4 +833,5 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
+
 }

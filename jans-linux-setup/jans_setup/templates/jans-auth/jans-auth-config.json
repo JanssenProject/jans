@@ -602,5 +602,10 @@
     "lockMessageConfig": {
         "enableTokenMessages" : false,
         "tokenMessagesChannel": "jans_token"
+    },
+    "connectionServiceConfiguration": {
+        "maxTotal": 200,
+        "maxPerRoute": 50,
+        "validateAfterInactivity": 0
     }
 }
