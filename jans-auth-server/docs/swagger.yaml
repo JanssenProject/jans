@@ -152,6 +152,10 @@ paths:
                 custom_response_headers:
                   type: string
                   description: Custom Response Headers.
+                logout_status_jwt:
+                  type: string
+                  description: Possible values are true or false. Returns back Logout Status JWT if send logout_status_jwt=true and authorization is successful.
+
       responses:
         200:
           description: OK
@@ -168,6 +172,10 @@ paths:
                     type: string
                     description: Authorization Code
                     example: uY29tL2F1dGhlbnRpY
+                  logout_status_jwt:
+                    type: string
+                    description: Logout Status JWT
+                    example: eyJraWQiOiJjb25uZWN0XzA3ZjQ3ZmRkLTg0NTYtNDMzOC1iYTRmLWNhNmU0NDBmYjljOV9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9
         400:
           $ref: '#/components/responses/InvalidRequest'
         401:
