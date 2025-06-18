@@ -14,8 +14,13 @@ extra:
     default: stable
     provider: mike
 extra_css:
-- css/tabs.css
-- stylesheets/mermaid-extra.css
+  - css/tabs.css
+  - stylesheets/mermaid-extra.css
+  - stylesheets/home.css
+
+extra_javascript:
+  - javascripts/skeleton-loader.js
+
 markdown_extensions:
 - admonition
 - attr_list
@@ -31,9 +36,10 @@ markdown_extensions:
     alternate_style: true
 - pymdownx.emoji:
     emoji_generator: !!python/name:materialx.emoji.to_svg
-    emoji_index: !!python/name:materialx.emoji.twemoji
+    emoji_index: !!python/name:material.extensions.emoji.twemoji
 - pymdownx.details
 nav:
+- Home: index.md
 - 'Janssen Server':
   - Introduction: janssen-server/README.md
   - Deployment and Planning Guide:
@@ -158,7 +164,7 @@ nav:
   - Database Guide:
     - janssen-server/reference/database/README.md
     - RDBMS Erwin Table: janssen-server/reference/database/rdbms-erwin.md
-  
+
     - MySQL:
       - MySQL Schema: janssen-server/reference/database/mysql-schema.md
       - MySQL Configuration: janssen-server/reference/database/mysql-config.md
@@ -405,7 +411,7 @@ nav:
   - Quick Start:
     - Authorization Using Cedarling: 'cedarling/cedarling-quick-start-unsigned.md'
     - Implement TBAC Using Cedarling: 'cedarling/cedarling-quick-start-tbac.md'
-  - Tutorials: 
+  - Tutorials:
     - 'cedarling/cedarling-getting-started.md'
     - Javascript: 'cedarling/getting-started/javascript.md'
     - Python: 'cedarling/getting-started/python.md'
@@ -433,8 +439,8 @@ nav:
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
       - Android Apps: 'cedarling/uniffi/cedarling-android.md'
-      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'  
-    - Sidecar: 
+      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'
+    - Sidecar:
       - Sidecar: 'cedarling/cedarling-sidecar-overview.md'
       - Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
   - Integrations:
@@ -472,32 +478,32 @@ nav:
   - Code of Conduct: CODE_OF_CONDUCT.md
   - Design and Implementation:
     - contribute/implementation-design/README.md
-    - Agama: 
+    - Agama:
       - contribute/implementation-design/agama-design/README.md
       - ADR: contribute/implementation-design/agama-design/adr/README.md
-    - jans-auth-server: 
+    - jans-auth-server:
       - contribute/implementation-design/jans-auth-server-design/README.md
       - ADR: contribute/implementation-design/jans-auth-server-design/adr/README.md
-    - jans-cli: 
+    - jans-cli:
        - contribute/implementation-design/jans-cli-design/README.md
        - ADR: contribute/implementation-design/jans-cli-design/adr/README.md
-    - jans-config-api: 
+    - jans-config-api:
        - contribute/implementation-design/jans-config-api-design/README.md
        - OpenAPI Spec generation: contribute/implementation-design/jans-config-api-design/config-api-swagger-spec-generation.md
        - ADR: contribute/implementation-design/jans-config-api-design/adr/README.md
-    - jans-core: 
+    - jans-core:
        - contribute/implementation-design/jans-core-design/README.md
        - ADR: contribute/implementation-design/jans-core-design/adr/README.md
-    - jans-fido2: 
+    - jans-fido2:
        - contribute/implementation-design/jans-fido2-design/README.md
        - ADR: contribute/implementation-design/jans-fido2-design/adr/README.md
-    - jans-orm: 
+    - jans-orm:
       - contribute/implementation-design/jans-orm-design/README.md
       - ADR: contribute/implementation-design/jans-orm-design/adr/README.md
-    - jans-scim: 
+    - jans-scim:
       - contribute/implementation-design/jans-scim-design/README.md
       - ADR: contribute/implementation-design/jans-scim-design/adr/README.md
-    - jans-casa: 
+    - jans-casa:
       - contribute/implementation-design/jans-casa-design/README.md
       - ADR: contribute/implementation-design/jans-casa-design/adr/README.md
     - jans-cedarling:
@@ -524,8 +530,6 @@ plugins:
 - include-markdown
 - tags
 - search
-- exclude-search:
-    exclude_unreferenced: true
 - git-revision-date-localized:
     enable_creation_date: true
     type: timeago
