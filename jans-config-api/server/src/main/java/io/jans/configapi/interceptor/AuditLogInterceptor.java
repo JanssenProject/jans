@@ -18,8 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriInfo;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

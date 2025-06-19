@@ -164,6 +164,7 @@ public class ApiApplication extends BaseApiApplication {
         classes.add(ClientAuthResource.class);
         classes.add(TokenResource.class);
         classes.add(AgamaRepoResource.class);
+        classes.add(AuditLoggerResource.class);
                 
         log.info("appConfiguration:{}",appConfiguration );
         if(appConfiguration!=null && appConfiguration.getAssetMgtConfiguration()!=null && appConfiguration.getAssetMgtConfiguration().isAssetMgtEnabled()) {
