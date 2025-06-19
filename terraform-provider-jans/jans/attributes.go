@@ -16,39 +16,41 @@ type AttributeValidation struct {
 
 // Attribute represents a single Jans attribute.
 type Attribute struct {
-	Dn                     string               `schema:"dn" json:"dn,omitempty"`
-	Selected               bool                 `schema:"selected" json:"selected,omitempty"`
-	Inum                   string               `schema:"inum" json:"inum,omitempty"`
-	SourceAttribute        string               `schema:"source_attribute" json:"sourceAttribute,omitempty"`
-	NameIdType             string               `schema:"name_id_type" json:"nameIdType,omitempty"`
-	Name                   string               `schema:"name" json:"name,omitempty"`
-	DisplayName            string               `schema:"display_name" json:"displayName,omitempty"`
-	Description            string               `schema:"description" json:"description,omitempty"`
-	Origin                 string               `schema:"origin" json:"origin,omitempty"`
-	DataType               string               `schema:"data_type" json:"dataType,omitempty"`
-	EditType               []string             `schema:"edit_type" json:"editType,omitempty"`
-	ViewType               []string             `schema:"view_type" json:"viewType,omitempty"`
-	UsageType              []string             `schema:"usage_type" json:"usageType,omitempty"`
-	ClaimName              string               `schema:"claim_name" json:"claimName,omitempty"`
-	SeeAlso                string               `schema:"see_also" json:"seeAlso,omitempty"`
-	Status                 string               `schema:"status" json:"status,omitempty"`
-	Saml1Uri               string               `schema:"saml1_uri" json:"saml1Uri,omitempty"`
-	Saml2Uri               string               `schema:"saml2_uri" json:"saml2Uri,omitempty"`
-	Urn                    string               `schema:"urn" json:"urn,omitempty"`
-	ScimCustomAttr         bool                 `schema:"scim_custom_attr" json:"scimCustomAttr,omitempty"`
-	OxMultiValuedAttribute bool                 `schema:"ox_multi_valued_attribute" json:"oxMultiValuedAttribute,omitempty"`
-	JansHideOnDiscovery    bool                 `schema:"jans_hide_on_discovery" json:"jansHideOnDiscovery,omitempty"`
-	Custom                 bool                 `schema:"custom" json:"custom,omitempty"`
-	AttributeValidation    *AttributeValidation `schema:"attribute_validation" json:"attributeValidation,omitempty"`
-	Tooltip                string               `schema:"tooltip" json:"tooltip,omitempty"`
-	AdminCanAccess         bool                 `schema:"admin_can_access" json:"adminCanAccess,omitempty"`
-	AdminCanView           bool                 `schema:"admin_can_view" json:"adminCanView,omitempty"`
-	AdminCanEdit           bool                 `schema:"admin_can_edit" json:"adminCanEdit,omitempty"`
-	UserCanAccess          bool                 `schema:"user_can_access" json:"userCanAccess,omitempty"`
-	UserCanView            bool                 `schema:"user_can_view" json:"userCanView,omitempty"`
-	UserCanEdit            bool                 `schema:"user_can_edit" json:"userCanEdit,omitempty"`
-	WhitePagesCanView      bool                 `schema:"white_pages_can_view" json:"whitePagesCanView,omitempty"`
-	BaseDn                 string               `schema:"base_dn" json:"baseDn,omitempty"`
+	Dn                       string               `schema:"dn" json:"dn,omitempty"`
+	Selected                 bool                 `schema:"selected" json:"selected,omitempty"`
+	Inum                     string               `schema:"inum" json:"inum,omitempty"`
+	SourceAttribute          string               `schema:"source_attribute" json:"sourceAttribute,omitempty"`
+	NameIdType               string               `schema:"name_id_type" json:"nameIdType,omitempty"`
+	Name                     string               `schema:"name" json:"name,omitempty"`
+	DisplayName              string               `schema:"display_name" json:"displayName,omitempty"`
+	Description              string               `schema:"description" json:"description,omitempty"`
+	Origin                   string               `schema:"origin" json:"origin,omitempty"`
+	DataType                 string               `schema:"data_type" json:"dataType,omitempty"`
+	EditType                 []string             `schema:"edit_type" json:"editType,omitempty"`
+	ViewType                 []string             `schema:"view_type" json:"viewType,omitempty"`
+	UsageType                []string             `schema:"usage_type" json:"usageType,omitempty"`
+	ClaimName                string               `schema:"claim_name" json:"claimName,omitempty"`
+	SeeAlso                  string               `schema:"see_also" json:"seeAlso,omitempty"`
+	Status                   string               `schema:"status" json:"status,omitempty"`
+	Saml1Uri                 string               `schema:"saml1_uri" json:"saml1Uri,omitempty"`
+	Saml2Uri                 string               `schema:"saml2_uri" json:"saml2Uri,omitempty"`
+	Urn                      string               `schema:"urn" json:"urn,omitempty"`
+	ScimCustomAttr           bool                 `schema:"scim_custom_attr" json:"scimCustomAttr,omitempty"`
+	OxMultiValuedAttribute   bool                 `schema:"ox_multi_valued_attribute" json:"oxMultiValuedAttribute,omitempty"`
+	JansMultivaluedAttr      bool                 `schema:"jans_multivalued_attr" json:"jansMultivaluedAttr,omitempty"`
+	JansHideOnDiscovery      bool                 `schema:"jans_hide_on_discovery" json:"jansHideOnDiscovery,omitempty"`
+	Custom                   bool                 `schema:"custom" json:"custom,omitempty"`
+	Required                 bool                 `schema:"required" json:"required,omitempty"`
+	AttributeValidation      *AttributeValidation `schema:"attribute_validation" json:"attributeValidation,omitempty"`
+	Tooltip                  string               `schema:"tooltip" json:"tooltip,omitempty"`
+	AdminCanAccess           bool                 `schema:"admin_can_access" json:"adminCanAccess,omitempty"`
+	AdminCanView             bool                 `schema:"admin_can_view" json:"adminCanView,omitempty"`
+	AdminCanEdit             bool                 `schema:"admin_can_edit" json:"adminCanEdit,omitempty"`
+	UserCanAccess            bool                 `schema:"user_can_access" json:"userCanAccess,omitempty"`
+	UserCanView              bool                 `schema:"user_can_view" json:"userCanView,omitempty"`
+	UserCanEdit              bool                 `schema:"user_can_edit" json:"userCanEdit,omitempty"`
+	WhitePagesCanView        bool                 `schema:"white_pages_can_view" json:"whitePagesCanView,omitempty"`
+	BaseDn                   string               `schema:"base_dn" json:"baseDn,omitempty"`
 }
 
 // GetAttributes returns a list of all Jans attributes currently configured

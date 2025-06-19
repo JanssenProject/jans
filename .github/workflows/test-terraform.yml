@@ -1,0 +1,45 @@
+name: Test Terraform provider
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: latest
+    strategy:
+      max-parallel: 6
+      matrix:
+        persistence-backends: ["MYSQL", "PGSQL"]
+        python-version: ["3.7"]
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python3
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version-file: 'go.mod'
+
+    - name: Test Flex monolith demo
+      run: |
+        ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+        wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssendemo.sh
+        sudo chmod u+x startjanssendemo.sh
+        sudo bash startjanssendemo.sh demoexample.gluu.org ${{ matrix.persistence-backends }} true $ip ${{ matrix.istio }} "--devel"
+         
+        export JANS_URL=https://demoexample.gluu.org
+        export JANS_CLIENT_ID=$(sudo microk8s.kubectl get cm cn -n jans --template={{.data.test_client_id}})
+        export JANS_CLIENT_SECRET=$(sudo microk8s.kubectl get secret cn -n jans --template={{.data.test_client_pw}} | base64 -d)
+        export JANS_INSECURE_CLIENT=true
+        export TF_ACC=1
+        
+        go install github.com/jstemmer/go-junit-report/v2@latest
+        go test -v ./...

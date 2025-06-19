@@ -1,8 +1,11 @@
 package jans
 
 import (
+	"bytes"
 	"context"
-	"os"
+	"fmt"
+	"io"
+	"net/url"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -16,6 +19,14 @@ func TestCreateIDP(t *testing.T) {
 
 	ctx := context.Background()
 
+	// Get current host for dynamic metadata generation
+	currentHost := GetCurrentHost()
+	parsedURL, err := url.Parse(currentHost)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hostDomain := parsedURL.Host
+
 	idp := &IdentityProvider{
 		CreatorId:              "admin",
 		Description:            "Test IDP",
@@ -23,14 +34,22 @@ func TestCreateIDP(t *testing.T) {
 		Name:                   "test-idp",
 		Realm:                  "jans",
 		NameIDPolicyFormat:     "urn:mace:shibboleth:1.0:nameIdentifier",
-		IdpEntityId:            "https://moabu-promoted-loon.gluu.info/idp/shibboleth",
-		SingleSignOnServiceUrl: "https://moabu-promoted-loon.gluu.info/idp/profile/SAML2/POST/SSO",
+		IdpEntityId:            fmt.Sprintf("https://%s/idp/shibboleth", hostDomain),
+		SingleSignOnServiceUrl: fmt.Sprintf("https://%s/idp/profile/SAML2/POST/SSO", hostDomain),
 	}
 
-	file, err := os.Open("testdata/metadata.xml")
+	// Generate metadata dynamically with current host
+	metadataReader, err := GenerateMetadataReader(currentHost)
 	if err != nil {
-		t.Fatalf("could not open metadata file: %v", err)
+		t.Fatalf("could not generate metadata: %v", err)
 	}
+
+	// Convert reader to ReadSeeker for the API
+	metadataBytes, err := io.ReadAll(metadataReader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	file := bytes.NewReader(metadataBytes)
 
 	idp, err = c.CreateIDP(ctx, idp, file)
 	if err != nil {
@@ -44,9 +63,17 @@ func TestCreateIDP(t *testing.T) {
 
 	idp.Description = "Updated description"
 
-	if _, err = file.Seek(0, 0); err != nil {
-		t.Fatalf("could not seek to beginning of file: %v", err)
+	// Generate fresh metadata for update
+	metadataReader, err = GenerateMetadataReader(currentHost)
+	if err != nil {
+		t.Fatalf("could not generate metadata for update: %v", err)
 	}
+	
+	metadataBytes, err = io.ReadAll(metadataReader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	file = bytes.NewReader(metadataBytes)
 
 	idp, err = c.UpdateIDP(ctx, idp, file)
 	if err != nil {

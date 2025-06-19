@@ -1,16 +1,13 @@
 package jans
 
 import (
+	"bytes"
 	"context"
-	"embed"
-	_ "embed"
+	"io"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 )
-
-//go:embed testdata/metadata.xml
-var testFile embed.FS
 
 func TestCreateJansAsset(t *testing.T) {
 	t.Skip("Service not implemented")
@@ -21,13 +18,17 @@ func TestCreateJansAsset(t *testing.T) {
 
 	ctx := context.Background()
 
-	file, err := testFile.Open("testdata/metadata.xml")
+	// Generate metadata dynamically
+	metadataReader, err := GenerateMetadataReader(GetCurrentHost())
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() {
-		file.Close()
-	})
+	
+	metadataBytes, err := io.ReadAll(metadataReader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	file := bytes.NewReader(metadataBytes)
 
 	doc, err := c.CreateJansAsset(ctx, Document{
 		FileName:    "metadata.xml",
@@ -49,13 +50,17 @@ func TestCreateJansAsset(t *testing.T) {
 		t.Fatalf("mismatch: %s", diff)
 	}
 
-	file1, err := testFile.Open("testdata/metadata.xml")
+	// Generate fresh metadata for update
+	metadataReader, err = GenerateMetadataReader(GetCurrentHost())
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() {
-		file1.Close()
-	})
+	
+	metadataBytes, err = io.ReadAll(metadataReader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	file1 := bytes.NewReader(metadataBytes)
 
 	doc.Description = "Updated description"
 	if doc, err = c.UpdateJansAsset(ctx, *doc, file1); err != nil {

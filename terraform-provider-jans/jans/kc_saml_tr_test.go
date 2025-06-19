@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	_ "embed"
+	"io"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -46,11 +47,25 @@ func TestCreateTR(t *testing.T) {
 		DisplayName:          "Some display name",
 		Description:          "Some trust relationship",
 		SPMetaDataSourceType: "file",
+		Status:               "",
+		ValidationStatus:     "",
+		ProfileConfigurations: ProfileConfigurations{},
 	}
 
-	r := bytes.NewReader(metadata)
+	// Generate metadata dynamically with current host
+	metadataReader, err := GenerateMetadataReader(GetCurrentHost())
+	if err != nil {
+		t.Fatalf("could not generate metadata: %v", err)
+	}
 
-	tr, err = c.CreateTR(ctx, tr, r)
+	// Convert reader to ReadSeeker for the API
+	metadataBytes, err := io.ReadAll(metadataReader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	file := bytes.NewReader(metadataBytes)
+
+	tr, err = c.CreateTR(ctx, tr, file)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,11 +77,23 @@ func TestCreateTR(t *testing.T) {
 
 	tr.Description = "Updated description"
 
-	if _, err := r.Seek(0, 0); err != nil {
+	// Generate fresh metadata for update
+	metadataReader, err = GenerateMetadataReader(GetCurrentHost())
+	if err != nil {
+		t.Fatalf("could not generate metadata for update: %v", err)
+	}
+
+	metadataBytes, err = io.ReadAll(metadataReader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	file1 := bytes.NewReader(metadataBytes)
+
+	if _, err := file1.Seek(0, 0); err != nil {
 		t.Fatal(err)
 	}
 
-	tr, err = c.UpdateTR(ctx, tr, r)
+	tr, err = c.UpdateTR(ctx, tr, file1)
 	if err != nil {
 		t.Fatal(err)
 	}

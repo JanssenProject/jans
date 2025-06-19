@@ -153,7 +153,17 @@ func resourceAttribute() *schema.Resource {
 			"ox_multi_valued_attribute": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Boolean value indicating if the attribute can hold multiple value.",
+				Description: "Boolean value indicating if the attribute is multivalued (legacy field).",
+			},
+			"jans_multivalued_attr": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value indicating if the attribute is multivalued.",
+			},
+			"required": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value indicating if the attribute is required.",
 			},
 			"attribute_validation": {
 				Type:        schema.TypeList,
@@ -195,10 +205,6 @@ func resourceAttribute() *schema.Resource {
 				Optional: true,
 			},
 			"custom": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"required": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},

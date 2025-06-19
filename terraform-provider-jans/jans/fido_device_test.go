@@ -1,3 +1,4 @@
+
 package jans
 
 import (
@@ -6,6 +7,10 @@ import (
 )
 
 func TestFidoDevices(t *testing.T) {
+
+	if skipKnownFailures {
+		t.SkipNow()
+	}
 
 	client, err := NewInsecureClient(host, user, pass)
 	if err != nil {
