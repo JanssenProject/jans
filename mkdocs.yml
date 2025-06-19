@@ -190,6 +190,7 @@ nav:
       - OpenID id_token: janssen-server/auth-server/tokens/openid-id-token.md
       - OpenID Userinfo Token: janssen-server/auth-server/tokens/openid-userinfo-token.md
       - UMA RPT Token: janssen-server/auth-server/tokens/uma-rpt-token.md
+      - Logout Status JWT: janssen-server/auth-server/endpoints/logout-status-jwt.md
     - Scopes: janssen-server/auth-server/scopes/README.md
     - Rich Authorization Requests : janssen-server/auth-server/authz-details/README.md
     - Endpoints:
@@ -206,7 +207,6 @@ nav:
       - Token Revocation: janssen-server/auth-server/endpoints/token-revocation.md
       - Global Token Revocation: janssen-server/auth-server/endpoints/global-token-revocation.md
       - Session Revocation: janssen-server/auth-server/endpoints/session-revocation.md
-      - Session Status List: janssen-server/auth-server/endpoints/session-status-list.md
       - End Session: janssen-server/auth-server/endpoints/end-session.md
       - Clientinfo: janssen-server/auth-server/endpoints/clientinfo.md
       - JWKS URI: janssen-server/auth-server/endpoints/jwks-uri.md
