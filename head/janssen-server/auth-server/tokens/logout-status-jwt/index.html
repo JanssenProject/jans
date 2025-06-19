@@ -12,13 +12,9 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://jans.io/docs/head/janssen-server/auth-server/endpoints/session-status-list/">
+        <link rel="canonical" href="https://jans.io/docs/head/janssen-server/auth-server/tokens/logout-status-jwt/">
       
       
-        <link rel="prev" href="../session-revocation/">
-      
-      
-        <link rel="next" href="../end-session/">
       
       
       <link rel="icon" href="../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
@@ -26,7 +22,7 @@
     
     
       
-        <title>Session Status List - Janssen Documentation</title>
+        <title>Logout Status JWT - Janssen Documentation</title>
       
     
     
@@ -86,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#session-status-list" class="md-skip">
+        <a href="#logout-status-jwt" class="md-skip">
           Skip to content
         </a>
       
@@ -137,7 +133,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Session Status List
+              Logout Status JWT
             
           </span>
         </div>
@@ -269,12 +265,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../../../" class="md-tabs__link">
           
   
@@ -475,8 +469,6 @@
       
   
   
-    
-  
   
   
     
@@ -522,17 +514,14 @@
     
     
       
-        
-        
-      
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -549,13 +538,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Janssen Server
@@ -4194,8 +4183,6 @@
                 
   
   
-    
-  
   
   
     
@@ -4240,11 +4227,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -4267,7 +4254,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2_9">
             <span class="md-nav__icon md-icon"></span>
             Auth Server Admin Guide
@@ -4438,6 +4425,8 @@
       
         
       
+        
+      
     
     
     
@@ -4453,7 +4442,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../tokens/" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
   
@@ -4488,7 +4477,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tokens/oauth-access-tokens/" class="md-nav__link">
+      <a href="../oauth-access-tokens/" class="md-nav__link">
         
   
   
@@ -4511,7 +4500,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tokens/oauth-refresh-tokens/" class="md-nav__link">
+      <a href="../oauth-refresh-tokens/" class="md-nav__link">
         
   
   
@@ -4534,7 +4523,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tokens/oauth-tx-tokens/" class="md-nav__link">
+      <a href="../oauth-tx-tokens/" class="md-nav__link">
         
   
   
@@ -4557,7 +4546,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tokens/openid-id-token/" class="md-nav__link">
+      <a href="../openid-id-token/" class="md-nav__link">
         
   
   
@@ -4580,7 +4569,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tokens/openid-userinfo-token/" class="md-nav__link">
+      <a href="../openid-userinfo-token/" class="md-nav__link">
         
   
   
@@ -4603,12 +4592,35 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tokens/uma-rpt-token/" class="md-nav__link">
+      <a href="../uma-rpt-token/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     UMA RPT Token
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/logout-status-jwt.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Logout Status JWT
     
   </span>
   
@@ -4677,8 +4689,6 @@
                 
   
   
-    
-  
   
   
     
@@ -4728,8 +4738,6 @@
       
         
       
-        
-      
     
     
     
@@ -4737,15 +4745,15 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9_7" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9_7" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="../../endpoints/" class="md-nav__link ">
               
   
   
@@ -4764,7 +4772,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_9_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_9_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2_9_7">
             <span class="md-nav__icon md-icon"></span>
             Endpoints
@@ -4780,7 +4788,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../configuration/" class="md-nav__link">
+      <a href="../../endpoints/configuration/" class="md-nav__link">
         
   
   
@@ -4803,7 +4811,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../client-registration/" class="md-nav__link">
+      <a href="../../endpoints/client-registration/" class="md-nav__link">
         
   
   
@@ -4826,7 +4834,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../client-authn.md" class="md-nav__link">
+      <a href="../../endpoints/client-authn.md" class="md-nav__link">
         
   
   
@@ -4849,7 +4857,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../authorization/" class="md-nav__link">
+      <a href="../../endpoints/authorization/" class="md-nav__link">
         
   
   
@@ -4872,7 +4880,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../authorization-challenge/" class="md-nav__link">
+      <a href="../../endpoints/authorization-challenge/" class="md-nav__link">
         
   
   
@@ -4895,7 +4903,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../access-evaluation/" class="md-nav__link">
+      <a href="../../endpoints/access-evaluation/" class="md-nav__link">
         
   
   
@@ -4918,7 +4926,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../token/" class="md-nav__link">
+      <a href="../../endpoints/token/" class="md-nav__link">
         
   
   
@@ -4941,7 +4949,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ssa/" class="md-nav__link">
+      <a href="../../endpoints/ssa/" class="md-nav__link">
         
   
   
@@ -4964,7 +4972,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../userinfo/" class="md-nav__link">
+      <a href="../../endpoints/userinfo/" class="md-nav__link">
         
   
   
@@ -4987,7 +4995,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../token-revocation/" class="md-nav__link">
+      <a href="../../endpoints/token-revocation/" class="md-nav__link">
         
   
   
@@ -5010,7 +5018,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../global-token-revocation/" class="md-nav__link">
+      <a href="../../endpoints/global-token-revocation/" class="md-nav__link">
         
   
   
@@ -5033,7 +5041,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../session-revocation/" class="md-nav__link">
+      <a href="../../endpoints/session-revocation/" class="md-nav__link">
         
   
   
@@ -5053,102 +5061,10 @@
                 
   
   
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Session Status List
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    Session Status List
-    
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
-    <span class="md-ellipsis">
-      Disabling The Endpoint Using Feature Flag
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    <span class="md-ellipsis">
-      References
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
   
   
     <li class="md-nav__item">
-      <a href="../end-session/" class="md-nav__link">
+      <a href="../../endpoints/end-session/" class="md-nav__link">
         
   
   
@@ -5171,7 +5087,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../clientinfo/" class="md-nav__link">
+      <a href="../../endpoints/clientinfo/" class="md-nav__link">
         
   
   
@@ -5194,7 +5110,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../jwks-uri/" class="md-nav__link">
+      <a href="../../endpoints/jwks-uri/" class="md-nav__link">
         
   
   
@@ -5217,7 +5133,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../archived-jwks-uri/" class="md-nav__link">
+      <a href="../../endpoints/archived-jwks-uri/" class="md-nav__link">
         
   
   
@@ -5240,7 +5156,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../introspection/" class="md-nav__link">
+      <a href="../../endpoints/introspection/" class="md-nav__link">
         
   
   
@@ -5263,7 +5179,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../device-authorization/" class="md-nav__link">
+      <a href="../../endpoints/device-authorization/" class="md-nav__link">
         
   
   
@@ -5286,7 +5202,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../par/" class="md-nav__link">
+      <a href="../../endpoints/par/" class="md-nav__link">
         
   
   
@@ -5309,7 +5225,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../backchannel-authentication/" class="md-nav__link">
+      <a href="../../endpoints/backchannel-authentication/" class="md-nav__link">
         
   
   
@@ -14188,6 +14104,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#usage" class="md-nav__link">
     <span class="md-ellipsis">
       Usage
@@ -14197,9 +14122,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
+  <a href="#disabling-logout-status-jwt-using-feature-flag" class="md-nav__link">
     <span class="md-ellipsis">
-      Disabling The Endpoint Using Feature Flag
+      Disabling Logout Status JWT Using Feature Flag
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#revoking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Revoking
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
     </span>
   </a>
   
@@ -14245,13 +14188,7 @@
       
       
       
-        <span class="md-tag">endpoint</span>
-      
-    
-      
-      
-      
-        <span class="md-tag">session-status-list</span>
+        <span class="md-tag">logout-status-jwt</span>
       
     
   </nav>
@@ -14261,54 +14198,50 @@
   
 
 
-<h1 id="session-status-list">Session Status List<a class="headerlink" href="#session-status-list" title="Permanent link">#</a></h1>
-<p>Janssen Server provides session status list endpoint to enable the client to query session status.
-Though not being part of any industry standard/specification, Janssen Server provides this endpoint to allow greater 
-visibility of sessions on OP.</p>
-<p>URL to access session status list endpoint on Janssen Server is listed in the response of Janssen Server's well-known
-endpoint given below.</p>
-<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
-</code></pre></div>
-<p><code>session_status_list_endpoint</code> claim in the response specifies the URL for session status list endpoint. By default, endpoint looks like below:</p>
-<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/session_status_list
-</code></pre></div>
-<p>More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Session_Management/get-session-status-list">jans-auth-server module</a>.</p>
+<h1 id="logout-status-jwt">Logout Status JWT<a class="headerlink" href="#logout-status-jwt" title="Permanent link">#</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>The Logout Status JWT is a compact, self-contained, purpose-built token that represents the state and validity of a user "logged-in" state.</p>
+<p>Logout Status JWT is returned from Authorization Endpoint and Authorization Challenge Endpoint by sending <code>logout_status_jwt=true</code> parameter in request. It is returned back upon successful authn&amp;authz (when <code>code</code> is returned).</p>
+<p>Janssen Server provides Token Status List endpoint to enable the client to query token status.
+Logout Status JWT state can be queries via Token Status List endpoint.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<p>There is new concept of Session JWT. It can be requested at Authorization Endpoint by providing additional parameter <code>session_jwt=true</code>.</p>
-<p>Sample Session JWT request</p>
-<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/authorize?response_type=code&amp;client_id=990593dd-ba2f-45e8-a284-947965631336&amp;scope=openid+profile+address+email+phone+user_name+revoke_session&amp;redirect_uri=https%3A%2F%2Fyuriyz-internal-jaguar.gluu.info%2Fjans-auth-rp%2Fhome.htm&amp;state=db87d011-8953-45a3-87fd-9f91f723a09f&amp;nonce=928d1314-577e-446f-9a33-f2cb76a4647e&amp;prompt=&amp;ui_locales=&amp;claims_locales=&amp;acr_values=&amp;request_session_id=false&amp;session_jwt=true
+<p>Logout Status JWT can be requested at Authorization Endpoint or Authorization Challenge Endpoint by providing additional parameter <code>logout_status_jwt=true</code>.</p>
+<p>Sample request (that requests Logout Status JWT)</p>
+<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/authorize?response_type=code&amp;client_id=435636e1-c8cf-4b27-8ee3-d6121286f3dc&amp;scope=openid+profile+address+email+phone+user_name+revoke_any_token+global_token_revocation&amp;redirect_uri=https%3A%2F%2Fjanssen.server.host%2Fjans-auth-rp%2Fhome.htm&amp;state=172645ff-4887-4e97-9152-197efb1591d0&amp;nonce=85b2161e-7502-4619-8eaf-1caa4cf7bec0&amp;prompt=&amp;ui_locales=&amp;claims_locales=&amp;acr_values=&amp;request_session_id=false&amp;logout_status_jwt=true
 </code></pre></div>
-<p>After successful authentication and authorization AS returns back also Session JWT.</p>
-<p><strong>Encoded Session JWT example</strong>
-<div class="highlight"><pre><span></span><code><span class="n">eyJraWQiOiJjb25uZWN0X2FkYjg2ODg5LWRjOGYtNDJkMC04ZjdiLTVjYTc1YjhiZDgwY19zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9</span><span class="p">.</span><span class="na">eyJhdWQiOiI5OTA1OTNkZC1iYTJmLTQ1ZTgtYTI4NC05NDc5NjU2MzEzMzYiLCJuYmYiOjE3NDcwNDk1NjEsInN0YXR1c19saXN0Ijp7ImlkeCI6MjgyNCwidXJpIjoiaHR0cHM6Ly95dXJpeXotaW50ZXJuYWwtamFndWFyLmdsdXUuaW5mby9qYW5zLWF1dGgvcmVzdHYxL3Nlc3Npb25fc3RhdHVzX2xpc3QifSwiaXNzIjoiaHR0cHM6Ly95dXJpeXotaW50ZXJuYWwtamFndWFyLmdsdXUuaW5mbyIsImV4cCI6MTc0NzEzNTk2MSwiaWF0IjoxNzQ3MDQ5NTYxLCJqdGkiOiJjYzk1MmYyNS1kODc2LTQ1NWUtYmNmZC00ZDcwNTAzNjYwZjUiLCJzaWQiOiJjY2RkZjQ0MC1iMDAzLTRkNzItODFhMS0yMTQzM2E5ZTBjZmMifQ</span><span class="p">.</span><span class="na">QZYEkqu</span><span class="o">-</span><span class="n">nFFkklRN60RDH7_bCwDyS_2d4LN9p3WpSpWBUiepea3h0m_o6wMw8qACE_qDr4b1S9QLVYEnMi_AN7fj_k3HGIGnksV8WqKkCgvz4DIozMYlXpaPs4BchZq4whgJsIfIphEskYisJ_7GjnoMDDPkhRCJHyGidNk_hay3ESHf9Eu2MnPkXUu3apNTpIOlHEUbfrqRxTMoyvg6Y2pIb7rYTYxWVJdVeJefZHt8HMyJ2WmUZAFEfRii4n6cQ2LbdwVsrQ64nZZSHOvEZIQnvL03_XdYiypJWgeiua3kTHWa72uBRJOgiavrZnPuKmzJjHZh6A0JyxB8wbHcaQ</span>
+<p>After successful authentication and authorization AS returns back also Logout Status JWT.</p>
+<p>Sample response
+<div class="highlight"><pre><span></span><code>HTTP/1.1 302 Found
+Location: https://janssen.server.host/jans-auth-rp/home.htm?code=03cb499b-a6fb-4ac1-b406-051baf7278cc&amp;scope=openid+revoke_any_token+global_token_revocation&amp;logout_status_jwt=eyJraWQiOiJjb25uZWN0XzA3ZjQ3ZmRkLTg0NTYtNDMzOC1iYTRmLWNhNmU0NDBmYjljOV9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0MzU2MzZlMS1jOGNmLTRiMjctOGVlMy1kNjEyMTI4NmYzZGMiLCJuYmYiOjE3NDkyMjUwMzgsInN0YXR1c19saXN0Ijp7ImlkeCI6ODEsInVyaSI6Imh0dHBzOi8veXVyaXl6LWludGVybmFsLWphZ3Vhci5nbHV1LmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9LCJpc3MiOiJodHRwczovL3l1cml5ei1pbnRlcm5hbC1qYWd1YXIuZ2x1dS5pbmZvIiwiZXhwIjoxNzQ5MzExNDM4LCJpYXQiOjE3NDkyMjUwMzgsImp0aSI6ImZmOWFkMzEyLWRmODgtNGJkOS04ODhlLWJhNTk1NDNlNmE4MCJ9.eIHpiFoc7tp4Yin52cje7u8vNsnojcpurKWel2pGOKcWkjZw2f3Ioyhpe0nacNiA8tJDV11B6i_S49q4X4TTFjoY-oR7bfbXMhKe64L1Km71qP240rfsppcxbpVccRjvwFpX3ZSrvq1yWaxY4E8UoiRS168JtXGBlvZ1Hr89GoUVEdsTmowITRbSCQK2s7ENsD53P9M0--mag3YFAA9LTvQqfWtD1fhqoqpC9Hm4rEnO6VgTbI0tCuKIB1ncnMU30gH_PrKY53Z_n3NEYF_BdwkejcHE6mGybAtlTEXGqVSt5FQFUKIvsJM8kW6mK_XGsIhFNu49T70oPEs5ZSD2Zg&amp;state=172645ff-4887-4e97-9152-197efb1591d0&amp;session_state=f71764d3f7f2280ecbfe170a5c0dd51b3e20769c7deadaee1bda8eb8d2df0f8f.3281229a-0118-4037-895b-43aed75ad2f8
 </code></pre></div></p>
-<p><strong>Decoded payload of Session JWT</strong>
+<p><strong>Encoded Logout Status JWT example</strong>
+<div class="highlight"><pre><span></span><code><span class="n">eyJraWQiOiJjb25uZWN0XzA3ZjQ3ZmRkLTg0NTYtNDMzOC1iYTRmLWNhNmU0NDBmYjljOV9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9</span><span class="p">.</span><span class="na">eyJhdWQiOiI0MzU2MzZlMS1jOGNmLTRiMjctOGVlMy1kNjEyMTI4NmYzZGMiLCJuYmYiOjE3NDkyMjUwMzgsInN0YXR1c19saXN0Ijp7ImlkeCI6ODEsInVyaSI6Imh0dHBzOi8veXVyaXl6LWludGVybmFsLWphZ3Vhci5nbHV1LmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9LCJpc3MiOiJodHRwczovL3l1cml5ei1pbnRlcm5hbC1qYWd1YXIuZ2x1dS5pbmZvIiwiZXhwIjoxNzQ5MzExNDM4LCJpYXQiOjE3NDkyMjUwMzgsImp0aSI6ImZmOWFkMzEyLWRmODgtNGJkOS04ODhlLWJhNTk1NDNlNmE4MCJ9</span><span class="p">.</span><span class="na">eIHpiFoc7tp4Yin52cje7u8vNsnojcpurKWel2pGOKcWkjZw2f3Ioyhpe0nacNiA8tJDV11B6i_S49q4X4TTFjoY</span><span class="o">-</span><span class="n">oR7bfbXMhKe64L1Km71qP240rfsppcxbpVccRjvwFpX3ZSrvq1yWaxY4E8UoiRS168JtXGBlvZ1Hr89GoUVEdsTmowITRbSCQK2s7ENsD53P9M0</span><span class="o">--</span><span class="n">mag3YFAA9LTvQqfWtD1fhqoqpC9Hm4rEnO6VgTbI0tCuKIB1ncnMU30gH_PrKY53Z_n3NEYF_BdwkejcHE6mGybAtlTEXGqVSt5FQFUKIvsJM8kW6mK_XGsIhFNu49T70oPEs5ZSD2Zg</span>
+</code></pre></div></p>
+<p><strong>Decoded payload of Logout Status JWT</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;990593dd-ba2f-45e8-a284-947965631336&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;nbf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1747049561</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;435636e1-c8cf-4b27-8ee3-d6121286f3dc&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;nbf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1749225038</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;status_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;idx&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2824</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host/jans-auth/restv1/session_status_list&quot;</span>
+<span class="w">    </span><span class="nt">&quot;idx&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">81</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host/jans-auth/restv1/status_list&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1747135961</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1747049561</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc952f25-d876-455e-bcfd-4d70503660f5&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;sid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ccddf440-b003-4d72-81a1-21433a9e0cfc&quot;</span>
+<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1749311438</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1749225038</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ff9ad312-df88-4bd9-888e-ba59543e6a80&quot;</span>
 <span class="p">}</span>
-</code></pre></div></p>
+</code></pre></div>
 <p><strong>Claims</strong>
-- idx - index in session status list
-- exp - expiration date of the session</p>
-<p>When RP receives Session JWT it can query Session Status List to get session status at any time.</p>
-<p><strong>Sample session status list request</strong>
-<div class="highlight"><pre><span></span><code><span class="n">POST</span><span class="w"> </span><span class="o">/</span><span class="n">jans</span><span class="o">-</span><span class="n">auth</span><span class="o">/</span><span class="n">restv1</span><span class="o">/</span><span class="n">session_status_list</span>
+- idx - index in token status list
+- exp - expiration date of the Logout Status Token</p>
+<p>When RP receives Logout Status JWT and it can query Token Status List to get Logout Status JWT status at any time.</p>
+<p><strong>Sample status list request</strong>
+<div class="highlight"><pre><span></span><code><span class="n">POST</span><span class="w"> </span><span class="o">/</span><span class="n">jans</span><span class="o">-</span><span class="n">auth</span><span class="o">/</span><span class="n">restv1</span><span class="o">/</span><span class="n">status_list</span>
 <span class="nl">Accept</span><span class="p">:</span><span class="w"> </span><span class="n">application</span><span class="o">/</span><span class="n">statuslist</span><span class="o">+</span><span class="n">json</span>
 </code></pre></div></p>
-<p><strong>Sample session status list response</strong>
+<p><strong>Sample status list response</strong>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host/jans-auth/restv1/session_status_list&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host/jans-auth/restv1/status_list&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;nbf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1747049562</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;status_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;bits&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
@@ -14322,14 +14255,26 @@ the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://r
 </code></pre></div></p>
 <p><strong>lst</strong> contains encoded status list. Status list has encoded statuses based on <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-02.html">Token Status List spec</a>.</p>
 <p><strong>Important</strong>
-Session JWT specifies <code>exp</code> which means that OP Session must be considered expired when this time is reached independently from Session Status List response.
-If Session Status List has <code>INVALID</code> (<code>1</code> - at <code>idx</code> index for 2 bits) then RP must consider OP Session as invalid. </p>
-<h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
-<p><code>Session status list</code> endpoint can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#session_status_list">SESSION_STATUS_LIST feature flag</a>.
+Logout Status JWT specifies <code>exp</code> which means that token must be considered expired when this time is reached independently from Token Status List response.
+If Token Status List has <code>INVALID</code> (<code>1</code> - at <code>idx</code> index for 2 bits) then RP must consider Logout Status JWT as invalid. </p>
+<h2 id="disabling-logout-status-jwt-using-feature-flag">Disabling Logout Status JWT Using Feature Flag<a class="headerlink" href="#disabling-logout-status-jwt-using-feature-flag" title="Permanent link">#</a></h2>
+<p><code>Logout Status JWT</code> can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#logout_status_jwt">logout_status_jwt feature flag</a>.
 Use <a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/config-tools/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
 <p>When using TUI, navigate via <code>Auth Server</code>-&gt;<code>Properties</code>-&gt;<code>enabledFeatureFlags</code> to screen below. From here, enable or
-disable <code>SESSION_STATUS_LIST</code> flag as required.</p>
+disable <code>logout_status_jwt</code> flag as required.</p>
 <p><img alt="" src="../../../../assets/image-tui-enable-components.png" /></p>
+<h2 id="revoking">Revoking<a class="headerlink" href="#revoking" title="Permanent link">#</a></h2>
+<p>Logout Status JWT can be revoked:
+- via standard Revocation Endpoint by providing full token (<code>/revoke</code> and form parameters <code>token_type_hint=logout_status_jwt&amp;token=&lt;logout status jwt&gt;</code>)
+- via standard Revocation Endpoint by providing jti (<code>/revoke</code> and form parameters <code>token_type_hint=jti&amp;token=&lt;jti from logout status jwt&gt;</code>)
+- via Global Token Revocation Endpoint</p>
+<p>After revocation token status is changed in Token Status List (<code>VALID</code> -&gt; <code>INVALID</code>)</p>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
+<ul>
+<li><code>logoutStatusJwtLifetime</code> - The lifetime of Logout Status JWT. If not set falls back to 1 day</li>
+<li><code>logoutStatusJwtSigningAlgValuesSupported</code> - This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Logout Status JWT at Authorization Endpoint to encode the claims in a JWT </li>
+<li><code>logout_status_jwt</code> value within <code>featureFlags</code> to enable/disable Logout Status JWT.</li>
+</ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-02.html">Token Status List spec</a></li>
@@ -14356,7 +14301,7 @@ disable <code>SESSION_STATUS_LIST</code> flag as required.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 11, 2025 10:24:05 UTC"><span class="timeago" datetime="2025-06-11T10:24:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 11, 2025 10:24:05 UTC">2025-06-11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 19, 2025 15:39:21 UTC"><span class="timeago" datetime="2025-06-19T15:39:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 19, 2025 15:39:21 UTC">2025-06-19</span>
   </span>
 
     
@@ -14366,7 +14311,7 @@ disable <code>SESSION_STATUS_LIST</code> flag as required.</p>
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 22, 2025 10:26:21 UTC"><span class="timeago" datetime="2025-05-22T10:26:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 22, 2025 10:26:21 UTC">2025-05-22</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 19, 2025 15:39:21 UTC"><span class="timeago" datetime="2025-06-19T15:39:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 19, 2025 15:39:21 UTC">2025-06-19</span>
   </span>
 
     
