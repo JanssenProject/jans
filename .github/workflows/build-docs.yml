@@ -79,21 +79,6 @@ jobs:
           poetry install --no-root
           cp mkdocs.yml ../
 
-      - name: Verify build environment
-        run: |
-          echo "=== Build Environment Information ==="
-          echo "Java version:"
-          java -version
-          echo "Maven version:"
-          mvn --version
-          echo "Python version:"
-          python --version
-          echo "Poetry version:"
-          poetry --version
-          echo "Available disk space:"
-          df -h
-          echo "======================================"
-
       - name: Checkout jans ${{ github.event.inputs.version }}
         if: >-
           github.event_name == 'workflow_dispatch'
