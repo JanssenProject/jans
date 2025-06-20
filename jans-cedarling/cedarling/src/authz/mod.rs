@@ -248,6 +248,29 @@ impl Authz {
             .as_ref()
             .map(|auth_info| &auth_info.diagnostics);
 
+        // Log policy evaluation errors if any exist
+        if let Some(diagnostics) = user_authz_diagnostic {
+            if !diagnostics.errors.is_empty() {
+                self.config.log_service.log_any(
+                    LogEntry::new_with_data(LogType::System, Some(request_id))
+                        .set_level(LogLevel::ERROR)
+                        .set_message("Policy evaluation errors for user principal".to_string())
+                        .set_error(format!("{:?}", diagnostics.errors)),
+                );
+            }
+        }
+
+        if let Some(diagnostics) = workload_authz_diagnostic {
+            if !diagnostics.errors.is_empty() {
+                self.config.log_service.log_any(
+                    LogEntry::new_with_data(LogType::System, Some(request_id))
+                        .set_level(LogLevel::ERROR)
+                        .set_message("Policy evaluation errors for workload principal".to_string())
+                        .set_error(format!("{:?}", diagnostics.errors)),
+                );
+            }
+        }
+
         let tokens_logging_info = LogTokensInfo::new(
             &tokens,
             self.config
@@ -404,6 +427,18 @@ impl Authz {
             .iter()
             .map(|info| Some(&info.diagnostics))
             .collect::<Vec<_>>();
+
+        // Log policy evaluation errors if any exist
+        for info in &debug_authorize_info {
+            if !info.diagnostics.errors.is_empty() {
+                self.config.log_service.log_any(
+                    LogEntry::new_with_data(LogType::System, Some(request_id))
+                        .set_level(LogLevel::ERROR)
+                        .set_message(format!("Policy evaluation errors for principal {}", info.principal))
+                        .set_error(format!("{:?}", info.diagnostics.errors)),
+                );
+            }
+        }
 
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
