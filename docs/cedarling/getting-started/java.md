@@ -50,6 +50,7 @@ We need to initialize Cedarling first.
 ```java
 
         import uniffi.cedarling_uniffi.*;
+        import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
         ...
         
         /*
