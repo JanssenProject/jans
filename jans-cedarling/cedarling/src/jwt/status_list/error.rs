@@ -3,7 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use reqwest::header::ToStrError;
 use thiserror::Error;
 use url::Url;
 
@@ -59,22 +58,4 @@ pub enum UpdateStatusListError {
     ParseStatusList(#[from] ParseStatusListError),
     #[error("failed to get status list JWT: {0}")]
     GetStatusListJwt(#[source] HttpError),
-
-    // TODO: we might be able to remove these
-    #[error("failed to get status list endpoint from {0}: {1}")]
-    GetStatusListEndpoint(Url, reqwest::Error),
-    #[error("failed to deserialize the openid configuration for {0}: {1}")]
-    DeserializeOidcConfig(Url, reqwest::Error),
-    #[error("the the `status_list_endpoint` from is invalid {0}: {1}")]
-    InvalidStatusListUri(Url, url::ParseError),
-    #[error("failed to get status list from {0}: {1}")]
-    GetStatusList(Url, reqwest::Error),
-    #[error("the Content-Type of response from {0} is invalid: {1}")]
-    InvalidContentType(Url, ToStrError),
-    #[error(
-        "got unsupported status list type from {0}: {1}. Cedarling currently only supports 'application/statuslist+jwt'"
-    )]
-    UnsupportedStatusListType(Url, String),
-    #[error("failed to decode the response from {0}: {1}")]
-    DecodeResponse(Url, reqwest::Error),
 }
