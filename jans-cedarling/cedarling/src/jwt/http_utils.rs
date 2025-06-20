@@ -100,7 +100,7 @@ impl StatusListJwtStr {
     pub async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
         let response = HTTP_CLIENT
             .get(url.as_str())
-            .header("Content-Type", "statuslist+jwt")
+            .header("Content-Type", "application/statuslist+jwt")
             .send()
             .await
             .map_err(HttpError::GetRequest)?
