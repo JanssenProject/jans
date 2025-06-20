@@ -43,7 +43,7 @@ pub enum JwtStatusError {
 
 #[derive(Debug, Error)]
 pub enum UpdateStatusListError {
-    #[error("the issuer config is missing an OptnieConfig")]
+    #[error("the issuer config is missing an OpenIdConfig")]
     MissingOpenIdConfig,
     #[error("the openid configuration does not include a 'status_list_endpoint'")]
     MissingStatusListUri,
