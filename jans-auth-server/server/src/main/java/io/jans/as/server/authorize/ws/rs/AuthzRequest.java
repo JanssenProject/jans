@@ -71,14 +71,14 @@ public class AuthzRequest {
     private Client client;
     private OAuth2AuditLog auditLog;
     private boolean promptFromJwt;
-    private boolean shouldReturnSessionJwt;
+    private boolean shouldReturnLogoutStatusJwt;
 
-    public boolean getShouldReturnSessionJwt() {
-        return shouldReturnSessionJwt;
+    public boolean getShouldReturnLogoutStatusJwt() {
+        return shouldReturnLogoutStatusJwt;
     }
 
-    public AuthzRequest setShouldReturnSessionJwt(boolean shouldReturnSessionJwt) {
-        this.shouldReturnSessionJwt = shouldReturnSessionJwt;
+    public AuthzRequest setShouldReturnLogoutStatusJwt(boolean shouldReturnSessionJwt) {
+        this.shouldReturnLogoutStatusJwt = shouldReturnSessionJwt;
         return this;
     }
 
@@ -501,7 +501,7 @@ public class AuthzRequest {
                 ", client=" + client +
                 ", auditLog=" + auditLog +
                 ", promptFromJwt=" + promptFromJwt +
-                ", shouldReturnSessionJwt=" + shouldReturnSessionJwt +
+                ", shouldReturnLogoutStatusJwt=" + shouldReturnLogoutStatusJwt +
                 '}';
     }
 }

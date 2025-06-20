@@ -9338,17 +9338,17 @@ components:
           type: string
         selected:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
-          type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -9602,7 +9602,7 @@ components:
           type: array
           items:
             type: string
-        sessionJwtSigningAlgValuesSupported:
+        logoutStatusJwtSigningAlgValuesSupported:
           type: array
           items:
             type: string
@@ -11040,7 +11040,7 @@ components:
           type: string
         txTokenEncryptedResponseEnc:
           type: string
-        sessionJwtSignedResponseAlg:
+        logoutStatusJwtSignedResponseAlg:
           type: string
         authorizationDetailsTypes:
           type: array
@@ -12011,8 +12011,6 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -12022,6 +12020,8 @@ components:
           - REFRESH_TOKEN
           - AUTHORIZATION_CODE
           - TX_TOKEN
+        accessToken:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

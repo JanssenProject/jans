@@ -7,6 +7,7 @@ we can use specialized hooks/plugins system.
 import itertools
 import os
 import typing as _t
+from contextlib import suppress
 
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
@@ -131,7 +132,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
         ("sessionIdCookieLifetime", 86400),
         ("tokenIndexAllocationBlockSize", 10),
         ("tokenIndexLimit", 10000000),
-        ("sessionJwtSigningAlgValuesSupported", [
+        ("logoutStatusJwtSigningAlgValuesSupported", [
             "HS256",
             "HS384",
             "HS512",
@@ -317,7 +318,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
         "status_list",
         "rate_limit",
         "access_evaluation",
-        "session_status_list",
+        "logout_status_jwt",
     ]:
         if flag not in conf["featureFlags"]:
             conf["featureFlags"].append(flag)
@@ -331,6 +332,16 @@ def transform_auth_dynamic_config_hook(conf, manager):
 
     if conf["authorizationChallengeEndpoint"] != auth_challenge_endpoint:
         conf["authorizationChallengeEndpoint"] = auth_challenge_endpoint
+        should_update = True
+
+    # remove featureFlags.session_status_list
+    with suppress(ValueError):
+        conf["featureFlags"].remove("session_status_list")
+        should_update = True
+
+    # remove sessionJwtSigningAlgValuesSupported
+    if "sessionJwtSigningAlgValuesSupported" in conf:
+        conf.pop("sessionJwtSigningAlgValuesSupported")
         should_update = True
 
     # return the conf and flag to determine whether it needs update or not

@@ -114,7 +114,7 @@ public class RegisterRequest extends BaseRequest {
     private SignatureAlgorithm txTokenSignedResponseAlg;
     private KeyEncryptionAlgorithm txTokenEncryptedResponseAlg;
     private BlockEncryptionAlgorithm txTokenEncryptedResponseEnc;
-    private SignatureAlgorithm sessionJwtSignedResponseAlg;
+    private SignatureAlgorithm logoutStatusJwtSignedResponseAlg;
     private SignatureAlgorithm requestObjectSigningAlg;
     private KeyEncryptionAlgorithm requestObjectEncryptionAlg;
     private BlockEncryptionAlgorithm requestObjectEncryptionEnc;
@@ -1002,21 +1002,21 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
-     * Returns the JWS alg algorithm (JWA) required for Session JWT.
+     * Returns the JWS alg algorithm (JWA) required for Logout Status JWT.
      *
-     * @return The JWS algorithm (JWA) for Session JWT.
+     * @return The JWS algorithm (JWA) for Logout Status JWT.
      */
-    public SignatureAlgorithm getSessionJwtSignedResponseAlg() {
-        return sessionJwtSignedResponseAlg;
+    public SignatureAlgorithm getLogoutStatusJwtSignedResponseAlg() {
+        return logoutStatusJwtSignedResponseAlg;
     }
 
     /**
-     * Sets the JWS alg algorithm (JWA) required for Session JWT.
+     * Sets the JWS alg algorithm (JWA) required for Logout Status JWT.
      *
-     * @param sessionJwtSignedResponseAlg The JWS algorithm (JWA) for Session JWT.
+     * @param logoutStatusJwtSignedResponseAlg The JWS algorithm (JWA) for Logout Status JWT.
      */
-    public RegisterRequest setSessionJwtSignedResponseAlg(SignatureAlgorithm sessionJwtSignedResponseAlg) {
-        this.sessionJwtSignedResponseAlg = sessionJwtSignedResponseAlg;
+    public RegisterRequest setLogoutStatusJwtSignedResponseAlg(SignatureAlgorithm logoutStatusJwtSignedResponseAlg) {
+        this.logoutStatusJwtSignedResponseAlg = logoutStatusJwtSignedResponseAlg;
         return this;
     }
 
@@ -1930,7 +1930,7 @@ public class RegisterRequest extends BaseRequest {
         result.setTxTokenSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(TX_TOKEN_SIGNED_RESPONSE_ALG.toString())));
         result.setTxTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(TX_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())));
         result.setTxTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(TX_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())));
-        result.setSessionJwtSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(SESSION_JWT_SIGNED_RESPONSE_ALG.toString())));
+        result.setLogoutStatusJwtSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(LOGOUT_STATUS_JWT_SIGNED_RESPONSE_ALG.toString())));
         result.setRequestObjectSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(REQUEST_OBJECT_SIGNING_ALG.toString())));
         result.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
         result.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
@@ -2121,8 +2121,8 @@ public class RegisterRequest extends BaseRequest {
         if (txTokenEncryptedResponseEnc != null) {
             function.apply(TX_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), txTokenEncryptedResponseEnc.getName());
         }
-        if (sessionJwtSignedResponseAlg != null) {
-            function.apply(SESSION_JWT_SIGNED_RESPONSE_ALG.toString(), sessionJwtSignedResponseAlg.getName());
+        if (logoutStatusJwtSignedResponseAlg != null) {
+            function.apply(LOGOUT_STATUS_JWT_SIGNED_RESPONSE_ALG.toString(), logoutStatusJwtSignedResponseAlg.getName());
         }
         if (requestObjectSigningAlg != null) {
             function.apply(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());

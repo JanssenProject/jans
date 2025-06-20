@@ -31,9 +31,19 @@ public enum TokenTypeHint implements HasParamName, AttributeEnum {
     TX_TOKEN("tx_token"),
 
     /**
+     * Logout Status JWT
+     */
+    LOGOUT_STATUS_JWT("logout_status_jwt"),
+
+    /**
      * A refresh token as defined in RFC6749, Section 1.5
      */
-    REFRESH_TOKEN("refresh_token");
+    REFRESH_TOKEN("refresh_token"),
+
+    /**
+     * Look up token by jti
+     */
+    JTI("jti");
 
     private final String value;
 
