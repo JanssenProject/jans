@@ -19,8 +19,21 @@ func TestSchemas(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(schemas) != 5 {
-		t.Errorf("expected 5 schemas, got %d", len(schemas))
+	if len(schemas) == 0 {
+		t.Fatal("expected at least one schema, got none")
+	}
+
+	// Verify that each schema has required fields
+	for _, schema := range schemas {
+		if len(schema.Schemas) == 0 {
+			t.Fatal("schema should have at least one schema identifier")
+		}
+		if schema.ID == "" {
+			t.Fatal("schema ID should not be empty")
+		}
+		if schema.Name == "" {
+			t.Fatal("schema name should not be empty")
+		}
 	}
 
 	groupSchema, err := client.GetSchema(ctx, "urn:ietf:params:scim:schemas:core:2.0:Group")

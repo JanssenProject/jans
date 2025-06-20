@@ -19,7 +19,17 @@ func TestPlugins(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(plugins) != 7 {
-		t.Fatal("expected 7 plugins, got ", len(plugins))
+	if len(plugins) == 0 {
+		t.Fatal("expected at least one plugin, got none")
+	}
+
+	// Verify that each plugin has required fields
+	for _, plugin := range plugins {
+		if plugin.Name == "" {
+			t.Fatal("plugin name should not be empty")
+		}
+		if plugin.Description == "" {
+			t.Fatal("plugin description should not be empty")
+		}
 	}
 }

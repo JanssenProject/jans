@@ -523,5 +523,5 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta any) d
 	}
 	tflog.Debug(ctx, "User deleted", map[string]interface{}{"id": id})
 
-	return resourceUserRead(ctx, d, meta)
+	return nil
 }

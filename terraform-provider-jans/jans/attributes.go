@@ -37,8 +37,10 @@ type Attribute struct {
 	Urn                    string               `schema:"urn" json:"urn,omitempty"`
 	ScimCustomAttr         bool                 `schema:"scim_custom_attr" json:"scimCustomAttr,omitempty"`
 	OxMultiValuedAttribute bool                 `schema:"ox_multi_valued_attribute" json:"oxMultiValuedAttribute,omitempty"`
+	JansMultivaluedAttr    bool                 `schema:"jans_multivalued_attr" json:"jansMultivaluedAttr,omitempty"`
 	JansHideOnDiscovery    bool                 `schema:"jans_hide_on_discovery" json:"jansHideOnDiscovery,omitempty"`
 	Custom                 bool                 `schema:"custom" json:"custom,omitempty"`
+	Required               bool                 `schema:"required" json:"required,omitempty"`
 	AttributeValidation    *AttributeValidation `schema:"attribute_validation" json:"attributeValidation,omitempty"`
 	Tooltip                string               `schema:"tooltip" json:"tooltip,omitempty"`
 	AdminCanAccess         bool                 `schema:"admin_can_access" json:"adminCanAccess,omitempty"`

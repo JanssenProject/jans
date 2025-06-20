@@ -19,11 +19,14 @@ func TestPersistance(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// this is the original value against the server, used during
-	// development. The value might be different on a different
-	// development server.
-	if cfg.PersistenceType != "sql" {
-		t.Fatal("PersistenceType is not sql")
+	// Check that we're using a SQL database (MySQL in this case)
+	// The API doesn't return persistenceType, but we can infer it from productName
+	if cfg.ProductName != "MySQL" {
+		t.Fatalf("Expected MySQL database, got %s", cfg.ProductName)
+	}
+
+	if cfg.DatabaseName == "" {
+		t.Fatal("DatabaseName should not be empty")
 	}
 
 }

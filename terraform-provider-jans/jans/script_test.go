@@ -1,3 +1,4 @@
+// Removing hardcoded Dn and Inum from the test script creation.
 package jans
 
 import (
@@ -26,41 +27,31 @@ func TestScripts(t *testing.T) {
 	}
 
 	newScript := &Script{
-		Dn:                  "inum=4A4E-4F3D,ou=scripts,o=jans",
-		Inum:                "4A4E-4F3D",
 		Name:                "test_script",
 		Description:         "Test description",
-		Script:              "",
+		Script:              "# Test script\nprint('Hello World')",
 		ScriptType:          "introspection",
 		ProgrammingLanguage: "python",
 		Level:               1,
 		Revision:            1,
-		Enabled:             true,
+		Enabled:             false,
 		Modified:            false,
 		Internal:            false,
 		LocationType:        "db",
-		LocationPath:        "string",
-		BaseDN:              "inum=4A4E-4F3D,ou=scripts,o=jans",
 		ModuleProperties: []SimpleCustomProperty{
 			{
 				Value1: "location_type",
 				Value2: "db",
 			},
-			{
-				Value1: "location_option",
-				Value2: "foo",
-			},
-			{
-				Value1: "location_path",
-				Value2: "string",
-			},
 		},
 	}
 
-	_, err = client.CreateScript(ctx, newScript)
+	createdScript, err := client.CreateScript(ctx, newScript)
 	if err != nil {
 		t.Fatal(err)
 	}
+	newScript.Inum = createdScript.Inum //Assign the inum after creation to compare.
+	newScript.Dn = createdScript.Dn     //Assign the dn after creation to compare.
 
 	loadScript, err := client.GetScript(ctx, newScript.Inum)
 	if err != nil {
@@ -73,9 +64,9 @@ func TestScripts(t *testing.T) {
 		}
 	})
 
-	// for new script a default source code is set, so we need to ignore it
+	// for new script a default source code is set, and BaseDN is server-generated, so we need to ignore them
 	filter := cmp.FilterPath(func(p cmp.Path) bool {
-		return p.String() == "Script"
+		return p.String() == "Script" || p.String() == "BaseDN"
 	}, cmp.Ignore())
 
 	if diff := cmp.Diff(newScript, loadScript, filter); diff != "" {

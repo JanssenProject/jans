@@ -26,6 +26,14 @@ type getter func(key string) (val any, ok bool)
 func toSchemaResource(d *schema.ResourceData, entity any) error {
 
 	setter := func(key string, val any) error {
+		// Check if the key exists in the resource schema
+		rawState := d.GetRawState()
+		if !rawState.IsNull() {
+			if attrVal := rawState.GetAttr(key); !attrVal.IsNull() && !attrVal.IsKnown() {
+				// Skip fields that don't exist in the schema to prevent panics
+				return nil
+			}
+		}
 		return d.Set(key, val)
 	}
 

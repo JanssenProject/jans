@@ -23,10 +23,10 @@ type FidoDevice struct {
 	Description            string   `schema:"description" json:"description,omitempty"`
 }
 
-// GetFidoDevices returns all currently configured Fido devices.
+// GetFidoDevices returns all currently configured Fido devices using the Fido2Devices endpoint.
 func (c *Client) GetFidoDevices(ctx context.Context) ([]FidoDevice, error) {
 
-	token, err := c.getToken(ctx, "https://jans.io/scim/fido.read")
+	token, err := c.getToken(ctx, "https://jans.io/scim/fido2.read")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
@@ -41,68 +41,68 @@ func (c *Client) GetFidoDevices(ctx context.Context) ([]FidoDevice, error) {
 
 	ret := Response{}
 
-	if err := c.get(ctx, "/jans-scim/restv1/v2/FidoDevices", token, &ret); err != nil {
+	if err := c.get(ctx, "/jans-scim/restv1/v2/Fido2Devices", token, &ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
 	return ret.Resources, nil
 }
 
-// GetFidoDevice returns the Fido device with the given ID.
+// GetFidoDevice returns the Fido device with the given ID using the Fido2Devices endpoint.
 func (c *Client) GetFidoDevice(ctx context.Context, id string) (*FidoDevice, error) {
 
 	if id == "" {
 		return nil, fmt.Errorf("id is empty")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/scim/fido.read")
+	token, err := c.getToken(ctx, "https://jans.io/scim/fido2.read")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	ret := &FidoDevice{}
 
-	if err := c.get(ctx, "/jans-scim/restv1/v2/FidoDevices/"+id, token, ret); err != nil {
+	if err := c.get(ctx, "/jans-scim/restv1/v2/Fido2Devices/"+id, token, ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
 	return ret, nil
 }
 
-// // UpdateFidoDevice updates an already existing Fido device.
+// UpdateFidoDevice updates an already existing Fido device using the Fido2Devices endpoint.
 func (c *Client) UpdateFidoDevice(ctx context.Context, device *FidoDevice) (*FidoDevice, error) {
 
 	if device == nil {
-		return nil, fmt.Errorf("user is nil")
+		return nil, fmt.Errorf("device is nil")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/scim/fido.write")
+	token, err := c.getToken(ctx, "https://jans.io/scim/fido2.write")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	ret := &FidoDevice{}
 
-	if err := c.put(ctx, "/jans-scim/restv1/v2/FidoDevices/"+device.ID, token, device, ret); err != nil {
+	if err := c.put(ctx, "/jans-scim/restv1/v2/Fido2Devices/"+device.ID, token, device, ret); err != nil {
 		return nil, fmt.Errorf("put request failed: %w", err)
 	}
 
 	return ret, nil
 }
 
-// DeleteFidoDevice deletes an already existing Fido device.
+// DeleteFidoDevice deletes an already existing Fido device using the Fido2Devices endpoint.
 func (c *Client) DeleteFidoDevice(ctx context.Context, id string) error {
 
 	if id == "" {
 		return fmt.Errorf("id is empty")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/scim/fido.write")
+	token, err := c.getToken(ctx, "https://jans.io/scim/fido2.write")
 	if err != nil {
 		return fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.delete(ctx, "/jans-scim/restv1/v2/FidoDevices/"+id, token); err != nil {
+	if err := c.delete(ctx, "/jans-scim/restv1/v2/Fido2Devices/"+id, token); err != nil {
 		return fmt.Errorf("delete request failed: %w", err)
 	}
 

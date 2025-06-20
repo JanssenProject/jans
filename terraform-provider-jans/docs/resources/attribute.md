@@ -63,10 +63,11 @@ resource "jans_attribute" "country_attribute" {
 - `claim_name` (String)
 - `custom` (Boolean)
 - `jans_hide_on_discovery` (Boolean) Boolean value indicating if the attribute should be shown on that discovery page.
+- `jans_multivalued_attr` (Boolean) Boolean value indicating if the attribute is multivalued.
 - `name_id_type` (String)
 - `origin` (String)
-- `ox_multi_valued_attribute` (Boolean) Boolean value indicating if the attribute can hold multiple value.
-- `required` (Boolean)
+- `ox_multi_valued_attribute` (Boolean) Boolean value indicating if the attribute is multivalued (legacy field).
+- `required` (Boolean) Boolean value indicating if the attribute is required.
 - `saml1_uri` (String)
 - `saml2_uri` (String)
 - `scim_custom_attr` (Boolean) Boolean value indicating if the attribute is a SCIM custom attribute

@@ -30,7 +30,7 @@ func (c *Client) GetFido2Config(ctx context.Context) (*Fido2Config, error) {
 
 	ret := &Fido2Config{}
 
-	if err := c.get(ctx, "/jans-fido2/fido2/configuration", token, ret); err != nil {
+	if err := c.get(ctx, "/jans-fido2/restv1/configuration", token, ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
