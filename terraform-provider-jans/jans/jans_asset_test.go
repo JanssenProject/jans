@@ -23,7 +23,7 @@ func TestCreateJansAsset(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	metadataBytes, err := io.ReadAll(metadataReader)
 	if err != nil {
 		t.Fatal(err)
@@ -55,7 +55,7 @@ func TestCreateJansAsset(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	metadataBytes, err = io.ReadAll(metadataReader)
 	if err != nil {
 		t.Fatal(err)

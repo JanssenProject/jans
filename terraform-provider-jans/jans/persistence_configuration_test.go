@@ -24,7 +24,7 @@ func TestPersistance(t *testing.T) {
 	if cfg.ProductName != "MySQL" {
 		t.Fatalf("Expected MySQL database, got %s", cfg.ProductName)
 	}
-	
+
 	if cfg.DatabaseName == "" {
 		t.Fatal("DatabaseName should not be empty")
 	}

@@ -68,7 +68,7 @@ func TestCreateIDP(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not generate metadata for update: %v", err)
 	}
-	
+
 	metadataBytes, err = io.ReadAll(metadataReader)
 	if err != nil {
 		t.Fatal(err)

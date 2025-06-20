@@ -1,4 +1,3 @@
-
 package jans
 
 import (
@@ -96,7 +95,6 @@ func (c *Client) DeleteMessage(ctx context.Context, id string) error {
 
 	return nil
 }
-
 
 type PostgresMessageConfiguration struct {
 	DriverClassName        string `schema:"driver_class_name" json:"driverClassName,omitempty"`

@@ -51,7 +51,7 @@ func TestScripts(t *testing.T) {
 		t.Fatal(err)
 	}
 	newScript.Inum = createdScript.Inum //Assign the inum after creation to compare.
-	newScript.Dn = createdScript.Dn       //Assign the dn after creation to compare.
+	newScript.Dn = createdScript.Dn     //Assign the dn after creation to compare.
 
 	loadScript, err := client.GetScript(ctx, newScript.Inum)
 	if err != nil {

@@ -1,4 +1,3 @@
-
 package jans
 
 import (
@@ -7,21 +6,21 @@ import (
 )
 
 type FidoDevice struct {
-	ID           string   `schema:"id" json:"id,omitempty"`
-	Schemas      []string `schema:"schemas" json:"schemas,omitempty"`
-	Meta         Meta     `schema:"meta" json:"meta,omitempty"`
-	UserID       string   `schema:"userId" json:"userId,omitempty"`
-	CreationDate string   `schema:"creation_date" json:"creationDate,omitempty"`
-	Application  string   `schema:"application" json:"application,omitempty"`
-	Counter      int      `schema:"counter" json:"counter,omitempty"`
-	DeviceData   string   `schema:"device_data" json:"deviceData,omitempty"`
-	DeviceHashCode         string `schema:"device_hash_code" json:"deviceHashCode,omitempty"`
-	DeviceKeyHandle        string `schema:"device_key_handle" json:"deviceKeyHandle,omitempty"`
-	DeviceRegistrationConf string `schema:"device_registration_conf" json:"deviceRegistrationConf,omitempty"`
-	LastAccessTime         string `schema:"last_access_time" json:"lastAccessTime,omitempty"`
-	Status       string   `schema:"status" json:"status,omitempty"`
-	DisplayName  string   `schema:"display_name" json:"displayName,omitempty"`
-	Description  string   `schema:"description" json:"description,omitempty"`
+	ID                     string   `schema:"id" json:"id,omitempty"`
+	Schemas                []string `schema:"schemas" json:"schemas,omitempty"`
+	Meta                   Meta     `schema:"meta" json:"meta,omitempty"`
+	UserID                 string   `schema:"userId" json:"userId,omitempty"`
+	CreationDate           string   `schema:"creation_date" json:"creationDate,omitempty"`
+	Application            string   `schema:"application" json:"application,omitempty"`
+	Counter                int      `schema:"counter" json:"counter,omitempty"`
+	DeviceData             string   `schema:"device_data" json:"deviceData,omitempty"`
+	DeviceHashCode         string   `schema:"device_hash_code" json:"deviceHashCode,omitempty"`
+	DeviceKeyHandle        string   `schema:"device_key_handle" json:"deviceKeyHandle,omitempty"`
+	DeviceRegistrationConf string   `schema:"device_registration_conf" json:"deviceRegistrationConf,omitempty"`
+	LastAccessTime         string   `schema:"last_access_time" json:"lastAccessTime,omitempty"`
+	Status                 string   `schema:"status" json:"status,omitempty"`
+	DisplayName            string   `schema:"display_name" json:"displayName,omitempty"`
+	Description            string   `schema:"description" json:"description,omitempty"`
 }
 
 // GetFidoDevices returns all currently configured Fido devices using the Fido2Devices endpoint.

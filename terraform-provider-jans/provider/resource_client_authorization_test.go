@@ -1,4 +1,3 @@
-
 package provider
 
 import (
@@ -18,7 +17,7 @@ func TestResourceClientAuthorization_Mapping(t *testing.T) {
 
 	auth := jans.ClientAuthorization{
 		ID:           "test-id",
-		ClientID:     "test-client-id",
+		ClientId:     "test-client-id",
 		Scopes:       []string{"openid", "profile"},
 		RedirectURIs: []string{"https://example.com/callback"},
 		GrantTypes:   []string{"authorization_code"},

@@ -1,4 +1,3 @@
-
 package jans
 
 import (
@@ -8,8 +7,8 @@ import (
 )
 
 type ClientAuth struct {
-	ClientID string                `json:"clientId,omitempty"`
-	Data     map[string][]Scope    `json:"data,omitempty"`
+	ClientID string             `json:"clientId,omitempty"`
+	Data     map[string][]Scope `json:"data,omitempty"`
 }
 
 func (c *Client) GetClientAuthorization(ctx context.Context, userId string) (*ClientAuth, error) {

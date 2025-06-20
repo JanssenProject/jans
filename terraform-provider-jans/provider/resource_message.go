@@ -1,4 +1,3 @@
-
 package provider
 
 import (
@@ -110,7 +109,6 @@ func resourceMessageDelete(ctx context.Context, d *schema.ResourceData, meta int
 	tflog.Debug(ctx, "Message deleted")
 	return nil
 }
-
 
 func resourceMessageConfiguration() *schema.Resource {
 	return &schema.Resource{

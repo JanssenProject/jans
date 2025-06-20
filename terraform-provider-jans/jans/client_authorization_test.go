@@ -26,7 +26,7 @@ func TestClientAuthorization(t *testing.T) {
 	// Test create, get, update, delete cycle
 	newAuth := &ClientAuthorization{
 		ClientId:     "test-client-id",
-		UserId:       "test-user-id", 
+		UserId:       "test-user-id",
 		Scopes:       []string{"openid", "profile"},
 		RedirectURIs: []string{"https://example.com/callback"},
 		GrantTypes:   []string{"authorization_code"},

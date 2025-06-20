@@ -43,12 +43,12 @@ func TestCreateTR(t *testing.T) {
 	ctx := context.Background()
 
 	tr := &TrustRelationship{
-		Name:                 "My TR7",
-		DisplayName:          "Some display name",
-		Description:          "Some trust relationship",
-		SPMetaDataSourceType: "file",
-		Status:               "",
-		ValidationStatus:     "",
+		Name:                  "My TR7",
+		DisplayName:           "Some display name",
+		Description:           "Some trust relationship",
+		SPMetaDataSourceType:  "file",
+		Status:                "",
+		ValidationStatus:      "",
 		ProfileConfigurations: ProfileConfigurations{},
 	}
 

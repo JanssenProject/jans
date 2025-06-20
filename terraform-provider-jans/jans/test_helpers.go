@@ -1,4 +1,3 @@
-
 package jans
 
 import (
@@ -16,18 +15,18 @@ func GenerateMetadataReader(hostURL string) (io.Reader, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	host := parsedURL.Host
-	
+
 	// Read the template file
 	templateBytes, err := os.ReadFile("testdata/metadata.xml.template")
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Replace the placeholder with the actual host
 	metadataContent := strings.ReplaceAll(string(templateBytes), "{{HOST}}", host)
-	
+
 	return strings.NewReader(metadataContent), nil
 }
 
