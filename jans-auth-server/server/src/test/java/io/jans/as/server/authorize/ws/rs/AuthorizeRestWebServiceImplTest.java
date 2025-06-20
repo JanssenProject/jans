@@ -22,7 +22,6 @@ import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalCreateUserService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
-import io.jans.as.server.service.session.SessionJwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.mockito.InjectMocks;
@@ -127,9 +126,6 @@ public class AuthorizeRestWebServiceImplTest {
 
     @Mock
     private ExternalCreateUserService externalCreateUserService;
-
-    @Mock
-    private SessionJwtService sessionJwtService;
 
     @Test
     public void checkPromptCreate_whenDisabledPromptCreate_shouldNotThrowException() {

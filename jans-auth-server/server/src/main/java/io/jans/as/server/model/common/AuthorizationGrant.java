@@ -36,6 +36,7 @@ import io.jans.as.server.service.external.ExternalIntrospectionService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalIntrospectionContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
+import io.jans.as.server.service.logout.LogoutStatusJwtService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.service.token.StatusListIndexService;
 import io.jans.as.server.service.token.StatusListService;
@@ -113,6 +114,9 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Inject
     private StatusListIndexService statusListIndexService;
+
+    @Inject
+    private LogoutStatusJwtService logoutStatusJwtService;
 
     private boolean isCachedWithNoPersistence = false;
 
@@ -216,6 +220,32 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
         if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
             token.setJwtRequest(jwtRequest.getEncodedJwt());
+        }
+    }
+
+    @Override
+    public LogoutStatusJwt createLogoutStatusJwt(ExecutionContext context) {
+        try {
+            final LogoutStatusJwt logoutStatusJwt = logoutStatusJwtService.createLogoutStatusJwt(context, this);
+            if (logoutStatusJwt == null) {
+                log.error("Failed to create Logout Status JWT.");
+                return null;
+            }
+
+            final TokenEntity tokenEntity = asToken(logoutStatusJwt);
+            context.setLogoutStatusJwtEntity(tokenEntity);
+
+            persist(tokenEntity);
+            statService.reportLogoutStatusJwt(getGrantType());
+            metricService.incCounter(MetricType.TOKEN_LOGOUT_STATUS_JWT_COUNT);
+
+            log.debug("Logout Status JWT is successfully persisted, jti: {}", logoutStatusJwt.getJti());
+            return logoutStatusJwt;
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
         }
     }
 
@@ -499,6 +529,12 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         return result;
     }
 
+    public TokenEntity asToken(LogoutStatusJwt logoutStatusJwt) {
+        final TokenEntity result = asTokenEntity(logoutStatusJwt);
+        result.setTokenTypeEnum(TokenType.LOGOUT_STATUS_JWT);
+        return result;
+    }
+
     public TokenEntity asToken(TxToken txToken) {
         final TokenEntity result = asTokenEntity(txToken);
         result.setTokenTypeEnum(TokenType.TX_TOKEN);
@@ -528,6 +564,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setUserDn(getUserDn());
         result.setClientId(getClientId());
         result.setReferenceId(token.getReferenceId());
+        result.setJti(token.getJti());
 
         result.getAttributes().setStatusListIndex(token.getStatusListIndex());
         result.getAttributes().setX5cs256(token.getX5ts256());
