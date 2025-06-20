@@ -31,6 +31,7 @@ def load_bootstrap_config(policy_store_location=None, log_type="std_out", log_tt
         "CEDARLING_LOG_TYPE": log_type,
         "CEDARLING_LOG_TTL": log_ttl,
         "CEDARLING_LOG_LEVEL": "DEBUG",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"],
     }
     if config_cb is not None:
         config_cb(config)
