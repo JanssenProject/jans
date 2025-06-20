@@ -135,7 +135,7 @@ impl JwtService {
                 openid_config: None,
             };
 
-            if jwt_config.jwt_sig_validation {
+            if jwt_config.jwt_sig_validation || jwt_config.jwt_status_validation {
                 iss_claim = update_openid_config(&mut iss_config, &logger).await?;
             }
 

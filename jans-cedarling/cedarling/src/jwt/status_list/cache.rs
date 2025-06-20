@@ -52,7 +52,9 @@ impl StatusListCache {
             .status_list_endpoint
             .as_ref()
             .ok_or(UpdateStatusListError::MissingStatusListUri)?;
-        let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url).await?;
+        let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url)
+            .await
+            .map_err(UpdateStatusListError::GetStatusListJwt)?;
 
         let decoded_jwt = decode_jwt(&status_list_jwt.0)?;
 
@@ -86,7 +88,7 @@ impl StatusListCache {
         let status_list: StatusList = status_list_jwt.try_into()?;
         let status_list = Arc::new(RwLock::new(status_list));
 
-        // spawn a backgroud task to handle updating the statuslist if the JWT has a TTL
+        // spawn a background task to handle updating the statuslist if the JWT has a TTL
         // claim
         if let Some(ttl) = ttl {
             crate::http::spawn_task(keep_status_list_updated(

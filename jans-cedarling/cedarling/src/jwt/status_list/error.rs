@@ -57,10 +57,10 @@ pub enum UpdateStatusListError {
     ValidateJwtError(#[from] ValidateJwtError),
     #[error("failed to parse status list: {0}")]
     ParseStatusList(#[from] ParseStatusListError),
+    #[error("failed to get status list JWT: {0}")]
+    GetStatusListJwt(#[source] HttpError),
 
     // TODO: we might be able to remove these
-    #[error("failed to get status list JWT: {0}")]
-    GetStatusListJwt(#[from] HttpError),
     #[error("failed to get status list endpoint from {0}: {1}")]
     GetStatusListEndpoint(Url, reqwest::Error),
     #[error("failed to deserialize the openid configuration for {0}: {1}")]
