@@ -45,9 +45,9 @@ public enum FeatureFlagType {
     @DocFeatureFlag(description = "Enable/Disable status list endpoint",
             defaultValue = "Enabled")
     STATUS_LIST("status_list"),
-    @DocFeatureFlag(description = "Enable/Disable session status list endpoint",
+    @DocFeatureFlag(description = "Enable/Disable logout status jwt",
             defaultValue = "Enabled")
-    SESSION_STATUS_LIST("session_status_list"),
+    LOGOUT_STATUS_JWT("logout_status_jwt"),
     @DocFeatureFlag(description = "Enable/Disable active session endpoint",
             defaultValue = "Enabled")
     ACTIVE_SESSION("active_session"),

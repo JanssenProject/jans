@@ -207,6 +207,10 @@ class SSA(DialogUtils):
             if self.expire_widget.value:
                 new_data['expiration'] = int(self.expire_widget.value.timestamp())
 
+        if new_data['expiration'] < time.time() + 5 * 60:
+            self.app.show_message(_(common_strings.error), _("SSA lifetime should be at least 5 minutes.\nSet expiration time at least 5 minutes away from now."), tobefocused = dialog)
+            return
+
         new_data['software_roles'] = new_data['software_roles'].splitlines()
 
         template_data = copy.deepcopy(new_data)
