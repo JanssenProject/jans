@@ -230,7 +230,7 @@
 
 * Add DCR flow ([#5096](https://github.com/JanssenProject/jans/issues/5096)) ([4bdea42](https://github.com/JanssenProject/jans/commit/4bdea425bb3d2b174049d03f3664db559e449eb9)), closes [#5092](https://github.com/JanssenProject/jans/issues/5092)
 * **agama:** allow flows to supply the identity of the user to authenticate with a parameterizable attribute ([#5010](https://github.com/JanssenProject/jans/issues/5010)) ([ca941ce](https://github.com/JanssenProject/jans/commit/ca941ce0c2b54a84cd0327f8ac21fe926b533660))
-* **config-api:** cache-refresh plugin code ([#5000](https://github.com/JanssenProject/jans/issues/5000)) ([eed9526](https://github.com/JanssenProject/jans/commit/eed9526415996278b52806cfe37a4dfb5076aa00))
+* **config-api:** link-interception plugin code ([#5000](https://github.com/JanssenProject/jans/issues/5000)) ([eed9526](https://github.com/JanssenProject/jans/commit/eed9526415996278b52806cfe37a4dfb5076aa00))
 * **fido2:** Apple_WebAuthn_Root_CA certificate is now downloaded to /authentication_cert folder and read from AttestationCertificateService ([#4756](https://github.com/JanssenProject/jans/issues/4756)) ([1600185](https://github.com/JanssenProject/jans/commit/16001859895d5aa5d840cfc9d425d0ee95149979))
 * **jans-auth-server:** added ability to set client expiration via DCR [#5057](https://github.com/JanssenProject/jans/issues/5057) ([#5185](https://github.com/JanssenProject/jans/issues/5185)) ([a15054b](https://github.com/JanssenProject/jans/commit/a15054b1c3350d6ee0bb9c92d39f6b2d992abfa1))
 * update SG script to conform prod server ([#5103](https://github.com/JanssenProject/jans/issues/5103)) ([0ec3ca8](https://github.com/JanssenProject/jans/commit/0ec3ca8b0e4e8e7287c8041dc75be9b29632da81))

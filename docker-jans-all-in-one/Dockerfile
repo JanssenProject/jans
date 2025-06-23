@@ -14,9 +14,11 @@ ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${BASE_VERSION}
 ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${BASE_VERSION}
 ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${BASE_VERSION}
 ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${BASE_VERSION}
-ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${BASE_VERSION}
-ARG JANS_KEYCLOAK_LINK_IMAGE=ghcr.io/janssenproject/jans/keycloak-link:${BASE_VERSION}
 ARG JANS_SAML_IMAGE=ghcr.io/janssenproject/jans/saml:${BASE_VERSION}
+
+# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${BASE_VERSION}
+# ARG JANS_KEYCLOAK_LINK_IMAGE=ghcr.io/janssenproject/jans/keycloak-link:${BASE_VERSION}
 
 # -----------
 # base images
@@ -36,11 +38,11 @@ FROM ${JANS_SCIM_IMAGE} AS jans-scim-src
 
 FROM ${JANS_CASA_IMAGE} AS jans-casa-src
 
-FROM ${JANS_LINK_IMAGE} AS jans-link-src
-
-FROM ${JANS_KEYCLOAK_LINK_IMAGE} AS jans-keycloak-link-src
-
 FROM ${JANS_SAML_IMAGE} AS jans-saml-src
+
+# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# FROM ${JANS_LINK_IMAGE} AS jans-link-src
+# FROM ${JANS_KEYCLOAK_LINK_IMAGE} AS jans-keycloak-link-src
 
 # ===
 # app
@@ -58,7 +60,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=0d0794cf0cd68b95283fe7634d9890069278e60b
+ENV JANS_SOURCE_VERSION=6cf20a3a2981ecea790ff16bfb82a3a839df1d48
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -148,22 +150,25 @@ COPY --from=jans-casa-src /app/scripts /app/jans_aio/jans_casa
 COPY --from=jans-casa-src /usr/share/java/casa-agama-project.zip /usr/share/java
 RUN ln -sf /app/jans_aio/jans_casa/entrypoint.sh /app/bin/jans-casa-entrypoint.sh
 
-COPY --from=jans-link-src /opt/jans/jetty/jans-link /opt/jans/jetty/jans-link
-COPY --from=jans-link-src /app/templates/jans-link /app/templates/jans-link
-COPY --from=jans-link-src /app/scripts /app/jans_aio/jans_link
-RUN ln -sf /app/jans_aio/jans_link/entrypoint.sh /app/bin/jans-link-entrypoint.sh
-
-COPY --from=jans-keycloak-link-src /opt/jans/jetty/jans-keycloak-link /opt/jans/jetty/jans-keycloak-link
-COPY --from=jans-keycloak-link-src /app/templates/jans-keycloak-link /app/templates/jans-keycloak-link
-COPY --from=jans-keycloak-link-src /app/scripts /app/jans_aio/jans_keycloak_link
-COPY --from=jans-keycloak-link-src /var/jans/cr-snapshots /var/jans/cr-snapshots
-RUN ln -sf /app/jans_aio/jans_keycloak_link/entrypoint.sh /app/bin/jans-keycloak-link-entrypoint.sh
-
 COPY --from=jans-saml-src /app/templates/jans-saml /app/templates/jans-saml
 COPY --from=jans-saml-src /app/scripts /app/jans_aio/jans_saml
 COPY --from=jans-saml-src /opt/idp /opt/idp
 COPY --from=jans-saml-src /opt/keycloak /opt/keycloak
 RUN ln -sf /app/jans_aio/jans_saml/entrypoint.sh /app/bin/jans-saml-entrypoint.sh
+
+# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# COPY --from=jans-link-src /opt/jans/jetty/jans-link /opt/jans/jetty/jans-link
+# COPY --from=jans-link-src /app/templates/jans-link /app/templates/jans-link
+# COPY --from=jans-link-src /app/scripts /app/jans_aio/jans_link
+# COPY --from=jans-link-src /var/jans/link-snapshots /var/jans/link-snapshots
+# RUN ln -sf /app/jans_aio/jans_link/entrypoint.sh /app/bin/jans-link-entrypoint.sh
+
+# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# COPY --from=jans-keycloak-link-src /opt/jans/jetty/jans-keycloak-link /opt/jans/jetty/jans-keycloak-link
+# COPY --from=jans-keycloak-link-src /app/templates/jans-keycloak-link /app/templates/jans-keycloak-link
+# COPY --from=jans-keycloak-link-src /app/scripts /app/jans_aio/jans_keycloak_link
+# COPY --from=jans-keycloak-link-src /var/jans/keycloak-link-snapshots /var/jans/keycloak-link-snapshots
+# RUN ln -sf /app/jans_aio/jans_keycloak_link/entrypoint.sh /app/bin/jans-keycloak-link-entrypoint.sh
 
 # ----
 # misc
@@ -183,6 +188,14 @@ ENV CN_VERSION=0.0.0-nightly
 
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app
+
+# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# CN_LINK_JETTY_HOST=127.0.0.1 \
+# CN_LINK_JETTY_PORT=9091 \
+# CN_LINK_JAVA_OPTIONS="" \
+# CN_KEYCLOAK_LINK_JETTY_HOST=127.0.0.1 \
+# CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
+# CN_KEYCLOAK_LINK_JAVA_OPTIONS="" \
 
 ENV JETTY_BASE=/opt/jans/jetty \
     JETTY_HOME=/opt/jetty \
@@ -210,14 +223,8 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_CASA_ADMIN_LOCK_FILE=/opt/jans/jetty/jans-casa/resources/.administrable \
     CN_CASA_JWKS_SIZE_LIMIT=100000 \
     CN_CASA_JAVA_OPTIONS="" \
-    CN_LINK_JETTY_HOST=127.0.0.1 \
-    CN_LINK_JETTY_PORT=9091 \
-    CN_LINK_JAVA_OPTIONS="" \
     CN_SHARE_AUTH_CONF=false \
     CN_SQL_PASSWORD_FILE=/etc/jans/conf/sql_password \
-    CN_KEYCLOAK_LINK_JETTY_HOST=127.0.0.1 \
-    CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
-    CN_KEYCLOAK_LINK_JAVA_OPTIONS="" \
     CN_SAML_HTTP_HOST=127.0.0.1 \
     CN_SAML_HTTP_PORT=8083 \
     CN_SAML_JAVA_OPTIONS="" \
@@ -255,6 +262,14 @@ RUN adduser -s /bin/sh -h /home/1000 -D -u 1000 jans \
 
 RUN chmod +x /app/bin/entrypoint.sh
 
+# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# ${JETTY_BASE}/jans-link/resources \
+# ${JETTY_BASE}/jans-link/logs \
+# ${JETTY_BASE}/jans-keycloak-link/resources \
+# ${JETTY_BASE}/jans-keycloak-link/logs \
+# /var/jans/link-snapshots \
+# /var/jans/keycloak-link-snapshots
+
 # adjust ownership and permission
 RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \
@@ -276,10 +291,6 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     ${JETTY_BASE}/jans-casa/plugins \
     ${JETTY_BASE}/jans-casa/resources \
     ${JETTY_BASE}/jans-casa/logs \
-    ${JETTY_BASE}/jans-link/resources \
-    ${JETTY_BASE}/jans-link/logs \
-    ${JETTY_BASE}/jans-keycloak-link/resources \
-    ${JETTY_BASE}/jans-keycloak-link/logs \
     /etc/certs \
     /etc/jans \
     /opt/jans/python/libs \
@@ -291,10 +302,17 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     /var/log/adminui \
     /etc/nginx/jans-aio \
     /usr/share/java \
-    /var/jans/cr-snapshots \
     /opt/idp \
     /opt/keycloak/logs \
     /opt/keycloak/conf
+
+# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# ${JETTY_BASE}/jans-link/resources \
+# ${JETTY_BASE}/jans-link/logs \
+# ${JETTY_BASE}/jans-keycloak-link/resources \
+# ${JETTY_BASE}/jans-keycloak-link/logs \
+# /var/jans/link-snapshots \
+# /var/jans/keycloak-link-snapshots
 
 RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \
@@ -316,10 +334,6 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/jans-casa/plugins \
     ${JETTY_BASE}/jans-casa/resources \
     ${JETTY_BASE}/jans-casa/logs \
-    ${JETTY_BASE}/jans-link/resources \
-    ${JETTY_BASE}/jans-link/logs \
-    ${JETTY_BASE}/jans-keycloak-link/resources \
-    ${JETTY_BASE}/jans-keycloak-link/logs \
     /etc/certs \
     /etc/jans \
     /opt/jans/python/libs \
@@ -331,7 +345,6 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     /var/log/adminui \
     /etc/nginx/jans-aio \
     /usr/share/java \
-    /var/jans/cr-snapshots \
     /opt/idp \
     /opt/keycloak/logs \
     /opt/keycloak/conf

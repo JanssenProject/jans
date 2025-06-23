@@ -116,6 +116,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("allowOfflineAccessWithoutConsent")
     private Boolean allowOfflineAccessWithoutConsent;
 
+    @JsonProperty("requirePkce")
+    private Boolean requirePkce = false;
+
     @JsonProperty("minimumAcrLevel")
     private Integer minimumAcrLevel = -1;
 
@@ -152,8 +155,22 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("txTokenEncryptedResponseEnc")
     private String txTokenEncryptedResponseEnc;
 
+    @JsonProperty("logoutStatusJwtSignedResponseAlg")
+    private String logoutStatusJwtSignedResponseAlg;
+
     @JsonProperty("authorizationDetailsTypes")
     private List<String> authorizationDetailsTypes;
+
+    public Boolean getRequirePkce() {
+        if (requirePkce == null) {
+            requirePkce = false;
+        }
+        return requirePkce;
+    }
+
+    public void setRequirePkce(Boolean requirePkce) {
+        this.requirePkce = requirePkce;
+    }
 
     public List<String> getAuthorizationDetailsTypes() {
         if (authorizationDetailsTypes == null) authorizationDetailsTypes = new ArrayList<>();
@@ -170,6 +187,15 @@ public class ClientAttributes implements Serializable {
 
     public void setTxTokenSignedResponseAlg(String txTokenSignedResponseAlg) {
         this.txTokenSignedResponseAlg = txTokenSignedResponseAlg;
+    }
+
+    public String getLogoutStatusJwtSignedResponseAlg() {
+        return logoutStatusJwtSignedResponseAlg;
+    }
+
+    public ClientAttributes setLogoutStatusJwtSignedResponseAlg(String logoutStatusJwtSignedResponseAlg) {
+        this.logoutStatusJwtSignedResponseAlg = logoutStatusJwtSignedResponseAlg;
+        return this;
     }
 
     public String getTxTokenEncryptedResponseAlg() {
@@ -579,6 +605,7 @@ public class ClientAttributes implements Serializable {
                 ", txTokenSignedResponseAlg=" + txTokenSignedResponseAlg +
                 ", txTokenEncryptedResponseAlg=" + txTokenEncryptedResponseAlg +
                 ", txTokenEncryptedResponseEnc=" + txTokenEncryptedResponseEnc +
+                ", logoutStatusJwtSignedResponseAlg=" + logoutStatusJwtSignedResponseAlg +
                 ", authorizationDetailsTypes=" + authorizationDetailsTypes +
                 '}';
     }

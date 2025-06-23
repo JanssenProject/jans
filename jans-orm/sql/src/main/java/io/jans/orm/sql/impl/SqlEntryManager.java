@@ -41,6 +41,8 @@ import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.PasswordAttributeData;
+import io.jans.orm.model.PersistenceMetadata;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.reflect.property.PropertyAnnotation;
@@ -183,7 +185,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
             	// Process userPassword 
                 if (StringHelper.equalsIgnoreCase(SqlOperationService.USER_PASSWORD, attributeName)) {
-                    realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues));
+                    realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues), attribute);
                 }
 
                 escapeValues(realValues);
@@ -248,16 +250,16 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 AttributeModificationType modificationType = attributeDataModification.getModificationType();
 				if ((AttributeModificationType.ADD == modificationType) ||
                 	(AttributeModificationType.FORCE_UPDATE == modificationType)) {
-                    modification = createModification(modificationType, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, attributeValues);
+                    modification = createModification(attribute, modificationType, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, attributeValues);
                 } else {
                     if ((AttributeModificationType.REMOVE == modificationType)) {
                 		if ((attribute == null) && isEmptyAttributeValues(oldAttribute)) {
 							// It's RDBS case. We don't need to set null to already empty table cell
                 			continue;
                 		}
-                        modification = createModification(AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, oldAttributeValues);
+                		modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, oldAttributeValues);
                     } else if ((AttributeModificationType.REPLACE == modificationType)) {
-                        modification = createModification(AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, attributeValues);
+                        modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, attributeValues);
                     }
                 }
 
@@ -728,12 +730,12 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         return searchResult.getTotalEntriesCount();
     }
 
-    private AttributeDataModification createModification(final AttributeModificationType type, final String attributeName, final Boolean multiValued, final Boolean jsonValue, final Object... attributeValues) {
+    private AttributeDataModification createModification(final AttributeData attribute, final AttributeModificationType type, final String attributeName, final Boolean multiValued, final Boolean jsonValue, final Object... attributeValues) {
         String realAttributeName = attributeName;
 
         Object[] realValues = attributeValues;
         if (StringHelper.equalsIgnoreCase(SqlOperationService.USER_PASSWORD, realAttributeName)) {
-            realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues));
+            realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues), attribute);
         }
 
         escapeValues(realValues);
@@ -909,6 +911,11 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     @Override
 	public String getPersistenceType(String primaryKey) {
 		return SqlEntryManagerFactory.PERSISTENCE_TYPE;
+	}
+
+	@Override
+	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
+		return operationService.getPersistenceMetadata(primaryKey);
 	}
 
 	@Override

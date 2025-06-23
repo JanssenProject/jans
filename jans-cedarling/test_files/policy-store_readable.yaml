@@ -50,7 +50,7 @@ policy_stores:
         entity TrustedIssuer = {"issuer_entity_id": Url};
         entity User = {"country": String, "email": String, "sub": String, "username": String};
         entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String};
-        entity id_token = {"acr": String, "amr": String, "aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "sub": String};
+        entity Id_token = {"acr": String, "amr": String, "aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "sub": String};
         action "Update" appliesTo {
           principal: [Workload, User],
           resource: [Issue],

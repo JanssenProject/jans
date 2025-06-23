@@ -18,17 +18,11 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.service.DataSourceTypeService;
 import io.jans.util.ArrayHelper;
 import io.jans.util.StringHelper;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
-import jakarta.inject.Inject;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
@@ -62,6 +56,21 @@ public abstract class UserService {
             return null;
         }
         return persistenceEntryManager.find(dn, User.class, returnAttributes);
+    }
+
+    /**
+     * returns User by Dn
+     *
+     * @return User
+     */
+    @Nullable
+    public User getUserByDnSilently(String dn, String... returnAttributes) {
+        try {
+            return getUserByDn(dn, returnAttributes);
+        } catch (Exception e) {
+            log.trace("user's dn=" + dn, e);
+            return null;
+        }
     }
 
     public User getUserByInum(String inum, String... returnAttributes) {

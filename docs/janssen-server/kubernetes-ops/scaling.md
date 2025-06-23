@@ -6,7 +6,9 @@ tags:
   - scaling
 ---
 
-## Overview 
+# Scaling
+
+
 Scaling is the ability to handle the increase in usage by expanding the existing resources(nodes/pods).
 
 ## Scaling types

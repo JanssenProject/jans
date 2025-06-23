@@ -127,10 +127,10 @@
 			<artifactId>jans-core-timer-weld</artifactId>
 		</dependency>
 
-        <dependency>
-            <groupId>io.jans</groupId>
-	    	<artifactId>jans-core-document-store</artifactId>
-        </dependency>
+        	<dependency>
+            		<groupId>io.jans</groupId>
+		    	<artifactId>jans-core-document-store</artifactId>
+        	</dependency>
 
 		<!-- RestEasy -->
 		<dependency>
@@ -217,6 +217,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.8.0</version>
 			</plugin>
 		</plugins>
 	</reporting>

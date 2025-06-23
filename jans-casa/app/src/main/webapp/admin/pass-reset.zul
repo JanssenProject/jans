@@ -13,12 +13,17 @@
         <div class="${css['sectionsWrapper']}">
             <section class="${css.section}">
                 <div class="${css.panel}">
-                    <h2 class="f4 dark-blue2">${labels.adm.passreset_title}</h2>
-                    <p>${labels.adm.passreset_text}</p>
+                    <h2 class="f4 dark-blue2">${labels.adm.pass_settings}</h2>
 
-                    <div class="flex justify-center">
-                        <z:checkbox mold="switch" label="@load(c:toUpperCase(c:l(vm.passResetEnabled ? 'general.on' : 'general.off')))"
-                                    checked="@bind(vm.passResetEnabled)" w:onClick="alertRef = $('#feedback-pass-reset')" onCheck="@('change')" />
+                    <div class="flex flex-column">
+                        <z:checkbox sclass="pt2" label="${labels.adm.passreset_text}" checked="@bind(vm.passResetEnabled)" />
+
+                        <z:checkbox sclass="pt2" label="${labels.adm.pass_usepolicy}" checked="@bind(vm.passPolicy)" />
+
+                        <div class="tc pt4">
+                            <z:button sclass="${css.primaryButton}" w:onClick="alertRef = $('#feedback-pass-reset')"
+                                    label="${labels.general.save}" onClick="@('update')" />
+                        </div>
                     </div>
                 </div>
             </section>
@@ -28,6 +33,14 @@
             <div class="alert alert-success dn" id="feedback-pass-reset" role="alert" />
         </div>
 
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <style>
+            label.z-checkbox-content {
+                display: inline;
+            }
+        </style>
     </z:div>
 
 </zk:zk>

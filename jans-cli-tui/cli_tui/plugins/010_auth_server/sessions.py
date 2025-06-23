@@ -143,7 +143,7 @@ class Sessions(DialogUtils):
             search_arg_lists.append(f'expirationDate<{date_before}')
 
         if search_arg_lists:
-            endpoint_args += ',fieldValuePair:' + '\,'.join(search_arg_lists)
+            endpoint_args += ',fieldValuePair:' + '\\,'.join(search_arg_lists)
 
 
         async def search_sessions_coroutine():

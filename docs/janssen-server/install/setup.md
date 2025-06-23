@@ -40,10 +40,9 @@ tags:
 4. Next, pick which services should be installed for this deployment:
 
   ```bash
-Install Jans Config API? [Yes] : 
-Install Scim Server? [Yes] : 
-Install Fido2 Server? [Yes] : 
-Install Jans Link Server? [Yes] : 
+Install Jans Config API? [Yes] :
+Install Scim Server? [Yes] :
+Install Fido2 Server? [Yes] :
 Install Gluu Casa? [No] :
   ```
    
@@ -82,14 +81,14 @@ usage: jans_setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [
                      [-remote-rdbm {mysql,pgsql} | -local-rdbm {mysql,pgsql}] [-ip-address IP_ADDRESS]
                      [-host-name HOST_NAME] [-org-name ORG_NAME] [-email EMAIL] [-city CITY] [-state STATE]
                      [-country COUNTRY] [-rdbm-user RDBM_USER] [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT]
-                     [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] [--reset-rdbm-db] [--shell] [--dump-config-on-error]
+                     [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] [-rdbm-schema RDBM_SCHEMA] [--reset-rdbm-db] [--shell] [--dump-config-on-error]
                      [--no-progress] [-admin-password ADMIN_PASSWORD] [-jans-max-mem JANS_MAX_MEM]
                      [-properties-password PROPERTIES_PASSWORD] [-approved-issuer APPROVED_ISSUER] [--force-download]
                      [--download-exit] [-jans-app-version JANS_APP_VERSION] [-jans-build JANS_BUILD]
                      [-setup-branch SETUP_BRANCH] [--disable-config-api-security] [--cli-test-client]
                      [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT] [-disable-script DISABLE_SCRIPT]
                      [-java-version {11,17}] [-stm] [-w] [-t] [-x] [--allow-pre-released-features] [--no-data]
-                     [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-jans-ldap-link]
+                     [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-link]
                      [--install-jans-keycloak-link] [--with-casa] [--install-jans-saml] [--install-jans-lock]
                      [--install-opa] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
                      [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
@@ -125,6 +124,7 @@ Below are the optional arguments:
 | -rdbm-port RDBM_PORT | RDBM port |
 | -rdbm-db RDBM_DB | RDBM database |
 | -rdbm-host RDBM_HOST | RDBM host |
+| -rdbm-schema | Jans Database Schema |
 | --reset-rdbm-db | Deletes all tables on target database. Warning! You will lose all data on target database. |
 | --shell | Drop into interactive shell before starting installation |
 | --dump-config-on-error | Dump configuration on error |
@@ -154,10 +154,9 @@ Below are the optional arguments:
 | --no-config-api | Do not install Jans Auth Config Api |
 | --no-scim | Do not install Scim Server |
 | --no-fido2 | Do not install Fido2 Server |
-| --install-jans-ldap-link | Install LDAP Link Server |
 | --with-casa | Install Gluu/Flex Casa Server |
 | --load-config-api-test | Load Config Api Test Data |
-| --install-cache-refresh | Install Cache Refresh Server |
+| --install-link | Install Link Server |
 | -config-patch-creds CONFIG_PATCH_CREDS | password:username for downloading auto test ciba password |
 | -test-client-id TEST_CLIENT_ID | ID of test client which has all available scopes. Must be in UUID format. |
 | -test-client-pw TEST_CLIENT_PW | Secret for test client |

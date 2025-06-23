@@ -15,6 +15,7 @@
 mod authz;
 mod bootstrap_config;
 mod common;
+mod entity_builder;
 mod http;
 mod init;
 mod jwt;
@@ -31,16 +32,18 @@ mod tests;
 
 use std::sync::Arc;
 
+pub use crate::common::json_rules::JsonRule;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
-pub use authz::request::{Request, ResourceData, Tokens};
+pub use authz::request::{EntityData, Request, RequestUnsigned};
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
 use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
+use lock::InitLockServiceError;
 use log::interface::LogWriter;
 use log::{LogEntry, LogType};
 pub use log::{LogLevel, LogStorage};
@@ -53,6 +56,9 @@ pub mod bindings {
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
     pub use crate::common::policy_store::PolicyStore;
+
+    pub use serde_json;
+    pub use serde_yml;
 }
 
 /// Errors that can occur during initialization Cedarling.
@@ -71,6 +77,10 @@ pub enum InitCedarlingError {
     /// Error while init tokio runtime
     #[error(transparent)]
     RuntimeInit(std::io::Error),
+    /// Error returned when Cedarling fails to obtain client credentials for sending
+    /// logs to the Lock Server.
+    #[error("failed to initialize the Lock Service: {0}")]
+    InitLockService(#[from] InitLockServiceError),
 }
 
 /// The instance of the Cedarling application.
@@ -98,7 +108,14 @@ impl Cedarling {
         let pdp_id = app_types::PdpID::new();
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName(config.application_name.clone()));
-        let log = log::init_logger(&config.log_config, pdp_id, app_name);
+
+        let log = log::init_logger(
+            &config.log_config,
+            pdp_id,
+            app_name,
+            config.lock_config.as_ref(),
+        )
+        .await?;
 
         let service_config = ServiceConfig::new(config)
             .await
@@ -132,6 +149,15 @@ impl Cedarling {
         self.authz.authorize(request).await
     }
 
+    /// Authorize request with unsigned data.
+    /// makes authorization decision based on the [`RequestUnverified`]
+    pub async fn authorize_unsigned(
+        &self,
+        request: RequestUnsigned,
+    ) -> Result<AuthorizeResult, AuthorizeError> {
+        self.authz.authorize_unsigned(request).await
+    }
+
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
     #[doc(hidden)]
     #[cfg(test)]
@@ -141,6 +167,11 @@ impl Cedarling {
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let tokens = self.authz.decode_tokens(request).await?;
         self.authz.build_entities(request, &tokens)
+    }
+
+    /// Closes the connections to the Lock Server and pushes all available logs.
+    pub async fn shut_down(&self) {
+        self.log.shut_down().await;
     }
 }
 

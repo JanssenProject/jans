@@ -43,6 +43,10 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       dnsPolicy: {{ .Values.dnsPolicy | quote }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
     {{- with .Values.dnsConfig }}
       dnsConfig:
 {{ toYaml . | indent 8 }}
@@ -139,4 +143,8 @@ spec:
       {{- end }}
       {{- with (include "cn.config.schema" . | fromYaml).volumes }}
 {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{- toYaml .Values.nodeSelector | nindent 8 }}
       {{- end }}

@@ -20,8 +20,6 @@ pub enum LoggerType {
     /// Logger that print logs to stdout
     #[serde(rename = "std_out")]
     StdOut,
-    /// Logger send log messages to `Lock` server
-    Lock,
 }
 
 impl FromStr for LoggerType {
@@ -33,7 +31,6 @@ impl FromStr for LoggerType {
         match s.as_str() {
             "memory" => Ok(Self::Memory),
             "std_out" => Ok(Self::StdOut),
-            "lock" => Ok(Self::Lock),
             "off" => Ok(Self::Off),
             _ => Err(Self::Err { logger_type: s }),
         }
@@ -47,7 +44,6 @@ impl Display for LoggerType {
             LoggerType::Off => write!(f, "off"),
             LoggerType::Memory => write!(f, "memory"),
             LoggerType::StdOut => write!(f, "stdout"),
-            LoggerType::Lock => write!(f, "lock"),
         }
     }
 }
@@ -119,41 +115,6 @@ impl FeatureToggle {
 impl From<bool> for FeatureToggle {
     fn from(val: bool) -> Self {
         FeatureToggle::from_bool(val)
-    }
-}
-
-#[derive(Default, Clone, Copy, Debug, PartialEq, Deserialize, Serialize)]
-#[serde(rename_all = "UPPERCASE")]
-/// Operator that define boolean operator `AND` or `OR`.
-pub enum WorkloadBoolOp {
-    #[default]
-    /// Variant boolean `AND` operator.
-    And,
-    /// Variant boolean `OR` operator.
-    Or,
-}
-
-impl FromStr for WorkloadBoolOp {
-    type Err = ParseWorkloadBoolOpError;
-
-    /// Parse [`WorkloadBoolOp`] from string.
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s = s.to_uppercase();
-        Ok(match s.as_str() {
-            "AND" => Self::And,
-            "OR" => Self::Or,
-            _ => return Err(ParseWorkloadBoolOpError { payload: s }),
-        })
-    }
-}
-
-impl WorkloadBoolOp {
-    /// execute boolean operator for boolean parameters
-    pub(crate) fn calc(&self, rhd: bool, lhd: bool) -> bool {
-        match self {
-            WorkloadBoolOp::And => rhd && lhd,
-            WorkloadBoolOp::Or => rhd || lhd,
-        }
     }
 }
 

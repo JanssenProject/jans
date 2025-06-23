@@ -10,41 +10,54 @@ permissions:
 jobs:
   publish_binary_packages:
     if: github.repository == 'JanssenProject/jans'
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
+    permissions:
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
-        name: [ubuntu22, ubuntu20, el8, suse15]
-
+        name: [ubuntu24, ubuntu22, ubuntu20, el8, suse15]
         include:
+          - name: ubuntu24
+            os: ubuntu-22.04
+            asset_suffix: ~ubuntu24.04_amd64.deb
+            build_files: deb/noble
+            asset_prefix: '_'
+            asset_path: jans
+            sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
+            python_version: 3.11
           - name: ubuntu22
+            os: ubuntu-22.04
             asset_suffix: ~ubuntu22.04_amd64.deb
             build_files: deb/jammy
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: dpkg-sig -s builder -k DE92BEF14A1A4E542F678B64DC3C790386C73900
-            python_version: 3.8                
+            sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
+            python_version: 3.8
           - name: ubuntu20
+            os: ubuntu-22.04
             asset_suffix: ~ubuntu20.04_amd64.deb
             build_files: deb/focal
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: dpkg-sig -s builder -k DE92BEF14A1A4E542F678B64DC3C790386C73900
+            sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
             python_version: 3.8
           - name: el8
+            os: ubuntu-22.04
             asset_suffix: .el8.x86_64.rpm
             build_files: rpm/el8
             asset_prefix: '-'
             asset_path: jans/rpmbuild/RPMS/x86_64
             sign_cmd: rpm --addsign
-            python_version: 3.6
+            python_version: 3.8
           - name: suse15
+            os: ubuntu-22.04
             asset_suffix: .suse15.x86_64.rpm
             build_files: rpm/suse15
             asset_prefix: '-'
             asset_path: jans/rpmbuild/RPMS/x86_64
             sign_cmd: rpm --addsign
-            python_version: 3.6
+            python_version: 3.8
 
     steps:
     - name: Harden Runner
@@ -66,9 +79,10 @@ jobs:
          sudo add-apt-repository ppa:deadsnakes/ppa
          sudo apt-get update
          sudo apt-get install -y python${{ matrix.python_version }}
-         sudo apt install -y build-essential devscripts debhelper rpm dpkg-sig python3-dev python3-requests python3-ruamel.yaml python3-pymysql python3-crypto python3-distutils python3-prompt-toolkit python${{ matrix.python_version }}-distutils libpq-dev python${{ matrix.python_version }}-dev apache2 rsyslog python3-urllib3 python3-certifi postgresql postgresql-contrib 
+         sudo apt install -y build-essential devscripts debhelper rpm python3-dev python3-requests python3-ruamel.yaml python3-pymysql python3-prompt-toolkit python${{ matrix.python_version }}-distutils libpq-dev python${{ matrix.python_version }}-dev apache2 rsyslog python3-urllib3 python3-certifi postgresql postgresql-contrib
+         sudo apt install -y dpkg-sig python3-crypto python3-distutils ||  sudo apt install -y python3-distutils-extra python3-cryptography
          sudo cp -r /usr/lib/python3/dist-packages /usr/lib/python${{ matrix.python_version }}/
-         sudo python${{ matrix.python_version }} -m pip install psycopg2-binary psycopg2
+         sudo python${{ matrix.python_version }} -m pip install psycopg2-binary psycopg2 || echo "failed to install psycopg2"
     - name: Import GPG key
       id: import_gpg
       continue-on-error: true
@@ -80,7 +94,7 @@ jobs:
         git_commit_gpgsign: true
     - name: List keys
       id: list_keys
-      run: gpg -K        
+      run: gpg -K
     - name: Get latest tag
       id: previoustag
       run: |
@@ -106,14 +120,18 @@ jobs:
          touch jans-src/opt/jans/jans-setup/package
          rm -rf install.py install jans-cli-tui
          rm -rf jans-src/opt/jans/jans-setup/logs/setup.log
-         rm -rf jans-src/opt/jans/jans-setup/logs/setup_error.log         
+         rm -rf jans-src/opt/jans/jans-setup/logs/setup_error.log
          sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" run-build.sh
          cat run-build.sh
          sudo ./run-build.sh
+
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
+
     - name: Sign package
       id: sign_package
       run : |
-        echo '%_gpg_name moauto (automation) <54212639+mo-auto@users.noreply.github.com>' >> ~/.rpmmacros      
+        echo '%_gpg_name moauto (automation) <54212639+mo-auto@users.noreply.github.com>' >> ~/.rpmmacros
         ${{ matrix.sign_cmd }} ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
         gpg --armor --detach-sign ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
 
@@ -152,9 +170,26 @@ jobs:
         asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.asc
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
-  build_python_packages:
+
+  build_and_upload_python_packages:
     if: github.repository == 'JanssenProject/jans'
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ubuntu
+            os: ubuntu-22.04
+            python_version: 3.8
+          - name: suse
+            os: ubuntu-22.04
+            python_version: 3.8
+            use_docker: true
+            docker_image: opensuse/leap:15.4
+          - name: macos
+            os: macos-latest
+            python_version: 3.8
+
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
@@ -163,12 +198,19 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-    - uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
-      name: Build with Suse
-      continue-on-error: true
+
+    - name: Set up Python
+      if: matrix.name != 'suse'
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
       with:
-        image: opensuse/leap:15.4
-        options: -v ${{ github.workspace }}:/suse
+        python-version: ${{ matrix.python_version }}
+
+    - name: Build with Docker (SUSE)
+      if: matrix.use_docker
+      uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
+      with:
+        image: ${{ matrix.docker_image }}
+        options: -v ${{ github.workspace }}:/workspace
         run: |
           zypper addrepo https://download.opensuse.org/repositories/openSUSE:Leap:15.1/standard/openSUSE:Leap:15.1.repo
           zypper --gpg-auto-import-keys refresh
@@ -177,11 +219,9 @@ jobs:
           zypper --gpg-auto-import-keys refresh
           zypper download python3-dev
           rpm -i --nodeps /var/cache/zypp/packages/home_smarty12_Python/noarch/python3-dev-0.4.0-lp152.1.4.noarch.rpm
-          zypper --non-interactive install -y python3
-          zypper --non-interactive install -y python3-devel
-          echo "Building jans-linux-setup package"
-          cd /suse/jans-linux-setup
+          zypper --non-interactive install -y python3 python3-devel
           pip install shiv
+          cd /workspace/jans-linux-setup
           make zipapp
           mv jans-linux-setup.pyz jans-linux-suse-X86-64-setup.pyz
           sha256sum jans-linux-suse-X86-64-setup.pyz > jans-linux-suse-X86-64-setup.pyz.sha256sum
@@ -189,18 +229,14 @@ jobs:
           make zipapp 
           mv jans-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
           sha256sum jans-cli-tui-linux-suse-X86-64.pyz > jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
-    - name: Set up Python 3.6
-      uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
-      with:
-        python-version: 3.6
+
     - name: Build with Ubuntu
-      continue-on-error: true
+      if: matrix.name == 'ubuntu'
       run: |
         sudo apt-get update
         sudo apt-get install -y python3 build-essential ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc
         python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
         pip3 install shiv wheel setuptools
-        echo "Building jans-linux-setup package"
         sudo chown -R runner:docker /home/runner/work/jans/jans        
         cd jans-linux-setup
         make zipapp || echo "Creating linux setup failed for ubuntu"
@@ -210,101 +246,73 @@ jobs:
         make zipapp 
         mv jans-cli-tui.pyz jans-cli-tui-linux-ubuntu-X86-64.pyz
         sha256sum jans-cli-tui-linux-ubuntu-X86-64.pyz > jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
-    - uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
-      id: cache-installers
-      with:
-        path: |
-          ${{github.workspace}}/jans-linux-setup/jans-linux-suse-X86-64-setup.pyz
-          ${{github.workspace}}/jans-linux-setup/jans-linux-suse-X86-64-setup.pyz.sha256sum
-          ${{github.workspace}}/jans-linux-setup/jans-linux-ubuntu-X86-64-setup.pyz
-          ${{github.workspace}}/jans-linux-setup/jans-linux-ubuntu-X86-64-setup.pyz.sha256sum
-          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz
-          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
-          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz
-          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
-        key: ${{ github.sha }}
-  upload_python_packages:
-    if: github.repository == 'JanssenProject/jans'
-    needs: build_python_packages
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        name: [ubuntu, suse]
-    steps:
-    - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
-      with:
-        egress-policy: audit
 
-    - name: Checkout
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-    - uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
-      id: cache-installers
-      with:
-        path: |
-          ${{github.workspace}}/jans-linux-setup/jans-linux-suse-X86-64-setup.pyz
-          ${{github.workspace}}/jans-linux-setup/jans-linux-suse-X86-64-setup.pyz.sha256sum
-          ${{github.workspace}}/jans-linux-setup/jans-linux-ubuntu-X86-64-setup.pyz
-          ${{github.workspace}}/jans-linux-setup/jans-linux-ubuntu-X86-64-setup.pyz.sha256sum
-          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz
-          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
-          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz
-          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
-        key: ${{ github.sha }}
+    - name: Build with macOS
+      if: matrix.name == 'macos'
+      run: |
+        python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
+        pip3 install shiv wheel setuptools
+        cd jans-linux-setup
+        make zipapp || echo "Creating linux setup failed for macOS"
+        mv jans-linux-setup.pyz jans-linux-macos-setup.pyz || echo "Failed"
+        shasum -a 256 jans-linux-macos-setup.pyz > jans-linux-macos-setup.pyz.sha256sum || echo "Failed"
+        cd ../jans-cli-tui
+        make zipapp 
+        mv jans-cli-tui.pyz jans-cli-tui-macos.pyz
+        shasum -a 256 jans-cli-tui-macos.pyz > jans-cli-tui-macos.pyz.sha256sum
+
     - name: Get latest tag
       id: previoustag
       run: |
-        
-        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        if [[ ${{ github.event.ref }} == 'refs/tags/nightly' ]]; then
+          echo "version=0.0.0-nightly" >> $GITHUB_OUTPUT
+        else
+          echo "version=$(echo ${{ github.event.ref }} | cut -d 'v' -f 2)-stable" >> $GITHUB_OUTPUT
+        fi
         echo "tag=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
         echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
         echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
-        echo "PACKAGE_PREFIX=jans" >> ${GITHUB_ENV}
 
-    - name: Print Version and tag
-      run: |
-        echo "Version: ${{ steps.previoustag.outputs.version }}"
-        echo "Tag: ${{ github.event.ref }}"
-    - name: Upload binaries to release
-      id: upload_binaries_setup
+    - name: Upload setup binaries to release
       continue-on-error: true
       uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-X86-64-setup.pyz
-        asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-X86-64-setup.pyz
+        file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
+        asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
-    - name: Upload checksum to release
-      id: upload_shas_setup
+
+    - name: Upload setup checksum to release
       continue-on-error: true
       uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
-        asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
+        file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz.sha256sum
+        asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
-    - name: Upload binaries to release
-      id: upload_binaries_cli
+
+    - name: Upload CLI binaries to release
       continue-on-error: true
       uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz
-        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name }}-X86-64.pyz
+        file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz
+        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name == 'macos' && 'macos' || format('{0}-X86-64', matrix.name) }}.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
-    - name: Upload checksum to release
-      id: upload_shas_cli
+
+    - name: Upload CLI checksum to release
       continue-on-error: true
       uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz.sha256sum
-        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name }}-X86-64.pyz.sha256sum
+        file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz.sha256sum
+        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name == 'macos' && 'macos' || format('{0}-X86-64', matrix.name) }}.pyz.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
+
   build_demo_packages:
     if: github.repository == 'JanssenProject/jans'
     # Needs cedarling wasm as jans-tarp uses the wasm package
@@ -322,16 +330,19 @@ jobs:
       continue-on-error: true
       run: |
         sudo apt-get update
-        sudo apt-get install -y zip
+        sudo apt-get install -y zip jq
         cd demos
         VER=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i && sha256sum demo-${i%/}-$VER-source.zip > demo-${i%/}-$VER-source.zip.sha256sum; done
-        sudo rm demo-jans-tarp-$VER-source.zip demo-jans-tarp-$VER-source.zip.sha256sum
-        cd jans-tarp
+        sudo rm demo-janssen-tarp-$VER-source.zip demo-janssen-tarp-$VER-source.zip.sha256sum || echo "No such file or directory"
+        cd janssen-tarp
         # Get the latest cedarling wasm package
         TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
           TAG="0.0.0"
+          RANDOM_NUMBER=$((RANDOM % 9000 + 1000))
+          jq --arg version "0.0.$RANDOM_NUMBER" '.version = $version' src/static/firefox/manifest.json > temp.json && mv temp.json src/static/firefox/manifest.json
+          echo "Replaced  $RANDOM_NUMBER in manifest.json"
         fi
         wget https://github.com/${{ github.repository }}/releases/download/"${VER}"/cedarling_wasm_"${TAG}"_pkg.tar.gz -O cedarling_wasm.tar.gz
         mkdir -p wasm
@@ -339,20 +350,26 @@ jobs:
         rm cedarling_wasm.tar.gz
         ls wasm
         # END Get the latest cedarling wasm package
+        # Sign Firefox extension
+        npm install --global web-ext
         npm install
         npm run build
+        cd ./dist/firefox
+        web-ext sign --channel=unlisted  --api-key="${{ secrets.MOZILLA_API_KEY }}" --api-secret="${{ secrets.MOZILLA_API_SECRET }}" || echo "Sign your extension for self-distribution to mozilla failed"
+        cd ../..
         npm run pack
-        mv ./release/jans-tarp-chrome-*.zip ../demo-jans-tarp-chrome-$VER.zip
-        mv ./release/jans-tarp-firefox-*.zip ../demo-jans-tarp-firefox-$VER.zip
-        sha256sum ../demo-jans-tarp-chrome-$VER.zip > ../demo-jans-tarp-chrome-$VER.zip.sha256sum
-        sha256sum ../demo-jans-tarp-firefox-$VER.zip > ../demo-jans-tarp-firefox-$VER.zip.sha256sum
+        mv ./release/janssen-tarp-chrome-*.zip ../demo-janssen-tarp-chrome-$VER.zip
+        mv ./dist/firefox/web-ext-artifacts/*.xpi ../demo-janssen-tarp-firefox-$VER.xpi || touch ../demo-janssen-tarp-firefox-$VER.xpi
+        sha256sum ../demo-janssen-tarp-chrome-$VER.zip > ../demo-janssen-tarp-chrome-$VER.zip.sha256sum
+        sha256sum ../demo-janssen-tarp-firefox-$VER.xpi > ../demo-janssen-tarp-firefox-$VER.xpi.sha256sum
         cd ..
-        
+
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload $VER *.zip *.sha256sum --clobber
+        gh release upload $VER *.xpi  --clobber || echo "Sign your extension for self-distribution to mozilla failed"
   build_cedarling_python:
     if: github.repository == 'JanssenProject/jans'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
@@ -371,7 +388,7 @@ jobs:
         git_user_signingkey: true
         git_commit_gpgsign: true
 
-    - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
     - uses: PyO3/maturin-action@ea5bac0f1ccd0ab11c805e2b804bfcb65dac2eab # v1.45.0
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
@@ -388,15 +405,17 @@ jobs:
           TAG="0.0.0"
         fi
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
-        sha256sum cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl > cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl.sha256sum
-        sha256sum cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl > cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl.sha256sum
-        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl || echo "Failed to sign"
-        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl || echo "Failed to sign"
+        sha256sum cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl > cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl.sha256sum
+        sha256sum cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl > cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl.sha256sum
+        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl || echo "Failed to sign"
+        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" *.whl *.sha256sum *.asc
   build_cedarling_wasm:
     if: github.repository == 'JanssenProject/jans'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
@@ -427,23 +446,45 @@ jobs:
       run: |
         rustup update stable && rustup default stable
         cargo install wasm-pack
+        TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+        NPM_TAG=latest
+        if [ "${TAG}" == "nightly" ]; then
+          NPM_TAG=nightly
+          TAG="0.0.0"
+          LAST_NIGHTLY_NPM_VERSION=$(npm dist-tag ls @janssenproject/cedarling_wasm | grep nightly | awk '{print $2}' | sort -V | tail -n 1) || echo "Failed to get last nightly version"
+          NEW_NPM_VERSION=$(echo $LAST_NIGHTLY_NPM_VERSION | awk -F. '{print $1"."$2"."$3+1}')
+          sed -i "s/^version = \".*\"/version = \"${NEW_NPM_VERSION}\"/" Cargo.toml
+          echo "Replaced  $NEW_NPM_VERSION in Cargo.toml"
+        fi
+        
+        # Build for web target
         wasm-pack build --release --target web --scope janssenproject
-        ls pkg
+        cd pkg
+        echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+        npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
+        npm publish --provenance --access=public --tag "${NPM_TAG}"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
+        cd ..
+        
+        # Build for Node.js target with modified version
+        NODEJS_VERSION="${TAG}-nodejs"
+        if [ "${TAG}" == "0.0.0" ]; then
+          NODEJS_VERSION="${NEW_NPM_VERSION}-nodejs"
+        fi
+        sed -i "s/^version = \".*\"/version = \"${NODEJS_VERSION}\"/" Cargo.toml
+        wasm-pack build --release --target nodejs --scope janssenproject --out-dir pkg-nodejs
+        cd pkg-nodejs
+        npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
+
     - name: Archive and sign pkg contents
       id: archive_pkg
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       run: |
         TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
         VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
-        cd pkg
         if [ "${TAG}" == "nightly" ]; then
           VERSION=nightly
           TAG="0.0.0"
-          # remove, do not publish on nightly or random nightly build versions to be published
-          #npm unpublish cedarling_wasm@0.0.0
         fi
-        npm publish --access public --tag "${VERSION}" || echo "failed to piblish to NPM"
-        cd ..
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
         sha256sum cedarling_wasm_"${TAG}"_pkg.tar.gz > cedarling_wasm_"${TAG}"_pkg.tar.gz.sha256sum
@@ -452,7 +493,8 @@ jobs:
         gh release upload "${VERSION}" *.tar.gz *.sha256sum *.asc
   build_cedarling_krakend:
     if: github.repository == 'JanssenProject/jans'
-    runs-on: ubuntu-20.04
+    needs: build_cedarling_go
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         krakend-builder-image: [ 'builder:2.9.0', 'builder:2.9.0-linux-generic' ]
@@ -490,15 +532,18 @@ jobs:
         if [ "${{ matrix.krakend-builder-image }}" == "builder:2.9.0-linux-generic" ]; then
           echo CC="aarch64-linux-gnu-gcc" >> $GITHUB_ENV
         fi
-    - name: Build plugin for AMD64 
+    - name: Build plugin for AMD64
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
+        wget https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0_x86-64.so -O libcedarling_go.so
         docker run -i -v "$PWD:/app" -w /app krakend/"${{ matrix.krakend-builder-image }}" go build -buildmode=plugin -o cedarling-krakend-amd64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so .
+        rm libcedarling_go.so
     - name: Build plugin for ARM64
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
-
+        wget https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0_arm64.so -O libcedarling_go.so
         docker run -i -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=${{ env.CC }}" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}" go build -ldflags='-extldflags=-fuse-ld=bfd -extld=${{ env.CC }}' -buildmode=plugin -o  cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so .
+        rm libcedarling_go.so
     - name: Generate sha256sum and sign
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
@@ -508,3 +553,197 @@ jobs:
         gpg --armor --detach-sign cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${{ env.VERSION }}" *.so *.sha256sum *.asc
+  build_cedarling_go:
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [ubuntu22, ubuntu22-arm, mac, windows]
+        include:
+          - name: ubuntu22
+            os: ubuntu-22.04
+          - name: ubuntu22-arm
+            os: ubuntu-22.04-arm
+          - name: mac
+            os: macos-15
+          - name: windows
+            os: windows-2025
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Import GPG key
+        id: import_gpg
+        continue-on-error: true
+        uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
+        with:
+          gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+      - name: Install Golang dependencies
+        uses: actions/setup-go@v5
+        with:
+            go-version: '1.24'
+      - name: Build rust artifacts linux
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        if: matrix.name == 'ubuntu22'
+        run: |
+          rustup update stable && rustup default stable
+          TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+          VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+          if [ "${TAG}" == "nightly" ]; then
+            VERSION=nightly
+            TAG="0.0.0"
+          fi
+          cargo build -r -p cedarling_go
+          cp ../../target/release/libcedarling_go.so libcedarling_go-${TAG}_x86-64.so
+      - name: Build rust artifacts for linux ARM64
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        if: matrix.name == 'ubuntu22-arm'
+        run: |
+          rustup update stable && rustup default stable
+          TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+          VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+          if [ "${TAG}" == "nightly" ]; then
+            VERSION=nightly
+            TAG="0.0.0"
+          fi
+          cargo build -r -p cedarling_go
+          cp ../../target/release/libcedarling_go.so libcedarling_go-${TAG}_arm64.so
+      - name: Build rust artifacts mac
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        if: matrix.name == 'mac'
+        run: |
+          brew install rustup
+          rustup update stable && rustup default stable
+          TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+          VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+          if [ "${TAG}" == "nightly" ]; then
+            VERSION=nightly
+            TAG="0.0.0"
+          fi
+          cargo build -r -p cedarling_go
+          cp ../../target/release/libcedarling_go.dylib libcedarling_go-${TAG}.dylib
+      - name: Build rust artifacts windows
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        if: matrix.name == 'windows'
+        shell: bash
+        run: |
+          choco install rustup.install
+          rustup update stable && rustup default stable
+          TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+          VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+          if [ "${TAG}" = "nightly" ]; then
+            VERSION=nightly
+            TAG="0.0.0"
+          fi
+          cargo build -r -p cedarling_go
+          cp ../../target/release/cedarling_go.dll cedarling_go-${TAG}.dll
+          cp ../../target/release/cedarling_go.dll.lib cedarling_go-${TAG}.lib
+
+      - name: Generate sha256sum and sign
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        shell: bash
+        run: |
+          TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+          VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+          if [ "${TAG}" = "nightly" ]; then
+            VERSION=nightly
+            TAG="0.0.0"
+          fi
+
+          case "${{ matrix.name }}" in
+            ubuntu22)
+              FILE="libcedarling_go-${TAG}_x86-64.so"
+              ;;
+            ubuntu22-arm)
+              FILE="libcedarling_go-${TAG}_arm64.so"
+              ;;
+            mac)
+              FILE="libcedarling_go-${TAG}.dylib"
+              ;;
+            windows)
+              FILE="cedarling_go-${TAG}.dll"
+              FILE_LIB="cedarling_go-${TAG}.lib"
+              ;;
+          esac
+
+          sha256sum $FILE >> $FILE.sha256sum
+          gpg --armor --detach-sign $FILE || echo "Failed to sign"
+          gpg --armor --detach-sign $FILE.sha256sum || echo "Failed to sign"
+
+          if [ -n "$FILE_LIB" ]; then
+            sha256sum $FILE_LIB >> $FILE_LIB.sha256sum
+            gpg --armor --detach-sign $FILE_LIB || echo "Failed to sign"
+            gpg --armor --detach-sign $FILE_LIB.sha256sum || echo "Failed to sign"
+          fi
+
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+          gh release upload "${VERSION}" $FILE $FILE.sha256sum $FILE.asc
+
+          if [ -n "$FILE_LIB" ]; then
+            gh release upload "${VERSION}" $FILE_LIB $FILE_LIB.sha256sum $FILE_LIB.asc
+          fi
+  build_cedarling_uniffi:
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Import GPG key
+      id: import_gpg
+      continue-on-error: true
+      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
+      with:
+        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
+    - name: Build and release cedarling uniffi build in linux
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+      run: |
+        rustup update stable && rustup default stable
+        TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+        VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+        if [ "${TAG}" == "nightly" ]; then
+          VERSION=nightly
+          TAG="0.0.0"
+        fi
+        cargo build -r -p cedarling_uniffi
+        cp ../../target/release/libcedarling_uniffi.so libcedarling_uniffi-${TAG}.so
+        FILE="libcedarling_uniffi-${TAG}.so"
+        sha256sum $FILE >> $FILE.sha256sum
+        gpg --armor --detach-sign $FILE || echo "Failed to sign"
+        gpg --armor --detach-sign $FILE.sha256sum || echo "Failed to sign"
+
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+        gh release upload "${VERSION}" $FILE $FILE.sha256sum $FILE.asc
+    - name: Build kotlin binding in linux
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+      run: |
+        rustup update stable && rustup default stable
+        TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+        VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+        if [ "${TAG}" == "nightly" ]; then
+          VERSION=nightly
+          TAG="0.0.0"
+        fi
+        cargo build -r -p cedarling_uniffi
+        cargo run --bin uniffi-bindgen generate --library ${{ github.workspace }}/jans-cedarling/target/release/libcedarling_uniffi.so --language kotlin --out-dir ./
+        zip -r cedarling_uniffi-kotlin-${TAG}.zip uniffi
+        FILE="cedarling_uniffi-kotlin-${TAG}.zip"
+        sha256sum $FILE >> $FILE.sha256sum
+        gpg --armor --detach-sign $FILE || echo "Failed to sign"
+        gpg --armor --detach-sign $FILE.sha256sum || echo "Failed to sign"
+
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+        gh release upload "${VERSION}" $FILE $FILE.sha256sum $FILE.asc

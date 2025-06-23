@@ -137,6 +137,11 @@ public enum RegisterRequestParam {
     RPT_AS_JWT("rpt_as_jwt"),
 
     /**
+     * Whether to require PKCE
+     */
+    REQUIRE_PKCE("require_pkce"),
+
+    /**
      * Whether to return access token as signed JWT
      */
     ACCESS_TOKEN_AS_JWT("access_token_as_jwt"),
@@ -220,6 +225,11 @@ public enum RegisterRequestParam {
      * JWE enc algorithm (JWA) required for symmetric encryption of Transaction Token Responses.
      */
     TX_TOKEN_ENCRYPTED_RESPONSE_ENC("tx_token_encrypted_response_enc"),
+
+    /**
+     * JWS alg algorithm (JWA) required for Logout Status JWT.
+     */
+    LOGOUT_STATUS_JWT_SIGNED_RESPONSE_ALG("logout_status_jwt_signed_response_alg"),
 
     /**
      * JWS alg algorithm (JWA) that must be required by the Authorization Server.

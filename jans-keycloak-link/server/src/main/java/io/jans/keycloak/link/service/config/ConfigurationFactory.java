@@ -87,7 +87,7 @@ public class ConfigurationFactory {
 	private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
 	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
-	private static final String APP_PROPERTIES_FILE = DIR + "cache-refresh.properties";
+	private static final String APP_PROPERTIES_FILE = DIR + "link-interception.properties";
 
 	private final String SALT_FILE_NAME = "salt";
 

@@ -7,32 +7,28 @@
 package io.jans.as.server.revoke;
 
 import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.session.EndSessionErrorResponseType;
-import io.jans.as.common.model.session.SessionId;
-import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.UserService;
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.ws.rs.FormParam;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -92,6 +88,7 @@ public class RevokeSessionRestWebService {
 
             final List<SessionId> authenticatedSessions = sessionIdList.stream().filter(sessionId -> sessionId.getState() == SessionIdState.AUTHENTICATED).collect(Collectors.toList());
             sessionIdService.remove(authenticatedSessions);
+
             log.debug("Revoked {} user's sessions (user: {})", authenticatedSessions.size(), user.getUserId());
 
             return Response.ok().build();

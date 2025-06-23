@@ -29,15 +29,17 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def __repr__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         txt = ''
+        name_sep = 35
+        state_sep = 25
         try:
             if not Config.installed_instance:
-                txt += 'hostname'.ljust(30) + Config.hostname.rjust(35) + "\n"
-                txt += 'orgName'.ljust(30) + Config.orgName.rjust(35) + "\n"
-                txt += 'os'.ljust(30) + Config.os_type.rjust(35) + "\n"
-                txt += 'city'.ljust(30) + Config.city.rjust(35) + "\n"
-                txt += 'state'.ljust(30) + Config.state.rjust(35) + "\n"
-                txt += 'countryCode'.ljust(30) + Config.countryCode.rjust(35) + "\n"
-                txt += 'Applications max ram (MB)'.ljust(30) + str(Config.application_max_ram).rjust(35) + "\n"
+                txt += 'hostname'.ljust(name_sep) + Config.hostname.rjust(state_sep) + "\n"
+                txt += 'orgName'.ljust(name_sep) + Config.orgName.rjust(state_sep) + "\n"
+                txt += 'os'.ljust(name_sep) + Config.os_type.rjust(state_sep) + "\n"
+                txt += 'city'.ljust(name_sep) + Config.city.rjust(state_sep) + "\n"
+                txt += 'state'.ljust(name_sep) + Config.state.rjust(state_sep) + "\n"
+                txt += 'countryCode'.ljust(name_sep) + Config.countryCode.rjust(state_sep) + "\n"
+                txt += 'Applications max ram (MB)'.ljust(name_sep) + str(Config.application_max_ram).rjust(state_sep) + "\n"
 
                 bc = []
 
@@ -49,14 +51,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
                 if bc:
                     bct = ', '.join(bc)
-                    txt += 'Backends'.ljust(30) + bct.rjust(35) + "\n"
+                    txt += 'Backends'.ljust(name_sep) + bct.rjust(state_sep) + "\n"
 
-                txt += 'Java Type'.ljust(30) + Config.java_type.rjust(35) + "\n"
+                txt += 'Java Type'.ljust(name_sep) + Config.java_type.rjust(state_sep) + "\n"
 
             def get_install_string(prefix, install_var):
                 if not base.argsp.allow_pre_released_features and Config.get(install_var+'_pre_released'):
                     return ''
-                return prefix.ljust(30) + repr(getattr(Config, install_var, False)).rjust(35) + (' *' if install_var in Config.addPostSetupService else '') + '\n'
+                return prefix.ljust(name_sep) + repr(getattr(Config, install_var, False)).rjust(state_sep) + (' *' if install_var in Config.addPostSetupService else '') + '\n'
 
             txt += get_install_string('Install Apache 2 web server', 'install_httpd')
             txt += get_install_string('Install Auth Server', 'install_jans_auth')
@@ -65,15 +67,17 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 for prompt_str, install_var in (
                         ('Install Fido2 Server', 'install_fido2'),
                         ('Install Scim Server', 'install_scim_server'),
-                        ('Install Jans LDAP Link Server', 'install_jans_ldap_link'),
                         ('Install Jans KC Link Server', 'install_jans_keycloak_link'),
                         ('Install Jans Casa', 'install_casa'),
                         ('Install Jans Lock', 'install_jans_lock'),
                         ('Install Jans KC', 'install_jans_saml')):
                     txt += get_install_string(prompt_str, install_var)
 
+                if base.argsp.install_link:
+                    txt += get_install_string('Install Link Server', 'install_link')
+
             if base.argsp.t:
-                txt += 'Load Test Data '.ljust(30) + repr( base.argsp.t).rjust(35) + "\n"
+                txt += 'Load Test Data '.ljust(name_sep) + repr( base.argsp.t).rjust(state_sep) + "\n"
 
             return txt
 
@@ -265,7 +269,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chmod, '+x', script])
 
         # scripts that can be executed by user jetty
-        jetty_user_scripts = (Config.jansScriptFiles[3], Config.jansScriptFiles[4])
+        jetty_user_scripts = (Config.jansScriptFiles[2], Config.jansScriptFiles[3])
         for script in jetty_user_scripts:
             script_fn = os.path.join(Config.jansOptBinFolder, os.path.basename(script))
             self.chown(script_fn, user=Config.root_user, group=Config.jetty_user)
@@ -313,6 +317,17 @@ class JansInstaller(BaseInstaller, SetupUtils):
             if scr.name in [show_version_s] + [os.path.basename(_) for _ in jetty_user_scripts]:
                 continue
             self.run([paths.cmd_chmod, '700', scr_path])
+
+        # link jans script to /usr/local/bin
+        self.run([
+                paths.cmd_ln, '-s',
+                os.path.join(
+                    Config.jansOptBinFolder,
+                    os.path.basename(Config.jansScriptFiles[1])
+                ),
+                '/usr/local/bin'
+                ])
+
 
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
@@ -618,7 +633,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-config-api', 'install_config_api'),
                         ('jans-casa', 'install_casa'),
                         ('jans-fido2', 'install_fido2'),
-                        ('jans-link', 'install_jans_ldap_link'),
+                        ('jans-link', 'install_link'),
                         ('jans-scim', 'install_scim_server'),
                         ('jans-lock', 'install_jans_lock_as_server'),
                         ('opa', 'install_opa'),

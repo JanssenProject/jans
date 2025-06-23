@@ -67,6 +67,11 @@ class Config:
         self.application_max_ram = int(Config.jans_max_mem)
 
     @classmethod
+    def set_rdbm_schema(self):
+        if not self.get('rdbm_schema'):
+            self.rdbm_schema = 'public' if self.rdbm_type == 'pgsql' else self.rdbm_db
+
+    @classmethod
     def init(self, install_dir=INSTALL_DIR):
 
         self.install_dir = install_dir
@@ -157,6 +162,7 @@ class Config:
         self.rdbm_password = None
         self.rdbm_password_enc = ''
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
+        self.schema_files = [os.path.join(self.install_dir, 'schema', schemma_fn) for schemma_fn in ('jans_schema.json', 'custom_schema.json')]
 
         # Jans components installation status
         self.loadData = True
@@ -171,7 +177,7 @@ class Config:
         self.install_config_api = True
         self.install_casa = False
         self.install_jans_cli = True
-        self.install_jans_ldap_link = False
+        self.install_link = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
         self.install_jans_saml = False
@@ -222,11 +228,10 @@ class Config:
         self.script_catalog_dir = os.path.join(self.install_dir, 'script_catalog')
 
         self.jansScriptFiles = [
-                            os.path.join(self.install_dir, 'static/scripts/logmanager.sh'),
-                            os.path.join(self.install_dir, 'static/scripts/testBind.py'),
-                            os.path.join(self.install_dir, 'static/scripts/jans'),
-                            os.path.join(self.install_dir, 'static/scripts/jans_services_status.py'),
-                            os.path.join(self.install_dir, 'static/scripts/get_agama_lab_projects.py'),
+                            os.path.join(self.staticFolder, 'scripts/logmanager.sh'),
+                            os.path.join(self.staticFolder, 'scripts/jans'),
+                            os.path.join(self.staticFolder, 'scripts/jans_services_status.py'),
+                            os.path.join(self.staticFolder, 'scripts/get_agama_lab_projects.py'),
                             ]
 
         self.redhat_services = ['httpd', 'rsyslog']

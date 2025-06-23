@@ -24,7 +24,7 @@ public class SqlEntryManagerSample {
         Properties connectionProperties = new Properties();
 
 
-        boolean mysql = true;
+        boolean mysql = false;
     	if (mysql) {
             connectionProperties.put("sql#db.schema.name", "jansdb");
             connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/jansdb?profileSQL=true");

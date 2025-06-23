@@ -128,9 +128,6 @@ Create aio enabled list
 {{- if index .Values "config-api" "enabled" }}
 {{ $newList = append $newList ("jans-config-api") }}
 {{- end}}
-{{- if .Values.link.enabled}}
-{{ $newList = append $newList ("jans-link") }}
-{{- end}}
 {{- if .Values.fido2.enabled}}
 {{ $newList = append $newList ("jans-fido2") }}
 {{- end}}
@@ -200,6 +197,86 @@ volumeMounts:
 {{- end }}
 
 {{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "auth-server.customJavaOptions"}}
+{{ $custom := "" }}
+{{- $cnCustomJavaOptions := index .Values "auth-server" "cnCustomJavaOptions" }}
+{{- $custom := printf "%s" $cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.25) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "casa.customJavaOptions"}}
+{{ $custom := "" }}
+{{ $custom = printf "%s" .Values.casa.cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.10) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "config-api.customJavaOptions"}}
+{{ $custom := "" }}
+{{- $cnCustomJavaOptions := index .Values "config-api" "cnCustomJavaOptions" }}
+{{- $custom := printf "%s" $cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.10) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "fido2.customJavaOptions"}}
+{{ $custom := "" }}
+{{ $custom = printf "%s" .Values.fido2.cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.08) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "scim.customJavaOptions"}}
+{{ $custom := "" }}
+{{ $custom = printf "%s" .Values.scim.cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.15) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "saml.customJavaOptions"}}
+{{ $custom := "" }}
+{{ $custom = printf "%s" .Values.saml.cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.10) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
 Obfuscate configuration schema (only if configuration key is available)
 */}}
 {{- define "janssen-all-in-one.config.prepareSchema" }}
@@ -233,8 +310,8 @@ Obfuscate configuration schema (only if configuration key is available)
 {{- $_ := set $secretSchema "google_credentials" .Values.configmap.cnGoogleSecretManagerServiceAccount }}
 {{- end }}
 {{- if or (eq .Values.configAdapterName "aws") (eq .Values.configSecretAdapter "aws") }}
-{{- $_ := set $secretSchema "aws_credentials" (include "config.aws-shared-credentials" . | b64enc) }}
-{{- $_ := set $secretSchema "aws_config" (include "config.aws-config" . | b64enc) }}
+{{- $_ := set $secretSchema "aws_credentials" (include "janssen-all-in-one.aws-shared-credentials" . | b64enc) }}
+{{- $_ := set $secretSchema "aws_config" (include "janssen-all-in-one.aws-config" . | b64enc) }}
 {{- $_ := set $secretSchema "aws_replica_regions" (toJson .Values.configmap.cnAwsSecretsReplicaRegions | b64enc) }}
 {{- end }}
 {{- if .Values.saml.enabled }}

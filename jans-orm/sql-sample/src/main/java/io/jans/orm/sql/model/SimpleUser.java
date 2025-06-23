@@ -16,6 +16,7 @@ import io.jans.orm.annotation.CustomObjectClass;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.Password;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.util.StringHelper;
 
@@ -35,6 +36,7 @@ public class SimpleUser implements Serializable {
     private String userId;
 
     @AttributeName(name = "userPassword")
+    @Password(skipHashed = true)
     private String userPassword;
     
     @AttributeName(name = "role")

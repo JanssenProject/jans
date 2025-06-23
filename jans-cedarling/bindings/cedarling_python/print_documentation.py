@@ -6,10 +6,6 @@
 import inspect
 from types import ModuleType
 import cedarling_python
-from cedarling_python import BootstrapConfig
-from cedarling_python import Cedarling
-from cedarling_python import ResourceData, Request, AuthorizeResult, AuthorizeResultResponse, Decision, Diagnostics, PolicyEvaluationError
-from cedarling_python import authorize_errors
 
 
 # script to show the signature and documentation string for a python cedarling bindings
@@ -33,8 +29,7 @@ def print_inspect(type_value):
     print(type_value.__doc__)
     print("\n")
 
-    print(f"Show signature of type: {type_value.__name__}: {
-          inspect.signature(type_value)}")
+    print(f"Show signature of type: {type_value.__name__}: {inspect.signature(type_value)}")
 
     methods_list = [method for method in dir(type_value) if callable(
         getattr(type_value, method)) and not method.startswith("_")]
@@ -43,8 +38,7 @@ def print_inspect(type_value):
         if i != 0:
             print()
         signature = inspect.signature(getattr(type_value, method))
-        print(f"Signature of method {
-              type_value.__name__}.{method}:{signature}")
+        print(f"Signature of method {type_value.__name__}.{method}:{signature}")
         doc = getattr(type_value, method).__doc__
         if doc is not None:
             print(f"documentation: {doc}")

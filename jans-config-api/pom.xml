@@ -27,7 +27,7 @@
 
 		<jans.version>${project.version}</jans.version>
 		
-		<resteasy.version>6.0.3.Final</resteasy.version>
+		<resteasy.version>6.2.3.Final</resteasy.version>
 		<jackson.version>2.13.2</jackson.version>
 		<jetty.version>11.0.15</jetty.version>
 		<weld.version>4.0.3.Final</weld.version>	
@@ -47,7 +47,7 @@
 		<cucumber.version>3.8.0</cucumber.version>
 		<jacoco.version>0.8.10</jacoco.version>
 		<mapstruct.version>1.5.3.Final</mapstruct.version>
-		<swagger.version>2.2.7</swagger.version>
+		<swagger.version>2.2.11</swagger.version>
 
 		<sonar.projectKey>JanssenProject_jans-config-api</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -230,17 +230,6 @@
 				<groupId>io.jans</groupId>
 				<artifactId>agama-transpiler</artifactId>
 				<version>${jans.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.mail</groupId>
-				<artifactId>jakarta.mail</artifactId>
-				<version>1.6.7</version>
-				<exclusions>
-					<exclusion>
-						<groupId>jakarta.activation</groupId>
-						<artifactId>jakarta.activation-api</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 
 			<!-- Security -->

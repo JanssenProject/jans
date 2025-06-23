@@ -16,22 +16,26 @@ import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.IdTokenMember;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
+import io.jans.as.server.model.session.SessionClient;
+import io.jans.as.server.security.Identity;
+import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RequestParameterService;
 import io.jans.as.server.util.ServerUtil;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 import java.util.Date;
 import java.util.Set;
 
 import static io.jans.as.model.util.StringUtils.implode;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -59,6 +63,12 @@ public class ParValidator {
 
     @Inject
     private RequestParameterService requestParameterService;
+
+    @Inject
+    private Identity identity;
+
+    @Inject
+    private ClientService clientService;
 
     public void validateRequestUriIsAbsent(@Nullable String requestUri) {
         validateRequestUriIsAbsent(requestUri, AuthorizeErrorResponseType.INVALID_REQUEST);
@@ -170,6 +180,23 @@ public class ParValidator {
         if (appConfiguration.isFapi() && StringUtils.isBlank(jwtRequest.getState())) {
             par.getAttributes().setState(""); // #1250 - FAPI : discard state if in JWT we don't have state
             redirectUriResponse.setState("");
+        }
+    }
+
+    public void validateAuthentication(String clientId, String state) {
+        SessionClient sessionClient = identity.getSessionClient();
+
+        Client client = sessionClient != null ? sessionClient.getClient() : null;
+        if (client == null) {
+            client = clientService.getClient(clientId);
+        }
+
+        if (isTrue(appConfiguration.getParForbidPublicClient()) && (client == null || clientService.isPublic(client))) {
+            log.trace("Client is public or not authenticated which is not allowed by 'parForbidPublicClient' AS configuration property.");
+            throw new WebApplicationException(Response
+                    .status(Response.Status.UNAUTHORIZED)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state, ""))
+                    .build());
         }
     }
 

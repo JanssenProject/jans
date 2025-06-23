@@ -1,6 +1,6 @@
 # Introspection Script Guide
 
-## Overview
+
 
 OAuth reference tokens don't convey any information. They are by their very nature, unguessable strings that meet the prescribed OAuth security guidelines for lack of order or predictability (entropy). However, there is still a large amount of data that may be attached to a token, such as:-
  - its current validity,

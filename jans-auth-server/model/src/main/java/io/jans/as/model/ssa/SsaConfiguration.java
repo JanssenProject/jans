@@ -1,13 +1,16 @@
 package io.jans.as.model.ssa;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @JsonIgnoreProperties(
         ignoreUnknown = true
 )
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SsaConfiguration {
 
     private String ssaEndpoint;
@@ -17,6 +20,17 @@ public class SsaConfiguration {
     private String ssaSigningAlg = "RS256";
 
     private Integer ssaExpirationInDays = 30;
+
+    private Map<String, List<String>> ssaMapSoftwareRolesToScopes;
+
+    public Map<String, List<String>> getSsaMapSoftwareRolesToScopes() {
+        return ssaMapSoftwareRolesToScopes;
+    }
+
+    public SsaConfiguration setSsaMapSoftwareRolesToScopes(Map<String, List<String>> ssaMapSoftwareRolesToScopes) {
+        this.ssaMapSoftwareRolesToScopes = ssaMapSoftwareRolesToScopes;
+        return this;
+    }
 
     public String getSsaEndpoint() {
         return ssaEndpoint;

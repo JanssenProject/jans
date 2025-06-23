@@ -1,4 +1,14 @@
-## Overview
+---
+tags:
+  - administration
+  - kubernetes
+  - configmaps
+  - secrets
+---
+
+# External Secrets and Configmaps
+
+
    This guide shows how to store and retrieve jans `configmaps` and `secrets` externally in `AWS Secrets Manager`, `GCP Secret Manager` and `Vault`.  
 
 !!! Note

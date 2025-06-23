@@ -4,10 +4,11 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::bindings::cedar_policy;
-use cedarling::{BootstrapConfig, BootstrapConfigRaw, LogStorage, Request};
+use cedarling::{BootstrapConfig, BootstrapConfigRaw, LogStorage, Request, RequestUnsigned};
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
 use serde_wasm_bindgen::Error;
+use std::collections::HashMap;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::js_sys::{Array, Map, Object, Reflect};
@@ -81,6 +82,24 @@ impl Cedarling {
         Ok(result.into())
     }
 
+    /// Authorize request for unsigned principals.
+    /// makes authorization decision based on the [`RequestUnsigned`]
+    pub async fn authorize_unsigned(&self, request: JsValue) -> Result<AuthorizeResult, Error> {
+        // if `request` is map convert to object
+        let request_object: JsValue = if request.is_instance_of::<Map>() {
+            Object::from_entries(&request)?.into()
+        } else {
+            request
+        };
+        let cedar_request: RequestUnsigned = serde_wasm_bindgen::from_value(request_object)?;
+        let result = self
+            .instance
+            .authorize_unsigned(cedar_request)
+            .await
+            .map_err(Error::new)?;
+        Ok(result.into())
+    }
+
     /// Get logs and remove them from the storage.
     /// Returns `Array` of `Map`
     pub fn pop_logs(&self) -> Result<Array, Error> {
@@ -148,6 +167,11 @@ impl Cedarling {
             .map(convert_json_to_object)
             .collect()
     }
+
+    /// Closes the connections to the Lock Server and pushes all available logs.
+    pub async fn shut_down(&self) {
+        self.instance.shut_down().await;
+    }
 }
 
 /// convert json to js object
@@ -205,6 +229,9 @@ pub struct AuthorizeResult {
     #[wasm_bindgen(getter_with_clone)]
     pub person: Option<AuthorizeResultResponse>,
 
+    #[wasm_bindgen(skip)]
+    pub principals: HashMap<String, AuthorizeResultResponse>,
+
     /// Result of authorization
     /// true means `ALLOW`
     /// false means `Deny`
@@ -223,6 +250,10 @@ impl AuthorizeResult {
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
+
+    pub fn principal(&self, principal: &str) -> Option<AuthorizeResultResponse> {
+        self.principals.get(principal).cloned()
+    }
 }
 
 impl From<cedarling::AuthorizeResult> for AuthorizeResult {
@@ -234,6 +265,11 @@ impl From<cedarling::AuthorizeResult> for AuthorizeResult {
             person: value
                 .person
                 .map(|v| AuthorizeResultResponse { inner: Rc::new(v) }),
+            principals: value
+                .principals
+                .into_iter()
+                .map(|(k, v)| (k.to_string(), AuthorizeResultResponse { inner: Rc::new(v) }))
+                .collect(),
             decision: value.decision,
             request_id: value.request_id,
         }

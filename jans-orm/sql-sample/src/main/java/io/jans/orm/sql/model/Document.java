@@ -52,9 +52,6 @@ public class Document extends Entry implements Serializable {
     @AttributeName
     private boolean jansEnabled;
 
-    @AttributeName
-    private String jansAlias;
-
     public String getInum() {
         return inum;
     }
@@ -118,14 +115,6 @@ public class Document extends Entry implements Serializable {
     public void setJansEnabled(boolean jansEnabled) {
         this.jansEnabled = jansEnabled;
     }
-
-    public String getJansAlias() {
-        return jansAlias;
-    }
-
-    public void setJansAlias(String jansAlias) {
-        this.jansAlias = jansAlias;
-    }
     
     public List<String> getJansService() {
         return jansService;
@@ -139,7 +128,6 @@ public class Document extends Entry implements Serializable {
     public String toString() {
         return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
                 + ", creationDate=" + creationDate + ", jansService=" + jansService
-                + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled=" + jansEnabled
-                + ", jansAlias=" + jansAlias + "]";
+                + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled=" + jansEnabled + "]";
     }
 }
