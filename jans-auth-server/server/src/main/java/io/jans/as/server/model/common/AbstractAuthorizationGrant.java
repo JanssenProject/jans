@@ -84,6 +84,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     protected final ConcurrentMap<String, TxToken> txTokens = new ConcurrentHashMap<>();
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<>();
     protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<>();
+    protected final ConcurrentMap<String, LogoutStatusJwt> logoutStatusJwts = new ConcurrentHashMap<>();
 
     protected AbstractAuthorizationGrant() {
     }
@@ -225,6 +226,17 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     public Set<String> getRefreshTokensCodes() {
         return refreshTokens.keySet();
     }
+
+    /**
+     * Returns a list with all the issued logout status jwts.
+     *
+     * @return List with all the issued logout status jwts.
+     */
+    @Override
+    public Set<String> getLogoutStatusJwtsCodes() {
+        return logoutStatusJwts.keySet();
+    }
+
 
     /**
      * Returns a list with all the issued access tokens codes.
@@ -530,6 +542,38 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
             }
         }
     }
+
+    /**
+     * Returns a list with all the issued logout status jwts.
+     *
+     * @return List with all the issued logout status jwts.
+     */
+    @Override
+    public List<LogoutStatusJwt> getLogoutStatusJwts() {
+        return new ArrayList<>(logoutStatusJwts.values());
+    }
+
+    @Override
+    public void setLogoutStatusJwts(List<LogoutStatusJwt> tokens) {
+        put(this.logoutStatusJwts, tokens);
+    }
+
+    /**
+     * Gets the logout out jwt instance from the logout status jwt list given its
+     * code.
+     *
+     * @param logoutStatusJwtCode The code of the logout status jwt.
+     * @return The logout status jwt instance or <code>null</code> if not found.
+     */
+    @Override
+    public LogoutStatusJwt getLogoutStatusJwt(String logoutStatusJwtCode) {
+        if (log.isTraceEnabled()) {
+            log.trace("Looking for the logout status jwt: {} for an authorization grant of type: {}",
+                    logoutStatusJwtCode, getAuthorizationGrantType());
+        }
+        return logoutStatusJwts.get(TokenHashUtil.hash(logoutStatusJwtCode));
+    }
+
 
     /**
      * Returns a list with all the issued refresh tokens.
