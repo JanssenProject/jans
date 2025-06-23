@@ -1237,6 +1237,14 @@ func resourceAppConfiguration() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"acr_to_consent_script_name_mapping": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: `A map of ACR to consent script name mapping. Example: { "acr1": "script1", "acr2": "script2" }`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"acr_to_agama_consent_flow_mapping": {
 				Type:        schema.TypeMap,
 				Optional:    true,
@@ -1702,7 +1710,7 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "The number of registration requests allowed per interval.",
 			},
-			"rateLimitRegistrationPeriodInSeconds": {
+			"rate_limit_registration_period_in_seconds": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "The time period in seconds for the rate limit.",
