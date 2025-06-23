@@ -7,7 +7,7 @@ tags:
 
 # BioID plugin
 
-## Overview
+
 This plugin allows users to enroll their BioID facial biometrics. 
 
 ## Requirements

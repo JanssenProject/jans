@@ -41,8 +41,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # =======
 
 
-ENV CN_VERSION=1.6.0
-ENV CN_BUILD_DATE='2025-05-08 08:25'
+ENV CN_VERSION=1.7.0
+ENV CN_BUILD_DATE='2025-05-20 10:12'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-keycloak-link-server/${CN_VERSION}/jans-keycloak-link-server-${CN_VERSION}.war
 
@@ -55,7 +55,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-keycloak-link/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=137153d287ced23f04cd26037cdd3e783babdd95
+ENV JANS_SOURCE_VERSION=6cf20a3a2981ecea790ff16bfb82a3a839df1d48
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -196,7 +196,7 @@ EXPOSE $CN_KEYCLOAK_LINK_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/keycloak-link" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.6.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen Keycloak Link" \
     org.opencontainers.image.description=""
 
@@ -206,7 +206,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java \
-    /var/jans/cr-snapshots
+    /var/jans/keycloak-link-snapshots
 
 COPY templates /app/templates/
 RUN cp /app/templates/jans-keycloak-link/jans-keycloak-link.xml ${JETTY_BASE}/jans-keycloak-link/webapps/
@@ -230,7 +230,7 @@ RUN chmod 664 ${JETTY_BASE}/jans-keycloak-link/resources/log4j2.xml \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-keycloak-link/webapps/jans-keycloak-link.xml \
-    && chown -R 1000:0 /var/jans/cr-snapshots \
+    && chown -R 1000:0 /var/jans/keycloak-link-snapshots \
     && chown -R 1000:0 ${JETTY_HOME}/temp \
     && chown -R 1000:0 /app/templates
 

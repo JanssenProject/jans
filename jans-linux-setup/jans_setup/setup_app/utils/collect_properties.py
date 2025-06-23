@@ -45,7 +45,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if os.path.exists(Config.jansRDBMProperties):
             jans_sql_prop = base.read_properties_file(Config.jansRDBMProperties)
 
-            uri_re = re.match('jdbc:(.*?)://(.*?):(.*?)/(.*)', jans_sql_prop['connection.uri'])
+            uri_re = re.match(r'jdbc:(.*?)://(.*?):(.*?)/(.*)', jans_sql_prop['connection.uri'])
             Config.rdbm_type, Config.rdbm_host, Config.rdbm_port, Config.rdbm_db = uri_re.groups()
             if '?' in Config.rdbm_db:
                 Config.rdbm_db = Config.rdbm_db.split('?')[0]
@@ -145,7 +145,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                 usedRatio += jetty_services[service]['memory']['ratio']
                 if service == 'jans-auth':
                     service_prop = base.read_properties_file(service_default_fn)
-                    m = re.search('-Xmx(\d*)m', service_prop['JAVA_OPTIONS'])
+                    m = re.search(r'-Xmx(\d*)m', service_prop['JAVA_OPTIONS'])
                     jans_auth_max_heap_mem = int(m.groups()[0])
 
         if jans_auth_max_heap_mem:

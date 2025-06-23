@@ -28,7 +28,7 @@ image:
   # -- Image  to use for deploying.
   repository:  janssenproject/auth-server
   # -- Image  tag to use for deploying.
-  tag: 1.6.0-1
+  tag: 0.0.0-nightly
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
@@ -95,3 +95,5 @@ additionalAnnotations: { }
 customScripts: []
 # -- Add custom pod's command. If passed, it will override the default conditional command.
 customCommand: []
+# -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
+nodeSelector: {}

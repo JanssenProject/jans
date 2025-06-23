@@ -35,6 +35,7 @@ public class AppConfiguration implements Configuration {
 
     public static final int DEFAULT_AUTHORIZATION_CHALLENGE_SESSION_LIFETIME = 86400;
     public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
+    public static final int DEFAULT_LOGOUT_STATUS_JWT_LIFETIME = 86400;
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
     public static final String DEFAULT_AUTHORIZATION_CHALLENGE_ACR = "default_challenge";
@@ -287,6 +288,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
     private List<String> introspectionEncryptionEncValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Logout Status JWT at Authorization Endpoint to encode the claims in a JWT")
+    private List<String> logoutStatusJwtSigningAlgValuesSupported;
 
     @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
     private List<String> txTokenSigningAlgValuesSupported;
@@ -543,11 +547,17 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to include sessionId in response", defaultValue = "false")
     private Boolean includeSidInResponse = false;
 
+    @DocProperty(description = "Boolean value specifying whether to include refresh token lifetime in token response", defaultValue = "false")
+    private Boolean includeRefreshTokenLifetimeInTokenResponse = false;
+
     @DocProperty(description = "Boolean value specifying whether to disable prompt=login", defaultValue = "false")
     private Boolean disablePromptLogin = false;
 
     @DocProperty(description = "Boolean value specifying whether to disable prompt=consent", defaultValue = "false")
     private Boolean disablePromptConsent = false;
+
+    @DocProperty(description = "The lifetime of Logout Status JWT. If not set falls back to 1 day")
+    private Integer logoutStatusJwtLifetime = DEFAULT_LOGOUT_STATUS_JWT_LIFETIME;
 
     /**
      * SessionId will be expired after sessionIdLifetime seconds
@@ -962,6 +972,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
     private LockMessageConfig lockMessageConfig;
+
+    @DocProperty(description = "Connection service Configuration")
+    private ConnectionServiceConfiguration connectionServiceConfiguration;
 
     public Boolean getUseOpenidSubAttributeValueForPairwiseLocalAccountId() {
         if (useOpenidSubAttributeValueForPairwiseLocalAccountId == null) useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
@@ -1393,6 +1406,16 @@ public class AppConfiguration implements Configuration {
 
     public void setIncludeSidInResponse(Boolean includeSidInResponse) {
         this.includeSidInResponse = includeSidInResponse;
+    }
+
+    public Boolean getIncludeRefreshTokenLifetimeInTokenResponse() {
+        if (includeRefreshTokenLifetimeInTokenResponse == null) includeRefreshTokenLifetimeInTokenResponse = false;
+        return includeRefreshTokenLifetimeInTokenResponse;
+    }
+
+    public AppConfiguration setIncludeRefreshTokenLifetimeInTokenResponse(Boolean includeRefreshTokenLifetimeInTokenResponse) {
+        this.includeRefreshTokenLifetimeInTokenResponse = includeRefreshTokenLifetimeInTokenResponse;
+        return this;
     }
 
     public Boolean getSessionIdPersistInCache() {
@@ -2123,6 +2146,15 @@ public class AppConfiguration implements Configuration {
 
     public void setIntrospectionEncryptionEncValuesSupported(List<String> introspectionEncryptionEncValuesSupported) {
         this.introspectionEncryptionEncValuesSupported = introspectionEncryptionEncValuesSupported;
+    }
+
+    public List<String> getLogoutStatusJwtSigningAlgValuesSupported() {
+        return logoutStatusJwtSigningAlgValuesSupported;
+    }
+
+    public AppConfiguration setLogoutStatusJwtSigningAlgValuesSupported(List<String> logoutStatusJwtSigningAlgValuesSupported) {
+        this.logoutStatusJwtSigningAlgValuesSupported = logoutStatusJwtSigningAlgValuesSupported;
+        return this;
     }
 
     public List<String> getTxTokenSigningAlgValuesSupported() {
@@ -3057,6 +3089,15 @@ public class AppConfiguration implements Configuration {
         this.grantTypesSupportedByDynamicRegistration = grantTypesSupportedByDynamicRegistration;
     }
 
+    public Integer getLogoutStatusJwtLifetime() {
+        return logoutStatusJwtLifetime;
+    }
+
+    public AppConfiguration setLogoutStatusJwtLifetime(Integer logoutStatusJwtLifetime) {
+        this.logoutStatusJwtLifetime = logoutStatusJwtLifetime;
+        return this;
+    }
+
     /**
      * @return session_id lifetime. If value is zero or less then session_id lifetime is set to Integer.MAX_VALUE. If null then falls back to 86400 seconds.
      */
@@ -3727,4 +3768,11 @@ public class AppConfiguration implements Configuration {
 		this.lockMessageConfig = lockMessageConfig;
 	}
 
+	public ConnectionServiceConfiguration getConnectionServiceConfiguration() {
+		return connectionServiceConfiguration;
+	}
+
+	public void setConnectionServiceConfiguration(ConnectionServiceConfiguration connectionServiceConfiguration) {
+		this.connectionServiceConfiguration = connectionServiceConfiguration;
+	}
 }

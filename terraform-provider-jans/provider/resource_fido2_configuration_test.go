@@ -20,8 +20,6 @@ func TestResourceFido2Config_Mapping(t *testing.T) {
 	cfg := jans.JansFido2DynConfiguration{
 		Issuer:                      "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info",
 		BaseEndpoint:                "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info/jans-fido2/restv1",
-		CleanServiceInterval:        60,
-		CleanServiceBatchChunkSize:  100,
 		UseLocalCache:               true,
 		DisableJdkLogger:            true,
 		LoggingLevel:                "",

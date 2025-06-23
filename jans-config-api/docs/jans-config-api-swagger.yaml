@@ -9328,6 +9328,8 @@ components:
           type: boolean
         jansHideOnDiscovery:
           type: boolean
+        required:
+          type: boolean
         custom:
           type: boolean
         attributeValidation:
@@ -9338,15 +9340,15 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
-        userCanAccess:
+        adminCanEdit:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -9600,6 +9602,13 @@ components:
           type: array
           items:
             type: string
+        logoutStatusJwtSigningAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        sessionStatusListBitSize:
+          type: integer
+          format: int32
         txTokenSigningAlgValuesSupported:
           type: array
           items:
@@ -9840,6 +9849,8 @@ components:
           items:
             type: string
         includeSidInResponse:
+          type: boolean
+        includeRefreshTokenLifetimeInTokenResponse:
           type: boolean
         disablePromptLogin:
           type: boolean
@@ -10175,6 +10186,7 @@ components:
             - REVOKE_SESSION
             - GLOBAL_TOKEN_REVOCATION
             - STATUS_LIST
+            - SESSION_STATUS_LIST
             - ACTIVE_SESSION
             - END_SESSION
             - STATUS_SESSION
@@ -10222,6 +10234,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        connectionServiceConfiguration:
+          $ref: '#/components/schemas/ConnectionServiceConfiguration'
         fapi:
           type: boolean
         allResponseTypesSupported:
@@ -10313,6 +10327,18 @@ components:
           type: string
           xml:
             name: base-dn
+    ConnectionServiceConfiguration:
+      type: object
+      properties:
+        maxTotal:
+          type: integer
+          format: int32
+        maxPerRoute:
+          type: integer
+          format: int32
+        validateAfterInactivity:
+          type: integer
+          format: int32
     CorsConfigurationFilter:
       type: object
       properties:
@@ -10450,8 +10476,24 @@ components:
     PersistenceConfiguration:
       type: object
       properties:
-        persistenceType:
+        databaseName:
           type: string
+          description: Connection object's current catalog name.
+        schemaName:
+          type: string
+          description: Schema name.
+        productName:
+          type: string
+          description: Name of database product.
+        productVersion:
+          type: string
+          description: Version number of this database product.
+        driverName:
+          type: string
+          description: Name of this JDBC driver.
+        driverVersion:
+          type: string
+          description: JDBC driver version number.
     JsonPatch:
       type: object
     CacheConfiguration:
@@ -10998,6 +11040,8 @@ components:
           type: string
         txTokenEncryptedResponseEnc:
           type: string
+        logoutStatusJwtSignedResponseAlg:
+          type: string
         authorizationDetailsTypes:
           type: array
           items:
@@ -11357,14 +11401,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11776,6 +11820,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        predefinedAttributes:
+          $ref: '#/components/schemas/SessionIdPredefinedAttributes'
         deviceSecrets:
           type: array
           items:
@@ -11806,6 +11852,12 @@ components:
             type: boolean
           xml:
             name: map
+    SessionIdPredefinedAttributes:
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
     SessionPagedResult:
       type: object
       properties:

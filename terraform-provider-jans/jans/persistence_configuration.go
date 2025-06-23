@@ -8,6 +8,12 @@ import (
 // PersistenceConfiguration represents the persistence configuration
 // of the Janssen server.
 type PersistenceConfiguration struct {
+	DatabaseName    string `json:"databaseName,omitempty"`
+	SchemaName      string `json:"schemaName,omitempty"`
+	ProductName     string `json:"productName,omitempty"`
+	ProductVersion  string `json:"productVersion,omitempty"`
+	DriverName      string `json:"driverName,omitempty"`
+	DriverVersion   string `json:"driverVersion,omitempty"`
 	PersistenceType string `schema:"persistence_type" json:"persistenceType,omitempty"`
 }
 

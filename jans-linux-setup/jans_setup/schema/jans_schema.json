@@ -1359,6 +1359,17 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "Identifier",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jti"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "Numeric identifier",
       "equality": "integerMatch",
       "names": [
@@ -4143,6 +4154,16 @@
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
+    },
+	{
+      "desc": "Specifies if required",
+      "equality": "booleanMatch",
+      "names": [
+        "jansRequired"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
     }
   ],
   "objectClasses": [
@@ -4441,7 +4462,8 @@
         "urn",
         "jansRegExp",
         "jansTooltip",
-        "jansValidation"
+        "jansValidation",
+		"jansRequired"
       ],
       "must": [
         "objectclass"
@@ -4637,7 +4659,8 @@
         "jansPermissionGrantedMap",
         "jansInvolvedClnts",
         "deviceSecret",
-        "jansSessAttr"
+        "jansSessAttr",
+        "jansAttrs"
       ],
       "must": [
         "objectclass"
@@ -4797,7 +4820,8 @@
         "attr",
         "tknBndCnf",
         "dpop",
-        "jansId"
+        "jansId",
+        "jti"
       ],
       "must": [
         "objectclass"
@@ -5641,6 +5665,28 @@
       ],
       "names": [
         "jansStatusIdxPool"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansNum",
+        "jansNodeId",
+        "dat",
+        "jansLastUpd",
+        "exp",
+        "lockKey"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansSessionStatusIdxPool"
       ],
       "oid": "jansObjClass",
       "sup": [

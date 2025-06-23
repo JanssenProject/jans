@@ -359,8 +359,11 @@ public class AuthUtil {
     }
 
     public List<String> findMissingElements(List<String> list1, List<String> list2) {
-        if (list1 == null || list1.isEmpty() || list2 == null || list2.isEmpty()) {
+        if (list1 == null || list1.isEmpty()) {
             return Collections.emptyList();
+        }
+        if(list2==null || list2.isEmpty()) {
+            return list1;
         }
         return list1.stream().filter(e -> !list2.contains(e)).collect(Collectors.toList());
     }

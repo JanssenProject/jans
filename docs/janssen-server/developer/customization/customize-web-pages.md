@@ -84,22 +84,6 @@ Listing of custom asset types that each Janssen Server module accepts:
 | /opt/jans/jetty/jans-lock/custom/libs	| *.jar
 
 
-### KeyCloak-link
-
-| Path | Asset Type |
-|----------------|-------------|
-| /opt/jans/jetty/jans-keycloak-link/custom/libs/| *.jar
-| /var/jans/keycloak-link-snapshots/	| *.txt
-
-
-### Link
-
-| Path | Asset Type |
-|----------------|-------------|
-| /opt/jans/jetty/jans-link/custom/libs	| *.jar
-| /var/jans/link-snapshots/	| *.txt
-
-
 ## Managing Custom Assets
 
 Janssen Server configuration tools like CLI and TUI provide the ability to add, 

@@ -1,5 +1,5 @@
 # FROM blazemeter/taurus:master-f96971fa-2022-12-12
-FROM blazemeter/taurus:1.16.41@sha256:e346b19420ca1d4e303a426172fef6611675e1a7e2a5a0327eb4c99ed08e5d97
+FROM blazemeter/taurus:1.16.42@sha256:73025e8d5898b418aa832c530ee46f25bbc991a600d9b8d95bd3d869c954ab28
 
 # ===============
 # Ubuntu packages
@@ -61,7 +61,7 @@ RUN mkdir -p /root/.bzt/jmeter-taurus \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/loadtesting-jmeter" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.6.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen Jmeter tests" \
     org.opencontainers.image.description="Janssen Jmeter and user loader image"
 

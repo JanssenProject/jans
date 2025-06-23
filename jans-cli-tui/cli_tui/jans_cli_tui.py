@@ -11,7 +11,6 @@ import asyncio
 import concurrent.futures
 
 from enum import Enum
-from functools import partial
 from pathlib import Path
 from itertools import cycle
 from requests.models import Response
@@ -127,11 +126,15 @@ from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
+
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
+data_dir = home_dir.joinpath('.jans-cli-tui')
 
+if not data_dir.exists():
+    data_dir.mkdir(parents=True, exist_ok=True)
 
 def accept_yes() -> None:
     get_app().exit(result=True)
@@ -149,6 +152,7 @@ class JansCliApp(Application):
     def __init__(self):
 
         common_data.app = self
+        common_data.app.data_dir = data_dir
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
         self.set_keybindings()
         self.init_logger()
@@ -964,10 +968,10 @@ class JansCliApp(Application):
 
         return result
 
-    def show_jans_dialog(self, dialog:Dialog, focus=None) -> None:
+    def show_jans_dialog(self, dialog:Dialog, focus=None, tobefocused=None) -> None:
 
         async def coroutine():
-            focused_before = self.layout.current_window
+            focused_before = tobefocused or self.layout.current_window
             result = await self.show_dialog_as_float(dialog, focus)
 
             if not self.root_layout.floats:
@@ -1004,7 +1008,7 @@ class JansCliApp(Application):
                 with open(path, 'w') as w:
                     w.write(text_area.text)
                 self.pbar_text = _("File {} was saved".format(text_area.text))
-                self.show_message(_("Info"), _("File {} was successfully saved").format(path), tobefocused=self.center_container)
+                self.show_message(_("Info"), _("File {} was successfully saved").format(path), tobefocused=params.get('tobefocused') or self.center_container)
             except Exception as e:
                 self.show_message(_("Error!"), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=self.center_container)
 
@@ -1015,7 +1019,7 @@ class JansCliApp(Application):
         save_button = Button(_("Export"), handler=save)
         buttons = [Button('Close'), save_button]
         dialog = JansGDialog(self, title=title, body=body, buttons=buttons)
-        self.show_jans_dialog(dialog)
+        self.show_jans_dialog(dialog, tobefocused=params.get('tobefocused'))
 
     def save_creds(self, dialog:Dialog) -> None:
 
@@ -1052,8 +1056,8 @@ class JansCliApp(Application):
 
     def show_message(
             self, 
-            title: AnyFormattedText,  
-            message: AnyFormattedText,  
+            title: AnyFormattedText,
+            message: AnyFormattedText,
             buttons:Optional[Sequence[Button]] = [],
             tobefocused: AnyContainer= None
             ) -> None:

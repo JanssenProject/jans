@@ -67,6 +67,11 @@ class Config:
         self.application_max_ram = int(Config.jans_max_mem)
 
     @classmethod
+    def set_rdbm_schema(self):
+        if not self.get('rdbm_schema'):
+            self.rdbm_schema = 'public' if self.rdbm_type == 'pgsql' else self.rdbm_db
+
+    @classmethod
     def init(self, install_dir=INSTALL_DIR):
 
         self.install_dir = install_dir
