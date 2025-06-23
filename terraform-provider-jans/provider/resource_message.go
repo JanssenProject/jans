@@ -10,6 +10,106 @@ import (
 	"github.com/jans/terraform-provider-jans/jans"
 )
 
+func resourceMessage() *schema.Resource {
+	return &schema.Resource{
+		Description:   "Resource for managing Message.",
+		CreateContext: resourceMessageCreate,
+		ReadContext:   resourceMessageRead,
+		UpdateContext: resourceMessageUpdate,
+		DeleteContext: resourceMessageDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+		Schema: map[string]*schema.Schema{
+			"key": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Message key.",
+			},
+			"value": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Message value.",
+			},
+			"language": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Message language.",
+			},
+			"application": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Message application.",
+			},
+		},
+	}
+}
+
+func resourceMessageCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	c := meta.(*jans.Client)
+	var message jans.Message
+
+	if err := fromSchemaResource(d, &message); err != nil {
+		return diag.FromErr(err)
+	}
+
+	tflog.Debug(ctx, "Creating new Message")
+	createdMessage, err := c.CreateMessage(ctx, &message)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(createdMessage.ID)
+	tflog.Debug(ctx, "New Message created", map[string]interface{}{"id": createdMessage.ID})
+
+	return resourceMessageRead(ctx, d, meta)
+}
+
+func resourceMessageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	c := meta.(*jans.Client)
+
+	message, err := c.GetMessage(ctx, d.Id())
+	if err != nil {
+		return handleNotFoundError(ctx, err, d)
+	}
+
+	if err := toSchemaResource(d, message); err != nil {
+		return diag.FromErr(err)
+	}
+
+	tflog.Debug(ctx, "Message read")
+	return nil
+}
+
+func resourceMessageUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	c := meta.(*jans.Client)
+
+	var message jans.Message
+	if err := fromSchemaResource(d, &message); err != nil {
+		return diag.FromErr(err)
+	}
+	message.ID = d.Id()
+
+	updatedMessage, err := c.UpdateMessage(ctx, &message)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	tflog.Debug(ctx, "Message updated", map[string]interface{}{"id": updatedMessage.ID})
+	return resourceMessageRead(ctx, d, meta)
+}
+
+func resourceMessageDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	c := meta.(*jans.Client)
+
+	if err := c.DeleteMessage(ctx, d.Id()); err != nil {
+		return diag.FromErr(err)
+	}
+
+	tflog.Debug(ctx, "Message deleted")
+	return nil
+}
+
 func resourceMessageConfiguration() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Resource for managing Message Configuration.",
@@ -232,7 +332,7 @@ func resourceMessageConfigurationRead(ctx context.Context, d *schema.ResourceDat
 
 	c := meta.(*jans.Client)
 
-	message, err := c.GetMessage(ctx)
+	message, err := c.GetMessageConfiguration(ctx)
 	if err != nil {
 		return handleNotFoundError(ctx, err, d)
 	}
