@@ -100,11 +100,11 @@ public class AuditLogInterceptor {
 
     private String getResource(String path) {
         if (StringUtils.isNotBlank(path)) {
-            path.replace("/", " ");
+            path.replace("/", "-");
         }
         return path;
     }
-
+    
     private AuditLogConf getAuditLogConf() {
         return this.authUtil.getAuditLogConf();
     }

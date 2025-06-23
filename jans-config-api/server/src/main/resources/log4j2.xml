@@ -15,7 +15,7 @@
         </RollingFile>
 		
         <RollingFile name="AUDIT_FILE" fileName="${sys:log.base}/logs/configapi-audit.log" filePattern="${sys:log.base}/logs/configapi-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p %m%n" />
 
             <Policies>
                 <SizeBasedTriggeringPolicy size="5 MB" />

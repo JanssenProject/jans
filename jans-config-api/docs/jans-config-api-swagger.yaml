@@ -1627,7 +1627,7 @@ paths:
       - Logs
       summary: Get audit details.
       description: Get audit details.
-      operationId: get-audit
+      operationId: get-audit_1
       parameters:
       - name: limit
         in: query
@@ -1641,7 +1641,7 @@ paths:
         description: Search pattern
         schema:
           type: string
-          default: ""
+          default: ^.*$
       - name: status
         in: query
         description: Status of the attribute
@@ -9412,19 +9412,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanAccess:
+          type: boolean
         adminCanAccess:
           type: boolean
-        adminCanView:
-          type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -10310,6 +10310,8 @@ components:
           $ref: '#/components/schemas/LockMessageConfig'
         connectionServiceConfiguration:
           $ref: '#/components/schemas/ConnectionServiceConfiguration'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10319,8 +10321,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11913,10 +11913,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -12087,8 +12087,6 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -12099,6 +12097,8 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
         logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
