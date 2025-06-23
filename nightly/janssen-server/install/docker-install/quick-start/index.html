@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
@@ -14262,6 +14263,7 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
+  
                   
 
   <nav class="md-tags" >
@@ -14309,7 +14311,7 @@
 <p>Installation depends on a <a href="https://github.com/JanssenProject/jans/tree/main/docker-jans-monolith#environment-variables">set of environment variables</a>.
 These environment variables can be set to customize installation as per the need. If not set, the installer uses default values.</p>
 <p>Run this command to start the installation:</p>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/startjanssenmonolithdemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssenmonolithdemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>startjanssenmonolithdemo.sh<span class="w"> </span>demoexample.jans.io<span class="w"> </span>MYSQL<span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>main
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssenmonolithdemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>startjanssenmonolithdemo.sh<span class="w"> </span>demoexample.jans.io<span class="w"> </span>MYSQL<span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>main
 </code></pre></div>
 <p>Console messages like below confirms the successful installation:</p>
 <div class="highlight"><pre><span></span><code>[+] Running 3/3
@@ -14400,6 +14402,7 @@ Testing openid-configuration endpoint..
 
 
                 
+
               </article>
             </div>
           
@@ -14456,7 +14459,7 @@ Testing openid-configuration endpoint..
     
     
       
-      <script id="__config" type="application/json">{"base": "../../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link"], "search": "../../../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"base": "../../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../../../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 
@@ -14467,6 +14470,8 @@ Testing openid-configuration endpoint..
         <script src="../../../../js/timeago_mkdocs_material.js"></script>
       
         <script src="../../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../../javascripts/full-screen-sections.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->

@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
@@ -14244,6 +14245,7 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
+  
                   
 
   <nav class="md-tags" >
@@ -14277,7 +14279,7 @@
 </ul>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
 <ol>
-<li><a href="https://maven.jans.io/maven/io/jans/casa/plugins/bioid-plugin/0.0.0-nightly/bioid-plugin-0.0.0-nightly-jar-with-dependencies.jar">Download</a> the plugin jar.</li>
+<li><a href="https://maven.jans.io/maven/io/jans/casa/plugins/bioid-plugin/replace-janssen-version/bioid-plugin-replace-janssen-version-jar-with-dependencies.jar">Download</a> the plugin jar.</li>
 <li>Log into Casa as an administrator, navigate to <code>Administration Console &gt; Casa plugins</code> and add the plugin jar</li>
 <li>Restart the casa service: <code>sudo systemctl restart jans-casa</code></li>
 <li>Using the TUI, navigate to <code>Auth Server</code> &gt; <code>Clients</code>, open the details for <code>Client for Casa</code>, and add the following redirect URI: <code>https://&lt;hostname&gt;/jans-casa/pl/bioid-plugin/user/interlude.zul</code>. Replace <code>&lt;hostname&gt;</code> with the hostname of your server, and save the client.</li>
@@ -14356,6 +14358,7 @@ zip -r casa-bioid.gama ./*
 
 
                 
+
               </article>
             </div>
           
@@ -14412,7 +14415,7 @@ zip -r casa-bioid.gama ./*
     
     
       
-      <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 
@@ -14423,6 +14426,8 @@ zip -r casa-bioid.gama ./*
         <script src="../../../js/timeago_mkdocs_material.js"></script>
       
         <script src="../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../javascripts/full-screen-sections.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->

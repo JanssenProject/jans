@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
@@ -14121,6 +14122,7 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
+  
                   
 
   <nav class="md-tags" >
@@ -14166,26 +14168,26 @@ Uninstalling and re-installing with newer binaries is the only option that requi
 Though this is made easy using <a href="../../terraform/">Terraform</a>. 
 We recommend using Kubernetes installations over VM, to avail smooth upgrades and better HA support.</p>
 </div>
-<p>Let's assume we are upgrading Jans VM installation from <code>current version</code> to <code>nightly</code></p>
+<p>Let's assume we are upgrading Jans VM installation from <code>current version</code> to <code>vreplace-janssen-version</code></p>
 <ol>
 <li>
 <p>Keep the old VM installation running.</p>
 </li>
 <li>
-<p><a href="../../install/vm-install/">Install</a> on a separate VM the target new Jans installation, i.e. <code>nightly</code>.</p>
+<p><a href="../../install/vm-install/">Install</a> on a separate VM the target new Jans installation, i.e. <code>vreplace-janssen-version</code>.</p>
 <p>You can install with a test client. For example:</p>
 <p><code>sudo python3 /opt/jans/jans-setup/setup.py -test-client-id 6382c9da-f25d-435f-ac63-6acde36f4859 -test-client-pw secret1172023</code></p>
 <p>This <code>client-id</code> and <code>client-pw</code> will then be used to import Terraform configurations</p>
 </li>
 <li>
-<p>Use our Terraform <a href="../../terraform/">docs</a> on the new installation, i.e. <code>nightly</code> to:</p>
+<p>Use our Terraform <a href="../../terraform/">docs</a> on the new installation, i.e. <code>vreplace-janssen-version</code> to:</p>
 <ul>
 <li>import all the global configurations from the new installation using <code>terraform import</code></li>
 <li>define all the custom IDP configurations and apply them using <code>terraform apply</code></li>
 </ul>
 </li>
 <li>
-<p>At this point there should be two versions up, <code>old version</code> and <code>nightly</code>.</p>
+<p>At this point there should be two versions up, <code>old version</code> and <code>vreplace-janssen-version</code>.</p>
 </li>
 <li>
 <p>Traffic should be switched gradually from the old setup to the new setup.
@@ -14237,6 +14239,7 @@ We recommend using Kubernetes installations over VM, to avail smooth upgrades an
 
 
                 
+
               </article>
             </div>
           
@@ -14293,7 +14296,7 @@ We recommend using Kubernetes installations over VM, to avail smooth upgrades an
     
     
       
-      <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 
@@ -14304,6 +14307,8 @@ We recommend using Kubernetes installations over VM, to avail smooth upgrades an
         <script src="../../../js/timeago_mkdocs_material.js"></script>
       
         <script src="../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../javascripts/full-screen-sections.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->
