@@ -95,7 +95,7 @@ public class AuditLoggerResource extends ConfigBaseResource {
 // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getLogsEnteries(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(description = "Search pattern") @DefaultValue("^.*$") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "Search pattern") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "Status of the attribute") @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
@@ -108,8 +108,16 @@ public class AuditLoggerResource extends ConfigBaseResource {
                     escapeLog(limit), escapeLog(pattern), escapeLog(status), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
+        String searchPattern = ApiConstants.DEFAULT_SEARCH_PATTERN;
+        if(StringUtils.isNotBlank(pattern)) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("^.*");
+            stringBuilder.append(pattern);
+            stringBuilder.append(".*$");
+            searchPattern =  stringBuilder.toString();
+        }
 
-        return Response.ok(this.getLogEntries(AUDIT_FILE_PATH + AUDIT_FILE_NAME, pattern, startIndex, limit)).build();
+        return Response.ok(this.getLogEntries(AUDIT_FILE_PATH + AUDIT_FILE_NAME, searchPattern, startIndex, limit)).build();
     }
 
     @Operation(summary = "Get audit details.", description = "Get audit details.", operationId = "get-audit", tags = {

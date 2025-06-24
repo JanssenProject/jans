@@ -1641,7 +1641,6 @@ paths:
         description: Search pattern
         schema:
           type: string
-          default: ^.*$
       - name: status
         in: query
         description: Status of the attribute
@@ -9412,17 +9411,17 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
-          type: boolean
         userCanEdit:
           type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
+          type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -10310,8 +10309,6 @@ components:
           $ref: '#/components/schemas/LockMessageConfig'
         connectionServiceConfiguration:
           $ref: '#/components/schemas/ConnectionServiceConfiguration'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10321,6 +10318,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11913,10 +11912,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -12087,6 +12086,10 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -12097,10 +12100,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
