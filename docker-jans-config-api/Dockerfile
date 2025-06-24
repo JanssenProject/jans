@@ -52,10 +52,11 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
 
 # =======
 # Plugins
+# jans-link kc-link removed for now, as it is not available in the jans repo
 # =======
 
 RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
-    && for plugin in scim admin-ui fido2 user-mgt kc-saml lock jans-link kc-link; \
+    && for plugin in scim admin-ui fido2 user-mgt kc-saml lock; \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/${plugin}-plugin/${CN_VERSION}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
     done
@@ -65,7 +66,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # ===========
 
 ENV JANS_SOURCE_VERSION=f29d9a32b0a52a3540ecadf137fbda4b3992559d
-    ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
 # note that as we're pulling from a monorepo (with multiple project in it)
