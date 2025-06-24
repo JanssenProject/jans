@@ -23,7 +23,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # KC integration
 # ==============
 
-ENV CN_VERSION=1.8.0-1
+ENV CN_VERSION=1.8.0
 ENV CN_BUILD_DATE='2025-06-13 08:55'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}.jar -P /opt/keycloak/providers \

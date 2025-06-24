@@ -184,7 +184,7 @@ RUN mkdir -p /opt/jans/configurator/db \
 COPY app /app
 
 # CN version as env var (with suffix if any, i.e. SNAPSHOT)
-ENV CN_VERSION=1.8.0-1
+ENV CN_VERSION=1.8.0
 
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app
