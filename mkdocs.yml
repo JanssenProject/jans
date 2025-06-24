@@ -20,6 +20,7 @@ extra_css:
 
 extra_javascript:
   - javascripts/skeleton-loader.js
+  - javascripts/full-screen-sections.js
 
 markdown_extensions:
 - admonition
@@ -549,6 +550,9 @@ theme:
   - navigation.tabs.sticky
   - navigation.indexes
   - content.tabs.link
+  - content.code.copy
+  - content.code.select
+  - content.code.annotate
   font:
     code: Roboto Mono
     text: Roboto
