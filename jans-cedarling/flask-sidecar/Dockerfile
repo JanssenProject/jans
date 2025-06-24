@@ -31,7 +31,7 @@ RUN pip3 install "poetry==$POETRY_VERSION" gunicorn \
 # ===============
 # Project setup
 # ===============
-ENV JANS_SOURCE_VERSION=6955c02158b6119f3f09421df106f8e6a0472fb4
+ENV JANS_SOURCE_VERSION=7ebc2a5991ad39f1a8f58b6c8a25dd5b88d18713
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
@@ -54,8 +54,10 @@ RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject
         && version=$(sed -n 's/.*version = "\([0-9].[0-9].[0-9]\)"/\1/p' Cargo.toml) \
         && echo "${version}" > /api/cedarling_version \
         && release_version="${version}" \
-        && if [ "$version" = "0.0.0" ]; then release_version="nightly"; fi \
-        && wget -q https://github.com/JanssenProject/jans/releases/download/"${release_version}"/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl \
+        && if [ "$version" = "0.0.0" ] || [[ "$version" == *"nightly"* ]]; then release_version="nightly"; fi \
+        && (wget -q https://github.com/JanssenProject/jans/releases/download/v"${release_version}"/cedarling_python-"${version}"-cp310-cp310-manylinux_2_34_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_34_x86_64.whl || \
+            wget -q https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp310-cp310-manylinux_2_34_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_34_x86_64.whl || \
+            echo "Warning: Could not download wheel file, will try to build from source") \
         && rm -rf /tmp/jans
 
 # Setting up proper permissions:
@@ -63,7 +65,7 @@ RUN chmod -R g=u /api \
     && chown -R 1000:1000 /api
 
 # Project initialization:
-RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp310-cp310-manylinux_2_31_x86_64.whl \
+RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp310-cp310-manylinux_2_34_x86_64.whl \
     && poetry install --no-dev --no-root --no-interaction --no-ansi \
     # Cleaning poetry installation's cache for production:
     && rm -rf "$POETRY_CACHE_DIR"

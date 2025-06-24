@@ -29,7 +29,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # Casa
 # ====
 
-ENV CN_VERSION=1.8.0-1
+ENV CN_VERSION=1.8.0
 ENV CN_BUILD_DATE='2025-06-13 08:52'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
@@ -54,7 +54,7 @@ RUN mkdir -p /usr/share/java \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=6955c02158b6119f3f09421df106f8e6a0472fb4
+ENV JANS_SOURCE_VERSION=f29d9a32b0a52a3540ecadf137fbda4b3992559d
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)

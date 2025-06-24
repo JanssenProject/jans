@@ -60,7 +60,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=6955c02158b6119f3f09421df106f8e6a0472fb4
+ENV JANS_SOURCE_VERSION=f29d9a32b0a52a3540ecadf137fbda4b3992559d
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -184,7 +184,7 @@ RUN mkdir -p /opt/jans/configurator/db \
 COPY app /app
 
 # CN version as env var (with suffix if any, i.e. SNAPSHOT)
-ENV CN_VERSION=1.8.0-1
+ENV CN_VERSION=1.8.0
 
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app
