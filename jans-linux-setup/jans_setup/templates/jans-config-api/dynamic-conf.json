@@ -67,8 +67,10 @@
     "ignoreHttpMethod": [],
     "headerAttributes": [
       "User-inum",
-	  "jans-client"
-    ]
+      "jans-client"
+    ],
+    "auditLogFilePath": "/opt/jans/jetty/jans-config-api/logs/",
+    "auditLogFileName": "configapi-audit.log"
   },
   "dataFormatConversionConf": {
     "enabled": true,

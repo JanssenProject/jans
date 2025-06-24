@@ -19,6 +19,12 @@ public class AuditLogConf {
     @Schema(description = "List of header HTTP attributes whose value is to be logged.")
     private List<String> headerAttributes;
 
+    @Schema(description = "Audit log file location.")
+    private String auditLogFilePath;
+
+    @Schema(description = "Audit log file name.")
+    private String auditLogFileName;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -43,10 +49,26 @@ public class AuditLogConf {
         this.headerAttributes = headerAttributes;
     }
 
+    public String getAuditLogFilePath() {
+        return auditLogFilePath;
+    }
+
+    public void setAuditLogFilePath(String auditLogFilePath) {
+        this.auditLogFilePath = auditLogFilePath;
+    }
+
+    public String getAuditLogFileName() {
+        return auditLogFileName;
+    }
+
+    public void setAuditLogFileName(String auditLogFileName) {
+        this.auditLogFileName = auditLogFileName;
+    }
+
     @Override
     public String toString() {
         return "AuditLogConf [enabled=" + enabled + ", ignoreHttpMethod=" + ignoreHttpMethod + ", headerAttributes="
-                + headerAttributes + "]";
+                + headerAttributes + ", auditLogFilePath=" + auditLogFilePath + ", auditLogFileName=" + auditLogFileName
+                + "]";
     }
-
 }

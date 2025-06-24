@@ -148,6 +148,7 @@ public class ApiConstants {
     public static final String OUTSIDE_SID = "outsideSid";
     public static final String JANS_SESS_ATTR = "jansSessAttr";
     public static final String JANS_SERVICE_NAME = "service";
+    public static final String AUDIT = "/audit";
 
 
     public static final String ALL = "all";

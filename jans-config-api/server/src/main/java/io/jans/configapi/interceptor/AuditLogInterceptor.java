@@ -48,7 +48,7 @@ public class AuditLogInterceptor {
         try {
 
             if (apiAppConfiguration.isDisableAuditLogger()) {
-                LOG.debug("Audit is disabled by disableAuditLogger config.");
+                AUDIT_LOG.debug("Audit is disabled by disableAuditLogger config.");
                 return context.proceed();
             }
 
@@ -60,14 +60,12 @@ public class AuditLogInterceptor {
 
             // Log if enabled
             if (auditLogConf.isEnabled() && !ignoreMethod(context, auditLogConf)) {
-                AUDIT_LOG.info("\n ********************** Audit Request Detail Start ********************** ");
                 // Request audit
                 String beanClassName = context.getClass().getName();
                 String method = request.getMethod();
                 String client = httpHeaders.getHeaderString("jans-client");
 
                 AUDIT_LOG.info("User {} {} using client:{}", getAction(method), getResource(uriInfo.getPath()), client);
-
             }
 
         } catch (Exception ex) {
