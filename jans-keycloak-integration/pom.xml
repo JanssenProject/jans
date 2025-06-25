@@ -19,7 +19,7 @@
       <maven.min-version>3.3.9</maven.min-version>
       <maven.compiler.source>17</maven.compiler.source>
       <maven.compiler.target>17</maven.compiler.target>
-      <keycloak-server.version>25.0.6</keycloak-server.version>
+      <keycloak-server.version>26.0.5</keycloak-server.version>
       <nimbus.oauth-sdk.version>11.13</nimbus.oauth-sdk.version>
       <nimbus.oauth2-oidc-sdk.version>11.13</nimbus.oauth2-oidc-sdk.version>
       <jackson.coreutils.version>1.8</jackson.coreutils.version>
@@ -36,7 +36,7 @@
       <commons-lang.version>3.13.0</commons-lang.version>
       <commons-collection.version>4.1</commons-collection.version>
       <commons-io.version>2.14.0</commons-io.version>
-      <commons-beanutils.version>1.9.4</commons-beanutils.version>
+      <commons-beanutils.version>1.11.0</commons-beanutils.version>
       <swagger.version>2.2.7</swagger.version>
       <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
       <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
