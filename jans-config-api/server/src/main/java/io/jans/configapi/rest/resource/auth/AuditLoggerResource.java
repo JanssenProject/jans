@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -88,9 +89,8 @@ public class AuditLoggerResource extends ConfigBaseResource {
         log.error("Fetch log file:{}, pattern:{}", file, pattern);
 
         List<String> logEntries = new ArrayList<>();
-        try {
-            logEntries = Files.lines(java.nio.file.Path.of(file)).filter(s -> s.matches(pattern))
-                    .collect(Collectors.toList());
+        try (Stream<String> stream = Files.lines(java.nio.file.Path.of(file))) {
+            logEntries = stream.filter(s -> s.matches(pattern)).collect(Collectors.toList());
         } catch (IOException ex) {
             throwInternalServerException(" Error while fetching logs", ex);
         }
