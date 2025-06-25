@@ -68,6 +68,36 @@ public class AuditLoggerResource extends ConfigBaseResource {
             log.debug("Search Attribute filters with pattern:{}, startIndex:{}, limit:{}", escapeLog(pattern),
                     escapeLog(startIndex), escapeLog(limit));
         }
+        return Response.ok(this.doSearch(getPattern(pattern), startIndex, limit)).build();
+    }
+
+    private LogPagedResult doSearch(String pattern, int startIndex, int limit) {
+
+        log.info("Fetch log pattern:{}, startIndex:{}, limit:{}", pattern, startIndex, limit);
+
+        List<String> logEntriesList = getLogEntries(getAuditLogFile(), pattern);
+        log.debug("Log fetched  - logEntriesList:{}", logEntriesList);
+
+        LogPagedResult logPagedResult = getLogPagedResult(logEntriesList, startIndex, limit);
+        log.info("Audit Log PagedResult:{}", logPagedResult);
+        return logPagedResult;
+
+    }
+
+    private List<String> getLogEntries(String file, String pattern) {
+        log.error("Fetch log file:{}, pattern:{}", file, pattern);
+
+        List<String> logEntries = new ArrayList<>();
+        try {
+            logEntries = Files.lines(java.nio.file.Path.of(file)).filter(s -> s.matches(pattern))
+                    .collect(Collectors.toList());
+        } catch (IOException ex) {
+            throwInternalServerException(" Error while fetching logs", ex);
+        }
+        return logEntries;
+    }
+
+    private String getPattern(String pattern) {
         String searchPattern = ApiConstants.DEFAULT_SEARCH_PATTERN;
         if (StringUtils.isNotBlank(pattern)) {
             StringBuilder stringBuilder = new StringBuilder();
@@ -76,45 +106,40 @@ public class AuditLoggerResource extends ConfigBaseResource {
             stringBuilder.append(".*$");
             searchPattern = stringBuilder.toString();
         }
-
-        return Response.ok(this.doSearch(searchPattern, startIndex, limit)).build();
+        return searchPattern;
     }
 
-    private LogPagedResult doSearch(String pattern, int startIndex, int limit) {
-
-        log.info("Fetch log pattern:{}, startIndex:{}, limit:{}", pattern, startIndex, limit);
-
-        List<String> logEntriesList = getLogEntries(getAuditLogFile(), pattern, startIndex, limit);
-        log.debug("Log fetched  - logEntriesList:{}", logEntriesList);
+    private LogPagedResult getLogPagedResult(List<String> logEntriesList, int startIndex, int limit) {
+        log.info("Audit logEntriesList:{}, startIndex:{}, limit:{}", logEntriesList, startIndex, limit);
 
         LogPagedResult logPagedResult = new LogPagedResult();
         if (logEntriesList != null && !logEntriesList.isEmpty()) {
 
-            // Extract paginated data
-            List<String> sublist = logEntriesList.subList(startIndex, limit);
+            try {
 
-            logPagedResult.setStart(startIndex);
-            logPagedResult.setEntriesCount(limit);
-            logPagedResult.setTotalEntriesCount(logEntriesList.size());
-            logPagedResult.setEntries(sublist);
+                // verify start and limit index
+                getStartIndex(logEntriesList, startIndex);
+                limit = (limit <= logEntriesList.size()) ? limit : logEntriesList.size();
+                log.info("Final startIndex:{}, limit:{}", startIndex, limit);
+
+                // Extract paginated data
+                List<String> sublist = logEntriesList.subList(startIndex, limit);
+
+                logPagedResult.setStart(startIndex);
+                logPagedResult.setEntriesCount(limit);
+                logPagedResult.setTotalEntriesCount(logEntriesList.size());
+                logPagedResult.setEntries(sublist);
+
+            } catch (IndexOutOfBoundsException ioe) {
+                throwBadRequestException("Index may be incorrect, total entries:{" + logEntriesList.size()
+                        + "}, startIndex provided:{" + startIndex + "} , endtIndex provided:{" + limit + "} ");
+
+            }
         }
 
-        log.info("User logPagedResult:{}", logPagedResult);
+        log.info("Audit logPagedResult:{}", logPagedResult);
+
         return logPagedResult;
-
-    }
-
-    private List<String> getLogEntries(String file, String pattern, int startIndex, int limit) {
-        log.error("Fetch log file:{}, pattern:{}, startIndex:{}, limit:{}", file, pattern, startIndex, limit);
-
-        List<String> logEntries = new ArrayList<>();
-        try {
-            logEntries = Files.lines(java.nio.file.Path.of(file))
-           .filter(s -> s.matches(pattern)).collect(Collectors.toList());
-        } catch (IOException ex) {
-            throwInternalServerException(" Error while fetching logs", ex);
-        }
-        return logEntries;
     }
 
     private AuditLogConf getAuditLogConf() {
@@ -122,18 +147,32 @@ public class AuditLoggerResource extends ConfigBaseResource {
     }
 
     private String getAuditLogFile() {
-       
-        String filePath = (getAuditLogConf().getAuditLogFilePath() != null
-                ? getAuditLogConf().getAuditLogFilePath()
+
+        String filePath = (getAuditLogConf().getAuditLogFilePath() != null ? getAuditLogConf().getAuditLogFilePath()
                 : AUDIT_FILE_PATH);
-        String fileName = (getAuditLogConf().getAuditLogFileName() != null
-                ? getAuditLogConf().getAuditLogFileName()
+        String fileName = (getAuditLogConf().getAuditLogFileName() != null ? getAuditLogConf().getAuditLogFileName()
                 : AUDIT_FILE_NAME);
-       
+
         StringBuilder stringBuilder = new StringBuilder(filePath);
         stringBuilder.append(fileName);
 
         return stringBuilder.toString();
+    }
+
+    private int getStartIndex(List<String> logEntriesList, int startIndex) {
+        log.info("Get startIndex logEntriesList:{}, startIndex:{}", logEntriesList, startIndex);
+
+        if (logEntriesList != null && !logEntriesList.isEmpty()) {
+
+            try {
+                logEntriesList.get(startIndex);
+            } catch (IndexOutOfBoundsException ioe) {
+                throwBadRequestException("Page start index incorrect, total entries:{" + logEntriesList.size()
+                        + "}, but provided:{" + startIndex + "} ");
+
+            }
+        }
+        return startIndex;
     }
 
 }
