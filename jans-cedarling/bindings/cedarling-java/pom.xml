@@ -6,7 +6,7 @@
 
     <groupId>io.jans</groupId>
     <artifactId>cedarling-java</artifactId>
-    <version>0.0.0-nightly</version>
+    <version>1.8.0</version>
     <name>Cedarling Java binding</name>
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -85,7 +85,7 @@
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
-            <version>5.15.0</version>
+            <version>5.16.0</version>
         </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>
