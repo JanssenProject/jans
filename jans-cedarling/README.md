@@ -116,7 +116,7 @@ The SSA JWT must contain the following claims as defined by RFC 7591:
 ### Validation Process
 
 1. **Structure Validation**: Verify all required claims are present and have correct types
-2. **JWKS Fetching**: Retrieve JSON Web Key Set from the Identity Provider
+2. **JWKS Fetching**: Retrieve JSON Web Key Set from the identity provider
 3. **Key Resolution**: Find the appropriate key using the JWT's `kid` header
 4. **Signature Validation**: Verify the JWT signature using the resolved key
 5. **Claims Validation**: Validate expiration and other standard JWT claims
