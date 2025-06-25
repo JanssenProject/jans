@@ -161,7 +161,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         for ca in custom_attributes:
 
-            if ca['name'] in ('middleName', 'sn', 'status', 'nickname', 'jansActive', 'userPassword', 'jansAdminUIRole'):
+            if ca['name'] in ('middleName', 'sn', 'status', 'nickname', 'jansActive', 'userPassword', 'jansAdminUIRole', 'jansStatus'):
                 continue
 
             claim_prop = self.get_claim_properties(ca['name'])

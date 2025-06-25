@@ -249,7 +249,7 @@ public class UserMgmtService {
         
         for (CustomObjectAttribute attribute : customAttributes) {
             CustomObjectAttribute existingAttribute = userService.getCustomAttribute(user, attribute.getName());
-            logger.debug("Existing CustomAttributes with existingAttribute.getName():{} ", existingAttribute.getName());
+            logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
 
             // add
             if (existingAttribute == null) {
@@ -333,6 +333,17 @@ public class UserMgmtService {
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         List<String> mandatoryAttributes = authUtil.getUserMandatoryAttributes();
         logger.debug("mandatoryAttributess :{}, excludeAttributes:{} ", mandatoryAttributes, excludeAttributes);
+
+        List<String> requiredAttributes = getJansAttributeName(this.getRequiredAttributes());
+        logger.debug("requiredAttributes:{} ", requiredAttributes);
+
+        if (requiredAttributes != null && !requiredAttributes.isEmpty()) {
+            if (mandatoryAttributes == null) {
+                mandatoryAttributes = new ArrayList<>();
+            }
+            mandatoryAttributes.addAll(requiredAttributes);
+        }
+        logger.info("Final mandatoryAttributes after adding requiredAttributes is {} ", mandatoryAttributes);
 
         StringBuilder missingAttributes = new StringBuilder();
 
@@ -504,11 +515,46 @@ public class UserMgmtService {
         }
         return customAttributes;
     }
-
-    public List<JansAttribute> findAttributeByName(String name) {
+        
+   public List<JansAttribute> findAttributeByName(String name) {
         return persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                 Filter.createEqualityFilter(AttributeConstants.JANS_ATTR_NAME, name));
     }
+    
+    public List<JansAttribute> getRequiredAttributes() {
+        List<JansAttribute> jansAttributes = null;
+        try {
+            Filter requiredFilter = Filter.createANDFilter(
+                    Filter.createEqualityFilter("jansRequired", true),
+                    Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "active"));
+
+                    logger.info("requiredFilter:{}", requiredFilter);
+            jansAttributes = persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
+                    requiredFilter);
+            logger.info("Required JansAttribute jansAttributes:{}", jansAttributes);
+
+        } catch (Exception ex) {
+            logger.error("Failed to load required attribute", ex);
+        }
+        return jansAttributes;
+    }
+    
+    
+    public List<String> getJansAttributeName(List<JansAttribute> jansAttributeList) {
+        List<String> jansAttributeNameList = null;
+
+        if (jansAttributeList == null || jansAttributeList.isEmpty()) {
+            return jansAttributeNameList;
+        }
+        
+        jansAttributeNameList = new ArrayList<>();
+
+        for (JansAttribute attribute : jansAttributeList) {
+            jansAttributeNameList.add(attribute.getName());
+        }
+        return jansAttributeNameList;
+    }
+
 
     private String getDnForAttribute(String inum) {
         String attributesDn = staticConfiguration.getBaseDn().getAttributes();

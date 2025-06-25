@@ -9328,6 +9328,8 @@ components:
           type: boolean
         jansHideOnDiscovery:
           type: boolean
+        required:
+          type: boolean
         custom:
           type: boolean
         attributeValidation:
@@ -9336,19 +9338,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
         whitePagesCanView:
+          type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -9600,13 +9602,10 @@ components:
           type: array
           items:
             type: string
-        sessionJwtSigningAlgValuesSupported:
+        logoutStatusJwtSigningAlgValuesSupported:
           type: array
           items:
             type: string
-        sessionStatusListBitSize:
-          type: integer
-          format: int32
         txTokenSigningAlgValuesSupported:
           type: array
           items:
@@ -9854,6 +9853,9 @@ components:
           type: boolean
         disablePromptConsent:
           type: boolean
+        logoutStatusJwtLifetime:
+          type: integer
+          format: int32
         sessionIdCookieLifetime:
           type: integer
           format: int32
@@ -10184,7 +10186,7 @@ components:
             - REVOKE_SESSION
             - GLOBAL_TOKEN_REVOCATION
             - STATUS_LIST
-            - SESSION_STATUS_LIST
+            - LOGOUT_STATUS_JWT
             - ACTIVE_SESSION
             - END_SESSION
             - STATUS_SESSION
@@ -10232,6 +10234,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        connectionServiceConfiguration:
+          $ref: '#/components/schemas/ConnectionServiceConfiguration'
         fapi:
           type: boolean
         allResponseTypesSupported:
@@ -10323,6 +10327,18 @@ components:
           type: string
           xml:
             name: base-dn
+    ConnectionServiceConfiguration:
+      type: object
+      properties:
+        maxTotal:
+          type: integer
+          format: int32
+        maxPerRoute:
+          type: integer
+          format: int32
+        validateAfterInactivity:
+          type: integer
+          format: int32
     CorsConfigurationFilter:
       type: object
       properties:
@@ -11024,7 +11040,7 @@ components:
           type: string
         txTokenEncryptedResponseEnc:
           type: string
-        sessionJwtSignedResponseAlg:
+        logoutStatusJwtSignedResponseAlg:
           type: string
         authorizationDetailsTypes:
           type: array
@@ -11823,10 +11839,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -11972,6 +11988,8 @@ components:
           type: string
         authorizationCode:
           type: string
+        jti:
+          type: string
         nonce:
           type: string
         codeChallenge:
@@ -12003,8 +12021,11 @@ components:
           - LONG_LIVED_ACCESS_TOKEN
           - REFRESH_TOKEN
           - AUTHORIZATION_CODE
+          - LOGOUT_STATUS_JWT
           - TX_TOKEN
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object
