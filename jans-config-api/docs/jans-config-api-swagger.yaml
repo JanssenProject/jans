@@ -41,7 +41,6 @@ tags:
 - name: Client Authorization
 - name: Jans Assets
 - name: Token
-- name: Logs
 paths:
   /api/v1/health/app-version:
     get:
@@ -1622,50 +1621,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/attributes.write
-  /api/v1/audit:
-    get:
-      tags:
-      - Logs
-      summary: Get audit details.
-      description: Get audit details.
-      operationId: get-audit-data
-      parameters:
-      - name: pattern
-        in: query
-        description: Search pattern
-        schema:
-          type: string
-      - name: startIndex
-        in: query
-        description: The 1-based index of the first query result
-        schema:
-          type: integer
-          format: int32
-          default: 0
-      - name: limit
-        in: query
-        description: Search size - max size of the results to return
-        schema:
-          type: integer
-          format: int32
-          default: 50
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LogPagedResult'
-              examples:
-                Response example:
-                  description: Response example
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - logging.read
   /api/v1/jans-auth-server/config:
     get:
       tags:
@@ -9383,19 +9338,19 @@ components:
           type: string
         selected:
           type: boolean
+        whitePagesCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
         adminCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9408,22 +9363,6 @@ components:
           type: string
         value:
           type: string
-    LogPagedResult:
-      type: object
-      properties:
-        start:
-          type: integer
-          format: int32
-        totalEntriesCount:
-          type: integer
-          format: int32
-        entriesCount:
-          type: integer
-          format: int32
-        entries:
-          type: array
-          items:
-            type: string
     AppConfiguration:
       type: object
       properties:
@@ -11306,12 +11245,6 @@ components:
           items:
             type: string
             description: List of header HTTP attributes whose value is to be logged.
-        auditLogFilePath:
-          type: string
-          description: Audit log file location.
-        auditLogFileName:
-          type: string
-          description: Audit log file name.
       description: Audit Log configuration details.
     DataFormatConversionConf:
       type: object
@@ -11468,14 +11401,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -12080,8 +12013,6 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -12092,6 +12023,8 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        logoutStatusJwt:
+          type: boolean
         accessToken:
           type: boolean
     TokenEntityPagedResult:
@@ -12244,4 +12177,3 @@ components:
             https://jans.io/oauth/config/token.write: Manage Token details
             https://jans.io/oauth/config/token.delete: Delete Token details
             https://jans.io/oauth/config/data.readonly: View Config-API related data
-            https://jans.io/oauth/config/audit-read: View Audit Log related data
