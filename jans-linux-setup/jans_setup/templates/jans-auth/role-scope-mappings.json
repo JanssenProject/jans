@@ -770,9 +770,9 @@
     },
     {
       "permission": "https://jans.io/oauth/config/token.delete",
-      "description": "token",
+      "description": "",
       "defaultPermissionInToken": false,
-      "tag": ""
+      "tag": "token"
     },
     {
       "permission": "https://jans.io/oauth/config/agama-repo.readonly",
