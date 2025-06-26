@@ -69,7 +69,7 @@ async fn init_cedarling() -> Cedarling {
             decision_log_default_jwt_id: "jti".to_string(),
             decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
             decision_log_workload_claims: vec!["org_id".to_string()],
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         entity_builder_config: EntityBuilderConfig::default(),
