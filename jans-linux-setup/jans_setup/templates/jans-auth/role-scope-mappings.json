@@ -202,13 +202,13 @@
       "permission": "https://jans.io/oauth/config/message.readonly",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "cache"
+      "tag": "message"
     },
     {
       "permission": "https://jans.io/oauth/config/message.write",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "cache"
+      "tag": "message"
     },
     {
       "permission": "https://jans.io/oauth/config/cache.readonly",
@@ -262,49 +262,49 @@
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "role"
+      "tag": "adminui_role"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "role"
+      "tag": "adminui_role"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "permission"
+      "tag": "adminui_permission"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "permission"
+      "tag": "adminui_permission"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "rolePermissionMapping"
+      "tag": "adminui_rolePermissionMapping"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "rolePermissionMapping"
+      "tag": "adminui_rolePermissionMapping"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly",
       "description": null,
       "defaultPermissionInToken": true,
-      "tag": "license"
+      "tag": "adminui_license"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/license.write",
       "description": null,
       "defaultPermissionInToken": true,
-      "tag": "license"
+      "tag": "adminui_license"
     },
     {
       "permission": "openid",
