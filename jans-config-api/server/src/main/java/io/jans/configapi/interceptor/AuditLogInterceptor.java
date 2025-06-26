@@ -65,7 +65,7 @@ public class AuditLogInterceptor {
                 String method = request.getMethod();
                 String client = httpHeaders.getHeaderString("jans-client");
 
-                AUDIT_LOG.info("User {} {} using client:{}", getAction(method), getResource(uriInfo.getPath()), client);
+                AUDIT_LOG.info("{} {} using client:{}", getResource(uriInfo.getPath()),getAction(method), client);
             }
 
         } catch (Exception ex) {
@@ -98,7 +98,7 @@ public class AuditLogInterceptor {
 
     private String getResource(String path) {
         if (StringUtils.isNotBlank(path)) {
-            path.replace("/", "-");
+            path = path.replace("/", "-");
         }
         return path;
     }

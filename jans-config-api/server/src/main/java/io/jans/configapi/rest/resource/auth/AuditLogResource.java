@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.AUDIT)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class AuditLoggerResource extends ConfigBaseResource {
+public class AuditLogResource extends ConfigBaseResource {
 
     public static final String AUDIT_FILE_PATH = "/opt/jans/jetty/jans-config-api/logs/";
     public static final String AUDIT_FILE_NAME = "configapi-audit.log";
@@ -119,11 +119,11 @@ public class AuditLoggerResource extends ConfigBaseResource {
 
                 // verify start and limit index
                 getStartIndex(logEntriesList, startIndex);
-                limit = (limit <= logEntriesList.size()) ? limit : logEntriesList.size();
-                log.info("Final startIndex:{}, limit:{}", startIndex, limit);
+                int toIndex = (startIndex+limit <= logEntriesList.size()) ? startIndex+limit : logEntriesList.size();
+                log.info("Final startIndex:{}, limit:{}, toIndex:{}", startIndex, limit, toIndex);
 
                 // Extract paginated data
-                List<String> sublist = logEntriesList.subList(startIndex, limit);
+                List<String> sublist = logEntriesList.subList(startIndex, toIndex);
 
                 logPagedResult.setStart(startIndex);
                 logPagedResult.setEntriesCount(limit);
