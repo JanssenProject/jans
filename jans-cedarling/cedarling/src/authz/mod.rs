@@ -28,6 +28,7 @@ use std::io::Cursor;
 use std::str::FromStr;
 use std::sync::Arc;
 use trust_mode::*;
+use uuid7::Uuid;
 
 mod authorize_result;
 mod build_ctx;
@@ -248,6 +249,15 @@ impl Authz {
             .as_ref()
             .map(|auth_info| &auth_info.diagnostics);
 
+        // Log policy evaluation errors if any exist
+        if let Some(diagnostics) = user_authz_diagnostic {
+            self.log_policy_evaluation_errors(diagnostics, "user principal", request_id);
+        }
+
+        if let Some(diagnostics) = workload_authz_diagnostic {
+            self.log_policy_evaluation_errors(diagnostics, "workload principal", request_id);
+        }
+
         let tokens_logging_info = LogTokensInfo::new(
             &tokens,
             self.config
@@ -405,6 +415,11 @@ impl Authz {
             .map(|info| Some(&info.diagnostics))
             .collect::<Vec<_>>();
 
+        // Log policy evaluation errors if any exist
+        for info in &debug_authorize_info {
+            self.log_policy_evaluation_errors(&info.diagnostics, &info.principal, request_id);
+        }
+
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
         self.config.log_service.as_ref().log_any(&DecisionLogEntry {
@@ -476,6 +491,23 @@ impl Authz {
             .config
             .entity_builder
             .build_entities(tokens, &request.resource)?)
+    }
+
+    /// Log policy evaluation errors for diagnostics
+    fn log_policy_evaluation_errors(
+        &self,
+        diagnostics: &Diagnostics,
+        principal_name: &str,
+        request_id: Uuid,
+    ) {
+        if !diagnostics.errors.is_empty() {
+            self.config.log_service.log_any(
+                LogEntry::new_with_data(LogType::Decision, Some(request_id))
+                    .set_level(LogLevel::ERROR)
+                    .set_message(format!("Policy evaluation errors for {}", principal_name))
+                    .set_error(format!("{:?}", diagnostics.errors)),
+            );
+        }
     }
 }
 
