@@ -1,6 +1,6 @@
 # janssen
 
-![Version: 1.8.0-1](https://img.shields.io/badge/Version-1.8.0--1-informational?style=flat-square) ![AppVersion: 1.8.0-1](https://img.shields.io/badge/AppVersion-1.8.0--1-informational?style=flat-square)
+![Version: 1.8.0](https://img.shields.io/badge/Version-1.8.0-informational?style=flat-square) ![AppVersion: 1.8.0](https://img.shields.io/badge/AppVersion-1.8.0-informational?style=flat-square)
 
 Janssen Access and Identity Management Microservices Chart. This chart deploys each janssen microservice as a separate deployment.
 
@@ -23,19 +23,19 @@ Kubernetes: `>=v1.22.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-|  | auth-server | 1.8.0-1 |
-|  | auth-server-key-rotation | 1.8.0-1 |
-|  | casa | 1.8.0-1 |
-|  | cleanup | 1.8.0-1 |
-|  | cn-istio-ingress | 1.8.0-1 |
-|  | config | 1.8.0-1 |
-|  | config-api | 1.8.0-1 |
-|  | fido2 | 1.8.0-1 |
-|  | kc-scheduler | 1.8.0-1 |
-|  | nginx-ingress | 1.8.0-1 |
-|  | persistence | 1.8.0-1 |
-|  | saml | 1.8.0-1 |
-|  | scim | 1.8.0-1 |
+|  | auth-server | 1.8.0 |
+|  | auth-server-key-rotation | 1.8.0 |
+|  | casa | 1.8.0 |
+|  | cleanup | 1.8.0 |
+|  | cn-istio-ingress | 1.8.0 |
+|  | config | 1.8.0 |
+|  | config-api | 1.8.0 |
+|  | fido2 | 1.8.0 |
+|  | kc-scheduler | 1.8.0 |
+|  | nginx-ingress | 1.8.0 |
+|  | persistence | 1.8.0 |
+|  | saml | 1.8.0 |
+|  | scim | 1.8.0 |
 
 ## Values
 

@@ -1,6 +1,6 @@
 # config-api
 
-![Version: 1.8.0-1](https://img.shields.io/badge/Version-1.8.0--1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.8.0-1](https://img.shields.io/badge/AppVersion-1.8.0--1-informational?style=flat-square)
+![Version: 1.8.0](https://img.shields.io/badge/Version-1.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.8.0](https://img.shields.io/badge/AppVersion-1.8.0-informational?style=flat-square)
 
 Jans Config Api endpoints can be used to configure jans-auth-server, which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
 
