@@ -9,7 +9,6 @@
 use std::str::FromStr;
 
 use super::init_http_client;
-use derive_more::derive::Deref;
 use http_utils::{Backoff, HttpRequestError, Sender};
 use serde::{Deserialize, Deserializer, de};
 
@@ -80,8 +79,20 @@ impl LockConfig {
 }
 
 /// A wrapper for [`url::Url`] that implements [`serde::de::Deserialize`].
-#[derive(Debug, Deref, PartialEq, Clone)]
-pub struct Url(url::Url);
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Url(pub url::Url);
+
+impl AsRef<url::Url> for Url {
+    fn as_ref(&self) -> &url::Url {
+        &self.0
+    }
+}
+
+impl AsRef<str> for Url {
+    fn as_ref(&self) -> &str {
+        self.0.as_str()
+    }
+}
 
 impl FromStr for Url {
     type Err = url::ParseError;

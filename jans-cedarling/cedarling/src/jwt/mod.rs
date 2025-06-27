@@ -80,13 +80,13 @@ mod test_utils;
 
 pub use error::*;
 pub use token::{Token, TokenClaimTypeError, TokenClaims};
+pub use decode::*;
 
 use crate::JwtConfig;
 use crate::LogLevel;
 use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
-use decode::*;
 use http_utils::*;
 use key_service::*;
 use log_entry::*;

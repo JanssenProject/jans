@@ -3,36 +3,95 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! # Lock Engine
-//!
-//! [Janssen Lock](https://docs.jans.io/head/admin/lock/), or simply "Lock", provides a
-//! centralized control plane that enables domains to use Cedar for securing distributed
-//! applications and auditing the activities of both users and software.
-//!
-//! This module manages the communication between Cedarling and the Lock Server.
-//!
+//! # Lock Server Integration Module
+//! 
+//! This module provides integration with the Lock Server for centralized logging and monitoring.
+//! It includes support for Software Statement Assertion (SSA) JWT validation for secure client registration.
+//! 
+//! ## Overview
+//! 
+//! The Lock Server integration allows Cedarling to:
+//! - Send authorization decision logs to a centralized Lock Server
+//! - Register as a client using Dynamic Client Registration (DCR)
+//! - Validate SSA JWTs for enhanced security
+//! - Handle authentication and authorization with the Lock Server
+//! 
 //! ## Architecture
-//! - Collects logs from the currently initialized [`logger`]
-//! - Uses a [`background worker`] for collecting nad batching logs before sending it to
-//!   the lock server.
-//! - Handles Dynamic Client Registration (DCR) through [`register_client`]
-//! - Sends the collected logs to the lock server.
-//!
-//! For configuration details, refer to the [Cedarling properties documentation](https://docs.jans.io/head/cedarling/cedarling-properties/)
-//!
-//! ## Usage Requirements
-//!
-//! - A logger must be initialize by setting the `CEDARLING_LOG_TYPE` bootstrap property.
-//! - This module is only active if the `CEDARLING_LOCK` property is set to `enabled`.
-//!
-//! [`background worker`]: LogWorker
-//! [`logger`]: LogStrategyLogger
+//! 
+//! ### Components
+//! 
+//! - **LockService**: Main service that manages communication with the Lock Server
+//! - **LogWorker**: Background worker that sends logs to the Lock Server
+//! - **SSA Validation**: Validates Software Statement Assertion JWTs
+//! - **Client Registration**: Handles Dynamic Client Registration with the IDP
+//! 
+//! ### Flow
+//! 
+//! 1. **Initialization**: LockService is created with configuration
+//! 2. **SSA Validation**: If SSA JWT is provided, it's validated against the IDP's JWKS
+//! 3. **Client Registration**: DCR request is sent to the IDP (with SSA JWT if available)
+//! 4. **Access Token**: Client credentials are obtained for Lock Server communication
+//! 5. **Logging**: Authorization decisions are sent to the Lock Server's audit endpoint
+//! 
+//! ## SSA JWT Validation
+//! 
+//! Software Statement Assertion (SSA) JWTs provide a secure way to register clients
+//! with the Identity Provider. The SSA JWT contains claims about the software's
+//! identity, permissions, and configuration.
+//! 
+//! ### SSA JWT Structure
+//! 
+//! The SSA JWT must contain the following claims:
+//! - `software_id`: Unique identifier for the software
+//! - `grant_types`: Array of OAuth2 grant types the software can use
+//! - `org_id`: Organization identifier
+//! - `iss`: Issuer of the SSA JWT
+//! - `software_roles`: Array of roles/permissions for the software
+//! - `exp`: Expiration time
+//! - `iat`: Issued at time
+//! - `jti`: JWT ID (unique identifier)
+//! 
+//! ### Validation Process
+//! 
+//! 1. **Decode JWT**: Parse and decode the JWT structure
+//! 2. **Validate Structure**: Check for required claims and correct data types
+//! 3. **Fetch JWKS**: Retrieve JSON Web Key Set from the IDP
+//! 4. **Find Key**: Locate the appropriate key using the JWT's `kid` header
+//! 5. **Verify Signature**: Validate the JWT signature using the public key
+//! 6. **Validate Claims**: Check expiration and other claims
+//! 
+//! ## Error Handling
+//! 
+//! The module provides comprehensive error handling for various scenarios:
+//! 
+//! - **InvalidSsaJwt**: SSA JWT validation failed
+//! - **GetLockConfig**: Failed to retrieve Lock Server configuration
+//! - **ClientRegistration**: Failed to register client with IDP
+//! - **InitHttpClient**: Failed to initialize HTTP client
+//! 
+//! ## Integration with IDP
+//! 
+//! The Lock Server integration works with Identity Providers that support:
+//! 
+//! - Dynamic Client Registration (RFC 7591)
+//! - OAuth2 Client Credentials flow
+//! - JSON Web Key Set (JWKS) endpoint
+//! - Software Statement Assertion (SSA) validation
+//! 
+//! ### IDP Configuration
+//! 
+//! The IDP must be configured to:
+//! - Accept DCR requests with SSA JWTs
+//! - Validate SSA JWT signatures and claims
+//! - Issue access tokens for Lock Server communication
+//! - Provide JWKS endpoint for key validation
 
 mod lock_config;
 mod log_entry;
 mod log_worker;
 mod register_client;
 mod spawn_task;
+pub mod ssa_validation;
 
 use crate::app_types::PdpID;
 use crate::log::LoggerWeak;
@@ -50,16 +109,19 @@ use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use thiserror::Error;
 use tokio_util::sync::CancellationToken;
+use ssa_validation::validate_ssa_jwt;
 
 /// The base duration to wait for if an http request fails for workers.
 pub const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
 
+#[derive(Debug)]
 struct WorkerSenderAndHandle {
     tx: RwLock<mpsc::Sender<SerializedLogEntry>>,
     handle: JoinHandle<()>,
 }
 
 /// Stores logs in a buffer then sends them to the lock server in the background
+#[derive(Debug)]
 pub(crate) struct LockService {
     log_worker: Option<WorkerSenderAndHandle>,
     logger: Option<LoggerWeak>,
@@ -97,17 +159,26 @@ impl LockService {
         bootstrap_conf: &LockServiceConfig,
         logger: Option<LoggerWeak>,
     ) -> Result<Self, InitLockServiceError> {
-        // TODO: validate SSA JWT
-        // Validating the SSA JWT involves getting the keys from the IDP however, slotting in the
-        // JWT validator module here is a bit tricky. It might be better implement it in a
-        // separate PR then move the JWT validator to it's own crate.
-
-        // Get lock config from the config uri endpoint
+        // Get lock config from the config uri endpoint first
         let lock_config = LockConfig::get(
             &bootstrap_conf.config_uri,
             bootstrap_conf.accept_invalid_certs,
         )
         .await?;
+
+        // Validate SSA JWT if provided
+        if let Some(ssa_jwt) = &bootstrap_conf.ssa_jwt {
+            // Get the JWKS URI from the IDP URL (not the lock server URL)
+            let jwks_uri = format!("{}/jans-auth/restv1/jwks", 
+                lock_config.issuer_oidc_url.0.origin().ascii_serialization());
+            
+            // Validate the SSA JWT
+            validate_ssa_jwt(ssa_jwt, &jwks_uri, bootstrap_conf.accept_invalid_certs)
+                .await
+                .map_err(|e| {
+                    InitLockServiceError::InvalidSsaJwt(format!("SSA JWT validation failed: {}", e))
+                })?;
+        }
 
         // Register client
         let client_creds = register_client(
@@ -142,7 +213,7 @@ impl LockService {
                 let mut log_worker = LogWorker::new(
                     log_interval,
                     http_client.clone(),
-                    (*log_endpoint).clone(),
+                    log_endpoint.0.clone(),
                     logger.clone(),
                 );
 
@@ -206,8 +277,8 @@ impl LogWriter for LockService {
 
 #[derive(Debug, Error)]
 pub enum InitLockServiceError {
-    #[error("the provided CEDARLING_LOCK_SSA_JWT is either malformed or expired")]
-    InvalidSsaJwt,
+    #[error("the provided CEDARLING_LOCK_SSA_JWT is either malformed or expired: {0}")]
+    InvalidSsaJwt(String),
     #[error(
         "failed to GET lock server config from the `.well-known/lock-server-configuration` endpoint: {0}"
     )]
@@ -229,11 +300,28 @@ mod test {
     use std::time::Duration;
     use tokio::time::sleep;
     use uuid7::Uuid;
+    use jsonwebtoken::{encode, Header, EncodingKey};
+
+    fn generate_test_jwt() -> String {
+        let mut header = Header::new(jsonwebtoken::Algorithm::HS256);
+        header.kid = Some("test-kid".to_string());
+        let claims = json!({
+            "software_id": "test_software",
+            "grant_types": ["client_credentials"],
+            "org_id": "test_org",
+            "iss": "https://test.issuer.com",
+            "software_roles": ["cedarling"],
+            "exp": 9999999999u64,
+            "iat": 1111111111u64,
+            "jti": "test-jti-123"
+        });
+        encode(&header, &claims, &EncodingKey::from_secret(b"test-key")).unwrap()
+    }
 
     #[tokio::test]
     async fn test_lock_service() {
         let pdp_id = PdpID::new();
-        let ssa_jwt = "eyJraWQiOiJzc2FfOTgwYTQ0ZDQtZWE3OS00YTM1LThlNjMtNzlhNzg4NTNmYzUwX3NpZ19yczI1NiIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJzb2Z0d2FyZV9pZCI6IkNlZGFybGluZ1Rlc3QiLCJncmFudF90eXBlcyI6WyJhdXRob3JpemF0aW9uX2NvZGUiLCJyZWZyZXNoX3Rva2VuIl0sIm9yZ19pZCI6InRlc3QiLCJpc3MiOiJodHRwczovL2RlbW9leGFtcGxlLmphbnMuaW8iLCJzb2Z0d2FyZV9yb2xlcyI6WyJjZWRhcmxpbmciXSwiZXhwIjozMzE5NzE3ODEyLCJpYXQiOjE3NDI5MTc4MTMsImp0aSI6IjM5NTA0NTRlLTM5MWMtNDlhOS05YzYxLTY4MGMyNWE4MDk0ZCJ9.INA5qvpheWvJe6DJaeLkOYt1YH3W9gJQ3yy5Cr5G9_QbzazV23FMJDH2Rbysauk4YNC0oIsTL4MBQ_dRn3YaPLapOhizIlxZQF_uHBpYnopsk6KxgiRQTotg1Kw7Kwsi1RHtfHXpplSS15Dc-9QrOIGbNu44zEt1F5FYV5feW2c0u5HIRISoMNPutOYfMH18bZaBM28N8BssuqLv5X_Bc8EuSkmNTERP5L4khv6Mi3uVItkgK9xTbMKCpUstH_LchT1BKD_pTTMAQx6g6TOf3gnwKYQcmQhjJWFUbXnKCjghExV4PrYc6P8YaXdFnPBYoovd8FxS5qrX8trkh6pxeQ";
+        let ssa_jwt = generate_test_jwt();
 
         let mut mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
@@ -241,14 +329,66 @@ mod test {
         let (lock_config_uri, lock_config_endpoint) =
             mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
         let oidc_endpoint = mock_oidc_endpoint(&mut mock_idp_server);
-        let dcr_endpoint = mock_dcr_endpoint(&mut mock_idp_server, pdp_id, ssa_jwt);
+        let jwks_endpoint = mock_jwks_endpoint(&mut mock_idp_server);
+        let dcr_endpoint = mock_dcr_endpoint(&mut mock_idp_server, pdp_id, &ssa_jwt);
+        let token_endpoint = mock_token_endpoint(&mut mock_idp_server);
+        let log_endpoint = mock_log_endpoint(&mut mock_lock_server);
+        
+        let config = LockServiceConfig {
+            config_uri: lock_config_uri,
+            dynamic_config: false,
+            ssa_jwt: Some(ssa_jwt),
+            log_interval: Some(Duration::from_millis(100)),
+            health_interval: None,
+            telemetry_interval: None,
+            listen_sse: false,
+            log_level: LogLevel::TRACE,
+            accept_invalid_certs: true, // Allow invalid certs for testing
+        };
+
+        // Test startup
+        let logger = LockService::new(pdp_id, &config, None)
+            .await
+            .expect("build lock logger");
+        lock_config_endpoint.assert();
+        oidc_endpoint.assert();
+        jwks_endpoint.assert();
+        dcr_endpoint.assert();
+        token_endpoint.assert();
+
+        // Test if logs are getting sent
+        let log_entry = MockLogEntry {
+            level: LogLevel::TRACE,
+            id: "some_uuid_string".into(),
+            msg: "this is a test log entry".into(),
+        };
+        logger.log_any(log_entry);
+
+        // Sleep until the logs are sent
+        sleep(Duration::from_secs(1)).await;
+
+        // Check if logs were sent
+        log_endpoint.assert();
+    }
+
+    #[tokio::test]
+    async fn test_lock_service_without_ssa() {
+        let pdp_id = PdpID::new();
+
+        let mut mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+
+        let (lock_config_uri, lock_config_endpoint) =
+            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+        let oidc_endpoint = mock_oidc_endpoint(&mut mock_idp_server);
+        let dcr_endpoint = mock_dcr_endpoint_without_ssa(&mut mock_idp_server, pdp_id);
         let token_endpoint = mock_token_endpoint(&mut mock_idp_server);
         let log_endpoint = mock_log_endpoint(&mut mock_lock_server);
 
         let config = LockServiceConfig {
             config_uri: lock_config_uri,
             dynamic_config: false,
-            ssa_jwt: Some(ssa_jwt.to_string()),
+            ssa_jwt: None,
             log_interval: Some(Duration::from_millis(100)),
             health_interval: None,
             telemetry_interval: None,
@@ -257,7 +397,7 @@ mod test {
             accept_invalid_certs: false,
         };
 
-        // Test startup
+        // Test startup without SSA
         let logger = LockService::new(pdp_id, &config, None)
             .await
             .expect("build lock logger");
@@ -279,6 +419,35 @@ mod test {
 
         // Check if logs were sent
         log_endpoint.assert();
+    }
+
+    #[tokio::test]
+    async fn test_lock_service_invalid_ssa() {
+        let pdp_id = PdpID::new();
+        let invalid_ssa_jwt = "invalid.jwt.token";
+
+        let mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+
+        let (lock_config_uri, _) =
+            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+
+        let config = LockServiceConfig {
+            config_uri: lock_config_uri,
+            dynamic_config: false,
+            ssa_jwt: Some(invalid_ssa_jwt.to_string()),
+            log_interval: Some(Duration::from_millis(100)),
+            health_interval: None,
+            telemetry_interval: None,
+            listen_sse: false,
+            log_level: LogLevel::TRACE,
+            accept_invalid_certs: false,
+        };
+
+        // Test startup with invalid SSA should fail
+        let result = LockService::new(pdp_id, &config, None).await;
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), InitLockServiceError::InvalidSsaJwt(_)));
     }
 
     /// Mocks the `.well-known/lock-server-configuration` endpoint
@@ -355,6 +524,28 @@ mod test {
             .create()
     }
 
+    /// Mocks the JWKS endpoint for SSA validation
+    fn mock_jwks_endpoint(server: &mut ServerGuard) -> Mock {
+        let jwks_path = "/jans-auth/restv1/jwks";
+
+        server
+            .mock("GET", jwks_path)
+            .with_body(
+                json!({
+                    "keys": [
+                        {
+                            "kid": "test-kid",
+                            "alg": "HS256",
+                            "k": "dGVzdC1rZXk" // URL-safe base64 for "test-key" (no padding)
+                        }
+                    ]
+                })
+                .to_string(),
+            )
+            .expect(1)
+            .create()
+    }
+
     /// Mocks the dynamic client registration endpoint
     fn mock_dcr_endpoint(server: &mut ServerGuard, pdp_id: PdpID, ssa_jwt: &str) -> Mock {
         let dcr_path = "/jans-auth/restv1/register";
@@ -409,6 +600,30 @@ mod test {
                 "id": "some_uuid_string",
                 "msg": "this is a test log entry",
             }])))
+            .expect(1)
+            .create()
+    }
+
+    /// Mocks the dynamic client registration endpoint without SSA
+    fn mock_dcr_endpoint_without_ssa(server: &mut ServerGuard, pdp_id: PdpID) -> Mock {
+        let dcr_path = "/jans-auth/restv1/register";
+
+        server
+            .mock("POST", dcr_path)
+            .match_body(mockito::Matcher::PartialJson(json!({
+                "token_endpoint_auth_method": "client_secret_basic",
+                "grant_types": ["client_credentials"],
+                "client_name": format!("cedarling-{}", pdp_id),
+                "scope": DCR_SCOPE,
+                "access_token_as_jwt": true,
+            })))
+            .with_body(
+                json!({
+                    "client_id": "some_client_id",
+                    "client_secret": "some_client_secret",
+                })
+                .to_string(),
+            )
             .expect(1)
             .create()
     }
