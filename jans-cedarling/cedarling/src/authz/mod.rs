@@ -28,6 +28,7 @@ use std::io::Cursor;
 use std::str::FromStr;
 use std::sync::Arc;
 use trust_mode::*;
+use uuid7::Uuid;
 
 mod authorize_result;
 mod build_ctx;
@@ -250,25 +251,11 @@ impl Authz {
 
         // Log policy evaluation errors if any exist
         if let Some(diagnostics) = user_authz_diagnostic {
-            if !diagnostics.errors.is_empty() {
-                self.config.log_service.log_any(
-                    LogEntry::new_with_data(LogType::System, Some(request_id))
-                        .set_level(LogLevel::ERROR)
-                        .set_message("Policy evaluation errors for user principal".to_string())
-                        .set_error(format!("{:?}", diagnostics.errors)),
-                );
-            }
+            self.log_policy_evaluation_errors(diagnostics, "user principal", request_id);
         }
 
         if let Some(diagnostics) = workload_authz_diagnostic {
-            if !diagnostics.errors.is_empty() {
-                self.config.log_service.log_any(
-                    LogEntry::new_with_data(LogType::System, Some(request_id))
-                        .set_level(LogLevel::ERROR)
-                        .set_message("Policy evaluation errors for workload principal".to_string())
-                        .set_error(format!("{:?}", diagnostics.errors)),
-                );
-            }
+            self.log_policy_evaluation_errors(diagnostics, "workload principal", request_id);
         }
 
         let tokens_logging_info = LogTokensInfo::new(
@@ -430,14 +417,7 @@ impl Authz {
 
         // Log policy evaluation errors if any exist
         for info in &debug_authorize_info {
-            if !info.diagnostics.errors.is_empty() {
-                self.config.log_service.log_any(
-                    LogEntry::new_with_data(LogType::System, Some(request_id))
-                        .set_level(LogLevel::ERROR)
-                        .set_message(format!("Policy evaluation errors for principal {}", info.principal))
-                        .set_error(format!("{:?}", info.diagnostics.errors)),
-                );
-            }
+            self.log_policy_evaluation_errors(&info.diagnostics, &info.principal, request_id);
         }
 
         // Decision log
@@ -511,6 +491,23 @@ impl Authz {
             .config
             .entity_builder
             .build_entities(tokens, &request.resource)?)
+    }
+
+    /// Log policy evaluation errors for diagnostics
+    fn log_policy_evaluation_errors(
+        &self,
+        diagnostics: &Diagnostics,
+        principal_name: &str,
+        request_id: Uuid,
+    ) {
+        if !diagnostics.errors.is_empty() {
+            self.config.log_service.log_any(
+                LogEntry::new_with_data(LogType::Decision, Some(request_id))
+                    .set_level(LogLevel::ERROR)
+                    .set_message(format!("Policy evaluation errors for {}", principal_name))
+                    .set_error(format!("{:?}", diagnostics.errors)),
+            );
+        }
     }
 }
 
