@@ -74,7 +74,7 @@ impl Authz {
     pub(crate) async fn decode_tokens<'a>(
         &'a self,
         request: &'a Request,
-    ) -> Result<HashMap<String, Token<'a>>, AuthorizeError> {
+    ) -> Result<HashMap<String, Token>, AuthorizeError> {
         let tokens = self
             .config
             .jwt_service
