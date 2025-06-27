@@ -59,7 +59,7 @@ pub struct RefJwtStatusList {
 
 /// This struct is a wrapper over [`jsonwebtoken::Validation`] which implements an
 /// additional check for requiring custom JWT claims.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct JwtValidator {
     validation: Validation,
     required_claims: HashSet<Box<str>>,
@@ -214,10 +214,11 @@ impl JwtValidator {
 
             let jwt_status = {
                 self.status_list_cache
-                    .get(&ref_status_list.uri)
-                    .ok_or(ValidateJwtError::MissingStatusList)?
+                    .status_lists
                     .read()
                     .expect("obtain status list read lock")
+                    .get(&ref_status_list.uri)
+                    .ok_or(ValidateJwtError::MissingStatusList)?
                     .get_status(ref_status_list.idx)?
             };
 

@@ -32,7 +32,7 @@ pub type StatusListUri = String;
 /// Contains an Arc<RwLock<_>> internally so clone should be fine
 #[derive(Debug, Default, Clone)]
 pub struct StatusListCache {
-    status_lists: HashMap<StatusListUri, Arc<RwLock<StatusList>>>,
+    pub status_lists: Arc<RwLock<HashMap<StatusListUri, StatusList>>>,
 }
 
 impl StatusListCache {
@@ -86,7 +86,6 @@ impl StatusListCache {
 
         let ttl = status_list_jwt.ttl;
         let status_list: StatusList = status_list_jwt.try_into()?;
-        let status_list = Arc::new(RwLock::new(status_list));
 
         // spawn a background task to handle updating the statuslist if the JWT has a TTL
         // claim
@@ -96,20 +95,20 @@ impl StatusListCache {
                 status_list_url.clone(),
                 decoding_key.cloned(),
                 validator,
-                status_list.clone(),
+                self.status_lists.clone(),
                 logger,
             ));
         }
 
-        self.status_lists
-            .insert(status_list_url.to_string(), status_list);
+        {
+            let mut status_lists = self
+                .status_lists
+                .write()
+                .expect("acquire status_lists write lock");
+            status_lists.insert(status_list_url.to_string(), status_list);
+        }
 
         Ok(())
-    }
-
-    /// Returns the statuslist for the Given URI
-    pub fn get(&self, uri: &str) -> Option<Arc<RwLock<StatusList>>> {
-        self.status_lists.get(uri).cloned()
     }
 }
 
@@ -119,7 +118,7 @@ async fn keep_status_list_updated(
     status_list_url: Url,
     decoding_key: Option<DecodingKey>,
     validator: Arc<RwLock<JwtValidator>>,
-    status_list: Arc<RwLock<StatusList>>,
+    status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
     logger: Option<Logger>,
 ) {
     loop {
@@ -195,8 +194,20 @@ async fn keep_status_list_updated(
         };
 
         {
-            let mut lock = status_list.write().expect("obtain status list write lock");
-            *lock = updated_status_list;
+            let mut lists = status_lists.write().expect("obtain status list write lock");
+
+            if let Some(list) = lists.get_mut(status_list_url.as_str()) {
+                *list = updated_status_list;
+            } else {
+                logger.log_any(JwtLogEntry::new(
+                    format!(
+                        "missing entry for '{}' in the status list cache, will no longer keep this entry updated",
+                        status_list_url.as_str(),
+                    ),
+                    Some(LogLevel::ERROR),
+                ));
+                return;
+            };
         }
     }
 }
@@ -204,37 +215,8 @@ async fn keep_status_list_updated(
 impl From<HashMap<String, StatusList>> for StatusListCache {
     fn from(status_lists: HashMap<String, StatusList>) -> Self {
         Self {
-            status_lists: status_lists
-                .into_iter()
-                .map(|(uri, status_list)| (uri, Arc::new(RwLock::new(status_list))))
-                .collect(),
+            status_lists: Arc::new(RwLock::new(status_lists)),
         }
-    }
-}
-
-// we cannot derive PartialEqAutomaticall because of the Arc<RwLock<_>> in the
-// `status_lists` so we implement it manually.
-impl PartialEq for StatusListCache {
-    fn eq(&self, other: &Self) -> bool {
-        let self_status_lists = self
-            .status_lists
-            .clone()
-            .into_iter()
-            .map(|(uri, status_list)| {
-                let status_list = status_list.read().unwrap();
-                (uri, status_list.clone())
-            })
-            .collect::<HashMap<String, StatusList>>();
-        let other_status_lists = other
-            .status_lists
-            .clone()
-            .into_iter()
-            .map(|(uri, status_list)| {
-                let status_list = status_list.read().unwrap();
-                (uri, status_list.clone())
-            })
-            .collect::<HashMap<String, StatusList>>();
-        self_status_lists == other_status_lists
     }
 }
 
@@ -289,13 +271,17 @@ mod test {
             .unwrap();
 
         let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
-        let status_list = status_list
-            .get(&status_list_uri)
-            .expect("should have a status list");
 
         // Check if the status list is the same as we first generated
         {
-            let status_list = status_list.read().unwrap();
+            let lists = status_list
+                .status_lists
+                .read()
+                .expect("obtain status_lists read lock");
+            let status_list = lists
+                .get(&status_list_uri)
+                .expect("should have a status list");
+
             assert_eq!(
                 *status_list,
                 StatusList {
@@ -309,12 +295,19 @@ mod test {
         // Update the status in the server
         mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b0000_0001], None);
 
-        // Wait for the token to expire
+        // Wait for the token to expire and get updated
         tokio::time::sleep(Duration::from_secs(3)).await;
 
         // Check if the status list got updated
         {
-            let status_list = status_list.read().unwrap();
+            let lists = status_list
+                .status_lists
+                .read()
+                .expect("obtain status_lists read lock");
+            let status_list = lists
+                .get(&status_list_uri)
+                .expect("should have a status list");
+
             assert_eq!(
                 *status_list,
                 StatusList {
