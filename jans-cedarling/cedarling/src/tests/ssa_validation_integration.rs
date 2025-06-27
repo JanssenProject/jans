@@ -131,7 +131,7 @@ async fn test_cedarling_without_ssa() {
 #[tokio::test]
 async fn test_ssa_validation_structure() {
     // Test SSA JWT structure validation
-    use crate::lock::ssa_validation::{validate_ssa_structure, SsaValidationError};
+    use crate::lock::ssa_validation::{validate_ssa_structure_with_config, SsaValidationConfig, SsaValidationError};
     use crate::jwt::{DecodedJwt, DecodedJwtHeader, DecodedJwtClaims};
     use jsonwebtoken::Algorithm;
 
@@ -157,7 +157,8 @@ async fn test_ssa_validation_structure() {
         claims: DecodedJwtClaims { inner: valid_claims },
     };
 
-    let result = validate_ssa_structure(&valid_decoded_jwt);
+    let config = SsaValidationConfig::default();
+    let result = validate_ssa_structure_with_config(&valid_decoded_jwt, &config);
     assert!(result.is_ok());
 
     // Test missing required claims
@@ -177,7 +178,7 @@ async fn test_ssa_validation_structure() {
         claims: DecodedJwtClaims { inner: invalid_claims },
     };
 
-    let result = validate_ssa_structure(&invalid_decoded_jwt);
+    let result = validate_ssa_structure_with_config(&invalid_decoded_jwt, &config);
     assert!(matches!(result, Err(SsaValidationError::MissingRequiredClaims(_))));
 
     // Test invalid grant_types (not an array)
@@ -202,7 +203,7 @@ async fn test_ssa_validation_structure() {
         claims: DecodedJwtClaims { inner: invalid_grant_types_claims },
     };
 
-    let result = validate_ssa_structure(&invalid_grant_types_jwt);
+    let result = validate_ssa_structure_with_config(&invalid_grant_types_jwt, &config);
     assert!(matches!(result, Err(SsaValidationError::InvalidGrantTypes)));
 }
 

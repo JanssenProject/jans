@@ -300,11 +300,28 @@ mod test {
     use std::time::Duration;
     use tokio::time::sleep;
     use uuid7::Uuid;
+    use jsonwebtoken::{encode, Header, EncodingKey};
+
+    fn generate_test_jwt() -> String {
+        let mut header = Header::new(jsonwebtoken::Algorithm::HS256);
+        header.kid = Some("test-kid".to_string());
+        let claims = json!({
+            "software_id": "test_software",
+            "grant_types": ["client_credentials"],
+            "org_id": "test_org",
+            "iss": "https://test.issuer.com",
+            "software_roles": ["cedarling"],
+            "exp": 9999999999u64,
+            "iat": 1111111111u64,
+            "jti": "test-jti-123"
+        });
+        encode(&header, &claims, &EncodingKey::from_secret(b"test-key")).unwrap()
+    }
 
     #[tokio::test]
     async fn test_lock_service() {
         let pdp_id = PdpID::new();
-        let ssa_jwt = "eyJraWQiOiJzc2FfOTgwYTQ0ZDQtZWE3OS00YTM1LThlNjMtNzlhNzg4NTNmYzUwX3NpZ19yczI1NiIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJzb2Z0d2FyZV9pZCI6IkNlZGFybGluZ1Rlc3QiLCJncmFudF90eXBlcyI6WyJhdXRob3JpemF0aW9uX2NvZGUiLCJyZWZyZXNoX3Rva2VuIl0sIm9yZ19pZCI6InRlc3QiLCJpc3MiOiJodHRwczovL2RlbW9leGFtcGxlLmphbnMuaW8iLCJzb2Z0d2FyZV9yb2xlcyI6WyJjZWRhcmxpbmciXSwiZXhwIjozMzE5NzE3ODEyLCJpYXQiOjE3NDI5MTc4MTMsImp0aSI6IjM5NTA0NTRlLTM5MWMtNDlhOS05YzYxLTY4MGMyNWE4MDk0ZCJ9.INA5qvpheWvJe6DJaeLkOYt1YH3W9gJQ3yy5Cr5G9_QbzazV23FMJDH2Rbysauk4YNC0oIsTL4MBQ_dRn3YaPLapOhizIlxZQF_uHBpYnopsk6KxgiRQTotg1Kw7Kwsi1RHtfHXpplSS15Dc-9QrOIGbNu44zEt1F5FYV5feW2c0u5HIRISoMNPutOYfMH18bZaBM28N8BssuqLv5X_Bc8EuSkmNTERP5L4khv6Mi3uVItkgK9xTbMKCpUstH_LchT1BKD_pTTMAQx6g6TOf3gnwKYQcmQhjJWFUbXnKCjghExV4PrYc6P8YaXdFnPBYoovd8FxS5qrX8trkh6pxeQ";
+        let ssa_jwt = generate_test_jwt();
 
         let mut mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
@@ -312,20 +329,21 @@ mod test {
         let (lock_config_uri, lock_config_endpoint) =
             mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
         let oidc_endpoint = mock_oidc_endpoint(&mut mock_idp_server);
-        let dcr_endpoint = mock_dcr_endpoint(&mut mock_idp_server, pdp_id, ssa_jwt);
+        let jwks_endpoint = mock_jwks_endpoint(&mut mock_idp_server);
+        let dcr_endpoint = mock_dcr_endpoint(&mut mock_idp_server, pdp_id, &ssa_jwt);
         let token_endpoint = mock_token_endpoint(&mut mock_idp_server);
         let log_endpoint = mock_log_endpoint(&mut mock_lock_server);
         
         let config = LockServiceConfig {
             config_uri: lock_config_uri,
             dynamic_config: false,
-            ssa_jwt: Some(ssa_jwt.to_string()),
+            ssa_jwt: Some(ssa_jwt),
             log_interval: Some(Duration::from_millis(100)),
             health_interval: None,
             telemetry_interval: None,
             listen_sse: false,
             log_level: LogLevel::TRACE,
-            accept_invalid_certs: false,
+            accept_invalid_certs: true, // Allow invalid certs for testing
         };
 
         // Test startup
@@ -334,6 +352,7 @@ mod test {
             .expect("build lock logger");
         lock_config_endpoint.assert();
         oidc_endpoint.assert();
+        jwks_endpoint.assert();
         dcr_endpoint.assert();
         token_endpoint.assert();
 
@@ -498,6 +517,28 @@ mod test {
                 json!({
                     "registration_endpoint": registration_endpoint,
                     "token_endpoint": token_endpoint,
+                })
+                .to_string(),
+            )
+            .expect(1)
+            .create()
+    }
+
+    /// Mocks the JWKS endpoint for SSA validation
+    fn mock_jwks_endpoint(server: &mut ServerGuard) -> Mock {
+        let jwks_path = "/jans-auth/restv1/jwks";
+
+        server
+            .mock("GET", jwks_path)
+            .with_body(
+                json!({
+                    "keys": [
+                        {
+                            "kid": "test-kid",
+                            "alg": "HS256",
+                            "k": "dGVzdC1rZXk" // URL-safe base64 for "test-key" (no padding)
+                        }
+                    ]
                 })
                 .to_string(),
             )
