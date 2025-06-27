@@ -1,6 +1,6 @@
 # janssen-all-in-one
 
-![Version: 1.8.0-1](https://img.shields.io/badge/Version-1.8.0--1-informational?style=flat-square) ![AppVersion: 1.8.0-1](https://img.shields.io/badge/AppVersion-1.8.0--1-informational?style=flat-square)
+![Version: 1.8.0](https://img.shields.io/badge/Version-1.8.0-informational?style=flat-square) ![AppVersion: 1.8.0](https://img.shields.io/badge/AppVersion-1.8.0-informational?style=flat-square)
 
 Janssen Access and Identity Management All-in-One Chart. This chart deploys the selected janssen microservice all in one deployment.
 
