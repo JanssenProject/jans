@@ -15,7 +15,7 @@
         </RollingFile>
 		
         <RollingFile name="AUDIT_FILE" fileName="${sys:log.base}/logs/configapi-audit.log" filePattern="${sys:log.base}/logs/configapi-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="%d{dd-MM-YYYY HH:mm:ss.SSS} %m%n" />
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %m%n" />
 
             <Policies>
                 <SizeBasedTriggeringPolicy size="5 MB" />
@@ -69,7 +69,7 @@
             <AppenderRef ref="FILE" />
         </Logger>
 		
-		<Logger name="audit" level="INFO" additivity="false">
+		<Logger name="audit" level="${log4j.default.log.level}" additivity="false">
             <AppenderRef ref="AUDIT_FILE" />
         </Logger>
 

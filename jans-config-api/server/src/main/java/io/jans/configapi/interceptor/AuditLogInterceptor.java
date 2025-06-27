@@ -18,6 +18,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriInfo;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -47,14 +49,19 @@ public class AuditLogInterceptor {
 
         try {
 
+            
+            //return if audit disabled
             if (apiAppConfiguration.isDisableAuditLogger()) {
                 AUDIT_LOG.debug("Audit is disabled by disableAuditLogger config.");
                 return context.proceed();
             }
-
+            
+            //Log for audit
             HttpServletRequest request = ((BaseResource) context.getTarget()).getHttpRequest();
             HttpHeaders httpHeaders = ((BaseResource) context.getTarget()).getHttpHeaders();
             UriInfo uriInfo = ((BaseResource) context.getTarget()).getUriInfo();
+            
+            
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
 
@@ -64,14 +71,44 @@ public class AuditLogInterceptor {
                 String beanClassName = context.getClass().getName();
                 String method = request.getMethod();
                 String client = httpHeaders.getHeaderString("jans-client");
+                String userInum = httpHeaders.getHeaderString("User-inum");
 
-                AUDIT_LOG.info("{} {} using client:{}", getResource(uriInfo.getPath()),getAction(method), client);
+                if (StringUtils.isNotBlank(method) && !method.equals("GET") ) {
+                    StringBuilder data = new StringBuilder(getResource(uriInfo.getPath()));
+                    if(method.equals("PATCH")) { 
+                        data.append("{");
+                        data.append(getData(context));
+                        data.append("}");
+                    }
+                    AUDIT_LOG.info("User:{} {} {} {} using client:{}", userInum, getAction(method), data.toString(), client);
+                }
             }
 
         } catch (Exception ex) {
             LOG.error("Not able to log audit details due to error:{}", ex);
         }
         return context.proceed();
+    }
+    
+    private String getData(InvocationContext context) {
+        LOG.info("Process Audit Log Interceptor - context:{}", context);
+        jakarta.ws.rs.Path pathAnnotation = context.getMethod().getAnnotation(jakarta.ws.rs.Path.class);
+        if(pathAnnotation!=null) {
+            AUDIT_LOG.info("pathAnnotation.value():{} ", pathAnnotation.value()); 
+        }
+        StringBuilder sb = new StringBuilder();
+        Parameter[] parameters = context.getMethod().getParameters();
+
+        if (parameters != null && parameters.length > 0) {
+            for (int i = 0; i < parameters.length; i++) {               
+                sb.append(parameters[i].getName());
+                
+                if(i != parameters.length-1) {
+                    sb.append(",");
+                }
+            }
+        }
+        return sb.toString();
     }
 
     private String getAction(String method) {
