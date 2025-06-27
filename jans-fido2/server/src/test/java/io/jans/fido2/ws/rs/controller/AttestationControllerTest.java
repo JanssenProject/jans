@@ -187,4 +187,92 @@ class AttestationControllerTest {
         verifyNoInteractions(log, errorResponseFactory);
     }
 
+    @Test
+    void register_whenUsernameIsMissing_shouldThrowBadRequest() {
+        AttestationOptions attestationOptions = new AttestationOptions();
+        when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
+        when(attestationService.options(any())).thenThrow(
+                new BadRequestException(Response.status(400).entity("Missing username").build())
+        );
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> attestationController.register(attestationOptions));
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("Missing username", ex.getResponse().getEntity());
+        verify(appConfiguration).getFido2Configuration();
+        verify(attestationService).options(any());
+    }
+
+
+    @Test
+    void register_whenOriginIsInvalid_shouldThrowBadRequest() {
+        AttestationOptions attestationOptions = new AttestationOptions();
+        attestationOptions.setUsername("user");
+        attestationOptions.setDisplayName("User Display");
+        attestationOptions.setOrigin("https://invalid-origin.com");
+        when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
+        when(attestationService.options(any())).thenThrow(
+                new BadRequestException(Response.status(400).entity("Invalid origin").build())
+        );
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> attestationController.register(attestationOptions));
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("Invalid origin", ex.getResponse().getEntity());
+        verify(appConfiguration).getFido2Configuration();
+        verify(attestationService).options(any());
+    }
+
+
+    @Test
+    void verify_whenChallengeIsInvalid_shouldThrowBadRequest() {
+        AttestationResult attestationResult = new AttestationResult();
+
+        when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
+        when(attestationService.verify(any()))
+                .thenThrow(new BadRequestException(Response.status(400).entity("Invalid challenge").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> attestationController.verify(attestationResult));
+
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("Invalid challenge", ex.getResponse().getEntity());
+
+        verify(appConfiguration).getFido2Configuration();
+        verify(attestationService).verify(any());
+    }
+
+
+    @Test
+    void register_whenValidInput_shouldReturn200WithOptions() {
+        AttestationOptions options = new AttestationOptions();
+        options.setUsername("john");
+        options.setDisplayName("John");
+
+        PublicKeyCredentialCreationOptions creationOptions = new PublicKeyCredentialCreationOptions();
+        when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
+        when(attestationService.options(options)).thenReturn(creationOptions);
+
+        Response response = attestationController.register(options);
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+        assertEquals(creationOptions, response.getEntity());
+
+        verify(appConfiguration).getFido2Configuration();
+        verify(attestationService).options(options);
+    }
+
+    @Test
+    void verify_whenValidInput_shouldReturn200WithAttestationResult() {
+        AttestationResult result = new AttestationResult();
+        AttestationOrAssertionResponse responseData = mock(AttestationOrAssertionResponse.class);
+        when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
+        when(attestationService.verify(result)).thenReturn(responseData);
+        Response response = attestationController.verify(result);
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+        assertEquals(responseData, response.getEntity());
+        verify(appConfiguration).getFido2Configuration();
+        verify(attestationService).verify(result);
+    }
 }
