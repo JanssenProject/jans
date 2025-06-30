@@ -58,11 +58,7 @@ High-level steps involve:
 
 1. [Install Poetry](https://python-poetry.org/docs/#installation)
 2. Activate the Virtual Environment
-3. Navigate to the Janssen Codebase Root Directory
-   ```bash title="Command"
-   cd /janssen-root-directory
-   ```
-4. Run [MkDocs locally](https://squidfunk.github.io/mkdocs-material/creating-your-site/#previewing-as-you-write)
+3. Run MkDocs locally
    ```bash title="Command"
    mkdocs serve -f path/to/mkdocs.yml
    ```  
