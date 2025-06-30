@@ -59,6 +59,7 @@ public class ExecutionContext {
     private TokenEntity idTokenEntity;
     private TokenEntity accessTokenEntity;
     private TokenEntity refreshTokenEntity;
+    private TokenEntity logoutStatusJwtEntity;
 
     private String dpop;
     private String certAsPem;
@@ -147,6 +148,7 @@ public class ExecutionContext {
         executionContext.idTokenEntity = context.idTokenEntity;
         executionContext.accessTokenEntity = context.accessTokenEntity;
         executionContext.refreshTokenEntity = context.refreshTokenEntity;
+        executionContext.logoutStatusJwtEntity = context.logoutStatusJwtEntity;
         executionContext.dpop = context.dpop;
         executionContext.certAsPem = context.certAsPem;
         executionContext.deviceSecret = context.deviceSecret;
@@ -443,6 +445,15 @@ public class ExecutionContext {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public TokenEntity getLogoutStatusJwtEntity() {
+        return logoutStatusJwtEntity;
+    }
+
+    public ExecutionContext setLogoutStatusJwtEntity(TokenEntity logoutStatusJwtEntity) {
+        this.logoutStatusJwtEntity = logoutStatusJwtEntity;
+        return this;
     }
 
     public List<SessionId> getUserSessions() {

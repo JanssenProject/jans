@@ -2,17 +2,17 @@
 
 This guide explores the process of generating the Kotlin binding for Cedarling using [Cedarling UniFFI](https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_uniffi). The Kotlin binding is then wrapped in a Java class to enable convenient use in Java applications.
 
-## Building from Source
+## Installation
 
-If you are using pre-built binaries from the [Jans releases page](https://github.com/JanssenProject/jans/releases), you can skip this step. Otherwise, follow these instructions to build from source.
+### Building from Source
 
-### Prerequisites:
+#### Prerequisites:
 
 - Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
-- Java Development Kit (JDK): version 17
+- Java Development Kit (JDK): version 11 or higher
 - Apache Maven: Install it from [Apache Maven Website](https://maven.apache.org/download.cgi)
 
-### Building from Kotlin binding
+#### Building from Kotlin binding
 
 1. Build Cedarling by executing below command from `./jans/jans-cedarling` of cloned jans project:
 
@@ -40,6 +40,27 @@ cp ./target/release/{build_file} ./bindings/cedarling-java/src/main/resources
  mvn clean install
 ```
 
+### Using Cedarling-java Maven dependency
+
+To use Cedarling Java bindings in Java Maven Project add following `repository` and `dependency` in pom.xml of the project
+
+```declarative
+    <repositories>
+        <repository>
+            <id>jans</id>
+            <name>Janssen project repository</name>
+            <url>https://maven.jans.io/maven</url>
+        </repository>
+    </repositories>
+```
+```declarative
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>cedarling-java</artifactId>
+            <version>{latest-jans-stable-version}</version>
+        </dependency>
+```
+
 ## Recipes
 
 ### Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
@@ -47,8 +68,8 @@ cp ./target/release/{build_file} ./bindings/cedarling-java/src/main/resources
 **Note:** This recipe is compatible with Jans version 1.4.0 and earlier.
 
 1. Upload [bootstrap.json](./docs/bootstrap.json), [policy-store.json](./docs/policy-store.json), [action.txt](./docs/action.txt), [context.json](./docs/context.json), [principals.json](./docs/principals.json) and [resource.json](./docs/resource.json) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server.
-2. Upload the generate `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
-3. The following Post Authn script has been created for calling Cedarling authorization. Add and enable the following [Post Authn custom script](./docs/sample_cedarling_post_authn.txt) (in Java) with following Custom Properties. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
+2. Upload the generated `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
+3. The following Post Authn script has been created for calling Cedarling authorization. Add and enable the following [Post Authn custom script](./docs/sample_cedarling_post_authn.java) (in Java) with following Custom Properties. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
 
 |Key|Values|
 |---|------|

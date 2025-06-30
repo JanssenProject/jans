@@ -18,6 +18,7 @@ public enum TokenType {
     LONG_LIVED_ACCESS_TOKEN("access_token"),
     REFRESH_TOKEN("refresh_token"),
     AUTHORIZATION_CODE("authorization_code"),
+    LOGOUT_STATUS_JWT("logout_status_jwt"),
     TX_TOKEN("tx_token");
 
     private final String value;
