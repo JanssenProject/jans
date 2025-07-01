@@ -33,7 +33,7 @@ commercial distribution of Janssen Project Components called
 
 **Social**: [Linkedin](https://www.linkedin.com/company/janssen-project) | [YouTube](https://www.youtube.com/@JanssenProject)
 
-**Learn**: [Gluu Academy](https://learn.gluu.org/)
+**Resources to learn more**: [Gluu Academy](https://learn.gluu.org/)
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/JanssenProject/jans/badge)](https://scorecard.dev/viewer/?uri=github.com/JanssenProject/jans)
