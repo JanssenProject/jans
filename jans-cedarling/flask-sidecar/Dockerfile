@@ -31,7 +31,7 @@ RUN pip3 install "poetry==$POETRY_VERSION" gunicorn \
 # ===============
 # Project setup
 # ===============
-ENV JANS_SOURCE_VERSION=7ebc2a5991ad39f1a8f58b6c8a25dd5b88d18713
+ENV JANS_SOURCE_VERSION=329a1139194fd9819506150ec73225b425767064
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
@@ -54,10 +54,8 @@ RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject
         && version=$(sed -n 's/.*version = "\([0-9].[0-9].[0-9]\)"/\1/p' Cargo.toml) \
         && echo "${version}" > /api/cedarling_version \
         && release_version="${version}" \
-        && if [ "$version" = "0.0.0" ] || [[ "$version" == *"nightly"* ]]; then release_version="nightly"; fi \
-        && (wget -q https://github.com/JanssenProject/jans/releases/download/v"${release_version}"/cedarling_python-"${version}"-cp310-cp310-manylinux_2_34_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_34_x86_64.whl || \
-            wget -q https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp310-cp310-manylinux_2_34_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_34_x86_64.whl || \
-            echo "Warning: Could not download wheel file, will try to build from source") \
+        && if [ "$version" = "0.0.0" ]; then release_version="nightly"; fi \
+        && wget -q https://github.com/JanssenProject/jans/releases/download/"${release_version}"/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl \
         && rm -rf /tmp/jans
 
 # Setting up proper permissions:
@@ -65,7 +63,7 @@ RUN chmod -R g=u /api \
     && chown -R 1000:1000 /api
 
 # Project initialization:
-RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp310-cp310-manylinux_2_34_x86_64.whl \
+RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp310-cp310-manylinux_2_31_x86_64.whl \
     && poetry install --no-dev --no-root --no-interaction --no-ansi \
     # Cleaning poetry installation's cache for production:
     && rm -rf "$POETRY_CACHE_DIR"
@@ -79,7 +77,7 @@ EXPOSE 5000
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-flask-sidecar" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.8.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="AuthZen Flask API" \
     org.opencontainers.image.description="Flask API that implements the [AuthZen](https://openid.github.io/authzen/) specification with the [cedarling](../) python binding."
 

@@ -5,7 +5,7 @@
 	<artifactId>jans-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>jans-bom</name>
-	<version>1.8.0</version>
+	<version>0.0.0-nightly</version>
 
     <distributionManagement>
 	  <repository>
@@ -441,7 +441,7 @@
 			<!-- <dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
-				<version>1.8.0</version>
+				<version>0.0.0-nightly</version>
 			</dependency> -->
 
 			<!-- hibernate -->
@@ -504,7 +504,7 @@
 			<dependency>
 			    <groupId>commons-beanutils</groupId>
 			    <artifactId>commons-beanutils</artifactId>
-			    <version>1.11.0</version>
+			    <version>1.9.4</version>
 			</dependency>
    			<dependency>
 				<groupId>org.apache.commons</groupId>
