@@ -115,6 +115,7 @@ public interface PersistenceEntryManager extends EntityManager {
 	String getPersistenceType();
     String getPersistenceType(String primaryKey);
     PersistenceMetadata getPersistenceMetadata(String primaryKey);
+    Map<String, Map<String, AttributeType>> getTableColumnsMap();
 
     Date decodeTime(String primaryKey, String date);
     String encodeTime(String primaryKey, Date date);
