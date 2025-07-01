@@ -67,21 +67,22 @@ public class AuditLogInterceptor {
 
             // Log if enabled
             if (auditLogConf.isEnabled() && !ignoreMethod(context, auditLogConf)) {
+                
                 // Request audit
-                String beanClassName = context.getClass().getName();
                 String method = request.getMethod();
                 String client = httpHeaders.getHeaderString("jans-client");
                 String userInum = httpHeaders.getHeaderString("User-inum");
-
-                if (StringUtils.isNotBlank(method) && !method.equals("GET") ) {
+                LOG.error("Audit log method:{}, client:{}, userInum:{}", method, client, userInum);
+              
+               // if (StringUtils.isNotBlank(method) && !method.equals("GET") ) {
                     StringBuilder data = new StringBuilder(getResource(uriInfo.getPath()));
-                    if(method.equals("PATCH")) { 
+                  //  if(method.equals("PATCH")) { 
                         data.append("{");
                         data.append(getData(context));
                         data.append("}");
-                    }
-                    AUDIT_LOG.info("User:{} {} {} {} using client:{}", userInum, getAction(method), data.toString(), client);
-                }
+                    //}
+                    AUDIT_LOG.info("User:{} {} {} using client:{}", userInum, getAction(method), data.toString(), client);
+               // }
             }
 
         } catch (Exception ex) {
@@ -91,17 +92,18 @@ public class AuditLogInterceptor {
     }
     
     private String getData(InvocationContext context) {
-        LOG.info("Process Audit Log Interceptor - context:{}", context);
+        LOG.error("Process Audit Log Interceptor - context:{}", context);
         jakarta.ws.rs.Path pathAnnotation = context.getMethod().getAnnotation(jakarta.ws.rs.Path.class);
         if(pathAnnotation!=null) {
-            AUDIT_LOG.info("pathAnnotation.value():{} ", pathAnnotation.value()); 
+            LOG.error("pathAnnotation.value():{} ", pathAnnotation.value()); 
         }
         StringBuilder sb = new StringBuilder();
         Parameter[] parameters = context.getMethod().getParameters();
-
+        LOG.error("parameters():{} ", parameters); 
         if (parameters != null && parameters.length > 0) {
             for (int i = 0; i < parameters.length; i++) {               
                 sb.append(parameters[i].getName());
+                LOG.error("parameters[i].getName():{} ", parameters[i].getName());
                 
                 if(i != parameters.length-1) {
                     sb.append(",");
