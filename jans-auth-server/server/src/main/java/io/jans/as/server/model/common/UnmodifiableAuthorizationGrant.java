@@ -76,6 +76,11 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
+    public LogoutStatusJwt createLogoutStatusJwt(ExecutionContext executionContext) {
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
+    }
+
+    @Override
     public AccessToken createAccessToken(ExecutionContext executionContext) {
         throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
@@ -173,13 +178,33 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
+    public Set<String> getLogoutStatusJwtsCodes() {
+        return grant.getLogoutStatusJwtsCodes();
+    }
+
+    @Override
     public Set<String> getAccessTokensCodes() {
         return grant.getAccessTokensCodes();
     }
 
     @Override
+    public List<LogoutStatusJwt> getLogoutStatusJwts() {
+        return grant.getLogoutStatusJwts();
+    }
+
+    @Override
     public List<RefreshToken> getRefreshTokens() {
         return grant.getRefreshTokens();
+    }
+
+    @Override
+    public void setLogoutStatusJwts(List<LogoutStatusJwt> tokens) {
+        grant.setLogoutStatusJwts(tokens);
+    }
+
+    @Override
+    public LogoutStatusJwt getLogoutStatusJwt(String logoutStatusJwtCode) {
+        return grant.getLogoutStatusJwt(logoutStatusJwtCode);
     }
 
     @Override

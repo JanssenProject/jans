@@ -116,7 +116,6 @@ is the main channel for community support. There is also a
 
 Check out the [latest release]((https://github.com/JanssenProject/jans/releases/latest)) of the Janssen Project for new features and updates.
 
-
 ### Janssen History
 
 In 2020, [Gluu](https://gluu.org) decided to give contributors a role in the

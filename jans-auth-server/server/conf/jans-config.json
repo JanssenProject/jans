@@ -163,7 +163,7 @@
         "A128GCM",
         "A256GCM"
     ],
-    "sessionJwtSigningAlgValuesSupported":[
+    "logoutStatusJwtSigningAlgValuesSupported":[
         "HS256",
         "HS384",
         "HS512",
