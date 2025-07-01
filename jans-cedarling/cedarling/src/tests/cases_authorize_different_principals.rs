@@ -136,7 +136,11 @@ async fn success_test_for_principal_workload() {
             id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
-        crate::EntityBuilderConfig::default().with_workload(),
+        {
+            let mut config = crate::EntityBuilderConfig::default().with_workload();
+            config.build_user = false;
+            config
+        },
     )
     .await;
 
@@ -176,7 +180,11 @@ async fn success_test_for_principal_user() {
             id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
-        crate::EntityBuilderConfig::default().with_user(),
+        {
+            let mut config = crate::EntityBuilderConfig::default().with_user();
+            config.build_workload = false;
+            config
+        },
     )
     .await;
 
@@ -220,7 +228,11 @@ async fn success_test_for_principal_person_role() {
             id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
-        crate::EntityBuilderConfig::default().with_user(),
+        {
+            let mut config = crate::EntityBuilderConfig::default().with_user();
+            config.build_workload = false;
+            config
+        },
     )
     .await;
 

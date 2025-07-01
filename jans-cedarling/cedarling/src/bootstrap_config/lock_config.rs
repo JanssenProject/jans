@@ -58,7 +58,9 @@ impl Default for LockServiceConfig {
     fn default() -> Self {
         Self {
             log_level: LogLevel::INFO,
-            config_uri: "http://localhost:8080/.well-known/lock-server-configuration".parse().unwrap(),
+            config_uri: "http://localhost:8080/.well-known/lock-server-configuration"
+                .parse()
+                .expect("Failed to parse default lock server configuration URI"),
             dynamic_config: false,
             ssa_jwt: None,
             log_interval: None,
@@ -74,7 +76,9 @@ impl From<LockServiceConfigRaw> for LockServiceConfig {
     fn from(raw: LockServiceConfigRaw) -> Self {
         Self {
             log_level: raw.log_level,
-            config_uri: raw.config_uri.parse().unwrap(),
+            config_uri: raw.config_uri
+                .parse()
+                .expect("Failed to parse lock server configuration URI from raw config"),
             dynamic_config: raw.dynamic_config,
             ssa_jwt: raw.ssa_jwt,
             log_interval: raw.log_interval,

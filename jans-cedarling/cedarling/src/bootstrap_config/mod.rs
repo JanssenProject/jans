@@ -83,14 +83,14 @@ impl BootstrapConfig {
 
         let raw: BootstrapConfigRaw = config.try_deserialize()
             .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
-        Ok(raw.into())
+        raw.try_into()
     }
 
     /// Loads a `BootstrapConfig` from a JSON string
     pub fn load_from_json(json: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let raw: BootstrapConfigRaw = serde_json::from_str(json)
             .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
-        Ok(raw.into())
+        raw.try_into()
     }
 
     /// Load config from environment variables.
@@ -105,7 +105,7 @@ impl BootstrapConfig {
         let raw: BootstrapConfigRaw = config.try_deserialize()
             .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
 
-        Ok(raw.into())
+        raw.try_into()
     }
 
     /// Loads the default configuration bundled with the library.
@@ -129,15 +129,15 @@ impl BootstrapConfig {
         let raw: BootstrapConfigRaw = config.try_deserialize()
             .map_err(|e| BootstrapConfigLoadingError::DecodingYAML(e.to_string()))?;
         
-        Ok(raw.into())
+        raw.try_into()
     }
-
-    // Implementation moved to decode.rs
 }
 
-impl From<BootstrapConfigRaw> for BootstrapConfig {
-    fn from(raw: BootstrapConfigRaw) -> Self {
-        Self::from_raw_config(&raw).expect("Failed to convert BootstrapConfigRaw to BootstrapConfig")
+impl TryFrom<BootstrapConfigRaw> for BootstrapConfig {
+    type Error = BootstrapConfigLoadingError;
+
+    fn try_from(raw: BootstrapConfigRaw) -> Result<Self, Self::Error> {
+        Self::from_raw_config(&raw)
     }
 }
 

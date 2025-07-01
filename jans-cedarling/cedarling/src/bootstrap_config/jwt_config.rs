@@ -211,24 +211,45 @@ pub struct JwtConfigRaw {
 
 impl From<JwtConfigRaw> for JwtConfig {
     fn from(raw: JwtConfigRaw) -> Self {
+        let mut supported_algorithms = HashSet::new();
+        let mut unsupported_algorithms = Vec::new();
+
+        for alg in raw.signature_algorithms_supported {
+            let algorithm = match alg.as_str() {
+                "HS256" => Some(Algorithm::HS256),
+                "HS384" => Some(Algorithm::HS384),
+                "HS512" => Some(Algorithm::HS512),
+                "RS256" => Some(Algorithm::RS256),
+                "RS384" => Some(Algorithm::RS384),
+                "RS512" => Some(Algorithm::RS512),
+                "ES256" => Some(Algorithm::ES256),
+                "ES384" => Some(Algorithm::ES384),
+                "PS256" => Some(Algorithm::PS256),
+                "PS384" => Some(Algorithm::PS384),
+                "PS512" => Some(Algorithm::PS512),
+                "EdDSA" => Some(Algorithm::EdDSA),
+                _ => {
+                    unsupported_algorithms.push(alg);
+                    None
+                }
+            };
+            
+            if let Some(alg) = algorithm {
+                supported_algorithms.insert(alg);
+            }
+        }
+
+        // Log warnings for unsupported algorithms
+        if !unsupported_algorithms.is_empty() {
+            eprintln!("Warning: Unsupported JWT signature algorithms were ignored: {}", 
+                     unsupported_algorithms.join(", "));
+        }
+
         Self {
             jwks: raw.jwks,
             jwt_sig_validation: raw.jwt_sig_validation,
             jwt_status_validation: raw.jwt_status_validation,
-            signature_algorithms_supported: raw.signature_algorithms_supported
-                .into_iter()
-                .filter_map(|alg| match alg.as_str() {
-                    "HS256" => Some(Algorithm::HS256),
-                    "HS384" => Some(Algorithm::HS384),
-                    "HS512" => Some(Algorithm::HS512),
-                    "RS256" => Some(Algorithm::RS256),
-                    "RS384" => Some(Algorithm::RS384),
-                    "RS512" => Some(Algorithm::RS512),
-                    "ES256" => Some(Algorithm::ES256),
-                    "ES384" => Some(Algorithm::ES384),
-                    _ => None,
-                })
-                .collect(),
+            signature_algorithms_supported: supported_algorithms,
         }
     }
 }

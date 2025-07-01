@@ -41,7 +41,7 @@ pub struct AuthorizationConfig {
 
     /// Sets the validation level for ID tokens.
     ///
-    /// The available levels are [`Never`] and [`Strict`].
+    /// The available levels are [`Always`], [`Never`], [`IfPresent`], and [`Strict`].
     ///
     /// # Strict Mode
     ///
@@ -53,7 +53,9 @@ pub struct AuthorizationConfig {
     ///     - Its `sub` (subject) must match the `id_token`'s `sub`.
     ///     - Its `aud` (audience) must match the `access_token`'s `client_id`.
     ///
+    /// [`Always`]: IdTokenTrustMode::Always
     /// [`Never`]: IdTokenTrustMode::Never
+    /// [`IfPresent`]: IdTokenTrustMode::IfPresent
     /// [`Strict`]: IdTokenTrustMode::Strict
     pub id_token_trust_mode: IdTokenTrustMode,
 }

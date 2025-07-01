@@ -81,8 +81,8 @@ impl Default for EntityBuilderConfig {
                 role: DEFAULT_ROLE_ENTITY_NAME.to_string(),
                 iss: DEFAULT_ISS_ENTITY_NAME.to_string(),
             },
-            build_workload: false,
-            build_user: false,
+            build_workload: true,
+            build_user: true,
             unsigned_role_id_src: UnsignedRoleIdSrc(DEFAULT_UNSIGNED_ROLE_ID_SRC.to_string()),
         }
     }
