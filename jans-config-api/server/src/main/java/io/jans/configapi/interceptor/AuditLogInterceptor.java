@@ -11,6 +11,7 @@ import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.model.configuration.AuditLogConf;
 import io.jans.configapi.util.AuthUtil;
+import io.jans.configapi.core.util.Jackson;
 
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
@@ -25,9 +26,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.fge.jsonpatch.JsonPatch;
+
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.fge.jsonpatch.JsonPatchOperation;
 
 @Interceptor
 @RequestAuditInterceptor
@@ -64,7 +70,7 @@ public class AuditLogInterceptor {
             
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
-
+            processRequest(context);
             // Log if enabled
             if (auditLogConf.isEnabled() && !ignoreMethod(context, auditLogConf)) {
                 
@@ -78,9 +84,11 @@ public class AuditLogInterceptor {
                     StringBuilder data = new StringBuilder(getResource(uriInfo.getPath()));
                   //  if(method.equals("PATCH")) { 
                         data.append("{");
-                        data.append(getData(context));
+                        processRequest(context);
+                       // data.append(processRequest(context));
                         data.append("}");
                     //}
+                        //AUDIT_LOG
                     AUDIT_LOG.info("User:{} {} {} using client:{}", userInum, getAction(method), data.toString(), client);
                // }
             }
@@ -91,19 +99,48 @@ public class AuditLogInterceptor {
         return context.proceed();
     }
     
+    private void processRequest(InvocationContext context) {
+        AUDIT_LOG.error("Process Audit Log Interceptor - context:{}", context);
+
+        Object[] ctxParameters = context.getParameters();
+        Method method = context.getMethod();
+        int paramCount = method.getParameterCount();
+        Parameter[] parameters = method.getParameters();
+        Class[] clazzArray = method.getParameterTypes();
+
+        AUDIT_LOG.error("Processing  Data -  paramCount:{} , parameters:{}, clazzArray:{} ",
+                paramCount, parameters, clazzArray);
+
+        if (clazzArray != null && clazzArray.length > 0) {
+            for (int i = 0; i < clazzArray.length; i++) {
+                Class<?> clazz = clazzArray[i];
+                String propertyName = parameters[i].getName();
+                AUDIT_LOG.error("propertyName:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName, clazz,
+                        clazz.isPrimitive());
+
+                Object obj = ctxParameters[i];
+                AUDIT_LOG.error(" patched String :{}",getPatchFields(obj));
+                if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
+                        || !obj.toString().toUpperCase().contains("SECRET"))) {
+                    AUDIT_LOG.error("final - obj -  obj:{} ", obj);
+                }
+
+            }
+        }
+    }
     private String getData(InvocationContext context) {
-        LOG.error("Process Audit Log Interceptor - context:{}", context);
+        AUDIT_LOG.error("Process Audit Log Interceptor - context:{}", context);
         jakarta.ws.rs.Path pathAnnotation = context.getMethod().getAnnotation(jakarta.ws.rs.Path.class);
         if(pathAnnotation!=null) {
-            LOG.error("pathAnnotation.value():{} ", pathAnnotation.value()); 
+            AUDIT_LOG.error("pathAnnotation.value():{} ", pathAnnotation.value()); 
         }
         StringBuilder sb = new StringBuilder();
         Parameter[] parameters = context.getMethod().getParameters();
-        LOG.error("parameters():{} ", parameters); 
+        AUDIT_LOG.error("parameters():{} ", parameters); 
         if (parameters != null && parameters.length > 0) {
             for (int i = 0; i < parameters.length; i++) {               
                 sb.append(parameters[i].getName());
-                LOG.error("parameters[i].getName():{} ", parameters[i].getName());
+                AUDIT_LOG.error("parameters[i].getName():{} ", parameters[i].getName());
                 
                 if(i != parameters.length-1) {
                     sb.append(",");
@@ -166,6 +203,32 @@ public class AuditLogInterceptor {
 
         }
         return false;
+    }
+    
+    private boolean toProcess() {
+        boolean shouldProcess = false;
+        
+        return shouldProcess;
+    }
+    
+    private String getPatchFields(Object obj) {
+        StringBuilder sb = new StringBuilder();
+        
+        try {
+            if(obj==null) {
+                return sb.toString();
+            }
+            
+            JsonNode jsonNode = Jackson.asJsonNode(Jackson.asJson(obj));
+            AUDIT_LOG.error("jsonNode:{} ", jsonNode);
+            AUDIT_LOG.error("jsonNode.get(path):{} ", jsonNode.get("path"));             
+
+            
+        }catch(Exception ex) {
+            LOG.error("Error while processing :{}", ex);
+        }
+        return sb.toString();
+        
     }
 
 }
