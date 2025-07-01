@@ -10,10 +10,6 @@ tags:
 
 Before you install, check the [VM system requirements](vm-requirements.md).
 
-## Supported versions
-
-- Red Hat Enterprise Linux 8 (RHEL 8)
-
 ## Install the Package
 
 - Install EPEL and mod-auth-openidc as dependencies

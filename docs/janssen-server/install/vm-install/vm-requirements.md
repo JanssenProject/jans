@@ -10,9 +10,23 @@ tags:
 
 The Janssen Project currently provides packages for these Linux distros:
 
-- Ubuntu (versions: 20.04)
-- SUSE (SLES or LEAP) (version: 15)
-- RedHat Enterprise Linux (version: 8)
+## Supported OS Versions
+
+### Ubuntu
+
+ * Ubuntu 24.04
+ * Ubuntu 22.04
+ * Ubuntu 20.04
+
+### RHEL
+
+ * Red Hat Enterprise Linux 8 (RHEL 8)
+
+### SUSE
+
+ * SUSE Linux Enterprise Server (SLES) 15
+ * openSUSE Leap 15.5
+
 
 ## Hardware Requirements
 
