@@ -1111,4 +1111,9 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		return null;
 	}
 
+	@Override
+	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
+		return connectionProvider.getTableColumnsMap();
+	}
+
 }
