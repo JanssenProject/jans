@@ -71,7 +71,7 @@ git clone --depth 100 --filter blob:none --no-checkout https://github.com/jansse
     && git sparse-checkout init --cone \
     && git checkout main \
     && git sparse-checkout add docs \
-    && git sparse-checkout add mkdocs.yml \
+    && git sparse-checkout add --skip-checks mkdocs.yml \
     && cd docs \
     && poetry install --no-root \
     && poetry run mkdocs serve -f ../mkdocs.yml
