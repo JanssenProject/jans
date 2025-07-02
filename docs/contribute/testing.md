@@ -49,11 +49,17 @@ testing.
 Dependency vulnerabilities are monitored by Gihub. In addition we plan to use 
 the [Linux Foundation Community Bridge](https://security.communitybridge.org) vulnerability detection platform.
 
-## Contributing to the documentation and Testing changes locally
+## Contributing to the Documentation
 
-While contributing documentation to official Janssen Project [documentation](https://jans.io/docs/) it is important to make sure that documents meet [style guidelines](../CONTRIBUTING.md#documentation-style-guide) and have been proofread to remove any typographical or grammatical errors.
+While contributing documentation to official Janssen 
+Project [documentation](https://jans.io/docs/) it is important 
+to ensure the following. 
 
-Before the new content is pushed to the repository on GitHub, it should be tested locally by the author. Author can do this by deploying Material for MkDocs locally.
+- Changes adhere to the [style guidelines](../CONTRIBUTING.md#documentation-style-guide) 
+- Changes have been proofread to remove any typographical or grammatical errors
+- If section titles are being updated or removed, check and update any reference
+links to that section.
+- Changes render correctly on the documentation static site
 
 The command below will checkout the documentation and deploy the static site
 locally. Any changes made to the local documentation will be live reloaded
