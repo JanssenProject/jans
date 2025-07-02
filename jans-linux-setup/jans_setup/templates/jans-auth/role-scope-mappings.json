@@ -202,13 +202,13 @@
       "permission": "https://jans.io/oauth/config/message.readonly",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "cache"
+      "tag": "message"
     },
     {
       "permission": "https://jans.io/oauth/config/message.write",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "cache"
+      "tag": "message"
     },
     {
       "permission": "https://jans.io/oauth/config/cache.readonly",
@@ -262,49 +262,49 @@
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "role"
+      "tag": "adminui_role"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "role"
+      "tag": "adminui_role"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "permission"
+      "tag": "adminui_permission"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "permission"
+      "tag": "adminui_permission"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "rolePermissionMapping"
+      "tag": "adminui_rolePermissionMapping"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write",
       "description": null,
       "defaultPermissionInToken": false,
-      "tag": "rolePermissionMapping"
+      "tag": "adminui_rolePermissionMapping"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly",
       "description": null,
       "defaultPermissionInToken": true,
-      "tag": "license"
+      "tag": "adminui_license"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/license.write",
       "description": null,
       "defaultPermissionInToken": true,
-      "tag": "license"
+      "tag": "adminui_license"
     },
     {
       "permission": "openid",
@@ -491,6 +491,300 @@
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "logging"
+    },
+    {
+      "permission": "https://jans.io/scim/bulk",
+      "description": "Send requests to the bulk endpoint",
+      "defaultPermissionInToken": false,
+      "tag": "scim_bulk"
+    },
+    {
+      "permission": "https://jans.io/scim/users.write",
+      "description": "Modify user resources",
+      "defaultPermissionInToken": false,
+      "tag": "scim_users"
+    },
+    {
+      "permission": "https://jans.io/scim/fido.read",
+      "description": "Query fido resources",
+      "defaultPermissionInToken": false,
+      "tag": "scim_fido"
+    },
+    {
+      "permission": "https://jans.io/scim/all-resources.search",
+      "description": "Access the root .search endpoint",
+      "defaultPermissionInToken": false,
+      "tag": "scim"
+    },
+    {
+      "permission": "https://jans.io/scim/fido2.read",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "scim_fido2"
+    },
+    {
+      "permission": "https://jans.io/scim/groups.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "scim_groups"
+    },
+    {
+      "permission": "https://jans.io/scim/users.read",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "scim_users"
+    },
+    {
+      "permission": "https://jans.io/scim/groups.read",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "scim_groups"
+    },
+    {
+      "permission": "https://jans.io/scim/fido2.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "scim_fido2"
+    },
+    {
+      "permission": "https://jans.io/scim/fido.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "scim_fido"
+    },
+    {
+      "permission": "revoke_session",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "revoke_session"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/data.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "data"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/fido2.delete",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "fido2"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/jwks.delete",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "jwks"
+    },
+    {
+      "permission": "https://jans.io/scim/config.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "scim_config"
+    },
+    {
+      "permission": "https://jans.io/scim/config.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "scim_config"
+    },
+    {
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "adminui_role"
+    },
+    {
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "adminui_permission"
+    },
+    {
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "adminui_rolePermissionMapping"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/saml.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "saml"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/saml.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "saml"
+    },
+    {
+      "permission": "https://jans.io/idp/config.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "idp_config"
+    },
+    {
+      "permission": "https://jans.io/idp/config.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "idp_config"
+    },
+    {
+      "permission": "https://jans.io/idp/realm.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "idp_realm"
+    },
+    {
+      "permission": "https://jans.io/idp/realm.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "idp_realm"
+    },
+    {
+      "permission": "https://jans.io/idp/saml.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "idp_saml"
+    },
+    {
+      "permission": "https://jans.io/idp/saml.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "idp_saml"
+    },
+    {
+      "permission": "https://jans.io/idp/saml.delete",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "idp_saml"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/app-version.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "app-version"
+    },
+    {
+      "permission": "https://jans.io/oauth/kc-link-config.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "kc-link-config"
+    },
+    {
+      "permission": "https://jans.io/oauth/kc-link-config.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "kc-link-config"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock-config.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "lock-config"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock-config.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "lock-config"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/jans_asset-read",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "jans_asset"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/jans_asset-write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "jans_asset"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/jans_asset-delete",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "jans_asset"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/audit.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "lock_audit"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/audit.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "lock_audit"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/health.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "lock_health"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/health.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "lock_health"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/log.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "lock_log"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/log.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "lock_log"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/telemetry.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "lock_telemetry"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/telemetry.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "lock_telemetry"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/token.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "token"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/token.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "token"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/token.delete",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "token"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/agama-repo.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "agama-repo"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/read-all",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "lock"
     }
   ],
   "rolePermissionMapping": [
