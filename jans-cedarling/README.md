@@ -98,20 +98,31 @@ To enable SSA JWT validation, configure the following bootstrap properties:
 
 ### SSA JWT Structure
 
-The SSA JWT must contain the following claims as defined by RFC 7591:
+The SSA JWT must contain the following claims:
+
+**Claims defined by RFC 7591:**
 
 ```json
 {
   "software_id": "string",
   "grant_types": ["array"],
-  "org_id": "string",
   "iss": "string",
-  "software_roles": ["array"],
   "exp": "number",
   "iat": "number",
   "jti": "string"
 }
 ```
+
+**Additional custom claims required by Cedarling:**
+
+```json
+{
+  "org_id": "string",
+  "software_roles": ["array"]
+}
+```
+
+**Note:** While RFC 7591 defines `software_id`, `grant_types`, and standard JWT claims (`iss`, `exp`, `iat`, `jti`), the `org_id` and `software_roles` claims are custom requirements specific to the Cedarling implementation and are not part of the RFC 7591 specification.
 
 ### Validation Process
 

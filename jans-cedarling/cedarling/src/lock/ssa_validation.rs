@@ -18,14 +18,17 @@
 //! 
 //! An SSA JWT contains the following required claims:
 //! 
+//! **Claims defined by RFC 7591:**
 //! - **software_id**: Unique identifier for the software
 //! - **grant_types**: Array of OAuth2 grant types the software can use
-//! - **org_id**: Organization identifier
 //! - **iss**: Issuer of the SSA JWT
-//! - **software_roles**: Array of roles/permissions for the software
 //! - **exp**: Expiration time (Unix timestamp)
 //! - **iat**: Issued at time (Unix timestamp)
 //! - **jti**: JWT ID (unique identifier)
+//! 
+//! **Additional custom claims required by Cedarling:**
+//! - **org_id**: Organization identifier
+//! - **software_roles**: Array of roles/permissions for the software
 //! 
 //! ## Validation Process
 //! 
@@ -86,7 +89,8 @@ use thiserror::Error;
 #[derive(Debug, Clone)]
 pub struct SsaValidationConfig {
     /// Set of required claims that must be present in the SSA JWT.
-    /// Default includes: software_id, grant_types, org_id, iss, software_roles, exp, iat, jti
+    /// Default includes: software_id, grant_types, iss, exp, iat, jti (RFC 7591/RFC 7519)
+    /// plus org_id, software_roles (Cedarling custom requirements)
     pub required_claims: HashSet<String>,
     
     /// Set of allowed signature algorithms.
@@ -147,24 +151,26 @@ impl Default for SsaValidationConfig {
     }
 }
 
-/// SSA JWT claims structure as defined by RFC 7591
+/// SSA JWT claims structure
+/// 
+/// This struct includes both RFC 7591 defined claims and custom Cedarling requirements.
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct SsaClaims {
-    /// Software identifier
+    /// Software identifier (RFC 7591)
     pub software_id: String,
-    /// Grant types the software is authorized to use
+    /// Grant types the software is authorized to use (RFC 7591)
     pub grant_types: Vec<String>,
-    /// Organization identifier
+    /// Organization identifier (Cedarling custom requirement)
     pub org_id: String,
-    /// Issuer of the SSA
+    /// Issuer of the SSA (RFC 7591)
     pub iss: String,
-    /// Software roles/permissions
+    /// Software roles/permissions (Cedarling custom requirement)
     pub software_roles: Vec<String>,
-    /// Expiration time
+    /// Expiration time (RFC 7519 standard JWT claim)
     pub exp: u64,
-    /// Issued at time
+    /// Issued at time (RFC 7519 standard JWT claim)
     pub iat: u64,
-    /// JWT ID
+    /// JWT ID (RFC 7519 standard JWT claim)
     pub jti: String,
     /// Additional custom claims
     #[serde(flatten)]
