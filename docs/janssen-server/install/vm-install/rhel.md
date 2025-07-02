@@ -10,10 +10,6 @@ tags:
 
 Before you install, check the [VM system requirements](vm-requirements.md).
 
-## Supported versions
-
-- Red Hat Enterprise Linux 8 (RHEL 8)
-
 ## Install the Package
 
 - Install EPEL and mod-auth-openidc as dependencies
@@ -38,7 +34,7 @@ sudo rpm -import automation-jans-public-gpg.asc
 ```
 
 - Download the release package from the Github Janssen Project
-  [Releases](https://github.com/JanssenProject/jans/releases)
+  [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
 wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el8.x86_64.rpm -P ~/

@@ -62,6 +62,7 @@ import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.PasswordAttributeData;
 import io.jans.orm.model.PersistenceMetadata;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.operation.auth.PasswordEncryptionHelper;
@@ -574,13 +575,21 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         return result;
     }
 
-	public String[] createStoragePassword(String[] passwords) {
+	public String[] createStoragePassword(String[] passwords, AttributeData attributeData) {
         if (ArrayHelper.isEmpty(passwords)) {
             return passwords;
         }
 
+    	boolean isSkipHashed = (attributeData instanceof PasswordAttributeData) && ((PasswordAttributeData) attributeData).isSkipHashed();
+
         String[] results = new String[passwords.length];
         for (int i = 0; i < passwords.length; i++) {
+			if (isSkipHashed && (PasswordEncryptionHelper.findAlgorithmString(passwords[i]) != null)) {
+				// Skip password hashing only if password has prefix {alg} and defined with @Password(skipHashed = false)
+				results[i] = passwords[i];
+				continue;
+			}
+
 			if (persistenceExtension == null) {
 				results[i] = PasswordEncryptionHelper.createStoragePassword(passwords[i], connectionProvider.getPasswordEncryptionMethod());
 			} else {
@@ -1100,6 +1109,11 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		}
 
 		return null;
+	}
+
+	@Override
+	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
+		return connectionProvider.getTableColumnsMap();
 	}
 
 }

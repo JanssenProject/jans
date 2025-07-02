@@ -5,9 +5,9 @@ tags:
   - config-api
 ---
 
-# config-api
+# Config-api
 
-## Overview
+
 [Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) provides a central place to manage and configure jans modules.
 It helps in configuring auth-server, users, fido2 and scim modules.
 

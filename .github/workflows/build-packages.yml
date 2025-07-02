@@ -363,7 +363,7 @@ jobs:
         sha256sum ../demo-janssen-tarp-chrome-$VER.zip > ../demo-janssen-tarp-chrome-$VER.zip.sha256sum
         sha256sum ../demo-janssen-tarp-firefox-$VER.xpi > ../demo-janssen-tarp-firefox-$VER.xpi.sha256sum
         cd ..
-        
+
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload $VER *.zip *.sha256sum --clobber
         gh release upload $VER *.xpi  --clobber || echo "Sign your extension for self-distribution to mozilla failed"
@@ -456,11 +456,24 @@ jobs:
           sed -i "s/^version = \".*\"/version = \"${NEW_NPM_VERSION}\"/" Cargo.toml
           echo "Replaced  $NEW_NPM_VERSION in Cargo.toml"
         fi
+        
+        # Build for web target
         wasm-pack build --release --target web --scope janssenproject
         cd pkg
         echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
         npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
         npm publish --provenance --access=public --tag "${NPM_TAG}"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
+        cd ..
+        
+        # Build for Node.js target with modified version
+        NODEJS_VERSION="${TAG}-nodejs"
+        if [ "${TAG}" == "0.0.0" ]; then
+          NODEJS_VERSION="${NEW_NPM_VERSION}-nodejs"
+        fi
+        sed -i "s/^version = \".*\"/version = \"${NODEJS_VERSION}\"/" Cargo.toml
+        wasm-pack build --release --target nodejs --scope janssenproject --out-dir pkg-nodejs
+        cd pkg-nodejs
+        npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
 
     - name: Archive and sign pkg contents
       id: archive_pkg
@@ -519,7 +532,7 @@ jobs:
         if [ "${{ matrix.krakend-builder-image }}" == "builder:2.9.0-linux-generic" ]; then
           echo CC="aarch64-linux-gnu-gcc" >> $GITHUB_ENV
         fi
-    - name: Build plugin for AMD64 
+    - name: Build plugin for AMD64
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
         wget https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0_x86-64.so -O libcedarling_go.so
@@ -642,7 +655,7 @@ jobs:
             VERSION=nightly
             TAG="0.0.0"
           fi
-          
+
           case "${{ matrix.name }}" in
             ubuntu22)
               FILE="libcedarling_go-${TAG}_x86-64.so"
@@ -658,20 +671,20 @@ jobs:
               FILE_LIB="cedarling_go-${TAG}.lib"
               ;;
           esac
-          
+
           sha256sum $FILE >> $FILE.sha256sum
           gpg --armor --detach-sign $FILE || echo "Failed to sign"
           gpg --armor --detach-sign $FILE.sha256sum || echo "Failed to sign"
-          
+
           if [ -n "$FILE_LIB" ]; then
             sha256sum $FILE_LIB >> $FILE_LIB.sha256sum
             gpg --armor --detach-sign $FILE_LIB || echo "Failed to sign"
             gpg --armor --detach-sign $FILE_LIB.sha256sum || echo "Failed to sign"
           fi
-          
+
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
           gh release upload "${VERSION}" $FILE $FILE.sha256sum $FILE.asc
-          
+
           if [ -n "$FILE_LIB" ]; then
             gh release upload "${VERSION}" $FILE_LIB $FILE_LIB.sha256sum $FILE_LIB.asc
           fi
@@ -726,8 +739,8 @@ jobs:
         fi
         cargo build -r -p cedarling_uniffi
         cargo run --bin uniffi-bindgen generate --library ${{ github.workspace }}/jans-cedarling/target/release/libcedarling_uniffi.so --language kotlin --out-dir ./
-        mv cedarling_uniffi.kt cedarling_uniffi-${TAG}.kt
-        FILE="cedarling_uniffi-${TAG}.kt"
+        zip -r cedarling_uniffi-kotlin-${TAG}.zip uniffi
+        FILE="cedarling_uniffi-kotlin-${TAG}.zip"
         sha256sum $FILE >> $FILE.sha256sum
         gpg --armor --detach-sign $FILE || echo "Failed to sign"
         gpg --armor --detach-sign $FILE.sha256sum || echo "Failed to sign"

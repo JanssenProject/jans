@@ -18,8 +18,6 @@ import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.UserService;
-import io.jans.as.server.service.session.SessionStatusListIndexService;
-import io.jans.model.tokenstatus.TokenStatus;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,9 +31,6 @@ import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 
@@ -44,13 +39,6 @@ import java.util.stream.Collectors;
  */
 @Path("/")
 public class RevokeSessionRestWebService {
-
-    private static final ExecutorService sessionStatusListPool = Executors.newFixedThreadPool(5, runnable -> {
-        Thread thread = new Thread(runnable);
-        thread.setName("session_status_list_pool");
-        thread.setDaemon(true);
-        return thread;
-    });
 
     @Inject
     private Logger log;
@@ -69,9 +57,6 @@ public class RevokeSessionRestWebService {
 
     @Inject
     private ScopeService scopeService;
-
-    @Inject
-    private SessionStatusListIndexService sessionStatusListIndexService;
 
     @POST
     @Path("/revoke_session")
@@ -104,10 +89,6 @@ public class RevokeSessionRestWebService {
             final List<SessionId> authenticatedSessions = sessionIdList.stream().filter(sessionId -> sessionId.getState() == SessionIdState.AUTHENTICATED).collect(Collectors.toList());
             sessionIdService.remove(authenticatedSessions);
 
-            sessionStatusListPool.execute(() -> {
-                final List<Integer> indexes = authenticatedSessions.stream().map(sessionId -> sessionId.getPredefinedAttributes().getIndex()).filter(Objects::nonNull).collect(Collectors.toList());
-                sessionStatusListIndexService.updateStatusAtIndexes(indexes, TokenStatus.INVALID);
-            });
             log.debug("Revoked {} user's sessions (user: {})", authenticatedSessions.size(), user.getUserId());
 
             return Response.ok().build();

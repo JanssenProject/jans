@@ -12,11 +12,6 @@ tags:
 
 Before you install, check the [VM system requirements](vm-requirements.md).
 
-## Supported versions
-
-- SUSE Linux Enterprise Server (SLES) 15
-- openSUSE Leap 15.5
-
 ## Install the Package
 
 - If the server firewall is running, make sure you allow `https`, which is
@@ -50,7 +45,7 @@ sudo rpm -import automation-jans-public-gpg.asc
 ```
 
 - Download the release package from the GitHub Janssen Project
-  [Releases](https://github.com/JanssenProject/jans/releases)
+  [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```shell
 wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse15.x86_64.rpm

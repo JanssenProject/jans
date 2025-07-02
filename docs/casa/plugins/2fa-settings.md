@@ -7,7 +7,7 @@ tags:
 
 # 2FA Settings Plugin
 
-## Overview
+
 This plugin allows administrators to configure how and when 2FA is applied. Admins may:
 
 1. Specify the minimum number of credentials users must enroll before 2FA can be used

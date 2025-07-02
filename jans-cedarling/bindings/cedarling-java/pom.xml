@@ -9,8 +9,8 @@
     <version>0.0.0-nightly</version>
     <name>Cedarling Java binding</name>
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>2.1.20</kotlin.version>
         <jans.bom.version>${project.version}</jans.bom.version>
@@ -85,7 +85,7 @@
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
-            <version>5.15.0</version>
+            <version>5.16.0</version>
         </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>
@@ -200,6 +200,8 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <shadedArtifactAttached>false</shadedArtifactAttached> <!-- Don't create as a secondary artifact -->
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                             <!-- No mainClass transformer needed -->
                                 <!-- Include kotlin-stdlib -->
                                 <artifactSet>
@@ -210,7 +212,6 @@
                                         <include>net.java.dev.jna:jna</include>
                                     </includes>
                                 </artifactSet>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>distribution</shadedClassifierName>
                         </configuration>
                     </execution>
