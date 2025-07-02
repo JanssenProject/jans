@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -337,7 +338,7 @@ public class SqlConnectionProvider {
 					}
 				}
 
-				tableColumnsMap.put(StringHelper.toLowerCase(tableName), tableColumns);
+				tableColumnsMap.put(StringHelper.toLowerCase(tableName), Collections.unmodifiableMap(tableColumns));
 			}
 		}
 
