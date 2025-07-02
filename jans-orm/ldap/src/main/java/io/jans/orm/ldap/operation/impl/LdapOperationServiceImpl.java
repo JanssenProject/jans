@@ -66,6 +66,7 @@ import io.jans.orm.ldap.impl.LdapBatchOperationWraper;
 import io.jans.orm.ldap.operation.LdapOperationService;
 import io.jans.orm.ldap.operation.watch.OperationDurationUtil;
 import io.jans.orm.model.AttributeData;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
@@ -1279,6 +1280,11 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 			return lastSearchResult;
 		}
     }
+
+	@Override
+	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
 
 }
 
