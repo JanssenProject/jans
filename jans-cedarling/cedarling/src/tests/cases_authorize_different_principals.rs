@@ -541,7 +541,7 @@ async fn test_policy_evaluation_errors_logging() {
             use_user_principal: true,
             use_workload_principal: true,
             principal_bool_operator: OPERATOR_AND.to_owned(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         crate::EntityBuilderConfig::default().with_user().with_workload(),

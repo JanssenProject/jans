@@ -276,8 +276,6 @@ impl LogWriter for LockService {
 
 #[derive(Debug, thiserror::Error)]
 pub enum InitLockServiceError {
-    #[error("HTTP request error: {0}")]
-    HttpRequestError(#[from] HttpRequestError),
     #[error("the provided CEDARLING_LOCK_SSA_JWT is either malformed or expired: {0}")]
     InvalidSsaJwt(String),
     #[error(
@@ -288,18 +286,6 @@ pub enum InitLockServiceError {
     ClientRegistration(#[from] ClientRegistrationError),
     #[error("failed to initialize the Lock logger's HttpClient: {0}")]
     InitHttpClient(#[from] reqwest::Error),
-    #[error("URL parse error: {0}")]
-    UrlParseError(#[from] url::ParseError)
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum HttpRequestError {
-    #[error("Invalid URL: {0}")]
-    InvalidUrl(String),
-    #[error("HTTP request failed: {0}")]
-    RequestFailed(String),
-    #[error("Failed to initialize HTTP client: {0}")]
-    InitializeHttpClient(#[from] reqwest::Error),
 }
 
 #[cfg(test)]
