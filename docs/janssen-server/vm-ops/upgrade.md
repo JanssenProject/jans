@@ -14,6 +14,9 @@ This guide shows how to upgrade a Janssen VM deployment.
     Though this is made easy using [Terraform](../terraform/README.md). 
     We recommend using Kubernetes installations over VM, to avail smooth upgrades and better HA support.
 
+!!! Note
+    Custom scripts are considered external configuration and are not updated automatically during an upgrade.
+    Please review and update your custom scripts to match the new version of the Janssen Server.
 
 Let's assume we are upgrading Jans VM installation from `current version` to `vreplace-janssen-version`
 
