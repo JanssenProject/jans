@@ -31,7 +31,7 @@ cargo run -p cedarling --example log_init -- off
 ```
 
 - `stdout`- This log type writes all logs to `stdout`. Without storing or additional handling log messages.
-[Standart streams](https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html).
+  [Standart streams](https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html).
 
 ```bash
 cargo run -p cedarling --example log_init -- stdout
@@ -85,7 +85,7 @@ We use `cargo-llvm-cov` for code coverage.
 To install run:
 
 ```bash
-cargo install cargo-llvm-cov  
+cargo install cargo-llvm-cov
 ```
 
 Get coverage report in console with:
@@ -121,6 +121,10 @@ cargo doc -p cedarling --no-deps --open
 The python bindings for `Cedarling` is located in the `bindings/cedarling_python` folder.
 
 Or you can find readme by clicking [here](bindings/cedarling_python/README.md).
+
+## Configuration
+
+For complete configuration documentation, see [cedarling-properties.md](../docs/cedarling/cedarling-properties.md).
 
 ## Benchmarks
 
