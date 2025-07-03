@@ -12,11 +12,6 @@ tags:
 
 Before you install, check the [VM system requirements](vm-requirements.md).
 
-## Supported versions
-
-- SUSE Linux Enterprise Server (SLES) 15
-- openSUSE Leap 15.5
-
 ## Install the Package
 
 - If the server firewall is running, make sure you allow `https`, which is
