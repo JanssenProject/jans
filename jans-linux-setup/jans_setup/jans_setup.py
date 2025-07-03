@@ -402,6 +402,12 @@ def main():
                 if argsp.t or getattr(argsp, 'load_config_api_test', None):
                     configApiInstaller.load_test_data()
 
+
+            if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jansCliInstaller.install_var)):
+                    jansCliInstaller.start_installation()
+                    jansCliInstaller.configure()
+
             if Config.profile == 'jans':
 
                 if (Config.installed_instance and 'install_fido2' in Config.addPostSetupService) or (
@@ -424,11 +430,6 @@ def main():
                 if (Config.installed_instance and jans_keycloak_link_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jans_keycloak_link_installer.install_var)):
                     jans_keycloak_link_installer.start_installation()
-
-                if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
-                            not Config.installed_instance and Config.get(jansCliInstaller.install_var)):
-                        jansCliInstaller.start_installation()
-                        jansCliInstaller.configure()
 
                 if (Config.installed_instance and jans_saml_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jans_saml_installer.install_var)):
