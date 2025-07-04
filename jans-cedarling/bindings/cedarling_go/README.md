@@ -25,7 +25,7 @@ If youre using pre-built binaries from the [Jans releases page](https://github.c
 Download Jans monorepo:
 
 ```sh
-git clone --depth 1 https://github.com/JanssenProject/jans.git 
+git clone --depth 1 https://github.com/JanssenProject/jans.git
 ```
 
 We use `--depth 1` to avoid cloning unnecessary history and minimalize the download size.
@@ -71,7 +71,7 @@ go test .
 **1. Download pre-built binaries:**  
 Download the appropriate pre-built binary for your platform from the [Jans releases page](https://github.com/JanssenProject/jans/releases) or build it from source as described above.
 
-***2. Add linker flags in your main.go file:***  
+**_2. Add linker flags in your main.go file:_**  
 You need specify linker flags in your `main.go` file to link against the Cedarling library.
 
 ```go
@@ -81,14 +81,14 @@ import "C"
 
 And make sure that the Cedarling library files are located in the same directory as your main package.
 
-***3. Add the Cedarling Go package to your Go application:***  
+**_3. Add the Cedarling Go package to your Go application:_**  
 Use `go get` to fetch the Cedarling Go package:
 
 ```sh
 go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
 ```
 
-***4. Add the Cedarling Go package to your Go application:***  
+**_4. Add the Cedarling Go package to your Go application:_**  
 Build your Go application:
 
 ```sh
@@ -97,9 +97,10 @@ go build .
 
 Run application to ensure it works correctly.
 
-***Runtime Notes:***
+**_Runtime Notes:_**
 
 - On **Windows**, place the Rust artifacts (`cedarling_go.dll` and `cedarling_go.lib`) alongside the Go binary.
+
   - Files:
     - `cedarling_go.dll`
     - `cedarling_go.lib`
@@ -144,6 +145,7 @@ config := map[string]any{
     "CEDARLING_LOG_LEVEL":          "INFO",
     "CEDARLING_LOG_TYPE":           "std_out",
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
+    "CEDARLING_ID_TOKEN_TRUST_MODE": "strict", // Options: "strict", "never", "always", "ifpresent"
 }
 
 instance, err := cedarling_go.NewCedarling(config)
@@ -259,9 +261,44 @@ log := instance.GetLogById("log123")
 logs := instance.GetLogsByTag("info")
 ```
 
+## Configuration
+
+### ID Token Trust Mode
+
+The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
+
+- **`strict`** (default): Enforces strict validation rules
+  - ID token `aud` must match access token `client_id`
+  - If userinfo token is present, its `sub` must match the ID token `sub`
+- **`never`**: Disables ID token validation (useful for testing)
+- **`always`**: Always validates ID tokens when present
+- **`ifpresent`**: Validates ID tokens only if they are provided
+
+### Testing Configuration
+
+For testing scenarios, you may want to disable JWT validation:
+
+```go
+config := map[string]any{
+    "CEDARLING_APPLICATION_NAME":   "TestApp",
+    "CEDARLING_POLICY_STORE_ID":    "test-policy-store",
+    "CEDARLING_USER_AUTHZ":         "enabled",
+    "CEDARLING_WORKLOAD_AUTHZ":     "enabled",
+    "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+    "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+    "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
+    "CEDARLING_LOG_TYPE":           "std_out",
+    "CEDARLING_LOG_LEVEL":          "DEBUG",
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/test-policy-store.json",
+}
+```
+
+For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md).
+
 ## Building for Production
 
 Consider these settings for production deployments:
 
 - Set `CEDARLING_LOG_LEVEL` to `WARN` or `ERROR`
 - Enable JWT validation (ensure tokens are properly signed)
+- Use `CEDARLING_ID_TOKEN_TRUST_MODE: "strict"` for maximum security
