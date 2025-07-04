@@ -132,7 +132,6 @@ nav:
       - REST API:
         - janssen-server/config-guide/config-tools/config-api/README.md
         - Settings: janssen-server/config-guide/config-tools/config-api/config.md
-        - Attributes: janssen-server/config-guide/config-tools/config-api/attribute.md
         - Security: janssen-server/config-guide/config-tools/config-api/security.md
         - Logs: janssen-server/config-guide/config-tools/config-api/logs.md
         - Monitoring: janssen-server/config-guide/config-tools/config-api/monitoring.md
