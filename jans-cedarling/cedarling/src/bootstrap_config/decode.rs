@@ -126,7 +126,7 @@ impl BootstrapConfig {
             decision_log_user_claims: raw.decision_log_user_claims.clone(),
             decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
-            id_token_trust_mode: raw.id_token_trust_mode,
+            id_token_trust_mode: raw.id_token_trust_mode.clone(),
         };
 
         Ok(Self {

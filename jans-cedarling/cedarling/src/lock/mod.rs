@@ -101,13 +101,12 @@ use futures::channel::mpsc;
 use lock_config::*;
 use log_entry::LockLogEntry;
 use log_worker::*;
-use register_client::*;
+use register_client::{register_client, ClientRegistrationError};
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
 use spawn_task::*;
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
-use thiserror::Error;
 use tokio_util::sync::CancellationToken;
 use ssa_validation::validate_ssa_jwt;
 
@@ -275,7 +274,7 @@ impl LogWriter for LockService {
     }
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum InitLockServiceError {
     #[error("the provided CEDARLING_LOCK_SSA_JWT is either malformed or expired: {0}")]
     InvalidSsaJwt(String),
@@ -292,7 +291,7 @@ pub enum InitLockServiceError {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::LogLevel;
+    use crate::{lock::register_client::DCR_SCOPE, LogLevel};
     use crate::log::interface::Indexed;
     use mockito::{Mock, Server, ServerGuard};
     use serde::Serialize;

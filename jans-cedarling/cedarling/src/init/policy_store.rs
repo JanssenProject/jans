@@ -80,13 +80,13 @@ pub(crate) async fn load_policy_store(
         },
         PolicyStoreSource::FileJson(path) => {
             let policy_json = fs::read_to_string(path)
-                .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone(), e))?;
+                .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone().into(), e))?;
             let agama_policy_store = serde_json::from_str::<AgamaPolicyStore>(&policy_json)?;
             extract_first_policy_store(&agama_policy_store)?
         },
         PolicyStoreSource::FileYaml(path) => {
             let policy_yaml = fs::read_to_string(path)
-                .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone(), e))?;
+                .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone().into(), e))?;
             let agama_policy_store = serde_yml::from_str::<AgamaPolicyStore>(&policy_yaml)?;
             extract_first_policy_store(&agama_policy_store)?
         },
