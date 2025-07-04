@@ -806,9 +806,15 @@
         "https://jans.io/oauth/config/cache.readonly",
         "https://jans.io/oauth/jans-auth-server/config/properties.readonly",
         "https://jans.io/oauth/config/database/sql.readonly",
-        "https://jans.io/oauth/config/stats.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
-        "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write"
+        "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/license.write",
+        "https://jans.io/oauth/config/stats.readonly",
+        "https://jans.io/oauth/config/data.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly",
+        "jans_stat"
       ]
     },
     {
@@ -846,6 +852,11 @@
         "https://jans.io/oauth/config/stats.readonly",
         "jans_stat",
         "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/license.write",
+        "https://jans.io/oauth/config/data.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write"
       ]
     },
@@ -892,6 +903,11 @@
         "https://jans.io/oauth/config/stats.readonly",
         "jans_stat",
         "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/license.write",
+        "https://jans.io/oauth/config/data.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write"
       ]
     },
