@@ -14,7 +14,11 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
     BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::Memory(crate::MemoryLogConfig {
+                log_ttl: 60,
+                max_items: None,
+                max_item_size: None,
+            }),
             log_level: crate::LogLevel::DEBUG,
         },
         policy_store_config: PolicyStoreConfig {
@@ -25,7 +29,7 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
             use_user_principal: true,
             use_workload_principal: true,
             principal_bool_operator: JsonRule::default(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
@@ -63,7 +67,11 @@ pub async fn get_cedarling_with_authorization_conf(
     Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::Memory(crate::MemoryLogConfig {
+                log_ttl: 60,
+                max_items: None,
+                max_item_size: None,
+            }),
             log_level: crate::LogLevel::DEBUG,
         },
         policy_store_config: PolicyStoreConfig {

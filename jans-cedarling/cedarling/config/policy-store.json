@@ -1,0 +1,28 @@
+{
+    "cedar_version": "v4.0.0",
+    "cedar_policies": {
+        "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+            "description": "simple policy example for principal workload",
+            "creation_date": "2024-09-20T17:22:39.996050",
+            "policy_content": {
+                "encoding": "base64",
+                "content_type": "cedar-json",
+                "body": "ewogICAgInN0YXRpY1BvbGljaWVzIjogewogICAgICAgICJwb2xpY3kwIjogewogICAgICAgICAgICAiYWN0aW9uIjogewogICAgICAgICAgICAgICAgImVudGl0eSI6IHsKICAgICAgICAgICAgICAgICAgICAiaWQiOiAiVXBkYXRlIiwKICAgICAgICAgICAgICAgICAgICAidHlwZSI6ICJKYW5zOjpBY3Rpb24iCiAgICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAgIm9wIjogImluIgogICAgICAgICAgICB9LAogICAgICAgICAgICAiY29uZGl0aW9ucyI6IFsKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgICAiYm9keSI6IHsKICAgICAgICAgICAgICAgICAgICAgICAgIj09IjogewogICAgICAgICAgICAgICAgICAgICAgICAgICAgImxlZnQiOiB7CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIi4iOiB7CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICJhdHRyIjogIm9yZ19pZCIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICJsZWZ0IjogewogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIlZhciI6ICJwcmluY2lwYWwiCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAgICAgICAgICAgICAgInJpZ2h0IjogewogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICIuIjogewogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAiYXR0ciI6ICJvcmdfaWQiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAibGVmdCI6IHsKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICJWYXIiOiAicmVzb3VyY2UiCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAgICAgICJraW5kIjogIndoZW4iCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIF0sCiAgICAgICAgICAgICJlZmZlY3QiOiAicGVybWl0IiwKICAgICAgICAgICAgInByaW5jaXBhbCI6IHsKICAgICAgICAgICAgICAgICJlbnRpdHlfdHlwZSI6ICJKYW5zOjpXb3JrbG9hZCIsCiAgICAgICAgICAgICAgICAib3AiOiAiaXMiCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJyZXNvdXJjZSI6IHsKICAgICAgICAgICAgICAgICJlbnRpdHlfdHlwZSI6ICJKYW5zOjpJc3N1ZSIsCiAgICAgICAgICAgICAgICAib3AiOiAiaXMiCiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICB9LAogICAgInRlbXBsYXRlTGlua3MiOiBbXSwKICAgICJ0ZW1wbGF0ZXMiOiB7fQp9"
+            }
+        },
+        "444da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+            "description": "simple policy example for principal user",
+            "creation_date": "2024-09-20T17:22:39.996050",
+            "policy_content": {
+                "encoding": "none",
+                "content_type": "cedar",
+                "body": "permit(\n    principal is Jans::User,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.country == resource.country\n};"
+            }
+        }
+    },
+    "cedar_schema": {
+        "encoding": "none",
+        "content_type": "cedar",
+        "body": "namespace Jans {\ntype Url = {\"host\": String, \"path\": String, \"protocol\": String};\nentity Access_token = {\"aud\": String, \"exp\": Long, \"iat\": Long, \"iss\": TrustedIssuer, \"jti\": String};\nentity Issue = {\"country\": String, \"org_id\": String};\nentity TrustedIssuer = {\"issuer_entity_id\": Url};\nentity User = {\"country\": String, \"email\": String, \"sub\": String, \"username\": String};\nentity Workload = {\"client_id\": String, \"iss\": TrustedIssuer, \"name\": String, \"org_id\": String};\nentity id_token = {\"acr\": String, \"amr\": String, \"aud\": String, \"exp\": Long, \"iat\": Long, \"iss\": TrustedIssuer, \"jti\": String, \"sub\": String};\naction \"Update\" appliesTo {\n  principal: [Workload, User],\n  resource: [Issue],\n  context: {}\n};\n}\n"
+    }
+}
