@@ -9383,19 +9383,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
+        adminCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
         whitePagesCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -10297,8 +10297,6 @@ components:
           $ref: '#/components/schemas/LockMessageConfig'
         connectionServiceConfiguration:
           $ref: '#/components/schemas/ConnectionServiceConfiguration'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10308,6 +10306,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11468,14 +11468,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11906,10 +11906,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -12080,10 +12080,6 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -12094,6 +12090,10 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

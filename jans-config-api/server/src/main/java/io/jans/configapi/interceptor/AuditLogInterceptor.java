@@ -26,15 +26,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.fge.jsonpatch.JsonPatch;
-
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jsonpatch.JsonPatchOperation;
-
+import com.fasterxml.jackson.databind.node.ObjectNode;
 @Interceptor
 @RequestAuditInterceptor
 @Priority(Interceptor.Priority.APPLICATION)
@@ -218,11 +215,22 @@ public class AuditLogInterceptor {
             if(obj==null) {
                 return sb.toString();
             }
+            String jsonString = Jackson.asPrettyJson(obj);
+            AUDIT_LOG.error("jsonString:{} ", jsonString);
             
-            JsonNode jsonNode = Jackson.asJsonNode(Jackson.asJson(obj));
-            AUDIT_LOG.error("jsonNode:{} ", jsonNode);
-            AUDIT_LOG.error("jsonNode.get(path):{} ", jsonNode.get("path"));             
+            JsonNode jsonNode = Jackson.asJsonNode(jsonString);
+            ObjectNode objectNode = (ObjectNode) jsonNode;
+            AUDIT_LOG.error("New objectNode:{}, objectNode.get(path):{} ", objectNode, objectNode.get("path"));             
+            
+            StringBuilder values = new StringBuilder();
+            objectNode.forEach(jsonObject -> jsonObject.elements().forEachRemaining(valueNode -> {
+                if(valueNode.has("path"))
+                    values.append(valueNode.get("path").asText());
+                    values.append(",");
+                    AUDIT_LOG.error("valueNode.get(path).asText():{}", valueNode.get("path").asText());
+            }));
 
+            AUDIT_LOG.error("NEW values:{}", values.toString());
             
         }catch(Exception ex) {
             LOG.error("Error while processing :{}", ex);
