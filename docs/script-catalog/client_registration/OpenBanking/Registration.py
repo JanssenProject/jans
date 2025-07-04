@@ -38,8 +38,8 @@ from org.apache.http.ssl import SSLContexts
 from org.apache.http.util import EntityUtils
 from org.bouncycastle.util.io.pem import PemObject
 from org.bouncycastle.util.io.pem import PemReader
-from org.jose4j.jws import JsonWebSignature
-from org.jose4j.jwt import JwtClaims
+from com.google.api.client.json.webtoken import JsonWebSignature
+from io.jans.as.model.jwt import JwtClaims
 from org.json import JSONObject
 from  java.lang import StringBuilder 
 from java.lang import String
