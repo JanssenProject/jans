@@ -14482,9 +14482,9 @@
 
 
 <h1 id="implementing-tbac-using-cedarling">Implementing TBAC using Cedarling<a class="headerlink" href="#implementing-tbac-using-cedarling" title="Permanent link">#</a></h1>
-<p>This guide shows how to implement 
-<a href="../#token-based-access-control-tbac-v-application-asserted-identity">Token Based Access Control(TBAC)</a> using 
-the Cedarling. To do this, we need 3 things. </p>
+<p>This guide shows how to implement
+<a href="../#token-based-access-control-tbac-v-application-asserted-identity">Token Based Access Control(TBAC)</a> using
+the Cedarling. To do this, we need 3 things.</p>
 <ol>
 <li>An Authorization policy</li>
 <li>A request for user action</li>
@@ -14498,7 +14498,7 @@ purpose.</p>
 <li>Install the Janssen Tarp <a href="https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md#releases">on Chrome or Firefox</a>.</li>
 </ul>
 <h2 id="step-1-create-cedar-policy-and-schema">Step-1: Create Cedar Policy and Schema<a class="headerlink" href="#step-1-create-cedar-policy-and-schema" title="Permanent link">#</a></h2>
-<p>In this guide, we will use a policy that grants access to all actions and all the resources, only to the users with the <code>SupremeRuler</code> role. The policy is as follows: </p>
+<p>In this guide, we will use a policy that grants access to all actions and all the resources, only to the users with the <code>SupremeRuler</code> role. The policy is as follows:</p>
 <div class="highlight"><pre><span></span><code>@id(&quot;allow_supreme_ruler&quot;)
 permit(
   principal in Jans::Role::&quot;SupremeRuler&quot;,
@@ -14515,12 +14515,10 @@ permit(
 <li>Open the <a href="https://cloud.gluu.org/agama-lab/dashboard/policy_store">Agama Lab policy designer</a> and select your fork.</li>
 <li>Open the policy store named <code>tarpDemo</code></li>
 <li>Go to <code>Trusted Issuer</code> and edit the <code>testIdp</code> entry</li>
-<li>Replace the OpenID configuration endpoint with the one from your IDP. This server must:<ul>
+<li>Replace the OpenID configuration endpoint with the one from your IDP. This server must:</li>
 <li>Allow dynamic client registration</li>
 <li>Allow registered clients to request the <code>role</code> scope</li>
 <li>Have a user with the <code>role</code> claim set to the value <code>SupremeRuler</code> and return this claim in the userinfo token</li>
-</ul>
-</li>
 <li>Click Save</li>
 <li>Click on the button named <code>Copy Link</code>. You will need this link in the next section.</li>
 </ul>
@@ -14529,69 +14527,63 @@ permit(
 installed in the browser. The Cedarling instance embedded in the Tarp will
 use the policy stored in this store to evaluate the authorization result.</p>
 <ol>
-<li>Open Tarp installed in the Chrome browser </li>
-<li>Click <code>Add Client</code>. Use details below to add a new client.<ul>
-<li>Issuer: The hostname of your IDP </li>
-<li>Expiry: The day after today </li>
+<li>Open Tarp installed in the Chrome browser</li>
+<li>Click <code>Add Client</code>. Use details below to add a new client.</li>
+<li>Issuer: The hostname of your IDP</li>
+<li>Expiry: The day after today</li>
 <li>Scopes: <code>openid</code>, <code>profile</code>, <code>role</code></li>
-</ul>
-</li>
 <li>Click <code>Register</code></li>
 <li>Go to <code>Cedarling</code> tab and click <code>Add Configurations</code></li>
-<li>Select <code>JSON</code> configuration type and Paste the config as given below. 
-Remember to replace <code>&lt;Policy Store URI&gt;</code> with 
-the URI of your policy store:
-        <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;Policy Store URI&gt;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;std_out&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_PRINCIPAL_BOOLEAN_OPERATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_JWT_STATUS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_MAPPING_USER&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_MAPPING_WORKLOAD&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-</code></pre></div></li>
-<li>Click <code>Save</code> to initialize Cedarling. </li>
+<li>Select <code>JSON</code> configuration type and Paste the config as given below.
+   Remember to replace <code>&lt;Policy Store URI&gt;</code> with
+   the URI of your policy store:
+   <code>json
+         {
+           "CEDARLING_APPLICATION_NAME": "My App",
+           "CEDARLING_POLICY_STORE_URI": "&lt;Policy Store URI&gt;",
+           "CEDARLING_LOG_TYPE": "std_out",
+           "CEDARLING_LOG_LEVEL": "INFO",
+           "CEDARLING_USER_AUTHZ": "enabled",
+           "CEDARLING_WORKLOAD_AUTHZ": "disabled",
+           "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+             "===": [{"var": "Jans::User"}, "ALLOW"]
+           },
+           "CEDARLING_JWT_SIG_VALIDATION": "enabled",
+           "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+           "CEDARLING_MAPPING_USER": "Jans::User",
+           "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
+           "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+             "HS256", "RS256"
+           ],
+           "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+         }</code></li>
+<li>Click <code>Save</code> to initialize Cedarling.</li>
 </ol>
-<p>This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User. </p>
+<p>This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User.</p>
 <h2 id="step-3-test-the-policy-using-the-cedarling">Step-3: Test the policy using the Cedarling<a class="headerlink" href="#step-3-test-the-policy-using-the-cedarling" title="Permanent link">#</a></h2>
-<p>Since we are implementing TBAC, we have to authenticate the user first to get the tokens. </p>
+<p>Since we are implementing TBAC, we have to authenticate the user first to get the tokens.</p>
 <ol>
 <li>In Tarp, under <code>Authentication flow</code> tab, click the ⚡ icon to begin authentication</li>
-<li>Input:<ul>
+<li>Input:</li>
 <li>ACR: <code>basic</code></li>
 <li>Scopes: <code>openid</code>, <code>profile</code>, <code>role</code></li>
-</ul>
-</li>
 <li>Login using a user having the <code>SupremeRuler</code> role</li>
 <li>Click <code>Allow</code> on the consent screen</li>
 <li>If the authentication is successful, Tarp will show you a page with token details and <code>Cedarling Authz Request Form</code> section</li>
 <li>Open <code>Cedarling Signed Authz Form</code></li>
-<li>Use the details below as an input to this form:<ul>
+<li>Use the details below as an input to this form:</li>
 <li>Principal: select all 3 tokens</li>
 <li>Action: <code>Jans::Action::"Read"</code></li>
 <li>Resource:
-    <div class="highlight"><pre><span></span><code><span class="p">{</span>
+     <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;resource&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::SecretDocument&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
 <span class="p">}</span>
 </code></pre></div></li>
-</ul>
-</li>
 <li>Leave the <code>Context</code> blank</li>
 <li>Click <code>Cedarling Authz Request</code>
-      <div class="highlight"><span class="filename">Sample Response</span><pre><span></span><code><span class="p">{</span>
+   <div class="highlight"><span class="filename">Sample Response</span><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="err">...</span>
 <span class="w">  </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;019602f1-c964-7dbb-8a07-5b66b642e502&quot;</span>
@@ -14623,7 +14615,7 @@ the URI of your policy store:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 10, 2025 03:01:26 UTC"><span class="timeago" datetime="2025-06-10T03:01:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 10, 2025 03:01:26 UTC">2025-06-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 4, 2025 03:23:29 UTC"><span class="timeago" datetime="2025-07-04T03:23:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 4, 2025 03:23:29 UTC">2025-07-04</span>
   </span>
 
     

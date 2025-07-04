@@ -14559,7 +14559,7 @@
 <span class="w">  </span><span class="s2">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="s2">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="s2">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;never&quot;</span><span class="p">,</span>
 <span class="p">);</span>
 </code></pre></div>
 <h3 id="authorization">Authorization<a class="headerlink" href="#authorization" title="Permanent link">#</a></h3>
@@ -14571,22 +14571,22 @@
 <h4 id="token-based-authorization">Token-Based Authorization<a class="headerlink" href="#token-based-authorization" title="Permanent link">#</a></h4>
 <p>To perform an authorization check, follow these steps:</p>
 <p><strong>1. Prepare tokens</strong></p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">access_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;access_token&gt;&quot;</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">id_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;id_token&gt;&quot;</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">userinfo_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;userinfo_token&gt;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">access_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;access_token&gt;&quot;</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">id_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;id_token&gt;&quot;</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">userinfo_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;userinfo_token&gt;&quot;</span><span class="p">;</span>
 </code></pre></div>
 <p>Your <em>principals</em> will be built from these tokens.</p>
 <p><strong>2. Define the resource</strong></p>
 <p>This represents the <em>resource</em> that the action will be performed on, such as a protected API endpoint or file.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="s2">&quot;entity_type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;app_id_001&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;App Name&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;url&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;host&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;path&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;protocol&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https&quot;</span>
-<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;app_id_001&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;App Name&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">url</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">host</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">protocol</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="p">};</span>
 </code></pre></div>
 <p><strong>3. Define the action</strong></p>
@@ -14596,27 +14596,27 @@
 <p><strong>4. Define Context</strong></p>
 <p>The <em>context</em> represents additional data that may affect the authorization decision, such as time, location, or user-agent.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="s2">&quot;current_time&quot;</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="p">),</span>
-<span class="w">  </span><span class="s2">&quot;device_health&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="s2">&quot;fraud_indicators&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Allowed&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="s2">&quot;geolocation&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;America&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="s2">&quot;network&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;network_type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Local&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;operating_system&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;user_agent&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span>
+<span class="w">  </span><span class="nx">current_time</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">device_health</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">fraud_indicators</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Allowed&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">geolocation</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;America&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">network</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">network_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Local&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">operating_system</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">user_agent</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
 <span class="p">};</span>
 </code></pre></div>
 <p><strong>5. Build the request</strong></p>
 <p>Now you'll construct the <strong><em>request</em></strong> by including the <em>principals</em>, <em>action</em>, and <em>context</em>.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="s2">&quot;tokens&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;access_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">access_token</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;id_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">id_token</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;userinfo_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">userinfo_token</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">access_token</span><span class="o">:</span><span class="w"> </span><span class="nx">access_token</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">id_token</span><span class="o">:</span><span class="w"> </span><span class="nx">id_token</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">userinfo_token</span><span class="o">:</span><span class="w"> </span><span class="nx">userinfo_token</span><span class="p">,</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="s2">&quot;action&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">action</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;resource&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">resource</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">context</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="nx">action</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="nx">resource</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="nx">context</span><span class="p">,</span>
 <span class="p">};</span>
 </code></pre></div>
 <p><strong>6. Perform Authorization</strong></p>
@@ -14628,28 +14628,28 @@
 <p><strong>1. Define the Principals</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">principals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;entity_type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;some_workload_id&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;client_id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;some_client_id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;some_workload_id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">client_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;some_client_id&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;entity_type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;random_user_id&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;roles&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;manager&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;random_user_id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">roles</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;manager&quot;</span><span class="p">],</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="p">];</span>
 </code></pre></div>
 <p><strong>2. Define the Resource</strong></p>
 <p>This represents the <em>resource</em> that the action will be performed on, such as a protected API endpoint or file.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span>
-<span class="w">  </span><span class="s2">&quot;entity_type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;app_id_001&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;App Name&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;url&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;host&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;path&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;protocol&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https&quot;</span>
-<span class="w">  </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;app_id_001&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;App Name&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">url</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">host</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">protocol</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="p">};</span>
 </code></pre></div>
 <p><strong>3. Define the Action</strong></p>
@@ -14659,21 +14659,21 @@
 <p><strong>4. Define the Context</strong></p>
 <p>The <em>context</em> represents additional data that may affect the authorization decision, such as time, location, or user-agent.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;current_time&quot;</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="p">),</span>
-<span class="w">    </span><span class="s2">&quot;device_health&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s2">&quot;location&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;network&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;operating_system&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
-<span class="p">}</span>
+<span class="w">  </span><span class="nx">current_time</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">device_health</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">location</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">network</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">operating_system</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+<span class="p">};</span>
 </code></pre></div>
 <p><strong>5. Build the Request</strong></p>
 <p>Now you'll construct the <strong><em>request</em></strong> by including the <em>principals</em>, <em>action</em>, and <em>context</em>.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="s2">&quot;principals&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">principals</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;action&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">action</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;resource&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">resource</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">context</span>
-<span class="p">}</span>
+<span class="w">  </span><span class="nx">principals</span><span class="o">:</span><span class="w"> </span><span class="nx">principals</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="nx">action</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="nx">resource</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="nx">context</span><span class="p">,</span>
+<span class="p">};</span>
 </code></pre></div>
 <p><strong>6. Perform Authorization</strong></p>
 <p>Finally, call the <code>authorize</code> function to check whether the principals are allowed to perform the specified action on the resource.</p>
@@ -14681,7 +14681,7 @@
 </code></pre></div>
 <h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">#</a></h3>
 <p>The logs could be retrieved using the <code>pop_logs</code> function.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">logs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">pop_logs</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">logs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">pop_logs</span><span class="p">();</span>
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">logs</span><span class="p">);</span>
 </code></pre></div>
 <hr />
@@ -14714,7 +14714,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 15, 2025 17:35:38 UTC"><span class="timeago" datetime="2025-05-15T17:35:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 15, 2025 17:35:38 UTC">2025-05-15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 4, 2025 03:23:29 UTC"><span class="timeago" datetime="2025-07-04T03:23:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 4, 2025 03:23:29 UTC">2025-07-04</span>
   </span>
 
     

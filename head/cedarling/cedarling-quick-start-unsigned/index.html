@@ -14459,7 +14459,7 @@
 
 <h1 id="authorization-using-the-cedarling">Authorization Using The Cedarling<a class="headerlink" href="#authorization-using-the-cedarling" title="Permanent link">#</a></h1>
 <p>This quick start guide shows how to quickly test authorization of a user action
-using the Cedarling. To do this, we need 3 things. </p>
+using the Cedarling. To do this, we need 3 things.</p>
 <ol>
 <li>Authorization policy</li>
 <li>A request for user action</li>
@@ -14472,20 +14472,16 @@ using the Cedarling. To do this, we need 3 things. </p>
 <li>Install the Janssen Tarp <a href="https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md#releases">on Chrome or Firefox</a>.</li>
 </ul>
 <h2 id="step-1-create-cedar-policy-and-schema">Step-1: Create Cedar Policy and Schema<a class="headerlink" href="#step-1-create-cedar-policy-and-schema" title="Permanent link">#</a></h2>
-<p>The Cedarling needs policies and a schema to authorize access. These are bundled in a <em>policy store</em> (a JSON file). A demo repository is provided for this quickstart which contains two policy stores. We will be using the <code>tarpUnsignedDemo</code> store for this demo. </p>
+<p>The Cedarling needs policies and a schema to authorize access. These are bundled in a <em>policy store</em> (a JSON file). A demo repository is provided for this quickstart which contains two policy stores. We will be using the <code>tarpUnsignedDemo</code> store for this demo.</p>
 <ul>
 <li>Go to the <a href="https://github.com/JanssenProject/CedarlingQuickstart">Lock testing repository</a></li>
-<li>Click on <code>Fork</code><ul>
+<li>Click on <code>Fork</code></li>
 <li>Make sure the <code>Copy the master branch only</code> option is <strong>unchecked</strong></li>
-</ul>
-</li>
-<li>Fork the repository<ul>
+<li>Fork the repository</li>
 <li>Open the <a href="https://cloud.gluu.org/agama-lab/dashboard/policy_store">Agama Lab policy designer</a>.</li>
 <li>Click on <code>Change Repository</code>.</li>
 <li>Select the option <code>Manually Type Repository URL</code>.</li>
 <li>Paste the URL of your forked repository, then click the <code>Select</code> button.</li>
-</ul>
-</li>
 <li>Open the policy store named <code>tarpUnsignedDemo</code></li>
 <li>Click on the button named <code>Copy Link</code>. You will need this link in the next section.</li>
 </ul>
@@ -14494,10 +14490,10 @@ using the Cedarling. To do this, we need 3 things. </p>
 installed in the browser. The Cedarling instance embedded in the Tarp will
 use the policy stored in this store to evaluate the authorization result.</p>
 <ol>
-<li>Open Tarp installed in the browser </li>
+<li>Open Tarp installed in the browser</li>
 <li>Navigate to the <code>Cedarling</code> tab and click on <code>Add Configurations</code></li>
 <li>Paste the following configuration parameters as JSON. Make sure to update the <code>&lt;Policy Store URI&gt;</code> value to point to your policy store
-      <div class="highlight"><pre><span></span><code>{
+   <div class="highlight"><pre><span></span><code>{
     &quot;CEDARLING_APPLICATION_NAME&quot;: &quot;My App&quot;,
     &quot;CEDARLING_POLICY_STORE_URI&quot;: &quot;&lt;Policy Store URI&gt;&quot;,
     &quot;CEDARLING_LOG_TYPE&quot;: &quot;std_out&quot;,
@@ -14514,20 +14510,20 @@ use the policy stored in this store to evaluate the authorization result.</p>
     &quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;: [
       &quot;HS256&quot;, &quot;RS256&quot;
     ],
-    &quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;: &quot;none&quot;
+    &quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;: &quot;never&quot;
 }
 </code></pre></div></li>
-<li>Click <code>Save</code> to initialize Cedarling. </li>
+<li>Click <code>Save</code> to initialize Cedarling.</li>
 </ol>
-<p>This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User. </p>
+<p>This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User.</p>
 <h2 id="step-3-test-the-policy-using-cedarling">Step-3: Test the policy using cedarling<a class="headerlink" href="#step-3-test-the-policy-using-cedarling" title="Permanent link">#</a></h2>
 <p>Video walkthrough:</p>
 <p>https://streamable.com/25wcb7</p>
 <ol>
 <li>Go to Tarp, under <code>Cedarling</code> tab, click on <code>Cedarling Unsigned Authz Form</code></li>
-<li>
-<p>Input the following:
-      <div class="highlight"><span class="filename">Principal</span><pre><span></span><code><span class="w">    </span><span class="p">[</span>
+<li>Input the following:</li>
+</ol>
+<div class="highlight"><span class="filename">Principal</span><pre><span></span><code><span class="w">    </span><span class="p">[</span>
 <span class="w">      </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
@@ -14535,7 +14531,7 @@ use the policy stored in this store to evaluate the authorization result.</p>
 <span class="w">        </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;SupremeRuler&quot;</span><span class="p">]</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">]</span>
-</code></pre></div></p>
+</code></pre></div>
 <div class="highlight"><span class="filename">Actions</span><pre><span></span><code><span class="err">Ja</span><span class="kc">ns</span><span class="p">::</span><span class="err">Ac</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="p">::</span><span class="s2">&quot;Read&quot;</span>
 </code></pre></div>
 <div class="highlight"><span class="filename">Resource</span><pre><span></span><code><span class="w">    </span><span class="p">{</span>
@@ -14544,9 +14540,7 @@ use the policy stored in this store to evaluate the authorization result.</p>
 <span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 </code></pre></div>
-</li>
-</ol>
-<p>The request is ready to be sent. To send the request to the Cedarling, 
+<p>The request is ready to be sent. To send the request to the Cedarling,
 click on <code>Cedarling Authz Request</code></p>
 <div class="highlight"><span class="filename">Sample Response</span><pre><span></span><code><span class="w">    </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
@@ -14556,7 +14550,7 @@ click on <code>Cedarling Authz Request</code></p>
 </code></pre></div>
 <p>The top-level <code>decision: true</code> confirms successful authorization.</p>
 <p>Let's check a scenario where authorization is denied.</p>
-<p><div class="highlight"><pre><span></span><code>[
+<div class="highlight"><pre><span></span><code>[
   {
     &quot;type&quot;: &quot;Jans::User&quot;,
     &quot;id&quot;: &quot;some_id&quot;,
@@ -14565,13 +14559,13 @@ click on <code>Cedarling Authz Request</code></p>
   }
 ]
 </code></pre></div>
-And click <code>Cedarling Authz Request</code> again. Cedarling will return a new result:</p>
+<p>And click <code>Cedarling Authz Request</code> again. Cedarling will return a new result:</p>
 <div class="highlight"><pre><span></span><code>{
   &quot;decision&quot;: false,
   ...
 }
 </code></pre></div>
-<p>The top-level <code>decision: false</code> shows Cedarling denying authorization. </p>
+<p>The top-level <code>decision: false</code> shows Cedarling denying authorization.</p>
 
 
 
@@ -14594,7 +14588,7 @@ And click <code>Cedarling Authz Request</code> again. Cedarling will return a ne
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 10, 2025 03:01:26 UTC"><span class="timeago" datetime="2025-06-10T03:01:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 10, 2025 03:01:26 UTC">2025-06-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 4, 2025 03:23:29 UTC"><span class="timeago" datetime="2025-07-04T03:23:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 4, 2025 03:23:29 UTC">2025-07-04</span>
   </span>
 
     
