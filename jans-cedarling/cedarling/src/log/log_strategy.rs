@@ -41,7 +41,7 @@ impl LogStrategy {
         let logger = match &config.log_type {
             LogTypeConfig::Off => LogStrategyLogger::Off(NopLogger),
             LogTypeConfig::Memory(memory_config) => LogStrategyLogger::MemoryLogger(
-                MemoryLogger::new(*memory_config, config.log_level, pdp_id, app_name.clone()),
+                MemoryLogger::new(memory_config.clone(), config.log_level, pdp_id, app_name.clone()),
             ),
             LogTypeConfig::StdOut => LogStrategyLogger::StdOut(StdOutLogger::new(config.log_level)),
         };

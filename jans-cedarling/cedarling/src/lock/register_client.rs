@@ -37,11 +37,11 @@ pub async fn register_client(
 
     // Get openid config
     let oidc: OpenidConfig = sender
-        .send(|| client.get(oidc_endpoint.as_ref()))
+        .send(|| client.get(oidc_endpoint.0.as_str()))
         .await
         .map_err(ClientRegistrationError::GetOpenidConfig)?;
 
-    // Register client
+    // Register client with SSA JWT if provided
     let mut dcr_body = json!({
         "token_endpoint_auth_method": "client_secret_basic",
         "grant_types": ["client_credentials"],
@@ -49,9 +49,12 @@ pub async fn register_client(
         "scope": DCR_SCOPE,
         "access_token_as_jwt": true,
     });
+    
+    // Add SSA JWT to the DCR request if provided
     if let Some(ssa_jwt) = ssa_jwt {
         dcr_body["software_statement"] = json!(ssa_jwt);
     }
+    
     let ClientIdAndSecret {
         client_id,
         client_secret,
@@ -59,6 +62,7 @@ pub async fn register_client(
         .send(|| {
             client
                 .post(&oidc.registration_endpoint)
+                .header("Content-Type", "application/json")
                 .body(dcr_body.to_string())
         })
         .await
@@ -71,6 +75,7 @@ pub async fn register_client(
     }))
     // this should never fail since this is a hard-coded valid JSON
     .expect("serialize form data");
+    
     let AccessToken { access_token } = sender
         .send(|| {
             client
@@ -125,4 +130,152 @@ struct ClientIdAndSecret {
 struct AccessToken {
     #[serde(rename = "access_token")]
     access_token: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use mockito::{Mock, Server, ServerGuard};
+    use serde_json::json;
+
+    #[tokio::test]
+    async fn test_register_client_with_ssa() {
+        let pdp_id = PdpID::new();
+        let ssa_jwt = "eyJraWQiOiJzc2FfOTgwYTQ0ZDQtZWE3OS00YTM1LThlNjMtNzlhNzg4NTNmYzUwX3NpZ19yczI1NiIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJzb2Z0d2FyZV9pZCI6IkNlZGFybGluZ1Rlc3QiLCJncmFudF90eXBlcyI6WyJhdXRob3JpemF0aW9uX2NvZGUiLCJyZWZyZXNoX3Rva2VuIl0sIm9yZ19pZCI6InRlc3QiLCJpc3MiOiJodHRwczovL2RlbW9leGFtcGxlLmphbnMuaW8iLCJzb2Z0d2FyZV9yb2xlcyI6WyJjZWRhcmxpbmciXSwiZXhwIjozMzE5NzE3ODEyLCJpYXQiOjE3NDI5MTc4MTMsImp0aSI6IjM5NTA0NTRlLTM5MWMtNDlhOS05YzYxLTY4MGMyNWE4MDk0ZCJ9.INA5qvpheWvJe6DJaeLkOYt1YH3W9gJQ3yy5Cr5G9_QbzazV23FMJDH2Rbysauk4YNC0oIsTL4MBQ_dRn3YaPLapOhizIlxZQF_uHBpYnopsk6KxgiRQTotg1Kw7Kwsi1RHtfHXpplSS15Dc-9QrOIGbNu44zEt1F5FYV5feW2c0u5HIRISoMNPutOYfMH18bZaBM28N8BssuqLv5X_Bc8EuSkmNTERP5L4khv6Mi3uVItkgK9xTbMKCpUstH_LchT1BKD_pTTMAQx6g6TOf3gnwKYQcmQhjJWFUbXnKCjghExV4PrYc6P8YaXdFnPBYoovd8FxS5qrX8trkh6pxeQ";
+
+        let mut mock_server = Server::new_async().await;
+
+        let oidc_endpoint = mock_oidc_endpoint(&mut mock_server);
+        let dcr_endpoint = mock_dcr_endpoint(&mut mock_server, pdp_id, ssa_jwt);
+        let token_endpoint = mock_token_endpoint(&mut mock_server);
+
+        let oidc_url: url::Url = format!("{}/.well-known/openid-configuration", mock_server.url())
+            .parse()
+            .expect("valid URL");
+
+        let result = register_client(
+            pdp_id,
+            &super::super::lock_config::Url(oidc_url),
+            Some(&ssa_jwt.to_string()),
+            false,
+        )
+        .await;
+
+        assert!(result.is_ok());
+        oidc_endpoint.assert();
+        dcr_endpoint.assert();
+        token_endpoint.assert();
+    }
+
+    #[tokio::test]
+    async fn test_register_client_without_ssa() {
+        let pdp_id = PdpID::new();
+
+        let mut mock_server = Server::new_async().await;
+
+        let oidc_endpoint = mock_oidc_endpoint(&mut mock_server);
+        let dcr_endpoint = mock_dcr_endpoint_without_ssa(&mut mock_server, pdp_id);
+        let token_endpoint = mock_token_endpoint(&mut mock_server);
+
+        let oidc_url: url::Url = format!("{}/.well-known/openid-configuration", mock_server.url())
+            .parse()
+            .expect("valid URL");
+
+        let result = register_client(
+            pdp_id,
+            &super::super::lock_config::Url(oidc_url),
+            None,
+            false,
+        )
+        .await;
+
+        assert!(result.is_ok());
+        oidc_endpoint.assert();
+        dcr_endpoint.assert();
+        token_endpoint.assert();
+    }
+
+    /// Mocks the `.well-known/openid-configuration` endpoint
+    fn mock_oidc_endpoint(server: &mut ServerGuard) -> Mock {
+        let oidc_path = "/.well-known/openid-configuration";
+
+        let registration_endpoint = format!("{}/jans-auth/restv1/register", server.url());
+        let token_endpoint = format!("{}/jans-auth/restv1/token", server.url());
+        server
+            .mock("GET", oidc_path)
+            .with_body(
+                json!({
+                    "registration_endpoint": registration_endpoint,
+                    "token_endpoint": token_endpoint,
+                })
+                .to_string(),
+            )
+            .expect(1)
+            .create()
+    }
+
+    /// Mocks the dynamic client registration endpoint with SSA
+    fn mock_dcr_endpoint(server: &mut ServerGuard, pdp_id: PdpID, ssa_jwt: &str) -> Mock {
+        let dcr_path = "/jans-auth/restv1/register";
+
+        server
+            .mock("POST", dcr_path)
+            .match_body(mockito::Matcher::PartialJson(json!({
+                "token_endpoint_auth_method": "client_secret_basic",
+                "grant_types": ["client_credentials"],
+                "client_name": format!("cedarling-{}", pdp_id),
+                "scope": DCR_SCOPE,
+                "access_token_as_jwt": true,
+                "software_statement": ssa_jwt,
+            })))
+            .with_body(
+                json!({
+                    "client_id": "some_client_id",
+                    "client_secret": "some_client_secret",
+                })
+                .to_string(),
+            )
+            .expect(1)
+            .create()
+    }
+
+    /// Mocks the dynamic client registration endpoint without SSA
+    fn mock_dcr_endpoint_without_ssa(server: &mut ServerGuard, pdp_id: PdpID) -> Mock {
+        let dcr_path = "/jans-auth/restv1/register";
+
+        server
+            .mock("POST", dcr_path)
+            .match_body(mockito::Matcher::PartialJson(json!({
+                "token_endpoint_auth_method": "client_secret_basic",
+                "grant_types": ["client_credentials"],
+                "client_name": format!("cedarling-{}", pdp_id),
+                "scope": DCR_SCOPE,
+                "access_token_as_jwt": true,
+            })))
+            .with_body(
+                json!({
+                    "client_id": "some_client_id",
+                    "client_secret": "some_client_secret",
+                })
+                .to_string(),
+            )
+            .expect(1)
+            .create()
+    }
+
+    /// Mocks the `/token` endpoint
+    fn mock_token_endpoint(server: &mut ServerGuard) -> Mock {
+        let token_path = "/jans-auth/restv1/token";
+
+        server
+            .mock("POST", token_path)
+            .with_body(
+                json!({
+                    "access_token": "some.access.token",
+                })
+                .to_string(),
+            )
+            .expect(1)
+            .create()
+    }
 }
