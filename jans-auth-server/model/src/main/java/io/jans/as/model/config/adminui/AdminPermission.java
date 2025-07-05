@@ -7,6 +7,7 @@ public class AdminPermission {
     private String permission;
     private String description;
     private Boolean defaultPermissionInToken;
+    private Boolean essentialPermissionInAdminUI;
 
     public String getPermission() {
         return permission;
@@ -30,6 +31,14 @@ public class AdminPermission {
 
     public void setDefaultPermissionInToken(Boolean defaultPermissionInToken) {
         this.defaultPermissionInToken = defaultPermissionInToken;
+    }
+
+    public Boolean getEssentialPermissionInAdminUI() {
+        return essentialPermissionInAdminUI;
+    }
+
+    public void setEssentialPermissionInAdminUI(Boolean essentialPermissionInAdminUI) {
+        this.essentialPermissionInAdminUI = essentialPermissionInAdminUI;
     }
 
     public String getTag() {
@@ -59,6 +68,7 @@ public class AdminPermission {
                 "tag='" + tag + '\'' +
                 ", permission='" + permission + '\'' +
                 ", description='" + description + '\'' +
+                ", essentialPermissionInAdminUI='" + essentialPermissionInAdminUI + '\'' +
                 ", defaultPermissionInToken=" + defaultPermissionInToken +
                 '}';
     }
