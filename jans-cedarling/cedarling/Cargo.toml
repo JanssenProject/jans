@@ -46,6 +46,7 @@ flate2 = "1.1.1"
 async-trait = "0.1.88"
 futures = "0.3.31"
 wasm-bindgen-futures = { workspace = true }
+config = "0.15.11"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }

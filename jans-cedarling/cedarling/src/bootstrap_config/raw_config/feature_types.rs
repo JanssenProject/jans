@@ -118,26 +118,34 @@ impl From<bool> for FeatureToggle {
     }
 }
 
+/// Error parsing workload bool op
 #[derive(Default, Debug, derive_more::Display, derive_more::Error)]
-#[display("Could not parce `WorkloadBoolOp` with payload {payload}, should be `AND` or `OR`")]
+#[display("Could not parse `WorkloadBoolOp` with payload {payload}, should be `AND` or `OR`")]
 pub struct ParseWorkloadBoolOpError {
+    /// The payload that failed to parse
     payload: String,
 }
 
+/// Error parsing trust mode
 #[derive(Default, Debug, derive_more::Display, derive_more::Error)]
 #[display("Invalid `TrustMode`: {trust_mode}. should be `strict` or `none`")]
 pub struct ParseTrustModeError {
+    /// The trust mode string that failed to parse
     trust_mode: String,
 }
 
+/// Error parsing logger type
 #[derive(Default, Debug, derive_more::Display, derive_more::Error)]
 #[display("Invalid `LoggerType`: {logger_type}. should be `memory`, `std_out`, `lock`, or `off`")]
 pub struct ParseLoggerTypeError {
+    /// The logger type string that failed to parse
     logger_type: String,
 }
 
+/// Error parsing feature toggle
 #[derive(Default, Debug, derive_more::Display, derive_more::Error)]
 #[display("Invalid `FeatureToggle`: {value}. should be `enabled`, or `disabled`")]
 pub struct ParseFeatureToggleError {
+    /// The value that failed to parse
     value: String,
 }

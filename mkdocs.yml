@@ -20,6 +20,7 @@ extra_css:
 
 extra_javascript:
   - javascripts/skeleton-loader.js
+  - javascripts/full-screen-sections.js
 
 markdown_extensions:
 - admonition
@@ -190,7 +191,7 @@ nav:
       - OpenID id_token: janssen-server/auth-server/tokens/openid-id-token.md
       - OpenID Userinfo Token: janssen-server/auth-server/tokens/openid-userinfo-token.md
       - UMA RPT Token: janssen-server/auth-server/tokens/uma-rpt-token.md
-      - Logout Status JWT: janssen-server/auth-server/endpoints/logout-status-jwt.md
+      - Logout Status JWT: janssen-server/auth-server/tokens/logout-status-jwt.md
     - Scopes: janssen-server/auth-server/scopes/README.md
     - Rich Authorization Requests : janssen-server/auth-server/authz-details/README.md
     - Endpoints:
@@ -336,6 +337,7 @@ nav:
       - UMA Claims Gathering (Web Flow): script-catalog/uma_claims_gathering/uma-claims-web.md
       - UMA RPT Policies: script-catalog/uma_rpt_policy/uma-rpt.md
       - Update Token: script-catalog/update_token/update-token.md
+      - Link interception: script-catalog/link_interception/link-interception.md
       - SSA Modify Response: script-catalog/ssa/ssa-modify-response.md
   - Reference Guide:
     - janssen-server/reference/README.md
@@ -387,6 +389,10 @@ nav:
     - Security Considerations: janssen-server/scim/security.md
     - Bulk Adding Users: janssen-server/scim/bulk-users.md
     - Adding Custom Attributes: janssen-server/scim/custom-attributes.md
+  - Link Guide:
+    - janssen-server/link/README.md
+    - Jans LDAP Link: janssen-server/link/jans-link.md
+    - Jans Keycloak Link: janssen-server/link/jans-keycloak-link.md
   - Lock Guide:
       - janssen-server/lock/README.md
       - Lock Server: janssen-server/lock/lock-server.md
@@ -406,6 +412,7 @@ nav:
       - janssen-server/usermgmt/README.md
       - Using SCIM: janssen-server/usermgmt/usermgmt-scim.md
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
+      - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - 'Cedarling':
   - Overview: 'cedarling/README.md'
   - Quick Start:
@@ -549,6 +556,9 @@ theme:
   - navigation.tabs.sticky
   - navigation.indexes
   - content.tabs.link
+  - content.code.copy
+  - content.code.select
+  - content.code.annotate
   font:
     code: Roboto Mono
     text: Roboto

@@ -14,7 +14,7 @@ var bootstrapConfig string = `
         "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "none",
+        "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_TTL": 60,
         "CEDARLING_LOG_LEVEL": "DEBUG",

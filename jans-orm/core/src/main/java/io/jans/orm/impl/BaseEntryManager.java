@@ -2552,4 +2552,10 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
+    
+	@Override
+	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
+		return operationService.getTableColumnsMap();
+	}
+
 }

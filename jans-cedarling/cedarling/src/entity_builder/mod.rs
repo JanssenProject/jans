@@ -361,6 +361,7 @@ mod test {
 
         // Set the custom workload name in the config
         let mut config = EntityBuilderConfig::default().with_workload();
+        config.build_user = false; // Explicitly disable user entity building for this test
         config.entity_names.workload = "Jans::CustomWorkload".into();
 
         // Set the custom token names in the IDP metadata

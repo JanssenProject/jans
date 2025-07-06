@@ -8,11 +8,6 @@ tags:
 
 # Ubuntu Janssen Installation
 
-## Supported Versions
-- Ubuntu 24.04
-- Ubuntu 22.04
-- Ubuntu 20.04
-
 Before you install, check the [VM system requirements](vm-requirements.md).
 
 
@@ -103,6 +98,12 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 
 ```
 sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
+```
+
+Or, 
+
+```
+dpkg -i jans_1.4.0-stable.ubuntu22.04_amd64.deb
 ```
 
 ### Ubuntu 20.04
