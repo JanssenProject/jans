@@ -251,18 +251,19 @@ jythonInstaller = JythonInstaller()
 rdbmInstaller = RDBMInstaller()
 httpdinstaller = HttpdInstaller()
 jansAuthInstaller = JansAuthInstaller()
+if Config.profile == 'jans':
+    scimInstaller = ScimInstaller()
 configApiInstaller = ConfigApiInstaller()
+jansCliInstaller = JansCliInstaller()
 
 if Config.profile == 'jans':
     fidoInstaller = FidoInstaller()
-    scimInstaller = ScimInstaller()
     casa_installer = CasaInstaller()
     jans_link_installer = JansLinkInstaller()
     jans_keycloak_link_installer = JansKCLinkInstaller()
     jans_saml_installer = JansSamlInstaller()
     jans_lock_installer = JansLockInstaller()
 
-jansCliInstaller = JansCliInstaller()
 
 rdbmInstaller.packageUtils = packageUtils
 
@@ -394,12 +395,15 @@ def main():
                     not Config.installed_instance and Config.install_jans_auth):
                 jansAuthInstaller.start_installation()
 
+            if Config.profile == 'jans' and (Config.installed_instance and 'install_scim_server' in Config.addPostSetupService) or (
+                    not Config.installed_instance and Config.install_scim_server):
+                scimInstaller.start_installation()
+
             if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (
                     not Config.installed_instance and Config.get(configApiInstaller.install_var)):
                 configApiInstaller.start_installation()
                 if argsp.t or getattr(argsp, 'load_config_api_test', None):
                     configApiInstaller.app_test_data_loader()
-
 
             if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jansCliInstaller.install_var)):
@@ -411,10 +415,6 @@ def main():
                 if (Config.installed_instance and 'install_fido2' in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.install_fido2):
                     fidoInstaller.start_installation()
-
-                if (Config.installed_instance and 'install_scim_server' in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.install_scim_server):
-                    scimInstaller.start_installation()
 
                 if (Config.installed_instance and casa_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(casa_installer.install_var)):
