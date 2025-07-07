@@ -12,7 +12,7 @@ use std::collections::HashMap;
 /// - If we use user entity as principal.
 /// - If we use workload entity as principal.
 /// - What boolean operator we need to use when both is used
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AuthorizationConfig {
     /// When `enabled`, Cedar engine authorization is queried for a User principal.
     /// bootstrap property: `CEDARLING_USER_AUTHZ`
@@ -41,7 +41,7 @@ pub struct AuthorizationConfig {
 
     /// Sets the validation level for ID tokens.
     ///
-    /// The available levels are [`None`] and [`Strict`].
+    /// The available levels are [`Always`], [`Never`], [`IfPresent`], and [`Strict`].
     ///
     /// # Strict Mode
     ///
@@ -53,12 +53,78 @@ pub struct AuthorizationConfig {
     ///     - Its `sub` (subject) must match the `id_token`'s `sub`.
     ///     - Its `aud` (audience) must match the `access_token`'s `client_id`.
     ///
-    /// [`None`]: IdTokenTrustMode::None
+    /// [`Always`]: IdTokenTrustMode::Always
+    /// [`Never`]: IdTokenTrustMode::Never
+    /// [`IfPresent`]: IdTokenTrustMode::IfPresent
     /// [`Strict`]: IdTokenTrustMode::Strict
     pub id_token_trust_mode: IdTokenTrustMode,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+/// Raw authorization config
+pub struct AuthorizationConfigRaw {
+    /// Use user principal
+    pub use_user_principal: bool,
+    /// Use workload principal
+    pub use_workload_principal: bool,
+    /// Principal bool operator
+    pub principal_bool_operator: JsonRule,
+    /// Decision log default JWT ID
+    pub decision_log_default_jwt_id: String,
+    /// Decision log user claims
+    pub decision_log_user_claims: Vec<String>,
+    /// Decision log workload claims
+    pub decision_log_workload_claims: Vec<String>,
+}
+
+/// ID token trust mode
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum IdTokenTrustMode {
+    /// Always
+    Always,
+    /// Never
+    Never,
+    /// If present
+    IfPresent,
+    /// Strict
+    Strict,
+}
+
+impl Default for IdTokenTrustMode {
+    fn default() -> Self {
+        Self::Strict
+    }
+}
+
+impl Default for AuthorizationConfig {
+    fn default() -> Self {
+        Self {
+            use_user_principal: true,
+            use_workload_principal: true,
+            principal_bool_operator: JsonRule::default(),
+            decision_log_default_jwt_id: "jti".to_string(),
+            decision_log_user_claims: Vec::new(),
+            decision_log_workload_claims: Vec::new(),
+            id_token_trust_mode: IdTokenTrustMode::Strict,
+        }
+    }
+}
+
+impl From<AuthorizationConfigRaw> for AuthorizationConfig {
+    fn from(raw: AuthorizationConfigRaw) -> Self {
+        Self {
+            use_user_principal: raw.use_user_principal,
+            use_workload_principal: raw.use_workload_principal,
+            principal_bool_operator: raw.principal_bool_operator,
+            decision_log_default_jwt_id: raw.decision_log_default_jwt_id,
+            decision_log_user_claims: raw.decision_log_user_claims,
+            decision_log_workload_claims: raw.decision_log_workload_claims,
+            id_token_trust_mode: IdTokenTrustMode::Strict,
+        }
+    }
+}
+
+/// Token entity names
 pub struct TokenEntityNames(pub HashMap<String, String>);
 
 impl Default for TokenEntityNames {
@@ -86,27 +152,9 @@ impl From<TokenEntityNames> for HashMap<String, String> {
     }
 }
 
-/// Defines the level of validation for ID tokens.
-#[derive(Debug, Clone, PartialEq, Default, Deserialize, Serialize, Copy)]
-#[serde(rename_all = "lowercase")]
-pub enum IdTokenTrustMode {
-    /// No validation is performed on the ID token.
-    None,
-    /// Strict validation of the ID token.
-    ///
-    /// In this mode, the following conditions must be met:
-    ///
-    /// - The `id_token`'s `aud` (audience) must match the `access_token`'s `client_id`.
-    /// - If a Userinfo token is present:
-    ///   - Its `sub` (subject) must match the `id_token`'s `sub`.
-    ///   - Its `aud` must match the `access_token`'s `client_id`.
-    #[default]
-    Strict,
-}
-
 /// Error when parsing [`IdTokenTrustMode`]
 #[derive(Default, Debug, derive_more::Display, derive_more::Error)]
-#[display("Invalid `IdTokenTrustMode`: {trust_mode}. should be `strict` or `none`")]
+#[display("Invalid `IdTokenTrustMode`: {trust_mode}. should be `strict` or `never`")]
 pub struct IdTknTrustModeParseError {
     trust_mode: String,
 }
