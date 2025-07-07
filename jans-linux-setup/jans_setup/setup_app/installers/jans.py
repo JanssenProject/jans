@@ -56,7 +56,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'Java Type'.ljust(name_sep) + Config.java_type.rjust(state_sep) + "\n"
 
             def get_install_string(prefix, install_var):
-                if not base.argsp.allow_pre_released_features and Config.get(install_var+'_pre_released'):
+                if Config.profile != 'openbanking' and not base.argsp.allow_pre_released_features and Config.get(install_var+'_pre_released'):
                     return ''
                 return prefix.ljust(name_sep) + repr(getattr(Config, install_var, False)).rjust(state_sep) + (' *' if install_var in Config.addPostSetupService else '') + '\n'
 
@@ -523,11 +523,13 @@ class JansInstaller(BaseInstaller, SetupUtils):
         #enable scripts
         self.enable_scripts(base.argsp.enable_script)
 
-        # write default Lock Configuration to DB
-        base.current_app.JansLockInstaller.configure_message_conf()
+        if hasattr(base.current_app, 'JansLockInstaller'):
+            # write default Lock Configuration to DB
+            base.current_app.JansLockInstaller.configure_message_conf()
 
-        # Update jansServiceModule for config-api on DB
-        base.current_app.ConfigApiInstaller.update_jansservicemodule()
+        if hasattr(base.current_app, 'ConfigApiInstaller'):
+            # Update jansServiceModule for config-api on DB
+            base.current_app.ConfigApiInstaller.update_jansservicemodule()
 
         self.call_service_post_install_tasks()
 
