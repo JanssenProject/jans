@@ -16,7 +16,7 @@ This guide shows how to upgrade a Janssen VM deployment.
 
 !!! Note
     Custom scripts are considered external configuration and are not updated automatically during an upgrade.
-    Please review and update your custom scripts to match the new version of the Janssen Server.
+    Please review and adapt your custom scripts to work with the newer version of the Janssen Server.
 
 Let's assume we are upgrading Jans VM installation from `current version` to `vreplace-janssen-version`
 
