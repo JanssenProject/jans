@@ -1502,6 +1502,8 @@ components:
           type: string
         defaultPermissionInToken:
           type: boolean
+        essentialPermissionInAdminUI:
+          type: boolean
     GenericResponse:
       type: object
       properties:
