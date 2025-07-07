@@ -184,6 +184,10 @@ The python bindings for `Cedarling` is located in the `bindings/cedarling_python
 
 Or you can find readme by clicking [here](bindings/cedarling_python/README.md).
 
+## Configuration
+
+For complete configuration documentation, see [cedarling-properties.md](../docs/cedarling/cedarling-properties.md).
+
 ## Benchmarks
 
 Benchmarks have been written with the help of the [`criterion`](https://crates.io/crates/criterion) crate.
