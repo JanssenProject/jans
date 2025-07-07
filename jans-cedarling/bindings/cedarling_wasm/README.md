@@ -37,7 +37,7 @@ To run example using `index.html` you need execute following steps:
 1. Build wasm cedarling.
 2. Run webserver using `python3 -m http.server` or any other.
 3. Visit example app [localhost](http://localhost:8000/), on this app you will get log in browser console.
-    - Also you can try use cedarling with web app using [cedarling_app](http://localhost:8000/cedarling_app.html), using custom bootstrap properties and request.
+   - Also you can try use cedarling with web app using [cedarling_app](http://localhost:8000/cedarling_app.html), using custom bootstrap properties and request.
 
 ## WASM Usage
 
@@ -46,17 +46,17 @@ After building WASM bindings in folder `pkg` you can find where you can find `ce
 In `index.html` described simple usage of `cedarling wasm` API:
 
 ```js
-        import { BOOTSTRAP_CONFIG, REQUEST } from "/example_data.js" // Import js objects: bootstrap config and request
-        import initWasm, { init } from "/pkg/cedarling_wasm.js";
+import { BOOTSTRAP_CONFIG, REQUEST } from "/example_data.js"; // Import js objects: bootstrap config and request
+import initWasm, { init } from "/pkg/cedarling_wasm.js";
 
-        async function main() {
-            await initWasm(); // Initialize the WebAssembly module
+async function main() {
+  await initWasm(); // Initialize the WebAssembly module
 
-            let instance = await init(BOOTSTRAP_CONFIG);
-            let result = await instance.authorize(REQUEST);
-            console.log("result:", result);
-        }
-        main().catch(console.error);
+  let instance = await init(BOOTSTRAP_CONFIG);
+  let result = await instance.authorize(REQUEST);
+  console.log("result:", result);
+}
+main().catch(console.error);
 ```
 
 Before using any function from library you need initialize WASM runtime by calling `initWasm` function.
@@ -181,12 +181,12 @@ export class Diagnostics {
    *
    * The ids should be treated as unordered,
    */
-  readonly reason: (string)[];
+  readonly reason: string[];
   /**
    * Errors that occurred during authorization. The errors should be
    * treated as unordered, since policies may be evaluated in any order.
    */
-  readonly errors: (PolicyEvaluationError)[];
+  readonly errors: PolicyEvaluationError[];
 }
 
 /**
@@ -205,4 +205,35 @@ export class PolicyEvaluationError {
    */
   readonly error: string;
 }
+```
+
+## Configuration
+
+### ID Token Trust Mode
+
+The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
+
+- **`strict`** (default): Enforces strict validation rules
+  - ID token `aud` must match access token `client_id`
+  - If userinfo token is present, its `sub` must match the ID token `sub`
+- **`never`**: Disables ID token validation (useful for testing)
+- **`always`**: Always validates ID tokens when present
+- **`ifpresent`**: Validates ID tokens only if they are provided
+
+### Testing Configuration
+
+For testing scenarios, you may want to disable JWT validation. You can configure this in your bootstrap configuration:
+
+```javascript
+const BOOTSTRAP_CONFIG = {
+  CEDARLING_JWT_SIG_VALIDATION: "disabled",
+  CEDARLING_JWT_STATUS_VALIDATION: "disabled",
+  CEDARLING_ID_TOKEN_TRUST_MODE: "never",
+};
+```
+
+For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md).
+
+```
+
 ```

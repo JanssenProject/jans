@@ -1,6 +1,6 @@
 [package]
 name = "cedarling"
-version = "1.8.0"
+version = "0.0.0-nightly"
 edition = "2021"
 description = "The Cedarling: a high-performance local authorization service powered by the Rust Cedar Engine."
 license = "Apache-2.0"
@@ -45,6 +45,7 @@ datalogic-rs = "2.1.2"
 async-trait = "0.1.88"
 futures = "0.3.31"
 wasm-bindgen-futures = { workspace = true }
+config = "0.15.11"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }

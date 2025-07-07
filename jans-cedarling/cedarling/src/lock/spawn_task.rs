@@ -46,6 +46,7 @@ where
 /// This is a helper struct for managing the async handles.
 ///
 /// This is needed because the WASM bindings need special treatment.
+#[derive(Debug)]
 pub struct JoinHandle<T>
 where
     T: Send + 'static,
