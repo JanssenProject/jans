@@ -49,16 +49,33 @@ testing.
 Dependency vulnerabilities are monitored by Gihub. In addition we plan to use 
 the [Linux Foundation Community Bridge](https://security.communitybridge.org) vulnerability detection platform.
 
-## Testing Documentation Changes Locally
+## Contributing to the Documentation
 
-While contributing documentation to official Janssen Project [documentation](https://jans.io/docs/) it is important to make sure that documents meet [style guidelines](../CONTRIBUTING.md#documentation-style-guide) and have been proofread to remove any typographical or grammatical errors.
-Janssen Project uses [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) to create the documenation site. Before new content is pushed to the repository on GitHub, it should be tested locally by the author. Author can do this by deploying Material for MkDocs locally.
+While contributing documentation to official Janssen 
+Project [documentation](https://jans.io/docs/) it is important 
+to ensure the following. 
 
-High-level steps involve:
+- Changes adhere to the [style guidelines](../CONTRIBUTING.md#documentation-style-guide) 
+- Changes have been proofread to remove any typographical or grammatical errors
+- If section titles are being updated or removed, check and update any reference
+links to that section.
+- Changes render correctly on the documentation static site
 
-1. [Install Material for MkDocs](https://squidfunk.github.io/mkdocs-material/getting-started/#installation)
-2. Install required plugins
-3. [Preview as you write](https://squidfunk.github.io/mkdocs-material/creating-your-site/#previewing-as-you-write)
+The command below will checkout the documentation and deploy the static site
+locally. Any changes made to the local documentation will be live reloaded
+on the locally deployed static site. 
+
+```bash
+git clone --depth 100 --filter blob:none --no-checkout https://github.com/janssenproject/jans \
+    && cd jans \
+    && git sparse-checkout init --cone \
+    && git checkout main \
+    && git sparse-checkout add docs \
+    && git sparse-checkout add --skip-checks mkdocs.yml \
+    && cd docs \
+    && poetry install --no-root \
+    && poetry run mkdocs serve -f ../mkdocs.yml
+``` 
 
 ## Open Banking
 

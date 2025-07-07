@@ -174,7 +174,6 @@ nav:
       - PostgreSQL Indexes: janssen-server/reference/database/pgsql-schema-indexes.md
       - PostgreSQL Configuration: janssen-server/reference/database/pgsql-config.md
       - PostgreSQL Operation: janssen-server/reference/database/pgsql-ops.md
-    - Converting Data: janssen-server/reference/database/converting-data.md
   - Auth Server Admin Guide:
     - janssen-server/auth-server/README.md
     - Auth Server Config: janssen-server/auth-server/config.md
