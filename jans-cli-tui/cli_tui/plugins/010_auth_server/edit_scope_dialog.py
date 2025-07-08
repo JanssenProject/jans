@@ -285,7 +285,8 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                             name='dynamicScopeScripts',
                             value='\n'.join(self.data.get('dynamicScopeScripts', [])),
                             jans_help=self.app.get_help_from_schema(self.schema, 'dynamicScopeScripts'),
-                            height=3, 
+                            height=3,
+                            jans_list_type=True,
                             style=cli_style.edit_text
                             ),
 
