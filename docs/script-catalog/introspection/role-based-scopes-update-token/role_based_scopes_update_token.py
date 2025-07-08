@@ -85,6 +85,9 @@ class UpdateToken(UpdateTokenType):
             jwks = JSONObject(jwksObj)
 
             # Validate JWT
+            if userInfoJwt.getHeader().getSignatureAlgorithm().getAlgorithm() == None:
+                print "Error: Unsigned JWT not allowed. The User-Info JWT is not valid"
+                raise BadRequestException("Unsigned JWT not allowed. The User-Info JWT is not valid")
             authCryptoProvider = AuthCryptoProvider()
             validJwt = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), jwks, None, userInfoJwt.getHeader().getSignatureAlgorithm())
 
