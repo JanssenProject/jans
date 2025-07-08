@@ -38,8 +38,8 @@ from org.apache.http.ssl import SSLContexts
 from org.apache.http.util import EntityUtils
 from org.bouncycastle.util.io.pem import PemObject
 from org.bouncycastle.util.io.pem import PemReader
-from org.jose4j.jws import JsonWebSignature
-from org.jose4j.jwt import JwtClaims
+from com.google.api.client.json.webtoken import JsonWebSignature
+from io.jans.as.model.jwt import JwtClaims
 from org.json import JSONObject
 from  java.lang import StringBuilder 
 from java.lang import String
@@ -141,7 +141,7 @@ class ClientRegistration(ClientRegistrationType):
         print "Client registration. Destroyed successfully"
         return True
 
-    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see  https://github.com/JanssenProject/jans-auth-server/blob/nightly/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see  https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
     def createClient(self, context):
         print "Client registration. CreateClient method"
         client = context.getClient()
@@ -207,7 +207,7 @@ class ClientRegistration(ClientRegistrationType):
 
 
 
-    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see  https://github.com/JanssenProject/jans-auth-server/blob/nightly/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see  https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
     def updateClient(self, context):
         print "Client registration. UpdateClient method"
         return True
@@ -219,7 +219,7 @@ class ClientRegistration(ClientRegistrationType):
         return ""
 
     # cert - java.security.cert.X509Certificate
-    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/nightly/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
     def isCertValidForClient(self, cert, context):
         return False
 

@@ -3036,8 +3036,6 @@
       
         
       
-        
-      
     
     
     
@@ -3094,29 +3092,6 @@
   
   <span class="md-ellipsis">
     Settings
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../config-guide/config-tools/config-api/attribute/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Attributes
     
   </span>
   
@@ -3903,8 +3878,6 @@
       
         
       
-        
-      
     
     
     
@@ -4243,29 +4216,6 @@
           </ul>
         </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/database/converting-data.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Converting Data
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -14508,7 +14458,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-key-rotation</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1</span>
 <span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w"> </span><span class="c1"># This may be differnet in Helm</span>
@@ -14560,7 +14510,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">              </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web_https.key</span><span class="w">                              </span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">load-web-key-rotation</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1</span>
 <span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w">  </span><span class="c1">#This may be differnet in Helm</span>
@@ -14620,7 +14570,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">        </span><span class="nt">spec</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-key-rotation</span>
-<span class="w">              </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1</span>
+<span class="w">              </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1</span>
 <span class="w">              </span><span class="nt">resources</span><span class="p">:</span>
 <span class="w">                </span><span class="nt">requests</span><span class="p">:</span>
 <span class="w">                  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;300Mi&quot;</span>

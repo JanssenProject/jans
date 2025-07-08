@@ -2945,8 +2945,6 @@
       
         
       
-        
-      
     
     
     
@@ -3003,29 +3001,6 @@
   
   <span class="md-ellipsis">
     Settings
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/config-guide/config-tools/config-api/attribute/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Attributes
     
   </span>
   
@@ -3812,8 +3787,6 @@
       
         
       
-        
-      
     
     
     
@@ -4152,29 +4125,6 @@
           </ul>
         </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/database/converting-data.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Converting Data
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -14188,9 +14138,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#testing-documentation-changes-locally" class="md-nav__link">
+  <a href="#contributing-to-the-documentation" class="md-nav__link">
     <span class="md-ellipsis">
-      Testing Documentation Changes Locally
+      Contributing to the Documentation
     </span>
   </a>
   
@@ -14540,9 +14490,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#testing-documentation-changes-locally" class="md-nav__link">
+  <a href="#contributing-to-the-documentation" class="md-nav__link">
     <span class="md-ellipsis">
-      Testing Documentation Changes Locally
+      Contributing to the Documentation
     </span>
   </a>
   
@@ -14727,15 +14677,30 @@ testing.</p>
 <h2 id="dependency-vulnerabilities">Dependency Vulnerabilities<a class="headerlink" href="#dependency-vulnerabilities" title="Permanent link">#</a></h2>
 <p>Dependency vulnerabilities are monitored by Gihub. In addition we plan to use 
 the <a href="https://security.communitybridge.org">Linux Foundation Community Bridge</a> vulnerability detection platform.</p>
-<h2 id="testing-documentation-changes-locally">Testing Documentation Changes Locally<a class="headerlink" href="#testing-documentation-changes-locally" title="Permanent link">#</a></h2>
-<p>While contributing documentation to official Janssen Project <a href="https://jans.io/docs/">documentation</a> it is important to make sure that documents meet <a href="../../CONTRIBUTING/#documentation-style-guide">style guidelines</a> and have been proofread to remove any typographical or grammatical errors.
-Janssen Project uses <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a> to create the documenation site. Before new content is pushed to the repository on GitHub, it should be tested locally by the author. Author can do this by deploying Material for MkDocs locally.</p>
-<p>High-level steps involve:</p>
-<ol>
-<li><a href="https://squidfunk.github.io/mkdocs-material/getting-started/#installation">Install Material for MkDocs</a></li>
-<li>Install required plugins</li>
-<li><a href="https://squidfunk.github.io/mkdocs-material/creating-your-site/#previewing-as-you-write">Preview as you write</a></li>
-</ol>
+<h2 id="contributing-to-the-documentation">Contributing to the Documentation<a class="headerlink" href="#contributing-to-the-documentation" title="Permanent link">#</a></h2>
+<p>While contributing documentation to official Janssen 
+Project <a href="https://jans.io/docs/">documentation</a> it is important 
+to ensure the following. </p>
+<ul>
+<li>Changes adhere to the <a href="../../CONTRIBUTING/#documentation-style-guide">style guidelines</a> </li>
+<li>Changes have been proofread to remove any typographical or grammatical errors</li>
+<li>If section titles are being updated or removed, check and update any reference
+links to that section.</li>
+<li>Changes render correctly on the documentation static site</li>
+</ul>
+<p>The command below will checkout the documentation and deploy the static site
+locally. Any changes made to the local documentation will be live reloaded
+on the locally deployed static site. </p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--depth<span class="w"> </span><span class="m">100</span><span class="w"> </span>--filter<span class="w"> </span>blob:none<span class="w"> </span>--no-checkout<span class="w"> </span>https://github.com/janssenproject/jans<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>jans<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>sparse-checkout<span class="w"> </span>init<span class="w"> </span>--cone<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>main<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>sparse-checkout<span class="w"> </span>add<span class="w"> </span>docs<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>sparse-checkout<span class="w"> </span>add<span class="w"> </span>--skip-checks<span class="w"> </span>mkdocs.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>docs<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>poetry<span class="w"> </span>install<span class="w"> </span>--no-root<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>poetry<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>serve<span class="w"> </span>-f<span class="w"> </span>../mkdocs.yml
+</code></pre></div>
 <h2 id="open-banking">Open Banking<a class="headerlink" href="#open-banking" title="Permanent link">#</a></h2>
 <p>We are working on developing this content under <a href="https://github.com/JanssenProject/jans/issues/2548">issue 2548</a>. If you’d like to contribute the content, get started with the <a href="https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation">Contribution Guide</a> </p>
 <h3 id="how-to-test-openbanking">How to test OpenBanking?<a class="headerlink" href="#how-to-test-openbanking" title="Permanent link">#</a></h3>
@@ -14867,7 +14832,7 @@ of checkpoints to make sure release candidate (RC) build is healthy and function
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 20, 2025 11:40:49 UTC"><span class="timeago" datetime="2025-01-20T11:40:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 20, 2025 11:40:49 UTC">2025-01-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 7, 2025 09:44:00 UTC"><span class="timeago" datetime="2025-07-07T09:44:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 7, 2025 09:44:00 UTC">2025-07-07</span>
   </span>
 
     
