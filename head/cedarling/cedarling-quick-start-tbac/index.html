@@ -14542,7 +14542,28 @@ use the policy stored in this store to evaluate the authorization result.</p>
 </ol>
 <p>The top-level <code>decision: true</code> confirms successful authorization.</p>
 <h2 id="sequence-diagram">Sequence diagram<a class="headerlink" href="#sequence-diagram" title="Permanent link">#</a></h2>
-<p>View full diagram <a href="https://sequencediagram.org/index.html#initialData=C4S2BsFMAIGFICYEMBO4QDsDm0kYdACqoAOAUGSaqAMYhUbDQBCKA9gO4DOkKl1IOgybEU5Kilr08TAIIBXYAAtoAZV4A3XhVaceKALQA+USQBc0AKKNe0BcrWbbNNhgBmILGVPH7K9ShaKBYAIgCeGEgAtoJw6JCM0ABKkFggXMAoSKCu0GR+joG8xqYWsPGJAJIhuPiONCiQwGS63MUmpBbWwLbwyGiYOABGbGzAGVkk0C7unt6kvor+TsHQAOKWhNAA9ABWeFwGSEvbjRkaAIx7HADWXPlLhUElndAAUgDqANKq82IvYgslQwYBASHQAC8YH1UOhsC12G1DB1AWpgNRcEs2CgQBDsiBcm5wJw-iRFg4AkELBstnsDkcTmdgJdtsdlNjcZAAPwAOj5DwpKwB5h2NHB4CGSBoNy5LgQkAAvHyeaTycsiqsaTt9hhDmylKdIOcrsA2DcEgL1c8USKAN4AIilNCNXAA+qbzRh7RYADyfQhGAC+OkR+mFZUQsMGdiWEIAFCQcRghOCADS4Gg5DDps5seQoZ3pmY9AAewAAlKqjK19BH+nCcCFIHQuASMEA">here</a></p>
+<pre class="mermaid"><code>sequenceDiagram
+    title Cedarling and Tarp
+
+    participant Browser
+    participant Tarp
+    participant Auth Server
+
+    Browser-&gt;&gt;Tarp: Enter Auth Server config
+    Tarp-&gt;&gt;Auth Server: Dynamic Client Registration 
+    Auth Server-&gt;&gt;Tarp: Client ID and Secret
+    Browser-&gt;&gt;Tarp: Enter Cedarling bootstrap config
+    Tarp-&gt;&gt;Auth Server: GET /jans-auth/restv1/jwks
+    Auth Server-&gt;&gt;Tarp: JWKS
+    Tarp-&gt;&gt;Tarp: Initialize Cedarling
+    Browser-&gt;&gt;Tarp: Start authorization flow
+    Tarp-&gt;&gt;Auth Server: GET /jans-auth/restv1/authorize?...
+    Auth Server-&gt;&gt;Tarp: /callback?code=...
+    Tarp-&gt;&gt;Auth Server: GET /jans-auth/restv1/token
+    Auth Server-&gt;&gt;Tarp: {"access_token": &lt;JWT&gt;}
+
+    Browser-&gt;&gt;Tarp: Cedarling Authz(principal, action, resource, context)
+    Tarp-&gt;&gt;Browser: Cedarling Decision </code></pre>
 
 
 
@@ -14565,7 +14586,7 @@ use the policy stored in this store to evaluate the authorization result.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 4, 2025 03:23:29 UTC"><span class="timeago" datetime="2025-07-04T03:23:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 4, 2025 03:23:29 UTC">2025-07-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 8, 2025 11:35:42 UTC"><span class="timeago" datetime="2025-07-08T11:35:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 8, 2025 11:35:42 UTC">2025-07-08</span>
   </span>
 
     
