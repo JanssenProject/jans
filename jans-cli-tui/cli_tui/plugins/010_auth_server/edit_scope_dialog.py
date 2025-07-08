@@ -19,6 +19,7 @@ from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_label_container import JansLabelContainer
+from wui_components.jans_label_widget import JansLabelWidget
 
 
 class EditScopeDialog(JansGDialog, DialogUtils):
@@ -87,6 +88,9 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         if data['scopeType'] in ('openid', 'dynamic') and hasattr(self, 'claims_container') and self.claims_container:
             claims = [claim[0] for claim in self.claims_container.entries]
             data['claims'] = claims
+
+        if data['scopeType'] == 'dynamic':
+            data['dynamicScopeScripts'] = self.dynamic_scope_scripts_widget.get_values()
 
         self.app.logger.debug('DATA: ' + str(data))
         self.data = data
@@ -278,18 +282,25 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         self.alt_tabs['openid'] = HSplit(open_id_widgets, width=D())
 
+
+        dynamic_scope_scripts_data = []
+
+        for scr in common_data.enabled_scripts:
+            script_type = scr.get('scriptType')
+            script_dn = scr.get('dn')
+
+            if script_type == 'dynamic_scope':
+                dynamic_scope_scripts_data.append((script_dn, scr['name']))
+
+        self.dynamic_scope_scripts_widget = JansLabelWidget(
+                        title = _("Dynamic Scope Script"),
+                        values = self.data.get('dynamicScopeScripts', []),
+                        data = dynamic_scope_scripts_data
+                        )
+
         self.alt_tabs['dynamic'] = HSplit([
 
-                        self.app.getTitledText(
-                            _("Dynamic Scope Script"),
-                            name='dynamicScopeScripts',
-                            value='\n'.join(self.data.get('dynamicScopeScripts', [])),
-                            jans_help=self.app.get_help_from_schema(self.schema, 'dynamicScopeScripts'),
-                            height=3,
-                            jans_list_type=True,
-                            style=cli_style.edit_text
-                            ),
-
+                        self.dynamic_scope_scripts_widget,
                         self.app.getTitledText(
                                 _("Claims"),
                                 name='claims',
