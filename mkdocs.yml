@@ -132,7 +132,6 @@ nav:
       - REST API:
         - janssen-server/config-guide/config-tools/config-api/README.md
         - Settings: janssen-server/config-guide/config-tools/config-api/config.md
-        - Attributes: janssen-server/config-guide/config-tools/config-api/attribute.md
         - Security: janssen-server/config-guide/config-tools/config-api/security.md
         - Logs: janssen-server/config-guide/config-tools/config-api/logs.md
         - Monitoring: janssen-server/config-guide/config-tools/config-api/monitoring.md
@@ -175,7 +174,6 @@ nav:
       - PostgreSQL Indexes: janssen-server/reference/database/pgsql-schema-indexes.md
       - PostgreSQL Configuration: janssen-server/reference/database/pgsql-config.md
       - PostgreSQL Operation: janssen-server/reference/database/pgsql-ops.md
-    - Converting Data: janssen-server/reference/database/converting-data.md
   - Auth Server Admin Guide:
     - janssen-server/auth-server/README.md
     - Auth Server Config: janssen-server/auth-server/config.md
