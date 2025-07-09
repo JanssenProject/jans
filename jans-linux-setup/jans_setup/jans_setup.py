@@ -293,16 +293,19 @@ def print_or_log(msg):
     print(msg) if argsp.x else base.logIt(msg)
 
 
+def call_test_data_lodader():
+    print_or_log("Loading test data")
+    testDataLoader.dbUtils.bind()
+    testDataLoader.load_test_data()
+    jansInstaller.load_app_test_data()
+    print_or_log("Test data loaded.")
+
 if Config.profile == 'jans':
     if argsp.t:
         testDataLoader = TestDataLoader()
 
     if argsp.t and argsp.x:
-        print_or_log("Loading test data")
-        testDataLoader.dbUtils.bind()
-        configApiInstaller.load_test_data()
-        testDataLoader.load_test_data()
-        print_or_log("Test data loaded.")
+        call_test_data_lodader()
 
     if not argsp.t and argsp.x and argsp.load_config_api_test:
         print_or_log("Loading Config Api Test data")
@@ -457,7 +460,7 @@ def main():
 
             if argsp.t:
                 base.logIt("Loading test data")
-                testDataLoader.load_test_data()
+                call_test_data_lodader()
 
             jansProgress.progress(static.COMPLETED)
 

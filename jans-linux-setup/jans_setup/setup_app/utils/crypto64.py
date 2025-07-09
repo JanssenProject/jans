@@ -329,17 +329,16 @@ class Crypto64:
     def encode_test_passwords(self):
         self.logIt("Encoding test passwords")
         hostname = Config.hostname.split('.')[0]
-        try:
-            Config.templateRenderingDict['jans_auth_client_2_pw'] = Config.templateRenderingDict['jans_auth_client_2_inum'] + '-' + hostname
-            Config.templateRenderingDict['jans_auth_client_2_encoded_pw'] = self.obscure(Config.templateRenderingDict['jans_auth_client_2_pw'])
 
-            Config.templateRenderingDict['jans_auth_client_3_pw'] =  Config.templateRenderingDict['jans_auth_client_3_inum'] + '-' + hostname
-            Config.templateRenderingDict['jans_auth_client_3_encoded_pw'] = self.obscure(Config.templateRenderingDict['jans_auth_client_3_pw'])
+        test_client_ids = []
 
-            Config.templateRenderingDict['jans_auth_client_4_pw'] = Config.templateRenderingDict['jans_auth_client_4_inum'] + '-' + hostname
-            Config.templateRenderingDict['jans_auth_client_4_encoded_pw'] = self.obscure(Config.templateRenderingDict['jans_auth_client_4_pw'])
-        except:
-            self.logIt("Error encoding test passwords", True)
+        for tmp_str in list(Config.templateRenderingDict.keys()):
+            if re.match(r'jans_auth_client_(\d*)_inum', tmp_str):
+                cli_prefix = tmp_str.strip('_inum')
+                cli_pw_var = cli_prefix +'_pw'
+                if not cli_pw_var in Config.templateRenderingDict:
+                    Config.templateRenderingDict[cli_pw_var] = Config.templateRenderingDict[tmp_str] + '-' + hostname
+                    Config.templateRenderingDict[cli_prefix + '_encoded_pw'] = self.obscure(Config.templateRenderingDict[cli_pw_var])
 
     def get_server_certificate(self, host):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -367,3 +366,36 @@ class Crypto64:
         except Exception as e:
             print("{}Can't download certificate{}".format(static.colors.DANGER, static.colors.ENDC))
             print(e)
+
+    def create_test_client_keystore(self, service=None):
+        if not service:
+            service = self.service_name
+        self.logIt(f"Creating test client_keystore.p12 for {service}")
+        client_keystore_fn = os.path.join(Config.output_dir, 'test', service, 'client/client_keystore.p12')
+        keys_json_fn =  os.path.join(Config.output_dir, 'test', service, 'client/keys_client_keystore.json')
+
+        args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
+                    client_keystore_fn, '-storepass', 'secret', '-keypass', 
+                    'secret', '-dname', 
+                    "'{}'".format(Config.default_openid_jks_dn_name),
+                    '-storetype', 'PKCS12'
+                    ]
+
+        self.run(' '.join(args), shell=True)
+
+        args = [Config.cmd_java, '-Dlog4j.defaultInitOverride=true',
+                '-cp', Config.non_setup_properties['jans_auth_client_jar_fn'], Config.non_setup_properties['key_gen_path'],
+                '-key_ops_type', 'ALL',
+                '-keystore', client_keystore_fn,
+                '-keypasswd', 'secret',
+                '-sig_keys', Config.default_sig_key_algs,
+                '-enc_keys', Config.default_enc_key_algs,
+                '-dnname', "'{}'".format(Config.default_openid_jks_dn_name),
+                '-expiration', '365','>', keys_json_fn]
+
+        cmd = ' '.join(args)
+
+        self.run(cmd, shell=True)
+
+        self.copyFile(client_keystore_fn, os.path.join(Config.output_dir, 'test', service, 'server'))
+        self.copyFile(keys_json_fn, os.path.join(Config.output_dir, 'test', service, 'server'))
