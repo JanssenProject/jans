@@ -545,6 +545,18 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 if Config.get(service_install_var):
                     service_installer.service_post_install_tasks()
 
+
+    def load_app_test_data(self):
+        # call loading test data
+        self.logIt("Calling loading test data for apps")
+
+        for jans_service in jansProgress.services:
+            if 'object' in jans_service:
+                service_installer = jans_service['object']
+                if hasattr(service_installer, 'load_test_data'):
+                    service_installer.load_test_data()
+
+
     def secure_files(self):
         self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
         self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])

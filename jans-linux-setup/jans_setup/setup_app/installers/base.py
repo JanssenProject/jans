@@ -103,7 +103,8 @@ class BaseInstaller:
             self.logIt("Checking ID for client {}".format(client_var_name))
             rv = 1
 
-            if Config.get(client_var_name):
+
+            if not Config.get(client_var_name):
                 result = self.dbUtils.search('ou={},o=jans'.format(ou), '(&({}={}*)(objectClass=jansClnt))'.format(field_name, client_id_prefix))
                 if result:
                     setattr(Config, client_var_name, result[field_name])
@@ -261,6 +262,9 @@ class BaseInstaller:
         pass
 
     def service_post_install_tasks(self):
+        pass
+
+    def load_test_data(self):
         pass
 
     def create_scopes(self):
