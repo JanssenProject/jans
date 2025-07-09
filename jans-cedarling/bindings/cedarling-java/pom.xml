@@ -194,6 +194,13 @@
                     <groupId>org.jetbrains.dokka</groupId>
                     <artifactId>dokka-maven-plugin</artifactId>
                     <version>${dokka.version}</version>
+                    <configuration>
+                        <!-- Optional: Output in Javadoc format for consistency -->
+                        <sourceDirectories>
+                            <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+                            <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+                        </sourceDirectories>
+                    </configuration>
                     <executions>
                         <execution>
                             <phase>pre-site</phase>
