@@ -556,7 +556,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 if hasattr(service_installer, 'app_test_data_loader'):
                     service_installer.app_test_data_loader()
 
-
     def secure_files(self):
         self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
         self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])
