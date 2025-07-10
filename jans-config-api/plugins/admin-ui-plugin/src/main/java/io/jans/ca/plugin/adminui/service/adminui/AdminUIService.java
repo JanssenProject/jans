@@ -80,6 +80,10 @@ public class AdminUIService {
                 adminConf.getMainSettings().getUiConfig().setAllowSmtpKeystoreEdit(appConfigResponse.getAllowSmtpKeystoreEdit());
                 auiConfigurationService.getAUIConfiguration().setAllowSmtpKeystoreEdit(appConfigResponse.getAllowSmtpKeystoreEdit());
             }
+            if (appConfigResponse.getCedarlingLogType() != null) {
+                adminConf.getMainSettings().getUiConfig().setCedarlingLogType(appConfigResponse.getCedarlingLogType());
+                auiConfigurationService.getAUIConfiguration().setCedarlingLogType(appConfigResponse.getCedarlingLogType());
+            }
             entryManager.merge(adminConf);
             return getAdminUIEditableConfiguration();
         } catch (Exception e) {

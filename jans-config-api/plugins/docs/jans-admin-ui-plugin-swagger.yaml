@@ -1590,6 +1590,9 @@ components:
           description: Additional Authentication Parameters
           items:
             $ref: '#/components/schemas/KeyValuePair'
+        cedarlingLogType:
+          type: string
+          description: Cedarling log type
     KeyValuePair:
       type: object
       properties:

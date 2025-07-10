@@ -34,6 +34,8 @@ public class AppConfigResponse {
     private Boolean allowSmtpKeystoreEdit;
     @Schema(description = "Additional Authentication Parameters", accessMode = Schema.AccessMode.READ_WRITE)
     private List<KeyValuePair> additionalParameters;
+    @Schema(description = "Cedarling log type", accessMode = Schema.AccessMode.READ_WRITE)
+    private String cedarlingLogType;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -137,5 +139,13 @@ public class AppConfigResponse {
 
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
+    }
+
+    public String getCedarlingLogType() {
+        return cedarlingLogType;
+    }
+
+    public void setCedarlingLogType(String cedarlingLogType) {
+        this.cedarlingLogType = cedarlingLogType;
     }
 }

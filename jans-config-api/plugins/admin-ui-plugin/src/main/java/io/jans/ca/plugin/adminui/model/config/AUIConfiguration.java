@@ -41,6 +41,7 @@ public class AUIConfiguration {
     private Integer sessionTimeoutInMins;
     private Boolean allowSmtpKeystoreEdit;
     private List<KeyValuePair> additionalParameters;
+    private String cedarlingLogType;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -280,5 +281,13 @@ public class AUIConfiguration {
 
     public void setAllowSmtpKeystoreEdit(Boolean allowSmtpKeystoreEdit) {
         this.allowSmtpKeystoreEdit = allowSmtpKeystoreEdit;
+    }
+
+    public String getCedarlingLogType() {
+        return cedarlingLogType;
+    }
+
+    public void setCedarlingLogType(String cedarlingLogType) {
+        this.cedarlingLogType = cedarlingLogType;
     }
 }
