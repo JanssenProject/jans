@@ -62,21 +62,9 @@
       "enabled"
     ]
   },
-  "auditDataLogConf": {
-    "enabled": true,
-    "ignoreHttpMethod": [
-      "GET"
-    ],
-    "headerAttributes": [
-      "User-inum",
-      "jans-client"
-    ],
-    "auditDataLogFilePath": "/opt/jans/jetty/jans-config-api/logs/",
-    "auditDataLogFileName": "configapi-audit-data.log",
-    "auditDataLogDateFormat": "dd-MM-YYYY"
-  },
   "auditLogConf": {
     "enabled": true,
+	"logData": true,
     "ignoreHttpMethod": [
       "GET"
     ],

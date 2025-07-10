@@ -12,6 +12,9 @@ public class AuditLogConf {
 
     @Schema(description = "Flag to enable and disable audit log.")
     private boolean enabled;
+    
+    @Schema(description = "Flag to enable and disable loggin g data.")
+    private boolean logData;
 
     @Schema(description = "HTTP methods for which audit is disabled.")
     private Collection<String> ignoreHttpMethod;
@@ -34,6 +37,14 @@ public class AuditLogConf {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    } 
+    
+    public boolean isLogData() {
+        return logData;
+    }
+
+    public void setLogData(boolean logData) {
+        this.logData = logData;
     }
 
     public Collection<String> getIgnoreHttpMethod() {
@@ -78,9 +89,9 @@ public class AuditLogConf {
 
     @Override
     public String toString() {
-        return "AuditLogConf [enabled=" + enabled + ", ignoreHttpMethod=" + ignoreHttpMethod + ", headerAttributes="
-                + headerAttributes + ", auditLogFilePath=" + auditLogFilePath + ", auditLogFileName=" + auditLogFileName
-                + ", auditLogDateFormat=" + auditLogDateFormat + "]";
+        return "AuditLogConf [enabled=" + enabled + ", logData=" + logData + ", ignoreHttpMethod=" + ignoreHttpMethod
+                + ", headerAttributes=" + headerAttributes + ", auditLogFilePath=" + auditLogFilePath
+                + ", auditLogFileName=" + auditLogFileName + ", auditLogDateFormat=" + auditLogDateFormat + "]";
     }
 
 }

@@ -14,17 +14,19 @@ import io.jans.configapi.util.AuthUtil;
 
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InvocationContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriInfo;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jakarta.interceptor.AroundInvoke;
-import jakarta.interceptor.Interceptor;
-import jakarta.interceptor.InvocationContext;
 
 @Interceptor
 @RequestAuditInterceptor
@@ -68,16 +70,74 @@ public class AuditLogInterceptor {
                 String client = httpHeaders.getHeaderString("jans-client");
                 String userInum = httpHeaders.getHeaderString("User-inum");
 
-                // AUDIT_LOG
+                // Log request without data
                 AUDIT_LOG.info("User:{} {} {} using client:{}", userInum, getAction(method),
                         getResource(uriInfo.getPath()), client);
 
+                if (auditLogConf.isLogData()) {
+                    // Log request data
+                    processRequest(context, auditLogConf);
+                }
             }
 
         } catch (Exception ex) {
             LOG.error("Not able to log audit details due to error:{}", ex);
         }
         return context.proceed();
+    }
+
+    private void processRequest(InvocationContext context, AuditLogConf auditLogConf) {
+        LOG.info("Process Audit Log Interceptor - context:{}, auditLogConf:{}", context, auditLogConf);
+
+        Object[] ctxParameters = context.getParameters();
+        Method method = context.getMethod();
+        int paramCount = method.getParameterCount();
+        Parameter[] parameters = method.getParameters();
+        Class[] clazzArray = method.getParameterTypes();
+
+        LOG.trace("Processing  Data -  paramCount:{} , parameters:{}, clazzArray:{} ", paramCount, parameters,
+                clazzArray);
+
+        if (clazzArray != null && clazzArray.length > 0) {
+            for (int i = 0; i < clazzArray.length; i++) {
+                Class<?> clazz = clazzArray[i];
+                String propertyName = parameters[i].getName();
+                LOG.trace("propertyName:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName, clazz,
+                        clazz.isPrimitive());
+
+                Object obj = ctxParameters[i];
+                if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
+                        || !obj.toString().toUpperCase().contains("SECRET"))) {
+                    AUDIT_LOG.info("obj:{} ", obj);
+                }
+            }
+        }
+    }
+
+    private AuditLogConf getAuditLogConf() {
+        return this.authUtil.getAuditLogConf();
+    }
+
+    private boolean ignoreMethod(InvocationContext context, AuditLogConf auditLogConf) {
+        LOG.debug("Checking if method to be ignored - context:{}, auditLogConf:{}", context, auditLogConf);
+
+        if (auditLogConf == null || context.getMethod().getAnnotations() == null
+                || context.getMethod().getAnnotations().length <= 0) {
+            return false;
+        }
+
+        for (int i = 0; i < context.getMethod().getAnnotations().length; i++) {
+            LOG.debug("Check if method is to be ignored - context.getMethod().getAnnotations()[i]:{} ",
+                    context.getMethod().getAnnotations()[i]);
+
+            if (context.getMethod().getAnnotations()[i] != null && auditLogConf.getIgnoreHttpMethod() != null
+                    && auditLogConf.getIgnoreHttpMethod()
+                            .contains(context.getMethod().getAnnotations()[i].toString())) {
+                return true;
+            }
+
+        }
+        return false;
     }
 
     private String getAction(String method) {
@@ -107,32 +167,6 @@ public class AuditLogInterceptor {
             path = path.replace("/", "-");
         }
         return path;
-    }
-
-    private AuditLogConf getAuditLogConf() {
-        return this.authUtil.getAuditLogConf();
-    }
-
-    private boolean ignoreMethod(InvocationContext context, AuditLogConf auditLogConf) {
-        LOG.debug("Checking if method to be ignored - context:{}, auditLogConf:{}", context, auditLogConf);
-
-        if (auditLogConf == null || context.getMethod().getAnnotations() == null
-                || context.getMethod().getAnnotations().length <= 0) {
-            return false;
-        }
-
-        for (int i = 0; i < context.getMethod().getAnnotations().length; i++) {
-            LOG.debug("Check if method is to be ignored - context.getMethod().getAnnotations()[i]:{} ",
-                    context.getMethod().getAnnotations()[i]);
-
-            if (context.getMethod().getAnnotations()[i] != null && auditLogConf.getIgnoreHttpMethod() != null
-                    && auditLogConf.getIgnoreHttpMethod()
-                            .contains(context.getMethod().getAnnotations()[i].toString())) {
-                return true;
-            }
-
-        }
-        return false;
     }
 
 }

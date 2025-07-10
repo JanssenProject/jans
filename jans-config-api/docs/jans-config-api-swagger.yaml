@@ -9397,15 +9397,15 @@ components:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanEdit:
-          type: boolean
         userCanAccess:
           type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
-        userCanView:
+        userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -11304,6 +11304,9 @@ components:
         enabled:
           type: boolean
           description: Flag to enable and disable audit log.
+        logData:
+          type: boolean
+          description: Flag to enable and disable loggin g data.
         ignoreHttpMethod:
           type: array
           description: HTTP methods for which audit is disabled.
@@ -11919,10 +11922,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -12093,7 +12096,7 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
-        logoutStatusJwt:
+        accessToken:
           type: boolean
         tokenTypeEnum:
           type: string
@@ -12105,7 +12108,7 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object
