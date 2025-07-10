@@ -2,7 +2,7 @@
 <Configuration status="ERROR">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
+            <PatternLayout pattern="%d{dd-MM-YYYY HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
         </Console>
         
         <RollingFile name="FILE" fileName="${sys:log.base}/logs/configapi.log" filePattern="${sys:log.base}/logs/configapi-%d{yyyy-MM-dd}-%i.log">
@@ -15,7 +15,7 @@
         </RollingFile>
 		
         <RollingFile name="AUDIT_FILE" fileName="${sys:log.base}/logs/configapi-audit.log" filePattern="${sys:log.base}/logs/configapi-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern=" %m%n" />
+            <PatternLayout pattern="%d{dd-MM-YYYY HH:mm:ss.SSS} %m%n" />
 
             <Policies>
                 <SizeBasedTriggeringPolicy size="5 MB" />
