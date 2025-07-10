@@ -25,6 +25,11 @@ import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.nio.file.Files;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+import java.time.format.DateTimeFormatter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,6 +45,7 @@ public class AuditLogResource extends ConfigBaseResource {
 
     public static final String AUDIT_FILE_PATH = "/opt/jans/jetty/jans-config-api/logs/";
     public static final String AUDIT_FILE_NAME = "configapi-audit.log";
+    public static final String AUDIT_FILE_DATE_FORMAT = "dd-MM-YYYY";
     public static final String AUDIT_LOGGING_READ_SCOPE = "logging.read";
     static final String AUDIT = "/audit";
 
@@ -64,19 +70,30 @@ public class AuditLogResource extends ConfigBaseResource {
     public Response getLogsEnteries(
             @Parameter(description = "Search pattern") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Start-Date for which the log entries report is to be fetched") @QueryParam(value = "start_date") String startDate,
+            @Parameter(description = "End-Date for which the log entries is to be fetched") @QueryParam(value = "end_date") String endDate)
+
+    {
         if (log.isDebugEnabled()) {
-            log.debug("Search Attribute filters with pattern:{}, startIndex:{}, limit:{}", escapeLog(pattern),
-                    escapeLog(startIndex), escapeLog(limit));
+            log.debug("Search Attribute filters with pattern:{}, startIndex:{}, limit:{}, startDate:{}, endDate:{}",
+                    escapeLog(pattern), escapeLog(startIndex), escapeLog(limit), escapeLog(startDate),
+                    escapeLog(endDate));
         }
-        return Response.ok(this.doSearch(getPattern(pattern), startIndex, limit)).build();
+        return Response.ok(this.doSearch(getPattern(pattern), startIndex, limit, startDate, endDate)).build();
     }
 
-    private LogPagedResult doSearch(String pattern, int startIndex, int limit) {
+    private LogPagedResult doSearch(String pattern, int startIndex, int limit, String startDate, String endDate) {
 
-        log.info("Fetch log pattern:{}, startIndex:{}, limit:{}", pattern, startIndex, limit);
+        log.info("Fetch log pattern:{}, startIndex:{}, limit:{}, startDate:{}, endDate:{}", pattern, startIndex, limit,
+                startDate, endDate);
 
+        // Get data based on pattern and date filter
         List<String> logEntriesList = getLogEntries(getAuditLogFile(), pattern);
+        log.debug("Log fetched  - logEntriesList:{}", logEntriesList);
+
+        // Date filter
+        logEntriesList = filterLogByDateTime(logEntriesList, startDate, endDate);
         log.debug("Log fetched  - logEntriesList:{}", logEntriesList);
 
         LogPagedResult logPagedResult = getLogPagedResult(logEntriesList, startIndex, limit);
@@ -119,7 +136,8 @@ public class AuditLogResource extends ConfigBaseResource {
 
                 // verify start and limit index
                 getStartIndex(logEntriesList, startIndex);
-                int toIndex = (startIndex+limit <= logEntriesList.size()) ? startIndex+limit : logEntriesList.size();
+                int toIndex = (startIndex + limit <= logEntriesList.size()) ? startIndex + limit
+                        : logEntriesList.size();
                 log.info("Final startIndex:{}, limit:{}, toIndex:{}", startIndex, limit, toIndex);
 
                 // Extract paginated data
@@ -131,6 +149,7 @@ public class AuditLogResource extends ConfigBaseResource {
                 logPagedResult.setEntries(sublist);
 
             } catch (IndexOutOfBoundsException ioe) {
+                log.error("Error while getting log data is:{}", ioe);
                 throwBadRequestException("Index may be incorrect, total entries:{" + logEntriesList.size()
                         + "}, startIndex provided:{" + startIndex + "} , endtIndex provided:{" + limit + "} ");
 
@@ -144,6 +163,10 @@ public class AuditLogResource extends ConfigBaseResource {
 
     private AuditLogConf getAuditLogConf() {
         return this.authUtil.getAuditLogConf();
+    }
+
+    private String getAuditDateFormat() {
+        return this.authUtil.getAuditLogConf().getAuditLogDateFormat();
     }
 
     private String getAuditLogFile() {
@@ -167,12 +190,62 @@ public class AuditLogResource extends ConfigBaseResource {
             try {
                 logEntriesList.get(startIndex);
             } catch (IndexOutOfBoundsException ioe) {
+                log.error("Error while getting data startIndex:{}", startIndex, ioe);
                 throwBadRequestException("Page start index incorrect, total entries:{" + logEntriesList.size()
                         + "}, but provided:{" + startIndex + "} ");
 
             }
         }
         return startIndex;
+    }
+
+    private List<String> filterLogByDateTime(List<String> logEntries, String startDate, String endDate) {
+        log.info(" logEntries:{}, startDate:{}, endDate:{} ", logEntries, startDate, endDate);
+
+        if (logEntries == null || logEntries.isEmpty()) {
+            return logEntries;
+        }
+
+        if (StringUtils.isBlank(startDate) && StringUtils.isBlank(endDate)) {
+            return logEntries;
+        }
+
+        try {
+            String datePattern = (StringUtils.isNotBlank(getAuditDateFormat()) ? getAuditDateFormat()
+                    : AUDIT_FILE_DATE_FORMAT);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(datePattern);
+            LocalDateTime startDateTime = parseDate(startDate, formatter);
+            LocalDateTime endDateTime = parseDate(endDate, formatter);
+
+            for (int i = 0; i < logEntries.size(); i++) {
+                String line = logEntries.get(i);
+                String timestampPart = line.substring(0, datePattern.length());
+                LocalDateTime logDateTime = LocalDateTime.parse(timestampPart, formatter);
+
+                if (logDateTime.isBefore(startDateTime) || logDateTime.isAfter(endDateTime)) {
+                    logEntries.remove(i);
+                }
+
+            }
+        } catch (Exception ex) {
+            log.error("Error while filtering log file with startDate:{} and endDate:{} is:{}", startDate, endDate, ex);
+            return logEntries;
+        }
+        return logEntries;
+    }
+
+    private LocalDateTime parseDate(String date, DateTimeFormatter formatter) {
+        log.info(" Parse Date date:{}, formatter:{}", date, formatter);
+
+        LocalDateTime localDateTime = null;
+        try {
+            localDateTime = LocalDateTime.parse(date, formatter);
+        } catch (DateTimeParseException dtpe) {
+            log.error("Error while parsing date:{} is:{}", date, dtpe);
+            throwBadRequestException("Date format invalid required format is :{}", AUDIT_FILE_DATE_FORMAT);
+        }
+        return localDateTime;
     }
 
 }

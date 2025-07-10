@@ -14,7 +14,16 @@
             <DefaultRolloverStrategy max="30" />
         </RollingFile>
 		
-        <RollingFile name="AUDIT_FILE" fileName="${sys:log.base}/logs/configapi-audit.log" filePattern="${sys:log.base}/logs/configapi-%d{yyyy-MM-dd}-%i.log">
+        <RollingFile name="AUDIT_DATA_FILE" fileName="${sys:log.base}/logs/configapi-audit-data.log" filePattern="${sys:log.base}/logs/configapi-audit-data-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM-YYYY HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+
+            <Policies>
+                <SizeBasedTriggeringPolicy size="5 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
+		
+		<RollingFile name="AUDIT_FILE" fileName="${sys:log.base}/logs/configapi-audit.log" filePattern="${sys:log.base}/logs/configapi-audit-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d{dd-MM-YYYY HH:mm:ss.SSS} %m%n" />
 
             <Policies>
@@ -69,7 +78,11 @@
             <AppenderRef ref="FILE" />
         </Logger>
 		
-		<Logger name="audit" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="audit-data" level="${log4j.default.log.level}" additivity="false">
+            <AppenderRef ref="AUDIT_DATA_FILE" />
+        </Logger>
+		
+        <Logger name="audit" level="${log4j.default.log.level}" additivity="false">
             <AppenderRef ref="AUDIT_FILE" />
         </Logger>
 

@@ -8,7 +8,7 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AuditLogConf {
+public class AuditDataLogConf {
 
     @Schema(description = "Flag to enable and disable audit log.")
     private boolean enabled;
@@ -78,7 +78,7 @@ public class AuditLogConf {
 
     @Override
     public String toString() {
-        return "AuditLogConf [enabled=" + enabled + ", ignoreHttpMethod=" + ignoreHttpMethod + ", headerAttributes="
+        return "AuditDataLogConf [enabled=" + enabled + ", ignoreHttpMethod=" + ignoreHttpMethod + ", headerAttributes="
                 + headerAttributes + ", auditLogFilePath=" + auditLogFilePath + ", auditLogFileName=" + auditLogFileName
                 + ", auditLogDateFormat=" + auditLogDateFormat + "]";
     }

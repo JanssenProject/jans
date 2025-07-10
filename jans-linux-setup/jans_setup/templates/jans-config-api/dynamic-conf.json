@@ -62,15 +62,31 @@
       "enabled"
     ]
   },
+  "auditDataLogConf": {
+    "enabled": true,
+    "ignoreHttpMethod": [
+      "GET"
+    ],
+    "headerAttributes": [
+      "User-inum",
+      "jans-client"
+    ],
+    "auditDataLogFilePath": "/opt/jans/jetty/jans-config-api/logs/",
+    "auditDataLogFileName": "configapi-audit-data.log",
+    "auditDataLogDateFormat": "dd-MM-YYYY"
+  },
   "auditLogConf": {
     "enabled": true,
-    "ignoreHttpMethod": [],
+    "ignoreHttpMethod": [
+      "GET"
+    ],
     "headerAttributes": [
       "User-inum",
       "jans-client"
     ],
     "auditLogFilePath": "/opt/jans/jetty/jans-config-api/logs/",
-    "auditLogFileName": "configapi-audit.log"
+    "auditLogFileName": "configapi-audit.log",
+    "auditLogDateFormat": "dd-MM-YYYY"
   },
   "dataFormatConversionConf": {
     "enabled": true,

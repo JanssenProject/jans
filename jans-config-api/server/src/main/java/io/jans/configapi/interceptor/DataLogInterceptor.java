@@ -32,9 +32,12 @@ import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 
+@Interceptor
+@RequestAuditInterceptor
+@Priority(Interceptor.Priority.APPLICATION)
 public class DataLogInterceptor {
 
-    private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit");
+    private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit-data");
     private static final Logger LOG = LoggerFactory.getLogger(DataLogInterceptor.class);
 
     @Inject
