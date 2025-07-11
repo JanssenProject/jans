@@ -61,12 +61,12 @@ public class AuditLogInterceptor {
 
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
+            String method = request.getMethod();
 
             // Log if enabled
-            if (auditLogConf.isEnabled() && !ignoreMethod(context, auditLogConf)) {
+            if (auditLogConf.isEnabled() && !ignoreMethod(method, auditLogConf)) {
 
                 // Request audit
-                String method = request.getMethod();
                 String client = httpHeaders.getHeaderString("jans-client");
                 String userInum = httpHeaders.getHeaderString("User-inum");
 
@@ -116,6 +116,21 @@ public class AuditLogInterceptor {
 
     private AuditLogConf getAuditLogConf() {
         return this.authUtil.getAuditLogConf();
+    }
+
+    private boolean ignoreMethod(String method, AuditLogConf auditLogConf) {
+        LOG.debug("Checking if method to be ignored - method:{}, auditLogConf:{}", method, auditLogConf);
+
+        if (StringUtils.isBlank(method) || auditLogConf == null || auditLogConf.getIgnoreHttpMethod() == null
+                || auditLogConf.getIgnoreHttpMethod().isEmpty()) {
+            return false;
+        }
+
+        if (auditLogConf.getIgnoreHttpMethod().contains(method)) {
+            return true;
+        }
+
+        return false;
     }
 
     private boolean ignoreMethod(InvocationContext context, AuditLogConf auditLogConf) {
