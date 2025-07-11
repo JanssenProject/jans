@@ -75,8 +75,8 @@ public class AuditLogResource extends ConfigBaseResource {
             @Parameter(description = "End-Date for which the log entries is to be fetched") @QueryParam(value = "end_date") String endDate)
 
     {
-        if (log.isDebugEnabled()) {
-            log.debug("Search Attribute filters with pattern:{}, startIndex:{}, limit:{}, startDate:{}, endDate:{}",
+        if (log.isInfoEnabled()) {
+            log.info("Search Attribute filters with pattern:{}, startIndex:{}, limit:{}, startDate:{}, endDate:{}",
                     escapeLog(pattern), escapeLog(startIndex), escapeLog(limit), escapeLog(startDate),
                     escapeLog(endDate));
         }
@@ -84,9 +84,11 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private LogPagedResult doSearch(String pattern, int startIndex, int limit, String startDate, String endDate) {
-
-        log.info("Fetch log pattern:{}, startIndex:{}, limit:{}, startDate:{}, endDate:{}", pattern, startIndex, limit,
-                startDate, endDate);
+        if (log.isDebugEnabled()) {
+            log.debug("Search Attribute filters with pattern:{}, startIndex:{}, limit:{}, startDate:{}, endDate:{}",
+                    escapeLog(pattern), escapeLog(startIndex), escapeLog(limit), escapeLog(startDate),
+                    escapeLog(endDate));
+        }
 
         // Get data based on pattern and date filter
         List<String> logEntriesList = getLogEntries(getAuditLogFile(), pattern);
@@ -103,7 +105,9 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private List<String> getLogEntries(String file, String pattern) {
-        log.info("Fetch log file:{}, pattern:{}", file, pattern);
+        if (log.isDebugEnabled()) {
+            log.debug("Fetch log file:{}, pattern:{}", file, pattern);
+        }
 
         List<String> logEntries = new ArrayList<>();
         try (Stream<String> stream = Files.lines(java.nio.file.Path.of(file))) {
@@ -127,7 +131,9 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private LogPagedResult getLogPagedResult(List<String> logEntriesList, int startIndex, int limit) {
-        log.info("Audit logEntriesList:{}, startIndex:{}, limit:{}", logEntriesList, startIndex, limit);
+        if (log.isDebugEnabled()) {
+            log.debug("Audit logEntriesList:{}, startIndex:{}, limit:{}", logEntriesList, startIndex, limit);
+        }
 
         LogPagedResult logPagedResult = new LogPagedResult();
         if (logEntriesList != null && !logEntriesList.isEmpty()) {
@@ -183,7 +189,9 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private int getStartIndex(List<String> logEntriesList, int startIndex) {
-        log.info("Get startIndex logEntriesList:{}, startIndex:{}", logEntriesList, startIndex);
+        if (log.isDebugEnabled()) {
+            log.debug("Get startIndex logEntriesList:{}, startIndex:{}", logEntriesList, startIndex);
+        }
 
         if (logEntriesList != null && !logEntriesList.isEmpty()) {
 
@@ -201,8 +209,8 @@ public class AuditLogResource extends ConfigBaseResource {
     private List<String> filterLogByDateTime(List<String> logEntries, String startDate, String endDate) {
         log.info(" logEntries:{}, startDate:{}, endDate:{} ", logEntries, startDate, endDate);
 
-        if (logEntries == null || logEntries.isEmpty() || 
-                (StringUtils.isBlank(startDate) && StringUtils.isBlank(endDate)) ){
+        if (logEntries == null || logEntries.isEmpty()
+                || (StringUtils.isBlank(startDate) && StringUtils.isBlank(endDate))) {
             return logEntries;
         }
 
@@ -215,7 +223,6 @@ public class AuditLogResource extends ConfigBaseResource {
 
             LocalDateTime startDateTime = parseDate(startDate, formatter);
             LocalDateTime endDateTime = parseDate(endDate, formatter);
-            
 
             for (int i = 0; i < logEntries.size(); i++) {
                 String line = logEntries.get(i);
@@ -223,9 +230,9 @@ public class AuditLogResource extends ConfigBaseResource {
                 LocalDateTime logDateTime = LocalDateTime.parse(timestampPart, formatter);
                 log.info(" logDateTime:{}, startDateTime:{}, endDateTime:{} ", logDateTime, startDateTime, endDateTime);
 
-                if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate) && 
-                        (logDateTime.isBefore(startDateTime) || logDateTime.isAfter(endDateTime)) ){ 
-                        logEntries.remove(i);
+                if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)
+                        && (logDateTime.isBefore(startDateTime) || logDateTime.isAfter(endDateTime))) {
+                    logEntries.remove(i);
                 }
 
             }
