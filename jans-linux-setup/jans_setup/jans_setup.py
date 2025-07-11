@@ -307,11 +307,6 @@ if Config.profile == 'jans':
     if argsp.t and argsp.x:
         call_test_data_lodader()
 
-    if not argsp.t and argsp.x and argsp.load_config_api_test:
-        print_or_log("Loading Config Api Test data")
-        configApiInstaller.load_test_data()
-        print_or_log("Test data loaded. Exiting ...")
-
     if argsp.x:
         print("Exiting ...")
         sys.exit()
@@ -403,7 +398,7 @@ def main():
                     not Config.installed_instance and Config.get(configApiInstaller.install_var)):
                 configApiInstaller.start_installation()
                 if argsp.t or getattr(argsp, 'load_config_api_test', None):
-                    configApiInstaller.load_test_data()
+                    configApiInstaller.app_test_data_loader()
 
             if Config.profile == 'jans':
 

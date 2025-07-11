@@ -551,8 +551,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
         for jans_service in jansProgress.services:
             if 'object' in jans_service:
                 service_installer = jans_service['object']
-                if hasattr(service_installer, 'load_test_data'):
-                    service_installer.load_test_data()
+                if hasattr(service_installer, 'app_test_data_loader'):
+                    service_installer.app_test_data_loader()
 
 
     def secure_files(self):

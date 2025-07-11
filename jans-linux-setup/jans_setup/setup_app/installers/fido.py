@@ -103,7 +103,7 @@ class FidoInstaller(JettyInstaller):
         base.current_app.ConfigApiInstaller.install_plugin('fido2')
 
 
-    def load_test_data(self):
+    def app_test_data_loader(self):
         if not self.installed():
             return
 
