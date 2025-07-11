@@ -103,7 +103,7 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private List<String> getLogEntries(String file, String pattern) {
-        log.error("Fetch log file:{}, pattern:{}", file, pattern);
+        log.info("Fetch log file:{}, pattern:{}", file, pattern);
 
         List<String> logEntries = new ArrayList<>();
         try (Stream<String> stream = Files.lines(java.nio.file.Path.of(file))) {
@@ -149,7 +149,7 @@ public class AuditLogResource extends ConfigBaseResource {
                 logPagedResult.setEntries(sublist);
 
             } catch (IndexOutOfBoundsException ioe) {
-                log.error("Error while getting log data is:{}", ioe);
+                log.error("Error while getting log data is - ", ioe);
                 throwBadRequestException("Index may be incorrect, total entries:{" + logEntriesList.size()
                         + "}, startIndex provided:{" + startIndex + "} , endtIndex provided:{" + limit + "} ");
 
@@ -193,7 +193,6 @@ public class AuditLogResource extends ConfigBaseResource {
                 log.error("Error while getting data startIndex:{}", startIndex, ioe);
                 throwBadRequestException("Page start index incorrect, total entries:{" + logEntriesList.size()
                         + "}, but provided:{" + startIndex + "} ");
-
             }
         }
         return startIndex;
@@ -202,11 +201,8 @@ public class AuditLogResource extends ConfigBaseResource {
     private List<String> filterLogByDateTime(List<String> logEntries, String startDate, String endDate) {
         log.info(" logEntries:{}, startDate:{}, endDate:{} ", logEntries, startDate, endDate);
 
-        if (logEntries == null || logEntries.isEmpty()) {
-            return logEntries;
-        }
-
-        if (StringUtils.isBlank(startDate) && StringUtils.isBlank(endDate)) {
+        if (logEntries == null || logEntries.isEmpty() || 
+                (StringUtils.isBlank(startDate) && StringUtils.isBlank(endDate)) ){
             return logEntries;
         }
 
@@ -215,16 +211,21 @@ public class AuditLogResource extends ConfigBaseResource {
                     : AUDIT_FILE_DATE_FORMAT);
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(datePattern);
+            validateDate(startDate, endDate, formatter);
+
             LocalDateTime startDateTime = parseDate(startDate, formatter);
             LocalDateTime endDateTime = parseDate(endDate, formatter);
+            
 
             for (int i = 0; i < logEntries.size(); i++) {
                 String line = logEntries.get(i);
                 String timestampPart = line.substring(0, datePattern.length());
                 LocalDateTime logDateTime = LocalDateTime.parse(timestampPart, formatter);
+                log.info(" logDateTime:{}, startDateTime:{}, endDateTime:{} ", logDateTime, startDateTime, endDateTime);
 
-                if (logDateTime.isBefore(startDateTime) || logDateTime.isAfter(endDateTime)) {
-                    logEntries.remove(i);
+                if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate) && 
+                        (logDateTime.isBefore(startDateTime) || logDateTime.isAfter(endDateTime)) ){ 
+                        logEntries.remove(i);
                 }
 
             }
@@ -235,7 +236,38 @@ public class AuditLogResource extends ConfigBaseResource {
         return logEntries;
     }
 
-    private LocalDateTime parseDate(String date, DateTimeFormatter formatter) {
+    private void validateDate(String startDate, String endDate, DateTimeFormatter formatter) {
+        log.info(" Validate Date startDate:{}, endDate:{}, formatter:{}", startDate, endDate, formatter);
+
+        StringBuilder sb = new StringBuilder();
+        // validate startDate
+        if (StringUtils.isNotBlank(startDate)) {
+            try {
+                parseDate(startDate, formatter);
+            } catch (DateTimeParseException dtpe) {
+
+                sb.append("Start date is not valid, date:{" + startDate + "} whereas valid format is:{"
+                        + formatter.toString() + "}");
+            }
+        }
+
+        // validate endDate
+        if (StringUtils.isNotBlank(endDate)) {
+            try {
+                parseDate(endDate, formatter);
+            } catch (DateTimeParseException dtpe) {
+
+                sb.append("Start date is not valid, date:{" + startDate + "} whereas valid format is:{"
+                        + formatter.toString() + "}");
+            }
+        }
+
+        if (sb.toString().length() >= 0) {
+            throwBadRequestException(sb.toString(), "INVALID_DATE");
+        }
+    }
+
+    private LocalDateTime parseDate(String date, DateTimeFormatter formatter) throws DateTimeParseException {
         log.info(" Parse Date date:{}, formatter:{}", date, formatter);
 
         LocalDateTime localDateTime = null;
@@ -243,7 +275,7 @@ public class AuditLogResource extends ConfigBaseResource {
             localDateTime = LocalDateTime.parse(date, formatter);
         } catch (DateTimeParseException dtpe) {
             log.error("Error while parsing date:{} is:{}", date, dtpe);
-            throwBadRequestException("Date format invalid required format is :{}", AUDIT_FILE_DATE_FORMAT);
+            throw dtpe;
         }
         return localDateTime;
     }
