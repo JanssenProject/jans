@@ -817,6 +817,62 @@ public class SessionIdService {
         return null;
     }
 
+    /**
+     * Loads session by id without local cache
+     *
+     * @param sessionId session id
+     * @return session
+     */
+    @Nullable
+    public SessionId loadSessionById(@Nullable String sessionId) {
+        return loadSessionByDn(buildDn(sessionId), false);
+    }
+
+    /**
+     * Loads session by id without local cache
+     *
+     * @param sessionId session id
+     * @param silently if true - does not prints exception from persistence if it occurs
+     * @return session
+     */
+    @Nullable
+    public SessionId loadSessionById(@Nullable String sessionId, boolean silently) {
+        return loadSessionByDn(buildDn(sessionId), silently);
+    }
+
+    /**
+     * Loads session by dn without local cache
+     *
+     * @param dn session nd
+     * @param silently if true - does not prints exception from persistence if it occurs
+     * @return session
+     */
+    @Nullable
+    public SessionId loadSessionByDn(@Nullable String dn, boolean silently) {
+        if (StringUtils.isBlank(dn)) {
+            return null;
+        }
+
+        try {
+            final SessionId sessionId;
+            if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
+                sessionId = (SessionId) cacheService.get(dn);
+            } else {
+                sessionId = persistenceEntryManager.find(SessionId.class, dn);
+            }
+            return sessionId;
+        } catch (Exception e) {
+            if (!silently) {
+                if (BooleanUtils.isTrue(appConfiguration.getLogNotFoundEntityAsError())) {
+                    log.error("Failed to get session by dn: {}. {}", dn, e.getMessage());
+                } else {
+                    log.trace("Failed to get session by dn: {}. {}", dn, e.getMessage());
+                }
+            }
+        }
+        return null;
+    }
+
     public SessionId getSessionId(HttpServletRequest request) {
         final String sessionIdFromCookie = cookieService.getSessionIdFromCookie(request);
         log.trace("SessionId from cookie: {}", sessionIdFromCookie);
