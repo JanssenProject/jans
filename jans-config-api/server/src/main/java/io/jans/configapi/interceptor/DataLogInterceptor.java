@@ -14,31 +14,35 @@ import io.jans.configapi.util.AuthUtil;
 
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
-import jakarta.interceptor.AroundInvoke;
-import jakarta.interceptor.Interceptor;
-import jakarta.interceptor.InvocationContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriInfo;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InvocationContext;
 
 @Interceptor
 @RequestAuditInterceptor
 @Priority(Interceptor.Priority.APPLICATION)
-public class AuditLogInterceptor {
+public class DataLogInterceptor {
 
-    private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit");
-    private static final Logger LOG = LoggerFactory.getLogger(AuditLogInterceptor.class);
+    private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit-data");
+    private static final Logger LOG = LoggerFactory.getLogger(DataLogInterceptor.class);
 
     @Inject
     AuthUtil authUtil;
-
+    
     @Inject
     ApiAppConfiguration apiAppConfiguration;
 
@@ -47,37 +51,39 @@ public class AuditLogInterceptor {
     public Object aroundReadFrom(InvocationContext context) throws Exception {
 
         try {
+            LOG.debug("Audit Log Interceptor - context:{}, AUDIT_LOG:{}, apiAppConfiguration.isDisableAuditLogger():{}", context, AUDIT_LOG, apiAppConfiguration.isDisableAuditLogger());
 
-            // return if audit disabled
-            if (apiAppConfiguration.isDisableAuditLogger()) {
-                AUDIT_LOG.debug("Audit is disabled by disableAuditLogger config.");
+            if(apiAppConfiguration.isDisableAuditLogger()) {
+                LOG.debug("Audit is disabled by disableAuditLogger config.");
                 return context.proceed();
             }
-
-            // Log for audit
+            
             HttpServletRequest request = ((BaseResource) context.getTarget()).getHttpRequest();
             HttpHeaders httpHeaders = ((BaseResource) context.getTarget()).getHttpHeaders();
             UriInfo uriInfo = ((BaseResource) context.getTarget()).getUriInfo();
+            LOG.debug("Audit Log Interceptor -request:{}, httpHeaders:{}, uriInfo:{}", request, httpHeaders, uriInfo);
 
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
-            String method = request.getMethod();
+            LOG.debug("auditLogConf:{}, ignoreMethod(context):{}", auditLogConf, ignoreMethod(context, auditLogConf));
 
             // Log if enabled
-            if (auditLogConf.isEnabled() && !ignoreMethod(method, auditLogConf)) {
-
+            if (!ignoreMethod(context, auditLogConf)) {
+                AUDIT_LOG.info("\n ********************** Audit Request Detail Start ********************** ");
                 // Request audit
-                String client = httpHeaders.getHeaderString("jans-client");
-                String userInum = httpHeaders.getHeaderString("User-inum");
+                String beanClassName = context.getClass().getName();
+                String method = context.getMethod().getName();
 
-                // Log request without data
-                AUDIT_LOG.info("User:{} {} {} using client:{}", userInum, getAction(method),
-                        getResource(uriInfo.getPath()), client);
+                AUDIT_LOG.info("endpoint:{}, beanClassName:{}, method:{}, from:{}, user:{} ", uriInfo.getPath(),
+                        beanClassName, method, request.getRemoteAddr(), httpHeaders.getHeaderString("User-inum"));
 
-                if (auditLogConf.isLogData()) {
-                    // Log request data
-                    processRequest(context, auditLogConf);
-                }
+                // Header attribute audit
+                Map<String, String> headerData = getAuditHeaderAttributes(auditLogConf, httpHeaders);
+                AUDIT_LOG.info("headerData:{} ", headerData);
+
+                // Request object audit
+                processRequest(context, auditLogConf);
+                AUDIT_LOG.info("********************** Audit Request Detail End ********************** ");
             }
 
         } catch (Exception ex) {
@@ -95,42 +101,28 @@ public class AuditLogInterceptor {
         Parameter[] parameters = method.getParameters();
         Class[] clazzArray = method.getParameterTypes();
 
-        LOG.trace("Processing  Data -  paramCount:{} , parameters:{}, clazzArray:{} ", paramCount, parameters,
-                clazzArray);
+        AUDIT_LOG.info("RequestReaderInterceptor - Processing  Data -  paramCount:{} , parameters:{}, clazzArray:{} ",
+                paramCount, parameters, clazzArray);
 
         if (clazzArray != null && clazzArray.length > 0) {
             for (int i = 0; i < clazzArray.length; i++) {
                 Class<?> clazz = clazzArray[i];
                 String propertyName = parameters[i].getName();
-                LOG.trace("propertyName:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName, clazz,
+                AUDIT_LOG.info("propertyName:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName, clazz,
                         clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
                 if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
                         || !obj.toString().toUpperCase().contains("SECRET"))) {
-                    AUDIT_LOG.info("obj:{} ", obj);
+                    AUDIT_LOG.info("RequestReaderInterceptor final - obj -  obj:{} ", obj);
                 }
+
             }
         }
     }
 
     private AuditLogConf getAuditLogConf() {
         return this.authUtil.getAuditLogConf();
-    }
-
-    private boolean ignoreMethod(String method, AuditLogConf auditLogConf) {
-        LOG.debug("Checking if method to be ignored - method:{}, auditLogConf:{}", method, auditLogConf);
-
-        if (StringUtils.isBlank(method) || auditLogConf == null || auditLogConf.getIgnoreHttpMethod() == null
-                || auditLogConf.getIgnoreHttpMethod().isEmpty()) {
-            return false;
-        }
-
-        if (auditLogConf.getIgnoreHttpMethod().contains(method)) {
-            return true;
-        }
-
-        return false;
     }
 
     private boolean ignoreMethod(InvocationContext context, AuditLogConf auditLogConf) {
@@ -155,33 +147,27 @@ public class AuditLogInterceptor {
         return false;
     }
 
-    private String getAction(String method) {
-        String action = null;
-        if (StringUtils.isNotBlank(method)) {
-            switch (method) {
-            case "POST":
-                action = "added";
-                break;
-            case "PUT":
-            case "PATCH":
-                action = "changed";
-                break;
-            case "DELETE":
-                action = "deleted";
-                break;
-            default:
-                action = "fetched";
-                break;
+    private Map<String, String> getAuditHeaderAttributes(AuditLogConf auditLogConf, HttpHeaders httpHeaders) {
+        LOG.info("DataLogInterceptor::getAuditHeaderAttributes() - auditLogConf:{}, httpHeaders:{}", auditLogConf,
+                httpHeaders);
+        if (auditLogConf == null) {
+            return Collections.emptyMap();
+        }
+        List<String> attributes = auditLogConf.getHeaderAttributes();
+        LOG.info("DataLogInterceptor::getAuditHeaderAttributes() - attributes:{}", attributes);
+
+        Map<String, String> attributeMap = null;
+        if (attributes != null && !attributes.isEmpty()) {
+            attributeMap = new HashMap<>();
+            for (String attributeName : attributes) {
+
+                String attributeValue = httpHeaders.getHeaderString(attributeName);
+                attributeMap.put(attributeName, attributeValue);
             }
         }
-        return action;
-    }
 
-    private String getResource(String path) {
-        if (StringUtils.isNotBlank(path)) {
-            path = path.replace("/", "-");
-        }
-        return path;
+        LOG.info("DataLogInterceptor::getAuditHeaderAttributes() - attributeMap:{}", attributeMap);
+        return attributeMap;
     }
 
 }

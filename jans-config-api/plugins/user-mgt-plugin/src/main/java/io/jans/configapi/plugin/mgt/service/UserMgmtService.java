@@ -247,6 +247,11 @@ public class UserMgmtService {
         //validate custom attribute validation
         validateAttributes(customAttributes);
         
+        StringBuilder attributeAdded = new StringBuilder();
+        StringBuilder attributeEdited = new StringBuilder();
+        StringBuilder attributeDeleted = new StringBuilder();
+        
+        
         for (CustomObjectAttribute attribute : customAttributes) {
             CustomObjectAttribute existingAttribute = userService.getCustomAttribute(user, attribute.getName());
             logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
@@ -255,20 +260,24 @@ public class UserMgmtService {
             if (existingAttribute == null) {
                 boolean result = userService.addUserAttribute(user, attribute.getName(), attribute.getValues(),
                         attribute.isMultiValued());
+                attributeAdded.append(attribute.getName());
                 logger.debug("Result of adding CustomAttributes attribute.getName():{} , result:{} ", attribute.getName(), result);
             }
             // remove attribute
             else if (attribute.getValue() == null || attribute.getValues() == null) {
-
                 user.removeAttribute(attribute.getName());
+                attributeDeleted.append(attribute.getName());
             }
             // replace attribute
             else {
                 existingAttribute.setMultiValued(attribute.isMultiValued());
                 existingAttribute.setValues(attribute.getValues());
+                attributeEdited.append(attribute.getName());
             }
         }
-
+        logger.info("Attribute added - {}",attributeAdded);
+        logger.info("Attribute edited - {}",attributeEdited);
+        logger.info("Attribute removed - {}",attributeDeleted);
         return user;
     }
 
