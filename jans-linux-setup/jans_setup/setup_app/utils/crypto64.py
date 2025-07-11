@@ -333,7 +333,7 @@ class Crypto64:
         test_client_ids = []
 
         for tmp_str in list(Config.templateRenderingDict.keys()):
-            if re.match(r'jans_auth_client_(\d*)_inum', tmp_str):
+            if re.match(r'(.*?)test_client_(\d*)_inum', tmp_str):
                 cli_prefix = tmp_str.strip('_inum')
                 cli_pw_var = cli_prefix +'_pw'
                 if not cli_pw_var in Config.templateRenderingDict:
