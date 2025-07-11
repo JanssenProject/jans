@@ -291,7 +291,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         # make scope revoke_any_token as default
         self.dbUtils.set_configuration("jansDefScope", "true", "inum=7D91,ou=scopes,o=jans")
 
-        self.create_test_client_keystore('jans-suth')
+        self.create_test_client_keystore('jans-auth')
 
         self.load_agama_test_data()
 
