@@ -3,14 +3,19 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use std::sync::LazyLock;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+use super::http_utils::OpenIdConfig;
+use super::status_list::{self, StatusBitSize};
+use super::validation::RefJwtStatusList;
 use crate::common::policy_store::TrustedIssuer;
 use jsonwebtoken::DecodingKey;
 use mockito::{Mock, Server, ServerGuard};
+use reqwest::Client;
 use serde::Serialize;
 use serde_json::{Value, json};
 use url::Url;
-
-use super::http_utils::OpenIdConfig;
 
 use {jsonwebkey as jwk, jsonwebtoken as jwt};
 
@@ -195,14 +200,15 @@ impl MockServer {
         })
     }
 
-    /// Generates an HS256 signed token string in the given format:
-    /// - `"header.claim.signature"`
-    pub fn generate_token_string_hs256(
+    /// Generates an HS256 signed token string in the given format: `"header.claim.signature"`
+    ///
+    /// If `jwt_status_idx` is [`Some`], the jwt will also havae a `status` claim.
+    #[track_caller]
+    pub fn generate_token_with_hs256sig(
         &mut self,
-        tkn_typ: TokenTypeHeader,
-        claims: &Value,
+        claims: &mut Value,
+        jwt_status_idx: Option<usize>,
     ) -> Result<String, TokenGenerationError> {
-        // generate_token_using_claims(claims, &self.keys)
         let header = jwt::Header {
             alg: self.keys.alg,
             kid: self.keys.kid.clone(),
@@ -210,12 +216,21 @@ impl MockServer {
             ..Default::default()
         };
 
+        claims["iss"] = json!(self.server.url());
+
+        if let Some(idx) = jwt_status_idx {
+            claims["status"] = json!({"status_list": RefJwtStatusList {
+                idx,
+                uri: self
+                    .status_list_endpoint()
+                    .expect("the status list endpoint hasn't been generated yet. call `generate_status_list_endpoint` first")
+                    .to_string(),
+                ttl: None,
+            }});
+        }
+
         // serialize token to a string
         let jwt = jwt::encode(&header, &claims, &self.keys.encoding_key)?;
-
-        if matches!(tkn_typ, TokenTypeHeader::StatusListJwt) {
-            self.generate_status_list_endpoint(&jwt);
-        }
 
         Ok(jwt)
     }
@@ -229,17 +244,76 @@ impl MockServer {
         }
     }
 
-    fn generate_status_list_endpoint(&mut self, status_list_jwt: &str) {
+    /// Use this to generate the status list JWT
+    #[track_caller]
+    pub fn generate_status_list_endpoint(
+        &mut self,
+        status_list_bits: StatusBitSize,
+        status_list: &[u8],
+        ttl: Option<u64>,
+    ) {
+        // building the status list JWT
+        let bits: u8 = status_list_bits.into();
+        let lst = status_list::compress_and_encode(status_list);
+        let sub = format!("{}{}", self.server.url(), MOCK_STATUS_LIST_ENDPOINT);
+        let iss = self.server.url();
+        let header = jwt::Header {
+            alg: self.keys.alg,
+            kid: self.keys.kid.clone(),
+            typ: TokenTypeHeader::StatusListJwt.into(),
+            ..Default::default()
+        };
+        let encoding_key = self.keys.encoding_key.clone();
+        let build_jwt_claims = move || {
+            let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+            let exp = iat + Duration::from_secs(3600); // defaults to 1 hour
+            let ttl = ttl
+                .map(|x| Duration::from_secs(x))
+                .unwrap_or_else(|| 
+                    // defaults to 5 mins if the ttl is None
+                    Duration::from_secs(600)
+                );
+            let claims = json!({
+                "sub": sub,
+                "status_list": {
+                  "bits": bits,
+                  "lst": lst,
+                },
+                "iss": iss,
+                "exp": exp.as_secs(),
+                "ttl": ttl.as_secs(),
+                "iat": iat.as_secs(),
+            });
+
+            jwt::encode(&header, &claims, &encoding_key)
+                .expect("encode status list JWT")
+                .as_bytes()
+                .to_vec()
+        };
+
         let endpoint = Some(
             self.server
                 .mock("GET", MOCK_STATUS_LIST_ENDPOINT)
                 .with_status(200)
-                .with_header("content-type", "application/json")
-                .with_body(status_list_jwt)
+                .with_header("content-type", "application/statuslist+jwt")
+                .with_body_from_request(move |_| build_jwt_claims())
                 .expect(1)
                 .create(),
         );
         self.endpoints.status_list = endpoint;
+    }
+
+    /// Helper function for generating a status list JWT for this mock server
+    pub async fn status_list_jwt(&self) -> Result<String, reqwest::Error> {
+        static CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
+        let url = self.status_list_endpoint().expect("the status list endpoint hasn't been generated yet. call `generate_status_list_endpoint` first");
+        CLIENT
+            .get(url.to_string())
+            .send()
+            .await?
+            .error_for_status()?
+            .text()
+            .await
     }
 
     pub fn status_list_endpoint(&self) -> Option<Url> {
@@ -290,6 +364,7 @@ impl MockServer {
         OpenIdConfig {
             issuer: self.issuer(),
             jwks_uri: self.jwks_endpoint().unwrap(),
+            status_list_endpoint: self.status_list_endpoint(),
         }
     }
 }

@@ -17,7 +17,8 @@ var bootstrapConfig string = `
         "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_TTL": 60,
-        "CEDARLING_LOG_LEVEL": "DEBUG"
+        "CEDARLING_LOG_LEVEL": "DEBUG",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"]
 }
 `
 
