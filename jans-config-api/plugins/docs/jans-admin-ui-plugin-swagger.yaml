@@ -1593,6 +1593,9 @@ components:
         cedarlingLogType:
           type: string
           description: Cedarling log type
+          enum:
+          - "off"
+          - std_out
     KeyValuePair:
       type: object
       properties:

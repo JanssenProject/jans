@@ -2,6 +2,7 @@ package io.jans.ca.plugin.adminui.model.config;
 
 
 import io.jans.as.model.config.adminui.KeyValuePair;
+import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
 
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class AUIConfiguration {
     private Integer sessionTimeoutInMins;
     private Boolean allowSmtpKeystoreEdit;
     private List<KeyValuePair> additionalParameters;
-    private String cedarlingLogType;
+    private CedarlingLogType cedarlingLogType;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -283,11 +284,11 @@ public class AUIConfiguration {
         this.allowSmtpKeystoreEdit = allowSmtpKeystoreEdit;
     }
 
-    public String getCedarlingLogType() {
+    public CedarlingLogType getCedarlingLogType() {
         return cedarlingLogType;
     }
 
-    public void setCedarlingLogType(String cedarlingLogType) {
+    public void setCedarlingLogType(CedarlingLogType cedarlingLogType) {
         this.cedarlingLogType = cedarlingLogType;
     }
 }
