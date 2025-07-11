@@ -211,7 +211,7 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['config_api_scopes_list'] = ' '.join(scopes_id_list)
 
 
-    def load_test_data(self):
+    def app_test_data_loader(self):
         if not self.installed():
             return
 

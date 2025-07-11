@@ -264,7 +264,7 @@ class BaseInstaller:
     def service_post_install_tasks(self):
         pass
 
-    def load_test_data(self):
+    def app_test_data_loader(self):
         pass
 
     def create_scopes(self):
