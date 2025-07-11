@@ -90,13 +90,14 @@
   },
  "debian 13": {
     "optional": "",
-    "mandatory": "apache2 rsyslog python3-urllib3 python3-certifi postgresql postgresql-contrib",
+    "mandatory": "apache2 rsyslog python3-urllib3 python3-certifi postgresql",
     "python": {
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel.yaml",
       "cryptography": "python3-cryptography",
       "certifi": "python3-certifi",
-      "psycopg2": "python3-psycopg2"
+      "psycopg2": "python3-psycopg2",
+      "cffi": "python3-cffi"
     }
   },
   "debian 11": {
