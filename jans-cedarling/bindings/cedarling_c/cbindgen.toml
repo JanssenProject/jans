@@ -21,8 +21,8 @@ rename_fields = "ScreamingSnakeCase"
 must_use="CedarlingResult"
 
 [enum]
-rename = "ScreamingSnakeCase"
-must_use="CedarlingErrorCode"
+rename_variants = "ScreamingSnakeCase"
+must_use = "CedarlingErrorCode"
 
 
 [defines]
