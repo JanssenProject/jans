@@ -1,0 +1,31 @@
+language="C"
+header="/* Cedarling C Bindings - Auto generated header file*/"
+include_version = true
+namespace = "Cedarling"
+cpp_compat = true
+style = "both"
+
+[export]
+include=["CedarlingError","CedarlingStringArray","CedarlingResult"]
+exclude=[]
+
+[fn]
+prefix = "cedarling_"
+postfix = ""
+args="horizontal"
+rename_args="GeckoCase"
+
+
+[struct]
+rename_fields = "ScreamingSnakeCase"
+must_use="CedarlingResult"
+
+[enum]
+rename = "ScreamingSnakeCase"
+must_use="CedarlingErrorCode"
+
+
+[defines]
+"target_os=windows" = "CEDARLING_WINDOWS"
+"target_os=linux" = "CEDARLING_LINUX"
+"target_os=macos" = "CEDARLING_MACOS"
