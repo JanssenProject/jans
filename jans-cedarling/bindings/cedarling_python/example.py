@@ -61,8 +61,10 @@ def authorize_with_token():
 
     # or we can init resource using dict
     resource = EntityData.from_dict({
-        "type": "Jans::Application",
-        "id": "some_id",
+        "cedar_entity_mapping": {
+            "entity_type": "Jans::Application",
+            "id": "some_id"
+        },
         "app_id": "application_id",
         "name": "Some Application",
         "url": {

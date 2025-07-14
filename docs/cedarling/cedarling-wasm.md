@@ -6,50 +6,58 @@ tags:
 
 # WASM for Cedarling
 
-Cedarling provides a binding for JavaScript programs via the `wasm-pack` tool. 
+Cedarling provides a binding for JavaScript programs via the `wasm-pack` tool.
 This allows browser developers to use the cedarling crate in their code directly.
 
 ## Requirements
 
-* Rust 1.63 or Greater. Ensure that you have `Rust` version 1.63 or higher installed. You can check your 
+- Rust 1.63 or Greater. Ensure that you have `Rust` version 1.63 or higher installed. You can check your
   current version of Rust by running the following command in your terminal:
-```bash   
+
+```bash
 rustc --version
 ```
 
-* Installed `wasm-pack` via `Cargo`. 
-You can install it with the following command:
+- Installed `wasm-pack` via `Cargo`.
+  You can install it with the following command:
+
 ```bash
 cargo install wasm-pack
 ```
 
-* Ensure that Clang is installed with support for WebAssembly targets. 
-You can check the installation and available targets with:
-```bash 
+- Ensure that Clang is installed with support for WebAssembly targets.
+  You can check the installation and available targets with:
+
+```bash
 clang -print-targets
 ```
+
 Check `clang` version
-```bash 
+
+```bash
 clang --version
 ```
 
 ## Building
 
-  * Clone the Janssen server repository from the GitHub and change the directory 
+- Clone the Janssen server repository from the GitHub and change the directory
   to the `cedarling_wasm` directory:
-  ```bash title="Command"
-  cd /path/to/jans/jans-cedarling/bindings/cedarling_wasm
-  ```
 
-  * Build the WebAssembly package in release mode after you've reached 
-the `cedarling_wasm` directory. `wasm-pack` automatically optimizes the 
-WebAssembly binary file using `wasm-opt` for better performance.
+```bash title="Command"
+cd /path/to/jans/jans-cedarling/bindings/cedarling_wasm
+```
+
+- Build the WebAssembly package in release mode after you've reached
+  the `cedarling_wasm` directory. `wasm-pack` automatically optimizes the
+  WebAssembly binary file using `wasm-opt` for better performance.
+
 ```bash title="Command"
 wasm-pack build --release --target web
 ```
 
-  * To view the WebAssembly project in action, you can run a local server. 
-One way to do this is by using the following command:
+- To view the WebAssembly project in action, you can run a local server.
+  One way to do this is by using the following command:
+
 ```bash title="Command"
 python3 -m http.server
 ```
@@ -64,70 +72,76 @@ python3 -m http.server
     - `jans/jans-cedarling/bindings/cedarling_wasm/index.html`: A simple example demonstrating basic usage.
     - `jans/jans-cedarling/bindings/cedarling_wasm/cedarling_app.html`: A fully featured `Cedarling` browser app where you can test and validate your configuration.
 
-For using result files in the browser project, you need to make the 
-result `pkg` directory accessible for loading in the browser so that you can 
+For using result files in the browser project, you need to make the
+result `pkg` directory accessible for loading in the browser so that you can
 later import the corresponding file from the browser.
 
 ```html title="Example code snippet"
-   <script type="module">
-        import initWasm, { init } from "/pkg/cedarling_wasm.js";
+<script type="module">
+  import initWasm, { init } from "/pkg/cedarling_wasm.js";
 
-        async function main() {
-            await initWasm(); // Initialize the WebAssembly module
+  async function main() {
+    await initWasm(); // Initialize the WebAssembly module
 
-            // init cedarling with `BOOTSTRAP` config
-            let instance = await init({
-               "CEDARLING_APPLICATION_NAME": "My App",
-                "CEDARLING_POLICY_STORE_URI": "https://example.com/policy-store.json",
-                "CEDARLING_LOG_TYPE": "memory",
-                "CEDARLING_LOG_LEVEL": "INFO",
-                "CEDARLING_LOG_TTL": 120,
-                "CEDARLING_DECISION_LOG_USER_CLAIMS ": ["aud", "sub", "email", "username"],
-                "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS ": ["aud", "client_id", "rp_id"],
-                "CEDARLING_USER_AUTHZ": "enabled",
-                "CEDARLING_WORKLOAD_AUTHZ": "enabled",
-                "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-                    "and" : [
-                        {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
-                        {"===": [{"var": "Jans::User"}, "ALLOW"]}
-                    ]
-                },
-            });
-            // make authorize request
-            let result = await instance.authorize({
-                "tokens": {
-                    "access_token": "...",
-                    "id_token": "...",
-                    "userinfo_token": "...",
-                },
-                "action": 'Jans::Action::"Read"',
-                "resource": {
-                    "type": "Jans::Application",
-                    "id": "some_id",
-                    "app_id": "application_id",
-                    "name": "Some Application",
-                    "url": {
-                        "host": "jans.test",
-                        "path": "/protected-endpoint",
-                        "protocol": "http"
-                    }
-                },
-                "context": {
-                    "current_time": Math.floor(Date.now() / 1000),
-                    "device_health": ["Healthy"],
-                    "fraud_indicators": ["Allowed"],
-                    "geolocation": ["America"],
-                    "network": "127.0.0.1",
-                    "network_type": "Local",
-                    "operating_system": "Linux",
-                    "user_agent": "Linux"
-                },
-            });
-            console.log("result:", result);
-        }
-        main().catch(console.error);
-    </script>
-
+    // init cedarling with `BOOTSTRAP` config
+    let instance = await init({
+      CEDARLING_APPLICATION_NAME: "My App",
+      CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.json",
+      CEDARLING_LOG_TYPE: "memory",
+      CEDARLING_LOG_LEVEL: "INFO",
+      CEDARLING_LOG_TTL: 120,
+      "CEDARLING_DECISION_LOG_USER_CLAIMS ": [
+        "aud",
+        "sub",
+        "email",
+        "username",
+      ],
+      "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS ": ["aud", "client_id", "rp_id"],
+      CEDARLING_USER_AUTHZ: "enabled",
+      CEDARLING_WORKLOAD_AUTHZ: "enabled",
+      CEDARLING_PRINCIPAL_BOOLEAN_OPERATION: {
+        and: [
+          { "===": [{ var: "Jans::Workload" }, "ALLOW"] },
+          { "===": [{ var: "Jans::User" }, "ALLOW"] },
+        ],
+      },
+    });
+    // make authorize request
+    let result = await instance.authorize({
+      tokens: {
+        access_token: "...",
+        id_token: "...",
+        userinfo_token: "...",
+      },
+      action: 'Jans::Action::"Read"',
+      resource: {
+        cedar_entity_mapping: {
+          entity_type: "Jans::Application",
+          id: "some_id",
+        },
+        app_id: "application_id",
+        name: "Some Application",
+        url: {
+          host: "jans.test",
+          path: "/protected-endpoint",
+          protocol: "http",
+        },
+      },
+      context: {
+        current_time: Math.floor(Date.now() / 1000),
+        device_health: ["Healthy"],
+        fraud_indicators: ["Allowed"],
+        geolocation: ["America"],
+        network: "127.0.0.1",
+        network_type: "Local",
+        operating_system: "Linux",
+        user_agent: "Linux",
+      },
+    });
+    console.log("result:", result);
+  }
+  main().catch(console.error);
+</script>
 ```
 
 Example of calling method `authorize_unsigned` for the custom principals:
@@ -152,13 +166,15 @@ Example of calling method `authorize_unsigned` for the custom principals:
                         "app_id": "group_app_id",
                         "name": "Some Group",
                         "country": "US"
-                    
+
                     }
                 ]
                 "action": 'Jans::Action::"Read"',
                 "resource": {
-                    "type": "Jans::Application",
-                    "id": "some_id",
+                    "cedar_entity_mapping": {
+                        "entity_type": "Jans::Application",
+                        "id": "some_id"
+                    },
                     "app_id": "application_id",
                     "name": "Some Application",
                     "url": {
@@ -193,7 +209,6 @@ export function init(config: any): Promise<Cedarling>;
  * Represents the result of an authorization request.
  */
 export class AuthorizeResult {
-
   /**
    * Convert `AuthorizeResult` to json string value
    */
@@ -233,7 +248,6 @@ export class AuthorizeResult {
  * Represents the result of an authorization request.
  */
 export class AuthorizeResultResponse {
-
   /**
    * Authorization decision
    */
@@ -247,7 +261,6 @@ export class AuthorizeResultResponse {
  * The instance of the Cedarling application.
  */
 export class Cedarling {
-
   /**
    * Create a new instance of the Cedarling application.
    * Assume that config is `Object`
@@ -307,7 +320,6 @@ export class Cedarling {
  * Provides detailed information about how a policy decision was made, including policies that contributed to the decision and any errors encountered during evaluation.
  */
 export class Diagnostics {
-
   /**
    * `PolicyId`s of the policies that contributed to the decision.
    * If no policies applied to the request, this set will be empty.
@@ -331,7 +343,6 @@ export class JsJsonLogic {
  * Represents an error that occurred when evaluating a Cedar policy.
  */
 export class PolicyEvaluationError {
-
   /**
    * Id of the policy with an error
    */

@@ -40,10 +40,12 @@ The main way you will interact with Cedarling are through the following interfac
 The initialization or `init` interface is how you will initialize Cedarling. Initialization involves loading:
 
 **Bootstrap Configuration**
+
 - A set of properties that will tells how Cedarling behaves within your application.
 - Learn more in the [bootstrap properties guide](./cedarling-properties.md).
 
 **Policy Store**
+
 - A JSON file containing the schema, policies, trusted issuers, and token metadata schema used for making authorization decisions.
 - Learn more in the [policy store guide](./cedarling-policy-store.md).
 
@@ -81,7 +83,7 @@ The bootstrap configuration and policy store directly influence how Cedarling pe
         ...
         }
     """;
-    
+
     val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
     ```
 
@@ -119,8 +121,8 @@ The bootstrap configuration and policy store directly influence how Cedarling pe
     import uniffi.cedarling_uniffi.*;
     ...
      /*
-    * In a production environment, the bootstrap configuration should not be hardcoded. 
-    * Instead, it should be loaded dynamically from external sources such as environment variables, 
+    * In a production environment, the bootstrap configuration should not be hardcoded.
+    * Instead, it should be loaded dynamically from external sources such as environment variables,
     * configuration files, or a centralized configuration service.
     */
     String bootstrapJsonStr = """
@@ -129,7 +131,7 @@ The bootstrap configuration and policy store directly influence how Cedarling pe
             ...
         }
     """;
-        
+
     try {
         CedarlingAdapter cedarlingAdapter = new CedarlingAdapter();
         cedarlingAdapter.loadFromJson(bootstrapJsonStr);
@@ -151,6 +153,7 @@ When using Cedarling, **Action** and **Resource** are typically defined in the [
 Cedarling currently provides two modes of authorization:
 
 **Standard (Token-based) Interface**
+
 - Extracts the **Principal** from a JWT.
 - Accepts the **Context** as a structured map.
 
@@ -235,6 +238,7 @@ Cedarling currently provides two modes of authorization:
         context,
     ))
     ```
+
 === "Rust"
 
     ```rs
@@ -293,8 +297,10 @@ Cedarling currently provides two modes of authorization:
     val action = """Jans::Action::"Read""""
 
     val resource = mapOf(
-        "type" to "Jans::Application",
-        "id" to "app_id_001",
+        "cedar_entity_mapping" to mapOf(
+            "entity_type" to "Jans::Application",
+            "id" to "app_id_001"
+        ),
         "name" to "Some Application",
         "url" to mapOf(
             "host" to "example.com",
@@ -316,8 +322,8 @@ Cedarling currently provides two modes of authorization:
     val result = cedarling?.authorize(
         tokens,
         action,
-        resource["type"] as String,
-        resource["id"] as String,
+        resource["cedar_entity_mapping"]?.get("entity_type") as String,
+        resource["cedar_entity_mapping"]?.get("id") as String,
         anyToJson(resource),
         context
     )
@@ -335,8 +341,10 @@ Cedarling currently provides two modes of authorization:
     let action = #"Jans::Action::"Read""#
 
     let resource: [String: Any] = [
-        "resource_type": "Jans::Application",
-        "resource_id": "app_id_001",
+        "cedar_entity_mapping": [
+            "entity_type": "Jans::Application",
+            "id": "app_id_001"
+        ],
         "name": "Some Application",
         "url": [
             "host": "example.com",
@@ -363,8 +371,8 @@ Cedarling currently provides two modes of authorization:
     let result: AuthorizeResult = try cedarling.authorize(
         tokens: tokens,
         action: action,
-        resourceType: resource["resource_type"] as! String,
-        resourceId: resource["resource_id"] as! String,
+        resourceType: resource["cedar_entity_mapping"]?.get("entity_type") as! String,
+        resourceId: resource["cedar_entity_mapping"]?.get("id") as! String,
         payload: payloadJsonString,
         context: context
     )
@@ -381,8 +389,10 @@ Cedarling currently provides two modes of authorization:
     }
     action := "Jans::Action::\"Read\""
     resource := cedarling_go.EntityData{
-        EntityType: "Jans::Application",
-        ID: "app_id_001",
+        CedarMapping: cedarling_go.CedarMapping{
+            EntityType: "Jans::Application",
+            ID: "app_id_001",
+        },
         Payload: map[string]any{
             "name": "Some Application",
             "url": map[string]string{
@@ -407,11 +417,12 @@ Cedarling currently provides two modes of authorization:
         Resource: resource,
         Context: context,
     }
-	result, err := cedarling_instance.Authorize(request)
+    result, err := cedarling_instance.Authorize(request)
     if err != nil {
         panic!(err)
     }
     ```
+
 === "Java"
 
     ```java
@@ -419,10 +430,12 @@ Cedarling currently provides two modes of authorization:
     String resource = """
         {
           "app_id": "app_id_001",
-          "id": "admin_ui_id",
+          "cedar_entity_mapping": {
+            "entity_type": "Jans::Issue",
+            "id": "admin_ui_id"
+          },
           "name": "App Name",
-          "permission": "view_clients",
-          "type": "Jans::Issue"
+          "permission": "view_clients"
         }
     """;
 
@@ -457,6 +470,7 @@ Cedarling currently provides two modes of authorization:
     ```
 
 **Unsigned Authorization**
+
 - Accepts the **Principal** directly without requiring a JWT.
 - This makes authorization decisions by passing a set of **Principals** directly.
 - Similar to the standard interface, the **Context** is passed in as-is in a map-like structure.

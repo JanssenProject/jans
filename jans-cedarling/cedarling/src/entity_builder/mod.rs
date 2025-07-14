@@ -22,6 +22,7 @@ mod value_to_expr;
 
 use crate::authz::AuthorizeEntitiesData;
 use crate::authz::request::EntityData;
+use crate::CedarEntityMapping;
 use crate::common::PartitionResult;
 use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
@@ -412,8 +413,10 @@ mod test {
 
         let entities = entity_builder
             .build_entities(&tokens, &EntityData {
+                cedar_mapping: CedarEntityMapping {
                 entity_type: "Jans::Resource".into(),
                 id: "some_id".into(),
+                },
                 attributes: HashMap::new(),
             })
             .expect("build entities");
