@@ -2,6 +2,7 @@ import os
 import shutil
 import sys
 import importlib
+import tempfile
 
 from setup_app import paths
 from setup_app.config import Config
@@ -45,7 +46,6 @@ class PackageUtils(SetupUtils):
         self.run(install_command.format(packages), shell=True)
 
     def check_and_install_packages(self):
-
         install_command, update_command, query_command, check_text = self.get_install_commands()
         dnf_command = shutil.which('dnf')
         if dnf_command:
@@ -65,6 +65,21 @@ class PackageUtils(SetupUtils):
                     self.run(['rpm', '--import', '/etc/RPM-GPG-KEY-mysql'])
                     self.run(['zypper', '--no-gpg-checks', '--gpg-auto-import-keys', 'refresh'])
                     package_list[os_type_version]['mandatory'] += ' mysql-community-server-8.0.39'
+                elif base.os_type == 'debian' and base.os_version in ('12', '13'):
+                    with tempfile.TemporaryDirectory() as tmpdirname:
+                        libaio1_url = 'http://ftp.de.debian.org/debian/pool/main/liba/libaio/libaio1_0.3.113-4_amd64.deb'
+                        base.download(libaio1_url, os.path.join(tmpdirname, os.path.basename(libaio1_url)))
+                        for deb_fn in ( 'mysql-community-server_9.2.0-1debian12_amd64.deb',
+                                        'mysql-common_9.2.0-1debian12_amd64.deb',
+                                        'mysql-community-server-core_9.2.0-1debian12_amd64.deb',
+                                        'mysql-client_9.2.0-1debian12_amd64.deb',
+                                        'mysql-community-client_9.2.0-1debian12_amd64.deb',
+                                        'mysql-community-client-core_9.2.0-1debian12_amd64.deb',
+                                        'mysql-community-client-plugins_9.2.0-1debian12_amd64.deb',
+                                        ):
+                            base.download(f'https://downloads.mysql.com/archives/get/p/23/file/{deb_fn}', os.path.join(tmpdirname, deb_fn))
+                        self.run([install_command.format(os.path.join(tmpdirname, '*.deb'))],  shell=True)
+
                 else:
                     package_list[os_type_version]['mandatory'] += ' mysql-server'
 

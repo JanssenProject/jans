@@ -946,7 +946,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Engine Config which offers an alternative way to build authentication flows in Janssen server")
     private EngineConfig agamaConfiguration;
 
-    @DocProperty(description = "DCR SSA Validation configurations used to perform validation of SSA or DCR")
+    @DocProperty(description = "DCR SSA Validation configurations used to perform validation of SSA or DCR. Only needed if softwareStatementValidationType=builtin")
     private List<SsaValidationConfig> dcrSsaValidationConfigs;
 
     @DocProperty(description = "SSA Configuration")

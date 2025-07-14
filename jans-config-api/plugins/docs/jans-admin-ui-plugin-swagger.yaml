@@ -1502,6 +1502,8 @@ components:
           type: string
         defaultPermissionInToken:
           type: boolean
+        essentialPermissionInAdminUI:
+          type: boolean
     GenericResponse:
       type: object
       properties:
@@ -1588,6 +1590,12 @@ components:
           description: Additional Authentication Parameters
           items:
             $ref: '#/components/schemas/KeyValuePair'
+        cedarlingLogType:
+          type: string
+          description: Cedarling log type
+          enum:
+          - "off"
+          - std_out
     KeyValuePair:
       type: object
       properties:
