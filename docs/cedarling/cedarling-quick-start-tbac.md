@@ -136,4 +136,27 @@ The top-level `decision: true` confirms successful authorization.
 
 ## Sequence diagram
 
-View full diagram [here](https://sequencediagram.org/index.html#initialData=C4S2BsFMAIGFICYEMBO4QDsDm0kYdACqoAOAUGSaqAMYhUbDQBCKA9gO4DOkKl1IOgybEU5Kilr08TAIIBXYAAtoAZV4A3XhVaceKALQA+USQBc0AKKNe0BcrWbbNNhgBmILGVPH7K9ShaKBYAIgCeGEgAtoJw6JCM0ABKkFggXMAoSKCu0GR+joG8xqYWsPGJAJIhuPiONCiQwGS63MUmpBbWwLbwyGiYOABGbGzAGVkk0C7unt6kvor+TsHQAOKWhNAA9ABWeFwGSEvbjRkaAIx7HADWXPlLhUElndAAUgDqANKq82IvYgslQwYBASHQAC8YH1UOhsC12G1DB1AWpgNRcEs2CgQBDsiBcm5wJw-iRFg4AkELBstnsDkcTmdgJdtsdlNjcZAAPwAOj5DwpKwB5h2NHB4CGSBoNy5LgQkAAvHyeaTycsiqsaTt9hhDmylKdIOcrsA2DcEgL1c8USKAN4AIilNCNXAA+qbzRh7RYADyfQhGAC+OkR+mFZUQsMGdiWEIAFCQcRghOCADS4Gg5DDps5seQoZ3pmY9AAewAAlKqjK19BH+nCcCFIHQuASMEA)
+```mermaid
+sequenceDiagram
+    title Cedarling and Tarp
+
+    participant Browser
+    participant Tarp
+    participant Auth Server
+
+    Browser->>Tarp: Enter Auth Server config
+    Tarp->>Auth Server: Dynamic Client Registration 
+    Auth Server->>Tarp: Client ID and Secret
+    Browser->>Tarp: Enter Cedarling bootstrap config
+    Tarp->>Auth Server: GET /jans-auth/restv1/jwks
+    Auth Server->>Tarp: JWKS
+    Tarp->>Tarp: Initialize Cedarling
+    Browser->>Tarp: Start authorization flow
+    Tarp->>Auth Server: GET /jans-auth/restv1/authorize?...
+    Auth Server->>Tarp: /callback?code=...
+    Tarp->>Auth Server: GET /jans-auth/restv1/token
+    Auth Server->>Tarp: {"access_token": <JWT>}
+
+    Browser->>Tarp: Cedarling Authz(principal, action, resource, context)
+    Tarp->>Browser: Cedarling Decision 
+```
