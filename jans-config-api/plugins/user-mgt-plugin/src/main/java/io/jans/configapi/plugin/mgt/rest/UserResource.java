@@ -62,6 +62,7 @@ public class UserResource extends BaseResource {
     private static final String USER_PWD = "userPassword";
     private static final String INUM = "inum";
     private static final String USER_PLACEHOLDER = "user:{}";
+    private static final String USER_UPDATE_FLAG_PLACEHOLDER = "user:{}, isUpdate:{}";
 
     private class UserPagedResult extends PagedResult<CustomUser> {
     };
@@ -190,7 +191,7 @@ public class UserResource extends BaseResource {
             logger.error("InvalidAttributeException while creating user is:{}, cause:{}", iae, iae.getCause());
             throwBadRequestException("USER_CREATION_ERROR", iae.getMessage());
         } catch (Exception ex) {
-            logger.error("Exception while creating user is:{}, cause:{}", ex, ex.getCause());
+            logger.error("Exception while creating user is - ", ex);
             throwInternalServerException(ex);
         }
         return Response.status(Response.Status.CREATED).entity(customUser).build();
@@ -249,7 +250,7 @@ public class UserResource extends BaseResource {
             logger.error("InvalidAttributeException while updating user is:{}, cause:{}", iae, iae.getCause());
             throwBadRequestException("USER_UPDATE_ERROR", iae.getMessage());
         } catch (Exception ex) {
-            logger.error("Exception while updating user is:{}, cause:{}", ex, ex.getCause());
+            logger.error("Exception while updating user is - ", ex);
             throwInternalServerException(ex);
         }
         return Response.ok(customUser).build();
@@ -384,7 +385,7 @@ public class UserResource extends BaseResource {
     }
 
     private void validateUser(User user, boolean isUpdate) throws ApiApplicationException {
-        logger.info(USER_PLACEHOLDER, user);
+        logger.info(USER_UPDATE_FLAG_PLACEHOLDER, user, isUpdate);
 
         if (user == null) {
             return;
@@ -408,7 +409,7 @@ public class UserResource extends BaseResource {
     }
 
     private String validateUserName(User user, boolean isUpdate)  {
-        logger.info(USER_PLACEHOLDER, " isUpdate:{}", user, isUpdate);
+        logger.info(USER_UPDATE_FLAG_PLACEHOLDER, user, isUpdate);
 
         String msg = null;
 
@@ -425,14 +426,18 @@ public class UserResource extends BaseResource {
 
         // name validation
         if (sameNameUser != null && !sameNameUser.isEmpty()) {
-
+            
             List<User> users = null;
             if (isUpdate) {
                 users = sameNameUser.stream().filter(e -> !e.getAttribute("inum").equalsIgnoreCase(inum))
                         .collect(Collectors.toList());
             }
+            else {
+                users = sameNameUser.stream().filter(e -> e.getUserId().equalsIgnoreCase(name))
+                        .collect(Collectors.toList());
+            }
 
-            if (!isUpdate || (users != null && !users.isEmpty())) {
+            if ((users != null && !users.isEmpty())) {
                 msg = String.format(ApiErrorResponse.SAME_NAME_USER_EXISTS_ERROR.getDescription(), name);
             }
         }
@@ -440,7 +445,7 @@ public class UserResource extends BaseResource {
     }
 
     private String validateUserEmail(User user, boolean isUpdate)  {
-        logger.info(USER_PLACEHOLDER, " isUpdate:{}", user, isUpdate);
+        logger.info(USER_UPDATE_FLAG_PLACEHOLDER, user, isUpdate);
 
         String msg = null;
 
