@@ -151,21 +151,35 @@ public class UserMgmtService {
 
     public List<User> getUserByName(String name) {
         logger.info("Get user by name:{} ", name);
-        String[] targetArray = new String[] { name };
-        Filter nameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, targetArray, null);
+        List<User> users = null;
+        try {
+            Filter nameFilter = Filter.createANDFilter(Filter.createEqualityFilter("uid", name),
+                    Filter.createEqualityFilter("jansStatus", GluuStatus.ACTIVE.getValue()));
 
-        List<User> users = persistenceEntryManager.findEntries(userService.getPeopleBaseDn(), User.class, nameFilter);
-        logger.trace("Asset by name:{} are users:{}", name, users);
+            logger.debug("Get user by nameFilter:{} ", nameFilter);
+            users = persistenceEntryManager.findEntries(userService.getPeopleBaseDn(), User.class, nameFilter);
+            logger.debug("Asset by name:{} are users:{}", name, users);
+
+        } catch (Exception ex) {
+            logger.error("Failed to load user with name:{}, ex:{}", name, ex);
+        }
         return users;
     }
 
     public List<User> getUserByEmail(String email) {
         logger.info("Get user by email:{} ", email);
-        String[] targetArray = new String[] { email };
-        Filter emailFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("mail"), null, targetArray, null);
+        List<User> users = null;
+        try {
+            Filter emailFilter = Filter.createANDFilter(Filter.createEqualityFilter("mail", email),
+                    Filter.createEqualityFilter("jansStatus", GluuStatus.ACTIVE.getValue()));
 
-        List<User> users = persistenceEntryManager.findEntries(userService.getPeopleBaseDn(), User.class, emailFilter);
-        logger.trace("Asset by email:{} are users:{}", email, users);
+            logger.debug("Get user by emailFilter:{} ", emailFilter);
+            users = persistenceEntryManager.findEntries(userService.getPeopleBaseDn(), User.class, emailFilter);
+            logger.debug("Asset by email:{} are users:{}", email, users);
+        
+        } catch (Exception ex) {
+            logger.error("Failed to load user with email:{}, ex:{}", email, ex);
+        }
         return users;
     }
 
@@ -250,8 +264,7 @@ public class UserMgmtService {
         StringBuilder attributeAdded = new StringBuilder();
         StringBuilder attributeEdited = new StringBuilder();
         StringBuilder attributeDeleted = new StringBuilder();
-        
-        
+                
         for (CustomObjectAttribute attribute : customAttributes) {
             CustomObjectAttribute existingAttribute = userService.getCustomAttribute(user, attribute.getName());
             logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
@@ -275,6 +288,7 @@ public class UserMgmtService {
                 attributeEdited.append(attribute.getName());
             }
         }
+        
         logger.info("Attribute added - {}",attributeAdded);
         logger.info("Attribute edited - {}",attributeEdited);
         logger.info("Attribute removed - {}",attributeDeleted);
