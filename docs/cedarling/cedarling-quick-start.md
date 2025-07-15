@@ -168,6 +168,8 @@ The top-level `decision: false` shows Cedarling denying authorization.
 
 ## Implement TBAC Using Cedarling
 
+Token-Based Access Control (TBAC) in Cedarling involves using JWT tokens from an Identity Provider (IDP) 
+to authorize users based on roles.
 
 
 ### Step-1: Create Cedar Policy and Schema
@@ -183,10 +185,26 @@ permit(
 );
 ```
 
-The Cedarling needs policies and a schema to authorize access. These are bundled in a _policy store_ (a JSON file). A demo repository is provided for this quickstart which contains two policy stores. We will be modifying the `tarpDemo` store so that it uses your authorization server. When implementing TBAC, the Cedarling will validate the tokens with the IDP. To be able to this, we need to provide trusted issuer information to the Cedarling. We can do this by adding the trusted issuer information to the demo policy store.
 
-- Open the [Agama Lab policy designer](https://cloud.gluu.org/agama-lab/dashboard/policy_store) and select your fork.
-- Open the policy store named `tarpDemo`
+???+ info "Agama Lab: For authoring policies and managing the policy store"
+    
+    Agama Lab is a free web tool provided by Gluu. This tool makes it very 
+    easy to author, update policies and schema using an user interface. Follow
+    the steps below to make changes to the policy that we are using above.
+
+    - Go to the [CedarlingQuickstart repository](https://github.com/JanssenProject/CedarlingQuickstart) where the demo policy store is hosted
+        - Click on `Fork`
+        - **uncheck** the `Copy the master branch only` option 
+    - [Install Agama Lab app and allow access to forked repository](https://gluu.org/agama/how-to-integrate-agama%e2%80%90lab-github-app-with-your-github-account/)
+    - Open the [Agama Lab policy designer](https://cloud.gluu.org/agama-lab/dashboard/policy_store).
+    - Click on `Change Repository`.
+    - Select the option `Manually Type Repository URL`.
+    - Paste the URL of your forked repository, then click the `Select` button.
+    - This will open the dashboard with two policy stores listed. Open the policy store named `tarpDemo`.
+    - Now you can update the policy and schema using the 
+      [policy designer](https://help.gluu.org/kb/article/34/authorization-policy-designer)        
+
+
 - Go to `Trusted Issuer` and edit the `testIdp` entry
 - Replace the OpenID configuration endpoint with the one from your IDP. This server must:
     - Allow dynamic client registration
@@ -199,7 +217,7 @@ The Cedarling needs policies and a schema to authorize access. These are bundled
 
 In this step, we will add the policy store details in the Janssen Tarp that is
 installed in the browser. The Cedarling instance embedded in the Tarp will
-use the policy stored in this store to evaluate the authorization result.
+use the policy stored in the store (from [Step-1](#step-1-create-cedar-policy-and-schema_1)) to evaluate the authorization result.
 
 
 1. Open Tarp installed in the Chrome browser
