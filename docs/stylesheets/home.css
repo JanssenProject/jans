@@ -1,4 +1,3 @@
-
 /* Janssen Project Landing Page Styles */
 
 /* CSS Custom Properties - Janssen Brand Colors with Theme Support */
@@ -1271,4 +1270,13 @@ html {
 .md-typeset .grid.cards strong {
   color: var(--janssen-green-dark);
   font-weight: 600;
+}
+
+/* Fix H2 heading spacing to be consistent with other headings */
+.md-typeset h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+  margin-top: 1rem;
 }
