@@ -119,7 +119,10 @@
     }
   },
   "jansScr": {
-    "mysql": {
+        "mysql": {
+      "type": "LONGTEXT"
+    },
+    "pgsql": {
       "type": "TEXT"
     }
   },
