@@ -1,3 +1,4 @@
+
 // This software is available under the Apache-2.0 license.
 // See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
 //
@@ -493,59 +494,45 @@ async fn test_authorize_unsigned() {
         .await
         .expect("init function should be initialized with js map");
 
-    let principals = vec![
-        EntityData {
-            cedar_mapping: cedarling::CedarEntityMapping {
-                entity_type: "Jans::TestPrincipal1".to_string(),
-                id: "1".to_string(),
+    let request = RequestUnsigned {
+        principals: vec![
+            EntityData::deserialize(json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "1"
+                },
+                "is_ok": true
+            }))
+            .expect("EntityData should be deserialized correctly"),
+            EntityData::deserialize(json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal2",
+                    "id": "2"
+                },
+                "is_ok": true
+            }))
+            .expect("EntityData should be deserialized correctly"),
+            EntityData::deserialize(json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal3",
+                    "id": "3"
+                },
+                "is_ok": false
+            }))
+            .expect("EntityData should be deserialized correctly"),
+        ],
+        action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
             },
-            attributes: {
-                let mut map = HashMap::new();
-                map.insert("is_ok".to_string(), json!(true));
-                map
-            },
-        },
-        EntityData {
-            cedar_mapping: cedarling::CedarEntityMapping {
-                entity_type: "Jans::TestPrincipal2".to_string(),
-                id: "2".to_string(),
-            },
-            attributes: {
-                let mut map = HashMap::new();
-                map.insert("is_ok".to_string(), json!(true));
-                map
-            },
-        },
-        EntityData {
-            cedar_mapping: cedarling::CedarEntityMapping {
-                entity_type: "Jans::TestPrincipal3".to_string(),
-                id: "3".to_string(),
-            },
-            attributes: {
-                let mut map = HashMap::new();
-                map.insert("is_ok".to_string(), json!(false));
-                map
-            },
-        },
-    ];
-    let resource = EntityData {
-        cedar_mapping: cedarling::CedarEntityMapping {
-            entity_type: "Jans::Issue".to_string(),
-            id: "random_id".to_string(),
-        },
-        attributes: {
-            let mut map = HashMap::new();
-            map.insert("org_id".to_string(), json!("some_long_id"));
-            map.insert("country".to_string(), json!("US"));
-            map
-        },
+            "org_id": "some_long_id",
+            "country": "US"
+        }))
+        .expect("ResourceData should be deserialized correctly"),
+        context: json!({})
     };
-    let request = json!({
-        "principals": principals,
-        "action": "Jans::Action::\"UpdateForTestPrincipals\"",
-        "resource": resource,
-        "context": json!({})
-    });
 
     let result = instance
         .authorize_unsigned(
