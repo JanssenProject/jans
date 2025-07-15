@@ -32,9 +32,8 @@ For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/ja
 There are two ways to pass the details about the principal who is requesting
 an action. 
 
-   1. Pass a JSON string
-   2. Provide tokens obtained by authenticating the principal. This is also 
-   called Token Based Access Control (TBAC)
+   1. Pass as a JSON string
+   2. Provide principal details using tokens obtained by authenticating the principal. This is also called Token Based Access Control (TBAC)
 
 Refer to TBAC quick start guide to understand authorization using TBAC.
 
