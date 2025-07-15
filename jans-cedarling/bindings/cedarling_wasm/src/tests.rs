@@ -247,8 +247,10 @@ async fn test_run_cedarling() {
         }),
         action: "Jans::Action::\"Read\"".to_string(),
         resource: EntityData::deserialize(json!({
-            "type": "Jans::Application",
-            "id": "some_id",
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Application",
+                "id": "some_id"
+            },
             "app_id": "application_id",
             "name": "Some Application",
             "url": {
@@ -413,8 +415,10 @@ async fn test_memory_log_interface() {
         }),
         action: "Jans::Action::\"Read\"".to_string(),
         resource: EntityData::deserialize(json!({
-            "type": "Jans::Application",
-            "id": "some_id",
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Application",
+                "id": "some_id"
+            },
             "app_id": "application_id",
             "name": "Some Application",
             "url": {
@@ -492,25 +496,33 @@ async fn test_authorize_unsigned() {
     let request_json = json!({
         "principals": [
             {
-                "id": "1",
-                "type": "Jans::TestPrincipal1",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "1"
+                },
                 "is_ok": true
             },
             {
-                "id": "2",
-                "type": "Jans::TestPrincipal2",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal2",
+                    "id": "2"
+                },
                 "is_ok": true
             },
             {
-                "id": "3",
-                "type": "Jans::TestPrincipal3",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal3",
+                    "id": "3"
+                },
                 "is_ok": false
             }
         ],
         "action": "Jans::Action::\"UpdateForTestPrincipals\"",
         "resource": {
-            "type": "Jans::Issue",
-            "id": "random_id",
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
             "org_id": "some_long_id",
             "country": "US"
         },

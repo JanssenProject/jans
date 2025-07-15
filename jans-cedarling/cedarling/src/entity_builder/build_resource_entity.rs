@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::*;
-use crate::{EntityData, CedarEntityMapping};
+use crate::{EntityData};
 
 impl EntityBuilder {
     pub fn build_resource_entity(&self, resource: &EntityData) -> Result<Entity, BuildEntityError> {
@@ -40,6 +40,7 @@ mod test {
     use super::super::test::*;
     use super::super::*;
     use super::*;
+    use crate::CedarEntityMapping;
     use serde_json::json;
 
     #[test]

@@ -22,7 +22,6 @@ mod value_to_expr;
 
 use crate::authz::AuthorizeEntitiesData;
 use crate::authz::request::EntityData;
-use crate::CedarEntityMapping;
 use crate::common::PartitionResult;
 use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
@@ -276,6 +275,7 @@ impl TokenPrincipalMappings {
 mod test {
     use super::*;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::CedarEntityMapping;
     use cedar_policy::{Entities, Schema};
     use serde_json::{Value, json};
     use std::collections::HashMap;

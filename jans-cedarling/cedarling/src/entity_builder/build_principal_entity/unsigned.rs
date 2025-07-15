@@ -6,7 +6,6 @@
 use super::*;
 use cedar_policy::Entity;
 use std::collections::HashSet;
-use crate::CedarEntityMapping;
 
 impl EntityBuilder {
     pub fn build_principal_unsigned(
@@ -91,6 +90,7 @@ fn extract_roles_from_value(value: &Value) -> Result<Vec<String>, BuildUnsignedE
 mod test {
     use super::super::super::test::*;
     use super::*;
+    use crate::CedarEntityMapping;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
