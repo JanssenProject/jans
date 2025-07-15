@@ -495,37 +495,37 @@ async fn test_authorize_unsigned() {
 
     let request_json = json!({
         "principals": [
-            EntityData::deserialize(json!({
+            {
                 "cedar_entity_mapping": {
                     "entity_type": "Jans::TestPrincipal1",
                     "id": "1"
                 },
                 "is_ok": true
-            })).expect("principal 1 should deserialize"),
-            EntityData::deserialize(json!({
+            },
+            {
                 "cedar_entity_mapping": {
                     "entity_type": "Jans::TestPrincipal2",
                     "id": "2"
                 },
                 "is_ok": true
-            })).expect("principal 2 should deserialize"),
-            EntityData::deserialize(json!({
+            },
+            {
                 "cedar_entity_mapping": {
                     "entity_type": "Jans::TestPrincipal3",
                     "id": "3"
                 },
                 "is_ok": false
-            })).expect("principal 3 should deserialize")
+            }
         ],
         "action": "Jans::Action::\"UpdateForTestPrincipals\"",
-        "resource": EntityData::deserialize(json!({
+        "resource": {
             "cedar_entity_mapping": {
                 "entity_type": "Jans::Issue",
                 "id": "random_id"
             },
             "org_id": "some_long_id",
             "country": "US"
-        })).expect("resource should deserialize"),
+        },
         "context": json!({})
     });
 
