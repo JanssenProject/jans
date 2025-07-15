@@ -493,45 +493,63 @@ async fn test_authorize_unsigned() {
         .await
         .expect("init function should be initialized with js map");
 
-    let request_json = json!({
-        "principals": [
-            {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "1"
-                },
-                "is_ok": true
+    let principals = vec![
+        EntityData {
+            cedar_mapping: cedarling::CedarEntityMapping {
+                entity_type: "Jans::TestPrincipal1".to_string(),
+                id: "1".to_string(),
             },
-            {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal2",
-                    "id": "2"
-                },
-                "is_ok": true
+            attributes: {
+                let mut map = HashMap::new();
+                map.insert("is_ok".to_string(), json!(true));
+                map
             },
-            {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal3",
-                    "id": "3"
-                },
-                "is_ok": false
-            }
-        ],
-        "action": "Jans::Action::\"UpdateForTestPrincipals\"",
-        "resource": {
-            "cedar_entity_mapping": {
-                "entity_type": "Jans::Issue",
-                "id": "random_id"
-            },
-            "org_id": "some_long_id",
-            "country": "US"
         },
+        EntityData {
+            cedar_mapping: cedarling::CedarEntityMapping {
+                entity_type: "Jans::TestPrincipal2".to_string(),
+                id: "2".to_string(),
+            },
+            attributes: {
+                let mut map = HashMap::new();
+                map.insert("is_ok".to_string(), json!(true));
+                map
+            },
+        },
+        EntityData {
+            cedar_mapping: cedarling::CedarEntityMapping {
+                entity_type: "Jans::TestPrincipal3".to_string(),
+                id: "3".to_string(),
+            },
+            attributes: {
+                let mut map = HashMap::new();
+                map.insert("is_ok".to_string(), json!(false));
+                map
+            },
+        },
+    ];
+    let resource = EntityData {
+        cedar_mapping: cedarling::CedarEntityMapping {
+            entity_type: "Jans::Issue".to_string(),
+            id: "random_id".to_string(),
+        },
+        attributes: {
+            let mut map = HashMap::new();
+            map.insert("org_id".to_string(), json!("some_long_id"));
+            map.insert("country".to_string(), json!("US"));
+            map
+        },
+    };
+    let request = json!({
+        "principals": principals,
+        "action": "Jans::Action::\"UpdateForTestPrincipals\"",
+        "resource": resource,
         "context": json!({})
     });
 
     let result = instance
         .authorize_unsigned(
-            serde_wasm_bindgen::to_value(&request_json).expect("Failed to convert JSON to JsValue"),
+            serde_wasm_bindgen::to_value(&request).expect("Failed to convert JSON to JsValue"),
         )
         .await
         .expect("authorize_unsigned should be executed successfully");
