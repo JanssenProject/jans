@@ -18,44 +18,61 @@ using the Cedarling. To do this, we need 3 things.
 2. A request for user action
 3. A running instance of the Cedarling
 
-For `1` above, we will be using [Agama Lab policy designer](https://gluu.org/agama/authorization-policy-designer/) to quickly set up a [Cedar](https://www.cedarpolicy.com/) policy and a policy store.
+For `1` above, we will use a ready demo policy.
 
 For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md). Janssen Tarp is an easy to install browser plug-in that comes with embedded Cedarling instance (WASM). Janssen Tarp also provides user interface to build authorization and authentication requests for testing purpose.
 
-## Setup
+## Prerequisite
 
 - Install the Janssen Tarp [on Chrome or Firefox](https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md#releases).
 
 
 ## Two Ways to Perform Authorization Using the Cedarling
    
-   1. [Unsigned Using Cedarling](#unsigned-using-cedarling)
-   2. [Implement TBAC Using Cedarling](#implement-tbac-using-cedarling)
+There are two ways to pass the details about the principal who is requesting
+an action. 
 
-## Unsigned Using Cedarling
+   1. Pass a JSON string
+   2. Provide tokens obtained by authenticating the principal. This is also 
+   called Token Based Access Control (TBAC)
+
+Refer to TBAC quick start guide to understand authorization using TBAC.
+
+In this quick start, we will step through authorization when the details of 
+the principal is passed as a JSON string. 
 
 ### Step-1: Create Cedar Policy and Schema
 
-The Cedarling needs policies and a schema to authorize access. These are bundled in a _policy store_ (a JSON file). A demo repository is provided for this quickstart which contains two policy stores. We will be using the `tarpUnsignedDemo` store for this demo.
+The Cedarling needs policies and a schema to authorize access. These are bundled in a _policy store_ (a JSON file). To aid in this quick start guide, we have already created a 
+[policy store](https://raw.githubusercontent.com/ossdhaval/CedarlingQuickstart/refs/heads/agama-lab-policy-designer/449805c83e13f332b1b35eac6ffa93187fbd1c648085.json) at
+[quick start GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart/tree/main).
+We will use this policy store to allow/deny the incoming authorization request.
 
-- Go to the [Lock testing repository](https://github.com/JanssenProject/CedarlingQuickstart)
-- Click on `Fork`
-   - Make sure the `Copy the master branch only` option is **unchecked**
-- Fork the repository
+??? tip "Agama Lab: For authoring policies and managing the policy store"
+
+    Agama Lab is a free web tool provided by Gluu. This tool makes it very 
+    easy to author, update policies and schema using an user interface. Follow
+    the steps below to make changes to the policy that we are using above.
+
+    - Go to the [CedarlingQuickstart repository](https://github.com/JanssenProject/CedarlingQuickstart) where the demo policy store is hosted
+        - Click on `Fork`
+        - **uncheck** the `Copy the master branch only` option 
+    - [Install Agama Lab app and allow access to forked repository](https://gluu.org/agama/how-to-integrate-agama%e2%80%90lab-github-app-with-your-github-account/)
     - Open the [Agama Lab policy designer](https://cloud.gluu.org/agama-lab/dashboard/policy_store).
     - Click on `Change Repository`.
     - Select the option `Manually Type Repository URL`.
     - Paste the URL of your forked repository, then click the `Select` button.
-  - Open the policy store named `tarpUnsignedDemo`
-- Click on the button named `Copy Link`. You will need this link in the next section.
+    - This will open the dashboard with two policy stores listed. Open the policy store named `tarpUnsignedDemo`.
+    - Now you can update the policy and schema using the 
+      [policy designer](https://help.gluu.org/kb/article/34/authorization-policy-designer)
 
 ### Step-2: Configure Tarp
 
 In this step, we will add the policy store details in the Janssen Tarp that is
 installed in the browser. The Cedarling instance embedded in the Tarp will
-use the policy stored in this store to evaluate the authorization result.
+use the policy stored in the store (from [Step-1](#step-1-create-cedar-policy-and-schema)) to evaluate the authorization result.
 
-1. Open Tarp installed in the browser
+1. Open the Janssen Tarp installed in the browser
 2. Navigate to the `Cedarling` tab and click on `Add Configurations`
 3. Paste the following configuration parameters as JSON. Make sure to update the `<Policy Store URI>` value to point to your policy store
    ```json
@@ -85,9 +102,6 @@ This will start the Cedarling in Tarp, fetch and validate your policy store, and
 
 ### Step-3: Test the policy using cedarling
 
-Video walkthrough:
-
-https://streamable.com/25wcb7
 
 1. Go to Tarp, under `Cedarling` tab, click on `Cedarling Unsigned Authz Form`
 2. Input the following:
@@ -157,7 +171,6 @@ The top-level `decision: false` shows Cedarling denying authorization.
 
 
 
-
 ### Step-1: Create Cedar Policy and Schema
 
 We will use a policy that grants access to all actions and all the resources, only to the users with the `SupremeRuler` role. The policy is as follows:
@@ -188,6 +201,7 @@ The Cedarling needs policies and a schema to authorize access. These are bundled
 In this step, we will add the policy store details in the Janssen Tarp that is
 installed in the browser. The Cedarling instance embedded in the Tarp will
 use the policy stored in this store to evaluate the authorization result.
+
 
 1. Open Tarp installed in the Chrome browser
 2. Click `Add Client`. Use details below to add a new client.
