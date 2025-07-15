@@ -414,8 +414,7 @@ nav:
 - 'Cedarling':
   - Overview: 'cedarling/README.md'
   - Quick Start:
-    - Authorization Using Cedarling: 'cedarling/cedarling-quick-start-unsigned.md'
-    - Implement TBAC Using Cedarling: 'cedarling/cedarling-quick-start-tbac.md'
+    - Authorization Using Cedarling: 'cedarling/cedarling-quick-start.md'
   - Tutorials:
     - 'cedarling/cedarling-getting-started.md'
     - Javascript: 'cedarling/getting-started/javascript.md'
