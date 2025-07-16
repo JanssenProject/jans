@@ -784,7 +784,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-  /admin-ui/license/configReset:
+  /admin-ui/license/resetConfig:
     get:
       tags:
       - Admin UI - License

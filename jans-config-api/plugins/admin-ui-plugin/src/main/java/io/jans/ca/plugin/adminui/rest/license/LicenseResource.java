@@ -37,7 +37,7 @@ public class LicenseResource {
     static final String RETRIEVE = "/retrieve";
     static final String SSA = "/ssa";
     static final String IS_LICENSE_CONFIG_VALID = "/isConfigValid";
-    static final String CONFIG_RESET = "/configReset";
+    static final String CONFIG_RESET = "/resetConfig";
 
     public static final String SCOPE_LICENSE_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly";
     public static final String SCOPE_LICENSE_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/license.write";
