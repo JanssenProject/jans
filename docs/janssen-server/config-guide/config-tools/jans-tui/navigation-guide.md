@@ -45,6 +45,11 @@ Close any dialog or even nested dialog
 * `Ctrl+c`(Terminate) :  
 Terminate the program (SIGINT)
 
+!!! Note 
+
+    Configuration changes made through the CLI or Config-API may not immediately reflect in the current view of the TUI. To refresh the interface and see the latest updates, you can either switch to a different TUI tab and return, or restart the TUI application. TUI fetches configuration data from the backend server at the start of the TUI session. So, a restart of TUI will load fresh data.
+    
+
 ------------------------------------
 
 ## Navigation Shortcuts  
