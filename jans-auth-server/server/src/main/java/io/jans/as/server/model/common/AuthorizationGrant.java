@@ -602,7 +602,12 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public String getSub() {
-        return sectorIdentifierService.getSub(this);
+        final String sub = sectorIdentifierService.getSub(this);
+        if (StringUtils.isBlank(sub)) {
+            final String clientId = getClientId();
+            return StringUtils.isNotBlank(clientId) ? clientId : "";
+        }
+        return sub;
     }
 
     public boolean isCachedWithNoPersistence() {
