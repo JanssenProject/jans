@@ -1,5 +1,5 @@
 use std::ffi::{CStr, CString};
-use std::os::raw::{c_char, c_int};
+use std::os::raw::c_char;
 use std::ptr;
 
 /// Error codes returend by cedarling functions.
@@ -155,6 +155,7 @@ pub fn c_string_to_string(c_str: *const c_char) -> Result<String, CedarlingError
     }
 }
 
+#[allow(unused)]
 pub fn string_to_c_string(s: &str) -> *mut c_char {
     match CString::new(s) {
         Ok(c_string) => c_string.into_raw(),
@@ -162,7 +163,8 @@ pub fn string_to_c_string(s: &str) -> *mut c_char {
     }
 }
 
-/// thread-local storage for last error message
+// thread-local storage for last error message
+// Removing unused attribute since it doesn't apply to thread_local macro
 thread_local! {
     static LAST_ERROR: std::cell::RefCell<Option<CString>> = std::cell::RefCell::new(None);
 }
