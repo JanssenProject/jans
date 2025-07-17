@@ -1,4 +1,3 @@
-
 /* Janssen Project Landing Page Styles */
 
 /* CSS Custom Properties - Janssen Brand Colors with Theme Support */
@@ -74,7 +73,7 @@
   }
 }
 
-/* Skeleton Loading Animations */
+/* Skeleton Loading Animations - Optimized for speed */
 @keyframes skeleton-pulse {
   0% {
     background-position: -200px 0;
@@ -96,14 +95,14 @@
   }
 }
 
-/* Skeleton Loading Styles */
+/* Skeleton Loading Styles - Faster animations */
 .skeleton {
   background: linear-gradient(90deg,
     var(--janssen-bg-secondary) 25%,
     var(--janssen-border) 50%,
     var(--janssen-bg-secondary) 75%);
   background-size: 200px 100%;
-  animation: skeleton-pulse 1.5s infinite linear;
+  animation: skeleton-pulse 1s infinite linear;
   border-radius: 4px;
   position: relative;
   overflow: hidden;
@@ -156,7 +155,7 @@
   border: 1px solid var(--janssen-border);
   border-radius: 1rem;
   margin: 1.5rem 0;
-  animation: skeleton-fade 2s infinite ease-in-out;
+  animation: skeleton-fade 1.2s infinite ease-in-out;
 }
 
 .skeleton-tab {
@@ -206,7 +205,7 @@
 
 /* Enhanced skeleton animations for better visibility */
 .skeleton.skeleton-enhanced {
-  animation: skeleton-pulse 1.2s ease-in-out infinite;
+  animation: skeleton-pulse 0.8s ease-in-out infinite;
 }
 
 /* Automatic loading states */
@@ -429,7 +428,7 @@ pre {
 }
 
 .hero-section h1 {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.15;
   margin-bottom: 0.5rem;
@@ -532,23 +531,24 @@ pre {
 /* Grid and Cards System */
 .grid {
   display: grid;
-  gap: 1rem;
+  gap: 0.75rem;
   margin: 0;
   flex: 1;
 }
 
 .grid.cards {
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
 .grid.cards > * {
   background: var(--janssen-bg-primary);
   border: 2px solid var(--janssen-border);
-  border-radius: 1rem;
-  padding: 1.5rem;
+  border-radius: 0.75rem;
+  padding: 1rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px var(--janssen-shadow);
+  box-shadow: 0 2px 8px var(--janssen-shadow);
   position: relative;
+  min-height: auto;
 }
 
 .grid.cards > *::before {
@@ -570,7 +570,7 @@ pre {
 
 /* Override Material Theme Colors for Janssen Branding */
 .md-typeset h1 {
-  font-size: 3rem;
+  font-size: 2.25rem;
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: 1rem;
@@ -654,15 +654,20 @@ pre {
 }
 
 .tabbed-set > .tabbed-labels > label {
-  padding: 1.2rem 2rem;
+  padding: 0.25rem 0.5rem;
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 0.7rem;
   color: var(--janssen-text-secondary);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-bottom: 3px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-right: 1px solid rgba(0, 176, 80, 0.1);
   background: transparent;
   letter-spacing: 0.02em;
+}
+
+.tabbed-set > .tabbed-labels > label:last-child {
+  border-right: none;
 }
 
 .tabbed-set > .tabbed-labels > label:hover {
@@ -675,11 +680,11 @@ pre {
   color: var(--janssen-green-dark);
   border-bottom-color: var(--janssen-green);
   background: var(--janssen-bg-primary);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .tabbed-content {
-  padding: 2.5rem 2rem !important;
+  padding: 0.5rem 0.5rem !important;
   background: var(--janssen-bg-primary);
   margin: 0;
 }
@@ -688,7 +693,7 @@ pre {
 .md-typeset .tabbed-set .tabbed-content,
 .tabbed-set .tabbed-content,
 div.tabbed-content {
-  padding: 2.5rem 2rem !important;
+  padding: 0.5rem 0.5rem !important;
   box-sizing: border-box !important;
 }
 
@@ -748,16 +753,17 @@ div.tabbed-content {
 
 /* Typography Enhancements */
 .md-typeset .grid.cards h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
   color: var(--janssen-gray-dark);
 }
 
 .md-typeset .grid.cards p {
-  margin-bottom: 1.25rem;
-  line-height: 1.7;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
   color: var(--janssen-gray);
+  font-size: 0.95rem;
 }
 
 .md-typeset .grid.cards strong {
@@ -807,7 +813,7 @@ div.tabbed-content {
   }
 
   .hero-section h1 {
-    font-size: 3rem;
+    font-size: 1.75rem;
   }
 
   .architecture-diagram {
@@ -836,7 +842,7 @@ div.tabbed-content {
   }
 
   .hero-section h1 {
-    font-size: 2.5rem;
+    font-size: 1.5rem;
   }
 
   .hero-content {
@@ -906,7 +912,7 @@ div.tabbed-content {
 
 @media screen and (max-width: 480px) {
   .hero-section h1 {
-    font-size: 2rem;
+    font-size: 1.25rem;
   }
 
   .hero-description {
@@ -1264,4 +1270,13 @@ html {
 .md-typeset .grid.cards strong {
   color: var(--janssen-green-dark);
   font-weight: 600;
+}
+
+/* Fix H2 heading spacing to be consistent with other headings */
+.md-typeset h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+  margin-top: 1rem;
 }
