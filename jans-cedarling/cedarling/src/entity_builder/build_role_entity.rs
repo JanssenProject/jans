@@ -80,6 +80,7 @@ mod test {
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     #[test]
     fn can_build_role_entity_from_str() {
@@ -91,7 +92,7 @@ mod test {
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
@@ -102,7 +103,7 @@ mod test {
         let id_token = Token::new(
             "id_token",
             HashMap::from([("role".to_string(), json!("some_role"))]).into(),
-            Some(&iss),
+            Some(iss),
         );
         let tokens = HashMap::from([("id_token".into(), id_token)]);
 
@@ -133,7 +134,7 @@ mod test {
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
@@ -144,7 +145,7 @@ mod test {
         let id_token = Token::new(
             "id_token",
             HashMap::from([("role".to_string(), json!(["some_role", "another_role"]))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = HashMap::from([("id_token".into(), id_token)]);
 
@@ -185,7 +186,7 @@ mod test {
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
@@ -196,12 +197,12 @@ mod test {
         let id_token = Token::new(
             "id_token",
             HashMap::from([("role".to_string(), json!("some_role"))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let userinfo_token = Token::new(
             "userinfo_token",
             HashMap::from([("role".to_string(), json!("another_role"))]).into(),
-            Some(&iss),
+            Some(iss),
         );
         let tokens = HashMap::from([
             ("id_token".into(), id_token),
