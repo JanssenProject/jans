@@ -29,11 +29,13 @@ For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/ja
 
 ## Two Ways to Perform Authorization Using the Cedarling
    
-There are two ways to pass the details about the principal who is requesting
-an action. 
+There are two ways to implement authorization using Cedarling based on 
+how to we supply the information regarding the principal. Principal is the 
+person or the workload for which the authorization is being checked.
 
-   1. Pass as a JSON string
-   2. Provide principal details using tokens obtained by authenticating the principal. This is also called Token Based Access Control (TBAC)
+   1. Unsigned JSON: Use JSON string to pass the information related to the pricipal
+   2. Signed tokens: Use the tokens signed by the authentication provider to pass 
+   the information related to the principal. This is also called Token Based Access Control (TBAC)
 
 Refer to TBAC quick start guide to understand authorization using TBAC.
 
