@@ -53,6 +53,7 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
         },
         "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     })
 });
 
@@ -307,6 +308,7 @@ async fn test_memory_log_interface() {
             ]
         },
         "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     });
 
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)

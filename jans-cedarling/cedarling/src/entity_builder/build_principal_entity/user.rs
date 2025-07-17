@@ -65,7 +65,7 @@ impl UserIdSrcResolver {
     /// The method checks the following tokens and claims in order:
     /// - `userinfo_token.sub`
     /// - `id_token.sub`
-    pub fn resolve<'a>(tokens: &'a HashMap<String, Token>) -> Vec<EntityIdSrc<'a>> {
+    pub fn resolve(tokens: &HashMap<String, Token>) -> Vec<EntityIdSrc> {
         const DEFAULT_USER_ID_SRCS: &[PrincipalIdSrc] = &[
             PrincipalIdSrc {
                 token: "userinfo_token",
@@ -113,6 +113,7 @@ mod test {
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     #[track_caller]
     fn test_build_user(
@@ -161,6 +162,8 @@ mod test {
             Some(&validator_schema),
         )
         .expect("should init entity builder");
+        let iss = Arc::new(iss);
+
         let tkn_principal_mappings = TokenPrincipalMappings::from(
             [TokenPrincipalMapping {
                 principal: "Jans::User".into(),
@@ -181,7 +184,7 @@ mod test {
                 ("sub".to_string(), json!("some_sub")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss),
         );
 
         let tokens = HashMap::from([("id_token".into(), id_token)]);
@@ -235,6 +238,8 @@ mod test {
             Some(&validator_schema),
         )
         .expect("should init entity builder");
+        let iss = Arc::new(iss);
+
         let tkn_principal_mappings = TokenPrincipalMappings::from(
             [TokenPrincipalMapping {
                 principal: "Jans::User".into(),
@@ -255,7 +260,7 @@ mod test {
                 ("sub".to_string(), json!("some_sub")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss),
         );
 
         let tokens = HashMap::from([("userinfo_token".into(), userinfo_token)]);
@@ -313,6 +318,8 @@ mod test {
             Some(&validator_schema),
         )
         .expect("should init entity builder");
+        let iss = Arc::new(iss);
+
         let tkn_principal_mappings = TokenPrincipalMappings::from(
             [TokenPrincipalMapping {
                 principal: "Jans::User".into(),
@@ -334,7 +341,7 @@ mod test {
                 ("from_id_tkn".to_string(), json!("from_id_tkn")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let userinfo_token = Token::new(
             "userinfo_token",
@@ -344,7 +351,7 @@ mod test {
                 ("from_userinfo_tkn".to_string(), json!("from_userinfo_tkn")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss),
         );
 
         let tokens = HashMap::from([
@@ -392,6 +399,8 @@ mod test {
             None,
         )
         .expect("should init entity builder");
+        let iss = Arc::new(iss);
+
         let tkn_principal_mappings = TokenPrincipalMappings::from(
             [TokenPrincipalMapping {
                 principal: "Jans::User".into(),
@@ -412,7 +421,7 @@ mod test {
                 ("sub".to_string(), json!("some_sub")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss),
         );
 
         let tokens = HashMap::from([("id_token".into(), id_token)]);
