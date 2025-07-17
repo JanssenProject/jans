@@ -178,6 +178,30 @@ public class LicenseDetailsService extends BaseService {
         return CommonUtils.createGenericResponse(true, 200, "No error in license configuration.");
     }
     /**
+     * Resets the license-related configuration in both the persistent and in-memory Admin UI configuration.
+     */
+    public GenericResponse resetLicenseConfiguration() throws Exception {
+        log.info("Resetting Admin UI license configuration.");
+
+        // Fetch current persisted Admin UI configuration
+        AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+
+        // Reset license config in persistent storage
+        appConf.getMainSettings().setLicenseConfig(new LicenseConfig());
+        entryManager.merge(appConf); // Persist changes
+
+        // Fetch in-memory Admin UI configuration
+        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+
+        // Reset license config in in-memory configuration
+        auiConfiguration.setLicenseConfiguration(new LicenseConfiguration());
+        auiConfigurationService.setAuiConfiguration(auiConfiguration); // Apply changes
+
+        // Return a standard response
+        return CommonUtils.createGenericResponse(true, 200, "Admin UI license configuration reset successfully.");
+    }
+
+    /**
      * Checks if the license details are valid and up-to-date.
      *
      * This method retrieves the license configuration from the persistence layer and performs several checks:
@@ -328,6 +352,9 @@ public class LicenseDetailsService extends BaseService {
                 adminConf.getMainSettings().getLicenseConfig().setCustomerFirstName(licenseConfiguration.getCustomerFirstName());
                 adminConf.getMainSettings().getLicenseConfig().setCustomerLastName(licenseConfiguration.getCustomerLastName());
                 adminConf.getMainSettings().getLicenseConfig().setLicenseMAUThreshold(licenseConfiguration.getLicenseMAUThreshold());
+                if(adminConf.getMainSettings().getLicenseConfig().getIntervalForSyncLicenseDetailsInDays() == null) {
+                    adminConf.getMainSettings().getLicenseConfig().setIntervalForSyncLicenseDetailsInDays((long) AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS);
+                }
                 entryManager.merge(adminConf);
                 auiConfiguration.setLicenseConfiguration(licenseConfiguration);
                 auiConfigurationService.setAuiConfiguration(auiConfiguration);

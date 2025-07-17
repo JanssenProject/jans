@@ -37,6 +37,7 @@ public class LicenseResource {
     static final String RETRIEVE = "/retrieve";
     static final String SSA = "/ssa";
     static final String IS_LICENSE_CONFIG_VALID = "/isConfigValid";
+    static final String CONFIG_RESET = "/resetConfig";
 
     public static final String SCOPE_LICENSE_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly";
     public static final String SCOPE_LICENSE_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/license.write";
@@ -65,6 +66,31 @@ public class LicenseResource {
             log.info("Check if active license present.");
             licenseResponse = licenseDetailsService.checkLicense();
             log.info("Active license present (true/false): {}", licenseResponse.isSuccess());
+            return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
+            return Response.serverError().entity(licenseResponse).build();
+        }
+    }
+
+    @Operation(summary = "Reset admin-ui license details in configuration", description = "Reset admin-ui license details in configuration", operationId = "license-config-reset", tags = {
+            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
+            SCOPE_LICENSE_WRITE}))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
+    @GET
+    @Path(CONFIG_RESET)
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response resetLicenseConfiguration() {
+        GenericResponse licenseResponse = null;
+        try {
+            log.info("Before resetting license configuration.");
+            licenseResponse = licenseDetailsService.resetLicenseConfiguration();
+            log.info("License resetting successful (true/false): {}", licenseResponse.isSuccess());
             return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
