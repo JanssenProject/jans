@@ -19,21 +19,20 @@ The sidecar is a containerized Flask project that uses the `cedarling_python` bi
   ```
 - Run the docker image, replacing `</absolute/path/to/bootstrap.json>` with the absolute path to your bootstrap file:
 
-  ```bash
-  docker run -d \
-  	-e APP_MODE='development' \
-  	-e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
-  	-e SIDECAR_DEBUG_RESPONSE=False \
-  	--mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
-  	-p 5000:5000\
-  	ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
-  ```
+    ```bash
+    docker run -d \
+      -e APP_MODE='development' \
+      -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
+      -e SIDECAR_DEBUG_RESPONSE=False \
+      --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
+      -p 5000:5000\
+      ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+    ```
 
-  - `SIDECAR_DEBUG_RESPONSE` is an option that will cause the sidecar to return extra diagnostic information for each query if set to `True`. This may be useful to check which policies are being used to reach a decision.
-  - Take note of the output of the command. This is the container ID of the sidecar.
-
-- The sidecar runs in the background on port 5000. OpenAPI documentation is available at `http://0.0.0.0:5000/swagger-ui`
-- To stop the sidecar, run `docker container stop <container ID>`
+    - `SIDECAR_DEBUG_RESPONSE` is an option that will cause the sidecar to return extra diagnostic information for each query if set to `True`. This may be useful to check which policies are being used to reach a decision.
+    - Take note of the output of the command. This is the container ID of the sidecar.
+    - The sidecar runs in the background on port 5000. OpenAPI documentation is available at `http://0.0.0.0:5000/swagger-ui`
+    - To stop the sidecar, run `docker container stop <container ID>`
 
 ## Usage
 

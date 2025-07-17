@@ -169,8 +169,10 @@ Cedarling currently provides two modes of authorization:
     const action = 'Jans::Action::"Read"';
 
     const resource = {
-      type: "Jans::Application",
-      id: "app_id_001",
+      cedar_entity_mapping: {
+        entity_type: "Jans::Application",
+        id: "app_id_001"
+      },
       name: "Some Application",
       url: {
         host: "example.com",
@@ -210,16 +212,18 @@ Cedarling currently provides two modes of authorization:
 
     action = 'Jans::Action::"Read"'
 
-    resource = EntityData(
-        entity_type="Jans::Application",
-        id="app_id_001",
-        name="Some Application",
-        url={
+    resource = {
+        "cedar_entity_mapping": {
+            "entity_type": "Jans::Application",
+            "id": "app_id_001"
+        },
+        "name": "Some Application",
+        "url": {
             "host": "example.com",
             "path": "/admin-dashboard",
             "protocol": "https"
         }
-    )
+    }
 
     context = {
         "current_time": int(time.time() * 1000),
@@ -254,18 +258,18 @@ Cedarling currently provides two modes of authorization:
 
     let action = "Jans::Action::\"Read\"".to_string();
 
-    let resource = EntityData {
-        entity_type: "Jans::Application".to_string(),
-        id: "app_id_001".to_string(),
-        payload: HashMap::from([
-            ("name".to_string(), json!("Some Application")),
-            ("url".to_string(), json!({
-                "host": "example.com",
-                "path": "/admin-dashboard",
-                "protocol": "https"
-            }))
-        ]),
-    };
+    let resource = json!({
+        "cedar_entity_mapping": {
+            "entity_type": "Jans::Application",
+            "id": "app_id_001"
+        },
+        "name": "Some Application",
+        "url": {
+            "host": "example.com",
+            "path": "/admin-dashboard",
+            "protocol": "https"
+        }
+    });
 
     let context = json!({
         "current_time": Utc::now().timestamp_millis(),
@@ -429,13 +433,16 @@ Cedarling currently provides two modes of authorization:
 
     String resource = """
         {
-          "app_id": "app_id_001",
           "cedar_entity_mapping": {
-            "entity_type": "Jans::Issue",
-            "id": "admin_ui_id"
+            "entity_type": "Jans::Application",
+            "id": "app_id_001"
           },
-          "name": "App Name",
-          "permission": "view_clients"
+          "name": "Some Application",
+          "url": {
+            "host": "example.com",
+            "path": "/admin-dashboard",
+            "protocol": "https"
+          }
         }
     """;
 
