@@ -238,4 +238,7 @@ public class AttestationOrAssertionResponse {
 				+ ", extensions=" + extensions + "]";
 	}
 
+	public AttestationOrAssertionResponse() {
+	}
+
 }
