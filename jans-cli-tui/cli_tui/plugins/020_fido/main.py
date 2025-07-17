@@ -186,6 +186,16 @@ class Plugin(DialogUtils):
                                             style='class:outh-scope-text'
                                             ,widget_style=cli_style.black_bg_widget
                                             ),
+                                
+                                self.app.getTitledText(
+                                            _("Hints"),
+                                            name='hints',
+                                            value='\n'.join(fido2_static_config.get('hints', [])),
+                                            height=3,
+                                            jans_help=self.app.get_help_from_schema(self.schema, 'hints'),
+                                            style='class:outh-scope-text'
+                                            ,widget_style=cli_style.black_bg_widget
+                                            ),
 
                     VSplit([
                             HSplit([Label(text=requested_parties_title, style='class:script-label', width=len(requested_parties_title)+1),]),
@@ -286,6 +296,7 @@ class Plugin(DialogUtils):
 
         fido2_config['personCustomObjectClassList'] = fido2_config['personCustomObjectClassList'].splitlines()
         fido2_static['enabledFidoAlgorithms'] = fido2_static['enabledFidoAlgorithms'].splitlines()
+        fido2_static['hints'] = fido2_static['hints'].splitlines()
 
         fido2_static['rp'] = []
         for name, domains in self.requested_parties_container.data:

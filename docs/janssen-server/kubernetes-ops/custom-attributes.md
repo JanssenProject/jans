@@ -8,8 +8,8 @@ tags:
   - claim
 ---
 
+# Custom Attributes
 
-## Overview
 Making changes in the schema to add custom columns/attributes
 
 1.  Download the `custom_schema.json` file:

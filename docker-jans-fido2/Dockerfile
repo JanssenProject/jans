@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.24
+ARG JETTY_VERSION=12.0.19
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -42,26 +42,20 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2024-12-20 11:02'
+ENV CN_BUILD_DATE='2025-06-13 08:52'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
-COPY static/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
 RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
-    && wget -q ${CN_SOURCE_URL} -O /tmp/jans-fido2.war \
-    && cd /tmp \
-    && zip -d jans-fido2.war WEB-INF/jetty-web.xml \
-    && zip -r jans-fido2.war WEB-INF/jetty-env.xml \
-    && cp jans-fido2.war ${JETTY_BASE}/jans-fido2/webapps/jans-fido2.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
-    && rm -rf /tmp/jans-fido2.war /tmp/WEB-INF
+    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-fido2/webapps/jans-fido2.war \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-modules=server,resources,http,forwarded,threadpool,ee9-jsp,ee9-deploy,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
 
 # ===========
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=040ff17942019bc10433ce17d819b8d8474f13c8
+ENV JANS_SOURCE_VERSION=329a1139194fd9819506150ec73225b425767064
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -80,11 +74,12 @@ RUN mkdir -p /etc/jans/conf \
     /etc/jans/conf/fido2/server_metadata \
     /app/static/rdbm \
     /app/schema \
-    /app/templates/jans-fido2
+    /app/templates/jans-fido2 \
+    /app/static/fido2
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
-    && cp -R ${JANS_SETUP_DIR}/static/fido2/authenticator_cert /etc/jans/conf/fido2/authenticator_cert \
+    && cp -R ${JANS_SETUP_DIR}/static/fido2/authenticator_cert /app/static/fido2/authenticator_cert \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
@@ -92,13 +87,14 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2/* /app/templates/jans-fido2/ \
+    && cp ${JANS_SETUP_DIR}/templates/*.properties /app/templates/ \
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
     && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # download external files
 ARG MDS_DOWNLOAD_DATE='2022-10-03'
-RUN wget -q https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem -P /etc/jans/conf/fido2/authenticator_cert/ \
+RUN wget -q https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem -P /app/static/fido2/authenticator_cert/ \
     && wget -q https://mds.fidoalliance.org/ -O /etc/jans/conf/fido2/mds/toc/toc.jwt \
     && wget -q http://secure.globalsign.com/cacert/root-r3.crt -P /etc/jans/conf/fido2/mds/cert/
 

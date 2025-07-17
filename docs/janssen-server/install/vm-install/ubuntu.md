@@ -8,10 +8,6 @@ tags:
 
 # Ubuntu Janssen Installation
 
-## Supported Versions
-- Ubuntu 22.04
-- Ubuntu 20.04
-
 Before you install, check the [VM system requirements](vm-requirements.md).
 
 
@@ -32,10 +28,46 @@ sudo gpg --import automation-jans-public-gpg.asc;
 
 ## Install the Package
 
+### Ubuntu 24.04
+
+- Download the release package from the Github Janssen Project
+[Releases](https://github.com/JanssenProject/jans/releases/latest)
+
+```
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
+```
+
+- Verify integrity of the downloaded package by verifying published `sha256sum`.   
+
+    Download `sha256sum` file for the package
+
+    ```shell
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum -P /tmp
+    ```
+
+    Check the hash if it is matching.
+
+    ```shell
+    cd /tmp
+    sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
+    ```
+
+    Output similar to below should confirm the integrity of the downloaded package.
+
+    ```text
+    jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum: OK
+    ```
+
+- Install the package
+
+```
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
+```
+
 ### Ubuntu 22.04
 
 - Download the release package from the Github Janssen Project
-[Releases](https://github.com/JanssenProject/jans/releases)
+[Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
 wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
@@ -68,10 +100,16 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 ```
 
+Or, 
+
+```
+dpkg -i jans_1.4.0-stable.ubuntu22.04_amd64.deb
+```
+
 ### Ubuntu 20.04
 
 - Download the release package from the Github Janssen Project
-[Releases](https://github.com/JanssenProject/jans/releases)
+[Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
 wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb -P /tmp

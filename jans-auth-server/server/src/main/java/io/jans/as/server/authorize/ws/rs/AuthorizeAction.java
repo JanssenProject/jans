@@ -266,13 +266,13 @@ public class AuthorizeAction {
         try {
             client = clientService.getClient(clientId);
         } catch (EntryPersistenceException ex) {
-            log.debug("Permission denied. Failed to find client by inum '{}' in LDAP.", clientId, ex);
+            log.debug("Permission denied. Failed to find client by inum '{}' in DB.", clientId, ex);
             permissionDenied();
             return;
         }
 
         if (client == null) {
-            log.debug("Permission denied. Failed to find client_id '{}' in LDAP.", clientId);
+            log.debug("Permission denied. Failed to find client_id '{}' in DB.", clientId);
             permissionDenied();
             return;
         }
@@ -384,7 +384,7 @@ public class AuthorizeAction {
 
             boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession, !prompts.contains(io.jans.as.model.common.Prompt.NONE)); // always persist is prompt is not none
             if (persisted && log.isTraceEnabled()) {
-                log.trace("Session '{}' persisted to LDAP", unauthenticatedSession.getId());
+                log.trace("Session '{}' persisted to DB", unauthenticatedSession.getId());
             }
 
             this.sessionId = unauthenticatedSession.getId();
@@ -481,9 +481,10 @@ public class AuthorizeAction {
                 return;
             }
 
-            log.trace("Starting external consent-gathering flow");
+            List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
+            log.trace("Starting external consent-gathering flow, acrValues {} ...", acrValuesList);
 
-            boolean result = consentGatherer.configure(session.getUserDn(), clientId, state);
+            boolean result = consentGatherer.configure(session.getUserDn(), clientId, state, acrValuesList);
             if (!result) {
                 log.error("Failed to initialize external consent-gathering flow.");
                 permissionDenied();

@@ -6,26 +6,103 @@
 //! Log interface
 //! Contains the interface for logging. And getting log information from storage.
 
-use uuid7::Uuid;
+use std::sync::{Arc, Weak};
 
-use super::{LogEntry, LogLevel};
+use uuid7::Uuid;
+use crate::log::log_strategy::LogStrategyLogger;
+use super::{LogLevel, LogStrategy};
 
 /// Log Writer
 /// interface for logging events
 pub(crate) trait LogWriter {
     /// log any serializable entry that not suitable for [`LogEntry`]
     fn log_any<T: Loggable>(&self, entry: T);
+}
 
-    /// log logging entry
-    fn log(&self, entry: LogEntry) {
-        self.log_any(entry);
+impl LogWriter for Option<Arc<LogStrategy>> {
+    fn log_any<T: Loggable>(&self, entry: T) {
+        if let Some(logger) = self.as_ref() {
+            logger.log_any(entry);
+        }
     }
 }
 
-pub(crate) trait Loggable: serde::Serialize {
-    /// get unique request ID
-    fn get_request_id(&self) -> Uuid;
+impl LogWriter for Option<Weak<LogStrategy>> {
+    fn log_any<T: Loggable>(&self, entry: T) {
+        if let Some(log_strategy) = self.as_ref().and_then(|l| l.upgrade()) {
+            match log_strategy.logger() {
+                LogStrategyLogger::Off(log) => log.log_any(entry),
+                LogStrategyLogger::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
+                LogStrategyLogger::StdOut(std_out_logger) => std_out_logger.log_any(entry),
+            }
+            return;
+        }
 
+        // we log the error manually to stdout if the logger is gone
+        
+        let log = match serde_json::to_value(&entry) {
+            Ok(json) => json.to_string(),
+            Err(err) => {
+                let err_msg = format!("failed to serialize log entry to JSON: {err}");
+                serde_json::to_value(entry).expect(&err_msg).to_string()
+            },
+        };
+
+        println!("{log}");
+    }
+}
+
+const SEPARATOR: &str = "__";
+
+pub(crate) fn composite_key(id: &str, tag: &str) -> String {
+    [id, tag].join(SEPARATOR)
+}
+
+pub(crate) trait Indexed {
+    /// Get unique ID of entity
+    //  Is used in memory logger
+    fn get_id(&self) -> Uuid;
+
+    /// List of additional ids that entity can be related
+    //  Is used in memory logger
+    fn get_additional_ids(&self) -> Vec<Uuid>;
+
+    /// List of `tags` that entity can be related
+    //  Is used in memory logger
+    fn get_tags(&self) -> Vec<&str>;
+
+    fn get_index_keys(&self) -> Vec<String> {
+        let tags = self.get_tags();
+
+        let additional_ids = self
+            .get_additional_ids()
+            .into_iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<String>>();
+
+        let additional_id_and_tag = additional_ids
+            .iter()
+            .flat_map(|id| tags.iter().map(move |tag| composite_key(id, tag)))
+            .collect::<Vec<String>>();
+
+        let tags_iter = tags
+            .into_iter()
+            .map(Into::<String>::into)
+            .collect::<Vec<String>>();
+
+        let mut result = Vec::with_capacity(
+            additional_ids.len() + additional_id_and_tag.len() + tags_iter.len(),
+        );
+
+        result.extend(additional_ids);
+        result.extend(additional_id_and_tag);
+        result.extend(tags_iter);
+
+        result
+    }
+}
+
+pub(crate) trait Loggable: serde::Serialize + Indexed + Clone {
     /// get log level for entity
     /// not all log entities have log level, only when `log_kind` == `System`
     fn get_log_level(&self) -> Option<LogLevel>;
@@ -48,12 +125,26 @@ pub(crate) trait Loggable: serde::Serialize {
 /// Log Storage
 /// interface for getting log entries from the storage
 pub trait LogStorage {
-    /// return logs and remove them from the storage
+    /// Return logs and remove them from the storage
     fn pop_logs(&self) -> Vec<serde_json::Value>;
 
-    /// get specific log entry
+    /// Get specific log entry
     fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value>;
 
-    /// returns a list of all log ids
+    /// Returns a list of all log ids
     fn get_log_ids(&self) -> Vec<String>;
+
+    /// Get logs by tag, like `log_kind` or `log level`.
+    /// Tag can be `log_kind`, `log_level`.
+    fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value>;
+
+    /// Get logs by request_id.
+    /// Return log entries that match the given request_id.
+    fn get_logs_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value>;
+
+    /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+    /// Tag can be `log_kind`, `log_level`.
+    /// Return log entries that match the given request_id and tag.
+    fn get_logs_by_request_id_and_tag(&self, request_id: &str, tag: &str)
+    -> Vec<serde_json::Value>;
 }

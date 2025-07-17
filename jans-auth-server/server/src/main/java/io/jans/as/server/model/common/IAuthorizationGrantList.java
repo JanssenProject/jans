@@ -43,6 +43,8 @@ public interface IAuthorizationGrantList {
 
     AuthorizationGrant getAuthorizationGrantByAccessToken(String tokenCode);
 
+    AuthorizationGrant getAuthorizationGrantByJti(String jti);
+
     AuthorizationGrant getAuthorizationGrantByIdToken(String idToken);
 
     AuthorizationGrant getAuthorizationGrantByReferenceId(String idToken);

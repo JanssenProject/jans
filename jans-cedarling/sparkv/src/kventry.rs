@@ -7,7 +7,7 @@
 use chrono::Duration;
 use chrono::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct KvEntry<T> {
     pub key: String,
     pub value: T,

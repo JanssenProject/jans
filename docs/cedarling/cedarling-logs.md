@@ -14,8 +14,13 @@ tags:
 
 ## Cedarling Audit Logs
 
-The Cedarling logs contains a record of all a Cedarling's decisions and token validations.
-Cedarling has four logging options, which are configurable via the `CEDARLING_LOG_TYPE`
+There are three different log records produced by the Cedarling:
+
+* `Decision` - The result and diagnostics of an authz decision
+* `System` - Startup, debug and other Cedarling messages not related to authz
+* `Metric`- Performance and usage data
+
+The Cedarling has four logging options, which are configurable via the `CEDARLING_LOG_TYPE`
 bootstrap property:
 
 * `off` - no logging
@@ -24,15 +29,10 @@ bootstrap property:
 * `std_out` - write logs synchronously to std_out
 * `lock` - periodically POST logs to Jans Lock Server `/audit` endpoint for central archiving.
 
-There are three different log records produced by the Cedarling:
-
-* `Decision` - The result and diagnostics of an authz decision
-* `System` - Startup, debug and other Cedarling messages not related to authz
-* `Metric`- Performance and usage data
 
 ### System Log Levels
 
-This is set by `CEDARLING_LOG_LEVEL`
+Set with property `CEDARLING_LOG_LEVEL`
 
 * `FATAL`: Indicates very severe error events that will likely lead the application to abort. These are the most critical issues.
 * `ERROR`: Designates error events that might still allow the application to continue running but indicate a significant problem.
@@ -40,6 +40,43 @@ This is set by `CEDARLING_LOG_LEVEL`
 * `INFO`: Provides informational messages that highlight the progress of the application at a coarse-grained level.
 * `DEBUG`: Designates fine-grained informational events useful for debugging the application.
 * `TRACE`: Provides finer-grained informational events than DEBUG. It is often used for detailed tracing of program execution.
+
+## Memory Log interface
+
+This interface is used to interact with the memory log storage. It provides methods for getting logs and removing them from the storage. This interface is made available to other languages through bindings.
+
+Tags are used to filter logs. It can be `log_kind` and `log_level` values from log entry data.
+
+You can obtain the `request_id` from the result structure of the `authorize` method call.
+
+```rust
+/// Log Storage
+/// interface for getting log entries from the storage
+pub trait LogStorage {
+    /// Return logs and remove them from the storage
+    fn pop_logs(&self) -> Vec<serde_json::Value>;
+
+    /// Get specific log entry
+    fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value>;
+
+    /// Returns a list of all log ids
+    fn get_log_ids(&self) -> Vec<String>;
+
+    /// Get logs by tag, like `log_kind` or `log level`.
+    /// Tag can be `log_kind`, `log_level`.
+    fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value>;
+
+    /// Get logs by request_id.
+    /// Return log entries that match the given request_id.
+    fn get_logs_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value>;
+
+    /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+    /// Tag can be `log_kind`, `log_level`.
+    /// Return log entries that match the given request_id and tag.
+    fn get_logs_by_request_id_and_tag(&self, request_id: &str, tag: &str)
+    -> Vec<serde_json::Value>;
+}
+```
 
 ## Jans Lock Server
 
@@ -88,7 +125,10 @@ Example of decision log.
     "pdp_id": "9e189c4b-96ae-4818-8e7f-75a42186af15",
     "policystore_id": "a1bf93115de86de760ee0bea1d529b521489e5a11747",
     "policystore_version": "undefined",
-    "principal": "User & Workload",
+    "principal": [
+        "User",
+        "Workload"
+    ],
     "User": {
         "username": "admin@gluu.org"
     },
@@ -119,7 +159,7 @@ Example of decision log.
             "jti": "access_tkn_jti"
         }
     },
-    "decision_time_ms": 3
+    "decision_time_micro_sec": 3
 }
 ```
 
@@ -138,7 +178,7 @@ Example of decision log.
 * `resource`: From the Request
 * `decision`: `ALLOW` or `DENY`
 * `tokens`: Dictionary with the token type and claims which should be included in the log
-* `decision_time_ms`: how long the decision took
+* `decision_time_micro_sec`: how long the decision took
 
 ### Debug Log Sample
 

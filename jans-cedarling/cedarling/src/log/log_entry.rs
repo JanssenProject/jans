@@ -10,17 +10,17 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
 use std::hash::Hash;
 
-use uuid7::Uuid;
-
 use super::LogLevel;
-use super::interface::Loggable;
-use crate::bootstrap_config::AuthorizationConfig;
-use crate::common::app_types::{self, ApplicationName};
+use super::interface::{Indexed, Loggable};
 use crate::common::policy_store::PoliciesContainer;
+use crate::jwt::Token;
+use cedar_policy::EntityUid;
+use smol_str::{SmolStr, ToSmolStr};
+use uuid7::Uuid;
 
 /// ISO-8601 time format for [`chrono`]
 /// example: 2024-11-27T10:10:50.654Z
-const ISO8601: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
+pub(crate) const ISO8601: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
 
 /// LogEntry is a struct that encapsulates all relevant data for logging events.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -32,9 +32,6 @@ pub struct LogEntry {
 
     /// message of the event
     pub msg: String,
-    /// name of application from [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub application_id: Option<ApplicationName>,
     /// authorization information of the event
     #[serde(flatten)]
     pub auth_info: Option<AuthorizationLogInfo>,
@@ -50,17 +47,9 @@ pub struct LogEntry {
 }
 
 impl LogEntry {
-    pub(crate) fn new_with_data(
-        pdp_id: app_types::PdpID,
-        application_id: Option<app_types::ApplicationName>,
-        log_type: LogType,
-    ) -> LogEntry {
+    pub(crate) fn new_with_data(log_type: LogType, request_id: Option<Uuid>) -> LogEntry {
         Self {
-            base: BaseLogEntry::new(pdp_id, log_type),
-            // We use uuid v7 because it is generated based on the time and sortable.
-            // and we need sortable ids to use it in the sparkv database.
-            // Sparkv store data in BTree. So we need have correct order of ids.
-            application_id,
+            base: BaseLogEntry::new_opt_request_id(log_type, request_id),
             auth_info: None,
             msg: String::new(),
             error_msg: None,
@@ -96,18 +85,37 @@ impl LogEntry {
     }
 }
 
-impl Loggable for LogEntry {
-    fn get_request_id(&self) -> Uuid {
-        self.base.get_request_id()
+impl Indexed for LogEntry {
+    fn get_id(&self) -> Uuid {
+        self.base.get_id()
     }
 
+    fn get_additional_ids(&self) -> Vec<Uuid> {
+        self.base.get_additional_ids()
+    }
+
+    fn get_tags(&self) -> Vec<&str> {
+        self.base.get_tags()
+    }
+}
+
+impl Loggable for LogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
 }
 
 /// Type of log entry
-#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    serde::Serialize,
+    serde::Deserialize,
+    strum::IntoStaticStr,
+    derive_more::Display,
+)]
 pub enum LogType {
     Decision,
     System,
@@ -125,50 +133,27 @@ pub struct AuthorizationLogInfo {
     pub context: serde_json::Value,
     /// cedar-policy entities json presentation for forensic analysis
     pub entities: serde_json::Value,
-
-    // We use actually same structures but with different unique field names.
-    // It allow deserialize json to flatten structure.
-    /// Person authorize info
-    #[serde(flatten)]
-    pub person_authorize_info: Option<UserAuthorizeInfo>,
-    /// Workload authorize info
-    #[serde(flatten)]
-    pub workload_authorize_info: Option<WorkloadAuthorizeInfo>,
-
+    /// List of authorize info entries for debug
+    pub authorize_info: Vec<AuthorizeInfo>,
     /// is authorized
     pub authorized: bool,
 }
 
-/// Person authorize info
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct UserAuthorizeInfo {
-    /// cedar-policy user/person principal
-    #[serde(rename = "person_principal")]
-    pub principal: String,
-    /// cedar-policy user/person diagnostics information
-    #[serde(rename = "person_diagnostics")]
-    pub diagnostics: Diagnostics,
-    /// cedar-policy user/person decision
-    #[serde(rename = "person_decision")]
-    pub decision: Decision,
-}
-
 /// Workload authorize info
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct WorkloadAuthorizeInfo {
-    /// cedar-policy workload principal
-    #[serde(rename = "workload_principal")]
+pub struct AuthorizeInfo {
+    /// cedar-policy principal
     pub principal: String,
-    #[serde(rename = "workload_diagnostics")]
-    /// cedar-policy workload diagnostics information
+    /// cedar-policy diagnostics information
     pub diagnostics: Diagnostics,
-    /// cedar-policy workload decision
-    #[serde(rename = "workload_decision")]
+    /// cedar-policy decision
     pub decision: Decision,
 }
 
 /// Cedar-policy decision of the authorization
-#[derive(Debug, Clone, PartialEq, Eq, Copy, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, Copy, serde::Serialize, serde::Deserialize, strum::AsRefStr,
+)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Decision {
     /// Determined that the request should be allowed
@@ -250,7 +235,7 @@ pub struct DiagnosticsRefs<'a> {
 }
 
 impl DiagnosticsRefs<'_> {
-    pub fn new<'a>(diagnostics: &[&'a Option<&Diagnostics>]) -> DiagnosticsRefs<'a> {
+    pub fn new<'a>(diagnostics: &'a [Option<&'a Diagnostics>]) -> DiagnosticsRefs<'a> {
         let policy_info_iter = diagnostics
             .iter()
             .filter_map(|diagnostic_opt| diagnostic_opt.map(|diagnostic| &diagnostic.reason))
@@ -315,7 +300,7 @@ pub struct DecisionLogEntry<'a> {
     /// version of policy store
     pub policystore_version: &'a str,
     /// describe what principal was active on authorization request
-    pub principal: PrincipalLogEntry,
+    pub principal: Vec<SmolStr>,
     /// A list of claims, specified by the CEDARLING_DECISION_LOG_USER_CLAIMS property, that must be present in the Cedar User entity
     #[serde(rename = "User")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -336,16 +321,47 @@ pub struct DecisionLogEntry<'a> {
     /// decision for request
     pub decision: Decision,
     /// Dictionary with the token type and claims which should be included in the log
+    #[serde(skip_serializing_if = "LogTokensInfo::is_empty")]
     pub tokens: LogTokensInfo<'a>,
-    /// time in milliseconds spent for decision
-    pub decision_time_ms: i64,
+    /// time in micro-seconds spent for decision
+    pub decision_time_micro_sec: i64,
+}
+
+impl DecisionLogEntry<'_> {
+    pub fn principal(user: bool, workload: bool) -> Vec<SmolStr> {
+        let mut tags = Vec::with_capacity(2);
+        if user {
+            tags.push("User".into());
+        }
+        if workload {
+            tags.push("Workload".into());
+        }
+        tags
+    }
+
+    pub fn all_principals(principals: &[EntityUid]) -> Vec<SmolStr> {
+        principals
+            .iter()
+            .map(|uid| uid.type_name().to_smolstr())
+            .collect()
+    }
+}
+
+impl Indexed for &DecisionLogEntry<'_> {
+    fn get_id(&self) -> Uuid {
+        self.base.get_id()
+    }
+
+    fn get_additional_ids(&self) -> Vec<Uuid> {
+        self.base.get_additional_ids()
+    }
+
+    fn get_tags(&self) -> Vec<&str> {
+        self.base.get_tags()
+    }
 }
 
 impl Loggable for &DecisionLogEntry<'_> {
-    fn get_request_id(&self) -> Uuid {
-        self.base.get_request_id()
-    }
-
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
@@ -377,23 +393,25 @@ pub fn gen_uuid7() -> Uuid {
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct BaseLogEntry {
-    /// unique identifier for this event
-    pub request_id: Uuid,
+    /// Unique identifier for this event.
+    /// It should be uuid7
+    pub id: Uuid,
+    /// identifier for bunch of events (whole request)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub request_id: Option<Uuid>,
     /// Time of decision, in ISO-8601 time format
     /// This field is optional. Can be none if we can't have access to clock (WASM)
     /// or it is not specified in context
     pub timestamp: Option<String>,
     /// kind of log entry
     pub log_kind: LogType,
-    /// unique id of cedarling
-    pub pdp_id: Uuid,
     /// log level of entry
     #[serde(skip_serializing_if = "Option::is_none")]
     pub level: Option<LogLevel>,
 }
 
 impl BaseLogEntry {
-    pub(crate) fn new(pdp_id: app_types::PdpID, log_type: LogType) -> Self {
+    pub(crate) fn new(log_type: LogType, request_id: Uuid) -> Self {
         let local_time_string = chrono::Local::now().format(ISO8601).to_string();
 
         let default_log_level = if log_type == LogType::System {
@@ -403,84 +421,79 @@ impl BaseLogEntry {
         };
 
         Self {
-            // We use uuid v7 because it is generated based on the time and sortable.
-            // and we need sortable ids to use it in the sparkv database.
-            // Sparkv store data in BTree. So we need have correct order of ids.
-            request_id: gen_uuid7(),
+            id: gen_uuid7(),
+            request_id: Some(request_id),
             timestamp: Some(local_time_string),
             log_kind: log_type,
-            pdp_id: pdp_id.0,
+            level: default_log_level,
+        }
+    }
+
+    pub(crate) fn new_opt_request_id(log_type: LogType, request_id: Option<Uuid>) -> Self {
+        let local_time_string = chrono::Local::now().format(ISO8601).to_string();
+
+        let default_log_level = if log_type == LogType::System {
+            Some(LogLevel::TRACE)
+        } else {
+            None
+        };
+
+        Self {
+            id: gen_uuid7(),
+            request_id,
+            timestamp: Some(local_time_string),
+            log_kind: log_type,
             level: default_log_level,
         }
     }
 }
 
-impl Loggable for BaseLogEntry {
-    fn get_request_id(&self) -> Uuid {
-        self.request_id
+impl Indexed for BaseLogEntry {
+    fn get_id(&self) -> Uuid {
+        self.id
     }
 
+    fn get_additional_ids(&self) -> Vec<Uuid> {
+        // return empty vec if value is None
+        self.request_id.into_iter().collect()
+    }
+
+    fn get_tags(&self) -> Vec<&'static str> {
+        let mut tags = Vec::with_capacity(2);
+        tags.push(self.log_kind.into());
+
+        if let Some(level) = self.level {
+            tags.push(level.into());
+        }
+
+        tags
+    }
+}
+
+impl Loggable for BaseLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.level
     }
 }
 
-/// Describes what principal is was executed
-// is used only for logging
-#[derive(Debug, Clone, PartialEq)]
-pub enum PrincipalLogEntry {
-    User,
-    Workload,
-    UserAndWorkload,
-    UserORWorkload,
-    // corner case, should never happen
-    None,
-}
-
-impl PrincipalLogEntry {
-    pub(crate) fn new(conf: &AuthorizationConfig) -> Self {
-        match (
-            conf.use_user_principal,
-            conf.use_workload_principal,
-            conf.user_workload_operator,
-        ) {
-            (true, true, crate::WorkloadBoolOp::And) => Self::UserAndWorkload,
-            (true, true, crate::WorkloadBoolOp::Or) => Self::UserORWorkload,
-            (true, false, _) => Self::User,
-            (false, true, _) => Self::Workload,
-            (false, false, _) => Self::None,
-        }
-    }
-}
-
-impl Display for PrincipalLogEntry {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let str_val = match self {
-            Self::User => "User",
-            Self::Workload => "Workload",
-            Self::UserAndWorkload => "User & Workload",
-            Self::UserORWorkload => "User | Workload",
-            Self::None => "none",
-        };
-
-        f.write_str(str_val)
-    }
-}
-
-// implement Serialize for PrincipalLogEntry to use Display trait
-impl serde::Serialize for PrincipalLogEntry {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_str(self.to_string().as_str())
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
-pub struct LogTokensInfo<'a> {
-    pub id_token: Option<HashMap<&'a str, &'a serde_json::Value>>,
-    #[serde(rename = "Userinfo")]
-    pub userinfo: Option<HashMap<&'a str, &'a serde_json::Value>>,
-    pub access: Option<HashMap<&'a str, &'a serde_json::Value>>,
+pub struct LogTokensInfo<'a>(pub HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>);
+
+impl<'a> LogTokensInfo<'a> {
+    pub fn new(tokens: &'a HashMap<String, Token>, decision_log_jwt_id: &'a str) -> Self {
+        let tokens_logging_info = tokens
+            .iter()
+            .map(|(tkn_name, tkn)| (tkn_name.as_str(), tkn.logging_info(decision_log_jwt_id)))
+            .collect::<HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>>();
+
+        Self(tokens_logging_info)
+    }
+
+    pub(crate) fn empty() -> Self {
+        Self(HashMap::new())
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }

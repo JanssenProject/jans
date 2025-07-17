@@ -16,10 +16,32 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
+import javax.management.InvalidAttributeValueException;
+
+import org.apache.commons.lang3.StringUtils;
+
+import io.jans.orm.exception.operation.DuplicateEntryException;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
+import io.jans.scim.model.JansCustomPerson;
+import io.jans.scim.model.exception.SCIMException;
+import io.jans.scim.model.scim.ScimCustomPerson;
+import io.jans.scim.model.scim2.BaseScimResource;
+import io.jans.scim.model.scim2.ErrorScimType;
+import io.jans.scim.model.scim2.SearchRequest;
+import io.jans.scim.model.scim2.patch.PatchOperation;
+import io.jans.scim.model.scim2.patch.PatchRequest;
+import io.jans.scim.model.scim2.user.UserResource;
+import io.jans.scim.model.scim2.util.DateUtil;
+import io.jans.scim.model.scim2.util.ScimResourceUtil;
+import io.jans.scim.service.filter.ProtectedApi;
+import io.jans.scim.service.scim2.Scim2PatchService;
+import io.jans.scim.service.scim2.Scim2UserService;
+import io.jans.scim.service.scim2.interceptor.RefAdjusted;
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import javax.management.InvalidAttributeValueException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
@@ -35,34 +57,11 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.apache.commons.lang3.StringUtils;
-
-import io.jans.orm.exception.operation.DuplicateEntryException;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SortOrder;
-
-import io.jans.scim.model.GluuCustomPerson;
-import io.jans.scim.model.exception.SCIMException;
-import io.jans.scim.model.scim2.BaseScimResource;
-import io.jans.scim.model.scim2.ErrorScimType;
-import io.jans.scim.model.scim2.SearchRequest;
-import io.jans.scim.model.scim2.patch.PatchOperation;
-import io.jans.scim.model.scim2.patch.PatchRequest;
-import io.jans.scim.model.scim2.user.UserResource;
-import io.jans.scim.model.scim2.util.DateUtil;
-import io.jans.scim.model.scim2.util.ScimResourceUtil;
-import io.jans.scim.service.filter.ProtectedApi;
-import io.jans.scim.model.scim.ScimCustomPerson;
-import io.jans.scim.service.scim2.Scim2PatchService;
-import io.jans.scim.service.scim2.Scim2UserService;
-import io.jans.scim.service.scim2.interceptor.RefAdjusted;
-import io.jans.scim.ws.rs.scim2.IUserWebService;
-import io.jans.scim.ws.rs.scim2.PATCH;
-
 /**
  * Implementation of /Users endpoint. Methods here are intercepted.
  * Filter io.jans.scim.service.filter.AuthorizationProcessingFilter secures invocations
  */
+@Dependent
 @Named
 @Path("/v2/Users")
 public class UserWebService extends BaseScimWebService implements IUserWebService {
@@ -84,7 +83,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
     private void checkUidExistence(String uid, String id) throws DuplicateEntryException {
 
         // Validate if there is an attempt to supply a userName already in use by a user other than current
-        List<GluuCustomPerson> list = null;
+        List<JansCustomPerson> list = null;
         try {
             list = personService.findPersonsByUids(Collections.singletonList(uid), new String[]{"inum"});
         } catch (Exception e) {

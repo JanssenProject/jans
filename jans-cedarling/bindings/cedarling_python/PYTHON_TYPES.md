@@ -4,6 +4,34 @@
 This document describes the Cedarling Python bindings types.
 Documentation was generated from python types.
 
+AuthorizeResult
+===============
+
+A Python wrapper for the Rust `cedarling::AuthorizeResult` struct.
+Represents the result of an authorization request.
+
+Methods
+-------
+.. method:: is_allowed(self) -> bool
+    Returns whether the request is allowed.
+
+.. method:: workload(self) -> AuthorizeResultResponse
+    Returns the detailed response as an `AuthorizeResultResponse` object.
+
+___
+
+AuthorizeResultResponse
+=======================
+
+A Python wrapper for the Rust `cedar_policy::Response` struct.
+Represents the result of an authorization request.
+
+Attributes
+----------  
+:param decision: The authorization decision (wrapped `Decision` object).  
+:param diagnostics: Additional information on the decision (wrapped `Diagnostics` object).
+___
+
 BootstrapConfig
 =========
 
@@ -63,13 +91,16 @@ Methods
 
     :param config: A `BootstrapConfig` object with startup settings.
 
+.. method:: authorize(self, request: Request) -> AuthorizeResult
+
+    Execute authorize request
+    :param request: Request struct for authorize.
+
 .. method:: pop_logs(self) -> List[dict]
 
     Retrieves and removes all logs from storage.
 
     :returns: A list of log entries as Python objects.
-
-    :raises ValueError: If an error occurs while fetching logs.
 
 .. method:: get_log_by_id(self, id: str) -> dict|None
 
@@ -77,89 +108,36 @@ Methods
 
     :param id: The log entry ID.
 
-    :raises ValueError: If an error occurs while fetching the log.
-
 .. method:: get_log_ids(self) -> List[str]
 
     Retrieves all stored log IDs.
 
-.. method:: authorize(self, request: Request) -> AuthorizeResult
+.. method:: get_logs_by_tag(self, tag: str) -> List[dict]
 
-    Execute authorize request
-    :param request: Request struct for authorize.
+    Retrieves all logs matching a specific tag. Tags can be 'log_kind', 'log_level' params from log entries.
 
-___
+    :param tag: A string specifying the tag type.
 
-ResourceData
-============
+    :returns: A list of log entries filtered by the tag, each converted to a Python dictionary.
 
-A Python wrapper for the Rust `cedarling::ResourceData` struct. This class represents
-a resource entity with a type, ID, and attributes. Attributes are stored as a payload
-in a dictionary format.
+.. method:: get_logs_by_request_id(self, id: str) -> List[dict]
 
-Attributes
-----------  
-:param resource_type: Type of the resource entity.  
-:param id: ID of the resource entity.  
-:param payload: Optional dictionary of attributes.
+    Retrieves log entries associated with a specific request ID. Each log entry is converted to a Python dictionary containing fields like 'id', 'timestamp', and 'message'.
 
-Methods
--------
-.. method:: __init__(self, resource_type: str, id: str, **kwargs: dict)
-    Initialize a new ResourceData. In kwargs the payload is a dictionary of entity attributes.
+    :param id: The unique identifier for the request.
 
-.. method:: from_dict(cls, value: dict) -> ResourceData
-    Initialize a new ResourceData from a dictionary.
-    To pass `resource_type` you need to use `type` key.
-___
+    :returns: A list of dictionaries, each representing a log entry related to the specified request ID.
 
-Request
-=======
+.. method:: get_logs_by_request_id_and_tag(self, id: str, tag: str) -> List[dict]
 
-A Python wrapper for the Rust `cedarling::Request` struct. Represents
-authorization data with access token, action, resource, and context.
+    Retrieves all logs associated with a specific request ID and tag. The tag can be 'log_kind', 'log_level' params from log entries.
 
-Attributes
-----------  
-:param tokens: A class containing the JWTs what will be used for the request.  
-:param action: The action to be authorized.  
-:param resource: Resource data (wrapped `ResourceData` object).  
-:param context: Python dictionary with additional context.
+    :param id: The request ID as a string.
 
-Example
--------
-```python
-# Create a request for authorization
-request = Request(access_token="token123", action="read", resource=resource, context={})
-```
-___
+    :param tag: The tag type as a string.
 
-AuthorizeResult
-===============
+    :returns: A list of log entries matching both the request ID and tag, each converted to a Python dictionary.
 
-A Python wrapper for the Rust `cedarling::AuthorizeResult` struct.
-Represents the result of an authorization request.
-
-Methods
--------
-.. method:: is_allowed(self) -> bool
-    Returns whether the request is allowed.
-
-.. method:: workload(self) -> AuthorizeResultResponse
-    Returns the detailed response as an `AuthorizeResultResponse` object.
-
-___
-
-AuthorizeResultResponse
-=======================
-
-A Python wrapper for the Rust `cedar_policy::Response` struct.
-Represents the result of an authorization request.
-
-Attributes
-----------  
-:param decision: The authorization decision (wrapped `Decision` object).  
-:param diagnostics: Additional information on the decision (wrapped `Diagnostics` object).
 ___
 
 Decision
@@ -192,6 +170,29 @@ errors : list of PolicyEvaluationError
     A list of errors that occurred during the authorization process. These are unordered as policies may be evaluated in any order.
 ___
 
+EntityData
+============
+
+A Python wrapper for the Rust `cedarling::EntityData` struct. This class represents
+a resource entity with a type, ID, and attributes. Attributes are stored as a payload
+in a dictionary format.
+
+Attributes
+----------  
+:param entity_type: Type of the entity.  
+:param id: ID of the entity.  
+:param payload: Optional dictionary of attributes.
+
+Methods
+-------
+.. method:: __init__(self, resource_type: str, id: str, **kwargs: dict)
+    Initialize a new EntityData. In kwargs the payload is a dictionary of entity attributes.
+
+.. method:: from_dict(cls, value: dict) -> EntityData
+    Initialize a new EntityData from a dictionary.
+    To pass `resource_type` you need to use `type` key.
+___
+
 PolicyEvaluationError
 =====================
 
@@ -203,6 +204,49 @@ id : str
     The ID of the policy that caused the error.
 error : str
     The error message describing the evaluation failure.
+___
+
+Request
+=======
+
+A Python wrapper for the Rust `cedarling::Request` struct. Represents
+authorization data with access token, action, resource, and context.
+
+Attributes
+----------  
+:param tokens: A class containing the JWTs what will be used for the request.  
+:param action: The action to be authorized.  
+:param resource: Resource data (wrapped `EntityData` object).  
+:param context: Python dictionary with additional context.
+
+Example
+-------
+```python
+# Create a request for authorization
+request = Request(access_token="token123", action="read", resource=resource, context={})
+```
+___
+
+# RequestUnsigned
+Request
+=======
+
+A Python wrapper for the Rust `cedarling::RequestUnsigned` struct. Represents
+authorization data for unsigned authorization requests for many principals.
+
+Attributes
+----------  
+:param principals: A list of `EntityData` objects representing the principals.  
+:param action: The action to be authorized.  
+:param resource: Resource data (wrapped `ResourceData` object).  
+:param context: Python dictionary with additional context.
+
+Example
+-------
+```python
+# Create a request for authorization
+request = Request(principals=[principal], action="read", resource=resource, context={})
+```
 ___
 
 # authorize_errors.ActionError
@@ -225,27 +269,27 @@ ___
 Error encountered while validating context according to the schema
 ___
 
-# authorize_errors.EntitiesError
-Error encountered while collecting all entities
-___
-
 # authorize_errors.EntitiesToJsonError
 Error encountered while parsing all entities to json for logging
+___
+
+# authorize_errors.ExecuteRuleError
+Error encountered while executing the rule for principals
 ___
 
 # authorize_errors.IdTokenTrustModeError
 Error encountered while running on strict id token trust mode
 ___
 
+# authorize_errors.InvalidPrincipalError
+Error encountered while creating cedar_policy::Request for principal
+___
+
 # authorize_errors.ProcessTokens
 Error encountered while processing JWT token data
 ___
 
-# authorize_errors.UserRequestValidationError
-Error encountered while creating cedar_policy::Request for user entity principal
-___
-
-# authorize_errors.WorkloadRequestValidationError
-Error encountered while creating cedar_policy::Request for workload entity principal
+# authorize_errors.ValidateEntitiesError
+Error encountered while validating the entities to the schema
 ___
 

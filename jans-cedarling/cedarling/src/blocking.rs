@@ -9,6 +9,7 @@
 
 use crate::{
     AuthorizeError, AuthorizeResult, BootstrapConfig, InitCedarlingError, LogStorage, Request,
+    RequestUnsigned,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::sync::Arc;
@@ -49,6 +50,21 @@ impl Cedarling {
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         self.runtime.block_on(self.instance.authorize(request))
     }
+
+    /// Authorize request with unsigned data.
+    /// makes authorization decision based on the [`RequestUnverified`]
+    pub fn authorize_unsigned(
+        &self,
+        request: RequestUnsigned,
+    ) -> Result<AuthorizeResult, AuthorizeError> {
+        self.runtime
+            .block_on(self.instance.authorize_unsigned(request))
+    }
+
+    /// Closes the connections to the Lock Server and pushes all available logs.
+    pub fn shut_down(&self) {
+        self.runtime.block_on(self.instance.shut_down());
+    }
 }
 
 impl LogStorage for Cedarling {
@@ -62,5 +78,17 @@ impl LogStorage for Cedarling {
 
     fn get_log_ids(&self) -> Vec<String> {
         self.instance.get_log_ids()
+    }
+
+    fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value> {
+        self.instance.get_logs_by_tag(tag)
+    }
+
+    fn get_logs_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value> {
+        self.instance.get_logs_by_request_id(request_id)
+    }
+
+    fn get_logs_by_request_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value> {
+        self.instance.get_logs_by_request_id_and_tag(id, tag)
     }
 }

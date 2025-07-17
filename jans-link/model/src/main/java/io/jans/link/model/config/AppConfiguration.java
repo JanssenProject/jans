@@ -21,7 +21,7 @@ import jakarta.enterprise.inject.Vetoed;
  */
 @Vetoed
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AppConfiguration extends CacheRefreshConfiguration {
+public class AppConfiguration extends LinkConfiguration {
 
     private String baseDN;
 

@@ -4,7 +4,7 @@ tags:
   - auth-server
   - endpoint
 ---
-
+# Backchannel authentication Endpoint
 
 ## Backchannel authentication scripts
 Janssen server enables domains to render the username/pw login form, avoiding the redirect to the IDP-hosted login page. Many SSO solutions offer a proprietary endpoint to accomplish this. However, in Janssen server, this is accomplished with the OAuth/OpenID framework by using a combination of calling the /token endpoint using the OAuth password flow, and then redirecting to browser to the /authorization endpoint, but auto-submitting the form.

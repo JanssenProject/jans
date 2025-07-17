@@ -3345,6 +3345,29 @@
           ]
         }
       ]
+    },
+	{
+      "path": "/jans-config-api/audit",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.93",
+              "name": "https://jans.io/oauth/config/audit-read"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "janssen-tarp",
+  "version": "0.0.0",
+  "description": "Relying Party tool in form of a Chrome Extension. Please note that the manifest version field should be one to four dot-separated integers identifying the version of this extension. The descriptive version string can be stated in the `version_name` field. For more details see https://developer.chrome.com/docs/extensions/reference/manifest/version.",
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+
+  "action": {
+    "default_title": "janssen-tarp",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage",
+    "identity",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*/*"
+  ],
+  "options_page": "options.html",
+  "incognito": "split",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  }
+}

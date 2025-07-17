@@ -61,6 +61,7 @@ public class AuthorizationRequest extends BaseRequest {
     private String request;
     private String requestUri;
 
+    private boolean requestLogoutStatusJwt;
     private boolean requestSessionId;
     private String sessionId;
 
@@ -451,6 +452,26 @@ public class AuthorizationRequest extends BaseRequest {
     }
 
     /**
+     * Returns whether request logout status jwt
+     *
+     * @return whether request logout status jwt
+     */
+    public boolean isRequestLogoutStatusJwt() {
+        return requestLogoutStatusJwt;
+    }
+
+    /**
+     * Sets whether to request logout status jwt
+     *
+     * @param requestLogoutStatusJwt request logout status jwt
+     * @return authorization request
+     */
+    public AuthorizationRequest setRequestLogoutStatusJwt(boolean requestLogoutStatusJwt) {
+        this.requestLogoutStatusJwt = requestLogoutStatusJwt;
+        return this;
+    }
+
+    /**
      * Gets session id.
      *
      * @return session id.
@@ -616,6 +637,7 @@ public class AuthorizationRequest extends BaseRequest {
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REQUEST, request);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REQUEST_URI, requestUri);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REQUEST_SESSION_ID, requestSessionId);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.LOGOUT_STATUS_JWT, requestLogoutStatusJwt);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.SESSION_ID, sessionId);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
@@ -678,6 +700,7 @@ public class AuthorizationRequest extends BaseRequest {
             putNotBlank(parameters, AuthorizeRequestParam.REQUEST, request);
             putNotBlank(parameters, AuthorizeRequestParam.REQUEST_URI, requestUri);
             putNotBlank(parameters, AuthorizeRequestParam.REQUEST_SESSION_ID, requestSessionId ? Boolean.toString(requestSessionId) : null);
+            putNotBlank(parameters, AuthorizeRequestParam.LOGOUT_STATUS_JWT, requestLogoutStatusJwt ? Boolean.toString(requestLogoutStatusJwt) : null);
             putNotBlank(parameters, AuthorizeRequestParam.SESSION_ID, sessionId);
             putNotBlank(parameters, AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
             putNotBlank(parameters, AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);

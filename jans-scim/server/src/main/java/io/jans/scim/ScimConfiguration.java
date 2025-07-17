@@ -33,10 +33,6 @@ public class ScimConfiguration {
 	@ApiModelProperty(value = "The endpoint URI at which it's possible Retrieve, Add, Delete, Modify Groups.", required = true)
 	private String groupEndpoint;
 
-	@JsonProperty(value = "fido_devices_endpoint")
-	@ApiModelProperty(value = "The endpoint URI at which it's possible Retrieve, Delete, Modify FIDO U2F devices.", required = true)
-	private String fidoDevicesEndpoint;
-
 	@JsonProperty(value = "fido2_devices_endpoint")
 	@ApiModelProperty(value = "The endpoint URI at which it's possible Retrieve, Delete, Modify FIDO 2 devices.", required = true)
 	private String fido2DevicesEndpoint;
@@ -87,14 +83,6 @@ public class ScimConfiguration {
 
 	public void setGroupEndpoint(String groupEndpoint) {
 		this.groupEndpoint = groupEndpoint;
-	}
-
-	public String getFidoDevicesEndpoint() {
-		return fidoDevicesEndpoint;
-	}
-
-	public void setFidoDevicesEndpoint(String fidoDevicesEndpoint) {
-		this.fidoDevicesEndpoint = fidoDevicesEndpoint;
 	}
 
 	public String getFido2DevicesEndpoint() {

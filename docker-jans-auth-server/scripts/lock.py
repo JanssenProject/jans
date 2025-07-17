@@ -115,8 +115,6 @@ class LockPersistenceSetup:
         hostname = self.manager.config.get("hostname")
         ctx = {
             "hostname": hostname,
-            "jans_opa_host": "localhost",
-            "jans_opa_port": 8181,
             "base_endpoint": "jans-auth",
             "jans_auth_token_endpoint": f"https://{hostname}/jans-auth/restv1/token",
         }

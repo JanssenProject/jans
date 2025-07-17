@@ -36,7 +36,6 @@ class JansKCLinkInstaller(JettyInstaller):
 
     def install(self):
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
-        self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         self.enable()
 
     def render_import_templates(self):

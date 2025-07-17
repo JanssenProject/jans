@@ -70,7 +70,7 @@ public interface SpannerOperationService extends PersistenceOperationService {
             String[] attributes, Sort[] orderBy, SpannerBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType,
             int start, int count, int pageSize) throws SearchException;
 
-    String[] createStoragePassword(String[] passwords);
+    String[] createStoragePassword(String[] passwords, AttributeData attributeData);
     
     boolean isBinaryAttribute(String attribute);
     boolean isCertificateAttribute(String attribute);

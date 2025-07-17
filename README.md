@@ -19,7 +19,7 @@ Janssen software.
 
 If your enteprise needs Janssen for a production deployment, Gluu offers a 
 commercial distribution of Janssen Project Components called 
-[Gluu Flex](https://gluu.org/flex) and [hosting](https://gluu.org/solo).
+[Gluu Flex](https://gluu.org/flex) and [Gluu Solo](https://gluu.org/solo).
 
 ----
 
@@ -31,7 +31,9 @@ commercial distribution of Janssen Project Components called
 
 **Contribute**: [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/) | [Community Docs](https://docs.jans.io/head/governance/charter/) | [Developer Guides](https://docs.jans.io/head/CODE_OF_CONDUCT/)
 
-**Social**: [Linkedin](https://www.linkedin.com/company/janssen-project)
+**Social**: [Linkedin](https://www.linkedin.com/company/janssen-project) | [YouTube](https://www.youtube.com/@JanssenProject)
+
+**Resources to learn more**: [Gluu Academy](https://learn.gluu.org/)
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/JanssenProject/jans/badge)](https://scorecard.dev/viewer/?uri=github.com/JanssenProject/jans)
@@ -52,20 +54,25 @@ commercial distribution of Janssen Project Components called
 | **[Jans SCIM](jans-scim)**                   | [SCIM](http://www.simplecloud.info/) JSON/REST [API](https://docs.jans.io/head/admin/reference/openapi/) for user management, including associated FIDO devices.                                                                            | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Jans Config API](jans-config-api)**       | RESTful APIs manage configuration for all Janssen components.                                                                                                                                                                                           | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Text UI ("TUI")](jans-cli-tui)**          | User interface accessible from command line. TUI is text-based interactive configuration tool that leverages config-API to configure Janssen Server modules                                                                                                                                                 | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
-| **[Jans CLI](jans-cli-tui)**          | Command line configuration tools to help you correctly call the Config API.                                                                                                                                                 | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
+| **[Jans CLI](jans-cli-tui)**                 | Command line configuration tools to help you correctly call the Config API.                                                                                                                                                 | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Jans Casa](jans-casa)**                   | Jans Casa is a self-service web portal for end-users to manage authentication and authorization preferences for their account in the Janssen Server                                                                                         | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Jans KC](jans-keycloak-integration)**     | provides an array of out of the box IAM services in a single lightweight container image. It's handy for many workforce requirements like SAML. The Janssen authenticator module (SPI) simplifies SSO across Janssen and Keycloak websites. | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans LDAP Link](jans-link)**              | a group of components that provide synchronization services to update the Janssen User Store from an external authoritative LDAP data sources                                                                                               | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans Keycloak Link](jans-keycloak-link)** | a group of components that provide synchronization services to update the Janssen User Store from an external authoritative Keycloak data sources                                                                                           | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
-| **[Jans Cedarling](jans-cedarling)**          | Cedarling is an embeddable stateful Policy Decision Point for authorization requests. In simple terms, the Cedarling returns the answer: should the application allow this action on this resource given these JWT tokens. It is written in Rust with bindings to WASM, iOS, Android, and Python.                                                                | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
+| **[Jans Cedarling](jans-cedarling)**         | Cedarling is an embeddable stateful Policy Decision Point for authorization requests. In simple terms, the Cedarling returns the answer: should the application allow this action on this resource given these JWT tokens. It is written in Rust with bindings to WASM, iOS, Android, and Python.                                                                | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans Lock](jans-lock)**                   | An enterprise authorization solution featuring the Cedarling, a stateless PDP and the Lock Server which centralizes audit logs and configuration.                                                                                           | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
-| **[Jans Tarp](demos/jans-tarp)**             | An OpenID Connect RP test website that runs as a browser plugin in Chrome or Firefox.                                                                                                                                                       | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
+| **[Janssen Tarp](demos/janssen-tarp)**       | An OpenID Connect RP test website that runs as a browser plugin in Chrome or Firefox.                                                                                                                                                       | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans Chip](demos/jans-chip)**             | Sample iOS and Android mobile applications that implement the full OAuth and FIDO security stack for app integrity, client constrained access tokens, and user presence.                                                                    | ![Demo](https://img.shields.io/badge/Demo-%23368af7)             |
 
 ## Installation
 
 You can install the Janssen federation stack in a Kubernetes cluster or as a 
-single VM. Check out the 
+single VM. 
+
+Development environments: [Quick Start](https://docs.jans.io/head/janssen-server/install/docker-install/quick-start/) | [Local K8S](https://docs.jans.io/head/janssen-server/install/helm-install/local/) | [VM install](https://docs.jans.io/head/janssen-server/install/vm-install/vm-requirements/)
+Production deployments: [Amazon EKS](https://docs.jans.io/head/janssen-server/install/helm-install/amazon-eks/) | [Microsoft Azure AKS](https://docs.jans.io/head/janssen-server/install/helm-install/microsoft-azure/) | [Google GKE](https://docs.jans.io/head/janssen-server/install/helm-install/google-gke/) | [Rancher](https://docs.jans.io/head/janssen-server/install/helm-install/rancher/)
+
+Check out the 
 [Janssen Documentation](https://docs.jans.io/head/janssen-server/install/) 
 for details.
 
@@ -75,12 +82,6 @@ A BIG thanks to all the amazing contributors!! 👏 👏
 
 Building a diverse and inclusive community is an important goal. Please let us know what we
 can do to make you feel more welcome, no matter what you want to contribute.
-
-There are many ways you can contribute. Join this amazing team!
-
-<a href="https://github.com/JanssenProject/jans/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=JanssenProject/jans" />
-</a>
 
 ### Code of Conduct / Contribution Guidelines / Security
 
@@ -113,40 +114,7 @@ is the main channel for community support. There is also a
 
 ### Releases
 
-Below is the list of current mega releases that hold information about every single release of our services and modules:
-- [v1.2.0](https://github.com/JanssenProject/jans/releases/tag/v1.2.0)
-- [v1.1.6](https://github.com/JanssenProject/jans/releases/tag/v1.1.6)
-- [v1.1.5](https://github.com/JanssenProject/jans/releases/tag/v1.1.5)
-- [v1.1.4](https://github.com/JanssenProject/jans/releases/tag/v1.1.4)
-- [v1.1.3](https://github.com/JanssenProject/jans/releases/tag/v1.1.3)
-- [v1.1.2](https://github.com/JanssenProject/jans/releases/tag/v1.1.2)
-- [v1.1.1](https://github.com/JanssenProject/jans/releases/tag/v1.1.1)
-- [v1.1.0](https://github.com/JanssenProject/jans/releases/tag/v1.1.0)
-- [v1.0.22](https://github.com/JanssenProject/jans/releases/tag/v1.0.22)
-- [v1.0.21](https://github.com/JanssenProject/jans/releases/tag/v1.0.21)
-- [v1.0.20](https://github.com/JanssenProject/jans/releases/tag/v1.0.20)
-- [v1.0.19](https://github.com/JanssenProject/jans/releases/tag/v1.0.19)
-- [v1.0.18](https://github.com/JanssenProject/jans/releases/tag/v1.0.18)
-- [v1.0.17](https://github.com/JanssenProject/jans/releases/tag/v1.0.17)
-- [v1.0.16](https://github.com/JanssenProject/jans/releases/tag/v1.0.16)
-- [v1.0.15](https://github.com/JanssenProject/jans/releases/tag/v1.0.15)
-- [v1.0.14](https://github.com/JanssenProject/jans/releases/tag/v1.0.14)
-- [v1.0.13](https://github.com/JanssenProject/jans/releases/tag/v1.0.13)
-- [v1.0.12](https://github.com/JanssenProject/jans/releases/tag/v1.0.12)
-- [v1.0.11](https://github.com/JanssenProject/jans/releases/tag/v1.0.11)
-- [v1.0.10](https://github.com/JanssenProject/jans/releases/tag/v1.0.10)
-- [v1.0.9](https://github.com/JanssenProject/jans/releases/tag/v1.0.9)
-- [v1.0.8](https://github.com/JanssenProject/jans/releases/tag/v1.0.8)
-- [v1.0.7](https://github.com/JanssenProject/jans/releases/tag/v1.0.7)
-- [v1.0.6](https://github.com/JanssenProject/jans/releases/tag/v1.0.6)
-- [v1.0.5](https://github.com/JanssenProject/jans/releases/tag/v1.0.5)
-- [v1.0.4](https://github.com/JanssenProject/jans/releases/tag/v1.0.4)
-- [v1.0.3](https://github.com/JanssenProject/jans/releases/tag/v1.0.3)
-- [v1.0.2](https://github.com/JanssenProject/jans/releases/tag/v1.0.2)
-- [v1.0.1](https://github.com/JanssenProject/jans/releases/tag/v1.0.1)
-- [v1.0.0](https://github.com/JanssenProject/jans/releases/tag/v1.0.0)
-- [v1.0.0-beta.16](https://github.com/JanssenProject/jans/releases/tag/v1.0.0-beta.16)
-- [v1.0.0-beta.15](https://github.com/JanssenProject/jans/releases/tag/v1.0.0-beta.15)
+Check out the [latest release]((https://github.com/JanssenProject/jans/releases/latest)) of the Janssen Project for new features and updates.
 
 ### Janssen History
 

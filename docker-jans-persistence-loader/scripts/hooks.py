@@ -7,6 +7,7 @@ we can use specialized hooks/plugins system.
 import itertools
 import os
 import typing as _t
+from contextlib import suppress
 
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
@@ -62,7 +63,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "interruptionErrorPage": "timeout.ftl",
             "crashErrorPage": "crash.ftl",
             "finishedFlowPage": "finished.ftl",
-            "bridgeScriptPage": "agama.xhtml",
             "defaultResponseHeaders": {
                 "Cache-Control": "max-age=0, no-store",
             },
@@ -132,6 +132,26 @@ def transform_auth_dynamic_config_hook(conf, manager):
         ("sessionIdCookieLifetime", 86400),
         ("tokenIndexAllocationBlockSize", 10),
         ("tokenIndexLimit", 10000000),
+        ("logoutStatusJwtSigningAlgValuesSupported", [
+            "HS256",
+            "HS384",
+            "HS512",
+            "RS256",
+            "RS384",
+            "RS512",
+            "ES256",
+            "ES384",
+            "ES512",
+            "ES512",
+            "PS256",
+            "PS384",
+            "PS512"
+        ]),
+        ("connectionServiceConfiguration", {
+            "maxTotal": 200,
+            "maxPerRoute": 50,
+            "validateAfterInactivity": 0,
+        }),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -235,6 +255,11 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "JAVA": ["java", "sun", "com.sun", "jdk"],
             "KRYO": [],
         }),
+        # add url mapping
+        ("startEndUrlMapping", {
+            "agama/agama.xhtml": "postlogin.htm",
+            "agama/consent.xhtml": "agama/consent_authorize.htm",
+        }),
     ]:
         if new_key not in conf["agamaConfiguration"]:
             conf["agamaConfiguration"][new_key] = value
@@ -291,6 +316,9 @@ def transform_auth_dynamic_config_hook(conf, manager):
         "ssa",
         "global_token_revocation",
         "status_list",
+        "rate_limit",
+        "access_evaluation",
+        "logout_status_jwt",
     ]:
         if flag not in conf["featureFlags"]:
             conf["featureFlags"].append(flag)
@@ -304,6 +332,16 @@ def transform_auth_dynamic_config_hook(conf, manager):
 
     if conf["authorizationChallengeEndpoint"] != auth_challenge_endpoint:
         conf["authorizationChallengeEndpoint"] = auth_challenge_endpoint
+        should_update = True
+
+    # remove featureFlags.session_status_list
+    with suppress(ValueError):
+        conf["featureFlags"].remove("session_status_list")
+        should_update = True
+
+    # remove sessionJwtSigningAlgValuesSupported
+    if "sessionJwtSigningAlgValuesSupported" in conf:
+        conf.pop("sessionJwtSigningAlgValuesSupported")
         should_update = True
 
     # return the conf and flag to determine whether it needs update or not

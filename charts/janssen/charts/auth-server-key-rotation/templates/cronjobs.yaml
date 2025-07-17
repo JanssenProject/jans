@@ -20,7 +20,11 @@ metadata:
 {{- end }}
 {{- end }}
 spec:
+  {{- if ne .Values.cronJobSchedule  "" }}
+  schedule: {{  index .Values.cronJobSchedule | quote }}
+   {{- else }}
   schedule: "@every {{ .Values.keysLife }}h"
+   {{- end }}
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
@@ -31,9 +35,13 @@ spec:
         spec:
         {{- with .Values.image.pullSecrets }}
           imagePullSecrets:
-            {{- toYaml . | nindent 8 }}
+            {{- toYaml . | nindent 10}}
         {{- end }}
           dnsPolicy: {{ .Values.dnsPolicy | quote }}
+        {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 10 }}
+        {{- end }}
         {{- with .Values.dnsConfig }}
           dnsConfig:
 {{ toYaml . | indent 12 }}
@@ -53,7 +61,7 @@ spec:
                     {{- toYaml . | replace "- " "" | nindent 20}}
                     {{- end }}
                     /app/scripts/entrypoint.sh
-                {{- end}}    
+                {{- end}}
               {{- end}}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               env:
@@ -86,7 +94,7 @@ spec:
               resources:
 {{- toYaml .Values.resources | nindent 16 }}
               {{- end }}
-              args: ["patch", "auth", "--opts", "interval:{{ .Values.keysLife }}", "--opts", "key-strategy:{{ .Values.keysStrategy }}", "--opts", "privkey-push-delay:{{ .Values.keysPushDelay }}", "--opts", "privkey-push-strategy:{{ .Values.keysPushStrategy }}"]
+              args: ["certmanager", "patch", "auth", "--opts", "interval:{{ .Values.keysLife }}", "--opts", "key-strategy:{{ .Values.keysStrategy }}", "--opts", "privkey-push-delay:{{ .Values.keysPushDelay }}", "--opts", "privkey-push-strategy:{{ .Values.keysPushStrategy }}"]
           volumes:
           {{- with .Values.volumes }}
 {{- toYaml . | nindent 12 }}
@@ -95,3 +103,7 @@ spec:
 {{- toYaml . | nindent 12 }}
           {{- end }}
           restartPolicy: Never
+          {{- if .Values.nodeSelector }}
+          nodeSelector:
+{{- toYaml .Values.nodeSelector | nindent 12 }}
+          {{- end }}

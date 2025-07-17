@@ -3,11 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, TokenValidationConfig, Tokens,
-    WorkloadBoolOp,
-};
+use cedarling::*;
 use jsonwebtoken::Algorithm;
 use std::collections::{HashMap, HashSet};
 
@@ -24,9 +20,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         jwt_sig_validation: true,
         jwt_status_validation: false,
         signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
-        access_token_config: TokenValidationConfig::access_token(),
-        id_token_config: TokenValidationConfig::id_token(),
-        userinfo_token_config: TokenValidationConfig::userinfo_token(),
     };
 
     // You must change this with your own tokens
@@ -50,9 +43,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: JsonRule::new(serde_json::json!({
+                "and" : [
+                    {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+                    {"===": [{"var": "Jans::User"}, "ALLOW"]}
+                ]
+            }))
+            .unwrap(),
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+        lock_config: None,
     })
     .await?;
 
@@ -62,17 +63,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // authorization process, alongside resource and action details.
     let result = cedarling
         .authorize(Request {
-        tokens: Tokens {
-                access_token: Some(access_token),
-                id_token: Some(id_token),
-                userinfo_token: Some(userinfo_token),
-        },
+            tokens: HashMap::from([
+                ("access_token".to_string(), access_token.clone()),
+                ("id_token".to_string(), id_token.clone()),
+                ("userinfo_token".to_string(), userinfo_token.clone()),
+            ]),
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
-            resource: ResourceData {
+            resource: EntityData {
                 id: "random_id".to_string(),
-                resource_type: "Jans::Issue".to_string(),
-                payload: HashMap::from_iter([(
+                entity_type: "Jans::Issue".to_string(),
+                attributes: HashMap::from_iter([(
                     "org_id".to_string(),
                     serde_json::Value::String("some_long_id".to_string()),
                 )]),

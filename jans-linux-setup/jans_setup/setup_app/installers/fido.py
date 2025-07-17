@@ -43,15 +43,10 @@ class FidoInstaller(JettyInstaller):
 
         self.fido_document_certs_dir = os.path.join(self.fido2ConfigFolder, 'mds/cert')
         self.fido_document_tocs_dir = os.path.join(self.fido2ConfigFolder, 'mds/toc')
+        self.fido_document_authenticator_cert_dir = os.path.join(self.fido2ConfigFolder, 'authenticator_cert')
 
     def install(self):
-
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
-
-        self.logIt("Copying fido.war into jetty webapps folder...")
-        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
-        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
-
         self.enable()
 
     def generate_configuration(self):

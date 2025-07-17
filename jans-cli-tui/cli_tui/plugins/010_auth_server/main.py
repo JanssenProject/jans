@@ -108,6 +108,7 @@ class Plugin(DialogUtils):
             return
 
         self.app.app_configuration = response.json()
+        self.ssa.ssa_custom_attributes = self.app.app_configuration.get('ssaConfiguration', {}).get('ssaCustomAttributes', [])
         self.oauth_logging()
 
     def help(self):
@@ -218,7 +219,7 @@ class Plugin(DialogUtils):
         self.oauth_containers['clients'] = HSplit([
                     VSplit([
                         self.app.getTitledText(_("Search"), name='oauth:clients:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_clients,style='class:outh_containers_clients.text'),
-                        self.app.getButton(text=_("Add Client"), name='oauth:clients:add', jans_help=_("To add a new client press this button"), handler=self.add_client),
+                        self.app.getButton(text=_("Add Client"), name='oauth:clients:add', jans_help=_("To add a new client press this button"), handler=self.edit_client),
 
                         ],
                         padding=3,
@@ -330,6 +331,7 @@ class Plugin(DialogUtils):
         self.nav_bar.cur_navbar_selection = 0
         self.oauth_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
+
     def save_client_summary(self, event):
 
         def do_save(path):
@@ -391,10 +393,15 @@ class Plugin(DialogUtils):
             self.clients_container.clear()
 
             for d in all_data:
+                grant_types = d.get('grantTypes', [])
+                for gt in grant_types[:]:
+                    if not gt:
+                        grant_types.remove(gt)
+
                 self.clients_container.add_item([
                     d['inum'],
                     d.get('clientName', ''),
-                    ','.join(d.get('grantTypes', [])),
+                    ','.join(grant_types),
                     d.get('subjectType', '') 
                     ])
 
@@ -627,7 +634,7 @@ class Plugin(DialogUtils):
         # ------------------------------------------------------------------------------- #
 
         data =[]
-        
+
         if pattern:
             for k in self.app.app_configuration:
                 if pattern.lower() in k.lower():
@@ -714,6 +721,8 @@ class Plugin(DialogUtils):
         """
 
         selected_line_data = params['passed']    ##self.uma_result 
+
+        open("/tmp/property.json","w").write(json.dumps(selected_line_data))
 
         title = _("Edit property")
 
@@ -802,8 +811,9 @@ class Plugin(DialogUtils):
     def edit_client(self, **params: Any) -> None:
         """This Method show the scopes dialog for edit
         """
-        selected_line_data = params['data']
-        title = _("Edit Clients")
+        selected_line_data = params.get('data', {})
+
+        title = _("Edit Clients") if selected_line_data else _("Add Client")
 
         self.edit_client_dialog = EditClientDialog(
                                 parent=self.app,
@@ -813,7 +823,18 @@ class Plugin(DialogUtils):
                                 delete_uma_resource=self.delete_uma_resource
                                 )
 
-        self.app.show_jans_dialog(self.edit_client_dialog)
+        def show_edit_client_dialog():
+            self.app.show_jans_dialog(self.edit_client_dialog)
+
+        if self.edit_client_dialog.warnings:
+            self.app.show_message(
+                title=_(common_strings.warning),
+                message = '\n'.join(self.edit_client_dialog.warnings),
+                buttons = [Button('OK', handler=show_edit_client_dialog)]
+                )
+        else:
+            self.app.show_jans_dialog(self.edit_client_dialog)
+
 
     def save_client(self, dialog: Dialog) -> None:
         """This method to save the client data to server
@@ -891,11 +912,6 @@ class Plugin(DialogUtils):
         dialog = EditScopeDialog(self.app, title=_("Add New Scope"), data={}, save_handler=self.save_scope)
         self.app.show_jans_dialog(dialog)
 
-    def add_client(self) -> None:
-        """Method to display the dialog of clients (Add New)
-        """
-        dialog = EditClientDialog(self.app, title=_("Add Client"), data={}, save_handler=self.save_client)
-        self.app.show_jans_dialog(dialog)
 
     def get_help(self, **kwargs: Any):
         """This method get focused field Description to display on statusbar

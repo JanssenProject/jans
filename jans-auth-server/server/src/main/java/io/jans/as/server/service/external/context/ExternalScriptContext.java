@@ -54,6 +54,10 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
         this.persistenceEntryManager = ServerUtil.getLdapManager();
     }
 
+    public String getRequestParameter(String parameterName) {
+        return httpRequest != null ? httpRequest.getParameter(parameterName) : null;
+    }
+
     public ExecutionContext getExecutionContext() {
         return executionContext;
     }

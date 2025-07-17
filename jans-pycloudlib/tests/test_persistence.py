@@ -1,6 +1,4 @@
 import json
-import os
-import shutil
 from collections import namedtuple
 from io import StringIO
 
@@ -27,13 +25,15 @@ def test_render_base_properties(monkeypatch, tmpdir):
     src = tmpdir.join("jans.properties.tmpl")
     src.write("""
 persistence.type=%(persistence_type)s
-fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o=jans
+certsDir=%(certFolder)s
+pythonModulesDir=%(jansOptPythonFolder)s/libs
 """.strip())
     dest = tmpdir.join("jans.properties")
 
     expected = f"""
 persistence.type={persistence_type}
-fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o=jans
+certsDir=/etc/certs
+pythonModulesDir=/opt/jans/python/libs:/opt/jython/Lib/site-packages
 """.strip()
 
     render_base_properties(str(src), str(dest))

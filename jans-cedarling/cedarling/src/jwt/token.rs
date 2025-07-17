@@ -3,81 +3,44 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashMap;
-
+use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
-
-use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TokenKind, TrustedIssuer};
-
-const DEFAULT_USER_ID_SRC_CLAIM: &str = "sub";
-const DEFAULT_ROLE_SRC_CLAIM: &str = "role";
-
-pub enum TokenStr<'a> {
-    Access(&'a str),
-    Id(&'a str),
-    Userinfo(&'a str),
-}
+use std::{collections::HashMap, sync::Arc};
 
 #[derive(Debug, PartialEq)]
-pub struct Token<'a> {
-    pub kind: TokenKind,
-    pub iss: Option<&'a TrustedIssuer>,
+pub struct Token {
+    pub name: String,
+    pub iss: Option<Arc<TrustedIssuer>>,
     claims: TokenClaims,
 }
 
-impl<'a> Token<'a> {
-    pub fn new_access(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
+impl Token {
+    pub fn new(name: &str, claims: TokenClaims, iss: Option<Arc<TrustedIssuer>>) -> Token {
         Self {
-            kind: TokenKind::Access,
+            name: name.to_string(),
             iss,
             claims,
         }
     }
 
-    pub fn new_id(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
-        Self {
-            kind: TokenKind::Id,
-            iss,
-            claims,
-        }
+    pub fn get_metadata(&self) -> Option<&TokenEntityMetadata> {
+        self.iss.as_ref()?.get_token_metadata(&self.name)
     }
 
-    pub fn new_userinfo(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
-        Self {
-            kind: TokenKind::Userinfo,
-            iss,
-            claims,
-        }
-    }
-
-    pub fn metadata(&self) -> &TokenEntityMetadata {
-        self.iss.unwrap_or_default().token_metadata(self.kind)
-    }
-
-    pub fn user_mapping(&self) -> &str {
-        self.iss
-            .unwrap_or_default()
-            .user_mapping(self.kind)
-            .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM)
-    }
-
-    pub fn claim_mapping(&self) -> &ClaimMappings {
-        self.iss.unwrap_or_default().claim_mapping(self.kind)
-    }
-
-    pub fn role_mapping(&self) -> &str {
-        self.iss
-            .unwrap_or_default()
-            .role_mapping(self.kind)
-            .unwrap_or(DEFAULT_ROLE_SRC_CLAIM)
+    pub fn claim_mappings(&self) -> Option<&ClaimMappings> {
+        self.iss.as_ref()?.get_claim_mapping(&self.name)
     }
 
     pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
         self.claims.get_claim(name)
     }
 
-    pub fn logging_info(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
+    pub fn get_claim_val(&self, name: &str) -> Option<&Value> {
+        self.claims.claims.get(name)
+    }
+
+    pub fn logging_info<'a>(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
         self.claims.logging_info(claim)
     }
 
@@ -86,7 +49,6 @@ impl<'a> Token<'a> {
     }
 }
 
-/// A struct holding information on a decoded JWT.
 #[derive(Debug, PartialEq, Default, Deserialize, Clone)]
 pub struct TokenClaims {
     #[serde(flatten)]
@@ -99,12 +61,14 @@ impl From<HashMap<String, Value>> for TokenClaims {
     }
 }
 
-impl TokenClaims {
-    #[cfg(test)]
-    pub fn new(claims: HashMap<String, serde_json::Value>) -> Self {
+impl From<Value> for TokenClaims {
+    fn from(claims: Value) -> Self {
+        let claims = serde_json::from_value(claims).expect("should deserialize claims to hashmap");
         Self { claims }
     }
+}
 
+impl TokenClaims {
     pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
         self.claims.get(name).map(|value| TokenClaim {
             key: name.to_string(),
@@ -129,10 +93,6 @@ pub struct TokenClaim<'a> {
 }
 
 impl TokenClaim<'_> {
-    pub fn value(&self) -> &serde_json::Value {
-        self.value
-    }
-
     pub fn as_str(&self) -> Result<&str, TokenClaimTypeError> {
         self.value
             .as_str()
@@ -143,7 +103,9 @@ impl TokenClaim<'_> {
 }
 
 #[derive(Debug, thiserror::Error, PartialEq)]
-#[error("type mismatch for token claim '{key}'. expected: '{expected_type}', but found: '{actual_type}'")]
+#[error(
+    "type mismatch for token claim '{key}'. expected: '{expected_type}', but found: '{actual_type}'"
+)]
 pub struct TokenClaimTypeError {
     pub key: String,
     pub expected_type: String,

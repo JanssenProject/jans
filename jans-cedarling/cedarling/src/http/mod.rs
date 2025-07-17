@@ -3,6 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+mod spawn_task;
+
+pub use spawn_task::*;
+
 use reqwest::Client;
 use serde::Deserialize;
 use std::time::Duration;
@@ -80,10 +84,6 @@ pub struct Response {
 }
 
 impl Response {
-    pub fn text(&self) -> &str {
-        &self.text
-    }
-
     pub fn json<'a, T>(&'a self) -> Result<T, serde_json::Error>
     where
         T: Deserialize<'a>,
@@ -117,7 +117,6 @@ mod test {
     use serde_json::json;
     use std::time::Duration;
     use test_utils::assert_eq;
-    use tokio;
     use tokio::join;
 
     #[tokio::test]

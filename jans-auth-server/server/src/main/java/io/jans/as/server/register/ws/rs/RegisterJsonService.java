@@ -117,6 +117,7 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, TX_TOKEN_SIGNED_RESPONSE_ALG.toString(), client.getAttributes().getTxTokenSignedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TX_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), client.getAttributes().getTxTokenEncryptedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TX_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), client.getAttributes().getTxTokenEncryptedResponseEnc());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, LOGOUT_STATUS_JWT_SIGNED_RESPONSE_ALG.toString(), client.getAttributes().getLogoutStatusJwtSignedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_SIGNING_ALG.toString(), client.getRequestObjectSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_ENCRYPTION_ALG.toString(), client.getRequestObjectEncryptionAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_ENCRYPTION_ENC.toString(), client.getRequestObjectEncryptionEnc());
@@ -136,6 +137,7 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, SPONTANEOUS_SCOPES.toString(), client.getAttributes().getSpontaneousScopes());
         Util.addToJSONObjectIfNotNull(responseJsonObject, RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString(), client.getAttributes().getRunIntrospectionScriptBeforeJwtCreation());
         Util.addToJSONObjectIfNotNull(responseJsonObject, KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), client.getAttributes().getKeepClientAuthorizationAfterExpiration());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, REQUIRE_PKCE.toString(), client.getAttributes().getRequirePkce());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_AS_JWT.toString(), client.isAccessTokenAsJwt());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_SIGNING_ALG.toString(), client.getAccessTokenSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_LIFETIME.toString(), client.getAccessTokenLifetime());

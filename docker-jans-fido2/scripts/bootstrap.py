@@ -37,7 +37,7 @@ def main():
     render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
 
     mapper = PersistenceMapper()
-    persistence_groups = mapper.groups()
+    persistence_groups = mapper.groups().keys()
 
     if persistence_type == "hybrid":
         hybrid_prop = "/etc/jans/conf/jans-hybrid.properties"
@@ -46,11 +46,9 @@ def main():
 
     if "sql" in persistence_groups:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        render_sql_properties(
-            manager,
-            f"/app/templates/jans-{db_dialect}.properties",
-            "/etc/jans/conf/jans-sql.properties",
-        )
+        sql_prop = "/etc/jans/conf/jans-sql.properties"
+        if not os.path.exists(sql_prop):
+            render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
 
     wait_for_persistence(manager)
     override_simple_json_property("/etc/jans/conf/jans-sql.properties")
@@ -173,6 +171,7 @@ class PersistenceSetup:
             "fido2ConfigFolder": "/etc/jans/conf/fido2",
             "fido_document_certs_dir": "/etc/jans/conf/fido2/mds/cert",
             "fido_document_tocs_dir": "/etc/jans/conf/fido2/mds/toc",
+            "fido_document_authenticator_cert_dir": "/etc/jans/conf/fido2/authenticator_cert",
         }
 
         # pre-populate fido2_dynamic_conf_base64
@@ -185,12 +184,23 @@ class PersistenceSetup:
             ("/app/templates/jans-fido2/jans-fido2-errors.json", "fido2_error_base64", "r"),
             ("/etc/jans/conf/fido2/mds/toc/toc.jwt", "fido_document_tocs_base64", "r"),
             ("/etc/jans/conf/fido2/mds/cert/root-r3.crt", "fido_document_certs_base64", "rb"),
+            ("/app/static/fido2/authenticator_cert/yubico-u2f-ca-cert.crt", "yubico_u2f_ca_cert_base64", "r"),
+            ("/app/static/fido2/authenticator_cert/HyperFIDO_CA_Cert_V1.pem", "HyperFIDO_CA_Cert_V1_base64", "r"),
+            ("/app/static/fido2/authenticator_cert/HyperFIDO_CA_Cert_V2.pem", "HyperFIDO_CA_Cert_V2_base64", "r"),
+            ("/app/static/fido2/authenticator_cert/Apple_WebAuthn_Root_CA.pem", "Apple_WebAuthn_Root_CA_base64", "r"),
         ]:
             with open(tmpl, mode) as f:
                 ctx[ctx_name] = generate_base64_contents(f.read())
 
         # docs inum
-        for inum in ["fido_document_certs_inum", "fido_document_tocs_inum"]:
+        for inum in [
+            "fido_document_certs_inum",
+            "fido_document_tocs_inum",
+            "yubico_u2f_ca_cert_inum",
+            "HyperFIDO_CA_Cert_V1_inum",
+            "HyperFIDO_CA_Cert_V2_inum",
+            "Apple_WebAuthn_Root_CA_inum",
+        ]:
             ctx[inum] = self.manager.config.get(inum)
 
             if not ctx[inum]:

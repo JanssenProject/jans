@@ -1,6 +1,6 @@
 # Client Registration Interception Script
 
-## Overview
+
 The Janssen Authorization Server uses **interception scripts** to enable you to customize the behavior of the OpenID Provider. During client registration, custom interception scripts can be used to implement custom business logic. For instance, data could be validated, extra client claims could be populated, scopes could be modified, or APIs could be called to determine whether the client should get registered at all.
 
 ## Configuration Prerequisites

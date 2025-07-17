@@ -62,6 +62,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("postAuthnScripts")
     private List<String> postAuthnScripts;
 
+    @JsonProperty("tokenExchangeScripts")
+    private List<String> tokenExchangeScripts;
+
     @JsonProperty("consentGatheringScripts")
     private List<String> consentGatheringScripts;
 
@@ -113,6 +116,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("allowOfflineAccessWithoutConsent")
     private Boolean allowOfflineAccessWithoutConsent;
 
+    @JsonProperty("requirePkce")
+    private Boolean requirePkce = false;
+
     @JsonProperty("minimumAcrLevel")
     private Integer minimumAcrLevel = -1;
 
@@ -149,8 +155,22 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("txTokenEncryptedResponseEnc")
     private String txTokenEncryptedResponseEnc;
 
+    @JsonProperty("logoutStatusJwtSignedResponseAlg")
+    private String logoutStatusJwtSignedResponseAlg;
+
     @JsonProperty("authorizationDetailsTypes")
     private List<String> authorizationDetailsTypes;
+
+    public Boolean getRequirePkce() {
+        if (requirePkce == null) {
+            requirePkce = false;
+        }
+        return requirePkce;
+    }
+
+    public void setRequirePkce(Boolean requirePkce) {
+        this.requirePkce = requirePkce;
+    }
 
     public List<String> getAuthorizationDetailsTypes() {
         if (authorizationDetailsTypes == null) authorizationDetailsTypes = new ArrayList<>();
@@ -167,6 +187,15 @@ public class ClientAttributes implements Serializable {
 
     public void setTxTokenSignedResponseAlg(String txTokenSignedResponseAlg) {
         this.txTokenSignedResponseAlg = txTokenSignedResponseAlg;
+    }
+
+    public String getLogoutStatusJwtSignedResponseAlg() {
+        return logoutStatusJwtSignedResponseAlg;
+    }
+
+    public ClientAttributes setLogoutStatusJwtSignedResponseAlg(String logoutStatusJwtSignedResponseAlg) {
+        this.logoutStatusJwtSignedResponseAlg = logoutStatusJwtSignedResponseAlg;
+        return this;
     }
 
     public String getTxTokenEncryptedResponseAlg() {
@@ -346,6 +375,16 @@ public class ClientAttributes implements Serializable {
 
     public void setPostAuthnScripts(List<String> postAuthnScripts) {
         this.postAuthnScripts = postAuthnScripts;
+    }
+
+    public List<String> getTokenExchangeScripts() {
+        if (tokenExchangeScripts == null) tokenExchangeScripts = Lists.newArrayList();
+        return tokenExchangeScripts;
+    }
+
+    public ClientAttributes setTokenExchangeScripts(List<String> tokenExchangeScripts) {
+        this.tokenExchangeScripts = tokenExchangeScripts;
+        return this;
     }
 
     public List<String> getConsentGatheringScripts() {
@@ -539,6 +578,7 @@ public class ClientAttributes implements Serializable {
                 ", backchannelLogoutSessionRequired=" + backchannelLogoutSessionRequired +
                 ", additionalAudience=" + additionalAudience +
                 ", postAuthnScripts=" + postAuthnScripts +
+                ", tokenExchangeScripts=" + tokenExchangeScripts +
                 ", consentGatheringScripts=" + consentGatheringScripts +
                 ", introspectionScripts=" + introspectionScripts +
                 ", rptClaimsScripts=" + rptClaimsScripts +
@@ -565,6 +605,7 @@ public class ClientAttributes implements Serializable {
                 ", txTokenSignedResponseAlg=" + txTokenSignedResponseAlg +
                 ", txTokenEncryptedResponseAlg=" + txTokenEncryptedResponseAlg +
                 ", txTokenEncryptedResponseEnc=" + txTokenEncryptedResponseEnc +
+                ", logoutStatusJwtSignedResponseAlg=" + logoutStatusJwtSignedResponseAlg +
                 ", authorizationDetailsTypes=" + authorizationDetailsTypes +
                 '}';
     }

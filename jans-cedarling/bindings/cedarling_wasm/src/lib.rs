@@ -4,10 +4,11 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::bindings::cedar_policy;
-use cedarling::{BootstrapConfig, BootstrapConfigRaw, LogStorage, Request};
+use cedarling::{BootstrapConfig, BootstrapConfigRaw, LogStorage, Request, RequestUnsigned};
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
 use serde_wasm_bindgen::Error;
+use std::collections::HashMap;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::js_sys::{Array, Map, Object, Reflect};
@@ -81,6 +82,24 @@ impl Cedarling {
         Ok(result.into())
     }
 
+    /// Authorize request for unsigned principals.
+    /// makes authorization decision based on the [`RequestUnsigned`]
+    pub async fn authorize_unsigned(&self, request: JsValue) -> Result<AuthorizeResult, Error> {
+        // if `request` is map convert to object
+        let request_object: JsValue = if request.is_instance_of::<Map>() {
+            Object::from_entries(&request)?.into()
+        } else {
+            request
+        };
+        let cedar_request: RequestUnsigned = serde_wasm_bindgen::from_value(request_object)?;
+        let result = self
+            .instance
+            .authorize_unsigned(cedar_request)
+            .await
+            .map_err(Error::new)?;
+        Ok(result.into())
+    }
+
     /// Get logs and remove them from the storage.
     /// Returns `Array` of `Map`
     pub fn pop_logs(&self) -> Result<Array, Error> {
@@ -112,6 +131,46 @@ impl Cedarling {
             result.push(&js_id);
         }
         result
+    }
+
+    /// Get logs by tag, like `log_kind` or `log level`.
+    /// Tag can be `log_kind`, `log_level`.
+    pub fn get_logs_by_tag(&self, tag: &str) -> Result<Vec<JsValue>, Error> {
+        self.instance
+            .get_logs_by_tag(tag)
+            .iter()
+            .map(convert_json_to_object)
+            .collect()
+    }
+
+    /// Get logs by request_id.
+    /// Return log entries that match the given request_id.
+    pub fn get_logs_by_request_id(&self, request_id: &str) -> Result<Vec<JsValue>, Error> {
+        self.instance
+            .get_logs_by_request_id(request_id)
+            .iter()
+            .map(convert_json_to_object)
+            .collect()
+    }
+
+    /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+    /// Tag can be `log_kind`, `log_level`.
+    /// Return log entries that match the given request_id and tag.
+    pub fn get_logs_by_request_id_and_tag(
+        &self,
+        request_id: &str,
+        tag: &str,
+    ) -> Result<Vec<JsValue>, Error> {
+        self.instance
+            .get_logs_by_request_id_and_tag(request_id, tag)
+            .iter()
+            .map(convert_json_to_object)
+            .collect()
+    }
+
+    /// Closes the connections to the Lock Server and pushes all available logs.
+    pub async fn shut_down(&self) {
+        self.instance.shut_down().await;
     }
 }
 
@@ -170,12 +229,19 @@ pub struct AuthorizeResult {
     #[wasm_bindgen(getter_with_clone)]
     pub person: Option<AuthorizeResultResponse>,
 
+    #[wasm_bindgen(skip)]
+    pub principals: HashMap<String, AuthorizeResultResponse>,
+
     /// Result of authorization
     /// true means `ALLOW`
     /// false means `Deny`
     ///
     /// this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
     pub decision: bool,
+
+    /// Request ID of the authorization request
+    #[wasm_bindgen(getter_with_clone)]
+    pub request_id: String,
 }
 
 #[wasm_bindgen]
@@ -183,6 +249,10 @@ impl AuthorizeResult {
     /// Convert `AuthorizeResult` to json string value
     pub fn json_string(&self) -> String {
         json!(self).to_string()
+    }
+
+    pub fn principal(&self, principal: &str) -> Option<AuthorizeResultResponse> {
+        self.principals.get(principal).cloned()
     }
 }
 
@@ -195,7 +265,13 @@ impl From<cedarling::AuthorizeResult> for AuthorizeResult {
             person: value
                 .person
                 .map(|v| AuthorizeResultResponse { inner: Rc::new(v) }),
+            principals: value
+                .principals
+                .into_iter()
+                .map(|(k, v)| (k.to_string(), AuthorizeResultResponse { inner: Rc::new(v) }))
+                .collect(),
             decision: value.decision,
+            request_id: value.request_id,
         }
     }
 }

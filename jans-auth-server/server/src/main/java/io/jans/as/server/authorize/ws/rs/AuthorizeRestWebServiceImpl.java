@@ -64,8 +64,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -175,6 +175,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private ExternalResourceOwnerPasswordCredentialsService externalResourceOwnerPasswordCredentialsService;
 
     @Inject
+    private ExternalConsentGatheringService externalConsentGatheringService;
+
+    @Inject
     private DpopService dpopService;
 
     @Context
@@ -187,7 +190,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
-            String dpopJkt, String authorizationDetails,
+            String dpopJkt, String shouldReturnLogoutStatusJwt, String authorizationDetails,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
         AuthzRequest authzRequest = new AuthzRequest();
@@ -208,6 +211,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setAcrValues(acrValues);
         authzRequest.setAmrValues(amrValues);
         authzRequest.setDpopJkt(dpopJkt);
+        authzRequest.setShouldReturnLogoutStatusJwt(Boolean.parseBoolean(shouldReturnLogoutStatusJwt));
         authzRequest.setAuthzDetailsString(authorizationDetails);
         authzRequest.setRequest(request);
         authzRequest.setRequestUri(requestUri);
@@ -232,7 +236,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
-            String dpopJkt, String authorizationDetails,
+            String dpopJkt, String shouldReturnLogoutStatusJwt, String authorizationDetails,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
         AuthzRequest authzRequest = new AuthzRequest();
@@ -255,6 +259,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setRequest(request);
         authzRequest.setRequestUri(requestUri);
         authzRequest.setDpopJkt(dpopJkt);
+        authzRequest.setShouldReturnLogoutStatusJwt(Boolean.parseBoolean(shouldReturnLogoutStatusJwt));
         authzRequest.setAuthzDetailsString(authorizationDetails);
         authzRequest.setSessionId(sessionId);
         authzRequest.setOriginHeaders(originHeaders);
@@ -354,7 +359,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         validateRequestJwt(authzRequest, isPar, client);
 
         authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
-        authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getRedirectUriResponse());
+        authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getRedirectUriResponse(), client);
 
         dpopService.validateDpopThumprintIsPresent(authzRequest.getDpopJkt(), authzRequest.getState());
 
@@ -497,8 +502,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             log.trace("newSessionId = {}", newSessionId);
         }
 
-        addRespnseParameterSessionId(authzRequest, sessionUser);
+        addResponseParameterSessionId(authzRequest, sessionUser);
         addResponseParameterSid(authzRequest, sessionUser);
+        addResponseParameterLogoutStatusJwt(authzRequest, sessionUser, client, authorizationGrant);
 
         authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionIdService.computeSessionState(sessionUser, authzRequest.getClientId(), authzRequest.getRedirectUri()));
         authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.STATE, authzRequest.getState());
@@ -511,7 +517,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         ResponseBuilder builder = RedirectUtil.getRedirectResponseBuilder(authzRequest.getRedirectUriResponse().getRedirectUri(), authzRequest.getHttpRequest());
 
         addCustomHeaders(builder, authzRequest);
-        updateSession(authzRequest, sessionUser);
+        updateSession(authzRequest, sessionUser, user);
 
         runCiba(authzRequest, client);
         processDeviceAuthorization(deviceAuthzUserCode, user);
@@ -531,6 +537,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             sessionUser.setSessionAttributes(requestParameterMap);
 
             cookieService.createSessionIdCookie(sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
+            sessionIdService.updateAttributesWithUserClaims(sessionUser.getSessionAttributes(), user);
             sessionIdService.updateSessionId(sessionUser);
         }
         return sessionUser;
@@ -560,10 +567,40 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    private void addRespnseParameterSessionId(AuthzRequest authzRequest, SessionId sessionUser) {
+    private void addResponseParameterSessionId(AuthzRequest authzRequest, SessionId sessionUser) {
         if (!appConfiguration.isFapi() && isTrue(appConfiguration.getSessionIdRequestParameterEnabled())) {
             authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.SESSION_ID, sessionUser.getId());
         }
+    }
+
+    /**
+     *
+     * @param authzRequest authorization request
+     * @param sessionUser session
+     * @param client client
+     */
+    private void addResponseParameterLogoutStatusJwt(AuthzRequest authzRequest, SessionId sessionUser, Client client, AuthorizationGrant authorizationGrant) {
+        if (!authzRequest.getShouldReturnLogoutStatusJwt()) {
+            return;
+        }
+        if (!appConfiguration.isFeatureEnabled(FeatureFlagType.LOGOUT_STATUS_JWT)) {
+            log.debug("Unable to return Logout Status JWT because 'logout_status_jwt' feature flag is not present in AS configuration");
+            return;
+        }
+
+        if (authorizationGrant == null) {
+            log.debug("Unable to create Logout Status JWT because grant is null");
+            return;
+        }
+
+        final ExecutionContext executionContext = new ExecutionContext(authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
+        executionContext.setCertAsPem(authzRequest.getHttpRequest().getHeader("X-ClientCert"));
+
+        final LogoutStatusJwt logoutStatusJwt = authorizationGrant.createLogoutStatusJwt(executionContext);
+        if (logoutStatusJwt != null) {
+            authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.LOGOUT_STATUS_JWT, logoutStatusJwt.getCode());
+        }
+
     }
 
     private void addResponseParameterCustomParameters(AuthzRequest authzRequest) {
@@ -604,7 +641,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             return;
         }
 
-        if (authzRequest.getPromptList().contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
+        if (authzRequest.getPromptList().contains(Prompt.CONSENT) || (!isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId())) || externalConsentGatheringService.isEnabled())) {
+        	if (!authzRequest.getPromptList().contains(Prompt.CONSENT) && isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
+        		return;
+        	}
             if (!clientAuthorizationFetched) {
                 clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), authzRequest.getClient().getClientId());
             }
@@ -794,11 +834,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
                     SessionId sessionUser = sessionIdService.generateAuthenticatedSessionId(authzRequest.getHttpRequest(), userDn, authzRequest.getPrompt());
+                    User user = userService.getUserByDnSilently(sessionUser.getUserDn());
                     sessionUser.setSessionAttributes(requestParameterMap);
 
                     cookieService.createSessionIdCookie(sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
+                    sessionIdService.updateAttributesWithUserClaims(sessionUser.getSessionAttributes(), user);
                     sessionIdService.updateSessionId(sessionUser);
-                    User user = userService.getUserByDn(sessionUser.getUserDn());
+
                     return new Pair<>(user, sessionUser);
                 } else {
                     applicationAuditLogger.sendMessage(authzRequest.getAuditLog());
@@ -1003,6 +1045,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.SESSION_ID, authzRequest.getSessionId());
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.CLAIMS, authzRequest.getClaims());
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.AUTHORIZATION_DETAILS, authzRequest.getAuthzDetailsString());
+        redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.LOGOUT_STATUS_JWT, Boolean.toString(authzRequest.getShouldReturnLogoutStatusJwt()));
 
         // CIBA param
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.AUTH_REQ_ID, authzRequest.getAuthReqId());
@@ -1024,13 +1067,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return builder.build();
     }
 
-    private void updateSession(AuthzRequest authzRequest, SessionId sessionUser) {
+    private void updateSession(AuthzRequest authzRequest, SessionId sessionUser, User user) {
         authzRequestService.addDeviceSecretToSession(authzRequest, sessionUser);
 
         int rpRedirectCount = Util.parseIntSilently(sessionUser.getSessionAttributes().get(SUCCESSFUL_RP_REDIRECT_COUNT), 0);
         rpRedirectCount++;
 
         sessionUser.getSessionAttributes().put(SUCCESSFUL_RP_REDIRECT_COUNT, Integer.toString(rpRedirectCount));
+        sessionIdService.updateAttributesWithUserClaims(sessionUser.getSessionAttributes(), user);
         sessionIdService.updateSessionId(sessionUser);
     }
 

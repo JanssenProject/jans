@@ -1,6 +1,5 @@
 # Discovery Script Guide
 
-## Overview
 
 The Authorization Server Metadata spec [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414) (also known as OAuth Discovery) defines a format for clients to use to look up the information needed to interact with a particular OAuth server. This includes things like:-
 - finding the authorization endpoint,
@@ -36,7 +35,7 @@ The discovery interception script extends the base script type with the methods 
 The `configurationAttributes` parameter is `java.util.Map<String, SimpleCustomProperty>`.
 
     configurationAttributes = new HashMap<String, SimpleCustomProperty>();
-    configurationAttributes.put("Location Type", new SimpleCustomProperty("location_type", "MySQL", "Storage Location for the script"));
+    configurationAttributes.put("Location Type", new SimpleCustomProperty("location_type", "db", "Storage Location for the script"));
 
 ### Snippet
 

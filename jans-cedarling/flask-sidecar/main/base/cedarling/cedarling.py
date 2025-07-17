@@ -17,10 +17,9 @@ limitations under the License.
 from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
 from cedarling_python import (
-    ResourceData,
+    EntityData,
     Request,
-    AuthorizeResultResponse,
-    Tokens
+    AuthorizeResultResponse
 )
 from main.logger import logger
 from flask import Flask
@@ -56,15 +55,16 @@ class CedarlingInstance:
     def get_cedarling_instance(self) -> Cedarling:
         return self._cedarling
 
-    def generate_resource(self, resource: DictType) -> ResourceData:
+    def generate_resource(self, resource: DictType) -> EntityData:
         resource_properties = resource.get("properties", {})
         resource_entity_dict = {
+            "entity_type": "resource",
             "type": resource.get("type_field"),
             "id": resource.get("id")
         }
         for key in resource_properties.keys():
             resource_entity_dict[key] = resource_properties[key]
-        resource_entity = ResourceData.from_dict(resource_entity_dict)
+        resource_entity = EntityData.from_dict(resource_entity_dict)
         return resource_entity
 
     def validate_subject(self, subject: DictType) -> bool:
@@ -119,9 +119,22 @@ class CedarlingInstance:
         id_token = subject["properties"].get("id_token", None)
         userinfo_token = subject["properties"].get("userinfo_token", None)
         try:
-            tokens = Tokens(access_token, id_token, userinfo_token)
+            tokens={}
+            if access_token is not None:
+                tokens["access_token"] = access_token
+            if id_token is not None:
+                tokens["id_token"] = id_token
+            if userinfo_token is not None:
+                tokens["userinfo_token"] = userinfo_token
             request = Request(tokens, action_entity, resource_entity, context)
             authorize_result = self._cedarling.authorize(request)
+            request_id = authorize_result.request_id()
+            tag = "Decision"
+            decision_log = self._cedarling.get_logs_by_request_id_and_tag(request_id, tag)
+            i = 1
+            for log in decision_log:
+                logger.info(f"Decision log {i}: {str(log)}")
+                i += 1
         except Exception as e:
             result_dict["decision"] = False
             result_dict["context"] = {

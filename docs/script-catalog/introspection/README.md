@@ -1,6 +1,6 @@
 # Introspection Script Guide
 
-## Overview
+
 
 OAuth reference tokens don't convey any information. They are by their very nature, unguessable strings that meet the prescribed OAuth security guidelines for lack of order or predictability (entropy). However, there is still a large amount of data that may be attached to a token, such as:-
  - its current validity,
@@ -29,7 +29,7 @@ The introspection interception script extends the base script type with the meth
 The `configurationAttributes` parameter is `java.util.Map<String, SimpleCustomProperty>`. 
 
     configurationAttributes = new HashMap<String, SimpleCustomProperty>();
-    configurationAttributes.put("Location Type", new SimpleCustomProperty("location_type", "MySQL", "Storage Location for the script"));
+    configurationAttributes.put("Location Type", new SimpleCustomProperty("location_type", "db", "Storage Location for the script"));
 
 ### Snippet
 

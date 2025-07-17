@@ -6,7 +6,7 @@ tags:
   - DynamicScope
 ---
 
-## Overview
+# Dynamic Scope
 The dynamic scope custom script allows the authorization server to generate a list of claims (and their values) on the fly, depending on circumstances such as the ID of the client requesting it, authenticated user's session parameters, values of other users' attributes, results of some calculations implementing specific business logic and/or requests to remote APIs or databases. Claims are then returned the usual way in a response to a call to the `/userinfo` endpoint. 
 
 ## Interface
@@ -168,8 +168,8 @@ public class DynamicScope implements DynamicScopeType {
 ```
 
 ### Sample Scripts
-- [Dynamic Permission](../../../script-catalog/dynamic_scope/dynamic-permission/README.md)
-- [MemberOf Attribute](../../../script-catalog/dynamic_scope/memberof-attribute/README.md)
-- [Organization Name](../../../script-catalog/dynamic_scope/org-name/README.md)
-- [Session Parameter](../../../script-catalog/dynamic_scope/session-parameter/README.md)
-- [Work Phone](../../../script-catalog/dynamic_scope/work-phone/README.md)
+- [Dynamic Permission](../../../script-catalog/dynamic_scope/dynamic-permission)
+- [MemberOf Attribute](../../../script-catalog/dynamic_scope/memberof-attribute)
+- [Organization Name](../../../script-catalog/dynamic_scope/org-name)
+- [Session Parameter](../../../script-catalog/dynamic_scope/session-parameter)
+- [Work Phone](../../../script-catalog/dynamic_scope/work-phone)

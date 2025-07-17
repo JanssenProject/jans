@@ -7,12 +7,12 @@
 package io.jans.link.timer;
 
 import io.jans.link.constants.JansConstants;
-import io.jans.link.event.CacheRefreshEvent;
-import io.jans.link.external.ExternalCacheRefreshService;
+import io.jans.link.event.LinkEvent;
+import io.jans.link.external.ExternalLinkService;
 import io.jans.link.model.*;
 import io.jans.link.model.config.AppConfiguration;
-import io.jans.link.model.config.CacheRefreshConfiguration;
-import io.jans.link.server.service.CacheRefrshConfigurationService;
+import io.jans.link.model.config.LinkConfiguration;
+import io.jans.link.server.service.LinkConfigurationService;
 import io.jans.link.service.*;
 import io.jans.link.service.config.ApplicationFactory;
 import io.jans.link.service.config.ConfigurationFactory;
@@ -81,13 +81,13 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 	private ConfigurationFactory configurationFactory;
 
 	@Inject
-	private CacheRefreshSnapshotFileService cacheRefreshSnapshotFileService;
+	private LinkSnapshotFileService linkSnapshotFileService;
 
 	@Inject
-	private ExternalCacheRefreshService externalCacheRefreshService;
+	private ExternalLinkService externalLinkService;
 
 	@Inject
-	private CacheRefrshConfigurationService CacheRefrshConfigurationService;
+	private LinkConfigurationService linkConfigurationService;
 
 	@Inject
 	private EncryptionService encryptionService;
@@ -108,28 +108,28 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 	private long lastFinishedTime;
 
 	public void initTimer() {
-		log.info("Initializing jans link Cache Refresh Timer");
+		log.info("Initializing jans link Link Interception Timer");
 		this.isActive = new AtomicBoolean(false);
 
 		// Clean up previous Inum cache
-		CacheRefreshConfiguration cacheRefreshConfiguration = getConfigurationFactory().getAppConfiguration();
-		if (cacheRefreshConfiguration != null) {
-			String snapshotFolder = cacheRefreshConfiguration.getSnapshotFolder();
+		LinkConfiguration linkConfiguration = getConfigurationFactory().getAppConfiguration();
+		if (linkConfiguration != null) {
+			String snapshotFolder = linkConfiguration.getSnapshotFolder();
 			if (StringHelper.isNotEmpty(snapshotFolder)) {
-				String inumCachePath = getInumCachePath(cacheRefreshConfiguration);
+				String inumCachePath = getInumCachePath(linkConfiguration);
 				objectSerializationService.cleanup(inumCachePath);
 			}
 		}
 
-		// Schedule to start cache refresh every 1 minute
-		timerEvent.fire(new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new CacheRefreshEvent(),
+		// Schedule to start link every 1 minute
+		timerEvent.fire(new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new LinkEvent(),
 				Scheduled.Literal.INSTANCE));
 
 		this.lastFinishedTime = System.currentTimeMillis();
 	}
 
 	@Asynchronous
-	public void process(@Observes @Scheduled CacheRefreshEvent cacheRefreshEvent) {
+	public void process(@Observes @Scheduled LinkEvent linkEvent) {
 		if (this.isActive.get()) {
 			log.info("Another process is active");
 			return;
@@ -152,7 +152,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		AppConfiguration currentConfiguration = getConfigurationFactory().getAppConfiguration();
 		try {
 			currentConfiguration.setServerIpAddress("255.255.255.255");
-			if (!isStartCacheRefresh(currentConfiguration)) {
+			if (!isStartLink(currentConfiguration)) {
 				log.info("Starting conditions aren't reached");
 				return;
 			}
@@ -163,11 +163,11 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 			this.lastFinishedTime = System.currentTimeMillis();
 		} catch (Throwable ex) {
 			ex.printStackTrace();
-			log.info("Exception happened while executing cache refresh synchronization"+ ex);
+			log.info("Exception happened while executing link synchronization (exception: {})", ex.getMessage()); //Giving Exception Details
 		}
 	}
 
-	private boolean isStartCacheRefresh(AppConfiguration currentConfiguration) {
+	private boolean isStartLink(AppConfiguration currentConfiguration) {
 		if (!currentConfiguration.isLinkEnabled()) {
 			return false;
 		}
@@ -182,46 +182,46 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 			return false;
 		}
 
-		String cacheRefreshServerIpAddress = currentConfiguration.getServerIpAddress();
-		// if (StringHelper.isEmpty(cacheRefreshServerIpAddress)) {
-		// log.debug("There is no master Cache Refresh server");
+		String linkServerIpAddress = currentConfiguration.getServerIpAddress();
+		// if (StringHelper.isEmpty(linkServerIpAddress)) {
+		// log.debug("There is no master Link Interception server");
 		// return false;
 		// }
 
-		// Compare server IP address with cacheRefreshServerIp
-		boolean cacheRefreshServer = false;
+		// Compare server IP address with linkServerIpAddress
+		boolean linkServer = false;
 		try {
 			Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
 			for (NetworkInterface networkInterface : Collections.list(nets)) {
 				Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
 				for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-					if (StringHelper.equals(cacheRefreshServerIpAddress, inetAddress.getHostAddress())) {
-						cacheRefreshServer = true;
+					if (StringHelper.equals(linkServerIpAddress, inetAddress.getHostAddress())) {
+						linkServer = true;
 						break;
 					}
 				}
 
-				if (cacheRefreshServer) {
+				if (linkServer) {
 					break;
 				}
 			}
 		} catch (SocketException ex) {
-			log.error("Failed to enumerate server IP addresses"+ ex);
+			log.error("Failed to enumerate server IP addresses (exception: {})", ex.getMessage()); //Giving Exception Details
 		}
 
-		if (!cacheRefreshServer) {
-			cacheRefreshServer = externalCacheRefreshService.executeExternalIsStartProcessMethods();
-			cacheRefreshServer = true;
+		if (!linkServer) {
+			linkServer = externalLinkService.executeExternalIsStartProcessMethods();
+			linkServer = true;
 		}
 
-		if (!cacheRefreshServer) {
-			log.info("This server isn't master Cache Refresh server");
+		if (!linkServer) {
+			log.info("This server isn't master Link Interception server");
 			return false;
 		}
 
-		// Check if cache refresh specific configuration was loaded
+		// Check if link specific configuration was loaded
 		if (currentConfiguration == null) {
-			log.info("Failed to start cache refresh. Can't loading configuration from oxTrustCacheRefresh.properties");
+			log.info("Failed to start link. Can't loading configuration from link.properties");
 			return false;
 		}
 
@@ -233,7 +233,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 
 	private void processImpl(AppConfiguration currentConfiguration)
 			throws SearchException {
-		CacheRefreshUpdateMethod updateMethod = getUpdateMethod(currentConfiguration);
+		LinkUpdateMethod updateMethod = getUpdateMethod(currentConfiguration);
 
 		// Prepare and check connections to LDAP servers
 		LdapServerConnection[] sourceServerConnections = prepareLdapServerConnections(currentConfiguration,
@@ -244,7 +244,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 			GluuLdapConfiguration ldapInumConfiguration = new GluuLdapConfiguration();
 			ldapInumConfiguration.setConfigId("local_inum");
 			ldapInumConfiguration.setBaseDNsStringsList(
-					Arrays.asList(new String[] { JansConstants.CACHE_REFRESH_DEFAULT_BASE_DN }));
+					Arrays.asList(new String[] { JansConstants.LINK_DEFAULT_BASE_DN }));
 
 			inumDbServerConnection = prepareLdapServerConnection(currentConfiguration, ldapInumConfiguration,
 					true);
@@ -253,7 +253,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 					currentConfiguration.getInumConfig());
 		}
 
-		boolean isVdsUpdate = CacheRefreshUpdateMethod.VDS.equals(updateMethod);
+		boolean isVdsUpdate = LinkUpdateMethod.VDS.equals(updateMethod);
 		LdapServerConnection targetServerConnection = null;
 		if (isVdsUpdate) {
 			targetServerConnection = prepareLdapServerConnection(currentConfiguration,
@@ -263,7 +263,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		try {
 			if ((sourceServerConnections == null) || (inumDbServerConnection == null)
 					|| (isVdsUpdate && (targetServerConnection == null))) {
-				log.error("Skipping cache refresh due to invalid server configuration");
+				log.error("Skipping link due to invalid server configuration");
 			} else {
 				detectChangedEntries(currentConfiguration, sourceServerConnections,
 						inumDbServerConnection, targetServerConnection, updateMethod);
@@ -298,8 +298,8 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 	@SuppressWarnings("unchecked")
 	private boolean detectChangedEntries( AppConfiguration currentConfiguration, LdapServerConnection[] sourceServerConnections,
 										 LdapServerConnection inumDbServerConnection, LdapServerConnection targetServerConnection,
-										 CacheRefreshUpdateMethod updateMethod) throws SearchException {
-		boolean isVDSMode = CacheRefreshUpdateMethod.VDS.equals(updateMethod);
+										 LinkUpdateMethod updateMethod) throws SearchException {
+		boolean isVDSMode = LinkUpdateMethod.VDS.equals(updateMethod);
 
 		// Load all entries from Source servers
 		log.info("Attempting to load entries from source server");
@@ -311,11 +311,11 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 			sourcePersons = loadSourceServerEntriesWithoutLimits(currentConfiguration, sourceServerConnections);
 		}
 
-		log.info("Found '{}' entries in source server"+ sourcePersons.size());
+		log.info("Found {} entries in source server", sourcePersons.size());
 
 		Map<CacheCompoundKey, GluuSimplePerson> sourcePersonCacheCompoundKeyMap = getSourcePersonCompoundKeyMap(
 				currentConfiguration, sourcePersons);
-		log.info("Found '{}' unique entries in source server"+ sourcePersonCacheCompoundKeyMap.size());
+		log.info("Found {} unique entries in source server", sourcePersonCacheCompoundKeyMap.size());
 
 		// Load all inum entries
 		List<JansInumMap> inumMaps = null;
@@ -326,9 +326,9 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		if (loadedObject != null) {
 			try {
 				inumMaps = (List<JansInumMap>) loadedObject;
-				log.info("Found '{}' entries in inum objects disk cache"+ inumMaps.size());
+				log.info("Found {} entries in inum objects disk cache", inumMaps.size());
 			} catch (Exception ex) {
-				log.error("Failed to convert to GluuInumMap list"+ ex);
+				log.error("Failed to convert to GluuInumMap list (exception: {})", ex.getMessage()); //Giving Exception Details
 				objectSerializationService.cleanup(inumCachePath);
 			}
 		}
@@ -336,7 +336,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		if (inumMaps == null) {
 			// Load all inum entries from LDAP
 			inumMaps = loadInumServerEntries(currentConfiguration, inumDbServerConnection);
-			log.info("Found '{}' entries in inum server"+ inumMaps.size());
+			log.info("Found {} entries in inum server", inumMaps.size());
 		}
 
 		HashMap<CacheCompoundKey, JansInumMap> primaryKeyAttrValueInumMap = getPrimaryKeyAttrValueInumMap(inumMaps);
@@ -348,31 +348,31 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 
 		HashMap<CacheCompoundKey, JansInumMap> allPrimaryKeyAttrValueInumMap = getAllInumServerEntries(
 				primaryKeyAttrValueInumMap, addedPrimaryKeyAttrValueInumMap);
-		log.info("Count actual inum entries '{}' after updating inum server"+ allPrimaryKeyAttrValueInumMap.size());
+		log.info("Count actual inum entries {} after updating inum server", allPrimaryKeyAttrValueInumMap.size());
 
 		HashMap<String, Integer> currInumWithEntryHashCodeMap = getSourcePersonsHashCodesMap(inumDbServerConnection,
 				sourcePersonCacheCompoundKeyMap, allPrimaryKeyAttrValueInumMap);
-		log.info("Count actual source entries '{}' after calculating hash code"+ currInumWithEntryHashCodeMap.size());
+		log.info("Count actual source entries {} after calculating hash code", currInumWithEntryHashCodeMap.size());
 
 		// Create snapshots cache folder if needed
-		boolean result = cacheRefreshSnapshotFileService.prepareSnapshotsFolder(currentConfiguration);
+		boolean result = linkSnapshotFileService.prepareSnapshotsFolder(currentConfiguration);
 		if (!result) {
 			return false;
 		}
 
 		// Load last snapshot into memory
-		Map<String, Integer> prevInumWithEntryHashCodeMap = cacheRefreshSnapshotFileService
+		Map<String, Integer> prevInumWithEntryHashCodeMap = linkSnapshotFileService
 				.readLastSnapshot(currentConfiguration);
 
 		// Compare 2 snapshot and invoke update if needed
 		Set<String> changedInums = getChangedInums(currInumWithEntryHashCodeMap, prevInumWithEntryHashCodeMap,
 				isVDSMode);
-		log.info("Found '{}' changed entries"+ changedInums.size());
+		log.info("Found {} changed entries", changedInums.size());
 
 		// Load problem list from disk and add to changedInums
-		List<String> problemInums = cacheRefreshSnapshotFileService.readProblemList(currentConfiguration);
+		List<String> problemInums = linkSnapshotFileService.readProblemList(currentConfiguration);
 		if (problemInums != null) {
-			log.info("Loaded '{}' problem entries from problem file"+ problemInums.size());
+			log.info("Loaded {} problem entries from problem file", problemInums.size());
 			// Process inums from problem list too
 			changedInums.addAll(problemInums);
 		}
@@ -386,30 +386,30 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 					allPrimaryKeyAttrValueInumMap, changedInums);
 		}
 
-		log.info("Updated '{}' entries"+ updatedInums.size());
+		log.info("Updated {} entries", updatedInums.size());
 		changedInums.removeAll(updatedInums);
-		log.info("Failed to update '{}' entries"+ changedInums.size());
+		log.info("Failed to update {} entries", changedInums.size());
 
 		// Persist snapshot to cache folder
-		result = cacheRefreshSnapshotFileService.createSnapshot(currentConfiguration,
+		result = linkSnapshotFileService.createSnapshot(currentConfiguration,
 				currInumWithEntryHashCodeMap);
 		if (!result) {
 			return false;
 		}
 
 		// Retain only specified number of snapshots
-		cacheRefreshSnapshotFileService.retainSnapshots(currentConfiguration,
+		linkSnapshotFileService.retainSnapshots(currentConfiguration,
 				currentConfiguration.getSnapshotMaxCount());
 
 		// Save changedInums as problem list to disk
 		currentConfiguration.setProblemCount(String.valueOf(changedInums.size()));
-		cacheRefreshSnapshotFileService.writeProblemList(currentConfiguration, changedInums);
+		linkSnapshotFileService.writeProblemList(currentConfiguration, changedInums);
 
 		// Prepare list of persons for removal
 		List<GluuSimplePerson> personsForRemoval = null;
 
 		boolean keepExternalPerson = currentConfiguration.isKeepExternalPerson();
-		log.info("Keep external persons: '{}'"+ keepExternalPerson);
+		log.info("Keep external persons: {}", keepExternalPerson);
 		if (keepExternalPerson) {
 			// Determine entries which need to remove
 			personsForRemoval = getRemovedPersons(currInumWithEntryHashCodeMap, prevInumWithEntryHashCodeMap);
@@ -418,12 +418,12 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 
 			// Load all entries from Target server
 			List<TypedGluuSimplePerson> targetPersons = loadTargetServerEntries(currentConfiguration, getLdapEntryManager());
-			log.info("Found '{}' entries in target server"+ targetPersons.size());
+			log.info("Found {} entries in target server", targetPersons.size());
 
 			// Detect entries which need to remove
 			personsForRemoval = processTargetPersons(targetPersons, currInumWithEntryHashCodeMap);
 		}
-		log.info("Count entries '{}' for removal from target server"+ personsForRemoval.size());
+		log.info("Count entries {} for removal from target server", personsForRemoval.size());
 
 		// Remove entries from target server
 		HashMap<String, JansInumMap> inumInumMap = getInumInumMap(inumMaps);
@@ -431,7 +431,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 				getLdapEntryManager(), personsForRemoval, inumInumMap);
 		List<String> removedPersonInums = removeTargetEntriesResult.getFirst();
 		List<String> removedGluuInumMaps = removeTargetEntriesResult.getSecond();
-		log.info("Removed '{}' persons from target server"+ removedPersonInums.size());
+		log.info("Removed {} persons from target server", removedPersonInums.size());
 
 		// Prepare list of inum for serialization
 		ArrayList<JansInumMap> currentInumMaps = applyChangesToInumMap(inumInumMap, addedPrimaryKeyAttrValueInumMap,
@@ -446,12 +446,12 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		return true;
 	}
 
-	public LdapServerConnection prepareLdapServerConnection(CacheRefreshConfiguration cacheRefreshConfiguration,
+	public LdapServerConnection prepareLdapServerConnection(LinkConfiguration linkConfiguration,
 															GluuLdapConfiguration ldapConfiguration) {
-		return prepareLdapServerConnection(cacheRefreshConfiguration, ldapConfiguration, false);
+		return prepareLdapServerConnection(linkConfiguration, ldapConfiguration, false);
 	}
 
-	private LdapServerConnection prepareLdapServerConnection(CacheRefreshConfiguration cacheRefreshConfiguration,
+	private LdapServerConnection prepareLdapServerConnection(LinkConfiguration linkConfiguration,
 															 GluuLdapConfiguration ldapConfiguration, boolean useLocalConnection) {
 		String ldapConfig = ldapConfiguration.getConfigId();
 
@@ -466,7 +466,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		Properties ldapDecryptedProperties = encryptionService.decryptAllProperties(ldapProperties);
 
 		// Try to get updated password via script
-		BindCredentials bindCredentials = externalCacheRefreshService
+		BindCredentials bindCredentials = externalLinkService
 				.executeExternalGetBindCredentialsMethods(ldapConfig);
 		String bindPasswordPropertyKey = persistenceType + "#" + PropertiesDecrypter.BIND_PASSWORD;
 		if (bindCredentials != null) {
@@ -481,14 +481,14 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 			if (clonedLdapDecryptedProperties.getProperty(bindPasswordPropertyKey) != null) {
 				clonedLdapDecryptedProperties.setProperty(bindPasswordPropertyKey, "REDACTED");
 			}
-			log.trace("Attempting to create PersistenceEntryManager with properties: {}"+ clonedLdapDecryptedProperties);
+			log.trace("Attempting to create PersistenceEntryManager with properties: {}", clonedLdapDecryptedProperties);
 		}
 		PersistenceEntryManager customPersistenceEntryManager = entryManagerFactory
 				.createEntryManager(ldapDecryptedProperties);
-		log.info("Created Cache Refresh PersistenceEntryManager: {}"+ customPersistenceEntryManager);
+		log.info("Created Link Interception PersistenceEntryManager: {}", customPersistenceEntryManager);
 
 		if (!customPersistenceEntryManager.getOperationService().isConnected()) {
-			log.error("Failed to connect to LDAP server using configuration {}"+ ldapConfig);
+			log.error("Failed to connect to LDAP server using configuration {}", ldapConfig);
 			return null;
 		}
 
@@ -511,7 +511,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 			// Update GluuInumMap if it exist
 			JansInumMap currentInumMap = inumInumMap.get(inum);
 			if (currentInumMap == null) {
-				log.warn("Can't find inum entry of person with DN: {}"+ removedPerson.getDn());
+				log.warn("Can't find inum entry of person with DN: {}", removedPerson.getDn());
 			} else {
 				JansInumMap removedInumMap = getMarkInumMapEntryAsRemoved(currentInumMap,
 						getLdapEntryManager().encodeTime(removedPerson.getDn(), runDate));
@@ -519,8 +519,8 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 					inumDbPersistenceEntryManager.merge(removedInumMap);
 					result2.add(removedInumMap.getInum());
 				} catch (BasePersistenceException ex) {
-					log.error("Failed to update entry with inum '{}' and DN: {}"+ currentInumMap.getInum(),
-							currentInumMap.getDn(), ex);
+					log.error("Failed to update entry with inum {} and DN: {} (exception: {})", currentInumMap.getInum(),
+							currentInumMap.getDn(), ex.getMessage()); //Giving Exception Details
 					continue;
 				}
 			}
@@ -546,11 +546,11 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 				}
 				result1.add(inum);
 			} catch (BasePersistenceException ex) {
-				log.error("Failed to remove person entry with inum '{}' and DN: {}"+ inum, removedPerson.getDn(), ex);
+				log.error("Failed to remove person entry with inum {} and DN: {} (exception: {})", inum, removedPerson.getDn(), ex.getMessage()); //Giving Exception Details
 				continue;
 			}
 
-			log.info("Person with DN: '{}' removed from target server"+ removedPerson.getDn());
+			log.info("Person with DN: {} removed from target server", removedPerson.getDn());
 		}
 
 		return new Pair<List<String>, List<String>>(result1, result2);
@@ -561,7 +561,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		try {
 			clonedInumMap = (JansInumMap) BeanUtilsBean2.getInstance().cloneBean(currentInumMap);
 		} catch (Exception ex) {
-			log.error("Failed to prepare GluuInumMap for removal"+ ex);
+			log.error("Failed to prepare GluuInumMap for removal (exception: {})", ex.getMessage()); //Giving Exception Details
 			return null;
 		}
 
@@ -599,7 +599,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 	}
 
 	private HashMap<CacheCompoundKey, JansInumMap> addNewInumServerEntries(
-			CacheRefreshConfiguration cacheRefreshConfiguration, LdapServerConnection inumDbServerConnection,
+			LinkConfiguration linkConfiguration, LdapServerConnection inumDbServerConnection,
 			Map<CacheCompoundKey, GluuSimplePerson> sourcePersonCacheCompoundKeyMap,
 			HashMap<CacheCompoundKey, JansInumMap> primaryKeyAttrValueInumMap) {
 		PersistenceEntryManager inumDbPersistenceEntryManager = inumDbServerConnection.getPersistenceEntryManager();
@@ -607,14 +607,14 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 
 		HashMap<CacheCompoundKey, JansInumMap> result = new HashMap<CacheCompoundKey, JansInumMap>();
 
-		String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(cacheRefreshConfiguration);
+		String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(linkConfiguration);
 		for (Entry<CacheCompoundKey, GluuSimplePerson> sourcePersonCacheCompoundKeyEntry : sourcePersonCacheCompoundKeyMap
 				.entrySet()) {
 			CacheCompoundKey cacheCompoundKey = sourcePersonCacheCompoundKeyEntry.getKey();
 			GluuSimplePerson sourcePerson = sourcePersonCacheCompoundKeyEntry.getValue();
 
 			if (log.isTraceEnabled()) {
-				log.trace("Checking source entry with key: '{}', and DN: {}"+ cacheCompoundKey, sourcePerson.getDn());
+				log.trace("Checking source entry with key: {}, and DN: {}", cacheCompoundKey, sourcePerson.getDn());
 			}
 
 			JansInumMap currentInumMap = primaryKeyAttrValueInumMap.get(cacheCompoundKey);
@@ -623,9 +623,9 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 				currentInumMap = addGluuInumMap(inumbaseDn, inumDbPersistenceEntryManager, keyAttributesWithoutValues,
 						keyAttributesValues);
 				result.put(cacheCompoundKey, currentInumMap);
-				log.info("Added new inum entry for DN: {}"+ sourcePerson.getDn());
+				log.info("Added new inum entry for DN: {}", sourcePerson.getDn());
 			} else {
-				log.trace("Inum entry for DN: '{}' exist"+ sourcePerson.getDn());
+				log.trace("Inum entry for DN: {} exist", sourcePerson.getDn());
 			}
 		}
 
@@ -633,11 +633,11 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 	}
 
 	private Map<CacheCompoundKey, GluuSimplePerson> getSourcePersonCompoundKeyMap(
-			CacheRefreshConfiguration cacheRefreshConfiguration, List<GluuSimplePerson> sourcePersons) {
+			LinkConfiguration linkConfiguration, List<GluuSimplePerson> sourcePersons) {
 		Map<CacheCompoundKey, GluuSimplePerson> result = new HashMap<CacheCompoundKey, GluuSimplePerson>();
 		Set<CacheCompoundKey> duplicateKeys = new HashSet<CacheCompoundKey>();
 
-		String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(cacheRefreshConfiguration);
+		String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(linkConfiguration);
 		for (GluuSimplePerson sourcePerson : sourcePersons) {
 			String[][] keyAttributesValues = getKeyAttributesValues(keyAttributesWithoutValues, sourcePerson);
 			CacheCompoundKey cacheCompoundKey = new CacheCompoundKey(keyAttributesValues);
@@ -650,14 +650,14 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		}
 
 		for (CacheCompoundKey duplicateKey : duplicateKeys) {
-			log.error("Non-deterministic primary key. Skipping user with key: {}"+ duplicateKey);
+			log.error("Non-deterministic primary key. Skipping user with key: {}", duplicateKey);
 			result.remove(duplicateKey);
 		}
 
 		return result;
 	}
 
-	private LdapServerConnection[] prepareLdapServerConnections(CacheRefreshConfiguration cacheRefreshConfiguration,
+	private LdapServerConnection[] prepareLdapServerConnections(LinkConfiguration linkConfiguration,
 			List<GluuLdapConfiguration> ldapConfigurations) {
 		if (null == ldapConfigurations) {
 			return null;
@@ -665,7 +665,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 
 		LdapServerConnection[] ldapServerConnections = new LdapServerConnection[ldapConfigurations.size()];
 		for (int i = 0; i < ldapConfigurations.size(); i++) {
-			ldapServerConnections[i] = prepareLdapServerConnection(cacheRefreshConfiguration,
+			ldapServerConnections[i] = prepareLdapServerConnection(linkConfiguration,
 					ldapConfigurations.get(i));
 			if (ldapServerConnections[i] == null) {
 				return null;
@@ -689,7 +689,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		currentConfiguration.setLastUpdate(currentDateTime);
 		currentConfiguration.setLastUpdateCount(currentConfiguration.getLastUpdateCount());
 		currentConfiguration.setProblemCount(currentConfiguration.getProblemCount());
-		CacheRefrshConfigurationService.updateConfiguration(currentConfiguration);
+		linkConfigurationService.updateConfiguration(currentConfiguration);
 	}
 
 	public ConfigurationFactory getConfigurationFactory() {
@@ -702,31 +702,31 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 
 	public ArrayList<JansInumMap> applyChangesToInumMap(HashMap<String, JansInumMap> inumInumMap,
                                                          HashMap<CacheCompoundKey, JansInumMap> addedPrimaryKeyAttrValueInumMap, List<String> removedGluuInumMaps) {
-        log.info("There are '{}' entries before updating inum list"+ inumInumMap.size());
+        log.info("There are {} entries before updating inum list", inumInumMap.size());
         for (String removedGluuInumMap : removedGluuInumMaps) {
             inumInumMap.remove(removedGluuInumMap);
         }
-        log.info("There are '{}' entries after removal '{}' entries" + inumInumMap.size() +" : " +removedGluuInumMaps.size());
+        log.info("There are {} entries after removal {} entries", inumInumMap.size(), removedGluuInumMaps.size());
 
         ArrayList<JansInumMap> currentInumMaps = new ArrayList<JansInumMap>(inumInumMap.values());
         currentInumMaps.addAll(addedPrimaryKeyAttrValueInumMap.values());
-        log.info("There are '{}' entries after adding '{}' entries"+ currentInumMaps.size()+" : " +
+        log.info("There are {} entries after adding {} entries", currentInumMaps.size(),
                 addedPrimaryKeyAttrValueInumMap.size());
 
         return currentInumMaps;
     }
 
-	public List<String> updateTargetEntriesViaCopy(CacheRefreshConfiguration cacheRefreshConfiguration,
+	public List<String> updateTargetEntriesViaCopy(LinkConfiguration linkConfiguration,
 														Map<CacheCompoundKey, GluuSimplePerson> sourcePersonCacheCompoundKeyMap,
 														HashMap<CacheCompoundKey, JansInumMap> primaryKeyAttrValueInumMap, Set<String> changedInums) {
 			HashMap<String, CacheCompoundKey> inumCacheCompoundKeyMap = getInumCacheCompoundKeyMap(
 					primaryKeyAttrValueInumMap);
-			Map<String, String> targetServerAttributesMapping = getTargetServerAttributesMapping(cacheRefreshConfiguration);
+			Map<String, String> targetServerAttributesMapping = getTargetServerAttributesMapping(linkConfiguration);
 			String[] customObjectClasses = appConfiguration.getPersonObjectClassTypes();
 
 			List<String> result = new ArrayList<String>();
 
-			if (!validateTargetServerSchema(cacheRefreshConfiguration, targetServerAttributesMapping,
+			if (!validateTargetServerSchema(linkConfiguration, targetServerAttributesMapping,
 					customObjectClasses)) {
 				return result;
 			}
@@ -763,7 +763,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 			return result;
 		}
 
-    public List<JansInumMap> loadInumServerEntries(CacheRefreshConfiguration cacheRefreshConfiguration,
+    public List<JansInumMap> loadInumServerEntries(LinkConfiguration linkConfiguration,
                                                     LdapServerConnection inumDbServerConnection) {
         PersistenceEntryManager inumDbPersistenceEntryManager = inumDbServerConnection.getPersistenceEntryManager();
         String inumbaseDn = inumDbServerConnection.getBaseDns()[0];
@@ -775,7 +775,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
         Filter filter = Filter.createANDFilter(filterObjectClass, filterStatus);
 
         return inumDbPersistenceEntryManager.findEntries(inumbaseDn, JansInumMap.class, filter, SearchScope.SUB, null,
-                null, 0, 0, cacheRefreshConfiguration.getLdapSearchSizeLimit());
+                null, 0, 0, linkConfiguration.getLdapSearchSizeLimit());
     }
 
 	public HashMap<CacheCompoundKey, JansInumMap> getAllInumServerEntries(

@@ -137,11 +137,6 @@ class ValueExpressionAnalyzer {
         }
 
         @Override
-        public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context, Object base) {
-            return delegate.getFeatureDescriptors(context, base);
-        }
-
-        @Override
         public Class<?> getCommonPropertyType(ELContext context, Object base) {
             return delegate.getCommonPropertyType(context, base);
         }

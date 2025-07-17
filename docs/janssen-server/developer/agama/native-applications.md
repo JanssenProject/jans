@@ -182,7 +182,7 @@ From here onwards, requests must contain the following parameters:
 |-|-|
 |`use_auth_session`|true|
 |`auth_session`|The value obtained in the previous request|
-|`data`|A JSON object value which will become the result of the RRF instruction the flow is paused at|
+|`data`|A JSON object that will become the result of the RRF instruction the flow is paused at. If the given RRF has no assignment associated, an empty object must be passed: `{ }`|
 
 !!! Note
     Whenever a request is missing the `auth_session` param, it is assumed the [inital request](#initial-request) is being attempted.

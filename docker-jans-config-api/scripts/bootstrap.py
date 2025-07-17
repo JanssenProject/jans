@@ -52,11 +52,9 @@ def main():
 
     if "sql" in persistence_groups:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        render_sql_properties(
-            manager,
-            f"/app/templates/jans-{db_dialect}.properties",
-            "/etc/jans/conf/jans-sql.properties",
-        )
+        sql_prop = "/etc/jans/conf/jans-sql.properties"
+        if not os.path.exists(sql_prop):
+            render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
 
     wait_for_persistence(manager)
     override_simple_json_property("/etc/jans/conf/jans-sql.properties")
@@ -364,8 +362,16 @@ class PersistenceSetup:
 
         # pre-populate config_api_dynamic_conf_base64
         with open("/app/templates/jans-config-api/dynamic-conf.json") as f:
-            tmpl = Template(f.read())
-            ctx["config_api_dynamic_conf_base64"] = generate_base64_contents(tmpl.substitute(**ctx))
+            tmpl = Template(f.read()).substitute(**ctx)
+            ctx["config_api_dynamic_conf_base64"] = generate_base64_contents(tmpl)
+
+        # extract necessary keys for upgrade process
+        with open("/tmp/config-api.dynamic-conf.json", "w") as f:  # nosec: B108
+            partial_dyn_conf = {
+                k: v for k, v in json.loads(tmpl).items()
+                if k in ("plugins", "assetMgtConfiguration")
+            }
+            f.write(json.dumps(partial_dyn_conf))
 
         # finalize ctx
         return ctx

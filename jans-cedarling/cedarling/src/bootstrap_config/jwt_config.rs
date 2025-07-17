@@ -1,13 +1,15 @@
 // This software is available under the Apache-2.0 license.
+//
 // See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
 //
 // Copyright (c) 2024, Gluu, Inc.
 
 use jsonwebtoken::Algorithm;
 use std::collections::HashSet;
+use serde::{Deserialize, Serialize};
 
 /// The set of Bootstrap properties related to JWT validation.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct JwtConfig {
     /// A Json Web Key Store (JWKS) with public keys.
     ///
@@ -37,12 +39,6 @@ pub struct JwtConfig {
     pub jwt_status_validation: bool,
     /// Only tokens signed with algorithms in this list can be valid.
     pub signature_algorithms_supported: HashSet<Algorithm>,
-    /// Validation options related to the Access token
-    pub access_token_config: TokenValidationConfig,
-    /// Validation options related to the Id token
-    pub id_token_config: TokenValidationConfig,
-    /// Validation options related to the Userinfo token
-    pub userinfo_token_config: TokenValidationConfig,
 }
 
 /// Validation options related to JSON Web Tokens (JWT).
@@ -165,9 +161,6 @@ impl Default for JwtConfig {
             jwt_sig_validation: true,
             jwt_status_validation: true,
             signature_algorithms_supported: HashSet::new(),
-            access_token_config: TokenValidationConfig::access_token(),
-            id_token_config: TokenValidationConfig::id_token(),
-            userinfo_token_config: TokenValidationConfig::userinfo_token(),
         }
     }
 }
@@ -180,9 +173,6 @@ impl JwtConfig {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
-            access_token_config: TokenValidationConfig::default(),
-            id_token_config: TokenValidationConfig::default(),
-            userinfo_token_config: TokenValidationConfig::default(),
         }
         .allow_all_algorithms()
     }
@@ -204,5 +194,62 @@ impl JwtConfig {
             Algorithm::EdDSA,
         ]);
         self
+    }
+}
+
+/// Raw JWT config
+pub struct JwtConfigRaw {
+    /// JWKS
+    pub jwks: Option<String>,
+    /// JWT signature validation
+    pub jwt_sig_validation: bool,
+    /// JWT status validation
+    pub jwt_status_validation: bool,
+    /// Supported signature algorithms
+    pub signature_algorithms_supported: Vec<String>,
+}
+
+impl From<JwtConfigRaw> for JwtConfig {
+    fn from(raw: JwtConfigRaw) -> Self {
+        let mut supported_algorithms = HashSet::new();
+        let mut unsupported_algorithms = Vec::new();
+
+        for alg in raw.signature_algorithms_supported {
+            let algorithm = match alg.as_str() {
+                "HS256" => Some(Algorithm::HS256),
+                "HS384" => Some(Algorithm::HS384),
+                "HS512" => Some(Algorithm::HS512),
+                "RS256" => Some(Algorithm::RS256),
+                "RS384" => Some(Algorithm::RS384),
+                "RS512" => Some(Algorithm::RS512),
+                "ES256" => Some(Algorithm::ES256),
+                "ES384" => Some(Algorithm::ES384),
+                "PS256" => Some(Algorithm::PS256),
+                "PS384" => Some(Algorithm::PS384),
+                "PS512" => Some(Algorithm::PS512),
+                "EdDSA" => Some(Algorithm::EdDSA),
+                _ => {
+                    unsupported_algorithms.push(alg);
+                    None
+                }
+            };
+            
+            if let Some(alg) = algorithm {
+                supported_algorithms.insert(alg);
+            }
+        }
+
+        // Log warnings for unsupported algorithms
+        if !unsupported_algorithms.is_empty() {
+            eprintln!("Warning: Unsupported JWT signature algorithms were ignored: {}", 
+                     unsupported_algorithms.join(", "));
+        }
+
+        Self {
+            jwks: raw.jwks,
+            jwt_sig_validation: raw.jwt_sig_validation,
+            jwt_status_validation: raw.jwt_status_validation,
+            signature_algorithms_supported: supported_algorithms,
+        }
     }
 }

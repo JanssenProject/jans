@@ -134,8 +134,6 @@ configmap:
   kcDbUrlDatabase: keycloak
   # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
   kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
-  # -- URL of OPA API
-  cnOpaUrl: http://opa.opa.svc.cluster.cluster.local:8181/v1
   # -- Message type (one of POSTGRES, REDIS, or DISABLED)
   cnMessageType: DISABLED
 # -- Country code. Used for certificate creation.
@@ -194,7 +192,8 @@ migration:
 
 nameOverride: ""
 fullNameOverride: ""
-
+# -- Add tolerations for the pods
+tolerations: []
 # -- Additional labels that will be added across all resources definitions in the format of {mylabel: "myapp"}
 additionalLabels: { }
 # -- Additional annotations that will be added across all resources  in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken
@@ -205,3 +204,5 @@ additionalAnnotations: { }
 customScripts: [ ]
 # -- Add custom job's command. If passed, it will override the default conditional command.
 customCommand: []
+# -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
+nodeSelector: {}

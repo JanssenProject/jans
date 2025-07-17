@@ -9,6 +9,8 @@ use super::super::authorization_config::IdTokenTrustMode;
 use super::default_values::*;
 use super::feature_types::*;
 use super::json_util::*;
+use crate::UnsignedRoleIdSrc;
+use crate::common::json_rules::JsonRule;
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
@@ -56,6 +58,18 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub log_ttl: Option<u64>,
 
+    /// Maximum number of log entities that can be stored using [`LogType::Memory`].
+    /// If value is 0, there is no limit. But if None, default value is applied.
+    #[serde(rename = "CEDARLING_LOG_MAX_ITEMS", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub log_max_items: Option<usize>,
+
+    /// Maximum size of a single log entity in bytes using [`LogType::Memory`].
+    /// If value is 0, there is no limit. But if None, default value is applied.
+    #[serde(rename = "CEDARLING_LOG_MAX_ITEM_SIZE", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub log_max_item_size: Option<usize>,
+
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
@@ -85,11 +99,25 @@ pub struct BootstrapConfigRaw {
     /// Specifies what boolean operation to use for the `USER` and `WORKLOAD` when
     /// making authz (authorization) decisions.
     ///
-    /// # Available Operations
-    /// - **AND**: authz will be successful if `USER` **AND** `WORKLOAD` is valid.
-    /// - **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
-    #[serde(rename = "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION", default)]
-    pub usr_workload_bool_op: WorkloadBoolOp,
+    /// Use [JsonLogic](https://jsonlogic.com/).
+    ///
+    /// Default value:
+    /// ```json
+    /// {
+    ///     "and" : [
+    ///         {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+    ///         {"===": [{"var": "Jans::User"}, "ALLOW"]}
+    ///     ]
+    /// }
+    /// ```
+    #[serde(rename = "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub principal_bool_operation: JsonRule,
+
+    /// Mapping name of cedar schema TrustedIssuer entity
+    #[serde(rename = "CEDARLING_MAPPING_TRUSTED_ISSUER", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub mapping_iss: Option<String>,
 
     /// Mapping name of cedar schema User entity
     #[serde(rename = "CEDARLING_MAPPING_USER", default)]
@@ -101,20 +129,13 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub mapping_workload: Option<String>,
 
-    /// Mapping name of cedar schema id_token entity.
-    #[serde(rename = "CEDARLING_MAPPING_ID_TOKEN", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_id_token: Option<String>,
+    /// Mapping name of cedar schema Role entity.
+    #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
+    pub mapping_role: Option<String>,
 
-    /// Mapping name of cedar schema access_token entity.
-    #[serde(rename = "CEDARLING_MAPPING_ACCESS_TOKEN", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_access_token: Option<String>,
-
-    /// Mapping name of cedar schema userinfo_token entity.
-    #[serde(rename = "CEDARLING_MAPPING_USERINFO_TOKEN", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_userinfo_token: Option<String>,
+    /// Mapping name of cedar schema Role entity.
+    #[serde(rename = "CEDARLING_UNSIGNED_ROLE_ID_SRC", default)]
+    pub unsigned_role_id_src: UnsignedRoleIdSrc,
 
     /// Path to a local file pointing containing a JWKS.
     #[serde(
@@ -125,7 +146,7 @@ pub struct BootstrapConfigRaw {
     pub local_jwks: Option<String>,
 
     /// JSON object with policy store
-    #[serde(rename = "CEDARLING_LOCAL_POLICY_STORE", default)]
+    #[serde(rename = "CEDARLING_POLICY_STORE_LOCAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub local_policy_store: Option<String>,
 
@@ -160,65 +181,6 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
 
-    /// When enabled, the `iss` (Issuer) claim must be present in the Access Token and
-    /// the scheme must be https.
-    #[serde(rename = "CEDARLING_AT_ISS_VALIDATION", default)]
-    pub at_iss_validation: FeatureToggle,
-
-    /// When enabled, the `jti` (JWT ID) claim must be present in the Access Token.
-    #[serde(rename = "CEDARLING_AT_JTI_VALIDATION", default)]
-    pub at_jti_validation: FeatureToggle,
-
-    /// When enabled, the `nbf` (Not Before) claim must be present in the Access Token
-    /// and Cedarling will verify that the current date is after the `nbf`.
-    #[serde(rename = "CEDARLING_AT_NBF_VALIDATION", default)]
-    pub at_nbf_validation: FeatureToggle,
-
-    /// When enabled, the `exp` (Expiration) claim must be present in the Access Token
-    /// and not past the date specified.
-    #[serde(rename = "CEDARLING_AT_EXP_VALIDATION", default)]
-    pub at_exp_validation: FeatureToggle,
-
-    /// When enabled, the `iss` (Issuer) claim must be present in the ID Token and
-    /// the scheme must be https.
-    #[serde(rename = "CEDARLING_IDT_ISS_VALIDATION", default)]
-    pub idt_iss_validation: FeatureToggle,
-
-    /// When enabled, the `sub` (Subject) claim must be present in the ID Token.
-    #[serde(rename = "CEDARLING_IDT_SUB_VALIDATION", default)]
-    pub idt_sub_validation: FeatureToggle,
-
-    /// When enabled, the `exp` (Expiration) claim must be present in the ID Token
-    /// and not past the date specified.
-    #[serde(rename = "CEDARLING_IDT_EXP_VALIDATION", default)]
-    pub idt_exp_validation: FeatureToggle,
-
-    /// When enabled, the `iat` (Issued at) claim must be present in the ID Token.
-    #[serde(rename = "CEDARLING_IDT_IAT_VALIDATION", default)]
-    pub idt_iat_validation: FeatureToggle,
-
-    /// When enabled, the `aud` ( Audience) claim must be present in the ID Token.
-    #[serde(rename = "CEDARLING_IDT_AUD_VALIDATION", default)]
-    pub idt_aud_validation: FeatureToggle,
-
-    /// When enabled, the `iss` (Issuer) claim must be present in the Userinfo Token and
-    /// the scheme must be https.
-    #[serde(rename = "CEDARLING_USERINFO_ISS_VALIDATION", default)]
-    pub userinfo_iss_validation: FeatureToggle,
-
-    /// When enabled, the `sub` (Subject) claim must be present in the Userinfo Token.
-    #[serde(rename = "CEDARLING_USERINFO_SUB_VALIDATION", default)]
-    pub userinfo_sub_validation: FeatureToggle,
-
-    /// When enabled, the `aud` (Audience) claim must be present in the Userinfo Token.
-    #[serde(rename = "CEDARLING_USERINFO_AUD_VALIDATION", default)]
-    pub userinfo_aud_validation: FeatureToggle,
-
-    /// When enabled, the `exp` (Expiration) claim must be present in the Userinfo Token
-    /// and not past the date specified.
-    #[serde(rename = "CEDARLING_USERINFO_EXP_VALIDATION", default)]
-    pub userinfo_exp_validation: FeatureToggle,
-
     /// Varying levels of validations based on the preference of the developer.
     ///
     /// # Strict Mode
@@ -238,13 +200,13 @@ pub struct BootstrapConfigRaw {
     /// URI where Cedarling can get JSON file with all required metadata about
     /// Lock Master, i.e. .well-known/lock-master-configuration.
     ///
-    /// ***Required*** if `LOCK == Enabled`.
-    #[serde(rename = "CEDARLING_LOCK_MASTER_CONFIGURATION_URI", default)]
+    /// ***Required*** if `LOCK == enabled`.
+    #[serde(rename = "CEDARLING_LOCK_SERVER_CONFIGURATION_URI", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub lock_master_configuration_uri: Option<String>,
+    pub lock_server_configuration_uri: Option<String>,
 
     /// Controls whether Cedarling should listen for SSE config updates.
-    #[serde(rename = "CEDARLING_DYNAMIC_CONFIGURATION", default)]
+    #[serde(rename = "CEDARLING_LOCK_DYNAMIC_CONFIGURATION", default)]
     pub dynamic_configuration: FeatureToggle,
 
     /// SSA for DCR in a Lock Master deployment. The Cedarling will validate this
@@ -257,23 +219,27 @@ pub struct BootstrapConfigRaw {
     pub lock_ssa_jwt: Option<String>,
 
     /// How often to send log messages to Lock Master (0 to turn off trasmission).
-    #[serde(rename = "CEDARLING_AUDIT_LOG_INTERVAL", default)]
+    #[serde(rename = "CEDARLING_LOCK_LOG_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub audit_log_interval: u64,
 
     /// How often to send health messages to Lock Master (0 to turn off transmission).
-    #[serde(rename = "CEDARLING_AUDIT_HEALTH_INTERVAL", default)]
+    #[serde(rename = "CEDARLING_LOCK_HEALTH_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub audit_health_interval: u64,
 
     /// How often to send telemetry messages to Lock Master (0 to turn off transmission).
-    #[serde(rename = "CEDARLING_AUDIT_TELEMETRY_INTERVAL", default)]
+    #[serde(rename = "CEDARLING_LOCK_TELEMETRY_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub audit_health_telemetry_interval: u64,
+    pub audit_telemetry_interval: u64,
 
     /// Controls whether Cedarling should listen for updates from the Lock Server.
-    #[serde(rename = "CEDARLING_LISTEN_SSE", default)]
+    #[serde(rename = "CEDARLING_LOCK_LISTEN_SSE", default)]
     pub listen_sse: FeatureToggle,
+
+    /// Allow interaction with a Lock server with invalid certificates. Used for testing.
+    #[serde(rename = "CEDARLING_LOCK_ACCEPT_INVALID_CERTS", default)]
+    pub accept_invalid_certs: FeatureToggle,
 }
 
 impl BootstrapConfigRaw {
@@ -407,9 +373,9 @@ mod tests {
                 "Workload authorization should be disabled by default"
             );
             assert_eq!(
-                config.usr_workload_bool_op,
-                WorkloadBoolOp::And,
-                "Default user-workload boolean operator should be AND"
+                config.principal_bool_operation,
+                JsonRule::default(),
+                "Default user-workload boolean operator should default"
             );
         });
     }

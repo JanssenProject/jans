@@ -53,6 +53,8 @@ public class TokenEntity implements Serializable {
     private String jwtRequest;
     @AttributeName(name = "authzCode", consistency = true)
     private String authorizationCode;
+    @AttributeName(name = "jti", consistency = true)
+    private String jti;
     @AttributeName(name = "nnc")
     private String nonce;
     @AttributeName(name = "chlng")
@@ -80,6 +82,15 @@ public class TokenEntity implements Serializable {
 
     @AttributeName(name = "dpop")
     private String dpop;
+
+    public String getJti() {
+        return jti;
+    }
+
+    public TokenEntity setJti(String jti) {
+        this.jti = jti;
+        return this;
+    }
 
     public String getReferenceId() {
         return referenceId;
@@ -214,6 +225,16 @@ public class TokenEntity implements Serializable {
 
     public TokenType getTokenTypeEnum() {
         return TokenType.fromValue(tokenType);
+    }
+
+    public boolean isAccessToken() {
+        final TokenType tokenTypeEnum = getTokenTypeEnum();
+        return tokenTypeEnum == TokenType.ACCESS_TOKEN || tokenTypeEnum == TokenType.LONG_LIVED_ACCESS_TOKEN;
+    }
+
+    public boolean isLogoutStatusJwt() {
+        final TokenType tokenTypeEnum = getTokenTypeEnum();
+        return tokenTypeEnum == TokenType.LOGOUT_STATUS_JWT;
     }
 
     public void setTokenTypeEnum(TokenType tokenType) {

@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
     derive_more::Display,
     Deserialize,
     Serialize,
+    strum::IntoStaticStr,
 )]
 pub enum LogLevel {
     /// Fatal level

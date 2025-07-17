@@ -198,10 +198,6 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-jaxb-annotations</artifactId>
-        </dependency>
 
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -263,7 +259,6 @@
 		<dependency>
 		    <groupId>org.htmlunit</groupId>
 		    <artifactId>htmlunit</artifactId>
-		    <version>4.6.0</version>
 		</dependency>
         <dependency>
             <groupId>io.jans</groupId>

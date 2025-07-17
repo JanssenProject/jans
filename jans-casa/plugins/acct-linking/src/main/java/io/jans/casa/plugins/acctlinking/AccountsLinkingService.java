@@ -10,7 +10,9 @@ import io.jans.casa.conf.OIDCClientSettings;
 import io.jans.casa.core.model.IdentityPerson;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.model.ApplicationConfiguration;
+import io.jans.casa.plugins.acctlinking.conf.Config;
 import io.jans.casa.service.IPersistenceService;
+import io.jans.casa.service.settings.*;
 import io.jans.inbound.Provider;
 
 import java.io.IOException;
@@ -38,17 +40,26 @@ public class AccountsLinkingService {
 
     private static AccountsLinkingService instance;
     private IPersistenceService ips;
-    private ObjectMapper mapper;
     
+    private IPluginSettingsHandler<Config> settingsHandler;
+    private ObjectMapper mapper;
     private OIDCClientSettings clSettings;
     private String issuer;
-    private String basicAuthnHeader;
+    private String basicAuthnHeader;    
     
-    public static AccountsLinkingService getInstance() {
-        if (instance == null) {
-            instance = new AccountsLinkingService();
+    public static AccountsLinkingService getInstance(String pluginId) {
+        if (instance == null && pluginId != null) {
+            instance = new AccountsLinkingService(pluginId);
         }
         return instance;
+    }
+    
+    public static AccountsLinkingService getInstance() {
+        return instance;
+    }
+
+    public boolean usePopup() {
+        return Optional.ofNullable(settingsHandler.getSettings()).map(Config::isUsePopup).orElse(true);
     }
     
     public OIDCClientSettings getCasaClient() {
@@ -147,8 +158,10 @@ public class AccountsLinkingService {
         return providerId + ":" + id;
     }
     
-    private AccountsLinkingService() {
+    private AccountsLinkingService(String pluginId) {
         logger.info("Initializing AccountsLinkingService");
+        settingsHandler = Utils.managedBean(IPluginSettingsHandlerFactory.class)
+                .getHandler(pluginId, Config.class);
         mapper = new ObjectMapper();
         
         ips = Utils.managedBean(IPersistenceService.class);        

@@ -17,13 +17,12 @@ use super::authorization_config::{AuthorizationConfig, IdTokenTrustMode};
 use super::raw_config::LoggerType;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
-    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, TokenValidationConfig,
+    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
+use super::{BootstrapConfigRaw, LockServiceConfig};
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
-
-use super::BootstrapConfigRaw;
 
 impl BootstrapConfig {
     /// Construct `BootstrapConfig` from environment variables and `BootstrapConfigRaw` config.
@@ -45,6 +44,8 @@ impl BootstrapConfig {
             return Err(BootstrapConfigLoadingError::BothPrincipalsDisabled);
         }
 
+        let lock_config = raw.lock.is_enabled().then(|| raw.try_into()).transpose()?;
+
         // Decode LogCofig
         let log_type = match raw.log_type {
             LoggerType::Off => LogTypeConfig::Off,
@@ -52,9 +53,10 @@ impl BootstrapConfig {
                 log_ttl: raw
                     .log_ttl
                     .ok_or(BootstrapConfigLoadingError::MissingLogTTL)?,
+                max_item_size: raw.log_max_item_size,
+                max_items: raw.log_max_items,
             }),
             LoggerType::StdOut => LogTypeConfig::StdOut,
-            LoggerType::Lock => LogTypeConfig::Lock,
         };
         let log_config = LogConfig {
             log_type,
@@ -73,9 +75,9 @@ impl BootstrapConfig {
             (Some(policy_store), None, None) => PolicyStoreConfig {
                 source: PolicyStoreSource::Json(policy_store),
             },
-            // Case: get the policy store from the lock master
+            // Case: get the policy store from the lock server
             (None, Some(policy_store_uri), None) => PolicyStoreConfig {
-                source: PolicyStoreSource::LockMaster(policy_store_uri),
+                source: PolicyStoreSource::LockServer(policy_store_uri),
             },
             // Case: get the policy store from a local JSON file
             (None, None, Some(raw_path)) => {
@@ -115,43 +117,16 @@ impl BootstrapConfig {
             jwt_sig_validation: raw.jwt_sig_validation.into(),
             jwt_status_validation: raw.jwt_status_validation.into(),
             signature_algorithms_supported: raw.jwt_signature_algorithms_supported.clone(),
-            access_token_config: TokenValidationConfig {
-                iss_validation: raw.at_iss_validation.into(),
-                jti_validation: raw.at_jti_validation.into(),
-                nbf_validation: raw.at_nbf_validation.into(),
-                exp_validation: raw.at_exp_validation.into(),
-                ..Default::default()
-            },
-            id_token_config: TokenValidationConfig {
-                iss_validation: raw.idt_iss_validation.into(),
-                aud_validation: raw.idt_aud_validation.into(),
-                sub_validation: raw.idt_sub_validation.into(),
-                exp_validation: raw.idt_exp_validation.into(),
-                iat_validation: raw.idt_iat_validation.into(),
-                ..Default::default()
-            },
-            userinfo_token_config: TokenValidationConfig {
-                iss_validation: raw.userinfo_iss_validation.into(),
-                aud_validation: raw.userinfo_aud_validation.into(),
-                sub_validation: raw.userinfo_sub_validation.into(),
-                exp_validation: raw.userinfo_exp_validation.into(),
-                ..Default::default()
-            },
         };
 
         let authorization_config = AuthorizationConfig {
             use_user_principal: raw.user_authz.is_enabled(),
             use_workload_principal: raw.workload_authz.is_enabled(),
-            user_workload_operator: raw.usr_workload_bool_op,
+            principal_bool_operator: raw.principal_bool_operation.clone(),
             decision_log_user_claims: raw.decision_log_user_claims.clone(),
             decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
-            mapping_user: raw.mapping_user.clone(),
-            mapping_workload: raw.mapping_workload.clone(),
-            mapping_id_token: raw.mapping_id_token.clone(),
-            mapping_access_token: raw.mapping_access_token.clone(),
-            mapping_userinfo_token: raw.mapping_userinfo_token.clone(),
-            id_token_trust_mode: raw.id_token_trust_mode,
+            id_token_trust_mode: raw.id_token_trust_mode.clone(),
         };
 
         Ok(Self {
@@ -160,6 +135,8 @@ impl BootstrapConfig {
             policy_store_config,
             jwt_config,
             authorization_config,
+            entity_builder_config: raw.into(),
+            lock_config,
         })
     }
 }

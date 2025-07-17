@@ -9,9 +9,7 @@ on:
       - main
       - '!update-pycloud-in-**'
     paths:
-      - 'jans-link/**'
       - 'jans-keycloak-integration/**'
-      - 'jans-keycloak-link/**'
       - 'jans-auth-server/**'
       - 'jans-lock/**'
       - 'jans-orm/**'
@@ -36,9 +34,7 @@ on:
       - opened
       - synchronize
     paths:
-      - 'jans-link/**'
       - 'jans-keycloak-integration/**'
-      - 'jans-keycloak-link/**'
       - 'jans-auth-server/**'
       - 'jans-lock/**'
       - 'jans-orm/**'
@@ -64,12 +60,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jans-keycloak-link, jans-keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-pycloudlib, jans-link, jans-casa, jans-lock]
+        module: [jans-keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-pycloudlib, jans-casa, jans-lock]
     env:
       JVM_PROJECTS: |
         jans-keycloak-integration
-        jans-keycloak-link
-        jans-link
         jans-auth-server
         jans-lock
         jans-orm
@@ -124,7 +118,7 @@ jobs:
           echo changed dir list: ${{ env.CHANGED_DIR }}
           echo Matrix module: ${{ matrix.module }}
           echo GH event action: ${{ github.event.action }}
-          echo PR base sha: ${{ github.event.pull_request.base.sha }} 
+          echo PR base sha: ${{ github.event.pull_request.base.sha }}
           echo PR head sha: ${{ github.event.pull_request.head.sha }}
           echo event before: ${{ github.event.before }}
           echo GH sha: $GITHUB_SHA
@@ -132,20 +126,20 @@ jobs:
       - name: Set up JDK 17
         # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
-        uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
           java-version: '17'
           distribution: 'adopt'
-          
+
       - name: Cache SonarCloud packages for JVM based project
         # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
-        uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-          
+
       - name: Build and analyze JVM based project
         # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
@@ -158,7 +152,7 @@ jobs:
             "jans-auth-server")
                     ;&
             "jans-lock")
-                    ;&          
+                    ;&
             "jans-scim")
                     ;&
             "jans-config-api")

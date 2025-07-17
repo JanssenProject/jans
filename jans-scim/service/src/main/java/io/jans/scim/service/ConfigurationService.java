@@ -6,32 +6,33 @@
 
 package io.jans.scim.service;
 
-import io.jans.model.*;
-import io.jans.model.custom.script.CustomScriptType;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.util.StringHelper;
-import io.jans.util.security.StringEncrypter.EncryptionException;
-import org.slf4j.Logger;
-
-import io.jans.scim.model.GluuConfiguration;
-import io.jans.scim.model.GluuOxTrustStat;
-import io.jans.service.EncryptionService;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.faces.context.FacesContext;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+
+import io.jans.model.AuthenticationScriptUsageType;
+import io.jans.model.ProgrammingLanguage;
+import io.jans.model.ScriptLocationType;
+import io.jans.model.SmtpConfiguration;
+import io.jans.model.custom.script.CustomScriptType;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.scim.model.JansConfiguration;
+import io.jans.service.EncryptionService;
+import io.jans.util.StringHelper;
+import io.jans.util.security.StringEncrypter.EncryptionException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.ServletContext;
+
 /**
- * GluuConfiguration service
+ * JansConfiguration service
  * 
  * @author Reda Zerrad Date: 08.10.2012
  */
@@ -53,11 +54,14 @@ public class ConfigurationService implements Serializable {
 	@Inject
 	private EncryptionService encryptionService;
 
+	@Inject
+	private ServletContext servletContext;
+
 	private static final SimpleDateFormat PERIOD_DATE_FORMAT = new SimpleDateFormat("yyyyMM");
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	public boolean contains(String configurationDn) {
-		return persistenceEntryManager.contains(configurationDn, GluuConfiguration.class);
+		return persistenceEntryManager.contains(configurationDn, JansConfiguration.class);
 	}
 
 	/**
@@ -66,7 +70,7 @@ public class ConfigurationService implements Serializable {
 	 * @param configuration
 	 *            Configuration
 	 */
-	public void addConfiguration(GluuConfiguration configuration) {
+	public void addConfiguration(JansConfiguration configuration) {
 		persistenceEntryManager.persist(configuration);
 	}
 
@@ -74,24 +78,14 @@ public class ConfigurationService implements Serializable {
 	 * Update configuration entry
 	 * 
 	 * @param configuration
-	 *            GluuConfiguration
+	 *            JansConfiguration
 	 */
-	public void updateConfiguration(GluuConfiguration configuration) {
+	public void updateConfiguration(JansConfiguration configuration) {
 		try {
 			persistenceEntryManager.merge(configuration);
 		} catch (Exception e) {
 			log.info("", e);
 		}
-	}
-
-	public void updateOxtrustStat(GluuOxTrustStat oxTrustStat) {
-		try {
-			persistenceEntryManager.merge(oxTrustStat);
-		} catch (Exception e) {
-			log.info("===============================Error");
-			log.info("", e);
-		}
-
 	}
 
 	/**
@@ -100,7 +94,7 @@ public class ConfigurationService implements Serializable {
 	 * @return True if configuration with specified attributes exist
 	 */
 	public boolean containsConfiguration(String dn) {
-		return persistenceEntryManager.contains(dn, GluuConfiguration.class);
+		return persistenceEntryManager.contains(dn, JansConfiguration.class);
 	}
 
 	/**
@@ -111,8 +105,8 @@ public class ConfigurationService implements Serializable {
 	 * @return Configuration
 	 * @throws Exception
 	 */
-	public GluuConfiguration getConfigurationByInum(String inum) {
-		return persistenceEntryManager.find(GluuConfiguration.class, getDnForConfiguration());
+	public JansConfiguration getConfigurationByInum(String inum) {
+		return persistenceEntryManager.find(JansConfiguration.class, getDnForConfiguration());
 	}
 
 	/**
@@ -121,21 +115,9 @@ public class ConfigurationService implements Serializable {
 	 * @return Configuration
 	 * @throws Exception
 	 */
-	public GluuConfiguration getConfiguration(String[] returnAttributes) {
-		GluuConfiguration result = null;
-		result = persistenceEntryManager.find(getDnForConfiguration(), GluuConfiguration.class, returnAttributes);
-		return result;
-	}
-
-	public GluuOxTrustStat getOxtrustStat(String[] returnAttributes) {
-		GluuOxTrustStat result = null;
-		if (persistenceEntryManager.contains(getDnForOxtrustStat(), GluuOxTrustStat.class)) {
-			result = persistenceEntryManager.find(getDnForOxtrustStat(), GluuOxTrustStat.class, returnAttributes);
-		} else {
-			result = new GluuOxTrustStat();
-			result.setDn(getDnForOxtrustStat());
-			persistenceEntryManager.persist(result);
-		}
+	public JansConfiguration getConfiguration(String[] returnAttributes) {
+		JansConfiguration result = null;
+		result = persistenceEntryManager.find(getDnForConfiguration(), JansConfiguration.class, returnAttributes);
 		return result;
 	}
 
@@ -145,12 +127,8 @@ public class ConfigurationService implements Serializable {
 	 * @return Configuration
 	 * @throws Exception
 	 */
-	public GluuConfiguration getConfiguration() {
+	public JansConfiguration getConfiguration() {
 		return getConfiguration(null);
-	}
-
-	public GluuOxTrustStat getOxtrustStat() {
-		return getOxtrustStat(null);
 	}
 
 	/**
@@ -159,8 +137,8 @@ public class ConfigurationService implements Serializable {
 	 * @return List of attributes
 	 * @throws Exception
 	 */
-	public List<GluuConfiguration> getConfigurations() {
-		return persistenceEntryManager.findEntries(getDnForConfiguration(), GluuConfiguration.class, null);
+	public List<JansConfiguration> getConfigurations() {
+		return persistenceEntryManager.findEntries(getDnForConfiguration(), JansConfiguration.class, null);
 	}
 
 	/**
@@ -175,10 +153,6 @@ public class ConfigurationService implements Serializable {
 		return String.format("ou=configuration,%s", baseDn);
 	}
 
-	public String getDnForOxtrustStat() {
-		return buildDn(LocalDateTime.now().format(formatter), new Date(), ApplicationType.OX_TRUST);
-	}
-
 	public AuthenticationScriptUsageType[] getScriptUsageTypes() {
 		return new AuthenticationScriptUsageType[] { AuthenticationScriptUsageType.INTERACTIVE,
 				AuthenticationScriptUsageType.SERVICE, AuthenticationScriptUsageType.BOTH };
@@ -189,13 +163,13 @@ public class ConfigurationService implements Serializable {
 	}
 
 	public ScriptLocationType[] getLocationTypes() {
-		return new ScriptLocationType[] { ScriptLocationType.LDAP, ScriptLocationType.FILE };
+		return new ScriptLocationType[] { ScriptLocationType.DB, ScriptLocationType.FILE };
 	}
 
 	public CustomScriptType[] getCustomScriptTypes() {
 		return new CustomScriptType[] { CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CONSENT_GATHERING,
 				CustomScriptType.CLIENT_REGISTRATION,
-				CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.ID_GENERATOR, CustomScriptType.CACHE_REFRESH,
+				CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.ID_GENERATOR, CustomScriptType.LINK_INTERCEPTION,
 				CustomScriptType.UMA_RPT_POLICY, CustomScriptType.UMA_CLAIMS_GATHERING, CustomScriptType.UMA_RPT_CLAIMS, CustomScriptType.INTROSPECTION,
 				CustomScriptType.RESOURCE_OWNER_PASSWORD_CREDENTIALS, CustomScriptType.APPLICATION_SESSION,
 				CustomScriptType.END_SESSION, CustomScriptType.SCIM, CustomScriptType.POST_AUTHN,
@@ -204,7 +178,7 @@ public class ConfigurationService implements Serializable {
 
 	public CustomScriptType[] getOthersCustomScriptTypes() {
 		return new CustomScriptType[] { CustomScriptType.CONSENT_GATHERING, CustomScriptType.CLIENT_REGISTRATION,
-				CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.ID_GENERATOR, CustomScriptType.CACHE_REFRESH,
+				CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.ID_GENERATOR, CustomScriptType.LINK_INTERCEPTION,
 				CustomScriptType.UMA_RPT_POLICY, CustomScriptType.UMA_CLAIMS_GATHERING, CustomScriptType.UMA_RPT_CLAIMS, CustomScriptType.INTROSPECTION,
 				CustomScriptType.RESOURCE_OWNER_PASSWORD_CREDENTIALS, CustomScriptType.APPLICATION_SESSION,
 				CustomScriptType.END_SESSION, CustomScriptType.SCIM, CustomScriptType.POST_AUTHN,
@@ -261,8 +235,7 @@ public class ConfigurationService implements Serializable {
 		String version = getClass().getPackage().getImplementationVersion();
 		if (version == null) {
 			Properties prop = new Properties();
-			try (InputStream is = FacesContext.getCurrentInstance().getExternalContext()
-					.getResourceAsStream("/META-INF/MANIFEST.MF")) {
+			try (InputStream is = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF")) {
 				prop.load(is);
 				version = prop.getProperty("Implementation-Version");
 			} catch (IOException e) {
@@ -275,21 +248,6 @@ public class ConfigurationService implements Serializable {
 			return version;
 		}
 		return "";
-	}
-
-	private String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType) {
-		final StringBuilder dn = new StringBuilder();
-		if (StringHelper.isNotEmpty(uniqueIdentifier) && (creationDate != null) && (applicationType != null)) {
-			dn.append(String.format("uniqueIdentifier=%s,", uniqueIdentifier));
-		}
-		if ((creationDate != null) && (applicationType != null)) {
-			dn.append(String.format("ou=%s,", PERIOD_DATE_FORMAT.format(creationDate)));
-		}
-		if (applicationType != null) {
-			dn.append(String.format("ou=%s,", applicationType.getValue()));
-		}
-		dn.append("ou=statistic,o=metric");
-		return dn.toString();
 	}
 
 }

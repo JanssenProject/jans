@@ -5,7 +5,6 @@
 
 use crate::Config;
 use crate::SparKV;
-use serde_json;
 
 #[cfg(test)]
 fn json_value_size(value: &serde_json::Value) -> usize {
@@ -93,7 +92,7 @@ fn simple_serde_json() {
     let mut sparkv =
         SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
     let json = first_json();
-    sparkv.set("first", json.clone()).unwrap();
+    sparkv.set("first", json.clone(), &[]).unwrap();
     let stored_first = sparkv.get("first").unwrap();
     assert_eq!(&json, stored_first);
 }
@@ -104,7 +103,7 @@ fn type_serde_json() {
     let mut sparkv =
         SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
     let json = first_json();
-    sparkv.set("first", json.clone()).unwrap();
+    sparkv.set("first", json.clone(), &[]).unwrap();
 
     // now make sure it's actually stored as the value, not as a String
     let kv = sparkv.get_item("first").unwrap();
@@ -123,15 +122,15 @@ fn fails_size_calculator() {
     let mut sparkv =
         SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
 
-    let should_be_error = sparkv.set("first", json.clone());
+    let should_be_error = sparkv.set("first", json.clone(), &[]);
     assert_eq!(should_be_error, Err(crate::Error::ItemSizeExceeded));
 }
 
 #[test]
 fn two_json_items() {
     let mut sparkv = SparKV::<serde_json::Value>::new();
-    sparkv.set("first", first_json()).unwrap();
-    sparkv.set("second", second_json()).unwrap();
+    sparkv.set("first", first_json(), &[]).unwrap();
+    sparkv.set("second", second_json(), &[]).unwrap();
 
     let fj = sparkv.get("first").unwrap();
     assert_eq!(
@@ -149,8 +148,8 @@ fn two_json_items() {
 #[test]
 fn drain_all_json_items() {
     let mut sparkv = SparKV::<serde_json::Value>::new();
-    sparkv.set("first", first_json()).unwrap();
-    sparkv.set("second", second_json()).unwrap();
+    sparkv.set("first", first_json(), &[]).unwrap();
+    sparkv.set("second", second_json(), &[]).unwrap();
 
     let all_items = sparkv.drain();
     let all_values = all_items.map(|(_, v)| v).collect::<Vec<_>>();
@@ -163,8 +162,8 @@ fn drain_all_json_items() {
 fn rc_json_items() {
     use std::rc::Rc;
     let mut sparkv = SparKV::<Rc<serde_json::Value>>::new();
-    sparkv.set("first", Rc::new(first_json())).unwrap();
-    sparkv.set("second", Rc::new(second_json())).unwrap();
+    sparkv.set("first", Rc::new(first_json()), &[]).unwrap();
+    sparkv.set("second", Rc::new(second_json()), &[]).unwrap();
 
     let all_items = sparkv.drain();
     let all_values = all_items.map(|(_, v)| v).collect::<Vec<_>>();

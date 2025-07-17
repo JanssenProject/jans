@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.24
+ARG JETTY_VERSION=12.0.19
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -51,20 +51,14 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-01-13 16:11'
+ENV CN_BUILD_DATE='2025-06-09 08:27'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
-COPY static/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
 RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
-    && wget -q ${CN_SOURCE_URL} -O /tmp/jans-auth.war \
-    && cd /tmp \
-    && zip -d jans-auth.war WEB-INF/jetty-web.xml \
-    && zip -r jans-auth.war WEB-INF/jetty-env.xml \
-    && cp jans-auth.war ${JETTY_BASE}/jans-auth/webapps/jans-auth.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
-    && rm -rf /tmp/jans-auth.war /tmp/WEB-INF
+    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-auth/webapps/jans-auth.war \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-modules=server,resources,http,forwarded,threadpool,ee9-deploy,ee9-annotations,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
 
 # ===========
 # Custom libs
@@ -94,7 +88,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=040ff17942019bc10433ce17d819b8d8474f13c8
+ENV JANS_SOURCE_VERSION=329a1139194fd9819506150ec73225b425767064
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -114,6 +108,7 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/templates/*.properties /app/templates/ \
     && cp -R agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
     && cp -R ${JANS_SETUP_DIR}/static/auth/conf /etc/certs \
     && mkdir -p /opt/jans/python/libs \
@@ -230,7 +225,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AUTH_JETTY_HOST=0.0.0.0 \
     CN_SHARE_AUTH_CONF=true \
     CN_LOCK_ENABLED=false \
-    CN_OPA_URL=http://localhost:8181/v1 \
     CN_SSL_CERT_FROM_SECRETS=true
 
 # @TODO: revisit the usage (if any)

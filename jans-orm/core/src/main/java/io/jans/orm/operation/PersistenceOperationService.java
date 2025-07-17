@@ -6,11 +6,15 @@
 
 package io.jans.orm.operation;
 
+import java.util.Map;
+
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.operation.ConnectionException;
 import io.jans.orm.exception.operation.EntryConvertationException;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.extension.PersistenceExtension;
+import io.jans.orm.model.AttributeType;
+import io.jans.orm.model.PersistenceMetadata;
 
 /**
  * Base interface for Operation Service
@@ -26,5 +30,9 @@ public interface PersistenceOperationService {
 	public void setPersistenceExtension(PersistenceExtension persistenceExtension);
 
 	public boolean isSupportObjectClass(String objectClass);
+
+	PersistenceMetadata getPersistenceMetadata(String primaryKey);
+
+	public Map<String, Map<String, AttributeType>> getTableColumnsMap();
 
 }
