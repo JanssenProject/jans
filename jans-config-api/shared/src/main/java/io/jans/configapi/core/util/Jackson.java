@@ -55,6 +55,11 @@ public class Jackson {
         return applyPatch(jsonPatch, obj);
     }
 
+    public static JsonPatch getJsonPatch(String patchAsString) throws JsonPatchException, IOException {
+        LOG.debug("Patch details - patchAsString:{}", patchAsString  );
+        return JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));
+    }
+
     public static <T> T applyJsonPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, IOException {
         LOG.debug("Patch details - jsonPatch:{}, obj:{}", jsonPatch, obj );
         return applyPatch(jsonPatch, obj);
