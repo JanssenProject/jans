@@ -82,7 +82,6 @@ specification. Sample below:
   "clientinfo_endpoint" : "https://janssen-host-name/jans-auth/restv1/clientinfo",
   "request_object_signing_alg_values_supported" : [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
   "request_object_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
-  "session_revocation_endpoint" : "https://janssen-host-name/jans-auth/restv1/revoke_session",
   "global_token_revocation_endpoint" : "https://janssen-host-name/jans-auth/restv1/global-token-revocation",
   "check_session_iframe" : "https://janssen-host-name/jans-auth/opiframe.htm",
   "scopes_supported" : [ "https://jans.io/scim/all-resources.search", "address", "user_name", "clientinfo", "openid", "https://jans.io/scim/fido2.write", "profile", "uma_protection", "permission", "https://jans.io/scim/fido.read", "https://jans.io/scim/users.write", "https://jans.io/scim/groups.read", "revoke_session", "global_token_revocation", "https://jans.io/scim/fido.write", "https://jans.io/scim/bulk", "https://jans.io/scim/users.read", "phone", "mobile_phone", "offline_access", "https://jans.io/scim/groups.write", "email", "https://jans.io/scim/fido2.read", "jans_client_api" ],

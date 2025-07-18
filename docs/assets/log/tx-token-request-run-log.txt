@@ -95,7 +95,6 @@ X-Xss-Protection: 1; mode=block
   "request_object_signing_alg_values_supported" : [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
   "request_object_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
   "tx_token_signing_alg_values_supported" : [ "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
-  "session_revocation_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/revoke_session",
   "check_session_iframe" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/opiframe.htm",
   "scopes_supported" : [ "address", "introspection", "https://jans.io/auth/ssa.admin", "online_access", "openid", "user_name", "clientinfo", "profile", "uma_protection", "permission", "revoke_any_token", "revoke_session", "device_sso", "phone", "mobile_phone", "offline_access", "authorization_challenge", "email" ],
   "backchannel_logout_supported" : true,
