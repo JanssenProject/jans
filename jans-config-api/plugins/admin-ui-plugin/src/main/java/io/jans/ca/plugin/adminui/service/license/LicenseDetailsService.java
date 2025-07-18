@@ -178,10 +178,10 @@ public class LicenseDetailsService extends BaseService {
         return CommonUtils.createGenericResponse(true, 200, "No error in license configuration.");
     }
     /**
-     * Resets the license-related configuration in both the persistent and in-memory Admin UI configuration.
+     * Deletes the license-related configuration in both the persistent and in-memory Admin UI configuration.
      */
-    public GenericResponse resetLicenseConfiguration() throws Exception {
-        log.info("Resetting Admin UI license configuration.");
+    public GenericResponse deleteLicenseConfiguration() throws Exception {
+        log.info("Deleting Admin UI license configuration.");
 
         // Fetch current persisted Admin UI configuration
         AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
