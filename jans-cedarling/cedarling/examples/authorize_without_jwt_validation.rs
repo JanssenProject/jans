@@ -135,8 +135,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
             resource: EntityData {
+                cedar_mapping: CedarEntityMapping {
+                    entity_type: "Jans::Issue".to_string(),
                 id: "random_id".to_string(),
-                entity_type: "Jans::Issue".to_string(),
+                },
                 attributes: HashMap::from_iter([
                     (
                         "org_id".to_string(),

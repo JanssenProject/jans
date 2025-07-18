@@ -146,9 +146,16 @@ class RequestUnsigned:
 
 
 @final
-class EntityData:
+class CedarEntityMapping:
     entity_type: str
     id: str
+
+    def __init__(self, entity_type: str, id: str) -> None: ...
+
+
+@final
+class EntityData:
+    cedar_entity_mapping: CedarEntityMapping
     payload: Dict[str, Any]
 
     def __init__(self, entity_type: str, id: str, **kwargs) -> None: ...

@@ -52,7 +52,7 @@ let id_token = "<id_token>";
 let userinfo_token = "<userinfo_token>";
 ```
 
-Your *principals* will be built from these tokens.
+Your _principals_ will be built from these tokens.
 
 **2. Define the resource**
 
@@ -61,8 +61,10 @@ use std::collections::HashMap;
 use serde_json::json;
 
 let resource = EntityData {
-  entity_type: "Jans::Application".to_string(),
-  id: "app_id_001".to_string(),
+  cedar_entity_mapping: CedarEntityMapping {
+    entity_type: "Jans::Application".to_string(),
+    id: "app_id_001".to_string(),
+  },
   payload: HashMap::from_iter([
     ("protocol".to_string(), json!("https")),
     ("host".to_string(), json!("example.com")),
@@ -130,15 +132,19 @@ use cedarling::*;
 
 let principals = vec![
   EntityData {
-    entity_type: "Jans::Workload".to_string(),
-    id: "some_workload_id".to_string(),
+    cedar_entity_mapping: CedarEntityMapping {
+      entity_type: "Jans::Workload".to_string(),
+      id: "some_workload_id".to_string(),
+    },
     payload: HashMap::from_iter([
       ("client_id".to_string(), json!("some_client_id")),
     ]),
   },
   EntityData {
-    entity_type: "Jans::User".to_string(),
-    id: "random_user_id".to_string(),
+    cedar_entity_mapping: CedarEntityMapping {
+      entity_type: "Jans::User".to_string(),
+      id: "random_user_id".to_string(),
+    },
     payload: HashMap::from_iter([
       ("roles".to_string(), json!(["admin", "manager"])),
     ]),
@@ -148,15 +154,17 @@ let principals = vec![
 
 **2. Define the Resource**
 
-This represents the *resource* that the action will be performed on, such as a protected API endpoint or file.
+This represents the _resource_ that the action will be performed on, such as a protected API endpoint or file.
 
 ```rs
 use std::collections::HashMap;
 use serde_json::json;
 
 let resource = EntityData {
-  entity_type: "Jans::Application".to_string(),
-  id: "app_id_001".to_string(),
+  cedar_entity_mapping: CedarEntityMapping {
+    entity_type: "Jans::Application".to_string(),
+    id: "app_id_001".to_string(),
+  },
   payload: HashMap::from_iter([
     ("protocol".to_string(), json!("https")),
     ("host".to_string(), json!("example.com")),
@@ -167,7 +175,7 @@ let resource = EntityData {
 
 **3. Define the Action**
 
-An *action* represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
+An _action_ represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
 
 ```rs
 let action = r#"Jans::Action::"Read""#.to_string();
@@ -175,7 +183,7 @@ let action = r#"Jans::Action::"Read""#.to_string();
 
 **4. Define the Context**
 
-The *context* represents additional data that may affect the authorization decision, such as time, location, or user-agent.
+The _context_ represents additional data that may affect the authorization decision, such as time, location, or user-agent.
 
 ```rs
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -196,7 +204,7 @@ let context = json!({
 
 **5. Build the Request**
 
-Now you'll construct the ***request*** by including the *principals*, *action*, and *context*.
+Now you'll construct the **_request_** by including the _principals_, _action_, and _context_.
 
 ```rs
 use std::collection::HashMap;

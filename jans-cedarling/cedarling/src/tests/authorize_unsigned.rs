@@ -42,32 +42,37 @@ async fn test_authorize_unsigned_for_all_principals_success() {
         action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
         context: json!({}),
         principals: vec![
-            EntityData::deserialize(serde_json::json!(
-                {
-                "id": "random_id",
-                "type": "Jans::TestPrincipal1",
+            EntityData::deserialize(serde_json::json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "random_id"
+                },
                 "is_ok": true
             }))
             .unwrap(),
-            EntityData::deserialize(serde_json::json!(
-                {
-                "id": "random_id",
-                "type": "Jans::TestPrincipal2",
+            EntityData::deserialize(serde_json::json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal2",
+                    "id": "random_id"
+                },
                 "is_ok": true
             }))
             .unwrap(),
-            EntityData::deserialize(serde_json::json!(
-                {
-                "id": "random_id",
-                "type": "Jans::TestPrincipal3",
+            EntityData::deserialize(serde_json::json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal3",
+                    "id": "random_id"
+                },
                 "is_ok": true
             }))
             .unwrap(),
         ],
         resource: EntityData::deserialize(serde_json::json!(
         {
-            "id": "random_id",
-            "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
             "org_id": "some_long_id",
             "country": "US"
         }))
@@ -154,32 +159,37 @@ async fn test_authorize_unsigned_for_all_principals_success_using_entity_same_ty
         action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
         context: json!({}),
         principals: vec![
-            EntityData::deserialize(serde_json::json!(
-                {
-                "id": "id1",
-                "type": "Jans::TestPrincipal1",
+            EntityData::deserialize(serde_json::json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "id1"
+                },
                 "is_ok": true
             }))
             .unwrap(),
-            EntityData::deserialize(serde_json::json!(
-                {
-                "id": "id2",
-                "type": "Jans::TestPrincipal1",
+            EntityData::deserialize(serde_json::json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "id2"
+                },
                 "is_ok": true
             }))
             .unwrap(),
-            EntityData::deserialize(serde_json::json!(
-                {
-                "id": "id3",
-                "type": "Jans::TestPrincipal1",
+            EntityData::deserialize(serde_json::json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "id3"
+                },
                 "is_ok": false
             }))
             .unwrap(),
         ],
         resource: EntityData::deserialize(serde_json::json!(
         {
-            "id": "random_id",
-            "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
             "org_id": "some_long_id",
             "country": "US"
         }))
@@ -256,32 +266,37 @@ async fn test_authorize_unsigned_for_all_principals_failure() {
         action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
         context: json!({}),
         principals: vec![
-            EntityData::deserialize(serde_json::json!(
-                {
-                "id": "random_id",
-                "type": "Jans::TestPrincipal1",
+            EntityData::deserialize(serde_json::json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "random_id"
+                },
                 "is_ok": false
             }))
             .unwrap(),
-            EntityData::deserialize(serde_json::json!(
-                {
-                "id": "random_id",
-                "type": "Jans::TestPrincipal2",
+            EntityData::deserialize(serde_json::json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal2",
+                    "id": "random_id"
+                },
                 "is_ok": true
             }))
             .unwrap(),
-            EntityData::deserialize(serde_json::json!(
-                {
-                "id": "random_id",
-                "type": "Jans::TestPrincipal3",
+            EntityData::deserialize(serde_json::json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal3",
+                    "id": "random_id"
+                },
                 "is_ok": false
             }))
             .unwrap(),
         ],
         resource: EntityData::deserialize(serde_json::json!(
         {
-            "id": "random_id",
-            "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
             "org_id": "some_long_id",
             "country": "US"
         }))
@@ -362,16 +377,20 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
         context: json!({}),
         principals: vec![
             EntityData::deserialize(serde_json::json!({
-                "id": "user1",
-                "type": "Jans::User",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::User",
+                    "id": "user1"
+                },
                 "country": "US",
                 "role": ["Admin"],
                 "sub": "user1"
             }))
             .unwrap(),
             EntityData::deserialize(serde_json::json!({
-                "id": "user2",
-                "type": "Jans::User",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::User",
+                    "id": "user2"
+                },
                 "country": "US",
                 "role": ["Guest"],
                 "sub": "user2"
@@ -379,8 +398,10 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
             .unwrap(),
         ],
         resource: EntityData::deserialize(serde_json::json!({
-            "id": "issue1",
-            "type": "Jans::Issue",
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "issue1"
+            },
             "org_id": "invalid",
             "country": "US"
         }))

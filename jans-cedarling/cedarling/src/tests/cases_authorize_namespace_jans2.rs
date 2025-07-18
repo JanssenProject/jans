@@ -62,8 +62,10 @@ async fn test_namespace_jans2() {
             },
             "action": "Jans2::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans2::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans2::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },

@@ -10,7 +10,7 @@ tags:
 - [Installation](#installation)
 - [Usage](#usage)
 
-## Installation 
+## Installation
 
 ### Building from Source
 
@@ -33,6 +33,7 @@ To use Cedarling Java bindings in Java Maven Project add following `repository` 
         </repository>
     </repositories>
 ```
+
 ```declarative
         <dependency>
             <groupId>io.jans</groupId>
@@ -52,10 +53,10 @@ We need to initialize Cedarling first.
         import uniffi.cedarling_uniffi.*;
         import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
         ...
-        
+
         /*
-         * In a production environment, the bootstrap configuration should not be hardcoded. 
-         * Instead, it should be loaded dynamically from external sources such as environment variables, 
+         * In a production environment, the bootstrap configuration should not be hardcoded.
+         * Instead, it should be loaded dynamically from external sources such as environment variables,
          * configuration files, or a centralized configuration service.
          */
         String bootstrapJsonStr = """
@@ -69,7 +70,7 @@ We need to initialize Cedarling first.
             "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json"
         }
         """;
-        
+
         try {
             CedarlingAdapter cedarlingAdapter = new CedarlingAdapter();
             cedarlingAdapter.loadFromJson(bootstrapJsonStr);
@@ -85,22 +86,25 @@ We need to initialize Cedarling first.
 
 **1. Define the resource:**
 
-This represents the *resource* that the action will be performed on, such as a protected API endpoint or file.
+This represents the _resource_ that the action will be performed on, such as a protected API endpoint or file.
 
 ```java
     String resource = """
         {
           "app_id": "app_id_001",
-          "id": "admin_ui_id",
+          "cedar_entity_mapping": {
+            "entity_type": "Jans::Issue",
+            "id": "admin_ui_id"
+          },
           "name": "App Name",
-          "permission": "view_clients",
-          "type": "Jans::Issue"
+          "permission": "view_clients"
         }
         """;
 ```
+
 **2. Define the action:**
 
-An *action* represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
+An _action_ represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
 
 ```java
 String action = "Jans::Action::\"Update\"";
@@ -108,7 +112,7 @@ String action = "Jans::Action::\"Update\"";
 
 **3. Define Context**
 
-The *context* represents additional data that may affect the authorization decision, such as time, location, or user-agent.
+The _context_ represents additional data that may affect the authorization decision, such as time, location, or user-agent.
 
 ```java
     String context = """
@@ -161,13 +165,17 @@ Finally, call the `authorize` function to check whether the principals are allow
     String principals = """
         const principals = [
           {
-            "entity_type": "Jans::Workload",
-            "id": "some_workload_id",
+            "cedar_entity_mapping": {
+              "entity_type": "Jans::Workload",
+              "id": "some_workload_id"
+            },
             "client_id": "some_client_id",
           },
           {
-            "entity_type": "Jans::User",
-            "id": "random_user_id",
+            "cedar_entity_mapping": {
+              "entity_type": "Jans::User",
+              "id": "random_user_id"
+            },
             "roles": ["admin", "manager"]
           },
         ];
@@ -182,7 +190,7 @@ Finally, call the `authorize` function to check whether the principals are allow
 
 ```java
         List<EntityData> principals = List.of(EntityData.Companion.fromJson(principals));
-        
+
         AuthorizeResult result = adapter.authorizeUnsigned(principals, action, new JSONObject(resource), new JSONObject(context));
         if(result.getDecision()) {
             System.out.println("Access granted");
@@ -192,7 +200,7 @@ Finally, call the `authorize` function to check whether the principals are allow
 ```
 
 ### Logging
-    
+
 The logs could be retrieved using the `pop_logs` function.
 
 ```java
@@ -205,9 +213,7 @@ The logs could be retrieved using the `pop_logs` function.
     adapter.getLogsByTag("System");
 ```
 
-
 ## See Also
 
 - [Cedarling TBAC quickstart](../cedarling-quick-start-tbac.md)
 - [Cedarling Unsigned quickstart](../cedarling-quick-start-unsigned.md)
-
