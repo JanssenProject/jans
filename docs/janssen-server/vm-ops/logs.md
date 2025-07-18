@@ -117,7 +117,13 @@ The most important log files here are described below:
 1. `jans-auth.log`: This log file contains most authentication related information. Generally this is the first log to review for any authentication-related troubleshooting, like authentication failure or missing clients etc.
 1. `jans-auth_persistence.log`: This log file contains information about the Jans Auth server communicating with the persistence backend. 
 1. `jans-auth_script.log`: This log file contains debug messages printed from [interception scripts](../developer/interception-scripts.md).
-
+### Jans Fido2 server logs
+`/opt/jans/jetty/jans-fido2/logs/`
+1. `jetty.log`: Logs web server activity and HTTP request handling by the Jetty server.
+1. `fido2.log`: Logs FIDO2 authentication and registration events.
+1. `fido2_persistence.log`: Logs database operations for storing FIDO2 credentials and metadata.
+1. `fido2_persistence_duration.log`:  Logs the time taken for FIDO2 data persistence operations (database-related action when storing & retrieving data).
+1. `fido2_script.log`: Logs execution and outcomes of custom scripts used in FIDO2 flows.
 ## Server Logs
 In some cases, it may be necessary to examine the server logs themselves.
 
