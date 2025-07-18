@@ -2533,6 +2533,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#jans-fido2-server-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jans Fido2 server logs
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -14460,6 +14469,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#jans-fido2-server-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jans Fido2 server logs
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -14696,6 +14714,14 @@ The server will now have logs set to TRACE.</p>
 <li><code>jans-auth_persistence.log</code>: This log file contains information about the Jans Auth server communicating with the persistence backend. </li>
 <li><code>jans-auth_script.log</code>: This log file contains debug messages printed from <a href="../../developer/interception-scripts/">interception scripts</a>.</li>
 </ol>
+<h3 id="jans-fido2-server-logs">Jans Fido2 server logs<a class="headerlink" href="#jans-fido2-server-logs" title="Permanent link">#</a></h3>
+<p><code>/opt/jans/jetty/jans-fido2/logs/</code>
+1. <code>jetty.log</code>: Logs web server activity and HTTP request handling by the Jetty server.
+1. <code>fido2.log</code>: Logs FIDO2 authentication and registration events.
+1. <code>fido2_persistence.log</code>: Logs database operations for storing FIDO2 credentials and metadata.
+1. <code>fido2_persistence_duration.log</code>:  Logs the time taken for FIDO2 data persistence operations (database-related action when storing &amp; retrieving data).
+1. <code>fido2_script.log</code>: Logs execution and outcomes of custom scripts used in FIDO2 flows.
+we can change logging level of fido server from TUI or CLI as well , check more details <a href="../../config-guide/fido2-config/janssen-fido2-configuration/">here</a></p>
 <h2 id="server-logs">Server Logs<a class="headerlink" href="#server-logs" title="Permanent link">#</a></h2>
 <p>In some cases, it may be necessary to examine the server logs themselves.</p>
 <h3 id="os-logs">OS Logs<a class="headerlink" href="#os-logs" title="Permanent link">#</a></h3>
@@ -14742,7 +14768,7 @@ The server will now have logs set to TRACE.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 29, 2024 09:13:16 UTC"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 29, 2024 09:13:16 UTC">2024-10-29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 18, 2025 17:03:57 UTC"><span class="timeago" datetime="2025-07-18T17:03:57+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 18, 2025 17:03:57 UTC">2025-07-18</span>
   </span>
 
     
