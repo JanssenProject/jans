@@ -57,6 +57,17 @@ pub struct CedarEntityMapping {
     pub id: String,
 }
 
+#[pymethods]
+impl CedarEntityMapping {
+    #[new]
+    fn new(entity_type: String, id: String) -> Self {
+        Self {
+            entity_type,
+            id,
+        }
+    }
+}
+
 // type alias for the entity data attributes
 type EntityDataAttrs = HashMap<String, serde_json::Value>;
 
