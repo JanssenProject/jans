@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
 
 
 /**
+ * /revoke_session endpoint is deprecated in favor of Global Token Revocation which removes session as well and is standard one.
+ *
  * @author Yuriy Zabrovarnyy
  */
 @Path("/")

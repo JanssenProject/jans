@@ -80,8 +80,6 @@ public class DiscoveryService {
             jsonObj.put(ACCESS_EVALUATION_V1_ENDPOINT, getAccessEvaluationV1Endpoint(appConfiguration));
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_TOKEN))
             jsonObj.put(REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint());
-        if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_SESSION))
-            jsonObj.put(SESSION_REVOCATION_ENDPOINT, endpointUrl("/revoke_session"));
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.GLOBAL_TOKEN_REVOCATION))
             jsonObj.put(GLOBAL_TOKEN_REVOCATION_ENDPOINT, endpointUrl("/global-token-revocation"));
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.USERINFO))
@@ -310,8 +308,6 @@ public class DiscoveryService {
             aliases.put(CHECK_SESSION_IFRAME, appConfiguration.getMtlsCheckSessionIFrame());
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_TOKEN) && StringUtils.isNotBlank(appConfiguration.getMtlsTokenRevocationEndpoint()))
             aliases.put(REVOCATION_ENDPOINT, appConfiguration.getMtlsTokenRevocationEndpoint());
-        if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_SESSION) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
-            aliases.put(SESSION_REVOCATION_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/revoke_session"));
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.GLOBAL_TOKEN_REVOCATION) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
             aliases.put(GLOBAL_TOKEN_REVOCATION_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/global-token-revocation"));
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.USERINFO) && StringUtils.isNotBlank(appConfiguration.getMtlsUserInfoEndpoint()))
