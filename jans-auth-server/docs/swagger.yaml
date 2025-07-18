@@ -2769,36 +2769,6 @@ paths:
                     example: 100000000
                   custom_state:
                     type: string
-  /revoke_session:
-    post:
-      tags:
-        - Session Management
-      summary: Revoke all sessions for user.
-      description: Revoke all sessions for user (requires revoke_session scope).
-      operationId: revoke-session
-      requestBody:
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              required:
-                - user_criterion_key
-                - user_criterion_value
-              properties:
-                user_criterion_key:
-                  type: string
-                  description: user criterion key (e.g. uid)
-                user_criterion_value:
-                  type: string
-                  description: user criterion value (e.g. chris)
-      responses:
-        200:
-          description: OK - Returned if request was processed successfully. Means it will return in case sessions are found as well as in case sessions are not found (error is not returned to not disclose internal information).
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/InternalServerError'
 
   /status_list:
     get:

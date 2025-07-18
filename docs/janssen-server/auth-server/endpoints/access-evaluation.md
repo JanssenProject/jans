@@ -285,7 +285,6 @@ X-Xss-Protection: 1; mode=block
   "global_token_revocation_endpoint" : "https://happy-example.gluu.info/jans-auth/restv1/global-token-revocation",
   "introspection_signing_alg_values_supported" : [ "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
   "tx_token_signing_alg_values_supported" : [ "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
-  "session_revocation_endpoint" : "https://happy-example.gluu.info/jans-auth/restv1/revoke_session",
   "check_session_iframe" : "https://happy-example.gluu.info/jans-auth/opiframe.htm",
   "scopes_supported" : [ "address", "introspection", "role", "access_evaluation", "https://jans.io/auth/ssa.admin", "online_access", "openid", "clientinfo", "user_name", "profile", "uma_protection", "revoke_any_token", "global_token_revocation", "https://jans.io/scim/users.write", "revoke_session", "device_sso", "https://jans.io/scim/users.read", "phone", "mobile_phone", "offline_access", "authorization_challenge", "https://jans.io/oauth/lock/audit.write", "email", "https://jans.io/oauth/lock/audit.readonly" ],
   "backchannel_logout_supported" : true,
