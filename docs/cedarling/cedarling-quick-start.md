@@ -12,9 +12,14 @@ tags:
 # Authorization Using The Cedarling
 
 This quick start guide shows how to quickly test authorization of a user action
-using the Cedarling. To do this, we need 3 things.
+using the Cedarling. We will be using [the application asserted identity approach](./README.md#token-based-access-control-tbac-v-application-asserted-identity) 
+in this guide to implement role based access control(RBAC). Refer to [this section]() to understand how to use Cedarling
+with TBAC approach.
 
-1. Authorization policy
+
+To see authorization using Cedarling in action, we need 3 things.
+
+1. An authorization policy
 2. A request for user action
 3. A running instance of the Cedarling
 
@@ -24,23 +29,7 @@ For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/ja
 
 ## Prerequisite
 
-- Install the Janssen Tarp [on Chrome or Firefox](https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md#releases).
-
-
-## Two Ways to Perform Authorization Using the Cedarling
-   
-There are two ways to implement authorization using Cedarling based on 
-how to we supply the information regarding the principal. Principal is the 
-person or the workload for which the authorization is being checked.
-
-   1. Unsigned JSON: Use JSON string to pass the information related to the pricipal
-   2. Signed tokens: Use the tokens signed by the authentication provider to pass 
-   the information related to the principal. This is also called Token Based Access Control (TBAC)
-
-Refer to TBAC quick start guide to understand authorization using TBAC.
-
-In this quick start, we will step through authorization when the details of 
-the principal is passed as a JSON string. 
+- Install the Janssen Tarp [on Chrome or Firefox](https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md).
 
 ### Step-1: Create Cedar Policy and Schema
 
@@ -51,9 +40,13 @@ We will use this policy store to allow/deny the incoming authorization request.
 
 ??? tip "Agama Lab: For authoring policies and managing the policy store"
 
+    Alternatively, you can also use the Agama Lab For authoring policies and 
+    managing the policy stores. 
+
     Agama Lab is a free web tool provided by Gluu. This tool makes it very 
-    easy to author, update policies and schema using an user interface. Follow
-    the steps below to make changes to the policy that we are using above.
+    easy to author, update policies and schema using a web interface. Follow
+    the steps below if you want to make changes to the demo policy that we are 
+    using above.
 
     - Go to the [CedarlingQuickstart repository](https://github.com/JanssenProject/CedarlingQuickstart) where the demo policy store is hosted
         - Click on `Fork`
@@ -97,15 +90,17 @@ use the policy stored in the store (from [Step-1](#step-1-create-cedar-policy-an
        "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
    }
    ```
-4. Click `Save` to initialize Cedarling.
+4. Click `Save` to initialize the Cedarling. The Cedarling will fetch and validate your policy store during the
+initialization. 
 
-This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User.
+The Cedarling is ready to receive and evaluate authorization requests at this 
+stage.
 
-### Step-3: Test the policy using cedarling
+### Step-3: Test authorization using the Cedarling
 
 
-1. Go to Tarp, under `Cedarling` tab, click on `Cedarling Unsigned Authz Form`
-2. Input the following:
+1. Go to Tarp's `Cedarling` tab, click on `Cedarling Unsigned Authz Form`
+2. Input the following in respective input boxes:
 
    ```JSON title="Principal"
        [
@@ -130,8 +125,12 @@ This will start the Cedarling in Tarp, fetch and validate your policy store, and
        }
    ```
 
-The request is ready to be sent. To send the request to the Cedarling,
-click on `Cedarling Authz Request`
+Leave the `Context` blank.
+
+The request is ready to be sent. Click `Cedarling Authz Request` to send the 
+request to the embedded Cedarling. After evaluation of the authorization
+request, the Cedarling will respond with a JSON payload. Similar to what is 
+shown below.
 
 ```JSON title="Sample Response"
     {
@@ -143,9 +142,10 @@ click on `Cedarling Authz Request`
 
 The top-level `decision: true` confirms successful authorization.
 
-Let's check a scenario where authorization is denied.
+Let's check a scenario where authorization is denied. Remove the role from the
+`Principal` entity and test the authorization.
 
-```
+```JSON title="Principal"
 [
   {
     "type": "Jans::User",
@@ -158,7 +158,7 @@ Let's check a scenario where authorization is denied.
 
 And click `Cedarling Authz Request` again. Cedarling will return a new result:
 
-```
+```JSON title="Sample Response"
 {
   "decision": false,
   ...
@@ -170,13 +170,56 @@ The top-level `decision: false` shows Cedarling denying authorization.
 
 ## Implement TBAC Using Cedarling
 
-Token-Based Access Control (TBAC) in Cedarling involves using JWT tokens from an Identity Provider (IDP) 
-to authorize users based on roles.
+In this guide, we will use [Token-Based Access Control (TBAC)](./README.md#token-based-access-control-tbac-v-application-asserted-identity) to 
+implement role-based access control (RBAC). 
 
+For better understanding of the TBAC flow, see the diagram below. 
+
+??? "TBAC Sequence diagram"
+
+    ```mermaid
+    sequenceDiagram
+        title Cedarling and Tarp
+
+        participant Browser
+        participant Tarp
+        participant Auth Server
+
+        Browser->>Tarp: Enter Auth Server config
+        Tarp->>Auth Server: Dynamic Client Registration 
+        Auth Server->>Tarp: Client ID and Secret
+        Browser->>Tarp: Enter Cedarling bootstrap config
+        Tarp->>Auth Server: GET /jans-auth/restv1/jwks
+        Auth Server->>Tarp: JWKS
+        Tarp->>Tarp: Initialize Cedarling
+        Browser->>Tarp: Start authentication flow
+        Tarp->>Auth Server: GET /jans-auth/restv1/authorize?...
+        Auth Server->>Tarp: /callback?code=...
+        Tarp->>Auth Server: GET /jans-auth/restv1/token
+        Auth Server->>Tarp: {"access_token": <JWT>}
+
+        Browser->>Tarp: Cedarling authorization flow(principal, action, resource, context)
+        Tarp->>Browser: Cedarling Decision 
+    ```
+
+### Prerequisites
+
+- Install the Janssen Tarp [on Chrome or Firefox](https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md).
+- Instance of Janssen Server or any other IDP with following configuration
+  in place.
+    - Allow dynamic client registration
+    - Allow registered clients to request the `role` scope
+    - Have a user with the `role` claim set to the value `SupremeRuler` and 
+      return this claim in the userinfo token
 
 ### Step-1: Create Cedar Policy and Schema
 
-We will use a policy that grants access to all actions and all the resources, only to the users with the `SupremeRuler` role. The policy is as follows:
+For this guide, we have created a policy store in the 
+[demo GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart). 
+
+The policy store has a [policy](https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/refs/heads/main/tarpDemo/76acfe86fb09731682f92c4fbf7d2e066813ce639404.policy) 
+that grants access to all actions and all the resources, 
+to the users with the `SupremeRuler` role. The policy is as follows:
 
 ```
 @id("allow_supreme_ruler")
@@ -187,9 +230,38 @@ permit(
 );
 ```
 
+### Step-2 Update the IDP information
 
-???+ info "Agama Lab: For authoring policies and managing the policy store"
+The policy store in the demo repository has information about the IDP that 
+released the tokens. You'll need to fork the demo repository and update the 
+policy store to point it to your IDP instance. Follow the steps below to do 
+this.
+
+- Fork the [demo repository](https://github.com/JanssenProject/CedarlingQuickstart). While creating the fork, uncheck the
+  `Copy the main branch only` checkbox.
+- Update the `openid_configuration_endpoint` key in the policy store JSON file
+  named `449805c83e13f332b1b35eac6ffa93187fbd1c648085.json` in the fork. 
+  Set the value to 
+  the `.well-known/openid-configuration` endpoint of your IDP. 
+  
+    For instance:
+  
+    ```
+    "openid_configuration_endpoint": "https://test-jans.gluu.info/.well-known/openid-configuration"
+    ```
+
+- Copy the link of the policy store file's **raw** content. This is the same file that you edited in the step above.
+  The URI would be similar to the shown below. This URI will be used in the next step when we configure Tarp.
+
+    ```
+    https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/refs/heads/main/449805c83e13f332b1b35eac6ffa93187fbd1c648085.json
+    ```
+
+??? info "Agama Lab: For authoring policies and managing the policy store"
     
+    Alternatively, you can also use the Agama Lab For authoring policies and 
+    managing the policy stores. 
+
     Agama Lab is a free web tool provided by Gluu. This tool makes it very 
     easy to author, update policies and schema using an user interface. Follow
     the steps below to make changes to the policy that we are using above.
@@ -207,19 +279,14 @@ permit(
       [policy designer](https://help.gluu.org/kb/article/34/authorization-policy-designer)        
 
 
-- Go to `Trusted Issuer` and edit the `testIdp` entry
-- Replace the OpenID configuration endpoint with the one from your IDP. This server must:
-    - Allow dynamic client registration
-    - Allow registered clients to request the `role` scope
-    - Have a user with the `role` claim set to the value `SupremeRuler` and return this claim in the userinfo token
-- Click Save
-- Click on the button named `Copy Link`. You will need this link in the next section.
 
-### Step-2: Configure Tarp with the policy store
 
-In this step, we will add the policy store details in the Janssen Tarp that is
+### Step-3: Configure Tarp with the policy store
+
+We will now add the policy store details in the Janssen Tarp that is
 installed in the browser. The Cedarling instance embedded in the Tarp will
-use the policy stored in the store (from [Step-1](#step-1-create-cedar-policy-and-schema_1)) to evaluate the authorization result.
+use the policy from the store (from [step-1](#step-1-create-cedar-policy-and-schema_1)) 
+to evaluate the authorization request.
 
 
 1. Open Tarp installed in the Chrome browser
@@ -227,7 +294,7 @@ use the policy stored in the store (from [Step-1](#step-1-create-cedar-policy-an
     - Issuer: The hostname of your IDP
     - Expiry: The day after today
     - Scopes: `openid`, `profile`, `role`
-3. Click `Register`
+3. Click `Register` to register a new client on your IDP.
 4. Go to `Cedarling` tab and click `Add Configurations`
 5. Select `JSON` configuration type and Paste the config as given below.
    Remember to replace `<Policy Store URI>` with
@@ -255,9 +322,9 @@ use the policy stored in the store (from [Step-1](#step-1-create-cedar-policy-an
    ```
 6. Click `Save` to initialize Cedarling.
 
-This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User.
+This will start the embedded Cedarling instance in the Tarp.
 
-### Step-3: Test the policy using the Cedarling
+### Step-4: Test the policy using the Cedarling
 
 Since we are implementing TBAC, we have to authenticate the user first to get the tokens.
 
@@ -265,12 +332,15 @@ Since we are implementing TBAC, we have to authenticate the user first to get th
 2. Input:
       - ACR: `basic`
       - Scopes: `openid`, `profile`, `role`
-3. Login using a user having the `SupremeRuler` role
+      - Check the `Display access and ID token after authentication` checkbox
+   
+3. click the `Trigger auth flow` button
+3. Login using username and password of a user who has the `SupremeRuler` role assinged in the IDP
 4. Click `Allow` on the consent screen
-5. If the authentication is successful, Tarp will show you a page with token details and `Cedarling Authz Request Form` section
-6. Open `Cedarling Signed Authz Form`
+5. If the authentication is successful, Tarp will show you a page with token details 
+6. Move to `Cedarling` tab and select `Cedarling Signed Authz Form` tab
 7. Use the details below as an input to this form:
-      - Principal: select all 3 tokens
+      - Principal: select all 3 tokens. In TBAC approach here, we are passing tokens (i.e signed JWTs) in place of JSON string.
       - Action: `Jans::Action::"Read"`
       - Resource:
         ```json
@@ -280,7 +350,7 @@ Since we are implementing TBAC, we have to authenticate the user first to get th
           "id": "some_id"
         }
         ```
-8. Leave the `Context` blank
+      - Leave the `context` as default
 9. Click `Cedarling Authz Request`
    ```json title="Sample Response"
    {
@@ -293,29 +363,4 @@ Since we are implementing TBAC, we have to authenticate the user first to get th
 The top-level `decision: true` confirms successful authorization.
 
 
-### Sequence diagram
 
-```mermaid
-sequenceDiagram
-    title Cedarling and Tarp
-
-    participant Browser
-    participant Tarp
-    participant Auth Server
-
-    Browser->>Tarp: Enter Auth Server config
-    Tarp->>Auth Server: Dynamic Client Registration 
-    Auth Server->>Tarp: Client ID and Secret
-    Browser->>Tarp: Enter Cedarling bootstrap config
-    Tarp->>Auth Server: GET /jans-auth/restv1/jwks
-    Auth Server->>Tarp: JWKS
-    Tarp->>Tarp: Initialize Cedarling
-    Browser->>Tarp: Start authorization flow
-    Tarp->>Auth Server: GET /jans-auth/restv1/authorize?...
-    Auth Server->>Tarp: /callback?code=...
-    Tarp->>Auth Server: GET /jans-auth/restv1/token
-    Auth Server->>Tarp: {"access_token": <JWT>}
-
-    Browser->>Tarp: Cedarling Authz(principal, action, resource, context)
-    Tarp->>Browser: Cedarling Decision 
-```
