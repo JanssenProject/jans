@@ -695,8 +695,8 @@ paths:
     delete:
       tags:
       - Admin UI - License
-      summary: Delete admin-ui license details in configuration
-      description: Delete admin-ui license details in configuration
+      summary: Delete license details in admin-ui configuration
+      description: Delete license details in admin-ui configuration
       operationId: license-config-delete
       responses:
         "200":
