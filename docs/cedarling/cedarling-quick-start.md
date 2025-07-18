@@ -31,7 +31,7 @@ For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/ja
 
 - Install the Janssen Tarp [on Chrome or Firefox](https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md).
 
-### Step-1: Create Cedar Policy and Schema
+### Step-1: Create the Cedar Policy and Schema
 
 The Cedarling needs policies and a schema to authorize access. These are bundled in a _policy store_ (a JSON file). To aid in this quick start guide, we have already created a 
 [policy store](https://raw.githubusercontent.com/ossdhaval/CedarlingQuickstart/refs/heads/agama-lab-policy-designer/449805c83e13f332b1b35eac6ffa93187fbd1c648085.json) at
@@ -329,13 +329,13 @@ This will start the embedded Cedarling instance in the Tarp.
 Since we are implementing TBAC, we have to authenticate the user first to get the tokens.
 
 1. In Tarp, under `Authentication flow` tab, click the ⚡ icon to begin authentication
-2. Input:
+2. Use the following inputs to fill the form:
       - ACR: `basic`
       - Scopes: `openid`, `profile`, `role`
       - Check the `Display access and ID token after authentication` checkbox
    
-3. click the `Trigger auth flow` button
-3. Login using username and password of a user who has the `SupremeRuler` role assinged in the IDP
+3. Click the `Trigger auth flow` button
+3. Login using username and password of a user who has the `SupremeRuler` role assigned in the IDP
 4. Click `Allow` on the consent screen
 5. If the authentication is successful, Tarp will show you a page with token details 
 6. Move to `Cedarling` tab and select `Cedarling Signed Authz Form` tab
