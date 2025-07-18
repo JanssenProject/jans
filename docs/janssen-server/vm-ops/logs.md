@@ -124,6 +124,7 @@ The most important log files here are described below:
 1. `fido2_persistence.log`: Logs database operations for storing FIDO2 credentials and metadata.
 1. `fido2_persistence_duration.log`:  Logs the time taken for FIDO2 data persistence operations (database-related action when storing & retrieving data).
 1. `fido2_script.log`: Logs execution and outcomes of custom scripts used in FIDO2 flows.
+we can change logging level of fido server from TUI or CLI as well , check more details [here](../../fido2-config/janssen-fido2-configuration.md)
 ## Server Logs
 In some cases, it may be necessary to examine the server logs themselves.
 
