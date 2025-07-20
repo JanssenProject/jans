@@ -10,7 +10,6 @@ include=["CedarlingError","CedarlingStringArray","CedarlingResult"]
 exclude=[]
 
 [fn]
-prefix = "cedarling_"
 postfix = ""
 args="horizontal"
 rename_args="GeckoCase"
