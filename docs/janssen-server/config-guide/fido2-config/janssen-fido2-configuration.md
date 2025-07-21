@@ -129,7 +129,7 @@ It will return the result as below:
 To update the configuration follow the steps below.
 
 1. [Get the current configuration](#get-the-current-fido2-configuration) and store it into a file for editing
-2. Edit and update the desired configuration values in the file while keeping other properties and values unchanged. Updates must adhere to the `Fido2:AppConfiguration` schema as mentioned [here](#using-command-line). The schema details can be retrieved using the command below. The schema defines what values and datatypes are acceptable for each property value.
+2. Edit and update the desired configuration values (ex: change logging level to TRACE) in the file while keeping other properties and values unchanged. Updates must adhere to the `Fido2:AppConfiguration` schema as mentioned [here](#using-command-line). The schema details can be retrieved using the command below. The schema defines what values and datatypes are acceptable for each property value.
  ```text title="Command"
  jans cli --schema Fido2:AppConfiguration
  ```
@@ -137,7 +137,7 @@ To update the configuration follow the steps below.
  ```bash title="Command"
   jans cli --operation-id put-properties-fido2 --data /tmp/conf-data.json
  ```
- Upon successful execution of the update, the Janssen Server responds with updated configuration.
+ Upon successful execution of the update, the Janssen Server responds with updated configuration.you can check the updated value changed ("loggingLevel": "TRACE")
 
 
 ##  Using Text-based UI
