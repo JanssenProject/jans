@@ -436,6 +436,7 @@ nav:
     - Lock Configuration: 'cedarling/cedarling-lock-server.md'
     - Cedarling Entities: 'cedarling/cedarling-entities.md'
   - Developer:
+    - Rust: 'cedarling/cedarling-rust.md'
     - WASM: 'cedarling/cedarling-wasm.md'
     - Python:
       - cedarling/python/README.md
