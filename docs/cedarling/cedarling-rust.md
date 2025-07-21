@@ -187,8 +187,10 @@ async fn perform_token_authorization(cedarling: &Cedarling) -> Result<(), Box<dy
 
     // 2. Define the resource
     let resource = EntityData {
-        entity_type: "Jans::Application".to_string(),
-        id: "app_id_001".to_string(),
+        cedar_entity_mapping: CedarEntityMapping {
+            entity_type: "Jans::Application".to_string(),
+            id: "app_id_001".to_string(),
+        },
         attributes: HashMap::from_iter([
             ("protocol".to_string(), json!("https")),
             ("host".to_string(), json!("example.com")),
@@ -251,15 +253,19 @@ async fn perform_unsigned_authorization(cedarling: &Cedarling) -> Result<(), Box
     // 1. Define principals directly
     let principals = vec![
         EntityData {
-            entity_type: "Jans::Workload".to_string(),
-            id: "some_workload_id".to_string(),
+            cedar_entity_mapping: CedarEntityMapping {
+                entity_type: "Jans::Workload".to_string(),
+                id: "some_workload_id".to_string(),
+            },
             attributes: HashMap::from_iter([
                 ("client_id".to_string(), json!("some_client_id")),
             ]),
         },
         EntityData {
-            entity_type: "Jans::User".to_string(),
-            id: "random_user_id".to_string(),
+            cedar_entity_mapping: CedarEntityMapping {
+                entity_type: "Jans::User".to_string(),
+                id: "random_user_id".to_string(),
+            },
             attributes: HashMap::from_iter([
                 ("roles".to_string(), json!(["admin", "manager"])),
                 ("email".to_string(), json!("user@example.com")),
@@ -269,8 +275,10 @@ async fn perform_unsigned_authorization(cedarling: &Cedarling) -> Result<(), Box
 
     // 2. Define the resource
     let resource = EntityData {
-        entity_type: "Jans::Application".to_string(),
-        id: "app_id_001".to_string(),
+        cedar_entity_mapping: CedarEntityMapping {
+            entity_type: "Jans::Application".to_string(),
+            id: "app_id_001".to_string(),
+        },
         attributes: HashMap::from_iter([
             ("protocol".to_string(), json!("https")),
             ("host".to_string(), json!("example.com")),
@@ -397,8 +405,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Perform unsigned authorization
     let principals = vec![EntityData {
-        entity_type: "Jans::User".to_string(),
-        id: "test_user".to_string(),
+        cedar_entity_mapping: CedarEntityMapping {
+            entity_type: "Jans::User".to_string(),
+            id: "test_user".to_string(),
+        },
         attributes: HashMap::from_iter([
             ("roles".to_string(), json!(["admin"])),
             ("email".to_string(), json!("admin@example.com")),
@@ -406,8 +416,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }];
 
     let resource = EntityData {
-        entity_type: "Jans::Application".to_string(),
-        id: "admin_panel".to_string(),
+        cedar_entity_mapping: CedarEntityMapping {
+            entity_type: "Jans::Application".to_string(),
+            id: "admin_panel".to_string(),
+        },
         attributes: HashMap::from_iter([
             ("permission_level".to_string(), json!("admin")),
         ]),
@@ -493,9 +505,19 @@ Represents an entity in the authorization system.
 
 ```rust
 pub struct EntityData {
+    pub cedar_entity_mapping: CedarEntityMapping,
+    pub attributes: HashMap<String, serde_json::Value>,
+}
+```
+
+#### `CedarEntityMapping`
+
+Represents the entity type and id mapping.
+
+```rust
+pub struct CedarEntityMapping {
     pub entity_type: String,
     pub id: String,
-    pub attributes: HashMap<String, serde_json::Value>,
 }
 ```
 
