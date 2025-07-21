@@ -147,7 +147,6 @@ def do_exit(*c) -> None:
 
 class JansCliApp(Application):
 
-    entries_per_page = 20 # we can make this configurable
 
     def __init__(self):
 
@@ -229,6 +228,13 @@ class JansCliApp(Application):
 
         self.create_background_task(self.check_jans_cli_ini())
 
+    @property
+    def entries_per_page(self):
+        if self.output.get_size().rows > 31:
+            return 20
+        if self.output.get_size().rows > 26:
+            return 15
+        return 10
 
     async def progress_coroutine(self) -> None:
         """asyncio corotune for progress bar
