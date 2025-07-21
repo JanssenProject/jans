@@ -46,7 +46,7 @@
 		
 
 		<jackson.bom.version>2.13.4.20221013</jackson.bom.version>
-		<jackson.version>2.13.4</jackson.version>
+		<jackson.version>2.15.0</jackson.version>
 		<jackson.databind.version>2.13.4.2</jackson.databind.version>
 		<json.version>20231013</json.version>
 
@@ -314,7 +314,7 @@
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.37.3</version>
+				<version>10.0.2</version>
 			</dependency>
             <dependency>
                 <groupId>com.nimbusds</groupId>
@@ -489,7 +489,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>3.17.0</version>
+				<version>3.18.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -504,7 +504,7 @@
 			<dependency>
 			    <groupId>commons-beanutils</groupId>
 			    <artifactId>commons-beanutils</artifactId>
-			    <version>1.9.4</version>
+			    <version>1.11.0</version>
 			</dependency>
    			<dependency>
 				<groupId>org.apache.commons</groupId>
