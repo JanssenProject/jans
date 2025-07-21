@@ -180,7 +180,7 @@ public class AcrService {
 
                     sessionUser.setState(SessionIdState.UNAUTHENTICATED);
                     sessionUser.getSessionAttributes().put("prompt", authzRequest.getPrompt());
-                    if (!sessionIdService.persistSessionId(sessionUser)) {
+                    if (!sessionIdService.persistSessionId(sessionUser, false, true)) {
                         log.trace("Unable persist session_id, trying to update it.");
                         sessionIdService.updateSessionId(sessionUser);
                     }
