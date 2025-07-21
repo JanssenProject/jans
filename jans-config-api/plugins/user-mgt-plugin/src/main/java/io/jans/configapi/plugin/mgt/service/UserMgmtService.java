@@ -211,6 +211,7 @@ public class UserMgmtService {
 
         // patch for customAttributes
         if (userPatchRequest.getCustomAttributes() != null && !userPatchRequest.getCustomAttributes().isEmpty()) {
+            logger.debug("Patch Custom Attributes");
             updateCustomAttributes(user, userPatchRequest.getCustomAttributes());
         }
 
@@ -273,25 +274,25 @@ public class UserMgmtService {
             if (existingAttribute == null) {
                 boolean result = userService.addUserAttribute(user, attribute.getName(), attribute.getValues(),
                         attribute.isMultiValued());
-                attributeAdded.append(attribute.getName());
+                attributeAdded.append(attribute.getName()).append(",");
                 logger.debug("Result of adding CustomAttributes attribute.getName():{} , result:{} ", attribute.getName(), result);
             }
             // remove attribute
             else if (attribute.getValue() == null || attribute.getValues() == null) {
                 user.removeAttribute(attribute.getName());
-                attributeDeleted.append(attribute.getName());
+                attributeDeleted.append(attribute.getName()).append(",");
             }
             // replace attribute
             else {
                 existingAttribute.setMultiValued(attribute.isMultiValued());
                 existingAttribute.setValues(attribute.getValues());
-                attributeEdited.append(attribute.getName());
+                attributeEdited.append(attribute.getName()).append(",");
             }
         }
-        
-        logger.info("Attribute added - {}",attributeAdded);
-        logger.info("Attribute edited - {}",attributeEdited);
-        logger.info("Attribute removed - {}",attributeDeleted);
+    
+        logger.info(" *** Attribute added - {} {}",attributeAdded,"***");
+        logger.info(" *** Attribute edited - {} {}",attributeEdited,"***");
+        logger.info(" *** Attribute removed - {} {}",attributeDeleted,"***");
         return user;
     }
 
