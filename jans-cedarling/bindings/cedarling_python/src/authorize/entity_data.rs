@@ -83,17 +83,14 @@ fn get_payload(object: Bound<'_, PyDict>) -> PyResult<EntityDataAttrs> {
 #[pymethods]
 impl EntityData {
     #[new]
-    #[pyo3(signature = (entity_type, id, **kwargs))]
-    fn new(entity_type: String, id: String, kwargs: Option<Bound<'_, PyDict>>) -> PyResult<Self> {
+    #[pyo3(signature = (cedar_entity_mapping, **kwargs))]
+    fn new(cedar_entity_mapping: CedarEntityMapping, kwargs: Option<Bound<'_, PyDict>>) -> PyResult<Self> {
         let attributes = kwargs
             .map(|dict| get_payload(dict))
             .unwrap_or(Ok(HashMap::new()))?;
 
         Ok(Self {
-            cedar_mapping: CedarEntityMapping {
-                entity_type,
-                id,
-            },
+            cedar_mapping: cedar_entity_mapping,
             attributes,
         })
     }
