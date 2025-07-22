@@ -207,7 +207,7 @@ void test_logging_functions(){
     CedarlingStringArray log_ids;
     ret=cedarling_get_log_ids(instance_id,&log_ids);
     TEST_ASSERT(ret==0,"Get log IDs function executes");
-    TEST_ASSERT(log_ids.COUNT >= 0, "Log IDs count is valid");
+    // TEST_ASSERT(log_ids.COUNT >= 0, "Log IDs count is valid");
     printf(" Found %zu log IDs\n", log_ids.COUNT);
     cedarling_free_string_array(&log_ids);
 
@@ -215,7 +215,7 @@ void test_logging_functions(){
     CedarlingStringArray logs;
     ret=cedarling_pop_logs(instance_id,&logs);
     TEST_ASSERT(ret==0,"Pop logs function executes");
-    TEST_ASSERT(logs.COUNT >= 0, "Logs count is valid");
+    // TEST_ASSERT(logs.COUNT >= 0, "Logs count is valid");
     printf(" Found %zu logs\n", logs.COUNT);
     cedarling_free_string_array(&logs);
 
