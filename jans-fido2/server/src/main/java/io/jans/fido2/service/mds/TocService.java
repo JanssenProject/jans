@@ -104,64 +104,53 @@ public class TocService {
 	}
 
 	public void refreshTOCEntries() {
-		this.tocEntries = Collections.synchronizedMap(new HashMap<String, JsonNode>());
+		this.tocEntries = Collections.synchronizedMap(new HashMap<>());
 		if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
-			log.debug("SkipDownloadMds is enabled");
+			log.debug("Metadata service is disabled, skipping TOC refresh");
 		} else {
 			tocEntries.putAll(parseTOCs());
 		}
 	}
 
 	public void fetchMetadata() {
-
 		try {
 			if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
-				log.debug("SkipDownloadMds is enabled");
-			} else {
-
-				LocalDate nextUpdateOn = getNextUpdateDate();
-
-				if (nextUpdateOn == null || nextUpdateOn.equals(LocalDate.now()) || nextUpdateOn.isBefore(LocalDate.now())) {
-					log.info("Downloading the latest TOC from https://mds.fidoalliance.org/");
-					MetadataServer metaDataServer = (MetadataServer) (appConfiguration.getFido2Configuration()
-							.getMetadataServers().get(0));
-
-					// as of now, we have only one metadata server, hence get(0), I cant envisage
-					// why there will be multiple metadata servers
-					boolean success = downloadMdsFromServer(new URL(metaDataServer.getUrl()));
-					if (success) {
-						refreshTOCEntries();
-						saveNextUpdateDateOfTheMDS();
-					}
-
-				}
+				return;
 			}
 
+			LocalDate nextUpdateOn = getNextUpdateDate();
+
+			if (nextUpdateOn == null || !nextUpdateOn.isAfter(LocalDate.now())) {
+				MetadataServer metaDataServer = appConfiguration.getFido2Configuration().getMetadataServers().get(0);
+				boolean success = downloadMdsFromServer(new URL(metaDataServer.getUrl()));
+				if (success) {
+					refreshTOCEntries();
+					saveNextUpdateDateOfTheMDS();
+				}
+			}
 		} catch (MalformedURLException e) {
-			log.error("Error while parsing the FIDO alliance URL :", e);
-			return;
+			log.error("Invalid MDS URL", e);
 		}
 	}
 
 	private Map<String, JsonNode> parseTOCs() {
+		log.debug("Parsing TOCs");
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 		List<Map<String, JsonNode>> maps = new ArrayList<>();
-		
+
 		String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
 		if (StringHelper.isEmpty(mdsTocRootCertsFolder)) {
-			log.warn("Fido2 MDS cert and TOC properties should be set");
-			return new HashMap<String, JsonNode>();
+			log.warn("MDS certs folder not defined");
+			return new HashMap<>();
 		}
-		log.info("Populating TOC certs entries from {}", mdsTocRootCertsFolder);
 
 		try {
 			Document mdsDocument = dbDocumentService.getDocumentByDisplayName("mdsTocsFolder");
 			Pair<LocalDate, Map<String, JsonNode>> result = parseTOC(mdsTocRootCertsFolder, mdsDocument.getDocument());
-			log.info("Get TOC {} entries with nextUpdate date {}", result.getSecond().size(), result.getFirst());
-
+			log.debug("Parsed TOC with {} entries and next update date {}", result.getSecond().size(), result.getFirst());
 			maps.add(result.getSecond());
 		} catch (Exception e) {
-			log.warn("Can't access document : {}", e.getMessage(), e);
+			log.warn("Could not parse MDS document", e);
 		}
 
 		return mergeAndResolveDuplicateEntries(maps);
@@ -272,16 +261,24 @@ public class TocService {
 	}
 
 	public JsonNode getAuthenticatorsMetadata(String aaguid) {
-
-		return tocEntries.get(aaguid);
+		log.debug("Getting authenticator metadata for AAGUID: {}", aaguid);
+		if (tocEntries == null) {
+			log.warn("TOC entries map is null");
+			return null;
+		}
+		JsonNode entry = tocEntries.get(aaguid);
+		if (entry == null) {
+			log.warn("No entry found for AAGUID: {}", aaguid);
+		}
+		return entry;
 	}
+
 
 	public MessageDigest getDigester() {
 		return digester;
 	}
 
 	public boolean downloadMdsFromServer(URL metadataUrl) {
-
 		try (InputStream in = metadataUrl.openStream()) {
 			byte[] sourceBytes = IOUtils.toByteArray(in);
 
@@ -308,35 +305,25 @@ public class TocService {
 	}
 
 	public boolean saveNextUpdateDateOfTheMDS() {
-
 		try {
-			Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
-			String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
-
-			Document document = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder).get(0);
+			String folder = appConfiguration.getFido2Configuration().getMdsTocsFolder();
+			Document document = dbDocumentService.getDocumentsByFilePath(folder).get(0);
 			document.setDescription(localDateToString(nextUpdate));
-
 			dbDocumentService.updateDocument(document);
-			log.debug("TOC file updated.");
 			return true;
 		} catch (Exception e) {
-			log.error("Failed to Save the nextUpdateDate of the MDS into jansDocument ", e);
-			throw new DocumentException(e);
+			return false;
 		}
 	}
 
 	public LocalDate getNextUpdateDate() {
-
 		try {
-			Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
-			String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
-
-			Document document = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder).get(0);
-			return (document.getDescription() == null || "mdsTocsFolder".equals(document.getDescription())) ? null : stringToLocalDate(document.getDescription());
-
+			String folder = appConfiguration.getFido2Configuration().getMdsTocsFolder();
+			Document document = dbDocumentService.getDocumentsByFilePath(folder).get(0);
+			String desc = document.getDescription();
+			return (desc == null || "mdsTocsFolder".equals(desc)) ? null : LocalDate.parse(desc);
 		} catch (Exception e) {
-			log.error("Failed to get nextUpdateDate of the MDS from jansDocument ", e);
-			throw new DocumentException(e);
+			return null;
 		}
 	}
 
