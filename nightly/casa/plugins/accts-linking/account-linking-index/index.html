@@ -11331,6 +11331,8 @@
       
         
       
+        
+      
     
     
     
@@ -11364,6 +11366,29 @@
             Developer
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-rust/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rust
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -11414,7 +11439,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_3" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11431,14 +11456,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_3_5_2" id="__nav_3_5_2_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_3_5_3" id="__nav_3_5_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5_3">
             <span class="md-nav__icon md-icon"></span>
             Python
           </label>
@@ -11526,10 +11551,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_5" >
         
           
-          <label class="md-nav__link" for="__nav_3_5_4" id="__nav_3_5_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_5_5" id="__nav_3_5_5_label" tabindex="0">
             
   
   
@@ -11542,8 +11567,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5_4">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5_5">
             <span class="md-nav__icon md-icon"></span>
             Mobile Apps
           </label>
@@ -11650,10 +11675,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_5_5" id="__nav_3_5_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_5_6" id="__nav_3_5_6_label" tabindex="0">
             
   
   
@@ -11666,8 +11691,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5_5">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5_6">
             <span class="md-nav__icon md-icon"></span>
             Sidecar
           </label>
@@ -14404,10 +14429,10 @@
 <p>In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and <code>git</code> installed. </p>
 <ol>
 <li>
-<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/0.0.0-nightly/acct-linking-0.0.0-nightly-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
+<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/replace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
 </li>
 <li>
-<p>Download the utility jar file <code>https://maven.jans.io/maven/io/jans/agama-inbound/0.0.0-nightly/agama-inbound-0.0.0-nightly.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
+<p>Download the utility jar file <code>https://maven.jans.io/maven/io/jans/agama-inbound/replace-janssen-version/agama-inbound-replace-janssen-version.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
 </li>
 <li>
 <p>In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: <code>https://&lt;your-jans-host&gt;/jans-casa/pl/acct-linking/user/interlude.zul</code>. Replace the name of your Jans server accordingly </p>
@@ -14424,7 +14449,7 @@ zip -r inbound.zip *
 </code></pre></div>
 </li>
 <li>
-<p>Download the Casa accounts linking Agama project <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/0.0.0-nightly/acct-linking-agama-0.0.0-nightly-project.zip</code></p>
+<p>Download the Casa accounts linking Agama project <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/replace-janssen-version/acct-linking-agama-replace-janssen-version-project.zip</code></p>
 </li>
 <li>
 <p>Transfer the two zip files to a location in the server, deploy both archives separately using TUI (Agama menu -&gt; "Add a New Project" ). So, there will be two projects: <code>casa-account-linking</code> and <code>agama-inbound-oauth</code>. </p>
