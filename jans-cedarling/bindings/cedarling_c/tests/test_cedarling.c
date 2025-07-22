@@ -42,7 +42,7 @@ void test_initialization(){
     printf("==============================\n");
 
     int result=cedarling_init();
-    TEST_ASSERT(result==0,"Library Initialization")
+    TEST_ASSERT(result==0,"Library Initialization");
 
     const char* version=cedarling_version();
     TEST_ASSERT(version!=NULL,"Version string available");
