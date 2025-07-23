@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -56,6 +57,7 @@ import io.jans.orm.exception.operation.PersistenceException;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.PasswordAttributeData;
@@ -831,6 +833,11 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 
 	@Override
 	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
+
+	@Override
+	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
 

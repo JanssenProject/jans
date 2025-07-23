@@ -71,6 +71,7 @@ import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.Sort;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.operation.auth.PasswordEncryptionHelper;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
@@ -1322,6 +1323,11 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 
 	@Override
 	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
+
+	@Override
+	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
 

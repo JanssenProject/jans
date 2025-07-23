@@ -127,6 +127,25 @@ def _transform_api_dynamic_config(conf):
                 conf["assetMgtConfiguration"]["assetDirMapping"].pop(idx)
                 should_update = True
 
+    # audit log conf
+    if "jans-client" not in conf["auditLogConf"]["headerAttributes"]:
+        conf["auditLogConf"]["headerAttributes"].append("jans-client")
+        should_update = True
+
+    if "GET" not in conf["auditLogConf"]["ignoreHttpMethod"]:
+        conf["auditLogConf"]["ignoreHttpMethod"].append("GET")
+        should_update = True
+
+    for k, v in [
+        ("logData", True),
+        ("auditLogFilePath", "/opt/jans/jetty/jans-config-api/logs/"),
+        ("auditLogFileName", "configapi-audit.log"),
+        ("auditLogDateFormat", "dd-MM-YYYY"),
+    ]:
+        if k not in conf["auditLogConf"]:
+            conf["auditLogConf"][k] = v
+            should_update = True
+
     # finalized conf and flag to determine update process
     return conf, should_update
 

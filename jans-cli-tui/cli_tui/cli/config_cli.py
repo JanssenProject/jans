@@ -334,7 +334,7 @@ class JCA_CLI:
                 user_info = jwt.decode(config['DEFAULT']['user_data'],
                                     options={
                                             'verify_signature': False,
-                                            'verify_exp': True,
+                                            'verify_exp': False,
                                             'verify_aud': False
                                              }
                                     )
@@ -420,6 +420,7 @@ class JCA_CLI:
 
             user = self.get_user_info()
             if 'inum' in user:
+                headers['User-inum'] = user['inum']
                 headers['User-inum'] = user['inum']
 
         ret_val = {'Authorization': 'Bearer {}'.format(access_token)}

@@ -34,7 +34,6 @@ import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.as.server.service.external.session.SessionEventType;
-import io.jans.as.server.service.session.SessionStatusListIndexService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.JansAttribute;
@@ -131,9 +130,6 @@ public class SessionIdService {
 
     @Inject
     private AttributeService attributeService;
-
-    @Inject
-    private SessionStatusListIndexService sessionStatusListIndexService;
 
     private String buildDn(String sessionId) {
         return String.format("jansId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
@@ -465,12 +461,6 @@ public class SessionIdService {
         }
     }
 
-    public void setSessionIndexIfNeeded(SessionId session) {
-        if (session.getPredefinedAttributes().getIndex() == null) {
-            session.getPredefinedAttributes().setIndex(sessionStatusListIndexService.next());
-        }
-    }
-
     private String getClientOrigin(String redirectUri) throws URISyntaxException {
         if (StringHelper.isNotEmpty(redirectUri)) {
             final URI uri = new URI(redirectUri);
@@ -583,6 +573,11 @@ public class SessionIdService {
     }
 
     public boolean persistSessionId(final SessionId sessionId, boolean forcePersistence) {
+        return persistSessionId(sessionId, forcePersistence, false);
+    }
+
+
+    public boolean persistSessionId(final SessionId sessionId, boolean forcePersistence, boolean silent) {
         List<Prompt> prompts = getPromptsFromSessionId(sessionId);
 
         try {
@@ -604,7 +599,9 @@ public class SessionIdService {
                 return true;
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            if (!silent) { // do not log anything if method is explicitly called with silent=true
+                log.error(e.getMessage(), e);
+            }
         }
 
         return false;
@@ -659,9 +656,6 @@ public class SessionIdService {
                 }
 
                 if (update) {
-                    if (sessionId.getState() == SessionIdState.AUTHENTICATED) {
-                        setSessionIndexIfNeeded(sessionId);
-                    }
                     mergeWithRetry(sessionId);
                 }
             }
@@ -817,6 +811,62 @@ public class SessionIdService {
                 sessionId = persistenceEntryManager.find(SessionId.class, dn);
             }
             localCacheService.put(DEFAULT_LOCAL_CACHE_EXPIRATION, sessionId.getDn(), sessionId);
+            return sessionId;
+        } catch (Exception e) {
+            if (!silently) {
+                if (BooleanUtils.isTrue(appConfiguration.getLogNotFoundEntityAsError())) {
+                    log.error("Failed to get session by dn: {}. {}", dn, e.getMessage());
+                } else {
+                    log.trace("Failed to get session by dn: {}. {}", dn, e.getMessage());
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Loads session by id without local cache
+     *
+     * @param sessionId session id
+     * @return session
+     */
+    @Nullable
+    public SessionId loadSessionById(@Nullable String sessionId) {
+        return loadSessionByDn(buildDn(sessionId), false);
+    }
+
+    /**
+     * Loads session by id without local cache
+     *
+     * @param sessionId session id
+     * @param silently if true - does not prints exception from persistence if it occurs
+     * @return session
+     */
+    @Nullable
+    public SessionId loadSessionById(@Nullable String sessionId, boolean silently) {
+        return loadSessionByDn(buildDn(sessionId), silently);
+    }
+
+    /**
+     * Loads session by dn without local cache
+     *
+     * @param dn session nd
+     * @param silently if true - does not prints exception from persistence if it occurs
+     * @return session
+     */
+    @Nullable
+    public SessionId loadSessionByDn(@Nullable String dn, boolean silently) {
+        if (StringUtils.isBlank(dn)) {
+            return null;
+        }
+
+        try {
+            final SessionId sessionId;
+            if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
+                sessionId = (SessionId) cacheService.get(dn);
+            } else {
+                sessionId = persistenceEntryManager.find(SessionId.class, dn);
+            }
             return sessionId;
         } catch (Exception e) {
             if (!silently) {

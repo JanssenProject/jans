@@ -2,6 +2,7 @@ package io.jans.ca.plugin.adminui.model.auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.as.model.config.adminui.KeyValuePair;
+import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -34,6 +35,8 @@ public class AppConfigResponse {
     private Boolean allowSmtpKeystoreEdit;
     @Schema(description = "Additional Authentication Parameters", accessMode = Schema.AccessMode.READ_WRITE)
     private List<KeyValuePair> additionalParameters;
+    @Schema(description = "Cedarling log type", accessMode = Schema.AccessMode.READ_WRITE)
+    private CedarlingLogType cedarlingLogType;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -137,5 +140,13 @@ public class AppConfigResponse {
 
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
+    }
+
+    public CedarlingLogType getCedarlingLogType() {
+        return cedarlingLogType;
+    }
+
+    public void setCedarlingLogType(CedarlingLogType cedarlingLogType) {
+        this.cedarlingLogType = cedarlingLogType;
     }
 }

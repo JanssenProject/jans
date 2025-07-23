@@ -14,8 +14,14 @@ extra:
     default: stable
     provider: mike
 extra_css:
-- css/tabs.css
-- stylesheets/mermaid-extra.css
+  - css/tabs.css
+  - stylesheets/mermaid-extra.css
+  - stylesheets/home.css
+
+extra_javascript:
+  - javascripts/skeleton-loader.js
+  - javascripts/full-screen-sections.js
+
 markdown_extensions:
 - admonition
 - attr_list
@@ -30,10 +36,11 @@ markdown_extensions:
 - pymdownx.tabbed:
     alternate_style: true
 - pymdownx.emoji:
-    emoji_generator: !!python/name:materialx.emoji.to_svg
-    emoji_index: !!python/name:materialx.emoji.twemoji
+    emoji_generator: !!python/name:material.extensions.emoji.to_svg
+    emoji_index: !!python/name:material.extensions.emoji.twemoji
 - pymdownx.details
 nav:
+- Home: index.md
 - 'Janssen Server':
   - Introduction: janssen-server/README.md
   - Deployment and Planning Guide:
@@ -125,7 +132,6 @@ nav:
       - REST API:
         - janssen-server/config-guide/config-tools/config-api/README.md
         - Settings: janssen-server/config-guide/config-tools/config-api/config.md
-        - Attributes: janssen-server/config-guide/config-tools/config-api/attribute.md
         - Security: janssen-server/config-guide/config-tools/config-api/security.md
         - Logs: janssen-server/config-guide/config-tools/config-api/logs.md
         - Monitoring: janssen-server/config-guide/config-tools/config-api/monitoring.md
@@ -155,10 +161,11 @@ nav:
     - HASH Passwords: janssen-server/config-guide/hash-password.md
     - Link Configuration: janssen-server/config-guide/link-configuration.md
     - Custom Assets Configuration: janssen-server/config-guide/custom-assets-configuration.md
+    - Session: janssen-server/config-guide/session.md
   - Database Guide:
     - janssen-server/reference/database/README.md
     - RDBMS Erwin Table: janssen-server/reference/database/rdbms-erwin.md
-  
+
     - MySQL:
       - MySQL Schema: janssen-server/reference/database/mysql-schema.md
       - MySQL Configuration: janssen-server/reference/database/mysql-config.md
@@ -168,7 +175,6 @@ nav:
       - PostgreSQL Indexes: janssen-server/reference/database/pgsql-schema-indexes.md
       - PostgreSQL Configuration: janssen-server/reference/database/pgsql-config.md
       - PostgreSQL Operation: janssen-server/reference/database/pgsql-ops.md
-    - Converting Data: janssen-server/reference/database/converting-data.md
   - Auth Server Admin Guide:
     - janssen-server/auth-server/README.md
     - Auth Server Config: janssen-server/auth-server/config.md
@@ -184,6 +190,7 @@ nav:
       - OpenID id_token: janssen-server/auth-server/tokens/openid-id-token.md
       - OpenID Userinfo Token: janssen-server/auth-server/tokens/openid-userinfo-token.md
       - UMA RPT Token: janssen-server/auth-server/tokens/uma-rpt-token.md
+      - Logout Status JWT: janssen-server/auth-server/tokens/logout-status-jwt.md
     - Scopes: janssen-server/auth-server/scopes/README.md
     - Rich Authorization Requests : janssen-server/auth-server/authz-details/README.md
     - Endpoints:
@@ -200,7 +207,6 @@ nav:
       - Token Revocation: janssen-server/auth-server/endpoints/token-revocation.md
       - Global Token Revocation: janssen-server/auth-server/endpoints/global-token-revocation.md
       - Session Revocation: janssen-server/auth-server/endpoints/session-revocation.md
-      - Session Status List: janssen-server/auth-server/endpoints/session-status-list.md
       - End Session: janssen-server/auth-server/endpoints/end-session.md
       - Clientinfo: janssen-server/auth-server/endpoints/clientinfo.md
       - JWKS URI: janssen-server/auth-server/endpoints/jwks-uri.md
@@ -330,6 +336,7 @@ nav:
       - UMA Claims Gathering (Web Flow): script-catalog/uma_claims_gathering/uma-claims-web.md
       - UMA RPT Policies: script-catalog/uma_rpt_policy/uma-rpt.md
       - Update Token: script-catalog/update_token/update-token.md
+      - Link interception: script-catalog/link_interception/link-interception.md
       - SSA Modify Response: script-catalog/ssa/ssa-modify-response.md
   - Reference Guide:
     - janssen-server/reference/README.md
@@ -381,6 +388,10 @@ nav:
     - Security Considerations: janssen-server/scim/security.md
     - Bulk Adding Users: janssen-server/scim/bulk-users.md
     - Adding Custom Attributes: janssen-server/scim/custom-attributes.md
+  - Link Guide:
+    - janssen-server/link/README.md
+    - Jans LDAP Link: janssen-server/link/jans-link.md
+    - Jans Keycloak Link: janssen-server/link/jans-keycloak-link.md
   - Lock Guide:
       - janssen-server/lock/README.md
       - Lock Server: janssen-server/lock/lock-server.md
@@ -400,17 +411,19 @@ nav:
       - janssen-server/usermgmt/README.md
       - Using SCIM: janssen-server/usermgmt/usermgmt-scim.md
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
+      - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - 'Cedarling':
   - Overview: 'cedarling/README.md'
   - Quick Start:
     - Authorization Using Cedarling: 'cedarling/cedarling-quick-start-unsigned.md'
     - Implement TBAC Using Cedarling: 'cedarling/cedarling-quick-start-tbac.md'
-  - Tutorials: 
+  - Tutorials:
     - 'cedarling/cedarling-getting-started.md'
     - Javascript: 'cedarling/getting-started/javascript.md'
     - Python: 'cedarling/getting-started/python.md'
     - Rust: 'cedarling/getting-started/rust.md'
     - Golang: 'cedarling/getting-started/go.md'
+    - Java: 'cedarling/getting-started/java.md'
     - Kotlin: 'cedarling/getting-started/kotlin.md'
     - Swift: 'cedarling/getting-started/swift.md'
   - Reference:
@@ -424,6 +437,7 @@ nav:
     - Lock Configuration: 'cedarling/cedarling-lock-server.md'
     - Cedarling Entities: 'cedarling/cedarling-entities.md'
   - Developer:
+    - Rust: 'cedarling/cedarling-rust.md'
     - WASM: 'cedarling/cedarling-wasm.md'
     - Python:
       - cedarling/python/README.md
@@ -432,8 +446,8 @@ nav:
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
       - Android Apps: 'cedarling/uniffi/cedarling-android.md'
-      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'  
-    - Sidecar: 
+      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'
+    - Sidecar:
       - Sidecar: 'cedarling/cedarling-sidecar-overview.md'
       - Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
   - Integrations:
@@ -471,37 +485,38 @@ nav:
   - Code of Conduct: CODE_OF_CONDUCT.md
   - Design and Implementation:
     - contribute/implementation-design/README.md
-    - Agama: 
+    - Agama:
       - contribute/implementation-design/agama-design/README.md
       - ADR: contribute/implementation-design/agama-design/adr/README.md
-    - jans-auth-server: 
+    - jans-auth-server:
       - contribute/implementation-design/jans-auth-server-design/README.md
       - ADR: contribute/implementation-design/jans-auth-server-design/adr/README.md
-    - jans-cli: 
+    - jans-cli:
        - contribute/implementation-design/jans-cli-design/README.md
        - ADR: contribute/implementation-design/jans-cli-design/adr/README.md
-    - jans-config-api: 
+    - jans-config-api:
        - contribute/implementation-design/jans-config-api-design/README.md
        - OpenAPI Spec generation: contribute/implementation-design/jans-config-api-design/config-api-swagger-spec-generation.md
        - ADR: contribute/implementation-design/jans-config-api-design/adr/README.md
-    - jans-core: 
+    - jans-core:
        - contribute/implementation-design/jans-core-design/README.md
        - ADR: contribute/implementation-design/jans-core-design/adr/README.md
-    - jans-fido2: 
+    - jans-fido2:
        - contribute/implementation-design/jans-fido2-design/README.md
        - ADR: contribute/implementation-design/jans-fido2-design/adr/README.md
-    - jans-orm: 
+    - jans-orm:
       - contribute/implementation-design/jans-orm-design/README.md
       - ADR: contribute/implementation-design/jans-orm-design/adr/README.md
-    - jans-scim: 
+    - jans-scim:
       - contribute/implementation-design/jans-scim-design/README.md
       - ADR: contribute/implementation-design/jans-scim-design/adr/README.md
-    - jans-casa: 
+    - jans-casa:
       - contribute/implementation-design/jans-casa-design/README.md
       - ADR: contribute/implementation-design/jans-casa-design/adr/README.md
     - jans-cedarling:
       - contribute/implementation-design/jans-cedarling-design/README.md
       - ADR: contribute/implementation-design/jans-cedarling-design/adr/README.md
+      - Cedarling Technical Overview: contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview.md
   - CI-CD:
     #- GitHub CI: contribute/ci-cd/github-ci.md
     - Release Process: contribute/ci-cd/release-process.md
@@ -522,8 +537,6 @@ plugins:
 - include-markdown
 - tags
 - search
-- exclude-search:
-    exclude_unreferenced: true
 - git-revision-date-localized:
     enable_creation_date: true
     type: timeago
@@ -543,6 +556,9 @@ theme:
   - navigation.tabs.sticky
   - navigation.indexes
   - content.tabs.link
+  - content.code.copy
+  - content.code.select
+  - content.code.annotate
   font:
     code: Roboto Mono
     text: Roboto

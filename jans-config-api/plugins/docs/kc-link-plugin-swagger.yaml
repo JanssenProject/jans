@@ -139,7 +139,7 @@ components:
         attributeMapping:
           type: array
           items:
-            $ref: '#/components/schemas/CacheRefreshAttributeMapping'
+            $ref: '#/components/schemas/LinkAttributeMapping'
         snapshotFolder:
           type: string
         snapshotMaxCount:
@@ -199,13 +199,6 @@ components:
           type: string
         useLocalCache:
           type: boolean
-    CacheRefreshAttributeMapping:
-      type: object
-      properties:
-        source:
-          type: string
-        destination:
-          type: string
     GluuLdapConfiguration:
       type: object
       properties:
@@ -258,6 +251,13 @@ components:
         username:
           type: string
         password:
+          type: string
+    LinkAttributeMapping:
+      type: object
+      properties:
+        source:
+          type: string
+        destination:
           type: string
     JsonPatch:
       type: object

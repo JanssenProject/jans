@@ -63,9 +63,9 @@
         </classes>
     </test>
 
-    <test name="Session Status List Client test (HTTP)" enabled="true">
+    <test name="Logout Status JWT Client test (HTTP)" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.session.SessionStatusListHttpTest"/>
+            <class name="io.jans.as.client.ws.rs.logout.LogoutStatusJwtHttpTest"/>
         </classes>
     </test>
 
