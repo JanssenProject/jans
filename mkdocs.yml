@@ -36,7 +36,7 @@ markdown_extensions:
 - pymdownx.tabbed:
     alternate_style: true
 - pymdownx.emoji:
-    emoji_generator: !!python/name:materialx.emoji.to_svg
+    emoji_generator: !!python/name:material.extensions.emoji.to_svg
     emoji_index: !!python/name:material.extensions.emoji.twemoji
 - pymdownx.details
 nav:
@@ -161,6 +161,7 @@ nav:
     - HASH Passwords: janssen-server/config-guide/hash-password.md
     - Link Configuration: janssen-server/config-guide/link-configuration.md
     - Custom Assets Configuration: janssen-server/config-guide/custom-assets-configuration.md
+    - Session: janssen-server/config-guide/session.md
   - Database Guide:
     - janssen-server/reference/database/README.md
     - RDBMS Erwin Table: janssen-server/reference/database/rdbms-erwin.md
@@ -436,6 +437,7 @@ nav:
     - Lock Configuration: 'cedarling/cedarling-lock-server.md'
     - Cedarling Entities: 'cedarling/cedarling-entities.md'
   - Developer:
+    - Rust: 'cedarling/cedarling-rust.md'
     - WASM: 'cedarling/cedarling-wasm.md'
     - Python:
       - cedarling/python/README.md

@@ -14,6 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>2.1.20</kotlin.version>
         <jans.bom.version>${project.version}</jans.bom.version>
+        <dokka.version>2.0.0</dokka.version>
     </properties>
     <scm>
         <url>https://github.com/JanssenProject/jans</url>
@@ -189,6 +190,26 @@
                     </execution>
                 </executions>
             </plugin>
+                <plugin>
+                    <groupId>org.jetbrains.dokka</groupId>
+                    <artifactId>dokka-maven-plugin</artifactId>
+                    <version>${dokka.version}</version>
+                    <configuration>
+                        <!-- Optional: Output in Javadoc format for consistency -->
+                        <sourceDirectories>
+                            <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+                            <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+                        </sourceDirectories>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>pre-site</phase>
+                            <goals>
+                                <goal>javadoc</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>

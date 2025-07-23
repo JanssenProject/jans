@@ -24,7 +24,7 @@ use crate::jwt::{Token, TokenClaimTypeError};
 ///     - `userinfo_token.aud` == `access_token.client_id`
 ///     - `userinfo_token.sub` == `id_token.sub`
 pub fn validate_id_tkn_trust_mode(
-    tokens: &HashMap<String, Token<'_>>,
+    tokens: &HashMap<String, Token>,
 ) -> Result<(), IdTokenTrustModeError> {
     let access_tkn = tokens
         .get("access_token")
