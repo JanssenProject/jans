@@ -259,6 +259,7 @@
 		<dependency>
 		    <groupId>org.htmlunit</groupId>
 		    <artifactId>htmlunit</artifactId>
+			<scope>test</scope>
 		</dependency>
         <dependency>
             <groupId>io.jans</groupId>
