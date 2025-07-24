@@ -1,3 +1,10 @@
+/*
+ * This software is available under the Apache-2.0 license.
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2025, Gluu, Inc.
+ */
+
 #![cfg(not(target_arch = "wasm32"))]
 
 use std::os::raw::{c_char, c_int};
