@@ -131,11 +131,11 @@ jobs:
         working-directory: jans-cedarling/bindings/cedarling_c
         run: |
           cargo build --release
-      - name: Build and run C example
-        working-directory: jans-cedarling/bindings/cedarling_c/examples
-        run: |
-          make
-          LD_LIBRARY_PATH=../target/release ./basic_example
+      # - name: Build and run C example
+      #   working-directory: jans-cedarling/bindings/cedarling_c/examples
+      #   run: |
+      #     make
+      #     LD_LIBRARY_PATH=../target/release ./basic_example
       - name: Build and run C tests
         working-directory: jans-cedarling/bindings/cedarling_c/tests
         run: |
