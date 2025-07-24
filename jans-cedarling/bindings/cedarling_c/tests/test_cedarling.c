@@ -152,6 +152,7 @@ void test_authorization(){
         "    \"context\": {}\n"
         "}";
 
+    printf("Request JSON being sent:\n%s\n", valid_request);
     CedarlingResult auth_result;
 
     ret=cedarling_authorize(instance_id,valid_request,&auth_result);

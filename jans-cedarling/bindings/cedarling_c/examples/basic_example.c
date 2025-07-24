@@ -92,6 +92,7 @@ int main(){
 
     // Perform authorization
     printf("4. Performing authorization...\n");
+    printf("Request JSON being sent:\n%s\n", REQUEST_JSON);
     CedarlingResult auth_result;
     result=cedarling_authorize(instance_id,REQUEST_JSON,&auth_result);
 
