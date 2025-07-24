@@ -1,6 +1,6 @@
 [package]
 name = "cedarling"
-version = "0.0.0-nightly"
+version = "1.9.0"
 edition = "2021"
 description = "The Cedarling: a high-performance local authorization service powered by the Rust Cedar Engine."
 license = "Apache-2.0"
@@ -42,6 +42,7 @@ strum = { version = "0.26", features = ["derive"] }
 cedar-policy-validator = "4.3.3"
 cedar-policy-core = "4.3.3"
 datalogic-rs = "2.1.2"
+flate2 = "1.1.1"
 async-trait = "0.1.88"
 futures = "0.3.31"
 wasm-bindgen-futures = { workspace = true }

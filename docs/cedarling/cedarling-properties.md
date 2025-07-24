@@ -30,15 +30,15 @@ To load policy store one of the following keys must be provided:
 
 - **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Local file with JSON object with policy store
 
-[! NOTE]
-All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.
+!!! NOTE
+    All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.
 
 **Auxilliary properties**
 
 - **`CEDARLING_POLICY_STORE_ID`** : The identifier of the policy store in case there is more than one policy_store_id in the policy store.
 
 - **`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`** : property specifies whether to authorize the `USER`, `WORKLOAD` or both when making authorization decisions.
-  Use `"===": [{"var": "Jans::User"}, "ALLOW"]` if you only want user authorization. Use `"===": [{"var": "Jans::Workload"}, "ALLOW"]` if you only want workload authorization. [See here](#user-workload-boolean-operation) if you want anything more complicated.
+  Use `"===": [{"var": "Jans::User"}, "ALLOW"]` if you only want user authorization. Use `"===": [{"var": "Jans::Workload"}, "ALLOW"]` if you only want workload authorization. [See here](./cedarling-principal-boolean-operations.md) if you want anything more complicated.
 
 **Cedar Entity Mapping properties**
 

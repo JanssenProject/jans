@@ -573,6 +573,11 @@ public class SessionIdService {
     }
 
     public boolean persistSessionId(final SessionId sessionId, boolean forcePersistence) {
+        return persistSessionId(sessionId, forcePersistence, false);
+    }
+
+
+    public boolean persistSessionId(final SessionId sessionId, boolean forcePersistence, boolean silent) {
         List<Prompt> prompts = getPromptsFromSessionId(sessionId);
 
         try {
@@ -594,7 +599,9 @@ public class SessionIdService {
                 return true;
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            if (!silent) { // do not log anything if method is explicitly called with silent=true
+                log.error(e.getMessage(), e);
+            }
         }
 
         return false;

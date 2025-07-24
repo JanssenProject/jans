@@ -24,7 +24,7 @@ public class AppConfiguration {
     private static final String CFG_PROP_CFGAPI_AUTH_URL = "app.config-api.auth.url";
     private static final String CFG_PROP_CFGAPI_AUTH_CLIENT_ID = "app.config-api.auth.client.id";
     private static final String CFG_PROP_CFGAPI_AUTH_CLIENT_SECRET = "app.config-api.auth.client.secret";
-    private static final String CFG_PROP_CFGAPI_AUTH_SCOPES = "app.config-api.client.auth.scopes";
+    private static final String CFG_PROP_CFGAPI_AUTH_SCOPES = "app.config-api.auth.client.scopes";
     private static final String CFG_PROP_CFGAPI_AUTH_METHOD = "app.config-api.auth.method";
 
     private static final String CFG_PROP_KEYCLOAK_ADMIN_SERVER_URL = "app.keycloak-admin.url";
