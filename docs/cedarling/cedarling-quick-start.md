@@ -34,7 +34,7 @@ For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/ja
 ### Step-1: Create the Cedar Policy and Schema
 
 The Cedarling needs policies and a schema to authorize access. These are bundled in a _policy store_ (a JSON file). To aid in this quick start guide, we have already created a 
-[policy store](https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/refs/heads/main/449805c83e13f332b1b35eac6ffa93187fbd1c648085.json) at
+[policy store](https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/refs/heads/main/6d9f73b2d44ad4e7aa8f1182cde9f72dcbaa244f4327.json) at
 [quick start GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart/tree/main).
 We will use this policy store to allow/deny the incoming authorization request.
 
