@@ -42,6 +42,7 @@ tags:
 - name: Jans Assets
 - name: Token
 - name: Logs
+- name: Database
 paths:
   /api/v1/health/app-version:
     get:
@@ -1675,7 +1676,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - logging.read
+        - https://jans.io/oauth/config/logging.readonly
   /api/v1/jans-auth-server/config:
     get:
       tags:
@@ -4951,6 +4952,33 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/scripts.readonly
+  /api/v1/config/database:
+    get:
+      tags:
+      - Database
+      summary: Gets schema objects
+      description: Gets schema objects.
+      operationId: get-schema
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                Response example:
+                  description: Response example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/database.readonly
+        - https://jans.io/oauth/config/database.write
+        - https://jans.io/oauth/config/read-all
   /api/v1/jans-auth-server/health:
     get:
       tags:
@@ -9393,17 +9421,17 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
-          type: boolean
         userCanView:
           type: boolean
-        adminCanAccess:
+        adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -12096,8 +12124,6 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -12108,6 +12134,8 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        logoutStatusJwt:
+          type: boolean
         accessToken:
           type: boolean
     TokenEntityPagedResult:
