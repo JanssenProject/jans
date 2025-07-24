@@ -92,7 +92,30 @@ int main(){
 
     // Perform authorization
     printf("4. Performing authorization...\n");
-    printf("Request JSON being sent:\n%s\n", REQUEST_JSON);
+    // Extract and print the access_token value from REQUEST_JSON
+    const char* access_token_start = strstr(REQUEST_JSON, "\"access_token\": ");
+    if (access_token_start) {
+        access_token_start += strlen("\"access_token\": ");
+        // Skip any whitespace and opening quote
+        while (*access_token_start && (*access_token_start == ' ' || *access_token_start == '\"')) access_token_start++;
+        const char* access_token_end = strchr(access_token_start, '\"');
+        if (access_token_end) {
+            size_t token_len = access_token_end - access_token_start;
+            char token_buf[1024];
+            if (token_len < sizeof(token_buf)) {
+                strncpy(token_buf, access_token_start, token_len);
+                token_buf[token_len] = '\0';
+                printf("Access token: %s\n", token_buf);
+                printf("Access token length: %zu\n", token_len);
+            } else {
+                printf("Access token too long to print\n");
+            }
+        } else {
+            printf("Could not find end of access_token string\n");
+        }
+    } else {
+        printf("Could not find access_token in request JSON\n");
+    }
     CedarlingResult auth_result;
     result=cedarling_authorize(instance_id,REQUEST_JSON,&auth_result);
 
