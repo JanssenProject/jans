@@ -26,15 +26,17 @@ on:
           - "jans-lock/lock-server"
           - "agama"
           - "jans-auth-server"
+          - "jans-link"
           - "jans-fido2"
           - "jans-scim"
+          - "jans-keycloak-link"
           - "jans-config-api"
           - "jans-keycloak-integration"
           - "jans-casa"
-          - "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-fido2 jans-scim jans-config-api jans-keycloak-integration jans-casa"
+          - "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
         description: 'Service'
         required: true
-        default: "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-fido2 jans-scim jans-config-api jans-keycloak-integration jans-casa"
+        default: "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
 concurrency:
   group: run-once
   cancel-in-progress: false
@@ -97,7 +99,7 @@ jobs:
         run: |
             projects="${{ github.event.inputs.project }}"
             if [ -z "$projects" ]; then
-              projects="jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-fido2 jans-scim jans-config-api jans-keycloak-integration jans-casa"
+              projects="jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
             fi
             pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
             DIRECTORIES_CHANGED=$(gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep "jans-" || echo "$projects")
@@ -184,7 +186,7 @@ jobs:
       run: echo "Build failed"
 
   run-tests:
-    if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.project == 'jans-bom, jans-orm, jans-core, jans-lock/lock-server, agama, jans-auth-server, jans-fido2, jans-scim, jans-config-api, jans-keycloak-integration, jans-casa')
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.project == 'jans-bom, jans-orm, jans-core, jans-lock/lock-server, agama, jans-auth-server, jans-link, jans-fido2, jans-scim, jans-keycloak-link, jans-config-api, jans-keycloak-integration, jans-casa')
     permissions:
       contents: read
       packages: write
