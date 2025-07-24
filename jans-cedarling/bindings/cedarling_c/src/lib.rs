@@ -15,7 +15,7 @@ mod types;
 
 use c_interface::*;
 use types::*;
-
+/// # Safety
 /// Intialize the Cedarling library
 /// This Function should be called before any other functions
 #[no_mangle]
@@ -23,7 +23,7 @@ pub extern "C" fn cedarling_init() -> c_int {
     // Initialize any global state if needed
     0 // Success
 }
-
+/// # Safety
 /// Create a new Cedarling instance
 ///
 /// # Arguments
@@ -33,7 +33,7 @@ pub extern "C" fn cedarling_init() -> c_int {
 /// # Returns
 /// * 0 on success, error code on failure
 #[no_mangle]
-pub extern "C" fn cedarling_new(
+pub unsafe extern "C" fn cedarling_new(
     config_json: *const c_char,
     result: *mut CedarlingInstanceResult,
 ) -> c_int {
@@ -53,7 +53,7 @@ pub extern "C" fn cedarling_new(
     unsafe { *result = instance_result };
     unsafe { (*result).error_code as c_int }
 }
-
+/// # Safety
 /// Create a new Cedarling instance with environment variables support
 ///
 /// # Arguments
@@ -63,7 +63,7 @@ pub extern "C" fn cedarling_new(
 /// # Returns
 /// * 0 on success, error code on failure
 #[no_mangle]
-pub extern "C" fn cedarling_new_with_env(
+pub unsafe extern "C" fn cedarling_new_with_env(
     config_json: *const c_char,
     result: *mut CedarlingInstanceResult,
 ) -> c_int {
@@ -86,16 +86,16 @@ pub extern "C" fn cedarling_new_with_env(
     unsafe { *result = instance_result };
     unsafe { (*result).error_code as c_int }
 }
-
+/// # Safety
 /// Drop a cedarling instance
 ///
 /// # Arguments
 /// * `instance_id` - ID of the instance to be dropped
 #[no_mangle]
-pub extern "C" fn cedarling_drop(instance_id: u64) {
+pub unsafe extern "C" fn cedarling_drop(instance_id: u64) {
     drop_instance(instance_id);
 }
-
+/// # Safety
 /// Authorize a request
 ///
 /// # Arguments
@@ -106,7 +106,7 @@ pub extern "C" fn cedarling_drop(instance_id: u64) {
 /// # Returns
 /// * 0 on success, error code on failure
 #[no_mangle]
-pub extern "C" fn cedarling_authorize(
+pub unsafe extern "C" fn cedarling_authorize(
     instance_id: u64,
     request_json: *const c_char,
     result: *mut CedarlingResult,
@@ -127,7 +127,7 @@ pub extern "C" fn cedarling_authorize(
     unsafe { *result = auth_result };
     unsafe { (*result).error_code as c_int }
 }
-
+/// # Safety
 /// Authrorize an unsigned request
 ///
 /// # Arguments
@@ -138,7 +138,7 @@ pub extern "C" fn cedarling_authorize(
 /// # Returns
 /// * 0 on success, error code on failure
 #[no_mangle]
-pub extern "C" fn cedarling_authorize_unsigned(
+pub unsafe extern "C" fn cedarling_authorize_unsigned(
     instance_id: u64,
     request_json: *const c_char,
     result: *mut CedarlingResult,
@@ -159,7 +159,7 @@ pub extern "C" fn cedarling_authorize_unsigned(
     unsafe { *result = auth_result };
     unsafe { (*result).error_code as c_int }
 }
-
+/// # Safety
 /// Pop all logs from an instance
 ///
 /// # Arguments
@@ -169,7 +169,10 @@ pub extern "C" fn cedarling_authorize_unsigned(
 /// # Returns
 /// * 0 on success, error code on failure
 #[no_mangle]
-extern "C" fn cedarling_pop_logs(instance_id: u64, result: *mut CedarlingStringArray) -> c_int {
+unsafe extern "C" fn cedarling_pop_logs(
+    instance_id: u64,
+    result: *mut CedarlingStringArray,
+) -> c_int {
     if result.is_null() {
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
@@ -179,7 +182,7 @@ extern "C" fn cedarling_pop_logs(instance_id: u64, result: *mut CedarlingStringA
     unsafe { *result = logs };
     CedarlingErrorCode::Success as c_int
 }
-
+/// # Safety
 /// Get a log by ID
 ///
 /// # Arguments
@@ -189,7 +192,7 @@ extern "C" fn cedarling_pop_logs(instance_id: u64, result: *mut CedarlingStringA
 /// # Returns
 /// * 0 on success, error code on failure
 #[no_mangle]
-pub extern "C" fn cedarling_get_log_by_id(
+pub unsafe extern "C" fn cedarling_get_log_by_id(
     instance_id: u64,
     log_id: *const c_char,
     result: *mut CedarlingResult,
@@ -211,7 +214,7 @@ pub extern "C" fn cedarling_get_log_by_id(
     unsafe { *result = log_result };
     unsafe { (*result).error_code as c_int }
 }
-
+/// # Safety
 /// Get all log IDs
 ///
 /// # Arguments
@@ -221,7 +224,7 @@ pub extern "C" fn cedarling_get_log_by_id(
 /// # Returns
 /// * 0 on success, error code on failure
 #[no_mangle]
-pub extern "C" fn cedarling_get_log_ids(
+pub unsafe extern "C" fn cedarling_get_log_ids(
     instance_id: u64,
     result: *mut CedarlingStringArray,
 ) -> c_int {
@@ -234,7 +237,7 @@ pub extern "C" fn cedarling_get_log_ids(
     unsafe { *result = log_ids };
     CedarlingErrorCode::Success as c_int
 }
-
+/// # Safety
 /// Get logs by tag
 ///
 /// # Arguments
@@ -245,7 +248,7 @@ pub extern "C" fn cedarling_get_log_ids(
 /// # Returns
 /// * 0 on success, error code on failure
 #[no_mangle]
-pub extern "C" fn cedarling_get_logs_by_tag(
+pub unsafe extern "C" fn cedarling_get_logs_by_tag(
     instance_id: u64,
     tag: *const c_char,
     result: *mut CedarlingStringArray,
@@ -270,7 +273,7 @@ pub extern "C" fn cedarling_get_logs_by_tag(
     unsafe { *result = logs };
     CedarlingErrorCode::Success as c_int
 }
-
+/// # Safety
 /// Get logs by request ID
 ///
 /// # Arguments
@@ -281,7 +284,7 @@ pub extern "C" fn cedarling_get_logs_by_tag(
 /// # Returns
 /// * 0 on success, error code on failure
 #[no_mangle]
-pub extern "C" fn cedarling_get_logs_by_request_id(
+pub unsafe extern "C" fn cedarling_get_logs_by_request_id(
     instance_id: u64,
     request_id: *const c_char,
     result: *mut CedarlingStringArray,
@@ -306,7 +309,7 @@ pub extern "C" fn cedarling_get_logs_by_request_id(
     unsafe { *result = logs };
     CedarlingErrorCode::Success as c_int
 }
-
+/// # Safety
 /// Get logs by request ID and tag
 ///
 /// # Arguments
@@ -318,7 +321,7 @@ pub extern "C" fn cedarling_get_logs_by_request_id(
 /// # Returns
 /// * 0 on success, error code on failure
 #[no_mangle]
-pub extern "C" fn cedarling_get_logs_by_request_id_and_tag(
+pub unsafe extern "C" fn cedarling_get_logs_by_request_id_and_tag(
     instance_id: u64,
     request_id: *const c_char,
     tag: *const c_char,
@@ -356,6 +359,7 @@ pub extern "C" fn cedarling_get_logs_by_request_id_and_tag(
     CedarlingErrorCode::Success as c_int
 }
 
+/// # Safety
 /// Shutdown a Cedarling instance
 ///
 /// # Arguments
@@ -364,16 +368,16 @@ pub extern "C" fn cedarling_get_logs_by_request_id_and_tag(
 /// # Returns
 /// * 0 on success, error code on failure
 #[no_mangle]
-pub extern "C" fn cedarling_shutdown(instance_id: u64) -> c_int {
+pub unsafe extern "C" fn cedarling_shutdown(instance_id: u64) -> c_int {
     shutdown_instance(instance_id) as c_int
 }
-
+/// # Safety
 /// Free a string returned by Cedarling functions
 ///
 /// # Arguments
 /// * `str_ptr` - Pointer to the string to be freed
 #[no_mangle]
-pub extern "C" fn cedarling_free_string(str_ptr: *mut c_char) {
+pub unsafe extern "C" fn cedarling_free_string(str_ptr: *mut c_char) {
     if !str_ptr.is_null() {
         unsafe {
             // Convert the raw pointer back to a CString and drop it
@@ -381,13 +385,13 @@ pub extern "C" fn cedarling_free_string(str_ptr: *mut c_char) {
         }
     }
 }
-
+/// # Safety
 /// Free a string array returned by Cedarling functions
 ///
 /// # Arguments
 /// * `array` - Pointer to the CedarlingStringArray to be freed
 #[no_mangle]
-pub extern "C" fn cedarling_free_string_array(array: *mut CedarlingStringArray) {
+pub unsafe extern "C" fn cedarling_free_string_array(array: *mut CedarlingStringArray) {
     if array.is_null() {
         return;
     }
@@ -408,12 +412,13 @@ pub extern "C" fn cedarling_free_string_array(array: *mut CedarlingStringArray) 
     }
 }
 
+/// # Safety
 /// Free a CedarlingResult structure
 ///
 /// # Arguments
 /// * `result` - Pointer to the CedarlingResult structure to be freed
 #[no_mangle]
-pub extern "C" fn cedarling_free_result(result: *mut CedarlingResult) {
+pub unsafe extern "C" fn cedarling_free_result(result: *mut CedarlingResult) {
     if result.is_null() {
         return;
     }
@@ -431,12 +436,13 @@ pub extern "C" fn cedarling_free_result(result: *mut CedarlingResult) {
     }
 }
 
+/// # Safety
 /// Free a CedarlingInstanceResult structure
 ///
 /// # Arguments
 /// * `result` - Pointer to the CedarlingInstanceResult structure to be freed
 #[no_mangle]
-pub extern "C" fn cedarling_free_instance_result(result: *mut CedarlingInstanceResult) {
+pub unsafe extern "C" fn cedarling_free_instance_result(result: *mut CedarlingInstanceResult) {
     if result.is_null() {
         return;
     }
@@ -450,6 +456,7 @@ pub extern "C" fn cedarling_free_instance_result(result: *mut CedarlingInstanceR
     }
 }
 
+/// # Safety
 /// Get the last error message
 ///
 /// # Returns
@@ -459,12 +466,14 @@ pub extern "C" fn cedarling_get_last_error() -> *const c_char {
     get_last_error()
 }
 
+/// # Safety
 /// Clear last error message
 #[no_mangle]
 pub extern "C" fn cedarling_clear_last_error() {
     clear_last_error();
 }
 
+/// # Safety
 /// Get the Cedarling library version
 ///
 /// # Returns

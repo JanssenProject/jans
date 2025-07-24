@@ -173,7 +173,7 @@ pub fn string_to_c_string(s: &str) -> *mut c_char {
 // thread-local storage for last error message
 // Removing unused attribute since it doesn't apply to thread_local macro
 thread_local! {
-    static LAST_ERROR: std::cell::RefCell<Option<CString>> = std::cell::RefCell::new(None);
+    static LAST_ERROR: std::cell::RefCell<Option<CString>> = const { std::cell::RefCell::new(None) };
 }
 
 pub fn set_last_error(message: &str) {
