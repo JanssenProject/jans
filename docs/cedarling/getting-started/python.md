@@ -272,7 +272,7 @@ print(logs)
 
 ## See Also
 
-- [Cedarling TBAC quickstart](../cedarling-quick-start-tbac.md)
-- [Cedarling Unsigned quickstart](../cedarling-quick-start-unsigned.md)
+- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-tbac-using-cedarling)
+- [Cedarling Unsigned quickstart](../cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
 - [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
 
