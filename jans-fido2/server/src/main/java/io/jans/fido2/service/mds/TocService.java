@@ -278,7 +278,7 @@ public class TocService {
 		}
 		JsonNode entry = tocEntries.get(aaguid);
 		if (entry == null) {
-			log.warn("No entry found for AA GUID: {}", aaguid);
+			log.warn("No entryies found for AAGUID: {}", aaguid);
 		}
 		return entry;
 	}
