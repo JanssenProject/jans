@@ -37,25 +37,18 @@ sudo gpg --import automation-jans-public-gpg.asc;
 wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
 ```
 
-- Verify integrity of the downloaded package by verifying published `sha256sum`.   
-
-    Download `sha256sum` file for the package
-
-    ```shell
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum -P /tmp
-    ```
-
-    Check the hash if it is matching.
-
-    ```shell
-    cd /tmp
-    sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
+- Verify integrity of the downloaded package by verifying published `sha256sum`.  
+   
+    * Go to the [Janssen Project Releases page](https://github.com/JanssenProject/jans/releases/latest) and copy the `sha256sum` value for the `jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb` file:
+    * Replace `paste-release-sha256sum` in the command below with the actual checksum you copied from the release page, and run the following command:
+    ```bash title="Command"
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb' | sed 's/^sha256://' > jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text
-    jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum: OK
+    jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
     ```
 
 - Install the package
@@ -75,23 +68,18 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 
 - Verify integrity of the downloaded package by verifying published `sha256sum`.   
 
-    Download `sha256sum` file for the package
+   
+    * Go to the [Janssen Project Releases page](https://github.com/JanssenProject/jans/releases/latest) and copy the `sha256sum` value for the `jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb` file:
 
-    ```shell
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum -P /tmp
+
+    * Replace `paste-release-sha256sum` in the command below with the actual checksum you copied from the release page, and run the following command:
+    ```bash title="Command"
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb' | sed 's/^sha256://' > jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
     ```
-
-    Check the hash if it is matching.
-
-    ```shell
-    cd /tmp
-    sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
-    ```
-
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text
-    jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum: OK
+    jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
     ```
 
 - Install the package
@@ -116,24 +104,19 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 ```
 
 - Verify integrity of the downloaded package by verifying published `sha256sum`.   
+   
+    * Go to the [Janssen Project Releases page](https://github.com/JanssenProject/jans/releases/latest) and copy the `sha256sum` value for the `jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb` file:
 
-    Download `sha256sum` file for the package
 
-    ```shell
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum -P /tmp
-    ```
-
-    Check the hash if it is matching.
-
-    ```shell
-    cd /tmp
-    sha256sum -c jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum
+    * Replace `paste-release-sha256sum` in the command below with the actual checksum you copied from the release page, and run the following command:
+    ```bash title="Command"
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb' | sed 's/^sha256://' > jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text
-    jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum: OK
+    jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb: OK
     ```
 
 - Install the package
