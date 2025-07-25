@@ -68,8 +68,10 @@ impl EntityData {
             converted_payload.insert(k, json_value);
         }
         let inner = core::EntityData {
-            entity_type,
-            id,
+            cedar_mapping: core::CedarEntityMapping {
+                entity_type,
+                id,
+            },
             attributes: converted_payload,
         };
         Ok(Self { inner })

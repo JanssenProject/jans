@@ -34,17 +34,20 @@ func (r Request) MarshalJSON() ([]byte, error) {
 }
 
 type EntityData struct {
-	EntityType string
-	ID         string
+	CedarMapping CedarEntityMapping
 	// Payload will be flattened into the JSON object.
 	Payload map[string]any
+}
+
+type CedarEntityMapping struct {
+	EntityType string `json:"entity_type"`
+	ID         string `json:"id"`
 }
 
 // MarshalJSON flattens Payload into the top-level JSON object.
 func (e EntityData) MarshalJSON() ([]byte, error) {
 	m := map[string]any{
-		"type": e.EntityType,
-		"id":   e.ID,
+		"cedar_entity_mapping": e.CedarMapping,
 	}
 	for k, v := range e.Payload {
 		m[k] = v
@@ -52,19 +55,20 @@ func (e EntityData) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
-// UnmarshalJSON extracts "type" and "id" then stores the rest in Payload.
+// UnmarshalJSON extracts "cedar_entity_mapping" then stores the rest in Payload.
 func (e *EntityData) UnmarshalJSON(data []byte) error {
 	m := make(map[string]any)
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
-	if t, ok := m["type"].(string); ok {
-		e.EntityType = t
-		delete(m, "type")
+	if cedarMapping, ok := m["cedar_entity_mapping"].(map[string]any); ok {
+		if entityType, ok := cedarMapping["entity_type"].(string); ok {
+			e.CedarMapping.EntityType = entityType
 	}
-	if id, ok := m["id"].(string); ok {
-		e.ID = id
-		delete(m, "id")
+		if id, ok := cedarMapping["id"].(string); ok {
+			e.CedarMapping.ID = id
+		}
+		delete(m, "cedar_entity_mapping")
 	}
 	e.Payload = m
 	return nil

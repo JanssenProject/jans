@@ -160,8 +160,10 @@ if err != nil {
 
 ```go
 resource := cedarling_go.EntityData{
-    EntityType: "Jans::Issue",
-    ID:         "random_id",
+    CedarMapping: cedarling_go.CedarMapping{
+        EntityType: "Jans::Issue",
+        ID:         "random_id",
+    },
     Payload: map[string]any{
         "org_id":  "some_long_id",
         "country": "US",
@@ -211,8 +213,10 @@ if result.Decision {
 ```go
 principals := []cedarling_go.EntityData{
     {
-        EntityType: "Jans::User",
-        ID:         "random_id",
+        CedarMapping: cedarling_go.CedarMapping{
+            EntityType: "Jans::User",
+            ID:         "random_id",
+        },
         Payload: map[string]any{
             "role":    []string{"admin"},
             "country": "US",

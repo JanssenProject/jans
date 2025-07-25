@@ -100,9 +100,10 @@ https://streamable.com/25wcb7
 
    ```JSON title="Resource"
        {
-         "entity_type": "resource",
-         "type": "Jans::SecretDocument",
-         "id": "some_id"
+         "cedar_entity_mapping": {
+           "entity_type": "Jans::SecretDocument",
+           "id": "some_id"
+         }
        }
    ```
 

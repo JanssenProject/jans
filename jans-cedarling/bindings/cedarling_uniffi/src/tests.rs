@@ -21,8 +21,10 @@ fn test_authorize_success_with_tokens() {
         EntityData::from_json(
             r#"
   {
-           "type": "Jans::Issue",
-           "id": "some_id",
+           "cedar_entity_mapping": {
+             "entity_type": "Jans::Issue",
+             "id": "some_id"
+           },
           "app_id": "admin_ui_id",
           "name": "My App",
           "permission": "view_clients",
@@ -153,8 +155,10 @@ fn test_authorize_unsigned_success() {
         EntityData::from_json(
             r#"
         {
-          "type": "Jans::Issue",
-          "id": "some_id",
+          "cedar_entity_mapping": {
+            "entity_type": "Jans::Issue",
+            "id": "some_id"
+          },
           "app_id": "admin_ui_id",
           "name": "My App",
           "permission": "view_clients",
@@ -168,13 +172,17 @@ fn test_authorize_unsigned_success() {
 
     let principals = [
         json!({
-          "type": "Jans::TestPrincipal1",
-          "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+          "cedar_entity_mapping": {
+            "entity_type": "Jans::TestPrincipal1",
+            "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+          },
           "is_ok": true
         }),
         json!({
-          "type": "Jans::TestPrincipal2",
-          "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYkt1",
+          "cedar_entity_mapping": {
+            "entity_type": "Jans::TestPrincipal2",
+            "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYkt1"
+          },
           "is_ok": true
         }),
     ];

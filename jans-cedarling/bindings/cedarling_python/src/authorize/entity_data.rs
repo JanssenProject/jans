@@ -16,13 +16,12 @@ use serde_pyobject::from_pyobject;
 /// ============
 ///
 /// A Python wrapper for the Rust `cedarling::EntityData` struct. This class represents
-/// a resource entity with a type, ID, and attributes. Attributes are stored as a payload
+/// a resource entity with Cedar mapping information and attributes. Attributes are stored as a payload
 /// in a dictionary format.
 ///
 /// Attributes
 /// ----------
-/// :param entity_type: Type of the entity.
-/// :param id: ID of the entity.
+/// :param cedar_entity_mapping: Cedar entity mapping information containing entity_type and id.
 /// :param payload: Optional dictionary of attributes.
 ///
 /// Methods
@@ -32,20 +31,41 @@ use serde_pyobject::from_pyobject;
 ///
 /// .. method:: from_dict(cls, value: dict) -> EntityData
 ///     Initialize a new EntityData from a dictionary.
-///     To pass `entity_type` you need to use `type` key.
+///     The dictionary should contain a `cedar_entity_mapping` field with `entity_type` and `id` subfields.
 #[derive(Clone, serde::Deserialize)]
 #[pyclass]
 pub struct EntityData {
+    /// Cedar entity mapping info
+    #[pyo3(set)]
+    #[serde(rename = "cedar_entity_mapping")]
+    pub cedar_mapping: CedarEntityMapping,
+    /// entity attributes
+    #[serde(flatten)]
+    pub attributes: EntityDataAttrs,
+}
+
+/// Cedar entity mapping information
+#[derive(Clone, serde::Deserialize)]
+#[pyclass]
+pub struct CedarEntityMapping {
     /// entity type name
     #[pyo3(set)]
-    #[serde(rename = "type")]
+    #[serde(rename = "entity_type")]
     pub entity_type: String,
     /// entity id
     #[pyo3(set)]
     pub id: String,
-    /// entity attributes
-    #[serde(flatten)]
-    pub attributes: EntityDataAttrs,
+}
+
+#[pymethods]
+impl CedarEntityMapping {
+    #[new]
+    fn new(entity_type: String, id: String) -> Self {
+        Self {
+            entity_type,
+            id,
+        }
+    }
 }
 
 // type alias for the entity data attributes
@@ -63,15 +83,14 @@ fn get_payload(object: Bound<'_, PyDict>) -> PyResult<EntityDataAttrs> {
 #[pymethods]
 impl EntityData {
     #[new]
-    #[pyo3(signature = (entity_type, id, **kwargs))]
-    fn new(entity_type: String, id: String, kwargs: Option<Bound<'_, PyDict>>) -> PyResult<Self> {
+    #[pyo3(signature = (cedar_entity_mapping, **kwargs))]
+    fn new(cedar_entity_mapping: CedarEntityMapping, kwargs: Option<Bound<'_, PyDict>>) -> PyResult<Self> {
         let attributes = kwargs
             .map(|dict| get_payload(dict))
             .unwrap_or(Ok(HashMap::new()))?;
 
         Ok(Self {
-            entity_type,
-            id,
+            cedar_mapping: cedar_entity_mapping,
             attributes,
         })
     }
@@ -93,8 +112,10 @@ impl EntityData {
 impl From<EntityData> for cedarling::EntityData {
     fn from(value: EntityData) -> Self {
         Self {
-            entity_type: value.entity_type,
-            id: value.id,
+            cedar_mapping: cedarling::CedarEntityMapping {
+                entity_type: value.cedar_mapping.entity_type,
+                id: value.cedar_mapping.id,
+            },
             attributes: value.attributes,
         }
     }

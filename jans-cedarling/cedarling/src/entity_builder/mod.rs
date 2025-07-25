@@ -276,6 +276,7 @@ impl TokenPrincipalMappings {
 mod test {
     use super::*;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::CedarEntityMapping;
     use cedar_policy::{Entities, Schema};
     use serde_json::{Value, json};
     use std::collections::HashMap;
@@ -412,14 +413,13 @@ mod test {
             .expect("init entity builder");
 
         let entities = entity_builder
-            .build_entities(
-                &tokens,
-                &EntityData {
-                    entity_type: "Jans::Resource".into(),
-                    id: "some_id".into(),
-                    attributes: HashMap::new(),
+            .build_entities(&tokens, &EntityData {
+                cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Resource".into(),
+                id: "some_id".into(),
                 },
-            )
+                attributes: HashMap::new(),
+            })
             .expect("build entities");
 
         assert_entity_eq(

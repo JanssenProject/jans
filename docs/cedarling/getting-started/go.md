@@ -30,7 +30,7 @@ If youre using pre-built binaries from the [Jans releases page](https://github.c
 Download Jans monorepo:
 
 ```sh
-git clone --depth 1 https://github.com/JanssenProject/jans.git 
+git clone --depth 1 https://github.com/JanssenProject/jans.git
 ```
 
 We use `--depth 1` to avoid cloning unnecessary history and minimalize the download size.
@@ -76,7 +76,7 @@ go test .
 **1. Download pre-built binaries:**  
 Download the appropriate pre-built binary for your platform from the [Jans releases page](https://github.com/JanssenProject/jans/releases/latest) or build it from source as described above.
 
-***2. Add linker flags in your main.go file:***  
+**2. Add linker flags in your main.go file:**  
 You need specify linker flags in your `main.go` file to link against the Cedarling library.
 
 ```go
@@ -86,14 +86,14 @@ import "C"
 
 And make sure that the Cedarling library files are located in the same directory as your main package.
 
-***3. Add the Cedarling Go package to your Go application:***  
+**3. Add the Cedarling Go package to your Go application:**  
 Use `go get` to fetch the Cedarling Go package:
 
 ```sh
 go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
 ```
 
-***4. Add the Cedarling Go package to your Go application:***  
+**4. Add the Cedarling Go package to your Go application:**  
 Build your Go application:
 
 ```sh
@@ -102,9 +102,10 @@ go build .
 
 Run application to ensure it works correctly.
 
-***Runtime Notes:***
+**Runtime Notes:**
 
 - On **Windows**, place the Rust artifacts (`cedarling_go.dll` and `cedarling_go.lib`) alongside the Go binary.
+
   - Files:
     - `cedarling_go.dll`
     - `cedarling_go.lib`
@@ -163,8 +164,10 @@ if err != nil {
 
 ```go
 resource := cedarling_go.EntityData{
-    EntityType: "Jans::Issue",
-    ID:         "random_id",
+    CedarMapping: cedarling_go.CedarMapping{
+        EntityType: "Jans::Issue",
+        ID:         "random_id",
+    },
     Payload: map[string]any{
         "org_id":  "some_long_id",
         "country": "US",
@@ -214,8 +217,10 @@ if result.Decision {
 ```go
 principals := []cedarling_go.EntityData{
     {
-        EntityType: "Jans::User",
-        ID:         "random_id",
+        CedarMapping: cedarling_go.CedarMapping{
+            EntityType: "Jans::User",
+            ID:         "random_id",
+        },
         Payload: map[string]any{
             "role":    []string{"admin"},
             "country": "US",
