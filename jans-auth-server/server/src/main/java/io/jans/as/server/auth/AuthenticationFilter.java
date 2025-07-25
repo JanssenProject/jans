@@ -560,6 +560,7 @@ public class AuthenticationFilter implements Filter {
                 if (clientAssertionType == ClientAssertionType.JWT_BEARER) {
                     ClientAssertion clientAssertion = new ClientAssertion(appConfiguration, cryptoProvider, clientId,
                             clientAssertionType, encodedAssertion);
+                    clientAssertion.initAndVerify();
 
                     String username = clientAssertion.getSubjectIdentifier();
                     String password = clientAssertion.getClientSecret();
