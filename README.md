@@ -46,6 +46,9 @@ commercial distribution of Janssen Project Components called
 
 ## Janssen Components
 
+The table below lists components of the Janssen Project and their 
+[maturity stages](https://docs.jans.io/stable/CONTRIBUTING/#project-maturity-stages).
+
 | Component                                    | Description                                                                                                                                                                                                                                 | Lifecycle Stage                                                  |
 |:---------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------|
 | **[Jans Auth Server](jans-auth-server)**     | A complete OAuth Authorization Server and a [certified](https://openid.net/certification/) OpenID Connect Provider written in Java. It's the upstream open-source core of [Gluu Flex](https://gluu.org/flex).                                     | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
