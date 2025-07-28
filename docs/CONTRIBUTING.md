@@ -175,21 +175,19 @@ Follow the instructions and complete the signing process.
 
 **Graduated**
 
-* Projects that are mature, production-ready, and widely adopted, with a strong and diverse contributor base. These have met all CNCF graduation criteria including security, governance, and community sustainability.
-
-**Demo**
-
-* Projects focused on tooling. These projects might be of transient nature, not committed by Janssen Project roadmap.
-
+* Projects that are mature, production-ready, and widely adopted, with a strong and diverse contributor base. These have met all CNCF graduation criteria, including security, governance, and community sustainability.
 
 **Incubating**
 
 * Projects that show growth and use in production environments, with active maintainers and contributors. They meet certain CNCF standards but are still maturing toward full graduation.
 
-
 **Experimental**
 
 * Early-stage or experimental projects that are under active development but not yet proven in production. They are accepted for innovation and potential community interest.
+
+**Demo**
+
+* Projects focused on tooling. These projects might be of a transient nature, not committed by Janssen Project roadmap.
 
 ## Contributing to the documentation
 
