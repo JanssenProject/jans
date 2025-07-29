@@ -36,7 +36,7 @@ pub use crate::common::json_rules::JsonRule;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
-pub use authz::request::{EntityData, Request, RequestUnsigned, MultiContextRequest, MultiContextTokenBundle};
+pub use authz::request::{EntityData, Request, RequestUnsigned, CedarEntityMapping, MultiContextRequest, MultiContextTokenBundle};
 pub use authz::{AuthorizeError, AuthorizeResult, MultiContextAuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};

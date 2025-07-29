@@ -9,7 +9,7 @@ tags:
 
 # Authorization Using Cedarling
 
-The __Policy Store__ contains the Cedar Policies, Cedar Schema, and optionally, a list of the
+The **Policy Store** contains the Cedar Policies, Cedar Schema, and optionally, a list of the
 Trusted IDPs. The Cedarling loads its Policy Store during initialization as a static JSON file
 or fetched via HTTPS. In enterprise deployments, the Cedarling can retrieve its Policy Store from
 a Jans Lock Server OAuth protected endpoint.
@@ -45,7 +45,7 @@ The OIDC `id_token` JWT represents a Person authentication event. The access tok
 Workload authentication event. These tokens contain other interesting contextual data. The `id_token`
 tells you who authenticated, when they authenticated, how they authenticatated, and optionally other
 claims like the User's roles. An OAuth access token can tell you information about the Workload that
-obtained the JWT, its extent of access as defined by the OAuth Authorization Server (*i.e.* the
+obtained the JWT, its extent of access as defined by the OAuth Authorization Server (_i.e._ the
 values of the `scope` claim), or other claims--domains frequently enhance the access token to
 contain business specific data needed for policy evaluation.
 
@@ -57,17 +57,19 @@ this is a sample request from a hypothetical application:
 ```js
 const bootstrap_config = {...};
 const cedarling = await init(bootstrap_config);
-let input = { 
+let input = {
   "tokens": {
-    "access_token": "eyJhbGc....", 
-    "id_token": "eyJjbGc...", 
+    "access_token": "eyJhbGc....",
+    "id_token": "eyJjbGc...",
     "userinfo_token": "eyJjbGc...",
   },
   "action": "View",
   "resource": {
-    "id": "ticket-10101",
-    "type" : "Ticket",
-    "owner": "bob@acme.com", 
+    "cedar_entity_mapping": {
+      "entity_type": "Ticket",
+      "id": "ticket-10101"
+    },
+    "owner": "bob@acme.com",
     "org_id": "Acme"
   },
   "context": {
@@ -94,29 +96,29 @@ Cedarling simplifies context creation by automatically including certain entitie
 
 ### Example Policy
 
-Below is an example policy schema that illustrates how entities are used:  
+Below is an example policy schema that illustrates how entities are used:
 
 ```cedarschema
 type Context = {
-  "access_token": Access_token, 
-  "time": Long, 
-  "user": User, 
+  "access_token": Access_token,
+  "time": Long,
+  "user": User,
   "workload": Workload
 };
 
 type Url = {
-  "host": String, 
-  "path": String, 
+  "host": String,
+  "path": String,
   "protocol": String
 };
 
 entity Access_token = {
-  "exp": Long, 
+  "exp": Long,
   "iss": TrustedIssuer
 };
 
 entity Issue = {
-  "country": String, 
+  "country": String,
   "org_id": String
 };
 
@@ -127,16 +129,16 @@ entity TrustedIssuer = {
 };
 
 entity User in [Role] = {
-  "country": String, 
-  "email": String, 
-  "sub": String, 
+  "country": String,
+  "email": String,
+  "sub": String,
   "username": String
 };
 
 entity Workload = {
-  "client_id": String, 
-  "iss": TrustedIssuer, 
-  "name": String, 
+  "client_id": String,
+  "iss": TrustedIssuer,
+  "name": String,
   "org_id": String
 };
 
@@ -144,9 +146,9 @@ action "Update" appliesTo {
   principal: [Role, Workload, User],
   resource: [Issue],
   context: {
-    "access_token": Access_token, 
-    "time": Long, 
-    "user": User, 
+    "access_token": Access_token,
+    "time": Long,
+    "user": User,
     "workload": Workload
   }
 };
@@ -162,8 +164,8 @@ With this schema, you only need to provide the fields that are not automatically
 
 ```js
 let context = {
-  "time": 1719266610.98636,
-}
+  time: 1719266610.98636,
+};
 ```
 
 ## Unsigned Authorization (authorize_unsigned)
@@ -178,27 +180,29 @@ Example usage:
 
 ```js
 let input = {
-  "principals": [
+  principals: [
     {
-      "id": "user123",
-      "type": "User",
-      "email": "user@example.com",
-      "roles": ["admin"]
-    }
+      id: "user123",
+      type: "User",
+      email: "user@example.com",
+      roles: ["admin"],
+    },
   ],
-  "action": "View",
-  "resource": {
-    "id": "ticket-10101",
-    "type" : "Ticket",
-    "owner": "bob@acme.com", 
-    "org_id": "Acme"
+  action: "View",
+  resource: {
+    cedar_entity_mapping: {
+      entity_type: "Ticket",
+      id: "ticket-10101",
+    },
+    owner: "bob@acme.com",
+    org_id: "Acme",
   },
-  "context": {
-    "ip_address": "54.9.21.201",
-    "network_type": "VPN",
-    "user_agent": "Chrome 125.0.6422.77 (Official Build) (arm64)",
-    "time": "1719266610.98636",
-  }
+  context: {
+    ip_address: "54.9.21.201",
+    network_type: "VPN",
+    user_agent: "Chrome 125.0.6422.77 (Official Build) (arm64)",
+    time: "1719266610.98636",
+  },
 };
 
 decision_result = await cedarling.authorize_unsigned(input);
