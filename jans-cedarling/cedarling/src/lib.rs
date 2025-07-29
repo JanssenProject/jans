@@ -36,8 +36,8 @@ pub use crate::common::json_rules::JsonRule;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
-pub use authz::request::{EntityData, Request, RequestUnsigned};
-pub use authz::{AuthorizeError, AuthorizeResult};
+pub use authz::request::{EntityData, Request, RequestUnsigned, MultiContextRequest, MultiContextTokenBundle};
+pub use authz::{AuthorizeError, AuthorizeResult, MultiContextAuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
 use init::ServiceFactory;
@@ -156,6 +156,16 @@ impl Cedarling {
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
         self.authz.authorize_unsigned(request).await
+    }
+
+    /// Authorize multi-context request.
+    /// Processes multiple token bundles from different issuers/authorities
+    /// Each token bundle represents a different authorization context
+    pub async fn authorize_multi_context(
+        &self,
+        request: authz::request::MultiContextRequest,
+    ) -> Result<MultiContextAuthorizeResult, AuthorizeError> {
+        self.authz.authorize_multi_context(request).await
     }
 
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.

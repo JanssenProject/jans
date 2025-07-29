@@ -84,6 +84,7 @@ At a high level, developers interact with the Cedarling using four core interfac
 * **Initialization** (`init`) – Loads the policy store and retrieves configuration settings.
 * **Authorization** (`authz`) – Evaluates policies by sending a bundle of JWTs to specify the principal.
 * **Authorization** (`authz_unsigned`) – Evaluates policies with an application asserted principal.
+* **Multi-Context Authorization** (`authz_multi_context`) – Evaluates policies with multiple token bundles from different issuers/authorities.
 * **Logging** (`log`) – Retrieves decision and system logs for auditing. 
 
 Developers call the `init` interface on startup of their application, causing the Cedarling to read
@@ -96,6 +97,8 @@ the resulting decision.
 
 The `authorize_unsigned` variant is used when JWTs have already been validated by the application, 
 or when working with non-token based principals. It follows the same evaluation logic but skips JWT validation steps.
+
+The `authorize_multi_context` method enables complex authorization scenarios where multiple token bundles from different issuers/authorities need to be processed in a single request. This is particularly useful for scenarios involving multiple government agencies, healthcare providers, or financial institutions. The method supports mixing signed (JWT) and unsigned (pre-built principal) requests within the same multi-context call, providing maximum flexibility for complex authorization scenarios.
 
 The `log` interface enables developers to retrieve decision and system logs from the Cedarling's 
 in-memory cache. See the Cedarling [log](./cedarling-logs) documentation for more information. 

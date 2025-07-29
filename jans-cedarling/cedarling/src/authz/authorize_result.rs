@@ -42,6 +42,24 @@ pub struct AuthorizeResult {
     pub request_id: String,
 }
 
+/// Result of multi-context authorization
+/// Contains results for multiple authorization contexts
+#[derive(Debug, Clone, Serialize)]
+pub struct MultiContextAuthorizeResult {
+    /// Results for each authorization context
+    /// Key is the context_id (or index if no context_id provided)
+    /// Value is the authorization result for that context
+    pub context_results: HashMap<String, AuthorizeResult>,
+    
+    /// Overall decision based on all contexts
+    /// true means `ALLOW` (all contexts allow)
+    /// false means `Deny` (at least one context denies)
+    pub overall_decision: bool,
+    
+    /// Request ID, generated per each request call, is used to get logs from memory logger
+    pub request_id: String,
+}
+
 /// Custom serializer for an Option<cedar_policy::Response> which converts `None` to an empty string and vice versa.
 pub fn serialize_opt_response<S>(
     value: &Option<cedar_policy::Response>,

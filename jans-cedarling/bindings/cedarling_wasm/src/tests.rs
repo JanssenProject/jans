@@ -152,7 +152,7 @@ async fn test_run_cedarling() {
         .expect("init function should be initialized with js map");
 
     let request = Request {
-        tokens: HashMap::from([
+        tokens: Some(HashMap::from([
             (
                 "access_token".to_string(),
                 generate_token_using_claims(json!({
@@ -235,7 +235,7 @@ async fn test_run_cedarling() {
                   ]
                 })),
             ),
-        ]),
+        ])),
         context: json!({
             "current_time": 1735349685, // unix time
             "device_health": ["Healthy"],
@@ -319,7 +319,7 @@ async fn test_memory_log_interface() {
         .expect("init function should be initialized with js map");
 
     let request = Request {
-        tokens: HashMap::from([
+        tokens: Some(HashMap::from([
             (
                 "access_token".to_string(),
                 generate_token_using_claims(json!({
@@ -402,7 +402,7 @@ async fn test_memory_log_interface() {
                   ]
                 })),
             ),
-        ]),
+        ])),
         context: json!({
             "current_time": 1735349685, // unix time
             "device_health": ["Healthy"],

@@ -15,3 +15,4 @@ mod json_logic;
 mod schema_type_mapping;
 mod ssa_validation_integration;
 mod success_test_json;
+mod multi_context_test;

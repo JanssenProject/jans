@@ -206,9 +206,127 @@ decision_result = await cedarling.authorize_unsigned(input);
 
 ### When to use authorize_unsigned vs authorize
 
-| Feature               | authorize          | authorize_unsigned  |
-|-----------------------|--------------------|---------------------|
-| JWT validation        | Yes                | No                  |
-| Token requirements    | Requires valid JWTs| Accepts raw entities|
-| Use case              | Standard auth flows| Custom auth flows   |
-| Security              | Higher (validates) | Lower (trusts input)|
+| Feature            | authorize           | authorize_unsigned   |
+| ------------------ | ------------------- | -------------------- |
+| JWT validation     | Yes                 | No                   |
+| Token requirements | Requires valid JWTs | Accepts raw entities |
+| Use case           | Standard auth flows | Custom auth flows    |
+| Security           | Higher (validates)  | Lower (trusts input) |
+
+## Multi-Context Authorization (authorize_multi_context)
+
+The `authorize_multi_context` method enables processing multiple token bundles from different issuers/authorities in a single authorization request. This is particularly useful for complex scenarios where authorization decisions depend on multiple sources of identity and context.
+
+### Key Features
+
+- **Mixed signed/unsigned requests**: Some contexts can use JWT tokens while others use pre-built principal entities
+- **Dynamic token type support**: Custom token types beyond standard OAuth2/OIDC tokens
+- **Flexible context processing**: Each context can be processed independently with different validation rules
+
+### Use Cases
+
+- **Government Services**: Multiple agencies (DMV, IRS, State Police) each provide their own tokens
+- **Healthcare**: Doctor credentials, patient consent, insurance verification
+- **Financial Services**: Bank identity, credit bureau data, fraud detection
+- **IoT/Smart Cities**: Device authentication, location services, environmental sensors
+
+### Example Usage
+
+```js
+let input = {
+  token_bundles: [
+    {
+      tokens: {
+        access_token: "eyJhbGc....",
+        id_token: "eyJjbGc...",
+        dolphin_token: "eyJhbGc....", // Custom token type
+      },
+      context_id: "texas_dmv",
+    },
+    {
+      principals: [
+        {
+          id: "user123",
+          type: "User",
+          email: "user@example.com",
+          country: "US",
+        },
+      ],
+      context_id: "emissions_shop",
+    },
+  ],
+  action: "Update",
+  resource: {
+    id: "vehicle_registration",
+    type: "Issue",
+    org_id: "TexasDMV",
+  },
+  context: {
+    operation: "update_vehicle_registration",
+  },
+};
+
+decision_result = await cedarling.authorize_multi_context(input);
+```
+
+### Response Structure
+
+The multi-context authorization returns a comprehensive result:
+
+```js
+{
+  "context_results": {
+    "texas_dmv": {
+      "decision": "ALLOW",
+      "diagnostics": [...],
+      "request_id": "..."
+    },
+    "emissions_shop": {
+      "decision": "ALLOW",
+      "diagnostics": [...],
+      "request_id": "..."
+    }
+  },
+  "overall_decision": true,
+  "request_id": "..."
+}
+```
+
+### Decision Logic
+
+- **Individual Context Processing**: Each token bundle is processed as a separate authorization request
+- **Overall Decision Logic**: If any context denies, the overall decision is `DENY` (fail-safe approach)
+- **Context Identification**: Uses `context_id` if provided, otherwise uses index as string
+- **Result Aggregation**: Combines individual results into a comprehensive response
+
+### Dynamic Token Types
+
+The multi-context authorization supports custom token types defined in your policy store configuration:
+
+```yaml
+# Policy store configuration
+trusted_issuers:
+  marine_research_issuer:
+    name: "Marine Research Authority"
+    token_metadata:
+      dolphin_token: # Custom token type
+        entity_type_name: "Marine::DolphinToken"
+        principal_mapping:
+          - "Marine::Researcher"
+        claim_mapping:
+          blowhole_size:
+            attr: "size"
+            type: "Number"
+```
+
+### When to use authorize_multi_context
+
+| Feature            | authorize | authorize_unsigned | authorize_multi_context |
+| ------------------ | --------- | ------------------ | ----------------------- |
+| Multiple contexts  | No        | No                 | Yes                     |
+| Mixed auth methods | No        | No                 | Yes                     |
+| Custom token types | Limited   | No                 | Yes                     |
+| Complex scenarios  | No        | No                 | Yes                     |
+| Performance        | Fastest   | Fast               | Moderate                |
+
+For more detailed information about multi-context authorization, see [Multi-Context Authorization](./cedarling-multi-context-authorization.md).

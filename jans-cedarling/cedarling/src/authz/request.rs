@@ -13,7 +13,7 @@ use serde_json::Value;
 pub struct Request {
     /// Contains the JWTs that will be used for the AuthZ request
     #[serde(default, deserialize_with = "deserialize_tokens")]
-    pub tokens: HashMap<String, String>,
+    pub tokens: Option<HashMap<String, String>>,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
@@ -23,7 +23,7 @@ pub struct Request {
 }
 
 /// Custom parser for an Option<String> which returns `None` if the string is empty.
-fn deserialize_tokens<'de, D>(deserializer: D) -> Result<HashMap<String, String>, D::Error>
+fn deserialize_tokens<'de, D>(deserializer: D) -> Result<Option<HashMap<String, String>>, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -56,7 +56,7 @@ where
         )));
     };
 
-    Ok(tokens)
+    Ok(Some(tokens))
 }
 
 fn value_to_str(value: &Value) -> &'static str {
@@ -75,6 +75,40 @@ fn value_to_str(value: &Value) -> &'static str {
 pub struct RequestUnsigned {
     /// Contains the JWTs that will be used for the AuthZ request
     pub principals: Vec<EntityData>,
+    /// cedar_policy action
+    pub action: String,
+    /// cedar_policy resource data
+    pub resource: EntityData,
+    /// context to be used in cedar_policy
+    pub context: Value,
+}
+
+/// Token bundle for a specific authorization context
+/// Each bundle represents tokens from a specific issuer or authority
+/// Supports both signed (with JWT tokens) and unsigned (with pre-built principals) requests
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MultiContextTokenBundle {
+    /// For signed requests: Contains the JWTs for this specific context
+    /// Keys are token types (e.g., "tx_token", "id_token", "access_token", "dolphin_token")
+    /// Values are the JWT strings
+    /// If None, the request is treated as unsigned
+    #[serde(default, deserialize_with = "deserialize_tokens")]
+    pub tokens: Option<HashMap<String, String>>,
+    /// For unsigned requests: Contains pre-built principals
+    /// If None, the request is treated as signed
+    pub principals: Option<Vec<EntityData>>,
+    /// Optional context identifier for this token bundle
+    /// e.g., "texas_dmv", "emissions_shop", "google_identity"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context_id: Option<String>,
+}
+
+/// Multi-context authorization request
+/// Supports multiple token bundles from different issuers/authorities
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MultiContextRequest {
+    /// Array of token bundles, each representing a different authorization context
+    pub token_bundles: Vec<MultiContextTokenBundle>,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data

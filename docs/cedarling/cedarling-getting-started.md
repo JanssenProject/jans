@@ -461,6 +461,160 @@ Cedarling currently provides two modes of authorization:
 - This makes authorization decisions by passing a set of **Principals** directly.
 - Similar to the standard interface, the **Context** is passed in as-is in a map-like structure.
 
+**Multi-Context Authorization**
+
+- Processes multiple token bundles from different issuers/authorities in a single request.
+- Supports mixing signed (JWT) and unsigned (pre-built principal) requests within the same call.
+- Enables complex authorization scenarios involving multiple government agencies, healthcare providers, or financial institutions.
+
+=== "JavaScript"
+
+    ```js
+    const tokenBundles = [
+      {
+        tokens: {
+          access_token: "<access_token>",
+          id_token: "<id_token>",
+          dolphin_token: "<custom_token>" // Custom token type
+        },
+        context_id: "texas_dmv"
+      },
+      {
+        principals: [
+          {
+            id: "user123",
+            type: "User",
+            email: "user@example.com",
+            country: "US"
+          }
+        ],
+        context_id: "emissions_shop"
+      }
+    ];
+
+    const action = 'Jans::Action::"Update"';
+
+    const resource = {
+      type: "Jans::Issue",
+      id: "vehicle_registration",
+      org_id: "TexasDMV"
+    };
+
+    const context = {
+      operation: "update_vehicle_registration"
+    };
+
+    const result = await cedarling.authorize_multi_context({
+      token_bundles: tokenBundles,
+      action,
+      resource,
+      context,
+    });
+    ```
+
+=== "Python"
+
+    ```py
+    token_bundles = [
+        {
+            "tokens": {
+                "access_token": "<access_token>",
+                "id_token": "<id_token>",
+                "dolphin_token": "<custom_token>"  # Custom token type
+            },
+            "context_id": "texas_dmv"
+        },
+        {
+            "principals": [
+                {
+                    "id": "user123",
+                    "type": "User",
+                    "email": "user@example.com",
+                    "country": "US"
+                }
+            ],
+            "context_id": "emissions_shop"
+        }
+    ]
+
+    action = 'Jans::Action::"Update"'
+
+    resource = EntityData(
+        entity_type="Jans::Issue",
+        id="vehicle_registration",
+        org_id="TexasDMV"
+    )
+
+    context = {
+        "operation": "update_vehicle_registration"
+    }
+
+    result = cedarling.authorize_multi_context(MultiContextRequest(
+        token_bundles,
+        action,
+        resource,
+        context,
+    ))
+    ```
+
+=== "Rust"
+
+    ```rs
+    use std::collections::HashMap;
+    use serde_json::json;
+
+    let token_bundles = vec![
+        MultiContextTokenBundle {
+            tokens: Some(HashMap::from([
+                ("access_token".to_string(), "<access_token>".to_string()),
+                ("id_token".to_string(), "<id_token>".to_string()),
+                ("dolphin_token".to_string(), "<custom_token>".to_string()), // Custom token type
+            ])),
+            principals: None,
+            context_id: Some("texas_dmv".to_string()),
+        },
+        MultiContextTokenBundle {
+            tokens: None,
+            principals: Some(vec![
+                EntityData {
+                    id: "user123".to_string(),
+                    entity_type: "Jans::User".to_string(),
+                    attributes: HashMap::from([
+                        ("sub".to_string(), json!("user123")),
+                        ("country".to_string(), json!("US")),
+                    ]),
+                }
+            ]),
+            context_id: Some("emissions_shop".to_string()),
+        }
+    ];
+
+    let action = "Jans::Action::\"Update\"".to_string();
+
+    let resource = EntityData {
+        entity_type: "Jans::Issue".to_string(),
+        id: "vehicle_registration".to_string(),
+        attributes: HashMap::from([
+            ("org_id".to_string(), json!("TexasDMV")),
+        ]),
+    };
+
+    let context = json!({
+        "operation": "update_vehicle_registration"
+    });
+
+    let request = MultiContextRequest {
+        token_bundles,
+        action,
+        resource,
+        context,
+    };
+
+    let result = cedarling.authorize_multi_context(request).await?;
+    ```
+
+For more detailed information about multi-context authorization, see [Multi-Context Authorization](./cedarling-multi-context-authorization.md).
+
 ### Logging
 
 Cedarling supports logging of both **decision** and **system** events, useful for auditing and troubleshooting. Logging is optional and can be configured (or disabled) via the [bootstrap properties](./cedarling-properties.md).
@@ -473,5 +627,6 @@ You're now ready to dive deeper into Cedarling. From here, you could either:
 
 - See how you can use [TBAC with Cedarling](./cedarling-quick-start-tbac.md).
 - Explore how to use [Cedarling's Unsigned interface](./cedarling-quick-start-unsigned.md).
+- Learn about [Multi-Context Authorization](./cedarling-multi-context-authorization.md) for complex scenarios.
 - Use the [Cedarling Sidecar](./cedarling-sidecar-overview.md) for a quick, zero-code deployment.
 - Learn more about [why Cedarling exists](./README.md#why-zero-trust-needs-cedarlings) and the problems it solves.

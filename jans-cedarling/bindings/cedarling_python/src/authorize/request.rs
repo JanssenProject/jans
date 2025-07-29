@@ -73,7 +73,7 @@ impl Request {
         })?;
 
         Ok(cedarling::Request {
-            tokens,
+            tokens: Some(tokens),
             action: self.action.clone(),
             resource: self.resource.clone().into(),
             context,
