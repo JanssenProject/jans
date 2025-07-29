@@ -11636,6 +11636,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#cedarentitymapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      CedarEntityMapping
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -14978,6 +14987,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#cedarentitymapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      CedarEntityMapping
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -15399,8 +15417,10 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 
 <span class="w">    </span><span class="c1">// 2. Define the resource</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">        </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
 <span class="w">            </span><span class="p">(</span><span class="s">&quot;protocol&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;https&quot;</span><span class="p">)),</span>
 <span class="w">            </span><span class="p">(</span><span class="s">&quot;host&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;example.com&quot;</span><span class="p">)),</span>
@@ -15459,15 +15479,19 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 <span class="w">    </span><span class="c1">// 1. Define principals directly</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">principals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span>
 <span class="w">        </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Workload&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">            </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;some_workload_id&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Workload&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">                </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;some_workload_id&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
 <span class="w">                </span><span class="p">(</span><span class="s">&quot;client_id&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;some_client_id&quot;</span><span class="p">)),</span>
 <span class="w">            </span><span class="p">]),</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">            </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;random_user_id&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">                </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;random_user_id&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
 <span class="w">                </span><span class="p">(</span><span class="s">&quot;roles&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">([</span><span class="s">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;manager&quot;</span><span class="p">])),</span>
 <span class="w">                </span><span class="p">(</span><span class="s">&quot;email&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;user@example.com&quot;</span><span class="p">)),</span>
@@ -15477,8 +15501,10 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 
 <span class="w">    </span><span class="c1">// 2. Define the resource</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">        </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
 <span class="w">            </span><span class="p">(</span><span class="s">&quot;protocol&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;https&quot;</span><span class="p">)),</span>
 <span class="w">            </span><span class="p">(</span><span class="s">&quot;host&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;example.com&quot;</span><span class="p">)),</span>
@@ -15597,8 +15623,10 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 
 <span class="w">    </span><span class="c1">// Perform unsigned authorization</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">principals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">        </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;test_user&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;test_user&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
 <span class="w">            </span><span class="p">(</span><span class="s">&quot;roles&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">([</span><span class="s">&quot;admin&quot;</span><span class="p">])),</span>
 <span class="w">            </span><span class="p">(</span><span class="s">&quot;email&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;admin@example.com&quot;</span><span class="p">)),</span>
@@ -15606,8 +15634,10 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 <span class="w">    </span><span class="p">}];</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">        </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin_panel&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin_panel&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
 <span class="w">            </span><span class="p">(</span><span class="s">&quot;permission_level&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;admin&quot;</span><span class="p">)),</span>
 <span class="w">        </span><span class="p">]),</span>
@@ -15671,9 +15701,15 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 <h4 id="entitydata"><code>EntityData</code><a class="headerlink" href="#entitydata" title="Permanent link">#</a></h4>
 <p>Represents an entity in the authorization system.</p>
 <div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">EntityData</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">Value</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="cedarentitymapping"><code>CedarEntityMapping</code><a class="headerlink" href="#cedarentitymapping" title="Permanent link">#</a></h4>
+<p>Represents the entity type and id mapping.</p>
+<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">Value</span><span class="o">&gt;</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="main-methods">Main Methods<a class="headerlink" href="#main-methods" title="Permanent link">#</a></h3>
@@ -15813,7 +15849,7 @@ cargo<span class="w"> </span>run<span class="w"> </span>--example<span class="w"
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 21, 2025 09:26:11 UTC"><span class="timeago" datetime="2025-07-21T09:26:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 21, 2025 09:26:11 UTC">2025-07-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2025 15:11:12 UTC"><span class="timeago" datetime="2025-07-29T15:11:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2025 15:11:12 UTC">2025-07-29</span>
   </span>
 
     

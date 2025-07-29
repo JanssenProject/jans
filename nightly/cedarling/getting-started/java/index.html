@@ -14597,7 +14597,7 @@
 <li>Java Development Kit (JDK): version 11 or higher</li>
 </ul>
 <p>To use Cedarling Java bindings in Java Maven Project add following <code>repository</code> and <code>dependency</code> in pom.xml of the project</p>
-<p><div class="highlight"><pre><span></span><code>    &lt;repositories&gt;
+<div class="highlight"><pre><span></span><code>    &lt;repositories&gt;
         &lt;repository&gt;
             &lt;id&gt;jans&lt;/id&gt;
             &lt;name&gt;Janssen project repository&lt;/name&gt;
@@ -14610,7 +14610,7 @@
             &lt;artifactId&gt;cedarling-java&lt;/artifactId&gt;
             &lt;version&gt;{latest-jans-stable-version}&lt;/version&gt;
         &lt;/dependency&gt;
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <h3 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">#</a></h3>
 <p>We need to initialize Cedarling first.</p>
@@ -14619,8 +14619,8 @@
 <span class="w">        </span><span class="p">...</span>
 
 <span class="w">        </span><span class="cm">/*</span>
-<span class="cm">         * In a production environment, the bootstrap configuration should not be hardcoded. </span>
-<span class="cm">         * Instead, it should be loaded dynamically from external sources such as environment variables, </span>
+<span class="cm">         * In a production environment, the bootstrap configuration should not be hardcoded.</span>
+<span class="cm">         * Instead, it should be loaded dynamically from external sources such as environment variables,</span>
 <span class="cm">         * configuration files, or a centralized configuration service.</span>
 <span class="cm">         */</span>
 <span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">bootstrapJsonStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span>
@@ -14647,17 +14647,19 @@
 <h3 id="token-based-authorization">Token-Based Authorization<a class="headerlink" href="#token-based-authorization" title="Permanent link">#</a></h3>
 <p><strong>1. Define the resource:</strong></p>
 <p>This represents the <em>resource</em> that the action will be performed on, such as a protected API endpoint or file.</p>
-<p><div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        {</span>
 <span class="s">          &quot;app_id&quot;: &quot;app_id_001&quot;,</span>
-<span class="s">          &quot;id&quot;: &quot;admin_ui_id&quot;,</span>
+<span class="s">          &quot;cedar_entity_mapping&quot;: {</span>
+<span class="s">            &quot;entity_type&quot;: &quot;Jans::Issue&quot;,</span>
+<span class="s">            &quot;id&quot;: &quot;admin_ui_id&quot;</span>
+<span class="s">          },</span>
 <span class="s">          &quot;name&quot;: &quot;App Name&quot;,</span>
-<span class="s">          &quot;permission&quot;: &quot;view_clients&quot;,</span>
-<span class="s">          &quot;type&quot;: &quot;Jans::Issue&quot;</span>
+<span class="s">          &quot;permission&quot;: &quot;view_clients&quot;</span>
 <span class="s">        }</span>
 <span class="s">        &quot;&quot;&quot;</span><span class="p">;</span>
 </code></pre></div>
-<strong>2. Define the action:</strong></p>
+<p><strong>2. Define the action:</strong></p>
 <p>An <em>action</em> represents what the principal is trying to do to the resource. For example, read, write, or delete operations.</p>
 <div class="highlight"><pre><span></span><code><span class="n">String</span><span class="w"> </span><span class="n">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Jans::Action::\&quot;Update\&quot;&quot;</span><span class="p">;</span>
 </code></pre></div>
@@ -14702,13 +14704,17 @@
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">principals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        const principals = [</span>
 <span class="s">          {</span>
-<span class="s">            &quot;entity_type&quot;: &quot;Jans::Workload&quot;,</span>
-<span class="s">            &quot;id&quot;: &quot;some_workload_id&quot;,</span>
+<span class="s">            &quot;cedar_entity_mapping&quot;: {</span>
+<span class="s">              &quot;entity_type&quot;: &quot;Jans::Workload&quot;,</span>
+<span class="s">              &quot;id&quot;: &quot;some_workload_id&quot;</span>
+<span class="s">            },</span>
 <span class="s">            &quot;client_id&quot;: &quot;some_client_id&quot;,</span>
 <span class="s">          },</span>
 <span class="s">          {</span>
-<span class="s">            &quot;entity_type&quot;: &quot;Jans::User&quot;,</span>
-<span class="s">            &quot;id&quot;: &quot;random_user_id&quot;,</span>
+<span class="s">            &quot;cedar_entity_mapping&quot;: {</span>
+<span class="s">              &quot;entity_type&quot;: &quot;Jans::User&quot;,</span>
+<span class="s">              &quot;id&quot;: &quot;random_user_id&quot;</span>
+<span class="s">            },</span>
 <span class="s">            &quot;roles&quot;: [&quot;admin&quot;, &quot;manager&quot;]</span>
 <span class="s">          },</span>
 <span class="s">        ];</span>
@@ -14763,7 +14769,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 23, 2025 06:52:21 UTC"><span class="timeago" datetime="2025-06-23T06:52:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 23, 2025 06:52:21 UTC">2025-06-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2025 15:11:12 UTC"><span class="timeago" datetime="2025-07-29T15:11:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2025 15:11:12 UTC">2025-07-29</span>
   </span>
 
     

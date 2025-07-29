@@ -14589,7 +14589,7 @@
 </ul>
 <p><strong>1. Build the Rust library:</strong></p>
 <p>Download Jans monorepo:</p>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--depth<span class="w"> </span><span class="m">1</span><span class="w"> </span>https://github.com/JanssenProject/jans.git<span class="w"> </span>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--depth<span class="w"> </span><span class="m">1</span><span class="w"> </span>https://github.com/JanssenProject/jans.git
 </code></pre></div>
 <p>We use <code>--depth 1</code> to avoid cloning unnecessary history and minimalize the download size.</p>
 <p>Navigate to the Cedarling Go bindings directory:</p>
@@ -14617,25 +14617,29 @@ cp<span class="w"> </span>target/release/libcedarling_go.dylib<span class="w"> <
 <h3 id="build-your-go-application-with-dynamic-linking">Build your Go application with dynamic linking<a class="headerlink" href="#build-your-go-application-with-dynamic-linking" title="Permanent link">#</a></h3>
 <p><strong>1. Download pre-built binaries:</strong><br />
 Download the appropriate pre-built binary for your platform from the <a href="https://github.com/JanssenProject/jans/releases/latest">Jans releases page</a> or build it from source as described above.</p>
-<p><strong><em>2. Add linker flags in your main.go file:</em></strong><br />
+<p><strong>2. Add linker flags in your main.go file:</strong><br />
 You need specify linker flags in your <code>main.go</code> file to link against the Cedarling library.</p>
 <div class="highlight"><pre><span></span><code><span class="c1">// #cgo LDFLAGS: -L. -lcedarling_go</span>
 <span class="kn">import</span><span class="w"> </span><span class="s">&quot;C&quot;</span>
 </code></pre></div>
 <p>And make sure that the Cedarling library files are located in the same directory as your main package.</p>
-<p><strong><em>3. Add the Cedarling Go package to your Go application:</em></strong><br />
+<p><strong>3. Add the Cedarling Go package to your Go application:</strong><br />
 Use <code>go get</code> to fetch the Cedarling Go package:</p>
 <div class="highlight"><pre><span></span><code>go<span class="w"> </span>get<span class="w"> </span>github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
 </code></pre></div>
-<p><strong><em>4. Add the Cedarling Go package to your Go application:</em></strong><br />
+<p><strong>4. Add the Cedarling Go package to your Go application:</strong><br />
 Build your Go application:</p>
 <div class="highlight"><pre><span></span><code>go<span class="w"> </span>build<span class="w"> </span>.
 </code></pre></div>
 <p>Run application to ensure it works correctly.</p>
-<p><strong><em>Runtime Notes:</em></strong></p>
+<p><strong>Runtime Notes:</strong></p>
 <ul>
-<li>On <strong>Windows</strong>, place the Rust artifacts (<code>cedarling_go.dll</code> and <code>cedarling_go.lib</code>) alongside the Go binary.</li>
-<li>Files:<ul>
+<li>
+<p>On <strong>Windows</strong>, place the Rust artifacts (<code>cedarling_go.dll</code> and <code>cedarling_go.lib</code>) alongside the Go binary.</p>
+</li>
+<li>
+<p>Files:</p>
+<ul>
 <li><code>cedarling_go.dll</code></li>
 <li><code>cedarling_go.lib</code></li>
 </ul>
@@ -14692,8 +14696,10 @@ Build your Go application:</p>
 <h3 id="token-based-authorization">Token-Based Authorization<a class="headerlink" href="#token-based-authorization" title="Permanent link">#</a></h3>
 <p><strong>1. Define the resource:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nx">resource</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">EntityData</span><span class="p">{</span>
-<span class="w">    </span><span class="nx">EntityType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Issue&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">ID</span><span class="p">:</span><span class="w">         </span><span class="s">&quot;random_id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">CedarMapping</span><span class="p">:</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">CedarMapping</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">EntityType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Issue&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">ID</span><span class="p">:</span><span class="w">         </span><span class="s">&quot;random_id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nx">Payload</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span>
 <span class="w">        </span><span class="s">&quot;org_id&quot;</span><span class="p">:</span><span class="w">  </span><span class="s">&quot;some_long_id&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="s">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;US&quot;</span><span class="p">,</span>
@@ -14730,8 +14736,10 @@ Build your Go application:</p>
 <p><strong>1. Define principals:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nx">principals</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">EntityData</span><span class="p">{</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="nx">EntityType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nx">ID</span><span class="p">:</span><span class="w">         </span><span class="s">&quot;random_id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">CedarMapping</span><span class="p">:</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">CedarMapping</span><span class="p">{</span>
+<span class="w">            </span><span class="nx">EntityType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">ID</span><span class="p">:</span><span class="w">         </span><span class="s">&quot;random_id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="nx">Payload</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span>
 <span class="w">            </span><span class="s">&quot;role&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;admin&quot;</span><span class="p">},</span>
 <span class="w">            </span><span class="s">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;US&quot;</span><span class="p">,</span>
@@ -14797,7 +14805,7 @@ Build your Go application:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 11, 2025 10:23:01 UTC"><span class="timeago" datetime="2025-06-11T10:23:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 11, 2025 10:23:01 UTC">2025-06-11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2025 15:11:12 UTC"><span class="timeago" datetime="2025-07-29T15:11:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2025 15:11:12 UTC">2025-07-29</span>
   </span>
 
     
