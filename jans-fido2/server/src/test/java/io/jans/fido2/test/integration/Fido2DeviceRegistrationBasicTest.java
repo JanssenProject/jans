@@ -14,7 +14,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import jakarta.inject.Inject;
-import java.util.List;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -63,8 +62,12 @@ public class Fido2DeviceRegistrationBasicTest {
         assertNotNull(appConfiguration, "FIDO2 configuration should be available");
         
         log.info("FIDO2 configuration loaded successfully");
-        log.info("Issuer: {}", appConfiguration.getIssuer());
-        log.info("Base Endpoint: {}", appConfiguration.getBaseEndpoint());
+        if (appConfiguration.getIssuer() != null) {
+            log.info("Issuer: {}", appConfiguration.getIssuer());
+        }
+        if (appConfiguration.getBaseEndpoint() != null) {
+            log.info("Base Endpoint: {}", appConfiguration.getBaseEndpoint());
+        }
     }
 
     @Test(description = "Test FIDO2 service availability and basic configuration")
@@ -108,7 +111,9 @@ public class Fido2DeviceRegistrationBasicTest {
             
             log.info("Attestation options generation test passed");
             log.info("Challenge length: {}", options.getChallenge().length());
-            log.info("Relying Party: {}", options.getRp().getName());
+            if (options.getRp() != null && options.getRp().getName() != null) {
+                log.info("Relying Party: {}", options.getRp().getName());
+            }
             
         } catch (Exception e) {
             log.error("Failed to generate attestation options", e);
@@ -142,7 +147,9 @@ public class Fido2DeviceRegistrationBasicTest {
                 log.info("Test device registration found and validated");
                 log.info("Device ID: {}", device.getId());
                 log.info("Display Name: {}", device.getDisplayName());
-                log.info("Status: {}", device.getRegistrationStatus().getValue());
+                if (device.getRegistrationStatus() != null) {
+                    log.info("Status: {}", device.getRegistrationStatus().getValue());
+                }
             } else {
                 log.info("Test device registration not found (this is OK for initial test)");
             }
@@ -170,8 +177,12 @@ public class Fido2DeviceRegistrationBasicTest {
         assertTrue(appConfiguration.getFido2Configuration().isUserAutoEnrollment(), "User auto enrollment should be enabled for testing");
         
         log.info("FIDO2 configuration validation passed");
-        log.info("Requested Parties: {}", appConfiguration.getFido2Configuration().getRequestedParties().size());
-        log.info("Enabled Algorithms: {}", appConfiguration.getFido2Configuration().getEnabledFidoAlgorithms().size());
+        if (appConfiguration.getFido2Configuration().getRequestedParties() != null) {
+            log.info("Requested Parties: {}", appConfiguration.getFido2Configuration().getRequestedParties().size());
+        }
+        if (appConfiguration.getFido2Configuration().getEnabledFidoAlgorithms() != null) {
+            log.info("Enabled Algorithms: {}", appConfiguration.getFido2Configuration().getEnabledFidoAlgorithms().size());
+        }
         log.info("User Auto Enrollment: {}", appConfiguration.getFido2Configuration().isUserAutoEnrollment());
     }
 } 
