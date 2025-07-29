@@ -74,26 +74,26 @@ use the policy stored in this store to evaluate the authorization result.
    Remember to replace `<Policy Store URI>` with
    the URI of your policy store:
    `json
-         {
-           "CEDARLING_APPLICATION_NAME": "My App",
-           "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
-           "CEDARLING_LOG_TYPE": "std_out",
-           "CEDARLING_LOG_LEVEL": "INFO",
-           "CEDARLING_USER_AUTHZ": "enabled",
-           "CEDARLING_WORKLOAD_AUTHZ": "disabled",
-           "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-             "===": [{"var": "Jans::User"}, "ALLOW"]
-           },
-           "CEDARLING_JWT_SIG_VALIDATION": "enabled",
-           "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-           "CEDARLING_MAPPING_USER": "Jans::User",
-           "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
-           "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
-             "HS256", "RS256"
-           ],
-           "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
-         }
-     `
+      {
+        "CEDARLING_APPLICATION_NAME": "My App",
+        "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
+        "CEDARLING_LOG_TYPE": "std_out",
+        "CEDARLING_LOG_LEVEL": "INFO",
+        "CEDARLING_USER_AUTHZ": "enabled",
+        "CEDARLING_WORKLOAD_AUTHZ": "disabled",
+        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+          "===": [{"var": "Jans::User"}, "ALLOW"]
+        },
+        "CEDARLING_JWT_SIG_VALIDATION": "enabled",
+        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+        "CEDARLING_MAPPING_USER": "Jans::User",
+        "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+          "HS256", "RS256"
+        ],
+        "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+      }
+  `
 6. Click `Save` to initialize Cedarling.
 
 This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User.
@@ -116,9 +116,10 @@ Since we are implementing TBAC, we have to authenticate the user first to get th
    - Resource:
      ```json
      {
-       "entity_type": "resource",
-       "type": "Jans::SecretDocument",
-       "id": "some_id"
+       "cedar_entity_mapping": {
+         "entity_type": "Jans::SecretDocument",
+         "id": "some_id"
+       }
      }
      ```
 8. Leave the `Context` blank

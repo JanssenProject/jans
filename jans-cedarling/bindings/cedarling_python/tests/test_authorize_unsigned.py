@@ -21,8 +21,10 @@ POLICY_STORE_LOCATION = join(TEST_FILES_PATH, "policy-store_ok_2.yaml")
 
 # Create resouce with type "Jans::Issue" from cedar-policy schema.
 RESOURCE = EntityData.from_dict({
-    "type": "Jans::Issue",
-    "id": "random_id",
+    "cedar_entity_mapping": {
+        "entity_type": "Jans::Issue",
+        "id": "random_id"
+    },
     "org_id": "some_long_id",
     "country": "US"
 })
@@ -53,18 +55,24 @@ def test_authorize_unsigned():
 
     request = RequestUnsigned(
         principals=[EntityData.from_dict({
-            "id": "1",
-            "type": "Jans::TestPrincipal1",
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::TestPrincipal1",
+                "id": "1"
+            },
             "is_ok": True
         }),
             EntityData.from_dict({
-                "id": "2",
-                "type": "Jans::TestPrincipal2",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal2",
+                    "id": "2"
+                },
                 "is_ok": True
             }),
             EntityData.from_dict({
-                "id": "3",
-                "type": "Jans::TestPrincipal3",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal3",
+                    "id": "3"
+                },
                 "is_ok": False
             })],
         action='Jans::Action::"UpdateForTestPrincipals"',
@@ -120,18 +128,24 @@ def test_authorize_unsigned_json_rule_by_uid():
 
     request = RequestUnsigned(
         principals=[EntityData.from_dict({
-            "id": "1",
-            "type": "Jans::TestPrincipal1",
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::TestPrincipal1",
+                "id": "1"
+            },
             "is_ok": True
         }),
             EntityData.from_dict({
-                "id": "2",
-                "type": "Jans::TestPrincipal2",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal2",
+                    "id": "2"
+                },
                 "is_ok": True
             }),
             EntityData.from_dict({
-                "id": "3",
-                "type": "Jans::TestPrincipal3",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal3",
+                    "id": "3"
+                },
                 "is_ok": False
             })],
         action='Jans::Action::"UpdateForTestPrincipals"',
