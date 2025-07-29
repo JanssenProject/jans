@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -36,7 +37,9 @@ import org.slf4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class DatabaseResource extends ConfigBaseResource {
-
+    private class DatabaseSchema extends HashMap<String, Map<String, AttributeType>> {
+    };
+    
     @Inject
     Logger log;
 
@@ -51,7 +54,7 @@ public class DatabaseResource extends ConfigBaseResource {
                     ApiAccessConstants.DATABASE_READ_ACCESS, ApiAccessConstants.DATABASE_WRITE_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class, description = "A map of table_name as key and Map of attributes"), examples = @ExampleObject(name = "Response example", value = "example/database/tableInfo.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DatabaseSchema.class, description = "A map of table_name as key and Map of attributes"), examples = @ExampleObject(name = "Response example", value = "example/database/tableInfo.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET

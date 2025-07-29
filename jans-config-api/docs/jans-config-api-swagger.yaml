@@ -4963,7 +4963,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: "#/components/schemas/DatabaseSchema"
               examples:
                 Response example:
                   description: Response example
@@ -14875,19 +14875,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanEdit:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
-          type: boolean
         whitePagesCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -15789,8 +15789,6 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -15800,6 +15798,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -16966,14 +16966,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -17004,6 +17004,22 @@ components:
           type: boolean
         description:
           type: string
+    AttributeType:
+      type: object
+      properties:
+        name:
+          type: string
+        defName:
+          type: string
+        type:
+          type: string
+        multiValued:
+          type: boolean
+    DatabaseSchema:
+      type: object
+      properties:
+        empty:
+          type: boolean
     JSONWebKey:
       type: object
       properties:
@@ -17578,6 +17594,8 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        accessToken:
+          type: boolean
         logoutStatusJwt:
           type: boolean
         tokenTypeEnum:
@@ -17590,8 +17608,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
