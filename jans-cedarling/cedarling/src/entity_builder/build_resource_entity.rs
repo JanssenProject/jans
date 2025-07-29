@@ -4,11 +4,11 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::*;
-use crate::EntityData;
+use crate::{EntityData};
 
 impl EntityBuilder {
     pub fn build_resource_entity(&self, resource: &EntityData) -> Result<Entity, BuildEntityError> {
-        let resource_type_name = &resource.entity_type;
+        let resource_type_name = &resource.cedar_mapping.entity_type;
 
         let attrs_shape = self
             .schema
@@ -22,7 +22,7 @@ impl EntityBuilder {
         )
         .map_err(|e| BuildEntityErrorKind::from(e).while_building(resource_type_name))?;
 
-        let resource = build_cedar_entity(resource_type_name, &resource.id, attrs, HashSet::new())?;
+        let resource = build_cedar_entity(resource_type_name, &resource.cedar_mapping.id, attrs, HashSet::new())?;
 
         Ok(resource)
     }
@@ -40,6 +40,7 @@ mod test {
     use super::super::test::*;
     use super::super::*;
     use super::*;
+    use crate::CedarEntityMapping;
     use serde_json::json;
 
     #[test]
@@ -51,8 +52,10 @@ mod test {
         )
         .expect("should init entity builder");
         let resource_data = EntityData {
+            cedar_mapping: CedarEntityMapping {
             entity_type: "Jans::HTTP_Request".to_string(),
             id: "some_request".to_string(),
+            },
             attributes: HashMap::from([
                 ("header".to_string(), json!({"Accept": "test"})),
                 (
@@ -94,8 +97,10 @@ mod test {
         )
         .expect("should init entity builder");
         let resource_data = EntityData {
+            cedar_mapping: CedarEntityMapping {
             entity_type: "Jans::HTTP_Request".to_string(),
             id: "some_request".to_string(),
+            },
             attributes: HashMap::new(),
         };
         let entity = builder
