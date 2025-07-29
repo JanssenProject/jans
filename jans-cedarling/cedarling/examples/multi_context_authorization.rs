@@ -77,8 +77,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         tokens: None,
         principals: Some(vec![
             EntityData {
-                entity_type: "Jans::User".to_string(),
-                id: "unsigned_user".to_string(),
+                cedar_mapping: CedarEntityMapping {
+                    entity_type: "Jans::User".to_string(),
+                    id: "unsigned_user".to_string(),
+                },
                 attributes: HashMap::from([
                     ("sub".to_string(), serde_json::json!("unsigned_user")),
                     ("department".to_string(), serde_json::json!("Engineering")),
@@ -94,8 +96,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         token_bundles: vec![signed_bundle, unsigned_bundle],
         action: "Jans::Action::\"Update\"".to_string(),
         resource: EntityData {
-            entity_type: "Jans::Issue".to_string(),
-            id: "test_resource".to_string(),
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(),
+                id: "test_resource".to_string(),
+            },
             attributes: HashMap::from([
                 ("org_id".to_string(), serde_json::json!("TestOrg")),
                 ("country".to_string(), serde_json::json!("US")),
@@ -136,8 +140,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         token_bundles: vec![signed_bundle1, signed_bundle2],
         action: "Jans::Action::\"Update\"".to_string(),
         resource: EntityData {
-            entity_type: "Jans::Issue".to_string(),
-            id: "test_resource".to_string(),
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(),
+                id: "test_resource".to_string(),
+            },
             attributes: HashMap::from([
                 ("org_id".to_string(), serde_json::json!("TestOrg")),
                 ("country".to_string(), serde_json::json!("US")),
@@ -162,8 +168,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         tokens: None,
         principals: Some(vec![
             EntityData {
-                entity_type: "Jans::User".to_string(),
-                id: "user1".to_string(),
+                cedar_mapping: CedarEntityMapping {
+                    entity_type: "Jans::User".to_string(),
+                    id: "user1".to_string(),
+                },
                 attributes: HashMap::from([
                     ("sub".to_string(), serde_json::json!("user1")),
                     ("department".to_string(), serde_json::json!("Sales")),
@@ -179,13 +187,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         tokens: None,
         principals: Some(vec![
             EntityData {
-                entity_type: "Jans::User".to_string(),
-                id: "user2".to_string(),
+                cedar_mapping: CedarEntityMapping {
+                    entity_type: "Jans::User".to_string(),
+                    id: "user2".to_string(),
+                },
                 attributes: HashMap::from([
                     ("sub".to_string(), serde_json::json!("user2")),
                     ("department".to_string(), serde_json::json!("Marketing")),
-                    ("role".to_string(), serde_json::json!("Director")),
-                    ("country".to_string(), serde_json::json!("US")),
+                    ("role".to_string(), serde_json::json!("Analyst")),
+                    ("country".to_string(), serde_json::json!("CA")),
                 ]),
             },
         ]),
@@ -196,8 +206,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         token_bundles: vec![unsigned_bundle1, unsigned_bundle2],
         action: "Jans::Action::\"Update\"".to_string(),
         resource: EntityData {
-            entity_type: "Jans::Issue".to_string(),
-            id: "test_resource".to_string(),
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(),
+                id: "test_resource".to_string(),
+            },
             attributes: HashMap::from([
                 ("org_id".to_string(), serde_json::json!("TestOrg")),
                 ("country".to_string(), serde_json::json!("US")),

@@ -98,8 +98,10 @@ async fn test_multi_context_authorization_basic() {
         token_bundles: vec![bundle1, bundle2],
         action: "Jans::Action::\"Update\"".to_string(),
         resource: EntityData {
-            entity_type: "Jans::Issue".to_string(),
-            id: "test_resource".to_string(),
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(),
+                id: "test_resource".to_string(),
+            },
             attributes: HashMap::from([
                 ("org_id".to_string(), serde_json::json!("TestOrg")),
                 ("country".to_string(), serde_json::json!("US")),
@@ -208,8 +210,10 @@ async fn test_multi_context_authorization_without_context_ids() {
         token_bundles: vec![bundle1, bundle2],
         action: "Jans::Action::\"Update\"".to_string(),
         resource: EntityData {
-            entity_type: "Jans::Issue".to_string(),
-            id: "test_resource".to_string(),
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(),
+                id: "test_resource".to_string(),
+            },
             attributes: HashMap::from([
                 ("org_id".to_string(), serde_json::json!("TestOrg")),
                 ("country".to_string(), serde_json::json!("US")),
@@ -310,8 +314,10 @@ async fn test_multi_context_authorization_mixed_context_ids() {
         token_bundles: vec![bundle1, bundle2],
         action: "Jans::Action::\"Update\"".to_string(),
         resource: EntityData {
-            entity_type: "Jans::Issue".to_string(),
-            id: "test_resource".to_string(),
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(),
+                id: "test_resource".to_string(),
+            },
             attributes: HashMap::from([
                 ("org_id".to_string(), serde_json::json!("TestOrg")),
                 ("country".to_string(), serde_json::json!("US")),
@@ -410,8 +416,10 @@ async fn test_multi_context_authorization_empty_bundles() {
         token_bundles: vec![bundle1, bundle2],
         action: "Jans::Action::\"Update\"".to_string(),
         resource: EntityData {
-            entity_type: "Jans::Issue".to_string(),
-            id: "test_resource".to_string(),
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(),
+                id: "test_resource".to_string(),
+            },
             attributes: HashMap::from([
                 ("org_id".to_string(), serde_json::json!("TestOrg")),
                 ("country".to_string(), serde_json::json!("US")),
@@ -506,8 +514,10 @@ async fn test_multi_context_authorization_with_custom_token_types() {
         token_bundles: vec![bundle1, bundle2],
         action: "Jans::Action::\"Update\"".to_string(),
         resource: EntityData {
-            entity_type: "Jans::Issue".to_string(),
-            id: "test_resource".to_string(),
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(),
+                id: "test_resource".to_string(),
+            },
             attributes: HashMap::from([
                 ("org_id".to_string(), serde_json::json!("TestOrg")),
                 ("country".to_string(), serde_json::json!("US")),
