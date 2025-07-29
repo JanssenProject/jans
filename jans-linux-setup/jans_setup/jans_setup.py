@@ -410,6 +410,11 @@ def main():
                     jansCliInstaller.start_installation()
                     jansCliInstaller.configure()
 
+            if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jansCliInstaller.install_var)):
+                    jansCliInstaller.start_installation()
+                    jansCliInstaller.configure()
+
             if Config.profile == 'jans':
 
                 if (Config.installed_instance and 'install_fido2' in Config.addPostSetupService) or (
