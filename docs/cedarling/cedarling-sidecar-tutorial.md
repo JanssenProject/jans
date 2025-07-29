@@ -50,8 +50,10 @@ end
     }
   },
   "resource": {
-    "type": "Jans::HTTP_Request",
-    "id": "some_id",
+    "cedar_entity_mapping": {
+      "entity_type": "Jans::HTTP_Request",
+      "id": "some_id"
+    },
     "properties": {
       "header": {},
       "url": {
@@ -78,7 +80,7 @@ Before you begin, make sure you have the following:
 
 ## Policy Store Setup (Agama Lab)
 
-To begin using Cedarling, you need to set up a policy store. We’ll use this [Agama Lab](https://cloud.gluu.org/agama-lab/login) for this purpose.
+To begin using Cedarling, you need to set up a policy store. We'll use this [Agama Lab](https://cloud.gluu.org/agama-lab/login) for this purpose.
 
 1. Sign in to [Agama Lab](https://cloud.gluu.org/agama-lab/login) using your GitHub account and click on Policy Designer.
    ![image](../assets/cedarling-policy-designer.png)
@@ -248,8 +250,10 @@ def protected():
             }
         },
         "resource": {
-            "type": "Jans::HTTP_Request",
-            "id": "some_id",
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::HTTP_Request",
+                "id": "some_id"
+            },
             "properties": {
                 "header": {},
                 "url": {
