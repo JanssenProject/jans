@@ -3346,7 +3346,7 @@
         }
       ]
     },
-	{
+    {
       "path": "/jans-config-api/audit",
       "conditions": [
         {
@@ -3356,10 +3356,43 @@
           "scopes": [
             {
               "inum": "1800.01.93",
-              "name": "https://jans.io/oauth/config/audit-read"
+              "name": "https://jans.io/oauth/config/logging.readonly"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.01.94",
+              "name": "https://jans.io/oauth/config/logging.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/config/database",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.95",
+              "name": "https://jans.io/oauth/config/database.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.96",
+              "name": "https://jans.io/oauth/config/database.write"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.1",
