@@ -46,7 +46,7 @@ public class AuditLogResource extends ConfigBaseResource {
     public static final String AUDIT_FILE_PATH = "/opt/jans/jetty/jans-config-api/logs/";
     public static final String AUDIT_FILE_NAME = "configapi-audit.log";
     public static final String AUDIT_FILE_DATE_FORMAT = "dd-MM-YYYY";
-    public static final String AUDIT_LOGGING_READ_SCOPE = "logging.read";
+
     static final String AUDIT = "/audit";
 
     private class LogPagedResult extends PagedResult<String> {
@@ -59,14 +59,15 @@ public class AuditLogResource extends ConfigBaseResource {
     AuthUtil authUtil;
 
     @Operation(summary = "Get audit details.", description = "Get audit details.", operationId = "get-audit-data", tags = {
-            "Logs" }, security = @SecurityRequirement(name = "oauth2", scopes = { AUDIT_LOGGING_READ_SCOPE }))
+            "Logs" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.LOGGING_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LogPagedResult.class), examples = @ExampleObject(name = "Response example"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUDIT_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_AUDIT_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS }, groupScopes = {ApiAccessConstants.LOGGING_WRITE_ACCESS}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getLogsEnteries(
             @Parameter(description = "Search pattern") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,

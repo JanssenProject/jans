@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 @Priority(Interceptor.Priority.APPLICATION)
 public class AuditLogInterceptor {
 
-    private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit");
     private static final Logger LOG = LoggerFactory.getLogger(AuditLogInterceptor.class);
+    private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit");
 
     @Inject
     AuthUtil authUtil;
