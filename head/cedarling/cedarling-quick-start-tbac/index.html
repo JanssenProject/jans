@@ -14538,25 +14538,25 @@ use the policy stored in this store to evaluate the authorization result.</p>
    Remember to replace <code>&lt;Policy Store URI&gt;</code> with
    the URI of your policy store:
    <code>json
-         {
-           "CEDARLING_APPLICATION_NAME": "My App",
-           "CEDARLING_POLICY_STORE_URI": "&lt;Policy Store URI&gt;",
-           "CEDARLING_LOG_TYPE": "std_out",
-           "CEDARLING_LOG_LEVEL": "INFO",
-           "CEDARLING_USER_AUTHZ": "enabled",
-           "CEDARLING_WORKLOAD_AUTHZ": "disabled",
-           "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-             "===": [{"var": "Jans::User"}, "ALLOW"]
-           },
-           "CEDARLING_JWT_SIG_VALIDATION": "enabled",
-           "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-           "CEDARLING_MAPPING_USER": "Jans::User",
-           "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
-           "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
-             "HS256", "RS256"
-           ],
-           "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
-         }</code></li>
+      {
+        "CEDARLING_APPLICATION_NAME": "My App",
+        "CEDARLING_POLICY_STORE_URI": "&lt;Policy Store URI&gt;",
+        "CEDARLING_LOG_TYPE": "std_out",
+        "CEDARLING_LOG_LEVEL": "INFO",
+        "CEDARLING_USER_AUTHZ": "enabled",
+        "CEDARLING_WORKLOAD_AUTHZ": "disabled",
+        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+          "===": [{"var": "Jans::User"}, "ALLOW"]
+        },
+        "CEDARLING_JWT_SIG_VALIDATION": "enabled",
+        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+        "CEDARLING_MAPPING_USER": "Jans::User",
+        "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+          "HS256", "RS256"
+        ],
+        "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+      }</code></li>
 <li>Click <code>Save</code> to initialize Cedarling.</li>
 </ol>
 <p>This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User.</p>
@@ -14576,9 +14576,10 @@ use the policy stored in this store to evaluate the authorization result.</p>
 <li>Action: <code>Jans::Action::"Read"</code></li>
 <li>Resource:
      <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;resource&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::SecretDocument&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">  </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::SecretDocument&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></li>
 <li>Leave the <code>Context</code> blank</li>
@@ -14636,7 +14637,7 @@ use the policy stored in this store to evaluate the authorization result.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 8, 2025 11:35:42 UTC"><span class="timeago" datetime="2025-07-08T11:35:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 8, 2025 11:35:42 UTC">2025-07-08</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2025 15:11:12 UTC"><span class="timeago" datetime="2025-07-29T15:11:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2025 15:11:12 UTC">2025-07-29</span>
   </span>
 
     

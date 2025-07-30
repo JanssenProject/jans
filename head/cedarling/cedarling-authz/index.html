@@ -14412,17 +14412,19 @@ Action, Resource and Context is sent by the application in the authorization req
 this is a sample request from a hypothetical application:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">bootstrap_config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{...};</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">(</span><span class="nx">bootstrap_config</span><span class="p">);</span>
-<span class="kd">let</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="s2">&quot;tokens&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;access_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJhbGc....&quot;</span><span class="p">,</span><span class="w"> </span>
-<span class="w">    </span><span class="s2">&quot;id_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJjbGc...&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">&quot;access_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJhbGc....&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;id_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJjbGc...&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="s2">&quot;userinfo_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJjbGc...&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="s2">&quot;action&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;View&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="s2">&quot;resource&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ticket-10101&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;type&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Ticket&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;owner&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;bob@acme.com&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="s2">&quot;cedar_entity_mapping&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="s2">&quot;entity_type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Ticket&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ticket-10101&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="s2">&quot;owner&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;bob@acme.com&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="s2">&quot;org_id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="s2">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
@@ -14446,27 +14448,27 @@ this is a sample request from a hypothetical application:</p>
 <li>Userinfo Token Entity</li>
 </ul>
 <h3 id="example-policy">Example Policy<a class="headerlink" href="#example-policy" title="Permanent link">#</a></h3>
-<p>Below is an example policy schema that illustrates how entities are used:  </p>
+<p>Below is an example policy schema that illustrates how entities are used:</p>
 <div class="highlight"><pre><span></span><code>type Context = {
-  &quot;access_token&quot;: Access_token, 
-  &quot;time&quot;: Long, 
-  &quot;user&quot;: User, 
+  &quot;access_token&quot;: Access_token,
+  &quot;time&quot;: Long,
+  &quot;user&quot;: User,
   &quot;workload&quot;: Workload
 };
 
 type Url = {
-  &quot;host&quot;: String, 
-  &quot;path&quot;: String, 
+  &quot;host&quot;: String,
+  &quot;path&quot;: String,
   &quot;protocol&quot;: String
 };
 
 entity Access_token = {
-  &quot;exp&quot;: Long, 
+  &quot;exp&quot;: Long,
   &quot;iss&quot;: TrustedIssuer
 };
 
 entity Issue = {
-  &quot;country&quot;: String, 
+  &quot;country&quot;: String,
   &quot;org_id&quot;: String
 };
 
@@ -14477,16 +14479,16 @@ entity TrustedIssuer = {
 };
 
 entity User in [Role] = {
-  &quot;country&quot;: String, 
-  &quot;email&quot;: String, 
-  &quot;sub&quot;: String, 
+  &quot;country&quot;: String,
+  &quot;email&quot;: String,
+  &quot;sub&quot;: String,
   &quot;username&quot;: String
 };
 
 entity Workload = {
-  &quot;client_id&quot;: String, 
-  &quot;iss&quot;: TrustedIssuer, 
-  &quot;name&quot;: String, 
+  &quot;client_id&quot;: String,
+  &quot;iss&quot;: TrustedIssuer,
+  &quot;name&quot;: String,
   &quot;org_id&quot;: String
 };
 
@@ -14494,9 +14496,9 @@ action &quot;Update&quot; appliesTo {
   principal: [Role, Workload, User],
   resource: [Issue],
   context: {
-    &quot;access_token&quot;: Access_token, 
-    &quot;time&quot;: Long, 
-    &quot;user&quot;: User, 
+    &quot;access_token&quot;: Access_token,
+    &quot;time&quot;: Long,
+    &quot;user&quot;: User,
     &quot;workload&quot;: Workload
   }
 };
@@ -14509,8 +14511,8 @@ action &quot;View&quot; appliesTo {
 </code></pre></div>
 <p>With this schema, you only need to provide the fields that are not automatically included. For instance, to define the <code>time</code> in the context:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="s2">&quot;time&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">1719266610.98636</span><span class="p">,</span>
-<span class="p">}</span>
+<span class="w">  </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="mf">1719266610.98636</span><span class="p">,</span>
+<span class="p">};</span>
 </code></pre></div>
 <h2 id="unsigned-authorization-authorize_unsigned">Unsigned Authorization (authorize_unsigned)<a class="headerlink" href="#unsigned-authorization-authorize_unsigned" title="Permanent link">#</a></h2>
 <p>The <code>authorize_unsigned</code> method allows making authorization decisions without JWT token verification. This is useful when:</p>
@@ -14521,27 +14523,29 @@ action &quot;View&quot; appliesTo {
 </ul>
 <p>Example usage:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="s2">&quot;principals&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nx">principals</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;user123&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;email&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;user@example.com&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;roles&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">]</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">      </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;user123&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">email</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;user@example.com&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">roles</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="p">},</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="s2">&quot;action&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;View&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;resource&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ticket-10101&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;type&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Ticket&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;owner&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;bob@acme.com&quot;</span><span class="p">,</span><span class="w"> </span>
-<span class="w">    </span><span class="s2">&quot;org_id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span>
+<span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;View&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Ticket&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ticket-10101&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">owner</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;bob@acme.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">org_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="s2">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;ip_address&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;54.9.21.201&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;network_type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;VPN&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;user_agent&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Chrome 125.0.6422.77 (Official Build) (arm64)&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;time&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;1719266610.98636&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ip_address</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;54.9.21.201&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">network_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;VPN&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">user_agent</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Chrome 125.0.6422.77 (Official Build) (arm64)&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;1719266610.98636&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="p">};</span>
 
 <span class="nx">decision_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned</span><span class="p">(</span><span class="nx">input</span><span class="p">);</span>
@@ -14600,7 +14604,7 @@ action &quot;View&quot; appliesTo {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 26, 2025 15:21:30 UTC"><span class="timeago" datetime="2025-03-26T15:21:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 26, 2025 15:21:30 UTC">2025-03-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2025 15:11:12 UTC"><span class="timeago" datetime="2025-07-29T15:11:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2025 15:11:12 UTC">2025-07-29</span>
   </span>
 
     

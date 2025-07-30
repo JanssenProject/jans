@@ -14494,12 +14494,16 @@
 </ul>
 <h3 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">#</a></h3>
 <p>The initialization or <code>init</code> interface is how you will initialize Cedarling. Initialization involves loading:</p>
-<p><strong>Bootstrap Configuration</strong>
-- A set of properties that will tells how Cedarling behaves within your application.
-- Learn more in the <a href="../cedarling-properties/">bootstrap properties guide</a>.</p>
-<p><strong>Policy Store</strong>
-- A JSON file containing the schema, policies, trusted issuers, and token metadata schema used for making authorization decisions.
-- Learn more in the <a href="../cedarling-policy-store/">policy store guide</a>.</p>
+<p><strong>Bootstrap Configuration</strong></p>
+<ul>
+<li>A set of properties that will tells how Cedarling behaves within your application.</li>
+<li>Learn more in the <a href="../cedarling-properties/">bootstrap properties guide</a>.</li>
+</ul>
+<p><strong>Policy Store</strong></p>
+<ul>
+<li>A JSON file containing the schema, policies, trusted issuers, and token metadata schema used for making authorization decisions.</li>
+<li>Learn more in the <a href="../cedarling-policy-store/">policy store guide</a>.</li>
+</ul>
 <p>The bootstrap configuration and policy store directly influence how Cedarling performs <a href="#authorization">authorization</a>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:7"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><input id="__tabbed_1_7" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">JavaScript</label><label for="__tabbed_1_2">Python</label><label for="__tabbed_1_3">Rust</label><label for="__tabbed_1_4">Kotlin</label><label for="__tabbed_1_5">Swift</label><label for="__tabbed_1_6">Go</label><label for="__tabbed_1_7">Java</label></div>
 <div class="tabbed-content">
@@ -14557,8 +14561,8 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">uniffi.cedarling_uniffi.*</span><span class="p">;</span>
 <span class="p">...</span>
 <span class="w"> </span><span class="cm">/*</span>
-<span class="cm">* In a production environment, the bootstrap configuration should not be hardcoded. </span>
-<span class="cm">* Instead, it should be loaded dynamically from external sources such as environment variables, </span>
+<span class="cm">* In a production environment, the bootstrap configuration should not be hardcoded.</span>
+<span class="cm">* Instead, it should be loaded dynamically from external sources such as environment variables,</span>
 <span class="cm">* configuration files, or a centralized configuration service.</span>
 <span class="cm">*/</span>
 <span class="n">String</span><span class="w"> </span><span class="n">bootstrapJsonStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span>
@@ -14587,9 +14591,11 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 </blockquote>
 <p>When using Cedarling, <strong>Action</strong> and <strong>Resource</strong> are typically defined in the <a href="../cedarling-policy-store/">policy store</a>, while <strong>Principal</strong> and <strong>Context</strong> are supplied at runtime via the <code>authz</code> interface.</p>
 <p>Cedarling currently provides two modes of authorization:</p>
-<p><strong>Standard (Token-based) Interface</strong>
-- Extracts the <strong>Principal</strong> from a JWT.
-- Accepts the <strong>Context</strong> as a structured map.</p>
+<p><strong>Standard (Token-based) Interface</strong></p>
+<ul>
+<li>Extracts the <strong>Principal</strong> from a JWT.</li>
+<li>Accepts the <strong>Context</strong> as a structured map.</li>
+</ul>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:7"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><input id="__tabbed_2_7" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">JavaScript</label><label for="__tabbed_2_2">Python</label><label for="__tabbed_2_3">Rust</label><label for="__tabbed_2_4">Kotlin</label><label for="__tabbed_2_5">Swift</label><label for="__tabbed_2_6">Go</label><label for="__tabbed_2_7">Java</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -14602,8 +14608,10 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <span class="kd">const</span><span class="w"> </span><span class="nx">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span><span class="p">;</span>
 
 <span class="kd">const</span><span class="w"> </span><span class="nx">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;app_id_001&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;app_id_001&quot;</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Some Application&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">url</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">host</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
@@ -14641,16 +14649,18 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 
 <span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span>
 
-<span class="n">resource</span> <span class="o">=</span> <span class="n">EntityData</span><span class="p">(</span>
-    <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
-    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;app_id_001&quot;</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Some Application&quot;</span><span class="p">,</span>
-    <span class="n">url</span><span class="o">=</span><span class="p">{</span>
+<span class="n">resource</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;entity_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;app_id_001&quot;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Some Application&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
         <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
         <span class="s2">&quot;protocol&quot;</span><span class="p">:</span> <span class="s2">&quot;https&quot;</span>
     <span class="p">}</span>
-<span class="p">)</span>
+<span class="p">}</span>
 
 <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;current_time&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">),</span>
@@ -14683,18 +14693,18 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 
 <span class="kd">let</span><span class="w"> </span><span class="n">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Jans::Action::</span><span class="se">\&quot;</span><span class="s">Read</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span>
 
-<span class="kd">let</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">    </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">    </span><span class="n">payload</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from</span><span class="p">([</span>
-<span class="w">        </span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Some Application&quot;</span><span class="p">)),</span>
-<span class="w">        </span><span class="p">(</span><span class="s">&quot;url&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">({</span>
-<span class="w">            </span><span class="s">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example.com&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https&quot;</span>
-<span class="w">        </span><span class="p">}))</span>
-<span class="w">    </span><span class="p">]),</span>
-<span class="p">};</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">({</span>
+<span class="w">    </span><span class="s">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="s">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Some Application&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example.com&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">});</span>
 
 <span class="kd">let</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">({</span>
 <span class="w">    </span><span class="s">&quot;current_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="nc">Utc</span><span class="p">::</span><span class="n">now</span><span class="p">().</span><span class="n">timestamp_millis</span><span class="p">(),</span>
@@ -14724,8 +14734,10 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <span class="kd">val</span><span class="w"> </span><span class="nv">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;Jans::Action::&quot;Read&quot;&quot;&quot;&quot;</span>
 
 <span class="s">val resource = mapOf(</span>
-<span class="s">    &quot;</span><span class="n">type</span><span class="s">&quot; to &quot;</span><span class="n">Jans</span><span class="o">::</span><span class="n">Application</span><span class="s">&quot;,</span>
-<span class="s">    &quot;</span><span class="n">id</span><span class="s">&quot; to &quot;</span><span class="n">app_id_001</span><span class="s">&quot;,</span>
+<span class="s">    &quot;</span><span class="n">cedar_entity_mapping</span><span class="s">&quot; to mapOf(</span>
+<span class="s">        &quot;</span><span class="n">entity_type</span><span class="s">&quot; to &quot;</span><span class="n">Jans</span><span class="o">::</span><span class="n">Application</span><span class="s">&quot;,</span>
+<span class="s">        &quot;</span><span class="n">id</span><span class="s">&quot; to &quot;</span><span class="n">app_id_001</span><span class="s">&quot;</span>
+<span class="s">    ),</span>
 <span class="s">    &quot;</span><span class="n">name</span><span class="s">&quot; to &quot;</span><span class="n">Some</span><span class="w"> </span><span class="n">Application</span><span class="s">&quot;,</span>
 <span class="s">    &quot;</span><span class="n">url</span><span class="s">&quot; to mapOf(</span>
 <span class="s">        &quot;</span><span class="n">host</span><span class="s">&quot; to &quot;</span><span class="n">example</span><span class="p">.</span><span class="na">com</span><span class="s">&quot;,</span>
@@ -14747,8 +14759,8 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <span class="s">val result = cedarling?.authorize(</span>
 <span class="s">    tokens,</span>
 <span class="s">    action,</span>
-<span class="s">    resource[&quot;</span><span class="n">type</span><span class="s">&quot;] as String,</span>
-<span class="s">    resource[&quot;</span><span class="n">id</span><span class="s">&quot;] as String,</span>
+<span class="s">    resource[&quot;</span><span class="n">cedar_entity_mapping</span><span class="s">&quot;]?.get(&quot;</span><span class="n">entity_type</span><span class="s">&quot;) as String,</span>
+<span class="s">    resource[&quot;</span><span class="n">cedar_entity_mapping</span><span class="s">&quot;]?.get(&quot;</span><span class="n">id</span><span class="s">&quot;) as String,</span>
 <span class="s">    anyToJson(resource),</span>
 <span class="s">    context</span>
 <span class="s">)</span>
@@ -14764,8 +14776,10 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <span class="kd">let</span><span class="w"> </span><span class="nv">action</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">#</span><span class="s">&quot;Jans::Action::&quot;</span><span class="n">Read</span><span class="s">&quot;&quot;</span><span class="p">#</span>
 
 <span class="kd">let</span><span class="w"> </span><span class="nv">resource</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="nb">Any</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s">&quot;resource_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;resource_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span>
+<span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="s">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Some Application&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="s">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="s">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example.com&quot;</span><span class="p">,</span>
@@ -14792,8 +14806,8 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <span class="kd">let</span><span class="w"> </span><span class="nv">result</span><span class="p">:</span><span class="w"> </span><span class="n">AuthorizeResult</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">authorize</span><span class="p">(</span>
 <span class="w">    </span><span class="n">tokens</span><span class="p">:</span><span class="w"> </span><span class="n">tokens</span><span class="p">,</span>
 <span class="w">    </span><span class="n">action</span><span class="p">:</span><span class="w"> </span><span class="n">action</span><span class="p">,</span>
-<span class="w">    </span><span class="n">resourceType</span><span class="p">:</span><span class="w"> </span><span class="n">resource</span><span class="p">[</span><span class="s">&quot;resource_type&quot;</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="p">!</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
-<span class="w">    </span><span class="n">resourceId</span><span class="p">:</span><span class="w"> </span><span class="n">resource</span><span class="p">[</span><span class="s">&quot;resource_id&quot;</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="p">!</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="n">resourceType</span><span class="p">:</span><span class="w"> </span><span class="n">resource</span><span class="p">[</span><span class="s">&quot;cedar_entity_mapping&quot;</span><span class="p">]?.</span><span class="kr">get</span><span class="p">(</span><span class="s">&quot;entity_type&quot;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="p">!</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="n">resourceId</span><span class="p">:</span><span class="w"> </span><span class="n">resource</span><span class="p">[</span><span class="s">&quot;cedar_entity_mapping&quot;</span><span class="p">]?.</span><span class="kr">get</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="p">!</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">    </span><span class="n">payload</span><span class="p">:</span><span class="w"> </span><span class="n">payloadJsonString</span><span class="p">,</span>
 <span class="w">    </span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="n">context</span>
 <span class="p">)</span>
@@ -14807,8 +14821,10 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <span class="p">}</span>
 <span class="nx">action</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">&quot;Jans::Action::\&quot;Read\&quot;&quot;</span>
 <span class="nx">resource</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">EntityData</span><span class="p">{</span>
-<span class="w">    </span><span class="nx">EntityType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">CedarMapping</span><span class="p">:</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">CedarMapping</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">EntityType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nx">Payload</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span>
 <span class="w">        </span><span class="s">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Some Application&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="s">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span>
@@ -14842,11 +14858,16 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">String</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">    {</span>
-<span class="s">      &quot;app_id&quot;: &quot;app_id_001&quot;,</span>
-<span class="s">      &quot;id&quot;: &quot;admin_ui_id&quot;,</span>
-<span class="s">      &quot;name&quot;: &quot;App Name&quot;,</span>
-<span class="s">      &quot;permission&quot;: &quot;view_clients&quot;,</span>
-<span class="s">      &quot;type&quot;: &quot;Jans::Issue&quot;</span>
+<span class="s">      &quot;cedar_entity_mapping&quot;: {</span>
+<span class="s">        &quot;entity_type&quot;: &quot;Jans::Application&quot;,</span>
+<span class="s">        &quot;id&quot;: &quot;app_id_001&quot;</span>
+<span class="s">      },</span>
+<span class="s">      &quot;name&quot;: &quot;Some Application&quot;,</span>
+<span class="s">      &quot;url&quot;: {</span>
+<span class="s">        &quot;host&quot;: &quot;example.com&quot;,</span>
+<span class="s">        &quot;path&quot;: &quot;/admin-dashboard&quot;,</span>
+<span class="s">        &quot;protocol&quot;: &quot;https&quot;</span>
+<span class="s">      }</span>
 <span class="s">    }</span>
 <span class="s">&quot;&quot;&quot;</span><span class="p">;</span>
 
@@ -14881,10 +14902,12 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 </div>
 </div>
 </div>
-<p><strong>Unsigned Authorization</strong>
-- Accepts the <strong>Principal</strong> directly without requiring a JWT.
-- This makes authorization decisions by passing a set of <strong>Principals</strong> directly.
-- Similar to the standard interface, the <strong>Context</strong> is passed in as-is in a map-like structure.</p>
+<p><strong>Unsigned Authorization</strong></p>
+<ul>
+<li>Accepts the <strong>Principal</strong> directly without requiring a JWT.</li>
+<li>This makes authorization decisions by passing a set of <strong>Principals</strong> directly.</li>
+<li>Similar to the standard interface, the <strong>Context</strong> is passed in as-is in a map-like structure.</li>
+</ul>
 <h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">#</a></h3>
 <p>Cedarling supports logging of both <strong>decision</strong> and <strong>system</strong> events, useful for auditing and troubleshooting. Logging is optional and can be configured (or disabled) via the <a href="../cedarling-properties/">bootstrap properties</a>.</p>
 <hr />
@@ -14918,7 +14941,7 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 16, 2025 15:08:42 UTC"><span class="timeago" datetime="2025-06-16T15:08:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 16, 2025 15:08:42 UTC">2025-06-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2025 15:11:12 UTC"><span class="timeago" datetime="2025-07-29T15:11:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2025 15:11:12 UTC">2025-07-29</span>
   </span>
 
     
