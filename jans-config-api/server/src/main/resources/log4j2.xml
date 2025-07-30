@@ -69,7 +69,7 @@
             <AppenderRef ref="FILE" />
         </Logger>		
 		
-        <Logger name="audit" level="${log4j.default.log.level}" additivity="false">
+        <Logger name="configapi-audit" level="${log4j.default.log.level}" additivity="false">
             <AppenderRef ref="AUDIT_FILE" />
         </Logger>
 
