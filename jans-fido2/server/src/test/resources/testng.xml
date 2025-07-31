@@ -5,4 +5,9 @@
             <class name="io.jans.fido2.test.integration.Fido2DeviceRegistrationBasicTest"/>
         </classes>
     </test>
+    <test name="FIDO2 Device Registration Enhanced Test">
+        <classes>
+            <class name="io.jans.fido2.test.integration.Fido2DeviceRegistrationEnhancedTest"/>
+        </classes>
+    </test>
 </suite> 
