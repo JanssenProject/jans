@@ -70,8 +70,10 @@ This represents the _resource_ that the action will be performed on, such as a p
 
 ```js
 const resource = {
-  entity_type: "Jans::Application",
-  id: "app_id_001",
+  cedar_entity_mapping: {
+    entity_type: "Jans::Application",
+    id: "app_id_001",
+  },
   name: "App Name",
   url: {
     host: "example.com",
@@ -140,13 +142,17 @@ In unsigned authorization, you pass a set of Principals directly, without relyin
 ```js
 const principals = [
   {
-    entity_type: "Jans::Workload",
-    id: "some_workload_id",
+    cedar_entity_mapping: {
+      entity_type: "Jans::Workload",
+      id: "some_workload_id",
+    },
     client_id: "some_client_id",
   },
   {
-    entity_type: "Jans::User",
-    id: "random_user_id",
+    cedar_entity_mapping: {
+      entity_type: "Jans::User",
+      id: "random_user_id",
+    },
     roles: ["admin", "manager"],
   },
 ];
@@ -158,8 +164,10 @@ This represents the _resource_ that the action will be performed on, such as a p
 
 ```js
 const resource = {
-  entity_type: "Jans::Application",
-  id: "app_id_001",
+  cedar_entity_mapping: {
+    entity_type: "Jans::Application",
+    id: "app_id_001",
+  },
   name: "App Name",
   url: {
     host: "example.com",
@@ -225,7 +233,7 @@ console.log(logs);
 
 ## See Also
 
-- [Cedarling TBAC quickstart](../cedarling-quick-start-tbac.md)
-- [Cedarling Unsigned quickstart](../cedarling-quick-start-unsigned.md)
+- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-tbac-using-cedarling)
+- [Cedarling Unsigned quickstart](../cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
 - [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
 - [Cedarling WASM](../cedarling-wasm.md)

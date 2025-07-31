@@ -87,14 +87,22 @@ pub struct RequestUnsigned {
 /// fields represent EntityUid
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EntityData {
-    /// entity type name
-    #[serde(rename = "type")]
-    pub entity_type: String,
-    /// entity id
-    pub id: String,
+    /// Cedar entity mapping info
+    #[serde(rename = "cedar_entity_mapping")]
+    pub cedar_mapping: CedarEntityMapping,
     /// entity attributes
     #[serde(flatten)]
     pub attributes: HashMap<String, Value>,
+}
+
+/// Cedar entity mapping information
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct CedarEntityMapping {
+    /// entity type name
+    #[serde(rename = "entity_type")]
+    pub entity_type: String,
+    /// entity id
+    pub id: String,
 }
 
 impl EntityData {

@@ -272,8 +272,15 @@ public class TocService {
 	}
 
 	public JsonNode getAuthenticatorsMetadata(String aaguid) {
-
-		return tocEntries.get(aaguid);
+		if (tocEntries == null) {
+			log.warn("TOC entries map is null");
+			return null;
+		}
+		JsonNode entry = tocEntries.get(aaguid);
+		if (entry == null) {
+			log.warn("No entry found for AAGUID: {}", aaguid);
+		}
+		return entry;
 	}
 
 	public MessageDigest getDigester() {
