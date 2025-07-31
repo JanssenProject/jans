@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriInfo;
 
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
@@ -62,8 +63,7 @@ public class AuditLogInterceptor {
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
             String method = request.getMethod();
-            AUDIT_LOG.error(" method:{}, ignoreMethod(method, auditLogConf):{}", method,
-                    ignoreMethod(method, auditLogConf));
+            LOG.trace(" method:{}, ignoreMethod(method, auditLogConf):{}", method, ignoreMethod(method, auditLogConf));
 
             // Log if enabled
             if (auditLogConf.isEnabled() && !ignoreMethod(method, auditLogConf)) {
@@ -99,13 +99,16 @@ public class AuditLogInterceptor {
 
         LOG.trace("Processing  Data -  paramCount:{} , parameters:{}, clazzArray:{} ", paramCount, parameters,
                 clazzArray);
+        HttpServletRequest request = ((BaseResource) context.getTarget()).getHttpRequest();
+        getRequestObject(request);
 
         if (clazzArray != null && clazzArray.length > 0) {
             for (int i = 0; i < clazzArray.length; i++) {
                 Class<?> clazz = clazzArray[i];
                 String propertyName = parameters[i].getName();
-                LOG.trace("propertyName:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName, clazz,
-                        clazz.isPrimitive());
+                Object propertyValue = parameters[i].toString();
+                LOG.trace("propertyName:{}, propertyValue:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName,
+                        propertyValue, clazz, clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
                 if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
@@ -126,9 +129,7 @@ public class AuditLogInterceptor {
         if (StringUtils.isBlank(method) || auditLogConf == null || auditLogConf.getIgnoreHttpMethod() == null
                 || auditLogConf.getIgnoreHttpMethod().isEmpty()) {
             return false;
-        }
-
-        if (auditLogConf.getIgnoreHttpMethod().contains(method)) {
+        } else if (auditLogConf.getIgnoreHttpMethod().contains(method)) {
             return true;
         }
 
@@ -162,6 +163,26 @@ public class AuditLogInterceptor {
             path = path.replace("/", "-");
         }
         return path;
+    }
+
+    public HttpServletRequest getRequestObject(HttpServletRequest request) {
+        if (request == null) {
+            return request;
+        }
+
+        try {
+            InputStream inputStream = request.getInputStream();
+            LOG.debug("inputStream.available():{}", inputStream.available());
+            if (inputStream.available() > 0) {
+                byte[] requestEntity = inputStream.readAllBytes();
+                StringBuilder stringBuilder = new StringBuilder(new String(requestEntity)).append("\n");
+                LOG.debug(stringBuilder);
+            }
+
+        } catch (Exception ex) {
+            LOG.error(" Error while reading data - ", ex);
+        }
+        return request;
     }
 
 }

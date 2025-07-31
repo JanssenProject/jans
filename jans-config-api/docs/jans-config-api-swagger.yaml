@@ -14877,7 +14877,9 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanView:
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         adminCanView:
           type: boolean
@@ -14885,9 +14887,7 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -17423,10 +17423,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -17607,9 +17607,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object

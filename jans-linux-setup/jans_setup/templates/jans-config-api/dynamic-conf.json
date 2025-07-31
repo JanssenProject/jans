@@ -66,7 +66,7 @@
     "enabled": true,
 	"logData": true,
     "ignoreHttpMethod": [
-      "@jakarta.ws.rs.GET()"
+      "GET"
     ],
     "headerAttributes": [
       "User-inum",
