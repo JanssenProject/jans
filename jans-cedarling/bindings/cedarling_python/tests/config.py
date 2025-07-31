@@ -27,10 +27,11 @@ def load_bootstrap_config(policy_store_location=None, log_type="std_out", log_tt
         "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "none",
+        "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
         "CEDARLING_LOG_TYPE": log_type,
         "CEDARLING_LOG_TTL": log_ttl,
         "CEDARLING_LOG_LEVEL": "DEBUG",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"],
     }
     if config_cb is not None:
         config_cb(config)

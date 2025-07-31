@@ -28,7 +28,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: "#/components/schemas/AppConfiguration"
         "401":
           description: Unauthorized
         "500":
@@ -47,14 +47,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AppConfiguration'
+              $ref: "#/components/schemas/AppConfiguration"
       responses:
         "200":
           description: JansLinkConfiguration
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: "#/components/schemas/AppConfiguration"
         "401":
           description: Unauthorized
         "500":
@@ -70,11 +70,11 @@ components:
         sourceConfigs:
           type: array
           items:
-            $ref: '#/components/schemas/GluuLdapConfiguration'
+            $ref: "#/components/schemas/GluuLdapConfiguration"
         inumConfig:
-          $ref: '#/components/schemas/GluuLdapConfiguration'
+          $ref: "#/components/schemas/GluuLdapConfiguration"
         targetConfig:
-          $ref: '#/components/schemas/GluuLdapConfiguration'
+          $ref: "#/components/schemas/GluuLdapConfiguration"
         ldapSearchSizeLimit:
           type: integer
           format: int32
@@ -103,7 +103,7 @@ components:
         attributeMapping:
           type: array
           items:
-            $ref: '#/components/schemas/CacheRefreshAttributeMapping'
+            $ref: "#/components/schemas/LinkAttributeMapping"
         snapshotFolder:
           type: string
         snapshotMaxCount:
@@ -161,13 +161,6 @@ components:
           type: string
         useLocalCache:
           type: boolean
-    CacheRefreshAttributeMapping:
-      type: object
-      properties:
-        source:
-          type: string
-        destination:
-          type: string
     GluuLdapConfiguration:
       type: object
       properties:
@@ -204,6 +197,13 @@ components:
         level:
           type: integer
           format: int32
+    LinkAttributeMapping:
+      type: object
+      properties:
+        source:
+          type: string
+        destination:
+          type: string
   securitySchemes:
     oauth2:
       type: oauth2

@@ -292,11 +292,24 @@ SSA with matching names.
 
 Add a new SSA using the `Add SSA` button. It will open a dialogue where you can add an SSA detail and save it. as shown in the image below.
 
-![image](../../../assets/tui-add-ssa.png)
+![image](../../../assets/tui-ssa-create.png)
 
-To get the detail of any SSA, bring the control on that SSA (using the tab key), and press `v`. Also can export the detail.
+Please see description of fields at [SSA field descriptions](./../../auth-server/endpoints/ssa.md#request-body-description)
 
-![image](../../../assets/tui-ssa-detail.png)
+If you are going to create similar SSA, you can save as template by enabling checkbox **Save as Template** and write a template name.
+
+Once you hit **<   Save   >** button, you will have a dialog which displays created SSA as jwt. Please save it by
+using button **<  Export  >**.
+
+![TUI SSA Export](../../../assets/tui-ssa-export.png)
+
+If you saved as template, you can re-use it by hitting button **< Templates >** which opens a dialog that lists saved
+SSA templates.
+
+To get the detail of any SSA, bring the control on that SSA (using the up-down arrows), and press **Enter**, you will have
+the following dialog, so that you can display SSA token, revoke (delete) and also edit details and recreate.
+
+![TUI SSA Details](../../../assets/tui-ssa-detail.png)
 
 
 ## Using Configuration REST API

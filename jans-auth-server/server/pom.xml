@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.6.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<prerequisites>
@@ -485,16 +485,6 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.mail</groupId>
-			<artifactId>jakarta.mail</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>jakarta.activation</groupId>
-					<artifactId>jakarta.activation-api</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- Google -->

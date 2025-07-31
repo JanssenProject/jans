@@ -1,6 +1,6 @@
 # config
 
-![Version: 1.6.0](https://img.shields.io/badge/Version-1.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.6.0](https://img.shields.io/badge/AppVersion-1.6.0-informational?style=flat-square)
+![Version: 0.0.0-nightly](https://img.shields.io/badge/Version-0.0.0--nightly-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.0-nightly](https://img.shields.io/badge/AppVersion-0.0.0--nightly-informational?style=flat-square)
 
 Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 
@@ -90,13 +90,14 @@ Kubernetes: `>=v1.22.0-0`
 | fullNameOverride | string | `""` |  |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"janssenproject/configurator"` | Image  to use for deploying. |
-| image.tag | string | `"1.6.0-1"` | Image  tag to use for deploying. |
+| image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | lifecycle | object | `{}` |  |
 | migration | object | `{"enabled":false,"migrationDataFormat":"ldif","migrationDir":"/ce-migration"}` | CE to CN Migration section |
 | migration.enabled | bool | `false` | Boolean flag to enable migration from CE |
 | migration.migrationDataFormat | string | `"ldif"` | migration data-format depending on persistence backend. Supported data formats are ldif, postgresql+json, and mysql+json. |
 | migration.migrationDir | string | `"/ce-migration"` | Directory holding all migration files |
 | nameOverride | string | `""` |  |
+| nodeSelector | object | `{}` | Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) |
 | orgName | string | `"Janssen"` | Organization name. Used for certificate creation. |
 | redisPassword | string | `"P@assw0rd"` | Redis admin password if `config.configmap.cnCacheType` is set to `REDIS`. |
 | resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |

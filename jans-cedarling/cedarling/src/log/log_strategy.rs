@@ -3,19 +3,23 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use serde::Serialize;
+use std::sync::RwLock;
 
+use super::InitLockServiceError;
 use super::interface::{Indexed, LogStorage, LogWriter, Loggable};
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
+use crate::lock::LockService;
+use serde::Serialize;
 
 pub(crate) struct LogStrategy {
     logger: LogStrategyLogger,
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
+    lock_service: RwLock<Option<LockService>>,
 }
 
 /// LogStrategy implements strategy pattern for logging.
@@ -29,42 +33,65 @@ pub(crate) enum LogStrategyLogger {
 impl LogStrategy {
     /// Creates a new `LogStrategy` based on the provided configuration.
     /// Initializes the corresponding logger accordingly.
-    pub fn new(config: &LogConfig, pdp_id: PdpID, app_name: Option<ApplicationName>) -> Self {
-        let logger = match config.log_type {
+    pub async fn new(
+        config: &LogConfig,
+        pdp_id: PdpID,
+        app_name: Option<ApplicationName>,
+    ) -> Result<Self, InitLockServiceError> {
+        let logger = match &config.log_type {
             LogTypeConfig::Off => LogStrategyLogger::Off(NopLogger),
             LogTypeConfig::Memory(memory_config) => LogStrategyLogger::MemoryLogger(
-                MemoryLogger::new(memory_config, config.log_level, pdp_id, app_name.clone()),
+                MemoryLogger::new(memory_config.clone(), config.log_level, pdp_id, app_name.clone()),
             ),
             LogTypeConfig::StdOut => LogStrategyLogger::StdOut(StdOutLogger::new(config.log_level)),
-            LogTypeConfig::Lock => todo!(),
         };
-        Self {
+        Ok(Self {
             logger,
             pdp_id,
             app_name,
-        }
+            lock_service: RwLock::new(None),
+        })
     }
 
-    #[cfg(test)]
     pub fn new_with_logger(
         logger: LogStrategyLogger,
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
+        lock_service: Option<LockService>,
     ) -> Self {
         Self {
             logger,
             pdp_id,
             app_name,
+            lock_service: RwLock::new(lock_service),
         }
     }
 
-    #[cfg(test)]
-    pub fn logger(&self) -> &LogStrategyLogger {
+    pub(crate) fn logger(&self) -> &LogStrategyLogger {
         &self.logger
+    }
+
+    pub fn set_lock_service(&self, lock_service: LockService) {
+        *self
+            .lock_service
+            .write()
+            .expect("obtain lock_service write lock") = Some(lock_service);
+    }
+
+    pub async fn shut_down(&self) {
+        let lock = self
+            .lock_service
+            .write()
+            .expect("obtain lock_service write lock")
+            .take();
+
+        if let Some(mut lock_service) = lock {
+            lock_service.shut_down().await
+        }
     }
 }
 
-#[derive(Serialize, PartialEq)]
+#[derive(Serialize, PartialEq, Clone)]
 pub(crate) struct LogEntryWithClientInfo<Entry: Loggable> {
     #[serde(flatten)]
     entry: Entry,
@@ -98,6 +125,14 @@ impl LogWriter for LogStrategy {
     fn log_any<T: Loggable>(&self, entry: T) {
         let entry =
             LogEntryWithClientInfo::from_loggable(entry, self.pdp_id, self.app_name.clone());
+        if let Some(lock_service) = self
+            .lock_service
+            .read()
+            .expect("obtain lock_service read lock")
+            .as_ref()
+        {
+            lock_service.log_any(entry.clone());
+        }
         match &self.logger {
             LogStrategyLogger::Off(log) => log.log_any(entry),
             LogStrategyLogger::MemoryLogger(memory_logger) => memory_logger.log_any(entry),

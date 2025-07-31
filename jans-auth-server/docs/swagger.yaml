@@ -152,6 +152,10 @@ paths:
                 custom_response_headers:
                   type: string
                   description: Custom Response Headers.
+                logout_status_jwt:
+                  type: string
+                  description: Possible values are true or false. Returns back Logout Status JWT if send logout_status_jwt=true and authorization is successful.
+
       responses:
         200:
           description: OK
@@ -168,6 +172,10 @@ paths:
                     type: string
                     description: Authorization Code
                     example: uY29tL2F1dGhlbnRpY
+                  logout_status_jwt:
+                    type: string
+                    description: Logout Status JWT
+                    example: eyJraWQiOiJjb25uZWN0XzA3ZjQ3ZmRkLTg0NTYtNDMzOC1iYTRmLWNhNmU0NDBmYjljOV9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9
         400:
           $ref: '#/components/responses/InvalidRequest'
         401:
@@ -340,6 +348,12 @@ paths:
           description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
           schema:
             type: string
+        - name: logout_status_jwt
+          in: query
+          required: false
+          description: Possible values are true or false. Returns back Logout Status JWT if send logout_status_jwt=true and authorization is successful.
+          schema:
+            type: string
         - name: authorization_details
           in: query
           required: false
@@ -493,6 +507,9 @@ paths:
                 dpop_jkt:
                   type: string
                   description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
+                logout_status_jwt:
+                  type: string
+                  description: Possible values are true or false. Returns back Logout Status JWT if send logout_status_jwt=true and authorization is successful.
                 authorization_details:
                   type: string
                   description: The request parameter authorization_details contains, in JSON notation, an array of objects. Each JSON object contains the data to specify the authorization requirements for a certain type of resource. The type of resource or access requirement is determined by the type field.
@@ -1500,6 +1517,9 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                logout_status_jwt_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Logout Status JWT.
                 tx_token_signed_response_alg:
                   type: string
                   description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -1953,6 +1973,9 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                logout_status_jwt_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Logout Status JWT.
                 tx_token_signed_response_alg:
                   type: string
                   description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -2386,6 +2409,9 @@ paths:
                   introspection_encrypted_response_enc:
                     type: string
                     description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                  logout_status_jwt_signed_response_alg:
+                    type: string
+                    description: JWS alg algorithm (JWA) required for signing Logout Status JWT.
                   tx_token_signed_response_alg:
                     type: string
                     description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -2721,8 +2747,8 @@ paths:
     get:
       tags:
         - Session Management
-      summary: Determine current sesion status.
-      description: Determine current sesion status.
+      summary: Determine current session status.
+      description: Determine current session status.
       operationId: session_status
       responses:
         200:
@@ -2743,36 +2769,6 @@ paths:
                     example: 100000000
                   custom_state:
                     type: string
-  /revoke_session:
-    post:
-      tags:
-        - Session Management
-      summary: Revoke all sessions for user.
-      description: Revoke all sessions for user (requires revoke_session scope).
-      operationId: revoke-session
-      requestBody:
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              required:
-                - user_criterion_key
-                - user_criterion_value
-              properties:
-                user_criterion_key:
-                  type: string
-                  description: user criterion key (e.g. uid)
-                user_criterion_value:
-                  type: string
-                  description: user criterion value (e.g. chris)
-      responses:
-        200:
-          description: OK - Returned if request was processed successfully. Means it will return in case sessions are found as well as in case sessions are not found (error is not returned to not disclose internal information).
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/InternalServerError'
 
   /status_list:
     get:

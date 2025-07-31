@@ -50,8 +50,8 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.6.0
-ENV CN_BUILD_DATE='2025-05-08 08:25'
+ENV CN_VERSION=0.0.0-nightly
+ENV CN_BUILD_DATE='2025-07-23 13:16'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
@@ -88,7 +88,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=137153d287ced23f04cd26037cdd3e783babdd95
+ENV JANS_SOURCE_VERSION=329a1139194fd9819506150ec73225b425767064
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -108,6 +108,7 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/templates/*.properties /app/templates/ \
     && cp -R agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
     && cp -R ${JANS_SETUP_DIR}/static/auth/conf /etc/certs \
     && mkdir -p /opt/jans/python/libs \
@@ -238,7 +239,7 @@ EXPOSE $CN_AUTH_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.6.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen Authorization Server" \
     org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 

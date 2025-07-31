@@ -1,6 +1,6 @@
 # casa
 
-![Version: 1.6.0](https://img.shields.io/badge/Version-1.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.6.0](https://img.shields.io/badge/AppVersion-1.6.0-informational?style=flat-square)
+![Version: 0.0.0-nightly](https://img.shields.io/badge/Version-0.0.0--nightly-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.0-nightly](https://img.shields.io/badge/AppVersion-0.0.0--nightly-informational?style=flat-square)
 
 Jans Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Jans Server.
 
@@ -38,11 +38,12 @@ Kubernetes: `>=v1.21.0-0`
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"janssenproject/casa"` | Image  to use for deploying. |
-| image.tag | string | `"1.6.0-1"` | Image  tag to use for deploying. |
+| image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | lifecycle | object | `{}` |  |
 | livenessProbe | object | `{"httpGet":{"path":"/jans-casa/health-check","port":"http-casa"},"initialDelaySeconds":25,"periodSeconds":25,"timeoutSeconds":5}` | Configure the liveness healthcheck for casa if needed. |
 | livenessProbe.httpGet.path | string | `"/jans-casa/health-check"` | http liveness probe endpoint |
 | nameOverride | string | `""` |  |
+| nodeSelector | object | `{}` | Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) |
 | podSecurityContext | object | `{}` |  |
 | readinessProbe | object | `{"httpGet":{"path":"/jans-casa/health-check","port":"http-casa"},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the readiness healthcheck for the casa if needed. |
 | readinessProbe.httpGet.path | string | `"/jans-casa/health-check"` | http readiness probe endpoint |

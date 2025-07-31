@@ -12,9 +12,11 @@ tags:
 
 ## Installation
 
+At the moment, the Cedarling Python bindings are not available via package managers like PyPI. To use them, you can either download a pre-compiled `cedarling_python` wheel from the [releases page](https://github.com/JanssenProject/jans/releases/latest) or [build it from the source](#building-from-source).
+
 ### Building from source
 
-The recommended way to use Cedarling in a Python project is by compiling a wheel using [Maturin](https://github.com/PyO3/maturin).
+The recommended approach is to compile a Python wheel using [Maturin](https://github.com/PyO3/maturin), a tool for building and publishing Rust-based Python packages.
 
 **1. Set up a virtual environment**
 
@@ -57,10 +59,6 @@ This produces a `.whl` file in the `target/wheels/` directory.
 ```sh
 maturin develop
 ```
-
-### Installation using `pip`
-
-Coming Soon...
 
 ## Including in projects
 
@@ -121,14 +119,16 @@ id_token = "<id_token>"
 userinfo_token = "<userinfo_token>"
 ```
 
-Your *principals* will be build from this tokens.
+Your _principals_ will be built from these tokens.
 
 **2. Define the resource**
 
 ```py
 resource = EntityData(
-  entity_type="Jans::Application",
-  id="app_id_001",
+  cedar_entity_mapping=CedarEntityMapping(
+    entity_type="Jans::Application",
+    id="app_id_001"
+  ),
   name="App Name",
   url={
     "host": "example.com",
@@ -189,13 +189,17 @@ In unsigned authorization, you pass a set of Principals directly, without relyin
 ```py
 principals = [
   EntityData(
-    entity_type="Jans::Workload",
-    id="some_workload_id",
+    cedar_entity_mapping=CedarEntityMapping(
+      entity_type="Jans::Workload",
+      id="some_workload_id"
+    ),
     client_id="some_client_id",
   ),
   EntityData(
-    entity_type="Jans::User",
-    id="random_user_id",
+    cedar_entity_mapping=CedarEntityMapping(
+      entity_type="Jans::User",
+      id="random_user_id"
+    ),
     roles=["admin", "manager"]
   ),
 ]
@@ -203,12 +207,14 @@ principals = [
 
 **2. Define the Resource**
 
-This represents the *resource* that the action will be performed on, such as a protected API endpoint or file.
+This represents the _resource_ that the action will be performed on, such as a protected API endpoint or file.
 
 ```py
 resource = EntityData(
-  entity_type="Jans::Application",
-  id="app_id_001",
+  cedar_entity_mapping=CedarEntityMapping(
+    entity_type="Jans::Application",
+    id="app_id_001"
+  ),
   name="App Name",
   url={
     "host": "example.com",
@@ -220,7 +226,7 @@ resource = EntityData(
 
 **3. Define the Action**
 
-An *action* represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
+An _action_ represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
 
 ```py
 action = 'Jans::Action::"Write"'
@@ -228,7 +234,7 @@ action = 'Jans::Action::"Write"'
 
 **4. Define the Context**
 
-The *context* represents additional data that may affect the authorization decision, such as time, location, or user-agent.
+The _context_ represents additional data that may affect the authorization decision, such as time, location, or user-agent.
 
 ```py
 context = {
@@ -242,7 +248,7 @@ context = {
 
 **5. Build the Request**
 
-Now you'll construct the ***request*** by including the *principals*, *action*, and *context*.
+Now you'll construct the **_request_** by including the _principals_, _action_, and _context_.
 
 ```py
 request = RequestUnsigned(
@@ -255,7 +261,7 @@ request = RequestUnsigned(
 
 **6. Perform Authorization**
 
-Finally, call the `authorize` function to check whether the principals are allowed to perform the specified action on the resource.A
+Finally, call the `authorize` function to check whether the principals are allowed to perform the specified action on the resource.
 
 ```py
 result = cedarling.authorize_unsigned(request);
@@ -274,5 +280,6 @@ print(logs)
 
 ## See Also
 
+- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-tbac-using-cedarling)
+- [Cedarling Unsigned quickstart](../cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
 - [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
-

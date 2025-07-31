@@ -55,6 +55,11 @@ public class Jackson {
         return applyPatch(jsonPatch, obj);
     }
 
+    public static JsonPatch getJsonPatch(String patchAsString) throws JsonPatchException, IOException {
+        LOG.debug("Patch details - patchAsString:{}", patchAsString  );
+        return JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));
+    }
+
     public static <T> T applyJsonPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, IOException {
         LOG.debug("Patch details - jsonPatch:{}, obj:{}", jsonPatch, obj );
         return applyPatch(jsonPatch, obj);
@@ -129,6 +134,30 @@ public class Jackson {
         }
 
         return jsonObject;
+    }
+    
+    public static boolean isValidJson(String json) {
+        try {
+            new JSONObject(json);
+        } catch (JSONException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isValidJson(Object obj) {
+        try {
+            new JSONObject(obj);
+        } catch (JSONException e) {
+            return false;
+        }
+        return true;
+    }
+    public static JSONObject convertObjectToJsonObject(Object obj) throws JsonProcessingException {
+        final ObjectMapper objectMapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        String jsonString = objectMapper.writeValueAsString(obj);
+        // Create JSONObject from the JSON string
+        return new JSONObject(jsonString);
     }
 
 }

@@ -41,8 +41,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # =====
 
 
-ENV CN_VERSION=1.6.0
-ENV CN_BUILD_DATE='2025-05-08 08:25'
+ENV CN_VERSION=0.0.0-nightly
+ENV CN_BUILD_DATE='2025-07-23 13:16'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
@@ -55,7 +55,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=137153d287ced23f04cd26037cdd3e783babdd95
+ENV JANS_SOURCE_VERSION=329a1139194fd9819506150ec73225b425767064
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -87,6 +87,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2/* /app/templates/jans-fido2/ \
+    && cp ${JANS_SETUP_DIR}/templates/*.properties /app/templates/ \
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
     && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
@@ -204,7 +205,7 @@ EXPOSE $CN_FIDO2_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/fido2" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.6.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen FIDO2" \
     org.opencontainers.image.description="FIDO2 server"
 

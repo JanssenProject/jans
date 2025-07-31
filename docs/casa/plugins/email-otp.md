@@ -7,7 +7,6 @@ tags:
 
 # E-mail OTP Plugin
 
-## Overview 
 
 With this plugin, administrators can onboard a new type of authentication factor consisting of one-time passcodes (OTP) delivered to the user's inbox.
 
@@ -39,7 +38,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 ### Agama project
 
-1. Download the project [archive](https://maven.jans.io/maven/io/jans/casa/plugins/email_2fa/replace-janssen-version/email_2fa-agama-replace-janssen-version-project.zip)
+1. Download the project [archive](https://maven.jans.io/maven/io/jans/casa/plugins/email_2fa-agama/replace-janssen-version/email_2fa-agama-replace-janssen-version-project.zip)
 
 1. Deploy the project onto the server - you can use TUI for this task
 

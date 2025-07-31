@@ -6,7 +6,7 @@ tags:
 - endpoint
 ---
 # Global Token Revocation
-## Overview
+
 
 Janssen Server provides global token revocation endpoint to enable the client to revoke all tokens and sessions of a user.
 Janssen Server provides this endpoint to allow greater 
@@ -33,6 +33,32 @@ the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-
 
 A request to this endpoint can revoke all tokens and sessions of one particular user. Use the request parameters to specify 
 criteria to select the user. If there are multiple users matching the given criteria, the first found user will be affected.
+
+**Sample request**
+```text
+POST /global-token-revocation
+Host: example.com
+Content-Type: application/json
+Authorization: Bearer f5641763544a7b24b08e4f74045
+
+{
+  "sub_id": {
+    "format": "uid",
+    "id": "breakfast"
+  }
+}
+```
+
+- `format` - specifies user attribute name
+- `id` - specifies user attribute value
+
+In sample above it identifies user by `uid=breakfast`. 
+
+**Sample response**
+
+```text
+HTTP/1.1 204
+```
 
 - View full sample execution log [here](../../../assets/log/global-token-revocation-run-log.txt)
 

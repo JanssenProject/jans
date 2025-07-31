@@ -3,8 +3,6 @@ tags:
   - administration
 ---
 
-# Overview
-
 # Administration
 
 Welcome Admins! This collection of guides will help you deploy, configure
