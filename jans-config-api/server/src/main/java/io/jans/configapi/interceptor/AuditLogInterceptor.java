@@ -113,7 +113,7 @@ public class AuditLogInterceptor {
                 Object obj = ctxParameters[i];
                 if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
                         || !obj.toString().toUpperCase().contains("SECRET"))) {
-                    AUDIT_LOG.error("obj:{} ", obj);
+                    AUDIT_LOG.error(obj);
                 }
             }
         }

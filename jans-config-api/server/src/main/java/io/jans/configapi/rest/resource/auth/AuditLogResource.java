@@ -66,8 +66,8 @@ public class AuditLogResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS }, groupScopes = {ApiAccessConstants.LOGGING_WRITE_ACCESS}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.LOGGING_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getLogsEnteries(
             @Parameter(description = "Search pattern") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -100,7 +100,7 @@ public class AuditLogResource extends ConfigBaseResource {
         log.debug("Log fetched  - logEntriesList:{}", logEntriesList);
 
         LogPagedResult logPagedResult = getLogPagedResult(logEntriesList, startIndex, limit);
-        log.info("Audit Log PagedResult:{}", logPagedResult);
+        log.debug("Audit Log PagedResult:{}", logPagedResult);
         return logPagedResult;
 
     }
@@ -208,13 +208,13 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private List<String> filterLogByDateTime(List<String> logEntries, String startDate, String endDate) {
-        log.info(" logEntries:{}, startDate:{}, endDate:{} ", logEntries, startDate, endDate);
+        log.debug(" logEntries:{}, startDate:{}, endDate:{} ", logEntries, startDate, endDate);
 
         if (logEntries == null || logEntries.isEmpty()
                 || (StringUtils.isBlank(startDate) && StringUtils.isBlank(endDate))) {
             return logEntries;
         }
-
+        List<String> filteredLogEntries = new ArrayList<>();
         try {
             String datePattern = (StringUtils.isNotBlank(getAuditDateFormat()) ? getAuditDateFormat()
                     : AUDIT_FILE_DATE_FORMAT);
@@ -229,11 +229,19 @@ public class AuditLogResource extends ConfigBaseResource {
                 String line = logEntries.get(i);
                 String timestampPart = line.substring(0, datePattern.length());
                 LocalDateTime logDateTime = LocalDateTime.parse(timestampPart, formatter);
-                log.info(" logDateTime:{}, startDateTime:{}, endDateTime:{} ", logDateTime, startDateTime, endDateTime);
+                log.info(" \n\n logDateTime:{}, startDateTime:{}, endDateTime:{} ", logDateTime, startDateTime, endDateTime);
 
                 if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)
-                        && (logDateTime.isBefore(startDateTime) || logDateTime.isAfter(endDateTime))) {
-                    logEntries.remove(i);
+                        && ( (logDateTime.isEqual(startDateTime) || logDateTime.isAfter(startDateTime)) 
+                                && (logDateTime.isEqual(endDateTime) || logDateTime.isBefore(endDateTime)))
+                                ) {
+                    filteredLogEntries.add(line);
+                } else if (StringUtils.isNotBlank(startDate) && StringUtils.isBlank(endDate)
+                        && (logDateTime.isEqual(startDateTime) || logDateTime.isAfter(startDateTime))) {
+                    filteredLogEntries.add(line);
+                } else if (StringUtils.isBlank(startDate) && StringUtils.isNotBlank(endDate)
+                        && (logDateTime.isEqual(endDateTime) || logDateTime.isBefore(endDateTime))) {
+                    filteredLogEntries.add(line);
                 }
 
             }
@@ -241,7 +249,7 @@ public class AuditLogResource extends ConfigBaseResource {
             log.error("Error while filtering log file with startDate:{} and endDate:{} is:{}", startDate, endDate, ex);
             return logEntries;
         }
-        return logEntries;
+        return filteredLogEntries;
     }
 
     private void validateDate(String startDate, String endDate, DateTimeFormatter formatter) {
