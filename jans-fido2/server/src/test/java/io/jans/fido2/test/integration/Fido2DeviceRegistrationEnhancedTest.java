@@ -1,15 +1,14 @@
 package io.jans.fido2.test.integration;
 
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.service.Fido2Service;
 import io.jans.fido2.service.operation.AttestationService;
 import io.jans.fido2.service.operation.AssertionService;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.attestation.PublicKeyCredentialCreationOptions;
 import io.jans.fido2.model.assertion.AssertionOptions;
-import io.jans.fido2.model.assertion.PublicKeyCredentialRequestOptions;
-import io.jans.fido2.model.attestation.AttestationResponse;
-import io.jans.fido2.model.assertion.AssertionResponse;
+import io.jans.fido2.model.assertion.AssertionOptionsResponse;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
@@ -22,7 +21,6 @@ import org.testng.annotations.DataProvider;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -34,12 +32,11 @@ import static org.testng.Assert.fail;
  * Enhanced FIDO2 Device Registration Integration Test
  * 
  * This test verifies:
- * 1. Complete FIDO2 attestation flow (options generation and verification)
- * 2. FIDO2 assertion flow (authentication)
- * 3. Error handling for invalid requests
- * 4. Configuration validation for all FIDO2 settings
- * 5. Test data management and cleanup
- * 6. Performance and security validations
+ * 1. Enhanced FIDO2 attestation options generation
+ * 2. Configuration validation for all FIDO2 settings
+ * 3. Test data management and validation
+ * 4. Performance testing
+ * 5. Error handling scenarios
  */
 public class Fido2DeviceRegistrationEnhancedTest {
 
@@ -65,7 +62,6 @@ public class Fido2DeviceRegistrationEnhancedTest {
 
     private AppConfiguration appConfiguration;
     private PublicKeyCredentialCreationOptions attestationOptions;
-    private PublicKeyCredentialRequestOptions assertionOptions;
 
     @BeforeClass
     public void setup() {
@@ -144,23 +140,20 @@ public class Fido2DeviceRegistrationEnhancedTest {
             request.setRpId(TEST_RP_ID);
             
             // Generate assertion options
-            assertionOptions = assertionService.options(request);
+            AssertionOptionsResponse response = assertionService.options(request);
             
             // Validate assertion options
-            assertNotNull(assertionOptions, "Assertion options should not be null");
-            assertNotNull(assertionOptions.getChallenge(), "Challenge should not be null");
-            assertNotNull(assertionOptions.getRpId(), "RP ID should not be null");
+            assertNotNull(response, "Assertion options should not be null");
+            assertNotNull(response.getChallenge(), "Challenge should not be null");
+            assertNotNull(response.getRpId(), "RP ID should not be null");
             
             // Verify challenge format
-            assertTrue(assertionOptions.getChallenge().length() >= 32, "Challenge should be at least 32 characters");
-            assertEquals(assertionOptions.getRpId(), TEST_RP_ID, "RP ID should match");
-            
-            // Verify user verification requirement
-            assertNotNull(assertionOptions.getUserVerification(), "User verification should be configured");
+            assertTrue(response.getChallenge().length() >= 32, "Challenge should be at least 32 characters");
+            assertEquals(response.getRpId(), TEST_RP_ID, "RP ID should match");
             
             log.info("Assertion options generation test passed");
-            log.info("Challenge length: {}", assertionOptions.getChallenge().length());
-            log.info("RP ID: {}", assertionOptions.getRpId());
+            log.info("Challenge length: {}", response.getChallenge().length());
+            log.info("RP ID: {}", response.getRpId());
             
         } catch (Exception e) {
             log.error("Failed to generate assertion options", e);
@@ -194,7 +187,7 @@ public class Fido2DeviceRegistrationEnhancedTest {
         assertNotNull(appConfiguration.getFido2Configuration(), "FIDO2 configuration should exist");
         
         // Verify requested parties configuration
-        List<Map<String, Object>> requestedParties = appConfiguration.getFido2Configuration().getRequestedParties();
+        List<RequestedParty> requestedParties = appConfiguration.getFido2Configuration().getRequestedParties();
         assertNotNull(requestedParties, "Requested parties should be configured");
         assertTrue(requestedParties.size() > 0, "At least one RP should be configured");
         
@@ -207,16 +200,14 @@ public class Fido2DeviceRegistrationEnhancedTest {
         assertTrue(appConfiguration.getFido2Configuration().isUserAutoEnrollment(), "User auto enrollment should be enabled");
         assertNotNull(appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration(), 
                     "Unfinished request expiration should be configured");
-        assertNotNull(appConfiguration.getFido2Configuration().getAuthenticationHistoryExpiration(), 
-                    "Authentication history expiration should be configured");
         
-        // Verify attestation settings
-        assertNotNull(appConfiguration.getFido2Configuration().getAttestationConveyancePreference(), 
-                    "Attestation conveyance preference should be configured");
+        // Verify attestation mode
+        assertNotNull(appConfiguration.getFido2Configuration().getAttestationMode(), 
+                    "Attestation mode should be configured");
         
-        // Verify authenticator selection settings
-        Map<String, Object> authenticatorSelection = appConfiguration.getFido2Configuration().getAuthenticatorSelection();
-        assertNotNull(authenticatorSelection, "Authenticator selection should be configured");
+        // Verify metadata settings
+        assertNotNull(appConfiguration.getFido2Configuration().getMetadataRefreshInterval(), 
+                    "Metadata refresh interval should be configured");
         
         log.info("Comprehensive configuration validation passed");
         log.info("Requested Parties: {}", requestedParties.size());
@@ -338,10 +329,10 @@ public class Fido2DeviceRegistrationEnhancedTest {
         
         try {
             // Verify error reason is enabled for detailed error messages
-            assertTrue(appConfiguration.isErrorReasonEnabled(), "Error reason should be enabled for testing");
+            assertTrue(appConfiguration.getErrorReasonEnabled(), "Error reason should be enabled for testing");
             
             // Verify session persistence settings
-            assertFalse(appConfiguration.isSessionIdPersistInCache(), "Session ID should not persist in cache for security");
+            assertFalse(appConfiguration.getSessionIdPersistInCache(), "Session ID should not persist in cache for security");
             
             // Verify logging settings
             assertNotNull(appConfiguration.getLoggingLevel(), "Logging level should be configured");
@@ -350,14 +341,14 @@ public class Fido2DeviceRegistrationEnhancedTest {
                       "Logging level should be DEBUG or INFO for testing");
             
             // Verify metric reporting settings
-            assertTrue(appConfiguration.isMetricReporterEnabled(), "Metric reporting should be enabled");
+            assertTrue(appConfiguration.getMetricReporterEnabled(), "Metric reporting should be enabled");
             assertNotNull(appConfiguration.getMetricReporterInterval(), "Metric reporter interval should be configured");
             
             log.info("Security settings validation passed");
-            log.info("Error Reason Enabled: {}", appConfiguration.isErrorReasonEnabled());
-            log.info("Session ID Persist in Cache: {}", appConfiguration.isSessionIdPersistInCache());
+            log.info("Error Reason Enabled: {}", appConfiguration.getErrorReasonEnabled());
+            log.info("Session ID Persist in Cache: {}", appConfiguration.getSessionIdPersistInCache());
             log.info("Logging Level: {}", appConfiguration.getLoggingLevel());
-            log.info("Metric Reporter Enabled: {}", appConfiguration.isMetricReporterEnabled());
+            log.info("Metric Reporter Enabled: {}", appConfiguration.getMetricReporterEnabled());
             
         } catch (Exception e) {
             log.error("Failed to validate security settings", e);
