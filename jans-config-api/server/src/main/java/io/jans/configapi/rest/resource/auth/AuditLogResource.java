@@ -26,7 +26,7 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.format.DateTimeFormatter;
 
@@ -222,25 +222,25 @@ public class AuditLogResource extends ConfigBaseResource {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(datePattern);
             validateDate(startDate, endDate, formatter);
 
-            LocalDateTime startDateTime = parseDate(startDate, formatter);
-            LocalDateTime endDateTime = parseDate(endDate, formatter);
+            LocalDate startDateTime = parseDate(startDate, formatter);
+            LocalDate endDateTime = parseDate(endDate, formatter);
 
             for (int i = 0; i < logEntries.size(); i++) {
                 String line = logEntries.get(i);
                 String timestampPart = line.substring(0, datePattern.length());
-                LocalDateTime logDateTime = LocalDateTime.parse(timestampPart, formatter);
-                log.info(" \n\n logDateTime:{}, startDateTime:{}, endDateTime:{} ", logDateTime, startDateTime, endDateTime);
+                LocalDate logDate = LocalDate.parse(timestampPart, formatter);
+                log.error(" \n\n logDate:{}, startDateTime:{}, endDateTime:{} ", logDate, startDateTime, endDateTime);
 
                 if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)
-                        && ( (logDateTime.isEqual(startDateTime) || logDateTime.isAfter(startDateTime)) 
-                                && (logDateTime.isEqual(endDateTime) || logDateTime.isBefore(endDateTime)))
+                        && ( (logDate.isEqual(startDateTime) || logDate.isAfter(startDateTime)) 
+                                && (logDate.isEqual(endDateTime) || logDate.isBefore(endDateTime)))
                                 ) {
                     filteredLogEntries.add(line);
                 } else if (StringUtils.isNotBlank(startDate) && StringUtils.isBlank(endDate)
-                        && (logDateTime.isEqual(startDateTime) || logDateTime.isAfter(startDateTime))) {
+                        && (logDate.isEqual(startDateTime) || logDate.isAfter(startDateTime))) {
                     filteredLogEntries.add(line);
                 } else if (StringUtils.isBlank(startDate) && StringUtils.isNotBlank(endDate)
-                        && (logDateTime.isEqual(endDateTime) || logDateTime.isBefore(endDateTime))) {
+                        && (logDate.isEqual(endDateTime) || logDate.isBefore(endDateTime))) {
                     filteredLogEntries.add(line);
                 }
 
@@ -261,7 +261,6 @@ public class AuditLogResource extends ConfigBaseResource {
             try {
                 parseDate(startDate, formatter);
             } catch (DateTimeParseException dtpe) {
-
                 sb.append("Start date is not valid, date:{" + startDate + "} whereas valid format is:{"
                         + formatter.toString() + "}");
             }
@@ -272,7 +271,6 @@ public class AuditLogResource extends ConfigBaseResource {
             try {
                 parseDate(endDate, formatter);
             } catch (DateTimeParseException dtpe) {
-
                 sb.append("Start date is not valid, date:{" + startDate + "} whereas valid format is:{"
                         + formatter.toString() + "}");
             }
@@ -283,13 +281,13 @@ public class AuditLogResource extends ConfigBaseResource {
         }
     }
 
-    private LocalDateTime parseDate(String date, DateTimeFormatter formatter) throws DateTimeParseException {
+    private LocalDate parseDate(String date, DateTimeFormatter formatter) throws DateTimeParseException {
         log.info(" Parse Date date:{}, formatter:{}", date, formatter);
 
-        LocalDateTime localDateTime = null;
+        LocalDate localDateTime = null;
         try {
-            localDateTime = LocalDateTime.parse(date, formatter);
-        } catch (DateTimeParseException dtpe) {
+            localDateTime = LocalDate.parse(date);
+        } catch (Exception dtpe) {
             log.error("Error while parsing date:{} is:{}", date, dtpe);
             throw dtpe;
         }
