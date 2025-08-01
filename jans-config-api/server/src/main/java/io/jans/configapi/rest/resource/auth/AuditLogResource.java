@@ -134,7 +134,8 @@ public class AuditLogResource extends ConfigBaseResource {
 
     private LogPagedResult getLogPagedResult(List<String> logEntriesList, int startIndex, int limit) {
         if (log.isDebugEnabled()) {
-            log.debug("Audit logEntriesList:{}, startIndex:{}, limit:{}", logEntriesList, startIndex, limit);
+            log.debug("Audit logEntriesList:{}, startIndex:{}, limit:{}", logEntriesList, escapeLog(startIndex),
+                    escapeLog(limit));
         }
 
         LogPagedResult logPagedResult = new LogPagedResult();
@@ -192,7 +193,7 @@ public class AuditLogResource extends ConfigBaseResource {
 
     private int getStartIndex(List<String> logEntriesList, int startIndex) {
         if (log.isDebugEnabled()) {
-            log.debug("Get startIndex logEntriesList:{}, startIndex:{}", logEntriesList, startIndex);
+            log.debug("Get startIndex logEntriesList:{}, startIndex:{}", logEntriesList, escapeLog(startIndex));
         }
 
         if (logEntriesList != null && !logEntriesList.isEmpty()) {
@@ -209,7 +210,10 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private List<String> filterLogByDate(List<String> logEntries, String startDate, String endDate) {
-        log.debug(" logEntries:{}, startDate:{}, endDate:{} ", logEntries, startDate, endDate);
+        if (log.isDebugEnabled()) {
+            log.debug(" logEntries:{}, startDate:{}, endDate:{} ", logEntries, escapeLog(startDate),
+                    escapeLog(endDate));
+        }
 
         if (logEntries == null || logEntries.isEmpty()
                 || (StringUtils.isBlank(startDate) && StringUtils.isBlank(endDate))) {
@@ -241,7 +245,10 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private void validateDate(String startDate, String endDate, DateTimeFormatter formatter) {
-        log.debug(" Validate Date startDate:{}, endDate:{}, formatter:{}", startDate, endDate, formatter);
+        if (log.isDebugEnabled()) {
+            log.debug(" Validate Date startDate:{}, endDate:{}, formatter:{}", escapeLog(startDate), escapeLog(endDate),
+                    formatter);
+        }
 
         StringBuilder sb = new StringBuilder();
         // validate startDate
@@ -271,8 +278,11 @@ public class AuditLogResource extends ConfigBaseResource {
 
     private boolean isValidlogEntry(DateTimeFormatter formatter, String startDate, String endDate,
             LocalDate logEntryLocalDate) {
-        log.debug(" formatter:{}, startDate:{}, endDate:{}, logEntryLocalDate:{}", formatter, startDate, endDate,
-                logEntryLocalDate);
+        if (log.isDebugEnabled()) {
+            log.debug(" formatter:{}, startDate:{}, endDate:{}, logEntryLocalDate:{}", formatter, escapeLog(startDate),
+                    escapeLog(endDate), logEntryLocalDate);
+        }
+
         boolean isValid = false;
 
         // validate date
