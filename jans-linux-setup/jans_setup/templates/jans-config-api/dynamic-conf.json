@@ -74,7 +74,7 @@
     ],
     "auditLogFilePath": "/opt/jans/jetty/jans-config-api/logs/",
     "auditLogFileName": "configapi-audit.log",
-    "auditLogDateFormat": "dd-MM-YYYY"
+    "auditLogDateFormat": "dd-MM-yyyy"
   },
   "dataFormatConversionConf": {
     "enabled": true,
