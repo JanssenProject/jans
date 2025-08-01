@@ -21,20 +21,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriInfo;
 
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Interceptor
 @RequestAuditInterceptor
 @Priority(Interceptor.Priority.APPLICATION)
 public class AuditLogInterceptor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AuditLogInterceptor.class);
-    private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit");
+    private static final Logger LOG = LogManager.getLogger(AuditLogInterceptor.class);
+    private static final Logger AUDIT_LOG = LogManager.getLogger("audit");
 
     @Inject
     AuthUtil authUtil;
@@ -50,7 +51,7 @@ public class AuditLogInterceptor {
 
             // return if audit disabled
             if (apiAppConfiguration.isDisableAuditLogger()) {
-                AUDIT_LOG.debug("Audit is disabled by disableAuditLogger config.");
+                AUDIT_LOG.error("Audit is disabled by disableAuditLogger config.");
                 return context.proceed();
             }
 
@@ -62,6 +63,7 @@ public class AuditLogInterceptor {
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
             String method = request.getMethod();
+            LOG.trace(" method:{}, ignoreMethod(method, auditLogConf):{}", method, ignoreMethod(method, auditLogConf));
 
             // Log if enabled
             if (auditLogConf.isEnabled() && !ignoreMethod(method, auditLogConf)) {
@@ -71,7 +73,7 @@ public class AuditLogInterceptor {
                 String userInum = httpHeaders.getHeaderString("User-inum");
 
                 // Log request without data
-                AUDIT_LOG.info("User:{} {} {} using client:{}", userInum, getAction(method),
+                AUDIT_LOG.error("User:{} {} {} using client:{}", userInum, getAction(method),
                         getResource(uriInfo.getPath()), client);
 
                 if (auditLogConf.isLogData()) {
@@ -97,18 +99,21 @@ public class AuditLogInterceptor {
 
         LOG.trace("Processing  Data -  paramCount:{} , parameters:{}, clazzArray:{} ", paramCount, parameters,
                 clazzArray);
+        HttpServletRequest request = ((BaseResource) context.getTarget()).getHttpRequest();
+        getRequestObject(request);
 
         if (clazzArray != null && clazzArray.length > 0) {
             for (int i = 0; i < clazzArray.length; i++) {
                 Class<?> clazz = clazzArray[i];
                 String propertyName = parameters[i].getName();
-                LOG.trace("propertyName:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName, clazz,
-                        clazz.isPrimitive());
+                Object propertyValue = parameters[i].toString();
+                LOG.trace("propertyName:{}, propertyValue:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName,
+                        propertyValue, clazz, clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
                 if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
                         || !obj.toString().toUpperCase().contains("SECRET"))) {
-                    AUDIT_LOG.info("obj:{} ", obj);
+                    AUDIT_LOG.error(obj);
                 }
             }
         }
@@ -124,34 +129,10 @@ public class AuditLogInterceptor {
         if (StringUtils.isBlank(method) || auditLogConf == null || auditLogConf.getIgnoreHttpMethod() == null
                 || auditLogConf.getIgnoreHttpMethod().isEmpty()) {
             return false;
-        }
-
-        if (auditLogConf.getIgnoreHttpMethod().contains(method)) {
+        } else if (auditLogConf.getIgnoreHttpMethod().contains(method)) {
             return true;
         }
 
-        return false;
-    }
-
-    private boolean ignoreMethod(InvocationContext context, AuditLogConf auditLogConf) {
-        LOG.debug("Checking if method to be ignored - context:{}, auditLogConf:{}", context, auditLogConf);
-
-        if (auditLogConf == null || context.getMethod().getAnnotations() == null
-                || context.getMethod().getAnnotations().length <= 0) {
-            return false;
-        }
-
-        for (int i = 0; i < context.getMethod().getAnnotations().length; i++) {
-            LOG.debug("Check if method is to be ignored - context.getMethod().getAnnotations()[i]:{} ",
-                    context.getMethod().getAnnotations()[i]);
-
-            if (context.getMethod().getAnnotations()[i] != null && auditLogConf.getIgnoreHttpMethod() != null
-                    && auditLogConf.getIgnoreHttpMethod()
-                            .contains(context.getMethod().getAnnotations()[i].toString())) {
-                return true;
-            }
-
-        }
         return false;
     }
 
@@ -182,6 +163,26 @@ public class AuditLogInterceptor {
             path = path.replace("/", "-");
         }
         return path;
+    }
+
+    public HttpServletRequest getRequestObject(HttpServletRequest request) {
+        if (request == null) {
+            return request;
+        }
+
+        try {
+            InputStream inputStream = request.getInputStream();
+            LOG.debug("inputStream.available():{}", inputStream.available());
+            if (inputStream.available() > 0) {
+                byte[] requestEntity = inputStream.readAllBytes();
+                StringBuilder stringBuilder = new StringBuilder(new String(requestEntity)).append("\n");
+                LOG.debug(stringBuilder);
+            }
+
+        } catch (Exception ex) {
+            LOG.error(" Error while reading data - ", ex);
+        }
+        return request;
     }
 
 }
