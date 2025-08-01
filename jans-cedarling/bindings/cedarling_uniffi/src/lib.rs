@@ -164,7 +164,7 @@ impl Cedarling {
         let core_resource = resource.inner.clone();
 
         let core_request = core::Request {
-            tokens,
+            tokens: Some(tokens),
             action,
             resource: core_resource,
             context: context
