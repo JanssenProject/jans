@@ -131,6 +131,7 @@ The C API exposes functions for:
 - `void cedarling_free_result(CedarlingResult* result);`
 - `void cedarling_free_string_array(CedarlingStringArray* array);`
 - `const char* cedarling_get_last_error(void);`
+- `int cedarling_drop(uint64_t instance_id);`
 - ...and more (see `cedarling_c.h` for the full list)
 
 ## Code Example
