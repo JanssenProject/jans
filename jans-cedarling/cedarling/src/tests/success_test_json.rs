@@ -93,8 +93,10 @@ async fn success_test_json() {
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },

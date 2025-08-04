@@ -20,7 +20,11 @@ metadata:
 {{- end }}
 {{- end }}
 spec:
+  {{- if ne (index .Values "auth-server-key-rotation" "cronJobSchedule")  "" }}
+  schedule: {{  index .Values "auth-server-key-rotation" "cronJobSchedule"  | quote }}
+   {{- else }}
   schedule: "@every {{ index .Values "auth-server-key-rotation" "keysLife" }}h"
+   {{- end }}
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:

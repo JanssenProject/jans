@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:25.0.6@sha256:82c5b7a110456dbd42b86ea572e728878549954cc8bd03cd65410d75328095d2 as kc-src
+FROM quay.io/keycloak/keycloak:26.0.6@sha256:da9d969a5c1fca9560680b620f18495b82257dd4d743d0c105343a18be26738a as kc-src
 
 FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:29cb2ee552c7c7a924b6a1b59802508dc5123e7edad1d65d575bbf07cd05fa6d
 
@@ -24,7 +24,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # ==============
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-05-04 08:49'
+ENV CN_BUILD_DATE='2025-07-23 13:16'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}-deps.zip -O /tmp/kc-jans-spi.zip \
@@ -35,7 +35,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-j
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=7ebc2a5991ad39f1a8f58b6c8a25dd5b88d18713
+ENV JANS_SOURCE_VERSION=67b36806c69928d6458fe397d95245eccd0c0b10
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -60,7 +60,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/* /app/templates/jans-saml
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/* /app/templates/jans-saml \
+    && cp ${JANS_SETUP_DIR}/templates/*.properties /app/templates/
 
 # ======
 # Python

@@ -65,10 +65,17 @@
   },
   "auditLogConf": {
     "enabled": true,
-    "ignoreHttpMethod": [],
+	"logData": true,
+    "ignoreHttpMethod": [
+      "@jakarta.ws.rs.GET()"
+    ],
     "headerAttributes": [
-      "User-inum"
-    ]
+      "User-inum",
+      "jans-client"
+    ],
+    "auditLogFilePath": "/opt/jans/jetty/jans-config-api/logs/",
+    "auditLogFileName": "configapi-audit.log",
+    "auditLogDateFormat": "dd-MM-YYYY"
   },
   "dataFormatConversionConf": {
     "enabled": true,
@@ -116,8 +123,10 @@
         "jansServiceModule": [
           "jans-auth",
           "jans-config-api",
+          "jans-keycloak-link",
           "jans-scim",
-          "jans-lock"
+          "jans-lock",
+          "jans-link"
         ],
         "description": "java archive library."
       },
@@ -265,6 +274,26 @@
           "jans-fido2"
         ],
         "description": " FIDO Server Metadata."
+      },
+      {
+        "directory": "/var/jans/keycloak-link-snapshots",
+        "type": [
+          "txt"
+        ],
+        "jansServiceModule": [
+          "jans-keycloak-link"
+        ],
+        "description": "Keycloak link snapshots."
+      },
+      {
+        "directory": "/var/jans/link-snapshots/",
+        "type": [
+          "txt"
+        ],
+        "jansServiceModule": [
+          "jans-link"
+        ],
+        "description": "Link snapshots."
       }
     ]
   },
@@ -290,9 +319,19 @@
       "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication"
     },
     {
+      "name": "jans-link",
+      "description": "jans-link plugin",
+      "className": "io.jans.configapi.plugin.link.rest.ApiApplication"
+    },
+    {
       "name": "saml",
       "description": "saml plugin",
       "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
+    },
+    {
+      "name": "kc-link",
+      "description": "kc-link plugin",
+      "className": "io.jans.configapi.plugin.kc.link.rest.ApiApplication"
     },
     {
       "name": "lock",

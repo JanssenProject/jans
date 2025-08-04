@@ -151,21 +151,35 @@ public class UserMgmtService {
 
     public List<User> getUserByName(String name) {
         logger.info("Get user by name:{} ", name);
-        String[] targetArray = new String[] { name };
-        Filter nameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, targetArray, null);
+        List<User> users = null;
+        try {
+            Filter nameFilter = Filter.createANDFilter(Filter.createEqualityFilter("uid", name),
+                    Filter.createEqualityFilter("jansStatus", GluuStatus.ACTIVE.getValue()));
 
-        List<User> users = persistenceEntryManager.findEntries(userService.getPeopleBaseDn(), User.class, nameFilter);
-        logger.trace("Asset by name:{} are users:{}", name, users);
+            logger.debug("Get user by nameFilter:{} ", nameFilter);
+            users = persistenceEntryManager.findEntries(userService.getPeopleBaseDn(), User.class, nameFilter);
+            logger.debug("Asset by name:{} are users:{}", name, users);
+
+        } catch (Exception ex) {
+            logger.error("Failed to load user with name:{}, ex:{}", name, ex);
+        }
         return users;
     }
 
     public List<User> getUserByEmail(String email) {
         logger.info("Get user by email:{} ", email);
-        String[] targetArray = new String[] { email };
-        Filter emailFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("mail"), null, targetArray, null);
+        List<User> users = null;
+        try {
+            Filter emailFilter = Filter.createANDFilter(Filter.createEqualityFilter("mail", email),
+                    Filter.createEqualityFilter("jansStatus", GluuStatus.ACTIVE.getValue()));
 
-        List<User> users = persistenceEntryManager.findEntries(userService.getPeopleBaseDn(), User.class, emailFilter);
-        logger.trace("Asset by email:{} are users:{}", email, users);
+            logger.debug("Get user by emailFilter:{} ", emailFilter);
+            users = persistenceEntryManager.findEntries(userService.getPeopleBaseDn(), User.class, emailFilter);
+            logger.debug("Asset by email:{} are users:{}", email, users);
+        
+        } catch (Exception ex) {
+            logger.error("Failed to load user with email:{}, ex:{}", email, ex);
+        }
         return users;
     }
 
@@ -197,6 +211,7 @@ public class UserMgmtService {
 
         // patch for customAttributes
         if (userPatchRequest.getCustomAttributes() != null && !userPatchRequest.getCustomAttributes().isEmpty()) {
+            logger.debug("Patch Custom Attributes");
             updateCustomAttributes(user, userPatchRequest.getCustomAttributes());
         }
 
@@ -247,28 +262,37 @@ public class UserMgmtService {
         //validate custom attribute validation
         validateAttributes(customAttributes);
         
+        StringBuilder attributeAdded = new StringBuilder();
+        StringBuilder attributeEdited = new StringBuilder();
+        StringBuilder attributeDeleted = new StringBuilder();
+                
         for (CustomObjectAttribute attribute : customAttributes) {
             CustomObjectAttribute existingAttribute = userService.getCustomAttribute(user, attribute.getName());
-            logger.debug("Existing CustomAttributes with existingAttribute.getName():{} ", existingAttribute.getName());
+            logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
 
             // add
             if (existingAttribute == null) {
                 boolean result = userService.addUserAttribute(user, attribute.getName(), attribute.getValues(),
                         attribute.isMultiValued());
+                attributeAdded.append(attribute.getName()).append(",");
                 logger.debug("Result of adding CustomAttributes attribute.getName():{} , result:{} ", attribute.getName(), result);
             }
             // remove attribute
             else if (attribute.getValue() == null || attribute.getValues() == null) {
-
                 user.removeAttribute(attribute.getName());
+                attributeDeleted.append(attribute.getName()).append(",");
             }
             // replace attribute
             else {
                 existingAttribute.setMultiValued(attribute.isMultiValued());
                 existingAttribute.setValues(attribute.getValues());
+                attributeEdited.append(attribute.getName()).append(",");
             }
         }
-
+    
+        logger.info(" *** Attribute added - {} {}",attributeAdded,"***");
+        logger.info(" *** Attribute edited - {} {}",attributeEdited,"***");
+        logger.info(" *** Attribute removed - {} {}",attributeDeleted,"***");
         return user;
     }
 
@@ -333,6 +357,17 @@ public class UserMgmtService {
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         List<String> mandatoryAttributes = authUtil.getUserMandatoryAttributes();
         logger.debug("mandatoryAttributess :{}, excludeAttributes:{} ", mandatoryAttributes, excludeAttributes);
+
+        List<String> requiredAttributes = getJansAttributeName(this.getRequiredAttributes());
+        logger.debug("requiredAttributes:{} ", requiredAttributes);
+
+        if (requiredAttributes != null && !requiredAttributes.isEmpty()) {
+            if (mandatoryAttributes == null) {
+                mandatoryAttributes = new ArrayList<>();
+            }
+            mandatoryAttributes.addAll(requiredAttributes);
+        }
+        logger.info("Final mandatoryAttributes after adding requiredAttributes is {} ", mandatoryAttributes);
 
         StringBuilder missingAttributes = new StringBuilder();
 
@@ -504,11 +539,46 @@ public class UserMgmtService {
         }
         return customAttributes;
     }
-
-    public List<JansAttribute> findAttributeByName(String name) {
+        
+   public List<JansAttribute> findAttributeByName(String name) {
         return persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                 Filter.createEqualityFilter(AttributeConstants.JANS_ATTR_NAME, name));
     }
+    
+    public List<JansAttribute> getRequiredAttributes() {
+        List<JansAttribute> jansAttributes = null;
+        try {
+            Filter requiredFilter = Filter.createANDFilter(
+                    Filter.createEqualityFilter("jansRequired", true),
+                    Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "active"));
+
+                    logger.info("requiredFilter:{}", requiredFilter);
+            jansAttributes = persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
+                    requiredFilter);
+            logger.info("Required JansAttribute jansAttributes:{}", jansAttributes);
+
+        } catch (Exception ex) {
+            logger.error("Failed to load required attribute", ex);
+        }
+        return jansAttributes;
+    }
+    
+    
+    public List<String> getJansAttributeName(List<JansAttribute> jansAttributeList) {
+        List<String> jansAttributeNameList = null;
+
+        if (jansAttributeList == null || jansAttributeList.isEmpty()) {
+            return jansAttributeNameList;
+        }
+        
+        jansAttributeNameList = new ArrayList<>();
+
+        for (JansAttribute attribute : jansAttributeList) {
+            jansAttributeNameList.add(attribute.getName());
+        }
+        return jansAttributeNameList;
+    }
+
 
     private String getDnForAttribute(String inum) {
         String attributesDn = staticConfiguration.getBaseDn().getAttributes();

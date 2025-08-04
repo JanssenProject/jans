@@ -39,7 +39,7 @@ public abstract class OrganizationService extends io.jans.service.OrganizationSe
 
     public GluuOrganization getOrganization() {
         BaseCacheService usedCacheService = getCacheService();
-        return usedCacheService.getWithPut(OxConstants.CACHE_ORGANIZATION_KEY + "_oxauth", () -> ldapEntryManager.find(GluuOrganization.class, getDnForOrganization()), ONE_MINUTE_IN_SECONDS);
+        return usedCacheService.getWithPut(OxConstants.CACHE_ORGANIZATION_KEY + "_jans", () -> ldapEntryManager.find(GluuOrganization.class, getDnForOrganization()), ONE_MINUTE_IN_SECONDS);
     }
 
     public String getDnForOrganization() {

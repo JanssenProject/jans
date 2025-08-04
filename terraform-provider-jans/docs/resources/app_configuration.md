@@ -33,6 +33,7 @@ resource "jans_app_configuration" "global" {
 - `acr_mappings` (Map of String) A map of ACR mappings. Example: { "acr1": "script1", "acr2": "script2" }
 - `acr_to_agama_consent_flow_mapping` (Map of String) A map of ACR to agama consent flow mapping. Example: { "acr1": "agama1", "acr2": "agama2" }
 - `acr_to_consent_script_mapping` (Map of String) A map of ACR to consent script mapping. Example: { "acr1": "script1", "acr2": "script2" }
+- `acr_to_consent_script_name_mapping` (Map of String) A map of ACR to consent script name mapping. Example: { "acr1": "script1", "acr2": "script2" }
 - `active_session_authorization_scope` (String) Authorization Scope for active session.
 - `agama_configuration` (Block List, Max: 1) Engine Config which offers an alternative way to build authentication flows in Janssen server (see [below for nested schema](#nestedblock--agama_configuration))
 - `all_response_types_supported` (List of String) List of all response types supported.
@@ -258,7 +259,7 @@ resource "jans_app_configuration" "global" {
 - `persist_refresh_token` (Boolean) Specifies whether to persist refresh_token (otherwise saves into cache).
 - `person_custom_object_class_list` (List of String) LDAP custom object class list for dynamic person enrolment. One of 'gluuCustomPerson', 'gluuPerson'.
 - `public_subject_identifier_per_client_enabled` (Boolean) Specifies whether public subject identifier is allowed per client.
-- `rateLimitRegistrationPeriodInSeconds` (Number) The time period in seconds for the rate limit.
+- `rate_limit_registration_period_in_seconds` (Number) The time period in seconds for the rate limit.
 - `rate_limit_registration_request_count` (Number) The number of registration requests allowed per interval.
 - `redirect_uris_regex_enabled` (Boolean) Enable/Disable redirect uris validation using regular expression.
 - `refresh_token_extend_lifetime_on_rotation` (Boolean) Boolean value specifying whether to extend refresh tokens on rotation.
@@ -469,6 +470,10 @@ Optional:
 <a id="nestedblock--dcr_ssa_validation_configs"></a>
 ### Nested Schema for `dcr_ssa_validation_configs`
 
+Required:
+
+- `id` (String)
+
 Optional:
 
 - `allowed_claims` (List of String)
@@ -482,10 +487,6 @@ Optional:
 - `scopes` (List of String)
 - `shared_secret` (String)
 - `type` (String)
-
-Read-Only:
-
-- `id` (String) The ID of this resource.
 
 
 <a id="nestedblock--lock_message_config"></a>

@@ -1,7 +1,5 @@
 # Sign-in using Google Account
 
-## Overview 
-
 Google's OAuth 2.0 APIs can be used for both authentication and authorization. This document describes how to integrate Google's OAuth 2.0 implementation for authentication thus allowing a user to sign in using his Google account.
 
    

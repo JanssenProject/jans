@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::super::TokenValidationConfig;
+use crate::bootstrap_config::jwt_config::TokenValidationConfig;
 use super::super::authorization_config::TokenEntityNames;
 use super::FeatureToggle;
 use serde::{Deserialize, Serialize};
@@ -31,6 +31,7 @@ pub struct TokenConfig {
     claims: ClaimsValidationConfig,
 }
 
+/// Claims validation config
 #[derive(Debug, Deserialize, PartialEq, Clone, Default, Serialize)]
 #[serde(default)]
 pub struct ClaimsValidationConfig {
@@ -51,6 +52,7 @@ pub struct ClaimsValidationConfig {
 }
 
 impl TokenConfigs {
+    /// Create a config without validation
     pub fn without_validation() -> Self {
         Self(HashMap::from([
             ("access_token".to_string(), TokenConfig {

@@ -205,7 +205,6 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             jsonObj.put(AUTHORIZATION_CHALLENGE_ENDPOINT, appConfiguration.getAuthorizationChallengeEndpoint());
             jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
             jsonObj.put(REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint());
-            jsonObj.put(SESSION_REVOCATION_ENDPOINT, endpointUrl("/revoke_session"));
             jsonObj.put(GLOBAL_TOKEN_REVOCATION_ENDPOINT, endpointUrl("/global-token-revocation"));
             jsonObj.put(USER_INFO_ENDPOINT, appConfiguration.getUserInfoEndpoint());
             jsonObj.put(CLIENT_INFO_ENDPOINT, appConfiguration.getClientInfoEndpoint());
@@ -269,7 +268,7 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             Util.putArray(jsonObj, appConfiguration.getTxTokenEncryptionAlgValuesSupported(), TX_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED);
             Util.putArray(jsonObj, appConfiguration.getTxTokenEncryptionEncValuesSupported(), TX_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
-            Util.putArray(jsonObj, appConfiguration.getSessionJwtSigningAlgValuesSupported(), SESSION_JWT_SIGNING_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getLogoutStatusJwtSigningAlgValuesSupported(), LOGOUT_STATUS_JWT_SIGNING_ALG_VALUES_SUPPORTED);
 
             JSONArray userInfoSigningAlgValuesSupported = new JSONArray();
             for (String userInfoSigningAlg : appConfiguration.getUserInfoSigningAlgValuesSupported()) {

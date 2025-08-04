@@ -1,0 +1,9 @@
+wget https://downloads.mysql.com/archives/get/p/23/file/mysql-community-server_9.2.0-1debian13_amd64.deb
+wget https://downloads.mysql.com/archives/get/p/23/file/mysql-community-server_9.2.0-1debian12_amd64.deb
+wget https://downloads.mysql.com/archives/get/p/23/file/mysql-common_9.2.0-1debian12_amd64.deb
+wget https://downloads.mysql.com/archives/get/p/23/file/mysql-community-server-core_9.2.0-1debian12_amd64.deb
+wget https://downloads.mysql.com/archives/get/p/23/file/mysql-client_9.2.0-1debian12_amd64.deb
+wget https://downloads.mysql.com/archives/get/p/23/file/mysql-community-client_9.2.0-1debian12_amd64.deb
+wget http://ftp.de.debian.org/debian/pool/main/liba/libaio/libaio1_0.3.113-4_amd64.deb
+wget https://downloads.mysql.com/archives/get/p/23/file/mysql-community-client-core_9.2.0-1debian12_amd64.deb
+wget https://downloads.mysql.com/archives/get/p/23/file/mysql-community-client-plugins_9.2.0-1debian12_amd64.deb

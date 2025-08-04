@@ -114,7 +114,6 @@ cargo ndk -o ./bindings/cedarling_uniffi/androidApp/app/src/main/jniLibs \
 
 5. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
 
-
 ```
 cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/androidApp/app/src/main/java/com/example/androidapp/cedarling/uniffi
 
@@ -129,7 +128,7 @@ Here we delve into the process of generating the Kotlin binding for cedarling an
 ### Prerequisites
 
 - Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
-- Java Development Kit (JDK): version 17
+- Java Development Kit (JDK): version 11
 - Apache Maven: Install it from [Apache Maven Website](https://maven.apache.org/download.cgi)
 
 ### Building and Testing
@@ -139,6 +138,7 @@ Here we delve into the process of generating the Kotlin binding for cedarling an
 ```bash
 cargo build -r -p cedarling_uniffi
 ```
+
 In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
 
 2. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
@@ -160,4 +160,31 @@ cp ./target/release/{build_file} ./bindings/cedarling_uniffi/javaApp/src/main/re
  mvn exec:java -Dexec.mainClass="org.example.Main"
 ```
 
-The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization with sample tokens, resource and context inputs and call log interface to print authorization logs on console. The sample `tokens`, `resource` and `context` input files used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`. 
+The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization with sample tokens, resource and context inputs and call log interface to print authorization logs on console. The sample `tokens`, `resource` and `context` input files used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`.
+
+## Configuration
+
+### ID Token Trust Mode
+
+The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
+
+- **`strict`** (default): Enforces strict validation rules
+  - ID token `aud` must match access token `client_id`
+  - If userinfo token is present, its `sub` must match the ID token `sub`
+- **`never`**: Disables ID token validation (useful for testing)
+- **`always`**: Always validates ID tokens when present
+- **`ifpresent`**: Validates ID tokens only if they are provided
+
+### Testing Configuration
+
+For testing scenarios, you may want to disable JWT validation. You can configure this in your bootstrap configuration:
+
+```json
+{
+  "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+  "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+  "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+}
+```
+
+For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md).

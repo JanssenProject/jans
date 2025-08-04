@@ -35,13 +35,13 @@ public class AppConfiguration implements Configuration {
 
     public static final int DEFAULT_AUTHORIZATION_CHALLENGE_SESSION_LIFETIME = 86400;
     public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
+    public static final int DEFAULT_LOGOUT_STATUS_JWT_LIFETIME = 86400;
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
     public static final String DEFAULT_AUTHORIZATION_CHALLENGE_ACR = "default_challenge";
 
     public static final int DEFAULT_STATUS_LIST_RESPONSE_JWT_LIFETIME = 600; // 10min
     public static final int DEFAULT_STATUS_LIST_BIT_SIZE = 2;
-    public static final int DEFAULT_SESSION_STATUS_LIST_BIT_SIZE = 2;
     public static final int DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
     public static final XFrameOptions DEFAULT_X_FRAME_ORIGINS_VALUE = XFrameOptions.SAMEORIGIN;
     public static final int DEFAULT_USER_INFO_LIFETIME = 3600;
@@ -99,6 +99,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "URL for Pushed Authorisation Request (PAR) Endpoint")
     private String parEndpoint;
+
+    @DocProperty(description = "Boolean value to indicate whether to allow client assertion 'aud' without strict server issuer match. Default value is false which means that server requires strict match.", defaultValue = "false")
+    private Boolean allowClientAssertionAudWithoutStrictIssuerMatch = false;
 
     @DocProperty(description = "Boolean value to indicate of Pushed Authorisation Request(PAR)is required", defaultValue = "false")
     private Boolean requirePar = false;
@@ -289,11 +292,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
     private List<String> introspectionEncryptionEncValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Session JWT at Authorization Endpoint to encode the claims in a JWT")
-    private List<String> sessionJwtSigningAlgValuesSupported;
-
-    @DocProperty(description = "Specifies session status list bit size. (2 bits - 4 statuses, 4 bits - 16 statuses). Defaults to 2.")
-    private int sessionStatusListBitSize = DEFAULT_SESSION_STATUS_LIST_BIT_SIZE;
+    @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Logout Status JWT at Authorization Endpoint to encode the claims in a JWT")
+    private List<String> logoutStatusJwtSigningAlgValuesSupported;
 
     @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
     private List<String> txTokenSigningAlgValuesSupported;
@@ -529,10 +529,10 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The lifetime for unused session states")
     private int sessionIdUnusedLifetime;
 
-    @DocProperty(description = "The lifetime for unused unauthenticated session states")
+    @DocProperty(description = "The lifetime for unused unauthenticated session states", defaultValue = "7200")
     private int sessionIdUnauthenticatedUnusedLifetime = 7200; // 2h
 
-    @DocProperty(description = "Boolean value specifying whether to persist session ID on prompt none")
+    @DocProperty(description = "Boolean value specifying whether to persist session ID on prompt none", defaultValue = "false")
     private Boolean sessionIdPersistOnPromptNone;
 
     @DocProperty(description = "Boolean value specifying whether to enable session_id HTTP request parameter", defaultValue = "false")
@@ -559,13 +559,16 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to disable prompt=consent", defaultValue = "false")
     private Boolean disablePromptConsent = false;
 
+    @DocProperty(description = "The lifetime of Logout Status JWT. If not set falls back to 1 day", defaultValue = "86400")
+    private Integer logoutStatusJwtLifetime = DEFAULT_LOGOUT_STATUS_JWT_LIFETIME;
+
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
-    @DocProperty(description = "The lifetime of session_id cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends")
+    @DocProperty(description = "The lifetime of session_id cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends", defaultValue = "86400")
     private Integer sessionIdCookieLifetime = DEFAULT_SESSION_ID_LIFETIME;
 
-    @DocProperty(description = "The lifetime of session_id server object in seconds. If not set falls back to session_id cookie expiration set by 'sessionIdCookieLifetime' configuration property")
+    @DocProperty(description = "The lifetime of session_id server object in seconds. If not set falls back to session_id cookie expiration set by 'sessionIdCookieLifetime' configuration property", defaultValue = "86400")
     private Integer sessionIdLifetime = sessionIdCookieLifetime;
 
     @DocProperty(description = "Authorization Scope for active session")
@@ -946,7 +949,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Engine Config which offers an alternative way to build authentication flows in Janssen server")
     private EngineConfig agamaConfiguration;
 
-    @DocProperty(description = "DCR SSA Validation configurations used to perform validation of SSA or DCR")
+    @DocProperty(description = "DCR SSA Validation configurations used to perform validation of SSA or DCR. Only needed if softwareStatementValidationType=builtin")
     private List<SsaValidationConfig> dcrSsaValidationConfigs;
 
     @DocProperty(description = "SSA Configuration")
@@ -972,6 +975,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
     private LockMessageConfig lockMessageConfig;
+
+    @DocProperty(description = "Connection service Configuration")
+    private ConnectionServiceConfiguration connectionServiceConfiguration;
 
     public Boolean getUseOpenidSubAttributeValueForPairwiseLocalAccountId() {
         if (useOpenidSubAttributeValueForPairwiseLocalAccountId == null) useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
@@ -1998,6 +2004,16 @@ public class AppConfiguration implements Configuration {
         this.parEndpoint = parEndpoint;
     }
 
+    public Boolean getAllowClientAssertionAudWithoutStrictIssuerMatch() {
+        if (allowClientAssertionAudWithoutStrictIssuerMatch == null) allowClientAssertionAudWithoutStrictIssuerMatch = false;
+        return allowClientAssertionAudWithoutStrictIssuerMatch;
+    }
+
+    public AppConfiguration setAllowClientAssertionAudWithoutStrictIssuerMatch(Boolean allowClientAssertionAudWithoutStrictIssuerMatch) {
+        this.allowClientAssertionAudWithoutStrictIssuerMatch = allowClientAssertionAudWithoutStrictIssuerMatch;
+        return this;
+    }
+
     public Boolean getRequirePar() {
         if (requirePar == null) requirePar = false;
         return requirePar;
@@ -2145,12 +2161,12 @@ public class AppConfiguration implements Configuration {
         this.introspectionEncryptionEncValuesSupported = introspectionEncryptionEncValuesSupported;
     }
 
-    public List<String> getSessionJwtSigningAlgValuesSupported() {
-        return sessionJwtSigningAlgValuesSupported;
+    public List<String> getLogoutStatusJwtSigningAlgValuesSupported() {
+        return logoutStatusJwtSigningAlgValuesSupported;
     }
 
-    public AppConfiguration setSessionJwtSigningAlgValuesSupported(List<String> sessionJwtSigningAlgValuesSupported) {
-        this.sessionJwtSigningAlgValuesSupported = sessionJwtSigningAlgValuesSupported;
+    public AppConfiguration setLogoutStatusJwtSigningAlgValuesSupported(List<String> logoutStatusJwtSigningAlgValuesSupported) {
+        this.logoutStatusJwtSigningAlgValuesSupported = logoutStatusJwtSigningAlgValuesSupported;
         return this;
     }
 
@@ -2572,15 +2588,6 @@ public class AppConfiguration implements Configuration {
 
     public void setStatusListResponseJwtSignatureAlgorithm(String statusListResponseJwtSignatureAlgorithm) {
         this.statusListResponseJwtSignatureAlgorithm = statusListResponseJwtSignatureAlgorithm;
-    }
-
-    public int getSessionStatusListBitSize() {
-        return sessionStatusListBitSize;
-    }
-
-    public AppConfiguration setSessionStatusListBitSize(int sessionStatusListBitSize) {
-        this.sessionStatusListBitSize = sessionStatusListBitSize;
-        return this;
     }
 
     public int getStatusListBitSize() {
@@ -3093,6 +3100,15 @@ public class AppConfiguration implements Configuration {
 
     public void setGrantTypesSupportedByDynamicRegistration(Set<GrantType> grantTypesSupportedByDynamicRegistration) {
         this.grantTypesSupportedByDynamicRegistration = grantTypesSupportedByDynamicRegistration;
+    }
+
+    public Integer getLogoutStatusJwtLifetime() {
+        return logoutStatusJwtLifetime;
+    }
+
+    public AppConfiguration setLogoutStatusJwtLifetime(Integer logoutStatusJwtLifetime) {
+        this.logoutStatusJwtLifetime = logoutStatusJwtLifetime;
+        return this;
     }
 
     /**
@@ -3765,4 +3781,11 @@ public class AppConfiguration implements Configuration {
 		this.lockMessageConfig = lockMessageConfig;
 	}
 
+	public ConnectionServiceConfiguration getConnectionServiceConfiguration() {
+		return connectionServiceConfiguration;
+	}
+
+	public void setConnectionServiceConfiguration(ConnectionServiceConfiguration connectionServiceConfiguration) {
+		this.connectionServiceConfiguration = connectionServiceConfiguration;
+	}
 }

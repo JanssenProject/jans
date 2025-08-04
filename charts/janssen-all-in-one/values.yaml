@@ -299,6 +299,8 @@ auth-server-key-rotation:
     tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: [ ]
+  # -- Auth server key rotation job schedule. It accepts any Cron syntax supported by Kubernetes. If empty, the schedule will run based on keysLife value.
+  cronJobSchedule: ""
   # -- Auth server key rotation keys life in hours
   keysLife: 48
   # -- Set key selection strategy used by Auth server

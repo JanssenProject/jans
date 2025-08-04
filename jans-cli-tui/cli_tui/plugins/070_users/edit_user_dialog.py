@@ -161,7 +161,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         for ca in custom_attributes:
 
-            if ca['name'] in ('middleName', 'sn', 'status', 'nickname', 'jansActive', 'userPassword', 'jansAdminUIRole'):
+            if ca['name'] in ('middleName', 'sn', 'status', 'nickname', 'jansActive', 'userPassword', 'jansAdminUIRole', 'jansStatus'):
                 continue
 
             claim_prop = self.get_claim_properties(ca['name'])
@@ -215,7 +215,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
         for claim in common_data.jans_attributes:
             if not claim['oxMultiValuedAttribute'] and claim['name'] in cur_claims:
                 continue
-            if claim['name'] in ('memberOf', 'userPassword', 'uid', 'status', 'jansActive', 'updatedAt', 'jansAdminUIRole'):
+            if claim['name'] in ('memberOf', 'userPassword', 'uid', 'status', 'jansActive', 'updatedAt', 'jansAdminUIRole', 'jansStatus'):
                 continue
             if claim.get('status') == 'active':
                 claims_list.append((claim['name'], claim['displayName']))

@@ -19,4 +19,10 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Password {
+    
+    /**
+     * (Optional) Specify that value should not be hashed if it has knows {HASH_TYPE} prefix.
+     * Defaults value is false.
+     */
+    boolean skipHashed() default false;
 }

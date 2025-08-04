@@ -468,6 +468,8 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
 
 	req.Header.Add("Accept", params.accept)
 	req.Header.Add("Content-Type", params.contentType)
+	req.Header.Add("jans-client", "infrastructure-as-code-tool")
+	req.Header.Add("user-inum", c.clientId)
 
 	if params.token != "" {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", params.token))

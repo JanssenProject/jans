@@ -39,7 +39,7 @@ let cedarling = init(
   "CEDARLING_USER_AUTHZ": "enabled",
   "CEDARLING_WORKLOAD_AUTHZ": "disabled",
   "CEDARLING_JWT_SIG_VALIDATION": "disabled",
-  "CEDARLING_ID_TOKEN_TRUST_MODE": "none",
+  "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
 );
 ```
 
@@ -57,33 +57,35 @@ To perform an authorization check, follow these steps:
 **1. Prepare tokens**
 
 ```js
-const access_token = "<access_token>"
-const id_token = "<id_token>"
-const userinfo_token = "<userinfo_token>"
+const access_token = "<access_token>";
+const id_token = "<id_token>";
+const userinfo_token = "<userinfo_token>";
 ```
 
-Your *principals* will be built from these tokens.
+Your _principals_ will be built from these tokens.
 
 **2. Define the resource**
 
-This represents the *resource* that the action will be performed on, such as a protected API endpoint or file.
+This represents the _resource_ that the action will be performed on, such as a protected API endpoint or file.
 
 ```js
 const resource = {
-  "entity_type": "Jans::Application",
-  "id": "app_id_001",
-  "name": "App Name",
-  "url": {
-    "host": "example.com",
-    "path": "/admin-dashboard",
-    "protocol": "https"
-  }
+  cedar_entity_mapping: {
+    entity_type: "Jans::Application",
+    id: "app_id_001",
+  },
+  name: "App Name",
+  url: {
+    host: "example.com",
+    path: "/admin-dashboard",
+    protocol: "https",
+  },
 };
 ```
 
 **3. Define the action**
 
-An *action* represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
+An _action_ represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
 
 ```js
 const action = 'Jans::Action::"Read"';
@@ -91,35 +93,35 @@ const action = 'Jans::Action::"Read"';
 
 **4. Define Context**
 
-The *context* represents additional data that may affect the authorization decision, such as time, location, or user-agent.
+The _context_ represents additional data that may affect the authorization decision, such as time, location, or user-agent.
 
 ```js
 const context = {
-  "current_time": Math.floor(Date.now() / 1000),
-  "device_health": ["Healthy"],
-  "fraud_indicators": ["Allowed"],
-  "geolocation": ["America"],
-  "network": "127.0.0.1",
-  "network_type": "Local",
-  "operating_system": "Linux",
-  "user_agent": "Linux"
+  current_time: Math.floor(Date.now() / 1000),
+  device_health: ["Healthy"],
+  fraud_indicators: ["Allowed"],
+  geolocation: ["America"],
+  network: "127.0.0.1",
+  network_type: "Local",
+  operating_system: "Linux",
+  user_agent: "Linux",
 };
 ```
 
 **5. Build the request**
 
-Now you'll construct the ***request*** by including the *principals*, *action*, and *context*.
+Now you'll construct the **_request_** by including the _principals_, _action_, and _context_.
 
 ```js
 const request = {
-  "tokens": {
-    "access_token": access_token,
-    "id_token": id_token,
-    "userinfo_token": userinfo_token,
+  tokens: {
+    access_token: access_token,
+    id_token: id_token,
+    userinfo_token: userinfo_token,
   },
-  "action": action,
-  "resource": resource,
-  "context": context,
+  action: action,
+  resource: resource,
+  context: context,
 };
 ```
 
@@ -140,38 +142,44 @@ In unsigned authorization, you pass a set of Principals directly, without relyin
 ```js
 const principals = [
   {
-    "entity_type": "Jans::Workload",
-    "id": "some_workload_id",
-    "client_id": "some_client_id",
+    cedar_entity_mapping: {
+      entity_type: "Jans::Workload",
+      id: "some_workload_id",
+    },
+    client_id: "some_client_id",
   },
   {
-    "entity_type": "Jans::User",
-    "id": "random_user_id",
-    "roles": ["admin", "manager"]
+    cedar_entity_mapping: {
+      entity_type: "Jans::User",
+      id: "random_user_id",
+    },
+    roles: ["admin", "manager"],
   },
 ];
 ```
 
 **2. Define the Resource**
 
-This represents the *resource* that the action will be performed on, such as a protected API endpoint or file.
+This represents the _resource_ that the action will be performed on, such as a protected API endpoint or file.
 
 ```js
-const resource = { 
-  "entity_type": "Jans::Application",
-  "id": "app_id_001",
-  "name": "App Name",
-  "url": {
-    "host": "example.com",
-    "path": "/admin-dashboard",
-    "protocol": "https"
-  }
+const resource = {
+  cedar_entity_mapping: {
+    entity_type: "Jans::Application",
+    id: "app_id_001",
+  },
+  name: "App Name",
+  url: {
+    host: "example.com",
+    path: "/admin-dashboard",
+    protocol: "https",
+  },
 };
 ```
 
 **3. Define the Action**
 
-An *action* represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
+An _action_ represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
 
 ```js
 const action = 'Jans::Action::"Write"';
@@ -179,29 +187,29 @@ const action = 'Jans::Action::"Write"';
 
 **4. Define the Context**
 
-The *context* represents additional data that may affect the authorization decision, such as time, location, or user-agent.
+The _context_ represents additional data that may affect the authorization decision, such as time, location, or user-agent.
 
 ```js
 const context = {
-    "current_time": Math.floor(Date.now() / 1000),
-    "device_health": ["Healthy"],
-    "location": "US",
-    "network": "127.0.0.1",
-    "operating_system": "Linux",
-}
+  current_time: Math.floor(Date.now() / 1000),
+  device_health: ["Healthy"],
+  location: "US",
+  network: "127.0.0.1",
+  operating_system: "Linux",
+};
 ```
 
 **5. Build the Request**
 
-Now you'll construct the ***request*** by including the *principals*, *action*, and *context*.
+Now you'll construct the **_request_** by including the _principals_, _action_, and _context_.
 
 ```js
 const request = {
-  "principals": principals,
-  "action": action,
-  "resource": resource,
-  "context": context
-}
+  principals: principals,
+  action: action,
+  resource: resource,
+  context: context,
+};
 ```
 
 **6. Perform Authorization**
@@ -217,7 +225,7 @@ const result = await cedarling.authorize_unsigned(request);
 The logs could be retrieved using the `pop_logs` function.
 
 ```js
-const logs = cedarling.pop_logs()
+const logs = cedarling.pop_logs();
 console.log(logs);
 ```
 
@@ -225,8 +233,7 @@ console.log(logs);
 
 ## See Also
 
-- [Cedarling TBAC quickstart](../cedarling-quick-start-tbac.md)
-- [Cedarling Unsigned quickstart](../cedarling-quick-start-unsigned.md)
+- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-tbac-using-cedarling)
+- [Cedarling Unsigned quickstart](../cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
 - [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
 - [Cedarling WASM](../cedarling-wasm.md)
-

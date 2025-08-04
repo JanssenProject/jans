@@ -20,7 +20,6 @@
         "ciba": "ou=ciba,o=jans",
         "ssa": "ou=ssa,o=jans",
         "node": "ou=node,o=jans",
-        "statusIndexPool": "ou=status_index_pool,o=jans",
-        "sessionStatusIndexPool": "ou=session_status_index_pool,o=jans"
+        "statusIndexPool": "ou=status_index_pool,o=jans"
     }
 }

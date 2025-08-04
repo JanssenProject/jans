@@ -177,9 +177,11 @@ class Config:
         self.install_config_api = True
         self.install_casa = False
         self.install_jans_cli = True
+        self.install_link = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
         self.install_jans_saml = False
+        self.install_jans_keycloak_link = False
         self.install_jans_lock = False
         self.install_opa = False
 
@@ -262,7 +264,7 @@ class Config:
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
         if self.profile == OPENBANKING_PROFILE:
-            self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
+            self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
         else:
             self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
 
