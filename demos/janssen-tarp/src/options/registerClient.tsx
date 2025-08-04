@@ -157,7 +157,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
           access_token_as_jwt: true,
           userinfo_signed_response_alg: "RS256",
           jansInclClaimsInIdTkn: "true",
-          access_token_lifetime: 86400
+          access_token_lifetime: 86400 //1 day
         };
 
         if (!!expireAt) {
