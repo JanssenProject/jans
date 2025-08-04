@@ -49,12 +49,7 @@ class ConfigApiInstaller(JettyInstaller):
     def install(self):
         self.copy_facter_script()
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
-        self.logIt("Copying jans-config-api.war into jetty webapps folder...")
-        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
-        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
-
         self.install_plugin('user-mgt')
-
         self.enable()
 
     def copy_facter_script(self):

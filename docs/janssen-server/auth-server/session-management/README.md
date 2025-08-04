@@ -5,7 +5,7 @@ tags:
   - session
 ---
 
-# Overview
+# Session Management
 
 A session is a reference identifier on the Jans Auth Server that connects to a
 person's authentication state. During an authentication workflow, Auth Server writes a cookie with the `session_id` in the person's browser. OpenID Native
@@ -61,7 +61,7 @@ Jans Auth Server updates `lastUsedAt` property of the session object:
 The [End Session endpoint](../endpoints/end-session.md) (`/end_session`)
 is where the user can end their own session. See [OpenID Logout](../openid-features/logout/README.md) for more information.
 
-To end another person's session, Jans Auth Server supports both [Session Revocation Endpoint](../endpoints/session-revocation.md) (`/revoke_session`) and [Global Session Revocation Endpoint](../endpoints/global-token-revocation.md) (`/global-token-revocation`').
+To end another person's session, Jans Auth Server supports [Global Token Revocation Endpoint](../endpoints/global-token-revocation.md) (`/global-token-revocation`').
 
 ## Session Event Interception Scripts
 
@@ -77,18 +77,7 @@ session events, see:
 ### MySQL 
 All session information is saved in this table : https://github.com/JanssenProject/jans/blob/main/docs/admin/reference/database/mysql-schema.md#janssessid 
 
-### TUI
-
-To start searching and deleting sessions, navigate to
-`Auth Server`->`Sessions`.  This brings up a screen as shown below
-with searching and deleting sessions.
-
-![Searching Sessions](../../../assets/tui-auth-server-sessions.png)
-
-After entering search criterias, navigate to **< Search >** button end press **Enter**.
-To delete a session, select it and press **delete** key.
-
-Refer to complete documentation [here](../../config-guide/config-tools/jans-tui/README.md)
+Follow [this link](../../config-guide/auth-server-config/session-management.md) for session management with configuration tools.
 
 
 ## FAQ

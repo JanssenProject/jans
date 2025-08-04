@@ -23,7 +23,7 @@ func TestResourceSmtpConfiguration_Mapping(t *testing.T) {
 		ConnectProtection:                 "StartTls",
 		TrustHost:                         true,
 		FromName:                          "Jans",
-		FromEmailAddress:                  "jans@jansen.io",
+		FromEmailAddress:                  "jans@jans.io",
 		RequiresAuthentication:            true,
 		SmtpAuthenticationAccountUsername: "jans",
 		SmtpAuthenticationAccountPassword: "password",

@@ -773,14 +773,6 @@ p.info {
     width: 450px;
 }
 
-#updateCacheRefresh {
-    background-image: url("/gluu/img/seam2_bg.jpg");
-    border: 1px solid #C0C0C0;
-    margin: 0 auto;
-    padding: 15px;
-    width: 430px;
-}
-
 #personImport {
     background-image: url("../img/seam2_bg.jpg");
     border: 1px solid #C0C0C0;

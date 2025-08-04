@@ -6,7 +6,9 @@ tags:
   - tui
 ---
 
-## Overview 
+# TUI K8s
+
+
 
   <div>
     <a href="https://www.loom.com/share/36688669f0aa4c22be2eaf3f711fe488">
@@ -20,7 +22,7 @@ tags:
    Installing TUI and connecting to a Kubernetes installation.
    
 
-1.  Download jans-cli-tui from the [release](https://github.com/JanssenProject/jans/releases) assets depending on your OS. For example: 
+1.  Download jans-cli-tui from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example: 
     
     `wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz`
     

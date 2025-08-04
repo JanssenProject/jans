@@ -5,7 +5,7 @@ This project uses `maturin` to create a Python library from Rust code. Follow th
 ## Prerequisites
 
 1. (Optional) Install build tools (for Linux users)
-   
+
    Install the `build-essential` package or its equivalent packages using your distribution's package manager.
 
    Ubuntu/Debian:
@@ -36,6 +36,7 @@ This project uses `maturin` to create a Python library from Rust code. Follow th
    If Rust is not installed, you can install it from [here](https://www.rust-lang.org/tools/install).
 
 1. Set up a virtual environment:
+
    - Install `venv` for your platform by following the [instructions here](https://virtualenv.pypa.io/en/latest/installation.html).
    - Create a virtual environment:
 
@@ -63,12 +64,15 @@ This project uses `maturin` to create a Python library from Rust code. Follow th
    ```
    pip install maturin
    ```
+
    For Linux, install patchelf dependency:
+
    ```
    pip install maturin[patchelf]
    ```
 
 1. Clone the repository:
+
    ```
    git clone https://github.com/JanssenProject/jans.git
    ```
@@ -96,7 +100,7 @@ This project uses `maturin` to create a Python library from Rust code. Follow th
    You should see `cedarling_python` listed among the available packages.
 
 1. Read documentation
-  After installing the package you can read the documentation from python using the following command:
+   After installing the package you can read the documentation from python using the following command:
 
    ```bash
    python -m pydoc cedarling_python
@@ -107,8 +111,41 @@ This project uses `maturin` to create a Python library from Rust code. Follow th
 To verify that the library works correctly, you can run the provided `example.py` script. Make sure the virtual environment is activated before running the script:
 
 ```bash
-CEDARLING_POLICY_STORE_LOCAL=example_files/policy-store.json python example.py
+CEDARLING_POLICY_STORE_LOCAL_FN=example_files/policy-store.json python example.py
 ```
+
+## Configuration
+
+### ID Token Trust Mode
+
+The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
+
+- **`strict`** (default): Enforces strict validation rules
+  - ID token `aud` must match access token `client_id`
+  - If userinfo token is present, its `sub` must match the ID token `sub`
+- **`never`**: Disables ID token validation (useful for testing)
+- **`always`**: Always validates ID tokens when present
+- **`ifpresent`**: Validates ID tokens only if they are provided
+
+### Testing Configuration
+
+For testing scenarios, you may want to disable JWT validation. You can set environment variables:
+
+```bash
+export CEDARLING_JWT_SIG_VALIDATION="disabled"
+export CEDARLING_JWT_STATUS_VALIDATION="disabled"
+export CEDARLING_ID_TOKEN_TRUST_MODE="never"
+```
+
+Or configure in your Python code:
+
+```python
+import os
+os.environ['CEDARLING_ID_TOKEN_TRUST_MODE'] = 'never'
+os.environ['CEDARLING_JWT_SIG_VALIDATION'] = 'disabled'
+```
+
+For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md).
 
 ## Building the Python Library
 
@@ -131,59 +168,59 @@ If you only want to build the library without installing it in the Python enviro
 
 ## Python types definitions
 
-  The python types definitions are available in the `PYTHON_TYPES.md` file. Or by clicking [here](PYTHON_TYPES.md).
-  Also after installing the library you can get same information using:
+The python types definitions are available in the `PYTHON_TYPES.md` file. Or by clicking [here](PYTHON_TYPES.md).
+Also after installing the library you can get same information using:
 
-  ```bash
-  python -m pydoc cedarling_python
-  ```
+```bash
+python -m pydoc cedarling_python
+```
 
 ## Testing the Python bindings
 
-  We use `pytest` and `tox` to create reproduceable environments for testing.
+We use `pytest` and `tox` to create reproduceable environments for testing.
 
-### Run test with `pytest`  
+### Run test with `pytest`
 
-  To run the tests, with `pytest`:
-  
-  1. Make sure that you have installed the `cedarling_python` package in your virtual environment or system.
-  1. Install `pytest`:
+To run the tests, with `pytest`:
 
-     ```bash
-     pip install pytest
-     ```
+1. Make sure that you have installed the `cedarling_python` package in your virtual environment or system.
+1. Install `pytest`:
 
-  1. Make sure that you are in the `jans/jans-cedarling/bindings/cedarling_python/` folder.
-  1. Run the following command:
+   ```bash
+   pip install pytest
+   ```
 
-     ```bash
-     pytest
-     ```
+1. Make sure that you are in the `jans/jans-cedarling/bindings/cedarling_python/` folder.
+1. Run the following command:
 
-     Or run `pytest` without capturing the output:
+   ```bash
+   pytest
+   ```
 
-     ```bash
-     pytest -s
-     ```
+   Or run `pytest` without capturing the output:
 
-  1. See the results in the terminal.
-  
+   ```bash
+   pytest -s
+   ```
+
+1. See the results in the terminal.
+
 ### Run test with `tox`
 
-  1. Ensure that you installed rust compiler and toolchain. You can install it by following the official [rust installation guide](https://www.rust-lang.org/tools/install).
+1. Ensure that you installed rust compiler and toolchain. You can install it by following the official [rust installation guide](https://www.rust-lang.org/tools/install).
 
-  1. Ensure tox is installed:
-  You can install tox in your environment using pip:
+1. Ensure tox is installed:
+   You can install tox in your environment using pip:
 
-     ```bash
-     pip install tox
-     ```
+   ```bash
+   pip install tox
+   ```
 
-  1. Make sure that you are in the `jans/jans-cedarling/bindings/cedarling_python/` folder.
-  1. Run the following command:
+1. Make sure that you are in the `jans/jans-cedarling/bindings/cedarling_python/` folder.
+1. Run the following command:
 
-     ```bash
-     tox
-     ```
+   ```bash
+   tox
+   ```
 
-  1. See the results in the terminal.
+1. See the results in the terminal.

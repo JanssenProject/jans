@@ -36,6 +36,7 @@ import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.as.server.service.external.session.SessionEventType;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.model.JansAttribute;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.search.filter.Filter;
@@ -126,6 +127,9 @@ public class SessionIdService {
 
     @Inject
     private StatService statService;
+
+    @Inject
+    private AttributeService attributeService;
 
     private String buildDn(String sessionId) {
         return String.format("jansId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
@@ -390,12 +394,15 @@ public class SessionIdService {
     }
 
     public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, Map<String, String> sessionIdAttributes) throws InvalidSessionStateException {
+
+        final User user = userService.getUserByDnSilently(userDn);
+        updateAttributesWithUserClaims(sessionIdAttributes, user);
         SessionId sessionId = generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
         if (sessionId == null) {
             throw new InvalidSessionStateException("Failed to generate authenticated session.");
         }
 
-        reportActiveUser(sessionId);
+        reportActiveUser(user);
 
         if (externalApplicationSessionService.isEnabled()) {
             String userName = sessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
@@ -413,9 +420,8 @@ public class SessionIdService {
         return sessionId;
     }
 
-    private void reportActiveUser(SessionId sessionId) {
+    private void reportActiveUser(User user) {
         try {
-            final User user = getUser(sessionId);
             if (user != null) {
                 statService.reportActiveUser(user.getUserId());
             }
@@ -567,6 +573,11 @@ public class SessionIdService {
     }
 
     public boolean persistSessionId(final SessionId sessionId, boolean forcePersistence) {
+        return persistSessionId(sessionId, forcePersistence, false);
+    }
+
+
+    public boolean persistSessionId(final SessionId sessionId, boolean forcePersistence, boolean silent) {
         List<Prompt> prompts = getPromptsFromSessionId(sessionId);
 
         try {
@@ -588,7 +599,9 @@ public class SessionIdService {
                 return true;
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            if (!silent) { // do not log anything if method is explicitly called with silent=true
+                log.error(e.getMessage(), e);
+            }
         }
 
         return false;
@@ -811,6 +824,62 @@ public class SessionIdService {
         return null;
     }
 
+    /**
+     * Loads session by id without local cache
+     *
+     * @param sessionId session id
+     * @return session
+     */
+    @Nullable
+    public SessionId loadSessionById(@Nullable String sessionId) {
+        return loadSessionByDn(buildDn(sessionId), false);
+    }
+
+    /**
+     * Loads session by id without local cache
+     *
+     * @param sessionId session id
+     * @param silently if true - does not prints exception from persistence if it occurs
+     * @return session
+     */
+    @Nullable
+    public SessionId loadSessionById(@Nullable String sessionId, boolean silently) {
+        return loadSessionByDn(buildDn(sessionId), silently);
+    }
+
+    /**
+     * Loads session by dn without local cache
+     *
+     * @param dn session nd
+     * @param silently if true - does not prints exception from persistence if it occurs
+     * @return session
+     */
+    @Nullable
+    public SessionId loadSessionByDn(@Nullable String dn, boolean silently) {
+        if (StringUtils.isBlank(dn)) {
+            return null;
+        }
+
+        try {
+            final SessionId sessionId;
+            if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
+                sessionId = (SessionId) cacheService.get(dn);
+            } else {
+                sessionId = persistenceEntryManager.find(SessionId.class, dn);
+            }
+            return sessionId;
+        } catch (Exception e) {
+            if (!silently) {
+                if (BooleanUtils.isTrue(appConfiguration.getLogNotFoundEntityAsError())) {
+                    log.error("Failed to get session by dn: {}. {}", dn, e.getMessage());
+                } else {
+                    log.trace("Failed to get session by dn: {}. {}", dn, e.getMessage());
+                }
+            }
+        }
+        return null;
+    }
+
     public SessionId getSessionId(HttpServletRequest request) {
         final String sessionIdFromCookie = cookieService.getSessionIdFromCookie(request);
         log.trace("SessionId from cookie: {}", sessionIdFromCookie);
@@ -1015,5 +1084,31 @@ public class SessionIdService {
 
     public void externalEvent(SessionEvent event) {
         externalApplicationSessionService.externalEvent(event);
+    }
+
+    public void updateAttributesWithUserClaims(Map<String, String> sessionAttributes, User user) {
+        final List<String> userClaims = appConfiguration.getSessionIdUserClaimsInAttributes();
+        if (userClaims == null || userClaims.isEmpty() || user == null || sessionAttributes == null) {
+            return;
+        }
+
+        for (String claim : userClaims) {
+            try {
+                if (sessionAttributes.containsKey(claim)) {
+                    continue;
+                }
+
+                JansAttribute jansAttribute = attributeService.getByClaimName(claim);
+                if (jansAttribute != null) {
+                    String dbName = jansAttribute.getName();
+                    Object value = user.getAttribute(dbName, true, jansAttribute.getOxMultiValuedAttribute());
+                    if (value != null) {
+                        sessionAttributes.put(claim, String.valueOf(value));
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to get user's claim by name " + claim, e);
+            }
+        }
     }
 }

@@ -9,8 +9,6 @@ import shutil
 import time
 import ssl
 import json
-import re
-import json
 
 from urllib import request
 from urllib.parse import urljoin, urlparse
@@ -249,7 +247,22 @@ def uninstall_jans():
     os.system('systemctl daemon-reload')
     os.system('systemctl reset-failed')
 
-    remove_list = ['/etc/certs', '/etc/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*', '/opt/keycloak', '/opt/idp', '/opt/opa', '/opt/kc-scheduler', '/etc/cron.d/kc-scheduler-cron']
+    remove_list = [
+        '/etc/certs',
+        '/etc/jans',
+        '/opt/amazon-corretto*',
+        '/opt/jre',
+        '/opt/node*',
+        '/opt/jetty*',
+        '/opt/jython*',
+        '/opt/keycloak',
+        '/opt/idp',
+        '/opt/opa',
+        '/opt/kc-scheduler',
+        '/etc/cron.d/kc-scheduler-cron',
+        '/etc/cron.d/jans-session',
+        '/usr/local/bin/jans',
+        ]
 
     if not argsp.keep_downloads:
         remove_list.append('/opt/dist')
@@ -268,7 +281,7 @@ def uninstall_jans():
         if glob.glob(p):
             cmd = 'rm -r -f ' + p
             print("Executing", cmd)
-            os.system('rm -r -f ' + p)
+            os.system(cmd)
 
     apache_conf_fn_list = []
 
@@ -326,6 +339,9 @@ def do_install():
 
     if argsp.download_exit:
         setup_args += ' --download-exit'
+
+    if argsp.yes:
+        setup_args += ' -n'
 
     if setup_args:
         setup_cmd += ' ' + setup_args

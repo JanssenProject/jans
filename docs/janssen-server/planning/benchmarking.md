@@ -4,6 +4,7 @@ tags:
   - planning
   - benchmarking
 ---
+# Benchmarking
 
 Want confidence that your Janssen platform will perform with the latency and
 concurrency you need in production? If so, then you MUST benchmark properly.

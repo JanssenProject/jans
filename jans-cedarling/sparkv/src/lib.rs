@@ -102,11 +102,17 @@ impl<T> SparKV<T> {
         }
     }
 
-    pub fn set(&mut self, key: &str, value: T) -> Result<(), Error> {
-        self.set_with_ttl(key, value, self.config.default_ttl)
+    pub fn set(&mut self, key: &str, value: T, index_keys: &[String]) -> Result<(), Error> {
+        self.set_with_ttl(key, value, self.config.default_ttl, index_keys)
     }
 
-    pub fn set_with_ttl(&mut self, key: &str, value: T, ttl: Duration) -> Result<(), Error> {
+    pub fn set_with_ttl(
+        &mut self,
+        key: &str,
+        value: T,
+        ttl: Duration,
+        index_keys: &[String],
+    ) -> Result<(), Error> {
         self.clear_expired_if_auto();
         self.ensure_capacity_ignore_key(key)?;
         self.ensure_item_size(&value)?;
@@ -119,6 +125,10 @@ impl<T> SparKV<T> {
         self.index
             .add_key_value(index::IndexKey(key.into()), index::ValueKey(key.into()));
         self.data.insert(key.into(), item);
+
+        for index_key in index_keys {
+            self.add_additional_index(key, index_key);
+        }
         Ok(())
     }
 
@@ -130,6 +140,10 @@ impl<T> SparKV<T> {
     pub fn get_item(&self, key: &str) -> Option<&KvEntry<T>> {
         let item = self.data.get(key)?;
         (item.expired_at > Utc::now()).then_some(item)
+    }
+
+    pub fn get_oldest_key_by_expiration(&self) -> Option<&ExpEntry> {
+        self.expiries.peek()
     }
 
     pub fn get_keys(&self) -> Vec<String> {
@@ -236,6 +250,11 @@ impl<T> SparKV<T> {
     }
 
     fn ensure_capacity(&self) -> Result<(), Error> {
+        if self.config.max_items == 0 {
+            // no limit
+            return Ok(());
+        }
+
         if self.len() >= self.config.max_items {
             return Err(Error::CapacityExceeded);
         }
@@ -250,6 +269,11 @@ impl<T> SparKV<T> {
     }
 
     fn ensure_item_size(&self, value: &T) -> Result<(), Error> {
+        if self.config.max_item_size == 0 {
+            // no limit
+            return Ok(());
+        }
+
         if let Some(calc) = self.size_calculator {
             if calc(value) > self.config.max_item_size {
                 return Err(Error::ItemSizeExceeded);

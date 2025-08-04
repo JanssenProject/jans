@@ -71,15 +71,11 @@ Let's add the required libraries to the authentication server:
 
 [gama files](https://docs.jans.io/head/agama/gama-format/) are deployable units in the Agama engine. To create one, simply zip the contents of [project](./project) subdirectory. The resulting archive must have three folders at top-level: `web`, `lib`, and `code`. The file extension does not matter in the end.
 
-To quickly collect the contents of `project`, you can do the following (requires `git` 2.25 or higher):
+To quickly collect the contents of `project`, you can do the following:
 
 ```
-git clone --depth 1 --branch main --no-checkout https://github.com/JanssenProject/jans.git
-cd jans
-git sparse-checkout init --cone
-git sparse-checkout set docs/agama-catalog/jans/inboundID/project
-git checkout main
-cd docs/agama-catalog/jans/inboundID/project
+git clone --depth 1 https://github.com/JanssenProject/jans.git
+cd jans/docs/agama-catalog/jans/inboundID/project
 ```
 
 ### Deploy the archive

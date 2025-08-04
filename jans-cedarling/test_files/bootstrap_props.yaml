@@ -10,7 +10,14 @@ CEDARLING_LOG_LEVEL: 'DEBUG'
 CEDARLING_LOG_TTL: 60
 CEDARLING_USER_AUTHZ: 'enabled'
 CEDARLING_WORKLOAD_AUTHZ: 'enabled'
-CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION: 'AND'
+CEDARLING_PRINCIPAL_BOOLEAN_OPERATION:
+    and:
+        - "===":
+            - var: "Jans::Workload"
+            - "ALLOW"
+        - "===":
+            - var: "Jans::User"
+            - "ALLOW"
 CEDARLING_LOCAL_JWKS: null
 CEDARLING_POLICY_STORE_LOCAL: null
 CEDARLING_POLICY_STORE_LOCAL_FN: '../test_files/policy-store_blobby.json'
@@ -19,42 +26,9 @@ CEDARLING_JWT_STATUS_VALIDATION: 'disabled'
 CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED:
     - 'HS256'
     - 'RS256'
-CEDARLING_TOKEN_CONFIGS:
-    access_token:
-        entity_type_name: 'Test::Access_token'
-        iss: 'disabled'
-        jti: 'disabled'
-        nbf: 'disabled'
-        exp: 'enabled'
-    id_token:
-        entity_type_name: 'Test::id_token'
-        iss: 'enabled'
-        sub: 'enabled'
-        exp: 'enabled'
-        iat: 'enabled'
-        aud: 'enabled'
-    userinfo_token:
-        entity_type_name: 'Test::Userinfo_token'
-        iss: 'enabled'
-        sub: 'enabled'
-        aud: 'enabled'
-        exp: 'enabled'
-CEDARLING_AT_ISS_VALIDATION: 'disabled'
-CEDARLING_AT_JTI_VALIDATION: 'disabled'
-CEDARLING_AT_NBF_VALIDATION: 'disabled'
-CEDARLING_AT_EXP_VALIDATION: 'enabled'
-CEDARLING_IDT_ISS_VALIDATION: 'enabled'
-CEDARLING_IDT_SUB_VALIDATION: 'enabled'
-CEDARLING_IDT_EXP_VALIDATION: 'enabled'
-CEDARLING_IDT_IAT_VALIDATION: 'enabled'
-CEDARLING_IDT_AUD_VALIDATION: 'enabled'
-CEDARLING_USERINFO_ISS_VALIDATION: 'enabled'
-CEDARLING_USERINFO_SUB_VALIDATION: 'enabled'
-CEDARLING_USERINFO_AUD_VALIDATION: 'enabled'
-CEDARLING_USERINFO_EXP_VALIDATION: 'enabled'
 CEDARLING_ID_TOKEN_TRUST_MODE: 'strict'
 CEDARLING_LOCK: 'disabled'
-CEDARLING_LOCK_MASTER_CONFIGURATION_URI: null
+CEDARLING_LOCK_SERVER_CONFIGURATION_URI: null
 CEDARLING_LOCK_DYNAMIC_CONFIGURATION: 'disabled'
 CEDARLING_LOCK_HEALTH_INTERVAL: 0
 CEDARLING_LOCK_TELEMETRY_INTERVAL: 0

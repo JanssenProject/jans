@@ -6,6 +6,7 @@ import uuid
 import shutil
 import json
 import tempfile
+import configparser
 
 from urllib.parse import urlparse
 
@@ -54,12 +55,11 @@ class JansAuthInstaller(JettyInstaller):
             Config.jwks_uri = base.argsp.jwks_uri
 
     def install(self):
-        self.logIt("Copying auth.war into jetty webapps folder...")
         self.make_pairwise_calculation_salt()
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
-        self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         self.set_class_path([os.path.join(self.custom_lib_dir, '*')])
         self.external_libs()
+        self.data_cleaner_crontab()
         self.setup_agama()
         if Config.persistence_type == 'ldap':
             self.populate_jans_db_auth()
@@ -242,3 +242,41 @@ class JansAuthInstaller(JettyInstaller):
 
         self.logIt(f"Populating jansDbAuth with {ldap_config}")
         self.dbUtils.set_configuration('jansDbAuth', json.dumps(ldap_config, indent=2), dn='ou=configuration,o=jans')
+
+
+    def data_cleaner_crontab(self):
+
+        cleaner_dir = '/opt/jans/data-cleaner'
+        cleaner_config_fn = os.path.join(cleaner_dir, 'data-clean.ini')
+
+        if not os.path.exists(cleaner_dir):
+            self.createDirs(cleaner_dir)
+
+        # copy files
+        crontab_fn = 'jans-clean-data-crontab.py'
+        cleaner_fn = 'clean-data.py'
+        for fn in (crontab_fn, cleaner_fn):
+            source = os.path.join(Config.staticFolder, 'auth/data_clean/', fn)
+            target = os.path.join(cleaner_dir, fn)
+            self.copyFile(source, target, backup=False)
+            self.run([paths.cmd_chmod, '+x', target])
+
+        crontab_lib = os.path.join(base.pylib_dir, 'crontab.py')
+        self.copyFile(crontab_lib, cleaner_dir, backup=False)
+
+
+        # scan tables to clean and write config file
+        tables = []
+        for schema_fn in Config.schema_files:
+            schema = base.readJsonFile(schema_fn)
+            for cls in schema['objectClasses']:
+                if 'exp' in cls['may'] and 'del' in cls['may']:
+                    tables.append(cls['names'][0])
+
+        config = configparser.ConfigParser()
+        config['main'] = { 'tables': ' '.join(tables) }
+        with open(cleaner_config_fn, 'w') as configfile:
+            config.write(configfile)
+
+        # create crontab entry
+        self.run([os.path.join(cleaner_dir, crontab_fn)])

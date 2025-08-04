@@ -6,23 +6,28 @@
 
 package io.jans.link.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import com.unboundid.ldap.sdk.LDAPException;
+
 import io.jans.link.constants.JansConstants;
-import io.jans.model.JansCustomAttribute;
-import io.jans.link.model.config.AppConfiguration;
-import io.jans.model.JansAttribute;
 import io.jans.model.GluuAttributeUsageType;
 import io.jans.model.GluuUserRole;
+import io.jans.model.JansAttribute;
+import io.jans.model.JansCustomAttribute;
 import io.jans.model.attribute.AttributeDataType;
 import io.jans.model.user.UserRole;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.BaseCacheService;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import java.util.*;
 
 /**
  * Provides operations with attributes

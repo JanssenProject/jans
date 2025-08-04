@@ -6,7 +6,7 @@ tags:
   - benchmarking
 ---
 
-# Overview
+# Benchmark
 
 The Janssen Server has been optimized with several container strategies that allow scaling microservices and orchestrating them using Kubernetes. In this tutorial we will be running a load test from three different regions on a janssen setup on three different regions. For simplicity, we will be using [microk8s](https://microk8s.io) however we do recommend users to use the kubernetes cluster providers that they will be using in production. For instance, we run our loadtests across EKS, GKE, AKS and DOKS.
 

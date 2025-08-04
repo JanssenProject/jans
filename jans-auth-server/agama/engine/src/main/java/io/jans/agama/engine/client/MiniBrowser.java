@@ -84,7 +84,7 @@ public class MiniBrowser {
     private int maxErrorContentLength;
     
     public MiniBrowser(String rootUrl) {
-        this(rootUrl, 3500, 3500, 4096);
+        this(rootUrl, 3500, 5500, 4096);
     }
     
     public MiniBrowser(String rootUrl, 

@@ -4,7 +4,7 @@ tags:
 - scim
 ---
 
-# Overview
+# SCIM Admin Guide
 
 **S**ystem for **C**ross-domain **I**dentity **M**anagement, in short **SCIM**, is a specification that simplifies the exchange of user identity information across different domains. The Janssen Server provides an implementation for the SCIM specification.
 

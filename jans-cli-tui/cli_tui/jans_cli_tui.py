@@ -9,14 +9,15 @@ import importlib
 import sys
 import asyncio
 import concurrent.futures
+import random
 
 from enum import Enum
-from functools import partial
 from pathlib import Path
 from itertools import cycle
 from requests.models import Response
 from logging.handlers import RotatingFileHandler
 
+tcols, trows = os.get_terminal_size()
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
 
@@ -24,10 +25,87 @@ pylib_dir = os.path.join(cur_dir, 'cli', 'pylib')
 if os.path.exists(pylib_dir):
     sys.path.insert(0, pylib_dir)
 
+from prompt_toolkit.shortcuts import clear
+
+# Import the defeat gorn game
+try:
+    from defeat_gorn import play_defeat_gorn_game
+except ImportError:
+    def play_defeat_gorn_game():
+        pass  # Fallback if game module not available
+
+### start splash logo
+with open(os.path.join(cur_dir, 'jans-logo.txt')) as f:
+    jans_logo = f.read()
+
+jans_logo_list = jans_logo.splitlines()
+
+if tcols < len(jans_logo_list[0])+1 or trows < len(jans_logo_list)+1:
+    jans_logo_list_resized = []
+    for line in jans_logo_list[::2]:
+        jans_logo_list_resized.append(line[::2])
+
+    jans_logo_list = jans_logo_list_resized[:]
+
+logo_cols = len(jans_logo_list[3])
+
+pre_cols = (int((tcols - logo_cols)/2) -1) * ' '
+for i, line in enumerate(jans_logo_list[:]):
+    jans_logo_list[i] = pre_cols + jans_logo_list[i]
+
+pre_rows = int((trows - len(jans_logo_list))/2) -2
+for _ in range(pre_rows):
+    jans_logo_list.insert(0, ' ')
+
+jans_logo = '\n'.join(jans_logo_list)
+
+clear()
+print(jans_logo)
+### end splash logo
+
+# 10% chance to show the defeat gorn game
+if random.random() < 0.10:  # 10% chance
+    try:
+        # Clear screen and show game
+        clear()
+        play_defeat_gorn_game()
+        # Clear screen again and show logo
+        clear()
+        print(jans_logo)
+    except Exception as e:
+        # If game fails, log error to file and continue normally
+        import traceback
+        import datetime
+        
+        # Create logs directory if it doesn't exist
+        logs_dir = os.path.join(cur_dir, 'logs')
+        os.makedirs(logs_dir, exist_ok=True)
+        
+        # Write error to log file
+        log_file = os.path.join(logs_dir, 'defeat_gorn_errors.log')
+        with open(log_file, 'a') as f:
+            f.write(f"\n{'='*50}\n")
+            f.write(f"Game Error - {datetime.datetime.now()}\n")
+            f.write(f"{'='*50}\n")
+            f.write(f"Error: {str(e)}\n")
+            f.write(f"Traceback:\n{traceback.format_exc()}\n")
+            f.write(f"{'='*50}\n")
+        
+        # Clear screen and show logo to ensure clean startup
+        clear()
+        print(jans_logo)
+
 no_tui = False
 if '--no-tui' in sys.argv:
     sys.argv.remove('--no-tui')
     no_tui = True
+
+
+def print_text(txt):
+    print("\033[%d;%dH" % (trows-2, 0))
+    print(txt.ljust(tcols))
+
+print_text("Importing CLI ...")
 
 from cli import config_cli
 
@@ -60,13 +138,13 @@ from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.layout import Layout
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.widgets import (
-    Button,
     Frame,
+    Button,
     Label,
     RadioList,
-    TextArea,
     CheckboxList,
     Checkbox,
+    TextArea
 )
 from collections import OrderedDict
 from typing import Any, Optional, Sequence, Union
@@ -88,10 +166,15 @@ from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
+
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
+data_dir = home_dir.joinpath('.jans-cli-tui')
+
+if not data_dir.exists():
+    data_dir.mkdir(parents=True, exist_ok=True)
 
 def accept_yes() -> None:
     get_app().exit(result=True)
@@ -104,10 +187,11 @@ def do_exit(*c) -> None:
 
 class JansCliApp(Application):
 
-    entries_per_page = 20 # we can make this configurable
 
     def __init__(self):
+
         common_data.app = self
+        common_data.app.data_dir = data_dir
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
         self.set_keybindings()
         self.init_logger()
@@ -152,6 +236,7 @@ class JansCliApp(Application):
                     jans_name='main:nav_bar',
                     last_to_right=True,
                     )
+
         self.center_frame = FloatContainer(content=
                     Frame(
                         body=DynamicContainer(lambda: self.center_container),
@@ -159,6 +244,7 @@ class JansCliApp(Application):
                         ),
                         floats=[],
                 )
+
         self.root_layout = FloatContainer(
                         HSplit([
                                 Frame(self.nav_bar.nav_window),
@@ -168,6 +254,7 @@ class JansCliApp(Application):
                                 ),
                         floats=[]
                 )
+
         super(JansCliApp, self).__init__(
                 layout=Layout(self.root_layout),
                 key_bindings=self.bindings, 
@@ -181,6 +268,13 @@ class JansCliApp(Application):
 
         self.create_background_task(self.check_jans_cli_ini())
 
+    @property
+    def entries_per_page(self):
+        if self.output.get_size().rows > 31:
+            return 20
+        if self.output.get_size().rows > 26:
+            return 15
+        return 10
 
     async def progress_coroutine(self) -> None:
         """asyncio corotune for progress bar
@@ -319,7 +413,7 @@ class JansCliApp(Application):
                 test_client=test_client
             )
 
-        print(_("Checking health of Jans Config Api Server"))
+        print_text(_("Checking health of Jans Config Api Server ..."))
         response = self.cli_requests({'operation_id': 'get-config-health'})
 
         if response.status_code != 200:
@@ -334,7 +428,8 @@ class JansCliApp(Application):
                     print(healt_status)
                     sys.exit()
 
-        print(_("Health of Jans Config Api Server seems good"))
+        time.sleep(1)
+        print_text(_("Health of Jans Config Api Server seems good."))
 
         status = self.cli_object.check_connection()
 
@@ -919,10 +1014,10 @@ class JansCliApp(Application):
 
         return result
 
-    def show_jans_dialog(self, dialog:Dialog, focus=None) -> None:
+    def show_jans_dialog(self, dialog:Dialog, focus=None, tobefocused=None) -> None:
 
         async def coroutine():
-            focused_before = self.layout.current_window
+            focused_before = tobefocused or self.layout.current_window
             result = await self.show_dialog_as_float(dialog, focus)
 
             if not self.root_layout.floats:
@@ -959,7 +1054,7 @@ class JansCliApp(Application):
                 with open(path, 'w') as w:
                     w.write(text_area.text)
                 self.pbar_text = _("File {} was saved".format(text_area.text))
-                self.show_message(_("Info"), _("File {} was successfully saved").format(path), tobefocused=self.center_container)
+                self.show_message(_("Info"), _("File {} was successfully saved").format(path), tobefocused=params.get('tobefocused') or self.center_container)
             except Exception as e:
                 self.show_message(_("Error!"), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=self.center_container)
 
@@ -970,7 +1065,7 @@ class JansCliApp(Application):
         save_button = Button(_("Export"), handler=save)
         buttons = [Button('Close'), save_button]
         dialog = JansGDialog(self, title=title, body=body, buttons=buttons)
-        self.show_jans_dialog(dialog)
+        self.show_jans_dialog(dialog, tobefocused=params.get('tobefocused'))
 
     def save_creds(self, dialog:Dialog) -> None:
 
@@ -1007,8 +1102,8 @@ class JansCliApp(Application):
 
     def show_message(
             self, 
-            title: AnyFormattedText,  
-            message: AnyFormattedText,  
+            title: AnyFormattedText,
+            message: AnyFormattedText,
             buttons:Optional[Sequence[Button]] = [],
             tobefocused: AnyContainer= None
             ) -> None:
@@ -1040,7 +1135,6 @@ class JansCliApp(Application):
         buttons = [Button(_("No")), Button(_("Yes"), handler=confirm_handler)]
         dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons, width=self.dialog_width-20)
         return dialog
-
 
 application = JansCliApp()
 

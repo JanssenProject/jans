@@ -16,10 +16,10 @@ SUPPORTED_PLUGINS = (
     "scim",
     "fido2",
     "user-mgt",
-    "jans-link",
     "kc-saml",
-    "kc-link",
     "lock",
+    "jans-link",
+    "kc-link",
 )
 
 

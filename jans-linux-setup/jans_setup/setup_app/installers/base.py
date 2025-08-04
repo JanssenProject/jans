@@ -102,7 +102,8 @@ class BaseInstaller:
 
             self.logIt("Checking ID for client {}".format(client_var_name))
             rv = 1
-            if not Config.get(client_var_name):
+
+            if Config.get(client_var_name):
                 result = self.dbUtils.search('ou={},o=jans'.format(ou), '(&({}={}*)(objectClass=jansClnt))'.format(field_name, client_id_prefix))
                 if result:
                     setattr(Config, client_var_name, result[field_name])
@@ -112,6 +113,9 @@ class BaseInstaller:
                         setattr(Config, client_pw, self.unobscure(result['jansClntSecret']))
                 else:
                     rv = -1
+            else:
+                rv = -1
+
 
             ret_val[client_id_prefix] = rv
 

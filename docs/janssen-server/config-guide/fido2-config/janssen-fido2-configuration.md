@@ -67,8 +67,8 @@ It will return the result as below:
 
 ```json title="Sample Output" linenums="1"
 {
-  "issuer": "https://jans-project.lxd",
-  "baseEndpoint": "https://jans-project.lxd/jans-fido2/restv1",
+  "issuer": "https://example.jans.io",
+  "baseEndpoint": "https://example.jans.io/jans-fido2/restv1",
   "cleanServiceInterval": 60,
   "cleanServiceBatchChunkSize": 10000,
   "useLocalCache": true,
@@ -91,25 +91,36 @@ It will return the result as below:
     "checkU2fAttestations": false,
     "debugUserAutoEnrollment": false,
     "unfinishedRequestExpiration": 180,
-    "authenticationHistoryExpiration": 1296000,
+    "metadataRefreshInterval": 1296000,
     "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
     "enabledFidoAlgorithms": [
       "RS256",
       "ES256"
     ],
-    "rp": [
+    "metadataServers": [
       {
-        "id": "https://jans-project.lxd",
-        "origins": [
-          "jans-project.lxd"
-        ]
+        "url": "https://mds.fidoalliance.org/"
       }
     ],
     "disableMetadataService": false,
+    "hints": [
+      "security-key",
+      "client-device",
+      "hybrid"
+    ],
+    "enterpriseAttestation": false,
     "attestationMode": "monitor",
-    "assertionOptionsGenerateEndpointEnabled": true
+    "rp": [
+      {
+        "id": "https://example.jans.io",
+        "origins": [
+          "example.jans.io"
+        ]
+      }
+    ]
   }
 }
+
 
 ```
 
@@ -118,7 +129,7 @@ It will return the result as below:
 To update the configuration follow the steps below.
 
 1. [Get the current configuration](#get-the-current-fido2-configuration) and store it into a file for editing
-2. Edit and update the desired configuration values in the file while keeping other properties and values unchanged. Updates must adhere to the `Fido2:AppConfiguration` schema as mentioned [here](#using-command-line). The schema details can be retrieved using the command below. The schema defines what values and datatypes are acceptable for each property value.
+2. Edit and update the desired configuration values (ex: change logging level to TRACE) in the file while keeping other properties and values unchanged. Updates must adhere to the `Fido2:AppConfiguration` schema as mentioned [here](#using-command-line). The schema details can be retrieved using the command below. The schema defines what values and datatypes are acceptable for each property value.
  ```text title="Command"
  jans cli --schema Fido2:AppConfiguration
  ```
@@ -126,7 +137,7 @@ To update the configuration follow the steps below.
  ```bash title="Command"
   jans cli --operation-id put-properties-fido2 --data /tmp/conf-data.json
  ```
- Upon successful execution of the update, the Janssen Server responds with updated configuration.
+ Upon successful execution of the update, the Janssen Server responds with updated configuration.you can check the updated value changed ("loggingLevel": "TRACE")
 
 
 ##  Using Text-based UI

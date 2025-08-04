@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::super::TokenValidationConfig;
+use crate::bootstrap_config::jwt_config::TokenValidationConfig;
 use super::super::authorization_config::TokenEntityNames;
 use super::FeatureToggle;
 use serde::{Deserialize, Serialize};
@@ -31,6 +31,7 @@ pub struct TokenConfig {
     claims: ClaimsValidationConfig,
 }
 
+/// Claims validation config
 #[derive(Debug, Deserialize, PartialEq, Clone, Default, Serialize)]
 #[serde(default)]
 pub struct ClaimsValidationConfig {
@@ -51,18 +52,19 @@ pub struct ClaimsValidationConfig {
 }
 
 impl TokenConfigs {
+    /// Create a config without validation
     pub fn without_validation() -> Self {
         Self(HashMap::from([
             ("access_token".to_string(), TokenConfig {
-                entity_type_name: "Access_token".to_string(),
+                entity_type_name: "Jans::Access_token".to_string(),
                 claims: ClaimsValidationConfig::default(),
             }),
             ("id_token".to_string(), TokenConfig {
-                entity_type_name: "id_token".to_string(),
+                entity_type_name: "Jans::Id_token".to_string(),
                 claims: ClaimsValidationConfig::default(),
             }),
             ("userinfo_token".to_string(), TokenConfig {
-                entity_type_name: "Userinfo_token".to_string(),
+                entity_type_name: "Jans::Userinfo_token".to_string(),
                 claims: ClaimsValidationConfig::default(),
             }),
         ]))
@@ -71,9 +73,11 @@ impl TokenConfigs {
 
 impl Default for TokenConfigs {
     fn default() -> Self {
+        // we need define namespace for each token type, so default will be `Jans`
+        // If we avoid define namespace for each token type, the namespace would be empty string ("")
         Self(HashMap::from([
             ("access_token".to_string(), TokenConfig {
-                entity_type_name: "Access_token".to_string(),
+                entity_type_name: "Jans::Access_token".to_string(),
                 claims: ClaimsValidationConfig {
                     iss: FeatureToggle::Enabled,
                     sub: FeatureToggle::Disabled,
@@ -85,7 +89,7 @@ impl Default for TokenConfigs {
                 },
             }),
             ("id_token".to_string(), TokenConfig {
-                entity_type_name: "id_token".to_string(),
+                entity_type_name: "Jans::Id_token".to_string(),
                 claims: ClaimsValidationConfig {
                     iss: FeatureToggle::Enabled,
                     sub: FeatureToggle::Enabled,
@@ -97,7 +101,7 @@ impl Default for TokenConfigs {
                 },
             }),
             ("userinfo_token".to_string(), TokenConfig {
-                entity_type_name: "Userinfo_token".to_string(),
+                entity_type_name: "Jans::Userinfo_token".to_string(),
                 claims: ClaimsValidationConfig {
                     iss: FeatureToggle::Enabled,
                     sub: FeatureToggle::Enabled,

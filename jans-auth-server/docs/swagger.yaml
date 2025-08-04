@@ -152,6 +152,10 @@ paths:
                 custom_response_headers:
                   type: string
                   description: Custom Response Headers.
+                logout_status_jwt:
+                  type: string
+                  description: Possible values are true or false. Returns back Logout Status JWT if send logout_status_jwt=true and authorization is successful.
+
       responses:
         200:
           description: OK
@@ -168,6 +172,10 @@ paths:
                     type: string
                     description: Authorization Code
                     example: uY29tL2F1dGhlbnRpY
+                  logout_status_jwt:
+                    type: string
+                    description: Logout Status JWT
+                    example: eyJraWQiOiJjb25uZWN0XzA3ZjQ3ZmRkLTg0NTYtNDMzOC1iYTRmLWNhNmU0NDBmYjljOV9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9
         400:
           $ref: '#/components/responses/InvalidRequest'
         401:
@@ -340,6 +348,12 @@ paths:
           description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
           schema:
             type: string
+        - name: logout_status_jwt
+          in: query
+          required: false
+          description: Possible values are true or false. Returns back Logout Status JWT if send logout_status_jwt=true and authorization is successful.
+          schema:
+            type: string
         - name: authorization_details
           in: query
           required: false
@@ -493,6 +507,9 @@ paths:
                 dpop_jkt:
                   type: string
                   description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
+                logout_status_jwt:
+                  type: string
+                  description: Possible values are true or false. Returns back Logout Status JWT if send logout_status_jwt=true and authorization is successful.
                 authorization_details:
                   type: string
                   description: The request parameter authorization_details contains, in JSON notation, an array of objects. Each JSON object contains the data to specify the authorization requirements for a certain type of resource. The type of resource or access requirement is determined by the type field.
@@ -1500,6 +1517,9 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                logout_status_jwt_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Logout Status JWT.
                 tx_token_signed_response_alg:
                   type: string
                   description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -1534,6 +1554,9 @@ paths:
                   type: integer
                   description: Specifies the Default Maximum Authentication Age.
                   example: 1000000
+                require_pkce:
+                  type: boolean
+                  description: Boolean specifying whether PKCE is required by client. Defalut value is false.
                 require_auth_time:
                   type: boolean
                   description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
@@ -1713,37 +1736,42 @@ paths:
                     type: string
                 spontaneous_scope_script_dns:
                   type: array
-                  description: Spontaneous scope script dn
+                  description: Spontaneous scope script dns
                   items:
                     type: string
                 update_token_script_dns:
                   type: array
-                  description: Update token script dn
+                  description: Update token script dns
                   items:
                     type: string
                 post_authn_script_dns:
                   type: array
-                  description: Post Authn script dn
+                  description: Post Authn script dns
+                  items:
+                    type: string
+                token_exchange_script_dns:
+                  type: array
+                  description: Token Exchange script dns
                   items:
                     type: string
                 consent_gathering_script_dns:
                   type: array
-                  description: Consent Gathering script dn
+                  description: Consent Gathering script dns
                   items:
                     type: string
                 introspection_script_dns:
                   type: array
-                  description: Introspection script dn
+                  description: Introspection script dns
                   items:
                     type: string
                 rpt_claims_script_dns:
                   type: array
-                  description: RPT Claims script dn
+                  description: RPT Claims script dns
                   items:
                     type: string
                 ropc_script_dns:
                   type: array
-                  description: ROPC script dn
+                  description: ROPC script dns
                   items:
                     type: string
                 org_id:
@@ -1945,6 +1973,9 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                logout_status_jwt_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Logout Status JWT.
                 tx_token_signed_response_alg:
                   type: string
                   description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -1979,6 +2010,9 @@ paths:
                   type: integer
                   description: Specifies the Default Maximum Authentication Age.
                   example: 1000000
+                require_pkce:
+                  type: boolean
+                  description: Boolean specifying whether PKCE is required by client. Defalut value is false.
                 require_auth_time:
                   type: boolean
                   description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
@@ -2143,37 +2177,42 @@ paths:
                     type: string
                 spontaneous_scope_script_dns:
                   type: array
-                  description: Spontaneous scope script dn
+                  description: Spontaneous scope script dns
                   items:
                     type: string
                 update_token_script_dns:
                   type: array
-                  description: Update token script dn
+                  description: Update token script dns
                   items:
                     type: string
                 post_authn_script_dns:
                   type: array
-                  description: Post Authn script dn
+                  description: Post Authn script dns
+                  items:
+                    type: string
+                token_exchange_script_dns:
+                  type: array
+                  description: Token Exchange script dns
                   items:
                     type: string
                 consent_gathering_script_dns:
                   type: array
-                  description: Consent Gathering script dn
+                  description: Consent Gathering script dns
                   items:
                     type: string
                 introspection_script_dns:
                   type: array
-                  description: Introspection script dn
+                  description: Introspection script dns
                   items:
                     type: string
                 rpt_claims_script_dns:
                   type: array
-                  description: RPT Claims script dn
+                  description: RPT Claims script dns
                   items:
                     type: string
                 ropc_script_dns:
                   type: array
-                  description: ROPC script dn
+                  description: ROPC script dns
                   items:
                     type: string
       responses:
@@ -2370,6 +2409,9 @@ paths:
                   introspection_encrypted_response_enc:
                     type: string
                     description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                  logout_status_jwt_signed_response_alg:
+                    type: string
+                    description: JWS alg algorithm (JWA) required for signing Logout Status JWT.
                   tx_token_signed_response_alg:
                     type: string
                     description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
@@ -2705,8 +2747,8 @@ paths:
     get:
       tags:
         - Session Management
-      summary: Determine current sesion status.
-      description: Determine current sesion status.
+      summary: Determine current session status.
+      description: Determine current session status.
       operationId: session_status
       responses:
         200:
@@ -2727,36 +2769,6 @@ paths:
                     example: 100000000
                   custom_state:
                     type: string
-  /revoke_session:
-    post:
-      tags:
-        - Session Management
-      summary: Revoke all sessions for user.
-      description: Revoke all sessions for user (requires revoke_session scope).
-      operationId: revoke-session
-      requestBody:
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              required:
-                - user_criterion_key
-                - user_criterion_value
-              properties:
-                user_criterion_key:
-                  type: string
-                  description: user criterion key (e.g. uid)
-                user_criterion_value:
-                  type: string
-                  description: user criterion value (e.g. chris)
-      responses:
-        200:
-          description: OK - Returned if request was processed successfully. Means it will return in case sessions are found as well as in case sessions are not found (error is not returned to not disclose internal information).
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/InternalServerError'
 
   /status_list:
     get:
@@ -4370,6 +4382,152 @@ paths:
                     type: string
         403:
           description: Invalid parameters provided to endpoint.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - insufficient_scope
+                  error_description:
+                    type: string
+                  details:
+                    type: string
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /internal/stat:
+    get:
+      tags:
+        - Internal Statistic
+      summary: Get Internal Statistic
+      description: |-
+        # Get Internal Statistic.
+        ----
+
+        **Security: Bearer Auth**
+
+        Provide your bearer token in the Authorization header when making requests to protected resources.
+
+        Example: `Authorization: Bearer {{your-access-token}}`
+
+        **Security: OAuth 2.0**
+
+        Scopes:
+        - `jans_stat` - required scope
+      operationId: get-internal-stat
+      security:
+        - bearer: [ ]
+      parameters:
+        - name: Authorization
+          in: header
+          description: Expects valid access token with appropriate prefix. Example 'Bearer {{your-access-token}}'. Token must have `jans_stat` scope.
+          schema:
+            type: string
+        - name: month
+          in: query
+          required: false
+          description: specify month in YYYYMM format (e.g. `January 2022` is `202201`). It's optional if start-month and end-month parameters are specified. Otherwise it's required.
+          schema:
+            type: string
+        - name: start-month
+          in: query
+          required: false
+          description: start month for range request. Specify month in YYYYMM format (e.g. `January 2022` is `202201`). It's optional if 'month' parameter is specified. Otherwise it's required.
+          schema:
+            type: string
+        - name: end-month
+          in: query
+          required: false
+          description: end month for range request. Specify month in YYYYMM format (e.g. `January 2022` is `202201`). It's optional if 'month' parameter is specified. Otherwise it's required.
+          schema:
+            type: string
+        - name: format
+          in: query
+          required: false
+          description: if no value is specified than json value is returns. Possible explicit values are `openmetrics` (open metrics format) and `jsonmonth` (all data are flattened for given month)
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: Successful response with internal statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        monthly_active_users:
+                          type: integer
+                          description: Number of active users for the month.
+                        token_count_per_granttype:
+                          type: object
+                          additionalProperties:
+                            type: object
+                            properties:
+                              access_token:
+                                type: integer
+                                description: Number of access tokens issued.
+                              refresh_token:
+                                type: integer
+                                description: Number of refresh tokens issued.
+                              uma_token:
+                                type: integer
+                                description: Number of UMA tokens issued.
+                              id_token:
+                                type: integer
+                                description: Number of ID tokens issued.
+        400:
+          description: Invalid parameters provided to endpoint.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - invalid_request
+                  error_description:
+                    type: string
+                  details:
+                    type: string
+        401:
+          description: Request is rejected due to invalid authorization.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - invalid_token
+                  error_description:
+                    type: string
+                  details:
+                    type: string
+        403:
+          description: Request is forbiden due to insufficient authorization (typically due to 'jans_stat' scope).
           content:
             application/json:
               schema:

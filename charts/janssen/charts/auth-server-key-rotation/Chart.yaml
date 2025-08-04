@@ -9,7 +9,7 @@ keywords:
   - Auth keys Rotation
 home: https://jans.io
 sources:
-  - https://github.com/JanssenProject/docker-jans-certmanager
+  - https://github.com/JanssenProject/docker-jans-cloudtools
 maintainers:
   - name: Mohammad Abudayyeh
     email: support@jans.io

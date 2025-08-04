@@ -9,14 +9,43 @@
 //! all case scenario should have `result.decision == true`
 //! because we have checked different scenarios in `cases_authorize_without_check_jwt.rs`
 
+use std::sync::LazyLock;
+
 use lazy_static::lazy_static;
 use test_utils::assert_eq;
 use tokio::test;
 
 use super::utils::*;
-use crate::{WorkloadBoolOp, authorization_config::IdTokenTrustMode, cmp_decision, cmp_policy}; /* macros is defined in the cedarling\src\tests\utils\cedarling_util.rs */
+use crate::{cmp_decision, cmp_policy, IdTokenTrustMode, JsonRule};
+use crate::log::interface::LogStorage;
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
+
+static OPERATOR_AND: LazyLock<JsonRule> = LazyLock::new(|| {
+    JsonRule::new(json!({
+        "and" : [
+            {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+            {"===": [{"var": "Jans::User"}, "ALLOW"]}
+        ]
+    }))
+    .unwrap()
+});
+
+static OPERATOR_OR: LazyLock<JsonRule> = LazyLock::new(|| {
+    JsonRule::new(json!({
+        "or" : [
+            {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+            {"===": [{"var": "Jans::User"}, "ALLOW"]}
+        ]
+    }))
+    .unwrap()
+});
+
+static OPERATOR_USER: LazyLock<JsonRule> =
+    LazyLock::new(|| JsonRule::new(json!({"===": [{"var": "Jans::User"}, "ALLOW"]})).unwrap());
+
+static OPERATOR_WORKLOAD: LazyLock<JsonRule> =
+    LazyLock::new(|| JsonRule::new(json!({"===": [{"var": "Jans::Workload"}, "ALLOW"]})).unwrap());
 
 lazy_static! {
     pub(crate) static ref AuthRequestBase: Request = Request::deserialize(serde_json::json!(
@@ -26,12 +55,12 @@ lazy_static! {
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
                 })),
@@ -39,16 +68,17 @@ lazy_static! {
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
-                    "role": "Admin",
+                    "iss": "https://account.gluu.org",
+                    "role": ["Admin"],
                 })),
             },
             // we need specify action name in each test case
             "action": "",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
@@ -78,7 +108,7 @@ async fn success_test_for_all_principals() {
     );
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -90,7 +120,7 @@ async fn success_test_for_all_principals() {
 
     cmp_policy!(
         result.person,
-        vec!["2", "3"],
+        ["2", "3"],
         "reason of permit person should be '2'"
     );
 
@@ -105,9 +135,14 @@ async fn success_test_for_principal_workload() {
         crate::AuthorizationConfig {
             use_user_principal: false,
             use_workload_principal: true,
-            user_workload_operator: Default::default(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            principal_bool_operator: OPERATOR_WORKLOAD.to_owned(),
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
+        },
+        {
+            let mut config = crate::EntityBuilderConfig::default().with_workload();
+            config.build_user = false;
+            config
         },
     )
     .await;
@@ -127,7 +162,7 @@ async fn success_test_for_principal_workload() {
     );
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -144,9 +179,14 @@ async fn success_test_for_principal_user() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: false,
-            user_workload_operator: Default::default(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            principal_bool_operator: OPERATOR_USER.to_owned(),
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
+        },
+        {
+            let mut config = crate::EntityBuilderConfig::default().with_user();
+            config.build_workload = false;
+            config
         },
     )
     .await;
@@ -166,7 +206,7 @@ async fn success_test_for_principal_user() {
     );
     cmp_policy!(
         result.person,
-        vec!["2"],
+        ["2"],
         "reason of permit person should be '2'"
     );
 
@@ -187,9 +227,14 @@ async fn success_test_for_principal_person_role() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: false,
-            user_workload_operator: Default::default(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            principal_bool_operator: OPERATOR_USER.to_owned(),
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
+        },
+        {
+            let mut config = crate::EntityBuilderConfig::default().with_user();
+            config.build_workload = false;
+            config
         },
     )
     .await;
@@ -204,7 +249,7 @@ async fn success_test_for_principal_person_role() {
 
     cmp_policy!(
         result.person,
-        vec!["2", "3"],
+        ["2", "3"],
         "reason of permit person should be '2'"
     );
 
@@ -230,10 +275,13 @@ async fn success_test_for_principal_workload_role() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
-            id_token_trust_mode: IdTokenTrustMode::None,
+            principal_bool_operator: OPERATOR_AND.to_owned(),
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .with_workload()
+            .with_user(),
     )
     .await;
 
@@ -252,7 +300,7 @@ async fn success_test_for_principal_workload_role() {
     );
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -263,7 +311,7 @@ async fn success_test_for_principal_workload_role() {
     );
     cmp_policy!(
         result.person,
-        vec!["3"],
+        ["3"],
         "reason of permit person should be '3'"
     );
 
@@ -279,10 +327,13 @@ async fn success_test_for_principal_workload_true_or_user_false() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::Or,
-            id_token_trust_mode: IdTokenTrustMode::None,
+            principal_bool_operator: OPERATOR_OR.to_owned(),
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .with_user()
+            .with_workload(),
     )
     .await;
 
@@ -301,7 +352,7 @@ async fn success_test_for_principal_workload_true_or_user_false() {
     );
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -328,10 +379,13 @@ async fn success_test_for_principal_workload_false_or_user_true() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::Or,
-            id_token_trust_mode: IdTokenTrustMode::None,
+            principal_bool_operator: OPERATOR_OR.to_owned(),
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .with_user()
+            .with_workload(),
     )
     .await;
 
@@ -361,7 +415,7 @@ async fn success_test_for_principal_workload_false_or_user_true() {
     );
     cmp_policy!(
         result.person,
-        vec!["2"],
+        ["2"],
         "reason of permit person should be '2'"
     );
 
@@ -377,10 +431,13 @@ async fn success_test_for_principal_workload_false_or_user_false() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::Or,
-            id_token_trust_mode: IdTokenTrustMode::None,
+            principal_bool_operator: OPERATOR_OR.to_owned(),
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .with_user()
+            .with_workload(),
     )
     .await;
 
@@ -425,10 +482,13 @@ async fn test_where_principal_workload_cant_be_applied() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: Default::default(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            principal_bool_operator: Default::default(),
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .with_user()
+            .with_workload(),
     )
     .await;
 
@@ -440,10 +500,7 @@ async fn test_where_principal_workload_cant_be_applied() {
         .await
         .expect_err("request should be parsed with error");
 
-    assert!(matches!(
-        result,
-        crate::AuthorizeError::WorkloadRequestValidation(_)
-    ))
+    assert!(matches!(result, crate::AuthorizeError::InvalidPrincipal(_)))
 }
 
 /// Check if action executes when principal user can't be applied
@@ -454,10 +511,11 @@ async fn test_where_principal_user_cant_be_applied() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: false,
-            user_workload_operator: Default::default(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            principal_bool_operator: JsonRule::default(),
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default().with_user(),
     )
     .await;
 
@@ -470,8 +528,83 @@ async fn test_where_principal_user_cant_be_applied() {
         .expect_err("request should be parsed with error");
 
     assert!(
-        matches!(result, crate::AuthorizeError::UserRequestValidation(_)),
-        "expected error UserRequestValidation, got: {}",
+        matches!(result, crate::AuthorizeError::InvalidPrincipal(_)),
+        "expected error InvalidPrincipal, got: {}",
         result
     )
+}
+
+/// Test policy evaluation errors are logged for signed authorization
+#[test]
+async fn test_policy_evaluation_errors_logging() {
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            principal_bool_operator: OPERATOR_AND.to_owned(),
+            id_token_trust_mode: IdTokenTrustMode::Never,
+            ..Default::default()
+        },
+        crate::EntityBuilderConfig::default().with_user().with_workload(),
+    )
+    .await;
+
+    let mut request = AuthRequestBase.clone();
+    request.action = "Jans::Action::\"AlwaysDeny\"".to_string();
+
+    let result = cedarling.authorize(request).await.expect("request should be parsed without errors");
+    
+    // Verify that logs were created and contain the request ID
+    let logs = cedarling.pop_logs();
+    assert!(!logs.is_empty(), "Should have created logs");
+    
+    let request_id = &result.request_id;
+    let logs_with_request_id: Vec<&serde_json::Value> = logs
+        .iter()
+        .filter(|log| log.get("request_id") == Some(&serde_json::json!(request_id)))
+        .collect();
+    
+    assert!(!logs_with_request_id.is_empty(), "Should have logs for the request ID");
+    
+    // Verify that logs contain expected content
+    for log in &logs_with_request_id {
+        // Verify basic log structure
+        assert!(log.get("id").is_some(), "Log should have an id field");
+        assert!(log.get("timestamp").is_some(), "Log should have a timestamp field");
+        assert!(log.get("log_kind").is_some(), "Log should have a log_kind field");
+        
+        // Verify log kind is valid
+        let log_kind = log.get("log_kind").unwrap();
+        assert!(
+            log_kind == "Decision" || log_kind == "System",
+            "Log kind should be Decision or System, got: {:?}",
+            log_kind
+        );
+        
+        // For Decision logs, verify they have required fields
+        if log_kind == "Decision" {
+            assert!(log.get("action").is_some(), "Decision log should have an action field");
+            assert!(log.get("resource").is_some(), "Decision log should have a resource field");
+            assert!(log.get("decision").is_some(), "Decision log should have a decision field");
+            assert!(log.get("diagnostics").is_some(), "Decision log should have a diagnostics field");
+            
+            // Verify the action matches what we requested
+            let log_action = log.get("action").unwrap();
+            assert_eq!(log_action, &serde_json::json!("Jans::Action::\"AlwaysDeny\""), "Decision log should have the correct action");
+            
+            // Verify the decision is DENY
+            let log_decision = log.get("decision").unwrap();
+            assert_eq!(log_decision, &serde_json::json!("DENY"), "Decision log should show DENY decision");
+            
+            // Verify diagnostics structure
+            let diagnostics = log.get("diagnostics").unwrap();
+            assert!(diagnostics.get("reason").is_some(), "Diagnostics should have a reason field");
+            assert!(diagnostics.get("errors").is_some(), "Diagnostics should have an errors field");
+            
+            // Verify no policy evaluation errors (since AlwaysDeny just denies, doesn't cause errors)
+            let errors = diagnostics.get("errors").unwrap();
+            assert_eq!(errors, &serde_json::json!([]), "Diagnostics should show no errors when there are no policy evaluation errors");
+        }
+    }
 }

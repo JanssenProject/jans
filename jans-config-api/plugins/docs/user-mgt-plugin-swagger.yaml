@@ -72,7 +72,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserPagedResult'
+                $ref: "#/components/schemas/UserPagedResult"
               examples:
                 Response json example:
                   description: Response json example
@@ -146,7 +146,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CustomUser'
+              $ref: "#/components/schemas/CustomUser"
             examples:
               Request json example:
                 description: Request json example
@@ -237,7 +237,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CustomUser'
+                $ref: "#/components/schemas/CustomUser"
               examples:
                 Response json example:
                   description: Response json example
@@ -327,7 +327,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "401":
           description: Unauthorized
         "404":
@@ -335,13 +335,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.write
@@ -365,7 +365,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CustomUser'
+              $ref: "#/components/schemas/CustomUser"
             examples:
               Request json example:
                 description: Request json example
@@ -453,7 +453,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CustomUser'
+                $ref: "#/components/schemas/CustomUser"
               examples:
                 Response json example:
                   description: Response json example
@@ -543,7 +543,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "401":
           description: Unauthorized
         "404":
@@ -551,13 +551,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.write
@@ -581,7 +581,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CustomUser'
+                $ref: "#/components/schemas/CustomUser"
               examples:
                 Response json example:
                   description: Response json example
@@ -726,7 +726,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserPatchRequest'
+              $ref: "#/components/schemas/UserPatchRequest"
             examples:
               Request json example:
                 description: Request json example
@@ -754,7 +754,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CustomUser'
+                $ref: "#/components/schemas/CustomUser"
               examples:
                 Response json example:
                   description: Response json example
@@ -889,7 +889,7 @@ components:
           items:
             type: string
         authenticator:
-          $ref: '#/components/schemas/UserAuthenticatorList'
+          $ref: "#/components/schemas/UserAuthenticatorList"
         status:
           type: string
           enum:
@@ -900,7 +900,7 @@ components:
         customAttributes:
           type: array
           items:
-            $ref: '#/components/schemas/CustomObjectAttribute'
+            $ref: "#/components/schemas/CustomObjectAttribute"
         customObjectClasses:
           type: array
           items:
@@ -934,7 +934,7 @@ components:
         authenticators:
           type: array
           items:
-            $ref: '#/components/schemas/UserAuthenticator'
+            $ref: "#/components/schemas/UserAuthenticator"
     ApiError:
       type: object
       properties:
@@ -959,7 +959,7 @@ components:
         entries:
           type: array
           items:
-            $ref: '#/components/schemas/CustomUser'
+            $ref: "#/components/schemas/CustomUser"
     UserPatchRequest:
       type: object
       properties:
@@ -968,7 +968,7 @@ components:
         customAttributes:
           type: array
           items:
-            $ref: '#/components/schemas/CustomObjectAttribute'
+            $ref: "#/components/schemas/CustomObjectAttribute"
   securitySchemes:
     oauth2:
       type: oauth2

@@ -67,11 +67,13 @@ import io.jans.model.custom.script.type.spontaneous.DummySpontaneousScopeType;
 import io.jans.model.custom.script.type.spontaneous.SpontaneousScopeType;
 import io.jans.model.custom.script.type.ssa.DummyModifySsaResponseType;
 import io.jans.model.custom.script.type.ssa.ModifySsaResponseType;
+import io.jans.model.custom.script.type.token.DummyTokenExchangeType;
 import io.jans.model.custom.script.type.token.DummyUpdateTokenType;
+import io.jans.model.custom.script.type.token.TokenExchangeType;
 import io.jans.model.custom.script.type.token.UpdateTokenType;
 import io.jans.model.custom.script.type.uma.*;
-import io.jans.model.custom.script.type.user.CacheRefreshType;
-import io.jans.model.custom.script.type.user.DummyCacheRefreshType;
+import io.jans.model.custom.script.type.user.LinkInterceptionType;
+import io.jans.model.custom.script.type.user.DummyLinkInterceptionType;
 import io.jans.orm.annotation.AttributeEnum;
 
 import java.util.HashMap;
@@ -91,8 +93,8 @@ public enum CustomScriptType implements AttributeEnum {
     RESOURCE_OWNER_PASSWORD_CREDENTIALS("resource_owner_password_credentials", "Resource Owner Password Credentials", ResourceOwnerPasswordCredentialsType.class, CustomScript.class, "ResourceOwnerPasswordCredentials", new DummyResourceOwnerPasswordCredentialsType()),
     APPLICATION_SESSION("application_session", "Application Session", ApplicationSessionType.class, CustomScript.class, "ApplicationSession",
             new DummyApplicationSessionType()),
-    CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh",
-            new DummyCacheRefreshType()),
+    LINK_INTERCEPTION("link_interception", "Link Interception", LinkInterceptionType.class, CustomScript.class, "LinkInterception",
+            new DummyLinkInterceptionType()),
     CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration",
             new DummyClientRegistrationType()),
     ID_GENERATOR("id_generator", "Id Generator", IdGeneratorType.class, CustomScript.class, "IdGenerator",
@@ -106,6 +108,7 @@ public enum CustomScriptType implements AttributeEnum {
             new DummyAccessEvaluationType()),
     ACCESS_EVALUATION_DISCOVERY("access_evaluation_discovery", "Access Evaluation Discovery", AccessEvaluationDiscoveryType.class, CustomScript.class, "AccessEvaluationDiscovery",
             new DummyAccessEvaluationDiscoveryType()),
+    TOKEN_EXCHANGE("token_exchange", "Token Exchange", TokenExchangeType.class, CustomScript.class, "TokenExchange", new DummyTokenExchangeType()),
     CONSENT_GATHERING("consent_gathering", "Consent Gathering", ConsentGatheringType.class, CustomScript.class, "ConsentGathering",
             new DummyConsentGatheringType()),
     DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", DynamicScopeType.class, CustomScript.class, "DynamicScope",

@@ -486,16 +486,6 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.sun.mail</groupId>
-			<artifactId>jakarta.mail</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>jakarta.activation</groupId>
-					<artifactId>jakarta.activation-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 
 		<!-- Google -->
 		<dependency>
@@ -508,6 +498,13 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
+
+        <!-- Bucket4j for rate limiting -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk11-core</artifactId>
+            <version>8.14.0</version>
+        </dependency>
 
 		<!-- JMS -->
 		<dependency>
@@ -794,18 +791,12 @@
 				</dependency> -->
 
 				<dependency>
-					<groupId>org.glassfish</groupId>
-					<artifactId>jakarta.el</artifactId>
-				</dependency>
-				<dependency>
 					<groupId>jakarta.el</groupId>
 					<artifactId>jakarta.el-api</artifactId>
-					<scope>test</scope>
 				</dependency>
 				<dependency>
 				    <groupId>jakarta.servlet.jsp</groupId>
 				    <artifactId>jakarta.servlet.jsp-api</artifactId>
-				    <scope>provided</scope>
 				</dependency>
 
 				<dependency>
@@ -824,7 +815,6 @@
     		        <groupId>jakarta.ejb</groupId>
                     <artifactId>jakarta.ejb-api</artifactId>
                 </dependency>
-
 
 				<!-- Test: Embedded Jetty -->
 				<dependency>

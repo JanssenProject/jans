@@ -18,7 +18,7 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.scim.ScimType;
 import io.jans.orm.model.base.Entry;
 import io.jans.orm.model.PagedResult;
-import io.jans.scim.model.GluuGroup;
+import io.jans.scim.model.JansGroup;
 import io.jans.scim.model.scim.ScimCustomPerson;
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.service.custom.script.ExternalScriptService;
@@ -185,7 +185,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    private boolean executeScimCreateGroupMethod(GluuGroup group, CustomScriptConfiguration customScriptConfiguration) {
+    private boolean executeScimCreateGroupMethod(JansGroup group, CustomScriptConfiguration customScriptConfiguration) {
 
         try {
             log.debug("Executing python 'SCIM Create Group' method");
@@ -203,7 +203,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    private boolean executeScimPostCreateGroupMethod(GluuGroup group, CustomScriptConfiguration customScriptConfiguration) {
+    private boolean executeScimPostCreateGroupMethod(JansGroup group, CustomScriptConfiguration customScriptConfiguration) {
 
         try {
             if (executeExternalGetApiVersion(customScriptConfiguration) < 2)
@@ -224,7 +224,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    private boolean executeScimUpdateGroupMethod(GluuGroup group, CustomScriptConfiguration customScriptConfiguration) {
+    private boolean executeScimUpdateGroupMethod(JansGroup group, CustomScriptConfiguration customScriptConfiguration) {
 
         try {
             log.debug("Executing python 'SCIM Update Group' method");
@@ -242,7 +242,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    private boolean executeScimPostUpdateGroupMethod(GluuGroup group, CustomScriptConfiguration customScriptConfiguration) {
+    private boolean executeScimPostUpdateGroupMethod(JansGroup group, CustomScriptConfiguration customScriptConfiguration) {
 
         try {
             if (executeExternalGetApiVersion(customScriptConfiguration) < 2)
@@ -263,7 +263,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    private boolean executeScimDeleteGroupMethod(GluuGroup group, CustomScriptConfiguration customScriptConfiguration) {
+    private boolean executeScimDeleteGroupMethod(JansGroup group, CustomScriptConfiguration customScriptConfiguration) {
 
         try {
             log.debug("Executing python 'SCIM Delete Group' method");
@@ -281,7 +281,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    private boolean executeScimPostDeleteGroupMethod(GluuGroup group, CustomScriptConfiguration customScriptConfiguration) {
+    private boolean executeScimPostDeleteGroupMethod(JansGroup group, CustomScriptConfiguration customScriptConfiguration) {
 
         try {
             if (executeExternalGetApiVersion(customScriptConfiguration) < 2)
@@ -302,7 +302,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    private boolean executeScimGetGroupMethod(GluuGroup group, CustomScriptConfiguration customScriptConfiguration) {
+    private boolean executeScimGetGroupMethod(JansGroup group, CustomScriptConfiguration customScriptConfiguration) {
 
         try {
             if (executeExternalGetApiVersion(customScriptConfiguration) < 3)
@@ -344,7 +344,7 @@ public class ExternalScimService extends ExternalScriptService {
         
     }
     
-    private boolean executeScimPostSearchGroupsMethod(PagedResult<GluuGroup> pagedResult, CustomScriptConfiguration customScriptConfiguration) {
+    private boolean executeScimPostSearchGroupsMethod(PagedResult<JansGroup> pagedResult, CustomScriptConfiguration customScriptConfiguration) {
 
         try {
             if (executeExternalGetApiVersion(customScriptConfiguration) < 4)
@@ -431,7 +431,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    public boolean executeScimCreateGroupMethods(GluuGroup group) {
+    public boolean executeScimCreateGroupMethods(JansGroup group) {
 
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
             if (!executeScimCreateGroupMethod(group, customScriptConfiguration)) {
@@ -442,7 +442,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    public boolean executeScimPostCreateGroupMethods(GluuGroup group) {
+    public boolean executeScimPostCreateGroupMethods(JansGroup group) {
 
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
             if (!executeScimPostCreateGroupMethod(group, customScriptConfiguration)) {
@@ -453,7 +453,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    public boolean executeScimUpdateGroupMethods(GluuGroup group) {
+    public boolean executeScimUpdateGroupMethods(JansGroup group) {
 
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
             if (!executeScimUpdateGroupMethod(group, customScriptConfiguration)) {
@@ -464,7 +464,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    public boolean executeScimPostUpdateGroupMethods(GluuGroup group) {
+    public boolean executeScimPostUpdateGroupMethods(JansGroup group) {
 
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
             if (!executeScimPostUpdateGroupMethod(group, customScriptConfiguration)) {
@@ -475,7 +475,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    public boolean executeScimDeleteGroupMethods(GluuGroup group) {
+    public boolean executeScimDeleteGroupMethods(JansGroup group) {
 
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
             if (!executeScimDeleteGroupMethod(group, customScriptConfiguration)) {
@@ -486,7 +486,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    public boolean executeScimPostDeleteGroupMethods(GluuGroup group) {
+    public boolean executeScimPostDeleteGroupMethods(JansGroup group) {
 
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
             if (!executeScimPostDeleteGroupMethod(group, customScriptConfiguration)) {
@@ -508,7 +508,7 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    public boolean executeScimGetGroupMethods(GluuGroup group) {
+    public boolean executeScimGetGroupMethods(JansGroup group) {
 
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
             if (!executeScimGetGroupMethod(group, customScriptConfiguration)) {
@@ -529,7 +529,7 @@ public class ExternalScimService extends ExternalScriptService {
         return true;
     }
     
-    public boolean executeScimPostSearchGroupsMethods(PagedResult<GluuGroup> result) {
+    public boolean executeScimPostSearchGroupsMethods(PagedResult<JansGroup> result) {
 
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
             if (!executeScimPostSearchGroupsMethod(result, customScriptConfiguration)) {

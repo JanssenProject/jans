@@ -53,9 +53,6 @@ public class Document extends Entry implements Serializable {
     @AttributeName(name = "jansEnabled")
     private boolean enabled;
 
-    @AttributeName(name = "jansAlias")
-    private String alias;
-
     public String getInum() {
         return inum;
     }
@@ -136,18 +133,10 @@ public class Document extends Entry implements Serializable {
 		this.enabled = enabled;
 	}
 
-	public String getAlias() {
-		return alias;
-	}
-
-	public void setAlias(String alias) {
-		this.alias = alias;
-	}
-
 	@Override
 	public String toString() {
 		return "Document [inum=" + inum + ", fileName=" + fileName + ", filePath=" + filePath + ", description="
 				+ description + ", creationDate=" + creationDate + ", service=" + service
-				+ ", level=" + level + ", revision=" + revision + ", enabled=" + enabled + ", alias=" + alias + "]";
+				+ ", level=" + level + ", revision=" + revision + ", enabled=" + enabled + "]";
 	}
 }

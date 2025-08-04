@@ -6,20 +6,17 @@
 use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
-use std::collections::HashMap;
-
-const DEFAULT_USER_ID_SRC_CLAIM: &str = "sub";
-const DEFAULT_ROLE_SRC_CLAIM: &str = "role";
+use std::{collections::HashMap, sync::Arc};
 
 #[derive(Debug, PartialEq)]
-pub struct Token<'a> {
+pub struct Token {
     pub name: String,
-    pub iss: Option<&'a TrustedIssuer>,
+    pub iss: Option<Arc<TrustedIssuer>>,
     claims: TokenClaims,
 }
 
-impl<'a> Token<'a> {
-    pub fn new(name: &str, claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
+impl Token {
+    pub fn new(name: &str, claims: TokenClaims, iss: Option<Arc<TrustedIssuer>>) -> Token {
         Self {
             name: name.to_string(),
             iss,
@@ -28,32 +25,22 @@ impl<'a> Token<'a> {
     }
 
     pub fn get_metadata(&self) -> Option<&TokenEntityMetadata> {
-        self.iss.unwrap_or_default().get_token_metadata(&self.name)
+        self.iss.as_ref()?.get_token_metadata(&self.name)
     }
 
-    pub fn user_mapping(&self) -> &str {
-        self.iss
-            .unwrap_or_default()
-            .get_user_mapping(&self.name)
-            .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM)
-    }
-
-    pub fn claim_mapping(&self) -> Option<&ClaimMappings> {
-        self.iss.unwrap_or_default().get_claim_mapping(&self.name)
-    }
-
-    pub fn role_mapping(&self) -> &str {
-        self.iss
-            .unwrap_or_default()
-            .get_role_mapping(&self.name)
-            .unwrap_or(DEFAULT_ROLE_SRC_CLAIM)
+    pub fn claim_mappings(&self) -> Option<&ClaimMappings> {
+        self.iss.as_ref()?.get_claim_mapping(&self.name)
     }
 
     pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
         self.claims.get_claim(name)
     }
 
-    pub fn logging_info(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
+    pub fn get_claim_val(&self, name: &str) -> Option<&Value> {
+        self.claims.claims.get(name)
+    }
+
+    pub fn logging_info<'a>(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
         self.claims.logging_info(claim)
     }
 
@@ -70,6 +57,13 @@ pub struct TokenClaims {
 
 impl From<HashMap<String, Value>> for TokenClaims {
     fn from(claims: HashMap<String, Value>) -> Self {
+        Self { claims }
+    }
+}
+
+impl From<Value> for TokenClaims {
+    fn from(claims: Value) -> Self {
+        let claims = serde_json::from_value(claims).expect("should deserialize claims to hashmap");
         Self { claims }
     }
 }
@@ -99,10 +93,6 @@ pub struct TokenClaim<'a> {
 }
 
 impl TokenClaim<'_> {
-    pub fn value(&self) -> &serde_json::Value {
-        self.value
-    }
-
     pub fn as_str(&self) -> Result<&str, TokenClaimTypeError> {
         self.value
             .as_str()

@@ -28,10 +28,9 @@ import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
 import io.jans.scim.exception.DuplicateEmailException;
-import io.jans.scim.model.GluuCustomAttribute;
-import io.jans.scim.model.GluuCustomPerson;
+import io.jans.scim.model.JansCustomAttribute;
+import io.jans.scim.model.JansCustomPerson;
 import io.jans.scim.model.User;
-import io.jans.scim.util.OxTrustConstants;
 import io.jans.util.ArrayHelper;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
@@ -63,9 +62,9 @@ public class PersonService implements Serializable {
 	@Inject
 	private ExternalIdGeneratorService idGeneratorService;
 	
-	private List<GluuCustomAttribute> mandatoryAttributes;
+	private List<JansCustomAttribute> mandatoryAttributes;
 
-	public void addCustomObjectClass(GluuCustomPerson person) {
+	public void addCustomObjectClass(JansCustomPerson person) {
 		String customObjectClass = attributeService.getCustomOrigin();
 		String[] customObjectClassesArray = person.getCustomObjectClasses();
 		if (ArrayHelper.isNotEmpty(customObjectClassesArray)) {
@@ -85,9 +84,9 @@ public class PersonService implements Serializable {
 	}
 
 	// TODO: Review this methods. We need to check if uid is unique in outside method
-	public void addPerson(GluuCustomPerson person) throws Exception {
+	public void addPerson(JansCustomPerson person) throws Exception {
 		try {
-			List<GluuCustomPerson> persons = getPersonsByUid(person.getUid());
+			List<JansCustomPerson> persons = getPersonsByUid(person.getUid());
 			if (persons == null || persons.size() == 0) {
 				person.setCreationDate(new Date());
 				attributeService.applyMetaData(person.getCustomAttributes());
@@ -107,7 +106,7 @@ public class PersonService implements Serializable {
 
 	}
 
-    private GluuCustomPerson ignoreCustomObjectClassesForNonLDAP(GluuCustomPerson person) {
+    private JansCustomPerson ignoreCustomObjectClassesForNonLDAP(JansCustomPerson person) {
         String persistenceType = persistenceEntryManager.getPersistenceType();
         log.debug("persistenceType: {}", persistenceType);
         if (!PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)) {
@@ -120,7 +119,7 @@ public class PersonService implements Serializable {
         return person;
     }
 
-	public void updatePerson(GluuCustomPerson person) throws Exception {
+	public void updatePerson(JansCustomPerson person) throws Exception {
 		try {
 			Date updateDate = new Date();
 			person.setUpdatedAt(updateDate);
@@ -139,45 +138,45 @@ public class PersonService implements Serializable {
 
 	}
 
-	public void removePerson(GluuCustomPerson person) {
-		persistenceEntryManager.removeRecursively(person.getDn(), GluuCustomPerson.class);
+	public void removePerson(JansCustomPerson person) {
+		persistenceEntryManager.removeRecursively(person.getDn(), JansCustomPerson.class);
 	}
 
-	public List<GluuCustomPerson> searchPersons(String pattern, int sizeLimit) {
+	public List<JansCustomPerson> searchPersons(String pattern, int sizeLimit) {
 		Filter searchFilter = buildFilter(pattern);
-		return persistenceEntryManager.findEntries(getDnForPerson(null), GluuCustomPerson.class, searchFilter, sizeLimit);
+		return persistenceEntryManager.findEntries(getDnForPerson(null), JansCustomPerson.class, searchFilter, sizeLimit);
 	}
 
-	public List<GluuCustomPerson> searchPersons(String pattern) {
+	public List<JansCustomPerson> searchPersons(String pattern) {
 		Filter searchFilter = buildFilter(pattern);
-		return persistenceEntryManager.findEntries(getDnForPerson(null), GluuCustomPerson.class, searchFilter);
+		return persistenceEntryManager.findEntries(getDnForPerson(null), JansCustomPerson.class, searchFilter);
 	}
 
 	private Filter buildFilter(String pattern) {
 		String[] targetArray = new String[] { pattern };
 		Filter uidFilter = Filter.createSubstringFilter(OxConstants.UID, null, targetArray, null);
-		Filter mailFilter = Filter.createSubstringFilter(OxTrustConstants.mail, null, targetArray, null);
-		Filter nameFilter = Filter.createSubstringFilter(OxTrustConstants.displayName, null, targetArray, null);
-		Filter ppidFilter = Filter.createSubstringFilter(OxTrustConstants.ppid, null, targetArray, null);
-		Filter inumFilter = Filter.createSubstringFilter(OxTrustConstants.inum, null, targetArray, null);
-		Filter snFilter = Filter.createSubstringFilter(OxTrustConstants.sn, null, targetArray, null);
+		Filter mailFilter = Filter.createSubstringFilter("mail", null, targetArray, null);
+		Filter nameFilter = Filter.createSubstringFilter("displayName", null, targetArray, null);
+		Filter ppidFilter = Filter.createSubstringFilter("jansPPID", null, targetArray, null);
+		Filter inumFilter = Filter.createSubstringFilter("inum", null, targetArray, null);
+		Filter snFilter = Filter.createSubstringFilter("sn", null, targetArray, null);
 		Filter searchFilter = Filter.createORFilter(uidFilter, mailFilter, nameFilter, ppidFilter, inumFilter,
 				snFilter);
 		return searchFilter;
 	}
 
-	public List<GluuCustomPerson> findPersons(GluuCustomPerson person, int sizeLimit) {
+	public List<JansCustomPerson> findPersons(JansCustomPerson person, int sizeLimit) {
 		person.setBaseDn(getDnForPerson(null));
 		return persistenceEntryManager.findEntries(person, sizeLimit);
 	}
 
-	public List<GluuCustomPerson> searchPersons(String pattern, int sizeLimit, List<GluuCustomPerson> excludedPersons)
+	public List<JansCustomPerson> searchPersons(String pattern, int sizeLimit, List<JansCustomPerson> excludedPersons)
 			throws Exception {
 		Filter orFilter = buildFilter(pattern);
 		Filter searchFilter = orFilter;
 		if (excludedPersons != null && excludedPersons.size() > 0) {
 			List<Filter> excludeFilters = new ArrayList<Filter>();
-			for (GluuCustomPerson excludedPerson : excludedPersons) {
+			for (JansCustomPerson excludedPerson : excludedPersons) {
 				Filter eqFilter = Filter.createEqualityFilter(OxConstants.UID, excludedPerson.getUid());
 				excludeFilters.add(eqFilter);
 			}
@@ -190,40 +189,40 @@ public class PersonService implements Serializable {
 			Filter notFilter = Filter.createNOTFilter(orExcludeFilter);
 			searchFilter = Filter.createANDFilter(orFilter, notFilter);
 		}
-		return persistenceEntryManager.findEntries(getDnForPerson(null), GluuCustomPerson.class, searchFilter, sizeLimit);
+		return persistenceEntryManager.findEntries(getDnForPerson(null), JansCustomPerson.class, searchFilter, sizeLimit);
 	}
 
-	public List<GluuCustomPerson> findAllPersons(String[] returnAttributes) {
-		return persistenceEntryManager.findEntries(getDnForPerson(null), GluuCustomPerson.class, null, returnAttributes);
+	public List<JansCustomPerson> findAllPersons(String[] returnAttributes) {
+		return persistenceEntryManager.findEntries(getDnForPerson(null), JansCustomPerson.class, null, returnAttributes);
 	}
 
-	public List<GluuCustomPerson> findPersonsByUids(List<String> uids, String[] returnAttributes) throws Exception {
+	public List<JansCustomPerson> findPersonsByUids(List<String> uids, String[] returnAttributes) throws Exception {
 		List<Filter> uidFilters = new ArrayList<Filter>();
 		for (String uid : uids) {
 			uidFilters.add(Filter.createEqualityFilter(OxConstants.UID, uid));
 		}
 		Filter filter = Filter.createORFilter(uidFilters);
-		return persistenceEntryManager.findEntries(getDnForPerson(null), GluuCustomPerson.class, filter, returnAttributes);
+		return persistenceEntryManager.findEntries(getDnForPerson(null), JansCustomPerson.class, filter, returnAttributes);
 	}
 
-	public List<GluuCustomPerson> findPersonsByMailids(List<String> mailids, String[] returnAttributes)
+	public List<JansCustomPerson> findPersonsByMailids(List<String> mailids, String[] returnAttributes)
 			throws Exception {
 		List<Filter> mailidFilters = new ArrayList<Filter>();
 		for (String mailid : mailids) {
-			mailidFilters.add(Filter.createEqualityFilter(OxTrustConstants.mail, mailid));
+			mailidFilters.add(Filter.createEqualityFilter("mail", mailid));
 		}
 		Filter filter = Filter.createORFilter(mailidFilters);
-		return persistenceEntryManager.findEntries(getDnForPerson(null), GluuCustomPerson.class, filter, returnAttributes);
+		return persistenceEntryManager.findEntries(getDnForPerson(null), JansCustomPerson.class, filter, returnAttributes);
 	}
 
-	public GluuCustomPerson findPersonByDn(String dn, String... returnAttributes) {
-		return persistenceEntryManager.find(dn, GluuCustomPerson.class, returnAttributes);
+	public JansCustomPerson findPersonByDn(String dn, String... returnAttributes) {
+		return persistenceEntryManager.find(dn, JansCustomPerson.class, returnAttributes);
 	}
 
-	public boolean containsPerson(GluuCustomPerson person) {
+	public boolean containsPerson(JansCustomPerson person) {
 		boolean result = false;
 		try {
-			result = persistenceEntryManager.contains(GluuCustomPerson.class);
+			result = persistenceEntryManager.contains(JansCustomPerson.class);
 		} catch (Exception e) {
 			log.debug(e.getMessage(), e);
 		}
@@ -231,28 +230,28 @@ public class PersonService implements Serializable {
 	}
 
 	public boolean contains(String dn) {
-		return persistenceEntryManager.contains(dn, GluuCustomPerson.class);
+		return persistenceEntryManager.contains(dn, JansCustomPerson.class);
 	}
 
-	public GluuCustomPerson getPersonByDn(String dn) {
-		GluuCustomPerson result = persistenceEntryManager.find(GluuCustomPerson.class, dn);
+	public JansCustomPerson getPersonByDn(String dn) {
+		JansCustomPerson result = persistenceEntryManager.find(JansCustomPerson.class, dn);
 
 		return result;
 
 	}
 
-	public GluuCustomPerson getPersonByInum(String inum) {
-		GluuCustomPerson person = null;
+	public JansCustomPerson getPersonByInum(String inum) {
+		JansCustomPerson person = null;
 		try {
-			person = persistenceEntryManager.find(GluuCustomPerson.class, getDnForPerson(inum));
+			person = persistenceEntryManager.find(JansCustomPerson.class, getDnForPerson(inum));
 		} catch (Exception e) {
 			log.error("Failed to find Person by Inum " + inum, e);
 		}
 		return person;
 	}
 
-	public GluuCustomPerson getPersonByUid(String uid, String... returnAttributes) {
-		List<GluuCustomPerson> entries = getPersonsByUid(uid, returnAttributes);
+	public JansCustomPerson getPersonByUid(String uid, String... returnAttributes) {
+		List<JansCustomPerson> entries = getPersonsByUid(uid, returnAttributes);
 
 		if (entries.size() > 0) {
 			return entries.get(0);
@@ -264,7 +263,7 @@ public class PersonService implements Serializable {
 	public int countPersons() {
 		String dn = getDnForPerson(null);
 
-		Class<?> searchClass = GluuCustomPerson.class;
+		Class<?> searchClass = JansCustomPerson.class;
 		if (persistenceEntryManager.hasBranchesSupport(dn)) {
 			searchClass = SimpleBranch.class;
 		}
@@ -273,15 +272,15 @@ public class PersonService implements Serializable {
 	}
 
 	public String generateInumForNewPerson() {
-		GluuCustomPerson person = null;
+		JansCustomPerson person = null;
 		String newInum = null;
 		String newDn = null;
 		do {
 			newInum = generateInumForNewPersonImpl();
 			newDn = getDnForPerson(newInum);
-			person = new GluuCustomPerson();
+			person = new JansCustomPerson();
 			person.setDn(newDn);
-		} while (persistenceEntryManager.contains(newDn, GluuCustomPerson.class));
+		} while (persistenceEntryManager.contains(newDn, JansCustomPerson.class));
 		return newInum;
 	}
 
@@ -320,24 +319,24 @@ public class PersonService implements Serializable {
 		return persistenceEntryManager.authenticate(userName, password);
 	}
 
-	public List<GluuCustomAttribute> getMandatoryAtributes() {
+	public List<JansCustomAttribute> getMandatoryAtributes() {
 		if (this.mandatoryAttributes == null) {
-			mandatoryAttributes = new ArrayList<GluuCustomAttribute>();
-			mandatoryAttributes.add(new GluuCustomAttribute(OxConstants.UID, "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("givenName", "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("displayName", "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("sn", "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("mail", "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("userPassword", "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("jansStatus", "", true, true));
+			mandatoryAttributes = new ArrayList<JansCustomAttribute>();
+			mandatoryAttributes.add(new JansCustomAttribute(OxConstants.UID, "", true, true));
+			mandatoryAttributes.add(new JansCustomAttribute("givenName", "", true, true));
+			mandatoryAttributes.add(new JansCustomAttribute("displayName", "", true, true));
+			mandatoryAttributes.add(new JansCustomAttribute("sn", "", true, true));
+			mandatoryAttributes.add(new JansCustomAttribute("mail", "", true, true));
+			mandatoryAttributes.add(new JansCustomAttribute("userPassword", "", true, true));
+			mandatoryAttributes.add(new JansCustomAttribute("jansStatus", "", true, true));
 		}
 		return mandatoryAttributes;
 	}
 
-	public String getPersonUids(List<GluuCustomPerson> persons) throws Exception {
+	public String getPersonUids(List<JansCustomPerson> persons) throws Exception {
 		StringBuilder sb = new StringBuilder();
-		for (Iterator<GluuCustomPerson> iterator = persons.iterator(); iterator.hasNext();) {
-			GluuCustomPerson call = iterator.next();
+		for (Iterator<JansCustomPerson> iterator = persons.iterator(); iterator.hasNext();) {
+			JansCustomPerson call = iterator.next();
 			sb.append('\'').append(call.getUid()).append('\'');
 			if (iterator.hasNext()) {
 				sb.append(", ");
@@ -346,10 +345,10 @@ public class PersonService implements Serializable {
 		return sb.toString();
 	}
 
-	public String getPersonMailids(List<GluuCustomPerson> persons) throws Exception {
+	public String getPersonMailids(List<JansCustomPerson> persons) throws Exception {
 		StringBuilder sb = new StringBuilder();
-		for (Iterator<GluuCustomPerson> iterator = persons.iterator(); iterator.hasNext();) {
-			GluuCustomPerson call = iterator.next();
+		for (Iterator<JansCustomPerson> iterator = persons.iterator(); iterator.hasNext();) {
+			JansCustomPerson call = iterator.next();
 			sb.append('\'').append(call.getMail()).append('\'');
 			if (iterator.hasNext()) {
 				sb.append(", ");
@@ -358,19 +357,19 @@ public class PersonService implements Serializable {
 		return sb.toString();
 	}
 
-	public List<GluuCustomPerson> createEntities(Map<String, List<AttributeData>> entriesAttributes) throws Exception {
-		return persistenceEntryManager.createEntities(GluuCustomPerson.class, entriesAttributes);
+	public List<JansCustomPerson> createEntities(Map<String, List<AttributeData>> entriesAttributes) throws Exception {
+		return persistenceEntryManager.createEntities(JansCustomPerson.class, entriesAttributes);
 	}
 
-	public GluuCustomPerson getPersonByEmail(String mail, String... returnAttributes) {
-		List<GluuCustomPerson> persons = getPersonsByEmail(mail, returnAttributes);
+	public JansCustomPerson getPersonByEmail(String mail, String... returnAttributes) {
+		List<JansCustomPerson> persons = getPersonsByEmail(mail, returnAttributes);
 		if ((persons != null) && (persons.size() > 0)) {
 			return persons.get(0);
 		}
 		return null;
 	}
 
-	public List<GluuCustomPerson> getPersonsByUid(String uid, String... returnAttributes) {
+	public List<JansCustomPerson> getPersonsByUid(String uid, String... returnAttributes) {
 		log.debug("Getting user information from DB: userId = {}", uid);
 
 		if (StringHelper.isEmpty(uid)) {
@@ -379,13 +378,13 @@ public class PersonService implements Serializable {
 
 		Filter userUidFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter(OxConstants.UID), StringHelper.toLowerCase(uid));
 
-		List<GluuCustomPerson> entries = persistenceEntryManager.findEntries(getDnForPerson(null), GluuCustomPerson.class, userUidFilter, returnAttributes);
+		List<JansCustomPerson> entries = persistenceEntryManager.findEntries(getDnForPerson(null), JansCustomPerson.class, userUidFilter, returnAttributes);
 		log.debug("Found {} entries for userId = {}", entries.size(), uid);
 
 		return entries;
 	}
 
-	public List<GluuCustomPerson> getPersonsByEmail(String mail, String... returnAttributes) {
+	public List<JansCustomPerson> getPersonsByEmail(String mail, String... returnAttributes) {
 		log.debug("Getting user information from DB: mail = {}", mail);
 
 		if (StringHelper.isEmpty(mail)) {
@@ -401,17 +400,17 @@ public class PersonService implements Serializable {
 		}
 		userMailFilter.multiValued(multiValued);
 
-		List<GluuCustomPerson> entries = persistenceEntryManager.findEntries(getDnForPerson(null), GluuCustomPerson.class, userMailFilter, returnAttributes);
+		List<JansCustomPerson> entries = persistenceEntryManager.findEntries(getDnForPerson(null), JansCustomPerson.class, userMailFilter, returnAttributes);
 		log.debug("Found {} entries for mail = {}", entries.size(), mail);
 
 		return entries;
 	}
 
-	public GluuCustomPerson getPersonByAttribute(String attribute, String value) throws Exception {
-		GluuCustomPerson person = new GluuCustomPerson();
+	public JansCustomPerson getPersonByAttribute(String attribute, String value) throws Exception {
+		JansCustomPerson person = new JansCustomPerson();
 		person.setBaseDn(getDnForPerson(null));
 		person.setAttribute(attribute, value);
-		List<GluuCustomPerson> persons = persistenceEntryManager.findEntries(person);
+		List<JansCustomPerson> persons = persistenceEntryManager.findEntries(person);
 		if ((persons != null) && (persons.size() > 0)) {
 			return persons.get(0);
 		}
@@ -439,11 +438,11 @@ public class PersonService implements Serializable {
 	 *            value
 	 * @return List <Person>
 	 */
-	public List<GluuCustomPerson> getPersonsByAttribute(String attribute, String value) throws Exception {
-		GluuCustomPerson person = new GluuCustomPerson();
+	public List<JansCustomPerson> getPersonsByAttribute(String attribute, String value) throws Exception {
+		JansCustomPerson person = new JansCustomPerson();
 		person.setBaseDn(getDnForPerson(null));
 		person.setAttribute(attribute, value);
-		List<GluuCustomPerson> persons = persistenceEntryManager.findEntries(person);
+		List<JansCustomPerson> persons = persistenceEntryManager.findEntries(person);
 		if ((persons != null) && (persons.size() > 0)) {
 			return persons;
 		}

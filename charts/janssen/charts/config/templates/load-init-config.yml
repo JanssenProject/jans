@@ -32,6 +32,10 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       dnsPolicy: {{ .Values.dnsPolicy | quote }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
     {{- with .Values.dnsConfig }}
       dnsConfig:
 {{ toYaml . | indent 8 }}
@@ -102,5 +106,9 @@ spec:
               {{- if .Values.global.istio.enabled }}
               curl -X POST http://localhost:15020/quitquitquit
               {{- end }}
-          {{- end}}     
+          {{- end}}
       restartPolicy: Never
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}

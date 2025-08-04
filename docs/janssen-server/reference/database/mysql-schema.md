@@ -340,7 +340,6 @@ tags:
 | jansLevel          | int          | YES  |     | None    | Level                                                         |
 | jansRevision       | int          | YES  |     | None    | Revision                                                      |
 | jansEnabled        | smallint     | YES  |     | None    | Status of the entry, used by many objectclasses               |
-| jansAlias          | json         | YES  |     | None    | jansAlias                                                     |
 
 ### jansFido2AuthnEntry
 | Field                 | Type         | Null | Key | Default | Comment                                         |
@@ -713,7 +712,8 @@ tags:
 | jansPermissionGrantedMap | text         | YES  |     | None    | jans Permission Granted Map                                                  |
 | jansInvolvedClnts        | text         | YES  |     | None    | Involved clients                                                             |
 | deviceSecret             | varchar(64)  | YES  | MUL | None    | deviceSecret                                                                 |
-| jansSessAttr             | text         | YES  |     | None    | jansSessAttr                                                                 |
+| jansSessAttr             | text         | YES  |     | None    | jansSessAttr - generic attributes expressed as key-value map                 |
+| jansAttrs                | text         | YES  |     | None    | jansAttrs - predefined attributes (e.g. index in status list)                |
 
 ### jansSsa
 | Field        | Type         | Null | Key | Default | Comment                                        |

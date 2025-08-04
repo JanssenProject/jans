@@ -198,7 +198,7 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
 
             	// Process userPassword 
                 if (StringHelper.equalsIgnoreCase(SpannerOperationService.USER_PASSWORD, attributeName)) {
-                    realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues));
+                    realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues), attribute);
                 }
 
                 escapeValues(realValues);
@@ -258,16 +258,16 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
                 AttributeModificationType modificationType = attributeDataModification.getModificationType();
 				if ((AttributeModificationType.ADD == modificationType) ||
                 	(AttributeModificationType.FORCE_UPDATE == modificationType)) {
-                    modification = createModification(modificationType, toInternalAttribute(attributeName), multiValued, attributeValues, oldAttributeValues);
+                    modification = createModification(attribute, modificationType, toInternalAttribute(attributeName), multiValued, attributeValues, oldAttributeValues);
                 } else {
                     if ((AttributeModificationType.REMOVE == modificationType)) {
                 		if ((attribute == null) && isEmptyAttributeValues(oldAttribute)) {
 							// It's RDBS case. We don't need to set null to already empty table cell
                 			continue;
                 		}
-                        modification = createModification(AttributeModificationType.REMOVE, toInternalAttribute(oldAttributeName), multiValued, oldAttributeValues, null);
+                        modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(oldAttributeName), multiValued, oldAttributeValues, null);
                     } else if ((AttributeModificationType.REPLACE == modificationType)) {
-                        modification = createModification(AttributeModificationType.REPLACE, toInternalAttribute(attributeName), multiValued, attributeValues, oldAttributeValues);
+                        modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(attributeName), multiValued, attributeValues, oldAttributeValues);
                     }
                 }
 
@@ -723,12 +723,12 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
         return searchResult.getTotalEntriesCount();
     }
 
-    private AttributeDataModification createModification(final AttributeModificationType type, final String attributeName, final Boolean multiValued, final Object[] attributeValues, final Object[] oldAttributeValues) {
+    private AttributeDataModification createModification(final AttributeData attribute, final AttributeModificationType type, final String attributeName, final Boolean multiValued, final Object[] attributeValues, final Object[] oldAttributeValues) {
         String realAttributeName = attributeName;
 
         Object[] realValues = attributeValues;
         if (StringHelper.equalsIgnoreCase(SpannerOperationService.USER_PASSWORD, realAttributeName)) {
-            realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues));
+            realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues), attribute);
         }
 
         escapeValues(realValues);

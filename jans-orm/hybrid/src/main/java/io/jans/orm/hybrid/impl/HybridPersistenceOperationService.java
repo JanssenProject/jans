@@ -7,11 +7,14 @@
 package io.jans.orm.hybrid.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.operation.ConnectionException;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.extension.PersistenceExtension;
+import io.jans.orm.model.AttributeType;
+import io.jans.orm.model.PersistenceMetadata;
 import io.jans.orm.operation.PersistenceOperationService;
 
 /**
@@ -56,6 +59,16 @@ public class HybridPersistenceOperationService implements PersistenceOperationSe
 
 	@Override
 	public boolean isSupportObjectClass(String objectClass) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
+
+	@Override
+	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
+
+	@Override
+	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
 

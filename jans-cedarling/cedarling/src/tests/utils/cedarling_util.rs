@@ -4,40 +4,21 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::authorization_config::IdTokenTrustMode;
-use crate::raw_config::token_settings::TokenConfigs;
-use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
+use crate::{AuthorizationConfig, EntityBuilderConfig, JsonRule, JwtConfig};
 pub use crate::{
-    BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource,
+    BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
 };
-use std::collections::HashMap;
-
-/// fixture for [`BootstrapConfigRaw`]
-pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
-    // field `local_policy_store` should get JSON field. So we map yaml to json
-    let local_policy_store_json: serde_json::Value =
-        serde_yml::from_str(local_policy_store).expect("yaml should be parsed without errors");
-
-    BootstrapConfigRaw {
-        application_name: "test_app".to_string(),
-        user_authz: FeatureToggle::Enabled,
-        workload_authz: FeatureToggle::Enabled,
-        usr_workload_bool_op: WorkloadBoolOp::And,
-        log_type: crate::LoggerType::StdOut,
-        local_policy_store: Some(local_policy_store_json.to_string()),
-        jwt_status_validation: FeatureToggle::Disabled,
-        token_configs: TokenConfigs::without_validation(),
-        id_token_trust_mode: IdTokenTrustMode::None,
-        ..Default::default()
-    }
-}
 
 /// fixture for [`BootstrapConfig`]
 pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
     BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::Memory(crate::MemoryLogConfig {
+                log_ttl: 60,
+                max_items: None,
+                max_item_size: None,
+            }),
             log_level: crate::LogLevel::DEBUG,
         },
         policy_store_config: PolicyStoreConfig {
@@ -47,22 +28,12 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
-            mapping_user: Some("Jans::User".to_string()),
-            mapping_workload: Some("Jans::Workload".to_string()),
-            mapping_role: Some("Jans::Role".to_string()),
-            mapping_tokens: HashMap::from([
-                ("access_token".to_string(), "Jans::Access_token".to_string()),
-                ("id_token".to_string(), "Jans::id_token".to_string()),
-                (
-                    "userinfo_token".to_string(),
-                    "Jans::Userinfo_token".to_string(),
-                ),
-            ])
-            .into(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            principal_bool_operator: JsonRule::default(),
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+        lock_config: None,
     }
 }
 
@@ -74,14 +45,33 @@ pub async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
+/// with a callback function to modify the bootstrap configuration.
+pub async fn get_cedarling_with_callback<F>(policy_source: PolicyStoreSource, cb: F) -> Cedarling
+where
+    F: FnOnce(&mut BootstrapConfig),
+{
+    let mut config = get_config(policy_source);
+    cb(&mut config); // Apply the callback function
+
+    Cedarling::new(&config)
+        .await
+        .expect("bootstrap config should initialize correctly")
+}
+
+/// create [`Cedarling`] from [`PolicyStoreSource`]
 pub async fn get_cedarling_with_authorization_conf(
     policy_source: PolicyStoreSource,
     auth_conf: AuthorizationConfig,
+    entity_builder_conf: EntityBuilderConfig,
 ) -> Cedarling {
     Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::Memory(crate::MemoryLogConfig {
+                log_ttl: 60,
+                max_items: None,
+                max_item_size: None,
+            }),
             log_level: crate::LogLevel::DEBUG,
         },
         policy_store_config: PolicyStoreConfig {
@@ -89,6 +79,8 @@ pub async fn get_cedarling_with_authorization_conf(
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: auth_conf,
+        entity_builder_config: entity_builder_conf,
+        lock_config: None,
     })
     .await
     .expect("bootstrap config should initialize correctly")
@@ -125,7 +117,7 @@ pub fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String
 macro_rules! cmp_policy {
     ($resp:expr, $vec_policy_id:expr, $msg:expr) => {
         let policy_ids_resp =
-            crate::tests::utils::cedarling_util::get_policy_id(&$resp).map(|mut v| {
+            $crate::tests::utils::cedarling_util::get_policy_id(&$resp).map(|mut v| {
                 v.sort();
                 v
             });
@@ -142,7 +134,10 @@ macro_rules! cmp_policy {
 
 /// util function for convenient conversion Decision
 pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_policy::Decision> {
-    resp.as_ref().map(|v| v.decision())
+    resp.as_ref().map(|v| {
+        println!("diagnostics: {:?}\n", v.diagnostics());
+        v.decision()
+    })
 }
 
 /// This macro removes code duplication when comparing a decision in tests.
@@ -165,7 +160,7 @@ pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_polic
 macro_rules! cmp_decision {
     ($resp:expr, $decision:expr, $msg:expr) => {
         assert_eq!(
-            crate::tests::utils::cedarling_util::get_decision(&$resp),
+            $crate::tests::utils::cedarling_util::get_decision(&$resp),
             Some($decision),
             $msg
         )

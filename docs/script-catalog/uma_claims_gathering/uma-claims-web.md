@@ -5,6 +5,8 @@ tags:
   - script-catalog
 ---
 
+# UMA Claims Gathering (Web Flow)
+
 ## Interface
 The UmaClaimsGathering script implements the [UmaClaimsGatheringType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/uma/UmaClaimsGatheringType.java) interface. This extends methods from the base script type in addition to adding new methods:
 

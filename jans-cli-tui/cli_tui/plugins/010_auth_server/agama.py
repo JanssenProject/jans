@@ -5,6 +5,7 @@ import zipfile
 import requests
 import tempfile
 import shutil
+import time
 
 from urllib import request
 from functools import partial
@@ -24,7 +25,7 @@ from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.widgets import Button, Label, TextArea, Box, Frame, RadioList
 
 from utils.multi_lang import _
-from utils.utils import DialogUtils, fromisoformat, get_help_with
+from utils.utils import DialogUtils, fromisoformat, get_help_with, common_data
 from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
@@ -49,6 +50,11 @@ class Agama(DialogUtils):
                 f'<Delete>         {_("Delete current Agama project")}',
                 without=['d', 'delete']
                 )
+
+        self.cummunity_projects_fn = os.path.join(common_data.app.data_dir, 'agama_community_projects.json')
+        self.cummunity_projects = []
+        self.cummunity_projects_update_time = 0
+        self.load_community_projects_from_file()
 
         self.working_container = JansVerticalNav(
                 myparent=app,
@@ -81,6 +87,18 @@ class Agama(DialogUtils):
                 f'<c>              {_("Manage Agama project configuration")}\n',
                 without=['v', 'enter']
                 )
+
+    def time_to_download_community_projects(self):
+        if os.path.exists(self.cummunity_projects_fn):
+            self.cummunity_projects_update_time = os.stat(self.cummunity_projects_fn).st_mtime
+
+        return self.cummunity_projects_update_time + 20*60 < time.time()
+
+
+    def load_community_projects_from_file(self):
+        if os.path.exists(self.cummunity_projects_fn):
+            with open(self.cummunity_projects_fn) as f:
+                self.cummunity_projects = json.load(f)
 
     def add_new_project(self) -> None:
 
@@ -547,9 +565,12 @@ class Agama(DialogUtils):
 
         def get_projects():
 
+            self.cummunity_projects.clear()
+
             response = requests.get('https://github.com/orgs/GluuFederation/repositories?q=agama-', headers={"Accept":"application/json"})
             result = response.json()
-            downloads = []
+            
+
             for repo in result["payload"]["repositories"]:
                 repo_name = repo["name"]
                 response = requests.get(f'https://api.github.com/repos/GluuFederation/{repo_name}/releases/latest', headers={'Accept': 'application/json'})
@@ -557,8 +578,12 @@ class Agama(DialogUtils):
                     result = response.json()
                     for asset in result['assets']:
                         if asset['name'].endswith('.gama'):
-                            downloads.append((repo_name, repo['description'], asset['browser_download_url']))
-            return downloads
+                            self.cummunity_projects.append((repo_name, repo['description'], asset['browser_download_url']))
+
+            self.cummunity_projects_update_time = time.time()
+
+            with open(self.cummunity_projects_fn, 'w') as w:
+                json.dump(self.cummunity_projects, w, indent=2)
 
 
         async def download_project_coroutine(download_project_dialog, download_url, download_fn, project_name):
@@ -582,19 +607,21 @@ class Agama(DialogUtils):
             self.upload_project(file_path=download_path, community_project_name=project_name)
 
 
-        async def get_projects_coroutine(get_projects_dialog):
-            self.app.start_progressing(_("Retrieving Agama Lab community projects..."))
-            downloads = await get_event_loop().run_in_executor(self.app.executor, get_projects)
-            self.app.stop_progressing()
-            get_projects_dialog.future.set_result(True)
+        async def get_projects_coroutine(get_projects_dialog=None, get_projects_timeout=False):
 
-            projects = [ (dl, name + "\n    " + desc) for name, desc, dl in downloads ]
+            if get_projects_timeout:
+                self.app.start_progressing(_("Retrieving Agama Lab community projects..."))
+                await get_event_loop().run_in_executor(self.app.executor, get_projects)
+                self.app.stop_progressing()
+                get_projects_dialog.future.set_result(True)
+
+            projects = [ (dl, name + "\n    " + desc) for name, desc, dl in self.cummunity_projects ]
 
             projects_radio_list = RadioList(values=projects)
 
             def deploy(select_project_dialog):
                 download_url = select_project_dialog.projects_radio_list.current_value
-                project_name = downloads[select_project_dialog.projects_radio_list._selected_index][0]
+                project_name = self.cummunity_projects[select_project_dialog.projects_radio_list._selected_index][0]
                 download_fn = os.path.split(download_url)[-1]
                 self.app.start_progressing(_("Downloading {}").format(download_fn))
 
@@ -622,16 +649,20 @@ class Agama(DialogUtils):
             select_project_dialog.projects_radio_list = projects_radio_list
             self.app.show_jans_dialog(select_project_dialog)
 
+        # check if 20 minutes passed from last retreival time
+        if self.time_to_download_community_projects():
+            buttons = [Button(_("Cancel"))]
 
-        buttons = [Button(_("Cancel"))]
+            get_projects_dialog = JansGDialog(
+                    self.app,
+                    title=_("Getting Projects"),
+                    body=HSplit([Label(_("Please wait while retrieving Agama Lab community projects"))]),
+                    buttons=buttons
+                    )
 
-        get_projects_dialog = JansGDialog(
-                self.app,
-                title=_("Getting Projects"),
-                body=HSplit([Label(_("Please wait while retrieving Agama Lab community projects"))]),
-                buttons=buttons
-                )
-        self.app.show_jans_dialog(get_projects_dialog)
+            self.app.show_jans_dialog(get_projects_dialog)
+            asyncio.ensure_future(get_projects_coroutine(get_projects_dialog, True))
 
-        asyncio.ensure_future(get_projects_coroutine(get_projects_dialog))
+        else:
+            asyncio.ensure_future(get_projects_coroutine())
 

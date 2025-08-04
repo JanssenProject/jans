@@ -2,7 +2,7 @@ import asyncio
 from collections import OrderedDict
 from functools import partial
 from typing import Any
-from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, Window
+from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, Window, HorizontalAlign
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Box, Dialog
 from prompt_toolkit.application import Application
@@ -94,6 +94,7 @@ class Plugin(DialogUtils):
 
     def create_widgets(self):
         self.schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/AppConfiguration')
+        fido2_static_config = self.data.get('fido2Configuration', {})
 
         self.tabs['configuration'] = HSplit([
                                 self.app.getTitledText(_("Issuer"), name='issuer', value=self.data.get('issuer',''), jans_help=self.app.get_help_from_schema(self.schema, 'issuer'), style='class:outh-scope-text',widget_style=cli_style.black_bg_widget),
@@ -124,22 +125,25 @@ class Plugin(DialogUtils):
                                             value='\n'.join(self.data.get('personCustomObjectClassList', [])),
                                             height=3,
                                             jans_help=self.app.get_help_from_schema(self.schema, 'personCustomObjectClassList'),
-                                            style='class:outh-scope-text'
-                                            ,widget_style=cli_style.black_bg_widget
+                                            style='class:outh-scope-text',
+                                            widget_style=cli_style.black_bg_widget
                                             ),
-                                Window(height=1),
-                                VSplit([Window(),
-                                HSplit([Button(_("Save"), handler=self.save_config)]),
-                                Window()]),
-                                ],
-                                width=D()
-                                )
+                                            
+                                self.app.getTitledText(
+                                            _("Hints"),
+                                            name='hints',
+                                            value='\n'.join(fido2_static_config.get('hints', [])),
+                                            height=3,
+                                            jans_help=self.app.get_help_from_schema(self.schema, 'hints'),
+                                            jans_list_type=True,
+                                            style='class:outh-scope-text',
+                                            widget_style=cli_style.black_bg_widget
+                                            ),
+                                ])
 
 
         static_schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/Fido2Configuration')
         static_schema = {}
-
-        fido2_static_config = self.data.get('fido2Configuration', {})
 
         requested_parties_title = _("Requested Parties")
         add_party_title =  _("Add Party")
@@ -201,10 +205,6 @@ class Plugin(DialogUtils):
                             height=5, width=D(),
                             ),
 
-                    VSplit([Window(), 
-                    HSplit([Button(_("Save"), handler=self.save_config)]),
-                    
-                    Window()]),
                                 ],
                                 width=D()
                                 )
@@ -251,11 +251,12 @@ class Plugin(DialogUtils):
         """
 
         self.tabs = OrderedDict()
-        self.main_area = HSplit([Label("configuration")],width=D())
+        self.main_area = HSplit([Label("configuration")], width=D())
 
         self.main_container = HSplit([
                                         Box(self.nav_bar.nav_window, style='class:sub-navbar', height=1),
                                         DynamicContainer(lambda: self.main_area),
+                                        VSplit([Button(_("Save"), handler=self.save_config)], align=HorizontalAlign.CENTER),
                                         ],
                                     height=D(),
                                     style='class:outh_maincontainer'
@@ -286,6 +287,7 @@ class Plugin(DialogUtils):
 
         fido2_config['personCustomObjectClassList'] = fido2_config['personCustomObjectClassList'].splitlines()
         fido2_static['enabledFidoAlgorithms'] = fido2_static['enabledFidoAlgorithms'].splitlines()
+        fido2_static['hints'] = fido2_config.pop('hints')
 
         fido2_static['rp'] = []
         for name, domains in self.requested_parties_container.data:

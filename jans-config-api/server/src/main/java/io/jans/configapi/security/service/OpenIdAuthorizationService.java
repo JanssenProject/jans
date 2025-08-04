@@ -128,7 +128,13 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             List<String> resourceScopes = getAllScopeList(resourceScopesByType);
             logger.debug("Validate scope, resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType,
                     resourceScopes);
-
+          
+            //If no scope required
+            if (resourceScopes == null || resourceScopes.isEmpty()) {
+                logger.info(" If no resource scopes required return original accessToken");
+                return AUTHENTICATION_SCHEME + accessToken;
+            }
+            
             // find missing scopes
             List<String> missingScopes = findMissingScopes(resourceScopesByType, tokenScopes);
             logger.info("missingScopes:{}", missingScopes);
@@ -164,7 +170,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             //If no scope is missing
             if (missingScopes == null || missingScopes.isEmpty()) {
                 logger.info(" No missing scopes and hence returning original accessToken");
-                return accessToken;
+                return AUTHENTICATION_SCHEME + accessToken;
             }
 
             logger.info("Generating new token with authSpecificScope");

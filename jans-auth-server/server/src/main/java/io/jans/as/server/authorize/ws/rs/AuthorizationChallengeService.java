@@ -16,6 +16,7 @@ import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.common.AuthorizationCodeGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.common.ExecutionContext;
+import io.jans.as.server.model.common.LogoutStatusJwt;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.RequestParameterService;
@@ -209,9 +210,7 @@ public class AuthorizationChallengeService {
         authorizationGrant.setAuthorizationChallenge(true);
         authorizationGrant.save();
 
-        String authorizationCode = authorizationGrant.getAuthorizationCode().getCode();
-
-        return createSuccessfulResponse(authorizationCode);
+        return createSuccessfulResponse(authorizationGrant, authzRequest);
     }
 
     private SessionId generateAuthenticateSessionWithCookieIfNeeded(AuthzRequest authzRequest, User user, SessionId scriptGeneratedSession) {
@@ -246,15 +245,28 @@ public class AuthorizationChallengeService {
         });
 
         cookieService.createSessionIdCookie(sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
+        sessionIdService.updateAttributesWithUserClaims(sessionUser.getSessionAttributes(), user);
         sessionIdService.updateSessionId(sessionUser);
         log.trace("Session updated with {}", sessionUser);
 
         return sessionUser;
     }
 
-    public Response createSuccessfulResponse(String authorizationCode) throws IOException {
+    public Response createSuccessfulResponse(AuthorizationCodeGrant authorizationGrant, AuthzRequest authzRequest) throws IOException {
+        String authorizationCode = authorizationGrant.getAuthorizationCode().getCode();
+
         AuthorizationChallengeResponse response = new AuthorizationChallengeResponse();
         response.setAuthorizationCode(authorizationCode);
+
+        if (authzRequest.getShouldReturnLogoutStatusJwt()) {
+            log.debug("Creating logout_status_jwt ...");
+            final ExecutionContext executionContext = ExecutionContext.of(authzRequest);
+
+            final LogoutStatusJwt logoutStatusJwt = authorizationGrant.createLogoutStatusJwt(executionContext);
+
+            response.setLogoutStatusJwt(logoutStatusJwt.getCode());
+            log.debug("Created logout_status_jwt.");
+        }
 
         return Response.status(Response.Status.OK)
                 .entity(ServerUtil.asJson(response))

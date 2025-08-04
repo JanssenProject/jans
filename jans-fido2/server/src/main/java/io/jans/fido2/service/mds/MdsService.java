@@ -36,10 +36,8 @@ import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.mds.AuthenticatorCertificationStatus;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
-import io.jans.fido2.service.client.ResteasyClientFactory;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.service.cdi.event.ApplicationInitialized;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;

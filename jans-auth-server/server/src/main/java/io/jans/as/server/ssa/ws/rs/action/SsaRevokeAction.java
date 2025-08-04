@@ -30,6 +30,7 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -101,8 +102,9 @@ public class SsaRevokeAction {
             }
             for (Ssa ssa : ssaList) {
                 ssa.setState(SsaState.REVOKED);
+                ssa.setExpirationDate(new Date());
                 ssaService.merge(ssa);
-                log.info("Ssa jti: '{}' updated status to '{}'", ssa.getId(), ssa.getState().getValue());
+                log.info("Ssa jti: '{}' updated status to '{}' and set it expired.", ssa.getId(), ssa.getState().getValue());
             }
 
             ModifySsaResponseContext context = ssaContextBuilder.buildModifySsaResponseContext(httpRequest, client);

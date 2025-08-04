@@ -116,8 +116,7 @@ class DBUtils:
     def read_jans_schema(self, others=[]):
         self.jans_attributes = []
 
-        for schema_fn_ in ['jans_schema.json', 'custom_schema.json'] + others:
-            schema_fn = schema_fn_ if schema_fn_.startswith('/') else os.path.join(Config.install_dir, 'schema', schema_fn_)
+        for schema_fn in Config.schema_files + others:
             schema = base.readJsonFile(schema_fn)
             self.jans_attributes += schema['attributeTypes']
 
@@ -233,13 +232,13 @@ class DBUtils:
             search_list = []
 
             if '&' in search_filter:
-                re_match = re.match('\(&\((.*?)=(.*?)\)\((.*?)=(.*?)\)', search_filter)
+                re_match = re.match(r'\(&\((.*?)=(.*?)\)\((.*?)=(.*?)\)', search_filter)
                 if re_match:
                     re_list = re_match.groups()
                     search_list.append((re_list[0], re_list[1]))
                     search_list.append((re_list[2], re_list[3]))
             else:
-                re_match = re.match('\((.*?)=(.*?)\)', search_filter)
+                re_match = re.match(r'\((.*?)=(.*?)\)', search_filter)
 
                 if re_match:
                     re_list = re_match.groups()

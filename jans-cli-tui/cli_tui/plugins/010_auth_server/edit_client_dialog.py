@@ -95,6 +95,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
         """
         super().__init__(parent, title, buttons)
 
+        self.warnings = []
+        self.script_type_warnings = []
         self.save_handler = save_handler
         self.delete_uma_resource = delete_uma_resource
         self.data = data
@@ -968,12 +970,17 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 ("OAuth Consent", 'consentGatheringScripts', ['application_session', 'authorization_challenge',  'cache_refresh', 'ciba_end_user_notification', 'client_registration', 'config_api_auth',  'consent_gathering', 'discovery', 'dynamic_scope', 'end_session', 'id_generator', 'idp'])
                 )
 
-
         for title, script_var, script_types in list_of_scripts:
             scripts_data = []
             for scr in common_data.enabled_scripts:
-                if scr['scriptType'] in script_types:
-                    scripts_data.append((scr['dn'], scr['name']))
+                script_type = scr.get('scriptType')
+                script_dn = scr.get('dn')
+                if not script_type and script_dn not in self.script_type_warnings:
+                    self.script_type_warnings.append(script_dn)
+                    continue
+
+                if script_type in script_types:
+                    scripts_data.append((script_dn, scr['name']))
 
             self.scripts_widget_dict[script_var] = JansLabelWidget(
                         title = _(title), 
@@ -1027,6 +1034,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         width=D())
 
         self.left_nav = list(self.tabs.keys())[0]
+
+
+        for dn in self.script_type_warnings:
+            self.warnings.append(_("Script %s does not have scriptType, please fix it.") % dn)
+
 
     def delete_active_token(self, **kwargs: Any) -> None:
         """This method for the deletion of the User 
@@ -1094,7 +1106,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             search_arg_lists.append(f'expirationDate<{date_before}')
 
         if search_arg_lists:
-            endpoint_args += '\,' + '\,'.join(search_arg_lists)
+            endpoint_args += '\\,' + '\\,'.join(search_arg_lists)
 
         if pattern:
             endpoint_args += f',pattern:{pattern}'

@@ -17,16 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Named;
 import javax.lang.model.type.NullType;
-import jakarta.ws.rs.DefaultValue;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Response;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.jans.scim.model.scim2.AttributeDefinition;
 import io.jans.scim.model.scim2.BaseScimResource;
@@ -43,12 +36,21 @@ import io.jans.scim.model.scim2.provider.schema.SchemaResource;
 import io.jans.scim.model.scim2.util.IntrospectUtil;
 import io.jans.scim.model.scim2.util.ScimResourceUtil;
 import io.jans.scim.service.scim2.interceptor.RejectFilterParam;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Named;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Web service for the /Schemas endpoint.
  */
+@Dependent
 @Named("scim2SchemaEndpoint")
 @Path("/v2/Schemas")
 public class SchemaWebService extends BaseScimWebService {

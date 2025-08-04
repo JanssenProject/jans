@@ -194,8 +194,8 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if ((tokenRevocationEndpoint || deviceAuthorizationEndpoint) && clientService.isPublic(httpRequest.getParameter(Constants.CLIENT_ID))) {
-                log.trace("Skipped authentication for {} for public client.", tokenRevocationEndpoint ? "Token Revocation" : "Device Authorization");
+            if ((tokenRevocationEndpoint || deviceAuthorizationEndpoint || isParEndpoint) && clientService.isPublic(httpRequest.getParameter(Constants.CLIENT_ID))) {
+                log.trace("Skipped authentication for {} for public client.", requestUrl);
                 filterChain.doFilter(httpRequest, httpResponse);
                 return;
             }
@@ -560,6 +560,7 @@ public class AuthenticationFilter implements Filter {
                 if (clientAssertionType == ClientAssertionType.JWT_BEARER) {
                     ClientAssertion clientAssertion = new ClientAssertion(appConfiguration, cryptoProvider, clientId,
                             clientAssertionType, encodedAssertion);
+                    clientAssertion.initAndVerify();
 
                     String username = clientAssertion.getSubjectIdentifier();
                     String password = clientAssertion.getClientSecret();

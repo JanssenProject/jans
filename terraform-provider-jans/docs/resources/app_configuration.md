@@ -23,11 +23,17 @@ resource "jans_app_configuration" "global" {
 
 ### Optional
 
+- `access_evaluation_allow_basic_client_authorization` (Boolean) Boolean value true allows basic client authorization.
+- `access_evaluation_discovery_cache_lifetime_in_minutes` (Number) The cache lifetime in minutes of the access evaluation discovery.
+- `access_evaluation_script_name` (String) Name of the access evaluation script.
 - `access_token_lifetime` (Number) The lifetime of the short-lived Access Token. Example: 3600
 - `access_token_signing_alg_values_supported` (List of String) A list of the access token signing algorithms (alg values) supported by the OP. 
 							One of "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", 
 							"ES512", "PS256", "PS384", "PS512"
 - `acr_mappings` (Map of String) A map of ACR mappings. Example: { "acr1": "script1", "acr2": "script2" }
+- `acr_to_agama_consent_flow_mapping` (Map of String) A map of ACR to agama consent flow mapping. Example: { "acr1": "agama1", "acr2": "agama2" }
+- `acr_to_consent_script_mapping` (Map of String) A map of ACR to consent script mapping. Example: { "acr1": "script1", "acr2": "script2" }
+- `acr_to_consent_script_name_mapping` (Map of String) A map of ACR to consent script name mapping. Example: { "acr1": "script1", "acr2": "script2" }
 - `active_session_authorization_scope` (String) Authorization Scope for active session.
 - `agama_configuration` (Block List, Max: 1) Engine Config which offers an alternative way to build authentication flows in Janssen server (see [below for nested schema](#nestedblock--agama_configuration))
 - `all_response_types_supported` (List of String) List of all response types supported.
@@ -52,6 +58,7 @@ resource "jans_app_configuration" "global" {
 - `authorization_endpoint` (String) The authorization endpoint URL. Example: https://server.example.com/restv1/authorize
 - `authorization_request_custom_allowed_parameters` (Block List) Authorization Request Custom Allowed Parameters. To avoid diverging state, those should be defined in alphabetical order. (see [below for nested schema](#nestedblock--authorization_request_custom_allowed_parameters))
 - `authorization_signing_alg_values_supported` (List of String) A list of the authorization signing algorithms supported.
+- `authorize_challenge_session_lifetime_in_seconds` (Number) The lifetime of the authorize challenge session in seconds.
 - `backchannel_authentication_endpoint` (String) Backchannel Authentication Endpoint. Example: https://server.example.com/oxeleven/rest/backchannel/backchannelAuthenticationEndpoint()
 - `backchannel_authentication_request_signing_alg_values_supported` (List of String) Backchannel Authentication Request Signing Alg Values Supported.
 - `backchannel_authentication_response_expires_in` (Number) Backchannel Authentication Response Expires In.
@@ -76,9 +83,6 @@ resource "jans_app_configuration" "global" {
 - `claim_types_supported` (List of String) A list of the Claim Types that the OpenID Provider supports. One of 'normal'
 - `claims_locales_supported` (List of String) Languages and scripts supported for values in Claims being returned. One of 'en'.
 - `claims_parameter_supported` (Boolean) Specifies whether the OP supports use of the claim’s parameter.
-- `clean_service_batch_chunk_size` (Number) Each clean up iteration fetches chunk of expired data per base dn and removes it from storage. Example: 10000
-- `clean_service_interval` (Number) Time interval for the Clean Service in seconds. Example: 60
-- `clean_up_inactive_client_after_hours_of_inactivity` (Number) The time interval in hours after which the client is considered inactive.
 - `client_authentication_filters` (Block List) List of client authentication filters. (see [below for nested schema](#nestedblock--client_authentication_filters))
 - `client_authentication_filters_enabled` (Boolean) Boolean value specifying whether to enable client authentication filters.
 - `client_black_list` (List of String) Black List for Client Redirection URIs.
@@ -145,7 +149,7 @@ resource "jans_app_configuration" "global" {
 - `end_session_with_access_token` (Boolean) Accept access token to call end_session endpoint.
 - `error_handling_method` (String) A list of possible error handling methods.
 - `error_reason_enabled` (Boolean) Boolean value specifying whether to return detailed reason of the error from AS..
-- `expiration_notificator_enabled` (Boolean) Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL).
+- `expiration_notificator_enabled` (Boolean) Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).
 - `expiration_notificator_interval_in_seconds` (Number) The expiration notificator interval in seconds. Example: 600
 - `expiration_notificator_map_size_limit` (Number) The expiration notificator maximum size limit. Example: 100000
 - `external_logger_configuration` (String) Path to external log4j2 logging configuration. Example: /identity/logviewer/configure
@@ -153,7 +157,7 @@ resource "jans_app_configuration" "global" {
 - `fapi` (Boolean) Boolean value specifying whether to enable FAPI.
 - `fapi_compatibility` (Boolean) Boolean value specifying whether turn on FAPI compatibility mode. If true AS behaves in more strict mode.
 - `feature_flags` (List of String) List of feature flags.
-- `force_id_token_hint_precense` (Boolean) Boolean value specifying whether force id_token_hint parameter presence.
+- `force_id_token_hint_presence` (Boolean) Boolean value specifying whether force id_token_hint parameter presence.
 - `force_offline_access_scope_to_enable_refresh_token` (Boolean) Boolean value specifying whether force offline_access scope to enable refresh_token grant type.
 - `force_ropc_in_authorization_endpoint` (Boolean) Specifies if ROPC is forced in authorization endpoint.
 - `force_signed_request_object` (Boolean) Boolean value true indicates that signed request object is mandatory.
@@ -255,6 +259,8 @@ resource "jans_app_configuration" "global" {
 - `persist_refresh_token` (Boolean) Specifies whether to persist refresh_token (otherwise saves into cache).
 - `person_custom_object_class_list` (List of String) LDAP custom object class list for dynamic person enrolment. One of 'gluuCustomPerson', 'gluuPerson'.
 - `public_subject_identifier_per_client_enabled` (Boolean) Specifies whether public subject identifier is allowed per client.
+- `rate_limit_registration_period_in_seconds` (Number) The time period in seconds for the rate limit.
+- `rate_limit_registration_request_count` (Number) The number of registration requests allowed per interval.
 - `redirect_uris_regex_enabled` (Boolean) Enable/Disable redirect uris validation using regular expression.
 - `refresh_token_extend_lifetime_on_rotation` (Boolean) Boolean value specifying whether to extend refresh tokens on rotation.
 - `refresh_token_lifetime` (Number) The lifetime of the Refresh Token.
@@ -343,10 +349,12 @@ resource "jans_app_configuration" "global" {
 - `use_highest_level_script_if_acr_script_not_found` (Boolean) Enable/Disable usage of highest level script in case ACR script does not exist.
 - `use_local_cache` (Boolean) Boolean value specifying whether to enable local in-memory cache.
 - `use_nested_jwt_during_encryption` (Boolean) Boolean value specifying whether to use nested Jwt during encryption.
+- `use_openid_sub_attribute_value_for_pairwise_local_account_id` (Boolean) Use OpenID sub attribute value for Pairwise Local Account ID.
 - `user_info_encryption_alg_values_supported` (List of String) A list of the JWE encryption algorithms (alg values) JWA supported by the UserInfo 
 							Endpoint to encode the Claims in a JWT. One of "RSA1_5", "RSA-OAEP", "A128KW", "A256KW"
 - `user_info_encryption_enc_values_supported` (List of String) A list of the JWE encryption algorithms (enc values) JWA supported by the UserInfo Endpoint 
 							to encode the Claims in a JWT. One of "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM".
+- `user_info_lifetime` (Number) The lifetime of the User Info Token. Example: 3600
 - `user_info_signing_alg_values_supported` (List of String) A list of the JWS signing algorithms (alg values) JWA supported by the UserInfo Endpoint to encode 
 								the Claims in a JWT. One of "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", 
 								"ES512", "PS256", "PS384", "PS512".
@@ -362,7 +370,6 @@ resource "jans_app_configuration" "global" {
 
 Optional:
 
-- `bridge_script_page` (String)
 - `crash_error_page` (String)
 - `default_response_headers` (Map of String)
 - `enabled` (Boolean)
@@ -372,6 +379,7 @@ Optional:
 - `page_mismatch_error_page` (String)
 - `root_dir` (String)
 - `scripts_path` (String)
+- `start_end_url_mapping` (Map of String)
 - `templates_path` (String)
 
 
@@ -462,6 +470,10 @@ Optional:
 <a id="nestedblock--dcr_ssa_validation_configs"></a>
 ### Nested Schema for `dcr_ssa_validation_configs`
 
+Required:
+
+- `id` (String)
+
 Optional:
 
 - `allowed_claims` (List of String)
@@ -475,10 +487,6 @@ Optional:
 - `scopes` (List of String)
 - `shared_secret` (String)
 - `type` (String)
-
-Read-Only:
-
-- `id` (String) The ID of this resource.
 
 
 <a id="nestedblock--lock_message_config"></a>

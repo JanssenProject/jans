@@ -1,6 +1,5 @@
 # Discovery Script Guide
 
-## Overview
 
 The Authorization Server Metadata spec [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414) (also known as OAuth Discovery) defines a format for clients to use to look up the information needed to interact with a particular OAuth server. This includes things like:-
 - finding the authorization endpoint,

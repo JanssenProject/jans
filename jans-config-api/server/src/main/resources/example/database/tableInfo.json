@@ -1,0 +1,5456 @@
+{
+    "janshealthentry": {
+        "jansservice": {
+            "name": "jansservice",
+            "defName": "jansService",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansnodename": {
+            "name": "jansnodename",
+            "defName": "jansNodeName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "enginestatus": {
+            "name": "enginestatus",
+            "defName": "engineStatus",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "eventtime": {
+            "name": "eventtime",
+            "defName": "eventTime",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "auifeatures": {
+        "webhookid": {
+            "name": "webhookid",
+            "defName": "webhookId",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "auifeatureid": {
+            "name": "auifeatureid",
+            "defName": "auiFeatureId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansscope": {
+            "name": "jansscope",
+            "defName": "jansScope",
+            "type": "jsonb",
+            "multiValued": true
+        }
+    },
+    "jansdocument": {
+        "jansrevision": {
+            "name": "jansrevision",
+            "defName": "jansRevision",
+            "type": "int4",
+            "multiValued": false
+        },
+        "jansservice": {
+            "name": "jansservice",
+            "defName": "jansService",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansenabled": {
+            "name": "jansenabled",
+            "defName": "jansEnabled",
+            "type": "bool",
+            "multiValued": false
+        },
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "ou": {
+            "name": "ou",
+            "defName": "ou",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "document": {
+            "name": "document",
+            "defName": "document",
+            "type": "text",
+            "multiValued": false
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansfilepath": {
+            "name": "jansfilepath",
+            "defName": "jansFilePath",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janslevel": {
+            "name": "janslevel",
+            "defName": "jansLevel",
+            "type": "int4",
+            "multiValued": false
+        }
+    },
+    "jansnode": {
+        "janslastupd": {
+            "name": "janslastupd",
+            "defName": "jansLastUpd",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansnum": {
+            "name": "jansnum",
+            "defName": "jansNum",
+            "type": "int4",
+            "multiValued": false
+        },
+        "lockkey": {
+            "name": "lockkey",
+            "defName": "lockKey",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janstype": {
+            "name": "janstype",
+            "defName": "jansType",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansu2freq": {
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansreqid": {
+            "name": "jansreqid",
+            "defName": "jansReqId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssessstateid": {
+            "name": "janssessstateid",
+            "defName": "jansSessStateId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansreq": {
+            "name": "jansreq",
+            "defName": "jansReq",
+            "type": "text",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "personinum": {
+            "name": "personinum",
+            "defName": "personInum",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "janssessid": {
+        "janspermissiongranted": {
+            "name": "janspermissiongranted",
+            "defName": "jansPermissionGranted",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janssessattr": {
+            "name": "janssessattr",
+            "defName": "jansSessAttr",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansinvolvedclnts": {
+            "name": "jansinvolvedclnts",
+            "defName": "jansInvolvedClnts",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansasjwt": {
+            "name": "jansasjwt",
+            "defName": "jansAsJwt",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansattrs": {
+            "name": "jansattrs",
+            "defName": "jansAttrs",
+            "type": "text",
+            "multiValued": false
+        },
+        "janslastaccesstime": {
+            "name": "janslastaccesstime",
+            "defName": "jansLastAccessTime",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansstate": {
+            "name": "jansstate",
+            "defName": "jansState",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "devicesecret": {
+            "name": "devicesecret",
+            "defName": "deviceSecret",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "sid": {
+            "name": "sid",
+            "defName": "sid",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "authntime": {
+            "name": "authntime",
+            "defName": "authnTime",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansjwt": {
+            "name": "jansjwt",
+            "defName": "jansJwt",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansusrdn": {
+            "name": "jansusrdn",
+            "defName": "jansUsrDN",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "janspermissiongrantedmap": {
+            "name": "janspermissiongrantedmap",
+            "defName": "jansPermissionGrantedMap",
+            "type": "text",
+            "multiValued": false
+        },
+        "janssessstate": {
+            "name": "janssessstate",
+            "defName": "jansSessState",
+            "type": "text",
+            "multiValued": false
+        }
+    },
+    "jansumarpt": {
+        "dpop": {
+            "name": "dpop",
+            "defName": "dpop",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "grttyp": {
+            "name": "grttyp",
+            "defName": "grtTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "chlng": {
+            "name": "chlng",
+            "defName": "chlng",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "usrid": {
+            "name": "usrid",
+            "defName": "usrId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansumapermission": {
+            "name": "jansumapermission",
+            "defName": "jansUmaPermission",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "uuid": {
+            "name": "uuid",
+            "defName": "uuid",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "acr": {
+            "name": "acr",
+            "defName": "acr",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jwtreq": {
+            "name": "jwtreq",
+            "defName": "jwtReq",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansusrdn": {
+            "name": "jansusrdn",
+            "defName": "jansUsrDN",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "attr": {
+            "name": "attr",
+            "defName": "attr",
+            "type": "text",
+            "multiValued": false
+        },
+        "iat": {
+            "name": "iat",
+            "defName": "iat",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "tkntyp": {
+            "name": "tkntyp",
+            "defName": "tknTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jti": {
+            "name": "jti",
+            "defName": "jti",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "tknbndcnf": {
+            "name": "tknbndcnf",
+            "defName": "tknBndCnf",
+            "type": "text",
+            "multiValued": false
+        },
+        "scp": {
+            "name": "scp",
+            "defName": "scp",
+            "type": "text",
+            "multiValued": false
+        },
+        "clms": {
+            "name": "clms",
+            "defName": "clms",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "nnc": {
+            "name": "nnc",
+            "defName": "nnc",
+            "type": "text",
+            "multiValued": false
+        },
+        "ssnid": {
+            "name": "ssnid",
+            "defName": "ssnId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "tkncde": {
+            "name": "tkncde",
+            "defName": "tknCde",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "clnid": {
+            "name": "clnid",
+            "defName": "clnId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "grtid": {
+            "name": "grtid",
+            "defName": "grtId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "chlngmth": {
+            "name": "chlngmth",
+            "defName": "chlngMth",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "authntime": {
+            "name": "authntime",
+            "defName": "authnTime",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "authzcode": {
+            "name": "authzcode",
+            "defName": "authzCode",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansarchjwk": {
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansdata": {
+            "name": "jansdata",
+            "defName": "jansData",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "attr": {
+            "name": "attr",
+            "defName": "attr",
+            "type": "text",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansrp": {
+        "dat": {
+            "name": "dat",
+            "defName": "dat",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansorganization": {
+        "mail": {
+            "name": "mail",
+            "defName": "mail",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "telephonenumber": {
+            "name": "telephonenumber",
+            "defName": "telephoneNumber",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansthemecolor": {
+            "name": "jansthemecolor",
+            "defName": "jansThemeColor",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "title": {
+            "name": "title",
+            "defName": "title",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janslogoimage": {
+            "name": "janslogoimage",
+            "defName": "jansLogoImage",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansmanagergrp": {
+            "name": "jansmanagergrp",
+            "defName": "jansManagerGrp",
+            "type": "text",
+            "multiValued": false
+        },
+        "uid": {
+            "name": "uid",
+            "defName": "uid",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "postalcode": {
+            "name": "postalcode",
+            "defName": "postalCode",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "street": {
+            "name": "street",
+            "defName": "street",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansorgshortname": {
+            "name": "jansorgshortname",
+            "defName": "jansOrgShortName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janscustommessage": {
+            "name": "janscustommessage",
+            "defName": "jansCustomMessage",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "st": {
+            "name": "st",
+            "defName": "st",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "c": {
+            "name": "c",
+            "defName": "c",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansregistrationconf": {
+            "name": "jansregistrationconf",
+            "defName": "jansRegistrationConf",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janslogopath": {
+            "name": "janslogopath",
+            "defName": "jansLogoPath",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansfaviconimage": {
+            "name": "jansfaviconimage",
+            "defName": "jansFaviconImage",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansmanager": {
+            "name": "jansmanager",
+            "defName": "jansManager",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "l": {
+            "name": "l",
+            "defName": "l",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "o": {
+            "name": "o",
+            "defName": "o",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansfaviconpath": {
+            "name": "jansfaviconpath",
+            "defName": "jansFaviconPath",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janscreationtimestamp": {
+            "name": "janscreationtimestamp",
+            "defName": "jansCreationTimestamp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "memberof": {
+            "name": "memberof",
+            "defName": "memberOf",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "agmflow": {
+        "jansrevision": {
+            "name": "jansrevision",
+            "defName": "jansRevision",
+            "type": "int4",
+            "multiValued": false
+        },
+        "jansenabled": {
+            "name": "jansenabled",
+            "defName": "jansEnabled",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janscustommessage": {
+            "name": "janscustommessage",
+            "defName": "jansCustomMessage",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansscrerror": {
+            "name": "jansscrerror",
+            "defName": "jansScrError",
+            "type": "text",
+            "multiValued": false
+        },
+        "agflowmeta": {
+            "name": "agflowmeta",
+            "defName": "agFlowMeta",
+            "type": "text",
+            "multiValued": false
+        },
+        "agflowtrans": {
+            "name": "agflowtrans",
+            "defName": "agFlowTrans",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansscr": {
+            "name": "jansscr",
+            "defName": "jansScr",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "agflowqname": {
+            "name": "agflowqname",
+            "defName": "agFlowQname",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansclnt": {
+        "jansresptyp": {
+            "name": "jansresptyp",
+            "defName": "jansRespTyp",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansinclclaimsinidtkn": {
+            "name": "jansinclclaimsinidtkn",
+            "defName": "jansInclClaimsInIdTkn",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janspolicyurilocalized": {
+            "name": "janspolicyurilocalized",
+            "defName": "jansPolicyURILocalized",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansjwks": {
+            "name": "jansjwks",
+            "defName": "jansJwks",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansattrs": {
+            "name": "jansattrs",
+            "defName": "jansAttrs",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansjwksuri": {
+            "name": "jansjwksuri",
+            "defName": "jansJwksURI",
+            "type": "text",
+            "multiValued": false
+        },
+        "janspostlogoutredirecturi": {
+            "name": "janspostlogoutredirecturi",
+            "defName": "jansPostLogoutRedirectURI",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "mycustomattr1": {
+            "name": "mycustomattr1",
+            "defName": "myCustomAttr1",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansdefacrvalues": {
+            "name": "jansdefacrvalues",
+            "defName": "jansDefAcrValues",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansdefmaxage": {
+            "name": "jansdefmaxage",
+            "defName": "jansDefMaxAge",
+            "type": "int4",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janstosurilocalized": {
+            "name": "janstosurilocalized",
+            "defName": "jansTosURILocalized",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "mycustomattr2": {
+            "name": "mycustomattr2",
+            "defName": "myCustomAttr2",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssoftid": {
+            "name": "janssoftid",
+            "defName": "jansSoftId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansdisabled": {
+            "name": "jansdisabled",
+            "defName": "jansDisabled",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janstosuri": {
+            "name": "janstosuri",
+            "defName": "jansTosURI",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansreqobjsigalg": {
+            "name": "jansreqobjsigalg",
+            "defName": "jansReqObjSigAlg",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansrequri": {
+            "name": "jansrequri",
+            "defName": "jansReqURI",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansaccesstknasjwt": {
+            "name": "jansaccesstknasjwt",
+            "defName": "jansAccessTknAsJwt",
+            "type": "bool",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansclntidissuedat": {
+            "name": "jansclntidissuedat",
+            "defName": "jansClntIdIssuedAt",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansauthorizedorigins": {
+            "name": "jansauthorizedorigins",
+            "defName": "jansAuthorizedOrigins",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "janssectoridentifieruri": {
+            "name": "janssectoridentifieruri",
+            "defName": "jansSectorIdentifierURI",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansusrinfencrespenc": {
+            "name": "jansusrinfencrespenc",
+            "defName": "jansUsrInfEncRespEnc",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janslastaccesstime": {
+            "name": "janslastaccesstime",
+            "defName": "jansLastAccessTime",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansrefreshtknlife": {
+            "name": "jansrefreshtknlife",
+            "defName": "jansRefreshTknLife",
+            "type": "int4",
+            "multiValued": false
+        },
+        "jansclnturilocalized": {
+            "name": "jansclnturilocalized",
+            "defName": "jansClntURILocalized",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansidtknencrespenc": {
+            "name": "jansidtknencrespenc",
+            "defName": "jansIdTknEncRespEnc",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansreqobjencalg": {
+            "name": "jansreqobjencalg",
+            "defName": "jansReqObjEncAlg",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janscontact": {
+            "name": "janscontact",
+            "defName": "jansContact",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansbackchannelclntnotificationendpoint": {
+            "name": "jansbackchannelclntnotificationendpoint",
+            "defName": "jansBackchannelClntNotificationEndpoint",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janslastlogontime": {
+            "name": "janslastlogontime",
+            "defName": "jansLastLogonTime",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "janstrustedclnt": {
+            "name": "janstrustedclnt",
+            "defName": "jansTrustedClnt",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansgrp": {
+            "name": "jansgrp",
+            "defName": "jansGrp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansextraconf": {
+            "name": "jansextraconf",
+            "defName": "jansExtraConf",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansredirecturi": {
+            "name": "jansredirecturi",
+            "defName": "jansRedirectURI",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "janssubjecttyp": {
+            "name": "janssubjecttyp",
+            "defName": "jansSubjectTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansregistrationaccesstkn": {
+            "name": "jansregistrationaccesstkn",
+            "defName": "jansRegistrationAccessTkn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssoftver": {
+            "name": "janssoftver",
+            "defName": "jansSoftVer",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansgranttyp": {
+            "name": "jansgranttyp",
+            "defName": "jansGrantTyp",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansclnturi": {
+            "name": "jansclnturi",
+            "defName": "jansClntURI",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansidtknsignedrespalg": {
+            "name": "jansidtknsignedrespalg",
+            "defName": "jansIdTknSignedRespAlg",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansscope": {
+            "name": "jansscope",
+            "defName": "jansScope",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "janssoftstatement": {
+            "name": "janssoftstatement",
+            "defName": "jansSoftStatement",
+            "type": "text",
+            "multiValued": false
+        },
+        "janstknendpointauthmethod": {
+            "name": "janstknendpointauthmethod",
+            "defName": "jansTknEndpointAuthMethod",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "displaynamelocalized": {
+            "name": "displaynamelocalized",
+            "defName": "displayNameLocalized",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "janslogourilocalized": {
+            "name": "janslogourilocalized",
+            "defName": "jansLogoURILocalized",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "janssignedrespalg": {
+            "name": "janssignedrespalg",
+            "defName": "jansSignedRespAlg",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansclntsecretexpat": {
+            "name": "jansclntsecretexpat",
+            "defName": "jansClntSecretExpAt",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "janslogouri": {
+            "name": "janslogouri",
+            "defName": "jansLogoURI",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansrptasjwt": {
+            "name": "jansrptasjwt",
+            "defName": "jansRptAsJwt",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansaccesstknsigalg": {
+            "name": "jansaccesstknsigalg",
+            "defName": "jansAccessTknSigAlg",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansdid": {
+            "name": "jansdid",
+            "defName": "jansdId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "tknbndcnf": {
+            "name": "tknbndcnf",
+            "defName": "tknBndCnf",
+            "type": "text",
+            "multiValued": false
+        },
+        "janspolicyuri": {
+            "name": "janspolicyuri",
+            "defName": "jansPolicyURI",
+            "type": "text",
+            "multiValued": false
+        },
+        "janslogouturi": {
+            "name": "janslogouturi",
+            "defName": "jansLogoutURI",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansusrinfencrespalg": {
+            "name": "jansusrinfencrespalg",
+            "defName": "jansUsrInfEncRespAlg",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janstknendpointauthsigalg": {
+            "name": "janstknendpointauthsigalg",
+            "defName": "jansTknEndpointAuthSigAlg",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janspersistclntauthzs": {
+            "name": "janspersistclntauthzs",
+            "defName": "jansPersistClntAuthzs",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansaccesstknlife": {
+            "name": "jansaccesstknlife",
+            "defName": "jansAccessTknLife",
+            "type": "int4",
+            "multiValued": false
+        },
+        "jansinitiateloginuri": {
+            "name": "jansinitiateloginuri",
+            "defName": "jansInitiateLoginURI",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansbackchannelusrcodeparameter": {
+            "name": "jansbackchannelusrcodeparameter",
+            "defName": "jansBackchannelUsrCodeParameter",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansidtknencrespalg": {
+            "name": "jansidtknencrespalg",
+            "defName": "jansIdTknEncRespAlg",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janslogoutsessrequired": {
+            "name": "janslogoutsessrequired",
+            "defName": "jansLogoutSessRequired",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansbackchannelauthnreqsigalg": {
+            "name": "jansbackchannelauthnreqsigalg",
+            "defName": "jansBackchannelAuthnReqSigAlg",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansreqobjencenc": {
+            "name": "jansreqobjencenc",
+            "defName": "jansReqObjEncEnc",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "o": {
+            "name": "o",
+            "defName": "o",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansapptyp": {
+            "name": "jansapptyp",
+            "defName": "jansAppTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansclaimredirecturi": {
+            "name": "jansclaimredirecturi",
+            "defName": "jansClaimRedirectURI",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansclaim": {
+            "name": "jansclaim",
+            "defName": "jansClaim",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansclntsecret": {
+            "name": "jansclntsecret",
+            "defName": "jansClntSecret",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansbackchanneltkndeliverymode": {
+            "name": "jansbackchanneltkndeliverymode",
+            "defName": "jansBackchannelTknDeliveryMode",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansauthchallsess": {
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "clnid": {
+            "name": "clnid",
+            "defName": "clnId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansusrdn": {
+            "name": "jansusrdn",
+            "defName": "jansUsrDN",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "attr": {
+            "name": "attr",
+            "defName": "attr",
+            "type": "text",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansattr": {
+        "jansattrorigin": {
+            "name": "jansattrorigin",
+            "defName": "jansAttrOrigin",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janshideondiscovery": {
+            "name": "janshideondiscovery",
+            "defName": "jansHideOnDiscovery",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansvalidation": {
+            "name": "jansvalidation",
+            "defName": "jansValidation",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansrequired": {
+            "name": "jansrequired",
+            "defName": "jansRequired",
+            "type": "bool",
+            "multiValued": false
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansregexp": {
+            "name": "jansregexp",
+            "defName": "jansRegExp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansnameidtyp": {
+            "name": "jansnameidtyp",
+            "defName": "jansNameIdTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansattrusgtyp": {
+            "name": "jansattrusgtyp",
+            "defName": "jansAttrUsgTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssaml2uri": {
+            "name": "janssaml2uri",
+            "defName": "jansSAML2URI",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansattredittyp": {
+            "name": "jansattredittyp",
+            "defName": "jansAttrEditTyp",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "seealso": {
+            "name": "seealso",
+            "defName": "seeAlso",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssourceattr": {
+            "name": "janssourceattr",
+            "defName": "jansSourceAttr",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansscimcustomattr": {
+            "name": "jansscimcustomattr",
+            "defName": "jansScimCustomAttr",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansattrsystemedittyp": {
+            "name": "jansattrsystemedittyp",
+            "defName": "jansAttrSystemEditTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansattrtyp": {
+            "name": "jansattrtyp",
+            "defName": "jansAttrTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janstooltip": {
+            "name": "janstooltip",
+            "defName": "jansTooltip",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansattrname": {
+            "name": "jansattrname",
+            "defName": "jansAttrName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansclaimname": {
+            "name": "jansclaimname",
+            "defName": "jansClaimName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "urn": {
+            "name": "urn",
+            "defName": "urn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansattrviewtyp": {
+            "name": "jansattrviewtyp",
+            "defName": "jansAttrViewTyp",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "janssaml1uri": {
+            "name": "janssaml1uri",
+            "defName": "jansSAML1URI",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansmultivaluedattr": {
+            "name": "jansmultivaluedattr",
+            "defName": "jansMultivaluedAttr",
+            "type": "bool",
+            "multiValued": false
+        }
+    },
+    "agmflowrun": {
+        "janscustommessage": {
+            "name": "janscustommessage",
+            "defName": "jansCustomMessage",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "agflowenccont": {
+            "name": "agflowenccont",
+            "defName": "agFlowEncCont",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "agflowst": {
+            "name": "agflowst",
+            "defName": "agFlowSt",
+            "type": "text",
+            "multiValued": false
+        }
+    },
+    "janspushdevice": {
+        "janspushapp": {
+            "name": "janspushapp",
+            "defName": "jansPushApp",
+            "type": "text",
+            "multiValued": false
+        },
+        "janstyp": {
+            "name": "janstyp",
+            "defName": "jansTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janspushdeviceconf": {
+            "name": "janspushdeviceconf",
+            "defName": "jansPushDeviceConf",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansusrid": {
+            "name": "jansusrid",
+            "defName": "jansUsrId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansmetric": {
+        "jansmetrictyp": {
+            "name": "jansmetrictyp",
+            "defName": "jansMetricTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansenddate": {
+            "name": "jansenddate",
+            "defName": "jansEndDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "uniqueidentifier": {
+            "name": "uniqueidentifier",
+            "defName": "uniqueIdentifier",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansapptyp": {
+            "name": "jansapptyp",
+            "defName": "jansAppTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansdata": {
+            "name": "jansdata",
+            "defName": "jansData",
+            "type": "text",
+            "multiValued": false
+        },
+        "janshost": {
+            "name": "janshost",
+            "defName": "jansHost",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstartdate": {
+            "name": "jansstartdate",
+            "defName": "jansStartDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        }
+    },
+    "jansfido2authnentry": {
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "janscodechallengehash": {
+            "name": "janscodechallengehash",
+            "defName": "jansCodeChallengeHash",
+            "type": "int4",
+            "multiValued": false
+        },
+        "jansauthdata": {
+            "name": "jansauthdata",
+            "defName": "jansAuthData",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "personinum": {
+            "name": "personinum",
+            "defName": "personInum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssessstateid": {
+            "name": "janssessstateid",
+            "defName": "jansSessStateId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janscodechallenge": {
+            "name": "janscodechallenge",
+            "defName": "jansCodeChallenge",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansapp": {
+            "name": "jansapp",
+            "defName": "jansApp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        }
+    },
+    "janssessionstatusidxpool": {
+        "janslastupd": {
+            "name": "janslastupd",
+            "defName": "jansLastUpd",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansnum": {
+            "name": "jansnum",
+            "defName": "jansNum",
+            "type": "int4",
+            "multiValued": false
+        },
+        "lockkey": {
+            "name": "lockkey",
+            "defName": "lockKey",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dat": {
+            "name": "dat",
+            "defName": "dat",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansnodeid": {
+            "name": "jansnodeid",
+            "defName": "jansNodeId",
+            "type": "int4",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansclntauthz": {
+        "clnid": {
+            "name": "clnid",
+            "defName": "clnId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansattrs": {
+            "name": "jansattrs",
+            "defName": "jansAttrs",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansusrid": {
+            "name": "jansusrid",
+            "defName": "jansUsrId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansscope": {
+            "name": "jansscope",
+            "defName": "jansScope",
+            "type": "jsonb",
+            "multiValued": true
+        }
+    },
+    "janslogentry": {
+        "jansservice": {
+            "name": "jansservice",
+            "defName": "jansService",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "clientid": {
+            "name": "clientid",
+            "defName": "clientId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "eventtime": {
+            "name": "eventtime",
+            "defName": "eventTime",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "principalid": {
+            "name": "principalid",
+            "defName": "principalId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "actionname": {
+            "name": "actionname",
+            "defName": "actionName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "contextinformation": {
+            "name": "contextinformation",
+            "defName": "contextInformation",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "requestedresource": {
+            "name": "requestedresource",
+            "defName": "requestedResource",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansnodename": {
+            "name": "jansnodename",
+            "defName": "jansNodeName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "decisionresult": {
+            "name": "decisionresult",
+            "defName": "decisionResult",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "eventtype": {
+            "name": "eventtype",
+            "defName": "eventType",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "severetylevel": {
+            "name": "severetylevel",
+            "defName": "severetyLevel",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "janscustomscr": {
+        "jansrevision": {
+            "name": "jansrevision",
+            "defName": "jansRevision",
+            "type": "int4",
+            "multiValued": false
+        },
+        "jansenabled": {
+            "name": "jansenabled",
+            "defName": "jansEnabled",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansscrerror": {
+            "name": "jansscrerror",
+            "defName": "jansScrError",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansmoduleproperty": {
+            "name": "jansmoduleproperty",
+            "defName": "jansModuleProperty",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansalias": {
+            "name": "jansalias",
+            "defName": "jansAlias",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansproglng": {
+            "name": "jansproglng",
+            "defName": "jansProgLng",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansscrtyp": {
+            "name": "jansscrtyp",
+            "defName": "jansScrTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansscr": {
+            "name": "jansscr",
+            "defName": "jansScr",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansconfproperty": {
+            "name": "jansconfproperty",
+            "defName": "jansConfProperty",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "janslevel": {
+            "name": "janslevel",
+            "defName": "jansLevel",
+            "type": "int4",
+            "multiValued": false
+        }
+    },
+    "janscache": {
+        "dat": {
+            "name": "dat",
+            "defName": "dat",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "uuid": {
+            "name": "uuid",
+            "defName": "uuid",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "iat": {
+            "name": "iat",
+            "defName": "iat",
+            "type": "timestamp",
+            "multiValued": false
+        }
+    },
+    "jansgrp": {
+        "owner": {
+            "name": "owner",
+            "defName": "owner",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansmetalocation": {
+            "name": "jansmetalocation",
+            "defName": "jansMetaLocation",
+            "type": "text",
+            "multiValued": false
+        },
+        "c": {
+            "name": "c",
+            "defName": "c",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansmetaver": {
+            "name": "jansmetaver",
+            "defName": "jansMetaVer",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "o": {
+            "name": "o",
+            "defName": "o",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansmetalastmod": {
+            "name": "jansmetalastmod",
+            "defName": "jansMetaLastMod",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "member": {
+            "name": "member",
+            "defName": "member",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "seealso": {
+            "name": "seealso",
+            "defName": "seeAlso",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansmetacreated": {
+            "name": "jansmetacreated",
+            "defName": "jansMetaCreated",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "janslockstatentry": {
+        "clntdat": {
+            "name": "clntdat",
+            "defName": "clntDat",
+            "type": "text",
+            "multiValued": false
+        },
+        "dat": {
+            "name": "dat",
+            "defName": "dat",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansdata": {
+            "name": "jansdata",
+            "defName": "jansData",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "attr": {
+            "name": "attr",
+            "defName": "attr",
+            "type": "text",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "janscibareq": {
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "clnid": {
+            "name": "clnid",
+            "defName": "clnId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "authreqid": {
+            "name": "authreqid",
+            "defName": "authReqId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "usrid": {
+            "name": "usrid",
+            "defName": "usrId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansappconf": {
+        "janssslexpiry": {
+            "name": "janssslexpiry",
+            "defName": "jansSslExpiry",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssoftver": {
+            "name": "janssoftver",
+            "defName": "jansSoftVer",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansorgprofilemgt": {
+            "name": "jansorgprofilemgt",
+            "defName": "jansOrgProfileMgt",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janslogviewerconfig": {
+            "name": "janslogviewerconfig",
+            "defName": "jansLogViewerConfig",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansconfapp": {
+            "name": "jansconfapp",
+            "defName": "jansConfApp",
+            "type": "text",
+            "multiValued": false
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssmtpconf": {
+            "name": "janssmtpconf",
+            "defName": "jansSmtpConf",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "janshostname": {
+            "name": "janshostname",
+            "defName": "jansHostname",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansdocstoreconf": {
+            "name": "jansdocstoreconf",
+            "defName": "jansDocStoreConf",
+            "type": "text",
+            "multiValued": false
+        },
+        "userpassword": {
+            "name": "userpassword",
+            "defName": "userPassword",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janslastupd": {
+            "name": "janslastupd",
+            "defName": "jansLastUpd",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansmessageconf": {
+            "name": "jansmessageconf",
+            "defName": "jansMessageConf",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansconfdyn": {
+            "name": "jansconfdyn",
+            "defName": "jansConfDyn",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansdbauth": {
+            "name": "jansdbauth",
+            "defName": "jansDbAuth",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "janswebkeyssettings": {
+            "name": "janswebkeyssettings",
+            "defName": "jansWebKeysSettings",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansrevision": {
+            "name": "jansrevision",
+            "defName": "jansRevision",
+            "type": "int4",
+            "multiValued": false
+        },
+        "c": {
+            "name": "c",
+            "defName": "c",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "ou": {
+            "name": "ou",
+            "defName": "ou",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansconfstatic": {
+            "name": "jansconfstatic",
+            "defName": "jansConfStatic",
+            "type": "text",
+            "multiValued": false
+        },
+        "janslogconfiglocation": {
+            "name": "janslogconfiglocation",
+            "defName": "jansLogConfigLocation",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansauthmode": {
+            "name": "jansauthmode",
+            "defName": "jansAuthMode",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansmanager": {
+            "name": "jansmanager",
+            "defName": "jansManager",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansurl": {
+            "name": "jansurl",
+            "defName": "jansUrl",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "o": {
+            "name": "o",
+            "defName": "o",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansscimenabled": {
+            "name": "jansscimenabled",
+            "defName": "jansScimEnabled",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janscacheconf": {
+            "name": "janscacheconf",
+            "defName": "jansCacheConf",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansconfwebkeys": {
+            "name": "jansconfwebkeys",
+            "defName": "jansConfWebKeys",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansemail": {
+            "name": "jansemail",
+            "defName": "jansEmail",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansconferrors": {
+            "name": "jansconferrors",
+            "defName": "jansConfErrors",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansfido2registrationentry": {
+        "janspublickeyidhash": {
+            "name": "janspublickeyidhash",
+            "defName": "jansPublicKeyIdHash",
+            "type": "int4",
+            "multiValued": false
+        },
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansregistrationdata": {
+            "name": "jansregistrationdata",
+            "defName": "jansRegistrationData",
+            "type": "text",
+            "multiValued": false
+        },
+        "janscodechallengehash": {
+            "name": "janscodechallengehash",
+            "defName": "jansCodeChallengeHash",
+            "type": "int4",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janspublickeyid": {
+            "name": "janspublickeyid",
+            "defName": "jansPublicKeyId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janscounter": {
+            "name": "janscounter",
+            "defName": "jansCounter",
+            "type": "int4",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "personinum": {
+            "name": "personinum",
+            "defName": "personInum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansdevicenotificationconf": {
+            "name": "jansdevicenotificationconf",
+            "defName": "jansDeviceNotificationConf",
+            "type": "text",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssessstateid": {
+            "name": "janssessstateid",
+            "defName": "jansSessStateId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janscodechallenge": {
+            "name": "janscodechallenge",
+            "defName": "jansCodeChallenge",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansapp": {
+            "name": "jansapp",
+            "defName": "jansApp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansdevicedata": {
+            "name": "jansdevicedata",
+            "defName": "jansDeviceData",
+            "type": "text",
+            "multiValued": false
+        }
+    },
+    "janstrustedidp": {
+        "janssamlidpmetadatafn": {
+            "name": "janssamlidpmetadatafn",
+            "defName": "jansSAMLidpMetaDataFN",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssamlidpmetalocation": {
+            "name": "janssamlidpmetalocation",
+            "defName": "jansSAMLidpMetaLocation",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "entityid": {
+            "name": "entityid",
+            "defName": "entityId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "encryptionpublickey": {
+            "name": "encryptionpublickey",
+            "defName": "encryptionPublicKey",
+            "type": "text",
+            "multiValued": false
+        },
+        "trustemail": {
+            "name": "trustemail",
+            "defName": "trustEmail",
+            "type": "bool",
+            "multiValued": false
+        },
+        "authenticatebydefault": {
+            "name": "authenticatebydefault",
+            "defName": "authenticateByDefault",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janssamlspmetalocation": {
+            "name": "janssamlspmetalocation",
+            "defName": "jansSAMLspMetaLocation",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "validatesignature": {
+            "name": "validatesignature",
+            "defName": "validateSignature",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "addreadtokenroleoncreate": {
+            "name": "addreadtokenroleoncreate",
+            "defName": "addReadTokenRoleOnCreate",
+            "type": "bool",
+            "multiValued": false
+        },
+        "principalattribute": {
+            "name": "principalattribute",
+            "defName": "principalAttribute",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "nameidpolicyformat": {
+            "name": "nameidpolicyformat",
+            "defName": "nameIDPolicyFormat",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "linkonly": {
+            "name": "linkonly",
+            "defName": "linkOnly",
+            "type": "bool",
+            "multiValued": false
+        },
+        "postbrokerloginflowalias": {
+            "name": "postbrokerloginflowalias",
+            "defName": "postBrokerLoginFlowAlias",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssamlidpconfdyn": {
+            "name": "janssamlidpconfdyn",
+            "defName": "jansSAMLidpConfDyn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "singlelogoutserviceurl": {
+            "name": "singlelogoutserviceurl",
+            "defName": "singleLogoutServiceUrl",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansvalidationlog": {
+            "name": "jansvalidationlog",
+            "defName": "jansValidationLog",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansenabled": {
+            "name": "jansenabled",
+            "defName": "jansEnabled",
+            "type": "bool",
+            "multiValued": false
+        },
+        "storetoken": {
+            "name": "storetoken",
+            "defName": "storeToken",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janssamlspmetadataurl": {
+            "name": "janssamlspmetadataurl",
+            "defName": "jansSAMLspMetaDataURL",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansvalidationstatus": {
+            "name": "jansvalidationstatus",
+            "defName": "jansValidationStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "creatorid": {
+            "name": "creatorid",
+            "defName": "creatorId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "principaltype": {
+            "name": "principaltype",
+            "defName": "principalType",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "providerid": {
+            "name": "providerid",
+            "defName": "providerId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "name": {
+            "name": "name",
+            "defName": "name",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssamlidpmetadataurl": {
+            "name": "janssamlidpmetadataurl",
+            "defName": "jansSAMLidpMetaDataURL",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "realm": {
+            "name": "realm",
+            "defName": "realm",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "firstbrokerloginflowalias": {
+            "name": "firstbrokerloginflowalias",
+            "defName": "firstBrokerLoginFlowAlias",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "signingcertificate": {
+            "name": "signingcertificate",
+            "defName": "signingCertificate",
+            "type": "text",
+            "multiValued": false
+        },
+        "janssamlspmetadatafn": {
+            "name": "janssamlspmetadatafn",
+            "defName": "jansSAMLspMetaDataFN",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "singlesignonserviceurl": {
+            "name": "singlesignonserviceurl",
+            "defName": "singleSignOnServiceUrl",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansscope": {
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansscopetyp": {
+            "name": "jansscopetyp",
+            "defName": "jansScopeTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansscrdn": {
+            "name": "jansscrdn",
+            "defName": "jansScrDn",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansattrs": {
+            "name": "jansattrs",
+            "defName": "jansAttrs",
+            "type": "text",
+            "multiValued": false
+        },
+        "creatorid": {
+            "name": "creatorid",
+            "defName": "creatorId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "creatortyp": {
+            "name": "creatortyp",
+            "defName": "creatorTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansgrpclaims": {
+            "name": "jansgrpclaims",
+            "defName": "jansGrpClaims",
+            "type": "bool",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansumapolicyscrdn": {
+            "name": "jansumapolicyscrdn",
+            "defName": "jansUmaPolicyScrDn",
+            "type": "text",
+            "multiValued": false
+        },
+        "creatorattrs": {
+            "name": "creatorattrs",
+            "defName": "creatorAttrs",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansdefscope": {
+            "name": "jansdefscope",
+            "defName": "jansDefScope",
+            "type": "bool",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansclaim": {
+            "name": "jansclaim",
+            "defName": "jansClaim",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansiconurl": {
+            "name": "jansiconurl",
+            "defName": "jansIconUrl",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        }
+    },
+    "jansgrant": {
+        "grtid": {
+            "name": "grtid",
+            "defName": "grtId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "iat": {
+            "name": "iat",
+            "defName": "iat",
+            "type": "timestamp",
+            "multiValued": false
+        }
+    },
+    "janstoken": {
+        "grttyp": {
+            "name": "grttyp",
+            "defName": "grtTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dpop": {
+            "name": "dpop",
+            "defName": "dpop",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "chlng": {
+            "name": "chlng",
+            "defName": "chlng",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "usrid": {
+            "name": "usrid",
+            "defName": "usrId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "uuid": {
+            "name": "uuid",
+            "defName": "uuid",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "acr": {
+            "name": "acr",
+            "defName": "acr",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jwtreq": {
+            "name": "jwtreq",
+            "defName": "jwtReq",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansusrdn": {
+            "name": "jansusrdn",
+            "defName": "jansUsrDN",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "attr": {
+            "name": "attr",
+            "defName": "attr",
+            "type": "text",
+            "multiValued": false
+        },
+        "iat": {
+            "name": "iat",
+            "defName": "iat",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "tkntyp": {
+            "name": "tkntyp",
+            "defName": "tknTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jti": {
+            "name": "jti",
+            "defName": "jti",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "tknbndcnf": {
+            "name": "tknbndcnf",
+            "defName": "tknBndCnf",
+            "type": "text",
+            "multiValued": false
+        },
+        "scp": {
+            "name": "scp",
+            "defName": "scp",
+            "type": "text",
+            "multiValued": false
+        },
+        "clms": {
+            "name": "clms",
+            "defName": "clms",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "nnc": {
+            "name": "nnc",
+            "defName": "nnc",
+            "type": "text",
+            "multiValued": false
+        },
+        "ssnid": {
+            "name": "ssnid",
+            "defName": "ssnId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "tkncde": {
+            "name": "tkncde",
+            "defName": "tknCde",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "grtid": {
+            "name": "grtid",
+            "defName": "grtId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "clnid": {
+            "name": "clnid",
+            "defName": "clnId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "chlngmth": {
+            "name": "chlngmth",
+            "defName": "chlngMth",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "authntime": {
+            "name": "authntime",
+            "defName": "authnTime",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "authzcode": {
+            "name": "authzcode",
+            "defName": "authzCode",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "janstrustrelationship": {
+        "jansregistrationaccesstkn": {
+            "name": "jansregistrationaccesstkn",
+            "defName": "jansRegistrationAccessTkn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansweborigins": {
+            "name": "jansweborigins",
+            "defName": "jansWebOrigins",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "consentrequired": {
+            "name": "consentrequired",
+            "defName": "consentRequired",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janspostlogoutredirecturi": {
+            "name": "janspostlogoutredirecturi",
+            "defName": "jansPostLogoutRedirectURI",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansprofileconf": {
+            "name": "jansprofileconf",
+            "defName": "jansProfileConf",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "rooturl": {
+            "name": "rooturl",
+            "defName": "rootUrl",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansisfed": {
+            "name": "jansisfed",
+            "defName": "jansIsFed",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "protocol": {
+            "name": "protocol",
+            "defName": "protocol",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "baseurl": {
+            "name": "baseurl",
+            "defName": "baseUrl",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "displayinconsole": {
+            "name": "displayinconsole",
+            "defName": "displayInConsole",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janssamlspmetadatasourcetyp": {
+            "name": "janssamlspmetadatasourcetyp",
+            "defName": "jansSAMLspMetaDataSourceTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "samlmetadata": {
+            "name": "samlmetadata",
+            "defName": "samlMetadata",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansvalidationlog": {
+            "name": "jansvalidationlog",
+            "defName": "jansValidationLog",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "owner": {
+            "name": "owner",
+            "defName": "owner",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janspreferredmethod": {
+            "name": "janspreferredmethod",
+            "defName": "jansPreferredMethod",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansreleasedattr": {
+            "name": "jansreleasedattr",
+            "defName": "jansReleasedAttr",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansenabled": {
+            "name": "jansenabled",
+            "defName": "jansEnabled",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansmetalocation": {
+            "name": "jansmetalocation",
+            "defName": "jansMetaLocation",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansentitytyp": {
+            "name": "jansentitytyp",
+            "defName": "jansEntityTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssamlspmetadataurl": {
+            "name": "janssamlspmetadataurl",
+            "defName": "jansSAMLspMetaDataURL",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansvalidationstatus": {
+            "name": "jansvalidationstatus",
+            "defName": "jansValidationStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "url": {
+            "name": "url",
+            "defName": "url",
+            "type": "text",
+            "multiValued": false
+        },
+        "surrogateauthrequired": {
+            "name": "surrogateauthrequired",
+            "defName": "surrogateAuthRequired",
+            "type": "bool",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "name": {
+            "name": "name",
+            "defName": "name",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansclntsecret": {
+            "name": "jansclntsecret",
+            "defName": "jansClntSecret",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansredirecturi": {
+            "name": "jansredirecturi",
+            "defName": "jansRedirectURI",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "janssamlspmetadatafn": {
+            "name": "janssamlspmetadatafn",
+            "defName": "jansSAMLspMetaDataFN",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "adminurl": {
+            "name": "adminurl",
+            "defName": "adminUrl",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssamlmetadatafilter": {
+            "name": "janssamlmetadatafilter",
+            "defName": "jansSAMLMetaDataFilter",
+            "type": "jsonb",
+            "multiValued": true
+        }
+    },
+    "jansdeviceregistration": {
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansmetalocation": {
+            "name": "jansmetalocation",
+            "defName": "jansMetaLocation",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansdevicehashcode": {
+            "name": "jansdevicehashcode",
+            "defName": "jansDeviceHashCode",
+            "type": "int4",
+            "multiValued": false
+        },
+        "jansdeviceregistrationconf": {
+            "name": "jansdeviceregistrationconf",
+            "defName": "jansDeviceRegistrationConf",
+            "type": "text",
+            "multiValued": false
+        },
+        "janslastaccesstime": {
+            "name": "janslastaccesstime",
+            "defName": "jansLastAccessTime",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansmetaver": {
+            "name": "jansmetaver",
+            "defName": "jansMetaVer",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansdevicekeyhandle": {
+            "name": "jansdevicekeyhandle",
+            "defName": "jansDeviceKeyHandle",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janscounter": {
+            "name": "janscounter",
+            "defName": "jansCounter",
+            "type": "int4",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "personinum": {
+            "name": "personinum",
+            "defName": "personInum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansdevicenotificationconf": {
+            "name": "jansdevicenotificationconf",
+            "defName": "jansDeviceNotificationConf",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansnickname": {
+            "name": "jansnickname",
+            "defName": "jansNickName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansmetalastmod": {
+            "name": "jansmetalastmod",
+            "defName": "jansMetaLastMod",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansapp": {
+            "name": "jansapp",
+            "defName": "jansApp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansdevicedata": {
+            "name": "jansdevicedata",
+            "defName": "jansDeviceData",
+            "type": "text",
+            "multiValued": false
+        }
+    },
+    "janspassresetreq": {
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansguid": {
+            "name": "jansguid",
+            "defName": "jansGuid",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "personinum": {
+            "name": "personinum",
+            "defName": "personInum",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansssa": {
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansattrs": {
+            "name": "jansattrs",
+            "defName": "jansAttrs",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansstate": {
+            "name": "jansstate",
+            "defName": "jansState",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "creatorid": {
+            "name": "creatorid",
+            "defName": "creatorId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "creatortyp": {
+            "name": "creatortyp",
+            "defName": "creatorTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "o": {
+            "name": "o",
+            "defName": "o",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        }
+    },
+    "jansinummap": {
+        "jansprimarykeyvalue": {
+            "name": "jansprimarykeyvalue",
+            "defName": "jansPrimaryKeyValue",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssecondarykeyattrname": {
+            "name": "janssecondarykeyattrname",
+            "defName": "jansSecondaryKeyAttrName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansprimarykeyattrname": {
+            "name": "jansprimarykeyattrname",
+            "defName": "jansPrimaryKeyAttrName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janstertiarykeyvalue": {
+            "name": "janstertiarykeyvalue",
+            "defName": "jansTertiaryKeyValue",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssecondarykeyvalue": {
+            "name": "janssecondarykeyvalue",
+            "defName": "jansSecondaryKeyValue",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janstertiarykeyattrname": {
+            "name": "janstertiarykeyattrname",
+            "defName": "jansTertiaryKeyAttrName",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "auiwebhooks": {
+        "jansenabled": {
+            "name": "jansenabled",
+            "defName": "jansEnabled",
+            "type": "bool",
+            "multiValued": false
+        },
+        "httpheaders": {
+            "name": "httpheaders",
+            "defName": "httpHeaders",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "httprequestbody": {
+            "name": "httprequestbody",
+            "defName": "httpRequestBody",
+            "type": "text",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "httpmethod": {
+            "name": "httpmethod",
+            "defName": "httpMethod",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "url": {
+            "name": "url",
+            "defName": "url",
+            "type": "text",
+            "multiValued": false
+        }
+    },
+    "janstelemetryentry": {
+        "jansservice": {
+            "name": "jansservice",
+            "defName": "jansService",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssuccessloadcounter": {
+            "name": "janssuccessloadcounter",
+            "defName": "jansSuccessLoadCounter",
+            "type": "int4",
+            "multiValued": false
+        },
+        "creationdate": {
+            "name": "creationdate",
+            "defName": "creationDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "evaluationtimens": {
+            "name": "evaluationtimens",
+            "defName": "evaluationTimeNs",
+            "type": "int4",
+            "multiValued": false
+        },
+        "policystats": {
+            "name": "policystats",
+            "defName": "policyStats",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "memoryusage": {
+            "name": "memoryusage",
+            "defName": "memoryUsage",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "eventtime": {
+            "name": "eventtime",
+            "defName": "eventTime",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "averagetimens": {
+            "name": "averagetimens",
+            "defName": "averageTimeNs",
+            "type": "int4",
+            "multiValued": false
+        },
+        "requestcounter": {
+            "name": "requestcounter",
+            "defName": "requestCounter",
+            "type": "int4",
+            "multiValued": false
+        },
+        "jansfailedloadcounter": {
+            "name": "jansfailedloadcounter",
+            "defName": "jansFailedLoadCounter",
+            "type": "int4",
+            "multiValued": false
+        },
+        "jansnodename": {
+            "name": "jansnodename",
+            "defName": "jansNodeName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansdownloadsize": {
+            "name": "jansdownloadsize",
+            "defName": "jansDownloadSize",
+            "type": "int4",
+            "multiValued": false
+        }
+    },
+    "jansstatentry": {
+        "dat": {
+            "name": "dat",
+            "defName": "dat",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansdata": {
+            "name": "jansdata",
+            "defName": "jansData",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "attr": {
+            "name": "attr",
+            "defName": "attr",
+            "type": "text",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "adsprjdeployment": {
+        "jansenddate": {
+            "name": "jansenddate",
+            "defName": "jansEndDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "adsprjdepldetails": {
+            "name": "adsprjdepldetails",
+            "defName": "adsPrjDeplDetails",
+            "type": "text",
+            "multiValued": false
+        },
+        "adsprjassets": {
+            "name": "adsprjassets",
+            "defName": "adsPrjAssets",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansactive": {
+            "name": "jansactive",
+            "defName": "jansActive",
+            "type": "bool",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstartdate": {
+            "name": "jansstartdate",
+            "defName": "jansStartDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "janspairwiseidentifier": {
+        "clnid": {
+            "name": "clnid",
+            "defName": "clnId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janssectoridentifier": {
+            "name": "janssectoridentifier",
+            "defName": "jansSectorIdentifier",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansusrid": {
+            "name": "jansusrid",
+            "defName": "jansUsrId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansumapct": {
+        "jansclaimvalues": {
+            "name": "jansclaimvalues",
+            "defName": "jansClaimValues",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dpop": {
+            "name": "dpop",
+            "defName": "dpop",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "grttyp": {
+            "name": "grttyp",
+            "defName": "grtTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "chlng": {
+            "name": "chlng",
+            "defName": "chlng",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "usrid": {
+            "name": "usrid",
+            "defName": "usrId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "uuid": {
+            "name": "uuid",
+            "defName": "uuid",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "acr": {
+            "name": "acr",
+            "defName": "acr",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jwtreq": {
+            "name": "jwtreq",
+            "defName": "jwtReq",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansusrdn": {
+            "name": "jansusrdn",
+            "defName": "jansUsrDN",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "attr": {
+            "name": "attr",
+            "defName": "attr",
+            "type": "text",
+            "multiValued": false
+        },
+        "iat": {
+            "name": "iat",
+            "defName": "iat",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "tkntyp": {
+            "name": "tkntyp",
+            "defName": "tknTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jti": {
+            "name": "jti",
+            "defName": "jti",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "tknbndcnf": {
+            "name": "tknbndcnf",
+            "defName": "tknBndCnf",
+            "type": "text",
+            "multiValued": false
+        },
+        "scp": {
+            "name": "scp",
+            "defName": "scp",
+            "type": "text",
+            "multiValued": false
+        },
+        "clms": {
+            "name": "clms",
+            "defName": "clms",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "nnc": {
+            "name": "nnc",
+            "defName": "nnc",
+            "type": "text",
+            "multiValued": false
+        },
+        "ssnid": {
+            "name": "ssnid",
+            "defName": "ssnId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "tkncde": {
+            "name": "tkncde",
+            "defName": "tknCde",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "clnid": {
+            "name": "clnid",
+            "defName": "clnId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "grtid": {
+            "name": "grtid",
+            "defName": "grtId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "chlngmth": {
+            "name": "chlngmth",
+            "defName": "chlngMth",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "authntime": {
+            "name": "authntime",
+            "defName": "authnTime",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "authzcode": {
+            "name": "authzcode",
+            "defName": "authzCode",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansumaresourcepermission": {
+        "jansticket": {
+            "name": "jansticket",
+            "defName": "jansTicket",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansconfcode": {
+            "name": "jansconfcode",
+            "defName": "jansConfCode",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansattrs": {
+            "name": "jansattrs",
+            "defName": "jansAttrs",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansresourcesetid": {
+            "name": "jansresourcesetid",
+            "defName": "jansResourceSetId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansumascope": {
+            "name": "jansumascope",
+            "defName": "jansUmaScope",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "janspushapp": {
+        "jansname": {
+            "name": "jansname",
+            "defName": "jansName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janspushappconf": {
+            "name": "janspushappconf",
+            "defName": "jansPushAppConf",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansstatusidxpool": {
+        "janslastupd": {
+            "name": "janslastupd",
+            "defName": "jansLastUpd",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansnum": {
+            "name": "jansnum",
+            "defName": "jansNum",
+            "type": "int4",
+            "multiValued": false
+        },
+        "lockkey": {
+            "name": "lockkey",
+            "defName": "lockKey",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dat": {
+            "name": "dat",
+            "defName": "dat",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansnodeid": {
+            "name": "jansnodeid",
+            "defName": "jansNodeId",
+            "type": "int4",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansscr": {
+        "jansscr": {
+            "name": "jansscr",
+            "defName": "jansScr",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansscrtyp": {
+            "name": "jansscrtyp",
+            "defName": "jansScrTyp",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansperson": {
+        "birthdate": {
+            "name": "birthdate",
+            "defName": "birthdate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansauthenticator": {
+            "name": "jansauthenticator",
+            "defName": "jansAuthenticator",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansusrtyp": {
+            "name": "jansusrtyp",
+            "defName": "jansUsrTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansrole": {
+            "name": "jansrole",
+            "defName": "jansRole",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "persistentid": {
+            "name": "persistentid",
+            "defName": "persistentId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "givenname": {
+            "name": "givenname",
+            "defName": "givenName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "seealso": {
+            "name": "seealso",
+            "defName": "seeAlso",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansunlinkedexternaluids": {
+            "name": "jansunlinkedexternaluids",
+            "defName": "jansUnlinkedExternalUids",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "profile": {
+            "name": "profile",
+            "defName": "profile",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansphotos": {
+            "name": "jansphotos",
+            "defName": "jansPhotos",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "janslastlogontime": {
+            "name": "janslastlogontime",
+            "defName": "jansLastLogonTime",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "jansbackchanneldeviceregistrationtkn": {
+            "name": "jansbackchanneldeviceregistrationtkn",
+            "defName": "jansBackchannelDeviceRegistrationTkn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansassociatedclnt": {
+            "name": "jansassociatedclnt",
+            "defName": "jansAssociatedClnt",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansentitlements": {
+            "name": "jansentitlements",
+            "defName": "jansEntitlements",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansadminuirole": {
+            "name": "jansadminuirole",
+            "defName": "jansAdminUIRole",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "janshonorificsuffix": {
+            "name": "janshonorificsuffix",
+            "defName": "jansHonorificSuffix",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "role": {
+            "name": "role",
+            "defName": "role",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansotpcache": {
+            "name": "jansotpcache",
+            "defName": "jansOTPCache",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "gender": {
+            "name": "gender",
+            "defName": "gender",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "transientid": {
+            "name": "transientid",
+            "defName": "transientId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "scimcustomthird": {
+            "name": "scimcustomthird",
+            "defName": "scimCustomThird",
+            "type": "int4",
+            "multiValued": false
+        },
+        "homepostaladdress": {
+            "name": "homepostaladdress",
+            "defName": "homePostalAddress",
+            "type": "text",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "uid": {
+            "name": "uid",
+            "defName": "uid",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "secretary": {
+            "name": "secretary",
+            "defName": "secretary",
+            "type": "text",
+            "multiValued": false
+        },
+        "nickname": {
+            "name": "nickname",
+            "defName": "nickname",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "phonenumberverified": {
+            "name": "phonenumberverified",
+            "defName": "phoneNumberVerified",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janshonorificprefix": {
+            "name": "janshonorificprefix",
+            "defName": "jansHonorificPrefix",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "sn": {
+            "name": "sn",
+            "defName": "sn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janspreferredmethod": {
+            "name": "janspreferredmethod",
+            "defName": "jansPreferredMethod",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "st": {
+            "name": "st",
+            "defName": "st",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "website": {
+            "name": "website",
+            "defName": "website",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "c": {
+            "name": "c",
+            "defName": "c",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "address": {
+            "name": "address",
+            "defName": "address",
+            "type": "text",
+            "multiValued": false
+        },
+        "preferreddeliverymethod": {
+            "name": "preferreddeliverymethod",
+            "defName": "preferredDeliveryMethod",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansextuid": {
+            "name": "jansextuid",
+            "defName": "jansExtUid",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "manager": {
+            "name": "manager",
+            "defName": "manager",
+            "type": "text",
+            "multiValued": false
+        },
+        "carlicense": {
+            "name": "carlicense",
+            "defName": "carLicense",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "scimcustomsecond": {
+            "name": "scimcustomsecond",
+            "defName": "scimCustomSecond",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansstrongauthpolicy": {
+            "name": "jansstrongauthpolicy",
+            "defName": "jansStrongAuthPolicy",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "cn": {
+            "name": "cn",
+            "defName": "cn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "l": {
+            "name": "l",
+            "defName": "l",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansotpdevices": {
+            "name": "jansotpdevices",
+            "defName": "jansOTPDevices",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "picture": {
+            "name": "picture",
+            "defName": "picture",
+            "type": "text",
+            "multiValued": false
+        },
+        "o": {
+            "name": "o",
+            "defName": "o",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansemail": {
+            "name": "jansemail",
+            "defName": "jansEmail",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansguid": {
+            "name": "jansguid",
+            "defName": "jansGuid",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansstatus": {
+            "name": "jansstatus",
+            "defName": "jansStatus",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansmetacreated": {
+            "name": "jansmetacreated",
+            "defName": "jansMetaCreated",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansimapdata": {
+            "name": "jansimapdata",
+            "defName": "jansIMAPData",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jans509certificate": {
+            "name": "jans509certificate",
+            "defName": "jans509Certificate",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "emailverified": {
+            "name": "emailverified",
+            "defName": "emailVerified",
+            "type": "bool",
+            "multiValued": false
+        },
+        "mail": {
+            "name": "mail",
+            "defName": "mail",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "telephonenumber": {
+            "name": "telephonenumber",
+            "defName": "telephoneNumber",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "roomnumber": {
+            "name": "roomnumber",
+            "defName": "roomNumber",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansprefusrname": {
+            "name": "jansprefusrname",
+            "defName": "jansPrefUsrName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "userpassword": {
+            "name": "userpassword",
+            "defName": "userPassword",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansmobiledevices": {
+            "name": "jansmobiledevices",
+            "defName": "jansMobileDevices",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansaddress": {
+            "name": "jansaddress",
+            "defName": "jansAddress",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansmetalastmod": {
+            "name": "jansmetalastmod",
+            "defName": "jansMetaLastMod",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansnameformatted": {
+            "name": "jansnameformatted",
+            "defName": "jansNameFormatted",
+            "type": "text",
+            "multiValued": false
+        },
+        "postofficebox": {
+            "name": "postofficebox",
+            "defName": "postOfficeBox",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansprofileurl": {
+            "name": "jansprofileurl",
+            "defName": "jansProfileURL",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "secretanswer": {
+            "name": "secretanswer",
+            "defName": "secretAnswer",
+            "type": "text",
+            "multiValued": false
+        },
+        "janscreationtimestamp": {
+            "name": "janscreationtimestamp",
+            "defName": "jansCreationTimestamp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "preferredlanguage": {
+            "name": "preferredlanguage",
+            "defName": "preferredLanguage",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "memberof": {
+            "name": "memberof",
+            "defName": "memberOf",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "departmentnumber": {
+            "name": "departmentnumber",
+            "defName": "departmentNumber",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janstrusteddevices": {
+            "name": "janstrusteddevices",
+            "defName": "jansTrustedDevices",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansmanagedorganizations": {
+            "name": "jansmanagedorganizations",
+            "defName": "jansManagedOrganizations",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansoptouts": {
+            "name": "jansoptouts",
+            "defName": "jansOptOuts",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "zoneinfo": {
+            "name": "zoneinfo",
+            "defName": "zoneinfo",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "employeenumber": {
+            "name": "employeenumber",
+            "defName": "employeeNumber",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansenrollmentcode": {
+            "name": "jansenrollmentcode",
+            "defName": "jansEnrollmentCode",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansmetaver": {
+            "name": "jansmetaver",
+            "defName": "jansMetaVer",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansbackchannelusrcode": {
+            "name": "jansbackchannelusrcode",
+            "defName": "jansBackchannelUsrCode",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "scimcustomfirst": {
+            "name": "scimcustomfirst",
+            "defName": "scimCustomFirst",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "locale": {
+            "name": "locale",
+            "defName": "locale",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "title": {
+            "name": "title",
+            "defName": "title",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "secretquestion": {
+            "name": "secretquestion",
+            "defName": "secretQuestion",
+            "type": "text",
+            "multiValued": false
+        },
+        "janscountinvalidlogin": {
+            "name": "janscountinvalidlogin",
+            "defName": "jansCountInvalidLogin",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "street": {
+            "name": "street",
+            "defName": "street",
+            "type": "text",
+            "multiValued": false
+        },
+        "postalcode": {
+            "name": "postalcode",
+            "defName": "postalCode",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansextid": {
+            "name": "jansextid",
+            "defName": "jansExtId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansppid": {
+            "name": "jansppid",
+            "defName": "jansPPID",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansmetalocation": {
+            "name": "jansmetalocation",
+            "defName": "jansMetaLocation",
+            "type": "text",
+            "multiValued": false
+        },
+        "employeetype": {
+            "name": "employeetype",
+            "defName": "employeeType",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "facsimiletelephonenumber": {
+            "name": "facsimiletelephonenumber",
+            "defName": "facsimileTelephoneNumber",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janspassexpdate": {
+            "name": "janspassexpdate",
+            "defName": "jansPassExpDate",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "mobile": {
+            "name": "mobile",
+            "defName": "mobile",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "middlename": {
+            "name": "middlename",
+            "defName": "middleName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansphonevalue": {
+            "name": "jansphonevalue",
+            "defName": "jansPhoneValue",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansimsvalue": {
+            "name": "jansimsvalue",
+            "defName": "jansImsValue",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansactive": {
+            "name": "jansactive",
+            "defName": "jansActive",
+            "type": "bool",
+            "multiValued": false
+        },
+        "janspersistentjwt": {
+            "name": "janspersistentjwt",
+            "defName": "jansPersistentJWT",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "usercertificate": {
+            "name": "usercertificate",
+            "defName": "userCertificate",
+            "type": "text",
+            "multiValued": false
+        },
+        "janstitle": {
+            "name": "janstitle",
+            "defName": "jansTitle",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "updatedat": {
+            "name": "updatedat",
+            "defName": "updatedAt",
+            "type": "timestamp",
+            "multiValued": false
+        }
+    },
+    "janssectoridentifier": {
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansredirecturi": {
+            "name": "jansredirecturi",
+            "defName": "jansRedirectURI",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansclntid": {
+            "name": "jansclntid",
+            "defName": "jansClntId",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    },
+    "jansumaresource": {
+        "owner": {
+            "name": "owner",
+            "defName": "owner",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansrevision": {
+            "name": "jansrevision",
+            "defName": "jansRevision",
+            "type": "int4",
+            "multiValued": false
+        },
+        "jansresource": {
+            "name": "jansresource",
+            "defName": "jansResource",
+            "type": "text",
+            "multiValued": false
+        },
+        "jansfaviconimage": {
+            "name": "jansfaviconimage",
+            "defName": "jansFaviconImage",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "description": {
+            "name": "description",
+            "defName": "description",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "inum": {
+            "name": "inum",
+            "defName": "inum",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "janstyp": {
+            "name": "janstyp",
+            "defName": "jansTyp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansassociatedclnt": {
+            "name": "jansassociatedclnt",
+            "defName": "jansAssociatedClnt",
+            "type": "jsonb",
+            "multiValued": true
+        },
+        "displayname": {
+            "name": "displayname",
+            "defName": "displayName",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansgrp": {
+            "name": "jansgrp",
+            "defName": "jansGrp",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansumascope": {
+            "name": "jansumascope",
+            "defName": "jansUmaScope",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "jansscopeexpression": {
+            "name": "jansscopeexpression",
+            "defName": "jansScopeExpression",
+            "type": "text",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "iat": {
+            "name": "iat",
+            "defName": "iat",
+            "type": "timestamp",
+            "multiValued": false
+        }
+    },
+    "janspar": {
+        "jansattrs": {
+            "name": "jansattrs",
+            "defName": "jansAttrs",
+            "type": "text",
+            "multiValued": false
+        },
+        "dn": {
+            "name": "dn",
+            "defName": "dn",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "del": {
+            "name": "del",
+            "defName": "del",
+            "type": "bool",
+            "multiValued": false
+        },
+        "jansid": {
+            "name": "jansid",
+            "defName": "jansId",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "exp": {
+            "name": "exp",
+            "defName": "exp",
+            "type": "timestamp",
+            "multiValued": false
+        },
+        "doc_id": {
+            "name": "doc_id",
+            "defName": "doc_id",
+            "type": "varchar",
+            "multiValued": false
+        },
+        "objectclass": {
+            "name": "objectclass",
+            "defName": "objectClass",
+            "type": "varchar",
+            "multiValued": false
+        }
+    }
+}

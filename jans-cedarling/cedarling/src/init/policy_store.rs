@@ -18,8 +18,8 @@ pub enum PolicyStoreLoadError {
     ParseJson(#[from] serde_json::Error),
     #[error("failed to parse the policy store from policy_store yaml: {0}")]
     ParseYaml(#[from] serde_yml::Error),
-    #[error("failed to fetch the policy store from the lock master")]
-    FetchFromLockMaster(#[from] HttpClientError),
+    #[error("failed to fetch the policy store from the lock server")]
+    FetchFromLockServer(#[from] HttpClientError),
     #[error("Policy Store does not contain correct structure: {0}")]
     InvalidStore(String),
     #[error("Failed to load policy store from {0}: {1}")]
@@ -75,18 +75,18 @@ pub(crate) async fn load_policy_store(
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
             extract_first_policy_store(&agama_policy_store)?
         },
-        PolicyStoreSource::LockMaster(policy_store_uri) => {
+        PolicyStoreSource::LockServer(policy_store_uri) => {
             load_policy_store_from_lock_master(policy_store_uri).await?
         },
         PolicyStoreSource::FileJson(path) => {
             let policy_json = fs::read_to_string(path)
-                .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone(), e))?;
+                .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone().into(), e))?;
             let agama_policy_store = serde_json::from_str::<AgamaPolicyStore>(&policy_json)?;
             extract_first_policy_store(&agama_policy_store)?
         },
         PolicyStoreSource::FileYaml(path) => {
             let policy_yaml = fs::read_to_string(path)
-                .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone(), e))?;
+                .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone().into(), e))?;
             let agama_policy_store = serde_yml::from_str::<AgamaPolicyStore>(&policy_yaml)?;
             extract_first_policy_store(&agama_policy_store)?
         },
@@ -159,7 +159,7 @@ mod test {
         let uri = format!("{}/policy-store", mock_server.url()).to_string();
 
         load_policy_store(&PolicyStoreConfig {
-            source: crate::PolicyStoreSource::LockMaster(uri),
+            source: crate::PolicyStoreSource::LockServer(uri),
         })
         .await
         .expect("Should load policy store from Lock Master file");
