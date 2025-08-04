@@ -66,9 +66,10 @@ class CedarlingInstance:
     def generate_resource(self, resource: DictType) -> EntityData:
         resource_properties = resource.get("properties", {})
         resource_entity_dict = {
-            "entity_type": "resource",
-            "type": resource.get("type_field"),
-            "id": resource.get("id")
+            "cedar_entity_mapping": {
+                "entity_type": resource.get("type_field"),
+                "id": resource.get("id")
+            }
         }
         for key in resource_properties.keys():
             resource_entity_dict[key] = resource_properties[key]
