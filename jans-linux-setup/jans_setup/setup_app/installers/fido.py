@@ -101,3 +101,16 @@ class FidoInstaller(JettyInstaller):
 
     def service_post_install_tasks(self):
         base.current_app.ConfigApiInstaller.install_plugin('fido2')
+
+
+    def app_test_data_loader(self):
+        if not self.installed():
+            return
+
+        self.logIt("Loding Jans Fido2 test data")
+        self.encode_test_passwords()
+        test_templates_dir = os.path.join(Config.templateFolder, 'test', self.service_name)
+        self.render_templates_folder(test_templates_dir)
+        import_fn_list = glob.glob(os.path.join(test_templates_dir, 'data/*.ldif'))
+        self.dbUtils.import_ldif(import_fn_list)
+        self.create_test_client_keystore()
