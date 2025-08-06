@@ -109,6 +109,7 @@ class FidoInstaller(JettyInstaller):
 
         self.logIt("Loding Jans Fido2 test data")
         self.encode_test_passwords()
+        self.update_rendering_dict()
         test_templates_dir = os.path.join(Config.templateFolder, 'test', self.service_name)
         self.render_templates_folder(test_templates_dir)
         import_fn_list = glob.glob(os.path.join(test_templates_dir, 'data/*.ldif'))
