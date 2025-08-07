@@ -3,8 +3,8 @@
 # Test user for FIDO2 device registration
 dn: inum=B1F3-AEAE-B798,ou=people,o=jans
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 uid: test_fido_user
 mail: test_fido_user@test.org
 givenName: Test
