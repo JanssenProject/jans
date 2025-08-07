@@ -294,21 +294,19 @@ def print_or_log(msg):
     print(msg) if argsp.x else base.logIt(msg)
 
 
+def call_test_data_lodader():
+    print_or_log("Loading test data")
+    testDataLoader.dbUtils.bind()
+    testDataLoader.load_test_data()
+    jansInstaller.load_app_test_data()
+    print_or_log("Test data loaded.")
+
 if Config.profile == 'jans':
     if argsp.t:
         testDataLoader = TestDataLoader()
 
     if argsp.t and argsp.x:
-        print_or_log("Loading test data")
-        testDataLoader.dbUtils.bind()
-        configApiInstaller.load_test_data()
-        testDataLoader.load_test_data()
-        print_or_log("Test data loaded.")
-
-    if not argsp.t and argsp.x and argsp.load_config_api_test:
-        print_or_log("Loading Config Api Test data")
-        configApiInstaller.load_test_data()
-        print_or_log("Test data loaded. Exiting ...")
+        call_test_data_lodader()
 
     if argsp.x:
         print("Exiting ...")
@@ -404,8 +402,6 @@ def main():
             if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (
                     not Config.installed_instance and Config.get(configApiInstaller.install_var)):
                 configApiInstaller.start_installation()
-                if argsp.t or getattr(argsp, 'load_config_api_test', None):
-                    configApiInstaller.load_test_data()
 
             if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jansCliInstaller.install_var)):
@@ -458,7 +454,7 @@ def main():
 
             if argsp.t:
                 base.logIt("Loading test data")
-                testDataLoader.load_test_data()
+                call_test_data_lodader()
 
             jansProgress.progress(static.COMPLETED)
 
