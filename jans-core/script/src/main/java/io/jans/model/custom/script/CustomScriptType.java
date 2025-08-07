@@ -67,13 +67,10 @@ import io.jans.model.custom.script.type.spontaneous.DummySpontaneousScopeType;
 import io.jans.model.custom.script.type.spontaneous.SpontaneousScopeType;
 import io.jans.model.custom.script.type.ssa.DummyModifySsaResponseType;
 import io.jans.model.custom.script.type.ssa.ModifySsaResponseType;
-import io.jans.model.custom.script.type.token.DummyTokenExchangeType;
-import io.jans.model.custom.script.type.token.DummyUpdateTokenType;
-import io.jans.model.custom.script.type.token.TokenExchangeType;
-import io.jans.model.custom.script.type.token.UpdateTokenType;
+import io.jans.model.custom.script.type.token.*;
 import io.jans.model.custom.script.type.uma.*;
-import io.jans.model.custom.script.type.user.LinkInterceptionType;
 import io.jans.model.custom.script.type.user.DummyLinkInterceptionType;
+import io.jans.model.custom.script.type.user.LinkInterceptionType;
 import io.jans.orm.annotation.AttributeEnum;
 
 import java.util.HashMap;
@@ -129,6 +126,7 @@ public enum CustomScriptType implements AttributeEnum {
     HEALTH_CHECK("health_check", "Health Check", HealthCheckType.class, CustomScript.class, "HealthCheck", new DummyHealthCheck()),
     AUTHZ_DETAIL("authz_detail", "Authorization Detail", AuthzDetailType.class, CustomScript.class, "AuthzDetail", new DummyAuthzDetail()),
     UPDATE_TOKEN("update_token", "Update Token", UpdateTokenType.class, CustomScript.class, "UpdateToken", new DummyUpdateTokenType()),
+    LOGOUT_STATUS_JWT("logout_status_jwt", "Logout Status Jwt", LogoutStatusJwtType.class, CustomScript.class, "LogoutStatusJwt", new DummyLogoutStatusJwtType()),
     CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType()),
     MODIFY_SSA_RESPONSE("modify_ssa_response", "Modify SSA Response", ModifySsaResponseType.class, CustomScript.class, "ModifySsaResponse", new DummyModifySsaResponseType()),
     FIDO2_EXTENSION("fido2_extension", "Fido2 Extension", Fido2ExtensionType.class, CustomScript.class, "Fido2Extension", new DummyFido2ExtensionType()),

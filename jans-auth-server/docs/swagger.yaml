@@ -1744,6 +1744,11 @@ paths:
                   description: Update token script dns
                   items:
                     type: string
+                logout_status_script_dns:
+                  type: array
+                  description: Logout status jwt script dns
+                  items:
+                    type: string
                 post_authn_script_dns:
                   type: array
                   description: Post Authn script dns
@@ -2183,6 +2188,11 @@ paths:
                 update_token_script_dns:
                   type: array
                   description: Update token script dns
+                  items:
+                    type: string
+                logout_status_script_dns:
+                  type: array
+                  description: Logout status jwt script dns
                   items:
                     type: string
                 post_authn_script_dns:
