@@ -38,6 +38,14 @@
                 "schema": {
                     "description": "The Cedar schema definition (encoded in Base64) that defines the shape of entities, actions, and context within this policy store.",
                     "type": "string"
+                },
+                "default_entities": {
+                    "description": "A map of default entity identifiers to their associated entity data. These entities are loaded at startup and made available for policy evaluation.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "description": "Default entity data that can be referenced in policies."
+                    }
                 }
             },
             "additionalProperties": true

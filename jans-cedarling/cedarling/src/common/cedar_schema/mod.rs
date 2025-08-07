@@ -42,6 +42,23 @@ pub struct CedarSchema {
     pub validator_schema: ValidatorSchema,
 }
 
+impl CedarSchema {
+    /// Create an empty CedarSchema for testing purposes
+    pub fn empty() -> Self {
+        Self {
+            schema: cedar_policy::Schema::from_json_str("{}").unwrap_or_else(|_| {
+                panic!("Failed to create empty Cedar schema")
+            }),
+            json: serde_json::from_str("{}").unwrap_or_else(|_| {
+                panic!("Failed to create empty CedarSchemaJson")
+            }),
+            validator_schema: ValidatorSchema::from_json_str("{}", cedar_policy_core::extensions::Extensions::all_available()).unwrap_or_else(|_| {
+                panic!("Failed to create empty ValidatorSchema")
+            }),
+        }
+    }
+}
+
 impl PartialEq for CedarSchema {
     fn eq(&self, other: &Self) -> bool {
         // Have to check principals, resources, action_groups, entity_types,

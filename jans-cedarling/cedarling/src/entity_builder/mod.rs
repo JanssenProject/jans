@@ -23,7 +23,7 @@ mod value_to_expr;
 use crate::authz::AuthorizeEntitiesData;
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
-use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
+use crate::common::policy_store::{ClaimMappings, TrustedIssuer, PolicyStore};
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::jwt::Token;
 use crate::{RequestUnsigned, entity_builder_config::*};
@@ -40,10 +40,110 @@ use url::Origin;
 pub(crate) use built_entities::BuiltEntities;
 pub use error::*;
 
+/// Parse default entities from the policy store configuration
+fn parse_default_entities(
+    policy_store: &PolicyStore,
+    schema: Option<&MappingSchema>,
+) -> Result<HashMap<String, Entity>, BuildEntityError> {
+    let mut default_entities = HashMap::new();
+    
+    if let Some(default_entities_data) = &policy_store.default_entities {
+        for (entity_id, entity_data) in default_entities_data {
+            // Parse the entity data as a JSON object
+            let entity_attrs = if let Value::Object(obj) = entity_data {
+                obj.clone()
+            } else {
+                return Err(BuildEntityError {
+                    entity_type_name: "DefaultEntity".to_string(),
+                    error: BuildEntityErrorKind::InvalidEntityData(
+                        format!("Default entity data for '{}' must be a JSON object", entity_id)
+                    ),
+                });
+            };
+            
+            // Extract entity type from the data or use a default
+            let entity_type = entity_attrs.get("entity_type")
+                .and_then(|v| v.as_str())
+                .unwrap_or("Jans::DefaultEntity");
+            
+            // Convert JSON attributes to Cedar expressions
+            let mut cedar_attrs = HashMap::new();
+            for (key, value) in entity_attrs.clone() {
+                if key != "entity_type" && key != "entity_id" {
+                    let expr = value_to_restricted_expression(value, schema)?;
+                    cedar_attrs.insert(key, expr);
+                }
+            }
+            
+            // Build the Cedar entity
+            let entity = build_cedar_entity(
+                entity_type,
+                entity_id,
+                cedar_attrs,
+                HashSet::new(),
+            )?;
+            
+            default_entities.insert(entity_id.clone(), entity);
+        }
+    }
+    
+    Ok(default_entities)
+}
+
+/// Convert a JSON value to a Cedar restricted expression
+fn value_to_restricted_expression(
+    value: Value,
+    schema: Option<&MappingSchema>,
+) -> Result<RestrictedExpression, BuildEntityError> {
+    match value {
+        Value::String(s) => Ok(RestrictedExpression::new_string(s)),
+        Value::Number(n) => {
+            if let Some(i) = n.as_i64() {
+                Ok(RestrictedExpression::new_long(i))
+            } else if let Some(f) = n.as_f64() {
+                // Cedar doesn't support floats, so we'll convert to string
+                Ok(RestrictedExpression::new_string(f.to_string()))
+            } else {
+                Err(BuildEntityError {
+                    entity_type_name: "DefaultEntity".to_string(),
+                    error: BuildEntityErrorKind::InvalidEntityData(
+                        "Unsupported number format".to_string()
+                    ),
+                })
+            }
+        },
+        Value::Bool(b) => Ok(RestrictedExpression::new_bool(b)),
+        Value::Array(arr) => {
+            let mut exprs = Vec::new();
+            for item in arr {
+                exprs.push(value_to_restricted_expression(item, schema)?);
+            }
+            Ok(RestrictedExpression::new_set(exprs))
+        },
+        Value::Object(obj) => {
+            let mut attrs = HashMap::new();
+            for (key, value) in obj {
+                attrs.insert(key, value_to_restricted_expression(value, schema)?);
+            }
+            RestrictedExpression::new_record(attrs).map_err(|e| BuildEntityError {
+                entity_type_name: "DefaultEntity".to_string(),
+                error: BuildEntityErrorKind::InvalidEntityData(format!("Failed to create record: {}", e)),
+            })
+        },
+        Value::Null => Err(BuildEntityError {
+            entity_type_name: "DefaultEntity".to_string(),
+            error: BuildEntityErrorKind::InvalidEntityData(
+                "Null values are not supported in Cedar expressions".to_string()
+            ),
+        }),
+    }
+}
+
 pub struct EntityBuilder {
     config: EntityBuilderConfig,
     iss_entities: HashMap<Origin, Entity>,
     schema: Option<MappingSchema>,
+    default_entities: HashMap<String, Entity>,
 }
 
 impl EntityBuilder {
@@ -51,6 +151,7 @@ impl EntityBuilder {
         config: EntityBuilderConfig,
         trusted_issuers: &HashMap<String, TrustedIssuer>,
         schema: Option<&ValidatorSchema>,
+        policy_store: &PolicyStore,
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
@@ -68,10 +169,15 @@ impl EntityBuilder {
 
         let iss_entities = ok.into_iter().collect::<HashMap<Origin, Entity>>();
 
+        // Parse default entities from the policy store
+        let default_entities = parse_default_entities(policy_store, schema.as_ref())
+            .map_err(|e| InitEntityBuilderError::BuildIssEntities(vec![e].into()))?;
+
         Ok(Self {
             config,
             iss_entities,
             schema,
+            default_entities,
         })
     }
 
@@ -139,6 +245,7 @@ impl EntityBuilder {
             resource,
             roles,
             tokens: token_entities,
+            default_entities: self.default_entities.clone(),
         })
     }
 
@@ -276,6 +383,8 @@ impl TokenPrincipalMappings {
 mod test {
     use super::*;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::common::cedar_schema::CedarSchema;
+    use crate::common::policy_store::PoliciesContainer;
     use crate::CedarEntityMapping;
     use cedar_policy::{Entities, Schema};
     use serde_json::{Value, json};
@@ -409,7 +518,25 @@ mod test {
             ),
         ]);
 
-        let entity_builder = EntityBuilder::new(config, &issuers, Some(&validator_schema))
+        // Create a mock policy store for testing
+        let policy_store = PolicyStore {
+            version: None,
+            name: "test".to_string(),
+            description: None,
+            cedar_version: None,
+            schema: CedarSchema {
+                schema: schema.clone(),
+                json: serde_json::from_str("{}").unwrap_or_else(|_| {
+                    panic!("Failed to create empty CedarSchemaJson")
+                }),
+                validator_schema: validator_schema.clone(),
+            },
+            policies: PoliciesContainer::empty(),
+            trusted_issuers: Some(issuers.clone()),
+            default_entities: None,
+        };
+
+        let entity_builder = EntityBuilder::new(config, &issuers, Some(&validator_schema), &policy_store)
             .expect("init entity builder");
 
         let entities = entity_builder
@@ -440,5 +567,60 @@ mod test {
             }),
             Some(&schema),
         );
+    }
+
+    #[test]
+    fn can_parse_default_entities() {
+        // Test the parse_default_entities function directly
+        let schema_src = r#"
+            namespace Jans {
+                entity DefaultEntity = {
+                    entity_id: String,
+                    o?: String,
+                    org_id?: String,
+                };
+            }
+        "#;
+        let schema = Schema::from_str(schema_src).expect("parse schema");
+        let validator_schema =
+            ValidatorSchema::from_str(schema_src).expect("parse validation schema");
+
+        // Create a policy store with default entities
+        let default_entities = HashMap::from([
+            ("1694c954f8d9".to_string(), json!({
+                "entity_id": "1694c954f8d9",
+                "entity_type": "Jans::DefaultEntity",
+                "o": "Acme Dolphins Division",
+                "org_id": "100129"
+            })),
+        ]);
+
+        let policy_store = PolicyStore {
+            version: None,
+            name: "test".to_string(),
+            description: None,
+            cedar_version: None,
+            schema: CedarSchema {
+                schema: schema.clone(),
+                json: serde_json::from_str("{}").unwrap_or_else(|_| {
+                    panic!("Failed to create empty CedarSchemaJson")
+                }),
+                validator_schema: validator_schema.clone(),
+            },
+            policies: PoliciesContainer::empty(),
+            trusted_issuers: Some(HashMap::new()),
+            default_entities: Some(default_entities),
+        };
+
+        // Test that parse_default_entities works
+        let parsed_entities = parse_default_entities(&policy_store, None)
+            .expect("should parse default entities");
+
+        assert_eq!(parsed_entities.len(), 1, "should have 1 default entity");
+        
+        // Verify the entity
+        let entity = parsed_entities.get("1694c954f8d9").expect("should have entity");
+        assert_eq!(entity.uid().type_name().to_string(), "Jans::DefaultEntity");
+        assert_eq!(entity.uid().id().as_ref() as &str, "1694c954f8d9");
     }
 }

@@ -41,14 +41,30 @@ mod test {
     use super::super::*;
     use super::*;
     use crate::CedarEntityMapping;
+    use crate::common::cedar_schema::CedarSchema;
+    use crate::common::policy_store::PoliciesContainer;
+    use crate::common::policy_store::PolicyStore;
     use serde_json::json;
 
     #[test]
     fn can_build_entity() {
+        // Create a mock policy store for testing
+        let policy_store = PolicyStore {
+            version: None,
+            name: "test".to_string(),
+            description: None,
+            cedar_version: None,
+            schema: CedarSchema::empty(),
+            policies: PoliciesContainer::empty(),
+            trusted_issuers: Some(HashMap::new()),
+            default_entities: None,
+        };
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
             &HashMap::new(),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
+            &policy_store,
         )
         .expect("should init entity builder");
         let resource_data = EntityData {
@@ -90,10 +106,23 @@ mod test {
 
     #[test]
     fn can_build_entity_with_optional_attr() {
+        // Create a mock policy store for testing
+        let policy_store = PolicyStore {
+            version: None,
+            name: "test".to_string(),
+            description: None,
+            cedar_version: None,
+            schema: CedarSchema::empty(),
+            policies: PoliciesContainer::empty(),
+            trusted_issuers: Some(HashMap::new()),
+            default_entities: None,
+        };
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
             &HashMap::new(),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
+            &policy_store,
         )
         .expect("should init entity builder");
         let resource_data = EntityData {

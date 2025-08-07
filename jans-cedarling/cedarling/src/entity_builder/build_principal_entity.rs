@@ -109,7 +109,8 @@ pub struct PrincipalIdSrc<'a> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::common::policy_store::TrustedIssuer;
+    use crate::common::policy_store::{TrustedIssuer, PolicyStore, PoliciesContainer};
+    use crate::common::cedar_schema::CedarSchema;
     use std::collections::HashMap;
 
     #[test]
@@ -123,10 +124,23 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+        // Create a mock policy store for testing
+        let policy_store = PolicyStore {
+            version: None,
+            name: "test".to_string(),
+            description: None,
+            cedar_version: None,
+            schema: CedarSchema::empty(),
+            policies: PoliciesContainer::empty(),
+            trusted_issuers: Some(issuers.clone()),
+            default_entities: None,
+        };
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             Some(&validator_schema),
+            &policy_store,
         )
         .expect("should init entity builder");
 

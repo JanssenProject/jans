@@ -107,6 +107,12 @@ pub struct PolicyStore {
     /// This field may contain issuers that are trusted to provide tokens, allowing for additional
     /// verification and security when handling JWTs.
     pub trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+
+    /// Default entities for the policy store.
+    ///
+    /// This optional field can be used to specify default entities that should be included
+    /// in the policy evaluation context.
+    pub default_entities: Option<HashMap<String, serde_json::Value>>,
 }
 
 impl PolicyStore {
@@ -358,6 +364,14 @@ impl PoliciesContainer {
     pub fn get_policy_description(&self, id: &str) -> Option<&str> {
         self.raw_policy_info.get(id).map(|v| v.description.as_str())
     }
+
+    /// Create an empty PoliciesContainer for testing purposes
+    pub fn empty() -> Self {
+        Self {
+            raw_policy_info: HashMap::new(),
+            policy_set: cedar_policy::PolicySet::new(),
+        }
+    }
 }
 
 /// Custom deserializer for converting base64-encoded policies into a `PolicySet`.
@@ -521,6 +535,12 @@ impl<'de> Deserialize<'de> for PolicyStore {
                 .map(|v| {
                     HashMap::<String, TrustedIssuer>::deserialize(v)
                         .map_err(|e| de::Error::custom(format!("error parsing trusted issuers: {}", e)))
+                })
+                .transpose()?,
+            default_entities: obj.get("default_entities")
+                .map(|v| {
+                    HashMap::<String, serde_json::Value>::deserialize(v)
+                        .map_err(|e| de::Error::custom(format!("error parsing default entities: {}", e)))
                 })
                 .transpose()?,
         };
