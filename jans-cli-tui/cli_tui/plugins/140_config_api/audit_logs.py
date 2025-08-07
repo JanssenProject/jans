@@ -27,7 +27,7 @@ class ConfigApiAuditLogs(DialogUtils):
         self.prev_next_buttons = VSplit([], width=D())
         self.working_container = JansVerticalNav(
                 myparent=common_data.app,
-                headers=[_("Date"), _("Type"), _("Log")],
+                headers=[_("Date Time"), _("Log")],
                 preferred_size= common_data.app.get_column_sizes(0, 0, 0),
                 on_display=common_data.app.data_display_dialog,
                 selectes=0,
@@ -37,8 +37,8 @@ class ConfigApiAuditLogs(DialogUtils):
             )
 
         self.search_pattern_text_area = TextArea(style=cli_style.white_bg_widget, multiline=False, height=1, width=15)
-        self.search_date_after_widget = DateSelectWidget(app=common_data.app)
-        self.search_date_before_widget = DateSelectWidget(app=common_data.app)
+        self.search_date_after_widget = DateSelectWidget(app=common_data.app, date_only=True)
+        self.search_date_before_widget = DateSelectWidget(app=common_data.app, date_only=True)
 
         pattern_title = _("Search Pattern")
         date_after_title = _("Satrt Date")
@@ -53,7 +53,7 @@ class ConfigApiAuditLogs(DialogUtils):
                         self.search_date_after_widget,
                         Label(date_before_title + ':', width=len(date_before_title)+1, style=cli_style.edit_text),
                         self.search_date_before_widget,
-                        Button(text=search_title, width=len(search_title)+4, handler=self.search_sessions),
+                        Button(text=search_title, width=len(search_title)+4, handler=self.search_auditlog),
                         ],
                         padding=1,
                         height=1,
@@ -77,22 +77,17 @@ class ConfigApiAuditLogs(DialogUtils):
         self.working_container.clear()
         all_entries = data.get('entries', [])
         for entry in all_entries:
-            self.working_container.add_item((
-                        entry.get('sessionAttributes', {}).get('auth_user', '--'),
-                        entry.get('expirationDate', '---'),
-                        str(entry.get('deletable', False)),
-                        entry.get('sessionAttributes', {}).get('client_id', '--'),
-                    ))
+            self.working_container.add_item((entry[:23], entry[24:]))
             self.working_container.all_data = all_entries
 
         buttons = []
         if data.get('start', 0) > 0:
-            handler_partial = partial(self.search_sessions, data['start'] - common_data.app.entries_per_page)
+            handler_partial = partial(self.search_auditlog, data['start'] - common_data.app.entries_per_page)
             prev_button = Button(_("Prev"), handler=handler_partial)
             prev_button.window.jans_help = _("Retreives previous %d entries") % common_data.app.entries_per_page
             buttons.append(prev_button)
         if  data.get('start', 0) + common_data.app.entries_per_page <  data.get('totalEntriesCount', 0):
-            handler_partial = partial(self.search_sessions, data['start'] + common_data.app.entries_per_page)
+            handler_partial = partial(self.search_auditlog, data['start'] + common_data.app.entries_per_page)
             next_button = Button(_("Next"), handler=handler_partial)
             next_button.window.jans_help = _("Retreives next %d entries") % common_data.app.entries_per_page
             buttons.append(next_button)
@@ -109,7 +104,7 @@ class ConfigApiAuditLogs(DialogUtils):
         common_data.app.layout.focus(self.working_container)
 
 
-    def search_sessions(
+    def search_auditlog(
         self,
         start_index: Optional[int]= 0
         ) -> None:
@@ -118,30 +113,32 @@ class ConfigApiAuditLogs(DialogUtils):
 
         endpoint_args = f'limit:{common_data.app.entries_per_page},startIndex:{start_index}'
         search_arg_lists = []
-        username = self.search_user_text_area.text
+        search_pattern = self.search_pattern_text_area.text
         date_after = self.search_date_after_widget.value
         date_before = self.search_date_before_widget.value
 
-        if username:
-            search_arg_lists.append(f'auth_user={username}')
+        if search_pattern:
+            search_arg_lists.append(f'pattern:{search_pattern}')
 
         if date_after:
-            date_after = date_after.replace(microsecond=0)
-            search_arg_lists.append(f'expirationDate>{date_after}')
+            date_after = date_after.strftime("%d-%m-%Y")
+            search_arg_lists.append(f'start_date:{date_after}')
 
         if date_before:
-            date_before = date_before.replace(microsecond=0)
-            search_arg_lists.append(f'expirationDate<{date_before}')
+            date_before = date_before.strftime("%d-%m-%Y")
+            search_arg_lists.append(f'end_date:{date_before}')
 
         if search_arg_lists:
-            endpoint_args += ',fieldValuePair:' + '\\,'.join(search_arg_lists)
+            endpoint_args += ',' + '\\,'.join(search_arg_lists)
 
-
-        async def search_sessions_coroutine():
-            cli_args = {'operation_id': 'search-session'}
+        async def search_auditlog_coroutine():
+            cli_args = {'operation_id': 'get-audit-data'}
             if endpoint_args:
                 cli_args['endpoint_args'] = endpoint_args
-            common_data.app.start_progressing(_("Searching sessions for user {}").format(username))
+            processing_message = _("Searching auidit logs")
+            if search_pattern:
+                processing_message += ' ' + _("for patters %s" % search_pattern)
+            common_data.app.start_progressing(search_pattern)
             response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
             common_data.app.stop_progressing()
 
@@ -152,46 +149,6 @@ class ConfigApiAuditLogs(DialogUtils):
             data = response.json()
             self.update_working_container(data=data)
 
-        asyncio.ensure_future(search_sessions_coroutine())
+        asyncio.ensure_future(search_auditlog_coroutine())
 
 
-
-
-    def delete_session(self, **kwargs: Any) -> None:
-        """This method is for deleting session.
-
-        Args:
-            kwargs (dict): arguments given by on_delete() function of Nav Bar
-        """
-
-        selected_idx = kwargs['selected_idx']
-        selected_session = self.working_container.all_data[selected_idx]
-        sid = selected_session['sessionAttributes']['sid']
-
-        if not selected_session.get('deletable'):
-            common_data.app.show_message(_(common_strings.warning), _("This session cannot be deleted."), tobefocused=self.working_container)
-            return
-
-        def do_delete_session(dialog):
-
-            async def coroutine():
-                cli_args = {'operation_id': 'delete-session', 'url_suffix': f'sid:{sid}'}
-                common_data.app.start_progressing(_("Deleting session {}").format(sid))
-                response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-                common_data.app.stop_progressing()
-
-                if response:
-                    common_data.app.show_message(_(common_strings.error), str(response), tobefocused=self.working_container)
-                    return
-
-                self.search_sessions()
-
-            asyncio.ensure_future(coroutine())
-
-
-        confirm_dialog = common_data.app.get_confirm_dialog(
-                HTML(_("Are you sure want to delete session <b>{}</b>.").format(sid)),
-                confirm_handler=do_delete_session
-                )
-
-        common_data.app.show_jans_dialog(confirm_dialog)
