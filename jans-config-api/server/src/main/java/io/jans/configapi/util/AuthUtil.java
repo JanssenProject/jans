@@ -25,6 +25,9 @@ import io.jans.service.EncryptionService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.lang.reflect.Field;
@@ -479,5 +482,13 @@ public class AuthUtil {
         return new ByteArrayInputStream(output.toByteArray());  
     }
     
+    public static String readFile(String filePath) {
+        Path path = Paths.get(filePath).toAbsolutePath();
+        try {
+            return Files.readString(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     
 }

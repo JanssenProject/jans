@@ -7,8 +7,8 @@
 package io.jans.configapi.security.service;
 
 import io.jans.as.model.exception.InvalidJwtException;
-import io.jans.cedarling.binding.wrapper.jwt.JWTCreator;
-import io.jans.cedarling.binding.wrapper.utils.AppUtils;
+import io.jans.configapi.service.cedar.CedarlingService;
+
 
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.core.util.ProtectionScopeType;
@@ -52,7 +52,7 @@ public class CedarAuthorizationService extends AuthorizationService implements S
 
     private static final long serialVersionUID = 1L;
     private static final String AUTHENTICATION_SCHEME = "Bearer ";
-    public static final String BOOTSTRAP_JSON_PATH = "./src/test/resources/config/bootstrap.json";
+    public static final String BOOTSTRAP_JSON_PATH = ".src/main/resources/cedar/config-api-cedarling-bootstrap.json";
     
     @Inject
     transient Logger logger;
@@ -75,8 +75,8 @@ public class CedarAuthorizationService extends AuthorizationService implements S
     @Inject
     ExternalInterceptionService externalInterceptionService;
     
-    @Injet 
-    private CedarlingAdapter adapter;
+    @Inject 
+    CedarlingService cedarlingService;
 
     public void setUp() throws Exception {
         adapter = new CedarlingAdapter();
