@@ -2,16 +2,20 @@
 tags:
   - cedarling
   - javascript
+  - WASM
+  - browser app
   - getting-started
 ---
 
 
-# Getting Started with Cedarling JavaScript
+# Getting Started with Cedarling in a JavaScript app
 
 This guide combines the JavaScript usage instructions with the WebAssembly (WASM) build and API reference for Cedarling.
 
 
 ## Installation
+
+### Using the package manager
 
 You can easily install Cedarling using WASM.
 
@@ -19,13 +23,16 @@ You can easily install Cedarling using WASM.
 npm i @janssenproject/cedarling_wasm
 ```
 
-Alternatively see [here](#build-from-source), if you want to build Cedarling from the source.
+Alternatively, see [here](#build-from-source), if you want to build Cedarling from the source.
 
 
 ### Build from Source
 
 
-Rust 1.63 or Greater. Ensure that you have `Rust` version 1.63 or higher installed. You can check your current version of Rust 
+#### Requirements
+
+Rust 1.63 or Greater. Ensure that you have `Rust` version 1.63 or higher installed. 
+You can check your current version of Rust using the command below.
 
 ```bash title="Command"
 rustc --version
@@ -49,10 +56,9 @@ Check `clang` version
 clang --version
 ```
 
-## Building
+#### Building
 
 Clone the Janssen server repository from the GitHub and change the directory to the `cedarling_wasm` directory:
-
 
 ```bash title="Command"
 cd /path/to/jans/jans-cedarling/bindings/cedarling_wasm
@@ -73,6 +79,14 @@ python3 -m http.server
 
 
 ## Usage
+
+!!! info "Sample Apps"
+
+    You can find usage examples at the following locations in the Janssen server
+    repository:
+
+    - A [sample app](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/index.html) that demonstrates basic usage.
+    - A fully featured [Cedarling browser](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/cedarling_app.html) app where you can test and validate your configuration.
 
 ### Initialization
 
