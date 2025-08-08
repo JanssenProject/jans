@@ -365,13 +365,7 @@ impl PoliciesContainer {
         self.raw_policy_info.get(id).map(|v| v.description.as_str())
     }
 
-    /// Create an empty PoliciesContainer for testing purposes
-    pub fn empty() -> Self {
-        Self {
-            raw_policy_info: HashMap::new(),
-            policy_set: cedar_policy::PolicySet::new(),
-        }
-    }
+
 }
 
 /// Custom deserializer for converting base64-encoded policies into a `PolicySet`.

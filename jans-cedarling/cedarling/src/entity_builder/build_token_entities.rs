@@ -92,9 +92,6 @@ pub struct BuildTokenEntityError {
 mod test {
     use super::super::test::*;
     use super::super::*;
-    use crate::common::cedar_schema::CedarSchema;
-    use crate::common::policy_store::PoliciesContainer;
-    use crate::common::policy_store::PolicyStore;
     use crate::common::policy_store::TrustedIssuer;
     use cedar_policy::Schema;
     use serde_json::json;
@@ -118,23 +115,12 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        // Create a mock policy store for testing
-        let policy_store = PolicyStore {
-            version: None,
-            name: "test".to_string(),
-            description: None,
-            cedar_version: None,
-            schema: CedarSchema::empty(),
-            policies: PoliciesContainer::empty(),
-            trusted_issuers: Some(issuers.clone()),
-            default_entities: None,
-        };
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
             &issuers,
             Some(&validator_schema),
-            &policy_store,
+            None,
         )
         .expect("should init entity builder");
         let access_token = Token::new(
@@ -181,19 +167,8 @@ mod test {
     fn can_build_tkn_entity_without_schema() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        // Create a mock policy store for testing
-        let policy_store = PolicyStore {
-            version: None,
-            name: "test".to_string(),
-            description: None,
-            cedar_version: None,
-            schema: CedarSchema::empty(),
-            policies: PoliciesContainer::empty(),
-            trusted_issuers: Some(issuers.clone()),
-            default_entities: None,
-        };
 
-        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &issuers, None, &policy_store)
+        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &issuers, None, None)
             .expect("should init entity builder");
         let access_token = Token::new(
             "access_token",

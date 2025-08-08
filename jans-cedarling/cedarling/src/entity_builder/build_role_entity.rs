@@ -76,9 +76,6 @@ mod test {
     use super::super::test::*;
     use super::super::*;
     use super::*;
-    use crate::common::cedar_schema::CedarSchema;
-    use crate::common::policy_store::PolicyStore;
-    use crate::common::policy_store::PoliciesContainer;
     use crate::common::policy_store::TrustedIssuer;
     use cedar_policy::Schema;
     use serde_json::json;
@@ -96,23 +93,12 @@ mod test {
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = Arc::new(TrustedIssuer::default());
-        // Create a mock policy store for testing
-        let policy_store = PolicyStore {
-            version: None,
-            name: "test".to_string(),
-            description: None,
-            cedar_version: None,
-            schema: CedarSchema::empty(),
-            policies: PoliciesContainer::empty(),
-            trusted_issuers: Some(HashMap::new()),
-            default_entities: None,
-        };
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
-            &policy_store,
+            None,
         )
         .expect("should init entity builder");
 
@@ -151,23 +137,12 @@ mod test {
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = Arc::new(TrustedIssuer::default());
-        // Create a mock policy store for testing
-        let policy_store = PolicyStore {
-            version: None,
-            name: "test".to_string(),
-            description: None,
-            cedar_version: None,
-            schema: CedarSchema::empty(),
-            policies: PoliciesContainer::empty(),
-            trusted_issuers: Some(HashMap::new()),
-            default_entities: None,
-        };
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
-            &policy_store,
+            None,
         )
         .expect("should init entity builder");
 
@@ -216,23 +191,12 @@ mod test {
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = Arc::new(TrustedIssuer::default());
-        // Create a mock policy store for testing
-        let policy_store = PolicyStore {
-            version: None,
-            name: "test".to_string(),
-            description: None,
-            cedar_version: None,
-            schema: CedarSchema::empty(),
-            policies: PoliciesContainer::empty(),
-            trusted_issuers: Some(HashMap::new()),
-            default_entities: None,
-        };
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
-            &policy_store,
+            None,
         )
         .expect("should init entity builder");
 
