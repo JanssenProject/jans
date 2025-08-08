@@ -6,10 +6,10 @@ import json
 def get_projects():
 
     try:
-        response = requests.get('https://github.com/orgs/GluuFederation/repositories?q=agama-', headers={"Accept":"application/json"})
+        response = requests.get('https://github.com/orgs/GluuFederation/repositories?q=agama-&per_page=200', headers={"Accept":"application/json"})
         result = response.json()
         downloads = []
-        for repo in result["payload"]["repositories"]:
+        for repo in result['payload']['repositoriesPageRoute']['repositories']:
             repo_name = repo["name"]
             response = requests.get(f'https://api.github.com/repos/GluuFederation/{repo_name}/releases/latest', headers={'Accept': 'application/json'})
             if response.ok:

@@ -60,12 +60,13 @@ class CollectProperties(SetupUtils, BaseInstaller):
         # It is time to bind database
         dbUtils.bind()
 
-        if dbUtils.session:
+        if dbUtils.local_session:
             dbUtils.rdm_automapper()
 
         result = dbUtils.search('ou=clients,o=jans', search_filter='(&(inum=1701.*)(objectClass=jansClnt))', search_scope=SearchScopes.SUBTREE)
 
         oxConfiguration = dbUtils.search(jans_ConfigurationDN, search_filter='(objectClass=jansAppConf)', search_scope=SearchScopes.BASE)
+        
         if 'jansIpAddress' in oxConfiguration:
             Config.ip = oxConfiguration['jansIpAddress']
 
@@ -85,6 +86,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('admin_ui_client_id', '1901.', {'pw': 'admin_ui_client_pw', 'encoded': 'admin_ui_client_encoded_pw'}),
                     ('casa_client_id', CasaInstaller.client_id_prefix),
                     ('saml_scim_client_id', '2100.'),
+                    ('tui_client_id', '2000.'),
                     ]
         self.check_clients(client_var_id_list, create=False)
 

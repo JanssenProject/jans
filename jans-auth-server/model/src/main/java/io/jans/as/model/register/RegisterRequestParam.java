@@ -399,6 +399,11 @@ public enum RegisterRequestParam {
     UPDATE_TOKEN_SCRIPT_DNS("update_token_script_dns"),
 
     /**
+     * list of logout status jwt script dns
+     */
+    LOGOUT_STATUS_JWT_SCRIPT_DNS("logout_status_jwt_script_dns"),
+
+    /**
      * list of post authn script dns
      */
     POST_AUTHN_SCRIPT_DNS("post_authn_script_dns"),

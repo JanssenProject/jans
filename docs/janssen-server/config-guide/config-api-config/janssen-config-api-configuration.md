@@ -291,7 +291,7 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 
 Navigate to `Config API` section where administrators can update Config-API configurations
 in six sub-tabs, namely **Main**, **Agama**, **Plugins**, **Asset Management**, **Audit Log Conf**,
-**Data Format Conversion**
+**Data Format Conversion**, and **Auidit Logs**
 
 
 ![image](../../../assets/tui-config-api-main.png)
