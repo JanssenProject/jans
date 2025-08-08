@@ -5,7 +5,11 @@ tags:
   - getting-started
 ---
 
+
 # Getting Started with Cedarling JavaScript
+
+This guide combines the JavaScript usage instructions with the WebAssembly (WASM) build and API reference for Cedarling.
+
 
 ## Installation
 
@@ -15,7 +19,58 @@ You can easily install Cedarling using WASM.
 npm i @janssenproject/cedarling_wasm
 ```
 
-Alternatively see [here](../cedarling-wasm.md), if you want to build Cedarling from the source.
+Alternatively see [here](#build-from-source), if you want to build Cedarling from the source.
+
+
+### Build from Source
+
+
+Rust 1.63 or Greater. Ensure that you have `Rust` version 1.63 or higher installed. You can check your current version of Rust 
+
+```bash title="Command"
+rustc --version
+```
+
+Installed `wasm-pack` via `Cargo`. You can install it with the following command:
+
+```bash title="Command"
+cargo install wasm-pack
+```
+
+Ensure that Clang is installed with support for WebAssembly targets. You can check the installation and available targets with:
+
+```bash title="Command"
+clang -print-targets
+```
+
+Check `clang` version
+
+```bash title="Command"
+clang --version
+```
+
+## Building
+
+Clone the Janssen server repository from the GitHub and change the directory to the `cedarling_wasm` directory:
+
+
+```bash title="Command"
+cd /path/to/jans/jans-cedarling/bindings/cedarling_wasm
+```
+
+Build the WebAssembly package in release mode after you've reached the `cedarling_wasm` directory. `wasm-pack` automatically optimizes the WebAssembly binary file using `wasm-opt` for better performance.
+
+```bash title="Command"
+wasm-pack build --release --target web
+```
+
+To view the WebAssembly project in action, you can run a local server. One way to do this is by using the following command:
+
+```bash title="Command"
+python3 -m http.server
+```
+
+
 
 ## Usage
 
@@ -229,6 +284,169 @@ const logs = cedarling.pop_logs();
 console.log(logs);
 ```
 
+## Defined API
+
+```
+/**
+ * Create a new instance of the Cedarling application.
+ * This function can take as config parameter the eather `Map` other `Object`
+ */
+export function init(config: any): Promise<Cedarling>;
+/**
+ * A WASM wrapper for the Rust `cedarling::AuthorizeResult` struct.
+ * Represents the result of an authorization request.
+ */
+export class AuthorizeResult {
+
+  /**
+   * Convert `AuthorizeResult` to json string value
+   */
+  json_string(): string;
+  principal(principal: string): AuthorizeResultResponse | undefined;
+  /**
+   * Result of authorization where principal is `Jans::Workload`
+   */
+  get workload(): AuthorizeResultResponse | undefined;
+  /**
+   * Result of authorization where principal is `Jans::Workload`
+   */
+  set workload(value: AuthorizeResultResponse | null | undefined);
+  /**
+   * Result of authorization where principal is `Jans::User`
+   */
+  get person(): AuthorizeResultResponse | undefined;
+  /**
+   * Result of authorization where principal is `Jans::User`
+   */
+  set person(value: AuthorizeResultResponse | null | undefined);
+  /**
+   * Result of authorization
+   * true means `ALLOW`
+   * false means `Deny`
+   *
+   * this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
+   */
+  decision: boolean;
+  /**
+   * Request ID of the authorization request
+   */
+  request_id: string;
+}
+/**
+ * A WASM wrapper for the Rust `cedar_policy::Response` struct.
+ * Represents the result of an authorization request.
+ */
+export class AuthorizeResultResponse {
+
+  /**
+   * Authorization decision
+   */
+  readonly decision: boolean;
+  /**
+   * Diagnostics providing more information on how this decision was reached
+   */
+  readonly diagnostics: Diagnostics;
+}
+/**
+ * The instance of the Cedarling application.
+ */
+export class Cedarling {
+
+  /**
+   * Create a new instance of the Cedarling application.
+   * Assume that config is `Object`
+   */
+  static new(config: object): Promise<Cedarling>;
+  /**
+   * Create a new instance of the Cedarling application.
+   * Assume that config is `Map`
+   */
+  static new_from_map(config: Map<any, any>): Promise<Cedarling>;
+  /**
+   * Authorize request
+   * makes authorization decision based on the [`Request`]
+   */
+  authorize(request: any): Promise<AuthorizeResult>;
+  /**
+   * Authorize request for unsigned principals.
+   * makes authorization decision based on the [`RequestUnsigned`]
+   */
+  authorize_unsigned(request: any): Promise<AuthorizeResult>;
+  /**
+   * Get logs and remove them from the storage.
+   * Returns `Array` of `Map`
+   */
+  pop_logs(): Array<any>;
+  /**
+   * Get specific log entry.
+   * Returns `Map` with values or `null`.
+   */
+  get_log_by_id(id: string): any;
+  /**
+   * Returns a list of all log ids.
+   * Returns `Array` of `String`
+   */
+  get_log_ids(): Array<any>;
+  /**
+   * Get logs by tag, like `log_kind` or `log level`.
+   * Tag can be `log_kind`, `log_level`.
+   */
+  get_logs_by_tag(tag: string): any[];
+  /**
+   * Get logs by request_id.
+   * Return log entries that match the given request_id.
+   */
+  get_logs_by_request_id(request_id: string): any[];
+  /**
+   * Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+   * Tag can be `log_kind`, `log_level`.
+   * Return log entries that match the given request_id and tag.
+   */
+  get_logs_by_request_id_and_tag(request_id: string, tag: string): any[];
+}
+/**
+ * Diagnostics
+ * ===========
+ *
+ * Provides detailed information about how a policy decision was made, including policies that contributed to the decision and any errors encountered during evaluation.
+ */
+export class Diagnostics {
+
+  /**
+   * `PolicyId`s of the policies that contributed to the decision.
+   * If no policies applied to the request, this set will be empty.
+   *
+   * The ids should be treated as unordered,
+   */
+  readonly reason: string[];
+  /**
+   * Errors that occurred during authorization. The errors should be
+   * treated as unordered, since policies may be evaluated in any order.
+   */
+  readonly errors: PolicyEvaluationError[];
+}
+export class JsJsonLogic {
+  apply(logic: any, data: any): any;
+}
+/**
+ * PolicyEvaluationError
+ * =====================
+ *
+ * Represents an error that occurred when evaluating a Cedar policy.
+ */
+export class PolicyEvaluationError {
+
+  /**
+   * Id of the policy with an error
+   */
+  readonly id: string;
+  /**
+   * Underlying evaluation error string representation
+   */
+  readonly error: string;
+}
+```
+
 ---
 
 ## See Also
@@ -236,4 +454,3 @@ console.log(logs);
 - [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-tbac-using-cedarling)
 - [Cedarling Unsigned quickstart](../cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
 - [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
-- [Cedarling WASM](../cedarling-wasm.md)
