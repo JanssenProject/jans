@@ -24,7 +24,7 @@ By overriding the interface methods in [PersistenceType](https://github.com/Jans
 
 ## Usage
 
-The Jans-Auth server contains a [`PeristenceType`](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/persistence_extension/PersistenceExtension.py) script.
+The Jans-Auth server contains a [`PeristenceType`](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/persistence_extension/sample-script/PersistenceExtension.py) script.
 
 
 ## Hashed Passwords
