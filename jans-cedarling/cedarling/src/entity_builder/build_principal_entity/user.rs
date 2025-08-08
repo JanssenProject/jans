@@ -3,10 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::super::*;
-use super::super::entity_id_getters::*;
-use super::AttrSrc;
-use super::PrincipalIdSrc;
+use super::*;
 use cedar_policy::Entity;
 use std::collections::HashSet;
 

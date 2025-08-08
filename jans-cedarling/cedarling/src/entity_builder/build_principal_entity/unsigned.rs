@@ -91,7 +91,6 @@ mod test {
     use super::super::super::test::*;
     use super::*;
     use crate::CedarEntityMapping;
-    use crate::EntityData;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;

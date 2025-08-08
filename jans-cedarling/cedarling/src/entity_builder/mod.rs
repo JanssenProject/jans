@@ -542,4 +542,156 @@ mod test {
         assert_eq!(entity.uid().type_name().to_string(), "Jans::DefaultEntity");
         assert_eq!(entity.uid().id().as_ref() as &str, "1694c954f8d9");
     }
+
+    #[test]
+    fn can_build_entities_with_default_entities() {
+        // Test that default entities are properly included in the authorization flow
+        use crate::common::policy_store::TrustedIssuer;
+        use crate::jwt::Token;
+        use crate::authz::request::EntityData;
+        use url::Url;
+        use std::sync::Arc;
+
+        // Create a simple schema
+        let schema_src = r#"
+        namespace Jans {
+          entity DefaultEntity;
+          entity User;
+          entity Issue;
+          entity TrustedIssuer;
+        }
+        "#;
+
+        let schema = ValidatorSchema::from_str(schema_src)
+            .expect("should parse schema");
+
+        // Create default entities data
+        let default_entities_data = HashMap::from([
+            ("1694c954f8d9".to_string(), json!({
+                "entity_id": "1694c954f8d9",
+                "entity_type": "Jans::DefaultEntity",
+                "o": "Acme Dolphins Division",
+                "org_id": "100129",
+                "regions": ["Atlantic", "Pacific", "Indian"]
+            })),
+            ("74d109b20248".to_string(), json!({
+                "entity_id": "74d109b20248",
+                "entity_type": "Jans::DefaultEntity",
+                "description": "2025 Price List",
+                "products": {"15020": 995, "15050": 1495},
+                "services": {"51001": 9900, "51020": 29900}
+            })),
+        ]);
+
+        // Create trusted issuer
+        let trusted_issuer = TrustedIssuer {
+            name: "Test Issuer".to_string(),
+            description: "Test".to_string(),
+            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+                .expect("valid url"),
+            token_metadata: HashMap::from([
+                ("id_token".into(), TokenEntityMetadata::builder()
+                    .entity_type_name("Jans::Id_token".to_string())
+                    .principal_mapping(["Jans::User".to_string()].into_iter().collect())
+                    .build()),
+            ]),
+        };
+
+        let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+
+        // Create tokens
+        let tokens = HashMap::from([
+            ("id_token".to_string(), Token::new(
+                "id_token",
+                json!({
+                    "sub": "user123",
+                    "country": "Atlantic",
+                    "aud": "test_audience",
+                    "jti": "test_jti_123"
+                }).into(),
+                Some(Arc::new(trusted_issuers.get("test_issuer").unwrap().clone())),
+            )),
+        ]);
+
+        // Create entity builder with default entities
+        let mut config = EntityBuilderConfig::default();
+        config.build_workload = false;
+        config.build_user = true;
+        
+        let entity_builder = EntityBuilder::new(
+            config,
+            &trusted_issuers,
+            Some(&schema),
+            Some(&default_entities_data),
+        ).expect("should create entity builder");
+
+        // Create resource
+        let resource = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(),
+                id: "issue123".to_string(),
+            },
+            attributes: HashMap::from([
+                ("org_id".to_string(), json!("1694c954f8d9")),
+            ]),
+        };
+
+        // Build entities
+        let entities_data = entity_builder
+            .build_entities(&tokens, &resource)
+            .expect("should build entities");
+
+        // Verify default entities are included
+        assert_eq!(entities_data.default_entities.len(), 2, "should have 2 default entities");
+
+        // Verify specific default entity
+        let default_entity = entities_data.default_entities.get("1694c954f8d9")
+            .expect("should have default entity 1694c954f8d9");
+        
+        assert_eq!(default_entity.uid().type_name().to_string(), "Jans::DefaultEntity");
+        assert_eq!(default_entity.uid().id().as_ref() as &str, "1694c954f8d9");
+
+        // Verify default entity attributes
+        let entity_json = default_entity.to_json_value().expect("should convert to JSON");
+        let attrs = entity_json.get("attrs").expect("should have attrs");
+        
+        assert_eq!(attrs.get("o").and_then(|v| v.as_str()), Some("Acme Dolphins Division"));
+        assert_eq!(attrs.get("org_id").and_then(|v| v.as_str()), Some("100129"));
+        
+        // Verify regions attribute (should be a set)
+        let regions = attrs.get("regions").and_then(|v| v.as_array()).expect("should have regions");
+        assert_eq!(regions.len(), 3);
+        assert!(regions.contains(&json!("Atlantic")));
+        assert!(regions.contains(&json!("Pacific")));
+        assert!(regions.contains(&json!("Indian")));
+
+        // Verify user entity is built
+        let user = entities_data.user.expect("should have user entity");
+        assert_eq!(user.uid().type_name().to_string(), "Jans::User");
+        assert_eq!(user.uid().id().as_ref() as &str, "user123");
+
+        // Verify resource entity is built
+        assert_eq!(entities_data.resource.uid().type_name().to_string(), "Jans::Issue");
+        assert_eq!(entities_data.resource.uid().id().as_ref() as &str, "issue123");
+
+        // Verify all default entities are present and accessible
+        assert_eq!(entities_data.default_entities.len(), 2, "should have 2 default entities");
+        
+        // Verify the second default entity is also present
+        let second_default_entity = entities_data.default_entities.get("74d109b20248")
+            .expect("should have default entity 74d109b20248");
+        assert_eq!(second_default_entity.uid().type_name().to_string(), "Jans::DefaultEntity");
+        assert_eq!(second_default_entity.uid().id().as_ref() as &str, "74d109b20248");
+
+        // Verify second default entity attributes
+        let second_entity_json = second_default_entity.to_json_value().expect("should convert to JSON");
+        let second_attrs = second_entity_json.get("attrs").expect("should have attrs");
+        
+        assert_eq!(second_attrs.get("description").and_then(|v| v.as_str()), Some("2025 Price List"));
+        
+        // Verify products attribute (should be a record)
+        let products = second_attrs.get("products").and_then(|v| v.as_object()).expect("should have products");
+        assert_eq!(products.get("15020").and_then(|v| v.as_i64()), Some(995));
+        assert_eq!(products.get("15050").and_then(|v| v.as_i64()), Some(1495));
+    }
 }

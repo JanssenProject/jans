@@ -3,13 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::super::*;
-use super::super::entity_id_getters::*;
-use super::AttrSrc;
-use super::PrincipalIdSrc;
+use super::*;
 
 use cedar_policy::Entity;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashSet};
 
 const WORKLOAD_ATTR_SRC_TKNS: &[&str] = &["access_token"];
 
