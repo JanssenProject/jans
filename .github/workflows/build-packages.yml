@@ -481,20 +481,23 @@ jobs:
         KRAKEND_BUILDER_IMAGE=${KRAKEND_BUILDER_IMAGE/:/-}
         echo KRAKEND_BUILDER_IMAGE=${KRAKEND_BUILDER_IMAGE} >> $GITHUB_ENV
         echo CC="aarch64-linux-musl-gcc" >> $GITHUB_ENV
+        echo ADD_GIT="ls" >> $GITHUB_ENV
         if [ "${{ matrix.krakend-builder-image }}" == "builder:2.9.0-linux-generic" ]; then
           echo CC="aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+        else
+          echo "ADD_GIT=apk add --no-cache git" >> $GITHUB_ENV
         fi
     - name: Build plugin for AMD64
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
         wget https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0_x86-64.so -O libcedarling_go.so
-        docker run -i -v "$PWD:/app" -w /app krakend/"${{ matrix.krakend-builder-image }}" sh -c "apk add --no-cache git && go build -buildmode=plugin -o cedarling-krakend-amd64-\"${{ env.KRAKEND_BUILDER_IMAGE }}\"-\"${{ env.TAG }}\".so ."
+        docker run -i -v "$PWD:/app" -w /app krakend/"${{ matrix.krakend-builder-image }}" sh -c "${{ env.ADD_GIT }} && go build -buildmode=plugin -o cedarling-krakend-amd64-\"${{ env.KRAKEND_BUILDER_IMAGE }}\"-\"${{ env.TAG }}\".so ."
         rm libcedarling_go.so
     - name: Build plugin for ARM64
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
         wget https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0_arm64.so -O libcedarling_go.so
-        docker run -i -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=${{ env.CC }}" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}" sh -c "go build -ldflags='-extldflags=-fuse-ld=bfd -extld=${{ env.CC }}' -buildmode=plugin -o cedarling-krakend-arm64-\"${{ env.KRAKEND_BUILDER_IMAGE }}\"-\"${{ env.TAG }}\".so ."
+        docker run -i -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=${{ env.CC }}" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}" sh -c "${{ env.ADD_GIT }} && go build -ldflags='-extldflags=-fuse-ld=bfd -extld=${{ env.CC }}' -buildmode=plugin -o cedarling-krakend-arm64-\"${{ env.KRAKEND_BUILDER_IMAGE }}\"-\"${{ env.TAG }}\".so ."
         rm libcedarling_go.so
     - name: Sign and upload Cedarling Krakend plugins
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
