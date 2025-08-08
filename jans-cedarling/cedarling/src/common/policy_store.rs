@@ -107,6 +107,12 @@ pub struct PolicyStore {
     /// This field may contain issuers that are trusted to provide tokens, allowing for additional
     /// verification and security when handling JWTs.
     pub trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+
+    /// Default entities for the policy store.
+    ///
+    /// This optional field can be used to specify default entities that should be included
+    /// in the policy evaluation context.
+    pub default_entities: Option<HashMap<String, serde_json::Value>>,
 }
 
 impl PolicyStore {
@@ -358,6 +364,8 @@ impl PoliciesContainer {
     pub fn get_policy_description(&self, id: &str) -> Option<&str> {
         self.raw_policy_info.get(id).map(|v| v.description.as_str())
     }
+
+
 }
 
 /// Custom deserializer for converting base64-encoded policies into a `PolicySet`.
@@ -521,6 +529,61 @@ impl<'de> Deserialize<'de> for PolicyStore {
                 .map(|v| {
                     HashMap::<String, TrustedIssuer>::deserialize(v)
                         .map_err(|e| de::Error::custom(format!("error parsing trusted issuers: {}", e)))
+                })
+                .transpose()?,
+            default_entities: obj
+                .get("default_entities")
+                .map(|v| {
+                    // Expect an object mapping entity_id -> base64 string
+                    let map = v.as_object().ok_or_else(|| {
+                        de::Error::custom("'default_entities' must be a JSON object")
+                    })?;
+
+                    let mut decoded: HashMap<String, serde_json::Value> = HashMap::new();
+
+                    for (entity_id, raw_value) in map.iter() {
+                        let b64 = raw_value.as_str().ok_or_else(|| {
+                            de::Error::custom(format!(
+                                "error parsing default entities: entity '{}' must be a base64-encoded JSON string",
+                                entity_id
+                            ))
+                        })?;
+
+                        // Decode base64 string into UTF-8 JSON
+                        use base64::prelude::*;
+                        let buf = BASE64_STANDARD.decode(b64).map_err(|err| {
+                            de::Error::custom(format!(
+                                "error parsing default entities: failed to decode base64 for '{}': {}",
+                                entity_id, err
+                            ))
+                        })?;
+
+                        let json_str = String::from_utf8(buf).map_err(|err| {
+                            de::Error::custom(format!(
+                                "error parsing default entities: failed to decode utf8 for '{}': {}",
+                                entity_id, err
+                            ))
+                        })?;
+
+                        let value: serde_json::Value = serde_json::from_str(&json_str).map_err(|err| {
+                            de::Error::custom(format!(
+                                "error parsing default entities: invalid JSON for '{}': {}",
+                                entity_id, err
+                            ))
+                        })?;
+
+                        // Require an object for each entity
+                        if !value.is_object() {
+                            return Err(de::Error::custom(format!(
+                                "error parsing default entities: entity '{}' must decode to a JSON object",
+                                entity_id
+                            )));
+                        }
+
+                        decoded.insert(entity_id.clone(), value);
+                    }
+
+                    Ok(decoded)
                 })
                 .transpose()?,
         };

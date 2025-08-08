@@ -534,6 +534,7 @@ pub struct AuthorizeEntitiesData {
     pub user: Option<Entity>,
     pub roles: Vec<Entity>,
     pub resource: Entity,
+    pub default_entities: HashMap<String, Entity>,
 }
 
 impl AuthorizeEntitiesData {
@@ -544,6 +545,7 @@ impl AuthorizeEntitiesData {
             .chain(self.issuers)
             .chain(self.roles)
             .chain(self.tokens.into_values())
+            .chain(self.default_entities.into_values())
             .chain(vec![self.user, self.workload].into_iter().flatten())
     }
 
@@ -561,6 +563,7 @@ impl AuthorizeEntitiesData {
     /// - **Token Entities**: e.g., `access_token`, `id_token`, etc.
     /// - **Principal Entities**: e.g., `Workload`, `User`, etc.
     /// - **Role Entities**
+    /// - **Default Entities**: Entities loaded from the policy store configuration
     ///
     /// Only entities that have been built will be included
     fn built_entities(&self) -> BuiltEntities {
@@ -569,11 +572,13 @@ impl AuthorizeEntitiesData {
             .into_iter()
             .flatten();
         let role_entities = self.roles.iter();
+        let default_entities = self.default_entities.values();
 
         BuiltEntities::from_iter(
             token_entities
                 .chain(principal_entities)
                 .chain(role_entities)
+                .chain(default_entities)
                 .map(|e| e.uid()),
         )
     }

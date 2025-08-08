@@ -49,6 +49,7 @@ mod test {
             EntityBuilderConfig::default(),
             &HashMap::new(),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
+            None,
         )
         .expect("should init entity builder");
         let resource_data = EntityData {
@@ -94,6 +95,7 @@ mod test {
             EntityBuilderConfig::default(),
             &HashMap::new(),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
+            None,
         )
         .expect("should init entity builder");
         let resource_data = EntityData {
