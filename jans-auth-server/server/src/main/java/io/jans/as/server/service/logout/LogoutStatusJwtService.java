@@ -8,6 +8,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.ExecutionContext;
@@ -16,10 +17,15 @@ import io.jans.as.server.model.token.JwtSigner;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.DiscoveryService;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.external.ExternalLogoutStatusJwtService;
+import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.as.server.service.token.StatusListIndexService;
+import io.jans.as.server.util.ServerUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -57,12 +63,21 @@ public class LogoutStatusJwtService {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    @Inject
+    private ExternalLogoutStatusJwtService externalLogoutStatusJwtService;
+
     public LogoutStatusJwt createLogoutStatusJwt(ExecutionContext context, AuthorizationGrant grant) {
         try {
             context.initFromGrantIfNeeded(grant);
             context.generateRandomTokenReferenceId();
 
-            final Integer lifetime = appConfiguration.getLogoutStatusJwtLifetime();
+            Integer lifetime = appConfiguration.getLogoutStatusJwtLifetime();
+            int lifetimeFromScript = externalLogoutStatusJwtService.getLifetimeInSeconds(ExternalScriptContext.of(context));
+            if (lifetimeFromScript > 0) {
+                lifetime = lifetimeFromScript;
+                log.trace("Override logout_status_jwt lifetime with value from script: {}", lifetimeFromScript);
+            }
+
             LogoutStatusJwt logoutStatusJwt = new LogoutStatusJwt(lifetime);
 
             logoutStatusJwt.setSessionDn(grant.getSessionDn());
@@ -104,6 +119,20 @@ public class LogoutStatusJwtService {
 
             Audience.setAudience(jwt.getClaims(), client);
 
+            boolean externalOk = externalLogoutStatusJwtService.modifyLogoutStatusJwtMethod(jwt, ExternalScriptContext.of(context));
+            if (!externalOk) {
+                final String reason = "External LogoutStatusJwt script forbids logout_status_jwt creation.";
+                log.trace(reason);
+
+                throw new WebApplicationException(Response
+                        .status(Response.Status.FORBIDDEN)
+                        .type(MediaType.APPLICATION_JSON_TYPE)
+                        .cacheControl(ServerUtil.cacheControl(true, false))
+                        .header("Pragma", "no-cache")
+                        .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.ACCESS_DENIED, reason))
+                        .build());
+            }
+
             final String jwtString = jwtSigner.sign().toString();
             if (log.isDebugEnabled())
                 log.debug("Created Logout Status JWT: {}", jwtString + ", claims: " + jwtSigner.getJwt().getClaims().toJsonString());
@@ -134,7 +163,7 @@ public class LogoutStatusJwtService {
         jwt.getClaims().setNbf(now);
 
         final String jti = UUID.randomUUID().toString();
-        // for not we don't need "sid" - left code because maybe later we change our mind
+        // for now we don't need "sid" - left code because maybe later we change our mind
 //        if (isNotBlank(sessionDn)) {
 //            final SessionId sessionByDn = sessionIdService.getSessionByDn(sessionDn);
 //            if (sessionByDn != null && isNotBlank(sessionByDn.getOutsideSid())) {

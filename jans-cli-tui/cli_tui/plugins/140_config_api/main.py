@@ -21,6 +21,7 @@ from utils.multi_lang import _
 from utils.utils import DialogUtils, common_data
 from utils.static import cli_style, common_strings
 from utils.background_tasks import get_asset_services
+from audit_logs import ConfigApiAuditLogs
 
 class Plugin(DialogUtils):
     """This is a general class for plugins 
@@ -41,7 +42,7 @@ class Plugin(DialogUtils):
         self.server_side_plugin = False
         self.page_entered = False
         self.data = {}
-
+        self.audit_logs = ConfigApiAuditLogs()
         self.prepare_navbar()
         self.prepare_containers()
 
@@ -286,6 +287,7 @@ class Plugin(DialogUtils):
 
             )
 
+        self.tabs['auiditLogs'] = self.audit_logs.main_container
 
         def edit_asset_dir_mapping(*args, **kwargs: Any) -> None:
 
@@ -607,6 +609,7 @@ class Plugin(DialogUtils):
                             ('assetMgtConfiguration', 'Asse[t] Management'),
                             ('auditLogConf', 'Audit Log Conf'),
                             ('dataFormatConversionConf', 'Data Format Conversion'),
+                            (('auiditLogs', 'Auidit Logs')),
                             ],
                     selection_changed=self.nav_selection_changed,
                     select=0,
@@ -623,7 +626,7 @@ class Plugin(DialogUtils):
         self.main_container = HSplit([
                                         Box(self.nav_bar.nav_window, style='class:sub-navbar', height=1),
                                         DynamicContainer(lambda: self.main_area),
-                                        VSplit([Button(_("Save"), handler=self.save_config)], align=HorizontalAlign.CENTER),
+                                        DynamicContainer(lambda: self.main_area_save_button),
                                         ],
                                     height=D(),
                                     style='class:outh_maincontainer'
@@ -644,6 +647,12 @@ class Plugin(DialogUtils):
             self.main_area = HSplit([self.tabs[selection]],height=D()) 
         else:
             self.main_area = self.app.not_implemented
+
+        if selection != 'auiditLogs':
+            self.main_area_save_button = VSplit([Button(_("Save"), handler=self.save_config)], align=HorizontalAlign.CENTER)
+        else:
+            self.main_area_save_button = Window(height=0)
+
 
     def save_config(self) -> None:
         """This method for saving the configuration

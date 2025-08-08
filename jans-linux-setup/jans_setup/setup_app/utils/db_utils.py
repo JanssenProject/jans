@@ -319,7 +319,7 @@ class DBUtils:
 
             if backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
                 with self.local_session.begin() as session:
-                    sqlalchemy_obj = self.get_sqlalchObj_for_dn(dn)
+                    sqlalchemy_obj = self.get_sqlalchObj_for_dn(dn, session)
                     if sqlalchemy_obj:
                         session.delete(sqlalchemy_obj)
 

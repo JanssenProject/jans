@@ -327,6 +327,7 @@ nav:
       - Script Debugging: script-catalog/introspection/interception-scripts-debug.md
       - Access Evaluation: script-catalog/access_evaluation/access-evaluation.md
       - Access Evaluation Discovery: script-catalog/access_evaluation/access-evaluation-discovery.md
+      - Logout Status JWT: script-catalog/logout_status_jwt/logout-status-jwt.md
       - Select Account: script-catalog/select_account/select-account.md
       - Spontaneous Scope: script-catalog/spontaneous_scope/spontaneous-scope.md
       - Fido2 Extension: script-catalog/fido2_extension/fido2-extension.md

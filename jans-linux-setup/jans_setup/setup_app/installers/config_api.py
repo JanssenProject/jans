@@ -228,7 +228,7 @@ class ConfigApiInstaller(JettyInstaller):
 
 
         self.logIt("Loding Jans Config Api test data")
-
+        self.update_rendering_dict()
         self.render_templates_folder(os.path.join(Config.templateFolder, 'test', self.service_name))
         ldif_fn = os.path.join(Config.output_dir, 'test', self.service_name, 'data/jans-config-api.ldif')
         self.dbUtils.import_ldif([ldif_fn])

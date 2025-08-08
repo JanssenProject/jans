@@ -402,8 +402,6 @@ def main():
             if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (
                     not Config.installed_instance and Config.get(configApiInstaller.install_var)):
                 configApiInstaller.start_installation()
-                if argsp.t or getattr(argsp, 'load_config_api_test', None):
-                    configApiInstaller.app_test_data_loader()
 
             if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jansCliInstaller.install_var)):
