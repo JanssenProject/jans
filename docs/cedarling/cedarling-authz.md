@@ -94,6 +94,8 @@ Cedarling simplifies context creation by automatically including certain entitie
 - ID Token Entity
 - Userinfo Token Entity
 
+Additionally, any [default entities](./cedarling-policy-store.md#default-entities) defined in the policy store are available for all authorization decisions without needing to be explicitly passed in the request.
+
 ### Example Policy
 
 Below is an example policy schema that illustrates how entities are used:

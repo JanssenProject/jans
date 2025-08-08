@@ -40,11 +40,11 @@
                     "type": "string"
                 },
                 "default_entities": {
-                    "description": "A map of default entity identifiers to their associated entity data. These entities are loaded at startup and made available for policy evaluation.",
+                    "description": "A map of default entity identifiers to Base64-encoded JSON objects. Each value MUST be a Base64 string encoding a JSON object representing the default entity.",
                     "type": "object",
                     "additionalProperties": {
-                        "type": "object",
-                        "description": "Default entity data that can be referenced in policies."
+                        "type": "string",
+                        "description": "Base64-encoded JSON object representing the default entity."
                     }
                 }
             },
