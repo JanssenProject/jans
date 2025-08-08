@@ -140,3 +140,8 @@ class ApplicationSession(ApplicationSessionType):
         print "Application session. isFirstSession: True"
         return True
 ```
+
+
+## Sample Script 
+
+[jans-session-audit.py](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/application_session/jans-session-audit/jans-session-audit.py) - This script performs advanced session auditing for monitoring and tracking user sessions.
