@@ -22,7 +22,7 @@ use crate::log::{
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
-use request::{Request, RequestUnsigned};
+use request::{Request, RequestUnsigned, MultiContextRequest};
 use std::collections::{HashMap, HashSet};
 use std::io::Cursor;
 use std::str::FromStr;
@@ -36,7 +36,7 @@ mod trust_mode;
 
 pub(crate) mod request;
 
-pub use authorize_result::AuthorizeResult;
+pub use authorize_result::{AuthorizeResult, MultiContextAuthorizeResult};
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -76,12 +76,15 @@ impl Authz {
         &'a self,
         request: &'a Request,
     ) -> Result<HashMap<String, Token>, AuthorizeError> {
-        let tokens = self
-            .config
-            .jwt_service
-            .validate_tokens(&request.tokens)
-            .await?;
-        Ok(tokens)
+        let tokens = request.tokens.as_ref()
+            .ok_or_else(|| AuthorizeError::BuildContext(
+                BuildContextError::KeyConflict(
+                    "No tokens provided for signed request".to_string()
+                )
+            ))?;
+        
+        self.config.jwt_service.validate_tokens(tokens).await
+            .map_err(AuthorizeError::ProcessTokens)
     }
 
     /// Evaluate Authorization Request
@@ -308,6 +311,98 @@ impl Authz {
         );
 
         Ok(result)
+    }
+
+    /// Evaluate Multi-Context Authorization Request
+    /// Processes multiple token bundles from different issuers/authorities
+    /// Each token bundle represents a different authorization context
+    pub async fn authorize_multi_context(
+        &self,
+        request: MultiContextRequest,
+    ) -> Result<MultiContextAuthorizeResult, AuthorizeError> {
+        let start_time = Utc::now();
+        let request_id = gen_uuid7();
+        
+        let mut context_results = HashMap::new();
+        let mut overall_decision = true; // Start with allow, any deny will make it false
+        
+        // Process each token bundle as a separate authorization context
+        for (index, token_bundle) in request.token_bundles.iter().enumerate() {
+            let result = match (&token_bundle.tokens, &token_bundle.principals) {
+                // Signed request (with tokens)
+                (Some(tokens), None) => {
+                    let single_request = Request {
+                        tokens: Some(tokens.clone()),
+                        action: request.action.clone(),
+                        resource: request.resource.clone(),
+                        context: request.context.clone(),
+                    };
+                    self.authorize(single_request).await?
+                },
+                // Unsigned request (with principals)
+                (None, Some(principals)) => {
+                    let unsigned_request = RequestUnsigned {
+                        principals: principals.clone(),
+                        action: request.action.clone(),
+                        resource: request.resource.clone(),
+                        context: request.context.clone(),
+                    };
+                    self.authorize_unsigned(unsigned_request).await?
+                },
+                // Invalid: both tokens and principals provided
+                (Some(_), Some(_)) => {
+                    return Err(AuthorizeError::BuildContext(
+                        BuildContextError::KeyConflict(
+                            "Cannot provide both tokens and principals in the same bundle".to_string()
+                        )
+                    ));
+                },
+                // Invalid: neither tokens nor principals provided
+                (None, None) => {
+                    return Err(AuthorizeError::BuildContext(
+                        BuildContextError::KeyConflict(
+                            "Must provide either tokens (for signed request) or principals (for unsigned request)".to_string()
+                        )
+                    ));
+                },
+            };
+            
+            // Use context_id if provided, otherwise use index as string
+            let context_key = token_bundle.context_id.clone()
+                .unwrap_or_else(|| index.to_string());
+            
+            context_results.insert(context_key, result.clone());
+            
+            // Update overall decision - if any context denies, overall is deny
+            if !result.decision {
+                overall_decision = false;
+            }
+        }
+        
+        // measure time how long request executes
+        let since_start = Utc::now().signed_duration_since(start_time);
+        let _decision_time_micro_sec = since_start.num_microseconds().unwrap_or({
+            //overflow (exceeding 2^63 microseconds in either direction)
+            i64::MAX
+        });
+
+        // Log the multi-context authorization
+        self.config.log_service.log_any(
+            LogEntry::new_with_data(LogType::System, Some(request_id))
+                .set_level(LogLevel::INFO)
+                .set_message(format!(
+                    "Multi-context authorization completed with {} contexts, overall decision: {}",
+                    context_results.len(),
+                    if overall_decision { "ALLOW" } else { "DENY" }
+                ))
+                .set_cedar_version(),
+        );
+
+        Ok(MultiContextAuthorizeResult {
+            context_results,
+            overall_decision,
+            request_id: request_id.to_string(),
+        })
     }
 
     /// Evaluate Authorization Request with unsigned data.

@@ -95,11 +95,11 @@ async fn call_authorize(
 ) {
     let _result = cedarling
         .authorize(Request {
-            tokens: HashMap::from([
+            tokens: Some(HashMap::from([
                 ("access_token".to_string(), access_token.to_string()),
                 ("id_token".to_string(), id_token.to_string()),
                 ("userinfo_token".to_string(), userinfo_token.to_string()),
-            ]),
+            ])),
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
             resource: EntityData {

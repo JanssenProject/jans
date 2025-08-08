@@ -63,11 +63,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // authorization process, alongside resource and action details.
     let result = cedarling
         .authorize(Request {
-            tokens: HashMap::from([
+            tokens: Some(HashMap::from([
                 ("access_token".to_string(), access_token.clone()),
                 ("id_token".to_string(), id_token.clone()),
                 ("userinfo_token".to_string(), userinfo_token.clone()),
-            ]),
+            ])),
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
             resource: EntityData {
