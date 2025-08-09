@@ -1,0 +1,111 @@
+yaml-variable-01:
+  &project_name "Dummy Project for CLI auto-test"
+
+operation-01:
+  #pass-this: true
+  id: "post-agama-prj"
+  url-suffix:
+    name: *project_name
+  upload-file: "files/dummy_project.zip"
+  expected-status-code: 202
+  sleep: 25
+
+operation-02:
+  #pass-this: true
+  id: "get-agama-prj"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      start:
+        type: "integer"
+      totalEntriesCount:
+        type: "integer"
+      entriesCount:
+        type: "integer"
+      entries:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            dn:
+              type: "string"
+            id:
+              type: "string"
+            details:
+              type: "object"
+              properties:
+                projectMetadata:
+                  type: "object"
+                  properties:
+                    projectName:
+                      type: "string"
+                  required:
+                    - projectName
+              required:
+                - projectMetadata
+          required:
+          - dn
+          - id
+          - details
+
+  expected-output:
+    - /entries/-1/details/projectMetadata/projectName: *project_name
+
+
+operation-03:
+  #pass-this: true
+  id: "get-agama-prj-by-name"
+  url-suffix:
+    name: *project_name
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      id:
+        type: "string"
+      details:
+        type: "object"
+        properties:
+          projectMetadata:
+            type: "object"
+            properties:
+              projectName:
+                type: "string"
+            required:
+              - projectName
+        required:
+          - projectMetadata
+    required:
+     - dn
+     - id
+     - details
+
+  expected-output:
+    - /details/projectMetadata/projectName: *project_name
+
+
+operation-04:
+  pass-this: true
+  id: "get-agama-prj-configs"
+  url-suffix:
+    name: *project_name
+
+
+operation-05:
+  #pass-this: true
+  id: "delete-agama-prj"
+  url-suffix:
+    name: *project_name
+  expected-status-code: null
+  expected-response-text: null
+
+
+
+
+operation-0x:
+  pass-this: true
+  id: "put-agama-prj"
+  # can't figure out what to do

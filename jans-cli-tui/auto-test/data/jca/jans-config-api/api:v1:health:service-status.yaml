@@ -1,0 +1,5 @@
+operation-01:
+  id: "get-service-status"
+  expected-status-code: 200
+  schema:
+    type: "object"
