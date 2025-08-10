@@ -139,10 +139,10 @@ tags:
 | jansAttrEditTyp       | json         | YES  |     | None    | Specify in exclude who can update an attribute, admin or user                                                                |
 | jansAttrName          | varchar(64)  | YES  | MUL | None    | Specify an identifier for an attribute. May be multi-value  where an attribute has two names, like givenName and first-name. |
 | jansAttrOrigin        | varchar(64)  | YES  | MUL | None    | Specify the person objectclass associated with the attribute,  used for display purposes in exclude.                         |
-| jansAttrSystemEditTyp | varchar(64)  | YES  |     | None    | TODO - still required?                                                                                                       |
+| jansAttrSystemEditTyp | varchar(64)  | YES  |     | None    | System edit type for attribute. Controls whether attribute can be edited by system administrators only.                     |
 | jansAttrTyp           | varchar(64)  | YES  |     | None    | Data type of attribute. Values can be string, photo, numeric, date                                                           |
 | jansClaimName         | varchar(64)  | YES  |     | None    | Used by jans in conjunction with jansttributeName to map claims to attributes in datastore.                                       |
-| jansAttrUsgTyp        | varchar(64)  | YES  |     | None    | TODO - Usg? Value can be OpenID                                                                                              |
+| jansAttrUsgTyp        | varchar(64)  | YES  |     | None    | Usage type for attribute. Specifies the context where attribute is used (e.g., OpenID, SAML).                              |
 | jansAttrViewTyp       | json         | YES  |     | None    | Specify in exclude who can view an attribute, admin or user                                                                  |
 | jansSAML1URI          | varchar(64)  | YES  |     | None    | SAML 1 uri of attribute                                                                                                      |
 | jansSAML2URI          | varchar(64)  | YES  |     | None    | SAML 2 uri of attribute                                                                                                      |
@@ -454,7 +454,7 @@ tags:
 | description           | varchar(768) | YES  |     | None    |                                                                                                     |
 | displayName           | varchar(128) | YES  |     | None    | preferred name of a person to be used when displaying entries                                       |
 | jansCustomMessage     | varchar(128) | YES  |     | None    | exclude custom welcome message                                                                      |
-| jansFaviconImage      | varchar(64)  | YES  |     | None    | TODO - Stores URL of favicon                                                                        |
+| jansFaviconImage      | varchar(64)  | YES  |     | None    | Stores URL of favicon image used in the organization's web interface                                |
 | jansLogoImage         | varchar(64)  | YES  |     | None    | Logo used by exclude for default look and feel.                                                     |
 | jansManager           | varchar(64)  | YES  |     | None    | Used to specify if a person has the manager role                                                    |
 | jansManagerGrp        | tinytext     | YES  |     | None    | Used in organizatoin entry to specifies the dn of the group that  has admin priviledges in exclude. |

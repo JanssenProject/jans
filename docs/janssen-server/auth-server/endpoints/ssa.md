@@ -98,7 +98,7 @@ If `expiration` is not set take expiration from `ssaConfiguration.ssaExpirationI
 | grant_types    | Fixed value Fixed value `["client_credentials"]`.                                                                        | false    |
 | expiration     | Expiration date. `(Default value: calculated based on global SSA settings)`                                              | false     |
 | one_time_use   | Defined whether the SSA will be used only once or can be used multiple times. `(Default value: true)`                    | false     |
-| rotate_ssa     | TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. `(Default value: true)` | false     |
+| rotate_ssa     | Controls automatic rotation of SSA expiration. When enabled, the SSA will be automatically renewed before expiration. `(Default value: true)` | false     |
 | lifetime       | SSA Lifetime in seconds. If not set calculates lifetime, `lifetime = expiration - now`                                   | false     |
 
 **Note:** You can add more `custom attributes` in the request, (you must have previously configured in the SSA global
@@ -243,7 +243,7 @@ Get existing active SSA based on `jti` or `org_id`.
     - `iat` — Creation time.
     - `description` — Describe SSA.
     - `one_time_use` — Defined whether the SSA will be used only once or can be used multiple times.
-    - `rotate_ssa` — TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.
+    - `rotate_ssa` — Controls automatic rotation of SSA expiration. When enabled, the SSA will be automatically renewed before expiration.
     - `lifetime` — SSA lifetime in seconds.
     - `myCustom1, myCustom2, ...` — if you have custom attributes, they will be displayed here.
 - `iss` — The "iss" is related to the client that created this SSA.
