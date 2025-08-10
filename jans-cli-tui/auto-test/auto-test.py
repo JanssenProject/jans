@@ -143,7 +143,10 @@ for schema_fp in sorted(input_file):
         cli_data = {'operation_id': cli_op_id}
         if yaml_path['__method__'] in ('put', 'post'):
             if 'data' in schema_data[operation_id]:
-                cli_data['data'] = schema_data[operation_id]['data']
+                if '__JSON_DATA__' in schema_data[operation_id]['data']:
+                    cli_data['data'] = json.loads(schema_data[operation_id]['data']['__JSON_DATA__'])
+                else:
+                    cli_data['data'] = schema_data[operation_id]['data']
             elif 'upload-file' in schema_data[operation_id]:
                 cli_data['data_fn'] = schema_fp.parent.joinpath(schema_data[operation_id]['upload-file']).as_posix()
 

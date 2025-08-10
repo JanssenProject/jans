@@ -1,12 +1,12 @@
 yaml-variable-01:
-  &project_name "Dummy Project for CLI auto-test"
+  &project_name "Agama Lab Journey for CLI auto-test"
 
 operation-01:
   #pass-this: true
   id: "post-agama-prj"
   url-suffix:
     name: *project_name
-  upload-file: "files/dummy_project.zip"
+  upload-file: "files/journey.zip"
   expected-status-code: 202
   sleep: 25
 
@@ -88,21 +88,67 @@ operation-03:
 
 
 operation-04:
-  pass-this: true
+  #pass-this: true
+  id: "put-agama-prj"
+  url-suffix:
+    name: *project_name
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      io.jans.agamaLab.registration:
+        type: "boolean"
+      io.jans.agamaLab.main:
+        type: "boolean"
+      io.jans.agamaLab.githubAuthn:
+        type: "boolean"
+
+    required:
+     - io.jans.agamaLab.registration
+     - io.jans.agamaLab.main
+     - io.jans.agamaLab.githubAuthn
+
+  data:
+    __JSON_DATA__: '{"io.jans.agamaLab.registration":{"recaptcha":{"enabled":false,"site_key":"AAA-BBB-CCCC-DDD"},"zohoCRM":{"clientId":"see deployment instructions","clientSecret":"","refreshToken":"","accountsUrl":"https://accounts.zoho.com (domain-specific Zoho Accounts URL - the domain hosting the token endpoint)"}},"io.jans.agamaLab.main":{"minCredsRequired":99,"supportedMethods":["otp","fido2"]},"io.jans.agamaLab.credsEnrollment.otp":{"timeout":80,"maxAttempts":4},"io.jans.agamaLab.authenticator.super_gluu":{"timeout":80},"io.jans.agamaLab.credsEnrollment.super_gluu":{"timeout":80},"io.jans.agamaLab.githubAuthn":{"authzEndpoint":"https://github.com/login/oauth/authorize","tokenEndpoint":"https://github.com/login/oauth/access_token","userInfoEndpoint":"https://api.github.com/user","clientId":"test-cli-client-id","clientSecret":"ZZZ-YYY-XXX-VVV","scopes":["user"]}}'
+
+  expected-output:
+    - /io.jans.agamaLab.main: true
+    - /io.jans.agamaLab.registration: true
+    - /io.jans.agamaLab.githubAuthn: true
+
+operation-05:
+  #pass-this: true
   id: "get-agama-prj-configs"
   url-suffix:
     name: *project_name
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      io.jans.agamaLab.registration:
+        type: "object"
+      io.jans.agamaLab.main:
+        type: "object"
+      io.jans.agamaLab.githubAuthn:
+        type: "object"
+
+    required:
+     - io.jans.agamaLab.registration
+     - io.jans.agamaLab.main
+     - io.jans.agamaLab.githubAuthn
+
+  expected-output:
+    - /io.jans.agamaLab.registration/recaptcha/site_key: "AAA-BBB-CCCC-DDD"
+    - /io.jans.agamaLab.main/minCredsRequired: 99
 
 
-operation-05:
+operation-06:
   #pass-this: true
   id: "delete-agama-prj"
   url-suffix:
     name: *project_name
   expected-status-code: null
   expected-response-text: null
-
-
 
 
 operation-0x:
