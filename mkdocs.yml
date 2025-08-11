@@ -438,7 +438,6 @@ nav:
     - Cedarling Entities: 'cedarling/cedarling-entities.md'
   - Developer:
     - Rust: 'cedarling/cedarling-rust.md'
-    - WASM: 'cedarling/cedarling-wasm.md'
     - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
