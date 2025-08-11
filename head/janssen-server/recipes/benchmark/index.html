@@ -15118,7 +15118,7 @@ cat<span class="w"> </span><span class="s">&lt;&lt; EOF &gt; auth_code_client.js
 <span class="s">}</span>
 <span class="s">EOF</span>
 </code></pre></div>
-3. Copy the following <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml">yaml</a> into the folder.</p>
+3. Copy the following <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml">yaml</a> into the folder. You may run the soak auth code test by copying the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/soak_test_auth_code.yaml">soak_test_auth_code.yaml</a> instead. </p>
 </li>
 <li>
 <p>Download or build <a href="../../config-guide/config-tools/jans-tui/">config-cli-tui</a> and run:</p>
@@ -15130,8 +15130,10 @@ cat<span class="w"> </span><span class="s">&lt;&lt; EOF &gt; auth_code_client.js
 </code></pre></div>
 </li>
 <li>
-<p>Save the client id and secret from the response and enter them along with your FQDN in the yaml file <code>load_test_auth_code.yaml</code>  under <code>AUTHZ_CLIENT_ID</code>, <code>AUTHZ_CLIENT_SECRET</code> and <code>FQDN</code> respectively then execute :</p>
+<p>Save the client id and secret from the response and enter them along with your FQDN in the yaml file downloaded in step 3  under <code>AUTHZ_CLIENT_ID</code>, <code>AUTHZ_CLIENT_SECRET</code> and <code>FQDN</code> respectively then execute :</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>load_test_auth_code.yaml
+<span class="c1"># or </span>
+kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>soak_test_auth_code.yaml
 </code></pre></div>
 </li>
 <li>
@@ -15142,7 +15144,9 @@ cat<span class="w"> </span><span class="s">&lt;&lt; EOF &gt; auth_code_client.js
 <li>
 <p>Finally, scale the load test. The replica number here should be manually controlled.
     <code>bash
-    kubectl scale deploy load-testing-authz -n load --replicas=20</code></p>
+    kubectl scale deploy load-testing-authz -n load --replicas=20
+   # or 
+    kubectl scale deploy load-testing-soak-authz -n load --replicas=20</code></p>
 </li>
 </ol>
 <h4 id="resource-owner-password-credentials-ropc-flow">Resource Owner Password Credentials (ROPC) flow<a class="headerlink" href="#resource-owner-password-credentials-ropc-flow" title="Permanent link">#</a></h4>
@@ -15393,7 +15397,7 @@ cat<span class="w"> </span><span class="s">&lt;&lt; EOF &gt; dcr_client.json</sp
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 28, 2025 10:27:29 UTC"><span class="timeago" datetime="2025-03-28T10:27:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 28, 2025 10:27:29 UTC">2025-03-28</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 11, 2025 14:02:01 UTC"><span class="timeago" datetime="2025-08-11T14:02:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 11, 2025 14:02:01 UTC">2025-08-11</span>
   </span>
 
     
