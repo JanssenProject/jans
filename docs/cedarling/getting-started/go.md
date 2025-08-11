@@ -9,130 +9,126 @@ tags:
 
 Go bindings for the Jans Cedarling authorization engine, providing policy-based access control.
 
-- [Installation](#installation)
-- [Documentation](#documentation)
-- [Usage](#usage)
-- [Building for Production](#building-for-production)
-
 ## Installation
 
-### Building from Source
+### Build with dynamic linking
 
-If youre using pre-built binaries from the [Jans releases page](https://github.com/JanssenProject/jans/releases/latest), you can skip this step. Otherwise, follow these instructions to build from source.
+1. Download pre-built binaries
 
-**Prerequisites:**
+    Download the appropriate pre-built binary for your platform from the [Jans releases page](https://github.com/JanssenProject/jans/releases/latest) or build it from source as described above.
+
+2. Add linker flags in your main.go file 
+
+    You need to specify linker flags in your `main.go` file to link against the Cedarling library.
+
+    ```go
+    // #cgo LDFLAGS: -L. -lcedarling_go
+    import "C"
+    ```
+
+    And make sure that the Cedarling library files are located in the same directory as your main package.
+
+3. Add the Cedarling Go package to your Go application
+
+    Use `go get` to fetch the Cedarling Go package:
+
+    ```sh
+    go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
+    ```
+
+4. Add the Cedarling Go package to your Go application
+
+    Build your Go application:
+
+    ```sh
+    go build .
+    ```
+
+    Run application to ensure it works correctly.
+
+5. Run the application
+
+    - **Windows**
+
+        - Place the Rust artifacts (`cedarling_go.dll` and `cedarling_go.lib`) alongside the Go binary.
+        - Windows searches libraries in directories below in the 
+          following order
+            1. The directory containing your Go executable (recommended location)
+            2. Windows system directories (e.g., `C:\Windows\System32`)
+            3. The `PATH` environment variable directories
+
+    - **Linux**
+    
+        Add the library directory that contains `libcedarling_go.so` to the
+        `LD_LIBRARY_PATH` environment variable
+
+        ```sh
+        export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
+        ```
+
+    - **MacOS**
+        
+        Add the library directory that contains `libcedarling_go.dylib` to the
+        `LD_LIBRARY_PATH` environment variable
+        
+        ```sh
+        export DYLD_LIBRARY_PATH=$(pwd):$DYLD_LIBRARY_PATH
+        ```
+
+### Build from Source
+
+Follow these instructions to build from source.
+
+Prerequisites:
 
 - Go 1.20+
-- Rust toolchain
+- Rust tool-chain
 
-**1. Build the Rust library:**
+1. Build the Rust library
 
-Download Jans monorepo:
+    Clone the Janssen repository:
 
-```sh
-git clone --depth 1 https://github.com/JanssenProject/jans.git
-```
+    ```sh
+    git clone --depth 1 https://github.com/JanssenProject/jans.git
+    ```
 
-We use `--depth 1` to avoid cloning unnecessary history and minimalize the download size.
+    We use `--depth 1` to avoid cloning unnecessary history and minimalize the download size.
 
-Navigate to the Cedarling Go bindings directory:
+    Navigate to the Cedarling Go bindings directory:
 
-```sh
-cd jans/jans-cedarling/bindings/cedarling_go
-```
+    ```sh
+    cd jans/jans-cedarling/bindings/cedarling_go
+    ```
 
-```sh
-cargo build --release -p cedarling_go
-```
+    ```sh
+    cargo build --release -p cedarling_go
+    ```
 
-**2. Copy the built artifacts to your application directory:**
+2. Copy the built artifacts to your application directory
 
-```sh
-# Windows
-cp target/release/cedarling_go.dll .
-cp target/release/cedarling_go.dll.lib cedarling_go.lib
+    ```sh
+    # Windows
+    cp target/release/cedarling_go.dll .
+    cp target/release/cedarling_go.dll.lib cedarling_go.lib
 
-# Linux
-cp target/release/libcedarling_go.so .
+    # Linux
+    cp target/release/libcedarling_go.so .
 
-# macOS
-cp target/release/libcedarling_go.dylib .
-```
+    # macOS
+    cp target/release/libcedarling_go.dylib .
+    ```
 
-or use scripts provided in the repository to automate this process:
+    or use scripts provided in the repository to automate this process:
 
-```sh
-sh build_and_copy_artifacts.sh
-```
+    ```sh
+    sh build_and_copy_artifacts.sh
+    ```
 
-Run go test to ensure everything is working correctly:
+    Run go test to ensure everything is working correctly:
 
-```sh
-go test .
-```
-
-### Build your Go application with dynamic linking
-
-**1. Download pre-built binaries:**  
-Download the appropriate pre-built binary for your platform from the [Jans releases page](https://github.com/JanssenProject/jans/releases/latest) or build it from source as described above.
-
-**2. Add linker flags in your main.go file:**  
-You need specify linker flags in your `main.go` file to link against the Cedarling library.
-
-```go
-// #cgo LDFLAGS: -L. -lcedarling_go
-import "C"
-```
-
-And make sure that the Cedarling library files are located in the same directory as your main package.
-
-**3. Add the Cedarling Go package to your Go application:**  
-Use `go get` to fetch the Cedarling Go package:
-
-```sh
-go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
-```
-
-**4. Add the Cedarling Go package to your Go application:**  
-Build your Go application:
-
-```sh
-go build .
-```
-
-Run application to ensure it works correctly.
-
-**Runtime Notes:**
-
-- On **Windows**, place the Rust artifacts (`cedarling_go.dll` and `cedarling_go.lib`) alongside the Go binary.
-
-  - Files:
-    - `cedarling_go.dll`
-    - `cedarling_go.lib`
-  - Windows make search in next directories:
-    - The directory containing your Go executable (recommended location)
-    - Windows system directories (e.g., `C:\Windows\System32`)
-    - The `PATH` environment variable directories
-
-- On **Linux**, add the library directory to `LD_LIBRARY_PATH`:
-  - Files:
-    - `libcedarling_go.so`
-
-```sh
-export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
-```
-
-- On **MacOS**, add the library directory to `DYLD_LIBRARY_PATH` (not tested):
-  - Files:
-    - `libcedarling_go.dylib`
-
-```sh
-export DYLD_LIBRARY_PATH=$(pwd):$DYLD_LIBRARY_PATH
-```
-
-## Documentation
-
-Autogenerated documentation is available on [pkg.go.dev](https://pkg.go.dev/github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go).
+    ```sh
+    go test .
+    ```
 
 ## Usage
 
@@ -158,7 +154,15 @@ if err != nil {
 }
 ```
 
-### Token-Based Authorization
+### Authorization
+
+Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
+
+- [**Token-Based Authorization**](#token-based-authorization) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
+- [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
+
+
+#### Token-Based Authorization
 
 **1. Define the resource:**
 
@@ -210,9 +214,11 @@ if result.Decision {
 }
 ```
 
-### Custom Principal Authorization (Unsigned)
+#### Unsigned Authorization
 
-**1. Define principals:**
+In unsigned authorization, you pass a set of Principals directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available.
+
+**1. Define the principals:**
 
 ```go
 principals := []cedarling_go.EntityData{
@@ -269,9 +275,6 @@ log := instance.GetLogById("log123")
 logs := instance.GetLogsByTag("info")
 ```
 
-## Building for Production
+## Defined API
 
-Consider these settings for production deployments:
-
-- Set `CEDARLING_LOG_LEVEL` to `WARN` or `ERROR`
-- Enable JWT validation (ensure tokens are properly signed)
+Auto-generated documentation is available on [pkg.go.dev](https://pkg.go.dev/github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go).
