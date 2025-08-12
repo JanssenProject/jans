@@ -3,6 +3,7 @@ package io.jans.configapi.plugin.scim.rest;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
+import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.scim.service.ScimConfigService;
 import io.jans.configapi.core.util.Jackson;
@@ -32,7 +33,7 @@ import jakarta.ws.rs.core.Response;
 @Path(Constants.SCIM_CONFIG)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ScimConfigResource {
+public class ScimConfigResource extends BaseResource {
 
     @Inject
     Logger log;
