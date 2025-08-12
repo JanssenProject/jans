@@ -37,6 +37,9 @@ use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 use url::Origin;
 
+// Global constants for entity types - following existing codebase pattern
+const DEFAULT_ENTITY_TYPE: &str = "Jans::DefaultEntity";
+
 pub(crate) use built_entities::BuiltEntities;
 pub use error::*;
 
@@ -47,12 +50,37 @@ fn parse_default_entities(
     let mut default_entities = HashMap::new();
     
     for (entity_id, entity_data) in default_entities_data {
+        // Validate entity ID to prevent injection attacks
+        if entity_id.trim().is_empty() {
+            return Err(BuildEntityError {
+                entity_type_name: "DefaultEntity".to_string(),
+                error: BuildEntityErrorKind::InvalidEntityData(
+                    "Entity ID cannot be empty or whitespace-only".to_string()
+                ),
+            });
+        }
+        
+        // Basic security validation - prevent obvious injection patterns
+        // Check for potentially dangerous characters while allowing valid Cedar entity ID formats
+        let dangerous_patterns = ["<script", "javascript:", "data:", "vbscript:", "onload=", "onerror="];
+        let entity_id_lower = entity_id.to_lowercase();
+        for pattern in &dangerous_patterns {
+            if entity_id_lower.contains(pattern) {
+                return Err(BuildEntityError {
+                    entity_type_name: "DefaultEntity".to_string(),
+                    error: BuildEntityErrorKind::InvalidEntityData(
+                        format!("Entity ID '{}' contains potentially dangerous content", entity_id)
+                    ),
+                });
+            }
+        }
+        
         // Parse the entity data as a JSON object
         let entity_attrs = if let Value::Object(obj) = entity_data {
             obj.clone()
         } else {
             return Err(BuildEntityError {
-                entity_type_name: "DefaultEntity".to_string(),
+                entity_type_name: DEFAULT_ENTITY_TYPE.to_string(),
                 error: BuildEntityErrorKind::InvalidEntityData(
                     format!("Default entity data for '{}' must be a JSON object", entity_id)
                 ),
@@ -62,7 +90,7 @@ fn parse_default_entities(
         // Extract entity type from the data or use a default
         let entity_type = entity_attrs.get("entity_type")
             .and_then(|v| v.as_str())
-            .unwrap_or("Jans::DefaultEntity");
+            .unwrap_or(DEFAULT_ENTITY_TYPE);
         
         // Convert JSON attributes to Cedar expressions using the existing value_to_expr function
         let mut cedar_attrs = HashMap::new();
@@ -80,7 +108,7 @@ fn parse_default_entities(
                         return Err(BuildEntityError {
                             entity_type_name: entity_type.to_string(),
                             error: BuildEntityErrorKind::InvalidEntityData(
-                                format!("Failed to convert attribute '{}': {:?}", key, errors)
+                                format!("Failed to convert attribute '{}' for entity '{}' (type: {}): {:?}", key, entity_id, entity_type, errors)
                             ),
                         });
                     }

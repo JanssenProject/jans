@@ -42,8 +42,6 @@ pub struct CedarSchema {
     pub validator_schema: ValidatorSchema,
 }
 
-
-
 impl PartialEq for CedarSchema {
     fn eq(&self, other: &Self) -> bool {
         // Have to check principals, resources, action_groups, entity_types,
