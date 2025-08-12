@@ -11,6 +11,7 @@ import html
 
 import ruamel.yaml
 import jsonschema
+import requests
 
 from enum import Enum
 from jsonpointer import resolve_pointer
@@ -142,12 +143,11 @@ for schema_fp in sorted(input_file):
 
         cli_data = {'operation_id': cli_op_id}
         if yaml_path['__method__'] in ('put', 'post'):
-            if 'data' in schema_data[operation_id]:
-                if '__JSON_DATA__' in schema_data[operation_id]['data']:
-                    cli_data['data'] = json.loads(schema_data[operation_id]['data']['__JSON_DATA__'])
-                else:
-                    cli_data['data'] = schema_data[operation_id]['data']
-            elif 'upload-file' in schema_data[operation_id]:
+            if 'json-data' in schema_data[operation_id]:
+                cli_data['data'] = json.loads(schema_data[operation_id]['json-data'])
+            elif 'data' in schema_data[operation_id]:
+                cli_data['data'] = schema_data[operation_id]['data']
+            if 'upload-file' in schema_data[operation_id]:
                 cli_data['data_fn'] = schema_fp.parent.joinpath(schema_data[operation_id]['upload-file']).as_posix()
 
         if 'url-suffix' in schema_data[operation_id]:
@@ -156,7 +156,12 @@ for schema_fp in sorted(input_file):
         print("Data to send:", cli_data)
 
         response = cli_requests(cli_object, cli_data)
-        
+
+        if isinstance(response, requests.models.Response):
+            print("Data received:", response.status_code, response.text)
+        else:
+            print("Data received:", response)
+
         if not schema_data[operation_id]['expected-status-code']:
             status_code = None
             if response == schema_data[operation_id]['expected-response-text']:
@@ -200,12 +205,19 @@ for schema_fp in sorted(input_file):
                         for item in schema_data[operation_id]['expected-output']:
                             print(item, schema_data[operation_id]['expected-output'])
                             for key in item:
-                                resolved_data = resolve_pointer(response_output, key)
+                                try:
+                                    resolved_data = resolve_pointer(response_output, key)
+                                except Exception as e:
+                                    err_msg += str(e)
                                 if item[key] != resolved_data:
                                    output_status = Status.OUTPUT_VERIFY_FAILED
-                                   err_msg = f"We Expect {item[key]} for {key} in output but got {resolved_data}"
+                                   err_msg += f"We Expect `{item[key]}` for `{key}` in output but got `{resolved_data}`"
             else:
                 output_status = Status.VERIFY_FAILED
+                if isinstance(response, requests.models.Response):
+                    err_msg = response.text
+                else:
+                    err_msg = response
 
         output_data.append((
             ' '.join(yaml_path['tags']),
