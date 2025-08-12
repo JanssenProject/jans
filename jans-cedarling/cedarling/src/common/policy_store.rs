@@ -18,6 +18,55 @@ use url::Url;
 pub(crate) use claim_mapping::ClaimMappings;
 pub use token_entity_metadata::TokenEntityMetadata;
 
+/// Configuration for limiting default entities to prevent DoS and memory exhaustion attacks
+#[derive(Debug, Clone)]
+pub struct DefaultEntitiesLimits {
+    /// Maximum number of default entities allowed
+    pub max_entities: usize,
+    /// Maximum size of base64-encoded strings in bytes
+    pub max_base64_size: usize,
+}
+
+impl Default for DefaultEntitiesLimits {
+    fn default() -> Self {
+        Self {
+            max_entities: 1000,
+            max_base64_size: 1024 * 1024, // 1MB
+        }
+    }
+}
+
+/// Validates default entities against size and count limits
+fn validate_default_entities(
+    entities: &HashMap<String, serde_json::Value>,
+    limits: &DefaultEntitiesLimits,
+) -> Result<(), String> {
+    // Check entity count limit
+    if entities.len() > limits.max_entities {
+        return Err(format!(
+            "Maximum number of default entities ({}) exceeded, found {}",
+            limits.max_entities,
+            entities.len()
+        ));
+    }
+
+    // Check base64 size limit for each entity
+    for (entity_id, entity_data) in entities {
+        if let Some(entity_str) = entity_data.as_str() {
+            if entity_str.len() > limits.max_base64_size {
+                return Err(format!(
+                    "Base64 string size ({}) for entity '{}' exceeds maximum allowed size ({})",
+                    entity_str.len(),
+                    entity_id,
+                    limits.max_base64_size
+                ));
+            }
+        }
+    }
+
+    Ok(())
+}
+
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone, PartialEq)]
 pub struct AgamaPolicyStore {
@@ -118,6 +167,24 @@ pub struct PolicyStore {
 impl PolicyStore {
     pub(crate) fn get_store_version(&self) -> &str {
         self.version.as_deref().unwrap_or("undefined")
+    }
+
+    /// Apply configuration limits to default entities
+    pub fn apply_default_entities_limits(
+        &mut self,
+        max_entities: Option<usize>,
+        max_base64_size: Option<usize>,
+    ) -> Result<(), String> {
+        if let Some(ref default_entities) = self.default_entities {
+            let limits = DefaultEntitiesLimits {
+                max_entities: max_entities.unwrap_or(1000),
+                max_base64_size: max_base64_size.unwrap_or(1024 * 1024),
+            };
+            
+            validate_default_entities(default_entities, &limits)?;
+        }
+        
+        Ok(())
     }
 }
 
@@ -583,11 +650,58 @@ impl<'de> Deserialize<'de> for PolicyStore {
                         decoded.insert(entity_id.clone(), value);
                     }
 
+                    // Validate against limits (using default limits for deserialization)
+                    // Note: Configuration limits will be applied later when the policy store is initialized
+                    let limits = DefaultEntitiesLimits::default();
+                    validate_default_entities(&decoded, &limits).map_err(|e| {
+                        de::Error::custom(format!("error validating default entities: {}", e))
+                    })?;
+
                     Ok(decoded)
                 })
                 .transpose()?,
         };
 
         Ok(store)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_validate_default_entities_limits() {
+        let limits = DefaultEntitiesLimits {
+            max_entities: 2,
+            max_base64_size: 100,
+        };
+
+        // Test valid entities
+        let valid_entities = HashMap::from([
+            ("entity1".to_string(), json!("dGVzdA=="),),
+            ("entity2".to_string(), json!("dGVzdDI="),),
+        ]);
+        assert!(validate_default_entities(&valid_entities, &limits).is_ok());
+
+        // Test entity count limit
+        let too_many_entities = HashMap::from([
+            ("entity1".to_string(), json!("dGVzdA=="),),
+            ("entity2".to_string(), json!("dGVzdDI="),),
+            ("entity3".to_string(), json!("dGVzdDM="),),
+        ]);
+        let result = validate_default_entities(&too_many_entities, &limits);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Maximum number of default entities (2) exceeded"));
+
+        // Test base64 size limit
+        let large_base64 = "dGVzdA==".repeat(20); // Much larger than 100 bytes
+        let large_entities = HashMap::from([
+            ("entity1".to_string(), json!(large_base64),),
+        ]);
+        let result = validate_default_entities(&large_entities, &limits);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Base64 string size"));
     }
 }

@@ -63,6 +63,8 @@ async fn test_cedarling_with_valid_ssa() {
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
         lock_config: Some(lock_config),
+        max_default_entities: None,
+        max_base64_size: None,
     })
     .await;
 
@@ -119,6 +121,8 @@ async fn test_cedarling_without_ssa() {
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
         lock_config: Some(lock_config),
+        max_default_entities: None,
+        max_base64_size: None,
     })
     .await;
 
