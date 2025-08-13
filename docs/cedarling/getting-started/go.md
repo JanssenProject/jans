@@ -15,7 +15,7 @@ Go bindings for the Jans Cedarling authorization engine, providing policy-based 
 
 1. Download pre-built binaries
 
-    Download the appropriate pre-built binary for your platform from the [Jans releases page](https://github.com/JanssenProject/jans/releases/latest) or build it from source as described above.
+    Download the appropriate pre-built binary for your platform from the [Jans releases page](https://github.com/JanssenProject/jans/releases/latest) or build it from source as described below.
 
 2. Add linker flags in your main.go file 
 
