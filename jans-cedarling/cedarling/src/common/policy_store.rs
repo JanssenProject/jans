@@ -18,6 +18,11 @@ use url::Url;
 pub(crate) use claim_mapping::ClaimMappings;
 pub use token_entity_metadata::TokenEntityMetadata;
 
+/// Default maximum number of entities allowed
+const DEFAULT_MAX_ENTITIES: usize = 1000;
+/// Default maximum size of base64-encoded strings in bytes
+const DEFAULT_MAX_BASE64_SIZE: usize = 1024 * 1024;
+
 /// Configuration for limiting default entities to prevent DoS and memory exhaustion attacks
 #[derive(Debug, Clone)]
 pub struct DefaultEntitiesLimits {
@@ -30,8 +35,8 @@ pub struct DefaultEntitiesLimits {
 impl Default for DefaultEntitiesLimits {
     fn default() -> Self {
         Self {
-            max_entities: 1000,
-            max_base64_size: 1024 * 1024, // 1MB
+            max_entities: DEFAULT_MAX_ENTITIES,
+            max_base64_size: DEFAULT_MAX_BASE64_SIZE,
         }
     }
 }
@@ -177,8 +182,8 @@ impl PolicyStore {
     ) -> Result<(), String> {
         if let Some(ref default_entities) = self.default_entities {
             let limits = DefaultEntitiesLimits {
-                max_entities: max_entities.unwrap_or(1000),
-                max_base64_size: max_base64_size.unwrap_or(1024 * 1024),
+                max_entities: max_entities.unwrap_or(DEFAULT_MAX_ENTITIES),
+                max_base64_size: max_base64_size.unwrap_or(DEFAULT_MAX_BASE64_SIZE),
             };
             
             validate_default_entities(default_entities, &limits)?;
