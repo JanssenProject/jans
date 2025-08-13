@@ -7,6 +7,7 @@ import io.jans.ca.plugin.adminui.service.auth.OAuth2Service;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.configapi.core.rest.BaseResource;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -21,7 +22,7 @@ import org.slf4j.Logger;
 
 @Hidden
 @Path("/app")
-public class OAuth2Resource {
+public class OAuth2Resource extends BaseResource {
     //appType: admin-ui, ads
     static final String OAUTH2_CONFIG = "/{appType}/oauth2/config";
     static final String OAUTH2_API_PROTECTION_TOKEN = "/{appType}/oauth2/api-protection-token";

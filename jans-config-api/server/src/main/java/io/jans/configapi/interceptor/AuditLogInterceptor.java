@@ -107,13 +107,13 @@ public class AuditLogInterceptor {
                 Class<?> clazz = clazzArray[i];
                 String propertyName = parameters[i].getName();
                 Object propertyValue = parameters[i].toString();
-                AUDIT_LOG.error("propertyName:{}, propertyValue:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName,
+                LOG.trace("propertyName:{}, propertyValue:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName,
                         propertyValue, clazz, clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
                 if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
                         || !obj.toString().toUpperCase().contains("SECRET"))) {
-                    AUDIT_LOG.error(obj);
+                    AUDIT_LOG.error("{}:{}", propertyName, obj);
                 }
             }
         }

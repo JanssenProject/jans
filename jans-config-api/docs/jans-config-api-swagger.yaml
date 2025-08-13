@@ -1650,14 +1650,18 @@ paths:
           default: 50
       - name: start_date
         in: query
-        description: Start-Date for which the log entries report is to be fetched
         schema:
           type: string
+          description: Start-Date for which the log entries report is to be fetched
+            in `dd-MM-yyyy` format
+          format: date
       - name: end_date
         in: query
-        description: End-Date for which the log entries is to be fetched
         schema:
           type: string
+          description: End-Date for which the log entries is to be fetched in `dd-MM-yyyy`
+            format
+          format: date
       responses:
         "200":
           description: Ok
@@ -4754,6 +4758,7 @@ paths:
                   - health_check
                   - authz_detail
                   - update_token
+                  - logout_status_jwt
                   - config_api_auth
                   - modify_ssa_response
                   - fido2_extension
@@ -14879,13 +14884,13 @@ components:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
-          type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanView:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -16498,6 +16503,10 @@ components:
           type: array
           items:
             type: string
+        logoutStatusJwtScriptDns:
+          type: array
+          items:
+            type: string
         backchannelLogoutUri:
           type: array
           items:
@@ -16937,6 +16946,7 @@ components:
           - health_check
           - authz_detail
           - update_token
+          - logout_status_jwt
           - config_api_auth
           - modify_ssa_response
           - fido2_extension
@@ -17597,6 +17607,10 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -17607,10 +17621,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

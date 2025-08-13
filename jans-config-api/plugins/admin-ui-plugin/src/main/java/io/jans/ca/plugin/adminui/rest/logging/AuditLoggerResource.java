@@ -2,6 +2,7 @@ package io.jans.ca.plugin.adminui.rest.logging;
 
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.inject.Inject;
@@ -18,7 +19,7 @@ import java.util.Map;
 
 @Hidden
 @Path("/admin-ui/logging")
-public class AuditLoggerResource {
+public class AuditLoggerResource extends BaseResource {
 
     public static final String AUDIT_LOGGING_WRITE_SCOPE = "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write";
     static final String AUDIT = "/audit";
