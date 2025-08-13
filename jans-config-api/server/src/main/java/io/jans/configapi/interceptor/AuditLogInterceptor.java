@@ -107,7 +107,7 @@ public class AuditLogInterceptor {
                 Class<?> clazz = clazzArray[i];
                 String propertyName = parameters[i].getName();
                 Object propertyValue = parameters[i].toString();
-                LOG.trace("propertyName:{}, propertyValue:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName,
+                AUDIT_LOG.error("propertyName:{}, propertyValue:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName,
                         propertyValue, clazz, clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
