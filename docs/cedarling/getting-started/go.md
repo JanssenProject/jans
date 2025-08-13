@@ -13,13 +13,10 @@ Go bindings for the Jans Cedarling authorization engine, providing policy-based 
 
 ### Build with dynamic linking
 
-1. Download pre-built binaries
+1. Download the appropriate pre-built binary for your platform from the Jans releases page or build it from source as 
+described above.
 
-    Download the appropriate pre-built binary for your platform from the [Jans releases page](https://github.com/JanssenProject/jans/releases/latest) or build it from source as described below.
-
-2. Add linker flags in your main.go file 
-
-    You need to specify linker flags in your `main.go` file to link against the Cedarling library.
+2. Specify linker flags in your main.go file to link against the Cedarling library.
 
     ```go
     // #cgo LDFLAGS: -L. -lcedarling_go
@@ -28,24 +25,18 @@ Go bindings for the Jans Cedarling authorization engine, providing policy-based 
 
     And make sure that the Cedarling library files are located in the same directory as your main package.
 
-3. Add the Cedarling Go package to your Go application
-
-    Use `go get` to fetch the Cedarling Go package:
+3. Use `go get` to fetch the Cedarling Go package
 
     ```sh
     go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
     ```
 
-4. Add the Cedarling Go package to your Go application
-
-    Build your Go application:
+4. Build your Go application
 
     ```sh
     go build .
     ```
-
-    Run application to ensure it works correctly.
-
+    
 5. Run the application
 
     - **Windows**
@@ -79,10 +70,12 @@ Go bindings for the Jans Cedarling authorization engine, providing policy-based 
 
 Follow these instructions to build from source.
 
-Prerequisites:
+#### Prerequisites
 
 - Go 1.20+
 - Rust tool-chain
+
+#### Steps to build from source
 
 1. Build the Rust library
 
