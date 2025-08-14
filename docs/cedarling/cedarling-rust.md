@@ -10,7 +10,7 @@ tags:
 
 ## Including in the project
 
-The Cedarling library is not yet uploaded to [crates.io](jans-cedarling) so the only way to use them right now is by including it directly [from the source](#building-from-source) in your project.
+The Cedarling library is not yet uploaded to [crates.io](jans-cedarling), so the only way to use it right now is by including it directly from the source in your project.
 
 **1. Clone the Jans repository**
 
