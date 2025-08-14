@@ -14468,7 +14468,7 @@
 </ul>
 <p>After creation, <strong>export the SSA token</strong> and save it securely.</p>
 <h3 id="2-setting-up-the-interception-script">2. Setting up the Interception Script<a class="headerlink" href="#2-setting-up-the-interception-script" title="Permanent link">#</a></h3>
-<p>Next, configure an <a href="../../janssen-server/developer/interception-scripts/"><em>interception script</em></a> to automatically add the required scopes when a Cedarling client registers.</p>
+<p>Next, configure an <a href="../janssen-server/developer/interception-scripts.md"><em>interception script</em></a> to automatically add the required scopes when a Cedarling client registers.</p>
 <p>In your server, create a script file at <code>/opt/jans/jetty/jans-auth/custom/script/add_cedarling_scopes.py</code> with the following content:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClientRegistrationType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">CdiUtil</span>
@@ -14646,7 +14646,7 @@
 </code></pre></div>
 <blockquote>
 <p>Note:</p>
-<p>If you want to learn more about configuring the example interception script, see the <a href="../../janssen-server/developer/interception-scripts/">reference</a>.</p>
+<p>If you want to learn more about configuring the example interception script, see the <a href="../janssen-server/developer/interception-scripts.md">reference</a>.</p>
 </blockquote>
 <hr />
 <h2 id="client-setup">Client Setup<a class="headerlink" href="#client-setup" title="Permanent link">#</a></h2>
