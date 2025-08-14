@@ -28,7 +28,15 @@ When reinutil.user2FAOn is false    // user has 2FA turned off?
 
 reinutil.jsonLocation = userData.location
 reinutil.jsonDevice = userData.device
-prompt2fa = Call reinutil prompt2FA
+
+// Validate session state before proceeding with 2FA
+sessionValid = Call reinutil validateSessionState
+When sessionValid is false
+    // Force fresh authentication by clearing any stale session data
+    Call reinutil clearStaleSessionData
+    prompt2fa = true
+Otherwise
+    prompt2fa = Call reinutil prompt2FA
 
 When prompt2fa is false     //skip 2FA?
     Call reinutil updateTrustedDevices
