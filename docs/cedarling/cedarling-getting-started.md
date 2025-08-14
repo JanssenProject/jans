@@ -492,7 +492,7 @@ Cedarling supports logging of both **decision** and **system** events, useful fo
 
 You're now ready to dive deeper into Cedarling. From here, you could either:
 
-- See how you can use [TBAC with Cedarling](./cedarling-quick-start.md#implement-tbac-using-cedarling).
+- See how you can use [RBAC with Cedarling](./cedarling-quick-start.md#implement-rbac-using-cedarling).
 - Explore how to use [Cedarling's Unsigned interface](./cedarling-authz.md#unsigned-authorization-authorize_unsigned).
 - Use the [Cedarling Sidecar](./cedarling-sidecar-overview.md) for a quick, zero-code deployment.
 - Learn more about [why Cedarling exists](./README.md#why-zero-trust-needs-cedarlings) and the problems it solves.
