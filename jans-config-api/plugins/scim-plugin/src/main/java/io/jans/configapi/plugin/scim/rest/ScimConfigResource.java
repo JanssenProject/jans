@@ -70,7 +70,7 @@ public class ScimConfigResource extends BaseResource {
     @ProtectedApi(scopes = { "https://jans.io/scim/config.write" })
     public Response patchAppConfigurationProperty(@NotNull String requestString)
             throws IOException, JsonPatchException {
-        log.debug("AUTH CONF details to patch - requestString:{}", requestString);
+        log.info("AUTH CONF details to patch - requestString:{}", requestString);
         Conf conf = scimConfigService.findConf();
         AppConfiguration appConfiguration = conf.getDynamicConf();
         log.trace("AUTH CONF details BEFORE patch - conf:{}, appConfiguration:{}", conf, appConfiguration);
