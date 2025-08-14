@@ -44,6 +44,7 @@ calling external APIs
 1. [Create User](./scripts/create-user.md)
 1. [Select Account](./scripts/select-account.md)
 1. [Health Check](./scripts/health-check.md)
+1. [Cookie](./scripts/cookie.md)
 1. Resource Owner Password Credentials
 1. UMA 2 RPT Authorization Policies
 1. UMA 2 Claims-Gathering
