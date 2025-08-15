@@ -177,7 +177,7 @@ class JansSamlInstaller(BaseInstaller, SetupUtils):
 
 
     def deploy_jans_keycloak_providers(self):
-        self.copyFile(self.source_files[0][0], self.idp_config_providers_dir)
+        #self.copyFile(self.source_files[0][0], self.idp_config_providers_dir)
         self.copyFile(self.source_files[5][0], self.idp_config_providers_dir)
         base.unpack_zip(self.source_files[6][0], self.idp_config_providers_dir)
 

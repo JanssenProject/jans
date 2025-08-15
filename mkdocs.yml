@@ -327,6 +327,7 @@ nav:
       - Script Debugging: script-catalog/introspection/interception-scripts-debug.md
       - Access Evaluation: script-catalog/access_evaluation/access-evaluation.md
       - Access Evaluation Discovery: script-catalog/access_evaluation/access-evaluation-discovery.md
+      - Logout Status JWT: script-catalog/logout_status_jwt/logout-status-jwt.md
       - Cookie: script-catalog/cookie/cookie.md
       - Discovery: script-catalog/discovery/discovery.md
       - Select Account: script-catalog/select_account/select-account.md
@@ -417,8 +418,7 @@ nav:
 - 'Cedarling':
   - Overview: 'cedarling/README.md'
   - Quick Start:
-    - Authorization Using Cedarling: 'cedarling/cedarling-quick-start-unsigned.md'
-    - Implement TBAC Using Cedarling: 'cedarling/cedarling-quick-start-tbac.md'
+    - Authorization Using Cedarling: 'cedarling/cedarling-quick-start.md'
   - Tutorials:
     - 'cedarling/cedarling-getting-started.md'
     - Javascript: 'cedarling/getting-started/javascript.md'
@@ -440,7 +440,6 @@ nav:
     - Cedarling Entities: 'cedarling/cedarling-entities.md'
   - Developer:
     - Rust: 'cedarling/cedarling-rust.md'
-    - WASM: 'cedarling/cedarling-wasm.md'
     - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
