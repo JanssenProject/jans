@@ -38,6 +38,14 @@
                 "schema": {
                     "description": "The Cedar schema definition (encoded in Base64) that defines the shape of entities, actions, and context within this policy store.",
                     "type": "string"
+                },
+                "default_entities": {
+                    "description": "A map of default entity identifiers to Base64-encoded JSON objects. Each value MUST be a Base64 string encoding a JSON object representing the default entity.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string",
+                        "description": "Base64-encoded JSON object representing the default entity."
+                    }
                 }
             },
             "additionalProperties": true

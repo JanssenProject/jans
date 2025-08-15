@@ -110,7 +110,6 @@ pub struct PrincipalIdSrc<'a> {
 mod test {
     use super::*;
     use crate::common::policy_store::TrustedIssuer;
-    use std::collections::HashMap;
 
     #[test]
     fn err_on_missing_entity_id() {
@@ -123,10 +122,12 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
 

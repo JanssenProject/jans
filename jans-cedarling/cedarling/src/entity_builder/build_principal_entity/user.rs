@@ -156,10 +156,12 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -232,10 +234,12 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -312,10 +316,12 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -377,10 +383,6 @@ mod test {
                         "type": "Jans::Userinfo_token",
                         "id": "some_jti",
                     }},
-                    "userinfo_token": {"__entity": {
-                        "type": "Jans::Userinfo_token",
-                        "id": "some_jti",
-                    }},
                 },
                 "parents": [{"type": "Jans::Role", "id": "some_role"}],
             }),
@@ -393,9 +395,11 @@ mod test {
     fn can_build_user_without_schema() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
+            None,
             None,
         )
         .expect("should init entity builder");
