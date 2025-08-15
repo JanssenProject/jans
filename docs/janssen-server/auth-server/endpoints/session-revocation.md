@@ -6,7 +6,7 @@ tags:
 - endpoint
 ---
 
-# Session Revocation
+# Session Revocation Endpoint
 
 **Note:** Endpoint is deprecated in favor of [Global Token Revocation](./global-token-revocation.md) 
 

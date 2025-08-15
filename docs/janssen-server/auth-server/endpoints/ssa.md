@@ -7,7 +7,7 @@ tags:
 - endpoint
 ---
 
-# Software Statement Assertion (SSA)
+# Software Statement Assertion (SSA) Endpoint
 
 Janssen Server provides SSA endpoint that enables management of SSAs. The SSA is a JSON Web Token (JWT) containing
 client metadata and some custom attributes. Specification for SSAs has been outlined as part of
