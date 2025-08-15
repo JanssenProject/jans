@@ -403,3 +403,85 @@ You will notice that test fixtures in the cedarling code base are quite often in
 yaml is intended for **cedarling internal use only**.
 
 The rationale is that yaml has excellent support for embedded, indented, multiline string values. That is far easier to read than base64 encoded json strings, and is beneficial for debugging and validation that test cases are correct.
+
+## Dynamic Token Types
+
+Cedarling supports **dynamic token types** beyond the standard OAuth2/OIDC tokens. This allows for extensible token mapping without hardcoding, enabling custom token types for specialized domains.
+
+### Standard Token Types
+
+The following token types are supported out-of-the-box:
+
+- `access_tokens`: OAuth2 access tokens
+- `id_tokens`: OpenID Connect ID tokens
+- `userinfo_tokens`: OpenID Connect userinfo tokens
+- `tx_tokens`: Transaction tokens (custom)
+
+### Custom Token Types
+
+You can define any custom token type in your policy store configuration. For example:
+
+```json
+"trusted_issuers": {
+    "marine_research_issuer": {
+        "name": "Marine Research Authority",
+        "description": "Marine research token issuer",
+        "openid_configuration_endpoint": "https://marine.auth.org/.well-known/openid-configuration",
+        "dolphin_tokens": {
+            "trusted": true,
+            "entity_type_name": "Marine::DolphinToken",
+            "principal_mapping": ["Marine::Researcher"],
+            "user_id": "sub",
+            "workload_id": "pod_id",
+            "claim_mapping": {
+                "blowhole_size": {
+                    "parser": "regex",
+                    "regex_expression": "^(?P<SIZE>\\d+)$",
+                    "SIZE": {
+                        "attr": "size",
+                        "type": "Number"
+                    }
+                },
+                "pod_name": {
+                    "attr": "pod_name",
+                    "type": "String"
+                }
+            }
+        }
+    }
+}
+```
+
+### Dynamic Token Processing
+
+The system handles custom token types gracefully:
+
+1. **Policy Store Lookup**: First checks if the token type is defined in the policy store's `token_metadata`
+2. **Entity Type Mapping**: Maps the token to the specified `entity_type_name`
+3. **Fallback Behavior**: If not found in policy store, the token is skipped (graceful degradation)
+4. **Extensible Design**: New token types can be added without code changes
+
+### Multi-Context Authorization Support
+
+Custom token types work seamlessly with multi-context authorization:
+
+```json
+{
+  "token_bundles": [
+    {
+      "tokens": {
+        "dolphin_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...."
+      },
+      "context_id": "texas_dmv"
+    },
+    {
+      "tokens": {
+        "dolphin_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...."
+      },
+      "context_id": "emissions_shop"
+    }
+  ]
+}
+```
+
+For more information about multi-context authorization with custom token types, see [Multi-Context Authorization](./cedarling-multi-context-authorization.md).
