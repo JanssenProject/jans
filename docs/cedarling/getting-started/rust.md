@@ -5,16 +5,63 @@ tags:
   - getting-started
 ---
 
-# Getting Started with Cedarling Rust
+# Getting Started with Cedarling in a Rust app
 
-- [Installation](#installation)
-- [Usage](#usage)
 
 ## Installation
 
-The Cedarling library is not yet uploaded to [crates.io](jans-cedarling) so the only way to use them right now is by including it directly from the source in your project.
+### Building from source
 
 To get started, clone the [Jans](https://github.com/JanssenProject/jans) repository. The source can be found in the [`jans-cedarling/cedarling`] directory.
+
+#### Requirements
+
+
+If you haven't installed Rust yet, follow the official installation guide:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+After installation, restart your terminal or run:
+
+```bash
+source $HOME/.cargo/env
+```
+
+Verify the installation:
+
+```bash
+rustc --version
+cargo --version
+```
+
+#### Building
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/JanssenProject/jans.git
+cd jans/jans-cedarling
+```
+
+**2. Build the library**
+
+```bash
+cargo build --release
+```
+
+**3. Run tests**
+
+```bash
+cargo test --workspace
+```
+
+**4. Generate documentation**
+
+```bash
+cargo doc -p cedarling --no-deps --open
+```
 
 ## Usage
 
@@ -246,14 +293,18 @@ println!("{:#?}", logs);
 
 For more detailed logging capabilities, see the [Cedarling Rust Developer Guide](../cedarling-rust.md#log-retrieval).
 
-```
+## Example
 
----
+Refer to [Cedarling Rust Developer Guide](../cedarling-rust.md#complete-example) 
+for a complete code example.
+
+## Defined API
+
+Please refer to [Cedarling Rust Developer Guide](../cedarling-rust.md#api-reference).
 
 ## See Also
 
 - [Cedarling Rust Developer Guide](../cedarling-rust.md)
-- [Cedarling TBAC quickstart](../cedarling-quick-start-tbac.md)
-- [Cedarling Unsigned quickstart](../cedarling-quick-start-unsigned.md)
+- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-tbac-using-cedarling)
+- [Cedarling Unsigned quickstart](../cedarling-quick-start.md#authorization-using-the-cedarling)
 - [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
-```
