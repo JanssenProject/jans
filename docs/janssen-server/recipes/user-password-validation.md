@@ -59,7 +59,7 @@ jans cli --operation-id patch-attributes-by-inum \
 
 ## Enable user password validation through Jans Text UI (TUI)
 
-1. When using [Janssen Text-based UI(TUI)](../../janssen-server/config-guide/config-tools/jans-tui/README.md) to configure `userPassword` attribute validation , navigate via
+1. When using [Janssen Text-based UI(TUI)](../config-guide/config-tools/jans-tui/README.md) to configure `userPassword` attribute validation , navigate via
 `Auth Server`->`Attributes`->search for `userPassword` attribute->open the attribute details->enable `Enable Custom Validation` field-> Enter a value for `Regular expression`, `Minimum Length` & `Maximum Length` fields->Save
 ![update default authentication method](../../assets/image-pwd-enable-custom-validation.png)
 
