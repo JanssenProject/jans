@@ -1,5 +1,6 @@
 package io.jans.configapi.model.configuration;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -7,7 +8,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DataFormatConversionConf {
+public class DataFormatConversionConf implements Serializable{
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     @Schema(description = "Flag to enable and disable data conversion.")
     private boolean enabled;

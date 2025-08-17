@@ -14880,19 +14880,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
-          type: boolean
-        adminCanAccess:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanEdit:
+          type: boolean
         userCanView:
+          type: boolean
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        userCanEdit:
-          type: boolean
-        whitePagesCanView:
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -16806,6 +16806,17 @@ components:
           items:
             type: string
             description: HTTP methods for which audit is disabled.
+        ignoreAnnotation:
+          type: array
+          description: Annotation for which audit is disabled.
+          items:
+            type: string
+            description: Annotation for which audit is disabled.
+        ignoreObjectDetails:
+          type: array
+          description: Object for which audit is disabled.
+          items:
+            $ref: "#/components/schemas/ObjectDetails"
         headerAttributes:
           type: array
           description: List of header HTTP attributes whose value is to be logged.
@@ -16835,6 +16846,19 @@ components:
             type: string
             description: HTTP methods for which data conversion is to be disabled.
       description: Configuration for data-type converstion.
+    ObjectDetails:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the object.
+        text:
+          type: array
+          description: List of string text that is to be ignored .
+          items:
+            type: string
+            description: List of string text that is to be ignored .
+      description: Object for which audit is disabled.
     PluginConf:
       type: object
       properties:
@@ -16978,14 +17002,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -17433,10 +17457,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -17617,9 +17641,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object
