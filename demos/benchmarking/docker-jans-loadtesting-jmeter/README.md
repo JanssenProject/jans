@@ -39,6 +39,7 @@ Installation depends on the set of environment variables shown below. These envi
 | `ROPC_CLIENT_ID`                   | Resource grant client id                                 | ``                            |
 | `ROPC_CLIENT_SECRET`               | Resource grant client secret                             | ``                            |
 | `RUN_CLIENT_CREDENTIALS_TEST`      | Run the client credentials test                          | `false`                       |
+| `RUN_AUTHZ_SOAK_TEST`              | Run the Authorization code soak test                     | `false`                       |
 | `RUN_AUTHZ_TEST`                   | Run the Authorization code test                          | `false`                       |
 | `RUN_ROPC_TEST`                    | Run the ROPC test                                        | `false`                       |
 | `TEST_USERS_PREFIX_STRING`         | The user prefix string attached to the test users loaded | `test_user`                   |
