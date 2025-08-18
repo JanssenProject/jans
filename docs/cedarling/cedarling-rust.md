@@ -36,7 +36,14 @@ tokio = { version = "1.0", features = ["full"] }
 cedarling = { git = "https://github.com/JanssenProject/jans", package = "cedarling" }
 ```
 
-## Working with examples
+## Building
+
+### Building Cedarling
+
+To build an executable library for Cedarling, follow the instructions 
+[here](getting-started/rust.md#building-from-source).
+
+### Building Examples
 
 The Cedarling project includes several examples that demonstrate different 
 use cases. Follow the steps below to build these examples.
