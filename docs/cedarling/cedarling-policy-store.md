@@ -107,6 +107,12 @@ Notes:
 - Cedar policies can reference these entities directly by type and ID, just like any other entity present during evaluation.
 - A common use case is defining an organization entity and writing policies that compare runtime attributes (e.g., `resource.org_id`) to attributes on the default entity.
 
+### Entity Conflict Resolution
+
+When request entities have the same UID as default entities, Cedarling automatically resolves conflicts by giving **request entities precedence** over default entities. This ensures that runtime data can override static configurations while maintaining consistency.
+
+Example: If a resource entity with UID `"org1"` is passed in an authorization request, and a default entity with the same UID exists, the resource entity's attributes will be used instead of the default entity's attributes.
+
 ## Cedar Policies Schema
 
 The `policies` field describes the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with each policy requiring a `unique_policy_id`.

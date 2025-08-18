@@ -74,6 +74,11 @@ To load policy store one of the following keys must be provided:
   - **`always`**: Always validates ID tokens when present (less strict than `strict` mode)
   - **`ifpresent`**: Validates ID tokens only if they are provided
 
+**The following bootstrap properties are for advanced configuration:**
+
+- **`CEDARLING_MAX_BASE64_SIZE`** : Maximum size in bytes for Base64-encoded content (policies, schema, etc.)
+- **`CEDARLING_MAX_DEFAULT_ENTITIES`** : Maximum number of default entities that can be loaded from the policy store.
+
 **The following bootstrap properties are only needed for the Lock Server Integration.**
 
 - **`CEDARLING_LOCK`** : `enabled` | `disabled`. If `enabled`, the Cedarling will connect to the Lock Server for policies, and subscribe for SSE events.
