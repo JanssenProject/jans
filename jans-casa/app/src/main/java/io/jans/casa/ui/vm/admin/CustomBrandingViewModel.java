@@ -37,13 +37,15 @@ public class CustomBrandingViewModel extends MainViewModel {
         return favicon;
     }
 
-    @Init
-    public void init() {
+    @Init(superclass = true)
+    public void childInit() {
         logo = new Pair<>(assetsService.getLogoUrl() + randomSuffix(), null);
         favicon = new Pair<>(assetsService.getFaviconUrl() + randomSuffix(), null);
     }
 
     public void save() {
+        
+        boolean success = false;
         try {
             if (favicon.getSecond() != null) {
                 assetsService.setFaviconContent(favicon.getSecond());
@@ -52,24 +54,29 @@ public class CustomBrandingViewModel extends MainViewModel {
                 assetsService.setLogoContent(logo.getSecond());
             }
             assetsService.useExtraCss(AssetsService.EMPTY_SNIPPET);
+            success = true;
             Messagebox.show(Labels.getLabel("adm.branding_changed"), null, Messagebox.OK, Messagebox.INFORMATION);
         } catch (Exception e) {
             UIUtils.showMessageUI(false, e.getMessage());
         }
+        logActionDetails(Labels.getLabel("adm.branding_action"), success);
 
     }
 
     @NotifyChange("*")
     public void revert() {
 
+        boolean success = false;
         try {
             assetsService.factoryReset();
             init();
+            success = true;
             UIUtils.showMessageUI(true);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             UIUtils.showMessageUI(false, e.getMessage());
         }
+        logActionDetails(Labels.getLabel("adm.branding_revert_action"), success);
 
     }
 
