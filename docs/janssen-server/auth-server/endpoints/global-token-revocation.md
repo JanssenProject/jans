@@ -5,7 +5,7 @@ tags:
 - session-revocation
 - endpoint
 ---
-# Global Token Revocation
+# Global Token Revocation Endpoint
 
 
 Janssen Server provides global token revocation endpoint to enable the client to revoke all tokens and sessions of a user.

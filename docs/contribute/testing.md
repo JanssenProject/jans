@@ -33,6 +33,8 @@ configurations using the Cloud Native distribution. The VM distribution will not
 goal for this distribution is development and small deployments. The JMeter test tool should be used to generate the 
 load. These tests are published so community members can run their own bench-marking analysis.
 
+In addition to standard performance testing, it’s highly recommended to perform full benchmarking to understand your system’s performance under stress. The [Benchmarking Documentation](../janssen-server/recipes/benchmark.md) provides a comprehensive guide for testing with JMeter scripts and other load generation tools.
+
 ## HA Tests
 HA tests should be run against the Cloud Native distribution, which by design is active-active with no single point of 
 failure. The HA testing should simulate taking down various pieces of infrastructure, to see if authentications can 
