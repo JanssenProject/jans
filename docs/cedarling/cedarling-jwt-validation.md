@@ -32,8 +32,11 @@ If timestamps are provided in the context, the Cedaring always verifies:
 
 If the Cedarling property `CEDARLING_ID_TOKEN_TRUST_MODE` is `Strict`, the Cedarling will:
 
-- Discard `id_token` if the `aud` claim does not match the `client_id` of the access token
+- Discard `id_token` if the `aud` claim does not contain the `client_id` of the access token
 - Discard Userinfo tokens that are not associated with a `sub` claim from the `id_token`
+
+!!! Note
+    The `aud` claim can be either a string or an array. When it's a string, it must exactly match the `client_id`. When it's an array, it must contain the `client_id` as one of its values. This supports providers like Auth0 that commonly use array `aud` claims.
 
 ### JWT Status Validation
 
@@ -51,8 +54,8 @@ Setting the validation level to `None` will not check for the conditions outline
 
 Strict mode requires:
 
-1. The `id_token`'s `aud` matches the `access_token`'s `client_id`;
-2. if a Userinfo token is present, the `sub` matches the `id_token`, and that the `aud` matches the access token's `client_id`.
+1. The `id_token`'s `aud` contains the `access_token`'s `client_id` (either as an exact string match or as a value within an array);
+2. if a Userinfo token is present, the `sub` matches the `id_token`, and that the `aud` contains the access token's `client_id`.
 
 ## Local JWKS
 
