@@ -10,13 +10,30 @@ import tempfile
 import html
 
 import ruamel.yaml
-import jsonschema
 import requests
 
 from enum import Enum
-from jsonpointer import resolve_pointer
 
-default_output_file = os.path.join(tempfile.gettempdir(), 'jans-config-api-auto-test.html')
+icon_url = 'https://raw.githubusercontent.com/ubuntu/yaru/refs/heads/master/icons/Yaru/22x22/actions/cancel.png'
+cur_path = pathlib.Path(__file__).parent.resolve()
+cli_src_path = cur_path.parent.joinpath('cli_tui').as_posix()
+cli_install_path = '/opt/jans/jans-cli'
+pydir_path = cur_path.joinpath('pylib')
+
+for package in ('jsonpointer', 'jsonschema', 'py-markdown-table'):
+    install_dir = package.replace('-','_')
+    if not (pydir_path.joinpath(install_dir).exists() or pydir_path.joinpath(install_dir+'.py').exists()):
+        print(f"Installing {package}")
+        cmd = f'pip3 install {package} --target {pydir_path}'
+        os.system(cmd)
+
+sys.path.insert(0, pydir_path.as_posix())
+
+from jsonpointer import resolve_pointer
+from py_markdown_table.markdown_table import markdown_table
+import jsonschema
+
+default_output_file = cur_path.joinpath('jans-config-api-auto-test.md').as_posix()
 parser = argparse.ArgumentParser(description="This script auotmatically test endpoints of jans-config-api using CLI")
 parser.add_argument('-output-file', help="Path of output file", default=default_output_file)
 parser.add_argument('-input-file', help="Path of input files", nargs='+', required=False)
@@ -34,12 +51,7 @@ for arg in sys.argv[:]:
             sys.argv.remove(av)
 
 input_file = argsp.input_file
-
 output_file = argsp.output_file
-
-cur_path = pathlib.Path(__file__).parent.resolve()
-cli_src_path = cur_path.parent.joinpath('cli_tui').as_posix()
-cli_install_path = '/opt/jans/jans-cli'
 
 if input_file:
     for i, ifp in enumerate(input_file[:]):
@@ -74,37 +86,10 @@ def get_cli_object():
 
 output_data = []
 
-css_style = '''
-table {
-    border-collapse: collapse;
-    border-color: #c7c7c7;
-    border-spacing: 0px;
-}
-table, td, th {
-    border: 1px solid;
-}
-'''
-
 def write_output():
     with open(output_file, 'w') as out_buffer:
-        out_buffer.write(f'<html><head><title>Jans Config API Auto Test Resuls</title><style>{css_style}</style></head>\n')
-        out_buffer.write('<body>\n')
-        out_buffer.write('<table style=><tr><th>Tag</th><th>Endpoint</th><th>Operation</th><th>Operation ID</th><th>Description</th><th>Expected Response</th><th>Actual Response</th><th>Status</th></tr>\n')
-
-        for row in output_data:
-            row_bgcolor = '' if row[-2] == Status.SUCCESS else ' bgcolor= "red"'
-            out_buffer.write(f'<tr{row_bgcolor}>')
-            for i, cell in enumerate(row[:-1]):
-                cell_value = cell.value if isinstance(cell, Status) else cell
-                title = ''
-                if i == len(row)-2 and row[-1]:
-                    title = f' title="{html.escape(row[-1])}"' if i == len(row)-2 else ''
-                out_buffer.write(f'<td{title}>{cell_value}</td>')
-            out_buffer.write('</tr>\n')
-
-        out_buffer.write('<table>\n')
-
-        out_buffer.write('</body>\n</html>')
+        markdown = markdown_table(output_data).set_params(row_sep = 'markdown', quote = False).get_markdown()
+        out_buffer.write(markdown)
 
     print(f"Output was dumped to {output_file}")
 
@@ -219,17 +204,22 @@ for schema_fp in sorted(input_file):
                 else:
                     err_msg = response
 
-        output_data.append((
-            ' '.join(yaml_path['tags']),
-            yaml_path['__path__'],
-            yaml_path['__method__'].upper(),
-            f'{operation_id}:{cli_op_id}',
-            yaml_path['description'] or yaml_path['summary'] or "No description found for this endpoint",
-            schema_data[operation_id]['expected-status-code'],
-            status_code,
-            output_status,
-            err_msg
-            ))
+        output_status_str = output_status.value
+        if err_msg:
+            err_msg = err_msg.replace('"',"`")
+            output_status_str += f' ![]({icon_url} "{err_msg}")'
+
+        output_data.append({
+            "Tag": ' '.join(yaml_path['tags']),
+            "Endpoint": yaml_path['__path__'],
+            "Operation": yaml_path['__method__'].upper(),
+            "Operation ID": f'{operation_id}:{cli_op_id}',
+            "Description": yaml_path['description'] or yaml_path['summary'] or "No description found for this endpoint",
+            "Expected Response": schema_data[operation_id]['expected-status-code'],
+            "Actual Response": status_code,
+            "Status": output_status_str
+            #"Error Message": err_msg
+            })
 
         print()
         sleep_time = schema_data[operation_id].get('sleep')
@@ -239,14 +229,3 @@ for schema_fp in sorted(input_file):
 
 write_output()
 
-"""
-response = cli_requests({'operation_id': 'get-app-version'})
-
-
-if response.status_code == 200:
-    result = response.json()
-    print("Validating", result)
-    jsonschema.validate(instance=result, schema=schema)
-
-#print(config_cli.cfg_yaml)
-"""
