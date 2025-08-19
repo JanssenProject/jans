@@ -44,8 +44,8 @@ public class AuthnMethodsViewModel extends MainViewModel {
         return currentAms;
     }
 
-    @Init
-    public void init() {
+    @Init(superclass = true)
+    public void childInit() {
 
         Map<String, String> mappedAcrs = getSettings().getAcrPluginMap();
         List<Pair<AuthnMethod, PluginDescriptor>> pairs = extManager.getAuthnMethodExts();
@@ -132,7 +132,7 @@ public class AuthnMethodsViewModel extends MainViewModel {
 		logger.info("New plugin mapping will be: {}", mapping);
 		getSettings().setAcrPluginMap(mapping);
 
-        updateMainSettings();
+        updateMainSettings(Labels.getLabel("adm.methods_action"));
 
 	}
 
