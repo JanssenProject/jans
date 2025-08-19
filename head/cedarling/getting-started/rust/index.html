@@ -87,7 +87,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getting-started-with-cedarling-rust" class="md-skip">
+        <a href="#getting-started-with-cedarling-in-a-rust-app" class="md-skip">
           Skip to content
         </a>
       
@@ -11033,6 +11033,45 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#building-from-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Building from source
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Building from source">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building" class="md-nav__link">
+    <span class="md-ellipsis">
+      Building
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -11098,6 +11137,33 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defined-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Defined API
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Also
+    </span>
+  </a>
   
 </li>
       
@@ -14432,6 +14498,45 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#building-from-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Building from source
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Building from source">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building" class="md-nav__link">
+    <span class="md-ellipsis">
+      Building
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -14500,6 +14605,33 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defined-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Defined API
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Also
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -14542,14 +14674,35 @@
   
 
 
-<h1 id="getting-started-with-cedarling-rust">Getting Started with Cedarling Rust<a class="headerlink" href="#getting-started-with-cedarling-rust" title="Permanent link">#</a></h1>
-<ul>
-<li><a href="#installation">Installation</a></li>
-<li><a href="#usage">Usage</a></li>
-</ul>
+<h1 id="getting-started-with-cedarling-in-a-rust-app">Getting Started with Cedarling in a Rust app<a class="headerlink" href="#getting-started-with-cedarling-in-a-rust-app" title="Permanent link">#</a></h1>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
-<p>The Cedarling library is not yet uploaded to <a href="jans-cedarling">crates.io</a> so the only way to use them right now is by including it directly from the source in your project.</p>
+<h3 id="building-from-source">Building from source<a class="headerlink" href="#building-from-source" title="Permanent link">#</a></h3>
 <p>To get started, clone the <a href="https://github.com/JanssenProject/jans">Jans</a> repository. The source can be found in the [<code>jans-cedarling/cedarling</code>] directory.</p>
+<h4 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">#</a></h4>
+<p>If you haven't installed Rust yet, follow the official installation guide:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--proto<span class="w"> </span><span class="s1">&#39;=https&#39;</span><span class="w"> </span>--tlsv1.2<span class="w"> </span>-sSf<span class="w"> </span>https://sh.rustup.rs<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</code></pre></div>
+<p>After installation, restart your terminal or run:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span><span class="nv">$HOME</span>/.cargo/env
+</code></pre></div>
+<p>Verify the installation:</p>
+<div class="highlight"><pre><span></span><code>rustc<span class="w"> </span>--version
+cargo<span class="w"> </span>--version
+</code></pre></div>
+<h4 id="building">Building<a class="headerlink" href="#building" title="Permanent link">#</a></h4>
+<p><strong>1. Clone the repository</strong></p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/JanssenProject/jans.git
+<span class="nb">cd</span><span class="w"> </span>jans/jans-cedarling
+</code></pre></div>
+<p><strong>2. Build the library</strong></p>
+<div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>--release
+</code></pre></div>
+<p><strong>3. Run tests</strong></p>
+<div class="highlight"><pre><span></span><code>cargo<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--workspace
+</code></pre></div>
+<p><strong>4. Generate documentation</strong></p>
+<div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>doc<span class="w"> </span>-p<span class="w"> </span>cedarling<span class="w"> </span>--no-deps<span class="w"> </span>--open
+</code></pre></div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <h3 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">cedarling</span><span class="p">::</span><span class="o">*</span><span class="p">;</span>
@@ -14723,15 +14876,18 @@
 <span class="fm">println!</span><span class="p">(</span><span class="s">&quot;{:#?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">logs</span><span class="p">);</span>
 </code></pre></div>
 <p>For more detailed logging capabilities, see the <a href="../../cedarling-rust/#log-retrieval">Cedarling Rust Developer Guide</a>.</p>
-<div class="highlight"><pre><span></span><code>---
-
-## See Also
-
-- [Cedarling Rust Developer Guide](../cedarling-rust.md)
-- [Cedarling TBAC quickstart](../cedarling-quick-start-tbac.md)
-- [Cedarling Unsigned quickstart](../cedarling-quick-start-unsigned.md)
-- [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
-</code></pre></div>
+<h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">#</a></h2>
+<p>Refer to <a href="../../cedarling-rust/#complete-example">Cedarling Rust Developer Guide</a> 
+for a complete code example.</p>
+<h2 id="defined-api">Defined API<a class="headerlink" href="#defined-api" title="Permanent link">#</a></h2>
+<p>Please refer to <a href="../../cedarling-rust/#api-reference">Cedarling Rust Developer Guide</a>.</p>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="../../cedarling-rust/">Cedarling Rust Developer Guide</a></li>
+<li><a href="../../cedarling-quick-start/#implement-tbac-using-cedarling">Cedarling TBAC quickstart</a></li>
+<li><a href="../../cedarling-quick-start/#authorization-using-the-cedarling">Cedarling Unsigned quickstart</a></li>
+<li><a href="../../cedarling-sidecar-tutorial/">Cedarling Sidecar Tutorial</a></li>
+</ul>
 
 
 
@@ -14754,7 +14910,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2025 15:11:12 UTC"><span class="timeago" datetime="2025-07-29T15:11:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2025 15:11:12 UTC">2025-07-29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 19, 2025 07:02:49 UTC"><span class="timeago" datetime="2025-08-19T07:02:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 19, 2025 07:02:49 UTC">2025-08-19</span>
   </span>
 
     
