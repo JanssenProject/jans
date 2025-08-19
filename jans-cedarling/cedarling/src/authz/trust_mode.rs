@@ -19,9 +19,9 @@ use crate::jwt::{Token, TokenClaimTypeError};
 /// # Strict Mode
 ///
 /// Strict mode requires the following:
-/// - `id_token.aud` == `access_token.client_id`
+/// - `id_token.aud` == `access_token.client_id` (or contains it if aud is an array)
 /// - if a Userinfo token is present:
-///     - `userinfo_token.aud` == `access_token.client_id`
+///     - `userinfo_token.aud` == `access_token.client_id` (or contains it if aud is an array)
 ///     - `userinfo_token.sub` == `id_token.sub`
 pub fn validate_id_tkn_trust_mode(
     tokens: &HashMap<String, Token>,
@@ -34,9 +34,9 @@ pub fn validate_id_tkn_trust_mode(
         .ok_or(IdTokenTrustModeError::MissingIdToken)?;
 
     let access_tkn_client_id = get_tkn_claim_as_str(access_tkn, "client_id")?;
-    let id_tkn_aud = get_tkn_claim_as_str(id_tkn, "aud")?;
-
-    if access_tkn_client_id != id_tkn_aud {
+    
+    // Check if id_token aud contains the client_id (handles both string and array)
+    if !aud_claim_contains_value(id_tkn, &access_tkn_client_id)? {
         return Err(IdTokenTrustModeError::AccessTokenClientIdMismatch);
     }
 
@@ -44,18 +44,46 @@ pub fn validate_id_tkn_trust_mode(
         Some(token) => token,
         None => return Ok(()),
     };
-    let userinfo_tkn_aud = get_tkn_claim_as_str(userinfo_tkn, "aud")?;
-
-    if userinfo_tkn_aud != id_tkn_aud {
-        return Err(IdTokenTrustModeError::SubMismatchIdTokenUserinfo);
-    }
-    if userinfo_tkn_aud != access_tkn_client_id {
+    
+    // Check if userinfo token aud contains the client_id (handles both string and array)
+    if !aud_claim_contains_value(userinfo_tkn, &access_tkn_client_id)? {
         return Err(IdTokenTrustModeError::ClientIdUserinfoAudMismatch);
     }
 
     Ok(())
 }
 
+/// Checks if an aud claim (which can be string or array) contains the expected value
+fn aud_claim_contains_value(
+    token: &Token,
+    expected_value: &str,
+) -> Result<bool, IdTokenTrustModeError> {
+    token
+        .get_claim("aud")
+        .ok_or_else(|| {
+            IdTokenTrustModeError::MissingRequiredClaim("aud".to_string(), token.name.clone())
+        })
+        .and_then(|claim| {
+            match claim.value() {
+                serde_json::Value::String(s) => {
+                    // String aud claim - direct comparison
+                    Ok(s == expected_value)
+                },
+                serde_json::Value::Array(arr) => {
+                    // Array aud claim - check if it contains the expected value
+                    Ok(arr.iter()
+                        .filter_map(|item| item.as_str())
+                        .any(|s| s == expected_value))
+                },
+                _ => Err(IdTokenTrustModeError::TokenClaimTypeError(
+                    token.name.clone(),
+                    TokenClaimTypeError::type_mismatch("aud", "string or array", claim.value())
+                ))
+            }
+        })
+}
+
+/// Gets a claim value as a string (for non-aud claims)
 fn get_tkn_claim_as_str(
     token: &Token,
     claim_name: &str,
@@ -299,7 +327,73 @@ mod test {
     }
 
     #[test]
-    fn errors_when_access_tkn_client_id_userinfo_tkn_aud_mismatch() {
+    fn success_with_auth0_array_aud_claim() {
+        let access_token = Token::new(
+            "access_token",
+            serde_json::from_value(json!({"client_id": "https://gluu.org/role"}))
+                .expect("valid token claims"),
+            None,
+        );
+        let id_token = Token::new(
+            "id_token",
+            serde_json::from_value(json!({
+                "aud": ["https://gluu.org/role", "https://dev-1e737fn2gji0j3fe.us.auth0.com/userinfo"]
+            })).expect("valid token claims"),
+            None,
+        );
+        let tokens = HashMap::from([
+            ("access_token".to_string(), access_token),
+            ("id_token".to_string(), id_token),
+        ]);
+        validate_id_tkn_trust_mode(&tokens).expect("should not error with Auth0 array aud claim");
+    }
+
+    #[test]
+    fn success_with_array_aud_claim_containing_client_id() {
+        let access_token = Token::new(
+            "access_token",
+            serde_json::from_value(json!({"client_id": "https://gluu.org/role"}))
+                .expect("valid token claims"),
+            None,
+        );
+        let id_token = Token::new(
+            "id_token",
+            serde_json::from_value(json!({
+                "aud": ["https://other.api", "https://gluu.org/role", "https://auth0.com/userinfo"]
+            })).expect("valid token claims"),
+            None,
+        );
+        let tokens = HashMap::from([
+            ("access_token".to_string(), access_token),
+            ("id_token".to_string(), id_token),
+        ]);
+        validate_id_tkn_trust_mode(&tokens).expect("should not error with array aud claim containing client_id");
+    }
+
+    #[test]
+    fn success_with_string_aud_claim() {
+        let access_token = Token::new(
+            "access_token",
+            serde_json::from_value(json!({"client_id": "https://gluu.org/role"}))
+                .expect("valid token claims"),
+            None,
+        );
+        let id_token = Token::new(
+            "id_token",
+            serde_json::from_value(json!({
+                "aud": "https://gluu.org/role"
+            })).expect("valid token claims"),
+            None,
+        );
+        let tokens = HashMap::from([
+            ("access_token".to_string(), access_token),
+            ("id_token".to_string(), id_token),
+        ]);
+        validate_id_tkn_trust_mode(&tokens).expect("should not error with string aud claim");
+    }
+
+    #[test]
+    fn errors_when_userinfo_tkn_aud_does_not_contain_client_id() {
         let access_token = Token::new(
             "access_token",
             serde_json::from_value(json!({"client_id": "some-id-123"}))
@@ -323,8 +417,8 @@ mod test {
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
-            matches!(err, IdTokenTrustModeError::SubMismatchIdTokenUserinfo),
-            "expected error due to the id_token's `aud` not matching with the userinfo_token's `aud`, got: {:?}",
+            matches!(err, IdTokenTrustModeError::ClientIdUserinfoAudMismatch),
+            "expected error due to userinfo token aud not containing client_id, got: {:?}",
             err
         )
     }

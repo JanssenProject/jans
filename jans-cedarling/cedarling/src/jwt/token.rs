@@ -100,6 +100,10 @@ impl TokenClaim<'_> {
                 &self.key, "String", self.value,
             ))
     }
+
+    pub fn value(&self) -> &Value {
+        self.value
+    }
 }
 
 #[derive(Debug, thiserror::Error, PartialEq)]
