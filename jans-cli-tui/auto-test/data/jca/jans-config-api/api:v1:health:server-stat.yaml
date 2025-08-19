@@ -1,0 +1,24 @@
+operation-01:
+  id: "get-server-stat"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      dbType:
+        type: "string"
+      lastUpdate:
+        type: "string"
+      facterData:
+        type: "object"
+        properties:
+          memoryfree:
+            type: "string"
+          swapfree:
+            type: "string"
+        required:
+          - memoryfree
+          - swapfree
+    required:
+     - dbType
+     - lastUpdate
+     - facterData
