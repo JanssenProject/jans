@@ -135,6 +135,6 @@ dmypy.json
 
 # do not upload local yaml files
 cli_tui/cli/ops/
-auto-test/pylib
+auto-test/pylib/*
 !auto-test/pylib/jsonpointer.py
 auto-test/jans-config-api-auto-test.md
