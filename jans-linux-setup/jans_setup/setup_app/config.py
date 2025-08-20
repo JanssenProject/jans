@@ -67,6 +67,11 @@ class Config:
         self.application_max_ram = int(Config.jans_max_mem)
 
     @classmethod
+    def set_rdbm_schema(self):
+        if not self.get('rdbm_schema'):
+            self.rdbm_schema = 'public' if self.rdbm_type == 'pgsql' else self.rdbm_db
+
+    @classmethod
     def init(self, install_dir=INSTALL_DIR):
 
         self.install_dir = install_dir
@@ -118,9 +123,11 @@ class Config:
 
         self.downloadWars = None
         self.templateRenderingDict = {
-                                        'jans_auth_client_2_inum': 'AB77-1A2B',
-                                        'jans_auth_client_3_inum': '3E20',
-                                        'jans_auth_client_4_inum': 'FF81-2D39',
+                                        'jans_auth_test_client_2_inum': 'AB77-1A2B',
+                                        'jans_auth_test_client_3_inum': '3E20',
+                                        'jans_auth_test_client_4_inum': 'FF81-2D39',
+                                        'jans_fido2_test_client_1_inum': 'AB77-1A2B',
+                                        'jans_fido2_test_client_2_inum':'FF81-2D39',
                                         'idp_attribute_resolver_ldap.search_filter': '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))',
                                         'server_time_zone': 'UTC' + time.strftime("%z"),
                                      }
@@ -172,9 +179,11 @@ class Config:
         self.install_config_api = True
         self.install_casa = False
         self.install_jans_cli = True
+        self.install_link = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
         self.install_jans_saml = False
+        self.install_jans_keycloak_link = False
         self.install_jans_lock = False
         self.install_opa = False
 
@@ -257,7 +266,7 @@ class Config:
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
         if self.profile == OPENBANKING_PROFILE:
-            self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
+            self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
         else:
             self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
 

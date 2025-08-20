@@ -12,29 +12,49 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { jwtDecode } from "jwt-decode";
 import { IJWT } from './IJWT';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import { pink } from '@mui/material/colors';
+import UseSnackbar from './UseSnackbar';
 const UserDetails = ({ data, notifyOnDataChange }) => {
     const [loading, setLoading] = useState(false);
     const [showPayloadIdToken, setShowPayloadIdToken] = useState(false);
     const [showPayloadAT, setShowPayloadAT] = useState(false);
     const [showPayloadUI, setShowPayloadUI] = useState(false);
+    const [snackbar, setSnackbar] = React.useState({ open: false, message: '' });
     const [decodedTokens, setDecodedTokens] = React.useState<{
-        accessToken: IJWT;
-        userInfoToken: IJWT;
-        idToken: IJWT;
+        access_token: IJWT;
+        userinfo_token: IJWT;
+        id_token: IJWT;
     }>({
-        accessToken: { header: {}, payload: {} },
-        userInfoToken: { header: {}, payload: {} },
-        idToken: { header: {}, payload: {} },
+        access_token: { header: {}, payload: {} },
+        userinfo_token: { header: {}, payload: {} },
+        id_token: { header: {}, payload: {} },
+    });
+    const [jwtTokens, setJwtTokens] = React.useState<{
+        access_token: String;
+        userinfo_token: String;
+        id_token: String;
+    }>({
+        access_token: "",
+        userinfo_token: "",
+        id_token: "",
     });
 
     React.useEffect(() => {
 
         if (data) {
             setDecodedTokens({
-                accessToken: decodeJWT(data.access_token),
-                userInfoToken: decodeJWT(data.userDetails),
-                idToken: decodeJWT(data.id_token),
+                access_token: decodeJWT(data.access_token),
+                userinfo_token: decodeJWT(data.userDetails),
+                id_token: decodeJWT(data.id_token),
             });
+            setJwtTokens({
+                access_token: data.access_token,
+                userinfo_token: data.userDetails,
+                id_token: data.id_token,
+            })
         }
     }, [data])
 
@@ -49,6 +69,16 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
             return { header: {}, payload: {} }; // Return empty object on error
         }
     };
+
+    const copyToClipboard = () => {
+        try {
+          const jsonString = JSON.stringify(jwtTokens, null, 2); // pretty print
+          navigator.clipboard.writeText(jsonString);
+          setSnackbar({ open: true, message: 'Token JSON copied to clipboard!' });
+        } catch (error) {
+          setSnackbar({ open: true, message: 'Copy failed: ' + error.message });
+        }
+      };
 
     async function logout() {
         setLoading(true);
@@ -110,12 +140,21 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
 
     return (
         <div className="box">
+            <UseSnackbar isSnackbarOpen={snackbar.open} handleSnackbar={(open) => setSnackbar({ ...snackbar, open })} message={snackbar.message}/>
             <div className="w3-panel w3-pale-yellow w3-border">
                 <WindmillSpinner loading={loading} color="#00ced1" />
                 <br />
             </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', maxWidth: '90vw' }}>
             <legend><span className="number">O</span> User Details:</legend>
+            <Tooltip title="Copy tokens JSON">
+                  <IconButton aria-label="Copy" style={{ maxWidth: '5vmax', float: 'right' }} onClick={copyToClipboard}>
+                    <ContentCopyIcon sx={{ color: pink[500] }} />
+                  </IconButton>
+                </Tooltip>
+                </div>
             <hr />
+            
             {data?.displayToken &&
                 <>
                     <Accordion>
@@ -130,8 +169,8 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                             <div className="alert alert-success alert-dismissable fade in">
                                 <p>{showPayloadAT ? (!!data ?
                                     <>
-                                        <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.accessToken.header} rootName="header" />
-                                        <JsonEditor data={decodedTokens.accessToken.payload} collapse={true} viewOnly={true} rootName="payload" />
+                                        <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.access_token.header} rootName="header" />
+                                        <JsonEditor data={decodedTokens.access_token.payload} collapse={true} viewOnly={true} rootName="payload" />
                                     </>
                                     : '') : (!!data ? data?.access_token : '')}</p>
                                 <a href="#!" onClick={() => setShowPayloadAT(!showPayloadAT)}>{showPayloadAT ? "Show JWT" : "Show Payload"}</a>
@@ -151,8 +190,8 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                             <div className="alert alert-success alert-dismissable fade in">
                                 <p>{showPayloadIdToken ? (!!data ?
                                     <>
-                                        <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.idToken.header} rootName="header" />
-                                        <JsonEditor data={decodedTokens.idToken.payload} collapse={true} viewOnly={true} rootName="payload" />
+                                        <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.id_token.header} rootName="header" />
+                                        <JsonEditor data={decodedTokens.id_token.payload} collapse={true} viewOnly={true} rootName="payload" />
                                     </>
                                     : '') : (!!data ? data?.id_token : '')}</p>
                                 <a href="#!" onClick={() => setShowPayloadIdToken(!showPayloadIdToken)}>{showPayloadIdToken ? "Show JWT" : "Show Payload"}</a>
@@ -172,8 +211,8 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                     <div className="alert alert-success alert-dismissable fade in">
                         <p>{showPayloadUI ? (!!data ?
                             <>
-                                <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.userInfoToken.header} rootName="header" />
-                                <JsonEditor data={decodedTokens.userInfoToken.payload} collapse={true} viewOnly={true} rootName="payload" />
+                                <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.userinfo_token.header} rootName="header" />
+                                <JsonEditor data={decodedTokens.userinfo_token.payload} collapse={true} viewOnly={true} rootName="payload" />
                             </>
                             : '') : (!!data ? data?.userDetails : '')}</p>
                         <a href="#!" onClick={() => setShowPayloadUI(!showPayloadUI)}>{showPayloadUI ? "Show JWT" : "Show Payload"}</a>

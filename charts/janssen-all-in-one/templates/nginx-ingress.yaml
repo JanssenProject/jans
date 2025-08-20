@@ -37,8 +37,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /.well-known/openid-configuration
-            pathType: Exact
+          - path: /.well-known/openid-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.service.name }}
@@ -84,8 +84,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /device-code
-            pathType: Exact
+          - path: /device-code$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.service.name }}
@@ -131,8 +131,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /firebase-messaging-sw.js
-            pathType: Exact
+          - path: /firebase-messaging-sw.js$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.service.name }}
@@ -178,8 +178,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /.well-known/uma2-configuration
-            pathType: Exact
+          - path: /.well-known/uma2-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.service.name }}
@@ -226,8 +226,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /.well-known/webfinger
-            pathType: Exact
+          - path: /.well-known/webfinger$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.service.name }}
@@ -273,8 +273,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /.well-known/simple-web-discovery
-            pathType: Exact
+          - path: /.well-known/simple-web-discovery$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.service.name }}
@@ -320,8 +320,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /.well-known/scim-configuration
-            pathType: Exact
+          - path: /.well-known/scim-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.service.name }}
@@ -461,8 +461,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /.well-known/fido-configuration
-            pathType: Exact
+          - path: /.well-known/fido-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.service.name }}
@@ -509,8 +509,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /.well-known/fido2-configuration
-            pathType: Exact
+          - path: /.well-known/fido2-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.service.name }}
@@ -604,55 +604,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /.well-known/webauthn
-            pathType: Exact
-            backend:
-              service:
-                name: {{ .Values.service.name }}
-                port:
-                  number: 8080
-{{- end }}
-
----
-
-{{ if .Values.link.ingress.linkEnabled -}}
-{{ $fullName := include "janssen-all-in-one.fullname" . -}}
-{{- $ingressPath := index .Values "nginx-ingress" "ingress" "path" -}}
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: {{ $fullName }}-link
-  labels:
-    app: {{ $fullName }}-link
-{{- if index .Values "nginx-ingress" "ingress" "additionalLabels" }}
-{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalLabels") | indent 4 }}
-{{- end }}
-{{- if .Values.link.ingress.linkLabels }}
-{{ toYaml .Values.link.ingress.linkLabels | indent 4 }}
-{{- end }}
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-{{- if .Values.link.ingress.linkAdditionalAnnotations }}
-{{ toYaml .Values.link.ingress.linkAdditionalAnnotations | indent 4 }}
-{{- end }}
-{{- if index .Values "nginx-ingress" "ingress" "additionalAnnotations" }}
-{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalAnnotations") | indent 4 }}
-{{- end }}
-spec:
-  ingressClassName: {{ index .Values "nginx-ingress" "ingress" "ingressClassName" }}
-{{- if index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
-  tls:
-    - hosts:
-        - {{ .Values.fqdn | quote }}
-      secretName: {{ index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
-{{- end }}
-  rules:
-    - host: {{ .Values.fqdn | quote }}
-      http:
-        paths:
-          - path: /jans-link
-            pathType: Prefix
+          - path: /.well-known/webauthn$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.service.name }}
@@ -825,7 +778,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/v1/configuration
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/api/v1/configuration
 {{- if index .Values "nginx-ingress" "ingress" "additionalAnnotations" }}
 {{ toYaml (index .Values "nginx-ingress" "ingress" "additionalAnnotations") | indent 4 }}
 {{- end }}
@@ -844,8 +797,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /.well-known/lock-server-configuration
-            pathType: Exact
+          - path: /.well-known/lock-server-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.service.name }}
@@ -939,55 +892,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /.well-known/authzen-configuration
-            pathType: Exact
-            backend:
-              service:
-                name: {{ .Values.service.name }}
-                port:
-                  number: 8080
-{{- end }}
-
----
-
-{{ if index .Values "keycloak-link" "ingress" "keycloakLinkEnabled" -}}
-{{ $fullName := include "janssen-all-in-one.fullname" . -}}
-{{- $ingressPath := index .Values "nginx-ingress" "ingress" "path" -}}
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: {{ $fullName }}-keycloak-link
-  labels:
-    app: {{ $fullName }}-keycloak-link
-{{- if index .Values "nginx-ingress" "ingress" "additionalLabels" }}
-{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalLabels") | indent 4 }}
-{{- end }}
-{{- if index .Values "keycloak-link" "ingress" "keycloakLinkLabels" }}
-{{ toYaml (index .Values "keycloak-link" "ingress" "keycloakLinkLabels") | indent 4 }}
-{{- end }}
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-{{- if index .Values "keycloak-link" "ingress" "keycloakLinkAdditionalAnnotations" }}
-{{ toYaml (index .Values "keycloak-link" "ingress" "keycloakLinkAdditionalAnnotations") | indent 4 }}
-{{- end }}
-{{- if index .Values "nginx-ingress" "ingress" "additionalAnnotations" }}
-{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalAnnotations") | indent 4 }}
-{{- end }}
-spec:
-  ingressClassName: {{ index .Values "nginx-ingress" "ingress" "ingressClassName" }}
-{{- if index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
-  tls:
-    - hosts:
-        - {{ .Values.fqdn | quote }}
-      secretName: {{ index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
-{{- end }}
-  rules:
-    - host: {{ .Values.fqdn | quote }}
-      http:
-        paths:
-          - path: /jans-keycloak-link
-            pathType: Prefix
+          - path: /.well-known/authzen-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.service.name }}

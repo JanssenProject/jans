@@ -43,9 +43,9 @@ class ActionSchema(BaseSchema):
     properties = ma.fields.Dict()
 
 class EvaluationRequestSchema(BaseSchema):
-    subject = SmartNested(SubjectSchema)
-    resource = SmartNested(ResourceSchema)
-    action = SmartNested(ActionSchema)
+    subject = SmartNested(SubjectSchema, required=True)
+    resource = SmartNested(ResourceSchema, required=True)
+    action = SmartNested(ActionSchema, required=True)
     context = ma.fields.Dict()
 
 class DecisionSchema(BaseSchema):

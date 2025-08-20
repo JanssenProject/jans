@@ -45,7 +45,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if os.path.exists(Config.jansRDBMProperties):
             jans_sql_prop = base.read_properties_file(Config.jansRDBMProperties)
 
-            uri_re = re.match('jdbc:(.*?)://(.*?):(.*?)/(.*)', jans_sql_prop['connection.uri'])
+            uri_re = re.match(r'jdbc:(.*?)://(.*?):(.*?)/(.*)', jans_sql_prop['connection.uri'])
             Config.rdbm_type, Config.rdbm_host, Config.rdbm_port, Config.rdbm_db = uri_re.groups()
             if '?' in Config.rdbm_db:
                 Config.rdbm_db = Config.rdbm_db.split('?')[0]
@@ -60,12 +60,13 @@ class CollectProperties(SetupUtils, BaseInstaller):
         # It is time to bind database
         dbUtils.bind()
 
-        if dbUtils.session:
+        if dbUtils.local_session:
             dbUtils.rdm_automapper()
 
         result = dbUtils.search('ou=clients,o=jans', search_filter='(&(inum=1701.*)(objectClass=jansClnt))', search_scope=SearchScopes.SUBTREE)
 
         oxConfiguration = dbUtils.search(jans_ConfigurationDN, search_filter='(objectClass=jansAppConf)', search_scope=SearchScopes.BASE)
+        
         if 'jansIpAddress' in oxConfiguration:
             Config.ip = oxConfiguration['jansIpAddress']
 
@@ -85,6 +86,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('admin_ui_client_id', '1901.', {'pw': 'admin_ui_client_pw', 'encoded': 'admin_ui_client_encoded_pw'}),
                     ('casa_client_id', CasaInstaller.client_id_prefix),
                     ('saml_scim_client_id', '2100.'),
+                    ('tui_client_id', '2000.'),
                     ]
         self.check_clients(client_var_id_list, create=False)
 
@@ -145,7 +147,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                 usedRatio += jetty_services[service]['memory']['ratio']
                 if service == 'jans-auth':
                     service_prop = base.read_properties_file(service_default_fn)
-                    m = re.search('-Xmx(\d*)m', service_prop['JAVA_OPTIONS'])
+                    m = re.search(r'-Xmx(\d*)m', service_prop['JAVA_OPTIONS'])
                     jans_auth_max_heap_mem = int(m.groups()[0])
 
         if jans_auth_max_heap_mem:
@@ -163,7 +165,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.install_scim_server = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.d'))
         Config.install_fido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.d'))
         Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
+        Config.install_link = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-link'))
         Config.install_casa = os.path.exists(os.path.join(Config.jetty_base, 'casa/start.d'))
+        Config.install_jans_keycloak_link = os.path.exists(os.path.join(Config.jetty_base, 'jans-keycloak-link/start.d'))
 
         # jans-idp config
         jans_idp_config_result = dbUtils.dn_exists("ou=jans-idp,ou=configuration,o=jans")

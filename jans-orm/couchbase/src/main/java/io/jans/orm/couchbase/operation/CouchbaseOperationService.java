@@ -14,6 +14,7 @@ import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.EntryNotFoundException;
 import io.jans.orm.exception.operation.PersistenceException;
 import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.Sort;
@@ -60,7 +61,7 @@ public interface CouchbaseOperationService extends PersistenceOperationService {
             String[] attributes, Sort[] orderBy, CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType,
             int start, int count, int pageSize) throws SearchException;
 
-    String[] createStoragePassword(String[] passwords);
+    String[] createStoragePassword(String[] passwords, AttributeData attributeData);
 
     boolean isBinaryAttribute(String attribute);
     boolean isCertificateAttribute(String attribute);

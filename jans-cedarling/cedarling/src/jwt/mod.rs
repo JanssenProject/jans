@@ -5,231 +5,187 @@
 
 //! # `JwtEngine`
 //!
-//! The `JwtEngine` is designed for managing JSON Web Tokens (JWTs) and provides the following functionalities:
-//! - Fetching decoding keys from a JSON Web Key Set (JWKS) provided by Identity Providers (IDPs) and storing these keys.
-//! - Extracting claims from JWTs for further processing and validation.
-//! - Validating the signatures of JWTs to ensure their integrity and authenticity.
-//! - Verifying the validity of JWTs based on claims such as expiration time and audience.
+//! The `JwtEngine` is responsible for handling JSON Web Tokens (JWTs). It provides
+//! robust functionality to support authentication and authorization flows, including:
+//!
+//! - Fetching and storing decoding keys from a JSON Web Key Set (JWKS) provided by
+//!   Identity Providers (IDPs).
+//! - Extracting and processing claims from JWTs.
+//! - Validating JWT signatures to ensure token integrity and authenticity.
+//! - Verifying token validity based on standard claims such as expiration (`exp`) and
+//!   audience (`aud`).
+//!
+//! ## Initialization
+//!
+//! The behavior of the `JwtEngine` is determined by parameters passed to [`JwtService::new`].
+//! These parameters are primarily configured via the [`jwt_config`] argument:
+//!
+//! - **JWKS (Optional)**: A JWKS string can be provided through the
+//!   `CEDARLING_LOCAL_JWKS` bootstrap property.
+//! - **Signature Validation**: JWT signature verification is supported using a wrapper
+//!   around the [`jsonwebtoken`] crate.
+//! - **Status Validation (WIP)**: Support for token status validation is being
+//!   developed in accordance with the [`IETF draft spec`].
+//! - **Algorithm Restrictions**: Only tokens signed using supported algorithms will
+//!   be validated. Tokens with unsupported algorithms will trigger a warning.
+//!
+//! Additionally, you can provide a list of **trusted issuers** during initialization.
+//! Only tokens issued by these trusted issuers, as defined in the [`policy store`],
+//! should be validated.
+//!
+//! [`jwt_config`]: JwtConfig
+//! [`policy store`]: crate::common::policy_store::PolicyStore
+//! [`IETF draft spec`]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html
+//!
+//! ## Usage
+//!
+//! The primary interface for token validation is [`JwtService::validate_tokens`].
+//!
+//! This method accepts a [`HashMap<String, String>`] representing the tokens, typically
+//! passed in through [`Cedarling::authorize`]. Each entry in the map is a
+//! `(token_name, jwt_string)` pair.
+//!
+//! Only tokens that:
+//! - match a trusted issuer defined in the [`policy store`], and
+//! - have a matching token name,
+//!
+//! will be processed. Untrusted tokens are ignored with a warning.
+//!
+//! If any token is invalid (e.g., malformed, expired, or fails validation), the
+//! method returns an error. Successfully validated tokens are returned in a `HashMap`
+//! keyed by token name.
+//!
+//! [`Cedarling::authorize`]: crate::Cedarling::authorize
+//!
+//! ## Security Features
+//!
+//! - [x] Only Accept tokens defined from the policy store
+//!   ones expire.
+//! - [x] Statuslist Check: The `status` claim of a JWT should be validated if present.
+//!   This is done through the [`status_list`] crate for the implementation.
+//! - [ ] JWK rotation (WIP): The service should automatically fetch new keys if the old
 
-mod issuers_store;
-mod jwk_store;
+mod decode;
+mod error;
+mod http_utils;
 mod key_service;
 mod log_entry;
-#[cfg(test)]
-mod test_utils;
+mod status_list;
 mod token;
-mod validator;
+mod validation;
+
+#[cfg(test)]
+#[allow(dead_code)]
+mod test_utils;
+
+pub use error::*;
+pub use token::{Token, TokenClaimTypeError, TokenClaims};
+pub use decode::*;
 
 use crate::JwtConfig;
 use crate::LogLevel;
 use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
-use base64::DecodeError;
-use base64::Engine;
-use base64::prelude::*;
-use key_service::{KeyService, KeyServiceError};
+use http_utils::*;
+use key_service::*;
 use log_entry::*;
-use std::collections::{HashMap, HashSet};
+use status_list::*;
+use std::collections::HashMap;
 use std::sync::Arc;
-use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
+use validation::*;
 
-pub use jsonwebtoken::Algorithm;
-pub use token::{Token, TokenClaimTypeError, TokenClaims};
+/// The value of the `iss` claim from a JWT
+type IssClaim = String;
 
-/// Type alias for Trusted Issuers' ID.
-type TrustedIssuerId = Arc<str>;
-
-/// Type alias for a Json Web Key ID (`kid`).
-type KeyId = Box<str>;
-
-#[derive(Debug, thiserror::Error)]
-pub enum JwtProcessingError {
-    #[error("Invalid token `{0}`: {1}")]
-    InvalidToken(String, JwtValidatorError),
-    #[error("Failed to deserialize from Value to String: {0}")]
-    StringDeserialization(#[from] serde_json::Error),
-    #[error("error while trying to parse issuer from token: {0}")]
-    GetIss(#[from] DecodeJwtError),
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum JwtServiceInitError {
-    #[error(
-        "Failed to initialize Key Service for JwtService due to a conflictig config: both a local \
-         JWKS and trusted issuers was provided."
-    )]
-    ConflictingJwksConfig,
-    #[error(
-        "Failed to initialize Key Service for JwtService due to a missing config: no local JWKS \
-         or trusted issuers was provided."
-    )]
-    MissingJwksConfig,
-    #[error("Failed to initialize Key Service: {0}")]
-    KeyService(#[from] KeyServiceError),
-    #[error("Encountered an unsupported algorithm in the config: {0}")]
-    UnsupportedAlgorithm(String),
-    #[error("Failed to initialize JwtValidator: {0}")]
-    InitJwtValidator(#[from] JwtValidatorError),
-    #[error("failed to parse the openid_configuration_endpoint for the trusted issuer `{0}`: {1}")]
-    ParseOidcUrl(String, url::ParseError),
-}
-
+/// Handles JWT validation
 pub struct JwtService {
-    validators: HashMap<ValidatorId, JwtValidator>,
+    validators: JwtValidatorCache,
+    key_service: Arc<KeyService>,
+    issuer_configs: HashMap<IssClaim, IssuerConfig>,
     logger: Option<Logger>,
 }
 
-#[derive(Eq, Hash, PartialEq, Debug)]
-struct ValidatorId {
-    iss: Option<String>,
-    token_name: String,
+struct IssuerConfig {
+    issuer_id: String,
+    /// The [`TrustedIssuer`] config loaded from the policy store
+    policy: Arc<TrustedIssuer>,
+    /// The [`OpenIdConfig`] loaded from the IDP's `/.well-known/openid-configuration` endpoint
+    openid_config: Option<OpenIdConfig>,
 }
 
 impl JwtService {
     pub async fn new(
-        config: &JwtConfig,
+        jwt_config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
-        let key_service: Arc<_> =
-            match (&config.jwt_sig_validation, &config.jwks, &trusted_issuers) {
-                // Case: no JWKS provided
-                (true, None, None) => {
-                    let err = JwtServiceInitError::MissingJwksConfig;
-                    logger.log_any(JwtLogEntry::new(format!("{err}"), Some(LogLevel::ERROR)));
-                    return Err(err);
-                },
-                // Case: Trusted issuers provided
-                (true, None, Some(issuers)) => {
-                    let key_service = KeyService::new_from_trusted_issuers(issuers)
-                        .await
-                        .inspect_err(|e| {
-                            logger.log_any(JwtLogEntry::new(
-                                format!("failed to initialize the JWT validation service: {}", e),
-                                Some(LogLevel::ERROR),
-                            ))
-                        })
-                        .map_err(JwtServiceInitError::KeyService)?;
-                    Some(key_service)
-                },
-                // Case: Local JWKS provided
-                (true, Some(jwks), None) => {
-                    let key_service = KeyService::new_from_str(jwks)
-                        .inspect_err(|e| {
-                            logger.log_any(JwtLogEntry::new(
-                                format!("failed to initialize the JWT validation service: {}", e),
-                                Some(LogLevel::ERROR),
-                            ))
-                        })
-                        .map_err(JwtServiceInitError::KeyService)?;
-                    Some(key_service)
-                },
-                // Case: Both a local JWKS and trusted issuers were provided
-                (true, Some(_), Some(_)) => {
-                    let err = JwtServiceInitError::ConflictingJwksConfig;
-                    logger.log_any(JwtLogEntry::new(format!("{err}"), Some(LogLevel::ERROR)));
-                    return Err(err);
-                },
-                // Case: Signature validation is Off so no key service is needed.
-                _ => None,
+        let mut status_lists = StatusListCache::default();
+        let mut issuer_configs = HashMap::default();
+        let mut validators = JwtValidatorCache::default();
+        let mut key_service = KeyService::new();
+
+        for (issuer_id, iss) in trusted_issuers.unwrap_or_default().into_iter() {
+            // this is what we expect to find in the JWT `iss` claim
+            let mut iss_claim = iss.oidc_endpoint.origin().ascii_serialization();
+
+            let mut iss_config = IssuerConfig {
+                issuer_id,
+                policy: Arc::new(iss),
+                openid_config: None,
+            };
+
+            if jwt_config.jwt_sig_validation || jwt_config.jwt_status_validation {
+                iss_claim = update_openid_config(&mut iss_config, &logger).await?;
             }
-            .into();
 
-        // prepare shared configs
-        let sig_validation: Arc<_> = config.jwt_sig_validation.into();
-        let status_validation: Arc<_> = config.jwt_status_validation.into();
-        let trusted_issuers: Arc<_> = trusted_issuers.clone().into();
-        let algs_supported: Arc<HashSet<Algorithm>> =
-            config.signature_algorithms_supported.clone().into();
+            insert_keys(&mut key_service, jwt_config, &iss_config, &logger).await?;
 
-        let mut validators = HashMap::new();
-        if let Some(issuers) = trusted_issuers.as_ref() {
-            for iss in issuers.values() {
-                let origin = iss.oidc_endpoint.origin().ascii_serialization();
-                for (tkn, metadata) in iss.token_metadata.iter() {
-                    if !metadata.trusted {
-                        logger.log_any(JwtLogEntry::new(
-                            format!("skipping metadata for {tkn} since `trusted == false`"),
-                            Some(LogLevel::WARN),
-                        ));
-                        continue;
-                    }
+            validators.init_for_iss(&iss_config, jwt_config, &status_lists, logger.clone());
 
-                    let required_claims = metadata.required_claims.clone();
-                    let validate_exp = required_claims.contains("exp");
-                    let validate_nbf = required_claims.contains("nbf");
-                    let validator = JwtValidator::new(
-                        JwtValidatorConfig {
-                            sig_validation: sig_validation.clone(),
-                            status_validation: status_validation.clone(),
-                            trusted_issuers: trusted_issuers.clone(),
-                            algs_supported: algs_supported.clone(),
-                            required_claims: required_claims
-                                .into_iter()
-                                .map(|x| x.into_boxed_str())
-                                .collect(),
-                            validate_exp,
-                            validate_nbf,
-                        },
-                        key_service.clone(),
-                    )?;
-                    let id = ValidatorId {
-                        iss: Some(origin.clone()),
-                        token_name: tkn.clone(),
-                    };
-                    validators.insert(id, validator);
-                }
+            if jwt_config.jwt_status_validation {
+                status_lists
+                    .init_for_iss(&iss_config, &validators, &key_service, logger.clone())
+                    .await?;
             }
+
+            issuer_configs.insert(iss_claim, iss_config);
         }
 
-        Ok(Self { validators, logger })
+        // quick check so we don't get surprised if the program runs but can't validate
+        // anything
+        if !key_service.has_keys() && jwt_config.jwt_sig_validation {
+            return Err(JwtServiceInitError::KeyServiceMissingKeys);
+        }
+        let key_service = Arc::new(key_service);
+
+        Ok(Self {
+            validators,
+            key_service,
+            issuer_configs,
+            logger,
+        })
     }
 
     pub async fn validate_tokens<'a>(
         &'a self,
         tokens: &'a HashMap<String, String>,
-    ) -> Result<HashMap<String, Token<'a>>, JwtProcessingError> {
+    ) -> Result<HashMap<String, Token>, JwtProcessingError> {
         let mut validated_tokens = HashMap::new();
+
         for (token_name, jwt) in tokens.iter() {
-            // we do a deserialization here to get the issuer since we use
-            // it to store the validators but the validators do another
-            // deserialization so we are doing that operation twice,
-            //
-            // can't really easily fix this right now since the jsonwebtoken
-            // crate doesn't support validation without deserialization.
-            let claims = decode_without_validation(jwt)?;
-            let iss = claims
-                .get_claim("iss")
-                .and_then(|x| x.as_str().ok().map(|x| x.to_string()));
-
-            let validator_id = ValidatorId {
-                iss: iss.clone(),
-                token_name: token_name.clone(),
+            let validated_jwt = match self.validate_single_token(token_name.clone(), jwt) {
+                Ok(jwt) => jwt,
+                Err(err) => {
+                    if matches!(err, ValidateJwtError::MissingValidator(_)) {
+                        self.logger
+                            .log_any(JwtLogEntry::new(err.to_string(), Some(LogLevel::WARN)));
+                        continue;
+                    } else {
+                        return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err));
+                    }
+                },
             };
-            let validator = if let Some(validator) = self.validators.get(&validator_id) {
-                validator
-            } else {
-                // we just ignore input tokens that are not defined
-                // in the policy store's tokens
-                if let Some(iss) = iss {
-                    self.logger.log_any(JwtLogEntry::new(
-                        format!(
-                            "ignoring {token_name} since it's from an untrusted issuer: '{iss}'"
-                        ),
-                        Some(LogLevel::WARN),
-                    ));
-                }
-                continue;
-            };
-
-            let validated_jwt = validator.process_jwt(jwt).map_err(|e| {
-                self.logger.log_any(JwtLogEntry::new(
-                    format!("failed to validate token: {e}"),
-                    Some(LogLevel::ERROR),
-                ));
-                JwtProcessingError::InvalidToken(token_name.to_string(), e)
-            })?;
 
             let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
                 .map_err(|err| {
@@ -249,25 +205,99 @@ impl JwtService {
 
         Ok(validated_tokens)
     }
-}
 
-#[derive(Debug, thiserror::Error)]
-pub enum DecodeJwtError {
-    #[error("invalid JWT. the JWT must be of form: header.body.signature")]
-    InvalidJwt,
-    #[error("failed to decode JWT from base64 encoding: {0}")]
-    DecodeFromB64(#[from] DecodeError),
-    #[error("failed to deserialize JWT from base64 encoding: {0}")]
-    DeserializeJwt(#[from] serde_json::Error),
-}
+    fn validate_single_token(
+        &self,
+        token_name: String,
+        jwt: &str,
+    ) -> Result<ValidatedJwt, ValidateJwtError> {
+        let decoded_jwt = decode_jwt(jwt)?;
 
-fn decode_without_validation(jwt: &str) -> Result<TokenClaims, DecodeJwtError> {
-    let parts = jwt.split(".").collect::<Vec<&str>>();
-    if parts.len() != 3 {
-        return Err(DecodeJwtError::InvalidJwt);
+        // Get decoding key
+        let decoding_key_info = decoded_jwt.decoding_key_info();
+        let decoding_key = self.key_service.get_key(&decoding_key_info);
+
+        // get validator
+        let validator_key = ValidatorInfo {
+            iss: decoded_jwt.iss(),
+            token_kind: TokenKind::AuthzRequestInput(&token_name),
+            algorithm: decoded_jwt.header.alg,
+        };
+        let validator = self
+            .validators
+            .get(&validator_key)
+            .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
+
+        // validate JWT
+        // NOTE: the JWT will be validated depending on the validator's settings that
+        // was set on initialization
+        let mut validated_jwt = {
+            validator
+                .read()
+                .expect("acquire JwtValidator read lock")
+                .validate_jwt(jwt, decoding_key)?
+        };
+
+        // The users of the validated JWT will need a reference to the TrustedIssuer
+        // to do some processing so we include it here for convenience
+        validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
+
+        Ok(validated_jwt)
     }
-    let decoded = &BASE64_STANDARD_NO_PAD.decode(parts[1])?;
-    Ok(serde_json::from_slice::<TokenClaims>(decoded)?)
+
+    /// Use the `iss` claim of a token to retrieve a reference to a [`TrustedIssuer`]
+    #[inline]
+    fn get_issuer_ref(&self, iss_claim: &str) -> Option<Arc<TrustedIssuer>> {
+        self.issuer_configs
+            .get(iss_claim)
+            .map(|config| &config.policy)
+            .cloned()
+    }
+}
+
+async fn update_openid_config(
+    iss_config: &mut IssuerConfig,
+    logger: &Option<Logger>,
+) -> Result<String, JwtServiceInitError> {
+    let openid_config = OpenIdConfig::get_from_url(&iss_config.policy.oidc_endpoint)
+        .await
+        .inspect_err(|e| {
+            logger.log_any(JwtLogEntry::new(
+                format!(
+                    "failed to get openid configuration for trusted issuer: '{}': {}",
+                    iss_config.issuer_id, e
+                ),
+                Some(LogLevel::ERROR),
+            ));
+        })?;
+
+    let iss_claim = openid_config.issuer.clone();
+    iss_config.openid_config = Some(openid_config);
+
+    Ok(iss_claim)
+}
+
+async fn insert_keys(
+    key_service: &mut KeyService,
+    jwt_config: &JwtConfig,
+    iss_config: &IssuerConfig,
+    logger: &Option<Logger>,
+) -> Result<(), KeyServiceError> {
+    if !jwt_config.jwt_sig_validation {
+        return Ok(());
+    }
+
+    if let Some(jwks) = jwt_config.jwks.as_ref() {
+        key_service.insert_keys_from_str(jwks)?;
+    }
+
+    if let Some(openid_config) = iss_config.openid_config.as_ref() {
+        key_service
+            .get_keys_using_oidc(openid_config, logger)
+            .await?;
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -275,79 +305,49 @@ mod test {
     use super::test_utils::*;
     use super::{JwtService, Token};
     use crate::JwtConfig;
-    use crate::common::policy_store::TrustedIssuer;
     use jsonwebtoken::Algorithm;
-    use mockito::Server;
     use serde_json::{Value, json};
     use std::collections::{HashMap, HashSet};
+    use std::sync::Arc;
     use tokio::test;
-    use url::Url;
 
     #[test]
-    pub async fn can_validate_token() {
-        let mut server = Server::new_async().await;
+    async fn can_validate_token() {
+        let mut server = MockServer::new_with_defaults().await.unwrap();
 
-        let oidc_endpoint = server
-            .mock("GET", "/.well-known/openid-configuration")
-            .with_status(200)
-            .with_header("content-type", "application/json")
-            .with_body(
-                json!({
-                    "issuer": server.url(),
-                    "jwks_uri": server.url() + "/jwks",
-                })
-                .to_string(),
-            )
-            .expect(1)
-            .create();
-
-        let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
-        let access_tkn_claims = json!({
-            "iss": server.url(),
+        // create tokens
+        let mut access_tkn_claims = json!({
+            "iss": server.issuer(),
             "sub": "some_sub",
             "jti": 1231231231,
             "exp": u64::MAX,
             "client_id": "test123",
         });
-        let access_tkn = generate_token_using_claims(&access_tkn_claims, &keys)
-            .expect("Should generate access token");
-        let id_tkn_claims = json!({
-            "iss": server.url(),
+        let access_tkn = server
+            .generate_token_with_hs256sig(&mut access_tkn_claims, None)
+            .unwrap();
+        let mut id_tkn_claims = json!({
+            "iss": server.issuer(),
             "aud": "test123",
             "sub": "some_sub",
             "name": "John Doe",
             "exp": u64::MAX,
         });
-        let id_tkn =
-            generate_token_using_claims(&id_tkn_claims, &keys).expect("Should generate id token");
-        let userinfo_tkn_claims = json!({
-            "iss": server.url(),
+        let id_tkn = server
+            .generate_token_with_hs256sig(&mut id_tkn_claims, None)
+            .unwrap();
+        let mut userinfo_tkn_claims = json!({
+            "iss": server.issuer(),
             "aud": "test123",
             "sub": "some_sub",
             "name": "John Doe",
             "exp": u64::MAX,
         });
-        let userinfo_tkn = generate_token_using_claims(&userinfo_tkn_claims, &keys)
-            .expect("Should generate userinfo token");
+        let userinfo_tkn = server
+            .generate_token_with_hs256sig(&mut userinfo_tkn_claims, None)
+            .unwrap();
 
-        let jwks_endpoint = server
-            .mock("GET", "/jwks")
-            .with_status(200)
-            .with_header("content-type", "application/json")
-            .with_body(json!({"keys": generate_jwks(&vec![keys]).keys}).to_string())
-            .expect(1)
-            .create();
-
-        let mut iss = TrustedIssuer {
-            oidc_endpoint: Url::parse(&(server.url() + "/.well-known/openid-configuration"))
-                .expect("should be a valid url"),
-            ..Default::default()
-        };
-        // we remove the `iss` claims since mockito can't really create https
-        // endpoints and the validation requires the `iss` to be https.
-        for (_name, metadata) in iss.token_metadata.iter_mut() {
-            metadata.required_claims.remove("iss");
-        }
+        let iss = server.trusted_issuer();
 
         let jwt_service = JwtService::new(
             &JwtConfig {
@@ -362,6 +362,7 @@ mod test {
         .await
         .inspect_err(|e| eprintln!("error msg: {}", e))
         .expect("Should create JwtService");
+        let iss = Arc::new(iss);
 
         let tokens = HashMap::from([
             ("access_token".to_string(), access_tkn),
@@ -381,7 +382,7 @@ mod test {
             .expect("Should create expected access_token claims");
         assert_eq!(
             token,
-            &Token::new("access_token", expected_claims.into(), Some(&iss))
+            &Token::new("access_token", expected_claims.into(), Some(iss.clone()))
         );
 
         // Test id_token
@@ -392,7 +393,7 @@ mod test {
             .expect("Should create expected id_token claims");
         assert_eq!(
             token,
-            &Token::new("id_token", expected_claims.into(), Some(&iss))
+            &Token::new("id_token", expected_claims.into(), Some(iss.clone()))
         );
 
         // Test userinfo_token
@@ -403,10 +404,7 @@ mod test {
             .expect("Should create expected userinfo_token claims");
         assert_eq!(
             token,
-            &Token::new("userinfo_token", expected_claims.into(), Some(&iss))
+            &Token::new("userinfo_token", expected_claims.into(), Some(iss))
         );
-
-        oidc_endpoint.assert();
-        jwks_endpoint.assert();
     }
 }

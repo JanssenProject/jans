@@ -148,6 +148,7 @@ public class ApiConstants {
     public static final String OUTSIDE_SID = "outsideSid";
     public static final String JANS_SESS_ATTR = "jansSessAttr";
     public static final String JANS_SERVICE_NAME = "service";
+    public static final String AUDIT = "/audit";
 
 
     public static final String ALL = "all";
@@ -171,6 +172,7 @@ public class ApiConstants {
     public static final String DEFAULT_LIST_SIZE = "50";
     public static final String DEFAULT_LIST_START_INDEX = "0";
     public static final int DEFAULT_MAX_COUNT = 200;  
+    public static final String DEFAULT_SEARCH_PATTERN = "^.*$";  
     public static final String SORT_BY = "sortBy";
     public static final String SORT_ORDER = "sortOrder";
     public static final String ASCENDING = "ascending";

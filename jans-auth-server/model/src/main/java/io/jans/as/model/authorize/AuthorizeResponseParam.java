@@ -34,6 +34,7 @@ public final class AuthorizeResponseParam {
      * String that represents the End-User's login state at the OP.
      */
     public static final String SESSION_ID = "session_id";
+    public static final String LOGOUT_STATUS_JWT = "logout_status_jwt";
 
     public static final String SID = "sid";
 

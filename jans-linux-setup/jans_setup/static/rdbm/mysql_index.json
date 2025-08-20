@@ -76,7 +76,8 @@
       "authzCode",
       "grtId",
       "ssnId",
-      "tknCde"
+      "tknCde",
+      "jti"
     ],
     "custom": [
       "`del`, `exp`"

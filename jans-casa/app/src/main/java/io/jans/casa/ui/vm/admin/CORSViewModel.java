@@ -29,8 +29,8 @@ public class CORSViewModel extends MainViewModel {
         return origins;
     }
 
-    @Init
-    public void init() {
+    @Init(superclass = true)
+    public void childInit() {
         //Obtain a reference to the list
         origins = getSettings().getCorsDomains();
     }
@@ -39,7 +39,7 @@ public class CORSViewModel extends MainViewModel {
     public void dropOrigin(String orig) {
         origins.remove(orig);
         getSettings().setCorsDomains(origins);
-        updateMainSettings();
+        updateMainSettings(Labels.getLabel("adm.cors_action"));
     }
 
     @NotifyChange({"origins", "origin"})
@@ -50,7 +50,7 @@ public class CORSViewModel extends MainViewModel {
                 origins.add(origin.toLowerCase());
                 
                 getSettings().setCorsDomains(origins);
-                if (updateMainSettings()) {
+                if (updateMainSettings(Labels.getLabel("adm.cors_action"))) {
                     origin = "";
                 }
             }

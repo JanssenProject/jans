@@ -140,6 +140,8 @@ from setup_app.installers.jans_auth import JansAuthInstaller
 if base.current_app.profile == 'jans':
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
+    from setup_app.installers.jans_link import JansLinkInstaller
+    from setup_app.installers.jans_keycloak_link import JansKCLinkInstaller
     from setup_app.installers.jans_casa import CasaInstaller
 
     from setup_app.installers.jans_saml import JansSamlInstaller
@@ -249,16 +251,19 @@ jythonInstaller = JythonInstaller()
 rdbmInstaller = RDBMInstaller()
 httpdinstaller = HttpdInstaller()
 jansAuthInstaller = JansAuthInstaller()
+if Config.profile == 'jans':
+    scimInstaller = ScimInstaller()
 configApiInstaller = ConfigApiInstaller()
+jansCliInstaller = JansCliInstaller()
 
 if Config.profile == 'jans':
     fidoInstaller = FidoInstaller()
-    scimInstaller = ScimInstaller()
     casa_installer = CasaInstaller()
+    jans_link_installer = JansLinkInstaller()
+    jans_keycloak_link_installer = JansKCLinkInstaller()
     jans_saml_installer = JansSamlInstaller()
     jans_lock_installer = JansLockInstaller()
 
-jansCliInstaller = JansCliInstaller()
 
 rdbmInstaller.packageUtils = packageUtils
 
@@ -289,21 +294,19 @@ def print_or_log(msg):
     print(msg) if argsp.x else base.logIt(msg)
 
 
+def call_test_data_lodader():
+    print_or_log("Loading test data")
+    testDataLoader.dbUtils.bind()
+    testDataLoader.load_test_data()
+    jansInstaller.load_app_test_data()
+    print_or_log("Test data loaded.")
+
 if Config.profile == 'jans':
     if argsp.t:
         testDataLoader = TestDataLoader()
 
     if argsp.t and argsp.x:
-        print_or_log("Loading test data")
-        testDataLoader.dbUtils.bind()
-        configApiInstaller.load_test_data()
-        testDataLoader.load_test_data()
-        print_or_log("Test data loaded.")
-
-    if not argsp.t and argsp.x and argsp.load_config_api_test:
-        print_or_log("Loading Config Api Test data")
-        configApiInstaller.load_test_data()
-        print_or_log("Test data loaded. Exiting ...")
+        call_test_data_lodader()
 
     if argsp.x:
         print("Exiting ...")
@@ -392,11 +395,18 @@ def main():
                     not Config.installed_instance and Config.install_jans_auth):
                 jansAuthInstaller.start_installation()
 
+            if Config.profile == 'jans' and (Config.installed_instance and 'install_scim_server' in Config.addPostSetupService) or (
+                    not Config.installed_instance and Config.install_scim_server):
+                scimInstaller.start_installation()
+
             if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (
                     not Config.installed_instance and Config.get(configApiInstaller.install_var)):
                 configApiInstaller.start_installation()
-                if argsp.t or getattr(argsp, 'load_config_api_test', None):
-                    configApiInstaller.load_test_data()
+
+            if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jansCliInstaller.install_var)):
+                    jansCliInstaller.start_installation()
+                    jansCliInstaller.configure()
 
             if Config.profile == 'jans':
 
@@ -404,18 +414,18 @@ def main():
                         not Config.installed_instance and Config.install_fido2):
                     fidoInstaller.start_installation()
 
-                if (Config.installed_instance and 'install_scim_server' in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.install_scim_server):
-                    scimInstaller.start_installation()
-
                 if (Config.installed_instance and casa_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(casa_installer.install_var)):
                     casa_installer.start_installation()
 
-                if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
-                            not Config.installed_instance and Config.get(jansCliInstaller.install_var)):
-                        jansCliInstaller.start_installation()
-                        jansCliInstaller.configure()
+
+                if (Config.installed_instance and jans_link_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jans_link_installer.install_var)):
+                    jans_link_installer.start_installation()
+
+                if (Config.installed_instance and jans_keycloak_link_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jans_keycloak_link_installer.install_var)):
+                    jans_keycloak_link_installer.start_installation()
 
                 if (Config.installed_instance and jans_saml_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jans_saml_installer.install_var)):
@@ -444,7 +454,7 @@ def main():
 
             if argsp.t:
                 base.logIt("Loading test data")
-                testDataLoader.load_test_data()
+                call_test_data_lodader()
 
             jansProgress.progress(static.COMPLETED)
 

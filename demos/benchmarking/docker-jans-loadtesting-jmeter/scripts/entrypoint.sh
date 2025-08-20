@@ -40,9 +40,18 @@ replace_all() {
 }
 
 cat /scripts/tests/authorization_code_flow.jmx | replace_all > tmpfile && mv tmpfile /scripts/authorization_code_flow.jmx
+cat /scripts/tests/authorization_code_flow_soak.jmx | replace_all > tmpfile && mv tmpfile /scripts/authorization_code_flow_soak.jmx
 cat /scripts/tests/resource_owner_password_credentials.jmx | replace_all > tmpfile && mv tmpfile /scripts/resource_owner_password_credentials.jmx
 cat /scripts/tests/register_client.jmx | replace_all > tmpfile && mv tmpfile /scripts/register_client.jmx
 cat /scripts/tests/client_credentials.jmx | replace_all > tmpfile && mv tmpfile /scripts/client_credentials.jmx
+
+if [[ "$RUN_AUTHZ_SOAK_TEST" = "true" ]]
+then
+  echo "Authentication code flow soak test is activated."
+  # Add -o modules.console.disable=true to disable TUI
+  bzt /scripts/authorization_code_flow_soak.jmx
+  exit 0
+fi
 
 if [[ "$RUN_AUTHZ_TEST" = "true" ]]
 then

@@ -9,9 +9,9 @@ import importlib
 import sys
 import asyncio
 import concurrent.futures
+import random
 
 from enum import Enum
-from functools import partial
 from pathlib import Path
 from itertools import cycle
 from requests.models import Response
@@ -26,6 +26,13 @@ if os.path.exists(pylib_dir):
     sys.path.insert(0, pylib_dir)
 
 from prompt_toolkit.shortcuts import clear
+
+# Import the defeat gorn game
+try:
+    from defeat_gorn import play_defeat_gorn_game
+except ImportError:
+    def play_defeat_gorn_game():
+        pass  # Fallback if game module not available
 
 ### start splash logo
 with open(os.path.join(cur_dir, 'jans-logo.txt')) as f:
@@ -54,7 +61,39 @@ jans_logo = '\n'.join(jans_logo_list)
 
 clear()
 print(jans_logo)
-### send plash logo
+### end splash logo
+
+# 10% chance to show the defeat gorn game
+if random.random() < 0.10:  # 10% chance
+    try:
+        # Clear screen and show game
+        clear()
+        play_defeat_gorn_game()
+        # Clear screen again and show logo
+        clear()
+        print(jans_logo)
+    except Exception as e:
+        # If game fails, log error to file and continue normally
+        import traceback
+        import datetime
+        
+        # Create logs directory if it doesn't exist
+        logs_dir = os.path.join(cur_dir, 'logs')
+        os.makedirs(logs_dir, exist_ok=True)
+        
+        # Write error to log file
+        log_file = os.path.join(logs_dir, 'defeat_gorn_errors.log')
+        with open(log_file, 'a') as f:
+            f.write(f"\n{'='*50}\n")
+            f.write(f"Game Error - {datetime.datetime.now()}\n")
+            f.write(f"{'='*50}\n")
+            f.write(f"Error: {str(e)}\n")
+            f.write(f"Traceback:\n{traceback.format_exc()}\n")
+            f.write(f"{'='*50}\n")
+        
+        # Clear screen and show logo to ensure clean startup
+        clear()
+        print(jans_logo)
 
 no_tui = False
 if '--no-tui' in sys.argv:
@@ -148,7 +187,6 @@ def do_exit(*c) -> None:
 
 class JansCliApp(Application):
 
-    entries_per_page = 20 # we can make this configurable
 
     def __init__(self):
 
@@ -230,6 +268,13 @@ class JansCliApp(Application):
 
         self.create_background_task(self.check_jans_cli_ini())
 
+    @property
+    def entries_per_page(self):
+        if self.output.get_size().rows > 31:
+            return 20
+        if self.output.get_size().rows > 26:
+            return 15
+        return 10
 
     async def progress_coroutine(self) -> None:
         """asyncio corotune for progress bar
@@ -969,10 +1014,10 @@ class JansCliApp(Application):
 
         return result
 
-    def show_jans_dialog(self, dialog:Dialog, focus=None) -> None:
+    def show_jans_dialog(self, dialog:Dialog, focus=None, tobefocused=None) -> None:
 
         async def coroutine():
-            focused_before = self.layout.current_window
+            focused_before = tobefocused or self.layout.current_window
             result = await self.show_dialog_as_float(dialog, focus)
 
             if not self.root_layout.floats:
@@ -1009,7 +1054,7 @@ class JansCliApp(Application):
                 with open(path, 'w') as w:
                     w.write(text_area.text)
                 self.pbar_text = _("File {} was saved".format(text_area.text))
-                self.show_message(_("Info"), _("File {} was successfully saved").format(path), tobefocused=self.center_container)
+                self.show_message(_("Info"), _("File {} was successfully saved").format(path), tobefocused=params.get('tobefocused') or self.center_container)
             except Exception as e:
                 self.show_message(_("Error!"), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=self.center_container)
 
@@ -1020,7 +1065,7 @@ class JansCliApp(Application):
         save_button = Button(_("Export"), handler=save)
         buttons = [Button('Close'), save_button]
         dialog = JansGDialog(self, title=title, body=body, buttons=buttons)
-        self.show_jans_dialog(dialog)
+        self.show_jans_dialog(dialog, tobefocused=params.get('tobefocused'))
 
     def save_creds(self, dialog:Dialog) -> None:
 
@@ -1057,8 +1102,8 @@ class JansCliApp(Application):
 
     def show_message(
             self, 
-            title: AnyFormattedText,  
-            message: AnyFormattedText,  
+            title: AnyFormattedText,
+            message: AnyFormattedText,
             buttons:Optional[Sequence[Button]] = [],
             tobefocused: AnyContainer= None
             ) -> None:

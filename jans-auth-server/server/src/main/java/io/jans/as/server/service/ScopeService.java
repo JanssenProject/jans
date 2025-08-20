@@ -6,18 +6,7 @@
 
 package io.jans.as.server.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.slf4j.Logger;
-
 import com.google.common.collect.Lists;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.config.StaticConfiguration;
@@ -35,6 +24,11 @@ import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.slf4j.Logger;
+
+import java.util.*;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012
@@ -42,6 +36,8 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 public class ScopeService {
+
+    private static final String CACHE_PREFIX = "scope_";
 
     @Inject
     private Logger log;
@@ -126,7 +122,7 @@ public class ScopeService {
         BaseCacheService usedCacheService = getCacheService();
         final Scope scope = usedCacheService.getWithPut(dn, () -> entryManager.find(Scope.class, dn), 60);
         if (scope != null && StringUtils.isNotBlank(scope.getId())) {
-            usedCacheService.put(scope.getId(), scope); // put also by id, since we call it by id and dn
+            usedCacheService.put(CACHE_PREFIX + scope.getId(), scope); // put also by id, since we call it by id and dn
         }
         return scope;
     }
@@ -154,7 +150,7 @@ public class ScopeService {
     public Scope getScopeById(String id) {
         BaseCacheService usedCacheService = getCacheService();
 
-        final Object cached = usedCacheService.get(id);
+        final Object cached = usedCacheService.get(CACHE_PREFIX + id);
         if (cached != null)
             return (Scope) cached;
 
@@ -163,7 +159,7 @@ public class ScopeService {
                     staticConfiguration.getBaseDn().getScopes(), Scope.class, Filter.createEqualityFilter("jansId", id));
             if ((scopes != null) && (scopes.size() > 0)) {
                 final Scope scope = scopes.get(0);
-                usedCacheService.put(id, scope);
+                usedCacheService.put(CACHE_PREFIX + id, scope);
                 usedCacheService.put(scope.getDn(), scope);
                 return scope;
             }

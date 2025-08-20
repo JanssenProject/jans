@@ -122,6 +122,7 @@ class JansSamlInstaller(BaseInstaller, SetupUtils):
     def create_clients(self):
         clients_data = base.readJsonFile(self.clients_json_fn)
         client_ldif_fns = []
+
         for client_info in clients_data:
                 check_client = self.check_clients([(client_info['client_var'], client_info['client_prefix'])])
                 if check_client.get(client_info['client_prefix']) == -1:
@@ -130,6 +131,7 @@ class JansSamlInstaller(BaseInstaller, SetupUtils):
                         scope_info = self.dbUtils.search('ou=scopes,o=jans', search_filter=f'(&(objectClass=jansScope)(jansId={scope_id}))')
                         if scope_info:
                             scopes.append(scope_info['dn'])
+                    setattr(Config, client_info['client_id']+'_scopes', client_info['scopes_ids'][:])
                     client_id = getattr(Config, client_info['client_var'])
                     client_ldif_fn = os.path.join(self.output_folder, f'clients-{client_id}.ldif')
                     client_ldif_fns.append(client_ldif_fn)
@@ -175,7 +177,7 @@ class JansSamlInstaller(BaseInstaller, SetupUtils):
 
 
     def deploy_jans_keycloak_providers(self):
-        self.copyFile(self.source_files[0][0], self.idp_config_providers_dir)
+        #self.copyFile(self.source_files[0][0], self.idp_config_providers_dir)
         self.copyFile(self.source_files[5][0], self.idp_config_providers_dir)
         base.unpack_zip(self.source_files[6][0], self.idp_config_providers_dir)
 
@@ -308,7 +310,7 @@ class JansSamlInstaller(BaseInstaller, SetupUtils):
                 'token_endpoint': jans_auth_config['tokenEndpoint'],
                 'client_id': Config.kc_scheduler_api_client_id,
                 'client_secret': Config.kc_scheduler_api_client_pw,
-                'scopes': '',
+                'scopes': ' '.join(Config.kc_scheduler_api_scopes),
                 'auth_method': 'basic',
                 'keycloak_admin_url': f'https://{Config.idp_config_hostname}/kc',
                 'keycloak_admin_realm': self.kc_admin_realm,

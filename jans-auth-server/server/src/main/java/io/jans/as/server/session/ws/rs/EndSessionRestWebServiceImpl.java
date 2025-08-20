@@ -593,9 +593,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             String id = cookieService.getConsentSessionIdFromCookie(httpRequest);
 
             if (StringHelper.isNotEmpty(id)) {
-                SessionId ldapSessionId = sessionIdService.getSessionId(id);
-                if (ldapSessionId != null) {
-                    boolean result = sessionIdService.remove(ldapSessionId);
+                SessionId dbSessionId = sessionIdService.getSessionId(id);
+                if (dbSessionId != null) {
+                    boolean result = sessionIdService.remove(dbSessionId);
                     if (!result) {
                         log.error("Failed to remove consent_session_id '{}'", id);
                     }

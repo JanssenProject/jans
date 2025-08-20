@@ -32,38 +32,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.register_progess()
         self.template_base = os.path.join(Config.templateFolder, 'test')
 
-    def create_test_client_keystore(self):
-        self.logIt("Creating client_keystore.p12")
-        client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client/client_keystore.p12')
-        keys_json_fn =  os.path.join(Config.output_dir, 'test/jans-auth/client/keys_client_keystore.json')
-
-        args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
-                    client_keystore_fn, '-storepass', 'secret', '-keypass', 
-                    'secret', '-dname', 
-                    "'{}'".format(Config.default_openid_jks_dn_name),
-                    '-storetype', 'PKCS12'
-                    ]
-
-        self.run(' '.join(args), shell=True)
-
-        args = [Config.cmd_java, '-Dlog4j.defaultInitOverride=true',
-                '-cp', Config.non_setup_properties['jans_auth_client_jar_fn'], Config.non_setup_properties['key_gen_path'],
-                '-key_ops_type', 'ALL',
-                '-keystore', client_keystore_fn,
-                '-keypasswd', 'secret',
-                '-sig_keys', Config.default_sig_key_algs,
-                '-enc_keys', Config.default_enc_key_algs,
-                '-dnname', "'{}'".format(Config.default_openid_jks_dn_name),
-                '-expiration', '365','>', keys_json_fn]
-
-        cmd = ' '.join(args)
-
-        self.run(cmd, shell=True)
-
-        self.copyFile(client_keystore_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
-        self.copyFile(keys_json_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
-
-
     def enable_cusom_scripts(self):
         self.logIt("Enabling custom scripts")
         custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8', 'A51E-76DA', '0300-BA90')
@@ -122,6 +90,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             base.current_app.ScimInstaller.start_installation()
 
         self.encode_test_passwords()
+
+        if Config.installed_instance:
+            base.current_app.ConfigApiInstaller.prepare_scope_list()
 
         Config.pbar.progress(self.service_name, "Rendering templates", False)
         self.logIt("Rendering test templates")
@@ -189,10 +160,10 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             config_jans_auth_test_properties
             )
 
-        ignoredirs = []
-
-        if not Config.install_config_api:
-            ignoredirs.append(os.path.join(self.template_base, 'jans-config-api'))
+        ignoredirs = [
+                os.path.join(self.template_base, 'jans-config-api'),
+                os.path.join(self.template_base, 'jans-fido2'),
+                ]
 
         self.render_templates_folder(self.template_base, ignoredirs=ignoredirs)
 
@@ -278,7 +249,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'tokenEndpointAuthMethodsSupported': [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth', 'self_signed_tls_client_auth', 'none' ],
                                     'sessionIdRequestParameterEnabled': True,
                                     'skipRefreshTokenDuringRefreshing': False,
-                                    'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list', 'access_evaluation'],
+                                    'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list', 'logout_status_jwt', 'access_evaluation'],
                                     'loggingLevel': 'TRACE',
                                     }
 
@@ -315,8 +286,12 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         # make scope offline_access as default
         self.dbUtils.set_configuration("jansDefScope", "true", "inum=C4F6,ou=scopes,o=jans")
+        # make scope revoke_session as default
+        self.dbUtils.set_configuration("jansDefScope", "true", "inum=7D90,ou=scopes,o=jans")
+        # make scope revoke_any_token as default
+        self.dbUtils.set_configuration("jansDefScope", "true", "inum=7D91,ou=scopes,o=jans")
 
-        self.create_test_client_keystore()
+        self.create_test_client_keystore('jans-auth')
 
         self.load_agama_test_data()
 

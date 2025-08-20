@@ -9,8 +9,6 @@ package io.jans.service.external.context;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.faces.context.ExternalContext;
-import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -41,13 +39,17 @@ public class ExternalScriptContext {
         this.httpResponse = httpResponse;
 
         if (this.httpRequest == null) {
-            FacesContext facesContext = FacesContext.getCurrentInstance();
-            if (facesContext != null) {
-                ExternalContext extCtx = facesContext.getExternalContext();
-                if (extCtx != null) {
-                    this.httpRequest = (HttpServletRequest) extCtx.getRequest();
-                }
-            }
+        	try {
+	        	jakarta.faces.context.FacesContext facesContext = jakarta.faces.context.FacesContext.getCurrentInstance();
+	            if (facesContext != null) {
+	            	jakarta.faces.context.ExternalContext extCtx = facesContext.getExternalContext();
+	                if (extCtx != null) {
+	                    this.httpRequest = (HttpServletRequest) extCtx.getRequest();
+	                }
+	            }
+        	} catch (java.lang.NoClassDefFoundError e) {
+				log.debug("Application not uses jakarta faces");
+			}
         }
     }
 

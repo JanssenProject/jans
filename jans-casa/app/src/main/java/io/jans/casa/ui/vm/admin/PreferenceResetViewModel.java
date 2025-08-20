@@ -45,8 +45,8 @@ public class PreferenceResetViewModel extends MainViewModel {
         return users;
     }
 
-    @Init
-    public void init() { }
+    @Init(superclass = true)
+    public void childInit() { }
 
     public void search() {
 
@@ -82,7 +82,9 @@ public class PreferenceResetViewModel extends MainViewModel {
         if (userInums.size() > 0) { //proceed only if there is some fresh selection in the grid
             //Perform the actual resetting
             int total = userService.resetPreference(userInums);
-            if (total == userInums.size()) {      //Check the no. of users changed matches the expected
+            boolean success = total == userInums.size();
+
+            if (success) {      //Check the no. of users changed matches the expected
                 users.forEach(usr -> usr.setAlreadyReset(usr.isChecked()));
                 UIUtils.showMessageUI(true);
             } else {
@@ -91,6 +93,8 @@ public class PreferenceResetViewModel extends MainViewModel {
                 String msg = Labels.getLabel("adm.resets_only_updated", new Integer[] { total });
                 UIUtils.showMessageUI(false, Labels.getLabel("general.error.detailed", new String[] { msg }));
             }
+            logActionDetails(Labels.getLabel("adm.resets_action"), success);
+
         } else {
             UIUtils.showMessageUI(false, Labels.getLabel("adm.resets_noselection"));
         }

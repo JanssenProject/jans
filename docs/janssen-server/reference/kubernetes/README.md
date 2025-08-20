@@ -30,8 +30,6 @@ This Reference guide helps you learn about the components and architecture of Ja
 | [jans-config-api](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-config-api/README.md)       |
 | [jans-configurator](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-configurator/README.md)   |
 | [jans-fido2](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-fido2/README.md)                 |
-| [jans-keycloak-link](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-keycloak-link/README.md) |
-| [jans-link](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-link/README.md)                   |
 | [jans-monolith](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-monolith/README.md)           |
 | [jans-persistence](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-persistence/README.md)     |
 | [jans-saml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-saml/README.md)                   |
