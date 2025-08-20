@@ -66,6 +66,10 @@ def _transform_fido2_dynamic_config(conf):
             meta_srv["rootCert"] = "http://secure.globalsign.com/cacert/root-r3.crt"
             should_update = True
 
+    if conf["fido2Configuration"]["hints"] != ["client-device"]:
+        conf["fido2Configuration"]["hints"] = ["client-device"]
+        should_update = True
+
     # return modified config (if any) and update flag
     return conf, should_update
 

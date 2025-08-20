@@ -13,8 +13,8 @@ impl EntityBuilder {
         principal: &EntityData,
         built_entities: &BuiltEntities,
     ) -> Result<BuiltPrincipalUnsigned, BuildUnsignedEntityError> {
-        let type_name: &str = &principal.entity_type;
-        let id_srcs = vec![EntityIdSrc::String(&principal.id)];
+        let type_name: &str = &principal.cedar_mapping.entity_type;
+        let id_srcs = vec![EntityIdSrc::String(&principal.cedar_mapping.id)];
 
         let roles = self.build_role_entities_unsigned(principal)?;
         let role_uids = roles
@@ -90,6 +90,7 @@ fn extract_roles_from_value(value: &Value) -> Result<Vec<String>, BuildUnsignedE
 mod test {
     use super::super::super::test::*;
     use super::*;
+    use crate::CedarEntityMapping;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
@@ -113,8 +114,10 @@ mod test {
 
         // Case: String in the `role` attribute
         let principal = EntityData {
+            cedar_mapping: CedarEntityMapping {
             entity_type: "Jans::User".to_string(),
             id: "some_user".to_string(),
+            },
             attributes: HashMap::from([("role".to_string(), json!("some_role"))]),
         };
         let token_entities = builder
@@ -133,8 +136,10 @@ mod test {
 
         // Case: Array in the `role` attribute
         let principal = EntityData {
+            cedar_mapping: CedarEntityMapping {
             entity_type: "Jans::User".to_string(),
             id: "some_user".to_string(),
+            },
             attributes: HashMap::from([("role".to_string(), json!(["some_role", "another_role"]))]),
         };
         let token_entities = builder
@@ -161,8 +166,10 @@ mod test {
         );
         // Case: Array in the `role` attribute
         let principal = EntityData {
+            cedar_mapping: CedarEntityMapping {
             entity_type: "Jans::User".to_string(),
             id: "some_user".to_string(),
+            },
             attributes: HashMap::from([("role".to_string(), json!(["some_role", "another_role"]))]),
         };
         let token_entities = builder
@@ -190,8 +197,10 @@ mod test {
 
         // Case: no `role` attribute
         let principal = EntityData {
+            cedar_mapping: CedarEntityMapping {
             entity_type: "Jans::User".to_string(),
             id: "some_user".to_string(),
+            },
             attributes: HashMap::new(),
         };
         let token_entities = builder

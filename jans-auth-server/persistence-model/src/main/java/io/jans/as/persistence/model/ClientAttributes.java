@@ -50,6 +50,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("updateTokenScriptDns")
     private List<String> updateTokenScriptDns = Lists.newArrayList();
 
+    @JsonProperty("logoutStatusJwtScriptDns")
+    private List<String> logoutStatusJwtScriptDns = Lists.newArrayList();
+
     @JsonProperty("backchannelLogoutUri")
     private List<String> backchannelLogoutUri;
 
@@ -155,6 +158,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("txTokenEncryptedResponseEnc")
     private String txTokenEncryptedResponseEnc;
 
+    @JsonProperty("logoutStatusJwtSignedResponseAlg")
+    private String logoutStatusJwtSignedResponseAlg;
+
     @JsonProperty("authorizationDetailsTypes")
     private List<String> authorizationDetailsTypes;
 
@@ -184,6 +190,15 @@ public class ClientAttributes implements Serializable {
 
     public void setTxTokenSignedResponseAlg(String txTokenSignedResponseAlg) {
         this.txTokenSignedResponseAlg = txTokenSignedResponseAlg;
+    }
+
+    public String getLogoutStatusJwtSignedResponseAlg() {
+        return logoutStatusJwtSignedResponseAlg;
+    }
+
+    public ClientAttributes setLogoutStatusJwtSignedResponseAlg(String logoutStatusJwtSignedResponseAlg) {
+        this.logoutStatusJwtSignedResponseAlg = logoutStatusJwtSignedResponseAlg;
+        return this;
     }
 
     public String getTxTokenEncryptedResponseAlg() {
@@ -437,6 +452,16 @@ public class ClientAttributes implements Serializable {
         this.updateTokenScriptDns = updateTokenScriptDns;
     }
 
+    public List<String> getLogoutStatusJwtScriptDns() {
+        if (logoutStatusJwtScriptDns == null) logoutStatusJwtScriptDns = Lists.newArrayList();
+        return logoutStatusJwtScriptDns;
+    }
+
+    public ClientAttributes setLogoutStatusJwtScriptDns(List<String> logoutStatusJwtScriptDns) {
+        this.logoutStatusJwtScriptDns = logoutStatusJwtScriptDns;
+        return this;
+    }
+
     public Boolean getRunIntrospectionScriptBeforeJwtCreation() {
         if (runIntrospectionScriptBeforeJwtCreation == null) {
             runIntrospectionScriptBeforeJwtCreation = false;
@@ -562,6 +587,7 @@ public class ClientAttributes implements Serializable {
                 ", spontaneousScopes=" + spontaneousScopes +
                 ", spontaneousScopeScriptDns=" + spontaneousScopeScriptDns +
                 ", updateTokenScriptDns=" + updateTokenScriptDns +
+                ", logoutStatusJwtScriptDns=" + logoutStatusJwtScriptDns +
                 ", backchannelLogoutUri=" + backchannelLogoutUri +
                 ", backchannelLogoutSessionRequired=" + backchannelLogoutSessionRequired +
                 ", additionalAudience=" + additionalAudience +
@@ -593,6 +619,7 @@ public class ClientAttributes implements Serializable {
                 ", txTokenSignedResponseAlg=" + txTokenSignedResponseAlg +
                 ", txTokenEncryptedResponseAlg=" + txTokenEncryptedResponseAlg +
                 ", txTokenEncryptedResponseEnc=" + txTokenEncryptedResponseEnc +
+                ", logoutStatusJwtSignedResponseAlg=" + logoutStatusJwtSignedResponseAlg +
                 ", authorizationDetailsTypes=" + authorizationDetailsTypes +
                 '}';
     }

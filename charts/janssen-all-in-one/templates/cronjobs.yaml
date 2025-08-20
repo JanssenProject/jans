@@ -20,7 +20,11 @@ metadata:
 {{- end }}
 {{- end }}
 spec:
+  {{- if ne (index .Values "auth-server-key-rotation" "cronJobSchedule")  "" }}
+  schedule: {{  index .Values "auth-server-key-rotation" "cronJobSchedule"  | quote }}
+   {{- else }}
   schedule: "@every {{ index .Values "auth-server-key-rotation" "keysLife" }}h"
+   {{- end }}
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
@@ -95,6 +99,10 @@ spec:
 {{- toYaml . | nindent 12 }}
           {{- end }}
           restartPolicy: Never
+          {{- if index .Values "auth-server-key-rotation" "nodeSelector" }}
+          nodeSelector:
+{{- toYaml (index .Values "auth-server-key-rotation" "nodeSelector") | nindent 12 }}
+          {{- end }}
 {{- end }}
 
 ---
@@ -196,6 +204,10 @@ spec:
               hostnames:
                 - {{ .Values.fqdn }}
           {{- end }}
+          {{- if index .Values "kc-scheduler" "nodeSelector" }}
+          nodeSelector:
+{{- toYaml (index .Values "kc-scheduler" "nodeSelector") | nindent 12 }}
+          {{- end }}
 {{- end }}
 
 ---
@@ -296,5 +308,9 @@ spec:
             - ip: {{ .Values.lbIp }}
               hostnames:
                 - {{ .Values.fqdn }}
+          {{- end }}
+          {{- if .Values.cleanup.nodeSelector }}
+          nodeSelector:
+{{- toYaml .Values.cleanup.nodeSelector | nindent 12 }}
           {{- end }}
 {{- end }}

@@ -4,6 +4,7 @@ public enum ErrorResponse {
     GET_API_PROTECTION_TOKEN_ERROR("Error in generating token to access Jans Config Api endpoints."),
     USER_INFO_JWT_BLANK("User-Info jwt is blank or empty. Generating token with default scopes."),
     CHECK_LICENSE_ERROR("Error in checking license status. Check logs for further details."),
+    LICENSE_DELETE_ERROR("Error in deleting license configuration. Check logs for further details."),
     ERROR_IN_LICENSE_CONFIGURATION_VALIDATION("Error in validating license configuration."),
     ACTIVATE_LICENSE_ERROR("Error in activating License. Check logs for further details."),
     MAU_IS_NULL("The MAU threshold value of the license is null."),

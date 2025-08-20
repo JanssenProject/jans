@@ -1,3 +1,4 @@
+
 // This software is available under the Apache-2.0 license.
 // See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
 //
@@ -52,6 +53,7 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
         },
         "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     })
 });
 
@@ -247,8 +249,10 @@ async fn test_run_cedarling() {
         }),
         action: "Jans::Action::\"Read\"".to_string(),
         resource: EntityData::deserialize(json!({
-            "type": "Jans::Application",
-            "id": "some_id",
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Application",
+                "id": "some_id"
+            },
             "app_id": "application_id",
             "name": "Some Application",
             "url": {
@@ -304,6 +308,7 @@ async fn test_memory_log_interface() {
             ]
         },
         "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     });
 
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
@@ -413,8 +418,10 @@ async fn test_memory_log_interface() {
         }),
         action: "Jans::Action::\"Read\"".to_string(),
         resource: EntityData::deserialize(json!({
-            "type": "Jans::Application",
-            "id": "some_id",
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Application",
+                "id": "some_id"
+            },
             "app_id": "application_id",
             "name": "Some Application",
             "url": {
@@ -489,37 +496,49 @@ async fn test_authorize_unsigned() {
         .await
         .expect("init function should be initialized with js map");
 
-    let request_json = json!({
-        "principals": [
-            {
-                "id": "1",
-                "type": "Jans::TestPrincipal1",
+    let request = RequestUnsigned {
+        principals: vec![
+            EntityData::deserialize(json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "1"
+                },
                 "is_ok": true
-            },
-            {
-                "id": "2",
-                "type": "Jans::TestPrincipal2",
+            }))
+            .expect("EntityData should be deserialized correctly"),
+            EntityData::deserialize(json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal2",
+                    "id": "2"
+                },
                 "is_ok": true
-            },
-            {
-                "id": "3",
-                "type": "Jans::TestPrincipal3",
+            }))
+            .expect("EntityData should be deserialized correctly"),
+            EntityData::deserialize(json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal3",
+                    "id": "3"
+                },
                 "is_ok": false
-            }
+            }))
+            .expect("EntityData should be deserialized correctly"),
         ],
-        "action": "Jans::Action::\"UpdateForTestPrincipals\"",
-        "resource": {
-            "type": "Jans::Issue",
-            "id": "random_id",
+        action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
             "org_id": "some_long_id",
             "country": "US"
-        },
-        "context": json!({})
-    });
+        }))
+        .expect("ResourceData should be deserialized correctly"),
+        context: json!({})
+    };
 
     let result = instance
         .authorize_unsigned(
-            serde_wasm_bindgen::to_value(&request_json).expect("Failed to convert JSON to JsValue"),
+            serde_wasm_bindgen::to_value(&request).expect("Failed to convert JSON to JsValue"),
         )
         .await
         .expect("authorize_unsigned should be executed successfully");

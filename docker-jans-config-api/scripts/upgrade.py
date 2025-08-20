@@ -115,7 +115,7 @@ def _transform_api_dynamic_config(conf):
         match dir_mapping["directory"]:
             # add missing service module for `/opt/jans/jetty/%s/custom/libs` dir mapping
             case "/opt/jans/jetty/%s/custom/libs":
-                for svc_module in ["jans-lock", "jans-link"]:
+                for svc_module in ["jans-lock", "jans-link", "jans-keycloak-link"]:
                     if svc_module in dir_mapping["jansServiceModule"]:
                         continue
 
@@ -126,6 +126,25 @@ def _transform_api_dynamic_config(conf):
             case "/opt/jans/jetty/%s/custom-libs":
                 conf["assetMgtConfiguration"]["assetDirMapping"].pop(idx)
                 should_update = True
+
+    # audit log conf
+    if "jans-client" not in conf["auditLogConf"]["headerAttributes"]:
+        conf["auditLogConf"]["headerAttributes"].append("jans-client")
+        should_update = True
+
+    if "GET" not in conf["auditLogConf"]["ignoreHttpMethod"]:
+        conf["auditLogConf"]["ignoreHttpMethod"].append("GET")
+        should_update = True
+
+    for k, v in [
+        ("logData", True),
+        ("auditLogFilePath", "/opt/jans/jetty/jans-config-api/logs/"),
+        ("auditLogFileName", "configapi-audit.log"),
+        ("auditLogDateFormat", "dd-MM-YYYY"),
+    ]:
+        if k not in conf["auditLogConf"]:
+            conf["auditLogConf"][k] = v
+            should_update = True
 
     # finalized conf and flag to determine update process
     return conf, should_update

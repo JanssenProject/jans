@@ -14,8 +14,14 @@ extra:
     default: stable
     provider: mike
 extra_css:
-- css/tabs.css
-- stylesheets/mermaid-extra.css
+  - css/tabs.css
+  - stylesheets/mermaid-extra.css
+  - stylesheets/home.css
+
+extra_javascript:
+  - javascripts/skeleton-loader.js
+  - javascripts/full-screen-sections.js
+
 markdown_extensions:
 - admonition
 - attr_list
@@ -30,9 +36,11 @@ markdown_extensions:
 - pymdownx.tabbed:
     alternate_style: true
 - pymdownx.emoji:
-    emoji_generator: !!python/name:materialx.emoji.to_svg
-    emoji_index: !!python/name:materialx.emoji.twemoji
+    emoji_generator: !!python/name:material.extensions.emoji.to_svg
+    emoji_index: !!python/name:material.extensions.emoji.twemoji
+- pymdownx.details
 nav:
+- Home: index.md
 - 'Janssen Server':
   - Introduction: janssen-server/README.md
   - Deployment and Planning Guide:
@@ -124,7 +132,6 @@ nav:
       - REST API:
         - janssen-server/config-guide/config-tools/config-api/README.md
         - Settings: janssen-server/config-guide/config-tools/config-api/config.md
-        - Attributes: janssen-server/config-guide/config-tools/config-api/attribute.md
         - Security: janssen-server/config-guide/config-tools/config-api/security.md
         - Logs: janssen-server/config-guide/config-tools/config-api/logs.md
         - Monitoring: janssen-server/config-guide/config-tools/config-api/monitoring.md
@@ -151,12 +158,14 @@ nav:
       - SCIM Group Management: janssen-server/config-guide/scim-config/scim-group-config.md
     - Custom Scripts: janssen-server/config-guide/custom-scripts-config.md
     - SMTP Configuration: janssen-server/config-guide/smtp-configuration.md
+    - HASH Passwords: janssen-server/config-guide/hash-password.md
     - Link Configuration: janssen-server/config-guide/link-configuration.md
     - Custom Assets Configuration: janssen-server/config-guide/custom-assets-configuration.md
+    - Session: janssen-server/config-guide/session.md
   - Database Guide:
     - janssen-server/reference/database/README.md
     - RDBMS Erwin Table: janssen-server/reference/database/rdbms-erwin.md
-  
+
     - MySQL:
       - MySQL Schema: janssen-server/reference/database/mysql-schema.md
       - MySQL Configuration: janssen-server/reference/database/mysql-config.md
@@ -166,7 +175,6 @@ nav:
       - PostgreSQL Indexes: janssen-server/reference/database/pgsql-schema-indexes.md
       - PostgreSQL Configuration: janssen-server/reference/database/pgsql-config.md
       - PostgreSQL Operation: janssen-server/reference/database/pgsql-ops.md
-    - Converting Data: janssen-server/reference/database/converting-data.md
   - Auth Server Admin Guide:
     - janssen-server/auth-server/README.md
     - Auth Server Config: janssen-server/auth-server/config.md
@@ -182,6 +190,7 @@ nav:
       - OpenID id_token: janssen-server/auth-server/tokens/openid-id-token.md
       - OpenID Userinfo Token: janssen-server/auth-server/tokens/openid-userinfo-token.md
       - UMA RPT Token: janssen-server/auth-server/tokens/uma-rpt-token.md
+      - Logout Status JWT: janssen-server/auth-server/tokens/logout-status-jwt.md
     - Scopes: janssen-server/auth-server/scopes/README.md
     - Rich Authorization Requests : janssen-server/auth-server/authz-details/README.md
     - Endpoints:
@@ -225,10 +234,7 @@ nav:
       - CIBA: janssen-server/auth-server/openid-features/ciba.md
       - JARM: janssen-server/auth-server/openid-features/jarm.md
       - Native SSO: janssen-server/auth-server/openid-features/native-sso.md
-      - User Claims:
-        - janssen-server/auth-server/openid-features/user-claims/README.md
-        - Built-in Claims: janssen-server/auth-server/openid-features/user-claims/built-in-claims.md
-        - Adding Custom Claims: janssen-server/auth-server/openid-features/user-claims/custom-claims.md
+      - User Claims: janssen-server/auth-server/openid-features/user-claims/README.md
       - Logout:
         - janssen-server/auth-server/openid-features/logout/README.md
         - Front Channel: janssen-server/auth-server/openid-features/logout/front-channel.md
@@ -321,6 +327,9 @@ nav:
       - Script Debugging: script-catalog/introspection/interception-scripts-debug.md
       - Access Evaluation: script-catalog/access_evaluation/access-evaluation.md
       - Access Evaluation Discovery: script-catalog/access_evaluation/access-evaluation-discovery.md
+      - Logout Status JWT: script-catalog/logout_status_jwt/logout-status-jwt.md
+      - Cookie: script-catalog/cookie/cookie.md
+      - Discovery: script-catalog/discovery/discovery.md
       - Select Account: script-catalog/select_account/select-account.md
       - Spontaneous Scope: script-catalog/spontaneous_scope/spontaneous-scope.md
       - Fido2 Extension: script-catalog/fido2_extension/fido2-extension.md
@@ -409,14 +418,14 @@ nav:
 - 'Cedarling':
   - Overview: 'cedarling/README.md'
   - Quick Start:
-    - Authorization Using Cedarling: 'cedarling/cedarling-quick-start-unsigned.md'
-    - Implement TBAC Using Cedarling: 'cedarling/cedarling-quick-start-tbac.md'
-  - Tutorials: 
+    - Authorization Using Cedarling: 'cedarling/cedarling-quick-start.md'
+  - Tutorials:
     - 'cedarling/cedarling-getting-started.md'
     - Javascript: 'cedarling/getting-started/javascript.md'
     - Python: 'cedarling/getting-started/python.md'
     - Rust: 'cedarling/getting-started/rust.md'
     - Golang: 'cedarling/getting-started/go.md'
+    - Java: 'cedarling/getting-started/java.md'
     - Kotlin: 'cedarling/getting-started/kotlin.md'
     - Swift: 'cedarling/getting-started/swift.md'
   - Reference:
@@ -430,7 +439,7 @@ nav:
     - Lock Configuration: 'cedarling/cedarling-lock-server.md'
     - Cedarling Entities: 'cedarling/cedarling-entities.md'
   - Developer:
-    - WASM: 'cedarling/cedarling-wasm.md'
+    - Rust: 'cedarling/cedarling-rust.md'
     - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
@@ -438,8 +447,8 @@ nav:
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
       - Android Apps: 'cedarling/uniffi/cedarling-android.md'
-      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'  
-    - Sidecar: 
+      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'
+    - Sidecar:
       - Sidecar: 'cedarling/cedarling-sidecar-overview.md'
       - Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
   - Integrations:
@@ -477,37 +486,38 @@ nav:
   - Code of Conduct: CODE_OF_CONDUCT.md
   - Design and Implementation:
     - contribute/implementation-design/README.md
-    - Agama: 
+    - Agama:
       - contribute/implementation-design/agama-design/README.md
       - ADR: contribute/implementation-design/agama-design/adr/README.md
-    - jans-auth-server: 
+    - jans-auth-server:
       - contribute/implementation-design/jans-auth-server-design/README.md
       - ADR: contribute/implementation-design/jans-auth-server-design/adr/README.md
-    - jans-cli: 
+    - jans-cli:
        - contribute/implementation-design/jans-cli-design/README.md
        - ADR: contribute/implementation-design/jans-cli-design/adr/README.md
-    - jans-config-api: 
+    - jans-config-api:
        - contribute/implementation-design/jans-config-api-design/README.md
        - OpenAPI Spec generation: contribute/implementation-design/jans-config-api-design/config-api-swagger-spec-generation.md
        - ADR: contribute/implementation-design/jans-config-api-design/adr/README.md
-    - jans-core: 
+    - jans-core:
        - contribute/implementation-design/jans-core-design/README.md
        - ADR: contribute/implementation-design/jans-core-design/adr/README.md
-    - jans-fido2: 
+    - jans-fido2:
        - contribute/implementation-design/jans-fido2-design/README.md
        - ADR: contribute/implementation-design/jans-fido2-design/adr/README.md
-    - jans-orm: 
+    - jans-orm:
       - contribute/implementation-design/jans-orm-design/README.md
       - ADR: contribute/implementation-design/jans-orm-design/adr/README.md
-    - jans-scim: 
+    - jans-scim:
       - contribute/implementation-design/jans-scim-design/README.md
       - ADR: contribute/implementation-design/jans-scim-design/adr/README.md
-    - jans-casa: 
+    - jans-casa:
       - contribute/implementation-design/jans-casa-design/README.md
       - ADR: contribute/implementation-design/jans-casa-design/adr/README.md
     - jans-cedarling:
       - contribute/implementation-design/jans-cedarling-design/README.md
       - ADR: contribute/implementation-design/jans-cedarling-design/adr/README.md
+      - Cedarling Technical Overview: contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview.md
   - CI-CD:
     #- GitHub CI: contribute/ci-cd/github-ci.md
     - Release Process: contribute/ci-cd/release-process.md
@@ -528,8 +538,6 @@ plugins:
 - include-markdown
 - tags
 - search
-- exclude-search:
-    exclude_unreferenced: true
 - git-revision-date-localized:
     enable_creation_date: true
     type: timeago
@@ -548,6 +556,10 @@ theme:
   - navigation.tabs
   - navigation.tabs.sticky
   - navigation.indexes
+  - content.tabs.link
+  - content.code.copy
+  - content.code.select
+  - content.code.annotate
   font:
     code: Roboto Mono
     text: Roboto

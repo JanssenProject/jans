@@ -31,7 +31,7 @@ KEEPDAYS1=1   #for compression
 KEEPDAYS2=15  #for deletion
 
 
-DIRS="/opt/jans/jetty/jans-auth/logs /opt/jans/jetty/jans-casa/logs /opt/jans/jetty/jans-config-api/logs /opt/jans/jetty/jans-fido2/logs /opt/jans/jetty/jans-lock/logs /opt/jans/jetty/jans-scim/logs /var/log/ /var/log/adminui"
+DIRS="/opt/jans/jetty/jans-auth/logs /opt/jans/jetty/jans-casa/logs /opt/jans/jetty/jans-config-api/logs /opt/jans/jetty/jans-fido2/logs /opt/jans/jetty/jans-keycloak-link/logs /opt/jans/jetty/jans-link/logs /opt/jans/jetty/jans-lock/logs /opt/jans/jetty/jans-scim/logs /var/log/ /var/log/adminui"
 
 PWD=`pwd`
 PWD1=$PWD

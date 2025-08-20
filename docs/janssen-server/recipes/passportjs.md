@@ -4,7 +4,9 @@ tags:
   - recipes
 ---
 
-## Overview
+# Passport JS recipe
+
+
 
 This is a guide for user authentication at any external Social Providers(Google, Apple, Facebook, etc) using Passport-JS(a.k.a "inbound identity").
 

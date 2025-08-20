@@ -34,7 +34,8 @@ class JansSelectDate:
     def __init__(
         self,
         value: datetime.datetime,
-        min_date: Optional[datetime.datetime]=None
+        min_date: Optional[datetime.datetime]=None,
+        date_only: Optional[bool]=False,
         )-> HSplit:
         
         """Date selection float
@@ -47,8 +48,9 @@ class JansSelectDate:
         self.chstate = change_loc.DAY
         self.cal = calendar.Calendar()
         self.min_date = min_date
+        self.date_only = date_only
 
-        self.container = HSplit(children=[
+        child_widgets = [
             Window(
                 content=FormattedTextControl(text=self._get_header_text),
                 height=1,
@@ -64,15 +66,21 @@ class JansSelectDate:
                 right_margins=[ScrollbarMargin(display_arrows=True)],
                 wrap_lines=True,
             ),
-            Window(
-                content=FormattedTextControl(text=self._get_time_text, focusable=True),
-                height=1,
-                cursorline=False,
-                style="class:date-picker-time",
-                right_margins=[ScrollbarMargin(display_arrows=True)],
-                wrap_lines=True
-            ),
-            ])
+            ]
+
+        if not self.date_only:
+            child_widgets.append(
+                Window(
+                    content=FormattedTextControl(text=self._get_time_text, focusable=True),
+                    height=1,
+                    cursorline=False,
+                    style="class:date-picker-time",
+                    right_margins=[ScrollbarMargin(display_arrows=True)],
+                    wrap_lines=True
+                )
+            )
+
+        self.container = HSplit(children=child_widgets)
 
     def _get_header_text(self)-> AnyFormattedText: 
         headers = (self.value.strftime('%B').center(12), str(self.value.year).center(6))
@@ -178,7 +186,8 @@ class DateSelectWidget:
         self,
         app: Application,
         value: Optional[datetime.datetime]=None,
-        min_date: Optional[datetime.datetime]=None
+        min_date: Optional[datetime.datetime]=None,
+        date_only: Optional[bool]=False,
     ) -> Window:
 
         """Date Pickler widget to select exact time and date
@@ -189,6 +198,7 @@ class DateSelectWidget:
         """
         self.value = value
         self.app = app
+        self.date_only = date_only
         self.window = Window(
             content=FormattedTextControl(
                 text=self._get_text,
@@ -198,12 +208,17 @@ class DateSelectWidget:
             height= 10
             )
 
-        self.select_box = JansSelectDate(self.value or datetime.datetime.now(), min_date=min_date)
+        self.select_box = JansSelectDate(self.value or datetime.datetime.now(), min_date=min_date, date_only=self.date_only)
         self.select_box_float = Float(content=self.select_box, xcursor=True, ycursor=True)
 
 
     def _get_text(self)-> AnyFormattedText:
-        text = self.value.strftime(ISOFORMAT) if self.value else _("Enter to Select")
+        if self.value:
+            text = self.value.strftime(ISOFORMAT)
+            if self.date_only:
+                text = text[:10]
+        else:
+            text = _("Enter to Select")
         return HTML(f'&gt; {text} &lt;')
 
     def _get_key_bindings(self)-> KeyBindings:

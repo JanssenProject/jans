@@ -13,6 +13,7 @@ public class PasswordDetails {
     private final PasswordEncryptionMethod algorithm;
     private final byte[] salt;
     private final byte[] password;
+	private Object extendedParameters;
 
     /**
      * Creates a new PasswordDetails instance
@@ -23,7 +24,12 @@ public class PasswordDetails {
         this.password = password;
     }
 
-    /**
+    public PasswordDetails(PasswordEncryptionMethod encryptionMethod, byte[] salt2, byte[] password, Object extendedParameters) {
+    	this(encryptionMethod, salt2, password);
+    	this.extendedParameters = extendedParameters;
+	}
+
+	/**
      * The hash algorithm used to hash the password, null for plain text passwords
      */
     public PasswordEncryptionMethod getAlgorithm() {
@@ -43,5 +49,9 @@ public class PasswordDetails {
     public byte[] getPassword() {
         return password;
     }
+
+	public Object getExtendedParameters() {
+		return extendedParameters;
+	}
 
 }

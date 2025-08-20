@@ -1,12 +1,16 @@
 package io.jans.casa.plugins.strongauthn.vm;
 
 import io.jans.casa.conf.Basic2FASettings;
+import io.jans.casa.core.pojo.User;
+import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.strongauthn.conf.TrustedDevicesSettings;
 import io.jans.casa.plugins.strongauthn.conf.Configuration;
 import io.jans.casa.plugins.strongauthn.conf.EnforcementPolicy;
 import io.jans.casa.plugins.strongauthn.service.StrongAuthSettingsService;
+import io.jans.casa.service.ISessionContext;
 import io.jans.casa.service.settings.IPluginSettingsHandler;
 import io.jans.casa.ui.UIUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.bind.BindUtils;
@@ -36,6 +40,8 @@ public class StrongAuthViewModel {
 
     private IPluginSettingsHandler<Configuration> settingsHandler;
     private Configuration settings;
+    private User user;
+    
     private int minCreds2FA;
     private List<Integer> minCredsList;
     private Set<String> enforcementPolicies;
@@ -98,6 +104,7 @@ public class StrongAuthViewModel {
         logger.debug("Initializing ViewModel");
         settingsHandler = StrongAuthSettingsService.instance().getSettingsHandler();
         settings = settingsHandler.getSettings();
+        user = Utils.managedBean(ISessionContext.class).getLoggedUser();
         reloadConfig();
     }
 
@@ -227,18 +234,21 @@ public class StrongAuthViewModel {
             //update app-level config and persist
             settingsHandler.setSettings(settings);
             settingsHandler.save();
-            if (sucessMessage == null) {
-                UIUtils.showMessageUI(true);
-            } else {
-                Messagebox.show(sucessMessage, null, Messagebox.OK, Messagebox.INFORMATION);
-            }
+            Messagebox.show(sucessMessage, null, Messagebox.OK, Messagebox.INFORMATION);
             success = true;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             UIUtils.showMessageUI(false, Labels.getLabel("adm.conffile_error_update"));
         }
+
+        logActionDetails(Labels.getLabel("adm.strongauth_action"), success);
         return success;
 
+    }
+    
+    void logActionDetails(String action, boolean success) {        
+        logger.debug("{}: result {} - performed by user '{}'", action,
+                success ? "OK" : "FAILED", user.getUserName());
     }
 
 }

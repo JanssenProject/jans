@@ -17,6 +17,12 @@
 		<param-value>false</param-value>
 	</context-param>
 
+	<!-- Weld -->
+	<context-param>
+		<param-name>org.jboss.weld.development</param-name>
+		<param-value>true</param-value>
+	</context-param>
+
 	<listener>
 		<listener-class>org.jboss.weld.environment.servlet.Listener
 		</listener-class>
