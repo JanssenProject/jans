@@ -611,7 +611,7 @@
   },
   "jansSAMLspMetaDataURL": {
     "mysql": {
-      "size": 128,
+      "size": 255,
       "type": "VARCHAR"
     }
   },

@@ -1,13 +1,13 @@
 package io.jans.casa.plugins.branding;
 
+import io.jans.casa.service.IBrandingManager;
+import io.jans.casa.ui.UIUtils;
+import io.jans.casa.misc.Utils;
 import io.jans.util.Pair;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import io.jans.casa.service.IBrandingManager;
-import io.jans.casa.ui.UIUtils;
-import io.jans.casa.misc.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.bind.BindUtils;
