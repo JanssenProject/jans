@@ -6,6 +6,7 @@ import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.config.adminui.AdminPermission;
 import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
+import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
 import io.jans.ca.plugin.adminui.model.auth.AppConfigResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
@@ -53,6 +54,7 @@ public class AdminUIService {
             appConfigResponse.setSessionTimeoutInMins(auiConfiguration.getSessionTimeoutInMins());
             appConfigResponse.setAllowSmtpKeystoreEdit(auiConfiguration.getAllowSmtpKeystoreEdit());
             appConfigResponse.setAdditionalParameters(auiConfiguration.getAdditionalParameters());
+            appConfigResponse.setCedarlingLogType(auiConfiguration.getCedarlingLogType());
 
             return appConfigResponse;
         } catch (Exception e) {
@@ -79,6 +81,10 @@ public class AdminUIService {
             if (appConfigResponse.getAllowSmtpKeystoreEdit() != null) {
                 adminConf.getMainSettings().getUiConfig().setAllowSmtpKeystoreEdit(appConfigResponse.getAllowSmtpKeystoreEdit());
                 auiConfigurationService.getAUIConfiguration().setAllowSmtpKeystoreEdit(appConfigResponse.getAllowSmtpKeystoreEdit());
+            }
+            if (appConfigResponse.getCedarlingLogType() != null) {
+                adminConf.getMainSettings().getUiConfig().setCedarlingLogType(appConfigResponse.getCedarlingLogType().getValue());
+                auiConfigurationService.getAUIConfiguration().setCedarlingLogType(appConfigResponse.getCedarlingLogType());
             }
             entryManager.merge(adminConf);
             return getAdminUIEditableConfiguration();

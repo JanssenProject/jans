@@ -106,7 +106,7 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
             use_user_principal: true,
             use_workload_principal: true,
             principal_bool_operator: JsonRule::default(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         entity_builder_config: EntityBuilderConfig::default().with_workload().with_user(),
@@ -148,7 +148,7 @@ async fn prepare_cedarling_with_jwt_validation(
             use_user_principal: true,
             use_workload_principal: true,
             principal_bool_operator: JsonRule::default(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         entity_builder_config: EntityBuilderConfig::default().with_workload().with_user(),

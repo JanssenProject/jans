@@ -48,8 +48,10 @@ async fn forbid_test_role_guest() {
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
@@ -126,8 +128,10 @@ async fn success_test_role_array() {
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
@@ -206,8 +210,10 @@ async fn success_test_no_role() {
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
@@ -287,8 +293,10 @@ async fn success_test_user_data_in_id_token() {
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
@@ -365,8 +373,10 @@ async fn all_forbid() {
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
@@ -441,8 +451,10 @@ async fn only_workload_permit() {
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
@@ -524,8 +536,10 @@ async fn only_person_permit() {
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
@@ -600,8 +614,10 @@ async fn only_user_role_permit() {
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
@@ -675,8 +691,10 @@ async fn only_workload_and_person_permit() {
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
@@ -750,8 +768,10 @@ async fn only_workload_and_role_permit() {
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },

@@ -19,6 +19,7 @@ This guide explores the process of generating the Kotlin binding for Cedarling u
 ```bash
 cargo build -r -p cedarling_uniffi
 ```
+
 In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
 
 2. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
@@ -53,6 +54,7 @@ To use Cedarling Java bindings in Java Maven Project add following `repository` 
         </repository>
     </repositories>
 ```
+
 ```declarative
         <dependency>
             <groupId>io.jans</groupId>
@@ -71,16 +73,43 @@ To use Cedarling Java bindings in Java Maven Project add following `repository` 
 2. Upload the generated `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
 3. The following Post Authn script has been created for calling Cedarling authorization. Add and enable the following [Post Authn custom script](./docs/sample_cedarling_post_authn.java) (in Java) with following Custom Properties. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
 
-|Key|Values|
-|---|------|
-|BOOTSTRAP_JSON_PATH|./custom/static/bootstrap.json|
-|ACTION_FILE_PATH|./custom/static/action.txt|
-|RESOURCE_FILE_PATH|./custom/static/resource.json|
-|CONTEXT_FILE_PATH|./custom/static/context.json|
-|PRINCIPALS_FILE_PATH|./custom/static/principals.json|
+| Key                  | Values                          |
+| -------------------- | ------------------------------- |
+| BOOTSTRAP_JSON_PATH  | ./custom/static/bootstrap.json  |
+| ACTION_FILE_PATH     | ./custom/static/action.txt      |
+| RESOURCE_FILE_PATH   | ./custom/static/resource.json   |
+| CONTEXT_FILE_PATH    | ./custom/static/context.json    |
+| PRINCIPALS_FILE_PATH | ./custom/static/principals.json |
 
 4. Map the script with client used to perform authentication.
 
 ![](./docs/mapping_post_authn_script_with_client.png)
 
 5. The script runs after client authentication to invoke Cedarling authz.
+
+## Configuration
+
+### ID Token Trust Mode
+
+The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
+
+- **`strict`** (default): Enforces strict validation rules
+  - ID token `aud` must match access token `client_id`
+  - If userinfo token is present, its `sub` must match the ID token `sub`
+- **`never`**: Disables ID token validation (useful for testing)
+- **`always`**: Always validates ID tokens when present
+- **`ifpresent`**: Validates ID tokens only if they are provided
+
+### Testing Configuration
+
+For testing scenarios, you may want to disable JWT validation. You can configure this in your bootstrap configuration:
+
+```json
+{
+  "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+  "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+  "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+}
+```
+
+For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md).

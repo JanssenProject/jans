@@ -334,7 +334,7 @@ class JCA_CLI:
                 user_info = jwt.decode(config['DEFAULT']['user_data'],
                                     options={
                                             'verify_signature': False,
-                                            'verify_exp': True,
+                                            'verify_exp': False,
                                             'verify_aud': False
                                              }
                                     )
@@ -351,7 +351,19 @@ class JCA_CLI:
             file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s"))
             self.cli_logger.addHandler(file_handler)
             def print_to_log(*args):
-                self.cli_logger.debug(" ".join(args))
+                log_args = list(args)
+                # don't log passwords
+                if log_args and log_args[0].startswith('send:'):
+                    try:
+                        log_data = json.loads(log_args[1].strip("b").strip("'"))
+                        for prop in log_data:
+                            if prop in ('userPassword', 'clientSecret'):
+                                log_data[prop] = '*****'
+                        log_args[1] = str(log_data)
+                    except Exception as e:
+                        pass
+
+                self.cli_logger.debug(" ".join(log_args))
             http.client.print = print_to_log
 
 
@@ -363,13 +375,19 @@ class JCA_CLI:
 
     def log_cmd(self, operation_id, url_suffix, endpoint_args, data):
 
+        log_data = copy.deepcopy(data)
+        # don't log passwords
+        for prop in log_data:
+            if prop in ('userPassword', 'clientSecret'):
+                log_data[prop] = '*****'
+
         cmdl = [sys.executable, __file__, '--operation-id', operation_id]
         if url_suffix:
             cmdl += ['--url-suffix', '"{}"'.format(url_suffix)]
         if endpoint_args:
             cmdl += ['--endpoint-args', '"{}"'.format(endpoint_args)]
         if data:
-            cmdl += ['--data', "'{}'".format(json.dumps(data))]
+            cmdl += ['--data', "'{}'".format(json.dumps(log_data))]
 
         with open(os.path.join(log_dir, 'cli_cmd.log'), 'a') as w:
             w.write(' '.join(cmdl) + '\n')
@@ -420,6 +438,7 @@ class JCA_CLI:
 
             user = self.get_user_info()
             if 'inum' in user:
+                headers['User-inum'] = user['inum']
                 headers['User-inum'] = user['inum']
 
         ret_val = {'Authorization': 'Bearer {}'.format(access_token)}
