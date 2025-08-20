@@ -31,6 +31,13 @@ For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/ja
 
 - Install the Janssen Tarp [on Chrome or Firefox](https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md).
 
+## Implement RBAC using Cedarling
+
+In this section, we will see how to implement the role-based access control
+using the Cedarling when
+the information about the principal is supplied by the host application. We can
+call this approach [the application asserted identity approach](./README.md#token-based-access-control-tbac-v-application-asserted-identity).
+
 ### Step-1: Create the Cedar Policy and Schema
 
 The Cedarling needs policies and a schema to authorize access. These are bundled in a _policy store_ (a JSON file). To aid in this quick start guide, we have already created a 
@@ -168,7 +175,7 @@ And click `Cedarling Authz Request` again. Cedarling will return a new result:
 The top-level `decision: false` shows Cedarling denying authorization.
 
 
-## Implement TBAC Using Cedarling
+## Implement RBAC using signed tokens (TBAC)
 
 In this guide, we will use [Token-Based Access Control (TBAC)](./README.md#token-based-access-control-tbac-v-application-asserted-identity) to 
 implement role-based access control (RBAC). 
