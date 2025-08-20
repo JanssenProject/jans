@@ -153,16 +153,15 @@ public class SessionValidationService {
                     return false;
                 }
                 
-                // Check for fallback values
-                if (browserVersion.equals("0.0.0") || browserVersion.equals("100.0.0")) {
+                // Check for fallback values - use more flexible validation
+                if (isFallbackVersion(browserVersion)) {
                     logger.debug("Chrome version appears to be fallback value: {}", browserVersion);
                     return false;
                 }
             }
             
-            // Check for suspicious OS version numbers
-            if (osVersion.equals("0.0.0") || osVersion.equals("10.0.0") || 
-                osVersion.equals("12.0.0") || osVersion.equals("5.0.0")) {
+            // Check for suspicious OS version numbers - use more flexible validation
+            if (isFallbackVersion(osVersion)) {
                 logger.debug("OS version appears to be fallback value: {}", osVersion);
                 return false;
             }
@@ -172,5 +171,32 @@ public class SessionValidationService {
             logger.debug("Error validating device data: {}", e.getMessage());
             return false;
         }
+    }
+    
+    /**
+     * Checks if a version string appears to be a fallback value
+     * @param version version string to check
+     * @return true if it appears to be a fallback value
+     */
+    private boolean isFallbackVersion(String version) {
+        if (version == null) return true;
+        
+        // Check for common fallback patterns
+        String[] fallbackPatterns = {
+            "0.0.0", "100.0.0", "999.0.0", "1.0.0", "10.0.0", "12.0.0", "5.0.0"
+        };
+        
+        for (String pattern : fallbackPatterns) {
+            if (pattern.equals(version)) {
+                return true;
+            }
+        }
+        
+        // Check for version patterns that are too generic
+        if (version.matches("\\d+\\.0\\.0") || version.matches("\\d+\\.\\d+\\.0")) {
+            return true;
+        }
+        
+        return false;
     }
 }

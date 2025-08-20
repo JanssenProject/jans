@@ -47,63 +47,17 @@ public class TrustedDevicesManager {
         if (device == null) return false; 
         logger.debug("Checking if user's device is known");
 
-        // Additional validation to prevent false positives
-        if (!isDeviceDataValid()) {
+        // Use centralized device validation service
+        io.jans.casa.core.SessionValidationService validationService = 
+            io.jans.service.cdi.util.CdiUtil.bean(io.jans.casa.core.SessionValidationService.class);
+        
+        if (!validationService.isDeviceDataValid(device.toString())) {
             logger.debug("Device data validation failed, treating as unknown device");
             return false;
         }
 
         return findDevice(device, trustedDevices) != -1;
 
-    }
-
-    /**
-     * Validates that the device data is complete and reliable for matching
-     */
-    private boolean isDeviceDataValid() {
-        try {
-            String browserName = device.optString("name");
-            String browserVersion = device.optString("version");
-            String osName = device.optString("osName");
-            String osVersion = device.optString("osVersion");
-            
-            // Check for required fields
-            if (browserName == null || browserName.trim().isEmpty() ||
-                browserVersion == null || browserVersion.trim().isEmpty() ||
-                osName == null || osName.trim().isEmpty() ||
-                osVersion == null || osVersion.trim().isEmpty()) {
-                
-                logger.debug("Device data missing required fields");
-                return false;
-            }
-            
-            // Additional validation for Chrome
-            if ("Chrome".equalsIgnoreCase(browserName)) {
-                // Ensure Chrome version is in proper format
-                if (!browserVersion.matches("\\d+\\.\\d+\\.\\d+.*")) {
-                    logger.debug("Chrome version format invalid: {}", browserVersion);
-                    return false;
-                }
-                
-                // Check for suspicious version numbers that might indicate detection issues
-                if (browserVersion.equals("0.0.0") || browserVersion.equals("100.0.0")) {
-                    logger.debug("Chrome version appears to be fallback value: {}", browserVersion);
-                    return false;
-                }
-            }
-            
-            // Check for suspicious OS version numbers
-            if (osVersion.equals("0.0.0") || osVersion.equals("10.0.0") || 
-                osVersion.equals("12.0.0") || osVersion.equals("5.0.0")) {
-                logger.debug("OS version appears to be fallback value: {}", osVersion);
-                return false;
-            }
-            
-            return true;
-        } catch (Exception e) {
-            logger.debug("Error validating device data: {}", e.getMessage());
-            return false;
-        }
     }
 
     public boolean knownLocation() {

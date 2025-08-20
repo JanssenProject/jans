@@ -110,44 +110,11 @@ public class UserAuthnUtil {
      * This prevents issues with stale or incomplete device fingerprints
      */
     private boolean isValidDeviceData() {
-        if (jsonDevice == null || jsonDevice.trim().isEmpty()) {
-            logger.debug("Device data is null or empty");
-            return false;
-        }
+        // Use centralized device validation service
+        io.jans.casa.core.SessionValidationService validationService = 
+            io.jans.service.cdi.util.CdiUtil.bean(io.jans.casa.core.SessionValidationService.class);
         
-        try {
-            // Parse the device JSON to validate it has required fields
-            org.json.JSONObject device = new org.json.JSONObject(jsonDevice);
-            String browserName = device.optString("name");
-            String browserVersion = device.optString("version");
-            String osName = device.optString("osName");
-            String osVersion = device.optString("osVersion");
-            
-            // Check if all required fields are present and not empty
-            if (browserName == null || browserName.trim().isEmpty() ||
-                browserVersion == null || browserVersion.trim().isEmpty() ||
-                osName == null || osName.trim().isEmpty() ||
-                osVersion == null || osVersion.trim().isEmpty()) {
-                
-                logger.debug("Device data is incomplete: browserName={}, browserVersion={}, osName={}, osVersion={}", 
-                           browserName, browserVersion, osName, osVersion);
-                return false;
-            }
-            
-            // Additional validation for Chrome-specific issues
-            if ("Chrome".equalsIgnoreCase(browserName)) {
-                // For Chrome, ensure we have a valid version string
-                if (!browserVersion.matches("\\d+\\.\\d+\\.\\d+.*")) {
-                    logger.debug("Chrome version format is invalid: {}", browserVersion);
-                    return false;
-                }
-            }
-            
-            return true;
-        } catch (Exception e) {
-            logger.debug("Failed to parse device JSON: {}", e.getMessage());
-            return false;
-        }
+        return validationService.isDeviceDataValid(jsonDevice);
     }
 
     /**
