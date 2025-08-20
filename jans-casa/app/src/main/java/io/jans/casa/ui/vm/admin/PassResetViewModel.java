@@ -5,6 +5,7 @@ import io.jans.casa.core.PasswordStatusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.bind.annotation.Init;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 
 /**
@@ -36,8 +37,8 @@ public class PassResetViewModel extends MainViewModel {
         this.passPolicy = passPolicy;
     }
 
-    @Init
-    public void init() {
+    @Init(superclass = true)
+    public void childInit() {
         MainSettings ms = getSettings();
         passResetEnabled = ms.isEnablePassReset();
         passPolicy = ms.isUsePasswordPolicy();        
@@ -49,7 +50,9 @@ public class PassResetViewModel extends MainViewModel {
         ms.setEnablePassReset(passResetEnabled);
         ms.setUsePasswordPolicy(passPolicy);
         
-        updateMainSettings();
+        if (updateMainSettings(Labels.getLabel("adm.passreset_action"))) {
+            logger.info("Password reset availability changed to {}. Enforce password policy changed to {}", passResetEnabled, passPolicy);
+        }
         pst.reloadStatus();
 
     }

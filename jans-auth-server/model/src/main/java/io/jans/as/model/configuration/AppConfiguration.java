@@ -100,6 +100,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL for Pushed Authorisation Request (PAR) Endpoint")
     private String parEndpoint;
 
+    @DocProperty(description = "Boolean value to indicate whether to allow client assertion 'aud' without strict server issuer match. Default value is false which means that server requires strict match.", defaultValue = "false")
+    private Boolean allowClientAssertionAudWithoutStrictIssuerMatch = false;
+
     @DocProperty(description = "Boolean value to indicate of Pushed Authorisation Request(PAR)is required", defaultValue = "false")
     private Boolean requirePar = false;
 
@@ -1999,6 +2002,16 @@ public class AppConfiguration implements Configuration {
 
     public void setParEndpoint(String parEndpoint) {
         this.parEndpoint = parEndpoint;
+    }
+
+    public Boolean getAllowClientAssertionAudWithoutStrictIssuerMatch() {
+        if (allowClientAssertionAudWithoutStrictIssuerMatch == null) allowClientAssertionAudWithoutStrictIssuerMatch = false;
+        return allowClientAssertionAudWithoutStrictIssuerMatch;
+    }
+
+    public AppConfiguration setAllowClientAssertionAudWithoutStrictIssuerMatch(Boolean allowClientAssertionAudWithoutStrictIssuerMatch) {
+        this.allowClientAssertionAudWithoutStrictIssuerMatch = allowClientAssertionAudWithoutStrictIssuerMatch;
+        return this;
     }
 
     public Boolean getRequirePar() {

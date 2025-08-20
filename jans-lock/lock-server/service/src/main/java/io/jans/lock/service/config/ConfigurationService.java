@@ -63,7 +63,7 @@ public class ConfigurationService {
 
         ObjectNode config = objectMapper.createObjectNode();
         response.set("config", config);
-        config.put("config_endpoint", baseEndpointUri + "/config");
+        config.put("config_endpoint", baseEndpointUri + "/configuration");
         config.put("issuers_endpoint", baseEndpointUri + "/config/issuers");
         config.put("policy_endpoint", baseEndpointUri + "/config/policy");
         config.put("schema_endpoint", baseEndpointUri + "/config/schema");

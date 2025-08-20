@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="FIDO2 Device Registration Test Suite" verbose="1">
+    <test name="FIDO2 Device Registration Basic Test">
+        <classes>
+            <class name="io.jans.fido2.test.integration.Fido2DeviceRegistrationBasicTest"/>
+        </classes>
+    </test>
+    <test name="FIDO2 Device Registration Enhanced Test">
+        <classes>
+            <class name="io.jans.fido2.test.integration.Fido2DeviceRegistrationEnhancedTest"/>
+        </classes>
+    </test>
+</suite> 

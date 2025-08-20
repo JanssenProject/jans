@@ -42,8 +42,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /.well-known/openid-configuration
-            pathType: Exact
+          - path: /.well-known/openid-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
@@ -98,8 +98,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /device-code
-            pathType: Exact
+          - path: /device-code$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
@@ -154,8 +154,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /firebase-messaging-sw.js
-            pathType: Exact
+          - path: /firebase-messaging-sw.js$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
@@ -210,8 +210,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /.well-known/uma2-configuration
-            pathType: Exact
+          - path: /.well-known/uma2-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
@@ -266,8 +266,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /.well-known/webfinger
-            pathType: Exact
+          - path: /.well-known/webfinger$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
@@ -322,8 +322,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /.well-known/simple-web-discovery
-            pathType: Exact
+          - path: /.well-known/simple-web-discovery$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
@@ -378,8 +378,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /.well-known/scim-configuration
-            pathType: Exact
+          - path: /.well-known/scim-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.global.scim.scimServiceName }}
@@ -546,8 +546,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /.well-known/fido-configuration
-            pathType: Exact
+          - path: /.well-known/fido-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
@@ -603,8 +603,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /.well-known/fido2-configuration
-            pathType: Exact
+          - path: /.well-known/fido2-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.global.fido2.fido2ServiceName }}
@@ -716,8 +716,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /.well-known/webauthn
-            pathType: Exact
+          - path: /.well-known/webauthn$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.global.fido2.fido2ServiceName }}
@@ -919,7 +919,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/v1/configuration
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/api/v1/configuration
 {{- if index .Values.global "auth-server" "ingress" "lockConfigAdditionalAnnotations" }}
 {{ toYaml (index .Values.global "auth-server" "ingress" "lockConfigAdditionalAnnotations") | indent 4 }}
 {{- end }}
@@ -945,8 +945,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /.well-known/lock-server-configuration
-            pathType: Exact
+          - path: /.well-known/lock-server-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
@@ -1059,8 +1059,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /.well-known/authzen-configuration
-            pathType: Exact
+          - path: /.well-known/authzen-configuration$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
