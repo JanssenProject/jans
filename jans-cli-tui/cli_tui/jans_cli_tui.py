@@ -62,7 +62,10 @@ jans_logo = '\n'.join(jans_logo_list)
 clear()
 print(jans_logo)
 ### end splash logo
-
+no_gorn = False
+if '--noGorn' in sys.argv:
+    sys.argv.remove('--noGorn')
+    no_gorn = True
 # 10% chance to show the defeat gorn game (unless disabled with --noGorn)
 if not no_gorn and random.random() < 0.10:  # 10% chance
     try:
@@ -99,11 +102,6 @@ no_tui = False
 if '--no-tui' in sys.argv:
     sys.argv.remove('--no-tui')
     no_tui = True
-
-no_gorn = False
-if '--noGorn' in sys.argv:
-    sys.argv.remove('--noGorn')
-    no_gorn = True
 
 
 def print_text(txt):
