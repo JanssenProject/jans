@@ -25,15 +25,15 @@
 
 ## Releases
 
-Instead of building from source code, you can download and install `janssen-tarp` directly in your browser. Look for the `demo-janssen-tarp-chrome-v{x.x.x}.zip` and `demo-janssen-tarp-firefox-v{x.x.x}.xpi` assets in the release section at https://github.com/JanssenProject/jans/releases.
+Instead of building from source code, you can download and install `janssen-tarp` directly in your browser. Look for the `demo-janssen-tarp-chrome-v{x.x.x}.zip` and `demo-janssen-tarp-firefox-v{x.x.x}.xpi` assets in the release section at https://github.com/JanssenProject/jans/releases/latest.
 
 ## Installation in browser
 
 ### Chrome
-
-1. Go to `Settings --> Extensions` of Chrome browser.
-2. Switch on the `Developer mode`.
-3. Click on `Load unpacked` button to load the extension and select the build created in `/janssen-tarp/dist/chrome` directory.
+1. Unzip the downloaded `demo-janssen-tarp-chrome-v{x.x.x}.zip`file
+2. Open Chrome and go to `Settings > Extensions`.
+3. Enable `Developer mode` at the top right.
+4. Click the `Load unpacked` button, and select the unzipped folder `demo-janssen-tarp-chrome-v{x.x.x}`.
 
 ### Firefox
 

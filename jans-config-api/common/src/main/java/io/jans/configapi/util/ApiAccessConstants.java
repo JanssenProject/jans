@@ -15,6 +15,10 @@ public class ApiAccessConstants {
     public static final String ACRS_READ_ACCESS = "https://jans.io/oauth/config/acrs.readonly";
     public static final String ACRS_WRITE_ACCESS = "https://jans.io/oauth/config/acrs.write";
 
+    public static final String DATABASE_READ_ACCESS = "https://jans.io/oauth/config/database.readonly";
+    public static final String DATABASE_WRITE_ACCESS = "https://jans.io/oauth/config/database.write";
+    public static final String DATABASE_DELETE_ACCESS = "https://jans.io/oauth/config/database.delete";
+
     public static final String DATABASE_LDAP_READ_ACCESS = "https://jans.io/oauth/config/database/ldap.readonly";
     public static final String DATABASE_LDAP_WRITE_ACCESS = "https://jans.io/oauth/config/database/ldap.write";
     public static final String DATABASE_LDAP_DELETE_ACCESS = "https://jans.io/oauth/config/database/ldap.delete";

@@ -4,7 +4,7 @@
     <groupId>io.jans</groupId>
     <artifactId>jans-kc-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.9.0</version>
+    <version>0.0.0-nightly</version>
     <name>keycloak-integration-parent</name>
 
     <distributionManagement>
@@ -369,8 +369,13 @@
                 <excludeTransitive>false</excludeTransitive>
                 <excludeGroupIds>
                   com.sun.activation,
+                  com.sun.mail,
                   jakarta.activation,
                   jakarta.annotation,
+                  jakarta.enterprise,
+                  jakarta.inject,
+                  jakarta.interceptor,
+                  jakarta.mail,
                   jakarta.servlet,
                   jakarta.validation,
                   jakarta.xml.bind,

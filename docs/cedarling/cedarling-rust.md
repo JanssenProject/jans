@@ -8,43 +8,9 @@ tags:
 
 # Cedarling Rust Developer Guide
 
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Building](#building)
-- [Usage](#usage)
-- [API Reference](#api-reference)
-- [Configuration](#configuration)
-- [Examples](#examples)
-- [Testing and Debugging](#testing-and-debugging)
+## Including in the project
 
-## Requirements
-
-### Rust Installation
-
-If you haven't installed Rust yet, follow the official installation guide:
-
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
-
-After installation, restart your terminal or run:
-
-```bash
-source $HOME/.cargo/env
-```
-
-Verify the installation:
-
-```bash
-rustc --version
-cargo --version
-```
-
-## Installation
-
-The Cedarling Rust library is not yet available on [crates.io](https://crates.io), so you need to include it directly from the source in your project.
-
-### Adding to Your Project
+The Cedarling library is not yet uploaded to [crates.io](jans-cedarling), so the only way to use it right now is by including it directly from the source in your project.
 
 **1. Clone the Jans repository**
 
@@ -72,7 +38,17 @@ cedarling = { git = "https://github.com/JanssenProject/jans", package = "cedarli
 
 ## Building
 
-### Building from Source
+### Building Cedarling
+
+To build an executable library for Cedarling, follow the instructions 
+[here](getting-started/rust.md#building-from-source).
+
+### Building Examples
+
+The Cedarling project includes several examples that demonstrate different 
+use cases. Follow the steps below to build these examples.
+
+### Building Examples
 
 **1. Clone the repository**
 
@@ -99,9 +75,7 @@ cargo test --workspace
 cargo doc -p cedarling --no-deps --open
 ```
 
-### Building Examples
-
-The Cedarling project includes several examples that demonstrate different use cases:
+**5. Build examples**
 
 ```bash
 # Run JWT validation example
@@ -110,241 +84,17 @@ cargo run -p cedarling --example authorize_with_jwt_validation
 # Run unsigned authorization example
 cargo run -p cedarling --example authorize_unsigned
 
-# Run logging example
+# Stdout logging
 cargo run -p cedarling --example log_init -- stdout
-```
 
-## Usage
+# Memory logging with TTL
+cargo run -p cedarling --example log_init -- memory 3600
 
-### Initialization
+# Disable logging
+cargo run -p cedarling --example log_init -- off
 
-The first step is to initialize Cedarling with your configuration:
-
-```rust
-use cedarling::*;
-use std::collections::HashSet;
-use jsonwebtoken::Algorithm;
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Configure JWT validation settings
-    let jwt_config = JwtConfig {
-        jwks: None,
-        jwt_sig_validation: true,
-        jwt_status_validation: false,
-        signature_algorithms_supported: HashSet::from_iter([
-            Algorithm::HS256,
-            Algorithm::RS256
-        ]),
-    };
-
-    // Initialize Cedarling with configuration
-    let cedarling = Cedarling::new(&BootstrapConfig {
-        application_name: "my_app".to_string(),
-        log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
-            log_level: LogLevel::INFO,
-        },
-        policy_store_config: PolicyStoreConfig {
-            source: PolicyStoreSource::Yaml(POLICY_STORE_YAML.to_string()),
-        },
-        jwt_config,
-        authorization_config: AuthorizationConfig {
-            use_user_principal: true,
-            use_workload_principal: true,
-            principal_bool_operator: JsonRule::new(serde_json::json!({
-                "and": [
-                    {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
-                    {"===": [{"var": "Jans::User"}, "ALLOW"]}
-                ]
-            })).unwrap(),
-            ..Default::default()
-        },
-        entity_builder_config: EntityBuilderConfig::default()
-            .with_user()
-            .with_workload(),
-        lock_config: None,
-    }).await?;
-
-    Ok(())
-}
-```
-
-### Token-Based Authorization
-
-Token-based authorization uses JWT tokens to extract principal information:
-
-```rust
-use cedarling::*;
-use std::collections::HashMap;
-use serde_json::json;
-
-async fn perform_token_authorization(cedarling: &Cedarling) -> Result<(), Box<dyn std::error::Error>> {
-    // 1. Prepare JWT tokens
-    let access_token = "your_access_token_here".to_string();
-    let id_token = "your_id_token_here".to_string();
-    let userinfo_token = "your_userinfo_token_here".to_string();
-
-    // 2. Define the resource
-    let resource = EntityData {
-        entity_type: "Jans::Application".to_string(),
-        id: "app_id_001".to_string(),
-        attributes: HashMap::from_iter([
-            ("protocol".to_string(), json!("https")),
-            ("host".to_string(), json!("example.com")),
-            ("path".to_string(), json!("/admin-dashboard")),
-        ]),
-    };
-
-    // 3. Define the action
-    let action = r#"Jans::Action::"Read""#.to_string();
-
-    // 4. Define context
-    let context = json!({
-        "current_time": std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_millis(),
-        "device_health": ["Healthy"],
-        "fraud_indicators": ["Allowed"],
-        "geolocation": ["America"],
-        "network": "127.0.0.1",
-        "network_type": "Local",
-        "operating_system": "Linux",
-        "user_agent": "Linux"
-    });
-
-    // 5. Build the request
-    let request = Request {
-        tokens: HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
-        ]),
-        action,
-        resource,
-        context,
-    };
-
-    // 6. Perform authorization
-    let result = cedarling.authorize(request).await?;
-
-    match result.decision {
-        true => println!("Access granted"),
-        false => println!("Access denied: {:?}", result.diagnostics),
-    }
-
-    Ok(())
-}
-```
-
-### Unsigned Authorization
-
-Unsigned authorization allows you to pass principals directly without JWT tokens:
-
-```rust
-use cedarling::*;
-use std::collections::HashMap;
-use serde_json::json;
-
-async fn perform_unsigned_authorization(cedarling: &Cedarling) -> Result<(), Box<dyn std::error::Error>> {
-    // 1. Define principals directly
-    let principals = vec![
-        EntityData {
-            entity_type: "Jans::Workload".to_string(),
-            id: "some_workload_id".to_string(),
-            attributes: HashMap::from_iter([
-                ("client_id".to_string(), json!("some_client_id")),
-            ]),
-        },
-        EntityData {
-            entity_type: "Jans::User".to_string(),
-            id: "random_user_id".to_string(),
-            attributes: HashMap::from_iter([
-                ("roles".to_string(), json!(["admin", "manager"])),
-                ("email".to_string(), json!("user@example.com")),
-            ]),
-        },
-    ];
-
-    // 2. Define the resource
-    let resource = EntityData {
-        entity_type: "Jans::Application".to_string(),
-        id: "app_id_001".to_string(),
-        attributes: HashMap::from_iter([
-            ("protocol".to_string(), json!("https")),
-            ("host".to_string(), json!("example.com")),
-            ("path".to_string(), json!("/admin-dashboard")),
-        ]),
-    };
-
-    // 3. Define the action
-    let action = r#"Jans::Action::"Update""#.to_string();
-
-    // 4. Define context
-    let context = json!({
-        "current_time": std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_millis(),
-        "device_health": ["Healthy"],
-        "fraud_indicators": ["Allowed"],
-        "geolocation": ["America"],
-        "network": "127.0.0.1",
-        "network_type": "Local",
-        "operating_system": "Linux",
-        "user_agent": "Linux"
-    });
-
-    // 5. Build the unsigned request
-    let request = RequestUnsigned {
-        principals,
-        action,
-        resource,
-        context,
-    };
-
-    // 6. Perform authorization
-    let result = cedarling.authorize_unsigned(request).await?;
-
-    match result.decision {
-        true => println!("Access granted"),
-        false => println!("Access denied: {:?}", result.diagnostics),
-    }
-
-    Ok(())
-}
-```
-
-### Log Retrieval
-
-Cedarling provides comprehensive logging capabilities:
-
-```rust
-use cedarling::*;
-
-async fn retrieve_logs(cedarling: &Cedarling) -> Result<(), Box<dyn std::error::Error>> {
-    // Get all log IDs
-    let log_ids = cedarling.get_log_ids();
-    println!("Available log IDs: {:?}", log_ids);
-
-    // Get specific log by ID
-    for id in &log_ids {
-        if let Some(log_entry) = cedarling.get_log_by_id(id) {
-            println!("Log entry {}: {:?}", id, log_entry);
-        }
-    }
-
-    // Pop all logs (retrieves and clears the buffer)
-    let logs = cedarling.pop_logs();
-    println!("Retrieved {} log entries", logs.len());
-
-    for (i, log) in logs.iter().enumerate() {
-        println!("Log {}: {:?}", i, log);
-    }
-
-    Ok(())
-}
+# Lock Server Integration
+cargo run -p cedarling --example lock_integration
 ```
 
 ### Complete Example
@@ -397,8 +147,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Perform unsigned authorization
     let principals = vec![EntityData {
-        entity_type: "Jans::User".to_string(),
-        id: "test_user".to_string(),
+        cedar_entity_mapping: CedarEntityMapping {
+            entity_type: "Jans::User".to_string(),
+            id: "test_user".to_string(),
+        },
         attributes: HashMap::from_iter([
             ("roles".to_string(), json!(["admin"])),
             ("email".to_string(), json!("admin@example.com")),
@@ -406,8 +158,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }];
 
     let resource = EntityData {
-        entity_type: "Jans::Application".to_string(),
-        id: "admin_panel".to_string(),
+        cedar_entity_mapping: CedarEntityMapping {
+            entity_type: "Jans::Application".to_string(),
+            id: "admin_panel".to_string(),
+        },
         attributes: HashMap::from_iter([
             ("permission_level".to_string(), json!("admin")),
         ]),
@@ -435,15 +189,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Core Types
 
-#### `Cedarling`
+- `Cedarling`
 
-The main struct for interacting with Cedarling.
+    The main struct for interacting with Cedarling.
 
-```rust
-pub struct Cedarling {
-    // Implementation details
-}
-```
+    ```rust
+    pub struct Cedarling {
+        // Implementation details
+    }
+    ```
 
 #### `BootstrapConfig`
 
@@ -493,9 +247,19 @@ Represents an entity in the authorization system.
 
 ```rust
 pub struct EntityData {
+    pub cedar_entity_mapping: CedarEntityMapping,
+    pub attributes: HashMap<String, serde_json::Value>,
+}
+```
+
+#### `CedarEntityMapping`
+
+Represents the entity type and id mapping.
+
+```rust
+pub struct CedarEntityMapping {
     pub entity_type: String,
     pub id: String,
-    pub attributes: HashMap<String, serde_json::Value>,
 }
 ```
 
@@ -581,40 +345,7 @@ let config = BootstrapConfig::from_json(json_string)?;
 let config = BootstrapConfig::from_file("config.json")?;
 ```
 
-## Examples
 
-The Cedarling project includes several examples in the `examples/` directory:
-
-### JWT Validation Example
-
-```bash
-cargo run -p cedarling --example authorize_with_jwt_validation
-```
-
-### Unsigned Authorization Example
-
-```bash
-cargo run -p cedarling --example authorize_unsigned
-```
-
-### Logging Examples
-
-```bash
-# Stdout logging
-cargo run -p cedarling --example log_init -- stdout
-
-# Memory logging with TTL
-cargo run -p cedarling --example log_init -- memory 3600
-
-# Disable logging
-cargo run -p cedarling --example log_init -- off
-```
-
-### Lock Server Integration
-
-```bash
-cargo run -p cedarling --example lock_integration
-```
 
 ## Testing and Debugging
 
@@ -674,8 +405,8 @@ let config = BootstrapConfig {
 
 ## See Also
 
-- [Getting Started with Cedarling Rust](../getting-started/rust.md)
-- [Cedarling TBAC quickstart](../cedarling-quick-start-tbac.md)
-- [Cedarling Unsigned quickstart](../cedarling-quick-start-unsigned.md)
-- [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
-- [Cedarling Properties](../cedarling-properties.md)
+- [Getting Started with Cedarling Rust](getting-started/rust.md)
+- [Cedarling TBAC quickstart](cedarling-quick-start.md#implement-tbac-using-cedarling)
+- [Cedarling Unsigned quickstart](cedarling-quick-start.md#authorization-using-the-cedarling)
+- [Cedarling Sidecar Tutorial](cedarling-sidecar-tutorial.md)
+- [Cedarling Properties](cedarling-properties.md)

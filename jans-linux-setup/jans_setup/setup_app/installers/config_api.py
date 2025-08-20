@@ -211,7 +211,7 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['config_api_scopes_list'] = ' '.join(scopes_id_list)
 
 
-    def load_test_data(self):
+    def app_test_data_loader(self):
         if not self.installed():
             return
 
@@ -228,17 +228,10 @@ class ConfigApiInstaller(JettyInstaller):
 
 
         self.logIt("Loding Jans Config Api test data")
-
-        if not base.argsp.t:
-            self.render_templates_folder(os.path.join(Config.templateFolder, 'test/jans-config-api'))
-
-        template_fn = os.path.join(Config.templateFolder, 'test/jans-config-api/data/jans-config-api.ldif')
-
-        template_text = self.readFile(template_fn)
-        rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
-        out_fn = os.path.join(self.output_folder, os.path.basename(template_fn))
-        self.writeFile(out_fn, rendered_text)
-        self.dbUtils.import_ldif([out_fn])
+        self.update_rendering_dict()
+        self.render_templates_folder(os.path.join(Config.templateFolder, 'test', self.service_name))
+        ldif_fn = os.path.join(Config.output_dir, 'test', self.service_name, 'data/jans-config-api.ldif')
+        self.dbUtils.import_ldif([ldif_fn])
 
     def update_jansservicemodule(self):
         # this function is called by jans.py: JansInstaller.post_install_tasks()

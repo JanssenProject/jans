@@ -85,14 +85,16 @@ async fn check_mapping_tokens_data() {
             },
             "action": "Jans::Action::\"Search\"",
             "resource": {
-                "id": "SomeID",
-                "type": "Jans::Application",
-                "app_id":"1234",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Application",
+                    "id": "SomeID"
+                },
+                "app_id": "1234",
                 "name": "some_app",
-                "url":{
+                "url": {
                     "host": "test-casa.gluu.info",
-                    "path":"/",
-                    "protocol":"https",
+                    "path": "/",
+                    "protocol": "https"
                 }
             },
             "context": {
