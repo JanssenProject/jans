@@ -1,5 +1,5 @@
 # FROM blazemeter/taurus:master-f96971fa-2022-12-12
-FROM blazemeter/taurus:1.16.41@sha256:e346b19420ca1d4e303a426172fef6611675e1a7e2a5a0327eb4c99ed08e5d97
+FROM blazemeter/taurus:1.16.45@sha256:8b867cb7ea6a0595020553eac68fd3fe97ac702bdd1daaf3c4d3a84120159979
 
 # ===============
 # Ubuntu packages
@@ -24,6 +24,7 @@ ENV FQDN="https://demoexample.jans.io" \
     ROPC_CLIENT_SECRET="" \
     DCR_CLIENT_ID="" \
     DCR_CLIENT_SECRET="" \
+    RUN_AUTHZ_SOAK_TEST=false \
     RUN_AUTHZ_TEST=false \
     RUN_ROPC_TEST=false \
     RUN_DCR_TEST=false \

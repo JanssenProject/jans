@@ -7,7 +7,6 @@ tags:
 
 # Accounts linking project configuration
 
-## Overview
 
 The accounts linking Agama project must be configured in order to integrate third-party identity providers. The configuration of this project is supplied in a JSON file whose structure is like:
 
@@ -43,7 +42,7 @@ Each property part of the JSON object `io.jans.casa.auth.acctlinking` holds the 
 
 In this case, we are populating the configuration of an OAuth-based provider called "Goooogle". 
 
-The tables shown in [this](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/agama-catalog/jans/inboundID/README.md#supply-configurations) page list all possible properties to configure a provider. Particularly, two properties deserve the most detail:
+The tables shown in [this](../../../agama-catalog/jans/inboundID/README.md#supply-configurations) page list all possible properties to configure a provider. Particularly, two properties deserve the most detail:
 
 1. `flowQname`. Agama projects are made up of flows - think of small "web journeys". This property must contain the name of an existing flow capable of interfacing with the identity provider of interest. Often, there is no need to write such "interfacing" flow. The below are ready-to-use and cover most of real-world cases, specifically  OpenId/OAuth providers that support the **authorization code grant** (see section 1.3 of [rfc6749](https://www.ietf.org/rfc/rfc6749)):
 

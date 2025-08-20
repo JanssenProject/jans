@@ -217,7 +217,6 @@ mod deserialize {
     mod tests {
         use test_utils::assert_eq;
 
-        use super::*;
         use crate::common::policy_store::{AgamaPolicyStore, PolicyStore};
 
         #[test]
@@ -273,8 +272,6 @@ mod deserialize {
             assert_eq!(yaml_policy_result.unwrap(), json_policy_result.unwrap());
         }
 
-        // In fact this fails because of limitations in cedar_policy::Policy::from_json
-        // see PolicyContentType
         #[test]
         fn test_both_ok() {
             static POLICY_STORE_RAW: &str =
@@ -283,7 +280,7 @@ mod deserialize {
             let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
             let err = policy_result.unwrap_err();
             let msg = err.to_string();
-            assert!(msg.contains("data did not match any variant of untagged enum MaybeEncoded"));
+            assert!(msg.contains("missing required field 'name' in policy store entry"));
         }
 
         #[test]
@@ -294,10 +291,7 @@ mod deserialize {
             let policy_result = serde_json::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW);
             let err = policy_result.unwrap_err();
             let msg = err.to_string();
-            assert!(
-                msg.contains(&ParseCedarSchemaSetMessage::Base64.to_string()),
-                "{err:?}"
-            );
+            assert!(msg.contains("missing required field 'name' in policy store entry"));
         }
 
         #[test]
@@ -308,13 +302,7 @@ mod deserialize {
             let policy_result = serde_yml::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW_YAML);
             let err = policy_result.unwrap_err();
             let msg = err.to_string();
-            assert!(
-                msg.contains(
-                    "unable to parse cedar policy schema: error parsing schema: unexpected end of \
-                     input"
-                ),
-                "{err:?}"
-            );
+            assert!(msg.contains("missing required field 'name' in policy store entry"));
         }
 
         #[test]
@@ -326,8 +314,7 @@ mod deserialize {
             let err_msg = policy_result.unwrap_err().to_string();
             assert_eq!(
                 err_msg,
-                "policy_stores.a1bf93115de86de760ee0bea1d529b521489e5a11747: unable to parse \
-                 cedar policy schema: failed to resolve type: User_TypeNotExist at line 8 column 5"
+                "error parsing policy store 'a1bf93115de86de760ee0bea1d529b521489e5a11747': missing required field 'name' in policy store entry"
             );
         }
     }

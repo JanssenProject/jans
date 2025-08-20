@@ -9,6 +9,11 @@ tags:
 
 This guide shows how to upgrade a Janssen helm deployment.
 
+!!! Note
+    Custom scripts are considered external configuration and are not updated automatically during an upgrade.
+    Please review and adapt your custom scripts to work with the newer version of the Janssen Server.
+
+
 1. `helm ls -n <namepsace>`
 
 2.  Keep note of the helm release version

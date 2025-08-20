@@ -260,7 +260,6 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.statusListEndpoint = statusListEndpoint;
     }
 
-
     /**
      * Gets access evaluation v1 endpoint
      *

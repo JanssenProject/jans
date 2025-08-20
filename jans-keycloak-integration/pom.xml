@@ -19,7 +19,7 @@
       <maven.min-version>3.3.9</maven.min-version>
       <maven.compiler.source>17</maven.compiler.source>
       <maven.compiler.target>17</maven.compiler.target>
-      <keycloak-server.version>25.0.6</keycloak-server.version>
+      <keycloak-client.version>26.0.6</keycloak-client.version>
       <nimbus.oauth-sdk.version>11.13</nimbus.oauth-sdk.version>
       <nimbus.oauth2-oidc-sdk.version>11.13</nimbus.oauth2-oidc-sdk.version>
       <jackson.coreutils.version>1.8</jackson.coreutils.version>
@@ -95,49 +95,49 @@
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-core</artifactId>
           <scope>provided</scope>
-          <version>${keycloak-server.version}</version>
+          <version>${keycloak-client.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-server-spi</artifactId>
           <scope>provided</scope>
-          <version>${keycloak-server.version}</version>
+          <version>${keycloak-client.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-server-spi-private</artifactId>
           <scope>provided</scope>
-          <version>${keycloak-server.version}</version>
+          <version>${keycloak-client.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-services</artifactId>
           <scope>provided</scope>
-          <version>${keycloak-server.version}</version>
+          <version>${keycloak-client.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-model-legacy</artifactId>
           <scope>provided</scope>
-          <version>${keycloak-server.version}</version>
+          <version>${keycloak-client.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-admin-client</artifactId>
           <scope>compile</scope>
-          <version>${keycloak-server.version}</version>
+          <version>${keycloak-client.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-saml-core-public</artifactId>
           <scope>provided</scope>
-          <version>${keycloak-server.version}</version>
+          <version>${keycloak-client.version}</version>
         </dependency>
 
         <!-- end keycloak dependencies-->
@@ -369,8 +369,13 @@
                 <excludeTransitive>false</excludeTransitive>
                 <excludeGroupIds>
                   com.sun.activation,
+                  com.sun.mail,
                   jakarta.activation,
                   jakarta.annotation,
+                  jakarta.enterprise,
+                  jakarta.inject,
+                  jakarta.interceptor,
+                  jakarta.mail,
                   jakarta.servlet,
                   jakarta.validation,
                   jakarta.xml.bind,

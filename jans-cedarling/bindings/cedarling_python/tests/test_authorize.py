@@ -100,8 +100,10 @@ DENY_DECISION_STR = "DENY"
 
 # Create resouce with type "Jans::Issue" from cedar-policy schema.
 RESOURCE = EntityData.from_dict({
-    "type": "Jans::Issue",
-    "id": "random_id",
+    "cedar_entity_mapping": {
+        "entity_type": "Jans::Issue",
+        "id": "random_id"
+    },
     "org_id": "some_long_id",
     "country": "US"
 })
@@ -169,8 +171,10 @@ def raise_authorize_error(bootstrap_config):
     #
     # org_id should be *string*
     resource = EntityData.from_dict({
-        "type": "Jans::Issue",
-        "id": "random_id",
+        "cedar_entity_mapping": {
+            "entity_type": "Jans::Issue",
+            "id": "random_id"
+        },
         "org_id": 1,  # it should be string according to schema in policy store
         "country": "US"
     })

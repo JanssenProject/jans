@@ -5,8 +5,8 @@ tags:
   - userinfo
   - endpoint
 ---
-# Userinfo
-## Overview
+# Userinfo Endpoint
+
 
 Userinfo endpoint is an OAuth2 protected endpoint that is used to retrieve claims about an authenticated end-user.
 Userinfo endpoint is defined in the [OpenID Connect specification](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo).

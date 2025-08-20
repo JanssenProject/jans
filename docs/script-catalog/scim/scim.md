@@ -7,7 +7,6 @@ tags:
 
 # SCIM Guide
 
-## Overview
 
 SCIM script allows you to execute custom logic when certain SCIM API operations are invoked.
 

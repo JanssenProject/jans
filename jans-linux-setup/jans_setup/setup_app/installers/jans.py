@@ -56,7 +56,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'Java Type'.ljust(name_sep) + Config.java_type.rjust(state_sep) + "\n"
 
             def get_install_string(prefix, install_var):
-                if not base.argsp.allow_pre_released_features and Config.get(install_var+'_pre_released'):
+                if Config.profile != 'openbanking' and not base.argsp.allow_pre_released_features and Config.get(install_var+'_pre_released'):
                     return ''
                 return prefix.ljust(name_sep) + repr(getattr(Config, install_var, False)).rjust(state_sep) + (' *' if install_var in Config.addPostSetupService else '') + '\n'
 
@@ -67,10 +67,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 for prompt_str, install_var in (
                         ('Install Fido2 Server', 'install_fido2'),
                         ('Install Scim Server', 'install_scim_server'),
+                        ('Install Jans KC Link Server', 'install_jans_keycloak_link'),
                         ('Install Jans Casa', 'install_casa'),
                         ('Install Jans Lock', 'install_jans_lock'),
                         ('Install Jans KC', 'install_jans_saml')):
                     txt += get_install_string(prompt_str, install_var)
+
+                if base.argsp.install_link:
+                    txt += get_install_string('Install Link Server', 'install_link')
 
             if base.argsp.t:
                 txt += 'Load Test Data '.ljust(name_sep) + repr( base.argsp.t).rjust(state_sep) + "\n"
@@ -519,11 +523,13 @@ class JansInstaller(BaseInstaller, SetupUtils):
         #enable scripts
         self.enable_scripts(base.argsp.enable_script)
 
-        # write default Lock Configuration to DB
-        base.current_app.JansLockInstaller.configure_message_conf()
+        if hasattr(base.current_app, 'JansLockInstaller'):
+            # write default Lock Configuration to DB
+            base.current_app.JansLockInstaller.configure_message_conf()
 
-        # Update jansServiceModule for config-api on DB
-        base.current_app.ConfigApiInstaller.update_jansservicemodule()
+        if hasattr(base.current_app, 'ConfigApiInstaller'):
+            # Update jansServiceModule for config-api on DB
+            base.current_app.ConfigApiInstaller.update_jansservicemodule()
 
         self.call_service_post_install_tasks()
 
@@ -538,6 +544,17 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 service_install_var = getattr(service_installer, 'install_var', None)
                 if Config.get(service_install_var):
                     service_installer.service_post_install_tasks()
+
+
+    def load_app_test_data(self):
+        # call loading test data
+        self.logIt("Calling loading test data for apps")
+
+        for jans_service in jansProgress.services:
+            if 'object' in jans_service:
+                service_installer = jans_service['object']
+                if hasattr(service_installer, 'app_test_data_loader'):
+                    service_installer.app_test_data_loader()
 
     def secure_files(self):
         self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
@@ -629,10 +646,12 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-config-api', 'install_config_api'),
                         ('jans-casa', 'install_casa'),
                         ('jans-fido2', 'install_fido2'),
+                        ('jans-link', 'install_link'),
                         ('jans-scim', 'install_scim_server'),
                         ('jans-lock', 'install_jans_lock_as_server'),
                         ('opa', 'install_opa'),
                         ('saml', 'install_jans_saml'),
+                        ('jans-keycloak-link', 'install_jans_keycloak_link'),
                         ('kc-scheduler', 'install_jans_saml'),
                         ]
         service_listr = service_list[:]

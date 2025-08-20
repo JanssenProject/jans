@@ -74,6 +74,7 @@ func Provider() *schema.Provider {
 			"jans_asset":                         resourceAsset(),
 			"jans_attribute":                     resourceAttribute(),
 			"jans_cache_configuration":           resourceCacheConfiguration(),
+			"jans_client_authorization":          resourceClientAuthorization(),
 			"jans_custom_user":                   resourceCustomUser(),
 			"jans_default_authentication_method": resourceDefaultAuthenticationMethod(),
 			"jans_fido_device":                   resourceFidoDevice(),
@@ -103,11 +104,14 @@ func Provider() *schema.Provider {
 		// Resource instances for data sources must have a Read function
 		// and must *not* implement Create, Update or Delete.
 		DataSourcesMap: map[string]*schema.Resource{
+			"jans_audit_logs":              dataSourceAuditLogs(),
 			"jans_custom_script_types":     dataSourceCustomScriptTypes(),
 			"jans_fido2_configuration":     dataSourceFido2Configuration(),
+			"jans_health_status":           dataSourceHealthStatus(),
 			"jans_persistence_config":      dataSourcePersistenceConfiguration(),
 			"jans_plugins":                 dataSourcePlugins(),
 			"jans_schema":                  dataSourceSchema(),
+			"jans_server_stats":            dataSourceServerStats(),
 			"jans_service_provider_config": dataSourceServiceProviderConfig(),
 		},
 

@@ -87,6 +87,7 @@ impl EntityBuilder {
         for (tkn_name, tkn) in tokens.iter() {
             let entity_name = tkn
                 .iss
+                .as_ref()
                 .and_then(|iss| iss.token_metadata.get(tkn_name))
                 .map(|metadata| metadata.entity_type_name.as_str())
                 .or_else(|| default_tkn_entity_name(tkn_name));
@@ -275,6 +276,7 @@ impl TokenPrincipalMappings {
 mod test {
     use super::*;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::CedarEntityMapping;
     use cedar_policy::{Entities, Schema};
     use serde_json::{Value, json};
     use std::collections::HashMap;
@@ -360,6 +362,7 @@ mod test {
 
         // Set the custom workload name in the config
         let mut config = EntityBuilderConfig::default().with_workload();
+        config.build_user = false; // Explicitly disable user entity building for this test
         config.entity_names.workload = "Jans::CustomWorkload".into();
 
         // Set the custom token names in the IDP metadata
@@ -393,7 +396,7 @@ mod test {
                 Token::new(
                     "access_token",
                     json!({"jti": "some_jti", "aud": "some_aud"}).into(),
-                    Some(issuers.get("some_iss").unwrap()),
+                    Some(issuers.get("some_iss").unwrap().clone().into()),
                 ),
             ),
             (
@@ -401,7 +404,7 @@ mod test {
                 Token::new(
                     "custom_token",
                     json!({"jti": "some_jti"}).into(),
-                    Some(issuers.get("some_iss").unwrap()),
+                    Some(issuers.get("some_iss").unwrap().clone().into()),
                 ),
             ),
         ]);
@@ -411,8 +414,10 @@ mod test {
 
         let entities = entity_builder
             .build_entities(&tokens, &EntityData {
+                cedar_mapping: CedarEntityMapping {
                 entity_type: "Jans::Resource".into(),
                 id: "some_id".into(),
+                },
                 attributes: HashMap::new(),
             })
             .expect("build entities");

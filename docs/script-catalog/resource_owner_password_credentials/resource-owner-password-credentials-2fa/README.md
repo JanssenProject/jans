@@ -1,8 +1,7 @@
 # 2FA Resource Owner Password Script Using Twilio
 
-## Overview 
 
-  This resource owner password script implements two factor 
+This resource owner password script implements two factor 
 authentication using twilio. This could easily be adjusted 
 for other 2FA use cases (e.g. using a Yubikey or a magic link).
 
@@ -28,7 +27,7 @@ Only then is the access token issued and authentication succeed.
 
 1. Open your Flex UI and go to `Admin` > `Scripts` > and add a new custom script.
 2. Make sure the script type is `RESOURCE_OWNER_PASSWORD_CREDENTIALS`. 
-3. The script contents should be  [this script](scripts/GamatechRopc.py).
+3. The script contents should be  [this script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/resource_owner_password_credentials/resource-owner-password-credentials-2fa/resource-owner-password-credentials-2fa.py).
 4. Add the following custom properties to the new script
    - `twilio_account_sid` containing your twilio SID 
    - `twilio_auth_token` containing your twilio authentication token

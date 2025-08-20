@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,6 +39,7 @@ import io.jans.orm.exception.KeyConversionException;
 import io.jans.orm.exception.operation.ConfigurationException;
 import io.jans.orm.exception.operation.ConnectionException;
 import io.jans.orm.model.AttributeType;
+import io.jans.orm.operation.auth.PasswordEncryptionHelper;
 import io.jans.orm.operation.auth.PasswordEncryptionMethod;
 import io.jans.orm.sql.dsl.template.MariaDBJsonTemplates;
 import io.jans.orm.sql.dsl.template.MySQLJsonTemplates;
@@ -66,6 +68,7 @@ public class SqlConnectionProvider {
 	private static final String MYSQL_QUERY_CONSTRAINT_CHECK = "SELECT CONSTRAINT_SCHEMA AS TABLE_SCHEMA, TABLE_NAME, CONSTRAINT_NAME, CHECK_CLAUSE AS DEFINITION FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = ? ORDER BY TABLE_SCHEMA, TABLE_NAME";
 
 	private static final String DRIVER_PROPERTIES_PREFIX = "connection.driver-property";
+	private static final String PASSWORD_METHOD_PREFIX = "password.method";
 
 	private Properties props;
 
@@ -191,6 +194,17 @@ public class SqlConnectionProvider {
 		if (testOnReturn != null) {
 			objectPoolConfig.setTestOnReturn(testOnReturn);
 		}
+
+		// Read properties which override default hash method parameters
+		Properties filteredPasswordMethodProperties = PropertiesHelper.findProperties(props, PASSWORD_METHOD_PREFIX, ".");
+		HashMap<String, String> passwordMethodProperties = new HashMap<>();
+		for (Entry<Object, Object> passwordMethodEntry : filteredPasswordMethodProperties.entrySet()) {
+			String key = StringHelper.toString(passwordMethodEntry.getKey()).substring(PASSWORD_METHOD_PREFIX.length() + 1);
+			String value = StringHelper.toString(passwordMethodEntry.getValue());
+			
+			passwordMethodProperties.put(key, value);
+		}
+		PasswordEncryptionHelper.configureParameters(passwordMethodProperties);
 
 		openWithWaitImpl();
 		LOG.info("Created connection pool");
@@ -324,7 +338,7 @@ public class SqlConnectionProvider {
 					}
 				}
 
-				tableColumnsMap.put(StringHelper.toLowerCase(tableName), tableColumns);
+				tableColumnsMap.put(StringHelper.toLowerCase(tableName), Collections.unmodifiableMap(tableColumns));
 			}
 		}
 

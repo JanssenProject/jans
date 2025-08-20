@@ -1,0 +1,44 @@
+{
+   "issuer":"https://%(hostname)s",
+   "baseEndpoint":"https://%(hostname)s/jans-fido2/restv1",
+   "cleanServiceInterval":60,
+   "cleanServiceBatchChunkSize":10000,
+   "useLocalCache":true,
+   "disableJdkLogger":true,
+   "loggingLevel":"DEBUG",
+   "loggingLayout":"text",
+   "externalLoggerConfiguration":"",
+   "metricReporterInterval":300,
+   "metricReporterKeepDataDays":15,
+   "metricReporterEnabled":true,
+   "personCustomObjectClassList":[
+      "jansCustomPerson",
+      "jansPerson"
+   ],
+   "sessionIdPersistInCache": false,
+   "errorReasonEnabled": true,
+   "fido2Configuration":{
+      "authenticatorCertsFolder":"%(fido2ConfigFolder)s/authenticator_cert",
+      "mdsCertsFolder":"%(fido2ConfigFolder)s/mds/cert",
+      "mdsTocsFolder":"%(fido2ConfigFolder)s/mds/toc",
+      "userAutoEnrollment":true,
+      "unfinishedRequestExpiration":120,
+      "authenticationHistoryExpiration":15,
+      "requestedParties":[
+         {
+            "name":"Jans FIDO2 Test",
+            "id":"%(hostname)s"
+         }
+      ],
+      "enabledFidoAlgorithms":[
+         "ES256",
+         "RS256"
+      ],
+      "attestationConveyancePreference":"direct",
+      "authenticatorSelection":{
+         "authenticatorAttachment":"cross-platform",
+         "requireResidentKey":false,
+         "userVerification":"preferred"
+      }
+   }
+} 

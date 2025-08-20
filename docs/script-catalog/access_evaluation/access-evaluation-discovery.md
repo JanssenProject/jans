@@ -7,7 +7,6 @@ tags:
 
 # Access Evaluation Discovery Custom Script
 
-## Overview
 
 This script is used to control Access Evaluation Discovery Endpoint (`/.well-known/authzen-configuration`).
 

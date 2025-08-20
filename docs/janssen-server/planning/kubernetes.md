@@ -7,7 +7,6 @@ tags:
 
 # Kubernetes
 
-## Overview
 
 This planning guide helps you learn about when to use Jans with Kubernetes, why to use it, an overview of best practices around it, platforms supported and important tools that can help ease the operations.
 
