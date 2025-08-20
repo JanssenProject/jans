@@ -114,14 +114,17 @@ public class AuditLogInterceptor {
                 Class<?> clazz = clazzArray[i];
                 String propertyName = parameters[i].getName();
                 Object propertyValue = parameters[i].toString();
-                LOG.trace("propertyName:{}, propertyValue:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName,
+                AUDIT_LOG.error("propertyName:{}, propertyValue:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName,
                         propertyValue, clazz, clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
                 if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
                         || !obj.toString().toUpperCase().contains("SECRET"))
-                        || !ignoreObject(propertyName, obj, auditLogConf)
+                        //|| !ignoreObject(propertyName, obj, auditLogConf)
                         ) {
+                    
+                    AUDIT_LOG.error("ignoreObject(propertyName, obj, auditLogConf):{} ", ignoreObject(propertyName, obj, auditLogConf));
+
                     AUDIT_LOG.error("{}:{}", propertyName, obj);
                 }
             }
@@ -162,15 +165,15 @@ public class AuditLogInterceptor {
     private boolean ignoreObject(String objectName, Object objectValue, AuditLogConf auditLogConf) {
         AUDIT_LOG.error("Checking if object to be ignored - objectName:{}, objectValue:{}, auditLogConf:{}", objectName, objectValue, auditLogConf);
 
-        if (StringUtils.isBlank(objectName) || auditLogConf == null || auditLogConf.getIgnoreObjectDetails() == null
-                || auditLogConf.getIgnoreObjectDetails().isEmpty()) {
+        if (StringUtils.isBlank(objectName) || auditLogConf == null || auditLogConf.getIgnoreObjectMapping() == null
+                || auditLogConf.getIgnoreObjectMapping().isEmpty()) {
             return false;
 
         }
 
-        ObjectDetails objectDetails = auditLogConf.getIgnoreObjectDetails().stream().filter(e -> e.equals(objectName))
+        ObjectDetails objectDetails = auditLogConf.getIgnoreObjectMapping().stream().filter(e -> e.equals(objectName))
                 .findFirst().orElse(null);
-        AUDIT_LOG.error("objectName:{}, objectValue:{}, objectDetails:{}", objectName, objectValue, objectDetails);
+        AUDIT_LOG.error("objectName:{}, objectValue:{}, objectDetails:{}, objectDetails.getText():{}, objectDetails.getText().contains(objectValue.toString()):{}", objectName, objectValue, objectDetails, objectDetails.getText(),objectDetails.getText().contains(objectValue.toString()));
 
         if (objectDetails == null) {
             return false;

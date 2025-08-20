@@ -28,7 +28,7 @@ public class AuditLogConf implements Serializable{
     private List<String> ignoreAnnotation;
 	
     @Schema(description = "Object for which audit is disabled.")
-    private List<ObjectDetails> ignoreObjectDetails;
+    private List<ObjectDetails> ignoreObjectMapping;
 
     @Schema(description = "List of header HTTP attributes whose value is to be logged.")
     private List<String> headerAttributes;
@@ -74,12 +74,12 @@ public class AuditLogConf implements Serializable{
         this.ignoreAnnotation = ignoreAnnotation;
     }
 
-    public List<ObjectDetails> getIgnoreObjectDetails() {
-        return ignoreObjectDetails;
+    public List<ObjectDetails> getIgnoreObjectMapping() {
+        return ignoreObjectMapping;
     }
 
-    public void setIgnoreObjectDetails(List<ObjectDetails> ignoreObjectDetails) {
-        this.ignoreObjectDetails = ignoreObjectDetails;
+    public void setIgnoreObjectMapping(List<ObjectDetails> ignoreObjectMapping) {
+        this.ignoreObjectMapping = ignoreObjectMapping;
     }
 
     public List<String> getHeaderAttributes() {
@@ -117,7 +117,7 @@ public class AuditLogConf implements Serializable{
     @Override
     public String toString() {
         return "AuditLogConf [enabled=" + enabled + ", logData=" + logData + ", ignoreHttpMethod=" + ignoreHttpMethod
-                + ", ignoreAnnotation=" + ignoreAnnotation + ", ignoreObjectDetails=" + ignoreObjectDetails
+                + ", ignoreAnnotation=" + ignoreAnnotation + ", ignoreObjectMapping=" + ignoreObjectMapping
                 + ", headerAttributes=" + headerAttributes + ", auditLogFilePath=" + auditLogFilePath
                 + ", auditLogFileName=" + auditLogFileName + ", auditLogDateFormat=" + auditLogDateFormat + "]";
     }

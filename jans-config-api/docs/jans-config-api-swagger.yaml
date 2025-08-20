@@ -4755,6 +4755,7 @@ paths:
                   - persistence_extension
                   - idp
                   - discovery
+                  - cookie
                   - health_check
                   - authz_detail
                   - update_token
@@ -14882,17 +14883,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
+        adminCanView:
           type: boolean
         userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
-          type: boolean
-        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -16812,7 +16813,7 @@ components:
           items:
             type: string
             description: Annotation for which audit is disabled.
-        ignoreObjectDetails:
+        ignoreObjectMapping:
           type: array
           description: Object for which audit is disabled.
           items:
@@ -16967,6 +16968,7 @@ components:
           - persistence_extension
           - idp
           - discovery
+          - cookie
           - health_check
           - authz_detail
           - update_token
@@ -17641,9 +17643,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object
