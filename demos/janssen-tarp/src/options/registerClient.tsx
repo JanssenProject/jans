@@ -156,7 +156,8 @@ export default function RegisterClient({ isOpen, handleDialog }) {
           token_endpoint_auth_method: 'client_secret_basic',
           access_token_as_jwt: true,
           userinfo_signed_response_alg: "RS256",
-          jansInclClaimsInIdTkn: "true"
+          jansInclClaimsInIdTkn: "true",
+          access_token_lifetime: 86400 //1 day
         };
 
         if (!!expireAt) {

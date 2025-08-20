@@ -123,9 +123,11 @@ class Config:
 
         self.downloadWars = None
         self.templateRenderingDict = {
-                                        'jans_auth_client_2_inum': 'AB77-1A2B',
-                                        'jans_auth_client_3_inum': '3E20',
-                                        'jans_auth_client_4_inum': 'FF81-2D39',
+                                        'jans_auth_test_client_2_inum': 'AB77-1A2B',
+                                        'jans_auth_test_client_3_inum': '3E20',
+                                        'jans_auth_test_client_4_inum': 'FF81-2D39',
+                                        'jans_fido2_test_client_1_inum': 'AB77-1A2B',
+                                        'jans_fido2_test_client_2_inum':'FF81-2D39',
                                         'idp_attribute_resolver_ldap.search_filter': '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))',
                                         'server_time_zone': 'UTC' + time.strftime("%z"),
                                      }
@@ -264,7 +266,7 @@ class Config:
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
         if self.profile == OPENBANKING_PROFILE:
-            self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
+            self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
         else:
             self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
 

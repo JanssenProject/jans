@@ -9,7 +9,9 @@ on:
       - main
       - '!update-pycloud-in-**'
     paths:
+      - 'jans-link/**'
       - 'jans-keycloak-integration/**'
+      - 'jans-keycloak-link/**'
       - 'jans-auth-server/**'
       - 'jans-lock/**'
       - 'jans-orm/**'
@@ -34,7 +36,9 @@ on:
       - opened
       - synchronize
     paths:
+      - 'jans-link/**'
       - 'jans-keycloak-integration/**'
+      - 'jans-keycloak-link/**'
       - 'jans-auth-server/**'
       - 'jans-lock/**'
       - 'jans-orm/**'
@@ -60,10 +64,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jans-keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-pycloudlib, jans-casa, jans-lock]
+        module: [jans-keycloak-link, jans-keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-pycloudlib, jans-link, jans-casa, jans-lock]
     env:
       JVM_PROJECTS: |
         jans-keycloak-integration
+        jans-keycloak-link
+        jans-link
         jans-auth-server
         jans-lock
         jans-orm
@@ -134,7 +140,7 @@ jobs:
       - name: Cache SonarCloud packages for JVM based project
         # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar

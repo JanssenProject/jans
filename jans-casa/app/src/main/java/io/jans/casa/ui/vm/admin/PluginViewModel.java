@@ -64,8 +64,8 @@ public class PluginViewModel extends MainViewModel {
         return engineAvailable;
     }
 
-    @Init
-    public void init() {
+    @Init(superclass = true)
+    public void childInit() {
         pluginList = new ArrayList<>();
         engineAvailable = extManager.getPluginsRoot() != null;
         extManager.getPlugins().forEach(wrapper -> pluginList.add(buildPluginData(wrapper)));
@@ -79,6 +79,7 @@ public class PluginViewModel extends MainViewModel {
     @NotifyChange({"pluginToShow"})
     public void uploaded(Media media) {
 
+        boolean success = false;
         try {
             pluginToShow = null;
             byte[] blob = media.getByteData();
@@ -104,6 +105,7 @@ public class PluginViewModel extends MainViewModel {
                             Files.write(Paths.get(extManager.getPluginsRoot().toString(), media.getName()), blob, StandardOpenOption.CREATE_NEW);
                             logger.info("Plugin jar file copied to app plugins directory");
                             Messagebox.show(Labels.getLabel("adm.plugins_deploy_pending"));
+                            success = true;
                         } catch (Exception e) {
                             logger.error(e.getMessage(), e);
                             UIUtils.showMessageUI(false);
@@ -121,6 +123,8 @@ public class PluginViewModel extends MainViewModel {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
+        logActionDetails(Labels.getLabel("adm.plugins_action_add"), success);
+        
     }
 
     public void deletePlugin(String pluginId, String provider) {
@@ -135,11 +139,13 @@ public class PluginViewModel extends MainViewModel {
             Messagebox.show(msg, null, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
                     event -> {
                         if (Messagebox.ON_YES.equals(event.getName())) {
-                            if (fspchecker.removePluginFile(pluginId)) {
-                                Messagebox.show(Labels.getLabel("adm.plugins_undeploy_pending"));
-                            } else {
-                                Messagebox.show(Labels.getLabel("adm.plugins_removal_failed"));
-                            }
+
+                            boolean success = fspchecker.removePluginFile(pluginId);
+                            Messagebox.show(Labels.getLabel(
+                                    success ? "adm.plugins_undeploy_pending" : "adm.plugins_removal_failed"));
+                            
+                            logActionDetails(Labels.getLabel("adm.plugins_action_remove"), success);
+
                             pluginToShow = null;
                             BindUtils.postNotifyChange(PluginViewModel.this, "pluginToShow");
                         }

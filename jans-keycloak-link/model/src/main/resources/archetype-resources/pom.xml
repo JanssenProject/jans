@@ -2,12 +2,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>$io.jans</groupId>
   <artifactId>$model</artifactId>
-  <version>1.8.0</version>
+  <version>0.0.0-nightly</version>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

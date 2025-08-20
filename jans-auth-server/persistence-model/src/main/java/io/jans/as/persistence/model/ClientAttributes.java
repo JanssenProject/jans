@@ -50,6 +50,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("updateTokenScriptDns")
     private List<String> updateTokenScriptDns = Lists.newArrayList();
 
+    @JsonProperty("logoutStatusJwtScriptDns")
+    private List<String> logoutStatusJwtScriptDns = Lists.newArrayList();
+
     @JsonProperty("backchannelLogoutUri")
     private List<String> backchannelLogoutUri;
 
@@ -449,6 +452,16 @@ public class ClientAttributes implements Serializable {
         this.updateTokenScriptDns = updateTokenScriptDns;
     }
 
+    public List<String> getLogoutStatusJwtScriptDns() {
+        if (logoutStatusJwtScriptDns == null) logoutStatusJwtScriptDns = Lists.newArrayList();
+        return logoutStatusJwtScriptDns;
+    }
+
+    public ClientAttributes setLogoutStatusJwtScriptDns(List<String> logoutStatusJwtScriptDns) {
+        this.logoutStatusJwtScriptDns = logoutStatusJwtScriptDns;
+        return this;
+    }
+
     public Boolean getRunIntrospectionScriptBeforeJwtCreation() {
         if (runIntrospectionScriptBeforeJwtCreation == null) {
             runIntrospectionScriptBeforeJwtCreation = false;
@@ -574,6 +587,7 @@ public class ClientAttributes implements Serializable {
                 ", spontaneousScopes=" + spontaneousScopes +
                 ", spontaneousScopeScriptDns=" + spontaneousScopeScriptDns +
                 ", updateTokenScriptDns=" + updateTokenScriptDns +
+                ", logoutStatusJwtScriptDns=" + logoutStatusJwtScriptDns +
                 ", backchannelLogoutUri=" + backchannelLogoutUri +
                 ", backchannelLogoutSessionRequired=" + backchannelLogoutSessionRequired +
                 ", additionalAudience=" + additionalAudience +

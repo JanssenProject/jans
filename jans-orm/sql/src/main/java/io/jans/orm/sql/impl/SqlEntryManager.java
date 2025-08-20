@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -916,6 +917,11 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 	@Override
 	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
 		return operationService.getPersistenceMetadata(primaryKey);
+	}
+
+	@Override
+	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
+		return Collections.unmodifiableMap(operationService.getTableColumnsMap());
 	}
 
 	@Override

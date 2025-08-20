@@ -168,12 +168,17 @@ def create_client_ldif(
             authorization_methods=None,
             response_types=['code'],
             application_type='web',
-            description=None
+            description=None,
+            other_props=None,
+            unset_props=()
             ):
     # create directory if not exists
     dirname = os.path.dirname(ldif_fn)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
+
+    if not other_props:
+        other_props = {}
 
     clients_ldif_fd = open(ldif_fn, 'wb')
     ldif_clients_writer = LDIFWriter(clients_ldif_fd, cols=1000)
@@ -188,17 +193,19 @@ def create_client_ldif(
         'del': ['false'],
         'displayName': [display_name],
         'inum': [client_id],
-        'jansAccessTknAsJwt': ['false'],
-        'jansAccessTknSigAlg': ['RS256'],
+        'jansAccessTknAsJwt': other_props.get('jansAccessTknAsJwt', ['false']),
+        'jansAccessTknSigAlg': other_props.get('jansAccessTknSigAlg', ['RS256']),
         'jansAppTyp': ['web'],
-        'jansAttrs': ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}'],
+        'jansAttrs': other_props.get('jansAttrs', 
+                                ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}']
+                                ),
         'jansClntSecret': [encoded_pw],
-        'jansDisabled': ['false'],
-        'jansIdTknSignedRespAlg': ['RS256'],
-        'jansInclClaimsInIdTkn': ['false'],
-        'jansLogoutSessRequired': ['false'],
-        'jansPersistClntAuthzs': ['true'],
-        'jansRptAsJwt': ['false'],
+        'jansDisabled': other_props.get('jansDisabled', ['false']),
+        'jansIdTknSignedRespAlg': other_props.get('jansIdTknSignedRespAlg', ['RS256']),
+        'jansInclClaimsInIdTkn': other_props.get('jansInclClaimsInIdTkn', ['false']),
+        'jansLogoutSessRequired': other_props.get('jansLogoutSessRequired', ['false']),
+        'jansPersistClntAuthzs': other_props.get('jansPersistClntAuthzs', ['true']),
+        'jansRptAsJwt': other_props.get('jansPersistClntAuthzs', ['false']),
         'jansScope': scopes,
         'jansSubjectTyp': ['pairwise'],
         'jansTknEndpointAuthMethod': authorization_methods,
@@ -212,6 +219,17 @@ def create_client_ldif(
         client_dict['jansRespTyp'] = response_types
     if grant_types:
         client_dict['jansGrantTyp'] = grant_types
+
+    other_props_keys = list(other_props.keys())
+    for key in client_dict:
+        if key in other_props_keys:
+            other_props_keys.remove(key)
+    for key in other_props_keys:
+        client_dict[key] = other_props[key]
+
+    for key in unset_props:
+        if key in client_dict:
+            del client_dict[key]
 
     ldif_clients_writer.unparse(client_dn, client_dict)
 

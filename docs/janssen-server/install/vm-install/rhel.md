@@ -10,10 +10,6 @@ tags:
 
 Before you install, check the [VM system requirements](vm-requirements.md).
 
-## Supported versions
-
-- Red Hat Enterprise Linux 8 (RHEL 8)
-
 ## Install the Package
 
 - Install EPEL and mod-auth-openidc as dependencies
@@ -46,23 +42,19 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 
 - Verify integrity of the downloaded package using published `sha256sum`.
 
-    Download `sha256sum` file for the package
+    * Go to the [Janssen Project Releases page](https://github.com/JanssenProject/jans/releases/latest) and copy the `sha256sum` value for the `jans-replace-janssen-version-stable.el8.x86_64.rpm` file:
 
-    ```shell
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el8.x86_64.rpm.sha256sum -P ~/
-    ```
 
-    Check the hash if it is matching.
-
-    ```shell
-    sha256sum -c jans-replace-janssen-version-stable-el8.x86_64.rpm.sha256sum
+    * Replace `paste-release-sha256sum` in the command below with the actual checksum you copied from the release page, and run the following command:
+    ```bash title="Command"
+    echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el8.x86_64.rpm' | sed 's/^sha256://' > jans-replace-janssen-version-stable.el8.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el8.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
-    ```text
-    jans-replace-janssen-version-stable.el8.x86_64.rpm: OK
-    ```
+      ```text
+      jans-replace-janssen-version-stable.el8.x86_64.rpm: OK
+      ```
   
 - Install the package
 
