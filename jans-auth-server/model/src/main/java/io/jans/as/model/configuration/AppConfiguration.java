@@ -181,6 +181,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Archived JWK lifetime in seconds")
     private int archivedJwkLifetimeInSeconds;
 
+    @DocProperty(description = "Boolean value to indicate whether to uppercase keys returns from /open-banking/v3.1/aisp/account-access-consents endpoint", defaultValue = "false")
+    private Boolean uppercaseResponseKeysInAccountAccessConsent = false;
+
     @DocProperty(description = "UMA Configuration endpoint URL")
     private String umaConfigurationEndpoint;
 
@@ -1124,6 +1127,16 @@ public class AppConfiguration implements Configuration {
 
     public void setLogNotFoundEntityAsError(Boolean logNotFoundEntityAsError) {
         this.logNotFoundEntityAsError = logNotFoundEntityAsError;
+    }
+
+    public Boolean getUppercaseResponseKeysInAccountAccessConsent() {
+        if (uppercaseResponseKeysInAccountAccessConsent == null) uppercaseResponseKeysInAccountAccessConsent = false;
+        return uppercaseResponseKeysInAccountAccessConsent;
+    }
+
+    public AppConfiguration setUppercaseResponseKeysInAccountAccessConsent(Boolean uppercaseResponseKeysInAccountAccessConsent) {
+        this.uppercaseResponseKeysInAccountAccessConsent = uppercaseResponseKeysInAccountAccessConsent;
+        return this;
     }
 
     public Boolean getRequirePkce() {
