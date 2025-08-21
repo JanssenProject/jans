@@ -972,4 +972,167 @@ mod test {
         assert_eq!(count_with_org, expected_count);
         assert_eq!(count_without_org, expected_count);
     }
+
+    #[test]
+    fn test_default_entity_as_principal() {
+        use url::Url;
+        
+        // Test that default entities can be used as principals in authorization requests
+        // This demonstrates a key use case where default entities represent system actors
+        
+        // Create a schema with entities that can act as principals
+        let schema_src = r#"
+            namespace Jans {
+                entity TrustedIssuer;
+                entity User = {
+                    name: String,
+                    role: String
+                };
+                entity ServiceAccount = {
+                    name: String,
+                    permissions: Set<String>,
+                    is_active: Bool
+                };
+                entity Resource = {
+                    name: String,
+                    owner: String,
+                    access_level: String
+                };
+            }
+        "#;
+        let schema = Schema::from_str(schema_src).expect("build cedar Schema");
+        let validator_schema = ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
+        
+        // Create default entities including a service account that can act as a principal
+        let default_entities_data = HashMap::from([
+            ("service-account-1".to_string(), json!({
+                "entity_id": "service-account-1",
+                "entity_type": "Jans::ServiceAccount",
+                "name": "Backup Service",
+                "permissions": ["read", "backup", "restore"],
+                "is_active": true
+            })),
+            ("service-account-2".to_string(), json!({
+                "entity_id": "service-account-2",
+                "entity_type": "Jans::ServiceAccount",
+                "name": "Monitoring Service",
+                "permissions": ["read", "monitor"],
+                "is_active": true
+            })),
+            ("admin-user".to_string(), json!({
+                "entity_id": "admin-user",
+                "entity_type": "Jans::User",
+                "name": "System Administrator",
+                "role": "admin"
+            })),
+        ]);
+
+        // Create trusted issuer
+        let trusted_issuer = TrustedIssuer {
+            name: "Test Issuer".to_string(),
+            description: "Test".to_string(),
+            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+                .expect("valid url"),
+            token_metadata: HashMap::new(),
+        };
+
+        let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+
+        // Create entity builder with default entities
+        let mut config = EntityBuilderConfig::default();
+        config.build_workload = false;
+        config.build_user = false;
+        
+        let entity_builder = EntityBuilder::new(
+            config,
+            &trusted_issuers,
+            Some(&validator_schema),
+            Some(&default_entities_data),
+        ).expect("should create entity builder");
+
+        // Test Case 1: Use a default service account as the principal (no tokens provided)
+        // This simulates a system-to-system authorization request
+        let resource = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Resource".to_string(),
+                id: "backup-storage".to_string(),
+            },
+            attributes: HashMap::from([
+                ("name".to_string(), json!("Backup Storage")),
+                ("owner".to_string(), json!("service-account-1")), // Owned by the default service account
+                ("access_level".to_string(), json!("restricted")),
+            ]),
+        };
+
+        let entities_data = entity_builder
+            .build_entities(&HashMap::new(), &resource) // No tokens = no user/workload principals
+            .expect("should build entities");
+
+        let cedar_entities = entities_data.entities(Some(&schema))
+            .expect("should create Cedar entities");
+
+        // Verify that the default service account entities are available for use as principals
+        let service_account_1 = cedar_entities.get(&"Jans::ServiceAccount::\"service-account-1\"".parse().unwrap())
+            .expect("should have default service account 1 entity");
+        
+        let service_account_2 = cedar_entities.get(&"Jans::ServiceAccount::\"service-account-2\"".parse().unwrap())
+            .expect("should have default service account 2 entity");
+
+        // Verify the service account attributes
+        let sa1_json = service_account_1.to_json_value().expect("should convert to JSON");
+        let sa1_attrs = sa1_json.get("attrs").expect("should have attrs");
+        assert_eq!(sa1_attrs.get("name").and_then(|v| v.as_str()), Some("Backup Service"));
+        assert_eq!(sa1_attrs.get("is_active").and_then(|v| v.as_bool()), Some(true));
+
+        let sa2_json = service_account_2.to_json_value().expect("should convert to JSON");
+        let sa2_attrs = sa2_json.get("attrs").expect("should have attrs");
+        assert_eq!(sa2_attrs.get("name").and_then(|v| v.as_str()), Some("Monitoring Service"));
+
+        // Test Case 2: Verify that default entities can be referenced in resource attributes
+        // This shows how default entities enable complex authorization scenarios
+        let resource_owned_by_sa = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Resource".to_string(),
+                id: "monitoring-dashboard".to_string(),
+            },
+            attributes: HashMap::from([
+                ("name".to_string(), json!("Monitoring Dashboard")),
+                ("owner".to_string(), json!("service-account-2")), // References default service account
+                ("access_level".to_string(), json!("admin")),
+            ]),
+        };
+
+        let entities_data_2 = entity_builder
+            .build_entities(&HashMap::new(), &resource_owned_by_sa)
+            .expect("should build entities");
+
+        let cedar_entities_2 = entities_data_2.entities(Some(&schema))
+            .expect("should create Cedar entities");
+
+        // Should have the same default entities available
+        let sa2_entity_2 = cedar_entities_2.get(&"Jans::ServiceAccount::\"service-account-2\"".parse().unwrap());
+        assert!(sa2_entity_2.is_some(), "should have service account 2 available for policy evaluation");
+
+        // Test Case 3: Demonstrate entity count consistency
+        let count_1 = cedar_entities.iter().count();
+        let count_2 = cedar_entities_2.iter().count();
+        
+        // Both should have the same count since they include all default entities
+        assert_eq!(count_1, count_2, "both cases should have the same entity count");
+        
+        // Expected count: 1 issuer + 1 resource + 3 default entities
+        let expected_count = 5;
+        assert_eq!(count_1, expected_count);
+        assert_eq!(count_2, expected_count);
+
+        // Test Case 4: Show how this enables policy evaluation
+        // In a real Cedar policy, you could now write rules like:
+        // "permit(principal: Jans::ServiceAccount::"service-account-1", action: "backup", resource: Jans::Resource::"backup-storage")"
+        // The default entities provide the principal and resource context needed for policy evaluation
+        
+        // Verify that the service account has the expected permissions
+        let sa1_permissions = sa1_attrs.get("permissions").and_then(|v| v.as_array()).expect("should have permissions");
+        assert!(sa1_permissions.iter().any(|p| p.as_str() == Some("backup")), "should have backup permission");
+        assert!(sa1_permissions.iter().any(|p| p.as_str() == Some("restore")), "should have restore permission");
+    }
 }
