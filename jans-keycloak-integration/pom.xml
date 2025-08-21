@@ -369,8 +369,13 @@
                 <excludeTransitive>false</excludeTransitive>
                 <excludeGroupIds>
                   com.sun.activation,
+                  com.sun.mail,
                   jakarta.activation,
                   jakarta.annotation,
+                  jakarta.enterprise,
+                  jakarta.inject,
+                  jakarta.interceptor,
+                  jakarta.mail,
                   jakarta.servlet,
                   jakarta.validation,
                   jakarta.xml.bind,

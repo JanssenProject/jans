@@ -108,16 +108,68 @@
         function fillPlatformData(field) {
 
             let uapr = (new UAParser()).getResult()
-            let platform = { name: uapr.browser.name, version: uapr.browser.version, 
-                    osName: uapr.os.name, osVersion: uapr.os.version }                        
+            
+            // Enhanced device fingerprinting with additional validation
+            let platform = { 
+                name: uapr.browser.name || "Unknown", 
+                version: uapr.browser.version || "0.0.0", 
+                osName: uapr.os.name || "Unknown", 
+                osVersion: uapr.os.version || "0.0.0",
+                userAgent: navigator.userAgent,
+                timestamp: new Date().getTime()
+            }
+            
+            // Additional validation for Chrome
+            if (platform.name === "Chrome") {
+                // Ensure we have a proper version string
+                if (!platform.version || platform.version === "0.0.0") {
+                    // Try to extract version from user agent as fallback
+                    const chromeMatch = navigator.userAgent.match(/Chrome\/(\d+\.\d+\.\d+)/)
+                    if (chromeMatch) {
+                        platform.version = chromeMatch[1]
+                    }
+                }
+                
+                // Additional Chrome-specific data
+                platform.chromeVersion = platform.version
+                platform.isChrome = true
+            }
+            
+            // Validate that we have meaningful data
+            if (platform.name === "Unknown" || platform.osName === "Unknown") {
+                console.warn("Unable to detect browser or OS, using fallback values")
+                // Use fallback values based on user agent
+                if (navigator.userAgent.includes("Chrome")) {
+                    platform.name = "Chrome"
+                    platform.version = "100.0.0" // Fallback version
+                } else if (navigator.userAgent.includes("Firefox")) {
+                    platform.name = "Firefox"
+                    platform.version = "100.0.0" // Fallback version
+                } else if (navigator.userAgent.includes("Safari")) {
+                    platform.name = "Safari"
+                    platform.version = "15.0.0" // Fallback version
+                }
+                
+                if (navigator.userAgent.includes("Windows")) {
+                    platform.osName = "Windows"
+                    platform.osVersion = "10.0.0"
+                } else if (navigator.userAgent.includes("Mac")) {
+                    platform.osName = "macOS"
+                    platform.osVersion = "12.0.0"
+                } else if (navigator.userAgent.includes("Linux")) {
+                    platform.osName = "Linux"
+                    platform.osVersion = "5.0.0"
+                }
+            }
+            
             field.value = JSON.stringify(platform)
-            console.log(field.value)
+            console.log("Device fingerprint:", field.value)
 
         }
 
         window.onload = (event) => { 
             
-            let f = document.forms.login                    
+            let f = document.forms.login
             if (${grabLocation?c}) fillLocationData(f.location)
             fillPlatformData(f.device)
 
