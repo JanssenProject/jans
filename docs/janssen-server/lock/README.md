@@ -130,8 +130,8 @@ is no data for the policies to evaluate. The Cedarling creates the Resource and
 ## More information
 
 * Lock Server configuration and operation [docs](./lock-server.md) 
-* Cedarling [docs](../../../docs/cedarling.md)
-* Cedarling [Readme](https://github.com/JanssenProject/jans/blob/main/jans-lock/cedarling/README.md)
+* Cedarling [docs](../../../docs/cedarling/README.md)
+* Cedarling [Readme](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/README.md)
 * Cedarling [Training](.) (coming soon)
 
 
