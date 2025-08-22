@@ -62,6 +62,10 @@ public class AuditLogInterceptor {
             HttpHeaders httpHeaders = ((BaseResource) context.getTarget()).getHttpHeaders();
             UriInfo uriInfo = ((BaseResource) context.getTarget()).getUriInfo();
 
+            AUDIT_LOG.error(" ******************************************************************\n");
+            AUDIT_LOG.error(" request.getLocalName():{}, request.getPathInfo():{},request.getClass().getCanonicalName():{},request.getContextPath():{},request.getMethod():{}, request.getClass().getDeclaredMethods():{}", request.getLocalName(), request.getPathInfo(),request.getClass().getCanonicalName(),request.getContextPath(),request.getMethod(), request.getClass().getDeclaredMethods());
+            AUDIT_LOG.error(" uriInfo.getClass().getCanonicalName():{}, uriInfo.getPath():{}, uriInfo.getAbsolutePath():{},uriInfo.toString():{}", uriInfo.getClass().getCanonicalName(), uriInfo.getPath(), uriInfo.getAbsolutePath(), uriInfo.toString());
+            
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
             String method = request.getMethod();
@@ -120,10 +124,11 @@ public class AuditLogInterceptor {
                 Object obj = ctxParameters[i];
                 if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
                         || !obj.toString().toUpperCase().contains("SECRET"))
-                        //|| !ignoreObject(propertyName, obj, auditLogConf)
-                        ) {
-                    
-                    AUDIT_LOG.error("ignoreObject(propertyName, obj, auditLogConf):{} ", ignoreObject(propertyName, obj, auditLogConf));
+                // || !ignoreObject(propertyName, obj, auditLogConf)
+                ) {
+
+                    AUDIT_LOG.error("ignoreObject(propertyName, obj, auditLogConf):{} ",
+                            ignoreObject(propertyName, obj, auditLogConf));
 
                     AUDIT_LOG.error("{}:{}", propertyName, obj);
                 }
@@ -149,8 +154,8 @@ public class AuditLogInterceptor {
     }
 
     private boolean ignoreAnnotation(String resourceMethod, AuditLogConf auditLogConf) {
-        AUDIT_LOG.error("Checking if resource method to be ignored - resourceMethod:{}, auditLogConf:{}", resourceMethod,
-                auditLogConf);
+        AUDIT_LOG.error("Checking if resource method to be ignored - resourceMethod:{}, auditLogConf:{}",
+                resourceMethod, auditLogConf);
 
         if (StringUtils.isBlank(resourceMethod) || auditLogConf == null || auditLogConf.getIgnoreAnnotation() == null
                 || auditLogConf.getIgnoreAnnotation().isEmpty()) {
@@ -163,24 +168,35 @@ public class AuditLogInterceptor {
     }
 
     private boolean ignoreObject(String objectName, Object objectValue, AuditLogConf auditLogConf) {
-        AUDIT_LOG.error("Checking if object to be ignored - objectName:{}, objectValue:{}, auditLogConf:{}", objectName, objectValue, auditLogConf);
+        AUDIT_LOG.error("Checking if object to be ignored - objectName:{}, objectValue:{}, auditLogConf:{}", objectName,
+                objectValue, auditLogConf);
 
         if (StringUtils.isBlank(objectName) || auditLogConf == null || auditLogConf.getIgnoreObjectMapping() == null
                 || auditLogConf.getIgnoreObjectMapping().isEmpty()) {
             return false;
-
         }
 
         ObjectDetails objectDetails = auditLogConf.getIgnoreObjectMapping().stream().filter(e -> e.equals(objectName))
                 .findFirst().orElse(null);
-        AUDIT_LOG.error("objectName:{}, objectValue:{}, objectDetails:{}, objectDetails.getText():{}, objectDetails.getText().contains(objectValue.toString()):{}", objectName, objectValue, objectDetails, objectDetails.getText(),objectDetails.getText().contains(objectValue.toString()));
 
         if (objectDetails == null) {
             return false;
         }
-        if ((StringUtils.isBlank(objectValue.toString()))
-                || (objectDetails.getText() != null && objectDetails.getText().contains(objectValue.toString()))) {
-            return true;
+        AUDIT_LOG.error(
+                "objectName:{}, objectValue:{}, objectDetails:{}, objectDetails.getText():{}, objectDetails.getText().contains(objectValue.toString()):{}",
+                objectName, objectValue, objectDetails, objectDetails.getText(),
+                objectDetails.getText().contains(objectValue.toString()));
+
+        if (objectName.equalsIgnoreCase(objectDetails.getName())) {
+
+            if (objectDetails.getText() == null || objectDetails.getText().isEmpty()) {
+                return true;
+            }
+
+            if ((StringUtils.isNotBlank(objectValue.toString()))
+                    && (objectDetails.getText() != null && objectDetails.getText().contains(objectValue.toString()))) {
+                return true;
+            }
         }
 
         return false;
