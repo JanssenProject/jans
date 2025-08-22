@@ -5,6 +5,7 @@
 
 use crate::jwt::log_entry::JwtLogEntry;
 use crate::jwt::{IssuerConfig, StatusListCache};
+use crate::common::issuer_utils::normalize_issuer;
 use crate::log::Logger;
 use crate::{JwtConfig, LogLevel, LogWriter};
 
@@ -44,13 +45,13 @@ impl JwtValidatorCache {
         let iss = iss_config
             .openid_config
             .as_ref()
-            .map(|oidc| oidc.issuer.clone())
+            .map(|oidc| normalize_issuer(&oidc.issuer))
             .unwrap_or_else(|| {
-                iss_config
+                normalize_issuer(&iss_config
                     .policy
                     .oidc_endpoint
                     .origin()
-                    .ascii_serialization()
+                    .ascii_serialization())
             });
 
         for (token_name, tkn_metadata) in iss_config.policy.token_metadata.iter() {
@@ -240,7 +241,7 @@ impl OwnedValidatorInfo {
             return false;
         }
 
-        if self.token_kind.is_equal_to(&other.token_kind) {
+        if !self.token_kind.is_equal_to(&other.token_kind) {
             return false;
         }
 
