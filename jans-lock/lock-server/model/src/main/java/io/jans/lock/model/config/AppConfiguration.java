@@ -111,29 +111,9 @@ public class AppConfiguration implements Configuration {
     @Schema(description = "Time interval for the Clean Service in seconds")
     private int cleanServiceInterval;
 
-    @DocProperty(description = "Authorization token to access Json Uris")
-    @Schema(description = "Authorization token to access Json Uris")
-    private String policiesJsonUrisAuthorizationToken;
-
-    @DocProperty(description = "List of Json Uris with link to Rego policies")
-    @Schema(description = "List of Json Uris with link to Rego policies")
-    private List<String> policiesJsonUris;
-
-    @DocProperty(description = "Authorization token to access Zip Uris")
-    @Schema(description = "Authorization token to access Zip Uris")
-    private String policiesZipUrisAuthorizationToken;
-
-    @DocProperty(description = "List of Zip Uris with policies")
-    @Schema(description = "List of Zip Uris with policies")
-    private List<String> policiesZipUris;
-
     @DocProperty(description = "PubSub consumer service")
     @Schema(description = "PubSub consumer service")
     private String messageConsumerType;
-
-    @DocProperty(description = "Policy consumer service")
-    @Schema(description = "Policy consumer service")
-    private String policyConsumerType;
     
     @DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from AS. Default value is false", defaultValue = "false")
     private Boolean errorReasonEnabled = false;
@@ -290,38 +270,6 @@ public class AppConfiguration implements Configuration {
         this.cleanServiceInterval = cleanServiceInterval;
     }
 
-    public String getPoliciesJsonUrisAuthorizationToken() {
-        return policiesJsonUrisAuthorizationToken;
-    }
-
-    public void setPoliciesJsonUrisAuthorizationToken(String policiesJsonUrisAuthorizationToken) {
-        this.policiesJsonUrisAuthorizationToken = policiesJsonUrisAuthorizationToken;
-    }
-
-    public List<String> getPoliciesJsonUris() {
-        return policiesJsonUris;
-    }
-
-    public void setPoliciesJsonUris(List<String> policiesJsonUris) {
-        this.policiesJsonUris = policiesJsonUris;
-    }
-
-    public String getPoliciesZipUrisAuthorizationToken() {
-        return policiesZipUrisAuthorizationToken;
-    }
-
-    public void setPoliciesZipUrisAuthorizationToken(String policiesZipUrisAuthorizationToken) {
-        this.policiesZipUrisAuthorizationToken = policiesZipUrisAuthorizationToken;
-    }
-
-    public List<String> getPoliciesZipUris() {
-        return policiesZipUris;
-    }
-
-    public void setPoliciesZipUris(List<String> policiesZipUris) {
-        this.policiesZipUris = policiesZipUris;
-    }
-
     public String getMessageConsumerType() {
         if (messageConsumerType == null) messageConsumerType = "DISABLED";
 		return messageConsumerType;
@@ -329,15 +277,6 @@ public class AppConfiguration implements Configuration {
 
 	public void setMessageConsumerType(String messageConsumerType) {
 		this.messageConsumerType = messageConsumerType;
-	}
-
-	public String getPolicyConsumerType() {
-        if (policyConsumerType == null) policyConsumerType = "DISABLED";
-		return policyConsumerType;
-	}
-
-	public void setPolicyConsumerType(String policyConsumerType) {
-		this.policyConsumerType = policyConsumerType;
 	}
 
 	public Boolean getErrorReasonEnabled() {
@@ -359,11 +298,8 @@ public class AppConfiguration implements Configuration {
 				+ loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
 				+ externalLoggerConfiguration + ", metricReporterInterval=" + metricReporterInterval
 				+ ", metricReporterKeepDataDays=" + metricReporterKeepDataDays + ", metricReporterEnabled="
-				+ metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval
-				+ ", policiesJsonUrisAuthorizationToken=" + policiesJsonUrisAuthorizationToken + ", policiesJsonUris="
-				+ policiesJsonUris + ", policiesZipUrisAuthorizationToken=" + policiesZipUrisAuthorizationToken
-				+ ", policiesZipUris=" + policiesZipUris + ", messageConsumerType=" + messageConsumerType
-				+ ", policyConsumerType=" + policyConsumerType + ", errorReasonEnabled=" + errorReasonEnabled + "]";
+				+ metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval + ", messageConsumerType="
+				+ messageConsumerType + ", errorReasonEnabled=" + errorReasonEnabled + "]";
 	}
 
 }
