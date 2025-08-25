@@ -35,7 +35,6 @@ pub fn validate_id_tkn_trust_mode(
 
     let access_tkn_client_id = get_tkn_claim_as_str(access_tkn, "client_id")?;
     
-    // Check if id_token aud contains the client_id (handles both string and array)
     if !aud_claim_contains_value(id_tkn, &access_tkn_client_id)? {
         return Err(IdTokenTrustModeError::AccessTokenClientIdMismatch);
     }
@@ -45,7 +44,6 @@ pub fn validate_id_tkn_trust_mode(
         None => return Ok(()),
     };
     
-    // Check if userinfo token aud contains the client_id (handles both string and array)
     if !aud_claim_contains_value(userinfo_tkn, &access_tkn_client_id)? {
         return Err(IdTokenTrustModeError::ClientIdUserinfoAudMismatch);
     }
@@ -53,7 +51,6 @@ pub fn validate_id_tkn_trust_mode(
     Ok(())
 }
 
-/// Checks if an aud claim (which can be string or array) contains the expected value
 fn aud_claim_contains_value(
     token: &Token,
     expected_value: &str,
