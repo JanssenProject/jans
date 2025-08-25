@@ -47,6 +47,15 @@ public class TrustedDevicesManager {
         if (device == null) return false; 
         logger.debug("Checking if user's device is known");
 
+        // Use centralized device validation service
+        io.jans.casa.core.SessionValidationService validationService = 
+            io.jans.service.cdi.util.CdiUtil.bean(io.jans.casa.core.SessionValidationService.class);
+        
+        if (!validationService.isDeviceDataValid(device.toString())) {
+            logger.debug("Device data validation failed, treating as unknown device");
+            return false;
+        }
+
         return findDevice(device, trustedDevices) != -1;
 
     }

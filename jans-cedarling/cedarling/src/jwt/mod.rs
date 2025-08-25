@@ -86,6 +86,7 @@ use crate::JwtConfig;
 use crate::LogLevel;
 use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
+use crate::common::issuer_utils::normalize_issuer;
 use crate::log::Logger;
 use http_utils::*;
 use key_service::*;
@@ -149,7 +150,7 @@ impl JwtService {
                     .await?;
             }
 
-            issuer_configs.insert(iss_claim, iss_config);
+            issuer_configs.insert(normalize_issuer(&iss_claim), iss_config);
         }
 
         // quick check so we don't get surprised if the program runs but can't validate
@@ -218,8 +219,9 @@ impl JwtService {
         let decoding_key = self.key_service.get_key(&decoding_key_info);
 
         // get validator
+        let normalized_iss = decoded_jwt.iss().map(normalize_issuer);
         let validator_key = ValidatorInfo {
-            iss: decoded_jwt.iss(),
+            iss: normalized_iss.as_deref(),
             token_kind: TokenKind::AuthzRequestInput(&token_name),
             algorithm: decoded_jwt.header.alg,
         };
@@ -249,7 +251,7 @@ impl JwtService {
     #[inline]
     fn get_issuer_ref(&self, iss_claim: &str) -> Option<Arc<TrustedIssuer>> {
         self.issuer_configs
-            .get(iss_claim)
+            .get(&normalize_issuer(iss_claim))
             .map(|config| &config.policy)
             .cloned()
     }
