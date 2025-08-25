@@ -24,6 +24,7 @@ use crate::authz::AuthorizeEntitiesData;
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
+use crate::common::issuer_utils::normalize_issuer;
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::jwt::Token;
 use crate::{RequestUnsigned, entity_builder_config::*};
@@ -57,7 +58,7 @@ impl EntityBuilder {
         let (ok, errs) = trusted_issuers
             .values()
             .map(|iss| {
-                let iss_id = iss.oidc_endpoint.origin().ascii_serialization();
+                let iss_id = normalize_issuer(&iss.oidc_endpoint.origin().ascii_serialization());
                 build_iss_entity(&config.entity_names.iss, &iss_id, iss, schema.as_ref())
             })
             .partition_result();
@@ -87,6 +88,7 @@ impl EntityBuilder {
         for (tkn_name, tkn) in tokens.iter() {
             let entity_name = tkn
                 .iss
+                .as_ref()
                 .and_then(|iss| iss.token_metadata.get(tkn_name))
                 .map(|metadata| metadata.entity_type_name.as_str())
                 .or_else(|| default_tkn_entity_name(tkn_name));
@@ -275,6 +277,7 @@ impl TokenPrincipalMappings {
 mod test {
     use super::*;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::CedarEntityMapping;
     use cedar_policy::{Entities, Schema};
     use serde_json::{Value, json};
     use std::collections::HashMap;
@@ -394,7 +397,7 @@ mod test {
                 Token::new(
                     "access_token",
                     json!({"jti": "some_jti", "aud": "some_aud"}).into(),
-                    Some(issuers.get("some_iss").unwrap()),
+                    Some(issuers.get("some_iss").unwrap().clone().into()),
                 ),
             ),
             (
@@ -402,7 +405,7 @@ mod test {
                 Token::new(
                     "custom_token",
                     json!({"jti": "some_jti"}).into(),
-                    Some(issuers.get("some_iss").unwrap()),
+                    Some(issuers.get("some_iss").unwrap().clone().into()),
                 ),
             ),
         ]);
@@ -412,8 +415,10 @@ mod test {
 
         let entities = entity_builder
             .build_entities(&tokens, &EntityData {
+                cedar_mapping: CedarEntityMapping {
                 entity_type: "Jans::Resource".into(),
                 id: "some_id".into(),
+                },
                 attributes: HashMap::new(),
             })
             .expect("build entities");

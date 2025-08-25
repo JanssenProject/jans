@@ -42,6 +42,6 @@
       "disableMetadataService":false,
       "attestationMode":"monitor",
       "enterpriseAttestation":"false",
-      "hints":["security-key","client-device","hybrid"]
+      "hints": ["client-device"]
    }
 }

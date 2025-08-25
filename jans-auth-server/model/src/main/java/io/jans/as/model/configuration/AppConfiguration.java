@@ -100,6 +100,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL for Pushed Authorisation Request (PAR) Endpoint")
     private String parEndpoint;
 
+    @DocProperty(description = "Boolean value to indicate whether to allow client assertion 'aud' without strict server issuer match. Default value is false which means that server requires strict match.", defaultValue = "false")
+    private Boolean allowClientAssertionAudWithoutStrictIssuerMatch = false;
+
     @DocProperty(description = "Boolean value to indicate of Pushed Authorisation Request(PAR)is required", defaultValue = "false")
     private Boolean requirePar = false;
 
@@ -177,6 +180,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Archived JWK lifetime in seconds")
     private int archivedJwkLifetimeInSeconds;
+
+    @DocProperty(description = "Boolean value to indicate whether to uppercase keys returns from /open-banking/v3.1/aisp/account-access-consents endpoint", defaultValue = "false")
+    private Boolean uppercaseResponseKeysInAccountAccessConsent = false;
 
     @DocProperty(description = "UMA Configuration endpoint URL")
     private String umaConfigurationEndpoint;
@@ -526,10 +532,10 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The lifetime for unused session states")
     private int sessionIdUnusedLifetime;
 
-    @DocProperty(description = "The lifetime for unused unauthenticated session states")
+    @DocProperty(description = "The lifetime for unused unauthenticated session states", defaultValue = "7200")
     private int sessionIdUnauthenticatedUnusedLifetime = 7200; // 2h
 
-    @DocProperty(description = "Boolean value specifying whether to persist session ID on prompt none")
+    @DocProperty(description = "Boolean value specifying whether to persist session ID on prompt none", defaultValue = "false")
     private Boolean sessionIdPersistOnPromptNone;
 
     @DocProperty(description = "Boolean value specifying whether to enable session_id HTTP request parameter", defaultValue = "false")
@@ -556,16 +562,16 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to disable prompt=consent", defaultValue = "false")
     private Boolean disablePromptConsent = false;
 
-    @DocProperty(description = "The lifetime of Logout Status JWT. If not set falls back to 1 day")
+    @DocProperty(description = "The lifetime of Logout Status JWT. If not set falls back to 1 day", defaultValue = "86400")
     private Integer logoutStatusJwtLifetime = DEFAULT_LOGOUT_STATUS_JWT_LIFETIME;
 
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
-    @DocProperty(description = "The lifetime of session_id cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends")
+    @DocProperty(description = "The lifetime of session_id cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends", defaultValue = "86400")
     private Integer sessionIdCookieLifetime = DEFAULT_SESSION_ID_LIFETIME;
 
-    @DocProperty(description = "The lifetime of session_id server object in seconds. If not set falls back to session_id cookie expiration set by 'sessionIdCookieLifetime' configuration property")
+    @DocProperty(description = "The lifetime of session_id server object in seconds. If not set falls back to session_id cookie expiration set by 'sessionIdCookieLifetime' configuration property", defaultValue = "86400")
     private Integer sessionIdLifetime = sessionIdCookieLifetime;
 
     @DocProperty(description = "Authorization Scope for active session")
@@ -1121,6 +1127,16 @@ public class AppConfiguration implements Configuration {
 
     public void setLogNotFoundEntityAsError(Boolean logNotFoundEntityAsError) {
         this.logNotFoundEntityAsError = logNotFoundEntityAsError;
+    }
+
+    public Boolean getUppercaseResponseKeysInAccountAccessConsent() {
+        if (uppercaseResponseKeysInAccountAccessConsent == null) uppercaseResponseKeysInAccountAccessConsent = false;
+        return uppercaseResponseKeysInAccountAccessConsent;
+    }
+
+    public AppConfiguration setUppercaseResponseKeysInAccountAccessConsent(Boolean uppercaseResponseKeysInAccountAccessConsent) {
+        this.uppercaseResponseKeysInAccountAccessConsent = uppercaseResponseKeysInAccountAccessConsent;
+        return this;
     }
 
     public Boolean getRequirePkce() {
@@ -1999,6 +2015,16 @@ public class AppConfiguration implements Configuration {
 
     public void setParEndpoint(String parEndpoint) {
         this.parEndpoint = parEndpoint;
+    }
+
+    public Boolean getAllowClientAssertionAudWithoutStrictIssuerMatch() {
+        if (allowClientAssertionAudWithoutStrictIssuerMatch == null) allowClientAssertionAudWithoutStrictIssuerMatch = false;
+        return allowClientAssertionAudWithoutStrictIssuerMatch;
+    }
+
+    public AppConfiguration setAllowClientAssertionAudWithoutStrictIssuerMatch(Boolean allowClientAssertionAudWithoutStrictIssuerMatch) {
+        this.allowClientAssertionAudWithoutStrictIssuerMatch = allowClientAssertionAudWithoutStrictIssuerMatch;
+        return this;
     }
 
     public Boolean getRequirePar() {

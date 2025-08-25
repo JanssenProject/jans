@@ -131,7 +131,7 @@ mod test {
         .expect("should init entity builder");
 
         let type_name = "Test";
-        let id_token = Token::new("token", HashMap::from([]).into(), Some(&iss));
+        let id_token = Token::new("token", HashMap::from([]).into(), Some(iss.into()));
         let attrs_srcs = Vec::default();
         let tkn_principal_mappings = TokenPrincipalMappings::default();
         let built_entities = BuiltEntities::default();

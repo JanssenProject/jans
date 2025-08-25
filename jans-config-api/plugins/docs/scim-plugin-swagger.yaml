@@ -28,7 +28,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: "#/components/schemas/AppConfiguration"
         "401":
           description: Unauthorized
         "500":
@@ -49,7 +49,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/JsonPatch'
+                $ref: "#/components/schemas/JsonPatch"
             example: "[ {op:replace, path: loggingLevel, value: DEBUG } ]"
       responses:
         "200":
@@ -57,7 +57,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: "#/components/schemas/AppConfiguration"
         "401":
           description: Unauthorized
         "500":

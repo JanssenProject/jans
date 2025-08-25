@@ -652,7 +652,7 @@ class Plugin(DialogUtils):
             data.sort()
             buttons = []
 
-            if len(data) > 20:
+            if len(data) > self.app.entries_per_page:
 
                 if start_index!=0:
                     handler_partial = partial(self.oauth_update_properties, start_index-1, pattern)
@@ -660,13 +660,13 @@ class Plugin(DialogUtils):
                     prev_button.window.jans_help = _("Displays previous %d entries") % self.app.entries_per_page
                     buttons.append(prev_button)
 
-                if start_index< int(len(data)/ 20) :
+                if start_index< int(len(data)/ self.app.entries_per_page) :
                     handler_partial = partial(self.oauth_update_properties, start_index+1, pattern)
                     next_button = Button(_("Next"), handler=handler_partial)
                     next_button.window.jans_help = _("Displays next %d entries") % self.app.entries_per_page
                     buttons.append(next_button)
 
-            data_now = data[start_index*20:start_index*20+20]
+            data_now = data[start_index*self.app.entries_per_page:start_index*self.app.entries_per_page+self.app.entries_per_page]
 
             properties =VSplit([
                 Label(text=" ",width=1),

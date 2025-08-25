@@ -17,7 +17,8 @@ var bootstrapConfig string = `
         "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_TTL": 60,
-        "CEDARLING_LOG_LEVEL": "DEBUG"
+        "CEDARLING_LOG_LEVEL": "DEBUG",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"]
 }
 `
 
@@ -128,8 +129,10 @@ func TestAuthorizeSuccess(t *testing.T) {
 	}
 
 	resource := EntityData{
+		CedarMapping: CedarEntityMapping{
 		EntityType: "Jans::Issue",
 		ID:         "random_id",
+		},
 		Payload: map[string]any{
 			"org_id":  "some_long_id",
 			"country": "US",
@@ -193,8 +196,10 @@ func TestAuthorizeUnsignedSuccess(t *testing.T) {
 	}
 
 	resource := EntityData{
+		CedarMapping: CedarEntityMapping{
 		EntityType: "Jans::Issue",
 		ID:         "random_id",
+		},
 		Payload: map[string]any{
 			"org_id":  "some_long_id",
 			"country": "US",
@@ -203,22 +208,28 @@ func TestAuthorizeUnsignedSuccess(t *testing.T) {
 
 	principals := []EntityData{
 		{
+			CedarMapping: CedarEntityMapping{
 			EntityType: "Jans::TestPrincipal1",
 			ID:         "1",
+			},
 			Payload: map[string]any{
 				"is_ok": true,
 			},
 		},
 		{
+			CedarMapping: CedarEntityMapping{
 			EntityType: "Jans::TestPrincipal2",
 			ID:         "2",
+			},
 			Payload: map[string]any{
 				"is_ok": true,
 			},
 		},
 		{
+			CedarMapping: CedarEntityMapping{
 			EntityType: "Jans::TestPrincipal3",
 			ID:         "3",
+			},
 			Payload: map[string]any{
 				"is_ok": false,
 			},
@@ -278,8 +289,10 @@ func TestAuthorizeValidationError(t *testing.T) {
 
 	// Invalid resource - org_id should be string but we set it to int
 	resource := EntityData{
+		CedarMapping: CedarEntityMapping{
 		EntityType: "Jans::Issue",
 		ID:         "random_id",
+		},
 		Payload: map[string]any{
 			"org_id":  1, // Should be string
 			"country": "US",

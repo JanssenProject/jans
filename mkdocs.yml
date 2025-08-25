@@ -36,7 +36,7 @@ markdown_extensions:
 - pymdownx.tabbed:
     alternate_style: true
 - pymdownx.emoji:
-    emoji_generator: !!python/name:materialx.emoji.to_svg
+    emoji_generator: !!python/name:material.extensions.emoji.to_svg
     emoji_index: !!python/name:material.extensions.emoji.twemoji
 - pymdownx.details
 nav:
@@ -161,6 +161,7 @@ nav:
     - HASH Passwords: janssen-server/config-guide/hash-password.md
     - Link Configuration: janssen-server/config-guide/link-configuration.md
     - Custom Assets Configuration: janssen-server/config-guide/custom-assets-configuration.md
+    - Session: janssen-server/config-guide/session.md
   - Database Guide:
     - janssen-server/reference/database/README.md
     - RDBMS Erwin Table: janssen-server/reference/database/rdbms-erwin.md
@@ -326,6 +327,9 @@ nav:
       - Script Debugging: script-catalog/introspection/interception-scripts-debug.md
       - Access Evaluation: script-catalog/access_evaluation/access-evaluation.md
       - Access Evaluation Discovery: script-catalog/access_evaluation/access-evaluation-discovery.md
+      - Logout Status JWT: script-catalog/logout_status_jwt/logout-status-jwt.md
+      - Cookie: script-catalog/cookie/cookie.md
+      - Discovery: script-catalog/discovery/discovery.md
       - Select Account: script-catalog/select_account/select-account.md
       - Spontaneous Scope: script-catalog/spontaneous_scope/spontaneous-scope.md
       - Fido2 Extension: script-catalog/fido2_extension/fido2-extension.md
@@ -415,8 +419,7 @@ nav:
   - Overview: 'cedarling/README.md'
   - Terminology: 'cedarling/intro/cedarling-terms.md'
   - Quick Start:
-    - Authorization Using Cedarling: 'cedarling/cedarling-quick-start-unsigned.md'
-    - Implement TBAC Using Cedarling: 'cedarling/cedarling-quick-start-tbac.md'
+    - Authorization Using Cedarling: 'cedarling/cedarling-quick-start.md'
   - Tutorials:
     - 'cedarling/cedarling-getting-started.md'
     - Javascript: 'cedarling/getting-started/javascript.md'
@@ -437,7 +440,7 @@ nav:
     - Lock Configuration: 'cedarling/cedarling-lock-server.md'
     - Cedarling Entities: 'cedarling/cedarling-entities.md'
   - Developer:
-    - WASM: 'cedarling/cedarling-wasm.md'
+    - Rust: 'cedarling/cedarling-rust.md'
     - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md

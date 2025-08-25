@@ -60,6 +60,10 @@ components:
           $ref: '#/components/schemas/Resource'
         subject:
           $ref: '#/components/schemas/Subject'
+      required:
+      - action
+      - resource
+      - subject
       type: object
     PaginationMetadata:
       properties:

@@ -186,6 +186,7 @@ impl JwkSet {
 }
 
 /// Tries to Casts a [`jsonwebtoken::jwk::KeyAlgorithm`] into a [`jsonwebtoken::Algorithm`].
+#[inline]
 fn cast_to_algorithm(
     key_alg: jsonwebtoken::jwk::KeyAlgorithm,
 ) -> Result<jsonwebtoken::Algorithm, jsonwebtoken::jwk::KeyAlgorithm> {

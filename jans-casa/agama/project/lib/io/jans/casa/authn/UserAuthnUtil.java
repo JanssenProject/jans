@@ -84,6 +84,12 @@ public class UserAuthnUtil {
         boolean prompt = policies.isEmpty() || policies.contains("EVERY_LOGIN");
         if (prompt) return true;
         
+        // Validate device and location data before proceeding
+        if (!isValidDeviceData()) {
+            logger.warn("Invalid or missing device data, forcing 2FA prompt");
+            return true;
+        }
+        
         TrustedDevicesManager tdm = new TrustedDevicesManager(user, jsonDevice, jsonLocation);
         
         if (/*!prompt &&*/ policies.contains("LOCATION_UNKNOWN")) {
@@ -97,6 +103,79 @@ public class UserAuthnUtil {
         }
         return prompt;
         
+    }
+
+    /**
+     * Validates that device data is complete and valid before using it for trusted device evaluation
+     * This prevents issues with stale or incomplete device fingerprints
+     */
+    private boolean isValidDeviceData() {
+        // Use centralized device validation service
+        io.jans.casa.core.SessionValidationService validationService = 
+            io.jans.service.cdi.util.CdiUtil.bean(io.jans.casa.core.SessionValidationService.class);
+        
+        return validationService.isDeviceDataValid(jsonDevice);
+    }
+
+    /**
+     * Validates the current session state to prevent stale session issues
+     * Returns true if session is valid, false if stale session detected
+     */
+    public boolean validateSessionState() {
+        try {
+            // Check if we have a valid session context
+            jakarta.servlet.http.HttpServletRequest request = CdiUtil.bean(jakarta.servlet.http.HttpServletRequest.class);
+            jakarta.servlet.http.HttpSession session = request.getSession(false);
+            
+            if (session == null) {
+                logger.debug("No active session found");
+                return false;
+            }
+            
+            // Check session age to detect stale sessions
+            long sessionAge = System.currentTimeMillis() - session.getCreationTime();
+            long maxSessionAge = 30 * 60 * 1000; // 30 minutes
+            
+            if (sessionAge > maxSessionAge) {
+                logger.debug("Session is too old ({} ms), considering stale", sessionAge);
+                return false;
+            }
+            
+            // Check for authentication-related session attributes
+            Object authUser = session.getAttribute("user");
+            if (authUser == null) {
+                logger.debug("No authenticated user in session");
+                return false;
+            }
+            
+            return true;
+        } catch (Exception e) {
+            logger.debug("Error validating session state: {}", e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Clears any stale session data to force fresh authentication
+     */
+    public void clearStaleSessionData() {
+        try {
+            jakarta.servlet.http.HttpServletRequest request = CdiUtil.bean(jakarta.servlet.http.HttpServletRequest.class);
+            jakarta.servlet.http.HttpSession session = request.getSession(false);
+            
+            if (session != null) {
+                // Clear authentication-related session attributes
+                session.removeAttribute("user");
+                session.removeAttribute("authFlowContext");
+                session.removeAttribute("sessionContext");
+                
+                // Invalidate the session to force fresh authentication
+                session.invalidate();
+                logger.debug("Cleared stale session data");
+            }
+        } catch (Exception e) {
+            logger.debug("Error clearing stale session data: {}", e.getMessage());
+        }
     }
 
     public List<String> computeUserMethods(LinkedHashSet<String> supportedMethods) {
@@ -146,6 +225,12 @@ public class UserAuthnUtil {
 
         try {
             if (policies.isEmpty() || !isUser2FAOn()) return;
+            
+            // Only update trusted devices if we have valid device data
+            if (!isValidDeviceData()) {
+                logger.warn("Skipping trusted device update due to invalid device data");
+                return;
+            }
             
             TrustedDevicesManager tdm = new TrustedDevicesManager(user, jsonDevice, jsonLocation);
             tdm.updateDevices();

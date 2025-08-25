@@ -68,8 +68,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .await?;
 
     let principals = vec![EntityData {
+        cedar_mapping: CedarEntityMapping {
         entity_type: "Jans::User".to_string(),
         id: "some_user".to_string(),
+        },
         attributes: HashMap::from([
             ("sub".to_string(), json!("some_sub")),
             ("email".to_string(), json!("email@email.com")),
@@ -85,8 +87,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
             resource: EntityData {
+                cedar_mapping: CedarEntityMapping {
+                    entity_type: "Jans::Issue".to_string(),
                 id: "random_id".to_string(),
-                entity_type: "Jans::Issue".to_string(),
+                },
                 attributes: HashMap::from_iter([
                     (
                         "org_id".to_string(),

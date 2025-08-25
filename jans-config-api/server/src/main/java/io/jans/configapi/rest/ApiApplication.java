@@ -53,6 +53,8 @@ import org.slf4j.Logger;
                 @Tag(name = "Configuration – Config API"), @Tag(name = "Client Authorization"),
                 @Tag(name = "Jans Assets"),
                 @Tag(name = "Token"),
+                @Tag(name = "Logs"),
+                @Tag(name = "Database"),
         },
 
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })
@@ -118,7 +120,8 @@ import org.slf4j.Logger;
         @OAuthScope(name = ApiAccessConstants.TOKEN_READ_ACCESS, description = "View Token details"),
         @OAuthScope(name = ApiAccessConstants.TOKEN_WRITE_ACCESS, description = "Manage Token details"),
         @OAuthScope(name = ApiAccessConstants.TOKEN_DELETE_ACCESS, description = "Delete Token details"),
-        @OAuthScope(name = ApiAccessConstants.APP_DATA_READ_ACCESS, description = "View Config-API related data")
+        @OAuthScope(name = ApiAccessConstants.APP_DATA_READ_ACCESS, description = "View Config-API related data"),
+        @OAuthScope(name = ApiAccessConstants.JANS_AUDIT_READ_ACCESS, description = "View Audit Log related data")
         }
 
 )))
@@ -164,6 +167,8 @@ public class ApiApplication extends BaseApiApplication {
         classes.add(ClientAuthResource.class);
         classes.add(TokenResource.class);
         classes.add(AgamaRepoResource.class);
+        classes.add(AuditLogResource.class);
+        classes.add(DatabaseResource.class);
                 
         log.info("appConfiguration:{}",appConfiguration );
         if(appConfiguration!=null && appConfiguration.getAssetMgtConfiguration()!=null && appConfiguration.getAssetMgtConfiguration().isAssetMgtEnabled()) {
