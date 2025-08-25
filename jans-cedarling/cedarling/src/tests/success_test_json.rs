@@ -50,7 +50,7 @@ async fn success_test_json() {
                 "id_token": generate_token_using_claims(json!({
                     "iss": "https://test.jans.org",
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
-                    "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+                    "aud": ["5b4487c4-8db1-409d-a653-f907b8094039"],
                     "exp": 1724835859,
                     "iat": 1724832259,
                     "jti": "sk3T40NYSYuk5saHZNpkZw",

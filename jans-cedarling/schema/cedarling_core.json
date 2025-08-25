@@ -341,8 +341,11 @@
                             "required": false
                         },
                         "aud": {
-                            "type": "EntityOrCommon",
-                            "name": "String"
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            }
                         },
                         "azp": {
                             "type": "EntityOrCommon",

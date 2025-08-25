@@ -356,7 +356,7 @@ Here is example of a minimum supported `cedar-policy schema`:
 
 ```cedar-policy_schema
 namespace Jans {
-  entity id_token = {"aud": String,"iss": String, "sub": String};
+  entity id_token = {"aud": Set<String>,"iss": String, "sub": String};
   entity Role;
   entity User in [Role] = {};
   entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String};

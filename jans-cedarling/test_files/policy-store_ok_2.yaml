@@ -122,7 +122,7 @@ policy_stores:
         entity Id_token = {
           iss: TrustedIssuer,
           sub: String,
-          aud: String,
+          aud: Set<String>,
         };
         entity Userinfo_token  = {
           iss: TrustedIssuer,

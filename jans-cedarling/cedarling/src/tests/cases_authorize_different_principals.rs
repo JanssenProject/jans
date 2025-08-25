@@ -61,7 +61,7 @@ lazy_static! {
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "https://account.gluu.org",
-                    "aud": "some_aud",
+                    "aud": ["some_aud"],
                     "sub": "some_sub",
                 })),
                 "userinfo_token":  generate_token_using_claims(json!({
