@@ -417,6 +417,7 @@ nav:
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - 'Cedarling':
   - Overview: 'cedarling/README.md'
+  - Terminology: 'cedarling/intro/cedarling-terms.md'
   - Quick Start:
     - Authorization Using Cedarling: 'cedarling/cedarling-quick-start.md'
   - Tutorials:
