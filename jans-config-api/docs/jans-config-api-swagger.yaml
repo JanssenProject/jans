@@ -4751,9 +4751,11 @@ paths:
                   - persistence_extension
                   - idp
                   - discovery
+                  - cookie
                   - health_check
                   - authz_detail
                   - update_token
+                  - logout_status_jwt
                   - config_api_auth
                   - modify_ssa_response
                   - fido2_extension
@@ -14883,9 +14885,9 @@ components:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -15012,6 +15014,8 @@ components:
         archivedJwkLifetimeInSeconds:
           type: integer
           format: int32
+        uppercaseResponseKeysInAccountAccessConsent:
+          type: boolean
         umaConfigurationEndpoint:
           type: string
         umaRptAsJwt:
@@ -16498,6 +16502,10 @@ components:
           type: array
           items:
             type: string
+        logoutStatusJwtScriptDns:
+          type: array
+          items:
+            type: string
         backchannelLogoutUri:
           type: array
           items:
@@ -16934,9 +16942,11 @@ components:
           - persistence_extension
           - idp
           - discovery
+          - cookie
           - health_check
           - authz_detail
           - update_token
+          - logout_status_jwt
           - config_api_auth
           - modify_ssa_response
           - fido2_extension
@@ -17423,10 +17433,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -17597,6 +17607,8 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -17608,8 +17620,6 @@ components:
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
         accessToken:
-          type: boolean
-        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object
