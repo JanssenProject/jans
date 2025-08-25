@@ -68,14 +68,12 @@ To load policy store one of the following keys must be provided:
 - **`CEDARLING_ID_TOKEN_TRUST_MODE`** : `strict` | `never` | `always` | `ifpresent`. Varying levels of validations based on the preference of the developer.
 
   - **`strict`** (default): Enforces strict validation rules:
-    - ID token `aud` must contain the access token `client_id` (supports both string and array `aud` claims)
+    - ID token `aud` must contain the access token `client_id` (the `aud` field is an array that must contain the `client_id`)
     - If userinfo token is present, its `sub` must match the ID token `sub`
   - **`never`**: Disables ID token validation entirely (useful for testing)
   - **`always`**: Always validates ID tokens when present (less strict than `strict` mode)
   - **`ifpresent`**: Validates ID tokens only if they are provided
 
-!!! Note
-    When `aud` claims are arrays, the system checks if the `client_id` is contained within the array values. This supports providers like Auth0 that commonly use array `aud` claims.
 
 **The following bootstrap properties are only needed for the Lock Server Integration.**
 

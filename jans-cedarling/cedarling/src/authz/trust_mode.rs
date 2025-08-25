@@ -19,9 +19,9 @@ use crate::jwt::{Token, TokenClaimTypeError};
 /// # Strict Mode
 ///
 /// Strict mode requires the following:
-/// - `id_token.aud` == `access_token.client_id` (or contains it if aud is an array)
+/// - `id_token.aud` contains `access_token.client_id`
 /// - if a Userinfo token is present:
-///     - `userinfo_token.aud` == `access_token.client_id` (or contains it if aud is an array)
+///     - `userinfo_token.aud` == `access_token.client_id`
 ///     - `userinfo_token.sub` == `id_token.sub`
 pub fn validate_id_tkn_trust_mode(
     tokens: &HashMap<String, Token>,
@@ -136,7 +136,7 @@ mod test {
         );
         let id_token = Token::new(
             "id_token",
-            serde_json::from_value(json!({"aud": "some-id-123"})).expect("valid token claims"),
+            serde_json::from_value(json!({"aud": ["some-id-123"]})).expect("valid token claims"),
             None,
         );
         let tokens = HashMap::from([
@@ -249,7 +249,7 @@ mod test {
         );
         let id_token = Token::new(
             "id_token",
-            serde_json::from_value(json!({"aud": "another-id-123"})).expect("valid token claims"),
+            serde_json::from_value(json!({"aud": ["another-id-123"]})).expect("valid token claims"),
             None,
         );
         let tokens = HashMap::from([
@@ -274,7 +274,7 @@ mod test {
         );
         let id_token = Token::new(
             "id_token",
-            serde_json::from_value(json!({"aud": "some-id-123"})).expect("valid token claims"),
+            serde_json::from_value(json!({"aud": ["some-id-123"]})).expect("valid token claims"),
             None,
         );
         let userinfo_token = Token::new(
@@ -300,7 +300,7 @@ mod test {
         );
         let id_token = Token::new(
             "id_token",
-            serde_json::from_value(json!({"aud": "some-id-123"})).expect("valid token claims"),
+            serde_json::from_value(json!({"aud": ["some-id-123"]})).expect("valid token claims"),
             None,
         );
         let userinfo_token = Token::new(
@@ -326,71 +326,6 @@ mod test {
         )
     }
 
-    #[test]
-    fn success_with_auth0_array_aud_claim() {
-        let access_token = Token::new(
-            "access_token",
-            serde_json::from_value(json!({"client_id": "https://gluu.org/role"}))
-                .expect("valid token claims"),
-            None,
-        );
-        let id_token = Token::new(
-            "id_token",
-            serde_json::from_value(json!({
-                "aud": ["https://gluu.org/role", "https://dev-1e737fn2gji0j3fe.us.auth0.com/userinfo"]
-            })).expect("valid token claims"),
-            None,
-        );
-        let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-        ]);
-        validate_id_tkn_trust_mode(&tokens).expect("should not error with Auth0 array aud claim");
-    }
-
-    #[test]
-    fn success_with_array_aud_claim_containing_client_id() {
-        let access_token = Token::new(
-            "access_token",
-            serde_json::from_value(json!({"client_id": "https://gluu.org/role"}))
-                .expect("valid token claims"),
-            None,
-        );
-        let id_token = Token::new(
-            "id_token",
-            serde_json::from_value(json!({
-                "aud": ["https://other.api", "https://gluu.org/role", "https://auth0.com/userinfo"]
-            })).expect("valid token claims"),
-            None,
-        );
-        let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-        ]);
-        validate_id_tkn_trust_mode(&tokens).expect("should not error with array aud claim containing client_id");
-    }
-
-    #[test]
-    fn success_with_string_aud_claim() {
-        let access_token = Token::new(
-            "access_token",
-            serde_json::from_value(json!({"client_id": "https://gluu.org/role"}))
-                .expect("valid token claims"),
-            None,
-        );
-        let id_token = Token::new(
-            "id_token",
-            serde_json::from_value(json!({
-                "aud": "https://gluu.org/role"
-            })).expect("valid token claims"),
-            None,
-        );
-        let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-        ]);
-        validate_id_tkn_trust_mode(&tokens).expect("should not error with string aud claim");
-    }
 
     #[test]
     fn errors_when_userinfo_tkn_aud_does_not_contain_client_id() {
@@ -402,7 +337,7 @@ mod test {
         );
         let id_token = Token::new(
             "id_token",
-            serde_json::from_value(json!({"aud": "some-id-123"})).expect("valid token claims"),
+            serde_json::from_value(json!({"aud": ["some-id-123"]})).expect("valid token claims"),
             None,
         );
         let userinfo_token = Token::new(
