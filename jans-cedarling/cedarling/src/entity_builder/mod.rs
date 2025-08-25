@@ -24,6 +24,7 @@ use crate::authz::AuthorizeEntitiesData;
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
+use crate::common::issuer_utils::normalize_issuer;
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::jwt::Token;
 use crate::{RequestUnsigned, entity_builder_config::*};
@@ -57,7 +58,7 @@ impl EntityBuilder {
         let (ok, errs) = trusted_issuers
             .values()
             .map(|iss| {
-                let iss_id = iss.oidc_endpoint.origin().ascii_serialization();
+                let iss_id = normalize_issuer(&iss.oidc_endpoint.origin().ascii_serialization());
                 build_iss_entity(&config.entity_names.iss, &iss_id, iss, schema.as_ref())
             })
             .partition_result();
