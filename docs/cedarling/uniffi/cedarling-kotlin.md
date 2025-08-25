@@ -4,13 +4,18 @@
 
 Please refer to [this document](./cedarling-uniffi.md) for details on the structs, enums, and functions exposed by UniFFI bindings. This section outlines the process of generating the Kotlin binding for Cedarling using Cedarling UniFFI. The Kotlin binding is then wrapped in a Java class to enable convenient use in Java applications.
 
-## Prerequisites
+## Building from Source
+
+Apart from using the Cedarling binding [using the package manager](), you 
+can also build it from source.
+
+### Prerequisites
 
 - Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
 - Java Development Kit (JDK): version 11 
 - Apache Maven: Install it from [Apache Maven Website](https://maven.apache.org/download.cgi)
 
-## Building from Source
+### Building
 
 1. Build Cedarling by executing below command from `./jans/jans-cedarling` of cloned jans project:
    ```bash
@@ -36,32 +41,14 @@ Please refer to [this document](./cedarling-uniffi.md) for details on the struct
     mvn clean install
    ```
    
-## Using Cedarling-java Maven dependency
-
-If you are using pre-built binaries, add the following `repository` and `dependency` to the `pom.xml` of your Java Maven project to use Cedarling Java bindings.
-
-```declarative
-    <repositories>
-        <repository>
-            <id>jans</id>
-            <name>Janssen project repository</name>
-            <url>https://maven.jans.io/maven</url>
-        </repository>
-    </repositories>
-```
-```declarative
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>cedarling-java</artifactId>
-            <version>{latest-jans-stable-version}</version>
-        </dependency>
-```
 
 ## Recipes
 
-### **Recipe 1:** Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
+### Use the Cedarling Java binding in custom scripts 
 
-**Note:** This recipe is compatible with Jans version 1.4.0 and earlier.
+!!! note 
+    This recipe is applicable to VM based installations, compatible with Jans 
+    version 1.4.0 and earlier.
 
 - Upload [bootstrap.json](./cedarling-sample-inputs.md/#bootstrapjson), [policy-store.json](./cedarling-sample-inputs.md/#policy-storejson), [action.txt](./cedarling-sample-inputs.md/#actiontxt), [context.json](./cedarling-sample-inputs.md/#contextjson), [principals.json](./cedarling-sample-inputs.md/#principalsjson) and [resource.json](./cedarling-sample-inputs.md/#resourcejson) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
 - Upload the generate `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
@@ -80,7 +67,7 @@ If you are using pre-built binaries, add the following `repository` and `depende
 
 - The script runs after client authentication to invoke Cedarling authz.
 
-### **Recipe 2:** Sample Java Maven project using the Kotlin binding
+### Build a sample Java Project using the Kotlin binding
 
 1. Build Cedarling by executing below command from `./jans/jans-cedarling` of cloned jans project:
     ```bash
@@ -105,14 +92,14 @@ If you are using pre-built binaries, add the following `repository` and `depende
     ```
 The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization with sample tokens, resource and context inputs and call log interface to print authorization logs on console.
 
-#### Sample Java Maven Project
-
 Note the following points in the sample Java Maven project to understand the changes required for using the Kotlin binding in other Java projects.
 
 - The sample `tokens`, `resource` and `context` input files along with files containing `bootstrap configuration` and `policy- store` used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`.
 - Refer to the Java code in org.example.Main to see how Cedarling's `init`, `authz`, and `log` interfaces are called using the Kotlin binding.
 
-##### Added dependencies in pom.xml:
+##### Required Dependencies
+
+Add the following dependencies in the pom.xml.
 
 - **Java Native Access (JNA):** A Java library that allows Java code to call native shared libraries (like .so on Linux, .dll on Windows, or .dylib on macOS) without writing JNI (Java Native Interface) code.
 
