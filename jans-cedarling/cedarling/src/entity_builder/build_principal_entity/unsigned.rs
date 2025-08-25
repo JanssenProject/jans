@@ -105,10 +105,12 @@ mod test {
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
 

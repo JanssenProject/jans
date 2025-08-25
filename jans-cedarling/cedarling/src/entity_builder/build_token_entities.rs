@@ -115,10 +115,12 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
             &issuers,
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
         let access_token = Token::new(
@@ -165,7 +167,8 @@ mod test {
     fn can_build_tkn_entity_without_schema() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &issuers, None)
+
+        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &issuers, None, None)
             .expect("should init entity builder");
         let access_token = Token::new(
             "access_token",
