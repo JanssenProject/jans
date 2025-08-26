@@ -21,7 +21,7 @@ tags:
 | issuer                          | URL using the https scheme for Issuer identifier                                              | [Details](#issuer)                          |
 | loggingLayout                   | Logging layout used for Fido2                                                                 | [Details](#logginglayout)                   |
 | loggingLevel                    | Logging level for Fido2 logger                                                                | [Details](#logginglevel)                    |
-| mdsAccessToken                  | MDS access token                                                                              | [Details](#mdsaccesstoken)                  |
+
 | mdsCertsFolder                  | MDS TOC root certificates folder                                                              | [Details](#mdscertsfolder)                  |
 | mdsTocsFolder                   | MDS TOC files folder                                                                          | [Details](#mdstocsfolder)                   |
 | metadataUrlsProvider            | String value to provide source of URLs with external metadata                                 | [Details](#metadataurlsprovider)            |
@@ -32,7 +32,7 @@ tags:
 | enabledFidoAlgorithms           | List of Requested Credential Types                                                            | [Details](#enabledFidoAlgorithms)           |
 | rp                              | Requested Parties Authenticators metadata in json format                                      | [Details](#rp)                              |
 | serverMetadataFolder            | Authenticators metadata in json format                                                        | [Details](#servermetadatafolder)            |
-| sessionIdPersistInCache         | Boolean value specifying whether to persist session_id in cache                               | [Details](#sessionidpersistincache)         |
+
 | unfinishedRequestExpiration     | Expiration time in seconds for pending enrollment/authentication requests                     | [Details](#unfinishedrequestexpiration)     |
 | useLocalCache                   | Boolean value to indicate if Local Cache is to be used                                        | [Details](#uselocalcache)                   |
 | debugUserAutoEnrollment         | Allow to enroll users on enrollment/authentication requests                                   | [Details](#userautoenrollment)              |
@@ -137,13 +137,7 @@ tags:
 - Default value: None
 
 
-### mdsAccessToken
 
-- Description: MDS access token
-
-- Required: No
-
-- Default value: None
 
 
 ### mdsCertsFolder
@@ -237,13 +231,7 @@ tags:
 
 
 
-### sessionIdPersistInCache
 
-- Description: Boolean value specifying whether to persist session_id in cache
-
-- Required: No
-
-- Default value: false
 
 
 ### unfinishedRequestExpiration

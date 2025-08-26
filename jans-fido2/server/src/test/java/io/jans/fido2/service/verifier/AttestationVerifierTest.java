@@ -175,7 +175,7 @@ class AttestationVerifierTest {
         when(authenticatorDataParser.parseAttestationData(authDataText)).thenReturn(authData);
         when(attestationProcessorFactory.getCommandProcessor(fmt)).thenReturn(attestationProcessor);
 
-        Fido2Configuration fido2Configuration = new Fido2Configuration(null, null, null,
+        Fido2Configuration fido2Configuration = new Fido2Configuration(null, null,
                 null, false, false,
                 0, 0, null,
                 null, null, null, false,
@@ -215,7 +215,7 @@ class AttestationVerifierTest {
         when(authenticatorDataParser.parseAttestationData(authDataText)).thenReturn(authData);
         when(attestationProcessorFactory.getCommandProcessor(fmt)).thenReturn(attestationProcessor);
 
-        Fido2Configuration fido2Configuration = new Fido2Configuration(null, null, null,
+        Fido2Configuration fido2Configuration = new Fido2Configuration(null, null,
                 null, false, false,
                 0, 0, null,
                 null, null, null, false,
@@ -253,7 +253,7 @@ class AttestationVerifierTest {
         when(authenticatorDataParser.parseAttestationData(authDataText)).thenReturn(authData);
         when(attestationProcessorFactory.getCommandProcessor(fmt)).thenReturn(attestationProcessor);
 
-        Fido2Configuration fido2Configuration = new Fido2Configuration(null, null, null,
+        Fido2Configuration fido2Configuration = new Fido2Configuration(null, null,
                 null, false, false,
                 0, 0, null,
                 null, null, null, false,
@@ -291,7 +291,7 @@ class AttestationVerifierTest {
         when(authenticatorDataParser.parseAttestationData(authDataText)).thenReturn(authData);
         when(attestationProcessorFactory.getCommandProcessor(fmt)).thenReturn(attestationProcessor);
 
-        Fido2Configuration fido2Configuration = new Fido2Configuration(null, null, null,
+        Fido2Configuration fido2Configuration = new Fido2Configuration(null, null,
                 null, false, false,
                 0, 0, null,
                 null, null, null, false,

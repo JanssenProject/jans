@@ -91,7 +91,7 @@ public class ErrorResponseFactory implements Configuration {
 
     private String errorAsJson(IErrorType type, String reason) {
         final DefaultErrorResponse error = getErrorResponse(type);
-        error.setReason(BooleanUtils.isTrue(appConfiguration.getErrorReasonEnabled()) ? reason : "");
+        error.setReason(reason);
         return error.toJSonString();
     }
 
