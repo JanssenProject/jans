@@ -30,6 +30,7 @@ public class ApiConstants {
     public static final String UMA = "/uma";
     public static final String DYN_REGISTRATION = "/dyn_registration";
     public static final String SESSION = "/session";
+    public static final String SSA = "/ssa";
     public static final String CLIENT = "/client";
     public static final String CLIENTS = "/clients";
     public static final String OPENID = "/openid";

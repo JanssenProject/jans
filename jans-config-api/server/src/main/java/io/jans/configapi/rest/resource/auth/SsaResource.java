@@ -1,0 +1,61 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
+package io.jans.configapi.rest.resource.auth;
+
+import io.jans.as.common.model.session.SessionId;
+import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.service.auth.SessionService;
+import io.jans.configapi.util.ApiAccessConstants;
+import io.jans.configapi.util.ApiConstants;
+import io.jans.model.SearchRequest;
+import io.jans.orm.model.PagedResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.*;
+
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
+import static io.jans.as.model.util.Util.escapeLog;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+
+@Path(ApiConstants.JANS_AUTH + ApiConstants.SSA)
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class SsaResource extends ConfigBaseResource {
+
+    @Inject
+    Logger log;
+
+    @Operation(summary = "Revoke existing active SSA based on `jti` or `org_id`", description = "Revoke existing active SSA based on `jti` or `org_id`", operationId = "revoke-ssa", tags = {
+            "Software Statement Assertion (SSA)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.SSA_DELETE_ACCESS}))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SessionPagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/session/get-session.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.SSA_DELETE_ACCESS }, groupScopes = {ApiAccessConstants.SSA_WRITE_ACCESS}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    public Response getSsa(String jti, String orgId) {
+               return Response.ok().build();
+    }
+
+    
+
+}

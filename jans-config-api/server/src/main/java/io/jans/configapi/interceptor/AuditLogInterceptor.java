@@ -152,7 +152,7 @@ public class AuditLogInterceptor {
 
         return false;
     }
-
+//Puja to Make use ??????????????
     private boolean ignoreAnnotation(String resourceMethod, AuditLogConf auditLogConf) {
         AUDIT_LOG.error("Checking if resource method to be ignored - resourceMethod:{}, auditLogConf:{}",
                 resourceMethod, auditLogConf);
@@ -176,7 +176,7 @@ public class AuditLogInterceptor {
             return false;
         }
 
-        ObjectDetails objectDetails = auditLogConf.getIgnoreObjectMapping().stream().filter(e -> e.equals(objectName))
+        ObjectDetails objectDetails = auditLogConf.getIgnoreObjectMapping().stream().filter(e -> (e!=null && e.getName()!=null && e.getName().equalsIgnoreCase(objectName)))
                 .findFirst().orElse(null);
 
         if (objectDetails == null) {
