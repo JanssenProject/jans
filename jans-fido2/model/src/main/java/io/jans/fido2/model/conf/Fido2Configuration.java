@@ -170,31 +170,6 @@ public class Fido2Configuration {
 		this.attestationMode = attestationMode;
 	}
 
-	public Fido2Configuration(String authenticatorCertsFolder, String mdsCertsFolder,
-			String mdsTocsFolder, boolean checkU2fAttestations, boolean debugUserAutoEnrollment,
-			int unfinishedRequestExpiration, int authenticationHistoryExpiration, String serverMetadataFolder,
-			List<String> enabledFidoAlgorithms, List<RequestedParty> requestedParties,
-			List<MetadataServer> metadataServers, boolean disableMetadataService, String attestationMode,
-			List<String> hints, boolean enterpriseAttestation) {
-		super();
-		this.authenticatorCertsFolder = authenticatorCertsFolder;
-
-		this.mdsCertsFolder = mdsCertsFolder;
-		this.mdsTocsFolder = mdsTocsFolder;
-
-		this.userAutoEnrollment = debugUserAutoEnrollment;
-		this.unfinishedRequestExpiration = unfinishedRequestExpiration;
-		this.authenticationHistoryExpiration = authenticationHistoryExpiration;
-		this.serverMetadataFolder = serverMetadataFolder;
-		this.enabledFidoAlgorithms = enabledFidoAlgorithms;
-		this.requestedParties = requestedParties;
-		this.metadataServers = metadataServers;
-		this.disableMetadataService = disableMetadataService;
-		this.attestationMode = attestationMode;
-		this.hints = hints;
-		this.enterpriseAttestation = enterpriseAttestation;
-	}
-
 	public Fido2Configuration() {
 	}
 
