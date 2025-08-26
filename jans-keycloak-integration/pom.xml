@@ -21,34 +21,31 @@
       <maven.compiler.target>17</maven.compiler.target>
       <keycloak-admin-client.version>26.0.6</keycloak-admin-client.version>
       <keycloak-server.version>26.3.2</keycloak-server.version>
-      <nimbus.oauth-sdk.version>11.13</nimbus.oauth-sdk.version>
-      <nimbus.oauth2-oidc-sdk.version>11.13</nimbus.oauth2-oidc-sdk.version>
-      <jackson.coreutils.version>1.8</jackson.coreutils.version>
+      <nimbus.oauth2-oidc-sdk.version>11.27.1</nimbus.oauth2-oidc-sdk.version>
       <jans.version>${project.version}</jans.version>
-      <jakarta.ws-rs-api.version>3.1.0</jakarta.ws-rs-api.version>
-      <jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
-      <jakarta.annotation-api.version>3.0.0-M1</jakarta.annotation-api.version>
+      <jakarta.ws-rs-api.version>4.0.0</jakarta.ws-rs-api.version>
+      <jakarta.servlet-api.version>6.1.0</jakarta.servlet-api.version>
+      <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
       <smallrye-config.version>3.13.4</smallrye-config.version>
-      <log4j.version>2.23.1</log4j.version>
-      <slf4j.version>1.7.36</slf4j.version>
-      <logback.version>1.4.14</logback.version>
-      <jboss-logging.version>3.5.1.Final</jboss-logging.version>
-      <fasterxml-jackson.version>2.16.0</fasterxml-jackson.version>
-      <commons-lang.version>3.13.0</commons-lang.version>
-      <commons-collection.version>4.1</commons-collection.version>
+      <log4j.version>2.25.1</log4j.version>
+      <slf4j.version>2.0.17</slf4j.version>
+      <logback.version>1.5.18</logback.version>
+      <jboss-logging.version>3.6.1.Final</jboss-logging.version>
+      <fasterxml-jackson.version>2.19.2</fasterxml-jackson.version>
+      <commons-lang.version>3.18.0</commons-lang.version>
+      <commons-collection.version>4.5.0</commons-collection.version>
       <commons-io.version>2.14.0</commons-io.version>
-      <commons-beanutils.version>1.9.4</commons-beanutils.version>
-      <swagger.version>2.2.7</swagger.version>
+      <commons-beanutils.version>1.11.0</commons-beanutils.version>
+      <swagger.version>2.2.36</swagger.version>
       <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
       <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
       <maven-deps-plugin.version>3.6.0</maven-deps-plugin.version>
       <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
-      <quartz-scheduler.version>2.3.2</quartz-scheduler.version>
-      <resteasy.version>6.2.4.Final</resteasy.version>
+      <quartz-scheduler.version>2.5.0</quartz-scheduler.version>
       <typesafe-config.version>1.4.3</typesafe-config.version>
       <openapi-generator-plugin.version>7.2.0</openapi-generator-plugin.version>
-      <jackson-datatype-jsr310.version>2.16.1</jackson-datatype-jsr310.version>
-      <jackson-databind.version>2.16.1</jackson-databind.version>
+      <jackson-datatype-jsr310.version>2.19.2</jackson-datatype-jsr310.version>
+      <jackson-databind.version>2.19.2</jackson-databind.version>
       <sonar.projectKey>JanssenProject_keycloak-integ</sonar.projectKey>
       <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
       <sonar.organization>janssenproject</sonar.organization>
