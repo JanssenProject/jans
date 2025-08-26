@@ -1280,3 +1280,33 @@ html {
   margin-bottom: 0.75rem;
   margin-top: 1rem;
 }
+
+.md-content p {
+    font-size: 16px !important;
+    line-height: 1.6;
+    margin-bottom: 1em;
+}
+
+.md-content h1 + p,
+.md-content h2 + p,
+.md-content h3 + p,
+.md-content h4 + p,
+.md-content h5 + p,
+.md-content h6 + p {
+    font-size: 16px !important;
+    margin-top: 0.5em;
+}
+
+.md-content .md-typeset p {
+    font-size: 16px !important;
+    font-weight: normal !important;
+}
+
+.md-content .md-typeset p.lead,
+.md-content .md-typeset p:first-of-type {
+    font-size: 16px !important;
+}
+
+.md-content .md-typeset .admonition p {
+    font-size: 16px !important;
+}

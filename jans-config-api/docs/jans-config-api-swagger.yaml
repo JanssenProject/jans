@@ -1650,18 +1650,14 @@ paths:
           default: 50
       - name: start_date
         in: query
+        description: Start-Date for which the log entries report is to be fetched
         schema:
           type: string
-          description: Start-Date for which the log entries report is to be fetched
-            in `dd-MM-yyyy` format
-          format: date
       - name: end_date
         in: query
+        description: End-Date for which the log entries is to be fetched
         schema:
           type: string
-          description: End-Date for which the log entries is to be fetched in `dd-MM-yyyy`
-            format
-          format: date
       responses:
         "200":
           description: Ok
@@ -14879,21 +14875,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        userCanEdit:
+        selected:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
-        selected:
-          type: boolean
-        whitePagesCanView:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -15018,6 +15014,8 @@ components:
         archivedJwkLifetimeInSeconds:
           type: integer
           format: int32
+        uppercaseResponseKeysInAccountAccessConsent:
+          type: boolean
         umaConfigurationEndpoint:
           type: string
         umaRptAsJwt:
@@ -15797,6 +15795,8 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -15806,8 +15806,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -16807,17 +16805,6 @@ components:
           items:
             type: string
             description: HTTP methods for which audit is disabled.
-        ignoreAnnotation:
-          type: array
-          description: Annotation for which audit is disabled.
-          items:
-            type: string
-            description: Annotation for which audit is disabled.
-        ignoreObjectMapping:
-          type: array
-          description: Object for which audit is disabled.
-          items:
-            $ref: "#/components/schemas/ObjectDetails"
         headerAttributes:
           type: array
           description: List of header HTTP attributes whose value is to be logged.
@@ -16847,19 +16834,6 @@ components:
             type: string
             description: HTTP methods for which data conversion is to be disabled.
       description: Configuration for data-type converstion.
-    ObjectDetails:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Name of the object.
-        text:
-          type: array
-          description: List of string text that is to be ignored .
-          items:
-            type: string
-            description: List of string text that is to be ignored .
-      description: Object for which audit is disabled.
     PluginConf:
       type: object
       properties:
@@ -17459,10 +17433,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -17633,6 +17607,8 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -17643,8 +17619,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
           type: boolean
     TokenEntityPagedResult:
