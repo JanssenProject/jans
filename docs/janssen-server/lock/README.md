@@ -47,7 +47,7 @@ A Lock topology consists of three main software components:
 
 ## Architecture Overview
 
-Lock is designed for domains that deploy a **network of Cedarlings**. Communication in this topology is bi-directional:
+Lock is designed for organizations that deploy a **network of Cedarlings**. Communication in this topology is bi-directional:
 
 - **Cedarling → Lock Server**: HTTP requests to OAuth-protected endpoints to retrieve policies and send audit data
 
