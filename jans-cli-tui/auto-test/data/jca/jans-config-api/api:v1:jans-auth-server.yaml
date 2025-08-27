@@ -1,0 +1,110 @@
+operation-01:
+  id: "get-properties"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      issuer:
+        type: "string"
+      allowClientAssertionAudWithoutStrictIssuerMatch:
+        type: "boolean"
+      responseTypesSupported:
+        type: "array"
+      refreshTokenLifetime:
+        type: "integer"
+      openidSubAttribute:
+        type: "string"
+      defaultSignatureAlgorithm:
+        type: "string"
+      authenticationFilters:
+        type: "array"        
+        items:
+          type: "object"
+          properties:
+            filter:
+              type: "string"
+            baseDn:
+              type: "string"
+          required:
+          - filter
+          - baseDn
+
+    required:
+    - issuer
+    - allowClientAssertionAudWithoutStrictIssuerMatch
+    - responseTypesSupported
+    - refreshTokenLifetime
+    - openidSubAttribute
+    - featureFlags
+
+  expected-output:
+    /issuer: "https://%(hostname)s"
+    /allowClientAssertionAudWithoutStrictIssuerMatch: false
+    /refreshTokenLifetime: 14400
+    /openidSubAttribute: "inum"
+    /defaultSignatureAlgorithm: "RS256"
+
+
+operation-02:
+  id: "patch-properties"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      umaRptLifetime:
+        type: "integer"
+      loggingLevel:
+        type: "string"
+    required:
+    - umaRptLifetime
+    - loggingLevel
+  data:
+    - op: "replace"
+      path: "/umaRptLifetime"
+      value: 3601
+    - op: "replace"
+      path: "/loggingLevel"
+      value: "DEBUG"
+  expected-output:
+    /umaRptLifetime: 3601
+    /loggingLevel: "DEBUG"
+
+
+operation-03:
+  id: "get-feature-flag-type"
+  expected-status-code: 200
+  schema:
+    type: "array"
+    items:
+        type: "string"
+
+  expected-output:
+    /0: "HEALTH_CHECK"
+
+
+operation-04:
+  id: "get-properties-persistence"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      databaseName:
+        type: "string"
+      schemaName:
+        type: "string"
+      productName:
+        type: "string"
+      productVersion:
+        type: "string"
+      driverName:
+        type: "string"
+      driverVersion:
+        type: "string"
+    required:
+    - databaseName
+    - schemaName
+    - productName
+    - productVersion
+    - driverName
+    - driverVersion
+

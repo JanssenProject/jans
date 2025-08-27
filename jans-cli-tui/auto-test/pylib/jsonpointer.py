@@ -71,6 +71,10 @@ def set_pointer(doc, pointer, value, inplace=True):
     pointer = JsonPointer(pointer)
     return pointer.set(doc, value, inplace)
 
+# Added by Mustafa Baser <mbaser_at_mail.com>
+def remove_pointer(doc, pointer, inplace=True):
+    pointer = JsonPointer(pointer)
+    return pointer.remove(doc, inplace)
 
 def resolve_pointer(doc, pointer, default=_nothing):
     """ Resolves pointer against doc and returns the referenced object
@@ -217,6 +221,28 @@ class JsonPointer(object):
             parent[part] = value
 
         return doc
+
+    # Added by Mustafa Baser <mbaser_at_mail.com>
+    def remove(self, doc, inplace=True):
+        """Removes the pointer against the doc"""
+
+        if len(self.parts) == 0:
+            if inplace:
+                raise JsonPointerException('Cannot set root in place')
+            return value
+
+        if not inplace:
+            doc = copy.deepcopy(doc)
+
+        (parent, part) = self.to_last(doc)
+
+        if isinstance(parent, Sequence) and part == '-':
+            parent.remove(part)
+        else:
+            del parent[part]
+
+        return doc
+
 
     @classmethod
     def get_part(cls, doc, part):

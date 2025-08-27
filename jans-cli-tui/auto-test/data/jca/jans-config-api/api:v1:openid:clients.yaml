@@ -1,0 +1,46 @@
+#Fixme
+#delete-client-authorization
+#get-client-authorization
+
+operation-01:
+  id: "get-oauth-openid-clients"
+  expected-status-code: 200
+  endpoint-args:
+    fieldValuePair: "displayName=Jans TUI Client"
+  schema:
+    type: "object"
+    properties:
+      start:
+        type: "integer"
+      totalEntriesCount:
+        type: "integer"
+      entriesCount:
+        type: "integer"
+      entries:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            dn:
+              type: "string"
+            inum:
+              type: "string"
+            clientSecret:
+              type: "string"
+            applicationType:
+              type: "string"
+            displayName:
+              type: "string"
+            grantTypes:
+              type: "array"
+          required:
+          - dn
+          - inum
+          - clientSecret
+          - applicationType
+          - displayName
+          - grantTypes
+
+  expected-output:
+    /entries/0/displayName: "Jans TUI Client"
+    /entries/0/authenticationMethod: "client_secret_basic"

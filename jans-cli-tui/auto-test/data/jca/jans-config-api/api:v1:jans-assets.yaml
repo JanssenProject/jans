@@ -1,0 +1,292 @@
+operation-01:
+  #pass-this: true
+  id: "get-all-assets"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      start:
+        type: "integer"
+      totalEntriesCount:
+        type: "integer"
+      entriesCount:
+        type: "integer"
+      entries:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            dn:
+              type: "string"
+            inum:
+              type: "string"
+            fileName:
+              type: "string"
+            filePath:
+              type: "string"
+            description:
+              type: "string"
+            document:
+              type: "string"
+            creationDate:
+              type: "string"
+            service:
+              type: "string"
+            level:
+              type: "integer"
+            enabled:
+              type: "boolean"
+            baseDn:
+              type: "string"
+          required:
+          - dn
+          - inum
+          - fileName
+          - filePath
+          - document
+          - enabled
+          - baseDn
+
+operation-02:
+  id: "get-asset-types"
+  expected-status-code: 200
+  schema:
+    type: "array"
+    items:
+      type: "string"
+  expected-output:
+    /0: "css"
+
+operation-03:
+  id: "get-asset-services"
+  expected-status-code: 200
+  schema:
+    type: "array"
+    items:
+      type: "string"
+  expected-output:
+    /0: "jans-auth"
+
+operation-04:
+  id: "post-new-asset"
+  expected-status-code: 201
+  json-data: '{"document": {"inum": "", "fileName": "asset-sample.css", "description": "Sampe CSS asset upoaded by auto-test", "level": 0, "enabled": false, "service": "jans-auth"}, "assetFile": "%(base_dir)s/data/jca/jans-config-api/files/asset-sample.css"}'
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      inum:
+        type: "string"
+      fileName:
+        type: "string"
+      filePath:
+        type: "string"
+      description:
+        type: "string"
+      document:
+        type: "string"
+      creationDate:
+        type: "string"
+      service:
+        type: "string"
+      level:
+        type: "integer"
+      enabled:
+        type: "boolean"
+      baseDn:
+        type: "string"
+    required:
+    - dn
+    - inum
+    - fileName
+    - filePath
+    - document
+    - enabled
+    - baseDn
+  expected-output:
+    /fileName: "asset-sample.css"
+  store-output-name: "sample-asset"
+
+operation-05:
+  id: "put-asset"
+  expected-status-code: 200
+  modify-output:
+    output-name: "sample-asset"
+    modifiers:
+      set:
+        /level: 13
+        /enabled: true
+        /description: "Changed by Auto-Test"
+      remove:
+        - /document
+        - /filePath
+  data:
+    document: "$sample-asset"
+
+  schema:
+    type: "object"
+    properties:
+      level:
+        type: "integer"
+      enabled:
+        type: "boolean"
+      description:
+        type: "string"
+    required:
+    - level
+    - enabled
+    - description
+  expected-output:
+    /level: 13
+    /enabled: true
+    /description: "Changed by Auto-Test"
+
+operation-06:
+  #pass-this: true
+  id: "get-asset-by-inum"
+  expected-status-code: 200
+  url-suffix:
+    inum: "$sample-asset:/inum"
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      inum:
+        type: "string"
+      fileName:
+        type: "string"
+      filePath:
+        type: "string"
+      description:
+        type: "string"
+      document:
+        type: "string"
+      creationDate:
+        type: "string"
+      service:
+        type: "string"
+      level:
+        type: "integer"
+      enabled:
+        type: "boolean"
+      baseDn:
+        type: "string"
+    required:
+    - dn
+    - inum
+    - fileName
+    - filePath
+    - document
+    - enabled
+    - baseDn
+  expected-output:
+    /level: 13
+    /enabled: true
+    /description: "Changed by Auto-Test"
+
+operation-07:
+  #pass-this: true
+  id: "get-asset-by-name"
+  expected-status-code: 200
+  url-suffix:
+    name: "$sample-asset:/fileName"
+  schema:
+    type: "object"
+    properties:
+      start:
+        type: "integer"
+      totalEntriesCount:
+        type: "integer"
+      entriesCount:
+        type: "integer"
+      entries:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            dn:
+              type: "string"
+            inum:
+              type: "string"
+            fileName:
+              type: "string"
+            filePath:
+              type: "string"
+            description:
+              type: "string"
+            document:
+              type: "string"
+            creationDate:
+              type: "string"
+            service:
+              type: "string"
+            level:
+              type: "integer"
+            enabled:
+              type: "boolean"
+            baseDn:
+              type: "string"
+          required:
+          - dn
+          - inum
+          - fileName
+          - filePath
+          - document
+          - enabled
+          - baseDn
+  expected-output:
+    /totalEntriesCount: 1
+    /entries/0/enabled: true
+    /entries/0/fileName: "asset-sample.css"
+
+#Fix-Me
+operation-08:
+  pass-this: true
+  id: "load-service-asset"
+  expected-status-code: 200
+  url-suffix:
+    name: "$sample-asset:/fileName"
+  schema:
+    type: "object"
+
+
+operation-09:
+  #pass-this: true
+  id: "delete-asset"
+  url-suffix:
+    inum: "$sample-asset:/inum"
+  expected-status-code: null
+  expected-response-text: null
+
+
+operation-10:
+  id: "get-asset-dir-mapping"
+  expected-status-code: 200
+  schema:
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        directory:
+          type: "string"
+        type:
+          type: "array"
+          items:
+            type: "string"
+        description:
+          type: "string"
+        jansServiceModule:
+          type: "array"
+          items:
+            type: "string"
+      
+  expected-output:
+    /0/type/0: "xml"
+
+
+
+
+
+

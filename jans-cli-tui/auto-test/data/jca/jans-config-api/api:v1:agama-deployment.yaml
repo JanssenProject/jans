@@ -84,7 +84,7 @@ operation-03:
      - details
 
   expected-output:
-    - /details/projectMetadata/projectName: "Test Project Name"
+    - /details/projectMetadata/projectName: *project_name
 
 
 operation-04:
