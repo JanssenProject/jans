@@ -24,6 +24,9 @@ import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.plugins.interceptors.AcceptEncodingGZIPFilter;
+import org.jboss.resteasy.plugins.interceptors.GZIPDecodingInterceptor;
+import org.jboss.resteasy.plugins.interceptors.GZIPEncodingInterceptor;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -242,6 +245,8 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
             resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(executor).build();
         }
 
+        resteasyClient.register(AcceptEncodingGZIPFilter.class).register(GZIPDecodingInterceptor.class).register(GZIPEncodingInterceptor.class);
+        
         webTarget = resteasyClient.target(getUrl());
     }
 

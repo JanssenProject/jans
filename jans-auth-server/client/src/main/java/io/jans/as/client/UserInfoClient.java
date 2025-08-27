@@ -6,24 +6,26 @@
 
 package io.jans.as.client;
 
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.util.JwtUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
-import java.nio.charset.StandardCharsets;
-import java.security.PrivateKey;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Encapsulates functionality to make user info request calls to an authorization server via REST Services.
@@ -93,6 +95,9 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
             }
 
             setResponse(new UserInfoResponse(clientResponse));
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Status code: " + clientResponse.getStatus());
+			}
 
             getResponse().setHeaders(clientResponse.getMetadata());
             parseEntity(getResponse().getEntity());
@@ -111,6 +116,15 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
         }
 
         List<Object> contentType = clientResponse.getHeaders().get("Content-Type");
+		if (LOG.isDebugEnabled()) {
+			if (contentType != null) {
+				LOG.debug("Content types: " + contentType);
+			}
+			if (entity != null) {
+				LOG.debug("Content in HEX: " + Hex.encodeHexString(entity.getBytes()));
+			}
+		}
+
         if (contentType != null && contentType.contains("application/jwt")) {
             String[] jwtParts = entity.split("\\.");
             if (jwtParts.length == 5) {
@@ -147,7 +161,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
 
     private void parseJson(String entity) {
         try {
-            JSONObject jsonObj = new JSONObject(entity);
+        	JSONObject jsonObj = new JSONObject(entity);
 
             for (Iterator<String> iterator = jsonObj.keys(); iterator.hasNext(); ) {
                 String key = iterator.next();
