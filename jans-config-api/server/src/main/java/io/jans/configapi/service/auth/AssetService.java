@@ -107,8 +107,10 @@ public class AssetService {
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
-                Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
-                log.trace("asset dataFilter:{}", dataFilter);
+                
+                String[] valueArr = new String[] { entry.getValue() };
+                Filter dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null);
+                log.info("asset dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
@@ -229,7 +231,7 @@ public class AssetService {
         List<Document> assets = persistenceEntryManager.findEntries(getDnForAsset(null), Document.class,
                 serviceNameFilter);
         log.info(" serviceNameFilter:{}, assets:{}", serviceNameFilter, assets);
-        if (assets == null || !assets.isEmpty()) {
+        if (assets == null || assets.isEmpty()) {
             sb.append(" No asset found for service{" + serviceName + "}");
             log.info(" No asset found for service:{}", serviceName);
             return sb.toString();
