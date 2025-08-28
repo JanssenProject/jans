@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.as.client.ssa.get.*;
+import io.jans.as.client.ssa.create.SsaCreateClient;
 import io.jans.as.client.service.StatService;
 import io.jans.as.client.JwkResponse;
 import io.jans.as.client.RevokeSessionResponse;
@@ -30,12 +31,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
+
 
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -188,18 +191,22 @@ public class AuthClientFactory {
 
     public static Response getSsa(final String issuer, final String accessToken, final String jti, final String orgId)
             throws Exception {
-        log.error("Request jti SSA List -  issuer:{}, accessToken:{}, jti:{} , orgId:{}", issuer, accessToken, jti,
+        log.error("NEW Request jti SSA List -  issuer:{}, accessToken:{}, jti:{} , orgId:{}", issuer, accessToken, jti,
                 orgId);
 
         String ssaEndpoint = getSsaEndpoint(issuer);
+        log.error("Get SSA -  ssaEndpoint:{}", ssaEndpoint);
+        
         Builder request = getClientBuilder(ssaEndpoint);
         request.header(AUTHORIZATION, accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         request.buildGet().property("jti", jti).property("org_id", orgId);
-        log.error(" request:{}}", request);
-
+        request.accept(MediaType.APPLICATION_JSON);
+        
+        log.error("Get SSA request:{}}", request);
+       
         Response response = request.get();
-        log.error(" response:{}", response);
+        log.error("GET SSA response:{}", response);
 
         return response;
     }
@@ -209,28 +216,34 @@ public class AuthClientFactory {
         log.error("Revoke jti -  issuer:{}, accessToken:{}, jti:{} , orgId:{}", issuer, accessToken, jti, orgId);
 
         String ssaEndpoint = getSsaEndpoint(issuer);
+        log.error("Revoke SSA -  ssaEndpoint:{}", ssaEndpoint);
+        
+        
         Builder request = getClientBuilder(ssaEndpoint);
         request.header(AUTHORIZATION, accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         request.buildDelete().property("jti", jti).property("org_id", orgId);
-        log.error(" request:{}}", request);
+        log.error("Revoke request:{}}", request);
 
-        Response response = request.get();
-        log.debug(" response:{}", response);
+        Response response = request.delete();
+        log.error(" Revoke response:{}", response);
 
         return response;
     }
 
     public static Response createSsa(final String issuer, final String accessToken, final String jsonNode)
             throws Exception {
-        log.error("Create jti -  issuer:{}, accessToken:{}, jsonNode:{}", issuer, accessToken, jsonNode);
+        log.error("NEW Create SSA -  issuer:{}, accessToken:{}, jsonNode:{}", issuer, accessToken, jsonNode);
 
         String ssaEndpoint = getSsaEndpoint(issuer);
+        log.error("Create SSA -  ssaEndpoint:{}", ssaEndpoint);
+        
         Builder request = getClientBuilder(ssaEndpoint);
+        log.error("Create SSA -  request:{}", request);
         request.header(AUTHORIZATION, accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        log.error(" request:{}}", request);
-
+        log.error(" request:{}", request);
+        
         MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>();
         multivaluedHashMap.add("accessToken", accessToken);
         multivaluedHashMap.add("requestParams", jsonNode);
@@ -309,20 +322,24 @@ public class AuthClientFactory {
     }
 
     public static String getSsaEndpoint(String issuer) throws JsonProcessingException {
-        log.error(" Get SSA Endpoint - issuer:{}", issuer);
+        log.debug(" Get SSA Endpoint - issuer:{}", issuer);
 
         String configurationEndpoint = issuer + OPENID_CONFIGURATION_URL;
         Builder openIdClient = getClientBuilder(configurationEndpoint);
         openIdClient.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         Response openIdResponse = openIdClient.get();
+        String endpoint = null;
 
-        log.trace("openIdResponse:{}", openIdResponse);
-        if (openIdResponse.getStatus() == 200) {
+        if (openIdResponse!=null && openIdResponse.getStatus() == 200) {
             String introspectionEntity = openIdResponse.readEntity(String.class);
             log.trace("introspectionEntity:{}", introspectionEntity);
-            return Jackson.getElement(introspectionEntity, "openIdResponse");
+            endpoint =  Jackson.getElement(introspectionEntity, "ssa_endpoint");
+            log.debug("endpoint:{}", endpoint);
+            if(StringUtils.isBlank(endpoint)) {
+                throw new WebApplicationException("configurationEndpoint {"+configurationEndpoint+"} does not ssa_endpoint is not avialable");
+            }
         }
-        return null;
+        return endpoint;
     }
 
     private static Builder getClientBuilder(String url) {

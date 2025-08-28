@@ -6,14 +6,12 @@
 
 package io.jans.configapi.rest.resource.auth;
 
-import io.jans.as.common.model.session.SessionId;
+import com.fasterxml.jackson.databind.JsonNode;
+
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.service.auth.SessionService;
 import io.jans.configapi.service.auth.SsaService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.model.SearchRequest;
-import io.jans.orm.model.PagedResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -58,21 +56,23 @@ public class SsaResource extends ConfigBaseResource {
             ApiAccessConstants.SSA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getSsa(
             @Parameter(description = "Authorization code") @HeaderParam("Authorization") String authorization,
-            @Parameter(description = "JWT ID - unique identifier for the JWT") @QueryParam(value = ApiConstants.JTI) String jti,
-            @Parameter(description = "Organization identifier") @QueryParam(value = ApiConstants.ORGID) String orgId) {
+            @Parameter(description = "JWT ID - unique identifier for the JWT") @QueryParam(value = ApiConstants.JTI) @NotNull String jti,
+            @Parameter(description = "Organization identifier") @QueryParam(value = ApiConstants.ORGID) @NotNull String orgId) {
         if (log.isInfoEnabled()) {
             logger.info("SSA search parameters - jti:{}, orgId:{}", escapeLog(jti), escapeLog(orgId));
         }
 
         logger.error("SSA search parameters - jti:{}, orgId:{}", jti, orgId);
-        Response response = null;
+        checkNotEmpty(jti, "jti");
+        JsonNode jsonNode = null;
         try {
-            response = ssaService.getSsa(authorization, jti, orgId);
+            jsonNode = ssaService.getSsa(authorization, jti, orgId);
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             throwInternalServerException(ex);
         }
-        return Response.ok(response).build();
+        return Response.ok(jsonNode).build();
     }
 
     @Operation(summary = "Create SSA ", description = "Create SSA", operationId = "create-ssa", tags = {
@@ -87,16 +87,18 @@ public class SsaResource extends ConfigBaseResource {
             ApiAccessConstants.SSA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createSsa(
             @Parameter(description = "Authorization code") @HeaderParam("Authorization") String authorization,
-            @Parameter(description = "SSA") @QueryParam(value = "json") String json) {
+            @Parameter(description = "SSA") @NotNull String ssaJson) {
         if (log.isInfoEnabled()) {
-            logger.info("Create SSA parameters - json:{}", escapeLog(json));
+            logger.info("Create SSA parameters - ssaJson:{}", escapeLog(ssaJson));
         }
-        logger.error("Create SSA search parameters - json:{}", json);
+        logger.error("Create SSA search parameters - ssaJson:{}", ssaJson);
+        checkNotEmpty(ssaJson, "ssaJson");
         Response response = null;
         try {
-            response = ssaService.createSsa(authorization, json);
+            response = ssaService.createSsa(authorization, ssaJson);
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             throwInternalServerException(ex);
         }
         return Response.ok(response).build();
@@ -115,7 +117,7 @@ public class SsaResource extends ConfigBaseResource {
     public Response revokeSsa(
             @Parameter(description = "Authorization code") @HeaderParam("Authorization") String authorization,
             @Parameter(description = "JWT ID - unique identifier for the JWT") @QueryParam(value = ApiConstants.JTI) String jti,
-            @Parameter(description = "Organization identifier") @QueryParam(value = ApiConstants.ORGID) String orgId) {
+            @Parameter(description = "Organization identifier") @QueryParam(value = ApiConstants.ORGID) @NotNull String orgId) {
         if (log.isInfoEnabled()) {
             logger.info("SSA search parameters - jti:{}, orgId:{}", escapeLog(jti), escapeLog(orgId));
         }
@@ -125,6 +127,7 @@ public class SsaResource extends ConfigBaseResource {
             response = ssaService.revokeSsa(authorization, jti, orgId);
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             throwInternalServerException(ex);
         }
         return Response.ok(response).build();

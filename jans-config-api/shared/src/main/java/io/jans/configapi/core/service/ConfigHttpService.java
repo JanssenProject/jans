@@ -6,6 +6,7 @@
 
 package io.jans.configapi.core.service;
 
+
 import io.jans.model.net.HttpServiceResponse;
 import io.jans.util.StringHelper;
 
@@ -30,12 +31,16 @@ import javax.net.ssl.SSLContext;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -63,6 +68,7 @@ import org.apache.http.util.EntityUtils;
 @ApplicationScoped
 public class ConfigHttpService implements Serializable {
 
+    private static final String OPENID_CONFIGURATION_URL = "/.well-known/openid-configuration";
     private static final long serialVersionUID = -2398422090669045605L;
     protected transient Logger log = LogManager.getLogger(getClass());
     private static final String CON_STATS_STR = "Connection manager stats: {}";
@@ -77,6 +83,10 @@ public class ConfigHttpService implements Serializable {
         connectionManager.setDefaultMaxPerRoute(50); // Increase default max connection per route to 50
 
         this.base64 = new Base64();
+    }
+
+    public static String getOpenidConfigurationUrl() {
+        return OPENID_CONFIGURATION_URL;
     }
 
     public CloseableHttpClient getHttpsClientTrustAll()
@@ -378,4 +388,57 @@ public class ConfigHttpService implements Serializable {
         return buildDefaultRoutePlanner(proxy, -1, null);
     }
 
+    public JsonNode getResponseJsonNode(HttpServiceResponse serviceResponse)
+            throws ApiApplicationException, JsonProcessingException {
+        JsonNode jsonNode = null;
+
+        if (serviceResponse == null) {
+            return jsonNode;
+        }
+
+        return getResponseJsonNode(getResponseEntityString(serviceResponse), "response");
+    }
+
+    public String getResponseEntityString(HttpServiceResponse serviceResponse) throws ApiApplicationException {
+        String jsonString = null;
+
+        if (serviceResponse == null) {
+            return jsonString;
+        }
+        HttpResponse httpResponse = serviceResponse.getHttpResponse();
+        if (httpResponse != null) {
+            HttpEntity entity = httpResponse.getEntity();
+            log.debug("entity:{}, httpResponse.getStatusLine().getStatusCode():{}", entity,
+                    httpResponse.getStatusLine().getStatusCode());
+            if (entity == null) {
+                return jsonString;
+            }
+            try {
+                jsonString = EntityUtils.toString(entity, "UTF-8");
+            } catch (Exception ex) {
+                log.error("Error while getting entity using EntityUtils is ", ex);
+            }
+
+            if (httpResponse.getStatusLine() != null
+                    && httpResponse.getStatusLine().getStatusCode() == Status.OK.getStatusCode()) {
+                return jsonString;
+            } else {
+               // throw new ApiApplicationException(httpResponse.getStatusLine().getStatusCode(), jsonString);
+            }
+        }
+        return jsonString;
+    }
+
+    public JsonNode getResponseJsonNode(String jsonSring, String nodeName) throws JsonProcessingException {
+        JsonNode jsonNode = null;
+
+        if (StringUtils.isBlank(jsonSring)) {
+            return jsonNode;
+        }
+       // jsonNode = Jackson.asJsonNode(jsonSring);
+        if (StringUtils.isNotBlank(nodeName) && jsonNode != null && jsonNode.get(nodeName) != null) {
+            jsonNode = jsonNode.get("response");
+        }
+        return jsonNode;
+    }
 }

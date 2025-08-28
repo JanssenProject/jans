@@ -43,6 +43,7 @@ tags:
 - name: Token
 - name: Logs
 - name: Database
+- name: Software Statement Assertion (SSA)
 paths:
   /api/v1/health/app-version:
     get:
@@ -13576,11 +13577,13 @@ paths:
       - name: jti
         in: query
         description: JWT ID - unique identifier for the JWT
+        required: true
         schema:
           type: string
       - name: orgId
         in: query
         description: Organization identifier
+        required: true
         schema:
           type: string
       responses:
@@ -13692,11 +13695,13 @@ paths:
         description: Authorization code
         schema:
           type: string
-      - name: json
-        in: query
+      requestBody:
         description: SSA
-        schema:
-          type: string
+        content:
+          application/json:
+            schema:
+              type: string
+        required: true
       responses:
         "200":
           content:
@@ -13814,6 +13819,7 @@ paths:
       - name: orgId
         in: query
         description: Organization identifier
+        required: true
         schema:
           type: string
       responses:
@@ -15234,19 +15240,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
         adminCanView:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
         whitePagesCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16152,8 +16158,6 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16163,6 +16167,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17359,14 +17365,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -17814,10 +17820,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -17919,23 +17925,23 @@ components:
       properties:
         type:
           type: string
+        title:
+          type: string
         params:
           type: object
           additionalProperties:
             type: string
-        title:
-          type: string
-        uriBuilder:
-          $ref: "#/components/schemas/UriBuilder"
         rel:
           type: string
+        uri:
+          type: string
+          format: uri
         rels:
           type: array
           items:
             type: string
-        uri:
-          type: string
-          format: uri
+        uriBuilder:
+          $ref: "#/components/schemas/UriBuilder"
     MediaType:
       type: object
       properties:
@@ -17947,9 +17953,9 @@ components:
           type: object
           additionalProperties:
             type: string
-        wildcardSubtype:
-          type: boolean
         wildcardType:
+          type: boolean
+        wildcardSubtype:
           type: boolean
     MultivaluedMapStringObject:
       type: object
@@ -18013,6 +18019,29 @@ components:
             type: array
             items:
               type: object
+        stringHeaders:
+          type: object
+          properties:
+            empty:
+              type: boolean
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        mediaType:
+          $ref: "#/components/schemas/MediaType"
+        entityTag:
+          $ref: "#/components/schemas/EntityTag"
+        allowedMethods:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        statusInfo:
+          $ref: "#/components/schemas/StatusType"
+        status:
+          type: integer
+          format: int32
         length:
           type: integer
           format: int32
@@ -18065,8 +18094,6 @@ components:
         lastModified:
           type: string
           format: date-time
-        closed:
-          type: boolean
         metadata:
           type: object
           properties:
@@ -18076,31 +18103,10 @@ components:
             type: array
             items:
               type: object
-        status:
-          type: integer
-          format: int32
-        entityTag:
-          $ref: "#/components/schemas/EntityTag"
-        statusInfo:
-          $ref: "#/components/schemas/StatusType"
-        allowedMethods:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-        stringHeaders:
-          type: object
-          properties:
-            empty:
-              type: boolean
-          additionalProperties:
-            type: array
-            items:
-              type: string
-        mediaType:
-          $ref: "#/components/schemas/MediaType"
         entity:
           type: object
+        closed:
+          type: boolean
         links:
           uniqueItems: true
           type: array
@@ -18122,11 +18128,11 @@ components:
           - CLIENT_ERROR
           - SERVER_ERROR
           - OTHER
-        reasonPhrase:
-          type: string
         statusCode:
           type: integer
           format: int32
+        reasonPhrase:
+          type: string
     UriBuilder:
       type: object
     TokenAttributes:
@@ -18220,9 +18226,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object
@@ -18375,3 +18381,6 @@ components:
             https://jans.io/oauth/config/token.delete: Delete Token details
             https://jans.io/oauth/config/data.readonly: View Config-API related data
             https://jans.io/oauth/config/audit-read: View Audit Log related data
+            https://jans.io/oauth/config/ssa.readonly: View SSA details
+            https://jans.io/oauth/config/ssa.write: Manage SSA details
+            https://jans.io/oauth/config/ssa.delete: Delete SSA details
