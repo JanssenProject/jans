@@ -77,7 +77,7 @@ const (
 	//   },
 	//   "role": "Admin"
 	// }
-	idToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY3IiOiJiYXNpYyIsImFtciI6IjEwIiwiYXVkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwiZXhwIjoxNzI0ODM1ODU5LCJpYXQiOjE3MjQ4MzIyNTksInN1YiI6ImJvRzhkZmM1TUtUbjM3bzdnc2RDZXlxTDhMcFdRdGdvTzQxbTFLWndkcTAiLCJpc3MiOiJodHRwczovL3Rlc3QuamFucy5vcmciLCJqdGkiOiJzazNUNDBOWVNZdWs1c2FIWk5wa1p3Iiwibm9uY2UiOiJjMzg3MmFmOS1hMGY1LTRjM2YtYTFhZi1mOWQwZTg4NDZlODEiLCJzaWQiOiI2YTdmZTUwYS1kODEwLTQ1NGQtYmU1ZC01NDlkMjk1OTVhMDkiLCJqYW5zT3BlbklEQ29ubmVjdFZlcnNpb24iOiJvcGVuaWRjb25uZWN0LTEuMCIsImNfaGFzaCI6InBHb0s2WV9SS2NXSGtVZWNNOXV3NlEiLCJhdXRoX3RpbWUiOjE3MjQ4MzA3NDYsImdyYW50IjoiYXV0aG9yaXphdGlvbl9jb2RlIiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6MjAyLCJ1cmkiOiJodHRwczovL3Rlc3QuamFucy5vcmcvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fSwicm9sZSI6IkFkbWluIn0.RgCuWFUUjPVXmbW3ExQavJZH8Lw4q3kGhMFBRR0hSjA"
+	idToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY3IiOiJiYXNpYyIsImFtciI6IjEwIiwiYXVkIjpbIjViNDQ4N2M0LThkYjEtNDA5ZC1hNjUzLWY5MDdiODA5NDAzOSJdLCJleHAiOjE3MjQ4MzU4NTksImlhdCI6MTcyNDgzMjI1OSwic3ViIjoiYm9HOGRmYzVNS1RuMzdvN2dzZENleXFMOExwV1F0Z29PNDFtMUtad2RxMCIsImlzcyI6Imh0dHBzOi8vdGVzdC5qYW5zLm9yZyIsImp0aSI6InNrM1Q0ME5ZU1l1azVzYUhaTnBrWnciLCJub25jZSI6ImMzODcyYWY5LWEwZjUtNGMzZi1hMWFmLWY5ZDBlODg0NmU4MSIsInNpZCI6IjZhN2ZlNTBhLWQ4MTAtNDU0ZC1iZTVkLTU0OWQyOTU5NWEwOSIsImphbnNPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIiwiY19oYXNoIjoicEdvSzZZX1JLY1dIa1VlY005dXc2USIsImF1dGhfdGltZSI6MTcyNDgzMDc0NiwiZ3JhbnQiOiJhdXRob3JpemF0aW9uX2NvZGUiLCJzdGF0dXMiOnsic3RhdHVzX2xpc3QiOnsiaWR4IjoyMDIsInVyaSI6Imh0dHBzOi8vdGVzdC5qYW5zLm9yZy9qYW5zLWF1dGgvcmVzdHYxL3N0YXR1c19saXN0In19LCJyb2xlIjoiQWRtaW4ifQ.RgCuWFUUjPVXmbW3ExQavJZH8Lw4q3kGhMFBRR0hSjA"
 
 	// JSON payload of userinfo token
 	// {
@@ -130,8 +130,8 @@ func TestAuthorizeSuccess(t *testing.T) {
 
 	resource := EntityData{
 		CedarMapping: CedarEntityMapping{
-		EntityType: "Jans::Issue",
-		ID:         "random_id",
+			EntityType: "Jans::Issue",
+			ID:         "random_id",
 		},
 		Payload: map[string]any{
 			"org_id":  "some_long_id",
@@ -197,8 +197,8 @@ func TestAuthorizeUnsignedSuccess(t *testing.T) {
 
 	resource := EntityData{
 		CedarMapping: CedarEntityMapping{
-		EntityType: "Jans::Issue",
-		ID:         "random_id",
+			EntityType: "Jans::Issue",
+			ID:         "random_id",
 		},
 		Payload: map[string]any{
 			"org_id":  "some_long_id",
@@ -209,8 +209,8 @@ func TestAuthorizeUnsignedSuccess(t *testing.T) {
 	principals := []EntityData{
 		{
 			CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::TestPrincipal1",
-			ID:         "1",
+				EntityType: "Jans::TestPrincipal1",
+				ID:         "1",
 			},
 			Payload: map[string]any{
 				"is_ok": true,
@@ -218,8 +218,8 @@ func TestAuthorizeUnsignedSuccess(t *testing.T) {
 		},
 		{
 			CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::TestPrincipal2",
-			ID:         "2",
+				EntityType: "Jans::TestPrincipal2",
+				ID:         "2",
 			},
 			Payload: map[string]any{
 				"is_ok": true,
@@ -227,8 +227,8 @@ func TestAuthorizeUnsignedSuccess(t *testing.T) {
 		},
 		{
 			CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::TestPrincipal3",
-			ID:         "3",
+				EntityType: "Jans::TestPrincipal3",
+				ID:         "3",
 			},
 			Payload: map[string]any{
 				"is_ok": false,
@@ -290,8 +290,8 @@ func TestAuthorizeValidationError(t *testing.T) {
 	// Invalid resource - org_id should be string but we set it to int
 	resource := EntityData{
 		CedarMapping: CedarEntityMapping{
-		EntityType: "Jans::Issue",
-		ID:         "random_id",
+			EntityType: "Jans::Issue",
+			ID:         "random_id",
 		},
 		Payload: map[string]any{
 			"org_id":  1, // Should be string
