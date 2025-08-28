@@ -42,27 +42,7 @@ impl TknClaimAttrSrc {
         &self,
         src: &Value,
     ) -> Result<Option<RestrictedExpression>, BuildExprErrorVec> {
-        // Special handling for aud claims: convert string to array if needed
-        if self.claim == "aud" && matches!(self.expected_type, ExpectedClaimType::Array(_)) {
-            if src.as_array().is_some() {
-                // Already an array, process normally
-                build_expr_from_value(&self.expected_type, src)
-            } else if let Some(string_val) = src.as_str() {
-                // String value for aud claim - convert to array
-                let expr = RestrictedExpression::new_string(string_val.to_string());
-                Ok(Some(RestrictedExpression::new_set(vec![expr])))
-            } else {
-                // Invalid type for aud claim
-                Err(TypeMismatchError {
-                    expected: "string or array".to_string(),
-                    actual: TypeMismatchError::value_type_name(src).to_string(),
-                }
-                .into())
-            }
-        } else {
-            // Normal processing for non-aud claims
-            build_expr_from_value(&self.expected_type, src)
-        }
+        build_expr_from_value(&self.expected_type, src)
     }
 }
 
