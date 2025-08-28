@@ -20,6 +20,7 @@ import jakarta.inject.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.python.google.common.collect.Lists;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -32,10 +33,9 @@ import static io.jans.as.model.util.StringUtils.implode;
 @Named
 public class AcrService {
 
-    public static final String AGAMA = "agama";
+    private static final Logger log = LoggerFactory.getLogger(AcrService.class);
 
-    @Inject
-    private Logger log;
+    public static final String AGAMA = "agama";
 
     @Inject
     private Identity identity;
@@ -102,12 +102,22 @@ public class AcrService {
     }
 
     public void applyAcrMappings(AuthzRequest authzRequest) {
+        applyAcrMappings(authzRequest, appConfiguration);
+    }
+
+    public void applyAcrMappings(AuthzRequest authzRequest, AppConfiguration appConfiguration) {
         final List<String> acrValues = authzRequest.getAcrValuesList();
-        final String result = applyAcrMappings(acrValues);
+        log.debug("ACR values before mapping: {}", acrValues);
+        final String result = applyAcrMappings(acrValues, appConfiguration);
+        log.debug("ACR values after mapping: {}", result);
         authzRequest.setAcrValues(result);
     }
 
     public String applyAcrMappings(List<String> acrValues) {
+        return applyAcrMappings(acrValues, appConfiguration);
+    }
+
+    public String applyAcrMappings(List<String> acrValues, AppConfiguration appConfiguration) {
         final Map<String, String> mappings = appConfiguration.getAcrMappings();
         if (acrValues == null || acrValues.isEmpty()) {
             return "";
@@ -120,15 +130,20 @@ public class AcrService {
         boolean updated = false;
         for (int i = 0; i < acrValues.size(); i++) {
             final String acr = acrValues.get(i);
-            final String value = mappings.get(acr);
+            String value = mappings.get(acr);
             if (StringUtils.isNotBlank(value)) {
+                if (acrValues.contains(value)) { // check duplidate before replacement
+                    log.debug("Found duplicated acr {}", value);
+                    value = "";
+                }
+
                 log.debug("Replaced acr {} with {}, defined from acrMapping.", acr, value);
                 acrValues.set(i, value);
                 updated = true;
             }
         }
 
-        final String result = implode(acrValues, " ");
+        final String result = implode(acrValues, " ").trim();
         if (updated) {
             log.debug("Mapped result: {}", result);
         }
