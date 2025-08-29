@@ -4751,9 +4751,11 @@ paths:
                   - persistence_extension
                   - idp
                   - discovery
+                  - cookie
                   - health_check
                   - authz_detail
                   - update_token
+                  - logout_status_jwt
                   - config_api_auth
                   - modify_ssa_response
                   - fido2_extension
@@ -14875,17 +14877,17 @@ components:
           type: string
         selected:
           type: boolean
+        adminCanView:
+          type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
+        adminCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        userCanView:
           type: boolean
-        adminCanAccess:
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -15012,6 +15014,8 @@ components:
         archivedJwkLifetimeInSeconds:
           type: integer
           format: int32
+        uppercaseResponseKeysInAccountAccessConsent:
+          type: boolean
         umaConfigurationEndpoint:
           type: string
         umaRptAsJwt:
@@ -16498,6 +16502,10 @@ components:
           type: array
           items:
             type: string
+        logoutStatusJwtScriptDns:
+          type: array
+          items:
+            type: string
         backchannelLogoutUri:
           type: array
           items:
@@ -16934,9 +16942,11 @@ components:
           - persistence_extension
           - idp
           - discovery
+          - cookie
           - health_check
           - authz_detail
           - update_token
+          - logout_status_jwt
           - config_api_auth
           - modify_ssa_response
           - fido2_extension
@@ -16968,14 +16978,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -17607,9 +17617,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object
