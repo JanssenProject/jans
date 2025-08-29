@@ -22,8 +22,6 @@ def _transform_fido2_dynamic_config(conf):
 
     # add missing top-level config (if not exist)
     for k, v in [
-        ("errorReasonEnabled", False),
-        ("sessionIdPersistInCache", False),
     ]:
         # update if key not exist
         if k not in conf:
@@ -38,7 +36,7 @@ def _transform_fido2_dynamic_config(conf):
         ("enterpriseAttestation", False),
         ("hints", ["security-key", "client-device", "hybrid"]),
         ("rp", conf["fido2Configuration"].pop("requestedParties", [])),
-        ("metadataRefreshInterval", 180),
+
         ("disableMetadataService", conf["fido2Configuration"].pop("skipDownloadMdsEnabled", False)),
     ]:
         # update if key not exist

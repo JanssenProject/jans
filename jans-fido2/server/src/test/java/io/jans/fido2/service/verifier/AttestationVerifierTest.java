@@ -175,11 +175,8 @@ class AttestationVerifierTest {
         when(authenticatorDataParser.parseAttestationData(authDataText)).thenReturn(authData);
         when(attestationProcessorFactory.getCommandProcessor(fmt)).thenReturn(attestationProcessor);
 
-        Fido2Configuration fido2Configuration = new Fido2Configuration(null, null, null,
-                null, false, false,
-                0, 0, null,
-                null, null, null, false,
-                AttestationMode.MONITOR.getValue(), null, false);
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setAttestationMode(AttestationMode.MONITOR.getValue());
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
 
 
@@ -215,11 +212,8 @@ class AttestationVerifierTest {
         when(authenticatorDataParser.parseAttestationData(authDataText)).thenReturn(authData);
         when(attestationProcessorFactory.getCommandProcessor(fmt)).thenReturn(attestationProcessor);
 
-        Fido2Configuration fido2Configuration = new Fido2Configuration(null, null, null,
-                null, false, false,
-                0, 0, null,
-                null, null, null, false,
-                AttestationMode.DISABLED.getValue(), null, false);
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setAttestationMode(AttestationMode.DISABLED.getValue());
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
 
         CredAndCounterData result = attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential);
@@ -253,11 +247,8 @@ class AttestationVerifierTest {
         when(authenticatorDataParser.parseAttestationData(authDataText)).thenReturn(authData);
         when(attestationProcessorFactory.getCommandProcessor(fmt)).thenReturn(attestationProcessor);
 
-        Fido2Configuration fido2Configuration = new Fido2Configuration(null, null, null,
-                null, false, false,
-                0, 0, null,
-                null, null, null, false,
-                AttestationMode.ENFORCED.getValue(), null, false);
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setAttestationMode(AttestationMode.ENFORCED.getValue());
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
 
         /*Fido2RuntimeException exception = assertThrows(Fido2RuntimeException.class, () ->
@@ -291,11 +282,8 @@ class AttestationVerifierTest {
         when(authenticatorDataParser.parseAttestationData(authDataText)).thenReturn(authData);
         when(attestationProcessorFactory.getCommandProcessor(fmt)).thenReturn(attestationProcessor);
 
-        Fido2Configuration fido2Configuration = new Fido2Configuration(null, null, null,
-                null, false, false,
-                0, 0, null,
-                null, null, null, false,
-                AttestationMode.ENFORCED.getValue(), null, false);
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setAttestationMode(AttestationMode.ENFORCED.getValue());
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         CredAndCounterData result = attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential);
 
