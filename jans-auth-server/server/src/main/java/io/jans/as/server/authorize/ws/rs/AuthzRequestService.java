@@ -118,6 +118,9 @@ public class AuthzRequestService {
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
+    @Inject
+    private AcrService acrService;
+
     private final Cache<String, Map<String, Integer>> acrToLevelCache = CacheBuilder.newBuilder()
             .expireAfterWrite(ACR_TO_LEVEL_CACHE_LIFETIME_IN_MINUTES, TimeUnit.MINUTES).build();
 
@@ -377,6 +380,8 @@ public class AuthzRequestService {
         final Claim acrClaim = idTokenMember.getClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
         if (acrClaim != null && acrClaim.getClaimValue() != null) {
             authzRequest.setAcrValues(acrClaim.getClaimValue().getValueAsString());
+            acrService.applyAcrMappings(authzRequest, appConfiguration);
+            log.debug("ACR values {}", authzRequest.getAcrValues());
         }
 
         Claim userIdClaim = idTokenMember.getClaim(JwtClaimName.SUBJECT_IDENTIFIER);
