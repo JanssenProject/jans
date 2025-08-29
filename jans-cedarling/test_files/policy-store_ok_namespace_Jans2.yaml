@@ -101,7 +101,7 @@ policy_stores:
           entity Id_token = {
             iss: Jans::TrustedIssuer,
             sub: String,
-            aud: String,
+            aud: Set<String>,
           };
           entity Userinfo_token  = {
             iss: Jans::TrustedIssuer,
