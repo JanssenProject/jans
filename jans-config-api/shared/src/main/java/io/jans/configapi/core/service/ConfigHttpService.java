@@ -6,7 +6,7 @@
 
 package io.jans.configapi.core.service;
 
-
+import io.jans.configapi.core.util.Jackson;
 import io.jans.model.net.HttpServiceResponse;
 import io.jans.util.StringHelper;
 
@@ -31,6 +31,7 @@ import javax.net.ssl.SSLContext;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
@@ -388,8 +389,7 @@ public class ConfigHttpService implements Serializable {
         return buildDefaultRoutePlanner(proxy, -1, null);
     }
 
-    public JsonNode getResponseJsonNode(HttpServiceResponse serviceResponse)
-            throws ApiApplicationException, JsonProcessingException {
+    public JsonNode getResponseJsonNode(HttpServiceResponse serviceResponse) throws JsonProcessingException {
         JsonNode jsonNode = null;
 
         if (serviceResponse == null) {
@@ -399,7 +399,7 @@ public class ConfigHttpService implements Serializable {
         return getResponseJsonNode(getResponseEntityString(serviceResponse), "response");
     }
 
-    public String getResponseEntityString(HttpServiceResponse serviceResponse) throws ApiApplicationException {
+    public String getResponseEntityString(HttpServiceResponse serviceResponse) {
         String jsonString = null;
 
         if (serviceResponse == null) {
@@ -423,7 +423,7 @@ public class ConfigHttpService implements Serializable {
                     && httpResponse.getStatusLine().getStatusCode() == Status.OK.getStatusCode()) {
                 return jsonString;
             } else {
-               // throw new ApiApplicationException(httpResponse.getStatusLine().getStatusCode(), jsonString);
+                throw new WebApplicationException(httpResponse.getStatusLine().getStatusCode() + ":" + jsonString);
             }
         }
         return jsonString;
@@ -435,10 +435,11 @@ public class ConfigHttpService implements Serializable {
         if (StringUtils.isBlank(jsonSring)) {
             return jsonNode;
         }
-       // jsonNode = Jackson.asJsonNode(jsonSring);
+        jsonNode = Jackson.asJsonNode(jsonSring);
         if (StringUtils.isNotBlank(nodeName) && jsonNode != null && jsonNode.get(nodeName) != null) {
             jsonNode = jsonNode.get("response");
         }
         return jsonNode;
     }
+
 }

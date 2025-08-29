@@ -45,6 +45,7 @@ public class Jackson {
 
     @SuppressWarnings("unchecked")
     public static String getElement(String jsonString, String fieldName) throws JsonProcessingException {
+        LOG.error("\n\n\n Jackson - jsonString:{}, fieldName:{}, {}", jsonString, fieldName, "\n\n");
         JsonNode jsonNode = JacksonUtils.newMapper().readTree(jsonString);
         return jsonNode.get(fieldName).textValue();
     }

@@ -15240,19 +15240,19 @@ components:
           type: string
         selected:
           type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
         whitePagesCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -17820,10 +17820,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -17923,14 +17923,16 @@ components:
     Link:
       type: object
       properties:
+        uriBuilder:
+          $ref: "#/components/schemas/UriBuilder"
         type:
-          type: string
-        title:
           type: string
         params:
           type: object
           additionalProperties:
             type: string
+        title:
+          type: string
         rel:
           type: string
         uri:
@@ -17940,8 +17942,6 @@ components:
           type: array
           items:
             type: string
-        uriBuilder:
-          $ref: "#/components/schemas/UriBuilder"
     MediaType:
       type: object
       properties:
@@ -18019,29 +18019,6 @@ components:
             type: array
             items:
               type: object
-        stringHeaders:
-          type: object
-          properties:
-            empty:
-              type: boolean
-          additionalProperties:
-            type: array
-            items:
-              type: string
-        mediaType:
-          $ref: "#/components/schemas/MediaType"
-        entityTag:
-          $ref: "#/components/schemas/EntityTag"
-        allowedMethods:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-        statusInfo:
-          $ref: "#/components/schemas/StatusType"
-        status:
-          type: integer
-          format: int32
         length:
           type: integer
           format: int32
@@ -18094,6 +18071,37 @@ components:
         lastModified:
           type: string
           format: date-time
+        cookies:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/NewCookie"
+        links:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: "#/components/schemas/Link"
+        allowedMethods:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        statusInfo:
+          $ref: "#/components/schemas/StatusType"
+        entityTag:
+          $ref: "#/components/schemas/EntityTag"
+        mediaType:
+          $ref: "#/components/schemas/MediaType"
+        stringHeaders:
+          type: object
+          properties:
+            empty:
+              type: boolean
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        entity:
+          type: object
         metadata:
           type: object
           properties:
@@ -18103,19 +18111,11 @@ components:
             type: array
             items:
               type: object
-        entity:
-          type: object
+        status:
+          type: integer
+          format: int32
         closed:
           type: boolean
-        links:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: "#/components/schemas/Link"
-        cookies:
-          type: object
-          additionalProperties:
-            $ref: "#/components/schemas/NewCookie"
     StatusType:
       type: object
       properties:
@@ -18216,6 +18216,10 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18226,10 +18230,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
