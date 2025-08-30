@@ -1,0 +1,324 @@
+operation-01:
+  id: "get-config-scripts"
+  expected-status-code: 200
+  endpoint-args:
+    sortOrder: "name"
+    limit: "5"
+  schema:
+    type: "object"
+    properties:
+      start:
+        type: "integer"
+      totalEntriesCount:
+        type: "integer"
+      entriesCount:
+        type: "integer"
+      entries:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            dn:
+              type: "string"
+            inum:
+              type: "string"
+            name:
+              type: "string"
+            script:
+              type: "string"
+            programmingLanguage:
+              type: "string"
+            enabled:
+              type: "boolean"
+            locationType: 
+              type: "string"
+          required:
+            - dn
+            - name
+            - script
+            - programmingLanguage
+            - enabled
+            - locationType
+ 
+  expected-output:
+    /entriesCount: 5
+    /entries/0/name: "logout_status_jwt_script_in_java"
+    /entries/0/programmingLanguage: "java"
+
+
+operation-02:
+  id: "post-config-scripts"
+  expected-status-code: 201
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      inum:
+        type: "string"
+      name:
+        type: "string"
+      script:
+        type: "string"
+      programmingLanguage:
+        type: "string"
+      scriptType:
+        type: "string"
+      enabled:
+        type: "boolean"
+      locationType: 
+        type: "string"
+    required:
+      - dn
+      - name
+      - script
+      - programmingLanguage
+      - enabled
+      - locationType
+      - scriptType
+
+  data:
+    name: "auto_test_sample_script"
+    description: "Sample Auto-Test Script"
+    script: "import os\nfor f in os.listdir('/'):\n\tprint(f)"
+    scriptType: "application_session"
+    programmingLanguage: "python"
+    level: 1000
+    revision: 5
+    enabled: false
+    modified: false
+    internal: false
+    locationType: "db"
+
+  expected-output:
+    /scriptType: "application_session"
+    /name: "auto_test_sample_script"
+
+  store-output-name: "sample-script"
+
+
+operation-03:
+  id: "put-config-scripts"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      inum:
+        type: "string"
+      name:
+        type: "string"
+      script:
+        type: "string"
+      programmingLanguage:
+        type: "string"
+      scriptType:
+        type: "string"
+      enabled:
+        type: "boolean"
+      locationType: 
+        type: "string"
+    required:
+      - dn
+      - name
+      - script
+      - programmingLanguage
+      - enabled
+      - locationType
+      - scriptType
+
+  modify-output:
+    output-name: "sample-script"
+    modifiers:
+      set:
+        /name: "auto_test_sample_script_renamed"
+        /scriptType: "introspection"
+
+  data: "$sample-script"
+
+  expected-output:
+    /name: "auto_test_sample_script_renamed"
+    /scriptType: "introspection"
+
+
+operation-04:
+  id: "patch-config-scripts-by-inum"
+  expected-status-code: 200
+  url-suffix:
+    inum: "$sample-script:/inum"
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      inum:
+        type: "string"
+      name:
+        type: "string"
+      script:
+        type: "string"
+      programmingLanguage:
+        type: "string"
+      scriptType:
+        type: "string"
+      enabled:
+        type: "boolean"
+      locationType: 
+        type: "string"
+    required:
+      - dn
+      - name
+      - script
+      - programmingLanguage
+      - enabled
+      - locationType
+      - scriptType
+
+  data:
+    - op: replace
+      path: /name
+      value: "auto_test_sample_script_patched"
+    - op: replace
+      path: /level
+      value: 1001
+
+  expected-output:
+    /name: "auto_test_sample_script_patched"
+    /level: 1001
+
+
+operation-05:
+  id: "get-config-scripts-by-inum"
+  expected-status-code: 200
+  url-suffix:
+    inum: "$sample-script:/inum"
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      inum:
+        type: "string"
+      name:
+        type: "string"
+      script:
+        type: "string"
+      programmingLanguage:
+        type: "string"
+      scriptType:
+        type: "string"
+      enabled:
+        type: "boolean"
+      locationType: 
+        type: "string"
+    required:
+      - dn
+      - name
+      - script
+      - programmingLanguage
+      - enabled
+      - locationType
+      - scriptType
+
+  expected-output:
+    /name: "auto_test_sample_script_patched"
+    /level: 1001
+
+
+operation-06:
+  id: "delete-config-scripts-by-inum"
+  url-suffix:
+    inum: "$sample-script:/inum"
+  expected-status-code: null
+  expected-response-text: null
+
+operation-07:
+  id: "get-custom-script-by-name"
+  expected-status-code: 200
+  url-suffix:
+    name: "basic"
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      inum:
+        type: "string"
+      name:
+        type: "string"
+      script:
+        type: "string"
+      programmingLanguage:
+        type: "string"
+      scriptType:
+        type: "string"
+      enabled:
+        type: "boolean"
+      locationType: 
+        type: "string"
+    required:
+      - dn
+      - name
+      - script
+      - programmingLanguage
+      - enabled
+      - locationType
+      - scriptType
+
+  expected-output:
+    /name: "basic"
+    /description: "Sample authentication module"
+
+#Fixme: config-api returns error
+operation-08:
+  id: "get-custom-script-types"
+  expected-status-code: 200
+  schema:
+    type: "array"
+
+
+operation-09:
+  id: "get-config-scripts-by-type"
+  expected-status-code: 200
+  url-suffix:
+    type: "idp"
+  schema:
+    type: "object"
+    properties:
+      start:
+        type: "integer"
+      totalEntriesCount:
+        type: "integer"
+      entriesCount:
+        type: "integer"
+      entries:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            dn:
+              type: "string"
+            inum:
+              type: "string"
+            name:
+              type: "string"
+            script:
+              type: "string"
+            programmingLanguage:
+              type: "string"
+            enabled:
+              type: "boolean"
+            locationType: 
+              type: "string"
+          required:
+            - dn
+            - name
+            - script
+            - programmingLanguage
+            - enabled
+            - locationType
+ 
+  expected-output:
+    /entriesCount: 1
+    /entries/0/name: "idp"

@@ -1,0 +1,66 @@
+operation-01:
+  id: "get-config-api-properties"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      serviceName:
+        type: "string"
+      apiProtectionType:
+        type: "string"
+      authIssuerUrl:
+        type: "string"
+      apiApprovedIssuer:
+        type: "array"
+    disableJdkLogger:
+        type: "boolean"
+    maxCount:
+        type: "integer"
+    assetMgtConfiguration:
+        type: "array"
+        items:
+          type: "object"
+
+  expected-output:
+    /serviceName: "jans-config-api"
+    /apiProtectionType: "oauth2"
+    /acrExclusionList:
+      - "simple_password_auth"
+    /userExclusionAttributes:
+      - "userPassword"
+
+
+operation-02:
+  id: "patch-config-api-properties"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      serviceName:
+        type: "string"
+      apiProtectionType:
+        type: "string"
+      authIssuerUrl:
+        type: "string"
+      apiApprovedIssuer:
+        type: "array"
+    disableJdkLogger:
+        type: "boolean"
+    maxCount:
+        type: "integer"
+    assetMgtConfiguration:
+        type: "array"
+        items:
+          type: "object"
+
+  expected-output:
+    /loggingLevel: "DEBUG"
+    /maxCount: 202
+
+  data:
+    - op: "replace"
+      path: "/loggingLevel"
+      value: "DEBUG"
+    - op: "replace"
+      path: /maxCount
+      value: 202
