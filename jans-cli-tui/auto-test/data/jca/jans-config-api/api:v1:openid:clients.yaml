@@ -44,3 +44,239 @@ operation-01:
   expected-output:
     /entries/0/displayName: "Jans TUI Client"
     /entries/0/authenticationMethod: "client_secret_basic"
+
+
+operation-02:
+  id: "post-oauth-openid-client"
+  expected-status-code: 201
+  endpoint-args:
+    fieldValuePair: "displayName=Jans TUI Client"
+  schema:
+      type: "object"
+      properties:
+        dn:
+          type: "string"
+        inum:
+          type: "string"
+        clientSecret:
+          type: "string"
+        applicationType:
+          type: "string"
+        displayName:
+          type: "string"
+        grantTypes:
+          type: "array"
+      required:
+      - dn
+      - inum
+      - clientSecret
+      - applicationType
+      - displayName
+      - grantTypes
+
+  expected-output:
+    /clientName: "auto_test_client"
+    /redirectUris/0: "https://jans.io/auto-test"
+
+  json-data: |
+    {
+      "disabled": false,
+      "clientName": "auto_test_client",
+      "clientSecret": "*****",
+      "description": "This is a test client created by Auto Test",
+      "tokenEndpointAuthMethod": "client_secret_basic",
+      "subjectType": "public",
+      "sectorIdentifierUri": "",
+      "grantTypes": [
+        "authorization_code",
+        "password"
+      ],
+      "responseTypes": [
+        "code",
+        "id_token"
+      ],
+      "trustedClient": false,
+      "applicationType": "web",
+      "redirectUris": [
+        "https://jans.io/auto-test"
+      ],
+      "accessTokenAsJwt": false,
+      "includeClaimsInIdToken": false,
+      "idTokenTokenBindingCnf": "",
+      "accessTokenLifetime": "",
+      "refreshTokenLifetime": "",
+      "defaultMaxAge": "",
+      "frontChannelLogoutUri": "",
+      "postLogoutRedirectUris": [],
+      "frontChannelLogoutSessionRequired": false,
+      "clientUri": "",
+      "policyUri": "",
+      "logoUri": "",
+      "contacts": [],
+      "authorizedOrigins": [],
+      "softwareId": "",
+      "softwareVersion": "",
+      "softwareStatement": "",
+      "backchannelTokenDeliveryMode": "poll",
+      "backchannelClientNotificationEndpoint": "",
+      "backchannelUserCodeParameter": false,
+      "rptAsJwt": false,
+      "claimRedirectUris": [],
+      "jwksUri": "",
+      "jwks": "",
+      "persistClientAuthorizations": false,
+      "initiateLoginUri": "",
+      "requestUris": [],
+      "defaultAcrValues": [],
+      "scopes": [
+        "inum=C17A,ou=scopes,o=jans",
+        "inum=764C,ou=scopes,o=jans"
+      ],
+      "attributes": {
+        "redirectUrisRegex": "",
+        "parLifetime": 0,
+        "requirePar": false,
+        "backchannelLogoutUri": [],
+        "additionalAudience": [],
+        "rptClaimsScripts": [],
+        "spontaneousScopeScriptDns": [],
+        "runIntrospectionScriptBeforeJwtCreation": false,
+        "backchannelLogoutSessionRequired": false,
+        "jansDefaultPromptLogin": false,
+        "allowSpontaneousScopes": false,
+        "tlsClientAuthSubjectDn": "",
+        "jansAuthorizedAcr": [],
+        "introspectionSignedResponseAlg": null,
+        "introspectionEncryptedResponseAlg": null,
+        "introspectionEncryptedResponseEnc": null,
+        "txTokenSignedResponseAlg": null,
+        "txTokenEncryptedResponseAlg": null,
+        "txTokenEncryptedResponseEnc": null
+      }
+    }
+
+  store-output-name: "sample-client"
+
+
+operation-03:
+  id: "put-oauth-openid-client"
+  expected-status-code: 200
+  schema:
+      type: "object"
+      properties:
+        dn:
+          type: "string"
+        inum:
+          type: "string"
+        clientSecret:
+          type: "string"
+        applicationType:
+          type: "string"
+        displayName:
+          type: "string"
+        grantTypes:
+          type: "array"
+      required:
+      - dn
+      - inum
+      - clientSecret
+      - applicationType
+      - displayName
+      - grantTypes
+
+  expected-output:
+    /logoUri: "https://avatar-placeholder.iran.liara.run/logo.png"
+    /clientUri: "https://jans.io/auto-test-cli-uri"
+
+  modify-output:
+    output-name: "sample-client"
+    modifiers:
+      set:
+        /logoUri: "https://avatar-placeholder.iran.liara.run/logo.png"
+        /clientUri: "https://jans.io/auto-test-cli-uri"
+
+  data: "$sample-client"
+
+
+operation-04:
+  id: "get-oauth-openid-clients-by-inum"
+  expected-status-code: 200
+  url-suffix:
+    inum: "$sample-client:/inum"
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      inum:
+        type: "string"
+      clientSecret:
+        type: "string"
+      applicationType:
+        type: "string"
+      displayName:
+        type: "string"
+      grantTypes:
+        type: "array"
+    required:
+    - dn
+    - inum
+    - clientSecret
+    - applicationType
+    - displayName
+    - grantTypes
+
+  expected-output:
+    /logoUri: "https://avatar-placeholder.iran.liara.run/logo.png"
+    /clientUri: "https://jans.io/auto-test-cli-uri"
+
+
+
+operation-05:
+  id: "patch-oauth-openid-client-by-inum"
+  expected-status-code: 200
+  url-suffix:
+    inum: "$sample-client:/inum"
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      inum:
+        type: "string"
+      clientSecret:
+        type: "string"
+      applicationType:
+        type: "string"
+      displayName:
+        type: "string"
+      grantTypes:
+        type: "array"
+    required:
+    - dn
+    - inum
+    - clientSecret
+    - applicationType
+    - displayName
+    - grantTypes
+
+  expected-output:
+    /initiateLoginUri: "https://test.jans.io/initiate-login-uri"
+    /trustedClient: true
+
+  data:
+    - op: replace
+      path: /initiateLoginUri
+      value: "https://test.jans.io/initiate-login-uri"
+    - op: replace
+      path: /trustedClient
+      value: true
+
+
+operation-06:
+  #pass-this: true
+  id: "delete-oauth-openid-client-by-inum"
+  url-suffix:
+    inum: "$sample-client:/inum"
+  expected-status-code: null
+  expected-response-text: null

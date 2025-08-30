@@ -1,0 +1,85 @@
+operation-01:
+  id: "get-config-smtp"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      port:
+        type: "integer"
+      key_store:
+        type: "string"
+      key_store_password:
+        type: "string"
+      key_store_alias:
+        type: "string"
+      signing_algorithm:
+        type: "string"
+    required:
+      - valid
+      - port
+      - requires_authentication
+
+  expected-output:
+    /valid: false
+
+  store-output-name: "smtp-config"
+
+operation-02:
+  id: "put-config-smtp"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      port:
+        type: "integer"
+      key_store:
+        type: "string"
+      key_store_password:
+        type: "string"
+      key_store_alias:
+        type: "string"
+      signing_algorithm:
+        type: "string"
+    required:
+      - key_store
+      - key_store_password
+      - key_store_alias
+
+  modify-output:
+    output-name: "smtp-config"
+    modifiers:
+      set:
+        /host: "test.jans.io"
+        /port: 260
+        /requires_ssl: true
+        /trust_host: true
+        /from_name: "Mike"
+        /from_email_address: "mike@test.jans.io"
+        /requires_authentication: true
+        /user_name: "mike"
+        /password: "test1234"
+
+  data: "$smtp-config"
+
+  expected-output:
+    /from_email_address: "mike@test.jans.io"
+    /host: "test.jans.io"
+
+
+operation-03:
+  id: "test-config-smtp"
+  expected-status-code: 200
+  schema:
+    type: boolean
+  data:
+    sign: false
+    subject: "test"
+    message: "hello there"
+
+  expected-output:
+    /: false
+
+operation-04:
+    id: "delete-config-smtp"
+    expected-status-code: null
+    expected-response-text: null
