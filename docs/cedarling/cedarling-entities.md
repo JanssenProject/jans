@@ -184,3 +184,39 @@ Cedarling creates **JWT entities** for each token defined in the [trusted issuer
 ### Attribute Mappings
 
 Each **claim** in the JWT is automatically added to the JWT entity's attributes.
+
+## Entity Merging and Conflict Resolution
+
+Cedarling automatically merges entities from multiple sources during authorization requests. The merging process follows specific rules to ensure consistency and handle conflicts appropriately.
+
+### Merging Order and Precedence
+
+1. **Default Entities**: Loaded first from policy store configuration
+2. **Request Entities**: Resource, issuers, roles, tokens, user, and workload entities
+3. **Conflict Resolution**: Request entities override default entities when UID conflicts occur
+
+### Example: Entity Override Scenario
+
+When a resource entity has the same UID as a default entity:
+
+```json
+// Default entity in policy store
+{
+  "org1": {
+    "entity_id": "org1",
+    "entity_type": "Jans::Organization", 
+    "name": "Default Organization",
+    "is_active": true
+  }
+}
+
+// Request resource entity
+{
+  "entity_type": "Jans::Organization",
+  "id": "org1", // Same UID as default entity
+  "name": "Updated Organization", // Different name
+  "is_active": false // Different status
+}
+```
+
+Result: The request entity's attributes (`"Updated Organization"`, `is_active: false`) will be used, overriding the default entity's values.

@@ -93,10 +93,12 @@ mod test {
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = Arc::new(TrustedIssuer::default());
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
 
@@ -135,10 +137,12 @@ mod test {
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = Arc::new(TrustedIssuer::default());
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
 
@@ -187,10 +191,12 @@ mod test {
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = Arc::new(TrustedIssuer::default());
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
 

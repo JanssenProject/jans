@@ -48,5 +48,7 @@ lazy_static! {
             .with_user()
             .with_workload(),
         lock_config: None,
+        max_base64_size: None,
+        max_default_entities: None,
     };
 }
