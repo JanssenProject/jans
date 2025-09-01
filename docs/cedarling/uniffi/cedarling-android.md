@@ -14,11 +14,7 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
     ```bash
     cargo build -r -p cedarling_uniffi
     ```
-   In `target/release`, you should find the `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file, depending on the operating system you are using.
-
-   - **.so** (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.
-   - **.dylib** (Dynamic Library) – This is the shared library format for macOS.
-   - **.dll** (Dynamic Link Library) - The shared library format used in Windows.
+   In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
 
 2. Set up cargo-ndk for cross-compiling:
     ```
