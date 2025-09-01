@@ -38,7 +38,7 @@
 
 		<swagger.version>2.2.10</swagger.version>
 
-		<jetty.version>11.0.15</jetty.version>
+		<jetty.version>12.0.25</jetty.version>
 
         <arquillian.version>1.4.0.Final</arquillian.version>
         <arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
