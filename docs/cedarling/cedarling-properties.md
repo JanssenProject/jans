@@ -32,8 +32,10 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature of all JWT tokens. This requires an `iss` is present.
 * **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info.
 * **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling.
-* **`CEDARLING_ID_TOKEN_TRUST_MODE`** : `Strict` | `None`. Varying levels of validations based on the preference of the developer.
-`Strict` mode requires (1) id_token `aud` matches the access_token `client_id`; (2) if a Userinfo token is present, the `sub` matches the id_token, and that the `aud` matches the access token client_id.
+* **`CEDARLING_ID_TOKEN_TRUST_MODE`** : `strict` | `never`. Varying levels of validations based on the preference of the developer.
+`strict` mode requires (1) id_token `aud` matches the access_token `client_id`; (2) if a Userinfo token is present, the `sub` matches the id_token, and that the `aud` matches the access token client_id.
+
+**Note:** While the enum defines additional values (`always`, `ifpresent`), only `strict` and `never` are currently implemented and supported.
 
 **The following bootstrap properties are only needed for enterprise deployments.**
 
@@ -99,14 +101,14 @@ To load policy store one of the following keys must be provided:
 - **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature of all JWT tokens. This requires an `iss` is present.
 - **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info.
 - **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling.
-- **`CEDARLING_ID_TOKEN_TRUST_MODE`** : `strict` | `never` | `always` | `ifpresent`. Varying levels of validations based on the preference of the developer.
+- **`CEDARLING_ID_TOKEN_TRUST_MODE`** : `strict` | `never`. Varying levels of validations based on the preference of the developer.
 
   - **`strict`** (default): Enforces strict validation rules:
     - ID token `aud` must contain the access token `client_id` (the `aud` field is an array that must contain the `client_id`)
     - If userinfo token is present, its `sub` must match the ID token `sub`
   - **`never`**: Disables ID token validation entirely (useful for testing)
-  - **`always`**: Always validates ID tokens when present (less strict than `strict` mode)
-  - **`ifpresent`**: Validates ID tokens only if they are provided
+
+  **Note:** While the enum defines additional values (`always`, `ifpresent`), only `strict` and `never` are currently implemented and supported.
 
 **The following bootstrap properties are only needed for the Lock Server Integration.**
 

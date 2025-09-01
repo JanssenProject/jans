@@ -195,6 +195,7 @@ The Token Entity Metadata Schema defines how tokens are mapped, parsed, and tran
 ```json
 {
   "trusted": true,
+  "entity_type_name": "Jans::Access_token",
   "token_id": "jti",
   "workload_id": "aud | client_id",
   "user_id": "sub | uid | email",
@@ -211,7 +212,7 @@ The Token Entity Metadata Schema defines how tokens are mapped, parsed, and tran
 }
 ```
 
-- `"trusted"` (bool, Default: true): Allows to toggling configuration without deleting the object.
+- `"trusted"` (bool, Default: true): Allows toggling configuration without deleting the object.
 - `"entity_type_name"` (string, required): The type name of the Cedar Entity that will be created from the token; for example: "Jans::Access_token".
 - `"principal_mapping"` (array[string], Default: []): Describes where references of the created token entity should be included.
 - `"token_id"` (string, Default: "jti"): The JWT claim that will be used as the ID for the Token Entity.
@@ -313,28 +314,25 @@ Here is a non-normative example of a `cedarling_store.json` file:
             "name": "Google",
             "description": "Consumer IDP",
             "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
-            "access_tokens": {
-              "trusted": true,
-              "entity_type_name": "Jans::Access_token",
-              "token_id": "jti",
-            },
-            "id_tokens": {
-              "trusted": true,
-              "entity_type_name": "Jans::Id_token",
-              "token_id": "jti",
-              "role_mapping": "role",
-            },
-            "userinfo_tokens": {
-              "trusted": true,
-              "entity_type_name": "Jans::Userinfo_token",
-              "token_id": "jti",
-              "role_mapping": "role",
-            },
-            "tx_tokens": {
-              "trusted": true,
-              "entity_type_name": "Jans::Tx_token",
-              "token_id": "jti",
-            },
+            "token_metadata": {
+              "access_token": {
+                "trusted": true,
+                "entity_type_name": "Jans::Access_token",
+                "token_id": "jti"
+              },
+              "id_token": {
+                "trusted": true,
+                "entity_type_name": "Jans::Id_token",
+                "token_id": "jti",
+                "role_mapping": "role"
+              },
+              "userinfo_token": {
+                "trusted": true,
+                "entity_type_name": "Jans::Userinfo_token",
+                "token_id": "jti",
+                "role_mapping": "role"
+              }
+            }
         }
     }
 }

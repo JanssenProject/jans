@@ -34,39 +34,44 @@ To allow an Access token like the one below to be used for authorization:
 }
 ```
 
-You **MUST** define a trusted issuer in you policy store with a matching `openid_configuration_endpoint` (same host as the token's `iss` claim):
+You **MUST** define a trusted issuer in your policy store with a matching `openid_configuration_endpoint` (same host as the token's `iss` claim):
 
 ```json
 {
   // ... other fields have been omitted for brevity
   "trusted_issuers": {
-    "name": "my trusted issuer",
-    "description": "an IDP that i trust",
-    "openid_configuration_endpoint": "https://test.issuer.com/.well-known/openid-configuration", // this endpoint has the same host as the token's `iss` claim
-    "tokens_metadata": { 
-      "access_token": { 
-        // metadata specific to this token type
+    "my_trusted_issuer_id": {
+      "name": "my trusted issuer",
+      "description": "an IDP that i trust",
+      "openid_configuration_endpoint": "https://test.issuer.com/.well-known/openid-configuration",
+      "token_metadata": { 
+        "access_token": { 
+          "entity_type_name": "Jans::Access_token",
+          "token_id": "jti",
+          "workload_id": "client_id",
+          "required_claims": ["exp", "client_id"]
+        }
       }
     }
   }
 }
 ```
 
-Additionally, only tokens **explicitly named** in the tokens_metadata section will be validated. All other tokens will be ignored.
+Additionally, only tokens **explicitly named** in the `token_metadata` section will be validated. All other tokens will be ignored.
 
 ### Validation Requirements
 
 In summary, for a token to be validated by Cedarling, two conditions must be met:
 
 1. The `iss` (Issuer) claim must match the **host** of an `openid_configuration_endpoint` in the policy store.
-2. The token must be provided under a **token name** defined in the corresponding `tokens_metadata`
+2. The token must be provided under a **token name** defined in the corresponding `token_metadata`
 
   ```js
   // Example authorize call
   cedarling.authorize({
     "tokens": {
       "access_token": "<access_token>", // will be validated and used for entity creation
-      "id_token": "<id_token>",         // will be ignored unless defined in tokens_metadata
+      "id_token": "<id_token>",         // will be ignored unless defined in token_metadata
     },
     // ...
   })
@@ -74,7 +79,7 @@ In summary, for a token to be validated by Cedarling, two conditions must be met
 
 ## JWT Content Validation
 
-Cedarling also supports validating the contents of a JWT by enforcing the presence of required claims. These requirements are defined in the `tokens_metadata` section of the policy store.
+Cedarling also supports validating the contents of a JWT by enforcing the presence of required claims. These requirements are defined in the `token_metadata` section of the policy store.
 
 ### Example
 
@@ -82,21 +87,24 @@ Cedarling also supports validating the contents of a JWT by enforcing the presen
 {
   // ... other fields have been omitted for brevity
   "trusted_issuers": {
-    "name": "my trusted issuer",
-    "description": "an IDP that i trust",
-    "openid_configuration_endpoint": "https://test.issuer.com/.well-known/openid-configuration", // this endpoint has the same host as the token's `iss` claim
-    "tokens_metadata": { 
-      "access_token": {
-        "required_claims": ["exp", "client_id"]
+    "my_trusted_issuer_id": {
+      "name": "my trusted issuer",
+      "description": "an IDP that i trust",
+      "openid_configuration_endpoint": "https://test.issuer.com/.well-known/openid-configuration",
+      "token_metadata": { 
+        "access_token": {
+          "entity_type_name": "Jans::Access_token",
+          "required_claims": ["exp", "client_id"]
+        }
       }
     }
   }
 }
 ```
 
-The above configuration means that any access_token must contain both the exp and client_id claims, or it will be rejected. Additionally, *registered claims*[^registered-claims] like the `exp` will also be validated.
+The above configuration means that any `access_token` must contain both the `exp` and `client_id` claims, or it will be rejected. Additionally, *registered claims*[^registered-claims] like the `exp` will also be validated according to RFC 7519 standards.
 
-[^registered-claims]: Registered claims like `exp`, `iat`, `iss`, etc., are defined in [`RFC 7519, Section 4.1`] (https://datatracker.ietf.org/doc/html/rfc7519#section-4.1)
+[^registered-claims]: Registered claims like `exp`, `iat`, `iss`, etc., are defined in [`RFC 7519, Section 4.1`](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1)
 
 ### Id Token Trust Mode
 
@@ -125,48 +133,47 @@ This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property.
 >
 > Enforcing token revocation can help mitigate account takeover risks by allowing for near-instant invalidation of compromised tokens.
 
-
 ## JWT Validation Flow Diagram
 
 JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct the Principal entities. In order to verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status(active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.
 
 ![](../assets/lock-cedarling-diagram-4.jpg)
 
-## Json Web Token Validation
+## JWT Validation Process
 
 **Note:** Make sure you have specified at least one [Trusted Issuer](./cedarling-policy-store.md#trusted-issuer-schema) in your [Policy Store](./cedarling-policy-store.md).
 
-###  JWT Signature Validation
+### JWT Signature Validation
 
-To enable this feature, set the `CEDARLING_JWT_VALIDATION` bootstrap property to `True`. For development and testing purposes, you can set this property to `False` and submit an unsigned JWT, such as one generated from [jwt.io](https://jwt.io). On initialization, the Cedarling will fetch the latest public 
-keys from the issuers specified in the Policy Store and cache them. The cedarling uses the JWT `iss` claim to select the appropriate keys for validation.
+To enable this feature, set the `CEDARLING_JWT_SIG_VALIDATION` bootstrap property to `enabled`. For development and testing purposes, you can set this property to `disabled` and submit an unsigned JWT, such as one generated from [jwt.io](https://jwt.io). On initialization, the Cedarling will fetch the latest public keys from the issuers specified in the Policy Store and cache them. The cedarling uses the JWT `iss` claim to select the appropriate keys for validation.
 
 ### JWT Content Validation
 
-If timestamps are provided in the context, the Cedaring always verifies: 
+If timestamps are provided in the context, the Cedarling always verifies: 
 
 - `exp` (expiration)
 - `nbf` (not before)
 
-If the Cedarling property `CEDARLING_ID_TOKEN_TRUST_MODE` is `Strict`, the Cedarling will:
+If the Cedarling property `CEDARLING_ID_TOKEN_TRUST_MODE` is `strict`, the Cedarling will:
 
 - Discard `id_token` if the `aud` claim does not contain the `client_id` of the access token
 - Discard Userinfo tokens that are not associated with a `sub` claim from the `id_token`
 
-
 ### JWT Status Validation
 
-The Cedarling can also check for JWT revocation if you have the `CEDARLING_JWT_STATUS_VALIDATION` property `Enabled`. The Cedarling checks the status bit of the Status Token JWT, as described in the [OAuth Status Lists](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) draft. Token status enforcement mitigates account takeover by enabling immediate revocation of all tokens issued to an attacker. 
+The Cedarling can also check for JWT revocation if you have the `CEDARLING_JWT_STATUS_VALIDATION` property set to `enabled`. The Cedarling checks the status bit of the Status Token JWT, as described in the [OAuth Status Lists](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) draft. Token status enforcement mitigates account takeover by enabling immediate revocation of all tokens issued to an attacker. 
 
 ## ID Token Trust Mode
 
-The level of validation for the ID Token JWT can be set to either `None` or `Strict`.
+The level of validation for the ID Token JWT can be set to either `never` or `strict`.
 
-### `None` Mode
+> **Implementation Status:** Currently, only `strict` and `never` modes are implemented. Additional modes (`always`, `ifpresent`) are defined in the enum but not yet supported in the validation logic.
 
-Setting the validation level to `None` will not check for the conditions outlined in [Strict Mode](#strict-mode).
+### `never` Mode
 
-### `Strict` Mode
+Setting the validation level to `never` will not check for the conditions outlined in [Strict Mode](#strict-mode).
+
+### `strict` Mode
 
 Strict mode requires:
 
@@ -179,14 +186,14 @@ A local JWKS can be used by setting the `CEDARLING_LOCAL_JWKS` bootstrap propert
 
 ```json
 {
-    "trusted_issuer_id": [ ... ]
+    "trusted_issuer_id": [ ... ],
     "another_trusted_issuer_id": [ ... ]
 }
 ```
 
 * Where keys are `Trusted Issuer IDs` assigned to each key store
 * and the values contains the JSON Web Keys as defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
-* The `trusted_issuers_id` is used to tag a JWKS with a unique identifier and enables using multiple key stores.
+* The `trusted_issuer_id` is used to tag a JWKS with a unique identifier and enables using multiple key stores.
 
 ## Related Bootstrap Properties
 
@@ -195,9 +202,11 @@ The following properties control JWT behavior in Cedarling. These must be set be
 | name | description | allowed values | default |
 | --- | --- | --- | --- |
 | `CEDARLING_LOCAL_JWKS` | A JSON Web Key Set for local testing | `null` or JWKS JSON string | `null` |
-| `CEDARLING_POLICY_STORE_LOCAL` | A JSON string string containing the full policy store. | `null` or JSON object string | `null` |
-| `CEDARLING_JWT_SIG_VALIDATION` | Toggles the JWT signature validation | `enabled`, `disbled` | `disabled` |
+| `CEDARLING_POLICY_STORE_LOCAL` | A JSON string containing the full policy store. | `null` or JSON object string | `null` |
+| `CEDARLING_JWT_SIG_VALIDATION` | Toggles the JWT signature validation | `enabled`, `disabled` | `disabled` |
 | `CEDARLING_JWT_STATUS_VALIDATION` | Enables token status validation (revocation support). See [JWT revocation section](#jwt-revocation-wip). | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_ID_TOKEN_TRUST_MODE` | Controls ID token trust checks. See [Id Token Trust Mode]. | `strict`, `none` | `strict` |
+| `CEDARLING_ID_TOKEN_TRUST_MODE` | Controls ID token trust checks. See [Id Token Trust Mode](#id-token-trust-mode). | `strict`, `never` | `strict` |
+
+**Note:** While the enum defines additional values (`always`, `ifpresent`), only `strict` and `never` are currently implemented and supported.
 
 See the full list of supported properties in the [bootstrap properties reference](./cedarling-properties.md).
