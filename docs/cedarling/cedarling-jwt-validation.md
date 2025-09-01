@@ -1,24 +1,44 @@
 ---
 tags:
-  - cedarling
-  - jwt-validation
+  - administration
+  - authorization / authz
+  - Cedar
+  - Cedarling
+  - jwt
+  - validation
 ---
 
 # Cedarling JWT Validation
 
 Cedarling performs JWT (JSON Web Token) validation as part of its authorization workflow. This process ensures that only tokens from trusted issuers, with valid signatures and required claims, are used to make policy decisions. Optional revocation and trust-mode checks add further assurance and control.
 
+## Overview
+
 Learn more about each part of the validation process:
 
 - [Signature Validation](#jwt-signature-validation): Verifies the token's origin using trusted issuer keys.
 - [Content Validation](#jwt-content-validation): Ensures required claims like `exp` or `client_id` are present.
+- [ID Token Trust Mode](#id-token-trust-mode): Validates relationships between different token types.
 - [JWT Revocation (W.I.P)](#jwt-revocation-wip): Checks if a token has been explicitly revoked.
-- [JWT Validation Flow Diagram](#jwt-validation-flow-diagram): Visual overview of Cedarling's validation logic.
-- [Related Bootstrap Properties](#related-bootstrap-properties): [Bootstrap properties](./cedarling-properties.md) that are related to JWT validation.
+- [Local JWKS](#local-jwks): Using local key stores for testing.
+
+**Key Configuration Properties:**
+- `CEDARLING_JWT_SIG_VALIDATION`: Controls JWT signature validation
+- `CEDARLING_JWT_STATUS_VALIDATION`: Controls JWT revocation checks  
+- `CEDARLING_ID_TOKEN_TRUST_MODE`: Controls ID token trust validation
+- `CEDARLING_LOCAL_JWKS`: Local key store for testing
+
+See the complete [bootstrap properties reference](./cedarling-properties.md) for all available configuration options.
 
 ## JWT Signature Validation
 
 At startup, Cedarling fetches public keys from trusted identity providers (IDPs) defined in the [policy store](./cedarling-policy-store.md). These keys are used to validate the signature of incoming JWTs.
+
+### Configuration
+
+To enable this feature, set the `CEDARLING_JWT_SIG_VALIDATION` bootstrap property to `enabled`. For development and testing purposes, you can set this property to `disabled` and submit an unsigned JWT, such as one generated from [jwt.io](https://jwt.io).
+
+On initialization, Cedarling will fetch the latest public keys from the issuers specified in the Policy Store and cache them. The system uses the JWT `iss` claim to select the appropriate keys for validation.
 
 ### Example Policy Store
 
@@ -81,7 +101,16 @@ In summary, for a token to be validated by Cedarling, two conditions must be met
 
 Cedarling also supports validating the contents of a JWT by enforcing the presence of required claims. These requirements are defined in the `token_metadata` section of the policy store.
 
-### Example
+### Required Claims
+
+If timestamps are provided in the context, Cedarling always verifies: 
+
+- `exp` (expiration)
+- `nbf` (not before)
+
+### Custom Required Claims
+
+You can specify additional required claims in your token metadata configuration:
 
 ```json
 {
@@ -106,13 +135,15 @@ The above configuration means that any `access_token` must contain both the `exp
 
 [^registered-claims]: Registered claims like `exp`, `iat`, `iss`, etc., are defined in [`RFC 7519, Section 4.1`](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1)
 
-### Id Token Trust Mode
+## ID Token Trust Mode
 
 Cedarling supports an optional strict trust mode for validating relationships between different token types—primarily ID tokens, Access tokens, and Userinfo tokens.
 
 This behavior is controlled via the `CEDARLING_ID_TOKEN_TRUST_MODE` [bootstrap property](#related-bootstrap-properties).
 
-#### `strict` Mode
+> **Implementation Status:** Currently, only `strict` and `never` modes are implemented. Additional modes (`always`, `ifpresent`) are defined in the enum but not yet supported in the validation logic.
+
+### `strict` Mode
 
 If `CEDARLING_ID_TOKEN_TRUST_MODE` is set to `strict`, Cedarling will enforce the following:
 
@@ -123,7 +154,11 @@ If `CEDARLING_ID_TOKEN_TRUST_MODE` is set to `strict`, Cedarling will enforce th
 
 These additional checks add another layer of identity assurance across tokens.
 
-## JWT Revocation (W.I.P)
+### `never` Mode
+
+Setting the validation level to `never` will not check for the conditions outlined in [Strict Mode](#strict-mode).
+
+## JWT Status Validation
 
 Cedarling optionally supports JWT revocation checks by validating the status bit of a "Status Token" JWT, as proposed in the [OAuth Status Lists](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) draft.
 
@@ -138,47 +173,6 @@ This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property.
 JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct the Principal entities. In order to verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status(active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.
 
 ![](../assets/lock-cedarling-diagram-4.jpg)
-
-## JWT Validation Process
-
-**Note:** Make sure you have specified at least one [Trusted Issuer](./cedarling-policy-store.md#trusted-issuer-schema) in your [Policy Store](./cedarling-policy-store.md).
-
-### JWT Signature Validation
-
-To enable this feature, set the `CEDARLING_JWT_SIG_VALIDATION` bootstrap property to `enabled`. For development and testing purposes, you can set this property to `disabled` and submit an unsigned JWT, such as one generated from [jwt.io](https://jwt.io). On initialization, the Cedarling will fetch the latest public keys from the issuers specified in the Policy Store and cache them. The cedarling uses the JWT `iss` claim to select the appropriate keys for validation.
-
-### JWT Content Validation
-
-If timestamps are provided in the context, the Cedarling always verifies: 
-
-- `exp` (expiration)
-- `nbf` (not before)
-
-If the Cedarling property `CEDARLING_ID_TOKEN_TRUST_MODE` is `strict`, the Cedarling will:
-
-- Discard `id_token` if the `aud` claim does not contain the `client_id` of the access token
-- Discard Userinfo tokens that are not associated with a `sub` claim from the `id_token`
-
-### JWT Status Validation
-
-The Cedarling can also check for JWT revocation if you have the `CEDARLING_JWT_STATUS_VALIDATION` property set to `enabled`. The Cedarling checks the status bit of the Status Token JWT, as described in the [OAuth Status Lists](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) draft. Token status enforcement mitigates account takeover by enabling immediate revocation of all tokens issued to an attacker. 
-
-## ID Token Trust Mode
-
-The level of validation for the ID Token JWT can be set to either `never` or `strict`.
-
-> **Implementation Status:** Currently, only `strict` and `never` modes are implemented. Additional modes (`always`, `ifpresent`) are defined in the enum but not yet supported in the validation logic.
-
-### `never` Mode
-
-Setting the validation level to `never` will not check for the conditions outlined in [Strict Mode](#strict-mode).
-
-### `strict` Mode
-
-Strict mode requires:
-
-1. The `id_token`'s `aud` contains the `access_token`'s `client_id` (the `aud` field is an array that must contain the `client_id`);
-2. if a Userinfo token is present, the `sub` matches the `id_token`, and that the `aud` matches the access token's `client_id`.
 
 ## Local JWKS
 
@@ -195,18 +189,3 @@ A local JWKS can be used by setting the `CEDARLING_LOCAL_JWKS` bootstrap propert
 * and the values contains the JSON Web Keys as defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
 * The `trusted_issuer_id` is used to tag a JWKS with a unique identifier and enables using multiple key stores.
 
-## Related Bootstrap Properties
-
-The following properties control JWT behavior in Cedarling. These must be set before startup and cannot be changed at runtime.
-
-| name | description | allowed values | default |
-| --- | --- | --- | --- |
-| `CEDARLING_LOCAL_JWKS` | A JSON Web Key Set for local testing | `null` or JWKS JSON string | `null` |
-| `CEDARLING_POLICY_STORE_LOCAL` | A JSON string containing the full policy store. | `null` or JSON object string | `null` |
-| `CEDARLING_JWT_SIG_VALIDATION` | Toggles the JWT signature validation | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_JWT_STATUS_VALIDATION` | Enables token status validation (revocation support). See [JWT revocation section](#jwt-revocation-wip). | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_ID_TOKEN_TRUST_MODE` | Controls ID token trust checks. See [Id Token Trust Mode](#id-token-trust-mode). | `strict`, `never` | `strict` |
-
-**Note:** While the enum defines additional values (`always`, `ifpresent`), only `strict` and `never` are currently implemented and supported.
-
-See the full list of supported properties in the [bootstrap properties reference](./cedarling-properties.md).
