@@ -823,7 +823,7 @@
 					<version>${arquillian.jetty.embedded.11.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>org.eclipse.jetty</groupId>
+					<groupId>org.eclipse.jetty.ee9</groupId>
 					<artifactId>jetty-ee9-webapp</artifactId>
 					<scope>test</scope>
 				</dependency>
@@ -833,12 +833,12 @@
 					<scope>test</scope>
 				</dependency>
 				<dependency>
-					<groupId>org.eclipse.jetty</groupId>
+					<groupId>org.eclipse.jetty.ee9</groupId>
 					<artifactId>jetty-ee9-annotations</artifactId>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
-					<groupId>org.eclipse.jetty</groupId>
+					<groupId>org.eclipse.jetty.ee9</groupId>
 					<artifactId>jetty-ee9-plus</artifactId>
 					<scope>test</scope>
 				</dependency>

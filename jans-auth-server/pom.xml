@@ -271,7 +271,7 @@
             </dependency>
 
 	        <dependency>
-	            <groupId>org.eclipse.jetty</groupId>
+	            <groupId>org.eclipse.jetty.ee9</groupId>
 	            <artifactId>jetty-ee9-webapp</artifactId>
 	            <version>${jetty.version}</version>
 	            <scope>provided</scope>
@@ -286,7 +286,7 @@
 
 	        <dependency>
 	            <!-- Jetty annotations needed for Servlet 3.1 support -->
-	            <groupId>org.eclipse.jetty</groupId>
+	            <groupId>org.eclipse.jetty.ee9</groupId>
 	            <artifactId>jetty-ee9-annotations</artifactId>
 	            <version>${jetty.version}</version>
 	            <scope>provided</scope>
@@ -294,7 +294,7 @@
 
 	        <dependency>
 	            <!-- Jetty plus and naming required for testing resource injections -->
-	            <groupId>org.eclipse.jetty</groupId>
+	            <groupId>org.eclipse.jetty.ee9</groupId>
 	            <artifactId>jetty-ee9-plus</artifactId>
 	            <version>${jetty.version}</version>
 	            <scope>provided</scope>
