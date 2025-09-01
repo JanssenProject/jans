@@ -167,3 +167,4 @@ data-sources.json
 # scanner reports
 trivy.json
 grype.json
+/.vscode/
