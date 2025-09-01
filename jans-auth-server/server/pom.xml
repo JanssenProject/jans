@@ -824,7 +824,7 @@
 				</dependency>
 				<dependency>
 					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-webapp</artifactId>
+					<artifactId>jetty-ee9-webapp</artifactId>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
@@ -834,12 +834,12 @@
 				</dependency>
 				<dependency>
 					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-annotations</artifactId>
+					<artifactId>jetty-ee9-annotations</artifactId>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-plus</artifactId>
+					<artifactId>jetty-ee9-plus</artifactId>
 					<scope>test</scope>
 				</dependency>
                 <dependency>
