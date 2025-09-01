@@ -23,7 +23,7 @@ can also build it from source.
    ```
    In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
 !!! note
-    You can use pre-built `libcedarling_uniffi.so` from the [Jans releases page](https://github.com/JanssenProject/jans/releases).
+    You can use pre-built `libcedarling_uniffi.so` from the [Jans releases page](https://github.com/JanssenProject/jans/releases) if you are using Linux OS.
 
 - Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
    ```bash
@@ -48,7 +48,7 @@ can also build it from source.
 
 ### Use the Cedarling Java binding in custom scripts 
 
-Here is a simple recipe to add scopes in access-token in update_token script only if the requesting client has `authorization_code` grant-type. We will use below policy for this:
+Here is a simple recipe to add scopes in access-token using update_token script only if the requesting client has `authorization_code` grant-type. We will use below policy for this:
 
 ```bash
 @id("Allow if the grant type is authorization_code")
