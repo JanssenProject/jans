@@ -20,14 +20,6 @@ Entry = namedtuple("Entry", ["id", "attrs"])
 def _transform_fido2_dynamic_config(conf):
     should_update = False
 
-    # add missing top-level config (if not exist)
-    for k, v in [
-    ]:
-        # update if key not exist
-        if k not in conf:
-            conf[k] = v
-            should_update = True
-
     # add missing fido2Configuration config (if not exist)
     for k, v in [
         ("attestationMode", conf.pop("attestationMode", "monitor")),
