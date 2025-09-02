@@ -548,7 +548,7 @@ jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java
 jansRevision: 1
 jansScr::%(logout_status_jwt_logoutstatusjwt)s
-jansScrTyp: cookie
+jansScrTyp: logout_status_jwt
 
 dn: inum=0300-BA90,ou=scripts,o=jans
 objectClass: jansCustomScr
