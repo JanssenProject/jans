@@ -15240,17 +15240,17 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
+        adminCanView:
           type: boolean
-        userCanAccess:
+        adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanView:
+        adminCanAccess:
           type: boolean
-        adminCanEdit:
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -16158,6 +16158,8 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16167,8 +16169,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17923,8 +17923,6 @@ components:
     Link:
       type: object
       properties:
-        uriBuilder:
-          $ref: "#/components/schemas/UriBuilder"
         type:
           type: string
         params:
@@ -17933,8 +17931,8 @@ components:
             type: string
         title:
           type: string
-        rel:
-          type: string
+        uriBuilder:
+          $ref: "#/components/schemas/UriBuilder"
         uri:
           type: string
           format: uri
@@ -17942,6 +17940,8 @@ components:
           type: array
           items:
             type: string
+        rel:
+          type: string
     MediaType:
       type: object
       properties:
@@ -18071,6 +18071,22 @@ components:
         lastModified:
           type: string
           format: date-time
+        entity:
+          type: object
+        status:
+          type: integer
+          format: int32
+        metadata:
+          type: object
+          properties:
+            empty:
+              type: boolean
+          additionalProperties:
+            type: array
+            items:
+              type: object
+        closed:
+          type: boolean
         cookies:
           type: object
           additionalProperties:
@@ -18080,11 +18096,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Link"
-        allowedMethods:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
         statusInfo:
           $ref: "#/components/schemas/StatusType"
         entityTag:
@@ -18100,22 +18111,11 @@ components:
             type: array
             items:
               type: string
-        entity:
-          type: object
-        metadata:
-          type: object
-          properties:
-            empty:
-              type: boolean
-          additionalProperties:
-            type: array
-            items:
-              type: object
-        status:
-          type: integer
-          format: int32
-        closed:
-          type: boolean
+        allowedMethods:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
     StatusType:
       type: object
       properties:
@@ -18128,11 +18128,11 @@ components:
           - CLIENT_ERROR
           - SERVER_ERROR
           - OTHER
+        reasonPhrase:
+          type: string
         statusCode:
           type: integer
           format: int32
-        reasonPhrase:
-          type: string
     UriBuilder:
       type: object
     TokenAttributes:
@@ -18216,10 +18216,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18230,6 +18226,10 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        logoutStatusJwt:
+          type: boolean
+        accessToken:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
