@@ -126,6 +126,11 @@ async fn prepare_cedarling_with_jwt_validation(
     policy_store["policy_stores"]["a1bf93115de86de760ee0bea1d529b521489e5a11747"]["trusted_issuers"]
         ["Jans123123"]["openid_configuration_endpoint"] =
         format!("{}/.well-known/openid-configuration", base_idp_url).into();
+    
+    // Also update the AnotherIssuer to use the mock server
+    policy_store["policy_stores"]["a1bf93115de86de760ee0bea1d529b521489e5a11747"]["trusted_issuers"]
+        ["AnotherIssuer"]["openid_configuration_endpoint"] =
+        format!("{}/.well-known/openid-configuration", base_idp_url).into();
 
     let bootstrap_config = BootstrapConfig {
         application_name: "test_app".to_string(),
@@ -236,8 +241,10 @@ pub fn prepare_cedarling_request_for_without_jwt_validation() -> Result<Request,
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
@@ -325,8 +332,10 @@ pub fn prepare_cedarling_request_for_with_jwt_validation(
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
