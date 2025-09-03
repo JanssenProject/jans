@@ -110,6 +110,11 @@
 				<artifactId>jans-fido2-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
