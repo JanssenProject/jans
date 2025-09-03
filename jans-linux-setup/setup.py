@@ -36,7 +36,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "setuptools>=59.6.0",
-        "prompt-toolkit==3.0.29",
+        "prompt-toolkit==3.0.52",
         "pyasn1==0.4.8",
         "ruamel.yaml>=0.16.5",
         "sqlalchemy==1.3.23",
