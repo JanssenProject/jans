@@ -19,10 +19,8 @@ public class LogoutServlet extends HttpServlet {
     @Override
     public void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         
-        // Use centralized session validation service for cleanup
-        io.jans.casa.core.SessionValidationService validationService = 
-            io.jans.service.cdi.util.CdiUtil.bean(io.jans.casa.core.SessionValidationService.class);
-        validationService.cleanupStaleSession();
+        // Clean up authentication-related cookies
+        cleanupAuthCookies(req, resp);
         
         // Invalidate session
         WebUtils.invalidateSession(req);
@@ -31,7 +29,41 @@ public class LogoutServlet extends HttpServlet {
         resp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         resp.setHeader("Pragma", "no-cache");
         resp.setHeader("Expires", "0");
-        resp.setHeader("Content-Type", "text/html");
+        resp.setHeader("Content-Type", "text/html; charset=UTF-8");
+        
+        // Redirect to login page
+        resp.sendRedirect(req.getContextPath() + "/");
+        
     }
-
+    
+    /**
+     * Cleans up authentication-related cookies to prevent stale session issues
+     */
+    private void cleanupAuthCookies(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            Cookie[] cookies = req.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    String name = cookie.getName();
+                    // Remove authentication and session related cookies
+                    if (name != null && (
+                        name.startsWith("JSESSIONID") ||
+                        name.startsWith("auth_") ||
+                        name.startsWith("session_") ||
+                        name.startsWith("casa_") ||
+                        name.equals("remember-me") ||
+                        name.equals("auth_token")
+                    )) {
+                        cookie.setValue("");
+                        cookie.setPath("/");
+                        cookie.setMaxAge(0);
+                        resp.addCookie(cookie);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Log error but don't fail the logout process
+            System.err.println("Error cleaning up cookies: " + e.getMessage());
+        }
+    }
 }

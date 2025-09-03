@@ -51,7 +51,7 @@ namespace Jans {
     entity id_token = {
         acr?: String,
         amr?: Set<String>,
-        aud: String,
+        aud: Set<String>,
         azp?: String,
         birthdate?: String,
         email?: email_address,

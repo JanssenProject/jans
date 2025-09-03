@@ -14,7 +14,9 @@
     "optional": "",
     "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {
-      
+      "zipp": "python3-zipp",
+      "typing_extensions": "python3-typing-extensions",
+      "importlib_metadata": "python3-importlib-metadata",
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel-yaml",
       "certifi": "python3-certifi",
