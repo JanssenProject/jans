@@ -19,10 +19,11 @@ Learn more about each part of the validation process:
 - [Signature Validation](#jwt-signature-validation): Verifies the token's origin using trusted issuer keys.
 - [Content Validation](#jwt-content-validation): Ensures required claims like `exp` or `client_id` are present.
 - [ID Token Trust Mode](#id-token-trust-mode): Validates relationships between different token types.
-- [JWT Revocation (W.I.P)](#jwt-revocation-wip): Checks if a token has been explicitly revoked.
+- [JWT Status Validation](#jwt-status-validation): Checks if a token has been explicitly revoked.
 - [Local JWKS](#local-jwks): Using local key stores for testing.
 
 **Key Configuration Properties:**
+
 - `CEDARLING_JWT_SIG_VALIDATION`: Controls JWT signature validation
 - `CEDARLING_JWT_STATUS_VALIDATION`: Controls JWT revocation checks  
 - `CEDARLING_ID_TOKEN_TRUST_MODE`: Controls ID token trust validation
@@ -131,15 +132,13 @@ You can specify additional required claims in your token metadata configuration:
 }
 ```
 
-The above configuration means that any `access_token` must contain both the `exp` and `client_id` claims, or it will be rejected. Additionally, *registered claims*[^registered-claims] like the `exp` will also be validated according to RFC 7519 standards.
-
-[^registered-claims]: Registered claims like `exp`, `iat`, `iss`, etc., are defined in [`RFC 7519, Section 4.1`](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1)
+The above configuration means that any `access_token` must contain both the `exp` and `client_id` claims, or it will be rejected. Additionally, *registered claims* like the `exp` will also be validated according to [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) standards.
 
 ## ID Token Trust Mode
 
 Cedarling supports an optional strict trust mode for validating relationships between different token types—primarily ID tokens, Access tokens, and Userinfo tokens.
 
-This behavior is controlled via the `CEDARLING_ID_TOKEN_TRUST_MODE` [bootstrap property](#related-bootstrap-properties).
+This behavior is controlled via the `CEDARLING_ID_TOKEN_TRUST_MODE` [bootstrap property](./cedarling-properties.md).
 
 > **Implementation Status:** Currently, only `strict` and `never` modes are implemented. Additional modes (`always`, `ifpresent`) are defined in the enum but not yet supported in the validation logic.
 
@@ -149,14 +148,14 @@ If `CEDARLING_ID_TOKEN_TRUST_MODE` is set to `strict`, Cedarling will enforce th
 
 1. The `id_token`'s `aud` (Audience) must match the `access_token`'s `client_id`;
 2. If a `userinfo_token` is also provided:
-  - Its `sub` (Subject) must match that of the `id_token`
-  - Its `aud` must also match the `access_token`'s `client_id`.
+   - Its `sub` (Subject) must match that of the `id_token`
+   - Its `aud` must also match the `access_token`'s `client_id`.
 
 These additional checks add another layer of identity assurance across tokens.
 
 ### `never` Mode
 
-Setting the validation level to `never` will not check for the conditions outlined in [Strict Mode](#strict-mode).
+Setting the validation level to `never` will not check for the conditions outlined in [`strict` Mode](#strict-mode).
 
 ## JWT Status Validation
 
