@@ -29,8 +29,6 @@ import jakarta.ws.rs.core.Response;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 
 @Path(ApiConstants.JANS_AUTH + ApiConstants.SSA)

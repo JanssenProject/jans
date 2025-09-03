@@ -22,8 +22,10 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 
@@ -111,11 +113,12 @@ public class SsaService {
                     " \n\n FINAL  httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
                     httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
                     httpServiceResponse.getHttpResponse().getEntity());
-            HttpEntity entity = httpServiceResponse.getHttpResponse().getEntity();
-            if (entity != null) {
 
-                jsonString = entity.toString();
-                logger.error(" \n\n jsonString:{}", jsonString);
+            HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
+            if (httpEntity != null) {
+
+                jsonString = getContent(httpEntity);
+
                 endpoint = Jackson.getElement(jsonString, "ssa_endpoint");
                 logger.error("endpoint:{}", endpoint);
                 if (StringUtils.isBlank(endpoint)) {
@@ -128,6 +131,30 @@ public class SsaService {
         logger.error(" return endpoint:{}", endpoint);
         return endpoint;
 
+    }
+
+    private String getContent(HttpEntity httpEntity) {
+        String jsonString = null;
+        InputStream inputStream = null;
+        try {
+
+            if (httpEntity == null) {
+                return jsonString;
+            }
+            inputStream = httpEntity.getContent();
+            logger.error(" \n\n getContent() - httpEntity.getContentLength():{}", httpEntity.getContentLength(),
+                    httpEntity.getContent());
+
+            jsonString = IOUtils.toString(httpEntity.getContent(), StandardCharsets.UTF_8);
+
+            logger.info("Data jsonString:{}", jsonString);
+
+        } catch (Exception ex) {
+            throw new WebApplicationException("Failed to read data '{" + httpEntity + "}'", ex);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        return jsonString;
     }
 
 }
