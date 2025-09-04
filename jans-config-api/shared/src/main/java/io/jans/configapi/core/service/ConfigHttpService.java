@@ -52,6 +52,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -162,14 +163,10 @@ public class ConfigHttpService implements Serializable {
 
     public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authCode,
             Map<String, String> headers, String postData, ContentType contentType, String authType) {
-
+        log.error("POST -  uri:{}, authCode:{} ", uri, authCode);
         HttpPost httpPost = new HttpPost(uri);
 
-        if (StringHelper.isEmpty(authType)) {
-            authType = "Basic ";
-        } else {
-            authType = authType + " ";
-        }
+        
         if (StringHelper.isNotEmpty(authCode)) {
             httpPost.setHeader("Authorization", authType + authCode);
         }
@@ -272,6 +269,50 @@ public class ConfigHttpService implements Serializable {
 
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) {
         return executeGet(httpClient, requestUri, null, null);
+    }
+
+    public HttpServiceResponse executeDelete(String requestUri, Map<String, String> headers, Map<String, String> data) {
+        HttpClient httpClient = this.getHttpsClient();
+        return executeDelete(httpClient, requestUri, headers, data);
+    }
+
+    public HttpServiceResponse executeDelete(HttpClient httpClient, String requestUri, Map<String, String> headers,
+            Map<String, String> parameters) {
+
+        log.info("\n\n Delete requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
+
+        if (parameters != null && !parameters.isEmpty()) {
+            StringBuilder query = new StringBuilder();
+            int i = 0;
+            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext();) {
+                String key = iterator.next();
+                String value = parameters.get(key);
+                if (StringUtils.isNotBlank(value)) {
+                    String delim = (i == 0) ? "?" : "&";
+                    query.append(delim + URLEncoder.encode(key, StandardCharsets.UTF_8) + "=");
+                    query.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+                    i++;
+                }
+            }
+            requestUri = requestUri + query.toString();
+            log.info("\n\n\n Final Delete requestUri:{}", requestUri);
+        }
+
+        HttpDelete httpDelete = new HttpDelete(requestUri);
+        if (headers != null) {
+            for (Entry<String, String> headerEntry : headers.entrySet()) {
+                httpDelete.setHeader(headerEntry.getKey(), headerEntry.getValue());
+            }
+        }
+        try {
+            HttpResponse httpResponse = httpClient.execute(httpDelete);
+            log.info("HttpDelete httpResponse:{}", httpResponse);
+            return new HttpServiceResponse(httpDelete, httpResponse);
+        } catch (IOException ex) {
+            log.error("Failed to execute get request", ex);
+        }
+
+        return null;
     }
 
     public byte[] getResponseContent(HttpResponse httpResponse) throws IOException {

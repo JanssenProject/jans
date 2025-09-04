@@ -19,7 +19,10 @@ import io.jans.model.net.HttpServiceResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
 
 import java.io.InputStream;
@@ -28,7 +31,7 @@ import java.util.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
-
+import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -77,22 +80,58 @@ public class SsaService {
         return jsonNode;
     }
 
-    public Response createSsa(final String accessToken, final String jsonNode) throws Exception {
+    public JsonNode createSsa(final String accessToken, final String jsonNode) throws Exception {
         if (logger.isInfoEnabled()) {
             logger.info("SSA Create parameters - jti:{}, orgId:{}", escapeLog(jsonNode));
         }
-        logger.error("Create SSA -  jsonNode:{}", jsonNode);
+        logger.error("Create SSA accessToken:{},  jsonNode:{}", accessToken, jsonNode);
 
-        return AuthClientFactory.createSsa(authUtil.getIssuer(), accessToken, jsonNode);
+        HttpServiceResponse httpServiceResponse = configHttpService.executePost(getSsaEndpoint(), accessToken, jsonNode,
+                ContentType.APPLICATION_JSON, null);
+        JsonNode jsonNodeResponse = null;
+
+        logger.info(" stat httpServiceResponse:{}", httpServiceResponse);
+        if (httpServiceResponse != null) {
+            logger.info(
+                    " stat httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
+                    httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
+                    httpServiceResponse.getHttpResponse().getEntity());
+            jsonNodeResponse = configHttpService.getResponseJsonNode(httpServiceResponse);
+        }
+        logger.info(" jsonNodeResponse:{}", jsonNodeResponse);
+        return jsonNodeResponse;
     }
 
-    public Response revokeSsa(final String accessToken, final String jti, final String orgId) throws Exception {
+    public JsonNode revokeSsa(final String accessToken, final String jti, final String orgId) throws Exception {
         if (logger.isInfoEnabled()) {
-            logger.info("SSA revoke parameters - jti:{}, orgId:{}", escapeLog(jti), escapeLog(orgId));
+            logger.info("Revoke SSA parameters - jti:{}, orgId:{}", escapeLog(jti), escapeLog(orgId));
         }
-        logger.error("Delete SSA -  jti:{} ", jti);
+        logger.error("Revoke SSA -  jti:{}, orgId:{} ", jti, orgId);
 
-        return AuthClientFactory.revokeSsa(authUtil.getIssuer(), accessToken, jti, orgId);
+        JsonNode jsonNode = null;
+
+        // Request headers
+        Map<String, String> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        headers.put(AUTHORIZATION, accessToken);
+
+        // Query Parameter
+        Map<String, String> data = new HashMap<>();
+        data.put("jti", jti);
+        data.put("org_id", orgId);
+        HttpServiceResponse httpServiceResponse = configHttpService.executeDelete(getSsaEndpoint(), headers, data);
+
+        logger.info(" Revoke SSA httpServiceResponse:{}", httpServiceResponse);
+        if (httpServiceResponse != null) {
+            logger.info(
+                    " Revoke SSA httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
+                    httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
+                    httpServiceResponse.getHttpResponse().getEntity());
+            jsonNode = configHttpService.getResponseJsonNode(httpServiceResponse);
+        }
+        logger.info(" Revoke SSA jsonNode:{}", jsonNode);
+        return jsonNode;
+
     }
 
     private String getSsaEndpoint() throws JsonProcessingException {
@@ -103,13 +142,13 @@ public class SsaService {
         logger.error(" configurationEndpoint:{}", configurationEndpoint);
 
         HttpServiceResponse httpServiceResponse = configHttpService.executeGet(configurationEndpoint, headers, null);
-        logger.error(" httpServiceResponse:{}", httpServiceResponse);
+        logger.debug(" httpServiceResponse:{}", httpServiceResponse);
         String jsonString = null;
         String endpoint = null;
         if (httpServiceResponse.getHttpResponse() != null
                 && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
 
-            logger.error(
+            logger.trace(
                     " \n\n FINAL  httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
                     httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
                     httpServiceResponse.getHttpResponse().getEntity());
@@ -122,13 +161,13 @@ public class SsaService {
                 endpoint = Jackson.getElement(jsonString, "ssa_endpoint");
                 logger.error("endpoint:{}", endpoint);
                 if (StringUtils.isBlank(endpoint)) {
-                    throw new WebApplicationException("configurationEndpoint {" + configurationEndpoint
-                            + "} does not ssa_endpoint is not avialable");
+                    throw new WebApplicationException("Error while fetching ssa_endpoint from configurationEndpoint {" + configurationEndpoint
+                            + "} ");
                 }
             }
 
         }
-        logger.error(" return endpoint:{}", endpoint);
+        logger.error(" Return endpoint:{}", endpoint);
         return endpoint;
 
     }

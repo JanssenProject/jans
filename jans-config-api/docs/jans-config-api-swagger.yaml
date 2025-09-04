@@ -15238,21 +15238,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
+        selected:
           type: boolean
         whitePagesCanView:
           type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
         adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
         userCanEdit:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        selected:
           type: boolean
         baseDn:
           type: string
@@ -17365,14 +17365,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -17923,25 +17923,25 @@ components:
     Link:
       type: object
       properties:
-        uriBuilder:
-          $ref: "#/components/schemas/UriBuilder"
-        rels:
-          type: array
-          items:
-            type: string
-        rel:
-          type: string
-        uri:
-          type: string
-          format: uri
-        title:
-          type: string
         type:
           type: string
         params:
           type: object
           additionalProperties:
             type: string
+        title:
+          type: string
+        rel:
+          type: string
+        uri:
+          type: string
+          format: uri
+        rels:
+          type: array
+          items:
+            type: string
+        uriBuilder:
+          $ref: "#/components/schemas/UriBuilder"
     MediaType:
       type: object
       properties:
@@ -17953,9 +17953,9 @@ components:
           type: object
           additionalProperties:
             type: string
-        wildcardType:
-          type: boolean
         wildcardSubtype:
+          type: boolean
+        wildcardType:
           type: boolean
     MultivaluedMapStringObject:
       type: object
@@ -18010,37 +18010,6 @@ components:
     Response:
       type: object
       properties:
-        mediaType:
-          $ref: "#/components/schemas/MediaType"
-        entityTag:
-          $ref: "#/components/schemas/EntityTag"
-        allowedMethods:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-        statusInfo:
-          $ref: "#/components/schemas/StatusType"
-        stringHeaders:
-          type: object
-          properties:
-            empty:
-              type: boolean
-          additionalProperties:
-            type: array
-            items:
-              type: string
-        cookies:
-          type: object
-          additionalProperties:
-            $ref: "#/components/schemas/NewCookie"
-        closed:
-          type: boolean
-        links:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: "#/components/schemas/Link"
         headers:
           type: object
           properties:
@@ -18107,6 +18076,8 @@ components:
           format: date-time
         entity:
           type: object
+        closed:
+          type: boolean
         metadata:
           type: object
           properties:
@@ -18116,9 +18087,43 @@ components:
             type: array
             items:
               type: object
+        links:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: "#/components/schemas/Link"
+        cookies:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/NewCookie"
+        allowedMethods:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        statusInfo:
+          $ref: "#/components/schemas/StatusType"
+        mediaType:
+          $ref: "#/components/schemas/MediaType"
+        entityTag:
+          $ref: "#/components/schemas/EntityTag"
+        stringHeaders:
+          type: object
+          properties:
+            empty:
+              type: boolean
+          additionalProperties:
+            type: array
+            items:
+              type: string
     StatusType:
       type: object
       properties:
+        statusCode:
+          type: integer
+          format: int32
+        reasonPhrase:
+          type: string
         family:
           type: string
           enum:
@@ -18128,11 +18133,6 @@ components:
           - CLIENT_ERROR
           - SERVER_ERROR
           - OTHER
-        statusCode:
-          type: integer
-          format: int32
-        reasonPhrase:
-          type: string
     UriBuilder:
       type: object
     TokenAttributes:
@@ -18216,7 +18216,7 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        logoutStatusJwt:
+        accessToken:
           type: boolean
         tokenTypeEnum:
           type: string
@@ -18228,7 +18228,7 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object

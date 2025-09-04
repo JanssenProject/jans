@@ -91,15 +91,15 @@ public class SsaResource extends ConfigBaseResource {
         }
         logger.error("Create SSA search parameters - ssaJson:{}", ssaJson);
         checkNotEmpty(ssaJson, "ssaJson");
-        Response response = null;
+        JsonNode jsonNode = null;
         try {
-            response = ssaService.createSsa(authorization, ssaJson);
+            jsonNode = ssaService.createSsa(authorization, ssaJson);
 
         } catch (Exception ex) {
             ex.printStackTrace();
             throwInternalServerException(ex);
         }
-        return Response.ok(response).build();
+        return Response.ok(jsonNode).build();
     }
 
     @Operation(summary = "Revoke existing active SSA based on `jti` or `org_id`", description = "Revoke existing active SSA based on `jti` or `org_id`", operationId = "revoke-ssa", tags = {
@@ -120,15 +120,15 @@ public class SsaResource extends ConfigBaseResource {
             logger.info("SSA search parameters - jti:{}, orgId:{}", escapeLog(jti), escapeLog(orgId));
         }
         logger.error("Delete SSA parameters - jti:{}, orgId:{}", jti, orgId);
-        Response response = null;
+        JsonNode jsonNode = null;
         try {
-            response = ssaService.revokeSsa(authorization, jti, orgId);
+            jsonNode = ssaService.revokeSsa(authorization, jti, orgId);
 
         } catch (Exception ex) {
             ex.printStackTrace();
             throwInternalServerException(ex);
         }
-        return Response.ok(response).build();
+        return Response.ok(jsonNode).build();
     }
 
 }
