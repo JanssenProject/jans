@@ -29,7 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: "#/components/schemas/AppConfiguration"
         "401":
           description: Unauthorized
         "500":
@@ -48,14 +48,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AppConfiguration'
+              $ref: "#/components/schemas/AppConfiguration"
       responses:
         "200":
           description: Fido2Config
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: "#/components/schemas/AppConfiguration"
         "401":
           description: Unauthorized
         "500":
@@ -83,7 +83,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Fido2RegistrationEntry'
+                $ref: "#/components/schemas/Fido2RegistrationEntry"
               examples:
                 Response example:
                   description: Response example
@@ -162,7 +162,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "401":
           description: Unauthorized
         "404":
@@ -170,13 +170,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.delete
@@ -200,7 +200,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Fido2RegistrationEntryPagedResult'
+                $ref: "#/components/schemas/Fido2RegistrationEntryPagedResult"
               examples:
                 Response example:
                   description: Response example
@@ -390,7 +390,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Fido2RegistrationEntryPagedResult'
+                $ref: "#/components/schemas/Fido2RegistrationEntryPagedResult"
               examples:
                 Response example:
                   description: Response example
@@ -565,21 +565,17 @@ components:
         errorReasonEnabled:
           type: boolean
         fido2Configuration:
-          $ref: '#/components/schemas/Fido2Configuration'
+          $ref: "#/components/schemas/Fido2Configuration"
     Fido2Configuration:
       type: object
       properties:
         authenticatorCertsFolder:
           type: string
-        mdsAccessToken:
-          type: string
         mdsCertsFolder:
           type: string
         mdsTocsFolder:
           type: string
-        checkU2fAttestations:
-          type: boolean
-        debugUserAutoEnrollment:
+        userAutoEnrollment:
           type: boolean
         unfinishedRequestExpiration:
           type: integer
@@ -596,7 +592,7 @@ components:
         metadataServers:
           type: array
           items:
-            $ref: '#/components/schemas/MetadataServer'
+            $ref: "#/components/schemas/MetadataServer"
         disableMetadataService:
           type: boolean
         hints:
@@ -610,16 +606,14 @@ components:
         rp:
           type: array
           items:
-            $ref: '#/components/schemas/RequestedParty'
+            $ref: "#/components/schemas/RequestedParty"
     MetadataServer:
       type: object
       properties:
         url:
           type: string
-        certificateDocumentInum:
-          type: array
-          items:
-            type: string
+        rootCert:
+          type: string
     RequestedParty:
       type: object
       properties:
@@ -778,7 +772,7 @@ components:
           type: integer
           format: int32
         registrationData:
-          $ref: '#/components/schemas/Fido2RegistrationData'
+          $ref: "#/components/schemas/Fido2RegistrationData"
         counter:
           type: integer
           format: int32
@@ -790,9 +784,9 @@ components:
           - compromised
           - canceled
         deviceNotificationConf:
-          $ref: '#/components/schemas/Fido2DeviceNotificationConf'
+          $ref: "#/components/schemas/Fido2DeviceNotificationConf"
         deviceData:
-          $ref: '#/components/schemas/Fido2DeviceData'
+          $ref: "#/components/schemas/Fido2DeviceData"
         expiration:
           type: integer
           format: int32
@@ -814,7 +808,7 @@ components:
         entries:
           type: array
           items:
-            $ref: '#/components/schemas/Fido2RegistrationEntry'
+            $ref: "#/components/schemas/Fido2RegistrationEntry"
   securitySchemes:
     oauth2:
       type: oauth2

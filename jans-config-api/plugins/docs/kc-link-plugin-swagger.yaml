@@ -28,7 +28,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: "#/components/schemas/AppConfiguration"
         "401":
           description: Unauthorized
         "500":
@@ -47,7 +47,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AppConfiguration'
+              $ref: "#/components/schemas/AppConfiguration"
             examples:
               Request example:
                 description: Request example
@@ -58,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: "#/components/schemas/AppConfiguration"
         "401":
           description: Unauthorized
         "500":
@@ -79,7 +79,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/JsonPatch'
+                $ref: "#/components/schemas/JsonPatch"
             examples:
               Request json example:
                 description: Request json example
@@ -90,7 +90,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: "#/components/schemas/AppConfiguration"
         "401":
           description: Unauthorized
         "500":
@@ -106,11 +106,11 @@ components:
         sourceConfigs:
           type: array
           items:
-            $ref: '#/components/schemas/GluuLdapConfiguration'
+            $ref: "#/components/schemas/GluuLdapConfiguration"
         inumConfig:
-          $ref: '#/components/schemas/GluuLdapConfiguration'
+          $ref: "#/components/schemas/GluuLdapConfiguration"
         targetConfig:
-          $ref: '#/components/schemas/GluuLdapConfiguration'
+          $ref: "#/components/schemas/GluuLdapConfiguration"
         ldapSearchSizeLimit:
           type: integer
           format: int32
@@ -139,14 +139,14 @@ components:
         attributeMapping:
           type: array
           items:
-            $ref: '#/components/schemas/CacheRefreshAttributeMapping'
+            $ref: "#/components/schemas/LinkAttributeMapping"
         snapshotFolder:
           type: string
         snapshotMaxCount:
           type: integer
           format: int32
         keycloakConfiguration:
-          $ref: '#/components/schemas/KeycloakConfiguration'
+          $ref: "#/components/schemas/KeycloakConfiguration"
         baseDN:
           type: string
         personObjectClassTypes:
@@ -199,13 +199,6 @@ components:
           type: string
         useLocalCache:
           type: boolean
-    CacheRefreshAttributeMapping:
-      type: object
-      properties:
-        source:
-          type: string
-        destination:
-          type: string
     GluuLdapConfiguration:
       type: object
       properties:
@@ -258,6 +251,13 @@ components:
         username:
           type: string
         password:
+          type: string
+    LinkAttributeMapping:
+      type: object
+      properties:
+        source:
+          type: string
+        destination:
           type: string
     JsonPatch:
       type: object

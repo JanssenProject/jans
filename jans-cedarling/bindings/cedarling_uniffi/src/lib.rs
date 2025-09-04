@@ -68,8 +68,10 @@ impl EntityData {
             converted_payload.insert(k, json_value);
         }
         let inner = core::EntityData {
-            entity_type,
-            id,
+            cedar_mapping: core::CedarEntityMapping {
+                entity_type,
+                id,
+            },
             attributes: converted_payload,
         };
         Ok(Self { inner })
@@ -302,5 +304,11 @@ impl Cedarling {
         }
 
         Ok(result)
+    }
+
+    /// Closes the connections to the Lock Server and pushes all available logs.
+    #[uniffi::method]
+    pub fn shut_down(&self) {
+        self.inner.shut_down();
     }
 }

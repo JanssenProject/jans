@@ -6,7 +6,6 @@ tags:
 
 # Jans Casa Documentation
 
-## Overview
 
 Jans Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Server. 
 

@@ -256,6 +256,9 @@ public class RegisterService {
         if (requestObject.getUpdateTokenScriptDns() != null) {
             client.getAttributes().setUpdateTokenScriptDns(requestObject.getUpdateTokenScriptDns());
         }
+        if (requestObject.getLogoutStatusJwtScriptDns() != null) {
+            client.getAttributes().setLogoutStatusJwtScriptDns(requestObject.getLogoutStatusJwtScriptDns());
+        }
         if (requestObject.getPostAuthnScriptDns() != null) {
             client.getAttributes().setPostAuthnScripts(requestObject.getPostAuthnScriptDns());
         }
@@ -327,6 +330,9 @@ public class RegisterService {
         }
         if (requestObject.getTxTokenEncryptedResponseEnc() != null) {
             client.getAttributes().setTxTokenEncryptedResponseEnc(requestObject.getTxTokenEncryptedResponseEnc().toString());
+        }
+        if (requestObject.getLogoutStatusJwtSignedResponseAlg() != null) {
+            client.getAttributes().setLogoutStatusJwtSignedResponseAlg(requestObject.getLogoutStatusJwtSignedResponseAlg().toString());
         }
         if (requestObject.getRequestObjectSigningAlg() != null) {
             client.setRequestObjectSigningAlg(requestObject.getRequestObjectSigningAlg().toString());

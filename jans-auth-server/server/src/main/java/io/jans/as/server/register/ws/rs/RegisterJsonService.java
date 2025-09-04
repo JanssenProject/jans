@@ -117,6 +117,7 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, TX_TOKEN_SIGNED_RESPONSE_ALG.toString(), client.getAttributes().getTxTokenSignedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TX_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), client.getAttributes().getTxTokenEncryptedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TX_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), client.getAttributes().getTxTokenEncryptedResponseEnc());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, LOGOUT_STATUS_JWT_SIGNED_RESPONSE_ALG.toString(), client.getAttributes().getLogoutStatusJwtSignedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_SIGNING_ALG.toString(), client.getRequestObjectSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_ENCRYPTION_ALG.toString(), client.getRequestObjectEncryptionAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_ENCRYPTION_ENC.toString(), client.getRequestObjectEncryptionEnc());

@@ -47,23 +47,11 @@ def authorize_with_token():
 
     # field entity_type and id is mandatory
     # other fields are attributes of the resource.
-    resource = EntityData(
-        entity_type="Jans::Application",
-        id="random_id",
-        app_id="application_id",
-        name="Some Application",
-        url={
-            "host": "jans.test",
-            "path": "/protected-endpoint",
-            "protocol": "http"
-        }
-    )
-
-    # or we can init resource using dict
     resource = EntityData.from_dict({
-        "entity_type": "resource",
-        "type": "Jans::Application",
-        "id": "some_id",
+        "cedar_entity_mapping": {
+            "entity_type": "Jans::Application",
+            "id": "some_id"
+        },
         "app_id": "application_id",
         "name": "Some Application",
         "url": {
@@ -257,14 +245,15 @@ def authorize_with_token():
 
     print()
 
-
 def authorize_without_token():
     # //// Execute authentication request without token ////
 
     # Create an entity data object using the EntityData class
     resource = EntityData.from_dict({
-        "type": "Jans::Application",
-        "id": "some_id",
+        "cedar_entity_mapping": {
+            "entity_type": "Jans::Application",
+            "id": "some_id"
+        },
         "app_id": "application_id",
         "name": "Some Application",
         "url": {
@@ -283,13 +272,17 @@ def authorize_without_token():
     request = RequestUnsigned(
         principals=[
             EntityData.from_dict({
-                "type": "Jans::TestPrincipal1",
-                "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+                },
                 "is_ok": True
             }),
             EntityData.from_dict({
-                "type": "Jans::TestPrincipal2",
-                "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYkt1",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal2",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYkt1"
+                },
                 "is_ok": True
             })
         ],

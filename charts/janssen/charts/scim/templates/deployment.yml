@@ -144,3 +144,7 @@ spec:
       {{- with (include "cn.config.schema" . | fromYaml).volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}

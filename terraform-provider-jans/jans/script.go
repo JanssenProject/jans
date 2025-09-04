@@ -168,6 +168,7 @@ func (c *Client) GetScriptTypes(ctx context.Context) ([]string, error) {
 	}
 
 	ret := []string{}
+
 	if err := c.get(ctx, "/jans-config-api/api/v1/config/scripts/types", token, &ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}

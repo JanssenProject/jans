@@ -11,6 +11,7 @@ import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.model.config.ConfigurationFactory;
+import io.jans.as.server.service.external.ExternalCookieService;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.service.cdi.util.CdiUtil;
 import jakarta.enterprise.context.RequestScoped;
@@ -42,12 +43,12 @@ import static io.jans.as.model.util.StringUtils.toList;
 public class CookieService {
 
     private static final String SESSION_STATE_COOKIE_NAME = "session_state";
-    public static final String OP_BROWSER_STATE = "opbs";
+    private static final String OP_BROWSER_STATE = "opbs";
     public static final String SESSION_ID_COOKIE_NAME = "session_id";
     private static final String RP_ORIGIN_ID_COOKIE_NAME = "rp_origin_id";
     private static final String UMA_SESSION_ID_COOKIE_NAME = "uma_session_id";
     public static final String CONSENT_SESSION_ID_COOKIE_NAME = "consent_session_id";
-    public static final String CURRENT_SESSIONS_COOKIE_NAME = "current_sessions";
+    private static final String CURRENT_SESSIONS_COOKIE_NAME = "current_sessions";
 
     @Inject
     private Logger log;
@@ -63,6 +64,9 @@ public class CookieService {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private ExternalCookieService externalCookieService;
 
     public String getSessionIdFromCookie(HttpServletRequest request) {
         return getValueFromCookie(request, SESSION_ID_COOKIE_NAME);
@@ -132,7 +136,7 @@ public class CookieService {
             header += "; Secure";
             header += "; HttpOnly";
 
-            createCookie(header, httpResponse);
+            createCookie(CURRENT_SESSIONS_COOKIE_NAME, header, httpResponse);
         } catch (UnsupportedEncodingException e) {
             log.error("Failed to modify current_sessions", e);
         }
@@ -244,7 +248,7 @@ public class CookieService {
         header += "; Secure";
         header += "; HttpOnly";
 
-        createCookie(header, httpResponse);
+        createCookie(RP_ORIGIN_ID_COOKIE_NAME, header, httpResponse);
     }
 
     public void createCookieWithState(String sessionId, String sessionState, String opbs, HttpServletRequest request, HttpServletResponse httpResponse, String cookieName) {
@@ -253,7 +257,7 @@ public class CookieService {
         header += "; Secure";
         header += "; HttpOnly";
 
-        createCookie(header, httpResponse);
+        createCookie(cookieName, header, httpResponse);
 
         createSessionStateCookie(sessionState, httpResponse);
         createOPBrowserStateCookie(opbs, httpResponse);
@@ -289,7 +293,7 @@ public class CookieService {
         header += "; Path=/";
         header += "; Secure";
 
-        createCookie(header, httpResponse);
+        createCookie(SESSION_STATE_COOKIE_NAME, header, httpResponse);
     }
 
     public void createOPBrowserStateCookie(String opbs, HttpServletResponse httpResponse) {
@@ -311,7 +315,7 @@ public class CookieService {
         httpResponse.addHeader("Set-Cookie", header);
     }
 
-    protected void createCookie(String header, HttpServletResponse httpResponse) {
+    protected void createCookie(String cookieName, String header, HttpServletResponse httpResponse) {
         Integer sessionStateLifetime = appConfiguration.getSessionIdCookieLifetime();
         if (sessionStateLifetime != null && sessionStateLifetime > 0) {
             DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
@@ -322,6 +326,8 @@ public class CookieService {
                 header += "Domain=" + appConfiguration.getCookieDomain() + ";";
             }
         }
+
+        header = externalCookieService.modifyCookieHeader(cookieName, header);
 
         httpResponse.addHeader("Set-Cookie", header);
     }

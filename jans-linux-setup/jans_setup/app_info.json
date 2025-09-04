@@ -1,13 +1,13 @@
 {
   "JANS_APP_VERSION": "0.0.0",
   "JANS_BUILD": "-nightly",
-  "JETTY_VERSION": "12.0.19",
+  "JETTY_VERSION": "12.0.25",
   "AMAZON_CORRETTO_VERSION": "17",
   "JYTHON_VERSION": "2.7.3",
   "OPENDJ_VERSION": "4.5.3",
   "JANS_MAVEN": "https://jenkins.jans.io",
   "APPLE_WEBAUTHN": "https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem",
-  "SQLALCHEMY": "https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip",
+  "SQLALCHEMY": "https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_4_50.zip",
   "PYJWT": "https://github.com/jpadilla/pyjwt/archive/refs/tags/2.4.0.zip",
   "PROMPT_TOOLKIT": "https://github.com/prompt-toolkit/python-prompt-toolkit/archive/refs/tags/3.0.33.zip",
   "WCWIDTH": "https://github.com/jquast/wcwidth/archive/refs/tags/0.2.5.zip",
@@ -18,6 +18,6 @@
   "PYCRONTAB": "https://gitlab.com/doctormo/python-crontab/-/archive/v3.2.0/python-crontab-v3.2.0.zip",
   "TWILIO_MAVEN": "https://repo1.maven.org/maven2/com/twilio/sdk/twilio/",
   "TWILIO_VERSION": "7.17.0",
-  "KC_VERSION": "25.0.6",
+  "KC_VERSION": "26.3.3",
   "OPA_VERSION": "v0.60.0"
 }

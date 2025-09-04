@@ -536,10 +536,24 @@ jansProgLng: python
 jansScrTyp: config_api_auth
 jansScr::%(config_api_config_api_interception)s
 
+dn: inum=0300-BA15,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: LogoutStatusJwt Custom Script - Sample in Java
+displayName: logout_status_jwt_script_in_java
+inum: 0300-BA15
+jansEnabled: FALSE
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansProgLng: java
+jansRevision: 1
+jansScr::%(logout_status_jwt_logoutstatusjwt)s
+jansScrTyp: logout_status_jwt
+
 dn: inum=0300-BA90,ou=scripts,o=jans
 objectClass: jansCustomScr
 objectClass: top
-description: Java Custom Sample Script
+description: Discovery Custom Script - Sample in Java
 displayName: discovery_java_params
 inum: 0300-BA90
 jansEnabled: FALSE
@@ -549,6 +563,20 @@ jansProgLng: java
 jansRevision: 1
 jansScr::%(discovery_discovery)s
 jansScrTyp: discovery
+
+dn: inum=0300-BA95,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Cookie Custom Script - Sample in Java
+displayName: cookie_script_in_java
+inum: 0300-BA95
+jansEnabled: FALSE
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansProgLng: java
+jansRevision: 1
+jansScr::%(cookie_cookie)s
+jansScrTyp: cookie
 
 dn: inum=0300-BA98,ou=scripts,o=jans
 objectClass: jansCustomScr

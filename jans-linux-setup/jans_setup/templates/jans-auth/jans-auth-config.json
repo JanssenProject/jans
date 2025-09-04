@@ -21,6 +21,7 @@
       "ssa",
       "global_token_revocation",
       "status_list",
+      "logout_status_jwt",
       "rate_limit",
       "access_evaluation"
     ],
@@ -145,6 +146,21 @@
         "A256CBC+HS512",
         "A128GCM",
         "A256GCM"
+    ],
+    "logoutStatusJwtSigningAlgValuesSupported":[
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
     ],
     "txTokenSigningAlgValuesSupported":[
         "HS256",
@@ -586,5 +602,10 @@
     "lockMessageConfig": {
         "enableTokenMessages" : false,
         "tokenMessagesChannel": "jans_token"
+    },
+    "connectionServiceConfiguration": {
+        "maxTotal": 200,
+        "maxPerRoute": 50,
+        "validateAfterInactivity": 0
     }
 }

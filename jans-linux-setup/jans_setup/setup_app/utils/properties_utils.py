@@ -412,6 +412,8 @@ class PropertiesUtils(SetupUtils):
                 Config.rdbm_db = self.getPrompt("  Jnas Database", Config.rdbm_db)
                 Config.rdbm_user = self.getPrompt("  Jans Database Username", Config.rdbm_user)
                 Config.rdbm_password = self.getPrompt("  Jans Database Password", Config.rdbm_password)
+                Config.set_rdbm_schema()
+                Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
 
                 result = dbUtils.sqlconnection()
 
@@ -486,6 +488,8 @@ class PropertiesUtils(SetupUtils):
                 Config.rdbm_user = self.getPrompt("  {} user".format(Config.rdbm_type.upper()), Config.get('rdbm_user'))
                 Config.rdbm_password = self.getPrompt("  {} password".format(Config.rdbm_type.upper()))
                 Config.rdbm_db = self.getPrompt("  {} database".format(Config.rdbm_type.upper()), Config.get('rdbm_db'))
+                Config.set_rdbm_schema()
+                Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
 
                 try:
                     if Config.rdbm_type == 'mysql':

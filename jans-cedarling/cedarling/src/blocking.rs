@@ -60,6 +60,11 @@ impl Cedarling {
         self.runtime
             .block_on(self.instance.authorize_unsigned(request))
     }
+
+    /// Closes the connections to the Lock Server and pushes all available logs.
+    pub fn shut_down(&self) {
+        self.runtime.block_on(self.instance.shut_down());
+    }
 }
 
 impl LogStorage for Cedarling {

@@ -273,7 +273,7 @@ Create the client needed to run the test by executing the following. Make sure t
     }
     EOF
     ```
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder.
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder. You may run the soak auth code test by copying the [soak_test_auth_code.yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/soak_test_auth_code.yaml) instead. 
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
 
@@ -285,10 +285,12 @@ Create the client needed to run the test by executing the following. Make sure t
     ./config-cli-tui.pyz --host $FQDN --client-id $TUI_CLIENT_ID --client-secret $TUI_CLIENT_SECRET --no-tui --operation-id=post-oauth-openid-client --data=auth_code_client.json
     ```
 
-5. Save the client id and secret from the response and enter them along with your FQDN in the yaml file `load_test_auth_code.yaml`  under `AUTHZ_CLIENT_ID`, `AUTHZ_CLIENT_SECRET` and `FQDN` respectively then execute :
+5. Save the client id and secret from the response and enter them along with your FQDN in the yaml file downloaded in step 3  under `AUTHZ_CLIENT_ID`, `AUTHZ_CLIENT_SECRET` and `FQDN` respectively then execute :
 
     ```bash
     kubectl apply -f load_test_auth_code.yaml
+    # or 
+    kubectl apply -f soak_test_auth_code.yaml
     ```
 
 6. The janssen setup by default installs an HPA which will automatically scale your pods if the metrics server is installed according to traffic. To load it very quickly scale the auth-server manually:
@@ -299,6 +301,8 @@ Create the client needed to run the test by executing the following. Make sure t
 7. Finally, scale the load test. The replica number here should be manually controlled.
     ```bash
     kubectl scale deploy load-testing-authz -n load --replicas=20
+   # or 
+    kubectl scale deploy load-testing-soak-authz -n load --replicas=20
    ```
 
 #### Resource Owner Password Credentials (ROPC) flow

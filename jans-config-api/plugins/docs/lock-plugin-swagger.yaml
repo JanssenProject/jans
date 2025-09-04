@@ -52,7 +52,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/HealthEntry'
+                  $ref: "#/components/schemas/HealthEntry"
         "400":
           description: Wrong date range specified
         "401":
@@ -97,7 +97,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/LogEntry'
+                  $ref: "#/components/schemas/LogEntry"
         "400":
           description: Wrong date range specified
         "401":
@@ -142,7 +142,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TelemetryEntry'
+                  $ref: "#/components/schemas/TelemetryEntry"
         "400":
           description: Wrong date range specified
         "401":
@@ -165,7 +165,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/HealthEntry'
+                $ref: "#/components/schemas/HealthEntry"
       responses:
         "200":
           description: Ok
@@ -174,7 +174,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "401":
           description: Unauthorized
         "404":
@@ -182,13 +182,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
@@ -205,7 +205,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/LogEntry'
+                $ref: "#/components/schemas/LogEntry"
       responses:
         "200":
           description: Ok
@@ -214,7 +214,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "401":
           description: Unauthorized
         "404":
@@ -222,13 +222,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
@@ -245,7 +245,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/TelemetryEntry'
+                $ref: "#/components/schemas/TelemetryEntry"
       responses:
         "200":
           description: Ok
@@ -254,7 +254,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "401":
           description: Unauthorized
         "404":
@@ -262,13 +262,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
@@ -283,7 +283,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/HealthEntry'
+              $ref: "#/components/schemas/HealthEntry"
       responses:
         "200":
           description: Ok
@@ -292,7 +292,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "401":
           description: Unauthorized
         "404":
@@ -300,13 +300,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
@@ -321,7 +321,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LogEntry'
+              $ref: "#/components/schemas/LogEntry"
       responses:
         "200":
           description: Ok
@@ -330,7 +330,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "401":
           description: Unauthorized
         "404":
@@ -338,13 +338,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
@@ -359,7 +359,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TelemetryEntry'
+              $ref: "#/components/schemas/TelemetryEntry"
       responses:
         "200":
           description: Ok
@@ -368,7 +368,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "401":
           description: Unauthorized
         "404":
@@ -376,13 +376,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
@@ -399,7 +399,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: "#/components/schemas/AppConfiguration"
         "401":
           description: Unauthorized
         "500":
@@ -418,7 +418,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AppConfiguration'
+              $ref: "#/components/schemas/AppConfiguration"
             examples:
               Request example:
                 description: Request example
@@ -429,7 +429,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: "#/components/schemas/AppConfiguration"
         "401":
           description: Unauthorized
         "500":
@@ -450,7 +450,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/JsonPatch'
+                $ref: "#/components/schemas/JsonPatch"
             examples:
               Request json example:
                 description: Request json example
@@ -461,7 +461,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: "#/components/schemas/AppConfiguration"
         "401":
           description: Unauthorized
         "500":
@@ -511,7 +511,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/JsonNode'
+                  $ref: "#/components/schemas/JsonNode"
         "401":
           description: Unauthorized
         "500":
@@ -719,30 +719,9 @@ components:
           type: integer
           description: Time interval for the Clean Service in seconds
           format: int32
-        policiesJsonUrisAuthorizationToken:
-          type: string
-          description: Authorization token to access Json Uris
-        policiesJsonUris:
-          type: array
-          description: List of Json Uris with link to Rego policies
-          items:
-            type: string
-            description: List of Json Uris with link to Rego policies
-        policiesZipUrisAuthorizationToken:
-          type: string
-          description: Authorization token to access Zip Uris
-        policiesZipUris:
-          type: array
-          description: List of Zip Uris with policies
-          items:
-            type: string
-            description: List of Zip Uris with policies
         messageConsumerType:
           type: string
           description: PubSub consumer service
-        policyConsumerType:
-          type: string
-          description: Policy consumer service
         errorReasonEnabled:
           type: boolean
     JsonPatch:

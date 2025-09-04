@@ -51,11 +51,5 @@
   "metricReporterKeepDataDays": 15,
   "metricReporterEnabled": true,
   "statEnabled": true,
-  "policiesJsonUris": [],
-  "policiesJsonUrisAuthorizationToken": "",
-  "policiesZipUris": [],
-  "policiesZipUrisAuthorizationToken": "",
-  "messageConsumerType" : "DISABLED",
-  "policyConsumerType" : "DISABLED",
   "errorReasonEnabled": false
 }

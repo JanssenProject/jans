@@ -41,11 +41,12 @@ lazy_static! {
             use_user_principal: true,
             use_workload_principal: true,
             principal_bool_operator: JsonRule::default(),
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
         entity_builder_config: cedarling::EntityBuilderConfig::default()
             .with_user()
             .with_workload(),
+        lock_config: None,
     };
 }

@@ -33,7 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             decision_log_default_jwt_id: "jti".to_string(),
             decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
             decision_log_workload_claims: vec!["org_id".to_string()],
-            id_token_trust_mode: IdTokenTrustMode::None,
+            id_token_trust_mode: IdTokenTrustMode::Never,
             principal_bool_operator: JsonRule::new(serde_json::json!({
                 "and" : [
                     {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
@@ -43,6 +43,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .unwrap(),
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+        lock_config: None,
     })
     .await?;
 
@@ -134,8 +135,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
             resource: EntityData {
+                cedar_mapping: CedarEntityMapping {
+                    entity_type: "Jans::Issue".to_string(),
                 id: "random_id".to_string(),
-                entity_type: "Jans::Issue".to_string(),
+                },
                 attributes: HashMap::from_iter([
                     (
                         "org_id".to_string(),

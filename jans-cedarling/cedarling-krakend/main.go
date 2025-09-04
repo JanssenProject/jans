@@ -27,8 +27,10 @@ func (r registerer) RegisterHandlers(f func(name string, handler func(context.Co
 
 func createResource(req *http.Request, namespace string) cedarling_go.EntityData {
 	resource := cedarling_go.EntityData{
-		EntityType: fmt.Sprintf("%s::HTTP_Request", namespace),
-		ID:         "krakend_request",
+		CedarMapping: cedarling_go.CedarEntityMapping{
+			EntityType: fmt.Sprintf("%s::HTTP_Request", namespace),
+			ID:         "krakend_request",
+		},
 		Payload: map[string]any{
 			"header": map[string]string{},
 			"url": map[string]string{
