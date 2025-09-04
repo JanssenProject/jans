@@ -341,14 +341,7 @@ public class AssertionService {
 		// Fido2RegistrationData to minimize DB updates
 		registrationData.setCounter(registrationEntry.getCounter());
 
-		try {
-			assertionVerifier.verifyAuthenticatorAssertionResponse(response, registrationData, authenticationData);
-		} catch (Fido2CompromisedDevice ex) {
-			registrationData.setStatus(Fido2RegistrationStatus.compromised);
-			registrationPersistenceService.update(registrationEntry);
-
-			throw ex;
-		}
+		verifyAuthenticatorAssertion(response, registrationData, authenticationData, registrationEntry);
 
 		// Store original response
 		authenticationData.setAssertionResponse(CommonUtilService.toJsonNode(assertionResult).toString());
@@ -467,6 +460,20 @@ public class AssertionService {
 			metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
 		} catch (Exception metricsException) {
 			log.debug("Failed to record authentication failure metrics: {}", metricsException.getMessage());
+		}
+	}
+	
+	/**
+	 * Verify authenticator assertion response with proper error handling
+	 */
+	private void verifyAuthenticatorAssertion(Response response, Fido2RegistrationData registrationData, 
+											  Fido2AuthenticationData authenticationData, Fido2RegistrationEntry registrationEntry) {
+		try {
+			assertionVerifier.verifyAuthenticatorAssertionResponse(response, registrationData, authenticationData);
+		} catch (Fido2CompromisedDevice ex) {
+			registrationData.setStatus(Fido2RegistrationStatus.compromised);
+			registrationPersistenceService.update(registrationEntry);
+			throw ex;
 		}
 	}
 

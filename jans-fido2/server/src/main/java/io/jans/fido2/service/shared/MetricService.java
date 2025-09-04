@@ -66,7 +66,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
     private Logger log;
 
     // Dedicated executor for async metrics processing to avoid blocking main operations
-    private transient final ExecutorService metricsExecutor = Executors.newFixedThreadPool(2);
+    private final transient ExecutorService metricsExecutor = Executors.newFixedThreadPool(2);
     
     private static final String UNKNOWN_ERROR = "UNKNOWN";
     private static final String ATTEMPT_STATUS = "ATTEMPT";
