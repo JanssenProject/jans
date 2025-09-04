@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.codahale.metrics.Timer;
 
 /**
  * Store and retrieve metric
@@ -67,7 +68,9 @@ public class MetricService extends io.jans.service.metric.MetricService {
     private Logger log;
 
     // Dedicated executor for async metrics processing to avoid blocking main operations
-    private final ExecutorService metricsExecutor = Executors.newFixedThreadPool(2);
+    private transient final ExecutorService metricsExecutor = Executors.newFixedThreadPool(2);
+    
+    private static final String UNKNOWN_ERROR = "UNKNOWN";
 
     public void initTimer() {
     	initTimer(this.appConfiguration.getMetricReporterInterval(), this.appConfiguration.getMetricReporterKeepDataDays());
@@ -112,22 +115,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param startTime Start time of the operation
      */
     public void recordPasskeyRegistrationAttempt(String username, HttpServletRequest request, long startTime) {
-        if (!isFido2MetricsEnabled()) {
-            return;
-        }
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                incCounter(MetricType.FIDO2_REGISTRATION_ATTEMPT);
-                
-                if (appConfiguration.isFido2DeviceInfoCollection()) {
-                    Fido2MetricsData metricsData = createRegistrationMetricsData(username, "ATTEMPT", request, startTime, null);
-                    storeFido2MetricsData(metricsData);
-                }
-            } catch (Exception e) {
-                log.warn("Failed to record passkey registration attempt metrics: {}", e.getMessage());
-            }
-        }, metricsExecutor);
+        recordRegistrationMetrics(username, request, startTime, null, "ATTEMPT", null, MetricType.FIDO2_REGISTRATION_ATTEMPT);
     }
 
     /**
@@ -139,29 +127,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param authenticatorType Type of authenticator used
      */
     public void recordPasskeyRegistrationSuccess(String username, HttpServletRequest request, long startTime, String authenticatorType) {
-        if (!isFido2MetricsEnabled()) {
-            return;
-        }
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                long duration = System.currentTimeMillis() - startTime;
-                incCounter(MetricType.FIDO2_REGISTRATION_SUCCESS);
-                
-                if (appConfiguration.isFido2PerformanceMetrics()) {
-                    Timer timer = getTimer(MetricType.FIDO2_REGISTRATION_DURATION);
-                    timer.update(duration, java.util.concurrent.TimeUnit.MILLISECONDS);
-                }
-                
-                if (appConfiguration.isFido2DeviceInfoCollection()) {
-                    Fido2MetricsData metricsData = createRegistrationMetricsData(username, "SUCCESS", request, startTime, authenticatorType);
-                    metricsData.setDurationMs(duration);
-                    storeFido2MetricsData(metricsData);
-                }
-            } catch (Exception e) {
-                log.warn("Failed to record passkey registration success metrics: {}", e.getMessage());
-            }
-        }, metricsExecutor);
+        recordRegistrationMetrics(username, request, startTime, authenticatorType, "SUCCESS", null, MetricType.FIDO2_REGISTRATION_SUCCESS);
     }
 
     /**
@@ -174,33 +140,47 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param authenticatorType Type of authenticator used (if known)
      */
     public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime, String errorReason, String authenticatorType) {
+        recordRegistrationMetrics(username, request, startTime, authenticatorType, "FAILURE", errorReason, MetricType.FIDO2_REGISTRATION_FAILURE);
+    }
+
+    /**
+     * Common method to record registration metrics
+     */
+    private void recordRegistrationMetrics(String username, HttpServletRequest request, long startTime, 
+                                        String authenticatorType, String status, String errorReason, MetricType metricType) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
 
         CompletableFuture.runAsync(() -> {
             try {
-                long duration = System.currentTimeMillis() - startTime;
-                incCounter(MetricType.FIDO2_REGISTRATION_FAILURE);
+                incCounter(metricType);
                 
-                if (appConfiguration.isFido2PerformanceMetrics()) {
+                if (appConfiguration.isFido2PerformanceMetrics() && !"ATTEMPT".equals(status)) {
+                    long duration = System.currentTimeMillis() - startTime;
                     Timer timer = getTimer(MetricType.FIDO2_REGISTRATION_DURATION);
                     timer.update(duration, java.util.concurrent.TimeUnit.MILLISECONDS);
                 }
                 
                 if (appConfiguration.isFido2DeviceInfoCollection()) {
-                    Fido2MetricsData metricsData = createRegistrationMetricsData(username, "FAILURE", request, startTime, authenticatorType);
-                    metricsData.setDurationMs(duration);
-                    metricsData.setErrorReason(errorReason);
+                    Fido2MetricsData metricsData = createRegistrationMetricsData(username, status, request, startTime, authenticatorType);
                     
-                    if (appConfiguration.isFido2ErrorCategorization()) {
-                        metricsData.setErrorCategory(categorizeError(errorReason));
+                    if (!"ATTEMPT".equals(status)) {
+                        long duration = System.currentTimeMillis() - startTime;
+                        metricsData.setDurationMs(duration);
+                    }
+                    
+                    if (errorReason != null) {
+                        metricsData.setErrorReason(errorReason);
+                        if (appConfiguration.isFido2ErrorCategorization()) {
+                            metricsData.setErrorCategory(categorizeError(errorReason));
+                        }
                     }
                     
                     storeFido2MetricsData(metricsData);
                 }
             } catch (Exception e) {
-                log.warn("Failed to record passkey registration failure metrics: {}", e.getMessage());
+                log.warn("Failed to record passkey registration {} metrics: {}", status.toLowerCase(), e.getMessage());
             }
         }, metricsExecutor);
     }
@@ -215,22 +195,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param startTime Start time of the operation
      */
     public void recordPasskeyAuthenticationAttempt(String username, HttpServletRequest request, long startTime) {
-        if (!isFido2MetricsEnabled()) {
-            return;
-        }
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                incCounter(MetricType.FIDO2_AUTHENTICATION_ATTEMPT);
-                
-                if (appConfiguration.isFido2DeviceInfoCollection()) {
-                    Fido2MetricsData metricsData = createAuthenticationMetricsData(username, "ATTEMPT", request, startTime, null);
-                    storeFido2MetricsData(metricsData);
-                }
-            } catch (Exception e) {
-                log.warn("Failed to record passkey authentication attempt metrics: {}", e.getMessage());
-            }
-        }, metricsExecutor);
+        recordAuthenticationMetrics(username, request, startTime, null, "ATTEMPT", null, MetricType.FIDO2_AUTHENTICATION_ATTEMPT);
     }
 
     /**
@@ -242,29 +207,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param authenticatorType Type of authenticator used
      */
     public void recordPasskeyAuthenticationSuccess(String username, HttpServletRequest request, long startTime, String authenticatorType) {
-        if (!isFido2MetricsEnabled()) {
-            return;
-        }
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                long duration = System.currentTimeMillis() - startTime;
-                incCounter(MetricType.FIDO2_AUTHENTICATION_SUCCESS);
-                
-                if (appConfiguration.isFido2PerformanceMetrics()) {
-                    Timer timer = getTimer(MetricType.FIDO2_AUTHENTICATION_DURATION);
-                    timer.update(duration, java.util.concurrent.TimeUnit.MILLISECONDS);
-                }
-                
-                if (appConfiguration.isFido2DeviceInfoCollection()) {
-                    Fido2MetricsData metricsData = createAuthenticationMetricsData(username, "SUCCESS", request, startTime, authenticatorType);
-                    metricsData.setDurationMs(duration);
-                    storeFido2MetricsData(metricsData);
-                }
-            } catch (Exception e) {
-                log.warn("Failed to record passkey authentication success metrics: {}", e.getMessage());
-            }
-        }, metricsExecutor);
+        recordAuthenticationMetrics(username, request, startTime, authenticatorType, "SUCCESS", null, MetricType.FIDO2_AUTHENTICATION_SUCCESS);
     }
 
     /**
@@ -277,33 +220,47 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param authenticatorType Type of authenticator used (if known)
      */
     public void recordPasskeyAuthenticationFailure(String username, HttpServletRequest request, long startTime, String errorReason, String authenticatorType) {
+        recordAuthenticationMetrics(username, request, startTime, authenticatorType, "FAILURE", errorReason, MetricType.FIDO2_AUTHENTICATION_FAILURE);
+    }
+
+    /**
+     * Common method to record authentication metrics
+     */
+    private void recordAuthenticationMetrics(String username, HttpServletRequest request, long startTime, 
+                                          String authenticatorType, String status, String errorReason, MetricType metricType) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
 
         CompletableFuture.runAsync(() -> {
             try {
-                long duration = System.currentTimeMillis() - startTime;
-                incCounter(MetricType.FIDO2_AUTHENTICATION_FAILURE);
+                incCounter(metricType);
                 
-                if (appConfiguration.isFido2PerformanceMetrics()) {
+                if (appConfiguration.isFido2PerformanceMetrics() && !"ATTEMPT".equals(status)) {
+                    long duration = System.currentTimeMillis() - startTime;
                     Timer timer = getTimer(MetricType.FIDO2_AUTHENTICATION_DURATION);
                     timer.update(duration, java.util.concurrent.TimeUnit.MILLISECONDS);
                 }
                 
                 if (appConfiguration.isFido2DeviceInfoCollection()) {
-                    Fido2MetricsData metricsData = createAuthenticationMetricsData(username, "FAILURE", request, startTime, authenticatorType);
-                    metricsData.setDurationMs(duration);
-                    metricsData.setErrorReason(errorReason);
+                    Fido2MetricsData metricsData = createAuthenticationMetricsData(username, status, request, startTime, authenticatorType);
                     
-                    if (appConfiguration.isFido2ErrorCategorization()) {
-                        metricsData.setErrorCategory(categorizeError(errorReason));
+                    if (!"ATTEMPT".equals(status)) {
+                        long duration = System.currentTimeMillis() - startTime;
+                        metricsData.setDurationMs(duration);
+                    }
+                    
+                    if (errorReason != null) {
+                        metricsData.setErrorReason(errorReason);
+                        if (appConfiguration.isFido2ErrorCategorization()) {
+                            metricsData.setErrorCategory(categorizeError(errorReason));
+                        }
                     }
                     
                     storeFido2MetricsData(metricsData);
                 }
             } catch (Exception e) {
-                log.warn("Failed to record passkey authentication failure metrics: {}", e.getMessage());
+                log.warn("Failed to record passkey authentication {} metrics: {}", status.toLowerCase(), e.getMessage());
             }
         }, metricsExecutor);
     }
@@ -414,7 +371,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      */
     private String categorizeError(String errorReason) {
         if (errorReason == null) {
-            return "UNKNOWN";
+            return UNKNOWN_ERROR;
         }
         
         String lowerError = errorReason.toLowerCase();
@@ -440,7 +397,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * Store FIDO2 metrics data (placeholder for future persistence implementation)
      */
     private void storeFido2MetricsData(Fido2MetricsData metricsData) {
-        // TODO: Implement persistence to database or external metrics system
+        // Placeholder for future persistence implementation
         // For now, just log the metrics data for debugging
         if (log.isDebugEnabled()) {
             log.debug("FIDO2 Metrics Data: {}", metricsData);

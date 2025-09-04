@@ -24,6 +24,8 @@ import java.util.regex.Pattern;
  */
 @Singleton
 public class DeviceInfoExtractor {
+    
+    private static final String UNKNOWN_VALUE = "Unknown";
 
     @Inject
     private Logger log;
@@ -111,8 +113,8 @@ public class DeviceInfoExtractor {
         }
 
         // Default fallback
-        deviceInfo.setBrowser("Unknown");
-        deviceInfo.setBrowserVersion("Unknown");
+        deviceInfo.setBrowser(UNKNOWN_VALUE);
+        deviceInfo.setBrowserVersion(UNKNOWN_VALUE);
     }
 
     /**
@@ -138,7 +140,7 @@ public class DeviceInfoExtractor {
         // Linux
         if (LINUX_PATTERN.matcher(userAgent).find()) {
             deviceInfo.setOperatingSystem("Linux");
-            deviceInfo.setOsVersion("Unknown");
+            deviceInfo.setOsVersion(UNKNOWN_VALUE);
             return;
         }
 
@@ -159,8 +161,8 @@ public class DeviceInfoExtractor {
         }
 
         // Default fallback
-        deviceInfo.setOperatingSystem("Unknown");
-        deviceInfo.setOsVersion("Unknown");
+        deviceInfo.setOperatingSystem(UNKNOWN_VALUE);
+        deviceInfo.setOsVersion(UNKNOWN_VALUE);
     }
 
     /**
@@ -183,10 +185,10 @@ public class DeviceInfoExtractor {
      */
     public DeviceInfo createMinimalDeviceInfo() {
         DeviceInfo deviceInfo = new DeviceInfo();
-        deviceInfo.setBrowser("Unknown");
-        deviceInfo.setBrowserVersion("Unknown");
-        deviceInfo.setOperatingSystem("Unknown");
-        deviceInfo.setOsVersion("Unknown");
+        deviceInfo.setBrowser(UNKNOWN_VALUE);
+        deviceInfo.setBrowserVersion(UNKNOWN_VALUE);
+        deviceInfo.setOperatingSystem(UNKNOWN_VALUE);
+        deviceInfo.setOsVersion(UNKNOWN_VALUE);
         deviceInfo.setDeviceType("UNKNOWN");
         return deviceInfo;
     }

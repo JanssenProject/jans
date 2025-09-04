@@ -59,14 +59,10 @@ class MetricServiceTest {
         String username = "testuser";
         long startTime = System.currentTimeMillis();
 
-        // When
-        metricService.recordPasskeyRegistrationAttempt(username, httpRequest, startTime);
-
-        // Then - should not throw exception and complete successfully
-        assertDoesNotThrow(() -> {
-            // Wait a bit for async processing
-            Thread.sleep(100);
-        });
+        // When & Then - should not throw exception and complete successfully
+        assertDoesNotThrow(() -> 
+            metricService.recordPasskeyRegistrationAttempt(username, httpRequest, startTime)
+        );
     }
 
     @Test
@@ -76,14 +72,10 @@ class MetricServiceTest {
         String authenticatorType = "platform";
         long startTime = System.currentTimeMillis();
 
-        // When
-        metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType);
-
-        // Then - should not throw exception and complete successfully
-        assertDoesNotThrow(() -> {
-            // Wait a bit for async processing
-            Thread.sleep(100);
-        });
+        // When & Then - should not throw exception and complete successfully
+        assertDoesNotThrow(() -> 
+            metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType)
+        );
     }
 
     @Test
@@ -94,14 +86,10 @@ class MetricServiceTest {
         String authenticatorType = "cross-platform";
         long startTime = System.currentTimeMillis();
 
-        // When
-        metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
-
-        // Then - should not throw exception and complete successfully
-        assertDoesNotThrow(() -> {
-            // Wait a bit for async processing
-            Thread.sleep(100);
-        });
+        // When & Then - should not throw exception and complete successfully
+        assertDoesNotThrow(() -> 
+            metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason, authenticatorType)
+        );
     }
 
     @Test
@@ -110,14 +98,10 @@ class MetricServiceTest {
         String username = "testuser";
         long startTime = System.currentTimeMillis();
 
-        // When
-        metricService.recordPasskeyAuthenticationAttempt(username, httpRequest, startTime);
-
-        // Then - should not throw exception and complete successfully
-        assertDoesNotThrow(() -> {
-            // Wait a bit for async processing
-            Thread.sleep(100);
-        });
+        // When & Then - should not throw exception and complete successfully
+        assertDoesNotThrow(() -> 
+            metricService.recordPasskeyAuthenticationAttempt(username, httpRequest, startTime)
+        );
     }
 
     @Test
@@ -127,14 +111,10 @@ class MetricServiceTest {
         String authenticatorType = "security-key";
         long startTime = System.currentTimeMillis();
 
-        // When
-        metricService.recordPasskeyAuthenticationSuccess(username, httpRequest, startTime, authenticatorType);
-
-        // Then - should not throw exception and complete successfully
-        assertDoesNotThrow(() -> {
-            // Wait a bit for async processing
-            Thread.sleep(100);
-        });
+        // When & Then - should not throw exception and complete successfully
+        assertDoesNotThrow(() -> 
+            metricService.recordPasskeyAuthenticationSuccess(username, httpRequest, startTime, authenticatorType)
+        );
     }
 
     @Test
@@ -145,14 +125,10 @@ class MetricServiceTest {
         String authenticatorType = "platform";
         long startTime = System.currentTimeMillis();
 
-        // When
-        metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
-
-        // Then - should not throw exception and complete successfully
-        assertDoesNotThrow(() -> {
-            // Wait a bit for async processing
-            Thread.sleep(100);
-        });
+        // When & Then - should not throw exception and complete successfully
+        assertDoesNotThrow(() -> 
+            metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, errorReason, authenticatorType)
+        );
     }
 
     @Test
@@ -162,14 +138,10 @@ class MetricServiceTest {
         String fallbackMethod = "PASSWORD";
         String reason = "User chose password";
 
-        // When
-        metricService.recordPasskeyFallback(username, fallbackMethod, reason);
-
-        // Then - should not throw exception and complete successfully
-        assertDoesNotThrow(() -> {
-            // Wait a bit for async processing
-            Thread.sleep(100);
-        });
+        // When & Then - should not throw exception and complete successfully
+        assertDoesNotThrow(() -> 
+            metricService.recordPasskeyFallback(username, fallbackMethod, reason)
+        );
     }
 
     @Test
