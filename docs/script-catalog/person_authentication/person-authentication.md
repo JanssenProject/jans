@@ -57,7 +57,7 @@ flow can be built using a custom script.
 ### A. Custom script
 The **PersonAuthenticationType** script is described by a java interface 
 whose methods should be overridden to implement an authentication workflow.
-The [article](../scripts/person-authentication-interface) talks about these
+The [article](person-authentication-interface.md) talks about these
 methods in detail and the psuedo code 
 for each method.
 
@@ -105,12 +105,13 @@ This [article](#c-page-customizations) covers all the details you need to write 
 ### C. Business logic in Custom script:  
 Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. 
 The most important aspects of business logic are implemented through a set of 
-beans. Details and examples of this can be found in this [article](../managed-beans.md)
+beans. Details and examples of this can be found in this [article](../../janssen-server/developer/managed-beans.md)
 
 ### D. Third party libraries for use in the custom script
 Java or Python libraries to be imported and used very easily. Remember, you 
 can import a python library only if it has been written in "pure python".
-More details of this mentioned [here](../interception-scripts.md#using-python-libraries-in-a-script)
+More details of this mentioned [here](../../janssen-server/developer/interception-scripts.md#using-python-libraries-in-a-script)
+
 
 ### E. Configuring the `acr` parameter in the Jans-auth server:
 
@@ -299,7 +300,8 @@ the form of authentication specified in this field.
 ## Usage scenarios
 
 ### A. Implementing 2FA authentication mechanisms
-1. [FIDO2](../../../script-catalog/person_authentication/fido2-external-authenticator/README) : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer
+1. [FIDO2](../../script-catalog/person_authentication/fido2-external-authenticator/README.md) : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer
+
 
 2. [OTP authentication](../../../script-catalog/person_authentication/otp-external-authenticator) : Authentication mechanism using an app like [Google authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en), [FreeOTP](https://freeotp.github.io/) or [Authy](https://authy.com/) that implements the open standards [HOTP](https://tools.ietf.org/html/rfc4226) and [TOTP](https://tools.ietf.org/html/rfc6238)
 
@@ -317,7 +319,8 @@ You can use a `PersonAuthenticationType` script to allow users to sign using
 credentials from popular **Social Identity providers** or 
 **Inbound Identity Providers** like Facebook, Google and Apple. After users 
 authenticate, thier Social Identity Provider credentials are provisioned into 
-the Jans-auth server. More on this topic in this [article](../../recipes/social-login.md)
+the Jans-auth server. More on this topic in this [article](../../janssen-server/recipes/social-login.md)
+
 
 ### D. Proactively perform fraud detection
 1. Impossible travel
