@@ -46,33 +46,7 @@ public enum MetricType implements AttributeEnum {
 	TOKEN_LONG_LIVED_ACCESS_TOKEN_COUNT("tkn_long_lived_access_token_count",
             "Count successfull issued long lived access tokens", CounterMetricData.class, CounterMetricEntry.class),
 
-    // FIDO2/Passkey Registration Metrics
-    FIDO2_REGISTRATION_ATTEMPT("fido2_registration_attempt",
-            "Count passkey registration attempts", CounterMetricData.class, CounterMetricEntry.class),
-    FIDO2_REGISTRATION_SUCCESS("fido2_registration_success",
-            "Count successful passkey registrations", CounterMetricData.class, CounterMetricEntry.class),
-    FIDO2_REGISTRATION_FAILURE("fido2_registration_failure",
-            "Count failed passkey registrations", CounterMetricData.class, CounterMetricEntry.class),
-    FIDO2_REGISTRATION_DURATION("fido2_registration_duration",
-            "Passkey registration completion time", TimerMetricData.class, TimerMetricEntry.class),
-
-    // FIDO2/Passkey Authentication Metrics
-    FIDO2_AUTHENTICATION_ATTEMPT("fido2_authentication_attempt",
-            "Count passkey authentication attempts", CounterMetricData.class, CounterMetricEntry.class),
-    FIDO2_AUTHENTICATION_SUCCESS("fido2_authentication_success",
-            "Count successful passkey authentications", CounterMetricData.class, CounterMetricEntry.class),
-    FIDO2_AUTHENTICATION_FAILURE("fido2_authentication_failure",
-            "Count failed passkey authentications", CounterMetricData.class, CounterMetricEntry.class),
-    FIDO2_AUTHENTICATION_DURATION("fido2_authentication_duration",
-            "Passkey authentication completion time", TimerMetricData.class, TimerMetricEntry.class),
-
-    // FIDO2/Passkey Fallback Metrics
-    FIDO2_FALLBACK_EVENT("fido2_fallback_event",
-            "Count passkey fallback events to other methods", CounterMetricData.class, CounterMetricEntry.class),
-
-    // FIDO2/Passkey Device Analytics
-    FIDO2_DEVICE_TYPE_USAGE("fido2_device_type_usage",
-            "Count usage by device/authenticator type", CounterMetricData.class, CounterMetricEntry.class);
+    ;
 
     private String value;
     private String displayName;

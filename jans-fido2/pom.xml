@@ -116,14 +116,7 @@
 				<version>${project.version}</version>
 			</dependency>
 
-			<!-- Ensure fido2 modules compile against the same jans-core-model as this build -->
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-core-model</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			
-			<!-- Also ensure jans-core-service is available for MetricService base class -->
+			<!-- Ensure jans-core-service is available for MetricService base class -->
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-core-service</artifactId>

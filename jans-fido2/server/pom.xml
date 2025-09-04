@@ -244,14 +244,6 @@
             <artifactId>commons-beanutils</artifactId>
         </dependency>
 
-		<!-- Critical: Explicit dependency on jans-core-model to ensure MetricType enum with FIDO2 constants is available -->
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-core-model</artifactId>
-			<version>${project.version}</version>
-			<!-- Force this exact version to ensure FIDO2 MetricType constants are available -->
-		</dependency>
-		
 		<!-- Base MetricService class dependency -->
 		<dependency>
 			<groupId>io.jans</groupId>
