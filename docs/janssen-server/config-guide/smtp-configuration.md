@@ -210,18 +210,27 @@ jans tui
 
 ### SMPT Screen
 
-Navigate to `Auth Server` -> `SMPT` to open the SMPT screen as shown
-in the image below.
+Navigate to `Auth Server` -> `SMPT` to open the SMPT screen.
 
-![image](../../assets/tui-smtp.png)
+The SMTP screen displays the input fields. Please enter the following data in these fields.
 
-* This screen shows the current SMTP server configuration.
-* After changing the SMPT data, update the SMPT server using the `Save` button.
-* Test the SMPTS server using the `Test` button, and the result will be displayed.
+  * **SMTP Host:** `smtp.gmail.com`
+  * **SMTP Port:** `587`
+  * **StartTls:** `true`
+  * **From Name:** Enter the sender’s name
+  * **From Email Address:** Enter the sender’s email address
+  * **SMTP User name:** Your full Gmail address
+  * **Requires Authentication:** `true`
+  * **SMTP password:** Add `App Password` form gmail account 
+     * Since you are using Gmail, an `App Password` is required for authentication. To create an App Password, follow the instructions in the Gmail Support [documentation](https://support.google.com/mail/answer/185833?hl=en).
+  * **Trust Server:** `true`
+  * After changing the SMPT data, update the SMPT server using the `Save` button.
 
-The test result image is shown below.
+     ![image](../../assets/jans-smtp-config-screen.png)
 
-![image](../../assets/tui-smtp-result.png)
+  * Test the SMTP server using the `Test` button, and the result will be displayed as shown below.
+
+     ![image](../../assets/jans-smtp-test-success.png)
 
 
 ## Using Configuration REST API
@@ -229,4 +238,7 @@ The test result image is shown below.
 Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring the SMTP. Endpoint details are published in the [Swagger
 document](./../reference/openapi.md).
+
+
+
 
