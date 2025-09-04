@@ -3,7 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedar_policy::Decision;
 use cedarling::*;
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
@@ -11,8 +10,16 @@ use std::time::Instant;
 
 static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.yaml");
 
+use stats_alloc::{INSTRUMENTED_SYSTEM, Region, StatsAlloc};
+use std::alloc::System;
+
+#[global_allocator]
+static GLOBAL: &StatsAlloc<System> = &INSTRUMENTED_SYSTEM;
+
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let reg = Region::new(&GLOBAL);
+
     println!("=== Cedarling Bulk Authorization Benchmark ===\n");
     println!("Simulating OpenSearch integration with 2000 documents per query\n");
 
@@ -144,7 +151,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Test 4: Memory usage simulation
     println!("\n4. Memory Usage Analysis:");
-    let mem_before = get_memory_usage();
+    let mem_before = get_memory_usage(&reg);
 
     // Process a large batch to see memory impact
     let large_batch: Vec<_> = documents.iter().take(1000).collect();
@@ -157,7 +164,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .into_iter()
     .collect::<Result<Vec<_>, _>>()?;
 
-    let mem_after = get_memory_usage();
+    let mem_after = get_memory_usage(&reg);
     println!("  Memory before: {} MB", mem_before);
     println!("  Memory after: {} MB", mem_after);
     println!("  Memory increase: {} MB", mem_after - mem_before);
@@ -252,8 +259,6 @@ fn generate_test_documents(count: usize) -> Vec<RequestUnsigned> {
     documents
 }
 
-fn get_memory_usage() -> u64 {
-    // Simple memory usage estimation
-    // In a real implementation, you'd use system-specific APIs
-    std::process::id() as u64 / 1000 // Rough approximation
+fn get_memory_usage<T: std::alloc::GlobalAlloc>(region: &Region<T>) -> u64 {
+    (region.change().allocations - region.change().deallocations) as u64
 }
