@@ -110,6 +110,20 @@
 				<artifactId>jans-fido2-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<!-- Ensure jans-core-service is available for MetricService base class -->
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-core-service</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+
 		</dependencies>
 	</dependencyManagement>
 
