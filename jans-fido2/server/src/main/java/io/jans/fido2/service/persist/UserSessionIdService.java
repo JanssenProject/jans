@@ -118,19 +118,8 @@ public class UserSessionIdService {
     }
 
     public void updateSessionId(SessionId entity) {
-        if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
-        	// Reuse existing expiration
-        	int expirationInSeconds = (int) ((entity.getExpirationDate().getTime() - new Date().getTime()) / 1000);
-        	
-        	// Make sure that expiration is bigger than zero
-        	if (expirationInSeconds <= 0) {
-        		expirationInSeconds = CacheService.DEFAULT_EXPIRATION;
-        	}
-            cacheService.put(expirationInSeconds, entity.getDn(), entity);
-        } else {
-        	entity.setLastUsedAt(new Date());
-	        persistenceEntryManager.merge(entity);
-        }
+    	entity.setLastUsedAt(new Date());
+        persistenceEntryManager.merge(entity);
 	}
 
     private SessionId getSessionId(String sessionId) {
@@ -141,13 +130,9 @@ public class UserSessionIdService {
         final SessionId entity;
         try {
         	String sessionDn = buildDn(sessionId);
-            if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
-            	entity = (SessionId) cacheService.get(sessionDn);
-            } else {
-	            entity = persistenceEntryManager.find(SessionId.class, sessionDn);
-	            if (entity == null) {
-	                log.warn("Failed to load session id '{}'", sessionId);
-	            }
+            entity = persistenceEntryManager.find(SessionId.class, sessionDn);
+            if (entity == null) {
+                log.warn("Failed to load session id '{}'", sessionId);
             }
         } catch (Exception ex) {
             log.trace(ex.getMessage(), ex);

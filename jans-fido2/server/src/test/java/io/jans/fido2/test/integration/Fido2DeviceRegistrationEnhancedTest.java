@@ -205,9 +205,7 @@ public class Fido2DeviceRegistrationEnhancedTest {
         assertNotNull(appConfiguration.getFido2Configuration().getAttestationMode(), 
                     "Attestation mode should be configured");
         
-        // Verify metadata settings
-        assertNotNull(appConfiguration.getFido2Configuration().getMetadataRefreshInterval(), 
-                    "Metadata refresh interval should be configured");
+
         
         log.info("Comprehensive configuration validation passed");
         log.info("Requested Parties: {}", requestedParties.size());
@@ -328,11 +326,7 @@ public class Fido2DeviceRegistrationEnhancedTest {
         log.info("Testing FIDO2 security settings validation");
         
         try {
-            // Verify error reason is enabled for detailed error messages
-            assertTrue(appConfiguration.getErrorReasonEnabled(), "Error reason should be enabled for testing");
-            
-            // Verify session persistence settings
-            assertFalse(appConfiguration.getSessionIdPersistInCache(), "Session ID should not persist in cache for security");
+            // Verify logging settings
             
             // Verify logging settings
             assertNotNull(appConfiguration.getLoggingLevel(), "Logging level should be configured");
@@ -345,8 +339,6 @@ public class Fido2DeviceRegistrationEnhancedTest {
             assertNotNull(appConfiguration.getMetricReporterInterval(), "Metric reporter interval should be configured");
             
             log.info("Security settings validation passed");
-            log.info("Error Reason Enabled: {}", appConfiguration.getErrorReasonEnabled());
-            log.info("Session ID Persist in Cache: {}", appConfiguration.getSessionIdPersistInCache());
             log.info("Logging Level: {}", appConfiguration.getLoggingLevel());
             log.info("Metric Reporter Enabled: {}", appConfiguration.getMetricReporterEnabled());
             

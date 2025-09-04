@@ -72,11 +72,9 @@ public class AppConfiguration implements Configuration, Serializable {
     private List<String> personCustomObjectClassList;
 	
 	
-    @DocProperty(description = "Boolean value specifying whether to persist session_id in cache", defaultValue = "false")
-    private Boolean sessionIdPersistInCache = false;
+
 	
-	@DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from Fido2. Default value is false", defaultValue = "false")
-	private Boolean errorReasonEnabled = false;
+
 
     private Fido2Configuration fido2Configuration;
 
@@ -193,20 +191,7 @@ public class AppConfiguration implements Configuration, Serializable {
 	}
 
 	
-    public Boolean getSessionIdPersistInCache() {
-        if (sessionIdPersistInCache == null) sessionIdPersistInCache = false;
-        return sessionIdPersistInCache;
-    }
 
-    public void setSessionIdPersistInCache(Boolean sessionIdPersistInCache) {
-        this.sessionIdPersistInCache = sessionIdPersistInCache;
-    }
 
-	public Boolean getErrorReasonEnabled() {
-		return errorReasonEnabled;
-	}
 
-	public void setErrorReasonEnabled(Boolean errorReasonEnabled) {
-		this.errorReasonEnabled = errorReasonEnabled;
-	}
 }
