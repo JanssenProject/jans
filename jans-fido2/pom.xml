@@ -115,6 +115,15 @@
 				<artifactId>jans-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
+			<!-- Ensure fido2 modules compile against the same jans-core-model as this build -->
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-core-model</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+
 		</dependencies>
 	</dependencyManagement>
 
