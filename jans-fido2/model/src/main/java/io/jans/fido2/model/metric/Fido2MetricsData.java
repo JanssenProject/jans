@@ -218,7 +218,9 @@ public class Fido2MetricsData implements Serializable {
         @JsonProperty("user_agent")
         private String userAgent;
 
-        public DeviceInfo() {}
+        public DeviceInfo() {
+            // Default constructor required for JSON serialization/deserialization
+        }
 
         // Getters and Setters
         public String getBrowser() {

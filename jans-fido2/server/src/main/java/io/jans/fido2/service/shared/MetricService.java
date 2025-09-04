@@ -23,7 +23,6 @@ import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.net.NetworkService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
-import com.codahale.metrics.Timer;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
@@ -154,30 +153,9 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
         CompletableFuture.runAsync(() -> {
             try {
-                incrementFido2Counter(metricType);
-                
-                if (appConfiguration.isFido2PerformanceMetrics() && !ATTEMPT_STATUS.equals(status)) {
-                    long duration = System.currentTimeMillis() - startTime;
-                    updateFido2Timer(Fido2MetricType.FIDO2_REGISTRATION_DURATION, duration);
-                }
-                
-                if (appConfiguration.isFido2DeviceInfoCollection()) {
-                    Fido2MetricsData metricsData = createRegistrationMetricsData(username, status, request, startTime, authenticatorType);
-                    
-                    if (!ATTEMPT_STATUS.equals(status)) {
-                        long duration = System.currentTimeMillis() - startTime;
-                        metricsData.setDurationMs(duration);
-                    }
-                    
-                    if (errorReason != null) {
-                        metricsData.setErrorReason(errorReason);
-                        if (appConfiguration.isFido2ErrorCategorization()) {
-                            metricsData.setErrorCategory(categorizeError(errorReason));
-                        }
-                    }
-                    
-                    storeFido2MetricsData(metricsData);
-                }
+                recordBasicMetrics(metricType, startTime, status, Fido2MetricType.FIDO2_REGISTRATION_DURATION);
+                recordDetailedMetrics(username, status, request, startTime, authenticatorType, errorReason, 
+                                    this::createRegistrationMetricsData);
             } catch (Exception e) {
                 log.warn("Failed to record passkey registration {} metrics: {}", status.toLowerCase(), e.getMessage());
             }
@@ -233,34 +211,58 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
         CompletableFuture.runAsync(() -> {
             try {
-                incrementFido2Counter(metricType);
-                
-                if (appConfiguration.isFido2PerformanceMetrics() && !ATTEMPT_STATUS.equals(status)) {
-                    long duration = System.currentTimeMillis() - startTime;
-                    updateFido2Timer(Fido2MetricType.FIDO2_AUTHENTICATION_DURATION, duration);
-                }
-                
-                if (appConfiguration.isFido2DeviceInfoCollection()) {
-                    Fido2MetricsData metricsData = createAuthenticationMetricsData(username, status, request, startTime, authenticatorType);
-                    
-                    if (!ATTEMPT_STATUS.equals(status)) {
-                        long duration = System.currentTimeMillis() - startTime;
-                        metricsData.setDurationMs(duration);
-                    }
-                    
-                    if (errorReason != null) {
-                        metricsData.setErrorReason(errorReason);
-                        if (appConfiguration.isFido2ErrorCategorization()) {
-                            metricsData.setErrorCategory(categorizeError(errorReason));
-                        }
-                    }
-                    
-                    storeFido2MetricsData(metricsData);
-                }
+                recordBasicMetrics(metricType, startTime, status, Fido2MetricType.FIDO2_AUTHENTICATION_DURATION);
+                recordDetailedMetrics(username, status, request, startTime, authenticatorType, errorReason, 
+                                    this::createAuthenticationMetricsData);
             } catch (Exception e) {
                 log.warn("Failed to record passkey authentication {} metrics: {}", status.toLowerCase(), e.getMessage());
             }
         }, metricsExecutor);
+    }
+
+    /**
+     * Record basic metrics (counter and timer)
+     */
+    private void recordBasicMetrics(Fido2MetricType metricType, long startTime, String status, Fido2MetricType durationMetricType) {
+        incrementFido2Counter(metricType);
+        
+        if (appConfiguration.isFido2PerformanceMetrics() && !ATTEMPT_STATUS.equals(status)) {
+            long duration = System.currentTimeMillis() - startTime;
+            updateFido2Timer(durationMetricType, duration);
+        }
+    }
+    
+    /**
+     * Record detailed metrics with device info collection
+     */
+    private void recordDetailedMetrics(String username, String status, HttpServletRequest request, long startTime, 
+                                     String authenticatorType, String errorReason, 
+                                     MetricsDataCreator dataCreator) {
+        if (appConfiguration.isFido2DeviceInfoCollection()) {
+            Fido2MetricsData metricsData = dataCreator.create(username, status, request, startTime, authenticatorType);
+            
+            if (!ATTEMPT_STATUS.equals(status)) {
+                long duration = System.currentTimeMillis() - startTime;
+                metricsData.setDurationMs(duration);
+            }
+            
+            if (errorReason != null) {
+                metricsData.setErrorReason(errorReason);
+                if (appConfiguration.isFido2ErrorCategorization()) {
+                    metricsData.setErrorCategory(categorizeError(errorReason));
+                }
+            }
+            
+            storeFido2MetricsData(metricsData);
+        }
+    }
+    
+    /**
+     * Functional interface for creating metrics data
+     */
+    @FunctionalInterface
+    private interface MetricsDataCreator {
+        Fido2MetricsData create(String username, String status, HttpServletRequest request, long startTime, String authenticatorType);
     }
 
     // ========== FIDO2 PASSKEY FALLBACK METRICS ==========
