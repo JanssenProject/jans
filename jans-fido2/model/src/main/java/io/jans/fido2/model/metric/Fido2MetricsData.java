@@ -64,7 +64,7 @@ public class Fido2MetricsData implements Serializable {
     private String fallbackReason;
 
     @JsonProperty("additional_data")
-    private Map<String, Object> additionalData;
+    private transient Map<String, Object> additionalData;
 
     @JsonProperty("timestamp")
     private LocalDateTime timestamp;

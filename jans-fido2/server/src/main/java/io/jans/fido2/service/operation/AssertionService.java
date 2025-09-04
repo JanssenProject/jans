@@ -394,22 +394,13 @@ public class AssertionService {
 				externalFido2InterceptionContext);
 
 		// Record metrics for successful authentication
-		try {
-			metricService.recordPasskeyAuthenticationSuccess(registrationData.getUsername(), httpRequest, startTime, authenticatorType);
-		} catch (Exception e) {
-			log.debug("Failed to record authentication success metrics: {}", e.getMessage());
-		}
+		recordAuthenticationSuccessMetrics(registrationData.getUsername(), httpRequest, startTime, authenticatorType);
 
 		return assertionResultResponse;
 		
 		} catch (Exception e) {
 			// Record metrics for failed authentication
-			try {
-				String errorReason = e.getMessage() != null ? e.getMessage() : "Unknown error";
-				metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
-			} catch (Exception metricsException) {
-				log.debug("Failed to record authentication failure metrics: {}", metricsException.getMessage());
-			}
+			recordAuthenticationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
 			
 			// Re-throw the original exception
 			throw e;
@@ -452,6 +443,31 @@ public class AssertionService {
 		applicationId = fidoRegistration.get().getRegistrationData().getRpId();
 
 		return Pair.of(allowedFido2Keys, applicationId);
+	}
+	
+	/**
+	 * Record authentication success metrics
+	 */
+	private void recordAuthenticationSuccessMetrics(String username, HttpServletRequest httpRequest, 
+													long startTime, String authenticatorType) {
+		try {
+			metricService.recordPasskeyAuthenticationSuccess(username, httpRequest, startTime, authenticatorType);
+		} catch (Exception e) {
+			log.debug("Failed to record authentication success metrics: {}", e.getMessage());
+		}
+	}
+	
+	/**
+	 * Record authentication failure metrics
+	 */
+	private void recordAuthenticationFailureMetrics(String username, HttpServletRequest httpRequest, 
+													long startTime, Exception error, String authenticatorType) {
+		try {
+			String errorReason = error.getMessage() != null ? error.getMessage() : "Unknown error";
+			metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
+		} catch (Exception metricsException) {
+			log.debug("Failed to record authentication failure metrics: {}", metricsException.getMessage());
+		}
 	}
 
 }

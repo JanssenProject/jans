@@ -29,7 +29,6 @@ import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import com.codahale.metrics.Timer;
 
 /**
  * Store and retrieve metric
@@ -71,6 +70,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
     private transient final ExecutorService metricsExecutor = Executors.newFixedThreadPool(2);
     
     private static final String UNKNOWN_ERROR = "UNKNOWN";
+    private static final String ATTEMPT_STATUS = "ATTEMPT";
 
     public void initTimer() {
     	initTimer(this.appConfiguration.getMetricReporterInterval(), this.appConfiguration.getMetricReporterKeepDataDays());
@@ -115,7 +115,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param startTime Start time of the operation
      */
     public void recordPasskeyRegistrationAttempt(String username, HttpServletRequest request, long startTime) {
-        recordRegistrationMetrics(username, request, startTime, null, "ATTEMPT", null, MetricType.FIDO2_REGISTRATION_ATTEMPT);
+        recordRegistrationMetrics(username, request, startTime, null, ATTEMPT_STATUS, null, MetricType.FIDO2_REGISTRATION_ATTEMPT);
     }
 
     /**
@@ -156,7 +156,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             try {
                 incCounter(metricType);
                 
-                if (appConfiguration.isFido2PerformanceMetrics() && !"ATTEMPT".equals(status)) {
+                if (appConfiguration.isFido2PerformanceMetrics() && !ATTEMPT_STATUS.equals(status)) {
                     long duration = System.currentTimeMillis() - startTime;
                     Timer timer = getTimer(MetricType.FIDO2_REGISTRATION_DURATION);
                     timer.update(duration, java.util.concurrent.TimeUnit.MILLISECONDS);
@@ -165,7 +165,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
                 if (appConfiguration.isFido2DeviceInfoCollection()) {
                     Fido2MetricsData metricsData = createRegistrationMetricsData(username, status, request, startTime, authenticatorType);
                     
-                    if (!"ATTEMPT".equals(status)) {
+                    if (!ATTEMPT_STATUS.equals(status)) {
                         long duration = System.currentTimeMillis() - startTime;
                         metricsData.setDurationMs(duration);
                     }
@@ -195,7 +195,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param startTime Start time of the operation
      */
     public void recordPasskeyAuthenticationAttempt(String username, HttpServletRequest request, long startTime) {
-        recordAuthenticationMetrics(username, request, startTime, null, "ATTEMPT", null, MetricType.FIDO2_AUTHENTICATION_ATTEMPT);
+        recordAuthenticationMetrics(username, request, startTime, null, ATTEMPT_STATUS, null, MetricType.FIDO2_AUTHENTICATION_ATTEMPT);
     }
 
     /**
@@ -236,7 +236,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             try {
                 incCounter(metricType);
                 
-                if (appConfiguration.isFido2PerformanceMetrics() && !"ATTEMPT".equals(status)) {
+                if (appConfiguration.isFido2PerformanceMetrics() && !ATTEMPT_STATUS.equals(status)) {
                     long duration = System.currentTimeMillis() - startTime;
                     Timer timer = getTimer(MetricType.FIDO2_AUTHENTICATION_DURATION);
                     timer.update(duration, java.util.concurrent.TimeUnit.MILLISECONDS);
@@ -245,7 +245,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
                 if (appConfiguration.isFido2DeviceInfoCollection()) {
                     Fido2MetricsData metricsData = createAuthenticationMetricsData(username, status, request, startTime, authenticatorType);
                     
-                    if (!"ATTEMPT".equals(status)) {
+                    if (!ATTEMPT_STATUS.equals(status)) {
                         long duration = System.currentTimeMillis() - startTime;
                         metricsData.setDurationMs(duration);
                     }

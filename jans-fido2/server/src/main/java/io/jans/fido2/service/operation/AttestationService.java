@@ -375,22 +375,13 @@ public class AttestationService {
 		authenticatorType = registrationData.getAuthentictatorAttachment();
 		
 		// Record metrics for successful registration
-		try {
-			metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType);
-		} catch (Exception e) {
-			log.debug("Failed to record registration success metrics: {}", e.getMessage());
-		}
+		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType);
 
 		return attestationResultResponse;
 		
 		} catch (Exception e) {
 			// Record metrics for failed registration
-			try {
-				String errorReason = e.getMessage() != null ? e.getMessage() : "Unknown error";
-				metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
-			} catch (Exception metricsException) {
-				log.debug("Failed to record registration failure metrics: {}", metricsException.getMessage());
-			}
+			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
 			
 			// Re-throw the original exception
 			throw e;
@@ -583,6 +574,31 @@ public class AttestationService {
 				.collect(Collectors.toSet());
 
 		return excludedKeys;
+	}
+	
+	/**
+	 * Record registration success metrics
+	 */
+	private void recordRegistrationSuccessMetrics(String username, HttpServletRequest httpRequest, 
+												  long startTime, String authenticatorType) {
+		try {
+			metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType);
+		} catch (Exception e) {
+			log.debug("Failed to record registration success metrics: {}", e.getMessage());
+		}
+	}
+	
+	/**
+	 * Record registration failure metrics
+	 */
+	private void recordRegistrationFailureMetrics(String username, HttpServletRequest httpRequest, 
+												  long startTime, Exception error, String authenticatorType) {
+		try {
+			String errorReason = error.getMessage() != null ? error.getMessage() : "Unknown error";
+			metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
+		} catch (Exception metricsException) {
+			log.debug("Failed to record registration failure metrics: {}", metricsException.getMessage());
+		}
 	}
 	
 }
