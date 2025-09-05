@@ -69,7 +69,7 @@ pprof = { version = "0.14.0", features = ["flamegraph"] }
 
 
 [[bench]]
-name = "authz_benchmark"
+name = "authz_authorize_benchmark"
 harness = false
 
 [[bench]]

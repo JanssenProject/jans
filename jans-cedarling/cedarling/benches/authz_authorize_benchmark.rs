@@ -28,7 +28,7 @@ fn without_jwt_validation_benchmark(c: &mut Criterion) {
         prepare_cedarling_request_for_without_jwt_validation().expect("should prepare r:equest");
 
     c.bench_with_input(
-        BenchmarkId::new("authz_without_jwt_validation", "tokio runtime"),
+        BenchmarkId::new("authz_authorize_without_jwt_validation", "tokio runtime"),
         &runtime,
         |b, rt| {
             b.to_async(rt)
@@ -72,7 +72,7 @@ fn with_jwt_validation_hs256_benchmark(c: &mut Criterion) {
         prepare_cedarling_request_for_with_jwt_validation(keys).expect("should prepare request");
 
     c.bench_with_input(
-        BenchmarkId::new("authz_with_jwt_validation_hs256", "tokio runtime"),
+        BenchmarkId::new("authz_authorize_with_jwt_validation_hs256", "tokio runtime"),
         &runtime,
         |b, rt| {
             b.to_async(rt)
@@ -126,7 +126,7 @@ async fn prepare_cedarling_with_jwt_validation(
     policy_store["policy_stores"]["a1bf93115de86de760ee0bea1d529b521489e5a11747"]["trusted_issuers"]
         ["Jans123123"]["openid_configuration_endpoint"] =
         format!("{}/.well-known/openid-configuration", base_idp_url).into();
-    
+
     // Also update the AnotherIssuer to use the mock server
     policy_store["policy_stores"]["a1bf93115de86de760ee0bea1d529b521489e5a11747"]["trusted_issuers"]
         ["AnotherIssuer"]["openid_configuration_endpoint"] =
