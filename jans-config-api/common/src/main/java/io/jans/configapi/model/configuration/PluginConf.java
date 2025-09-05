@@ -1,10 +1,17 @@
 package io.jans.configapi.model.configuration;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PluginConf {
+public class PluginConf implements Serializable {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     @Schema(description = "Name of the plugin.")
     private String name;

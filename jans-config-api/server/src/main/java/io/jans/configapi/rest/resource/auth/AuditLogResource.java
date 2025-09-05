@@ -72,8 +72,8 @@ public class AuditLogResource extends ConfigBaseResource {
             @Parameter(description = "Search pattern") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(description = "Start-Date for which the log entries report is to be fetched") @QueryParam(value = "start_date") String startDate,
-            @Parameter(description = "End-Date for which the log entries is to be fetched") @QueryParam(value = "end_date") String endDate)
+            @Parameter(schema = @Schema(type = "string", format = "date", description = "Start-Date for which the log entries report is to be fetched in `dd-MM-yyyy` format")) @QueryParam(value = "start_date") String startDate,
+            @Parameter(schema = @Schema(type = "string", format = "date", description = "End-Date for which the log entries is to be fetched in `dd-MM-yyyy` format")) @QueryParam(value = "end_date") String endDate)
 
     {
         if (log.isInfoEnabled()) {

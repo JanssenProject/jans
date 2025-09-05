@@ -24,12 +24,11 @@ import io.jans.util.StringHelper;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -121,14 +120,15 @@ public class SamlService {
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 displayNameFilter);
     }
-    
+
     public List<TrustRelationship> getAllTrustRelationshipByName(String name) {
         log.info("Search TrustRelationship with name:{}", name);
         Filter nameFilter = Filter.createEqualityFilter("name", name);
         log.debug("Search TrustRelationship with nameFilter:{}", nameFilter);
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, nameFilter);
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
+                nameFilter);
     }
-    
+
     public TrustRelationship getTrustContainerFederation(TrustRelationship trustRelationship) {
         return getRelationshipByDn(trustRelationship.getDn());
     }
@@ -206,18 +206,19 @@ public class SamlService {
 
         log.info("TrustRelationship searchFilter:{}", searchFilter);
 
-        return persistenceEntryManager.findPagedEntries(getDnForTrustRelationship(null), TrustRelationship.class, searchFilter,
-                null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+        return persistenceEntryManager.findPagedEntries(getDnForTrustRelationship(null), TrustRelationship.class,
+                searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
 
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) throws IOException {
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship)
+            throws IOException, WebApplicationException {
         return addTrustRelationship(trustRelationship, null);
     }
 
     public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship, InputStream file)
-            throws IOException {
+            throws IOException, WebApplicationException {
         log.info("Add new trustRelationship:{}, file:{}", trustRelationship, file);
 
         setTrustRelationshipDefaultValue(trustRelationship, false);
@@ -225,28 +226,29 @@ public class SamlService {
 
         if (file != null && file.available() > 0) {
             saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
-        }else {
+        } else {
             trustRelationship.setSpMetaDataFN(null);
         }
-        
+
         persistenceEntryManager.merge(trustRelationship);
         log.info("After saving new trustRelationship:{}", trustRelationship);
         return getTrustRelationshipByInum(trustRelationship.getInum());
     }
 
-    public TrustRelationship updateTrustRelationship(TrustRelationship trustRelationship) throws IOException {
+    public TrustRelationship updateTrustRelationship(TrustRelationship trustRelationship)
+            throws IOException, WebApplicationException {
         return updateTrustRelationship(trustRelationship, null);
     }
 
     public TrustRelationship updateTrustRelationship(TrustRelationship trustRelationship, InputStream file)
-            throws IOException {
+            throws IOException, WebApplicationException {
         log.info("Update trustRelationship:{}, file:{}", trustRelationship, file);
         setTrustRelationshipDefaultValue(trustRelationship, true);
-        
+
         if (file != null && file.available() > 0) {
             saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
         }
-        
+
         persistenceEntryManager.merge(trustRelationship);
         log.info("After updating trustRelationship:{}", trustRelationship);
         return getTrustRelationshipByInum(trustRelationship.getInum());
@@ -259,7 +261,7 @@ public class SamlService {
     }
 
     private TrustRelationship setTrustRelationshipDefaultValue(TrustRelationship trustRelationship, boolean update) {
-        log.debug("trustRelationship:{}, update:{}",trustRelationship, update);
+        log.debug("trustRelationship:{}, update:{}", trustRelationship, update);
         return trustRelationship;
     }
 
@@ -284,50 +286,50 @@ public class SamlService {
 
     private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship, InputStream file) {
 
-        log.debug("saveSpMetadataFileSourceTypeFile(). trustRelationship: {} . file: {}",trustRelationship,file);
-    
+        log.debug("saveSpMetadataFileSourceTypeFile(). trustRelationship: {} . file: {}", trustRelationship, file);
+
         final String spMetadataFileName = getSpNewMetadataFileName(trustRelationship);
         trustRelationship.setSpMetaDataFN(spMetadataFileName);
         InputStream targetStream = file;
-        final String metadataFilePath  = samlIdpService.saveMetadataFile(
-                samlConfigService.getSpMetadataDir(),spMetadataFileName,Constants.SP_MODULE,targetStream);
-        log.debug("targetStream: {}, spMetadataDir: {}, spMetadataFileName: {}",targetStream,samlConfigService.getSpMetadataDir(),spMetadataFileName);
-        if(StringHelper.isNotEmpty(metadataFilePath)) {
+        final String metadataFilePath = samlIdpService.saveMetadataFile(samlConfigService.getSpMetadataDir(),
+                spMetadataFileName, Constants.SP_MODULE, targetStream);
+        log.debug("targetStream: {}, spMetadataDir: {}, spMetadataFileName: {}", targetStream,
+                samlConfigService.getSpMetadataDir(), spMetadataFileName);
+        if (StringHelper.isNotEmpty(metadataFilePath)) {
             trustRelationship.setSpMetaDataFN(metadataFilePath);
-            log.debug("SP Metadata file ' {} ' saved.",spMetadataFileName);
+            log.debug("SP Metadata file ' {} ' saved.", spMetadataFileName);
             return true;
-        }else {
-            log.error("Failed to save SP metadata file for TrustRelationship ' {} '",trustRelationship.getInum());
+        } else {
+            log.error("Failed to save SP metadata file for TrustRelationship ' {} '", trustRelationship.getInum());
             return false;
         }
     }
-    
+
     public String getSpMetadataFilePath(String spMetaDataFN) {
         if (StringUtils.isBlank(getSpMetadataDir())) {
             throw new InvalidConfigurationException("Failed to return SP metadata file path as undefined!");
         }
         return getSpMetadataDir() + spMetaDataFN;
     }
-    
+
     public String getSpMetadataDir() {
         if (StringUtils.isBlank(samlConfigService.getSpMetadataDir())) {
             throw new InvalidConfigurationException("Failed to return SP metadata file path as undefined!");
         }
         return samlConfigService.getSpMetadataDir() + File.separator;
     }
-    
+
     public String getSpNewMetadataFileName(TrustRelationship trustRel) {
         return getSpNewMetadataFileName(trustRel.getInum());
     }
 
     public String getSpNewMetadataFileName(String inum) {
-        log.info("Generate SP Metadata FileName with inum:{}",inum);
+        log.info("Generate SP Metadata FileName with inum:{}", inum);
         String relationshipInum = StringHelper.removePunctuation(inum);
-        log.info("inum after remove punctuation is:{}",relationshipInum);
+        log.info("inum after remove punctuation is:{}", relationshipInum);
         return String.format(samlConfigService.getSpMetadataFilePattern(), relationshipInum);
     }
 
-    
     public InputStream getTrustRelationshipMetadataFile(TrustRelationship trustrelationship) {
 
         log.debug("Get trustrelationship metadata file");

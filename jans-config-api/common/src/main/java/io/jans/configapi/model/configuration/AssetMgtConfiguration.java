@@ -1,12 +1,19 @@
 package io.jans.configapi.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.io.Serializable;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AssetMgtConfiguration {
+public class AssetMgtConfiguration implements Serializable {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     @Schema(description = "Flag indicating if asset management functionality is enabled.")
     private boolean assetMgtEnabled;

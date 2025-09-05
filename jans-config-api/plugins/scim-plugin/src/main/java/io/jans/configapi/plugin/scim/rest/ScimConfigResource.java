@@ -3,6 +3,7 @@ package io.jans.configapi.plugin.scim.rest;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
+import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.scim.service.ScimConfigService;
 import io.jans.configapi.core.util.Jackson;
@@ -32,7 +33,7 @@ import jakarta.ws.rs.core.Response;
 @Path(Constants.SCIM_CONFIG)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ScimConfigResource {
+public class ScimConfigResource extends BaseResource {
 
     @Inject
     Logger log;
@@ -69,7 +70,7 @@ public class ScimConfigResource {
     @ProtectedApi(scopes = { "https://jans.io/scim/config.write" })
     public Response patchAppConfigurationProperty(@NotNull String requestString)
             throws IOException, JsonPatchException {
-        log.debug("AUTH CONF details to patch - requestString:{}", requestString);
+        log.info("AUTH CONF details to patch - requestString:{}", requestString);
         Conf conf = scimConfigService.findConf();
         AppConfiguration appConfiguration = conf.getDynamicConf();
         log.trace("AUTH CONF details BEFORE patch - conf:{}, appConfiguration:{}", conf, appConfiguration);

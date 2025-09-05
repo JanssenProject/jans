@@ -11,8 +11,11 @@ public class ApiConstants {
     private ApiConstants() {}
 
     public static final String BASE_API_URL = "/";
+    public static final String SEPARATOR = "/";
     public static final String CONFIG_APP_NAME = "jans-config-api";
     public static final String ARTIFACT = "artifact";
+    
+    //Path
     public static final String CONFIG = "/config";
     public static final String CONFIGS = "/configs";
     public static final String API_CONFIG = "/api-config";
@@ -30,6 +33,7 @@ public class ApiConstants {
     public static final String UMA = "/uma";
     public static final String DYN_REGISTRATION = "/dyn_registration";
     public static final String SESSION = "/session";
+    public static final String SSA = "/ssa";
     public static final String CLIENT = "/client";
     public static final String CLIENTS = "/clients";
     public static final String OPENID = "/openid";
@@ -44,7 +48,6 @@ public class ApiConstants {
     public static final String SUBJECT = "/subject";
     public static final String TOKEN = "/token";
     public static final String REVOKE = "/revoke";
-    public static final String SEPARATOR = "/";
     public static final String SERVER_CONFIG = "/server-config";
     public static final String SERVER_CLEANUP = "/server-cleanup";
     public static final String KEY_REGENERATION = "/key-regen";
@@ -67,13 +70,8 @@ public class ApiConstants {
     public static final String MEMCACHED = "/memcached";
     public static final String POSTGRES = "/postgres";
     public static final String TEST = "/test";
-    public static final String INUM_PATH = "{inum}";
-    public static final String ID_PATH = "{id}";
-    public static final String SCOPE_INUM_PATH = "{scope_inum}";
-    public static final String TYPE_PATH = "/{type}";
-    public static final String NAME_PARAM_PATH = "/{name}";
+    public static final String AUDIT = "/audit";
     public static final String KEY_PATH = "/key";
-    public static final String KID_PATH = "/{kid}";
     public static final String HEALTH = "/health";
     public static final String LIVE = "/live";
     public static final String READY = "/ready";
@@ -90,34 +88,41 @@ public class ApiConstants {
     public static final String SEARCH = "/search";
     public static final String JANSID_PATH = "/id";
     public static final String SID_PATH = "/sid";
-    public static final String SERVICE_STATUS_PATH = "/service-status";
-        
+    public static final String SERVICE_STATUS_PATH = "/service-status";        
     public static final String APP_VERSION = "/app-version";
     public static final String SERVER_STAT = "/server-stat";
+    public static final String AGAMA = "/agama";
+    public static final String AGAMA_DEPLOYMENTS = "/agama-deployment";
+    public static final String AGAMA_REPO = "/agama-repo";
+    public static final String SOURCE = "/source/";
+    public static final String PLUGIN = "/plugin";
+    public static final String AUTHORIZATIONS = "/authorizations";
+    public static final String TOKEN_CODE_PATH = "/tknCde";
+    
+    //Path Param
+    public static final String INUM_PATH = "{inum}";
+    public static final String ID_PATH = "{id}";
+    public static final String SCOPE_INUM_PATH = "{scope_inum}";
+    public static final String TYPE_PATH = "/{type}";
+    public static final String NAME_PARAM_PATH = "/{name}";
+    public static final String KID_PATH = "/{kid}";
     public static final String USERNAME_PATH = "/{username}";
     public static final String CLIENTID_PATH = "/{clientId}";
     public static final String CREATORID_PATH = "/{creatorId}";
     public static final String SESSIONID_PATH = "/{sessionId}";
     public static final String USERDN_PATH = "/{userDn}";
-    public static final String AGAMA = "/agama";
-    public static final String AGAMA_DEPLOYMENTS = "/agama-deployment";
-    public static final String AGAMA_REPO = "/agama-repo";
     public static final String QNAME_PATH = "{qname}";
-    public static final String ENABLED = "enabled";
-    public static final String QNAME = "qname";
-    public static final String INCLUDE_SOURCE = "includeSource";
-    public static final String SOURCE = "/source/";
-    public static final String PLUGIN = "/plugin";
     public static final String PLUGIN_NAME_PATH = "{pluginName}";
-    public static final String AUTHORIZATIONS = "/authorizations";
     public static final String USERID_PATH = "{userId}";
     public static final String SERVICE_NAME_PARAM_PATH = "/{service-name}";
     public static final String TOKEN_PATH = "/{token}";
-    public static final String TOKEN_CODE_PATH = "/tknCde";
     public static final String JANSID_PATH_PARAM = "/{jansId}";
     public static final String TOKEN_CODE_PATH_PARAM = "/{tknCde}";
     public static final String SID_PATH_PARAM = "/{sid}";
     
+    public static final String ENABLED = "enabled";
+    public static final String QNAME = "qname";
+    public static final String INCLUDE_SOURCE = "includeSource";
     public static final String USERID = "userId";
     public static final String USERNAME = "username";
     public static final String LIMIT = "limit";
@@ -148,15 +153,14 @@ public class ApiConstants {
     public static final String OUTSIDE_SID = "outsideSid";
     public static final String JANS_SESS_ATTR = "jansSessAttr";
     public static final String JANS_SERVICE_NAME = "service";
-    public static final String AUDIT = "/audit";
-
-
     public static final String ALL = "all";
     public static final String ACTIVE = "active";
     public static final String INACTIVE = "inactive"; 
     public static final String ADD_SCRIPT_TEMPLATE = "addScriptTemplate";
     public static final String REMOVE_NON_LDAP_ATTRIBUTES = "removeNonLDAPAttributes";    
-
+    public static final String JTI = "jti";    
+    public static final String ORGID = "orgId";    
+    
     // API Protection
     public static final String PROTECTION_TYPE_OAUTH2 = "oauth2";
     public static final String PROTECTION_TYPE_UMA = "uma";
