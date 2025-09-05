@@ -724,6 +724,11 @@ components:
           description: PubSub consumer service
         errorReasonEnabled:
           type: boolean
+        cleanServiceBatchChunkSize:
+          type: integer
+          description: Each clean up iteration fetches chunk of expired data per base
+            dn and removes it from storage
+          format: int32
     JsonPatch:
       type: object
     JsonNode:

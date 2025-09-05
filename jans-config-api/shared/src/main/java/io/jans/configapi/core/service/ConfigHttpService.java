@@ -163,9 +163,8 @@ public class ConfigHttpService implements Serializable {
 
     public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authCode,
             Map<String, String> headers, String postData, ContentType contentType, String authType) {
-        log.error("POST -  uri:{}, authCode:{} ", uri, authCode);
+        
         HttpPost httpPost = new HttpPost(uri);
-
         
         if (StringHelper.isNotEmpty(authCode)) {
             httpPost.setHeader("Authorization", authType + authCode);

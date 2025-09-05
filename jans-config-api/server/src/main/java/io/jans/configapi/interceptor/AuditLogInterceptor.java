@@ -25,7 +25,6 @@ import jakarta.ws.rs.core.UriInfo;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.stream.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -62,19 +61,10 @@ public class AuditLogInterceptor {
             HttpHeaders httpHeaders = ((BaseResource) context.getTarget()).getHttpHeaders();
             UriInfo uriInfo = ((BaseResource) context.getTarget()).getUriInfo();
 
-            AUDIT_LOG.error(" ******************************************************************\n");
-            AUDIT_LOG.error(" request.getLocalName():{}, request.getPathInfo():{},request.getClass().getCanonicalName():{},request.getContextPath():{},request.getMethod():{}, request.getClass().getDeclaredMethods():{}", request.getLocalName(), request.getPathInfo(),request.getClass().getCanonicalName(),request.getContextPath(),request.getMethod(), request.getClass().getDeclaredMethods());
-            AUDIT_LOG.error(" uriInfo.getClass().getCanonicalName():{}, uriInfo.getPath():{}, uriInfo.getAbsolutePath():{},uriInfo.toString():{}", uriInfo.getClass().getCanonicalName(), uriInfo.getPath(), uriInfo.getAbsolutePath(), uriInfo.toString());
-            
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
             String method = request.getMethod();
-            AUDIT_LOG.error(" method:{}, ignoreMethod(method, auditLogConf):{}", method,
-                    ignoreHttpMethod(method, auditLogConf));
-
-            AUDIT_LOG.error(
-                    " context.getTarget():{}, context.getContextData():{}, , context.getClass().getAnnotations():{}",
-                    context.getTarget(), context.getContextData(), context.getClass().getAnnotations());
+            LOG.trace(" method:{}, ignoreMethod(method, auditLogConf):{}, ignoreAnnotation(method, auditLogConf):{}", method, ignoreHttpMethod(method, auditLogConf), ignoreAnnotation(method, auditLogConf));
 
             // Log if enabled
             if (auditLogConf.isEnabled() && !ignoreHttpMethod(method, auditLogConf)) {
@@ -118,16 +108,15 @@ public class AuditLogInterceptor {
                 Class<?> clazz = clazzArray[i];
                 String propertyName = parameters[i].getName();
                 Object propertyValue = parameters[i].toString();
-                AUDIT_LOG.error("propertyName:{}, propertyValue:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName,
+                LOG.trace("propertyName:{}, propertyValue:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName,
                         propertyValue, clazz, clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
                 if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
-                        || !obj.toString().toUpperCase().contains("SECRET"))
-                // || !ignoreObject(propertyName, obj, auditLogConf)
-                ) {
+                        || !obj.toString().toUpperCase().contains("SECRET"))) {
+               
 
-                    AUDIT_LOG.error("ignoreObject(propertyName, obj, auditLogConf):{} ",
+                    LOG.trace("ignoreObject(propertyName, obj, auditLogConf):{} ",
                             ignoreObject(propertyName, obj, auditLogConf));
 
                     AUDIT_LOG.error("{}:{}", propertyName, obj);
@@ -152,9 +141,9 @@ public class AuditLogInterceptor {
 
         return false;
     }
-//Puja to Make use ??????????????
+
     private boolean ignoreAnnotation(String resourceMethod, AuditLogConf auditLogConf) {
-        AUDIT_LOG.error("Checking if resource method to be ignored - resourceMethod:{}, auditLogConf:{}",
+        LOG.trace("Checking if resource method to be ignored - resourceMethod:{}, auditLogConf:{}",
                 resourceMethod, auditLogConf);
 
         if (StringUtils.isBlank(resourceMethod) || auditLogConf == null || auditLogConf.getIgnoreAnnotation() == null
@@ -168,7 +157,7 @@ public class AuditLogInterceptor {
     }
 
     private boolean ignoreObject(String objectName, Object objectValue, AuditLogConf auditLogConf) {
-        AUDIT_LOG.error("Checking if object to be ignored - objectName:{}, objectValue:{}, auditLogConf:{}", objectName,
+        LOG.trace("Checking if object to be ignored - objectName:{}, objectValue:{}, auditLogConf:{}", objectName,
                 objectValue, auditLogConf);
 
         if (StringUtils.isBlank(objectName) || auditLogConf == null || auditLogConf.getIgnoreObjectMapping() == null
@@ -182,7 +171,7 @@ public class AuditLogInterceptor {
         if (objectDetails == null) {
             return false;
         }
-        AUDIT_LOG.error(
+        LOG.trace(
                 "objectName:{}, objectValue:{}, objectDetails:{}, objectDetails.getText():{}, objectDetails.getText().contains(objectValue.toString()):{}",
                 objectName, objectValue, objectDetails, objectDetails.getText(),
                 objectDetails.getText().contains(objectValue.toString()));
@@ -225,7 +214,7 @@ public class AuditLogInterceptor {
     }
 
     private String getResource(String path) {
-        AUDIT_LOG.error(" path:{] ", path);
+        LOG.trace(" path:{} ", path);
         if (StringUtils.isNotBlank(path)) {
             path = path.replace("/", "-");
         }

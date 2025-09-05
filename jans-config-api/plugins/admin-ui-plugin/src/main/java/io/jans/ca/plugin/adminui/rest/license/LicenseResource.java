@@ -8,7 +8,6 @@ import io.jans.ca.plugin.adminui.service.license.LicenseDetailsService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
-import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,7 +25,7 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 @Path("/admin-ui/license")
-public class LicenseResource extends BaseResource {
+public class LicenseResource {
 
     static final String IS_ACTIVE = "/isActive";
     static final String ACTIVATE = "/activate";

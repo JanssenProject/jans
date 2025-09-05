@@ -10,7 +10,6 @@ import io.jans.ca.plugin.adminui.service.adminui.AdminUIService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
-import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,7 +31,7 @@ import org.slf4j.Logger;
 import java.util.List;
 
 @Path("/admin-ui")
-public class AdminUIResource extends BaseResource {
+public class AdminUIResource {
     static final String CONFIG = "/config";
     static final String ROLES = "/adminUIRoles";
     static final String ROLE_PATH_VARIABLE = "/{adminUIRole}";

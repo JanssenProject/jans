@@ -13562,243 +13562,6 @@ paths:
         - https://jans.io/oauth/jans-auth-server/session.readonly
         - revoke_session
   /api/v1/jans-auth-server/ssa:
-    get:
-      tags:
-      - Software Statement Assertion (SSA)
-      summary: Get SSA based on `jti` or `org_id`
-      description: Get SSA based on `jti` or `org_id`
-      operationId: get-ssa
-      parameters:
-      - name: Authorization
-        in: header
-        description: Authorization code
-        schema:
-          type: string
-      - name: jti
-        in: query
-        description: JWT ID - unique identifier for the JWT
-        required: true
-        schema:
-          type: string
-      - name: orgId
-        in: query
-        description: Organization identifier
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Response"
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    [
-                        {
-                            "dn": "jansId=c0baae4d-3282-4d20-99d9-90c30a1b6e53,ou=sessions,o=jans",
-                            "id": "c0baae4d-3282-4d20-99d9-90c30a1b6e53",
-                            "outsideSid": "652dc5e2-d95b-416e-b1ca-34b7dfb441d9",
-                            "lastUsedAt": "2024-09-24T14:53:13",
-                            "userDn": "inum=122ff2df-911d-424b-bbfe-891a43a70e95,ou=people,o=jans",
-                            "authenticationTime": "2024-09-24T14:53:13",
-                            "state": "authenticated",
-                            "sessionState": "34d35953e0008389587369ab1be6d6c93aa6d9e103dc2da93c157fc1b8d12385.696be3a5-d30c-4401-831f-4cd9017e8772",
-                            "permissionGrantedMap": {
-                                "permissionGranted": {
-                                    "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9": true
-                                }
-                            },
-                            "sessionAttributes": {
-                                "acr": "simple_password_auth",
-                                "remote_ip": "123.201.169.114",
-                                "opbs": "355386a7-8e51-488b-ab1d-b65fa9f5a6d5",
-                                "acr_values": "simple_password_auth",
-                                "scope": "openid profile email user_name",
-                                "response_type": "code",
-                                "redirect_uri": "https://pujavs-hopeful-colt.gluu.info/admin",
-                                "state": "abc",
-                                "nonce": "puja",
-                                "client_id": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9",
-                                "auth_user": "admin",
-                                "old_session_id": "db06a1ad-fe41-4af1-b6a8-96eac8747b39",
-                                "session_id": "c0baae4d-3282-4d20-99d9-90c30a1b6e53",
-                                "sid": "652dc5e2-d95b-416e-b1ca-34b7dfb441d9",
-                                "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9_authz_scopes": "openid user_name profile email",
-                                "successful_rp_redirect_count": "1"
-                            },
-                            "expirationDate": "2024-11-25T14:53:06",
-                            "deletable": true,
-                            "creationDate": "2024-09-24T14:53:06",
-                            "persisted": false,
-                            "ttl": 0,
-                            "opbrowserState": "355386a7-8e51-488b-ab1d-b65fa9f5a6d5"
-                        },
-                        {
-                            "dn": "jansId=7cbad817-0b96-40ca-8667-1073bfa726c3,ou=sessions,o=jans",
-                            "id": "7cbad817-0b96-40ca-8667-1073bfa726c3",
-                            "outsideSid": "5c306424-462c-4b2d-8827-61c93dee54ce",
-                            "lastUsedAt": "2024-09-24T14:52:15",
-                            "userDn": "inum=122ff2df-911d-424b-bbfe-891a43a70e95,ou=people,o=jans",
-                            "authenticationTime": "2024-09-24T14:52:15",
-                            "state": "authenticated",
-                            "sessionState": "30288a431305c3fe91f716969837e809ae2c86982c8f0481c78c58f2db7dfd93.d3646d5e-62bf-421c-b1cf-51d6c4d6f64e",
-                            "permissionGrantedMap": {
-                                "permissionGranted": {
-                                    "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9": true
-                                }
-                            },
-                            "sessionAttributes": {
-                                "acr": "simple_password_auth",
-                                "remote_ip": "123.201.169.114",
-                                "opbs": "661fbf90-1ffc-4560-9f95-cb113791af38",
-                                "acr_values": "simple_password_auth",
-                                "scope": "openid profile email user_name jansAdminUIRole",
-                                "response_type": "code",
-                                "redirect_uri": "https://pujavs-hopeful-colt.gluu.info/admin",
-                                "state": "abc",
-                                "nonce": "xyz",
-                                "client_id": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9",
-                                "auth_user": "admin",
-                                "old_session_id": "84d59a22-e98b-41ab-a195-fe52efbc6cba",
-                                "session_id": "7cbad817-0b96-40ca-8667-1073bfa726c3",
-                                "sid": "5c306424-462c-4b2d-8827-61c93dee54ce",
-                                "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9_authz_scopes": "openid user_name profile email jansAdminUIRole",
-                                "successful_rp_redirect_count": "1"
-                            },
-                            "expirationDate": "2024-10-25T14:52:06",
-                            "deletable": true,
-                            "creationDate": "2024-09-24T14:52:06",
-                            "persisted": false,
-                            "ttl": 0,
-                            "opbrowserState": "661fbf90-1ffc-4560-9f95-cb113791af38"
-                        }
-                    ]
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/ssa.delete
-    post:
-      tags:
-      - Software Statement Assertion (SSA)
-      summary: 'Create SSA '
-      description: Create SSA
-      operationId: create-ssa
-      parameters:
-      - name: Authorization
-        in: header
-        description: Authorization code
-        schema:
-          type: string
-      requestBody:
-        description: SSA
-        content:
-          application/json:
-            schema:
-              type: string
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Response"
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    [
-                        {
-                            "dn": "jansId=c0baae4d-3282-4d20-99d9-90c30a1b6e53,ou=sessions,o=jans",
-                            "id": "c0baae4d-3282-4d20-99d9-90c30a1b6e53",
-                            "outsideSid": "652dc5e2-d95b-416e-b1ca-34b7dfb441d9",
-                            "lastUsedAt": "2024-09-24T14:53:13",
-                            "userDn": "inum=122ff2df-911d-424b-bbfe-891a43a70e95,ou=people,o=jans",
-                            "authenticationTime": "2024-09-24T14:53:13",
-                            "state": "authenticated",
-                            "sessionState": "34d35953e0008389587369ab1be6d6c93aa6d9e103dc2da93c157fc1b8d12385.696be3a5-d30c-4401-831f-4cd9017e8772",
-                            "permissionGrantedMap": {
-                                "permissionGranted": {
-                                    "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9": true
-                                }
-                            },
-                            "sessionAttributes": {
-                                "acr": "simple_password_auth",
-                                "remote_ip": "123.201.169.114",
-                                "opbs": "355386a7-8e51-488b-ab1d-b65fa9f5a6d5",
-                                "acr_values": "simple_password_auth",
-                                "scope": "openid profile email user_name",
-                                "response_type": "code",
-                                "redirect_uri": "https://pujavs-hopeful-colt.gluu.info/admin",
-                                "state": "abc",
-                                "nonce": "puja",
-                                "client_id": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9",
-                                "auth_user": "admin",
-                                "old_session_id": "db06a1ad-fe41-4af1-b6a8-96eac8747b39",
-                                "session_id": "c0baae4d-3282-4d20-99d9-90c30a1b6e53",
-                                "sid": "652dc5e2-d95b-416e-b1ca-34b7dfb441d9",
-                                "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9_authz_scopes": "openid user_name profile email",
-                                "successful_rp_redirect_count": "1"
-                            },
-                            "expirationDate": "2024-11-25T14:53:06",
-                            "deletable": true,
-                            "creationDate": "2024-09-24T14:53:06",
-                            "persisted": false,
-                            "ttl": 0,
-                            "opbrowserState": "355386a7-8e51-488b-ab1d-b65fa9f5a6d5"
-                        },
-                        {
-                            "dn": "jansId=7cbad817-0b96-40ca-8667-1073bfa726c3,ou=sessions,o=jans",
-                            "id": "7cbad817-0b96-40ca-8667-1073bfa726c3",
-                            "outsideSid": "5c306424-462c-4b2d-8827-61c93dee54ce",
-                            "lastUsedAt": "2024-09-24T14:52:15",
-                            "userDn": "inum=122ff2df-911d-424b-bbfe-891a43a70e95,ou=people,o=jans",
-                            "authenticationTime": "2024-09-24T14:52:15",
-                            "state": "authenticated",
-                            "sessionState": "30288a431305c3fe91f716969837e809ae2c86982c8f0481c78c58f2db7dfd93.d3646d5e-62bf-421c-b1cf-51d6c4d6f64e",
-                            "permissionGrantedMap": {
-                                "permissionGranted": {
-                                    "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9": true
-                                }
-                            },
-                            "sessionAttributes": {
-                                "acr": "simple_password_auth",
-                                "remote_ip": "123.201.169.114",
-                                "opbs": "661fbf90-1ffc-4560-9f95-cb113791af38",
-                                "acr_values": "simple_password_auth",
-                                "scope": "openid profile email user_name jansAdminUIRole",
-                                "response_type": "code",
-                                "redirect_uri": "https://pujavs-hopeful-colt.gluu.info/admin",
-                                "state": "abc",
-                                "nonce": "xyz",
-                                "client_id": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9",
-                                "auth_user": "admin",
-                                "old_session_id": "84d59a22-e98b-41ab-a195-fe52efbc6cba",
-                                "session_id": "7cbad817-0b96-40ca-8667-1073bfa726c3",
-                                "sid": "5c306424-462c-4b2d-8827-61c93dee54ce",
-                                "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9_authz_scopes": "openid user_name profile email jansAdminUIRole",
-                                "successful_rp_redirect_count": "1"
-                            },
-                            "expirationDate": "2024-10-25T14:52:06",
-                            "deletable": true,
-                            "creationDate": "2024-09-24T14:52:06",
-                            "persisted": false,
-                            "ttl": 0,
-                            "opbrowserState": "661fbf90-1ffc-4560-9f95-cb113791af38"
-                        }
-                    ]
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/ssa.delete
     delete:
       tags:
       - Software Statement Assertion (SSA)
@@ -15242,17 +15005,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
         userCanView:
           type: boolean
         userCanEdit:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16158,6 +15921,8 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16167,8 +15932,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -16983,10 +16746,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -17365,14 +17128,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -17929,9 +17692,9 @@ components:
           type: object
           additionalProperties:
             type: string
+        uriBuilder:
+          $ref: "#/components/schemas/UriBuilder"
         title:
-          type: string
-        rel:
           type: string
         uri:
           type: string
@@ -17940,8 +17703,8 @@ components:
           type: array
           items:
             type: string
-        uriBuilder:
-          $ref: "#/components/schemas/UriBuilder"
+        rel:
+          type: string
     MediaType:
       type: object
       properties:
@@ -17953,9 +17716,9 @@ components:
           type: object
           additionalProperties:
             type: string
-        wildcardSubtype:
-          type: boolean
         wildcardType:
+          type: boolean
+        wildcardSubtype:
           type: boolean
     MultivaluedMapStringObject:
       type: object
@@ -18019,9 +17782,6 @@ components:
             type: array
             items:
               type: object
-        status:
-          type: integer
-          format: int32
         length:
           type: integer
           format: int32
@@ -18074,10 +17834,6 @@ components:
         lastModified:
           type: string
           format: date-time
-        entity:
-          type: object
-        closed:
-          type: boolean
         metadata:
           type: object
           properties:
@@ -18087,26 +17843,29 @@ components:
             type: array
             items:
               type: object
+        status:
+          type: integer
+          format: int32
+        entity:
+          type: object
+        closed:
+          type: boolean
+        cookies:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/NewCookie"
         links:
           uniqueItems: true
           type: array
           items:
             $ref: "#/components/schemas/Link"
-        cookies:
-          type: object
-          additionalProperties:
-            $ref: "#/components/schemas/NewCookie"
+        mediaType:
+          $ref: "#/components/schemas/MediaType"
         allowedMethods:
           uniqueItems: true
           type: array
           items:
             type: string
-        statusInfo:
-          $ref: "#/components/schemas/StatusType"
-        mediaType:
-          $ref: "#/components/schemas/MediaType"
-        entityTag:
-          $ref: "#/components/schemas/EntityTag"
         stringHeaders:
           type: object
           properties:
@@ -18116,14 +17875,13 @@ components:
             type: array
             items:
               type: string
+        statusInfo:
+          $ref: "#/components/schemas/StatusType"
+        entityTag:
+          $ref: "#/components/schemas/EntityTag"
     StatusType:
       type: object
       properties:
-        statusCode:
-          type: integer
-          format: int32
-        reasonPhrase:
-          type: string
         family:
           type: string
           enum:
@@ -18133,6 +17891,11 @@ components:
           - CLIENT_ERROR
           - SERVER_ERROR
           - OTHER
+        statusCode:
+          type: integer
+          format: int32
+        reasonPhrase:
+          type: string
     UriBuilder:
       type: object
     TokenAttributes:
@@ -18218,6 +17981,8 @@ components:
           type: string
         accessToken:
           type: boolean
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18228,8 +17993,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
