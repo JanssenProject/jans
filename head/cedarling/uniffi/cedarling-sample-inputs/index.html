@@ -11107,6 +11107,8 @@
       
         
       
+        
+      
     
     
     
@@ -11140,6 +11142,29 @@
             Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/cedarling-terms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Terminology
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -14312,45 +14337,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#actiontxt" class="md-nav__link">
+  <a href="#sample_cedarling_update_tokenjava" class="md-nav__link">
     <span class="md-ellipsis">
-      action.txt
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contextjson" class="md-nav__link">
-    <span class="md-ellipsis">
-      context.json
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#principalsjson" class="md-nav__link">
-    <span class="md-ellipsis">
-      principals.json
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#resourcejson" class="md-nav__link">
-    <span class="md-ellipsis">
-      resource.json
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#sample_cedarling_post_authntxt" class="md-nav__link">
-    <span class="md-ellipsis">
-      sample_cedarling_post_authn.txt
+      sample_cedarling_update_token.java
     </span>
   </a>
   
@@ -14380,311 +14369,282 @@
 
 <h2 id="bootstrapjson">bootstrap.json<a class="headerlink" href="#bootstrapjson" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code>{
-  &quot;CEDARLING_APPLICATION_NAME&quot;: &quot;My App&quot;,
-  &quot;CEDARLING_AUDIT_HEALTH_INTERVAL&quot;: 0,
-  &quot;CEDARLING_AUDIT_TELEMETRY_INTERVAL&quot;: 0,
-  &quot;CEDARLING_DYNAMIC_CONFIGURATION&quot;: &quot;disabled&quot;,
-  &quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;: &quot;strict&quot;,
-  &quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;: [
+    &quot;CEDARLING_APPLICATION_NAME&quot;: &quot;Cedarling-Test-In-Custom-Script&quot;,
+    &quot;CEDARLING_AUDIT_HEALTH_INTERVAL&quot;: 0,
+    &quot;CEDARLING_AUDIT_TELEMETRY_INTERVAL&quot;: 0,
+    &quot;CEDARLING_DYNAMIC_CONFIGURATION&quot;: &quot;disabled&quot;,
+    &quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;: &quot;never&quot;,
+    &quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;: [
     &quot;HS256&quot;,
     &quot;RS256&quot;
-  ],
-  &quot;CEDARLING_JWT_SIG_VALIDATION&quot;: &quot;disabled&quot;,
-  &quot;CEDARLING_JWT_STATUS_VALIDATION&quot;: &quot;disabled&quot;,
-  &quot;CEDARLING_LISTEN_SSE&quot;: &quot;disabled&quot;,
-  &quot;CEDARLING_LOCAL_JWKS&quot;: null,
-  &quot;CEDARLING_LOCAL_POLICY_STORE&quot;: null,
-  &quot;CEDARLING_LOCK&quot;: &quot;disabled&quot;,
-  &quot;CEDARLING_LOCK_MASTER_CONFIGURATION_URI&quot;: null,
-  &quot;CEDARLING_LOCK_SSA_JWT&quot;: null,
-  &quot;CEDARLING_LOG_LEVEL&quot;: &quot;DEBUG&quot;,
-  &quot;CEDARLING_LOG_TTL&quot;: 120,
-  &quot;CEDARLING_LOG_TYPE&quot;: &quot;memory&quot;,
-  &quot;CEDARLING_POLICY_STORE_ID&quot;: &quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;,
-  &quot;CEDARLING_POLICY_STORE_LOCAL_FN&quot;: &quot;./custom/static/policy-store.json&quot;,
-  &quot;CEDARLING_POLICY_STORE_URI&quot;: &quot;&quot;,
-  &quot;CEDARLING_USER_AUTHZ&quot;: &quot;enabled&quot;,
-  &quot;CEDARLING_PRINCIPAL_BOOLEAN_OPERATION&quot;: {
-    &quot;or&quot;: [
-      {
-        &quot;and&quot;: [
-          {
-            &quot;===&quot;: [
-              {
-                &quot;var&quot;: &quot;Jans::Workload&quot;
-              },
-              &quot;ALLOW&quot;
-            ]
-          },
-          {
-            &quot;===&quot;: [
-              {
-                &quot;var&quot;: &quot;Jans::User&quot;
-              },
-              &quot;ALLOW&quot;
-            ]
-          }
+    ],
+    &quot;CEDARLING_JWT_SIG_VALIDATION&quot;: &quot;disabled&quot;,
+    &quot;CEDARLING_JWT_STATUS_VALIDATION&quot;: &quot;disabled&quot;,
+    &quot;CEDARLING_LISTEN_SSE&quot;: &quot;disabled&quot;,
+    &quot;CEDARLING_LOCAL_JWKS&quot;: null,
+    &quot;CEDARLING_LOCK&quot;: &quot;disabled&quot;,
+    &quot;CEDARLING_LOCK_SSA_JWT&quot;: null,
+    &quot;CEDARLING_LOG_LEVEL&quot;: &quot;DEBUG&quot;,
+    &quot;CEDARLING_LOG_TYPE&quot;: &quot;std_out&quot;,
+    &quot;CEDARLING_POLICY_STORE_ID&quot;: &quot;cdeb4b635459898300a5893589a76b726e202dcb5a86&quot;,
+    &quot;CEDARLING_POLICY_STORE_URI&quot;: &quot;./custom/static/policy-store.json&quot;,
+    &quot;CEDARLING_PRINCIPAL_BOOLEAN_OPERATION&quot;: {
+    &quot;===&quot;: [
+            {
+            &quot;var&quot;: &quot;Jans::Workload&quot;
+            },
+            &quot;ALLOW&quot;
         ]
-      },
-      {
-        &quot;and&quot;: [
-          {
-            &quot;===&quot;: [
-              {
-                &quot;var&quot;: &quot;Jans::TestPrincipal1&quot;
-              },
-              &quot;ALLOW&quot;
-            ]
-          },
-          {
-            &quot;===&quot;: [
-              {
-                &quot;var&quot;: &quot;Jans::TestPrincipal2&quot;
-              },
-              &quot;ALLOW&quot;
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  &quot;CEDARLING_WORKLOAD_AUTHZ&quot;: &quot;enabled&quot;,
-  &quot;id&quot;: &quot;67d412fb-5dd9-4f85-9bd3-7b6471d90aa3&quot;
+    },
+    &quot;CEDARLING_USER_AUTHZ&quot;: &quot;enabled&quot;,
+    &quot;CEDARLING_WORKLOAD_AUTHZ&quot;: &quot;enabled&quot;,
+    &quot;id&quot;: &quot;7a962b6e-aa45-4418-a94a-ee382d20a723&quot;
 }
 </code></pre></div>
 <h2 id="policy-storejson">policy-store.json<a class="headerlink" href="#policy-storejson" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code>{
-  &quot;cedar_version&quot;: &quot;v4.0.0&quot;,
-  &quot;policy_stores&quot;: {
-    &quot;a1bf93115de86de760ee0bea1d529b521489e5a11747&quot;: {
-      &quot;cedar_version&quot;: &quot;v4.0.0&quot;,
-      &quot;name&quot;: &quot;Jans&quot;,
-      &quot;description&quot;: &quot;A test policy store where everything is fine.&quot;,
-      &quot;trusted_issuers&quot;: {
-        &quot;some_test_iss_id&quot;: {
-          &quot;name&quot;: &quot;TestIss&quot;,
-          &quot;description&quot;: &quot;Some Test Issuer&quot;,
-          &quot;openid_configuration_endpoint&quot;: &quot;https://account.gluu.org/.well-known/openid-configuration&quot;,
-          &quot;token_metadata&quot;: {
-            &quot;access_token&quot;: {
-              &quot;entity_type_name&quot;: &quot;Jans::Access_token&quot;,
-              &quot;workload_id&quot;: &quot;client_id&quot;,
-              &quot;principal_mapping&quot;: [
-                &quot;Jans::Workload&quot;
-              ]
-            },
-            &quot;id_token&quot;: {
-              &quot;entity_type_name&quot;: &quot;Jans::Id_token&quot;,
-              &quot;user_id&quot;: &quot;sub&quot;,
-              &quot;principal_mapping&quot;: [
-                &quot;Jans::User&quot;
-              ]
-            },
-            &quot;userinfo_token&quot;: {
-              &quot;entity_type_name&quot;: &quot;Jans::Userinfo_token&quot;,
-              &quot;user_id&quot;: &quot;sub&quot;,
-              &quot;principal_mapping&quot;: [
-                &quot;Jans::User&quot;
-              ]
+    &quot;cedar_version&quot;: &quot;4.4.0&quot;,
+    &quot;policy_stores&quot;: {
+        &quot;3cf98caf8e7fdb289c922ba9514118dcba716ce426ae&quot;: {
+        &quot;name&quot;: &quot;admin_ui_store&quot;,
+        &quot;description&quot;: &quot;Admin UI Policy Store\t&quot;,
+        &quot;policies&quot;: {
+        &quot;7c52efd895db799901d8590a2c5e3a76539d4a6de514&quot;: {
+            &quot;description&quot;: &quot;Authorization policy&quot;,
+            &quot;creation_date&quot;: &quot;2025-06-09T12:32:26.114299&quot;,
+            &quot;policy_content&quot;: &quot;QGlkKCJBdXRob3JpemF0aW9uIHBvbGljeSIpCnBlcm1pdCAoCiAgcHJpbmNpcGFsIGlzIEphbnM6Oldvcmtsb2FkLAogIGFjdGlvbiA9PSBKYW5zOjpBY3Rpb246OiJFeGVjdXRlIiwKICByZXNvdXJjZSBpcyBKYW5zOjpBcHBsaWNhdGlvbgopCndoZW4gewogIHByaW5jaXBhbC5ncmFudFR5cGVzLmNvbnRhaW5zKCJhdXRob3JpemF0aW9uX2NvZGUiKQp9Ow==&quot;
             }
-          }
-        }
-      },
-      &quot;policies&quot;: {
-        &quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;: {
-          &quot;description&quot;: &quot;simple policy example for principal workload&quot;,
-          &quot;creation_date&quot;: &quot;2024-09-20T17:22:39.996050&quot;,
-          &quot;policy_content&quot;: {
-            &quot;encoding&quot;: &quot;none&quot;,
-            &quot;content_type&quot;: &quot;cedar&quot;,
-            &quot;body&quot;: &quot;permit(\n    principal is Jans::Workload,\n    action in [Jans::Action::\&quot;Update\&quot;],\n    resource is Jans::Issue\n)when{\n    principal.sub == resource.sub\n};&quot;
-          }
         },
-        &quot;444da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;: {
-          &quot;cedar_version&quot;: &quot;v4.0.0&quot;,
-          &quot;description&quot;: &quot;simple policy example for principal user&quot;,
-          &quot;creation_date&quot;: &quot;2024-09-20T17:22:39.996050&quot;,
-          &quot;policy_content&quot;: {
-            &quot;encoding&quot;: &quot;none&quot;,
-            &quot;content_type&quot;: &quot;cedar&quot;,
-            &quot;body&quot;: &quot;permit(\n    principal is Jans::User,\n    action in [Jans::Action::\&quot;Update\&quot;],\n    resource is Jans::Issue\n)when{\n    principal.sub == resource.sub\n};&quot;
-          }
-        },
-        &quot;TestPrincipal1&quot;: {
-          &quot;cedar_version&quot;: &quot;v4.0.0&quot;,
-          &quot;description&quot;: &quot;simple policy example for TestPrincipal1&quot;,
-          &quot;creation_date&quot;: &quot;2024-09-20T17:22:39.996050&quot;,
-          &quot;policy_content&quot;: {
-            &quot;encoding&quot;: &quot;none&quot;,
-            &quot;content_type&quot;: &quot;cedar&quot;,
-            &quot;body&quot;: &quot;permit(\n    principal is Jans::TestPrincipal1,\n    action,\n    resource\n)when{\n principal.is_ok\n};&quot;
-          }
-        },
-        &quot;TestPrincipal2&quot;: {
-          &quot;cedar_version&quot;: &quot;v4.0.0&quot;,
-          &quot;description&quot;: &quot;simple policy example for TestPrincipal2&quot;,
-          &quot;creation_date&quot;: &quot;2024-09-20T17:22:39.996050&quot;,
-          &quot;policy_content&quot;: {
-            &quot;encoding&quot;: &quot;none&quot;,
-            &quot;content_type&quot;: &quot;cedar&quot;,
-            &quot;body&quot;: &quot;permit(\n    principal is Jans::TestPrincipal2,\n    action,\n    resource\n)when{\n principal.is_ok\n};&quot;
-          }
+        &quot;trusted_issuers&quot;: {},
+        &quot;schema&quot;: &quot;eyJKYW5zIjp7ImNvbW1vblR5cGVzIjp7IkNvbnRleHQiOnsidHlwZSI6IlJlY29yZCIsImF0dHJpYnV0ZXMiOnsiY3VycmVudF90aW1lIjp7InR5cGUiOiJFbnRpdHlPckNvbW1vbiIsInJlcXVpcmVkIjpmYWxzZSwibmFtZSI6IkxvbmcifSwiZGV2aWNlX2hlYWx0aCI6eyJ0eXBlIjoiU2V0IiwicmVxdWlyZWQiOmZhbHNlLCJlbGVtZW50Ijp7InR5cGUiOiJFbnRpdHlPckNvbW1vbiIsIm5hbWUiOiJTdHJpbmcifX0sImZyYXVkX2luZGljYXRvcnMiOnsidHlwZSI6IlNldCIsInJlcXVpcmVkIjpmYWxzZSwiZWxlbWVudCI6eyJ0eXBlIjoiRW50aXR5T3JDb21tb24iLCJuYW1lIjoiU3RyaW5nIn19LCJnZW9sb2NhdGlvbiI6eyJ0eXBlIjoiU2V0IiwicmVxdWlyZWQiOmZhbHNlLCJlbGVtZW50Ijp7InR5cGUiOiJFbnRpdHlPckNvbW1vbiIsIm5hbWUiOiJTdHJpbmcifX0sIm5ldHdvcmsiOnsidHlwZSI6IkVudGl0eU9yQ29tbW9uIiwicmVxdWlyZWQiOmZhbHNlLCJuYW1lIjoiU3RyaW5nIn0sIm5ldHdvcmtfdHlwZSI6eyJ0eXBlIjoiRW50aXR5T3JDb21tb24iLCJyZXF1aXJlZCI6ZmFsc2UsIm5hbWUiOiJTdHJpbmcifSwib3BlcmF0aW5nX3N5c3RlbSI6eyJ0eXBlIjoiRW50aXR5T3JDb21tb24iLCJyZXF1aXJlZCI6ZmFsc2UsIm5hbWUiOiJTdHJpbmcifSwidXNlcl9hZ2VudCI6eyJ0eXBlIjoiRW50aXR5T3JDb21tb24iLCJyZXF1aXJlZCI6ZmFsc2UsIm5hbWUiOiJTdHJpbmcifX19LCJlbWFpbF9hZGRyZXNzIjp7InR5cGUiOiJSZWNvcmQiLCJhdHRyaWJ1dGVzIjp7ImRvbWFpbiI6eyJ0eXBlIjoiRW50aXR5T3JDb21tb24iLCJuYW1lIjoiU3RyaW5nIn0sInVpZCI6eyJ0eXBlIjoiRW50aXR5T3JDb21tb24iLCJuYW1lIjoiU3RyaW5nIn19fSwiVXJsIjp7InR5cGUiOiJTdHJpbmcifX0sImVudGl0eVR5cGVzIjp7IkFwcGxpY2F0aW9uIjp7InNoYXBlIjp7InR5cGUiOiJSZWNvcmQiLCJhdHRyaWJ1dGVzIjp7ImdyYW50VHlwZXMiOnsidHlwZSI6IlNldCIsImVsZW1lbnQiOnsidHlwZSI6IkVudGl0eU9yQ29tbW9uIiwibmFtZSI6IlN0cmluZyJ9fX19fSwiUm9sZSI6eyJzaGFwZSI6eyJ0eXBlIjoiUmVjb3JkIiwiYXR0cmlidXRlcyI6e319fSwiVHJ1c3RlZElzc3VlciI6eyJzaGFwZSI6eyJ0eXBlIjoiUmVjb3JkIiwiYXR0cmlidXRlcyI6eyJpc3N1ZXJfZW50aXR5X2lkIjp7InR5cGUiOiJFbnRpdHlPckNvbW1vbiIsIm5hbWUiOiJVcmwifX19fSwiVXNlciI6eyJzaGFwZSI6eyJ0eXBlIjoiUmVjb3JkIiwiYXR0cmlidXRlcyI6eyJlbWFpbCI6eyJ0eXBlIjoiRW50aXR5T3JDb21tb24iLCJyZXF1aXJlZCI6ZmFsc2UsIm5hbWUiOiJlbWFpbF9hZGRyZXNzIn0sInJvbGUiOnsidHlwZSI6IlNldCIsImVsZW1lbnQiOnsidHlwZSI6IkVudGl0eU9yQ29tbW9uIiwibmFtZSI6IlN0cmluZyJ9fSwic3ViIjp7InR5cGUiOiJFbnRpdHlPckNvbW1vbiIsInJlcXVpcmVkIjpmYWxzZSwibmFtZSI6IlN0cmluZyJ9fX0sIm1lbWJlck9mVHlwZXMiOlsiUm9sZSJdfSwiV29ya2xvYWQiOnsic2hhcGUiOnsidHlwZSI6IlJlY29yZCIsImF0dHJpYnV0ZXMiOnsiY2xpZW50X2lkIjp7InR5cGUiOiJFbnRpdHlPckNvbW1vbiIsIm5hbWUiOiJTdHJpbmcifSwiaXNzIjp7InR5cGUiOiJFbnRpdHlPckNvbW1vbiIsInJlcXVpcmVkIjpmYWxzZSwibmFtZSI6IlRydXN0ZWRJc3N1ZXIifSwibmFtZSI6eyJ0eXBlIjoiRW50aXR5T3JDb21tb24iLCJyZXF1aXJlZCI6ZmFsc2UsIm5hbWUiOiJTdHJpbmcifSwicnBfaWQiOnsidHlwZSI6IkVudGl0eU9yQ29tbW9uIiwicmVxdWlyZWQiOmZhbHNlLCJuYW1lIjoiU3RyaW5nIn0sInNwaWZmZV9pZCI6eyJ0eXBlIjoiRW50aXR5T3JDb21tb24iLCJyZXF1aXJlZCI6ZmFsc2UsIm5hbWUiOiJTdHJpbmcifSwiZ3JhbnRUeXBlcyI6eyJ0eXBlIjoiU2V0IiwiZWxlbWVudCI6eyJ0eXBlIjoiRW50aXR5T3JDb21tb24iLCJuYW1lIjoiU3RyaW5nIn19fX19fSwiYWN0aW9ucyI6eyJFeGVjdXRlIjp7ImFwcGxpZXNUbyI6eyJwcmluY2lwYWxUeXBlcyI6WyJXb3JrbG9hZCJdLCJyZXNvdXJjZVR5cGVzIjpbIkFwcGxpY2F0aW9uIl0sImNvbnRleHQiOnsidHlwZSI6IkNvbnRleHQifX19fX19&quot;
         }
-      },
-      &quot;schema&quot;: &quot;ewoiSmFucyI6IHsKImNvbW1vblR5cGVzIjogewoiQ29udGV4dCI6IHsKInR5cGUiOiAiUmVjb3JkIiwKImF0dHJpYnV0ZXMiOiB7CiJhY2Nlc3NfdG9rZW4iOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiQWNjZXNzX3Rva2VuIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImlkX3Rva2VuIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIklkX3Rva2VuIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInVzZXIiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiVXNlciIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJ1c2VyaW5mb190b2tlbiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJVc2VyaW5mb190b2tlbiIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJ3b3JrbG9hZCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJXb3JrbG9hZCIsCiJyZXF1aXJlZCI6IGZhbHNlCn0KfQp9LAoiVXJsIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImhvc3QiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIgp9LAoicGF0aCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciCn0sCiJwcm90b2NvbCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciCn0KfQp9Cn0sCiJlbnRpdHlUeXBlcyI6IHsKIkFjY2Vzc190b2tlbiI6IHsKInNoYXBlIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImFjciI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiYXVkIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJhdXRoX3RpbWUiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJjbGllbnRfaWQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImNvZGUiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImV4cCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJMb25nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImlhdCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJMb25nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImlzcyI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJUcnVzdGVkSXNzdWVyIgp9LAoianRpIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJuYmYiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJzY29wZSI6IHsKInR5cGUiOiAiU2V0IiwKImVsZW1lbnQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIgp9LAoicmVxdWlyZWQiOiBmYWxzZQp9LAoic3RhdHVzIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKInN0YXR1c19saXN0IjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImlkeCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJMb25nIgp9LAoidXJpIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIKfQp9Cn0KfSwKInJlcXVpcmVkIjogZmFsc2UKfSwKInN1YiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoidG9rZW5fdHlwZSI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoidXNlcm5hbWUiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKIng1dCNTMjU2IjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0KfQp9Cn0sCiJJc3N1ZSI6IHsKInNoYXBlIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImFwcF9pZCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiaWQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKIm5hbWUiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInBlcm1pc3Npb24iOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInN1YiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciCn0KfQp9Cn0sCiJSb2xlIjoge30sCiJUcnVzdGVkSXNzdWVyIjogewoic2hhcGUiOiB7CiJ0eXBlIjogIlJlY29yZCIsCiJhdHRyaWJ1dGVzIjogewoiaXNzdWVyX2VudGl0eV9pZCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJVcmwiCn0KfQp9Cn0sCiJVc2VyIjogewoibWVtYmVyT2ZUeXBlcyI6IFsKIlJvbGUiCl0sCiJzaGFwZSI6IHsKInR5cGUiOiAiUmVjb3JkIiwKImF0dHJpYnV0ZXMiOiB7CiJlbWFpbCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiaWRfdG9rZW4iOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiSWRfdG9rZW4iLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoicm9sZSI6IHsKInR5cGUiOiAiU2V0IiwKImVsZW1lbnQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIgp9LAoicmVxdWlyZWQiOiBmYWxzZQp9LAoic3ViIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIKfSwKInVzZXJpbmZvX3Rva2VuIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlVzZXJpbmZvX3Rva2VuIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInVzZXJuYW1lIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0KfQp9Cn0sCiJVc2VyaW5mb190b2tlbiI6IHsKInNoYXBlIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImFjciI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiYW1yIjogewoidHlwZSI6ICJTZXQiLAoiZWxlbWVudCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciCn0sCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJhdWQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImVtYWlsIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJlbWFpbF92ZXJpZmllZCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJCb29sIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImV4cCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJMb25nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImZhbWlseV9uYW1lIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJnaXZlbl9uYW1lIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJpYXQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJpbnVtIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJpc3MiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiVHJ1c3RlZElzc3VlciIKfSwKImphbnNBZG1pblVJUm9sZSI6IHsKInR5cGUiOiAiU2V0IiwKImVsZW1lbnQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIgp9LAoicmVxdWlyZWQiOiBmYWxzZQp9LAoianRpIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJtaWRkbGVfbmFtZSI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoibmFtZSI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoibmJmIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIkxvbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoibmlja25hbWUiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInJvbGUiOiB7CiJ0eXBlIjogIlNldCIsCiJlbGVtZW50IjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIKfSwKInJlcXVpcmVkIjogZmFsc2UKfSwKInN1YiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoidXBkYXRlZF9hdCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJMb25nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInVzZXJuYW1lIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0KfQp9Cn0sCiJXb3JrbG9hZCI6IHsKInNoYXBlIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImFjY2Vzc190b2tlbiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJBY2Nlc3NfdG9rZW4iLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiYXVkIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJjbGllbnRfaWQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInN1YiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiaXNzIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlRydXN0ZWRJc3N1ZXIiLAoicmVxdWlyZWQiOiBmYWxzZQp9Cn0KfQp9LAoiSWRfdG9rZW4iOiB7CiJzaGFwZSI6IHsKInR5cGUiOiAiUmVjb3JkIiwKImF0dHJpYnV0ZXMiOiB7CiJhY3IiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImFtciI6IHsKInR5cGUiOiAiU2V0IiwKImVsZW1lbnQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIgp9LAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiYXRfaGFzaCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiYXVkIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJhdXRoX3RpbWUiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJjX2hhc2giOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImV4cCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJMb25nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImdyYW50IjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJpYXQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJpc3MiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiVHJ1c3RlZElzc3VlciIKfSwKImphbnNPcGVuSURDb25uZWN0VmVyc2lvbiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoianRpIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJuYmYiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJuYmYiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJuYmYiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJuYmYiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJub25jZSI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoic2lkIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJzdGF0dXMiOiB7CiJ0eXBlIjogIlJlY29yZCIsCiJhdHRyaWJ1dGVzIjogewoic3RhdHVzX2xpc3QiOiB7CiJ0eXBlIjogIlJlY29yZCIsCiJhdHRyaWJ1dGVzIjogewoiaWR4IjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIkxvbmciCn0sCiJ1cmkiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIgp9Cn0KfQp9LAoicmVxdWlyZWQiOiBmYWxzZQp9LAoic3ViIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0KfQp9Cn0sCiJUZXN0UHJpbmNpcGFsMSI6IHsKInNoYXBlIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImlzX29rIjogewoidHlwZSI6ICJCb29sIiwKInJlcXVpcmVkIjogdHJ1ZQp9Cn0KfQp9LAoiVGVzdFByaW5jaXBhbDIiOiB7CiJzaGFwZSI6IHsKInR5cGUiOiAiUmVjb3JkIiwKImF0dHJpYnV0ZXMiOiB7CiJpc19vayI6IHsKInR5cGUiOiAiQm9vbCIsCiJyZXF1aXJlZCI6IHRydWUKfQp9Cn0KfQp9LAoiYWN0aW9ucyI6IHsKIlVwZGF0ZSI6IHsKImFwcGxpZXNUbyI6IHsKInJlc291cmNlVHlwZXMiOiBbCiJJc3N1ZSIKXSwKInByaW5jaXBhbFR5cGVzIjogWwoiV29ya2xvYWQiLAoiVXNlciIKXSwKImNvbnRleHQiOiB7CiJ0eXBlIjogIkNvbnRleHQiCn0KfQp9LAoiVXBkYXRlVGVzdFByaW5jaXBhbCI6IHsKImFwcGxpZXNUbyI6IHsKInJlc291cmNlVHlwZXMiOiBbCiJJc3N1ZSIKXSwKInByaW5jaXBhbFR5cGVzIjogWwoiVGVzdFByaW5jaXBhbDEiLAoiVGVzdFByaW5jaXBhbDIiCl0sCiJjb250ZXh0IjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHt9Cn0KfQp9Cn0KfQp9&quot;
     }
-  }
 }
 </code></pre></div>
-<h2 id="actiontxt">action.txt<a class="headerlink" href="#actiontxt" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>Jans::Action::&quot;Update&quot;
-</code></pre></div>
-<h2 id="contextjson">context.json<a class="headerlink" href="#contextjson" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>{}
-</code></pre></div>
-<h2 id="principalsjson">principals.json<a class="headerlink" href="#principalsjson" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>{
-    &quot;cedar_entity_mapping&quot;: {
-        &quot;entity_type&quot;: &quot;Jans::User&quot;,
-        &quot;id&quot;: &quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0&quot;
-    },
-    &quot;sub&quot;: &quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0&quot;,
-    &quot;role&quot;:&quot;CasaAdmin&quot;
-}
-</code></pre></div>
-<h2 id="resourcejson">resource.json<a class="headerlink" href="#resourcejson" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>{
-  &quot;app_id&quot;: &quot;admin_ui_id&quot;,
-  &quot;cedar_entity_mapping&quot;: {
-    &quot;entity_type&quot;: &quot;Jans::Issue&quot;,
-    &quot;id&quot;: &quot;admin_ui_id&quot;
-  },
-  &quot;name&quot;: &quot;My App&quot;,
-  &quot;permission&quot;: &quot;view_clients&quot;,
-  &quot;sub&quot;: &quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0&quot;,
-  &quot;loc&quot;: &quot;US&quot;
-}
-</code></pre></div>
-<h2 id="sample_cedarling_post_authntxt">sample_cedarling_post_authn.txt<a class="headerlink" href="#sample_cedarling_post_authntxt" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>import java.util.Map;
+<h2 id="sample_cedarling_update_tokenjava">sample_cedarling_update_token.java<a class="headerlink" href="#sample_cedarling_update_tokenjava" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.token.UpdateTokenType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uniffi.cedarling_uniffi.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.cedarling.binding.wrapper.CedarlingAdapter</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.external.context.ExternalUpdateTokenContext</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.model.common.AccessToken</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.json.JSONObject</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.List</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.ArrayList</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.model.common.GrantType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Files</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Path</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Paths</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.google.common.collect.Sets</span><span class="p">;</span>
 
-import io.jans.model.SimpleCustomProperty;
-import io.jans.model.custom.script.model.CustomScript;
-import io.jans.model.custom.script.type.postauthn.PostAuthnType;
-import io.jans.service.custom.script.CustomScriptManager;
-import uniffi.cedarling_uniffi.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import io.jans.as.server.service.external.context.ExternalScriptContext;
-import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
-import org.json.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 
-public class PostAuthn implements PostAuthnType {
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">UpdateTokenCedarling</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">UpdateTokenType</span><span class="w"> </span><span class="p">{</span>
 
-    private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
-    CedarlingAdapter cedarlingAdapter = null;
-    String action = null;
-    String resourceStr = null;
-    String contextStr = null;
-    String principalsStr = null;
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+<span class="w">    </span><span class="n">CedarlingAdapter</span><span class="w"> </span><span class="n">cedarlingAdapter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
 
-    @Override
-    public boolean init(Map&lt;String, SimpleCustomProperty&gt; configurationAttributes) {
-        log.info(&quot;Post Authentication. Initializing...&quot;);
-        log.info(&quot;Post Authentication. Initialized&quot;);
-        return true;
-    }
 
-    @Override
-    public boolean init(CustomScript customScript, Map&lt;String, SimpleCustomProperty&gt; configurationAttributes) {
-        log.info(&quot;Post Authentication. Initializing...&quot;);
-        log.info(&quot;Post Authentication. Initialized&quot;);
-        if(!configurationAttributes.containsKey(&quot;BOOTSTRAP_JSON_PATH&quot;)) {
-            log.error(&quot;Initialization. Property bootstrap_file_path is not specified.&quot;);
-            return true;
-        }
-        log.info(&quot;Initialize Cedarling...&quot;);
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UpdateTokenCedarling initialized!!!&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="c1">// Check if bootstrap JSON file path is configured</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">configurationAttributes</span><span class="p">.</span><span class="na">containsKey</span><span class="p">(</span><span class="s">&quot;BOOTSTRAP_JSON_PATH&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;Initialization. Property bootstrap_file_path is not specified.&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Initialize Cedarling...&quot;</span><span class="p">);</span>
 
-        // Read input files for authorization
-        String bootstrapFilePath = configurationAttributes.get(&quot;BOOTSTRAP_JSON_PATH&quot;).getValue2();
-        String actionFilePath = configurationAttributes.get(&quot;ACTION_FILE_PATH&quot;).getValue2();
-        String resourceFilePath = configurationAttributes.get(&quot;RESOURCE_FILE_PATH&quot;).getValue2();
-        String contextFilePath = configurationAttributes.get(&quot;CONTEXT_FILE_PATH&quot;).getValue2();
-        String principalsFilePath = configurationAttributes.get(&quot;PRINCIPALS_FILE_PATH&quot;).getValue2();
+<span class="w">        </span><span class="c1">// Get bootstrap file path</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">bootstrapFilePath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;BOOTSTRAP_JSON_PATH&quot;</span><span class="p">).</span><span class="na">getValue2</span><span class="p">();</span>
 
-        String bootstrapJson = null;
-        try {
-            bootstrapJson = readFile(bootstrapFilePath);
-            action = readFile(actionFilePath);
-            resourceStr = readFile(resourceFilePath);
-            contextStr = readFile(contextFilePath);
-            principalsStr = readFile(principalsFilePath);
-            cedarlingAdapter = new CedarlingAdapter();
-            cedarlingAdapter.loadFromJson(bootstrapJson);
-        } catch (CedarlingException e) {
-            log.error(&quot;Unable to initialize Cedarling&quot; + e.getMessage());
-            return true;
-        } catch (Exception e) {
-            log.error(&quot;Unable to initialize Cedarling&quot; + e.getMessage());
-            return true;
-        }
-            log.info(&quot;Cedarling Initialization successful...&quot;);
-        return true;
-    }
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">bootstrapJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Read bootstrap JSON from file</span>
+<span class="w">            </span><span class="n">bootstrapJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">readFile</span><span class="p">(</span><span class="n">bootstrapFilePath</span><span class="p">);</span>
+<span class="w">            </span><span class="c1">// Initialize Cedarling adapter</span>
+<span class="w">            </span><span class="n">cedarlingAdapter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CedarlingAdapter</span><span class="p">();</span>
+<span class="w">            </span><span class="n">cedarlingAdapter</span><span class="p">.</span><span class="na">loadFromJson</span><span class="p">(</span><span class="n">bootstrapJson</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">CedarlingException</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;Unable to initialize Cedarling&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;Unable to initialize Cedarling&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Cedarling Initialization successful...&quot;</span><span class="p">);</span>
 
-    @Override
-    public boolean destroy(Map&lt;String, SimpleCustomProperty&gt; configurationAttributes) {
-        log.info(&quot;Post Authentication. Destroying...&quot;);
-        log.info(&quot;Post Authentication. Destroyed.&quot;);
-        return true;
-    }
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-    @Override
-    public int getApiVersion() {
-        return 11;
-    }
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UpdateTokenCedarling initialized!!!&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="c1">// Check if bootstrap JSON file path is configured</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">configurationAttributes</span><span class="p">.</span><span class="na">containsKey</span><span class="p">(</span><span class="s">&quot;BOOTSTRAP_JSON_PATH&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;Initialization. Property bootstrap_file_path is not specified.&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Initialize Cedarling...&quot;</span><span class="p">);</span>
 
-    @Override
-    public boolean forceReAuthentication(Object context) {
-        return false;
-    }
+<span class="w">        </span><span class="c1">// Get bootstrap file path</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">bootstrapFilePath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;BOOTSTRAP_JSON_PATH&quot;</span><span class="p">).</span><span class="na">getValue2</span><span class="p">();</span>
 
-    @Override
-    public boolean forceAuthorization(Object context) {
-        log.info(&quot;Inside forceAuthorization method...&quot;);
-        ExternalScriptContext scriptContext = (ExternalScriptContext) context;
-        try {
-            List&lt;EntityData&gt; principalsJson = List.of(EntityData.Companion.fromJson(principalsStr));
-            JSONObject resourceJson = new JSONObject(resourceStr);
-            JSONObject contextJson = new JSONObject(contextStr);
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">bootstrapJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Read bootstrap JSON from file</span>
+<span class="w">            </span><span class="n">bootstrapJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">readFile</span><span class="p">(</span><span class="n">bootstrapFilePath</span><span class="p">);</span>
+<span class="w">            </span><span class="c1">// Initialize Cedarling adapter</span>
+<span class="w">            </span><span class="n">cedarlingAdapter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CedarlingAdapter</span><span class="p">();</span>
+<span class="w">            </span><span class="n">cedarlingAdapter</span><span class="p">.</span><span class="na">loadFromJson</span><span class="p">(</span><span class="n">bootstrapJson</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">CedarlingException</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;Unable to initialize Cedarling&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;Unable to initialize Cedarling&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Cedarling Initialization successful...&quot;</span><span class="p">);</span>
 
-            AuthorizeResult result = cedarlingAdapter.authorizeUnsigned(principalsJson, action, resourceJson, contextJson);
-            cedarlingAdapter.close();
-            log.info(&quot;Cedarling Authz Response Decision: &quot; + result.getDecision());
-            //logic to to use the Cedarling authorization decision ...
-        } catch(AuthorizeException | EntityException e) {
-            log.error(&quot;Error in Cedarling Authz: &quot; + e.getMessage());
-            return false;
-        }
-        return false;
-    }
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-    public String readFile(String filePath) {
-        Path path = Paths.get(filePath).toAbsolutePath();
-        try {
-            return Files.readString(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-}
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyIdToken</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">jwr</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">tokenContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyRefreshToken</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">refreshToken</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">tokenContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyAccessToken</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">accessTokenObj</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">contextObj</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">AccessToken</span><span class="w"> </span><span class="n">accessToken</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">AccessToken</span><span class="p">)</span><span class="w"> </span><span class="n">accessTokenObj</span><span class="p">;</span>
+<span class="w">            </span><span class="n">ExternalUpdateTokenContext</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalUpdateTokenContext</span><span class="p">)</span><span class="w"> </span><span class="n">contextObj</span><span class="p">;</span>
+
+<span class="w">            </span><span class="c1">// Collect client grant types</span>
+<span class="w">            </span><span class="n">List</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">grantTypes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayList</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="p">();</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">GrantType</span><span class="w"> </span><span class="n">gt</span><span class="p">:</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getClient</span><span class="p">().</span><span class="na">getGrantTypes</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">grantTypes</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">gt</span><span class="p">.</span><span class="na">getValue</span><span class="p">());</span>
+<span class="w">            </span><span class="p">}</span>
+
+<span class="w">            </span><span class="c1">// Build principal and resource entities</span>
+<span class="w">            </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">principalJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">buildPrincipalJson</span><span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="na">getClient</span><span class="p">().</span><span class="na">getClientId</span><span class="p">(),</span><span class="w"> </span><span class="n">grantTypes</span><span class="p">);</span>
+<span class="w">            </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">resourceJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">buildResourceJson</span><span class="p">(</span><span class="n">grantTypes</span><span class="p">);</span>
+
+<span class="w">            </span><span class="c1">// Convert principal JSON to EntityData</span>
+<span class="w">            </span><span class="n">List</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">EntityData</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">principalEntities</span><span class="w"> </span><span class="o">=</span>
+<span class="w">                </span><span class="n">List</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">EntityData</span><span class="p">.</span><span class="na">Companion</span><span class="p">.</span><span class="na">fromJson</span><span class="p">(</span><span class="n">principalJson</span><span class="p">.</span><span class="na">toString</span><span class="p">()));</span>
+
+<span class="w">            </span><span class="c1">// Empty context (placeholder for future extension)</span>
+<span class="w">            </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">contextJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">(</span><span class="s">&quot;{}&quot;</span><span class="p">);</span>
+
+<span class="w">            </span><span class="c1">// Call Cedarling authorization</span>
+<span class="w">            </span><span class="n">AuthorizeResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarlingAdapter</span><span class="p">.</span><span class="na">authorizeUnsigned</span><span class="p">(</span>
+<span class="w">                </span><span class="n">principalEntities</span><span class="p">,</span>
+<span class="w">                </span><span class="s">&quot;Jans::Action::\&quot;Execute\&quot;&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="n">resourceJson</span><span class="p">,</span>
+<span class="w">                </span><span class="n">contextJson</span>
+<span class="w">            </span><span class="p">);</span>
+
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Cedarling Authz Response Decision: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="na">getDecision</span><span class="p">());</span>
+
+<span class="w">            </span><span class="c1">// If authorized → overwrite scopes</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">getDecision</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">context</span><span class="p">.</span><span class="na">overwriteAccessTokenScopes</span><span class="p">(</span><span class="n">accessToken</span><span class="p">,</span><span class="w"> </span><span class="n">Sets</span><span class="p">.</span><span class="na">newHashSet</span><span class="p">(</span><span class="s">&quot;openid&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;profile&quot;</span><span class="p">));</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">AuthorizeException</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">EntityException</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;Error in Cedarling Authz&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** Helper: Build Principal JSON </span>
+<span class="cm">     * {</span>
+<span class="cm">     *    &quot;cedar_entity_mapping&quot;: {</span>
+<span class="cm">     *        &quot;entity_type&quot;: &quot;Jans::Workload&quot;,</span>
+<span class="cm">     *        &quot;id&quot;: &quot;wl_id&quot;</span>
+<span class="cm">     *    },</span>
+<span class="cm">     *    &quot;client_id&quot;: &quot;xxxxxxxx-xxxxx-xxxx-xxxxxxxx&quot;,</span>
+<span class="cm">     *    &quot;grantTypes&quot;: [&quot;authorization_code&quot;, &quot;refresh_token&quot;]</span>
+<span class="cm">     *}</span>
+<span class="cm">     * */</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">JSONObject</span><span class="w"> </span><span class="nf">buildPrincipalJson</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">clientId</span><span class="p">,</span><span class="w"> </span><span class="n">List</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">grantTypes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">();</span>
+<span class="w">        </span><span class="n">json</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;cedar_entity_mapping&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">()</span>
+<span class="w">            </span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;entity_type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Jans::Workload&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;wl_id&quot;</span><span class="p">));</span>
+<span class="w">        </span><span class="n">json</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;client_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">clientId</span><span class="p">);</span>
+<span class="w">        </span><span class="n">json</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;grantTypes&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">grantTypes</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">&quot;Principal JSON: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">json</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">json</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** Helper: Build Resource JSON </span>
+<span class="cm">     * </span>
+<span class="cm">     * {</span>
+<span class="cm">     *    &quot;cedar_entity_mapping&quot;: {</span>
+<span class="cm">     *        &quot;entity_type&quot;: &quot;Jans::Application&quot;,</span>
+<span class="cm">     *        &quot;id&quot;: &quot;app_id&quot;</span>
+<span class="cm">     *    },</span>
+<span class="cm">     *    &quot;grantTypes&quot;: [&quot;authorization_code&quot;, &quot;client_credentials&quot;]</span>
+<span class="cm">     *}</span>
+<span class="cm">     * */</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">JSONObject</span><span class="w"> </span><span class="nf">buildResourceJson</span><span class="p">(</span><span class="n">List</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">grantTypes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">();</span>
+<span class="w">        </span><span class="n">json</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;cedar_entity_mapping&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">()</span>
+<span class="w">            </span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;entity_type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;app_id&quot;</span><span class="p">));</span>
+<span class="w">        </span><span class="n">json</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;grantTypes&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">grantTypes</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">&quot;Resource JSON: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">json</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">json</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getRefreshTokenLifetimeInSeconds</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">tokenContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getIdTokenLifetimeInSeconds</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getAccessTokenLifetimeInSeconds</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">readFile</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">filePath</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Path</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">filePath</span><span class="p">).</span><span class="na">toAbsolutePath</span><span class="p">();</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">Files</span><span class="p">.</span><span class="na">readString</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">IOException</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RuntimeException</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="p">}</span>
 </code></pre></div>
 
 
@@ -14708,7 +14668,7 @@ public class PostAuthn implements PostAuthnType {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2025 15:11:12 UTC"><span class="timeago" datetime="2025-07-29T15:11:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2025 15:11:12 UTC">2025-07-29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 1, 2025 12:28:23 UTC"><span class="timeago" datetime="2025-09-01T12:28:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 1, 2025 12:28:23 UTC">2025-09-01</span>
   </span>
 
     

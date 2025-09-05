@@ -11120,6 +11120,8 @@
       
         
       
+        
+      
     
     
     
@@ -11153,6 +11155,29 @@
             Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/cedarling-terms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Terminology
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -11247,6 +11272,30 @@
   <a href="#schema" class="md-nav__link">
     <span class="md-ellipsis">
       schema
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#default-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Entities
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Default Entities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#entity-conflict-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entity Conflict Resolution
     </span>
   </a>
   
@@ -14522,6 +14571,30 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#default-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Entities
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Default Entities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#entity-conflict-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entity Conflict Resolution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#cedar-policies-schema" class="md-nav__link">
     <span class="md-ellipsis">
       Cedar Policies Schema
@@ -14710,6 +14783,7 @@
 <li><strong>Cedar Schema</strong>: The Cedar schema encoded in Base64.</li>
 <li><strong>Cedar Policies</strong>: The Cedar policies encoded in Base64.</li>
 <li><strong>Trusted Issuers</strong>: Details about the trusted issuers (see <a href="#trusted-issuers-schema">below</a> for syntax).</li>
+<li><strong>Default Entities</strong>: Optional static entities that are loaded at startup and available for all policy evaluations (see <a href="#default-entities">below</a>).</li>
 </ol>
 <p>For a comprehensive JSON schema defining the structure of the policy store, see: <a href="https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json">policy_store_schema.json</a>. You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].</p>
 <p><strong>Note:</strong> The <code>cedarling_store.json</code> file is only needed if the bootstrap properties: <code>CEDARLING_LOCK</code>; <code>CEDARLING_POLICY_STORE_URI</code>; and <code>CEDARLING_POLICY_STORE_ID</code> are not set to a local location. If you're fetching the policies remotely, you don't need a <code>cedarling_store.json</code> file.</p>
@@ -14723,7 +14797,8 @@
 <span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DoveCRM policies, schema, and trusted JWT issuers.&quot;</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
 <span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
-<span class="w">          </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span>
+<span class="w">          </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;default_entities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
@@ -14733,6 +14808,7 @@
 <li><strong>policies</strong> : (<em>Object</em>) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: <a href="#cedar-policies-schema">policies schema</a>.</li>
 <li><strong>schema</strong> : (<em>String</em> | <em>Object</em>) Base64 encoded JSON Object. See <a href="#schema">schema</a> below.</li>
 <li><strong>trusted_issuers</strong> : (<em>Object of {unique_id =&gt; IdentitySource}(#trusted-issuer-schema)</em>) List of metadata for Identity Sources.</li>
+<li><strong>default_entities</strong> : (<em>Object</em>) Optional map of entity IDs to encoded/default entity payloads. See <a href="#default-entities">Default Entities</a>.</li>
 </ul>
 <h3 id="schema"><code>schema</code><a class="headerlink" href="#schema" title="Permanent link">#</a></h3>
 <p>Either <em>String</em> or <em>Object</em>, where <em>Object</em> is preferred.</p>
@@ -14746,6 +14822,42 @@
 <p>Where <em>String</em> - The schema in cedar-json format, encoded as Base64. For example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span>
 </code></pre></div>
+<h2 id="default-entities">Default Entities<a class="headerlink" href="#default-entities" title="Permanent link">#</a></h2>
+<p>Default entities allow you to preload static entity records that are available to every authorization request. Cedarling loads these at startup alongside policies and schema.</p>
+<p>Format:</p>
+<ul>
+<li>Each entry is a simple key-value pair where the key is the entity ID and the value is a Base64-encoded JSON object representing the entity payload.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;default_entities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;1694c954f8d9&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJlbnRpdHlfaWQiOiIxNjk0Yzk1NGY4ZDkiLCJvIjoiQWNtZSBEb2xwaGlucyBEaXZpc2lvbiIsIm9yZ19pZCI6IjEwMDEyOSIsImRvbWFpbiI6ImFjbWUtZG9scGhpbi5zZWEiLCJyZWdpb25zIjpbIkF0bGFudGljIiwiUGFjaWZpYyIsIkluZGlhbiJdfQ==&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;74d109b20248&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJlbnRpdHlfaWQiOiI3NGQxMDliMjAyNDgiLCJkZXNjcmlwdGlvbiI6IjIwMjUgUHJpY2UgTGlzdCIsInByb2R1Y3RzIjp7IjE1MDIwIjo5Ljk1LCIxNTA1MCI6MTQuOTV9LCJzZXJ2aWNlcyI6eyI1MTAwMSI6OTkuMCwiNTEwMjAiOjI5OS4wfX0=&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Example of the decoded payloads for two default entities:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;1694c954f8d9&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;entity_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1694c954f8d9&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;o&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme Dolphins Division&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;org_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;100129&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;acme-dolphin.sea&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;regions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Atlantic&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Pacific&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Indian&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;74d109b20248&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;entity_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;74d109b20248&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025 Price List&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;products&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;15020&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">9.95</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;15050&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">14.95</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;services&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;51001&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">99.0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;51020&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">299.0</span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Notes:</p>
+<ul>
+<li>Cedar policies can reference these entities directly by type and ID, just like any other entity present during evaluation.</li>
+<li>A common use case is defining an organization entity and writing policies that compare runtime attributes (e.g., <code>resource.org_id</code>) to attributes on the default entity.</li>
+</ul>
+<h3 id="entity-conflict-resolution">Entity Conflict Resolution<a class="headerlink" href="#entity-conflict-resolution" title="Permanent link">#</a></h3>
+<p>When request entities have the same UID as default entities, Cedarling automatically resolves conflicts by giving <strong>request entities precedence</strong> over default entities. This ensures that runtime data can override static configurations while maintaining consistency.</p>
+<p>Example: If a resource entity with UID <code>"org1"</code> is passed in an authorization request, and a default entity with the same UID exists, the resource entity's attributes will be used instead of the default entity's attributes.</p>
 <h2 id="cedar-policies-schema">Cedar Policies Schema<a class="headerlink" href="#cedar-policies-schema" title="Permanent link">#</a></h2>
 <p>The <code>policies</code> field describes the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with each policy requiring a <code>unique_policy_id</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -14760,10 +14872,10 @@
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <ul>
-<li><strong>unique_policy_id</strong>: (<em>String</em>) A uniqe policy ID used to for tracking and auditing purposes.</li>
+<li><strong>unique_policy_id</strong>: (<em>String</em>) A unique policy ID used to for tracking and auditing purposes.</li>
 <li><strong>name</strong> : (<em>String</em>) A name for the policy</li>
 <li><strong>description</strong> : (<em>String</em>) A brief description of cedar policy</li>
-<li><strong>creation_date</strong> :  (<em>String</em>) Policy creating date in <code>YYYY-MM-DDTHH:MM:SS.ssssss</code></li>
+<li><strong>creation_date</strong> : (<em>String</em>) Policy creating date in <code>YYYY-MM-DDTHH:MM:SS.ssssss</code></li>
 <li><strong>policy_content</strong> : (<em>String</em> | <em>Object</em>) The Cedar Policy. See <a href="#policy_content">policy_content</a> below.</li>
 </ul>
 <h3 id="policy_content"><code>policy_content</code><a class="headerlink" href="#policy_content" title="Permanent link">#</a></h3>
@@ -14856,6 +14968,7 @@
 <p>The Token Entity Metadata Schema defines how tokens are mapped, parsed, and transformed within Cedarling. It allows you to specify how to extract user IDs, roles, and other claims from a token using customizable parsers.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;workload_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aud | client_id&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sub | uid | email&quot;</span><span class="p">,</span>
@@ -14872,7 +14985,7 @@
 <span class="p">}</span>
 </code></pre></div>
 <ul>
-<li><code>"trusted"</code> (bool, Default: true): Allows to toggling configuration without deleting the object.</li>
+<li><code>"trusted"</code> (bool, Default: true): Allows toggling configuration without deleting the object.</li>
 <li><code>"entity_type_name"</code> (string, required): The type name of the Cedar Entity that will be created from the token; for example: "Jans::Access_token".</li>
 <li><code>"principal_mapping"</code> (array[string], Default: []): Describes where references of the created token entity should be included.</li>
 <li><code>"token_id"</code> (string, Default: "jti"): The JWT claim that will be used as the ID for the Token Entity.</li>
@@ -14965,29 +15078,30 @@ If none <code>role_mapping</code> defined the <code>Cedarling</code> will try to
 <span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Consumer IDP&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;access_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_token&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="nt">&quot;userinfo_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Userinfo_token&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Tx_token&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">              </span><span class="p">},</span>
+<span class="w">              </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_token&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span>
+<span class="w">              </span><span class="p">},</span>
+<span class="w">              </span><span class="nt">&quot;userinfo_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Userinfo_token&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;default_entities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;1694c954f8d9&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJlbnRpdHlfaWQiOiIxNjk0Yzk1NGY4ZDkiLCJvIjoiQWNtZSBEb2xwaGlucyBEaXZpc2lvbiIsIm9yZ19pZCI6IjEwMDEyOSIsImRvbWFpbiI6ImFjbWUtZG9scGhpbi5zZWEiLCJyZWdpb25zIjpbIkF0bGFudGljIiwiUGFjaWZpYyIsIkluZGlhbiJdfQ==&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;74d109b20248&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJlbnRpdHlfaWQiOiI3NGQxMDliMjAyNDgiLCJkZXNjcmlwdGlvbiI6IjIwMjUgUHJpY2UgTGlzdCIsInByb2R1Y3RzIjp7IjE1MDIwIjo5Ljk1LCIxNTA1MCI6MTQuOTV9LCJzZXJ2aWNlcyI6eyI1MTAwMSI6OTkuMCwiNTEwMjAiOjI5OS4wfX0=&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -15001,7 +15115,7 @@ trusted IDPs and to publish a policy store to a Github repository.</p>
 <h3 id="minimum-supported-cedar-policy-schema">Minimum supported <code>cedar-policy schema</code><a class="headerlink" href="#minimum-supported-cedar-policy-schema" title="Permanent link">#</a></h3>
 <p>Here is example of a minimum supported <code>cedar-policy schema</code>:</p>
 <div class="highlight"><pre><span></span><code>namespace Jans {
-  entity id_token = {&quot;aud&quot;: String,&quot;iss&quot;: String, &quot;sub&quot;: String};
+  entity id_token = {&quot;aud&quot;: Set&lt;String&gt;,&quot;iss&quot;: String, &quot;sub&quot;: String};
   entity Role;
   entity User in [Role] = {};
   entity Access_token = {&quot;aud&quot;: String,&quot;iss&quot;: String, &quot;jti&quot;: String, &quot;client_id&quot;: String};
@@ -15076,7 +15190,7 @@ trusted IDPs and to publish a policy store to a Github repository.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 17, 2025 15:32:37 UTC"><span class="timeago" datetime="2025-04-17T15:32:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 17, 2025 15:32:37 UTC">2025-04-17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 5, 2025 19:07:59 UTC"><span class="timeago" datetime="2025-09-05T19:07:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 5, 2025 19:07:59 UTC">2025-09-05</span>
   </span>
 
     

@@ -11120,6 +11120,8 @@
       
         
       
+        
+      
     
     
     
@@ -11153,6 +11155,29 @@
             Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/cedarling-terms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Terminology
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -11489,6 +11514,39 @@
   <a href="#attribute-mappings" class="md-nav__link">
     <span class="md-ellipsis">
       Attribute Mappings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#entity-merging-and-conflict-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entity Merging and Conflict Resolution
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Entity Merging and Conflict Resolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#merging-order-and-precedence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Merging Order and Precedence
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-entity-override-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: Entity Override Scenario
     </span>
   </a>
   
@@ -14560,6 +14618,39 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#entity-merging-and-conflict-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entity Merging and Conflict Resolution
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Entity Merging and Conflict Resolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#merging-order-and-precedence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Merging Order and Precedence
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-entity-override-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: Entity Override Scenario
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -14756,6 +14847,35 @@ entity User in [Role] = {
 </ul>
 <h3 id="attribute-mappings">Attribute Mappings<a class="headerlink" href="#attribute-mappings" title="Permanent link">#</a></h3>
 <p>Each <strong>claim</strong> in the JWT is automatically added to the JWT entity's attributes.</p>
+<h2 id="entity-merging-and-conflict-resolution">Entity Merging and Conflict Resolution<a class="headerlink" href="#entity-merging-and-conflict-resolution" title="Permanent link">#</a></h2>
+<p>Cedarling automatically merges entities from multiple sources during authorization requests. The merging process follows specific rules to ensure consistency and handle conflicts appropriately.</p>
+<h3 id="merging-order-and-precedence">Merging Order and Precedence<a class="headerlink" href="#merging-order-and-precedence" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>Default Entities</strong>: Loaded first from policy store configuration</li>
+<li><strong>Request Entities</strong>: Resource, issuers, roles, tokens, user, and workload entities</li>
+<li><strong>Conflict Resolution</strong>: Request entities override default entities when UID conflicts occur</li>
+</ol>
+<h3 id="example-entity-override-scenario">Example: Entity Override Scenario<a class="headerlink" href="#example-entity-override-scenario" title="Permanent link">#</a></h3>
+<p>When a resource entity has the same UID as a default entity:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Default entity in policy store</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;org1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;entity_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Organization&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Default Organization&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;is_active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Request resource entity</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Organization&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org1&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Same UID as default entity</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Updated Organization&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Different name</span>
+<span class="w">  </span><span class="nt">&quot;is_active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="c1">// Different status</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Result: The request entity's attributes (<code>"Updated Organization"</code>, <code>is_active: false</code>) will be used, overriding the default entity's values.</p>
 
 
 
@@ -14778,7 +14898,7 @@ entity User in [Role] = {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2025 17:44:56 UTC"><span class="timeago" datetime="2025-03-20T17:44:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2025 17:44:56 UTC">2025-03-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 5, 2025 19:07:59 UTC"><span class="timeago" datetime="2025-09-05T19:07:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 5, 2025 19:07:59 UTC">2025-09-05</span>
   </span>
 
     

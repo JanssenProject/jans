@@ -11118,6 +11118,8 @@
       
         
       
+        
+      
     
     
     
@@ -11151,6 +11153,29 @@
             Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/cedarling-terms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Terminology
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -14536,7 +14561,7 @@
 <p><a href="https://mozilla.github.io/uniffi-rs/latest/">UniFFI</a> (Universal Foreign Function Interface) is a tool developed by Mozilla to simplify cross-language bindings, primarily between Rust and other languages like Kotlin, Swift, and Python. It allows Rust libraries to be used in these languages without manually writing complex foreign function interface (FFI) bindings.</p>
 <p>Please refer to <a href="../cedarling-uniffi/">this document</a> for details on the structs, enums, and functions exposed by UniFFI bindings. This section outlines the process of generating the Kotlin binding for Cedarling using Cedarling UniFFI. The Kotlin binding is then wrapped in a Java class to enable convenient use in Java applications.</p>
 <h2 id="building-from-source">Building from Source<a class="headerlink" href="#building-from-source" title="Permanent link">#</a></h2>
-<p>Apart from using the Cedarling binding <a href="">using the package manager</a>, you 
+<p>Apart from using the Cedarling binding <a href="../../getting-started/java/#using-the-package-manager">using the package manager</a>, you 
 can also build it from source.</p>
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h3>
 <ul>
@@ -14545,20 +14570,26 @@ can also build it from source.</p>
 <li>Apache Maven: Install it from <a href="https://maven.apache.org/download.cgi">Apache Maven Website</a></li>
 </ul>
 <h3 id="building">Building<a class="headerlink" href="#building" title="Permanent link">#</a></h3>
-<ol>
-<li>
-<p>Build Cedarling by executing below command from <code>./jans/jans-cedarling</code> of cloned jans project:
+<ul>
+<li>Build Cedarling by executing below command from <code>./jans/jans-cedarling</code> of cloned jans project:
    <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span>cedarling_uniffi
 </code></pre></div>
-   In <code>target/release</code>, you should find the <code>libcedarling_uniffi.dylib</code> (if Mac OS), <code>libcedarling_uniffi.so</code> (if Linux OS), or <code>libcedarling_uniffi.dll</code> (if Windows OS) file, depending on the operating system you are using.
-   📦 You can use pre-built <code>libcedarling_uniffi.so</code> from the <a href="https://github.com/JanssenProject/jans/releases">Jans releases page</a>.</p>
-</li>
-<li>
-<p>Generate the bindings for Kotlin by running the command below. Replace <code>{build_file}</code> with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
+   In <code>target/release</code>, you should find the <code>libcedarling_uniffi.dylib</code> (if Mac OS), <code>libcedarling_uniffi.so</code> (if Linux OS), or <code>libcedarling_uniffi.dll</code> (if Windows OS) file, depending on the operating system you are using.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can use pre-built <code>libcedarling_uniffi.so</code> from the <a href="https://github.com/JanssenProject/jans/releases">Jans releases page</a> if you are using Linux OS.</p>
+</div>
+<ul>
+<li>Generate the bindings for Kotlin by running the command below. Replace <code>{build_file}</code> with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
    <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>run<span class="w"> </span>--bin<span class="w"> </span>uniffi-bindgen<span class="w"> </span>generate<span class="w"> </span>--library<span class="w"> </span>./target/release/<span class="o">{</span>build_file<span class="o">}</span><span class="w"> </span>--language<span class="w"> </span>kotlin<span class="w"> </span>--out-dir<span class="w"> </span>./bindings/cedarling-java/src/main/kotlin/io/jans/cedarling
-</code></pre></div>
-   📦 You can use pre-built kotlin binding (<code>cedarling_uniffi-kotlin-{version}.zip</code>) from the <a href="https://github.com/JanssenProject/jans/releases">Jans releases page</a>.</p>
-</li>
+</code></pre></div></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can use pre-built kotlin binding (<code>cedarling_uniffi-kotlin-{version}.zip</code>) from the <a href="https://github.com/JanssenProject/jans/releases">Jans releases page</a>.</p>
+</div>
+<ul>
 <li>
 <p>Copy the generated <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code> file to resource directory of the <code>cedarling-java</code> Maven project. Replace <code>{build_file}</code> in the below commad with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
    <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>./bindings/cedarling-java/src/main/resources
@@ -14570,18 +14601,32 @@ cp<span class="w"> </span>./target/release/<span class="o">{</span>build_file<sp
    <div class="highlight"><pre><span></span><code><span class="w"> </span>mvn<span class="w"> </span>clean<span class="w"> </span>install
 </code></pre></div></p>
 </li>
-</ol>
+</ul>
 <h2 id="recipes">Recipes<a class="headerlink" href="#recipes" title="Permanent link">#</a></h2>
 <h3 id="use-the-cedarling-java-binding-in-custom-scripts">Use the Cedarling Java binding in custom scripts<a class="headerlink" href="#use-the-cedarling-java-binding-in-custom-scripts" title="Permanent link">#</a></h3>
+<p>Here is a simple recipe to add scopes in access-token using update_token script only if the requesting client has <code>authorization_code</code> grant-type. We will use below policy for this:</p>
+<div class="highlight"><pre><span></span><code>@id<span class="o">(</span><span class="s2">&quot;Allow if the grant type is authorization_code&quot;</span><span class="o">)</span>
+permit<span class="w"> </span><span class="o">(</span>
+<span class="w">  </span>principal<span class="w"> </span>is<span class="w"> </span>Jans::Workload,
+<span class="w">  </span><span class="nv">action</span><span class="w"> </span><span class="o">==</span><span class="w"> </span>Jans::Action::<span class="s2">&quot;Execute&quot;</span>,
+<span class="w">  </span>resource<span class="w"> </span>is<span class="w"> </span>Jans::Application
+<span class="o">)</span>
+when<span class="w"> </span><span class="o">{</span>
+<span class="w">  </span>principal.grantTypes.contains<span class="o">(</span><span class="s2">&quot;authorization_code&quot;</span><span class="o">)</span>
+<span class="o">}</span><span class="p">;</span>
+</code></pre></div>
+<p><strong>Steps:</strong> </p>
+<ul>
+<li>Upload <a href="../cedarling-sample-inputs/#bootstrapjson">bootstrap.json</a> and <a href="../cedarling-sample-inputs/#policy-storejson">policy-store.json</a> at <code>/opt/jans/jetty/jans-auth/custom/static</code> location of the auth server. The <a href="https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen">Asset Screen</a> can be used to upload assets.</li>
+<li>Upload the generate <code>cedarling-java-{version}.jar</code> at <code>/opt/jans/jetty/jans-auth/custom/libs</code> location of the auth server.</li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This recipe is applicable to VM based installations, compatible with Jans 
-version 1.4.0 and earlier.</p>
+<p>Rather than building the cedarling-java-{version}.jar from source code, you can directly download 
+the latest version of the jar from the <a href="https://maven.jans.io/maven/io/jans/cedarling-java/">Maven repository</a>.</p>
 </div>
 <ul>
-<li>Upload <a href="../cedarling-sample-inputs/#bootstrapjson">bootstrap.json</a>, <a href="../cedarling-sample-inputs/#policy-storejson">policy-store.json</a>, <a href="../cedarling-sample-inputs/#actiontxt">action.txt</a>, <a href="../cedarling-sample-inputs/#contextjson">context.json</a>, <a href="../cedarling-sample-inputs/#principalsjson">principals.json</a> and <a href="../cedarling-sample-inputs/#resourcejson">resource.json</a> at <code>/opt/jans/jetty/jans-auth/custom/static</code> location of the auth server. The <a href="https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen">Asset Screen</a> can be used to upload assets.</li>
-<li>Upload the generate <code>cedarling-java-{version}-distribution.jar</code> at <code>/opt/jans/jetty/jans-auth/custom/libs</code> location of the auth server.</li>
-<li>The following Post Authn script has been created for calling Cedarling authorization. Add and enable the <a href="../cedarling-sample-inputs/#sample_cedarling_post_authntxt">Post Authn custom script</a> (in Java) with following Custom Properties:</li>
+<li>The following java <a href="../cedarling-sample-inputs/#sample_cedarling_update_tokenjava">Update Token</a> script has been created for calling Cedarling authorization. Enable the script with following Custom Properties:</li>
 </ul>
 <table>
 <thead>
@@ -14595,31 +14640,15 @@ version 1.4.0 and earlier.</p>
 <td>BOOTSTRAP_JSON_PATH</td>
 <td>./custom/static/bootstrap.json</td>
 </tr>
-<tr>
-<td>ACTION_FILE_PATH</td>
-<td>./custom/static/action.txt</td>
-</tr>
-<tr>
-<td>RESOURCE_FILE_PATH</td>
-<td>./custom/static/resource.json</td>
-</tr>
-<tr>
-<td>CONTEXT_FILE_PATH</td>
-<td>./custom/static/context.json</td>
-</tr>
-<tr>
-<td>PRINCIPALS_FILE_PATH</td>
-<td>./custom/static/principals.json</td>
-</tr>
 </tbody>
 </table>
 <ul>
 <li>
-<p>Map the script with client used to perform authentication.
+<p>Map the script with the client used to perform authentication.
    <img alt="" src="../../../assets/cedarling-adding-client-script.png" /></p>
 </li>
 <li>
-<p>The script runs after client authentication to invoke Cedarling authz.</p>
+<p>The script runs before access_token generation and includes <code>openid</code> and <code>profile</code> scopes into the token if the oidc client has <code>authorization_code</code> in grant-types. </p>
 </li>
 </ul>
 <h3 id="build-a-sample-java-project-using-the-kotlin-binding">Build a sample Java Project using the Kotlin binding<a class="headerlink" href="#build-a-sample-java-project-using-the-kotlin-binding" title="Permanent link">#</a></h3>
@@ -14694,7 +14723,7 @@ The method will execute the steps for Cedarling initialization with a sample boo
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 26, 2025 09:05:35 UTC"><span class="timeago" datetime="2025-08-26T09:05:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 26, 2025 09:05:35 UTC">2025-08-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 1, 2025 12:28:23 UTC"><span class="timeago" datetime="2025-09-01T12:28:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 1, 2025 12:28:23 UTC">2025-09-01</span>
   </span>
 
     
