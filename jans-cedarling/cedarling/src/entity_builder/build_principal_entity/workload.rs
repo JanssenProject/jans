@@ -4,8 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::*;
+
 use cedar_policy::Entity;
-use std::collections::HashSet;
+use std::collections::{HashSet};
 
 const WORKLOAD_ATTR_SRC_TKNS: &[&str] = &["access_token"];
 
@@ -164,10 +165,12 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -237,10 +240,12 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -295,9 +300,11 @@ mod test {
     fn can_build_workload_without_schema() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
+            None,
             None,
         )
         .expect("should init entity builder");

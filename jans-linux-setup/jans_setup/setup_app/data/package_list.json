@@ -72,6 +72,9 @@
     "optional": "",
     "mandatory": "apache2 apache2-mod_auth_openidc rsyslog openssl postgresql postgresql-server postgresql-contrib",
     "python": {
+      "more_itertools": "python3-more-itertools",
+      "zipp": "python3-zipp",
+      "importlib_metadata": "python3-importlib-metadata",
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel.yaml",
       "certifi": "python3-certifi",
@@ -83,6 +86,9 @@
     "optional": "",
     "mandatory": "apache2 apache2-mod_auth_openidc  rsyslog openssl postgresql postgresql-server postgresql-contrib",
     "python": {
+      "more_itertools": "python3-more-itertools",
+      "zipp": "python3-zipp",
+      "importlib_metadata": "python3-importlib-metadata",
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel.yaml",
       "certifi": "python3-certifi",
