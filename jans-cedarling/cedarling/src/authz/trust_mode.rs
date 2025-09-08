@@ -13,7 +13,7 @@ use crate::jwt::{Token, TokenClaimTypeError};
 /// # Trust Modes
 ///
 /// There are currently two trust modes:
-/// - None
+/// - Never
 /// - Strict
 ///
 /// # Strict Mode
