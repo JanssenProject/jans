@@ -239,7 +239,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
                                      String authenticatorType, String errorReason, 
                                      MetricsDataCreator dataCreator) {
         if (appConfiguration.isFido2DeviceInfoCollection()) {
-            Fido2MetricsData metricsData = dataCreator.create(username, status, request, startTime, authenticatorType);
+            Fido2MetricsData metricsData = dataCreator.create(username, status, request, authenticatorType);
             
             if (!ATTEMPT_STATUS.equals(status)) {
                 long duration = System.currentTimeMillis() - startTime;
@@ -262,7 +262,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      */
     @FunctionalInterface
     private interface MetricsDataCreator {
-        Fido2MetricsData create(String username, String status, HttpServletRequest request, long startTime, String authenticatorType);
+        Fido2MetricsData create(String username, String status, HttpServletRequest request, String authenticatorType);
     }
 
     // ========== FIDO2 PASSKEY FALLBACK METRICS ==========
@@ -313,37 +313,23 @@ public class MetricService extends io.jans.service.metric.MetricService {
     /**
      * Create registration metrics data object
      */
-    private Fido2MetricsData createRegistrationMetricsData(String username, String status, HttpServletRequest request, long startTime, String authenticatorType) {
-        Fido2MetricsData metricsData = new Fido2MetricsData();
-        metricsData.setOperationType("REGISTRATION");
-        metricsData.setOperationStatus(status);
-        metricsData.setUsername(username);
-        metricsData.setStartTime(LocalDateTime.now());
-        metricsData.setEndTime(LocalDateTime.now());
-        
-        if (authenticatorType != null) {
-            metricsData.setAuthenticatorType(authenticatorType);
-            incrementFido2Counter(Fido2MetricType.FIDO2_DEVICE_TYPE_USAGE);
-        }
-        
-        if (request != null && appConfiguration.isFido2DeviceInfoCollection()) {
-            try {
-                metricsData.setDeviceInfo(deviceInfoExtractor.extractDeviceInfo(request));
-            } catch (Exception e) {
-                log.debug("Failed to extract device info: {}", e.getMessage());
-                metricsData.setDeviceInfo(deviceInfoExtractor.createMinimalDeviceInfo());
-            }
-        }
-        
-        return metricsData;
+    private Fido2MetricsData createRegistrationMetricsData(String username, String status, HttpServletRequest request, String authenticatorType) {
+        return createMetricsData("REGISTRATION", username, status, request, authenticatorType);
     }
 
     /**
      * Create authentication metrics data object
      */
-    private Fido2MetricsData createAuthenticationMetricsData(String username, String status, HttpServletRequest request, long startTime, String authenticatorType) {
+    private Fido2MetricsData createAuthenticationMetricsData(String username, String status, HttpServletRequest request, String authenticatorType) {
+        return createMetricsData("AUTHENTICATION", username, status, request, authenticatorType);
+    }
+
+    /**
+     * Common method to create metrics data objects
+     */
+    private Fido2MetricsData createMetricsData(String operationType, String username, String status, HttpServletRequest request, String authenticatorType) {
         Fido2MetricsData metricsData = new Fido2MetricsData();
-        metricsData.setOperationType("AUTHENTICATION");
+        metricsData.setOperationType(operationType);
         metricsData.setOperationStatus(status);
         metricsData.setUsername(username);
         metricsData.setStartTime(LocalDateTime.now());
