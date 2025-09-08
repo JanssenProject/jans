@@ -10,6 +10,7 @@ import io.jans.configapi.core.interceptor.RequestAuditInterceptor;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.model.configuration.AuditLogConf;
+import io.jans.configapi.model.configuration.ObjectDetails;
 import io.jans.configapi.util.AuthUtil;
 
 import jakarta.annotation.Priority;
@@ -63,10 +64,10 @@ public class AuditLogInterceptor {
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
             String method = request.getMethod();
-            LOG.trace(" method:{}, ignoreMethod(method, auditLogConf):{}", method, ignoreMethod(method, auditLogConf));
+            LOG.trace(" method:{}, ignoreMethod(method, auditLogConf):{}, ignoreAnnotation(method, auditLogConf):{}", method, ignoreHttpMethod(method, auditLogConf), ignoreAnnotation(method, auditLogConf));
 
             // Log if enabled
-            if (auditLogConf.isEnabled() && !ignoreMethod(method, auditLogConf)) {
+            if (auditLogConf.isEnabled() && !ignoreHttpMethod(method, auditLogConf)) {
 
                 // Request audit
                 String client = httpHeaders.getHeaderString("jans-client");
@@ -113,7 +114,12 @@ public class AuditLogInterceptor {
                 Object obj = ctxParameters[i];
                 if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
                         || !obj.toString().toUpperCase().contains("SECRET"))) {
-                    AUDIT_LOG.error(obj);
+               
+
+                    LOG.trace("ignoreObject(propertyName, obj, auditLogConf):{} ",
+                            ignoreObject(propertyName, obj, auditLogConf));
+
+                    AUDIT_LOG.error("{}:{}", propertyName, obj);
                 }
             }
         }
@@ -123,7 +129,7 @@ public class AuditLogInterceptor {
         return this.authUtil.getAuditLogConf();
     }
 
-    private boolean ignoreMethod(String method, AuditLogConf auditLogConf) {
+    private boolean ignoreHttpMethod(String method, AuditLogConf auditLogConf) {
         LOG.debug("Checking if method to be ignored - method:{}, auditLogConf:{}", method, auditLogConf);
 
         if (StringUtils.isBlank(method) || auditLogConf == null || auditLogConf.getIgnoreHttpMethod() == null
@@ -131,6 +137,55 @@ public class AuditLogInterceptor {
             return false;
         } else if (auditLogConf.getIgnoreHttpMethod().contains(method)) {
             return true;
+        }
+
+        return false;
+    }
+
+    private boolean ignoreAnnotation(String resourceMethod, AuditLogConf auditLogConf) {
+        LOG.trace("Checking if resource method to be ignored - resourceMethod:{}, auditLogConf:{}",
+                resourceMethod, auditLogConf);
+
+        if (StringUtils.isBlank(resourceMethod) || auditLogConf == null || auditLogConf.getIgnoreAnnotation() == null
+                || auditLogConf.getIgnoreAnnotation().isEmpty()) {
+            return false;
+        } else if (auditLogConf.getIgnoreAnnotation().contains(resourceMethod)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean ignoreObject(String objectName, Object objectValue, AuditLogConf auditLogConf) {
+        LOG.trace("Checking if object to be ignored - objectName:{}, objectValue:{}, auditLogConf:{}", objectName,
+                objectValue, auditLogConf);
+
+        if (StringUtils.isBlank(objectName) || auditLogConf == null || auditLogConf.getIgnoreObjectMapping() == null
+                || auditLogConf.getIgnoreObjectMapping().isEmpty()) {
+            return false;
+        }
+
+        ObjectDetails objectDetails = auditLogConf.getIgnoreObjectMapping().stream().filter(e -> (e!=null && e.getName()!=null && e.getName().equalsIgnoreCase(objectName)))
+                .findFirst().orElse(null);
+
+        if (objectDetails == null) {
+            return false;
+        }
+        LOG.trace(
+                "objectName:{}, objectValue:{}, objectDetails:{}, objectDetails.getText():{}, objectDetails.getText().contains(objectValue.toString()):{}",
+                objectName, objectValue, objectDetails, objectDetails.getText(),
+                objectDetails.getText().contains(objectValue.toString()));
+
+        if (objectName.equalsIgnoreCase(objectDetails.getName())) {
+
+            if (objectDetails.getText() == null || objectDetails.getText().isEmpty()) {
+                return true;
+            }
+
+            if ((StringUtils.isNotBlank(objectValue.toString()))
+                    && (objectDetails.getText() != null && objectDetails.getText().contains(objectValue.toString()))) {
+                return true;
+            }
         }
 
         return false;
@@ -159,6 +214,7 @@ public class AuditLogInterceptor {
     }
 
     private String getResource(String path) {
+        LOG.trace(" path:{} ", path);
         if (StringUtils.isNotBlank(path)) {
             path = path.replace("/", "-");
         }
