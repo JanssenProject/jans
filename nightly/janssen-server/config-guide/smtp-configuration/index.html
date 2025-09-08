@@ -14784,16 +14784,30 @@ Note:  <code>SMTP Password</code> should be an App password and not a web login 
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
 <h3 id="smpt-screen">SMPT Screen<a class="headerlink" href="#smpt-screen" title="Permanent link">#</a></h3>
-<p>Navigate to <code>Auth Server</code> -&gt; <code>SMPT</code> to open the SMPT screen as shown
-in the image below.</p>
-<p><img alt="image" src="../../../assets/tui-smtp.png" /></p>
+<p>Navigate to <code>Auth Server</code> -&gt; <code>SMPT</code> to open the SMPT screen.</p>
+<p>The SMTP screen displays the input fields. Please enter the following data in these fields.</p>
 <ul>
-<li>This screen shows the current SMTP server configuration.</li>
-<li>After changing the SMPT data, update the SMPT server using the <code>Save</code> button.</li>
-<li>Test the SMPTS server using the <code>Test</code> button, and the result will be displayed.</li>
+<li><strong>SMTP Host:</strong> <code>smtp.gmail.com</code></li>
+<li><strong>SMTP Port:</strong> <code>587</code></li>
+<li><strong>StartTls:</strong> <code>true</code></li>
+<li><strong>From Name:</strong> Enter the sender’s name</li>
+<li><strong>From Email Address:</strong> Enter the sender’s email address</li>
+<li><strong>SMTP User name:</strong> Your full Gmail address</li>
+<li><strong>Requires Authentication:</strong> <code>true</code></li>
+<li><strong>SMTP password:</strong> Add <code>App Password</code> form gmail account <ul>
+<li>Since you are using Gmail, an <code>App Password</code> is required for authentication. To create an App Password, follow the instructions in the Gmail Support <a href="https://support.google.com/mail/answer/185833?hl=en">documentation</a>.</li>
 </ul>
-<p>The test result image is shown below.</p>
-<p><img alt="image" src="../../../assets/tui-smtp-result.png" /></p>
+</li>
+<li><strong>Trust Server:</strong> <code>true</code></li>
+<li>
+<p>After changing the SMPT data, update the SMPT server using the <code>Save</code> button.</p>
+<p><img alt="image" src="../../../assets/jans-smtp-config-screen.png" /></p>
+</li>
+<li>
+<p>Test the SMTP server using the <code>Test</code> button, and the result will be displayed as shown below.</p>
+<p><img alt="image" src="../../../assets/jans-smtp-test-success.png" /></p>
+</li>
+</ul>
 <h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
 <p>Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring the SMTP. Endpoint details are published in the <a href="../../reference/openapi/">Swagger
@@ -14820,7 +14834,7 @@ document</a>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 29, 2024 09:13:16 UTC"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 29, 2024 09:13:16 UTC">2024-10-29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 8, 2025 09:33:56 UTC"><span class="timeago" datetime="2025-09-08T09:33:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 8, 2025 09:33:56 UTC">2025-09-08</span>
   </span>
 
     
