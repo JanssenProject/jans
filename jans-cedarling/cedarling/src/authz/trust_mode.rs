@@ -13,13 +13,13 @@ use crate::jwt::{Token, TokenClaimTypeError};
 /// # Trust Modes
 ///
 /// There are currently two trust modes:
-/// - None
+/// - Never
 /// - Strict
 ///
 /// # Strict Mode
 ///
 /// Strict mode requires the following:
-/// - `id_token.aud` == `access_token.client_id`
+/// - `id_token.aud` contains `access_token.client_id`
 /// - if a Userinfo token is present:
 ///     - `userinfo_token.aud` == `access_token.client_id`
 ///     - `userinfo_token.sub` == `id_token.sub`
@@ -34,9 +34,8 @@ pub fn validate_id_tkn_trust_mode(
         .ok_or(IdTokenTrustModeError::MissingIdToken)?;
 
     let access_tkn_client_id = get_tkn_claim_as_str(access_tkn, "client_id")?;
-    let id_tkn_aud = get_tkn_claim_as_str(id_tkn, "aud")?;
-
-    if access_tkn_client_id != id_tkn_aud {
+    
+    if !aud_claim_contains_value(id_tkn, &access_tkn_client_id)? {
         return Err(IdTokenTrustModeError::AccessTokenClientIdMismatch);
     }
 
@@ -44,18 +43,44 @@ pub fn validate_id_tkn_trust_mode(
         Some(token) => token,
         None => return Ok(()),
     };
-    let userinfo_tkn_aud = get_tkn_claim_as_str(userinfo_tkn, "aud")?;
-
-    if userinfo_tkn_aud != id_tkn_aud {
-        return Err(IdTokenTrustModeError::SubMismatchIdTokenUserinfo);
-    }
-    if userinfo_tkn_aud != access_tkn_client_id {
+    
+    if !aud_claim_contains_value(userinfo_tkn, &access_tkn_client_id)? {
         return Err(IdTokenTrustModeError::ClientIdUserinfoAudMismatch);
     }
 
     Ok(())
 }
 
+fn aud_claim_contains_value(
+    token: &Token,
+    expected_value: &str,
+) -> Result<bool, IdTokenTrustModeError> {
+    token
+        .get_claim("aud")
+        .ok_or_else(|| {
+            IdTokenTrustModeError::MissingRequiredClaim("aud".to_string(), token.name.clone())
+        })
+        .and_then(|claim| {
+            match claim.value() {
+                serde_json::Value::String(s) => {
+                    // String aud claim - direct comparison
+                    Ok(s == expected_value)
+                },
+                serde_json::Value::Array(arr) => {
+                    // Array aud claim - check if it contains the expected value
+                    Ok(arr.iter()
+                        .filter_map(|item| item.as_str())
+                        .any(|s| s == expected_value))
+                },
+                _ => Err(IdTokenTrustModeError::TokenClaimTypeError(
+                    token.name.clone(),
+                    TokenClaimTypeError::type_mismatch("aud", "string or array", claim.value())
+                ))
+            }
+        })
+}
+
+/// Gets a claim value as a string (for non-aud claims)
 fn get_tkn_claim_as_str(
     token: &Token,
     claim_name: &str,
@@ -108,7 +133,7 @@ mod test {
         );
         let id_token = Token::new(
             "id_token",
-            serde_json::from_value(json!({"aud": "some-id-123"})).expect("valid token claims"),
+            serde_json::from_value(json!({"aud": ["some-id-123"]})).expect("valid token claims"),
             None,
         );
         let tokens = HashMap::from([
@@ -221,7 +246,7 @@ mod test {
         );
         let id_token = Token::new(
             "id_token",
-            serde_json::from_value(json!({"aud": "another-id-123"})).expect("valid token claims"),
+            serde_json::from_value(json!({"aud": ["another-id-123"]})).expect("valid token claims"),
             None,
         );
         let tokens = HashMap::from([
@@ -246,7 +271,7 @@ mod test {
         );
         let id_token = Token::new(
             "id_token",
-            serde_json::from_value(json!({"aud": "some-id-123"})).expect("valid token claims"),
+            serde_json::from_value(json!({"aud": ["some-id-123"]})).expect("valid token claims"),
             None,
         );
         let userinfo_token = Token::new(
@@ -272,7 +297,7 @@ mod test {
         );
         let id_token = Token::new(
             "id_token",
-            serde_json::from_value(json!({"aud": "some-id-123"})).expect("valid token claims"),
+            serde_json::from_value(json!({"aud": ["some-id-123"]})).expect("valid token claims"),
             None,
         );
         let userinfo_token = Token::new(
@@ -298,8 +323,9 @@ mod test {
         )
     }
 
+
     #[test]
-    fn errors_when_access_tkn_client_id_userinfo_tkn_aud_mismatch() {
+    fn errors_when_userinfo_tkn_aud_does_not_contain_client_id() {
         let access_token = Token::new(
             "access_token",
             serde_json::from_value(json!({"client_id": "some-id-123"}))
@@ -308,7 +334,7 @@ mod test {
         );
         let id_token = Token::new(
             "id_token",
-            serde_json::from_value(json!({"aud": "some-id-123"})).expect("valid token claims"),
+            serde_json::from_value(json!({"aud": ["some-id-123"]})).expect("valid token claims"),
             None,
         );
         let userinfo_token = Token::new(
@@ -323,8 +349,8 @@ mod test {
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
-            matches!(err, IdTokenTrustModeError::SubMismatchIdTokenUserinfo),
-            "expected error due to the id_token's `aud` not matching with the userinfo_token's `aud`, got: {:?}",
+            matches!(err, IdTokenTrustModeError::ClientIdUserinfoAudMismatch),
+            "expected error due to userinfo token aud not containing client_id, got: {:?}",
             err
         )
     }
