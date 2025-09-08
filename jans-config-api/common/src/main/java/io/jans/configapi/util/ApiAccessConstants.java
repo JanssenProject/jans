@@ -112,5 +112,10 @@ public class ApiAccessConstants {
     public static final String JANS_ASSET_DELETE_ACCESS = "https://jans.io/oauth/config/jans_asset-delete";
     
     public static final String JANS_AUDIT_READ_ACCESS  = "https://jans.io/oauth/config/audit-read";
+    
+    public static final String SSA_READ_ACCESS = "https://jans.io/oauth/config/ssa.readonly";
+    public static final String SSA_WRITE_ACCESS = "https://jans.io/oauth/config/ssa.write";
+    public static final String SSA_DELETE_ACCESS = "https://jans.io/oauth/config/ssa.delete";
+
 
 }

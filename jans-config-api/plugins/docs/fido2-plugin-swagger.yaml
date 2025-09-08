@@ -580,6 +580,9 @@ components:
         unfinishedRequestExpiration:
           type: integer
           format: int32
+        authenticationHistoryExpiration:
+          type: integer
+          format: int32
         metadataRefreshInterval:
           type: integer
           format: int32
