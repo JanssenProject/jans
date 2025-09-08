@@ -168,7 +168,7 @@ RUN ln -sf /usr/lib/jvm/jre /opt/java
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
 
 # adjust ownership and permission
-RUN chmod -R g=u /etc/certs \
+RUN chown -R 1000:0 /etc/certs \
     && chmod -R g=u /etc/jans \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 /opt/kc-scheduler \
