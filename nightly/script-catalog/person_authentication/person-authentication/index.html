@@ -15096,7 +15096,7 @@ flow can be built using a custom script.</p>
 <h3 id="a-custom-script">A. Custom script<a class="headerlink" href="#a-custom-script" title="Permanent link">#</a></h3>
 <p>The <strong>PersonAuthenticationType</strong> script is described by a java interface 
 whose methods should be overridden to implement an authentication workflow.
-The <a href="../scripts/person-authentication-interface">article</a> talks about these
+The <a href="../person-authentication-interface/">article</a> talks about these
 methods in detail and the psuedo code 
 for each method.</p>
 <h3 id="b-ui-pages">B. UI pages:<a class="headerlink" href="#b-ui-pages" title="Permanent link">#</a></h3>
@@ -15150,11 +15150,11 @@ pages.</p>
 <h3 id="c-business-logic-in-custom-script">C. Business logic in Custom script:<a class="headerlink" href="#c-business-logic-in-custom-script" title="Permanent link">#</a></h3>
 <p>Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. 
 The most important aspects of business logic are implemented through a set of 
-beans. Details and examples of this can be found in this <a href="../managed-beans.md">article</a></p>
+beans. Details and examples of this can be found in this <a href="../../../janssen-server/developer/managed-beans/">article</a></p>
 <h3 id="d-third-party-libraries-for-use-in-the-custom-script">D. Third party libraries for use in the custom script<a class="headerlink" href="#d-third-party-libraries-for-use-in-the-custom-script" title="Permanent link">#</a></h3>
 <p>Java or Python libraries to be imported and used very easily. Remember, you 
 can import a python library only if it has been written in "pure python".
-More details of this mentioned <a href="../interception-scripts.md#using-python-libraries-in-a-script">here</a></p>
+More details of this mentioned <a href="../../janssen-server/developer/interception-scripts.md#using-python-libraries-in-a-script">here</a></p>
 <h3 id="e-configuring-the-acr-parameter-in-the-jans-auth-server">E. Configuring the <code>acr</code> parameter in the Jans-auth server:<a class="headerlink" href="#e-configuring-the-acr-parameter-in-the-jans-auth-server" title="Permanent link">#</a></h3>
 <p>The <code>acr</code> parameter can be configured in the following ways :</p>
 <h4 id="default-authentication-method">Default authentication method:<a class="headerlink" href="#default-authentication-method" title="Permanent link">#</a></h4>
@@ -15314,7 +15314,7 @@ the form of authentication specified in this field.</p>
 <h3 id="a-implementing-2fa-authentication-mechanisms">A. Implementing 2FA authentication mechanisms<a class="headerlink" href="#a-implementing-2fa-authentication-mechanisms" title="Permanent link">#</a></h3>
 <ol>
 <li>
-<p><a href="../../../script-catalog/person_authentication/fido2-external-authenticator/README">FIDO2</a> : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer</p>
+<p><a href="../fido2-external-authenticator/">FIDO2</a> : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer</p>
 </li>
 <li>
 <p><a href="../../../script-catalog/person_authentication/otp-external-authenticator">OTP authentication</a> : Authentication mechanism using an app like <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=en">Google authenticator</a>, <a href="https://freeotp.github.io/">FreeOTP</a> or <a href="https://authy.com/">Authy</a> that implements the open standards <a href="https://tools.ietf.org/html/rfc4226">HOTP</a> and <a href="https://tools.ietf.org/html/rfc6238">TOTP</a></p>
@@ -15336,7 +15336,7 @@ number of steps can be varied depending on the context or business requirement.<
 credentials from popular <strong>Social Identity providers</strong> or 
 <strong>Inbound Identity Providers</strong> like Facebook, Google and Apple. After users 
 authenticate, thier Social Identity Provider credentials are provisioned into 
-the Jans-auth server. More on this topic in this <a href="../../recipes/social-login.md">article</a></p>
+the Jans-auth server. More on this topic in this <a href="../../../janssen-server/recipes/social-login/">article</a></p>
 <h3 id="d-proactively-perform-fraud-detection">D. Proactively perform fraud detection<a class="headerlink" href="#d-proactively-perform-fraud-detection" title="Permanent link">#</a></h3>
 <ol>
 <li>Impossible travel</li>
@@ -15448,7 +15448,7 @@ The <code>&lt;f:viewAction action="#{authenticator.authenticateWithOutcome}" /&g
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 31, 2025 10:31:05 UTC"><span class="timeago" datetime="2025-05-31T10:31:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 31, 2025 10:31:05 UTC">2025-05-31</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 9, 2025 04:26:17 UTC"><span class="timeago" datetime="2025-09-09T04:26:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 9, 2025 04:26:17 UTC">2025-09-09</span>
   </span>
 
     
