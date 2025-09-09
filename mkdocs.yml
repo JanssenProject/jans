@@ -328,6 +328,8 @@ nav:
       - Access Evaluation: script-catalog/access_evaluation/access-evaluation.md
       - Access Evaluation Discovery: script-catalog/access_evaluation/access-evaluation-discovery.md
       - Logout Status JWT: script-catalog/logout_status_jwt/logout-status-jwt.md
+      - Cookie: script-catalog/cookie/cookie.md
+      - Discovery: script-catalog/discovery/discovery.md
       - Select Account: script-catalog/select_account/select-account.md
       - Spontaneous Scope: script-catalog/spontaneous_scope/spontaneous-scope.md
       - Fido2 Extension: script-catalog/fido2_extension/fido2-extension.md
@@ -427,6 +429,7 @@ nav:
     - Kotlin: 'cedarling/getting-started/kotlin.md'
     - Swift: 'cedarling/getting-started/swift.md'
   - Reference:
+    - Terminology: 'cedarling/intro/cedarling-terms.md'
     - Interfaces: 'cedarling/cedarling-interfaces.md'
     - Policy Store: 'cedarling/cedarling-policy-store.md'
     - Properties: 'cedarling/cedarling-properties.md'
@@ -438,11 +441,10 @@ nav:
     - Cedarling Entities: 'cedarling/cedarling-entities.md'
   - Developer:
     - Rust: 'cedarling/cedarling-rust.md'
-    - WASM: 'cedarling/cedarling-wasm.md'
     - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
-    - Kotlin/ Java: 'cedarling/uniffi/cedarling-kotlin.md'
+    - Kotlin and Java: 'cedarling/uniffi/cedarling-kotlin.md'
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
       - Android Apps: 'cedarling/uniffi/cedarling-android.md'

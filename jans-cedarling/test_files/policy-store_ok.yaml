@@ -62,7 +62,7 @@ policy_stores:
                 resource is Jans::Issue
             )when{
                 principal.country == resource.country &&
-                principal.id_token.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
+                principal.id_token.aud.contains("5b4487c4-8db1-409d-a653-f907b8094039") 
             };
       555da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         cedar_version: v4.0.0
@@ -111,7 +111,7 @@ policy_stores:
           entity Id_token = {
             iss: Jans::TrustedIssuer,
             sub: String,
-            aud: String,
+            aud: Set<String>,
           };
           entity Userinfo_token  = {
             iss: Jans::TrustedIssuer,

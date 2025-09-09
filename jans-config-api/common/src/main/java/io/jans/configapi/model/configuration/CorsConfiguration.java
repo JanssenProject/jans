@@ -1,10 +1,16 @@
 package io.jans.configapi.model.configuration;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.Optional;
 import jakarta.servlet.*;
 
-public class CorsConfiguration {
+public class CorsConfiguration implements Serializable {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     /**
      * A {@link Collection} of origins consisting of zero or more origins that are

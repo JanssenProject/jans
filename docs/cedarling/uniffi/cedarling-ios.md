@@ -19,11 +19,7 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
    ```bash
    cargo build -r -p cedarling_uniffi
    ```
-   In `target/release`, you should find the `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file, depending on the operating system you are using.
-
-   - **.so** (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.
-   - **.dylib** (Dynamic Library) – This is the shared library format for macOS.
-   - **.dll** (Dynamic Link Library) - The shared library format used in Windows.
+   In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
 
 3. Generate the bindings for Swift by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
    ```bash

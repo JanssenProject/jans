@@ -58,7 +58,7 @@
 		<aws.sns.version>1.12.708</aws.sns.version>
 		<jackrabbit.version>2.21.13</jackrabbit.version>
 
-		<bc.version>1.78</bc.version>
+		<bc.version>1.79</bc.version>
 		<junit.jupiter.version>5.9.2</junit.jupiter.version>
 		<mockito.version>5.1.1</mockito.version>
 
@@ -345,7 +345,7 @@
 			<dependency>
 				<groupId>org.eclipse.angus</groupId>
 				<artifactId>angus-mail</artifactId>
-				<version>2.0.3</version>
+				<version>2.0.4</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.mail</groupId>

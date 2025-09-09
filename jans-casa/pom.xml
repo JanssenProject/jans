@@ -31,9 +31,9 @@
         <jackson.version>2.18.1</jackson.version>
         <zk.version>10.0.0-jakarta</zk.version>
         <ldapsdk.version>6.0.8</ldapsdk.version>
-        <resteasy.version>6.0.3.Final</resteasy.version>
+        <resteasy.version>6.2.12.Final</resteasy.version>
         <tika.version>3.0.0</tika.version>
-        <bc.version>1.79</bc.version>
+        <bc.version>1.80</bc.version>
         <!-- SonarCloud integration properties -->
         <sonar.projectKey>JanssenProject_jans-casa</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -92,7 +92,7 @@
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-bom</artifactId>
-                <version>1.68.1</version>
+                <version>1.74.0</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -244,7 +244,7 @@
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>4.8.6.5</version>
+                    <version>4.9.4.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

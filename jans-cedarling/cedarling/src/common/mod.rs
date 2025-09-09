@@ -11,6 +11,7 @@ pub(crate) mod app_types;
 pub(crate) mod cedar_schema;
 pub(crate) mod json_rules;
 
+pub mod issuer_utils;
 pub mod policy_store;
 
 /// Used for decoding the policy and schema metadata
