@@ -26,8 +26,6 @@ import org.slf4j.Logger;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Store and retrieve metric
@@ -65,8 +63,6 @@ public class MetricService extends io.jans.service.metric.MetricService {
     @Inject
     private Logger log;
 
-    // Dedicated executor for async metrics processing to avoid blocking main operations
-    private final transient ExecutorService metricsExecutor = Executors.newFixedThreadPool(2);
     
     private static final String UNKNOWN_ERROR = "UNKNOWN";
     private static final String ATTEMPT_STATUS = "ATTEMPT";
@@ -159,7 +155,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             } catch (Exception e) {
                 log.warn("Failed to record passkey registration {} metrics: {}", status.toLowerCase(), e.getMessage());
             }
-        }, metricsExecutor);
+        });
     }
 
     // ========== FIDO2 PASSKEY AUTHENTICATION METRICS ==========
@@ -217,7 +213,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             } catch (Exception e) {
                 log.warn("Failed to record passkey authentication {} metrics: {}", status.toLowerCase(), e.getMessage());
             }
-        }, metricsExecutor);
+        });
     }
 
     /**
@@ -298,7 +294,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             } catch (Exception e) {
                 log.warn("Failed to record passkey fallback metrics: {}", e.getMessage());
             }
-        }, metricsExecutor);
+        });
     }
 
     // ========== PRIVATE HELPER METHODS ==========
@@ -408,12 +404,4 @@ public class MetricService extends io.jans.service.metric.MetricService {
         log.debug("FIDO2 Timer updated: {} - {} ms", fido2MetricType.getMetricName(), duration);
     }
 
-    /**
-     * Cleanup method to shutdown metrics executor
-     */
-    public void cleanup() {
-        if (metricsExecutor != null && !metricsExecutor.isShutdown()) {
-            metricsExecutor.shutdown();
-        }
-    }
 }

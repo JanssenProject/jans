@@ -160,14 +160,4 @@ class MetricServiceTest {
         });
     }
 
-    @Test
-    void testCleanup() {
-        // When
-        metricService.cleanup();
-
-        // Then - should complete without exception
-        assertDoesNotThrow(() -> {
-            // Cleanup should complete successfully
-        });
-    }
 }
