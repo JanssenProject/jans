@@ -10,7 +10,6 @@
 
 use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
-use crate::common::json_rules::ApplyRuleError;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::entity_builder::*;
 use crate::jwt::{self, Token};
@@ -32,11 +31,13 @@ use uuid7::Uuid;
 
 mod authorize_result;
 mod build_ctx;
+mod errors;
 mod trust_mode;
 
 pub(crate) mod request;
 
 pub use authorize_result::AuthorizeResult;
+pub use errors::*;
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -511,12 +512,6 @@ impl Authz {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum AuthzServiceInitError {
-    #[error(transparent)]
-    InitEntityBuilder(#[from] InitEntityBuilderError),
-}
-
 /// Helper struct to hold named parameters for [`Authz::execute_authorize`] method.
 struct ExecuteAuthorizeParameters<'a> {
     entities: &'a Entities,
@@ -539,22 +534,27 @@ pub struct AuthorizeEntitiesData {
 
 impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
-    /// 
+    ///
     /// This method merges request entities with default entities, where request entities
     /// take precedence over default entities in case of UID conflicts.
     fn into_iter(self) -> impl Iterator<Item = Entity> {
         let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::new();
-        
+
         // Add default entities first
         merged_entities.extend(self.default_entities.into_values().map(|e| (e.uid(), e)));
-        
+
         // Add request entities (these will override default entities if conflicts exist)
         merged_entities.extend(vec![self.resource].into_iter().map(|e| (e.uid(), e)));
         merged_entities.extend(self.issuers.into_iter().map(|e| (e.uid(), e)));
         merged_entities.extend(self.roles.into_iter().map(|e| (e.uid(), e)));
         merged_entities.extend(self.tokens.into_values().map(|e| (e.uid(), e)));
-        merged_entities.extend(vec![self.user, self.workload].into_iter().flatten().map(|e| (e.uid(), e)));
-        
+        merged_entities.extend(
+            vec![self.user, self.workload]
+                .into_iter()
+                .flatten()
+                .map(|e| (e.uid(), e)),
+        );
+
         merged_entities.into_values()
     }
 
@@ -575,90 +575,34 @@ impl AuthorizeEntitiesData {
     /// - **Default Entities**: Entities loaded from the policy store configuration
     ///
     /// Only entities that have been built will be included
-    /// 
+    ///
     /// Note: This method uses the same merging logic as `into_iter()` to ensure consistency
     /// and avoid duplicate entity UIDs in the context.
     fn built_entities(&self) -> BuiltEntities {
         // Use the same merging logic as into_iter() to ensure consistency
         let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::new();
-        
+
         // Add default entities first
         merged_entities.extend(self.default_entities.values().map(|e| (e.uid(), e.clone())));
-        
+
         // Add request entities, overriding any conflicting default entities
-        merged_entities.extend(vec![&self.resource].into_iter().map(|e| (e.uid(), e.clone())));
+        merged_entities.extend(
+            vec![&self.resource]
+                .into_iter()
+                .map(|e| (e.uid(), e.clone())),
+        );
         merged_entities.extend(self.issuers.iter().map(|e| (e.uid(), e.clone())));
         merged_entities.extend(self.roles.iter().map(|e| (e.uid(), e.clone())));
         merged_entities.extend(self.tokens.values().map(|e| (e.uid(), e.clone())));
-        merged_entities.extend(vec![&self.user, &self.workload].into_iter().flatten().map(|e| (e.uid(), e.clone())));
-        
+        merged_entities.extend(
+            vec![&self.user, &self.workload]
+                .into_iter()
+                .flatten()
+                .map(|e| (e.uid(), e.clone())),
+        );
+
         // Return built entities from merged collection
         BuiltEntities::from_iter(merged_entities.values().map(|e| e.uid()))
-    }
-}
-
-/// Error type for Authorization Service
-#[derive(thiserror::Error, Debug)]
-pub enum AuthorizeError {
-    /// Error encountered while processing JWT token data
-    #[error(transparent)]
-    ProcessTokens(#[from] jwt::JwtProcessingError),
-    /// Error encountered while parsing Action to EntityUid
-    #[error("could not parse action: {0}")]
-    Action(cedar_policy::ParseErrors),
-    /// Error encountered while validating context according to the schema
-    #[error("could not create context: {0}")]
-    CreateContext(#[from] cedar_policy::ContextJsonError),
-    /// Error encountered while creating [`cedar_policy::Request`] for entity principal
-    #[error(transparent)]
-    InvalidPrincipal(#[from] InvalidPrincipalError),
-    /// Error encountered while checking if the Entities adhere to the schema
-    #[error("failed to validate Cedar entities: {0:?}")]
-    ValidateEntities(#[from] cedar_policy::entities_errors::EntitiesError),
-    /// Error encountered while parsing all entities to json for logging
-    #[error("could convert entities to json: {0}")]
-    EntitiesToJson(serde_json::Error),
-    /// Error encountered while building the context for the request
-    #[error("Failed to build context: {0}")]
-    BuildContext(#[from] BuildContextError),
-    /// Error encountered while building the context for the request
-    #[error("error while running on strict id token trust mode: {0}")]
-    IdTokenTrustMode(#[from] IdTokenTrustModeError),
-    /// Error encountered while building Cedar Entities
-    #[error(transparent)]
-    BuildEntity(#[from] BuildEntityError),
-    /// Error encountered while executing the rule for principals
-    #[error(transparent)]
-    ExecuteRule(#[from] ApplyRuleError),
-    #[error("failed to build role entities for unsigned request: {0}")]
-    /// Error encountered while building Role entity in an unsigned request
-    BuildUnsignedRoleEntity(#[from] BuildUnsignedEntityError),
-}
-
-#[derive(Debug, derive_more::Error, derive_more::Display)]
-#[display("could not create request user entity principal for {uid}: {err}")]
-pub struct CreateRequestRoleError {
-    /// Error value
-    err: cedar_policy::RequestValidationError,
-    /// Role ID [`EntityUid`] value used for authorization request
-    uid: EntityUid,
-}
-
-#[derive(Debug, derive_more::Error, derive_more::Display)]
-#[display("The request for `{principal}` does not conform to the schema: {err}")]
-pub struct InvalidPrincipalError {
-    /// Principal name
-    principal: String,
-    /// Error value
-    err: cedar_policy::RequestValidationError,
-}
-
-impl InvalidPrincipalError {
-    fn new(principal: &EntityUid, err: cedar_policy::RequestValidationError) -> Self {
-        InvalidPrincipalError {
-            principal: principal.to_string(),
-            err,
-        }
     }
 }
 

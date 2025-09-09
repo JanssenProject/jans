@@ -5,6 +5,7 @@
 
 use std::collections::HashMap;
 
+use super::errors::IdTokenTrustModeError;
 use crate::jwt::{Token, TokenClaimTypeError};
 
 /// Enforces the trust mode setting set by the `CEDARLING_ID_TOKEN_TRUST_MODE`
@@ -34,7 +35,7 @@ pub fn validate_id_tkn_trust_mode(
         .ok_or(IdTokenTrustModeError::MissingIdToken)?;
 
     let access_tkn_client_id = get_tkn_claim_as_str(access_tkn, "client_id")?;
-    
+
     if !aud_claim_contains_value(id_tkn, &access_tkn_client_id)? {
         return Err(IdTokenTrustModeError::AccessTokenClientIdMismatch);
     }
@@ -43,7 +44,7 @@ pub fn validate_id_tkn_trust_mode(
         Some(token) => token,
         None => return Ok(()),
     };
-    
+
     if !aud_claim_contains_value(userinfo_tkn, &access_tkn_client_id)? {
         return Err(IdTokenTrustModeError::ClientIdUserinfoAudMismatch);
     }
@@ -68,14 +69,15 @@ fn aud_claim_contains_value(
                 },
                 serde_json::Value::Array(arr) => {
                     // Array aud claim - check if it contains the expected value
-                    Ok(arr.iter()
+                    Ok(arr
+                        .iter()
                         .filter_map(|item| item.as_str())
                         .any(|s| s == expected_value))
                 },
                 _ => Err(IdTokenTrustModeError::TokenClaimTypeError(
                     token.name.clone(),
-                    TokenClaimTypeError::type_mismatch("aud", "string or array", claim.value())
-                ))
+                    TokenClaimTypeError::type_mismatch("aud", "string or array", claim.value()),
+                )),
             }
         })
 }
@@ -96,24 +98,6 @@ fn get_tkn_claim_as_str(
                 .map(|s| s.into())
                 .map_err(|e| IdTokenTrustModeError::TokenClaimTypeError(token.name.clone(), e))
         })
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum IdTokenTrustModeError {
-    #[error("the access token's `client_id` does not match with the id token's `aud`")]
-    AccessTokenClientIdMismatch,
-    #[error("an access token is required when using strict mode")]
-    MissingAccessToken,
-    #[error("an id token is required when using strict mode")]
-    MissingIdToken,
-    #[error("the id token's `sub` does not match with the userinfo token's `sub`")]
-    SubMismatchIdTokenUserinfo,
-    #[error("the access token's `client_id` does not match with the userinfo token's `aud`")]
-    ClientIdUserinfoAudMismatch,
-    #[error("missing a required claim `{0}` from `{1}` token")]
-    MissingRequiredClaim(String, String),
-    #[error("invalid claim type in {0} token: {1}")]
-    TokenClaimTypeError(String, TokenClaimTypeError),
 }
 
 #[cfg(test)]
@@ -322,7 +306,6 @@ mod test {
             err
         )
     }
-
 
     #[test]
     fn errors_when_userinfo_tkn_aud_does_not_contain_client_id() {
