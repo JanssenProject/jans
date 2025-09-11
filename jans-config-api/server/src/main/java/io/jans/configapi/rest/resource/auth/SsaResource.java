@@ -46,28 +46,28 @@ public class SsaResource extends ConfigBaseResource {
             "Software Statement Assertion (SSA)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SSA_DELETE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Response.class), examples = @ExampleObject(name = "Response json example", value = "example/session/get-session.json"))),
+            @ApiResponse(responseCode = "200", description = "Success"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.SSA_DELETE_ACCESS }, groupScopes = {
             ApiAccessConstants.SSA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response revokeSsa(
             @Parameter(description = "Authorization code") @HeaderParam("Authorization") String authorization,
-            @Parameter(description = "JWT ID - unique identifier for the JWT") @QueryParam(value = ApiConstants.JTI) String jti,
-            @Parameter(description = "Organization identifier") @QueryParam(value = ApiConstants.ORGID) @NotNull String orgId) {
+            @Parameter(description = "JWT ID - unique identifier for the JWT") @QueryParam(value = ApiConstants.JTI) String jti) {
         if (log.isInfoEnabled()) {
-            log.info("SSA search parameters - jti:{}, orgId:{}", escapeLog(jti), escapeLog(orgId));
+            log.info("Delete SSA - jti:{}", escapeLog(jti));
         }
         
         JsonNode jsonNode = null;
         try {
-            jsonNode = ssaService.revokeSsa(authorization, jti, orgId);
-
+            jsonNode = ssaService.revokeSsa(authorization, jti);
+            log.info("SSA search parameters - jsonNode:{}",jsonNode);
         } catch (Exception ex) {
              throwInternalServerException(ex);
         }
-        return Response.ok(jsonNode).build();
+        return Response.ok().build();
     }
 
 }

@@ -44,9 +44,9 @@ public class SsaService {
     private static final String AUTHORIZATION = "Authorization";
 
     
-    public JsonNode revokeSsa(final String accessToken, final String jti, final String orgId) throws Exception {
+    public JsonNode revokeSsa(final String accessToken, final String jti) throws Exception {
         if (logger.isInfoEnabled()) {
-            logger.info("Revoke SSA parameters - jti:{}, orgId:{}", escapeLog(jti), escapeLog(orgId));
+            logger.info("Revoke SSA parameters - jti:{}", escapeLog(jti));
         }
        
         // Request headers
@@ -57,16 +57,17 @@ public class SsaService {
         // Query Parameter
         Map<String, String> data = new HashMap<>();
         data.put("jti", jti);
-        data.put("org_id", orgId);
+        
         HttpServiceResponse httpServiceResponse = configHttpService.executeDelete(getSsaEndpoint(), headers, data);
         JsonNode jsonNode = null;
         logger.debug(" Revoke SSA httpServiceResponse:{}", httpServiceResponse);
         if (httpServiceResponse != null) {
             logger.trace(
-                    " Revoke SSA httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
-                    httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
+                    " Revoke SSA httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
+                    httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode(),
                     httpServiceResponse.getHttpResponse().getEntity());
-            jsonNode = configHttpService.getResponseJsonNode(httpServiceResponse);
+            jsonNode = configHttpService.getResponseJsonNode(httpServiceResponse);            
+            
         }
         logger.info(" Revoke SSA jsonNode:{}", jsonNode);
         return jsonNode;
