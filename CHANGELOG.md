@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.10.0](https://github.com/JanssenProject/jans/compare/v1.9.0...v1.10.0) (2025-09-11)
+## [1.11.0](https://github.com/JanssenProject/jans/compare/v1.9.0...v1.11.0) (2025-09-11)
 
 
 ### Features
