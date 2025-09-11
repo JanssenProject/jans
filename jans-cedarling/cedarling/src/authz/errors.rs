@@ -16,7 +16,6 @@ pub use cedar_policy::entities_errors::EntitiesError;
 
 /// Error type for multi-issuer validation
 #[derive(Debug, thiserror::Error)]
-#[allow(dead_code)]
 pub enum MultiIssuerValidationError {
     #[error("Token input validation failed: {0}")]
     TokenInput(#[from] TokenInputError),
@@ -33,19 +32,22 @@ pub enum MultiIssuerValidationError {
     #[error("Invalid JSON in context field")]
     InvalidContextJson,
 
-    #[error("Invalid token mapping format: {mapping}")]
-    InvalidMappingFormat { mapping: String },
+
+    #[error("Missing issuer claim in JWT")]
+    MissingIssuer,
+
+    #[error(
+        "Duplicate token type '{token_type}' from issuer '{issuer}'. Only one token per type per issuer is allowed."
+    )]
+    NonDeterministicToken { issuer: String, token_type: String },
 }
 
 /// Error type for token input validation
 #[derive(Debug, thiserror::Error)]
-#[allow(dead_code)]
 pub enum TokenInputError {
     #[error("Empty mapping string")]
     EmptyMapping,
 
-    #[error("Invalid mapping format: {mapping}. Expected format: 'Namespace::TokenType'")]
-    InvalidMappingFormat { mapping: String },
 
     #[error("Empty payload")]
     EmptyPayload,
