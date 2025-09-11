@@ -8,7 +8,7 @@ use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_ma
 use jsonwebtoken::Algorithm;
 use serde::Deserialize;
 use serde_json::json;
-use std::collections::HashSet;
+use std::{collections::HashSet, time::Duration};
 use test_utils::token_claims::{
     KeyPair, generate_jwks, generate_keypair_hs256, generate_token_using_claims,
     generate_token_using_claims_and_keypair,
@@ -84,11 +84,18 @@ fn with_jwt_validation_hs256_benchmark(c: &mut Criterion) {
     oidc_endpoint.assert();
 }
 
-criterion_group!(
-    authz_benchmark,
-    without_jwt_validation_benchmark,
-    with_jwt_validation_hs256_benchmark,
-);
+fn measurement_config() -> Criterion {
+    Criterion::default()
+        .measurement_time(Duration::from_secs(5))
+        .warm_up_time(Duration::from_secs(5))
+}
+
+criterion_group! {
+    name = authz_benchmark;
+    config = measurement_config();
+    targets = without_jwt_validation_benchmark, with_jwt_validation_hs256_benchmark
+}
+
 criterion_main!(authz_benchmark);
 
 async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCedarlingError> {
