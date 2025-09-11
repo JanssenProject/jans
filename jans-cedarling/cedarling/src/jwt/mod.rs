@@ -78,24 +78,27 @@ mod validation;
 #[allow(dead_code)]
 mod test_utils;
 
-pub use error::*;
-pub use token::{Token, TokenClaimTypeError, TokenClaims};
 pub use decode::*;
+pub use error::*;
+use lru::LruCache;
+pub use token::{Token, TokenClaimTypeError, TokenClaims};
 
 use crate::JwtConfig;
 use crate::LogLevel;
 use crate::LogWriter;
-use crate::common::policy_store::TrustedIssuer;
 use crate::common::issuer_utils::normalize_issuer;
+use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
 use http_utils::*;
 use key_service::*;
 use log_entry::*;
+use serde_json::json;
 use status_list::*;
 use std::collections::HashMap;
+use std::num::NonZeroUsize;
 use std::sync::Arc;
+use std::sync::Mutex;
 use validation::*;
-use serde_json::json;
 
 /// The value of the `iss` claim from a JWT
 type IssClaim = String;
@@ -106,6 +109,7 @@ pub struct JwtService {
     key_service: Arc<KeyService>,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
     logger: Option<Logger>,
+    validated_jwt_cache: Arc<Mutex<LruCache<String, ValidatedJwt>>>,
 }
 
 struct IssuerConfig {
@@ -166,6 +170,9 @@ impl JwtService {
             key_service,
             issuer_configs,
             logger,
+            validated_jwt_cache: Arc::new(Mutex::new(LruCache::new(
+                NonZeroUsize::new(10).unwrap(),
+            ))),
         })
     }
 
@@ -213,11 +220,28 @@ impl JwtService {
         Ok(validated_tokens)
     }
 
+    fn find_token_in_cache(&self, jwt: &str) -> Option<ValidatedJwt> {
+        self.validated_jwt_cache
+            .lock()
+            .unwrap()
+            .get(jwt)
+            .map(|v| v.clone())
+    }
+
+    fn save_token_in_cache(&self, jwt: &str, validated_jwt: ValidatedJwt) {
+        let mut mu = self.validated_jwt_cache.lock().unwrap();
+        mu.push(jwt.to_owned(), validated_jwt);
+    }
+
     fn validate_single_token(
         &self,
         token_name: String,
         jwt: &str,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
+        if let Some(validated_jwt) = self.find_token_in_cache(jwt) {
+            return Ok(validated_jwt);
+        }
+
         let decoded_jwt = decode_jwt(jwt)?;
 
         // Get decoding key
@@ -250,6 +274,7 @@ impl JwtService {
         // to do some processing so we include it here for convenience
         validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
 
+        self.save_token_in_cache(jwt, validated_jwt.clone());
         Ok(validated_jwt)
     }
 
