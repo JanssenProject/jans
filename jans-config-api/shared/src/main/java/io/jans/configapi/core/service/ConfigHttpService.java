@@ -278,8 +278,6 @@ public class ConfigHttpService implements Serializable {
     public HttpServiceResponse executeDelete(HttpClient httpClient, String requestUri, Map<String, String> headers,
             Map<String, String> parameters) {
 
-        log.info("\n\n Delete requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
-
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
             int i = 0;
