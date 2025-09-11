@@ -19,6 +19,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response.Status;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -62,11 +63,23 @@ public class SsaService {
         JsonNode jsonNode = null;
         logger.debug(" Revoke SSA httpServiceResponse:{}", httpServiceResponse);
         if (httpServiceResponse != null) {
-            logger.trace(
+            logger.error(
                     " Revoke SSA httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
                     httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode(),
                     httpServiceResponse.getHttpResponse().getEntity());
-            jsonNode = configHttpService.getResponseJsonNode(httpServiceResponse);            
+            Status status = configHttpService.getResponseStatus(httpServiceResponse);
+            
+        
+            logger.error("\n\n\n status:{}, status.getStatusCode():{}", status, status.getStatusCode());
+            
+            StringBuilder stringBuilder = configHttpService.readEntity(httpServiceResponse.getHttpResponse().getEntity());
+            logger.error("\n\n\n stringBuilder:{}", stringBuilder);
+            
+            String jsonString = configHttpService.getContent(httpServiceResponse.getHttpResponse().getEntity());
+            logger.error("\n\n\n jsonString:{}", jsonString);
+            
+            jsonNode = configHttpService.getResponseJsonNode(httpServiceResponse);   
+            logger.error(" Revoke SSA jsonNode:{}", jsonNode);
             
         }
         logger.info(" Revoke SSA jsonNode:{}", jsonNode);
@@ -97,7 +110,7 @@ public class SsaService {
             HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
             if (httpEntity != null) {
 
-                jsonString = getContent(httpEntity);
+                jsonString = configHttpService.getContent(httpEntity);
 
                 endpoint = Jackson.getElement(jsonString, "ssa_endpoint");
                 logger.debug("endpoint:{}", endpoint);
@@ -111,26 +124,6 @@ public class SsaService {
         return endpoint;
     }
 
-    private String getContent(HttpEntity httpEntity) {
-        String jsonString = null;
-        InputStream inputStream = null;
-        try {
-
-            if (httpEntity == null) {
-                return jsonString;
-            }
-            inputStream = httpEntity.getContent();
-            logger.trace("  httpEntity.getContentLength():{}, httpEntity.getContent():{}", httpEntity.getContentLength(), httpEntity.getContent());
-
-            jsonString = IOUtils.toString(httpEntity.getContent(), StandardCharsets.UTF_8);
-            logger.debug("Data jsonString:{}", jsonString);
-
-        } catch (Exception ex) {
-            throw new WebApplicationException("Failed to read data '{" + httpEntity + "}'", ex);
-        } finally {
-            IOUtils.closeQuietly(inputStream);
-        }
-        return jsonString;
-    }
+    
 
 }
