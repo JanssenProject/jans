@@ -35,7 +35,7 @@
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 		<jetty.version>11.0.26</jetty.version>
-		<weld.version>4.0.3.Final</weld.version>
+		<weld.version>6.0.3.Final</weld.version>
 		<sonar.projectKey>JanssenProject_jans-link</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
 		<sonar.organization>janssenproject</sonar.organization>
