@@ -4,6 +4,7 @@
 	<artifactId>jans-auth-server</artifactId>
 	<name>Jans authentication server</name>
 	<packaging>war</packaging>
+    <version>0.0.0-yuriyz</version>
 
 	<parent>
 		<groupId>io.jans</groupId>
