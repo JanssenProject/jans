@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jans.lock.model.status;
+package io.jans.model.status;
 
 import java.util.Date;
 

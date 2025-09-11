@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [Janssen Project]
+ * Copyright [2025] [Janssen Project]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,27 @@
  * limitations under the License.
  */
 
-package io.jans.lock.service.status.cdi.event;
+package io.jans.lock.model.config;
 
 /**
- * Status checker event
- *
- * @author Yuriy Movchan Date: 12/12/2023
+ * 
+ * @author Yuriy Movchan Date: 10/08/2022
  */
-public class StatusCheckerTimerEvent {
+public enum CedarlingLogLevel {
+	FATAL("FATAL"),
+	ERROR("ERROR"),
+	WARN("WARN"),
+	INFO("INFO"),
+	DEBUG("DEBUG"),
+	TRACE("TRACE");
+	
+	private final String type;
 
-	public StatusCheckerTimerEvent() {}
+	private CedarlingLogLevel(String type) {
+		this.type = type;
+	}
 
+	public String getType() {
+		return type;
+	}
 }

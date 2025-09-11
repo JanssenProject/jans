@@ -1,10 +1,11 @@
-package io.jans.lock.service.filter;
+package io.jans.lock.cedarling.service.filter;
 
 import java.io.IOException;
 
 import org.slf4j.Logger;
 
-import io.jans.service.security.api.ProtectedApi;
+import io.jans.service.security.api.ProtectedCedarlingApi;
+import io.jans.lock.cedarling.CedarlingAuthorizationService;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -20,16 +21,16 @@ import jakarta.ws.rs.core.Response;
  * A RestEasy filter to centralize protection of APIs based on path pattern
  */
 // To protect JAX-RS resources with this filter add the @ProtectedApi annotation
-@ProtectedApi
+@ProtectedCedarlingApi
 @Priority(Priorities.AUTHENTICATION)
 @Dependent
-public class AuthorizationProcessingFilter implements ContainerRequestFilter {
+public class CedarlingAuthorizationProcessingFilter implements ContainerRequestFilter {
 
 	@Inject
 	private Logger log;
 	
 	@Inject
-	private ProtectionService protectionService;
+	private CedarlingAuthorizationService cedarlingAuthorizationService;
 
 	@Context
 	private HttpHeaders httpHeaders;
@@ -52,7 +53,8 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 		String path = requestContext.getUriInfo().getPath();
 		log.debug("REST call to '{}' intercepted", path);
-		Response authorizationResponse = protectionService.processAuthorization(httpHeaders, resourceInfo);
+
+		Response authorizationResponse = cedarlingAuthorizationService.authorize(requestContext, httpHeaders, resourceInfo);
 		if (authorizationResponse == null) {
 			// Actual processing of request proceeds
 			log.debug("Authorization passed");

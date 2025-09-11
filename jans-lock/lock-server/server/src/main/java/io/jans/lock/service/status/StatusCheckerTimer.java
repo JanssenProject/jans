@@ -29,12 +29,12 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jans.lock.model.status.FacterData;
-import io.jans.lock.model.status.StatsData;
 import io.jans.lock.service.config.ConfigurationFactory;
-import io.jans.lock.service.status.cdi.event.StatusCheckerTimerEvent;
+import io.jans.model.status.FacterData;
+import io.jans.model.status.StatsData;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
+import io.jans.service.cdi.event.StatusCheckerTimerEvent;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;

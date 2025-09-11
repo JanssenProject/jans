@@ -46,6 +46,14 @@ public class AppConfiguration implements Configuration {
     @Schema(description = "OpenID issuer URL")
     private String openIdIssuer;
     
+    @DocProperty(description = "SCIM Protection Mode")
+    @Schema(description = "OpenID issuer URL")
+    private CedarlingLockProtecionMode protectionMode;
+    
+    @DocProperty(description = "Cedarling configuration")
+    @Schema(description = "Cedarling configuration")
+    private CedarlingConfiguration cedarlingConfiguration;
+    
     @DocProperty(description = "Active stat enabled")
     @Schema(description = "Active stat enabled")
     private boolean statEnabled;
@@ -142,7 +150,23 @@ public class AppConfiguration implements Configuration {
         this.openIdIssuer = openIdIssuer;
     }
 
-    public boolean isStatEnabled() {
+    public CedarlingLockProtecionMode getProtectionMode() {
+		return protectionMode;
+	}
+
+	public void setProtectionMode(CedarlingLockProtecionMode protectionMode) {
+		this.protectionMode = protectionMode;
+	}
+
+	public CedarlingConfiguration getCedarlingConfiguration() {
+		return cedarlingConfiguration;
+	}
+
+	public void setCedarlingConfiguration(CedarlingConfiguration cedarlingConfiguration) {
+		this.cedarlingConfiguration = cedarlingConfiguration;
+	}
+
+	public boolean isStatEnabled() {
 		return statEnabled;
 	}
 

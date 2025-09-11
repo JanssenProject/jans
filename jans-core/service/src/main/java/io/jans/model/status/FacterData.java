@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jans.lock.model.status;
+package io.jans.model.status;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

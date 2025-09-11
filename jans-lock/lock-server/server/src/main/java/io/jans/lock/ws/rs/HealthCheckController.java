@@ -18,7 +18,7 @@ package io.jans.lock.ws.rs;
 
 import org.slf4j.Logger;
 
-import io.jans.lock.model.status.StatsData;
+import io.jans.model.status.StatsData;
 import io.jans.orm.PersistenceEntryManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
