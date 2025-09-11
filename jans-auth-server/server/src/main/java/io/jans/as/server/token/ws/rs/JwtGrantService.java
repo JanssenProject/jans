@@ -96,6 +96,7 @@ public class JwtGrantService {
         executionContext.setGrant(grant);
 
         scope = grant.checkScopesPolicy(scope);
+        log.trace("Granted scopes: {}", scope);
         AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), grant);
 
         AccessToken accessToken = grant.createAccessToken(executionContext); // create token after scopes are checked
