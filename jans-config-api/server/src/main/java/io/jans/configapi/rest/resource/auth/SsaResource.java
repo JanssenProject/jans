@@ -14,9 +14,6 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
@@ -59,7 +56,7 @@ public class SsaResource extends ConfigBaseResource {
         if (log.isInfoEnabled()) {
             log.info("Delete SSA - jti:{}", escapeLog(jti));
         }
-        
+        checkNotEmpty(jti, ApiConstants.JTI);
         JsonNode jsonNode = null;
         try {
             jsonNode = ssaService.revokeSsa(authorization, jti);
