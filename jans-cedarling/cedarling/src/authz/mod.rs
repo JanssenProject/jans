@@ -10,7 +10,6 @@
 
 use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
-use crate::common::json_rules::ApplyRuleError;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::entity_builder::*;
 use crate::jwt::{self, Token};
@@ -32,11 +31,13 @@ use uuid7::Uuid;
 
 mod authorize_result;
 mod build_ctx;
+mod errors;
 mod trust_mode;
 
 pub(crate) mod request;
 
 pub use authorize_result::AuthorizeResult;
+pub use errors::*;
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -512,12 +513,6 @@ impl Authz {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum AuthzServiceInitError {
-    #[error(transparent)]
-    InitEntityBuilder(#[from] InitEntityBuilderError),
-}
-
 /// Helper struct to hold named parameters for [`Authz::execute_authorize`] method.
 struct ExecuteAuthorizeParameters<'a> {
     entities: &'a Entities,
@@ -609,62 +604,6 @@ impl AuthorizeEntitiesData {
 
         // Return built entities from merged collection
         BuiltEntities::from_iter(merged_entities.values().map(|e| e.uid()))
-    }
-}
-
-/// Error type for Authorization Service
-#[derive(thiserror::Error, Debug)]
-pub enum AuthorizeError {
-    /// Error encountered while processing JWT token data
-    #[error(transparent)]
-    ProcessTokens(#[from] jwt::JwtProcessingError),
-    /// Error encountered while parsing Action to EntityUid
-    #[error("could not parse action: {0}")]
-    Action(Box<cedar_policy::ParseErrors>),
-    /// Error encountered while validating context according to the schema
-    #[error("could not create context: {0}")]
-    CreateContext(#[from] Box<cedar_policy::ContextJsonError>),
-    /// Error encountered while creating [`cedar_policy::Request`] for entity principal
-    #[error(transparent)]
-    InvalidPrincipal(#[from] InvalidPrincipalError),
-    /// Error encountered while checking if the Entities adhere to the schema
-    #[error("failed to validate Cedar entities: {0:?}")]
-    ValidateEntities(#[from] Box<cedar_policy::entities_errors::EntitiesError>),
-    /// Error encountered while parsing all entities to json for logging
-    #[error("could convert entities to json: {0}")]
-    EntitiesToJson(serde_json::Error),
-    /// Error encountered while building the context for the request
-    #[error("Failed to build context: {0}")]
-    BuildContext(#[from] BuildContextError),
-    /// Error encountered while building the context for the request
-    #[error("error while running on strict id token trust mode: {0}")]
-    IdTokenTrustMode(#[from] IdTokenTrustModeError),
-    /// Error encountered while building Cedar Entities
-    #[error(transparent)]
-    BuildEntity(#[from] BuildEntityError),
-    /// Error encountered while executing the rule for principals
-    #[error(transparent)]
-    ExecuteRule(#[from] ApplyRuleError),
-    #[error("failed to build role entities for unsigned request: {0}")]
-    /// Error encountered while building Role entity in an unsigned request
-    BuildUnsignedRoleEntity(#[from] BuildUnsignedEntityError),
-}
-
-#[derive(Debug, derive_more::Error, derive_more::Display)]
-#[display("The request for `{principal}` does not conform to the schema: {err}")]
-pub struct InvalidPrincipalError {
-    /// Principal name
-    principal: String,
-    /// Error value
-    err: Box<cedar_policy::RequestValidationError>,
-}
-
-impl InvalidPrincipalError {
-    fn new(principal: &EntityUid, err: Box<cedar_policy::RequestValidationError>) -> Self {
-        InvalidPrincipalError {
-            principal: principal.to_string(),
-            err,
-        }
     }
 }
 

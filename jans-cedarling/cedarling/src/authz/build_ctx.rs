@@ -7,9 +7,11 @@ use super::AuthzConfig;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use crate::entity_builder::BuiltEntities;
-use cedar_policy::{ContextJsonError, EntityTypeName, ParseErrors};
+use cedar_policy::EntityTypeName;
 use serde_json::{Value, json, map::Entry};
 use smol_str::ToSmolStr;
+
+use super::errors::BuildContextError;
 
 /// Constructs the authorization context by adding the built entities from the tokens
 pub fn build_context(
@@ -149,33 +151,6 @@ fn map_entity_id(
         Ok(Some(json!({"type": name.to_string(), "id": type_id})))
     } else {
         Err(BuildContextError::MissingEntityId(name.to_string()))
-    }
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum BuildContextError {
-    /// Error encountered while validating context according to the schema
-    #[error("failed to merge JSON objects due to conflicting keys: {0}")]
-    KeyConflict(String),
-    /// Error encountered while deserializing the Context from JSON
-    #[error(transparent)]
-    DeserializeFromJson(Box<ContextJsonError>),
-    /// Error encountered if the action being used as the reference to build the Context
-    /// is not in the schema
-    #[error("failed to find the action `{0}` in the schema")]
-    UnknownAction(String),
-    /// Error encountered while building entity references in the Context
-    #[error("failed to build entity reference for `{0}` since an entity id was not provided")]
-    MissingEntityId(String),
-    #[error("invalid action context type: {0}. expected: {1}")]
-    InvalidKind(String, String),
-    #[error("failed to parse the entity name `{0}`: {1}")]
-    ParseEntityName(String, Box<ParseErrors>),
-}
-
-impl From<ContextJsonError> for BuildContextError {
-    fn from(err: ContextJsonError) -> Self {
-        BuildContextError::DeserializeFromJson(Box::new(err))
     }
 }
 
