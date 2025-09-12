@@ -57,7 +57,7 @@ public class SsaResource extends ConfigBaseResource {
             log.info("Delete SSA - jti:{}", escapeLog(jti));
         }
         checkNotEmpty(jti, ApiConstants.JTI);
-        JsonNode jsonNode = null;
+        String jsonNode = null;
         try {
             jsonNode = ssaService.revokeSsa(authorization, jti);
             log.info("SSA search parameters - jsonNode:{}",jsonNode);

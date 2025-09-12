@@ -441,16 +441,6 @@ public class ConfigHttpService implements Serializable {
         return getResponseJsonNode(getResponseEntityString(serviceResponse), "response");
     }
     
-    public JsonNode getHttpServiceResponseJsonNode(HttpServiceResponse serviceResponse) throws JsonProcessingException {
-        JsonNode jsonNode = null;
-
-        if (serviceResponse == null) {
-            return jsonNode;
-        }
-
-        return getResponseJsonNode(getResponseEntityString(serviceResponse), "response");
-    }
-
     public String getResponseEntityString(HttpServiceResponse serviceResponse) {
         String jsonString = null;
 
@@ -552,5 +542,5 @@ public class ConfigHttpService implements Serializable {
         }
         return jsonString;
     }
-
+ 
 }

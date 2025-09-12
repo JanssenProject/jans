@@ -10,6 +10,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import static io.jans.as.model.util.Util.escapeLog;
+import io.jans.configapi.core.model.exception.ApiApplicationException;
+import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
 import io.jans.configapi.core.service.ConfigHttpService;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.util.AuthUtil;
@@ -45,7 +47,7 @@ public class SsaService {
     private static final String AUTHORIZATION = "Authorization";
 
     
-    public JsonNode revokeSsa(final String accessToken, final String jti) throws Exception {
+    public String revokeSsa(final String accessToken, final String jti) throws Exception {
         if (logger.isInfoEnabled()) {
             logger.info("Revoke SSA parameters - jti:{}", escapeLog(jti));
         }
@@ -61,8 +63,10 @@ public class SsaService {
         
         HttpServiceResponse httpServiceResponse = configHttpService.executeDelete(getSsaEndpoint(), headers, data);
         JsonNode jsonNode = null;
+        String responseString = null;
         logger.debug(" Revoke SSA httpServiceResponse:{}", httpServiceResponse);
-        if (httpServiceResponse != null) {
+        
+        if (httpServiceResponse != null && httpServiceResponse.getHttpResponse()!=null) {
             logger.error(
                     " Revoke SSA httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
                     httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode(),
@@ -79,11 +83,18 @@ public class SsaService {
             logger.error("\n\n\n jsonString:{}", jsonString);
             
             jsonNode = configHttpService.getResponseJsonNode(httpServiceResponse);   
-            logger.error(" Revoke SSA jsonNode:{}", jsonNode);
+            logger.error(" \n\n Revoke SSA jsonNode:{}", jsonNode);
             
+            responseString = configHttpService.convertEntityToString(configHttpService.getResponseContent(httpServiceResponse.getHttpResponse()));   
+            logger.error(" \n\n Revoke SSA responseString:{}", responseString);
+
+            if(status!=null && status.getStatusCode() != Status.OK.getStatusCode()) {
+                throw new ConfigApiApplicationException(Status.INTERNAL_SERVER_ERROR.getStatusCode(), responseString);
+                
+            }
         }
-        logger.info(" Revoke SSA jsonNode:{}", jsonNode);
-        return jsonNode;
+        logger.info(" Revoke SSA responseString:{}", responseString);
+        return responseString;
 
     }
 
