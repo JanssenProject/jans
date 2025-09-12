@@ -227,9 +227,30 @@ impl AuthorizeMultiIssuerRequest {
             }
         }
 
-        // If no tokens were successfully validated, return an error
+        // If no tokens were successfully validated, return a detailed error
         if validated_tokens.is_empty() {
-            return Err(MultiIssuerValidationError::EmptyTokenArray);
+            // Log detailed error information for each failed token
+            for failed in &failed_tokens {
+                logger.log_any(
+                    LogEntry::new_with_data(LogType::System, None)
+                        .set_level(LogLevel::ERROR)
+                        .set_message(format!(
+                            "Token validation failed at index {} (type: '{}'): {}",
+                            failed.index, self.tokens[failed.index].mapping, failed.error
+                        )),
+                );
+            }
+
+            // Collect failed token types for better error message
+            let failed_types: Vec<String> = failed_tokens
+                .iter()
+                .map(|failed| self.tokens[failed.index].mapping.clone())
+                .collect();
+
+            return Err(MultiIssuerValidationError::TokenValidationFailed {
+                failed_types,
+                total_count: self.tokens.len(),
+            });
         }
 
         // Check for non-deterministic tokens (duplicate issuer+type combinations)
@@ -321,24 +342,40 @@ pub struct FailedToken {
 mod tests {
     use super::*;
     use serde_json::json;
+    use test_utils::token_claims::generate_token_using_claims;
+
+    // Helper function to create test tokens with proper claims
+    fn create_test_token(mapping: &str, issuer: &str, sub: &str) -> TokenInput {
+        let claims = json!({
+            "sub": sub,
+            "iat": 1516239022,
+            "iss": issuer
+        });
+        let token_string = generate_token_using_claims(&claims);
+        TokenInput::new(mapping.to_string(), token_string)
+    }
+
+    // Helper function to create test token without issuer (for missing issuer tests)
+    fn create_test_token_no_issuer(mapping: &str, sub: &str) -> TokenInput {
+        let claims = json!({
+            "sub": sub,
+            "iat": 1516239022
+        });
+        let token_string = generate_token_using_claims(&claims);
+        TokenInput::new(mapping.to_string(), token_string)
+    }
 
     #[test]
     fn test_token_input_creation() {
-        let token = TokenInput::new(
-            "Jans::Access_Token".to_string(),
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-        );
+        let token = create_test_token("Jans::Access_Token", "https://example.com", "1234567890");
 
         assert_eq!(token.mapping, "Jans::Access_Token");
-        assert!(token.payload.starts_with("eyJ"));
+        assert!(token.payload.contains(".")); // JWT format check
     }
 
     #[test]
     fn test_token_input_parse_and_validate_success() {
-        let token = TokenInput::new(
-            "Jans::Access_Token".to_string(),
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-        );
+        let token = create_test_token("Jans::Access_Token", "https://example.com", "1234567890");
 
         let result = token.parse_and_validate();
         assert!(result.is_ok());
@@ -360,10 +397,7 @@ mod tests {
     #[test]
     fn test_token_input_parse_and_validate_with_namespaced_mapping() {
         // Test that namespaced mappings work correctly
-        let token = TokenInput::new(
-            "Jans::Access_Token".to_string(),
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-        );
+        let token = create_test_token("Jans::Access_Token", "https://example.com", "1234567890");
 
         let result = token.parse_and_validate();
         assert!(result.is_ok());
@@ -390,11 +424,8 @@ mod tests {
     #[test]
     fn test_authorize_multi_issuer_request_creation() {
         let tokens = vec![
-            TokenInput::new(
-                "Jans::Access_Token".to_string(),
-                "valid.jwt.token".to_string(),
-            ),
-            TokenInput::new("Jans::Id_Token".to_string(), "valid.jwt.token".to_string()),
+            create_test_token("Jans::Access_Token", "https://example.com", "1234567890"),
+            create_test_token("Jans::Id_Token", "https://example.com", "1234567890"),
         ];
 
         let request = AuthorizeMultiIssuerRequest::new(tokens.clone());
@@ -407,9 +438,10 @@ mod tests {
 
     #[test]
     fn test_authorize_multi_issuer_request_with_fields() {
-        let tokens = vec![TokenInput::new(
-            "Jans::Access_Token".to_string(),
-            "valid.jwt.token".to_string(),
+        let tokens = vec![create_test_token(
+            "Jans::Access_Token",
+            "https://example.com",
+            "1234567890",
         )];
 
         let resource = Some(json!({"type": "Document", "id": "doc123"}));
@@ -432,14 +464,8 @@ mod tests {
     #[test]
     fn test_authorize_multi_issuer_request_validation_success() {
         let tokens = vec![
-            TokenInput::new(
-                "Jans::Access_Token".to_string(),
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-            ),
-            TokenInput::new(
-                "Jans::Id_Token".to_string(),
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-            ),
+            create_test_token("Jans::Access_Token", "https://example.com", "1234567890"),
+            create_test_token("Jans::Id_Token", "https://example.com", "1234567890"),
         ];
 
         let request = AuthorizeMultiIssuerRequest::new(tokens);
@@ -472,18 +498,20 @@ mod tests {
         // and only fails on missing issuer or non-deterministic tokens
         // The token with invalid JWT format should fail at the JWT parsing stage
         // and be added to failed_tokens, but validation should continue
-        // Since there are no valid tokens, we should get EmptyTokenArray
+        // Since there are no valid tokens, we should get TokenValidationFailed
         assert!(matches!(
             result,
-            Err(MultiIssuerValidationError::EmptyTokenArray)
+            Err(MultiIssuerValidationError::TokenValidationFailed { failed_types, total_count })
+            if failed_types == vec!["access_token"] && total_count == 1
         ));
     }
 
     #[test]
     fn test_authorize_multi_issuer_request_validation_invalid_json_fields() {
-        let tokens = vec![TokenInput::new(
-            "Jans::Access_Token".to_string(),
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
+        let tokens = vec![create_test_token(
+            "Jans::Access_Token",
+            "https://example.com",
+            "1234567890",
         )];
 
         let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -502,9 +530,10 @@ mod tests {
 
     #[test]
     fn test_serialization_deserialization() {
-        let tokens = vec![TokenInput::new(
-            "Jans::Access_Token".to_string(),
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
+        let tokens = vec![create_test_token(
+            "Jans::Access_Token",
+            "https://example.com",
+            "1234567890",
         )];
 
         let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -527,14 +556,8 @@ mod tests {
     #[test]
     fn test_comprehensive_validation_success() {
         let tokens = vec![
-            TokenInput::new(
-                "Jans::Access_Token".to_string(),
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-            ),
-            TokenInput::new(
-                "Jans::Id_Token".to_string(),
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-            ),
+            create_test_token("Jans::Access_Token", "https://example.com", "1234567890"),
+            create_test_token("Jans::Id_Token", "https://example.com", "1234567890"),
         ];
 
         let request = AuthorizeMultiIssuerRequest::new(tokens);
@@ -544,14 +567,8 @@ mod tests {
     #[test]
     fn test_non_deterministic_token_detection() {
         let tokens = vec![
-            TokenInput::new(
-                "Jans::Access_Token".to_string(),
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-            ),
-            TokenInput::new(
-                "Jans::Access_Token".to_string(),
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5ODc2NTQzMjEwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-            ),
+            create_test_token("Jans::Access_Token", "https://example.com", "1234567890"),
+            create_test_token("Jans::Access_Token", "https://example.com", "9876543210"),
         ];
 
         let request = AuthorizeMultiIssuerRequest::new(tokens);
@@ -565,9 +582,9 @@ mod tests {
 
     #[test]
     fn test_missing_issuer_claim() {
-        let tokens = vec![TokenInput::new(
-            "Jans::Access_Token".to_string(),
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
+        let tokens = vec![create_test_token_no_issuer(
+            "Jans::Access_Token",
+            "1234567890",
         )];
 
         let request = AuthorizeMultiIssuerRequest::new(tokens);
@@ -581,26 +598,18 @@ mod tests {
     #[test]
     fn test_flexible_token_type_extraction() {
         // Test standard token types
-        let token1 = TokenInput::new(
-            "Jans::Access_Token".to_string(),
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-        );
+        let token1 = create_test_token("Jans::Access_Token", "https://example.com", "1234567890");
         let (token_type1, _) = token1.parse_and_validate().unwrap();
         assert_eq!(token_type1, "Jans::Access_Token");
 
         // Test custom token types from design document
-        let token2 = TokenInput::new(
-            "Acme::DolphinToken".to_string(),
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-        );
+        let token2 = create_test_token("Acme::DolphinToken", "https://example.com", "1234567890");
         let (token_type2, _) = token2.parse_and_validate().unwrap();
         assert_eq!(token_type2, "Acme::DolphinToken");
 
         // Test another custom token type
-        let token3 = TokenInput::new(
-            "Custom::EmployeeToken".to_string(),
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-        );
+        let token3 =
+            create_test_token("Custom::EmployeeToken", "https://example.com", "1234567890");
         let (token_type3, _) = token3.parse_and_validate().unwrap();
         assert_eq!(token_type3, "Custom::EmployeeToken");
     }
@@ -608,13 +617,36 @@ mod tests {
     #[test]
     fn test_token_type_extraction_with_simple_names() {
         // Test that simple token names work (compatibility with existing system)
-        let token = TokenInput::new(
-            "access_token".to_string(),
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c".to_string(),
-        );
+        let token = create_test_token("access_token", "https://example.com", "1234567890");
         let result = token.parse_and_validate();
         assert!(result.is_ok());
         let (token_type, _) = result.unwrap();
         assert_eq!(token_type, "access_token");
+    }
+
+    #[test]
+    fn test_detailed_error_message_for_failed_tokens() {
+        // Test that we get detailed error information when all tokens fail validation
+        let tokens = vec![
+            TokenInput::new(
+                "Jans::Access_Token".to_string(),
+                "invalid-jwt-1".to_string(),
+            ),
+            TokenInput::new("Jans::Id_Token".to_string(), "invalid-jwt-2".to_string()),
+        ];
+
+        let request = AuthorizeMultiIssuerRequest::new(tokens);
+        let result = request.validate(&None::<Logger>);
+
+        match result {
+            Err(MultiIssuerValidationError::TokenValidationFailed {
+                failed_types,
+                total_count,
+            }) => {
+                assert_eq!(failed_types, vec!["Jans::Access_Token", "Jans::Id_Token"]);
+                assert_eq!(total_count, 2);
+            },
+            _ => panic!("Expected TokenValidationFailed error"),
+        }
     }
 }

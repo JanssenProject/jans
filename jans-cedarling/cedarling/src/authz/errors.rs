@@ -23,6 +23,12 @@ pub enum MultiIssuerValidationError {
     #[error("Empty token array")]
     EmptyTokenArray,
 
+    #[error("Could not validate tokens. Failed token types: {failed_types:?}. Total tokens: {total_count}")]
+    TokenValidationFailed {
+        failed_types: Vec<String>,
+        total_count: usize,
+    },
+
     #[error("Invalid JSON in resource field")]
     InvalidResourceJson,
 
