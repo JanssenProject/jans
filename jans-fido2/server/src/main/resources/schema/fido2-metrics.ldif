@@ -1,0 +1,730 @@
+# FIDO2 Metrics LDAP Schema
+# This schema defines the LDAP object classes and attributes for FIDO2 metrics storage
+
+# Object Class for FIDO2 Metrics Entry
+dn: cn=jansFido2MetricsEntry,ou=schema,o=jans
+objectClass: top
+objectClass: jansCustomObject
+cn: jansFido2MetricsEntry
+jansDescription: FIDO2 Metrics Entry - stores individual metric events
+jansObjectClassType: custom
+jansObjectClassType: metric
+jansObjectClassType: fido2
+
+# Object Class for FIDO2 Metrics Aggregation
+dn: cn=jansFido2MetricsAggregation,ou=schema,o=jans
+objectClass: top
+objectClass: jansCustomObject
+cn: jansFido2MetricsAggregation
+jansDescription: FIDO2 Metrics Aggregation - stores summary data for different time periods
+jansObjectClassType: custom
+jansObjectClassType: metric
+jansObjectClassType: fido2
+jansObjectClassType: aggregation
+
+# Attribute Definitions for FIDO2 Metrics Entry
+dn: cn=jansId,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansId
+jansDescription: Unique identifier for the metrics entry
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: true
+jansStatus: active
+
+dn: cn=jansMetricType,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansMetricType
+jansDescription: Type of metric (e.g., fido2_registration_attempt)
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: true
+jansStatus: active
+
+dn: cn=jansTimestamp,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansTimestamp
+jansDescription: Timestamp when the metric event occurred
+jansDataType: generalizedTime
+jansEditType: admin
+jansMultivalued: false
+jansRequired: true
+jansStatus: active
+
+dn: cn=jansUserId,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansUserId
+jansDescription: User ID associated with the metric event
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansUsername,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansUsername
+jansDescription: Username associated with the metric event
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansOperationType,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansOperationType
+jansDescription: Type of operation (REGISTRATION, AUTHENTICATION, FALLBACK)
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: true
+jansStatus: active
+
+dn: cn=jansStatus,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansStatus
+jansDescription: Status of the operation (SUCCESS, FAILURE, ATTEMPT)
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: true
+jansStatus: active
+
+dn: cn=jansDurationMs,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansDurationMs
+jansDescription: Duration of the operation in milliseconds
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAuthenticatorType,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAuthenticatorType
+jansDescription: Type of authenticator used (PLATFORM, CROSS_PLATFORM, SECURITY_KEY)
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansDeviceInfo,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansDeviceInfo
+jansDescription: Device information in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansErrorReason,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansErrorReason
+jansDescription: Reason for failure if operation failed
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansErrorCategory,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansErrorCategory
+jansDescription: Category of error (TIMEOUT, INVALID_INPUT, etc.)
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansFallbackMethod,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansFallbackMethod
+jansDescription: Method user fell back to (PASSWORD, SMS, etc.)
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansFallbackReason,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansFallbackReason
+jansDescription: Reason for fallback
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansUserAgent,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansUserAgent
+jansDescription: User agent string from HTTP request
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansIpAddress,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansIpAddress
+jansDescription: IP address of the client
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansSessionId,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansSessionId
+jansDescription: Session ID associated with the operation
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAdditionalData,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAdditionalData
+jansDescription: Additional data in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansNodeId,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansNodeId
+jansDescription: Node ID where the operation occurred
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansApplicationType,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansApplicationType
+jansDescription: Type of application (FIDO2)
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+# Attribute Definitions for FIDO2 Metrics Aggregation
+dn: cn=jansAggregationType,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAggregationType
+jansDescription: Type of aggregation (HOURLY, DAILY, WEEKLY, MONTHLY)
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: true
+jansStatus: active
+
+dn: cn=jansTimePeriod,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansTimePeriod
+jansDescription: Time period identifier (e.g., 2024-01-15, 2024-W03)
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: true
+jansStatus: active
+
+dn: cn=jansStartTime,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansStartTime
+jansDescription: Start time of the aggregation period
+jansDataType: generalizedTime
+jansEditType: admin
+jansMultivalued: false
+jansRequired: true
+jansStatus: active
+
+dn: cn=jansEndTime,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansEndTime
+jansDescription: End time of the aggregation period
+jansDataType: generalizedTime
+jansEditType: admin
+jansMultivalued: false
+jansRequired: true
+jansStatus: active
+
+dn: cn=jansRegistrationAttempts,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansRegistrationAttempts
+jansDescription: Number of registration attempts in the period
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansRegistrationSuccesses,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansRegistrationSuccesses
+jansDescription: Number of successful registrations in the period
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansRegistrationFailures,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansRegistrationFailures
+jansDescription: Number of failed registrations in the period
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansRegistrationSuccessRate,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansRegistrationSuccessRate
+jansDescription: Registration success rate (0.0 to 1.0)
+jansDataType: decimal
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansRegistrationAvgDuration,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansRegistrationAvgDuration
+jansDescription: Average registration duration in milliseconds
+jansDataType: decimal
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansRegistrationMinDuration,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansRegistrationMinDuration
+jansDescription: Minimum registration duration in milliseconds
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansRegistrationMaxDuration,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansRegistrationMaxDuration
+jansDescription: Maximum registration duration in milliseconds
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAuthenticationAttempts,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAuthenticationAttempts
+jansDescription: Number of authentication attempts in the period
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAuthenticationSuccesses,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAuthenticationSuccesses
+jansDescription: Number of successful authentications in the period
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAuthenticationFailures,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAuthenticationFailures
+jansDescription: Number of failed authentications in the period
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAuthenticationSuccessRate,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAuthenticationSuccessRate
+jansDescription: Authentication success rate (0.0 to 1.0)
+jansDataType: decimal
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAuthenticationAvgDuration,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAuthenticationAvgDuration
+jansDescription: Average authentication duration in milliseconds
+jansDataType: decimal
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAuthenticationMinDuration,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAuthenticationMinDuration
+jansDescription: Minimum authentication duration in milliseconds
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAuthenticationMaxDuration,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAuthenticationMaxDuration
+jansDescription: Maximum authentication duration in milliseconds
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansFallbackEvents,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansFallbackEvents
+jansDescription: Number of fallback events in the period
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansFallbackRate,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansFallbackRate
+jansDescription: Fallback rate (0.0 to 1.0)
+jansDataType: decimal
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansFallbackMethods,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansFallbackMethods
+jansDescription: Fallback methods breakdown in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansDeviceTypes,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansDeviceTypes
+jansDescription: Device types breakdown in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAuthenticatorTypes,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAuthenticatorTypes
+jansDescription: Authenticator types breakdown in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansBrowsers,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansBrowsers
+jansDescription: Browsers breakdown in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansOperatingSystems,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansOperatingSystems
+jansDescription: Operating systems breakdown in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansErrorCategories,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansErrorCategories
+jansDescription: Error categories breakdown in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansTopErrors,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansTopErrors
+jansDescription: Top errors breakdown in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansUniqueUsers,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansUniqueUsers
+jansDescription: Number of unique users in the period
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansNewUsers,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansNewUsers
+jansDescription: Number of new users in the period
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansReturningUsers,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansReturningUsers
+jansDescription: Number of returning users in the period
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansUserAdoptionRate,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansUserAdoptionRate
+jansDescription: User adoption rate (0.0 to 1.0)
+jansDataType: decimal
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansPeakConcurrentOperations,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansPeakConcurrentOperations
+jansDescription: Peak number of concurrent operations in the period
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAvgConcurrentOperations,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAvgConcurrentOperations
+jansDescription: Average number of concurrent operations in the period
+jansDataType: decimal
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansPeakMemoryUsage,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansPeakMemoryUsage
+jansDescription: Peak memory usage in MB in the period
+jansDataType: integer
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAvgMemoryUsage,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAvgMemoryUsage
+jansDescription: Average memory usage in MB in the period
+jansDataType: decimal
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansPeakCpuUsage,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansPeakCpuUsage
+jansDescription: Peak CPU usage percentage in the period
+jansDataType: decimal
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansAvgCpuUsage,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansAvgCpuUsage
+jansDescription: Average CPU usage percentage in the period
+jansDataType: decimal
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansTopIpAddresses,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansTopIpAddresses
+jansDescription: Top IP addresses breakdown in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansGeographicDistribution,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansGeographicDistribution
+jansDescription: Geographic distribution breakdown in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansSessionMetrics,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansSessionMetrics
+jansDescription: Session metrics breakdown in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansCustomMetrics,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansCustomMetrics
+jansDescription: Custom metrics breakdown in JSON format
+jansDataType: json
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansLastUpdated,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansLastUpdated
+jansDescription: Last time the aggregation was updated
+jansDataType: generalizedTime
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansDataQuality,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansDataQuality
+jansDescription: Data quality indicator (HIGH, MEDIUM, LOW)
+jansDataType: string
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
+dn: cn=jansCompleteness,ou=attributes,o=jans
+objectClass: top
+objectClass: jansAttribute
+cn: jansCompleteness
+jansDescription: Data completeness indicator (0.0 to 1.0)
+jansDataType: decimal
+jansEditType: admin
+jansMultivalued: false
+jansRequired: false
+jansStatus: active
+
