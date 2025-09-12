@@ -17,7 +17,7 @@ import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.service.external.ExternalScimService;
 import io.jans.scim.service.external.OperationContext;
 import io.jans.scim.service.external.TokenDetails;
-import io.jans.scim.ws.rs.scim2.BaseScimWebService;
+import io.jans.scim.ws.rs.scim2.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -26,8 +26,6 @@ import org.slf4j.Logger;
 
 @ApplicationScoped
 public class ExternalConstraintsService {
-    
-    private static final String TOKENS_DN = "ou=tokens,o=jans";
 
     @Inject
     private Logger log;
@@ -112,7 +110,7 @@ public class ExternalConstraintsService {
         String hashedToken = token.startsWith("{sha256Hex}") ? token : DigestUtils.sha256Hex(token);
         try {
             return entryManager.find(TokenDetails.class,
-                    String.format("tknCde=%s,%s", hashedToken, TOKENS_DN));
+                    String.format("tknCde=%s,%s", hashedToken, UserTokensService.TOKENS_DN));
         } catch (Exception e) {
             log.warn(e.getMessage());
             return null;

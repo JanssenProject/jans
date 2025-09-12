@@ -101,6 +101,7 @@
     <test name="Additional tests" enabled="true">
         <classes>
         	<class name="io.jans.scim2.client.multipleresource.UpdatedUsersTest" />
+        	<class name="io.jans.scim2.client.tokens.UserTokensTest" />
             <!--class name="io.jans.scim2.client.SampleTest" /-->
         </classes>
     </test>
