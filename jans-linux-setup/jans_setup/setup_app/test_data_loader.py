@@ -84,10 +84,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             print("Test data loader needs internet connection. Giving up ...")
             return
 
-        if not base.current_app.ScimInstaller.installed():
-            self.logIt("Scim was not installed. Installing")
-            Config.install_scim_server = True
-            base.current_app.ScimInstaller.start_installation()
 
         self.encode_test_passwords()
 
@@ -187,6 +183,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             with open(jans_auth_test_data_server_properties_fn, 'wb') as w:
                 jans_auth_test_data_server_properties.store(w)
 
+
         self.logIt("Loading test ldif files")
         Config.pbar.progress(self.service_name, "Importing ldif files", False)
 
@@ -198,6 +195,19 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         ldif_files = (ox_auth_test_ldif, scim_test_ldif, ox_auth_test_user_ldif, scim_test_user_ldif)
         self.dbUtils.import_ldif(ldif_files)
+
+        # add password grant type to scim testing client
+        scim_client_dn = f'inum={Config.scim_client_id},ou=clients,o=jans'
+        scim_client = self.dbUtils.dn_exists(scim_client_dn)
+        scim_client_grand_types = scim_client["jansGrantTyp"]
+        if 'password' not in scim_client_grand_types:
+            scim_client_grand_types.append('password')
+            self.dbUtils.set_configuration('jansGrantTyp', scim_client_grand_types, scim_client_dn)
+
+        if not base.current_app.ScimInstaller.installed():
+            self.logIt("Scim was not installed. Installing")
+            Config.install_scim_server = True
+            base.current_app.ScimInstaller.start_installation()
 
         # Client keys deployment
         target_jwks_fn = os.path.join(base.current_app.HttpdInstaller.server_root, 'jans_test_client_keys.zip')
