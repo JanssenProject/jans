@@ -285,8 +285,7 @@ impl JwtService {
     fn get_issuer_ref(&self, iss_claim: &str) -> Option<Arc<TrustedIssuer>> {
         self.issuer_configs
             .get(&normalize_issuer(iss_claim))
-            .map(|config| &config.policy)
-            .cloned()
+            .map(|config| config.policy.clone())
     }
 }
 
