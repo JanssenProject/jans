@@ -223,14 +223,16 @@ impl JwtService {
     fn find_token_in_cache(&self, jwt: &str) -> Option<ValidatedJwt> {
         self.validated_jwt_cache
             .lock()
-            .unwrap()
+            .expect("validated_jwt_cache mutex should not be poisoned")
             .get(jwt)
             .map(|v| v.clone())
     }
 
     fn save_token_in_cache(&self, jwt: &str, validated_jwt: ValidatedJwt) {
-        let mut mu = self.validated_jwt_cache.lock().unwrap();
-        mu.push(jwt.to_owned(), validated_jwt);
+        self.validated_jwt_cache
+            .lock()
+            .expect("validated_jwt_cache mutex should not be poisoned")
+            .push(jwt.to_owned(), validated_jwt);
     }
 
     fn validate_single_token(
