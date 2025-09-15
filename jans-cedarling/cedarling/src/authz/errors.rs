@@ -23,7 +23,9 @@ pub enum MultiIssuerValidationError {
     #[error("Empty token array")]
     EmptyTokenArray,
 
-    #[error("Could not validate tokens. Failed token types: {failed_types:?}. Total tokens: {total_count}")]
+    #[error(
+        "Could not validate tokens. Failed token types: {failed_types:?}. Total tokens: {total_count}"
+    )]
     TokenValidationFailed {
         failed_types: Vec<String>,
         total_count: usize,
@@ -37,7 +39,6 @@ pub enum MultiIssuerValidationError {
 
     #[error("Invalid JSON in context field")]
     InvalidContextJson,
-
 
     #[error("Missing issuer claim in JWT")]
     MissingIssuer,
@@ -53,7 +54,6 @@ pub enum MultiIssuerValidationError {
 pub enum TokenInputError {
     #[error("Empty mapping string")]
     EmptyMapping,
-
 
     #[error("Empty payload")]
     EmptyPayload,
@@ -105,6 +105,9 @@ pub enum AuthorizeError {
     #[error("failed to build role entities for unsigned request: {0}")]
     /// Error encountered while building Role entity in an unsigned request
     BuildUnsignedRoleEntity(#[from] BuildUnsignedEntityError),
+    /// Error encountered while validating multi-issuer request
+    #[error(transparent)]
+    MultiIssuerValidation(#[from] MultiIssuerValidationError),
 }
 
 /// Error type for ID token trust mode validation
