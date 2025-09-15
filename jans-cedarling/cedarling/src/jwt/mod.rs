@@ -80,7 +80,6 @@ mod test_utils;
 
 pub use decode::*;
 pub use error::*;
-use lru::LruCache;
 pub use token::{Token, TokenClaimTypeError, TokenClaims};
 
 use crate::JwtConfig;
@@ -89,15 +88,19 @@ use crate::LogWriter;
 use crate::common::issuer_utils::normalize_issuer;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
+use chrono::Utc;
 use http_utils::*;
+use jsonwebtoken as jwt;
 use key_service::*;
 use log_entry::*;
+use lru::LruCache;
 use serde_json::json;
 use status_list::*;
 use std::collections::HashMap;
 use std::num::NonZeroUsize;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::sync::RwLock;
 use validation::*;
 
 /// The value of the `iss` claim from a JWT
@@ -109,7 +112,7 @@ pub struct JwtService {
     key_service: Arc<KeyService>,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
     logger: Option<Logger>,
-    validated_jwt_cache: Arc<Mutex<LruCache<String, ValidatedJwt>>>,
+    validated_jwt_cache: Arc<Mutex<LruCache<String, (ValidatedJwt, Arc<RwLock<JwtValidator>>)>>>,
 }
 
 struct IssuerConfig {
@@ -220,7 +223,7 @@ impl JwtService {
         Ok(validated_tokens)
     }
 
-    fn find_token_in_cache(&self, jwt: &str) -> Option<ValidatedJwt> {
+    fn find_token_in_cache(&self, jwt: &str) -> Option<(ValidatedJwt, Arc<RwLock<JwtValidator>>)> {
         self.validated_jwt_cache
             .lock()
             .expect("validated_jwt_cache mutex should not be poisoned")
@@ -228,11 +231,16 @@ impl JwtService {
             .map(|v| v.clone())
     }
 
-    fn save_token_in_cache(&self, jwt: &str, validated_jwt: ValidatedJwt) {
+    fn save_token_in_cache(
+        &self,
+        jwt: &str,
+        validated_jwt: ValidatedJwt,
+        validator: Arc<RwLock<JwtValidator>>,
+    ) {
         self.validated_jwt_cache
             .lock()
             .expect("validated_jwt_cache mutex should not be poisoned")
-            .push(jwt.to_owned(), validated_jwt);
+            .push(jwt.to_owned(), (validated_jwt, validator));
     }
 
     fn validate_single_token(
@@ -240,7 +248,30 @@ impl JwtService {
         token_name: String,
         jwt: &str,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
-        if let Some(validated_jwt) = self.find_token_in_cache(jwt) {
+        if let Some((validated_jwt, validator)) = self.find_token_in_cache(jwt) {
+            // Check if token is expired
+            if validator
+                .read()
+                .expect("JwtValidator mutex should not be poisoned")
+                .validation
+                .validate_exp
+            {
+                const EXP_CLAIM: &str = "exp";
+                let Some(exp) = validated_jwt
+                    .claims
+                    .get(EXP_CLAIM)
+                    .map(|exp_val| exp_val.as_i64())
+                    .flatten()
+                else {
+                    return Err(ValidateJwtError::MissingClaims(vec![EXP_CLAIM.into()]));
+                };
+
+                if Utc::now().timestamp() >= exp {
+                    return Err(ValidateJwtError::ValidateJwt(
+                        jwt::errors::ErrorKind::ExpiredSignature.into(),
+                    ));
+                }
+            };
             return Ok(validated_jwt);
         }
 
@@ -257,7 +288,7 @@ impl JwtService {
             token_kind: TokenKind::AuthzRequestInput(&token_name),
             algorithm: decoded_jwt.header.alg,
         };
-        let validator = self
+        let validator: Arc<RwLock<JwtValidator>> = self
             .validators
             .get(&validator_key)
             .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
@@ -276,7 +307,7 @@ impl JwtService {
         // to do some processing so we include it here for convenience
         validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
 
-        self.save_token_in_cache(jwt, validated_jwt.clone());
+        self.save_token_in_cache(jwt, validated_jwt.clone(), validator.clone());
         Ok(validated_jwt)
     }
 
