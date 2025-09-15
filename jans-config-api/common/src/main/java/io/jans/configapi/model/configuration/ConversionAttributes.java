@@ -1,11 +1,17 @@
 package io.jans.configapi.model.configuration;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ConversionAttributes {
+public class ConversionAttributes implements Serializable{
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     /**
      * Date attributes for conversion

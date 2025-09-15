@@ -21,6 +21,7 @@ import org.opensaml.saml.common.xml.SAMLSchemaBuilder.SAML1Version;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import javax.xml.validation.Schema;
 
 import java.io.File;
@@ -59,7 +60,7 @@ public class SamlIdpService {
     }
 
     public String saveMetadataFile(String metadataDir, String metadataFileName, String documentStoreModuleName,
-            InputStream stream) {
+            InputStream stream) throws WebApplicationException {
         logger.info("metadataDir:{}, metadataFileName:{}, documentStoreModuleName:{}, stream:{}", metadataDir,
                 metadataFileName, documentStoreModuleName, stream);
 
@@ -92,8 +93,8 @@ public class SamlIdpService {
             if (result != null) {
                 return metadataFile;
             }
-        } catch (Exception ex) {
-            logger.error("Failed to write SAML metadata file '{}'", metadataFile, ex);
+        } catch (Exception ex) {           
+            throw new WebApplicationException("Failed to write SAML metadata file '{" + metadataFile+"}'", ex);
         } finally {
             IOUtils.closeQuietly(stream);
         }

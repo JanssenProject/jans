@@ -58,6 +58,8 @@ pub enum BuildEntityErrorKind {
     NoAvailableTokensToBuildEntity(Vec<String>),
     #[error("the entity was not in the schema")]
     EntityNotInSchema,
+    #[error("invalid entity data: {0}")]
+    InvalidEntityData(String),
 }
 
 #[derive(Debug, Error)]

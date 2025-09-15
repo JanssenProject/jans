@@ -76,6 +76,8 @@ async fn init_cedarling() -> Cedarling {
         },
         entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
+        max_default_entities: None,
+        max_base64_size: None,
     })
     .await
     .expect("should initialize cedarling")
