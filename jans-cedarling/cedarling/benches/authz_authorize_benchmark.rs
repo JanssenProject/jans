@@ -4,10 +4,11 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::*;
-use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
 use serde::Deserialize;
 use serde_json::json;
+use std::hint::black_box;
 use std::{collections::HashSet, time::Duration};
 use test_utils::token_claims::{
     KeyPair, generate_jwks, generate_keypair_hs256, generate_token_using_claims,

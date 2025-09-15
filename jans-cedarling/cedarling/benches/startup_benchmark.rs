@@ -4,8 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::*;
-use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use lazy_static::lazy_static;
+use std::hint::black_box;
 use tokio::runtime::Runtime;
 
 const POLICY_STORE: &str = include_str!("../../test_files/policy-store_ok.yaml");
