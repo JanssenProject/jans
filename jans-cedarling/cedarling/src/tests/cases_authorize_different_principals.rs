@@ -11,7 +11,6 @@
 
 use std::sync::LazyLock;
 
-use lazy_static::lazy_static;
 use test_utils::assert_eq;
 use tokio::test;
 
@@ -47,8 +46,8 @@ static OPERATOR_USER: LazyLock<JsonRule> =
 static OPERATOR_WORKLOAD: LazyLock<JsonRule> =
     LazyLock::new(|| JsonRule::new(json!({"===": [{"var": "Jans::Workload"}, "ALLOW"]})).unwrap());
 
-lazy_static! {
-    pub(crate) static ref AuthRequestBase: Request = Request::deserialize(serde_json::json!(
+pub(crate) static AuthRequestBase: LazyLock<Request> = LazyLock::new(|| {
+    Request::deserialize(serde_json::json!(
         {
             "tokens": {
                 "access_token": generate_token_using_claims(json!({
@@ -85,8 +84,8 @@ lazy_static! {
             "context": {},
         }
     ))
-    .expect("Request should be deserialized from json");
-}
+    .expect("Request should be deserialized from json")
+});
 
 /// Check if action executes for next principals: Workload, User
 #[test]
