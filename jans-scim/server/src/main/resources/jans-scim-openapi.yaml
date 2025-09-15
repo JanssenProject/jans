@@ -18,8 +18,6 @@ tags:
   description: Endpoints for management of User resources
 - name: group
   description: Endpoints for management of Group resources
-- name: fido devices
-  description: Endpoints for management of Fido devices
 - name: fido2 devices
   description: Endpoints for management of Fido2 devices
 - name: global search
@@ -704,7 +702,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      x-codegen-request-body-name: fidoDeviceResource
+      x-codegen-request-body-name: fido2DeviceResource
     delete:
       tags:
         - fido2 devices
@@ -1269,6 +1267,158 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: searchRequest
+  /UserTokens:
+    get:
+      tags:
+      - user
+      operationId: user-tokens
+      description: Retrieves token metadata associated to a given user 
+      security:
+        - scim_oauth: [https://jans.io/scim/tokens]
+      parameters:
+      - name: attributes
+        in: query
+        description: A comma-separated list of attribute names to return in the response
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: The "id" attribute of the user in question
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UserTokensResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTokensResponse'
+        404:
+          description: No user exists with the given id
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+      - user
+      operationId: revoke-tokens
+      description: | 
+        Revokes one or more tokens associated to a given user. All tokens associated to the token that matches
+        the hash passed as input are removed (as long as they are tied to the user identified by the value passed)  
+      security:
+        - scim_oauth: [https://jans.io/scim/groups.write]
+      parameters:
+      - name: id
+        in: path
+        description: User identifier
+        required: true
+        schema:
+          type: string
+      - name: tokenHash
+        in: query
+        description: Hash of the token to revoke
+        required: true
+        schema:
+          type: string
+      responses:
+        204:
+          description: Successful operation. Empty response
+          content: {}
+        404:
+          description: User identifier unknown, token hash not associated to user, or unknown token hash 
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'          
+  /UpdatedUsers:
+    get:
+      tags:
+      - user
+      description: This endpoint searches local user entries updated or created after the specified time
+      operationId: updated-users
+      security:
+        - scim_oauth: [https://jans.io/scim/tokens]
+      parameters:
+      - name: timeStamp
+        in: query
+        description: A time stamp using ISO date format. For example `2019-12-24T12:00:03-05:00`, `2019-10-14T01:02:03Z` (denotes UTC)
+        required: true
+        schema:
+          type: string
+      - name: start
+        in: query
+        description: Numeric offset to start the search from. If ommited, zero is assumed (ie. no record skipping)
+        required: false
+        schema:
+          type: integer
+      - name: pagesize
+        in: query
+        description: Maximum number of results to retrieve. In practice, no more than 200 items will be returned
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UpdatedUsersResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdatedUsersResponse'
+        400:
+          description: A parameter is missing or not properly formatted
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was a failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'              
   /.search:
     post:
       description: |
@@ -1368,7 +1518,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      x-codegen-request-body-name: request
+      x-codegen-request-body-name: request  
   /ServiceProviderConfig:
     get:
       tags:
@@ -1426,7 +1576,6 @@ paths:
           enum:
           - User
           - Group
-          - FidoDevice
           - Fido2Device
       responses:
         200:
@@ -1479,7 +1628,6 @@ paths:
           - urn:ietf:params:scim:schemas:extension:gluu:2.0:User
           - urn:ietf:params:scim:schemas:core:2.0:Group
           - urn:ietf:params:scim:schemas:core:2.0:Fido2Device
-          - urn:ietf:params:scim:schemas:core:2.0:FidoDevice
       responses:
         200:
           description: Successful operation
@@ -1724,6 +1872,50 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SchemaAttribute'
+    TokenMetadata:
+      type: object
+      properties:
+        hash:
+          type: string
+          description: An opaque token identifier
+        type:
+          type: string
+          enum:
+          - access_token
+          - refresh_token
+          - id_token
+        issuedAt:
+          type: integer
+          description: A timestamp (unix epoch based) of token issuance date
+        expiresAt:
+          type: integer
+          description: A timestamp (unix epoch based) of token expiration date
+        appName:
+          type: string
+          description: A display name of the app (client) this token is associated to 
+        clientId:
+          type: string
+          description: Identifier of the OAuth client this token is associated to
+        scopes:
+          type: array
+          description: List of scopes associated to this token 
+          items:
+            type: string          
+    UpdatedUsersResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total number of entries included in the result set.
+        latestUpdateAt:
+          type: string
+          description: An ISO date time representing the latest update time seen in the entries of the result set
+        results:
+          type: array
+          items:
+            type: object
+          description: An array of objects. Every object is a dictionary whose keys are attribute names (as in local Jans database - no scim naming). Associated to every key is an array of values (for the mentioned attribute).
+            A sample object can be { "displayName" -> ["Jhonny"], "inum" -> ["abcd-1234"], "mail" -> ["jhon@office.com", "jhon@home.com"], "gluuSLAManager" -> [true], "updatedAt" -> ["2019-10-14T01:27:29.934Z"], "uid" -> ["JhonHoney"] }      
     BasicListResponse:
       type: object
       properties:
@@ -1771,6 +1963,16 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/UserResource'
+    UserTokensResponse: 
+      description: Metadata of tokens associated to a user
+      allOf:
+      - $ref: '#/components/schemas/BasicListResponse'
+      - type: object
+        properties:
+          Resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/TokenMetadata'             
     ResourceTypeListResponse:
       allOf:
       - $ref: '#/components/schemas/BasicListResponse'
@@ -2091,50 +2293,6 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Member'
-    FidoDeviceResource:
-      description: Represents a device enrollment like an U2F security key or a Super
-        Gluu device
-      allOf:
-      - $ref: '#/components/schemas/BaseResource'
-      - type: object
-        properties:
-          userId:
-            type: string
-            description: Identifies the owner of the enrollment
-          creationDate:
-            type: string
-            description: Date of enrollment in ISO format
-            format: date-time
-          application:
-            type: string
-            description: Associated U2F application ID
-          counter:
-            type: integer
-            description: Value used in the Fido U2F endpoints
-          deviceData:
-            type: string
-            description: A Json representation of low-level attributes of this enrollment
-          deviceHashCode:
-            type: integer
-          deviceKeyHandle:
-            type: string
-          deviceRegistrationConf:
-            type: string
-          lastAccessTime:
-            type: string
-            description: When this device was last used (eg. in order to log into
-              an application)
-            format: date-time
-          status:
-            type: string
-            enum:
-            - active
-            - compromised
-          displayName:
-            type: string
-            description: Device name suitable for display to end-users
-          description:
-            type: string
     Fido2DeviceResource:
       description: Represents a Fido 2 device enrollment
       allOf:
@@ -2278,3 +2436,4 @@ components:
             https://jans.io/scim/fido2.write: Modify fido 2 resources
             https://jans.io/scim/all-resources.search: Access the root .search endpoint 
             https://jans.io/scim/bulk: Send requests to the bulk endpoint
+            https://jans.io/scim/tokens: List and revoke user tokens
