@@ -6,8 +6,6 @@
 
 package io.jans.configapi.rest.resource.auth;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.SsaService;
 import io.jans.configapi.util.ApiAccessConstants;
@@ -19,13 +17,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import static io.jans.as.model.util.Util.escapeLog;
-
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 @Path(ApiConstants.JANS_AUTH + ApiConstants.SSA)
@@ -57,14 +54,14 @@ public class SsaResource extends ConfigBaseResource {
             log.info("Delete SSA - jti:{}", escapeLog(jti));
         }
         checkNotEmpty(jti, ApiConstants.JTI);
-        String jsonNode = null;
+        JSONObject jsonObject = null;
         try {
-            jsonNode = ssaService.revokeSsa(authorization, jti);
-            log.info("SSA search parameters - jsonNode:{}",jsonNode);
+            jsonObject = ssaService.revokeSsa(authorization, jti);
+            log.info("SSA search parameters - jsonObject:{}",jsonObject);
         } catch (Exception ex) {
              throwInternalServerException(ex);
         }
-        return Response.ok().build();
+        return Response.ok(jsonObject).build();
     }
 
 }
