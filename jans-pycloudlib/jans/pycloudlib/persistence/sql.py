@@ -13,6 +13,7 @@ from collections.abc import Callable
 from functools import cached_property
 from tempfile import NamedTemporaryFile
 
+import javaproperties
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.exc import SAWarning
 from sqlalchemy import create_engine
@@ -91,6 +92,14 @@ class PostgresqlAdapter:
         if exc.orig.pgcode not in ["23505"]:
             raise exc
 
+    @property
+    def connect_args(self):
+        opts = {}
+
+        if as_boolean(os.environ.get("CN_SQL_DB_SSL_ENABLED", "false")):
+            opts["sslmode"] = os.environ.get("CN_SQL_DB_SSL_MODE", "require")
+        return opts
+
 
 class MysqlAdapter:
     """Class for MySQL adapter."""
@@ -139,6 +148,11 @@ class MysqlAdapter:
         # - 1062: duplicate entry
         if exc.orig.args[0] not in [1062]:
             raise exc
+
+    @property
+    def connect_args(self):
+        opts = {}
+        return opts
 
 
 def doc_id_from_dn(dn: str) -> str:
@@ -263,7 +277,12 @@ class SqlClient(SqlSchemaMixin):
     def engine(self) -> Engine:
         """Lazy init of engine instance object."""
         if not self._engine:
-            self._engine = create_engine(self.engine_url, pool_pre_ping=True, hide_parameters=True)
+            self._engine = create_engine(
+                self.engine_url,
+                pool_pre_ping=True,
+                hide_parameters=True,
+                connect_args=self.adapter.connect_args,
+            )
 
             if self.dialect == "mysql":
                 event.listen(self._engine, "first_connect", set_mysql_strict_mode)
@@ -630,6 +649,10 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
         }
         f.write(rendered_txt)
 
+    # overrides if required
+    if as_boolean(os.environ.get("CN_SQL_DB_SSL_ENABLED", "false")):
+        override_ssl_props(dest)
+
 
 def set_mysql_strict_mode(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
@@ -648,8 +671,8 @@ def sync_sql_password(manager: Manager) -> None:
         manager: An instance of manager class.
     """
     logger.warning(
-        f"Accessing jans.pycloudlib.persistence.sql.sync_sql_password is deprecated; "
-        f"Use jans.pycloudlib.persistence.sql.get_sql_password instead"
+        "Accessing jans.pycloudlib.persistence.sql.sync_sql_password is deprecated; "
+        "Use jans.pycloudlib.persistence.sql.get_sql_password instead"
     )
 
 
@@ -660,7 +683,6 @@ def get_sql_password(manager: Manager | None = None):
 
     # safer method to get credential
     return manager.secret.get("sql_password")
-
 
 
 def preconfigure_simple_json(dbapi_connection, connection_record):
@@ -721,6 +743,7 @@ def override_simple_json_property(sql_prop_file):
         with open(sql_prop_file, "w") as f:
             f.write(txt)
 
+
 def load_sql_overrides():
     if os.path.isfile(SQL_OVERRIDES_FILE):
         with open(SQL_OVERRIDES_FILE) as f:
@@ -731,3 +754,14 @@ def load_sql_overrides():
 def dump_sql_overrides(data):
     with open(SQL_OVERRIDES_FILE, "w") as f:
         f.write(json.dumps(data))
+
+
+def override_ssl_props(sql_prop_file):
+    with open(sql_prop_file) as f:
+        props = javaproperties.loads(f.read())
+
+    props["connection.driver-property.ssl"] = as_boolean(os.environ.get("CN_SQL_DB_SSL_ENABLED", "false"))
+    props["connection.driver-property.sslmode"] = os.environ.get("CN_SQL_DB_SSL_MODE", "require")
+
+    with open(sql_prop_file, "w") as f:
+        f.write(javaproperties.dumps(props))
