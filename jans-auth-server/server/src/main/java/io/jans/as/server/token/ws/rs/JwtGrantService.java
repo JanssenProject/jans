@@ -21,6 +21,7 @@ import io.jans.as.server.authorize.ws.rs.AuthzDetailsService;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.*;
 import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.UserService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.util.ServerUtil;
@@ -52,6 +53,8 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 @Stateless
 @Named
 public class JwtGrantService {
+
+    public static final User EMPTY_USER = new User();
 
     @Inject
     private Logger log;
@@ -86,13 +89,16 @@ public class JwtGrantService {
     @Inject
     private AttributeService attributeService;
 
+    @Inject
+    private UserService userService;
+
     public JSONObject processJwtBearer(String assertion, String scope, HttpServletRequest httpRequest, Client client, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) throws StringEncrypter.EncryptionException, CryptoProviderException {
 
         log.debug("processJwtBearer - started with client_id: {}, assertion: {}", client.getClientId(), assertion);
 
-        validateAssertion(assertion, client, executionContext);
+        User user = validateAssertion(assertion, client, executionContext);
 
-        JwtBearerGrant grant = authorizationGrantList.createJwtBearerGrant(new User(), client);
+        JwtBearerGrant grant = authorizationGrantList.createJwtBearerGrant(user, client);
         executionContext.setGrant(grant);
 
         scope = grant.checkScopesPolicy(scope);
@@ -133,7 +139,7 @@ public class JwtGrantService {
         return jsonObj;
     }
 
-    private void validateAssertion(String assertion, Client client, ExecutionContext executionContext) throws CryptoProviderException, StringEncrypter.EncryptionException {
+    private User validateAssertion(String assertion, Client client, ExecutionContext executionContext) throws CryptoProviderException, StringEncrypter.EncryptionException {
         log.debug("Assertion: {}", assertion);
         Jwt jwt = Jwt.parseSilently(assertion);
         if (jwt == null) {
@@ -152,6 +158,16 @@ public class JwtGrantService {
             verifyNbf(jwt, executionContext);
 
             log.debug("Assertion validated successfully.");
+
+            final String uid = jwt.getClaims().getClaimAsString("uid");
+            if (StringUtils.isNotBlank(uid) && appConfiguration.getJwtGrantAllowUserByUidInAssertion()) {
+                log.debug("Trying to find user by uid {}", uid);
+                final User user = userService.getUser(uid);
+                log.debug("User by uid {} {}", uid, user != null ? " is found" : " is NOT found");
+                return user != null ? user : EMPTY_USER;
+            }
+
+            return EMPTY_USER;
         } catch (InvalidJwtException e) {
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, "'assertion' parameter is not valid."), executionContext.getAuditLog()));
         }
