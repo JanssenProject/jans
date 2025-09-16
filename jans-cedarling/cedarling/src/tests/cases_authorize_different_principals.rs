@@ -46,7 +46,7 @@ static OPERATOR_USER: LazyLock<JsonRule> =
 static OPERATOR_WORKLOAD: LazyLock<JsonRule> =
     LazyLock::new(|| JsonRule::new(json!({"===": [{"var": "Jans::Workload"}, "ALLOW"]})).unwrap());
 
-pub(crate) static AuthRequestBase: LazyLock<Request> = LazyLock::new(|| {
+pub(crate) static AUTH_REQUEST_BASE: LazyLock<Request> = LazyLock::new(|| {
     Request::deserialize(serde_json::json!(
         {
             "tokens": {
@@ -92,7 +92,7 @@ pub(crate) static AuthRequestBase: LazyLock<Request> = LazyLock::new(|| {
 async fn success_test_for_all_principals() {
     let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"Update\"".to_string();
 
     let result = cedarling
@@ -146,7 +146,7 @@ async fn success_test_for_principal_workload() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"UpdateForWorkload\"".to_string();
 
     let result = cedarling
@@ -190,7 +190,7 @@ async fn success_test_for_principal_user() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"UpdateForUser\"".to_string();
 
     let result = cedarling
@@ -238,7 +238,7 @@ async fn success_test_for_principal_person_role() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"UpdateForUserAndRole\"".to_string();
 
     let result = cedarling
@@ -284,7 +284,7 @@ async fn success_test_for_principal_workload_role() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"UpdateForWorkloadAndRole\"".to_string();
 
     let result = cedarling
@@ -336,7 +336,7 @@ async fn success_test_for_principal_workload_true_or_user_false() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"UpdateForWorkload\"".to_string();
 
     let result = cedarling
@@ -388,7 +388,7 @@ async fn success_test_for_principal_workload_false_or_user_true() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"UpdateForUser\"".to_string();
 
     let result = cedarling
@@ -440,7 +440,7 @@ async fn success_test_for_principal_workload_false_or_user_false() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"AlwaysDeny\"".to_string();
 
     let result = cedarling
@@ -491,7 +491,7 @@ async fn test_where_principal_workload_cant_be_applied() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"NoApplies\"".to_string();
 
     let result = cedarling
@@ -518,7 +518,7 @@ async fn test_where_principal_user_cant_be_applied() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"NoApplies\"".to_string();
 
     let result = cedarling
@@ -551,7 +551,7 @@ async fn test_policy_evaluation_errors_logging() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"AlwaysDeny\"".to_string();
 
     let result = cedarling
