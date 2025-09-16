@@ -97,6 +97,8 @@ use serde_json::json;
 use sparkv::SparKV;
 use status_list::*;
 use std::collections::HashMap;
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::RwLock;
@@ -230,11 +232,13 @@ impl JwtService {
         self.token_cache
             .lock()
             .expect("validated_jwt_cache mutex shouldn't be poisoned")
-            .get(jwt)
+            .get(&hash_str(jwt))
             .map(|v| v.to_owned())
     }
 
     fn save_token_in_cache(&self, jwt: &str, token: Arc<Token>) {
+        let key = hash_str(jwt);
+
         let cache_duration_opt = token
             .claims
             .get_claim("exp")
@@ -254,14 +258,14 @@ impl JwtService {
                 .token_cache
                 .lock()
                 .expect("validated_jwt_cache mutex shouldn't be poisoned")
-                .set_with_ttl(jwt, token, Duration::seconds(duration as i64), &[]);
+                .set_with_ttl(&key, token, Duration::seconds(duration as i64), &[]);
         } else {
             // set with default TTL
             let _ = self
                 .token_cache
                 .lock()
                 .expect("validated_jwt_cache mutex shouldn't be poisoned")
-                .set(jwt, token, &[]);
+                .set(&key, token, &[]);
         }
     }
 
@@ -381,6 +385,16 @@ fn fix_aud_claim_value_to_array(claims: TokenClaims) -> TokenClaims {
     }
 
     claims
+}
+
+/// Hash a string using `ahash` and return the hash value as a string
+/// This is used to create a key for caching tokens
+/// The hash value is used instead of the original string to have shorter keys for SparKV which utilizes BTree.
+fn hash_str(s: &str) -> String {
+    let mut hasher = ahash::AHasher::default();
+    s.hash(&mut hasher);
+    let hash_value = hasher.finish();
+    hash_value.to_string()
 }
 
 #[cfg(test)]
