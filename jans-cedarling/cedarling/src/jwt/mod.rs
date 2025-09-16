@@ -111,7 +111,7 @@ pub struct JwtService {
     key_service: Arc<KeyService>,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
     logger: Option<Logger>,
-    validated_jwt_cache: Arc<Mutex<SparKV<ValidatedJwt>>>,
+    token_cache: Arc<Mutex<SparKV<Arc<Token>>>>,
 }
 
 struct IssuerConfig {
@@ -172,67 +172,73 @@ impl JwtService {
             key_service,
             issuer_configs,
             logger,
-            validated_jwt_cache: Arc::new(Mutex::new(SparKV::new())),
+            token_cache: Arc::new(Mutex::new(SparKV::new())),
         })
     }
 
     pub async fn validate_tokens<'a>(
         &'a self,
         tokens: &'a HashMap<String, String>,
-    ) -> Result<HashMap<String, Token>, JwtProcessingError> {
+    ) -> Result<HashMap<String, Arc<Token>>, JwtProcessingError> {
         let mut validated_tokens = HashMap::new();
         const ID_TOKEN_NAME: &str = "id_token";
 
         for (token_name, jwt) in tokens.iter() {
-            let validated_jwt = match self.validate_single_token(token_name.clone(), jwt) {
-                Ok(jwt) => jwt,
-                Err(err) => {
-                    if matches!(err, ValidateJwtError::MissingValidator(_)) {
-                        self.logger
-                            .log_any(JwtLogEntry::new(err.to_string(), Some(LogLevel::WARN)));
-                        continue;
-                    } else {
-                        return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err));
-                    }
-                },
+            let token = if let Some(validated_token) = self.find_token_in_cache(jwt) {
+                validated_token
+            } else {
+                // validate token and save to cache
+                let validated_jwt = match self.validate_single_token(token_name.clone(), jwt) {
+                    Ok(jwt) => jwt,
+                    Err(err) => {
+                        if matches!(err, ValidateJwtError::MissingValidator(_)) {
+                            self.logger
+                                .log_any(JwtLogEntry::new(err.to_string(), Some(LogLevel::WARN)));
+                            continue;
+                        } else {
+                            return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err));
+                        }
+                    },
+                };
+
+                let mut claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
+                    .map_err(|err| {
+                        self.logger.log_any(JwtLogEntry::new(
+                            format!("failed to deserialize token claims: {err}"),
+                            Some(LogLevel::ERROR),
+                        ));
+                        err
+                    })
+                    .map_err(JwtProcessingError::StringDeserialization)?;
+
+                if token_name == ID_TOKEN_NAME {
+                    claims = fix_aud_claim_value_to_array(claims);
+                };
+
+                let token = Arc::new(Token::new(token_name, claims, validated_jwt.trusted_iss));
+                self.save_token_in_cache(jwt, token.clone());
+                token
             };
 
-            let mut claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
-                .map_err(|err| {
-                    self.logger.log_any(JwtLogEntry::new(
-                        format!("failed to deserialize token claims: {err}"),
-                        Some(LogLevel::ERROR),
-                    ));
-                    err
-                })
-                .map_err(JwtProcessingError::StringDeserialization)?;
-
-            if token_name == ID_TOKEN_NAME {
-                claims = fix_aud_claim_value_to_array(claims);
-            }
-
-            validated_tokens.insert(
-                token_name.to_string(),
-                Token::new(token_name, claims, validated_jwt.trusted_iss),
-            );
+            validated_tokens.insert(token_name.to_string(), token);
         }
 
         Ok(validated_tokens)
     }
 
-    fn find_token_in_cache(&self, jwt: &str) -> Option<ValidatedJwt> {
-        self.validated_jwt_cache
+    fn find_token_in_cache(&self, jwt: &str) -> Option<Arc<Token>> {
+        self.token_cache
             .lock()
             .expect("validated_jwt_cache mutex shouldn't be poisoned")
             .get(jwt)
             .map(|v| v.to_owned())
     }
 
-    fn save_token_in_cache(&self, jwt: &str, validated_jwt: ValidatedJwt) {
-        let cache_duration_opt = validated_jwt
+    fn save_token_in_cache(&self, jwt: &str, token: Arc<Token>) {
+        let cache_duration_opt = token
             .claims
-            .get("exp")
-            .and_then(|exp| exp.as_i64())
+            .get_claim("exp")
+            .and_then(|exp| exp.value().as_i64())
             .and_then(|exp| {
                 let now = Utc::now();
                 let duration = exp - now.timestamp();
@@ -245,17 +251,17 @@ impl JwtService {
 
         if let Some(duration) = cache_duration_opt {
             let _ = self
-                .validated_jwt_cache
+                .token_cache
                 .lock()
                 .expect("validated_jwt_cache mutex shouldn't be poisoned")
-                .set_with_ttl(jwt, validated_jwt, Duration::seconds(duration as i64), &[]);
+                .set_with_ttl(jwt, token, Duration::seconds(duration as i64), &[]);
         } else {
             // set with default TTL
             let _ = self
-                .validated_jwt_cache
+                .token_cache
                 .lock()
                 .expect("validated_jwt_cache mutex shouldn't be poisoned")
-                .set(jwt, validated_jwt, &[]);
+                .set(jwt, token, &[]);
         }
     }
 
@@ -264,10 +270,6 @@ impl JwtService {
         token_name: String,
         jwt: &str,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
-        if let Some(validated_jwt) = self.find_token_in_cache(jwt) {
-            return Ok(validated_jwt);
-        }
-
         let decoded_jwt = decode_jwt(jwt)?;
 
         // Get decoding key
@@ -300,7 +302,6 @@ impl JwtService {
         // to do some processing so we include it here for convenience
         validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
 
-        self.save_token_in_cache(jwt, validated_jwt.clone());
         Ok(validated_jwt)
     }
 
@@ -463,7 +464,7 @@ mod test {
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(access_tkn_claims)
             .expect("Should create expected access_token claims");
         assert_eq!(
-            token,
+            token.as_ref(),
             &Token::new("access_token", expected_claims.into(), Some(iss.clone()))
         );
 
@@ -474,7 +475,7 @@ mod test {
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(id_tkn_claims)
             .expect("Should create expected id_token claims");
         assert_eq!(
-            token,
+            token.as_ref(),
             &Token::new("id_token", expected_claims.into(), Some(iss.clone()))
         );
 
@@ -485,7 +486,7 @@ mod test {
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(userinfo_tkn_claims)
             .expect("Should create expected userinfo_token claims");
         assert_eq!(
-            token,
+            token.as_ref(),
             &Token::new("userinfo_token", expected_claims.into(), Some(iss))
         );
     }
