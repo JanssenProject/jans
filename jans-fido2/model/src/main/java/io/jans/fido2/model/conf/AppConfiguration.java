@@ -68,6 +68,21 @@ public class AppConfiguration implements Configuration, Serializable {
 	@DocProperty(description = "Boolean value specifying whether metric reporter is enabled")
     private boolean metricReporterEnabled = true;
 	
+	@DocProperty(description = "Boolean value specifying whether FIDO2 passkey metrics collection is enabled", defaultValue = "true")
+    private boolean fido2MetricsEnabled = true;
+	
+	@DocProperty(description = "Number of days to keep FIDO2 passkey metrics data", defaultValue = "90")
+    private int fido2MetricsRetentionDays = 90;
+	
+	@DocProperty(description = "Boolean value specifying whether to collect device information in FIDO2 metrics", defaultValue = "true")
+    private boolean fido2DeviceInfoCollection = true;
+	
+	@DocProperty(description = "Boolean value specifying whether to categorize errors in FIDO2 metrics", defaultValue = "true")
+    private boolean fido2ErrorCategorization = true;
+	
+	@DocProperty(description = "Boolean value specifying whether to collect detailed performance metrics for FIDO2 operations", defaultValue = "true")
+    private boolean fido2PerformanceMetrics = true;
+	
 	@DocProperty(description = "Custom object class list for dynamic person enrolment")
     private List<String> personCustomObjectClassList;
 	
@@ -172,6 +187,46 @@ public class AppConfiguration implements Configuration, Serializable {
 
 	public void setMetricReporterEnabled(boolean metricReporterEnabled) {
 		this.metricReporterEnabled = metricReporterEnabled;
+	}
+
+	public boolean isFido2MetricsEnabled() {
+		return fido2MetricsEnabled;
+	}
+
+	public void setFido2MetricsEnabled(boolean fido2MetricsEnabled) {
+		this.fido2MetricsEnabled = fido2MetricsEnabled;
+	}
+
+	public int getFido2MetricsRetentionDays() {
+		return fido2MetricsRetentionDays;
+	}
+
+	public void setFido2MetricsRetentionDays(int fido2MetricsRetentionDays) {
+		this.fido2MetricsRetentionDays = fido2MetricsRetentionDays;
+	}
+
+	public boolean isFido2DeviceInfoCollection() {
+		return fido2DeviceInfoCollection;
+	}
+
+	public void setFido2DeviceInfoCollection(boolean fido2DeviceInfoCollection) {
+		this.fido2DeviceInfoCollection = fido2DeviceInfoCollection;
+	}
+
+	public boolean isFido2ErrorCategorization() {
+		return fido2ErrorCategorization;
+	}
+
+	public void setFido2ErrorCategorization(boolean fido2ErrorCategorization) {
+		this.fido2ErrorCategorization = fido2ErrorCategorization;
+	}
+
+	public boolean isFido2PerformanceMetrics() {
+		return fido2PerformanceMetrics;
+	}
+
+	public void setFido2PerformanceMetrics(boolean fido2PerformanceMetrics) {
+		this.fido2PerformanceMetrics = fido2PerformanceMetrics;
 	}
 
 	public List<String> getPersonCustomObjectClassList() {

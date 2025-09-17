@@ -22,7 +22,6 @@ from jans.pycloudlib.persistence.sql import override_simple_json_property
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.utils import render_base_properties
 from jans.pycloudlib.persistence.utils import render_salt
-from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import get_random_chars

@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=12.0.19
+ARG JETTY_VERSION=12.0.25
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -64,7 +64,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=56df1e6508a510adb193450d408564765333ea67
+ENV JANS_SOURCE_VERSION=e6c0dc926a89e5a4f5db0fb1cf9c776e9da0e523
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 

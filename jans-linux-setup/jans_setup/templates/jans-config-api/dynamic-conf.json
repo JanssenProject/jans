@@ -68,6 +68,21 @@
     "ignoreHttpMethod": [
       "GET"
     ],
+	"ignoreAnnotation": [
+      "ignoreAudit"
+    ],
+    "ignoreObjectMapping": [
+    {
+      "name": "loggingRequest",
+      "text": [
+	  "action=FETCH"
+	  ]
+    },
+    {
+      "name": "ssaRequest",
+      "text": [ ]
+    }
+  ],
     "headerAttributes": [
       "User-inum",
       "jans-client"
