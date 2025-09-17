@@ -311,6 +311,35 @@ impl Authz {
         Ok(result)
     }
 
+    /// Evaluate Multi-Issuer Authorization Request
+    ///
+    /// This is a draft implementation for processing multiple JWT tokens from different issuers.
+    /// It validates the request format and JWT tokens, then performs authorization evaluation.
+    pub async fn authorize_multi_issuer(
+        &self,
+        request: request::AuthorizeMultiIssuerRequest,
+    ) -> Result<AuthorizeResult, AuthorizeError> {
+        // Validate the request format
+        request.validate()?;
+
+        // Validate JWT tokens using the JWT service
+        let _validated_tokens = self
+            .config
+            .jwt_service
+            .validate_multi_issuer_tokens(&request.tokens)
+            .map_err( AuthorizeError::MultiIssuerValidation)?;
+
+        // TODO: Convert validated tokens to Token HashMap for entity building
+        // TODO: Build entities from validated tokens
+        // TODO: Perform authorization evaluation
+        // TODO: Return authorization result
+
+        // Placeholder return - this will be implemented in future PRs
+        Err(AuthorizeError::MultiIssuerValidation(
+            MultiIssuerValidationError::EmptyTokenArray,
+        ))
+    }
+
     /// Evaluate Authorization Request with unsigned data.
     pub async fn authorize_unsigned(
         &self,

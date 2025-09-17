@@ -23,29 +23,15 @@ pub enum MultiIssuerValidationError {
     #[error("Empty token array")]
     EmptyTokenArray,
 
-    #[error("Could not validate tokens. Failed token types: {failed_types:?}. Total tokens: {total_count}")]
-    TokenValidationFailed {
-        failed_types: Vec<String>,
-        total_count: usize,
-    },
+    #[error("Could not validate tokens.")]
+    TokenValidationFailed,
 
-    #[error("Invalid JSON in resource field")]
-    InvalidResourceJson,
-
-    #[error("Invalid JSON in action field")]
-    InvalidActionJson,
 
     #[error("Invalid JSON in context field")]
     InvalidContextJson,
 
-
     #[error("Missing issuer claim in JWT")]
     MissingIssuer,
-
-    #[error(
-        "Duplicate token type '{token_type}' from issuer '{issuer}'. Only one token per type per issuer is allowed."
-    )]
-    NonDeterministicToken { issuer: String, token_type: String },
 }
 
 /// Error type for token input validation
@@ -54,12 +40,8 @@ pub enum TokenInputError {
     #[error("Empty mapping string")]
     EmptyMapping,
 
-
     #[error("Empty payload")]
     EmptyPayload,
-
-    #[error("Invalid JWT format")]
-    InvalidJwtFormat,
 }
 
 /// Error type for Authorization Service initialization
@@ -105,6 +87,9 @@ pub enum AuthorizeError {
     #[error("failed to build role entities for unsigned request: {0}")]
     /// Error encountered while building Role entity in an unsigned request
     BuildUnsignedRoleEntity(#[from] BuildUnsignedEntityError),
+    /// Error encountered while validating multi-issuer request
+    #[error(transparent)]
+    MultiIssuerValidation(#[from] MultiIssuerValidationError),
 }
 
 /// Error type for ID token trust mode validation

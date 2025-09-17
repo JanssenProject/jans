@@ -87,6 +87,7 @@ pub use token::{Token, TokenClaimTypeError, TokenClaims};
 use crate::JwtConfig;
 use crate::LogLevel;
 use crate::LogWriter;
+use crate::authz::MultiIssuerValidationError;
 use crate::common::issuer_utils::normalize_issuer;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
@@ -97,7 +98,7 @@ use log_entry::*;
 use serde_json::json;
 use sparkv::SparKV;
 use status_list::*;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use std::sync::RwLock;
 use validation::*;
@@ -297,7 +298,7 @@ impl JwtService {
 
     fn validate_single_token(
         &self,
-        token_name: String,
+        token_kind: TokenKind,
         jwt: &str,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
         let decoded_jwt = decode_jwt(jwt)?;
@@ -310,7 +311,7 @@ impl JwtService {
         let normalized_iss = decoded_jwt.iss().map(normalize_issuer);
         let validator_key = ValidatorInfo {
             iss: normalized_iss.as_deref(),
-            token_kind: TokenKind::AuthzRequestInput(&token_name),
+            token_kind,
             algorithm: decoded_jwt.header.alg,
         };
         let validator: Arc<RwLock<JwtValidator>> = self
@@ -333,6 +334,93 @@ impl JwtService {
         validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
 
         Ok(validated_jwt)
+    }
+
+    /// Validate multiple tokens from different issuers
+    ///
+    /// This method validates JWT tokens from multiple issuers, checking for:
+    /// - JWT signature validation
+    /// - Token expiration and other standard claims
+    /// - Non-deterministic token detection (duplicate issuer+type combinations)
+    ///
+    /// Returns a result containing validated tokens or detailed error information.
+    pub fn validate_multi_issuer_tokens(
+        &self,
+        tokens: &[crate::authz::request::TokenInput],
+    ) -> Result<Vec<ValidatedJwt>, MultiIssuerValidationError> {
+        if tokens.is_empty() {
+            return Err(MultiIssuerValidationError::EmptyTokenArray);
+        }
+
+        let mut validated_tokens = Vec::new();
+        let mut seen_combinations = HashSet::new();
+
+        for (index, token) in tokens.iter().enumerate() {
+            // Basic validation first
+            if let Err(err) = token.validate() {
+                if let Some(logger) = &self.logger {
+                    logger.log_any(JwtLogEntry::new(
+                        format!("Token validation failed at index {}: {}", index, err),
+                        Some(LogLevel::WARN),
+                    ));
+                }
+                continue;
+            }
+
+            // Validate JWT using existing single token validation
+            match self.validate_single_token(
+                TokenKind::AuthorizeMultiIssuer(&token.mapping),
+                &token.payload,
+            ) {
+                Ok(validated_jwt) => {
+                    // Extract issuer for non-deterministic check
+                    let issuer = validated_jwt
+                        .claims
+                        .get("iss")
+                        .and_then(|iss| iss.as_str())
+                        .ok_or(MultiIssuerValidationError::MissingIssuer)?;
+
+                    // Check for non-deterministic tokens (graceful validation)
+                    let combination = format!("{}:{}", issuer, token.mapping);
+                    if !seen_combinations.insert(combination.clone()) {
+                        // Log warning but continue processing
+                        if let Some(logger) = &self.logger {
+                            logger.log_any(JwtLogEntry::new(
+                                format!(
+                                    "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
+                                    token.mapping, issuer
+                                ),
+                                Some(LogLevel::WARN),
+                            ));
+                        }
+                    } else {
+                        validated_tokens.push(validated_jwt);
+                    }
+                },
+                Err(err) => {
+                    if let Some(logger) = &self.logger {
+                        logger.log_any(JwtLogEntry::new(
+                            format!("Token validation failed at index {}: {}", index, err),
+                            Some(LogLevel::WARN),
+                        ));
+                    }
+                },
+            }
+        }
+
+        // If no tokens were successfully validated, return a detailed error
+        if validated_tokens.is_empty() {
+            if let Some(logger) = &self.logger {
+                logger.log_any(JwtLogEntry::new(
+                    "No valid tokens found in multi-issuer request".to_string(),
+                    Some(LogLevel::ERROR),
+                ));
+            }
+
+            return Err(MultiIssuerValidationError::TokenValidationFailed);
+        }
+
+        Ok(validated_tokens)
     }
 
     /// Use the `iss` claim of a token to retrieve a reference to a [`TrustedIssuer`]
@@ -438,6 +526,8 @@ mod test {
     use super::test_utils::*;
     use super::{JwtService, Token};
     use crate::JwtConfig;
+    use crate::authz::MultiIssuerValidationError;
+    use crate::authz::request::TokenInput;
     use jsonwebtoken::Algorithm;
     use serde_json::{Value, json};
     use std::collections::{HashMap, HashSet};
@@ -540,5 +630,248 @@ mod test {
             token.as_ref(),
             &Token::new("userinfo_token", expected_claims.into(), Some(iss))
         );
+    }
+
+    #[test]
+    async fn test_validate_multi_issuer_tokens_success() {
+        let mut server = MockServer::new_with_defaults().await.unwrap();
+
+        // Create tokens with different issuers
+        let mut access_tkn_claims = json!({
+            "iss": server.issuer(),
+            "sub": "user123",
+            "jti": 1231231231,
+            "exp": u64::MAX,
+            "client_id": "test123",
+        });
+        let access_tkn = server
+            .generate_token_with_hs256sig(&mut access_tkn_claims, None)
+            .unwrap();
+
+        let mut id_tkn_claims = json!({
+            "iss": server.issuer(),
+            "sub": "user123",
+            "exp": u64::MAX,
+            "aud": ["test123"],
+        });
+        let id_tkn = server
+            .generate_token_with_hs256sig(&mut id_tkn_claims, None)
+            .unwrap();
+
+        let iss = server.trusted_issuer();
+
+        let jwt_service = JwtService::new(
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+            },
+            Some(HashMap::from([("Jans".into(), iss)])),
+            None,
+        )
+        .await
+        .expect("Should create JwtService");
+
+        // Create TokenInput structs
+        let tokens = vec![
+            TokenInput::new("Jans::Access_Token".to_string(), access_tkn),
+            TokenInput::new("Jans::Id_Token".to_string(), id_tkn),
+        ];
+
+        let result = jwt_service.validate_multi_issuer_tokens(&tokens);
+        assert!(result.is_ok());
+
+        let validated_tokens = result.unwrap();
+        assert_eq!(validated_tokens.len(), 2);
+    }
+
+    #[test]
+    async fn test_validate_multi_issuer_tokens_empty_array() {
+        let server = MockServer::new_with_defaults().await.unwrap();
+        let iss = server.trusted_issuer();
+
+        let jwt_service = JwtService::new(
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+            },
+            Some(HashMap::from([("Jans".into(), iss)])),
+            None,
+        )
+        .await
+        .expect("Should create JwtService");
+
+        let result = jwt_service.validate_multi_issuer_tokens(&[]);
+        assert!(matches!(
+            result,
+            Err(MultiIssuerValidationError::EmptyTokenArray)
+        ));
+    }
+
+    #[test]
+    async fn test_validate_multi_issuer_tokens_invalid_token_format() {
+        let server = MockServer::new_with_defaults().await.unwrap();
+        let iss = server.trusted_issuer();
+
+        let jwt_service = JwtService::new(
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+            },
+            Some(HashMap::from([("Jans".into(), iss)])),
+            None,
+        )
+        .await
+        .expect("Should create JwtService");
+
+        // Create tokens with invalid JWT format
+        let tokens = vec![
+            TokenInput::new("Jans::Access_Token".to_string(), "invalid-jwt".to_string()),
+            TokenInput::new("Jans::Id_Token".to_string(), "also-invalid".to_string()),
+        ];
+
+        let result = jwt_service.validate_multi_issuer_tokens(&tokens);
+        assert!(matches!(
+            result,
+            Err(MultiIssuerValidationError::TokenValidationFailed)
+        ));
+    }
+
+    #[test]
+    async fn test_validate_multi_issuer_tokens_graceful_validation() {
+        let mut server = MockServer::new_with_defaults().await.unwrap();
+
+        // Create valid token
+        let mut valid_claims = json!({
+            "iss": server.issuer(),
+            "sub": "user123",
+            "jti": 1231231231,
+            "exp": u64::MAX,
+        });
+        let valid_token = server
+            .generate_token_with_hs256sig(&mut valid_claims, None)
+            .unwrap();
+
+        let iss = server.trusted_issuer();
+
+        let jwt_service = JwtService::new(
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+            },
+            Some(HashMap::from([("Jans".into(), iss)])),
+            None,
+        )
+        .await
+        .expect("Should create JwtService");
+
+        // Create tokens with one valid and one invalid
+        let tokens = vec![
+            TokenInput::new("Jans::Access_Token".to_string(), valid_token),
+            TokenInput::new("Jans::Id_Token".to_string(), "invalid-jwt".to_string()),
+        ];
+
+        let result = jwt_service.validate_multi_issuer_tokens(&tokens);
+        assert!(result.is_ok());
+
+        let validated_tokens = result.unwrap();
+        assert_eq!(validated_tokens.len(), 1); // Only the valid token should be returned
+    }
+
+    #[test]
+    async fn test_validate_multi_issuer_tokens_non_deterministic_graceful() {
+        let mut server = MockServer::new_with_defaults().await.unwrap();
+
+        // Create two tokens with same issuer and type (non-deterministic)
+        let mut claims1 = json!({
+            "iss": server.issuer(),
+            "sub": "user123",
+            "jti": 1231231231,
+            "exp": u64::MAX,
+        });
+        let token1 = server
+            .generate_token_with_hs256sig(&mut claims1, None)
+            .unwrap();
+
+        let mut claims2 = json!({
+            "iss": server.issuer(),
+            "sub": "user456",
+            "jti": 1231231232,
+            "exp": u64::MAX,
+        });
+        let token2 = server
+            .generate_token_with_hs256sig(&mut claims2, None)
+            .unwrap();
+
+        let iss = server.trusted_issuer();
+
+        let jwt_service = JwtService::new(
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+            },
+            Some(HashMap::from([("Jans".into(), iss)])),
+            None,
+        )
+        .await
+        .expect("Should create JwtService");
+
+        // Create tokens with duplicate issuer+type combination
+        let tokens = vec![
+            TokenInput::new("Jans::Access_Token".to_string(), token1),
+            TokenInput::new("Jans::Access_Token".to_string(), token2), // Duplicate type from same issuer
+        ];
+
+        let result = jwt_service.validate_multi_issuer_tokens(&tokens);
+        assert!(result.is_ok());
+
+        let validated_tokens = result.unwrap();
+        assert_eq!(validated_tokens.len(), 1); // Only the first token should be returned (graceful validation)
+    }
+
+    #[test]
+    async fn test_validate_multi_issuer_tokens_missing_issuer() {
+        let mut server = MockServer::new_with_defaults().await.unwrap();
+
+        // Create token without issuer claim
+        let mut claims = json!({
+            "sub": "user123",
+            "exp": u64::MAX,
+        });
+        let token = server
+            .generate_token_with_hs256sig(&mut claims, None)
+            .unwrap();
+
+        let iss = server.trusted_issuer();
+
+        let jwt_service = JwtService::new(
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+            },
+            Some(HashMap::from([("Jans".into(), iss)])),
+            None,
+        )
+        .await
+        .expect("Should create JwtService");
+
+        let tokens = vec![TokenInput::new("Jans::Access_Token".to_string(), token)];
+
+        let result = jwt_service.validate_multi_issuer_tokens(&tokens);
+        assert!(matches!(
+            result,
+            Err(MultiIssuerValidationError::TokenValidationFailed)
+        ));
     }
 }
