@@ -30,6 +30,7 @@ from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
 from jans.pycloudlib.utils import get_password_from_file
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import exec_cmd
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -96,8 +97,16 @@ class PostgresqlAdapter:
     def connect_args(self):
         opts = {}
 
-        if as_boolean(os.environ.get("CN_SQL_DB_SSL_ENABLED", "false")):
-            opts["sslmode"] = os.environ.get("CN_SQL_DB_SSL_MODE", "require")
+        if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
+            opts["sslmode"] = os.environ.get("CN_SQL_SSL_MODE", "require")
+
+            if all([
+                os.environ.get("CN_SQL_DB_DIALECT") in ("pgsql", "postgresql"),
+                opts["sslmode"] in ("verify-ca", "verify-full"),
+            ]):
+                opts["sslrootcert"] = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
+                opts["sslcert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
+                opts["sslkey"] = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
         return opts
 
 
@@ -650,7 +659,7 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
         f.write(rendered_txt)
 
     # overrides if required
-    if as_boolean(os.environ.get("CN_SQL_DB_SSL_ENABLED", "false")):
+    if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
         override_ssl_props(dest)
 
 
@@ -760,8 +769,25 @@ def override_ssl_props(sql_prop_file):
     with open(sql_prop_file) as f:
         props = javaproperties.loads(f.read())
 
-    props["connection.driver-property.ssl"] = as_boolean(os.environ.get("CN_SQL_DB_SSL_ENABLED", "false"))
-    props["connection.driver-property.sslmode"] = os.environ.get("CN_SQL_DB_SSL_MODE", "require")
+    # boolean need to be defined as lowercase value
+    props["connection.driver-property.ssl"] = str(as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false"))).lower()
+
+    props["connection.driver-property.sslmode"] = os.environ.get("CN_SQL_SSL_MODE", "require")
+
+    if all([
+        os.environ.get("CN_SQL_DB_DIALECT") in ("pgsql", "postgresql"),
+        props["connection.driver-property.sslmode"] in ("verify-ca", "verify-full"),
+    ]):
+        props["connection.driver-property.sslrootcert"] = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
+        props["connection.driver-property.sslcert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
+        # client key need to be converted from PEM to DER format
+        ssl_key = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
+        _, err, code = exec_cmd(
+            f"openssl pkcs8 -topk8 -inform PEM -outform DER -in {ssl_key} -out /etc/certs/sql_client_key.pkcs8 -nocrypt"
+        )
+        if code != 0:
+            logger.warning(f"Unable to convert key file {ssl_key} to PKCS8 format; reason={err.decode()}")
+        props["connection.driver-property.sslkey"] = "/etc/certs/sql_client_key.pkcs8"
 
     with open(sql_prop_file, "w") as f:
-        f.write(javaproperties.dumps(props))
+        f.write(javaproperties.dumps(props, timestamp=None))
