@@ -7,10 +7,8 @@
 package io.jans.configapi.service.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import static io.jans.as.model.util.Util.escapeLog;
-import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
 import io.jans.configapi.core.service.ConfigHttpService;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.util.AuthUtil;
@@ -43,15 +41,16 @@ public class SsaService {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String AUTHORIZATION = "Authorization";
 
-    public JSONObject revokeSsa(final String accessToken, final String jti) throws Exception {
+    public JSONObject revokeSsa(final String accessToken, final String jti) throws JsonProcessingException {
         if (logger.isInfoEnabled()) {
             logger.info("Revoke SSA parameters - jti:{}", escapeLog(jti));
         }
-        logger.error(" Revoke SSA FINAL KRISHNA");
-        
-        if(StringUtils.isBlank(jti)) {
-            throw new ConfigApiApplicationException(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "SSA unique identifier - JTI is required!");
+
+        if (StringUtils.isBlank(jti)) {
+            throw new WebApplicationException("SSA unique identifier - JTI is required!",
+                    Status.INTERNAL_SERVER_ERROR.getStatusCode());
         }
+
         // Request headers
         Map<String, String> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
@@ -67,68 +66,26 @@ public class SsaService {
         logger.debug(" Revoke SSA httpServiceResponse:{}", httpServiceResponse);
 
         if (httpServiceResponse != null && httpServiceResponse.getHttpResponse() != null) {
-            logger.error(
-                    " Revoke SSA httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
-                    httpServiceResponse.getHttpResponse(),
-                    httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode(),
-                    httpServiceResponse.getHttpResponse().getEntity());
-            jSONObject = getResponseJSONObject(httpServiceResponse);
-        }
-        logger.error(" Revoke SSA response jSONObject:{}", jSONObject);
-        return jSONObject;
-
-    }
-
-    public String revokeSsa_Org(final String accessToken, final String jti) throws Exception {
-        if (logger.isInfoEnabled()) {
-            logger.info("Revoke SSA parameters - jti:{}", escapeLog(jti));
-        }
-        logger.error(" Revoke SSA NEW ");
-        // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        headers.put(AUTHORIZATION, accessToken);
-
-        // Query Parameter
-        Map<String, String> data = new HashMap<>();
-        data.put("jti", jti);
-
-        HttpServiceResponse httpServiceResponse = configHttpService.executeDelete(getSsaEndpoint(), headers, data);
-        JsonNode jsonNode = null;
-        String responseString = null;
-        logger.debug(" Revoke SSA httpServiceResponse:{}", httpServiceResponse);
-
-        if (httpServiceResponse != null && httpServiceResponse.getHttpResponse() != null) {
-            logger.error(
-                    " Revoke SSA httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
-                    httpServiceResponse.getHttpResponse(),
-                    httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode(),
-                    httpServiceResponse.getHttpResponse().getEntity());
             Status status = configHttpService.getResponseStatus(httpServiceResponse);
+            jSONObject = getResponseJSONObject(httpServiceResponse);
+            logger.info(" status:{}, status.getStatusCode():{}, getResponseJSONObject(httpServiceResponse):{}", status,
+                    status.getStatusCode(), getResponseJSONObject(httpServiceResponse));
 
-            logger.error(" status:{}, status.getStatusCode():{}", status, status.getStatusCode());
+            if (status.getStatusCode() != Status.OK.getStatusCode()) {
+                if (httpServiceResponse.getHttpResponse().getStatusLine() != null) {
+                    throw new WebApplicationException(
+                            httpServiceResponse.getHttpResponse().getStatusLine().getReasonPhrase(),
+                            httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode());
+                } else {
+                    throw new WebApplicationException("Error while revoking SSA",
+                            Status.INTERNAL_SERVER_ERROR.getStatusCode());
 
-            StringBuilder stringBuilder = configHttpService
-                    .readEntity(httpServiceResponse.getHttpResponse().getEntity());
-            logger.error(" stringBuilder:{}", stringBuilder);
-
-            String jsonString = configHttpService.getContent(httpServiceResponse.getHttpResponse().getEntity());
-            logger.error(" jsonString:{}", jsonString);
-
-            jsonNode = configHttpService.getResponseJsonNode(httpServiceResponse);
-            logger.error("  Revoke SSA jsonNode:{}", jsonNode);
-
-            responseString = configHttpService
-                    .convertEntityToString(configHttpService.getResponseContent(httpServiceResponse.getHttpResponse()));
-            logger.error("  Revoke SSA responseString:{}", responseString);
-
-            if (status != null && status.getStatusCode() != Status.OK.getStatusCode()) {
-                throw new ConfigApiApplicationException(Status.INTERNAL_SERVER_ERROR.getStatusCode(), responseString);
+                }
 
             }
         }
-        logger.info(" Revoke SSA responseString:{}", responseString);
-        return responseString;
+        logger.info(" Revoke SSA response jSONObject:{}", jSONObject);
+        return jSONObject;
 
     }
 
@@ -178,14 +135,11 @@ public class SsaService {
         jsonObj = new JSONObject();
         if (httpServiceResponse.getHttpResponse() != null) {
 
-            jsonObj.put("response", httpServiceResponse.getHttpResponse().toString());
             jsonObj.put("description", httpServiceResponse.getHttpResponse().getStatusLine());
             if (httpServiceResponse.getHttpResponse().getStatusLine() != null) {
                 jsonObj.put("status", httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode());
             }
-            if (httpServiceResponse.getHttpResponse().getEntity() != null) {
-                jsonObj.put("entity", httpServiceResponse.getHttpResponse().getEntity());
-            }
+
         }
         logger.info(" Return jsonObj:{}", jsonObj);
         return jsonObj;

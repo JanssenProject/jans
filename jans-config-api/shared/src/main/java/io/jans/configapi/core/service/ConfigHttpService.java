@@ -487,7 +487,7 @@ public class ConfigHttpService implements Serializable {
     public Status getResponseStatus(HttpServiceResponse serviceResponse) {
         Status status = Status.INTERNAL_SERVER_ERROR;
 
-        if (serviceResponse == null || serviceResponse.getHttpResponse() == null) {
+        if (serviceResponse == null || serviceResponse.getHttpResponse() == null || serviceResponse.getHttpResponse().getStatusLine()== null) {
             return status;
         }
 

@@ -35,14 +35,13 @@ public class SsaResource extends ConfigBaseResource {
 
     @Inject
     SsaService ssaService;
-   
+
     @Operation(summary = "Revoke existing active SSA based on `jti` or `org_id`", description = "Revoke existing active SSA based on `jti` or `org_id`", operationId = "revoke-ssa", tags = {
             "Software Statement Assertion (SSA)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SSA_DELETE_ACCESS }))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Success"),
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Success"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.SSA_DELETE_ACCESS }, groupScopes = {
@@ -57,11 +56,11 @@ public class SsaResource extends ConfigBaseResource {
         JSONObject jsonObject = null;
         try {
             jsonObject = ssaService.revokeSsa(authorization, jti);
-            log.info("SSA search parameters - jsonObject:{}",jsonObject);
+            log.info("SSA search parameters - jsonObject:{}", jsonObject);
         } catch (Exception ex) {
-             throwInternalServerException(ex);
+            throwInternalServerException(ex);
         }
-        return Response.ok(jsonObject).build();
+        return Response.ok().build();
     }
 
 }
