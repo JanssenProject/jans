@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
@@ -40,11 +41,14 @@ public class Fido2AnalyticsService {
     @Inject
     private Fido2UserMetricsService userMetricsService;
 
-    // Constants for magic numbers
-    private static final double STRONG_ADOPTION_RATE_THRESHOLD = 0.3;
-    private static final double LOW_ADOPTION_RATE_THRESHOLD = 0.1;
-    private static final double SLOW_REGISTRATION_DURATION_MS = 10000;
-    private static final double FAST_REGISTRATION_DURATION_MS = 3000;
+    // Load configuration from properties file
+    private static final ResourceBundle METRICS_CONFIG = ResourceBundle.getBundle("fido2-metrics");
+    
+    // Constants loaded from properties file
+    private static final double STRONG_ADOPTION_RATE_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.high.fallback.rate.threshold"));
+    private static final double LOW_ADOPTION_RATE_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.low.fallback.rate.threshold"));
+    private static final double SLOW_REGISTRATION_DURATION_MS = Double.parseDouble(METRICS_CONFIG.getString("fido2.performance.very.slow.operation.threshold.ms"));
+    private static final double FAST_REGISTRATION_DURATION_MS = Double.parseDouble(METRICS_CONFIG.getString("fido2.performance.slow.operation.threshold.ms"));
     private static final double LOW_SUCCESS_RATE_THRESHOLD = 0.8;
     private static final double HIGH_SUCCESS_RATE_THRESHOLD = 0.95;
     private static final double LOW_ADOPTION_RATE_RECOMMENDATION_THRESHOLD = 0.2;

@@ -43,20 +43,29 @@ public class Fido2UserMetricsService {
     @Named("fido2UserMetricsEntryManager")
     private PersistenceEntryManager persistenceEntryManager;
 
-    private static final String USER_METRICS_BASE_DN = "ou=fido2-user-metrics,o=jans";
-
-    // Constants for magic numbers
-    private static final double HIGH_FALLBACK_RATE_THRESHOLD = 0.5;
-    private static final double MEDIUM_FALLBACK_RATE_THRESHOLD = 0.2;
-    private static final double LOW_SUCCESS_RATE_THRESHOLD = 0.5;
-    private static final double MEDIUM_SUCCESS_RATE_THRESHOLD = 0.8;
-    private static final double NEW_USER_RISK_FACTOR = 0.1;
-    private static final double INACTIVE_USER_RISK_FACTOR = 0.2;
-    private static final double HIGH_FALLBACK_RISK_FACTOR = 0.3;
-    private static final double MEDIUM_FALLBACK_RISK_FACTOR = 0.1;
-    private static final double LOW_SUCCESS_RISK_FACTOR = 0.4;
-    private static final double MEDIUM_SUCCESS_RISK_FACTOR = 0.2;
-    private static final double MAX_RISK_SCORE = 1.0;
+    private static final ResourceBundle METRICS_CONFIG = ResourceBundle.getBundle("fido2-metrics");
+    private static final String USER_METRICS_BASE_DN = METRICS_CONFIG.getString("fido2.user.metrics.base.dn");
+    private static final double HIGH_FALLBACK_RATE_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.high.fallback.rate.threshold"));
+    private static final double MEDIUM_FALLBACK_RATE_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.medium.fallback.rate.threshold"));
+    private static final double LOW_FALLBACK_RATE_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.low.fallback.rate.threshold"));
+    private static final int HIGH_ENGAGEMENT_MIN_OPERATIONS = Integer.parseInt(METRICS_CONFIG.getString("fido2.user.high.engagement.min.operations"));
+    private static final int MEDIUM_ENGAGEMENT_MIN_OPERATIONS = Integer.parseInt(METRICS_CONFIG.getString("fido2.user.medium.engagement.min.operations"));
+    private static final int LOW_ENGAGEMENT_MIN_OPERATIONS = Integer.parseInt(METRICS_CONFIG.getString("fido2.user.low.engagement.min.operations"));
+    private static final int EARLY_ADOPTION_MAX_DAYS = Integer.parseInt(METRICS_CONFIG.getString("fido2.user.early.adoption.max.days"));
+    private static final int GROWTH_ADOPTION_MAX_DAYS = Integer.parseInt(METRICS_CONFIG.getString("fido2.user.growth.adoption.max.days"));
+    private static final int MATURE_ADOPTION_MIN_DAYS = Integer.parseInt(METRICS_CONFIG.getString("fido2.user.mature.adoption.min.days"));
+    private static final double HIGH_RISK_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.high.threshold"));
+    private static final double MEDIUM_RISK_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.medium.threshold"));
+    private static final double LOW_RISK_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.low.threshold"));
+    private static final double HIGH_FALLBACK_RISK_FACTOR = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.high.fallback.factor"));
+    private static final double MEDIUM_FALLBACK_RISK_FACTOR = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.medium.fallback.factor"));
+    private static final double LOW_SUCCESS_RATE_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.success.rate.low.threshold"));
+    private static final double LOW_SUCCESS_RISK_FACTOR = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.low.success.factor"));
+    private static final double MEDIUM_SUCCESS_RATE_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.success.rate.medium.threshold"));
+    private static final double MEDIUM_SUCCESS_RISK_FACTOR = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.medium.success.factor"));
+    private static final double NEW_USER_RISK_FACTOR = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.new.user.factor"));
+    private static final double INACTIVE_USER_RISK_FACTOR = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.inactive.user.factor"));
+    private static final double MAX_RISK_SCORE = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.max.score"));
 
     /**
      * Update user metrics for a registration event
