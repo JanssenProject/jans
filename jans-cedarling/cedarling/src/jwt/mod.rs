@@ -178,18 +178,19 @@ impl JwtService {
         const ID_TOKEN_NAME: &str = "id_token";
 
         for (token_name, jwt) in tokens.iter() {
-            let validated_jwt = match self.validate_single_token(token_name.clone(), jwt) {
-                Ok(jwt) => jwt,
-                Err(err) => {
-                    if matches!(err, ValidateJwtError::MissingValidator(_)) {
-                        self.logger
-                            .log_any(JwtLogEntry::new(err.to_string(), Some(LogLevel::WARN)));
-                        continue;
-                    } else {
-                        return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err));
-                    }
-                },
-            };
+            let validated_jwt =
+                match self.validate_single_token(TokenKind::AuthzRequestInput(token_name), jwt) {
+                    Ok(jwt) => jwt,
+                    Err(err) => {
+                        if matches!(err, ValidateJwtError::MissingValidator(_)) {
+                            self.logger
+                                .log_any(JwtLogEntry::new(err.to_string(), Some(LogLevel::WARN)));
+                            continue;
+                        } else {
+                            return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err));
+                        }
+                    },
+                };
 
             let mut claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
                 .map_err(|err| {
@@ -216,7 +217,7 @@ impl JwtService {
 
     fn validate_single_token(
         &self,
-        token_name: String,
+        token_kind: TokenKind,
         jwt: &str,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
         let decoded_jwt = decode_jwt(jwt)?;
@@ -229,7 +230,7 @@ impl JwtService {
         let normalized_iss = decoded_jwt.iss().map(normalize_issuer);
         let validator_key = ValidatorInfo {
             iss: normalized_iss.as_deref(),
-            token_kind: TokenKind::AuthzRequestInput(&token_name),
+            token_kind,
             algorithm: decoded_jwt.header.alg,
         };
         let validator = self
@@ -271,18 +272,25 @@ impl JwtService {
         }
 
         let mut validated_tokens = Vec::new();
-        let mut failed_tokens = Vec::new();
         let mut seen_combinations = HashSet::new();
 
         for (index, token) in tokens.iter().enumerate() {
             // Basic validation first
             if let Err(err) = token.validate() {
-                failed_tokens.push((index, err.to_string()));
+                if let Some(logger) = &self.logger {
+                    logger.log_any(JwtLogEntry::new(
+                        format!("Token validation failed at index {}: {}", index, err),
+                        Some(LogLevel::WARN),
+                    ));
+                }
                 continue;
             }
 
             // Validate JWT using existing single token validation
-            match self.validate_single_token(token.mapping.clone(), &token.payload) {
+            match self.validate_single_token(
+                TokenKind::AuthorizeMultiIssuer(&token.mapping),
+                &token.payload,
+            ) {
                 Ok(validated_jwt) => {
                     // Extract issuer for non-deterministic check
                     let issuer = validated_jwt
@@ -304,34 +312,18 @@ impl JwtService {
                                 Some(LogLevel::WARN),
                             ));
                         }
-                        // Add to failed tokens instead of returning error
-                        failed_tokens.push((
-                            index,
-                            format!(
-                                "Duplicate token type '{}' from issuer '{}'",
-                                token.mapping, issuer
-                            ),
-                        ));
                     } else {
                         validated_tokens.push(validated_jwt);
                     }
                 },
                 Err(err) => {
-                    failed_tokens.push((index, err.to_string()));
+                    if let Some(logger) = &self.logger {
+                        logger.log_any(JwtLogEntry::new(
+                            format!("Token validation failed at index {}: {}", index, err),
+                            Some(LogLevel::WARN),
+                        ));
+                    }
                 },
-            }
-        }
-
-        // Log any failed tokens as warnings
-        for (index, error) in &failed_tokens {
-            if let Some(logger) = &self.logger {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "Token validation failed at index {} (type: '{}'): {}",
-                        index, tokens[*index].mapping, error
-                    ),
-                    Some(LogLevel::WARN),
-                ));
             }
         }
 
@@ -344,15 +336,7 @@ impl JwtService {
                 ));
             }
 
-            let failed_types: Vec<String> = failed_tokens
-                .iter()
-                .map(|(index, _)| tokens[*index].mapping.clone())
-                .collect();
-
-            return Err(MultiIssuerValidationError::TokenValidationFailed {
-                failed_types,
-                total_count: tokens.len(),
-            });
+            return Err(MultiIssuerValidationError::TokenValidationFailed);
         }
 
         Ok(validated_tokens)
@@ -653,8 +637,7 @@ mod test {
         let result = jwt_service.validate_multi_issuer_tokens(&tokens);
         assert!(matches!(
             result,
-            Err(MultiIssuerValidationError::TokenValidationFailed { failed_types, total_count })
-            if failed_types == vec!["Jans::Access_Token", "Jans::Id_Token"] && total_count == 2
+            Err(MultiIssuerValidationError::TokenValidationFailed)
         ));
     }
 
@@ -787,8 +770,7 @@ mod test {
         let result = jwt_service.validate_multi_issuer_tokens(&tokens);
         assert!(matches!(
             result,
-            Err(MultiIssuerValidationError::TokenValidationFailed { failed_types, total_count })
-            if failed_types == vec!["Jans::Access_Token"] && total_count == 1
+            Err(MultiIssuerValidationError::TokenValidationFailed)
         ));
     }
 }

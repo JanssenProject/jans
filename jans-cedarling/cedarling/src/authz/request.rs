@@ -87,7 +87,7 @@ pub struct RequestUnsigned {
 
 /// Cedar policy entity data
 /// fields represent EntityUid
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct EntityData {
     /// Cedar entity mapping info
     #[serde(rename = "cedar_entity_mapping")]
@@ -98,7 +98,7 @@ pub struct EntityData {
 }
 
 /// Cedar entity mapping information
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct CedarEntityMapping {
     /// entity type name
     #[serde(rename = "entity_type")]
@@ -151,9 +151,9 @@ pub struct AuthorizeMultiIssuerRequest {
     /// Array of JWT tokens with explicit type mappings
     pub tokens: Vec<TokenInput>,
     /// Optional resource being accessed (JSON format)
-    pub resource: Option<Value>,
+    pub resource: Option<EntityData>,
     /// Optional action being performed (JSON format)
-    pub action: Option<Value>,
+    pub action: Option<String>,
     /// Optional additional context for policy evaluation (JSON format)
     pub context: Option<Value>,
 }
@@ -172,8 +172,8 @@ impl AuthorizeMultiIssuerRequest {
     /// Create a new AuthorizeMultiIssuerRequest with all fields
     pub fn new_with_fields(
         tokens: Vec<TokenInput>,
-        resource: Option<Value>,
-        action: Option<Value>,
+        resource: Option<EntityData>,
+        action: Option<String>,
         context: Option<Value>,
     ) -> Self {
         Self {
@@ -191,18 +191,6 @@ impl AuthorizeMultiIssuerRequest {
             return Err(MultiIssuerValidationError::EmptyTokenArray);
         }
 
-        // Validate JSON fields if provided
-        if let Some(ref resource) = self.resource {
-            if !resource.is_object() && !resource.is_string() {
-                return Err(MultiIssuerValidationError::InvalidResourceJson);
-            }
-        }
-
-        if let Some(ref action) = self.action {
-            if !action.is_string() {
-                return Err(MultiIssuerValidationError::InvalidActionJson);
-            }
-        }
 
         if let Some(ref context) = self.context {
             if !context.is_object() {
@@ -286,8 +274,14 @@ mod tests {
             "1234567890",
         )];
 
-        let resource = Some(json!({"type": "Document", "id": "doc123"}));
-        let action = Some(json!("Read"));
+        let resource = Some(EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Document".to_string(),
+                id: "doc123".to_string(),
+            },
+            attributes: HashMap::new(),
+        });
+        let action = Some("Read".to_string());
         let context = Some(json!({"location": "miami"}));
 
         let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -351,15 +345,15 @@ mod tests {
 
         let request = AuthorizeMultiIssuerRequest::new_with_fields(
             tokens,
-            Some(json!(123)), // Invalid resource (should be object or string)
-            Some(json!(123)), // Invalid action (should be string)
+            None, // Valid resource (None)
+            Some("Read".to_string()), // Valid action
             Some(json!(123)), // Invalid context (should be object)
         );
 
         let result = request.validate();
         assert!(matches!(
             result,
-            Err(MultiIssuerValidationError::InvalidResourceJson)
+            Err(MultiIssuerValidationError::InvalidContextJson)
         ));
     }
 
@@ -371,10 +365,17 @@ mod tests {
             "1234567890",
         )];
 
+        let resource = Some(EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Document".to_string(),
+                id: "doc123".to_string(),
+            },
+            attributes: HashMap::new(),
+        });
         let request = AuthorizeMultiIssuerRequest::new_with_fields(
             tokens,
-            Some(json!({"type": "Document"})),
-            Some(json!("Read")),
+            resource,
+            Some("Read".to_string()),
             Some(json!({"location": "miami"})),
         );
 
