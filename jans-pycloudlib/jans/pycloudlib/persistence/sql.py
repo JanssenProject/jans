@@ -282,6 +282,29 @@ class SqlClient(SqlSchemaMixin):
         self._metadata: _t.Optional[MetaData] = None
         self._engine = None
 
+        if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
+            self._bootstrap_ssl_assets()
+
+    def _bootstrap_ssl_assets(self):
+        for filepath, secret_name in [
+            (os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem"), "sql_ssl_ca_cert"),
+            (os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem"), "sql_ssl_client_cert"),
+            (os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem"), "sql_ssl_client_key"),
+        ]:
+            if os.path.isfile(filepath):
+                # asset already exists -- either mounted externally or pre-populated internally
+                continue
+
+            if filepath and (contents := self.manager.secret.get(secret_name)):
+                logger.info(f"Detected non-empty {secret_name=}. The secret will be populated into {filepath!r}.")
+
+                with open(filepath, "w") as f:
+                    f.write(contents)
+
+                # client key must be protected using 600 permission
+                if secret_name == "sql_ssl_client_key":  # noqa: B105
+                    os.chmod(filepath, 0o600)
+
     @property
     def engine(self) -> Engine:
         """Lazy init of engine instance object."""
@@ -658,10 +681,6 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
         }
         f.write(rendered_txt)
 
-    # overrides if required
-    if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
-        override_ssl_props(dest)
-
 
 def set_mysql_strict_mode(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
@@ -765,7 +784,7 @@ def dump_sql_overrides(data):
         f.write(json.dumps(data))
 
 
-def override_ssl_props(sql_prop_file):
+def override_sql_ssl_property(sql_prop_file):
     with open(sql_prop_file) as f:
         props = javaproperties.loads(f.read())
 
@@ -782,12 +801,11 @@ def override_ssl_props(sql_prop_file):
         props["connection.driver-property.sslcert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
         # client key need to be converted from PEM to DER format
         ssl_key = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
-        _, err, code = exec_cmd(
-            f"openssl pkcs8 -topk8 -inform PEM -outform DER -in {ssl_key} -out /etc/certs/sql_client_key.pkcs8 -nocrypt"
-        )
+        ssl_key_p8 = os.environ.get("CN_SQL_SSL_KEY_PKCS8_FILE", "/etc/certs/sql_client_key.pkcs8")
+        _, err, code = exec_cmd(f"openssl pkcs8 -topk8 -inform PEM -outform DER -in {ssl_key} -out {ssl_key_p8} -nocrypt")
         if code != 0:
-            logger.warning(f"Unable to convert key file {ssl_key} to PKCS8 format; reason={err.decode()}")
-        props["connection.driver-property.sslkey"] = "/etc/certs/sql_client_key.pkcs8"
+            logger.warning(f"Unable to convert key file {ssl_key} to PKCS8 file {ssl_key_p8}; reason={err.decode()}")
+        props["connection.driver-property.sslkey"] = ssl_key_p8
 
     with open(sql_prop_file, "w") as f:
         f.write(javaproperties.dumps(props, timestamp=None))
