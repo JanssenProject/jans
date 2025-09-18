@@ -100,7 +100,6 @@ use std::collections::HashMap;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::sync::Arc;
-use std::sync::Mutex;
 use std::sync::RwLock;
 use validation::*;
 
@@ -113,7 +112,7 @@ pub struct JwtService {
     key_service: Arc<KeyService>,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
     logger: Option<Logger>,
-    token_cache: Arc<Mutex<SparKV<Arc<Token>>>>,
+    token_cache: Arc<RwLock<SparKV<Arc<Token>>>>,
 }
 
 struct IssuerConfig {
@@ -174,7 +173,7 @@ impl JwtService {
             key_service,
             issuer_configs,
             logger,
-            token_cache: Arc::new(Mutex::new(SparKV::new())),
+            token_cache: Arc::new(RwLock::new(SparKV::new())),
         })
     }
 
@@ -230,7 +229,7 @@ impl JwtService {
 
     fn find_token_in_cache(&self, jwt: &str) -> Option<Arc<Token>> {
         self.token_cache
-            .lock()
+            .read()
             .expect("validated_jwt_cache mutex shouldn't be poisoned")
             .get(&hash_str(jwt))
             .map(|v| v.to_owned())
@@ -256,14 +255,14 @@ impl JwtService {
         if let Some(duration) = cache_duration_opt {
             let _ = self
                 .token_cache
-                .lock()
+                .write()
                 .expect("validated_jwt_cache mutex shouldn't be poisoned")
                 .set_with_ttl(&key, token, Duration::seconds(duration as i64), &[]);
         } else {
             // set with default TTL
             let _ = self
                 .token_cache
-                .lock()
+                .write()
                 .expect("validated_jwt_cache mutex shouldn't be poisoned")
                 .set(&key, token, &[]);
         }
