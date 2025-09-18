@@ -63,8 +63,10 @@ jobs:
     - name: Install Rust Stable
       uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
 
-    - name: Install WASM dependencies
-      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+    - name: Install specific wasm-pack version (v0.12.1)
+      run: |
+        curl -L https://github.com/rustwasm/wasm-pack/releases/download/v0.12.1/wasm-pack-v0.12.1-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin --strip-components=1
+        wasm-pack --version
 
     - name: Clean project
       working-directory: jans-cedarling
