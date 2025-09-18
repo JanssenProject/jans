@@ -117,8 +117,6 @@ public class ApiAccessConstants {
     public static final String SSA_WRITE_ACCESS = "https://jans.io/oauth/config/ssa.write";
     public static final String SSA_DELETE_ACCESS = "https://jans.io/oauth/config/ssa.delete";
 
-
 	public static final String AUTH_SSA_ADMIN = "https://jans.io/auth/ssa.admin";
-    public static final String AUTH_SSA_DEVELOPER = "https://jans.io/auth/ssa.developer";
-    public static final String AUTH_SSA_PORTAL = "https://jans.io/auth/ssa.portal";
+
 }
