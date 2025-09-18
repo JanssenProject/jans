@@ -61,24 +61,30 @@ jobs:
       run: sudo apt-get update && sudo apt-get install chromium-chromedriver
 
     - name: Install Rust Stable
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable is fine now
-
-    - name: Create .cargo/config.toml for WASM reference types
-      working-directory: jans-cedarling
-      run: |
-        mkdir -p .cargo
-        echo -e "\nrustflags = [\"-C\", \"target-feature=+reference-types\"]" >> .cargo/config.toml
+      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
 
     - name: Install WASM dependencies
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
+    - name: Clean project
+      working-directory: jans-cedarling
+      run: cargo clean
+
     - name: Run WASM tests using chrome
       working-directory: jans-cedarling/bindings/cedarling_wasm
-      run: wasm-pack test --headless --chrome
+      run: |
+        RUSTFLAGS='-C target-feature=+reference-types' wasm-pack test --headless --chrome
 
     - name: Run WASM tests using firefox
       working-directory: jans-cedarling/bindings/cedarling_wasm
-      run: wasm-pack test --headless --firefox
+      run: |
+        RUSTFLAGS='-C target-feature=+reference-types' wasm-pack test --headless --firefox
+
+    - name: Run Clippy on WASM target
+      working-directory: jans-cedarling
+      run: |
+        rustup component add clippy
+        RUSTFLAGS='-C target-feature=+reference-types' cargo clippy --target wasm32-unknown-unknown -- -Dwarnings
 
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
