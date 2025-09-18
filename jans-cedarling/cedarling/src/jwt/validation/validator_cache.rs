@@ -81,6 +81,20 @@ impl JwtValidatorCache {
 
                 self.insert(key, validator);
             }
+
+            for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
+                let (validator, key) = JwtValidator::new_multi_issuer_tkn_validator(
+                    Some(&iss),
+                    token_name,
+                    tkn_metadata,
+                    algorithm,
+                    status_lists.clone(),
+                    jwt_config.jwt_sig_validation,
+                    jwt_config.jwt_status_validation,
+                );
+
+                self.insert(key, validator);
+            }
         }
 
         if jwt_config.jwt_status_validation {
