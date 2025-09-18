@@ -55,12 +55,11 @@ jobs:
       with:
         egress-policy: audit
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-
     - name: Install chromium
       run: sudo apt-get update && sudo apt-get install chromium-chromedriver
 
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+    - name: Install Rust Nightly
+      uses: dtolnay/rust-toolchain@nightly # Changed from 'stable' to 'nightly'
 
     - name: Create .cargo/config.toml for WASM reference types
       working-directory: jans-cedarling
@@ -70,6 +69,11 @@ jobs:
 
     - name: Install WASM dependencies
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+    - name: Update Rust dependencies
+      working-directory: jans-cedarling
+      run: cargo update
+
     - name: Run WASM tests using chrome
       working-directory: jans-cedarling/bindings/cedarling_wasm
       run: |
