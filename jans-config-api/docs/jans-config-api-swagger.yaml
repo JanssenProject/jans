@@ -13591,6 +13591,9 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/ssa.delete
+        - https://jans.io/auth/ssa.admin
+        - https://jans.io/auth/ssa.developer
+        - https://jans.io/auth/ssa.portal
   /api/v1/stat:
     get:
       tags:
@@ -14912,19 +14915,19 @@ components:
           type: string
         selected:
           type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
         whitePagesCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -17666,7 +17669,7 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
+        logoutStatusJwt:
           type: boolean
         tokenTypeEnum:
           type: string
@@ -17678,7 +17681,7 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object

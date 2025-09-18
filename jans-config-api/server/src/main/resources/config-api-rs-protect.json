@@ -3465,6 +3465,18 @@
             {
               "inum": "1800.01.98",
               "name": "https://jans.io/oauth/config/ssa.write"
+            },
+            {
+              "inum": "",
+              "name": "https://jans.io/auth/ssa.admin"
+            },
+            {
+              "inum": "",
+              "name": "https://jans.io/auth/ssa.developer"
+            },
+            {
+              "inum": "",
+              "name": "https://jans.io/auth/ssa.portal"
             }
           ],
           "superScopes": [

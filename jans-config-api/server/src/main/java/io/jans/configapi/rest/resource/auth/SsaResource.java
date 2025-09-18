@@ -38,7 +38,7 @@ public class SsaResource extends ConfigBaseResource {
 
     @Operation(summary = "Revoke existing active SSA based on `jti` or `org_id`", description = "Revoke existing active SSA based on `jti` or `org_id`", operationId = "revoke-ssa", tags = {
             "Software Statement Assertion (SSA)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SSA_DELETE_ACCESS }))
+                    ApiAccessConstants.SSA_DELETE_ACCESS, ApiAccessConstants.AUTH_SSA_ADMIN, ApiAccessConstants.AUTH_SSA_DEVELOPER, ApiAccessConstants.AUTH_SSA_PORTAL }))
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Success"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity"),
