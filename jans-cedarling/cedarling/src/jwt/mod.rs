@@ -187,6 +187,12 @@ impl JwtService {
 
         let now = Utc::now();
 
+        // clear expired tokens from cache
+        self.token_cache
+            .write()
+            .expect("validated_jwt_cache mutex shouldn't be poisoned")
+            .clear_expired();
+
         for (token_name, jwt) in tokens.iter() {
             let token = if let Some(validated_token) = self.find_token_in_cache(jwt) {
                 validated_token
