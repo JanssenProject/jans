@@ -398,6 +398,7 @@ fn fix_aud_claim_value_to_array(claims: TokenClaims) -> TokenClaims {
 /// This is used to create a key for caching tokens
 /// The hash value is used instead of the original string to have shorter keys for SparKV which utilizes BTree.
 fn hash_str(s: &str) -> String {
+    // it use `getrandom` internally for seeding on first use
     let mut hasher = ahash::AHasher::default();
     s.hash(&mut hasher);
     let hash_value = hasher.finish();
