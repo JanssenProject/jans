@@ -78,6 +78,7 @@ mod validation;
 #[allow(dead_code)]
 mod test_utils;
 
+use chrono::DateTime;
 use chrono::Duration;
 pub use decode::*;
 pub use error::*;
@@ -184,6 +185,8 @@ impl JwtService {
         let mut validated_tokens = HashMap::new();
         const ID_TOKEN_NAME: &str = "id_token";
 
+        let now = Utc::now();
+
         for (token_name, jwt) in tokens.iter() {
             let token = if let Some(validated_token) = self.find_token_in_cache(jwt) {
                 validated_token
@@ -217,7 +220,7 @@ impl JwtService {
                 };
 
                 let token = Arc::new(Token::new(token_name, claims, validated_jwt.trusted_iss));
-                self.save_token_in_cache(jwt, token.clone());
+                self.save_token_in_cache(jwt, token.clone(), now);
                 token
             };
 
@@ -235,7 +238,7 @@ impl JwtService {
             .map(|v| v.to_owned())
     }
 
-    fn save_token_in_cache(&self, jwt: &str, token: Arc<Token>) {
+    fn save_token_in_cache(&self, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
         let key = hash_str(jwt);
 
         let cache_duration_opt = token
@@ -243,7 +246,6 @@ impl JwtService {
             .get_claim("exp")
             .and_then(|exp| exp.value().as_i64())
             .and_then(|exp| {
-                let now = Utc::now();
                 let duration = exp - now.timestamp();
                 if duration > 0 {
                     Some(duration as u64)
