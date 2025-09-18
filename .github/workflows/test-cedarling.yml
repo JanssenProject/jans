@@ -61,12 +61,6 @@ jobs:
     - name: Install Rust Nightly
       uses: dtolnay/rust-toolchain@nightly # Changed from 'stable' to 'nightly'
 
-    - name: Create .cargo/config.toml for WASM reference types
-      working-directory: jans-cedarling
-      run: |
-        mkdir -p .cargo
-        echo 'rustflags = ["-C", "target-feature=+reference-types"]' >> .cargo/config.toml
-
     - name: Install WASM dependencies
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
