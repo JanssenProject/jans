@@ -35,6 +35,7 @@ import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
+import io.jans.fido2.service.shared.MetricService;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
 import io.jans.fido2.service.persist.UserSessionIdService;
@@ -99,6 +100,9 @@ public class AssertionService {
 	@Inject
 	private ErrorResponseFactory errorResponseFactory;
 
+	@Inject
+	private MetricService metricService;
+
 	@Context
 	private HttpServletRequest httpRequest;
 	@Context
@@ -110,6 +114,9 @@ public class AssertionService {
 	 */
 	public AssertionOptionsResponse options(AssertionOptions assertionOptions) {
 		log.debug("Assertion options {}", CommonUtilService.toJsonNode(assertionOptions));
+
+		// Start timing for metrics collection
+		long startTime = System.currentTimeMillis();
 
 		// Apply external custom scripts
 		ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(
@@ -203,6 +210,13 @@ public class AssertionService {
 		externalFido2InterceptionService.authenticateAssertionFinish(CommonUtilService.toJsonNode(assertionOptions),
 				externalFido2InterceptionContext);
 
+		// Record metrics for authentication attempt
+		try {
+			metricService.recordPasskeyAuthenticationAttempt(username, httpRequest, startTime);
+		} catch (Exception e) {
+			log.debug("Failed to record authentication attempt metrics: {}", e.getMessage());
+		}
+
 		log.debug("assertionOptionsResponse :" + assertionOptionsResponse);
 		return assertionOptionsResponse;
 	}
@@ -272,6 +286,12 @@ public class AssertionService {
 	public AttestationOrAssertionResponse verify(AssertionResult assertionResult) {
 		log.debug("authenticateResponse verify {}", CommonUtilService.toJsonNode(assertionResult));
 
+		// Start timing for metrics collection
+		long startTime = System.currentTimeMillis();
+		String username = null;
+		String authenticatorType = null;
+
+		try {
 		// Apply external custom scripts
 		ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(
 				CommonUtilService.toJsonNode(assertionResult), httpRequest, httpResponse);
@@ -313,18 +333,15 @@ public class AssertionService {
 		log.debug("Fido2RegistrationEntry" + registrationEntry);
 		log.debug("registrationData" + registrationData);
 
+		// Set username and authenticator type for metrics
+		username = registrationData.getUsername();
+		authenticatorType = registrationData.getAuthentictatorAttachment();
+
 		// Set actual counter value. Note: Fido2 not update initial value in
 		// Fido2RegistrationData to minimize DB updates
 		registrationData.setCounter(registrationEntry.getCounter());
 
-		try {
-			assertionVerifier.verifyAuthenticatorAssertionResponse(response, registrationData, authenticationData);
-		} catch (Fido2CompromisedDevice ex) {
-			registrationData.setStatus(Fido2RegistrationStatus.compromised);
-			registrationPersistenceService.update(registrationEntry);
-
-			throw ex;
-		}
+		verifyAuthenticatorAssertion(response, registrationData, authenticationData, registrationEntry);
 
 		// Store original response
 		authenticationData.setAssertionResponse(CommonUtilService.toJsonNode(assertionResult).toString());
@@ -332,8 +349,8 @@ public class AssertionService {
 		authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
 
 		// Set expiration
-		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getMetadataRefreshInterval();
-		authenticationEntity.setExpiration(unfinishedRequestExpiration);
+		int authenticationHistoryExpiration = appConfiguration.getFido2Configuration().getAuthenticationHistoryExpiration();
+		authenticationEntity.setExpiration(authenticationHistoryExpiration);
 
 		authenticationPersistenceService.update(authenticationEntity);
 
@@ -369,7 +386,18 @@ public class AssertionService {
 		externalFido2InterceptionService.verifyAssertionFinish(CommonUtilService.toJsonNode(assertionResultResponse),
 				externalFido2InterceptionContext);
 
+		// Record metrics for successful authentication
+		recordAuthenticationSuccessMetrics(registrationData.getUsername(), httpRequest, startTime, authenticatorType);
+
 		return assertionResultResponse;
+		
+		} catch (Exception e) {
+			// Record metrics for failed authentication
+			recordAuthenticationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
+			
+			// Re-throw the original exception
+			throw e;
+		}
 	}
 
 	private Pair<List<PublicKeyCredentialDescriptor>, String> prepareAllowedCredentials(String origin,
@@ -408,6 +436,45 @@ public class AssertionService {
 		applicationId = fidoRegistration.get().getRegistrationData().getRpId();
 
 		return Pair.of(allowedFido2Keys, applicationId);
+	}
+	
+	/**
+	 * Record authentication success metrics
+	 */
+	private void recordAuthenticationSuccessMetrics(String username, HttpServletRequest httpRequest, 
+													long startTime, String authenticatorType) {
+		try {
+			metricService.recordPasskeyAuthenticationSuccess(username, httpRequest, startTime, authenticatorType);
+		} catch (Exception e) {
+			log.debug("Failed to record authentication success metrics: {}", e.getMessage());
+		}
+	}
+	
+	/**
+	 * Record authentication failure metrics
+	 */
+	private void recordAuthenticationFailureMetrics(String username, HttpServletRequest httpRequest, 
+													long startTime, Exception error, String authenticatorType) {
+		try {
+			String errorReason = error.getMessage() != null ? error.getMessage() : "Unknown error";
+			metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
+		} catch (Exception metricsException) {
+			log.debug("Failed to record authentication failure metrics: {}", metricsException.getMessage());
+		}
+	}
+	
+	/**
+	 * Verify authenticator assertion response with proper error handling
+	 */
+	private void verifyAuthenticatorAssertion(Response response, Fido2RegistrationData registrationData, 
+											  Fido2AuthenticationData authenticationData, Fido2RegistrationEntry registrationEntry) {
+		try {
+			assertionVerifier.verifyAuthenticatorAssertionResponse(response, registrationData, authenticationData);
+		} catch (Fido2CompromisedDevice ex) {
+			registrationData.setStatus(Fido2RegistrationStatus.compromised);
+			registrationPersistenceService.update(registrationEntry);
+			throw ex;
+		}
 	}
 
 }

@@ -171,6 +171,7 @@ class Upgrade:
         basic_id = doc_id_from_dn(JANS_BASIC_SCRIPT_DN)
         duo_id = doc_id_from_dn("inum=5018-F9CF,ou=scripts,o=jans")
         agama_id = doc_id_from_dn("inum=BADA-BADA,ou=scripts,o=jans")
+        logout_status_id = doc_id_from_dn("inum=0300-BA15,ou=scripts,o=jans")
         kwargs = {"table_name": "jansCustomScr"}
 
         # toggle scim script
@@ -194,6 +195,13 @@ class Upgrade:
         duo_entry = self.backend.get_entry(duo_id, **kwargs)
         if duo_entry and not as_boolean(os.environ.get("CN_DUO_ENABLED")):
             self.backend.delete_entry(duo_entry.id, **kwargs)
+
+        # logout status jwt type
+        logout_status_entry = self.backend.get_entry(logout_status_id, **kwargs)
+        if logout_status_entry and logout_status_entry.attrs["jansScrTyp"] != "logout_status_jwt":
+            logout_status_entry.attrs["jansScrTyp"] = "logout_status_jwt"
+            logout_status_entry.attrs["jansRevision"] += 1
+            self.backend.modify_entry(logout_status_entry.id, logout_status_entry.attrs, **kwargs)
 
         agama_entry = self.backend.get_entry(agama_id, **kwargs)
         if agama_entry:

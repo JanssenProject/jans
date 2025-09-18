@@ -1,5 +1,6 @@
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.util.RedirectUri;
@@ -8,18 +9,19 @@ import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.server.model.authorize.IdTokenMember;
+import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.par.ws.rs.ParService;
-import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.RedirectUriResponse;
-import io.jans.as.server.service.RedirectionUriService;
-import io.jans.as.server.service.RequestParameterService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
@@ -27,6 +29,7 @@ import org.testng.annotations.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -78,6 +81,44 @@ public class AuthzRequestServiceTest {
 
     @Mock
     private ExternalAuthenticationService externalAuthenticationService;
+
+    @Spy
+    private AcrService acrService;
+
+    @Test
+    public void checkIdTokenMember_whenAcrIsAliased_shouldUseMappedAcr() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("urn:openbanking:psd2:sca");
+
+        Map<String, String> acrMappings = new HashMap<>();
+        acrMappings.put("urn:openbanking:psd2:sca", "psd2sca");
+        acrMappings.put("urn:openbanking:psd2:ca", "psd2sca");
+
+        when(appConfiguration.getAcrMappings()).thenReturn(acrMappings);
+
+        IdTokenMember idTokenMember = new IdTokenMember(new JSONObject("{\n" +
+                "      \"openbanking_intent_id\": {\n" +
+                "        \"value\": \"urn-alphabank-intent-58923\",\n" +
+                "        \"essential\": \"true\"\n" +
+                "      },\n" +
+                "      \"acr\": {\n" +
+                "        \"essential\": \"true\",\n" +
+                "        \"values\": [\n" +
+                "          \"urn:openbanking:psd2:sca\",\n" +
+                "          \"urn:openbanking:psd2:ca\"\n" +
+                "        ]\n" +
+                "      }\n" +
+                "    }"));
+
+        final RedirectUriResponse redirectUriResponse = new RedirectUriResponse(mock(RedirectUri.class), "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class));
+
+        JwtAuthorizationRequest request = mock(JwtAuthorizationRequest.class);
+        when(request.getIdTokenMember()).thenReturn(idTokenMember);
+
+        authzRequestService.checkIdTokenMember(authzRequest, redirectUriResponse, new User(), request);
+
+        assertEquals(authzRequest.getAcrValues(), "psd2sca");
+    }
 
     @Test
     public void setAcrsIfNeeded_whenAcrsAreNotSetButDefaultAcrsAreConfigured_shouldSetDefaultAcrs() {

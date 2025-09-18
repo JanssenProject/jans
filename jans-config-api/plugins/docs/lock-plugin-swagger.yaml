@@ -719,32 +719,16 @@ components:
           type: integer
           description: Time interval for the Clean Service in seconds
           format: int32
-        policiesJsonUrisAuthorizationToken:
-          type: string
-          description: Authorization token to access Json Uris
-        policiesJsonUris:
-          type: array
-          description: List of Json Uris with link to Rego policies
-          items:
-            type: string
-            description: List of Json Uris with link to Rego policies
-        policiesZipUrisAuthorizationToken:
-          type: string
-          description: Authorization token to access Zip Uris
-        policiesZipUris:
-          type: array
-          description: List of Zip Uris with policies
-          items:
-            type: string
-            description: List of Zip Uris with policies
         messageConsumerType:
           type: string
           description: PubSub consumer service
-        policyConsumerType:
-          type: string
-          description: Policy consumer service
         errorReasonEnabled:
           type: boolean
+        cleanServiceBatchChunkSize:
+          type: integer
+          description: Each clean up iteration fetches chunk of expired data per base
+            dn and removes it from storage
+          format: int32
     JsonPatch:
       type: object
     JsonNode:

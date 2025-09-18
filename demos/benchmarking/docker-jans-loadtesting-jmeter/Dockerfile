@@ -24,6 +24,7 @@ ENV FQDN="https://demoexample.jans.io" \
     ROPC_CLIENT_SECRET="" \
     DCR_CLIENT_ID="" \
     DCR_CLIENT_SECRET="" \
+    RUN_AUTHZ_SOAK_TEST=false \
     RUN_AUTHZ_TEST=false \
     RUN_ROPC_TEST=false \
     RUN_DCR_TEST=false \

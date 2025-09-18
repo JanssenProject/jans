@@ -86,6 +86,7 @@ use crate::JwtConfig;
 use crate::LogLevel;
 use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
+use crate::common::issuer_utils::normalize_issuer;
 use crate::log::Logger;
 use http_utils::*;
 use key_service::*;
@@ -94,6 +95,7 @@ use status_list::*;
 use std::collections::HashMap;
 use std::sync::Arc;
 use validation::*;
+use serde_json::json;
 
 /// The value of the `iss` claim from a JWT
 type IssClaim = String;
@@ -149,7 +151,7 @@ impl JwtService {
                     .await?;
             }
 
-            issuer_configs.insert(iss_claim, iss_config);
+            issuer_configs.insert(normalize_issuer(&iss_claim), iss_config);
         }
 
         // quick check so we don't get surprised if the program runs but can't validate
@@ -172,6 +174,7 @@ impl JwtService {
         tokens: &'a HashMap<String, String>,
     ) -> Result<HashMap<String, Token>, JwtProcessingError> {
         let mut validated_tokens = HashMap::new();
+        const ID_TOKEN_NAME: &str = "id_token";
 
         for (token_name, jwt) in tokens.iter() {
             let validated_jwt = match self.validate_single_token(token_name.clone(), jwt) {
@@ -187,7 +190,7 @@ impl JwtService {
                 },
             };
 
-            let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
+            let mut claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
                 .map_err(|err| {
                     self.logger.log_any(JwtLogEntry::new(
                         format!("failed to deserialize token claims: {err}"),
@@ -196,6 +199,10 @@ impl JwtService {
                     err
                 })
                 .map_err(JwtProcessingError::StringDeserialization)?;
+
+            if token_name == ID_TOKEN_NAME {
+                claims = fix_aud_claim_value_to_array(claims);
+            }
 
             validated_tokens.insert(
                 token_name.to_string(),
@@ -218,8 +225,9 @@ impl JwtService {
         let decoding_key = self.key_service.get_key(&decoding_key_info);
 
         // get validator
+        let normalized_iss = decoded_jwt.iss().map(normalize_issuer);
         let validator_key = ValidatorInfo {
-            iss: decoded_jwt.iss(),
+            iss: normalized_iss.as_deref(),
             token_kind: TokenKind::AuthzRequestInput(&token_name),
             algorithm: decoded_jwt.header.alg,
         };
@@ -249,7 +257,7 @@ impl JwtService {
     #[inline]
     fn get_issuer_ref(&self, iss_claim: &str) -> Option<Arc<TrustedIssuer>> {
         self.issuer_configs
-            .get(iss_claim)
+            .get(&normalize_issuer(iss_claim))
             .map(|config| &config.policy)
             .cloned()
     }
@@ -300,6 +308,30 @@ async fn insert_keys(
     Ok(())
 }
 
+// Fix String `aud` claim value to array
+fn fix_aud_claim_value_to_array(claims: TokenClaims) -> TokenClaims {
+    // make owned value mutable
+    let mut claims = claims;
+
+    const AUD_KEY: &str = "aud";
+    let mut aud_value = serde_json::Value::Null;
+
+    if let Some(claim) = claims.get_claim(AUD_KEY) {
+        if let Some(claim_str_value) = claim.value().as_str() {
+            // convert String to Array for backward compatibility
+            aud_value = json!([claim_str_value]);
+        } else {
+            aud_value = claim.value().clone()
+        }
+    }
+
+    if aud_value != serde_json::Value::Null {
+        claims = claims.with_claim(AUD_KEY.to_string(), aud_value)
+    }
+
+    claims
+}
+
 #[cfg(test)]
 mod test {
     use super::test_utils::*;
@@ -328,7 +360,7 @@ mod test {
             .unwrap();
         let mut id_tkn_claims = json!({
             "iss": server.issuer(),
-            "aud": "test123",
+            "aud": ["test123"],
             "sub": "some_sub",
             "name": "John Doe",
             "exp": u64::MAX,

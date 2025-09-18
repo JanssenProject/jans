@@ -1,0 +1,150 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+cedar_version: v4.0.0
+policy_stores:
+  a1bf93115de86de760ee0bea1d529b521489e5a11747:
+    cedar_version: v4.0.0
+    name: Jans
+    description: A test policy store with default entities.
+    trusted_issuers:
+      Jans123123:
+        name: "Jans"
+        description: "A Test IDP"
+        openid_configuration_endpoint: "https://test.jans.org/.well-known/openid-configuration"
+        token_metadata:
+          access_token:
+            entity_type_name: "Jans::Access_token"
+            workload_id: "client_id"
+            principal_mapping:
+              - "Jans::Workload"
+          id_token:
+            entity_type_name: "Jans::Id_token"
+            principal_mapping:
+              - "Jans::User"
+          userinfo_token:
+            entity_type_name: "Jans::Userinfo_token"
+            user_id: "sub"
+            principal_mapping:
+              - "Jans::User"
+    policies:
+      840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+        description: simple policy example for principal workload
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::Workload,
+                action in [Jans::Action::"Update"],
+                resource is Jans::Issue
+            )when{
+                principal.access_token.org_id == resource.org_id &&
+                principal.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
+            };
+      444da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+        cedar_version: v4.0.0
+        description: simple policy example for principal user
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::User,
+                action in [Jans::Action::"Update"],
+                resource is Jans::Issue
+            )when{
+                principal.country == resource.country &&
+                principal.id_token.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
+            };
+      555da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+        cedar_version: v4.0.0
+        description: Policy that uses default entities
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::User,
+                action in [Jans::Action::"Read"],
+                resource is Jans::Issue
+            )when{
+                resource.org_id == "1694c954f8d9" &&
+                principal.country in ["Atlantic", "Pacific", "Indian"]
+            };
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+        namespace Jans {
+          type Url = {"host": String, "path": String, "protocol": String};
+          entity Issue = {"country": String, "org_id": String};
+          entity Role;
+          entity TrustedIssuer = {"issuer_entity_id": Url};
+          entity User in [Role] = {
+            sub?: String,
+            role?: String,
+            email: String,
+            username: String,
+            country: String,
+            id_token?: Id_token,
+            userinfo_token?: Userinfo_token,
+          };
+          entity Workload = {
+            iss: Jans::TrustedIssuer,
+            aud?: String,
+            client_id?: String,
+            access_token?: Access_token,
+          };
+          entity Access_token = {
+            aud?: String,
+            exp?: Long,
+            iat?: Long,
+            iss: TrustedIssuer,
+            jti: String,
+            org_id?: String,
+          };
+          entity Id_token = {
+            acr?: String,
+            amr?: String,
+            aud?: String,
+            exp?: Long,
+            iat?: Long,
+            iss: TrustedIssuer,
+            jti: String,
+            sub?: String,
+          };
+          entity Userinfo_token = {
+            sub?: String,
+            email?: String,
+            name?: String,
+          };
+          entity DefaultEntity = {
+            entity_id: String,
+            o?: String,
+            org_id?: String,
+            domain?: String,
+            regions?: Set<String>,
+            description?: String,
+            products?: Record<String, Long>,
+            services?: Record<String, Long>,
+          };
+          action "Update" appliesTo {
+            principal: [Workload, User],
+            resource: [Issue],
+            context: {}
+          };
+          action "Read" appliesTo {
+            principal: [User],
+            resource: [Issue],
+            context: {}
+          };
+        }
+    default_entities:
+      "1694c954f8d9": "eyJlbnRpdHlfaWQiOiIxNjk0Yzk1NGY4ZDkiLCJlbnRpdHlfdHlwZSI6IkphbnM6OkRlZmF1bHRFbnRpdHkiLCJvIjoiQWNtZSBEb2xwaGlucyBEaXZpc2lvbiIsIm9yZ19pZCI6IjEwMDEyOSIsImRvbWFpbiI6ImFjbWUtZG9scGhpbi5zZWEiLCJyZWdpb25zIjpbIkF0bGFudGljIiwiUGFjaWZpYyIsIkluZGlhbiJdfQ=="
+      "74d109b20248": "eyJlbnRpdHlfaWQiOiI3NGQxMDliMjAyNDgiLCJlbnRpdHlfdHlwZSI6IkphbnM6OkRlZmF1bHRFbnRpdHkiLCJkZXNjcmlwdGlvbiI6IjIwMjUgUHJpY2UgTGlzdCIsInByb2R1Y3RzIjp7IjE1MDIwIjo5OTUsIjE1MDUwIjoxNDk1fSwic2VydmljZXMiOnsiNTEwMDEiOjk5MDAsIjUxMDIwIjoyOTkwMH19"
+      "ece25bef0c2a": "eyJlbnRpdHlfaWQiOiJlY2UyNWJlZjBjMmEiLCJlbnRpdHlfdHlwZSI6IkphbnM6OkRlZmF1bHRFbnRpdHkiLCJvIjoiQWNtZSBBbmFseXRpY3MgRGl2aXNpb24iLCJvcmdfaWQiOiIxMDAxMzAiLCJkb21haW4iOiJhY21lLWFuYWx5dGljcy50ZWNoIiwicmVnaW9ucyI6WyJHbG9iYWwiXX0="

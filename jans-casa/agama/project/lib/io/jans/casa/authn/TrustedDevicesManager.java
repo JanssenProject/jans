@@ -47,8 +47,70 @@ public class TrustedDevicesManager {
         if (device == null) return false; 
         logger.debug("Checking if user's device is known");
 
+        // Additional validation to prevent false positives
+        if (!isDeviceDataValid()) {
+            logger.debug("Device data validation failed, treating as unknown device");
+            return false;
+        }
+
         return findDevice(device, trustedDevices) != -1;
 
+    }
+
+    /**
+     * Validates that the device data is complete and reliable for matching
+     */
+    private boolean isDeviceDataValid() {
+        try {
+            String browserName = device.optString("name");
+            String browserVersion = device.optString("version");
+            String osName = device.optString("osName");
+            String osVersion = device.optString("osVersion");
+            
+            // Check if browser information is complete
+            if (browserName == null || browserName.trim().isEmpty() || 
+                browserVersion == null || browserVersion.trim().isEmpty()) {
+                logger.debug("Browser information incomplete: name={}, version={}", browserName, browserVersion);
+                return false;
+            }
+            
+            // Check if OS information is complete
+            if (osName == null || osName.trim().isEmpty() || 
+                osVersion == null || osVersion.trim().isEmpty()) {
+                logger.debug("OS information incomplete: name={}, version={}", osName, osVersion);
+                return false;
+            }
+            
+            // Check for fallback/placeholder values that indicate incomplete data
+            if (isFallbackVersion(browserVersion) || isFallbackVersion(osVersion)) {
+                logger.debug("Device data contains fallback values: browser={}, os={}", browserVersion, osVersion);
+                return false;
+            }
+            
+            return true;
+            
+        } catch (Exception e) {
+            logger.debug("Error validating device data: {}", e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Checks if a version string represents a fallback/placeholder value
+     */
+    private boolean isFallbackVersion(String version) {
+        if (version == null) return true;
+        
+        String v = version.trim().toLowerCase();
+        return v.isEmpty() || 
+               v.equals("0.0.0") || 
+               v.equals("unknown") || 
+               v.equals("undefined") ||
+               v.equals("null") ||
+               v.equals("n/a") ||
+               v.equals("0") ||
+               v.equals("1.0.0") ||
+               v.equals("0.0");
     }
 
     public boolean knownLocation() {

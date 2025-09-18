@@ -242,6 +242,7 @@ public class RegisterValidator {
                 log.error("No jwks provided in Dynamic Client Registration script (method getDcrJwks didn't return actual jwks). ");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "");
             }
+            return jwks;
         }
         return null;
     }

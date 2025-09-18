@@ -85,6 +85,15 @@ impl TokenClaims {
 
         HashMap::from_iter(iter)
     }
+
+    // Update TokenClaims claim value by consuming itself.
+    // Consuming allows to be sure that only one instance exist.
+    pub fn with_claim(self, k: String, v: Value) -> Self {
+        let mut claims = self;
+        claims.claims.insert(k, v);
+        
+        claims
+    }
 }
 
 pub struct TokenClaim<'a> {
@@ -99,6 +108,10 @@ impl TokenClaim<'_> {
             .ok_or(TokenClaimTypeError::type_mismatch(
                 &self.key, "String", self.value,
             ))
+    }
+
+    pub fn value(&self) -> &Value {
+        self.value
     }
 }
 

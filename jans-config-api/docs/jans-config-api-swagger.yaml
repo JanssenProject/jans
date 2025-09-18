@@ -43,6 +43,7 @@ tags:
 - name: Token
 - name: Logs
 - name: Database
+- name: Software Statement Assertion (SSA)
 paths:
   /api/v1/health/app-version:
     get:
@@ -1650,14 +1651,18 @@ paths:
           default: 50
       - name: start_date
         in: query
-        description: Start-Date for which the log entries report is to be fetched
         schema:
           type: string
+          description: Start-Date for which the log entries report is to be fetched
+            in `dd-MM-yyyy` format
+          format: date
       - name: end_date
         in: query
-        description: End-Date for which the log entries is to be fetched
         schema:
           type: string
+          description: End-Date for which the log entries is to be fetched in `dd-MM-yyyy`
+            format
+          format: date
       responses:
         "200":
           description: Ok
@@ -4751,9 +4756,11 @@ paths:
                   - persistence_extension
                   - idp
                   - discovery
+                  - cookie
                   - health_check
                   - authz_detail
                   - update_token
+                  - logout_status_jwt
                   - config_api_auth
                   - modify_ssa_response
                   - fido2_extension
@@ -13554,6 +13561,36 @@ paths:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.readonly
         - revoke_session
+  /api/v1/jans-auth-server/ssa:
+    delete:
+      tags:
+      - Software Statement Assertion (SSA)
+      summary: Revoke existing active SSA based on `jti` or `org_id`
+      description: Revoke existing active SSA based on `jti` or `org_id`
+      operationId: revoke-ssa
+      parameters:
+      - name: Authorization
+        in: header
+        description: Authorization code
+        schema:
+          type: string
+      - name: jti
+        in: query
+        description: JWT ID - unique identifier for the JWT
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Success
+        "401":
+          description: Unauthorized
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/ssa.delete
   /api/v1/stat:
     get:
       tags:
@@ -14875,19 +14912,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanEdit:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
-          type: boolean
         whitePagesCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -15012,6 +15049,8 @@ components:
         archivedJwkLifetimeInSeconds:
           type: integer
           format: int32
+        uppercaseResponseKeysInAccountAccessConsent:
+          type: boolean
         umaConfigurationEndpoint:
           type: string
         umaRptAsJwt:
@@ -16498,6 +16537,10 @@ components:
           type: array
           items:
             type: string
+        logoutStatusJwtScriptDns:
+          type: array
+          items:
+            type: string
         backchannelLogoutUri:
           type: array
           items:
@@ -16797,6 +16840,17 @@ components:
           items:
             type: string
             description: HTTP methods for which audit is disabled.
+        ignoreAnnotation:
+          type: array
+          description: Annotation for which audit is disabled.
+          items:
+            type: string
+            description: Annotation for which audit is disabled.
+        ignoreObjectMapping:
+          type: array
+          description: Object for which audit is disabled.
+          items:
+            $ref: "#/components/schemas/ObjectDetails"
         headerAttributes:
           type: array
           description: List of header HTTP attributes whose value is to be logged.
@@ -16826,6 +16880,19 @@ components:
             type: string
             description: HTTP methods for which data conversion is to be disabled.
       description: Configuration for data-type converstion.
+    ObjectDetails:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the object.
+        text:
+          type: array
+          description: List of string text that is to be ignored .
+          items:
+            type: string
+            description: List of string text that is to be ignored .
+      description: Object for which audit is disabled.
     PluginConf:
       type: object
       properties:
@@ -16934,9 +17001,11 @@ components:
           - persistence_extension
           - idp
           - discovery
+          - cookie
           - health_check
           - authz_detail
           - update_token
+          - logout_status_jwt
           - config_api_auth
           - modify_ssa_response
           - fido2_extension
@@ -16968,14 +17037,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -17597,6 +17666,8 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        accessToken:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -17607,8 +17678,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
@@ -17762,3 +17831,6 @@ components:
             https://jans.io/oauth/config/token.delete: Delete Token details
             https://jans.io/oauth/config/data.readonly: View Config-API related data
             https://jans.io/oauth/config/audit-read: View Audit Log related data
+            https://jans.io/oauth/config/ssa.readonly: View SSA details
+            https://jans.io/oauth/config/ssa.write: Manage SSA details
+            https://jans.io/oauth/config/ssa.delete: Delete SSA details

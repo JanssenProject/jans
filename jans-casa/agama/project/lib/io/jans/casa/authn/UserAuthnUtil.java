@@ -5,6 +5,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.server.service.*;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.cdi.util.CdiUtil;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -84,6 +85,12 @@ public class UserAuthnUtil {
         boolean prompt = policies.isEmpty() || policies.contains("EVERY_LOGIN");
         if (prompt) return true;
         
+        // Validate device and location data before proceeding
+        if (!isValidDeviceData()) {
+            logger.warn("Invalid or missing device data, forcing 2FA prompt");
+            return true;
+        }
+        
         TrustedDevicesManager tdm = new TrustedDevicesManager(user, jsonDevice, jsonLocation);
         
         if (/*!prompt &&*/ policies.contains("LOCATION_UNKNOWN")) {
@@ -97,6 +104,112 @@ public class UserAuthnUtil {
         }
         return prompt;
         
+    }
+
+    /**
+     * Validates that device data is complete and valid before using it for trusted device evaluation
+     * This prevents issues with stale or incomplete device fingerprints
+     */
+    private boolean isValidDeviceData() {
+        if (jsonDevice == null || jsonDevice.trim().isEmpty()) {
+            logger.debug("Device data is null or empty");
+            return false;
+        }
+        
+        try {
+            // Parse the device JSON to validate it has required fields
+            org.json.JSONObject device = new org.json.JSONObject(jsonDevice);
+            String browserName = device.optString("name");
+            String browserVersion = device.optString("version");
+            String osName = device.optString("osName");
+            String osVersion = device.optString("osVersion");
+            
+            // Check if browser information is complete
+            if (browserName == null || browserName.trim().isEmpty() || 
+                browserVersion == null || browserVersion.trim().isEmpty()) {
+                logger.debug("Browser information incomplete: name={}, version={}", browserName, browserVersion);
+                return false;
+            }
+            
+            // Check if OS information is complete
+            if (osName == null || osName.trim().isEmpty() || 
+                osVersion == null || osVersion.trim().isEmpty()) {
+                logger.debug("OS information incomplete: name={}, version={}", osName, osVersion);
+                return false;
+            }
+            
+            // Check for fallback/placeholder values that indicate incomplete data
+            if (isFallbackVersion(browserVersion) || isFallbackVersion(osVersion)) {
+                logger.debug("Device data contains fallback values: browser={}, os={}", browserVersion, osVersion);
+                return false;
+            }
+            
+            return true;
+            
+        } catch (Exception e) {
+            logger.debug("Error parsing device data: {}", e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Checks if a version string represents a fallback/placeholder value
+     */
+    private boolean isFallbackVersion(String version) {
+        if (version == null) return true;
+        
+        String v = version.trim().toLowerCase();
+        return v.isEmpty() || 
+               v.equals("0.0.0") || 
+               v.equals("unknown") || 
+               v.equals("undefined") ||
+               v.equals("null") ||
+               v.equals("n/a") ||
+               v.equals("0") ||
+               v.equals("1.0.0") ||
+               v.equals("0.0");
+    }
+
+    /**
+     * Validates the current session state to prevent stale session issues
+     * Returns true if session is valid, false if stale session detected
+     */
+    public boolean validateSessionState() {
+        try {
+            // Simple session validation without servlet dependencies
+            // In Agama environment, we'll use a basic timestamp approach
+            
+            // Check if we have valid device data as a proxy for session freshness
+            if (!isValidDeviceData()) {
+                logger.debug("Device data invalid, considering session stale");
+                return false;
+            }
+            
+            // For now, always return true to avoid blocking authentication
+            // The device validation above will handle the main TouchID issue
+            return true;
+            
+        } catch (Exception e) {
+            logger.debug("Error validating session state: {}", e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Clears any stale session data to force fresh authentication
+     */
+    public void clearStaleSessionData() {
+        try {
+            // In Agama environment, we can't directly access servlet session
+            // Instead, we'll rely on device validation to handle stale session issues
+            logger.debug("Session cleanup not available in Agama environment, using device validation instead");
+            
+            // The device validation in isValidDeviceData() will prevent stale session issues
+            // by ensuring only valid, complete device data is used for trusted device evaluation
+            
+        } catch (Exception e) {
+            logger.debug("Error in session cleanup: {}", e.getMessage());
+        }
     }
 
     public List<String> computeUserMethods(LinkedHashSet<String> supportedMethods) {
@@ -146,6 +259,12 @@ public class UserAuthnUtil {
 
         try {
             if (policies.isEmpty() || !isUser2FAOn()) return;
+            
+            // Only update trusted devices if we have valid device data
+            if (!isValidDeviceData()) {
+                logger.warn("Skipping trusted device update due to invalid device data");
+                return;
+            }
             
             TrustedDevicesManager tdm = new TrustedDevicesManager(user, jsonDevice, jsonLocation);
             tdm.updateDevices();

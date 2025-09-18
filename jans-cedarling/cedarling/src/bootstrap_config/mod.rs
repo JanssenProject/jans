@@ -57,6 +57,12 @@ pub struct BootstrapConfig {
     /// Lock service configuration.
     /// If `None` then lock service is disabled.
     pub lock_config: Option<LockServiceConfig>,
+    /// Maximum number of default entities allowed in a policy store.
+    /// This prevents DoS attacks by limiting the number of entities that can be loaded.
+    pub max_default_entities: Option<usize>,
+    /// Maximum size of base64-encoded default entity strings in bytes.
+    /// This prevents memory exhaustion attacks from extremely large base64 strings.
+    pub max_base64_size: Option<usize>,
 }
 
 impl BootstrapConfig {
