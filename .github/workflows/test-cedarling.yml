@@ -67,7 +67,7 @@ jobs:
       working-directory: jans-cedarling
       run: |
         mkdir -p .cargo
-        echo -e "runner = \nrustflags = [\"-C\", \"target-feature=+reference-types\"]" >> .cargo/config.toml
+        echo -e "\nrustflags = [\"-C\", \"target-feature=+reference-types\"]" >> .cargo/config.toml
 
     - name: Install WASM dependencies
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
