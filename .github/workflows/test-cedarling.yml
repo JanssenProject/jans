@@ -62,10 +62,6 @@ jobs:
 
     - name: Install Rust Stable
       uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
-    
-    - name: Remove `rust-toolchain.toml` file
-      working-directory: jans-cedarling
-      run: rm rust-toolchain.toml
 
     - name: Install specific wasm-pack version (v0.13.1)
       run: |
