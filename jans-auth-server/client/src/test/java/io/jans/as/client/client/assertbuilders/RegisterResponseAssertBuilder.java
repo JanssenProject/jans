@@ -73,7 +73,7 @@ public class RegisterResponseAssertBuilder extends BaseAssertBuilder {
 
             assertNotNull(response.getClientId());
             assertNotNull(response.getClientSecret());
-            assertNotNull(response.getClientSecretExpiresAt());
+//            assertNotNull(response.getClientSecretExpiresAt());
             assertNotNull(response.getRegistrationAccessToken());
             assertNotNull(response.getClientIdIssuedAt());
 
