@@ -556,6 +556,17 @@ components:
           format: int32
         metricReporterEnabled:
           type: boolean
+        fido2MetricsEnabled:
+          type: boolean
+        fido2MetricsRetentionDays:
+          type: integer
+          format: int32
+        fido2DeviceInfoCollection:
+          type: boolean
+        fido2ErrorCategorization:
+          type: boolean
+        fido2PerformanceMetrics:
+          type: boolean
         personCustomObjectClassList:
           type: array
           items:
