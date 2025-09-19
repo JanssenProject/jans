@@ -1,3 +1,4 @@
+import json
 from prompt_toolkit.eventloop import get_event_loop
 
 from utils.utils import common_data
@@ -79,6 +80,7 @@ async def get_admin_ui_roles() -> None:
         return
 
     common_data.admin_ui_roles = response.json()
+    common_data.app.logger.info(f"Backrgound Task: admin-ui-roles: {json.dumps(common_data.admin_ui_roles)}")
 
 
 async def get_persistence_type() -> None:
