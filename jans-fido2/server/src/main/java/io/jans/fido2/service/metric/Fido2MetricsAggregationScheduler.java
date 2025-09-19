@@ -7,6 +7,7 @@
 package io.jans.fido2.service.metric;
 
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.quartz.Job;
@@ -44,7 +45,7 @@ public class Fido2MetricsAggregationScheduler {
         public void execute(JobExecutionContext context) throws JobExecutionException {
             try {
                 Fido2MetricsService metricsService = (Fido2MetricsService) context.getJobDetail()
-                    .getJobDataMap().get("metricsService");
+                    .getJobDataMap().get(Fido2MetricsConstants.METRICS_SERVICE);
                 
                 if (metricsService != null) {
                     // Process the previous hour to ensure data is complete
@@ -73,7 +74,7 @@ public class Fido2MetricsAggregationScheduler {
         public void execute(JobExecutionContext context) throws JobExecutionException {
             try {
                 Fido2MetricsService metricsService = (Fido2MetricsService) context.getJobDetail()
-                    .getJobDataMap().get("metricsService");
+                    .getJobDataMap().get(Fido2MetricsConstants.METRICS_SERVICE);
                 
                 if (metricsService != null) {
                     LocalDateTime previousDay = LocalDateTime.now().minusDays(1)
@@ -94,7 +95,7 @@ public class Fido2MetricsAggregationScheduler {
         public void execute(JobExecutionContext context) throws JobExecutionException {
             try {
                 Fido2MetricsService metricsService = (Fido2MetricsService) context.getJobDetail()
-                    .getJobDataMap().get("metricsService");
+                    .getJobDataMap().get(Fido2MetricsConstants.METRICS_SERVICE);
                 
                 if (metricsService != null) {
                     LocalDateTime previousWeek = LocalDateTime.now().minusWeeks(1)
@@ -116,7 +117,7 @@ public class Fido2MetricsAggregationScheduler {
         public void execute(JobExecutionContext context) throws JobExecutionException {
             try {
                 Fido2MetricsService metricsService = (Fido2MetricsService) context.getJobDetail()
-                    .getJobDataMap().get("metricsService");
+                    .getJobDataMap().get(Fido2MetricsConstants.METRICS_SERVICE);
                 
                 if (metricsService != null) {
                     LocalDateTime previousMonth = LocalDateTime.now().minusMonths(1)
@@ -138,7 +139,7 @@ public class Fido2MetricsAggregationScheduler {
         public void execute(JobExecutionContext context) throws JobExecutionException {
             try {
                 Fido2MetricsService metricsService = (Fido2MetricsService) context.getJobDetail()
-                    .getJobDataMap().get("metricsService");
+                    .getJobDataMap().get(Fido2MetricsConstants.METRICS_SERVICE);
                 
                 if (metricsService != null) {
                     int retentionDays = (Integer) context.getJobDetail()

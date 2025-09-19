@@ -10,10 +10,6 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2UserMetrics;
 import io.jans.fido2.model.metric.UserMetricsUpdateRequest;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SearchScope;
-import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -230,11 +226,9 @@ public class Fido2UserMetricsService {
     public List<Fido2UserMetrics> getUsersByAdoptionStage(String adoptionStage) {
         try {
             Filter filter = Filter.createEqualityFilter("jansAdoptionStage", adoptionStage);
-            List<Fido2UserMetrics> entries = persistenceEntryManager.findEntries(
+            return persistenceEntryManager.findEntries(
                 USER_METRICS_BASE_DN, Fido2UserMetrics.class, filter
             );
-
-            return entries;
         } catch (Exception e) {
             log.error("Failed to retrieve users by adoption stage {}: {}", adoptionStage, e.getMessage(), e);
             return Collections.emptyList();
@@ -248,11 +242,9 @@ public class Fido2UserMetricsService {
         try {
             LocalDateTime cutoffDate = LocalDateTime.now().minusDays(days);
             Filter filter = Filter.createGreaterOrEqualFilter("jansFirstRegistrationDate", cutoffDate);
-            List<Fido2UserMetrics> entries = persistenceEntryManager.findEntries(
+            return persistenceEntryManager.findEntries(
                 USER_METRICS_BASE_DN, Fido2UserMetrics.class, filter
             );
-
-            return entries;
         } catch (Exception e) {
             log.error("Failed to retrieve new users: {}", e.getMessage(), e);
             return Collections.emptyList();

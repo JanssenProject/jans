@@ -12,10 +12,6 @@ import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricsEntry;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SearchScope;
-import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -115,11 +111,9 @@ public class Fido2MetricsService {
                 Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endTime)
             );
 
-            List<Fido2MetricsEntry> entries = persistenceEntryManager.findEntries(
+            return persistenceEntryManager.findEntries(
                 METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter
             );
-
-            return entries;
         } catch (Exception e) {
             log.error("Failed to retrieve metrics entries for user {}: {}", userId, e.getMessage(), e);
             return Collections.emptyList();
@@ -137,11 +131,9 @@ public class Fido2MetricsService {
                 Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endTime)
             );
 
-            List<Fido2MetricsEntry> entries = persistenceEntryManager.findEntries(
+            return persistenceEntryManager.findEntries(
                 METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter
             );
-
-            return entries;
         } catch (Exception e) {
             log.error("Failed to retrieve metrics entries for operation {}: {}", operationType, e.getMessage(), e);
             return Collections.emptyList();

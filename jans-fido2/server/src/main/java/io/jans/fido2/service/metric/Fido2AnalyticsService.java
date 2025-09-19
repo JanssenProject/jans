@@ -231,7 +231,7 @@ public class Fido2AnalyticsService {
         report.put("deviceTrends", deviceTrends);
         
         // Device performance comparison
-        Map<String, Object> devicePerformance = compareDevicePerformance(deviceAnalytics);
+        Map<String, Object> devicePerformance = compareDevicePerformance();
         report.put("devicePerformance", devicePerformance);
         
         return report;
@@ -253,7 +253,7 @@ public class Fido2AnalyticsService {
         report.put("errorTrends", errorTrends);
         
         // Error impact analysis
-        Map<String, Object> errorImpact = analyzeErrorImpact(errorAnalysis);
+        Map<String, Object> errorImpact = analyzeErrorImpact();
         report.put("errorImpact", errorImpact);
         
         return report;
@@ -634,12 +634,12 @@ public class Fido2AnalyticsService {
         return benchmarks;
     }
 
-    private Map<String, Object> compareDevicePerformance(Map<String, Object> deviceAnalytics) {
+    private Map<String, Object> compareDevicePerformance() {
         // Implementation for device performance comparison
         return new HashMap<>();
     }
 
-    private Map<String, Object> analyzeErrorImpact(Map<String, Object> errorAnalysis) {
+    private Map<String, Object> analyzeErrorImpact() {
         // Implementation for error impact analysis
         return new HashMap<>();
     }

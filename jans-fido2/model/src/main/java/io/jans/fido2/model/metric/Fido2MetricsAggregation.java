@@ -7,7 +7,6 @@
 package io.jans.fido2.model.metric;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
@@ -17,6 +16,7 @@ import io.jans.orm.model.base.Entry;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * FIDO2 Metrics Aggregation - stores summary data for different time periods
@@ -623,6 +623,23 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
                 ", uniqueUsers=" + uniqueUsers +
                 ", lastUpdated=" + lastUpdated +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        
+        Fido2MetricsAggregation that = (Fido2MetricsAggregation) obj;
+        return Objects.equals(id, that.id) &&
+               Objects.equals(aggregationType, that.aggregationType) &&
+               Objects.equals(startTime, that.startTime) &&
+               Objects.equals(endTime, that.endTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, aggregationType, startTime, endTime);
     }
 }
 

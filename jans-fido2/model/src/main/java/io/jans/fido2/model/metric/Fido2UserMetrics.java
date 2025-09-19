@@ -7,7 +7,6 @@
 package io.jans.fido2.model.metric;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
@@ -17,6 +16,7 @@ import io.jans.orm.model.base.Entry;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * FIDO2 User Metrics - tracks individual user behavior and adoption patterns
@@ -465,6 +465,22 @@ public class Fido2UserMetrics extends Entry implements Serializable {
                 ", adoptionStage='" + adoptionStage + '\'' +
                 ", isActive=" + isActive +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        
+        Fido2UserMetrics that = (Fido2UserMetrics) obj;
+        return Objects.equals(userId, that.userId) &&
+               Objects.equals(username, that.username) &&
+               Objects.equals(firstRegistrationDate, that.firstRegistrationDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, username, firstRegistrationDate);
     }
 }
 
