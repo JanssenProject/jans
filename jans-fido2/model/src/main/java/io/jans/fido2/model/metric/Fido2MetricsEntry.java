@@ -85,7 +85,7 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
 
     @AttributeName(name = "jansAdditionalData")
     @JsonObject
-    private Map<String, Object> additionalData;
+    private transient Map<String, Object> additionalData;
 
     @AttributeName(name = "jansNodeId")
     private String nodeId;

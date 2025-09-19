@@ -71,4 +71,19 @@ public final class Fido2MetricsConstants {
     public static final String EARLY = "EARLY";
     public static final String GROWTH = "GROWTH";
     public static final String MATURE = "MATURE";
+
+    // Database Attributes
+    public static final String JANS_TIMESTAMP = "jansTimestamp";
+    
+    // Service Names
+    public static final String METRICS_SERVICE = "metricsService";
+    
+    // Benchmark Names
+    public static final String REGISTRATION_BENCHMARK = "registrationBenchmark";
+    public static final String AUTHENTICATION_BENCHMARK = "authenticationBenchmark";
+    
+    // Base DNs
+    public static final String FIDO2_METRICS_ENTRY_BASE_DN = "ou=fido2-metrics,o=jans";
+    public static final String FIDO2_METRICS_AGGREGATION_BASE_DN = "ou=fido2-aggregations,o=jans";
+    public static final String FIDO2_USER_METRICS_BASE_DN = "ou=fido2-user-metrics,o=jans";
 }

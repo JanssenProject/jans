@@ -89,8 +89,8 @@ public class Fido2MetricsService {
     public List<Fido2MetricsEntry> getMetricsEntries(LocalDateTime startTime, LocalDateTime endTime) {
         try {
             Filter filter = Filter.createANDFilter(
-                Filter.createGreaterOrEqualFilter("jansTimestamp", startTime),
-                Filter.createLessOrEqualFilter("jansTimestamp", endTime)
+                Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startTime),
+                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endTime)
             );
 
             List<Fido2MetricsEntry> entries = persistenceEntryManager.findEntries(
@@ -111,8 +111,8 @@ public class Fido2MetricsService {
         try {
             Filter filter = Filter.createANDFilter(
                 Filter.createEqualityFilter("jansUserId", userId),
-                Filter.createGreaterOrEqualFilter("jansTimestamp", startTime),
-                Filter.createLessOrEqualFilter("jansTimestamp", endTime)
+                Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startTime),
+                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endTime)
             );
 
             List<Fido2MetricsEntry> entries = persistenceEntryManager.findEntries(
@@ -133,8 +133,8 @@ public class Fido2MetricsService {
         try {
             Filter filter = Filter.createANDFilter(
                 Filter.createEqualityFilter("jansOperationType", operationType),
-                Filter.createGreaterOrEqualFilter("jansTimestamp", startTime),
-                Filter.createLessOrEqualFilter("jansTimestamp", endTime)
+                Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startTime),
+                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endTime)
             );
 
             List<Fido2MetricsEntry> entries = persistenceEntryManager.findEntries(
@@ -309,7 +309,7 @@ public class Fido2MetricsService {
                 LocalDateTime cutoffDate = LocalDateTime.now().minusDays(retentionDays);
                 
                 // Cleanup old metrics entries
-                Filter filter = Filter.createLessOrEqualFilter("jansTimestamp", cutoffDate);
+                Filter filter = Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, cutoffDate);
                 List<Fido2MetricsEntry> entries = persistenceEntryManager.findEntries(
                     METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter
                 );
@@ -474,7 +474,7 @@ public class Fido2MetricsService {
         // Success/failure rates
         long totalOperations = entries.size();
         long successfulOperations = entries.stream()
-            .filter(e -> "SUCCESS".equals(e.getStatus()))
+            .filter(e -> Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
             .count();
         
         if (totalOperations > 0) {
@@ -559,7 +559,7 @@ public class Fido2MetricsService {
 
             aggregation.setRegistrationAttempts((long) registrationEntries.size());
             aggregation.setRegistrationSuccesses(registrationEntries.stream()
-                .filter(e -> "SUCCESS".equals(e.getStatus()))
+                .filter(e -> Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
                 .count());
             aggregation.setRegistrationFailures(registrationEntries.stream()
                 .filter(e -> "FAILURE".equals(e.getStatus()))
@@ -572,7 +572,7 @@ public class Fido2MetricsService {
 
             aggregation.setAuthenticationAttempts((long) authenticationEntries.size());
             aggregation.setAuthenticationSuccesses(authenticationEntries.stream()
-                .filter(e -> "SUCCESS".equals(e.getStatus()))
+                .filter(e -> Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
                 .count());
             aggregation.setAuthenticationFailures(authenticationEntries.stream()
                 .filter(e -> "FAILURE".equals(e.getStatus()))

@@ -142,7 +142,7 @@ public class Fido2AnalyticsService {
         }
         
         // Performance insights
-        Double avgRegDuration = (Double) performance.get("registrationAvgDuration");
+        Double avgRegDuration = (Double) performance.get(Fido2MetricsConstants.REGISTRATION_AVG_DURATION);
         if (avgRegDuration != null) {
             if (avgRegDuration > SLOW_REGISTRATION_DURATION_MS) {
                 insights.add("Registration process is slow - consider optimization");
@@ -181,7 +181,7 @@ public class Fido2AnalyticsService {
         report.putAll(userAnalytics);
         
         // Adoption trends
-        List<Fido2MetricsAggregation> dailyAggregations = metricsService.getAggregations("DAILY", startTime, endTime);
+        List<Fido2MetricsAggregation> dailyAggregations = metricsService.getAggregations(Fido2MetricsConstants.DAILY, startTime, endTime);
         Map<String, Object> adoptionTrends = calculateAdoptionTrends(dailyAggregations);
         report.put("adoptionTrends", adoptionTrends);
         
@@ -204,7 +204,7 @@ public class Fido2AnalyticsService {
         report.putAll(performanceMetrics);
         
         // Performance trends
-        List<Fido2MetricsAggregation> dailyAggregations = metricsService.getAggregations("DAILY", startTime, endTime);
+        List<Fido2MetricsAggregation> dailyAggregations = metricsService.getAggregations(Fido2MetricsConstants.DAILY, startTime, endTime);
         Map<String, Object> performanceTrends = calculatePerformanceTrends(dailyAggregations);
         report.put("performanceTrends", performanceTrends);
         
@@ -226,7 +226,7 @@ public class Fido2AnalyticsService {
         report.putAll(deviceAnalytics);
         
         // Device trends
-        List<Fido2MetricsAggregation> dailyAggregations = metricsService.getAggregations("DAILY", startTime, endTime);
+        List<Fido2MetricsAggregation> dailyAggregations = metricsService.getAggregations(Fido2MetricsConstants.DAILY, startTime, endTime);
         Map<String, Object> deviceTrends = calculateDeviceTrends(dailyAggregations);
         report.put("deviceTrends", deviceTrends);
         
@@ -248,7 +248,7 @@ public class Fido2AnalyticsService {
         report.putAll(errorAnalysis);
         
         // Error trends
-        List<Fido2MetricsAggregation> dailyAggregations = metricsService.getAggregations("DAILY", startTime, endTime);
+        List<Fido2MetricsAggregation> dailyAggregations = metricsService.getAggregations(Fido2MetricsConstants.DAILY, startTime, endTime);
         Map<String, Object> errorTrends = calculateErrorTrends(dailyAggregations);
         report.put("errorTrends", errorTrends);
         
@@ -265,7 +265,7 @@ public class Fido2AnalyticsService {
     public Map<String, Object> generateTrendsReport(LocalDateTime startTime, LocalDateTime endTime) {
         Map<String, Object> report = new HashMap<>();
         
-        List<Fido2MetricsAggregation> dailyAggregations = metricsService.getAggregations("DAILY", startTime, endTime);
+        List<Fido2MetricsAggregation> dailyAggregations = metricsService.getAggregations(Fido2MetricsConstants.DAILY, startTime, endTime);
         
         // Usage trends
         Map<String, Object> usageTrends = calculateUsageTrends(dailyAggregations);
@@ -300,11 +300,11 @@ public class Fido2AnalyticsService {
             Double adoptionRate = (Double) userAdoption.get("adoptionRate");
             if (adoptionRate != null && adoptionRate < LOW_ADOPTION_RATE_RECOMMENDATION_THRESHOLD) {
                 recommendationList.add(Map.of(
-                    "category", "USER_ADOPTION",
-                    "priority", "HIGH",
-                    "title", "Improve User Adoption",
-                    "description", "Low adoption rate detected. Consider improving user education and onboarding process.",
-                    "actions", Arrays.asList(
+                    Fido2MetricsConstants.CATEGORY, "USER_ADOPTION",
+                    Fido2MetricsConstants.PRIORITY, "HIGH",
+                    Fido2MetricsConstants.TITLE, "Improve User Adoption",
+                    Fido2MetricsConstants.DESCRIPTION, "Low adoption rate detected. Consider improving user education and onboarding process.",
+                    Fido2MetricsConstants.ACTIONS, Arrays.asList(
                         "Implement user tutorials",
                         "Add progress indicators",
                         "Provide fallback options",
@@ -314,14 +314,14 @@ public class Fido2AnalyticsService {
             }
             
             // Performance recommendations
-            Double avgRegDuration = (Double) performance.get("registrationAvgDuration");
+            Double avgRegDuration = (Double) performance.get(Fido2MetricsConstants.REGISTRATION_AVG_DURATION);
             if (avgRegDuration != null && avgRegDuration > SLOW_REGISTRATION_RECOMMENDATION_MS) {
                 recommendationList.add(Map.of(
-                    "category", "PERFORMANCE",
-                    "priority", "MEDIUM",
-                    "title", "Optimize Registration Performance",
-                    "description", "Registration process is slower than optimal. Consider performance improvements.",
-                    "actions", Arrays.asList(
+                    Fido2MetricsConstants.CATEGORY, "PERFORMANCE",
+                    Fido2MetricsConstants.PRIORITY, "MEDIUM",
+                    Fido2MetricsConstants.TITLE, "Optimize Registration Performance",
+                    Fido2MetricsConstants.DESCRIPTION, "Registration process is slower than optimal. Consider performance improvements.",
+                    Fido2MetricsConstants.ACTIONS, Arrays.asList(
                         "Optimize database queries",
                         "Implement caching",
                         "Reduce network round trips",
@@ -334,11 +334,11 @@ public class Fido2AnalyticsService {
             Double successRate = (Double) errorAnalysis.get("successRate");
             if (successRate != null && successRate < LOW_SUCCESS_RATE_RECOMMENDATION_THRESHOLD) {
                 recommendationList.add(Map.of(
-                    "category", "RELIABILITY",
-                    "priority", "HIGH",
-                    "title", "Improve Success Rate",
-                    "description", "Success rate is below acceptable threshold. Investigate and fix common errors.",
-                    "actions", Arrays.asList(
+                    Fido2MetricsConstants.CATEGORY, "RELIABILITY",
+                    Fido2MetricsConstants.PRIORITY, "HIGH",
+                    Fido2MetricsConstants.TITLE, "Improve Success Rate",
+                    Fido2MetricsConstants.DESCRIPTION, "Success rate is below acceptable threshold. Investigate and fix common errors.",
+                    Fido2MetricsConstants.ACTIONS, Arrays.asList(
                         "Analyze error patterns",
                         "Improve error handling",
                         "Add retry mechanisms",
@@ -352,11 +352,11 @@ public class Fido2AnalyticsService {
             Map<String, Long> deviceTypes = (Map<String, Long>) deviceAnalytics.get("deviceTypes");
             if (deviceTypes != null && deviceTypes.containsKey("MOBILE") && deviceTypes.get("MOBILE") > deviceTypes.values().stream().mapToLong(Long::longValue).sum() * HIGH_MOBILE_USAGE_THRESHOLD) {
                 recommendationList.add(Map.of(
-                    "category", "UX_OPTIMIZATION",
-                    "priority", "MEDIUM",
-                    "title", "Optimize for Mobile",
-                    "description", "High mobile usage detected. Ensure mobile experience is optimized.",
-                    "actions", Arrays.asList(
+                    Fido2MetricsConstants.CATEGORY, "UX_OPTIMIZATION",
+                    Fido2MetricsConstants.PRIORITY, "MEDIUM",
+                    Fido2MetricsConstants.TITLE, "Optimize for Mobile",
+                    Fido2MetricsConstants.DESCRIPTION, "High mobile usage detected. Ensure mobile experience is optimized.",
+                    Fido2MetricsConstants.ACTIONS, Arrays.asList(
                         "Test mobile compatibility",
                         "Optimize touch interactions",
                         "Improve mobile UI",
@@ -368,18 +368,18 @@ public class Fido2AnalyticsService {
         } catch (Exception e) {
             log.error("Failed to generate recommendations: {}", e.getMessage(), e);
             recommendationList.add(Map.of(
-                "category", "SYSTEM",
-                "priority", "LOW",
-                "title", "System Error",
-                "description", "Unable to generate recommendations due to system error.",
-                "actions", Arrays.asList("Check system logs", "Verify data availability")
+                Fido2MetricsConstants.CATEGORY, "SYSTEM",
+                Fido2MetricsConstants.PRIORITY, "LOW",
+                Fido2MetricsConstants.TITLE, "System Error",
+                Fido2MetricsConstants.DESCRIPTION, "Unable to generate recommendations due to system error.",
+                Fido2MetricsConstants.ACTIONS, Arrays.asList("Check system logs", "Verify data availability")
             ));
         }
         
         recommendations.put("recommendations", recommendationList);
         recommendations.put("totalRecommendations", recommendationList.size());
         recommendations.put("highPriorityCount", recommendationList.stream()
-            .mapToInt(r -> "HIGH".equals(r.get("priority")) ? 1 : 0)
+            .mapToInt(r -> "HIGH".equals(r.get(Fido2MetricsConstants.PRIORITY)) ? 1 : 0)
             .sum());
         
         return recommendations;
@@ -411,7 +411,8 @@ public class Fido2AnalyticsService {
         if (!userGrowthRates.isEmpty()) {
             double avgGrowthRate = userGrowthRates.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
             trends.put("averageUserGrowthRate", avgGrowthRate);
-            trends.put("userGrowthTrend", avgGrowthRate > 0 ? "INCREASING" : avgGrowthRate < 0 ? "DECREASING" : "STABLE");
+            String trendDirection = getTrendDirection(avgGrowthRate);
+            trends.put("userGrowthTrend", trendDirection);
         }
         
         return trends;
@@ -458,8 +459,6 @@ public class Fido2AnalyticsService {
         }
         
         // Calculate device type trends over time
-        Map<String, List<Double>> deviceTrends = new HashMap<>();
-        
         for (Fido2MetricsAggregation agg : aggregations) {
             if (agg.getDeviceTypes() != null) {
                 // Parse device type usage and track trends
@@ -481,10 +480,8 @@ public class Fido2AnalyticsService {
         // Calculate error rate trends
         List<Double> errorRates = new ArrayList<>();
         for (Fido2MetricsAggregation agg : aggregations) {
-            long totalAttempts = (agg.getRegistrationAttempts() != null ? agg.getRegistrationAttempts() : 0) + 
-                               (agg.getAuthenticationAttempts() != null ? agg.getAuthenticationAttempts() : 0);
-            long totalSuccesses = (agg.getRegistrationSuccesses() != null ? agg.getRegistrationSuccesses() : 0) + 
-                                (agg.getAuthenticationSuccesses() != null ? agg.getAuthenticationSuccesses() : 0);
+            long totalAttempts = getTotalAttempts(agg);
+            long totalSuccesses = getTotalSuccesses(agg);
             
             if (totalAttempts > 0) {
                 double errorRate = 1.0 - (double) totalSuccesses / totalAttempts;
@@ -495,7 +492,7 @@ public class Fido2AnalyticsService {
         if (!errorRates.isEmpty()) {
             double avgErrorRate = errorRates.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
             trends.put("averageErrorRate", avgErrorRate);
-            trends.put("errorTrend", avgErrorRate > 0.1 ? "INCREASING" : "STABLE");
+            trends.put("errorTrend", avgErrorRate > 0.1 ? Fido2MetricsConstants.INCREASING : Fido2MetricsConstants.STABLE);
         }
         
         return trends;
@@ -510,8 +507,7 @@ public class Fido2AnalyticsService {
         
         // Calculate usage growth trends
         List<Long> totalAttempts = aggregations.stream()
-            .map(agg -> (agg.getRegistrationAttempts() != null ? agg.getRegistrationAttempts() : 0) + 
-                       (agg.getAuthenticationAttempts() != null ? agg.getAuthenticationAttempts() : 0))
+            .map(this::getTotalAttempts)
             .collect(Collectors.toList());
         
         if (totalAttempts.size() >= 2) {
@@ -521,7 +517,7 @@ public class Fido2AnalyticsService {
             if (firstWeek > 0) {
                 double growthRate = (double) (lastWeek - firstWeek) / firstWeek;
                 trends.put("usageGrowthRate", growthRate);
-                trends.put("usageTrend", growthRate > 0 ? "INCREASING" : growthRate < 0 ? "DECREASING" : "STABLE");
+                trends.put("usageTrend", getTrendDirection(growthRate));
             }
         }
         
@@ -548,7 +544,7 @@ public class Fido2AnalyticsService {
             if (firstWeek > 0) {
                 double userGrowthRate = (double) (lastWeek - firstWeek) / firstWeek;
                 trends.put("userGrowthRate", userGrowthRate);
-                trends.put("userGrowthTrend", userGrowthRate > 0 ? "INCREASING" : userGrowthRate < 0 ? "DECREASING" : "STABLE");
+                trends.put("userGrowthTrend", getTrendDirection(userGrowthRate));
             }
         }
         
@@ -566,8 +562,7 @@ public class Fido2AnalyticsService {
         Map<String, Long> dayOfWeekUsage = new HashMap<>();
         for (Fido2MetricsAggregation agg : aggregations) {
             String dayOfWeek = agg.getStartTime().getDayOfWeek().name();
-            long totalAttempts = (agg.getRegistrationAttempts() != null ? agg.getRegistrationAttempts() : 0) + 
-                               (agg.getAuthenticationAttempts() != null ? agg.getAuthenticationAttempts() : 0);
+            long totalAttempts = getTotalAttempts(agg);
             dayOfWeekUsage.merge(dayOfWeek, totalAttempts, Long::sum);
         }
         
@@ -610,29 +605,29 @@ public class Fido2AnalyticsService {
     private Map<String, Object> calculatePerformanceBenchmarks(Map<String, Object> performanceMetrics) {
         Map<String, Object> benchmarks = new HashMap<>();
         
-        Double avgRegDuration = (Double) performanceMetrics.get("registrationAvgDuration");
+        Double avgRegDuration = (Double) performanceMetrics.get(Fido2MetricsConstants.REGISTRATION_AVG_DURATION);
         if (avgRegDuration != null) {
             if (avgRegDuration < FAST_REGISTRATION_DURATION_MS) {
-                benchmarks.put("registrationBenchmark", "EXCELLENT");
+                benchmarks.put(Fido2MetricsConstants.REGISTRATION_BENCHMARK, "EXCELLENT");
             } else if (avgRegDuration < GOOD_REGISTRATION_DURATION_MS) {
-                benchmarks.put("registrationBenchmark", "GOOD");
+                benchmarks.put(Fido2MetricsConstants.REGISTRATION_BENCHMARK, "GOOD");
             } else if (avgRegDuration < ACCEPTABLE_REGISTRATION_DURATION_MS) {
-                benchmarks.put("registrationBenchmark", "ACCEPTABLE");
+                benchmarks.put(Fido2MetricsConstants.REGISTRATION_BENCHMARK, "ACCEPTABLE");
             } else {
-                benchmarks.put("registrationBenchmark", "NEEDS_IMPROVEMENT");
+                benchmarks.put(Fido2MetricsConstants.REGISTRATION_BENCHMARK, "NEEDS_IMPROVEMENT");
             }
         }
         
-        Double avgAuthDuration = (Double) performanceMetrics.get("authenticationAvgDuration");
+        Double avgAuthDuration = (Double) performanceMetrics.get(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION);
         if (avgAuthDuration != null) {
             if (avgAuthDuration < 1000) {
-                benchmarks.put("authenticationBenchmark", "EXCELLENT");
+                benchmarks.put(Fido2MetricsConstants.AUTHENTICATION_BENCHMARK, "EXCELLENT");
             } else if (avgAuthDuration < 2000) {
-                benchmarks.put("authenticationBenchmark", "GOOD");
+                benchmarks.put(Fido2MetricsConstants.AUTHENTICATION_BENCHMARK, "GOOD");
             } else if (avgAuthDuration < 3000) {
-                benchmarks.put("authenticationBenchmark", "ACCEPTABLE");
+                benchmarks.put(Fido2MetricsConstants.AUTHENTICATION_BENCHMARK, "ACCEPTABLE");
             } else {
-                benchmarks.put("authenticationBenchmark", "NEEDS_IMPROVEMENT");
+                benchmarks.put(Fido2MetricsConstants.AUTHENTICATION_BENCHMARK, "NEEDS_IMPROVEMENT");
             }
         }
         
@@ -647,6 +642,27 @@ public class Fido2AnalyticsService {
     private Map<String, Object> analyzeErrorImpact(Map<String, Object> errorAnalysis) {
         // Implementation for error impact analysis
         return new HashMap<>();
+    }
+
+    // Helper methods to reduce complexity
+    private long getTotalAttempts(Fido2MetricsAggregation agg) {
+        return (agg.getRegistrationAttempts() != null ? agg.getRegistrationAttempts() : 0) + 
+               (agg.getAuthenticationAttempts() != null ? agg.getAuthenticationAttempts() : 0);
+    }
+
+    private long getTotalSuccesses(Fido2MetricsAggregation agg) {
+        return (agg.getRegistrationSuccesses() != null ? agg.getRegistrationSuccesses() : 0) + 
+               (agg.getAuthenticationSuccesses() != null ? agg.getAuthenticationSuccesses() : 0);
+    }
+
+    private String getTrendDirection(double value) {
+        if (value > 0) {
+            return Fido2MetricsConstants.INCREASING;
+        } else if (value < 0) {
+            return Fido2MetricsConstants.DECREASING;
+        } else {
+            return Fido2MetricsConstants.STABLE;
+        }
     }
 }
 
