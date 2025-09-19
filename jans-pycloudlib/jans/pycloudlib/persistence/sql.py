@@ -99,11 +99,7 @@ class PostgresqlAdapter:
 
         if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
             opts["sslmode"] = os.environ.get("CN_SQL_SSL_MODE", "require")
-
-            if all([
-                os.environ.get("CN_SQL_DB_DIALECT") in ("pgsql", "postgresql"),
-                opts["sslmode"] in ("verify-ca", "verify-full"),
-            ]):
+            if opts["sslmode"] in ("verify-ca", "verify-full"):
                 opts["sslrootcert"] = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
                 opts["sslcert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
                 opts["sslkey"] = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
@@ -161,6 +157,16 @@ class MysqlAdapter:
     @property
     def connect_args(self):
         opts = {}
+
+        if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
+            opts["ssl"] = {}
+            ssl_mode = os.environ.get("CN_SQL_SSL_MODE", "REQUIRED")
+            if ssl_mode in ("VERIFY_CA", "VERIFY_IDENTITY"):
+                opts["ssl"]["ca"] = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
+                opts["ssl"]["cert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
+                opts["ssl"]["key"] = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
+            elif ssl_mode == "REQUIRED":
+                opts["ssl"]["check_hostname"] = False
         return opts
 
 
@@ -788,24 +794,56 @@ def override_sql_ssl_property(sql_prop_file):
     with open(sql_prop_file) as f:
         props = javaproperties.loads(f.read())
 
-    # boolean need to be defined as lowercase value
-    props["connection.driver-property.ssl"] = str(as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false"))).lower()
+    if os.environ.get("CN_SQL_DB_DIALECT") in ("pgsql", "postgresql"):
+        # boolean need to be defined as lowercase value
+        props["connection.driver-property.ssl"] = str(as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false"))).lower()
+        props["connection.driver-property.sslmode"] = os.environ.get("CN_SQL_SSL_MODE", "require")
 
-    props["connection.driver-property.sslmode"] = os.environ.get("CN_SQL_SSL_MODE", "require")
+        if props["connection.driver-property.sslmode"] in ("verify-ca", "verify-full"):
+            props["connection.driver-property.sslrootcert"] = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
+            props["connection.driver-property.sslcert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
 
-    if all([
-        os.environ.get("CN_SQL_DB_DIALECT") in ("pgsql", "postgresql"),
-        props["connection.driver-property.sslmode"] in ("verify-ca", "verify-full"),
-    ]):
-        props["connection.driver-property.sslrootcert"] = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
-        props["connection.driver-property.sslcert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
-        # client key need to be converted from PEM to DER format
-        ssl_key = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
-        ssl_key_p8 = os.environ.get("CN_SQL_SSL_KEY_PKCS8_FILE", "/etc/certs/sql_client_key.pkcs8")
-        _, err, code = exec_cmd(f"openssl pkcs8 -topk8 -inform PEM -outform DER -in {ssl_key} -out {ssl_key_p8} -nocrypt")
-        if code != 0:
-            logger.warning(f"Unable to convert key file {ssl_key} to PKCS8 file {ssl_key_p8}; reason={err.decode()}")
-        props["connection.driver-property.sslkey"] = ssl_key_p8
+            # client key need to be converted from PEM to DER format
+            ssl_key = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
+            ssl_key_p8 = os.environ.get("CN_SQL_SSL_KEY_P8_FILE", "/etc/certs/sql_client_key.pkcs8")
+            out, err, code = exec_cmd(f"openssl pkcs8 -topk8 -inform PEM -outform DER -in {ssl_key} -out {ssl_key_p8} -nocrypt")
+
+            if code != 0:
+                # error may not recorded in stderr but available in stdout
+                err = err or out
+                logger.warning(f"Unable to convert key file {ssl_key} to PKCS8 file {ssl_key_p8}; reason={err.decode()}")
+            props["connection.driver-property.sslkey"] = ssl_key_p8
+
+    # mysql dialect
+    else:
+        props["connection.driver-property.sslMode"] = os.environ.get("CN_SQL_SSL_MODE", "REQUIRED")
+        if props["connection.driver-property.sslMode"] in ("VERIFY_CA", "VERIFY_IDENTITY"):
+            # create truststore for CA cert
+            ssl_ca = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
+            ssl_ca_p12 = os.environ.get("CN_SQL_SSL_CACERT_P12_FILE", "/etc/certs/sql_cacert.pkcs12")
+            out, err, code = exec_cmd(f"keytool -importcert -alias mysql-cacert -file {ssl_ca} -keystore {ssl_ca_p12} -storepass changeit -noprompt")
+
+            if code != 0:
+                # error may not recorded in stderr but available in stdout
+                err = err or out
+                logger.warning(f"Unable to convert CA cert file {ssl_ca} to PKCS12 file {ssl_ca_p12}; reason={err.decode()}")
+
+            props["connection.driver-property.trustCertificateKeyStoreUrl"] = f"file://{ssl_ca_p12}"
+            props["connection.driver-property.trustCertificateKeyStorePassword"] = "changeit"
+
+            # create truststore for client cert and key
+            ssl_key = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
+            ssl_cert = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
+            ssl_certkey_p12 = os.environ.get("CN_SQL_SSL_CERTKEY_P12_FILE", "/etc/certs/sql_client_certkey.pkcs12")
+            out, err, code = exec_cmd(f"openssl pkcs12 -export -in {ssl_cert} -inkey {ssl_key} -name mysql-client -passout pass:changeit -out {ssl_certkey_p12}")
+
+            if code != 0:
+                # error may not recorded in stderr but available in stdout
+                err = err or out
+                logger.warning(f"Unable to convert cert file {ssl_cert} and key file {ssl_key} to PKCS12 file {ssl_certkey_p12}; reason={err.decode()}")
+
+            props["connection.driver-property.clientCertificateKeyStoreUrl"] = f"file://{ssl_certkey_p12}"
+            props["connection.driver-property.clientCertificateKeyStorePassword"] = "changeit"
 
     with open(sql_prop_file, "w") as f:
         f.write(javaproperties.dumps(props, timestamp=None))
