@@ -98,8 +98,6 @@ use serde_json::json;
 use sparkv::SparKV;
 use status_list::*;
 use std::collections::HashMap;
-use std::hash::Hash;
-use std::hash::Hasher;
 use std::sync::Arc;
 use std::sync::RwLock;
 use validation::*;
@@ -398,11 +396,20 @@ fn fix_aud_claim_value_to_array(claims: TokenClaims) -> TokenClaims {
 /// This is used to create a key for caching tokens
 /// The hash value is used instead of the original string to have shorter keys for SparKV which utilizes BTree.
 fn hash_str(s: &str) -> String {
-    // it use `getrandom` internally for seeding on first use
-    let mut hasher = ahash::AHasher::default();
-    s.hash(&mut hasher);
-    let hash_value = hasher.finish();
-    hash_value.to_string()
+    use std::sync::LazyLock;
+    static HASHER_KEYS: LazyLock<(u64, u64, u64, u64)> = LazyLock::new(|| {
+        (
+            rand::random(),
+            rand::random(),
+            rand::random(),
+            rand::random(),
+        )
+    });
+
+    let hasher =
+        ahash::RandomState::with_seeds(HASHER_KEYS.0, HASHER_KEYS.1, HASHER_KEYS.2, HASHER_KEYS.3);
+
+    hasher.hash_one(s).to_string()
 }
 
 #[cfg(test)]
