@@ -14,8 +14,8 @@ chrono = "0.4"
 http_utils = { path = "http_utils" }
 cedarling = { path = "cedarling" }
 test_utils = { path = "test_utils" }
-wasm-bindgen = "0.2"
-wasm-bindgen-futures = "0.4"
+wasm-bindgen = "0.2.103"
+wasm-bindgen-futures = "0.4.53"
 web-sys = "0.3"
 serde-wasm-bindgen = "0.6"
 tokio = "1.42.0"
