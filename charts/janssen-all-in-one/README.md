@@ -220,6 +220,11 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlDbSchema | string | `""` | Schema name used by SQL database (default to empty-string; if using MySQL, the schema name will be resolved as the database name, whereas in PostgreSQL the schema name will be resolved as `"public"`). |
 | configmap.cnSqlDbTimezone | string | `"UTC"` | SQL database timezone. |
 | configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
+| configmap.cnSqlSslCaCert | string | `""` | Base64-encoded string of CA certificate used to sign client/server certificate of MySQL/PostgreSQL server. Required if using client cert authentication. |
+| configmap.cnSqlSslClientCert | string | `""` | Base64-encoded string of client certificate signed by CA. Required if using client cert authentication. |
+| configmap.cnSqlSslClientKey | string | `""` | Base64-encoded string of client key signed by CA. Required if using client cert authentication. |
+| configmap.cnSqlSslEnabled | bool | `false` | Enforce connection to SQL database using SSL. |
+| configmap.cnSqlSslMode | string | `"REQUIRED"` | Mode when connecting to SQL database using SSL. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected the secrets . |
 | configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
 | configmap.cnVaultAppRolePath | string | `"approle"` | Path to Vault AppRole. |
