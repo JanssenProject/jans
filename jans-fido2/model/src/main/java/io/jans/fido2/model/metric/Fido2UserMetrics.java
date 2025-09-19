@@ -95,11 +95,11 @@ public class Fido2UserMetrics extends Entry implements Serializable {
 
     @AttributeName(name = "jansUserSegments")
     @JsonObject
-    private Map<String, Object> userSegments;
+    private transient Map<String, Object> userSegments;
 
     @AttributeName(name = "jansBehaviorPatterns")
     @JsonObject
-    private Map<String, Object> behaviorPatterns;
+    private transient Map<String, Object> behaviorPatterns;
 
     @AttributeName(name = "jansRiskScore")
     private Double riskScore;

@@ -17,6 +17,7 @@ import io.jans.orm.model.base.Entry;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * FIDO2 Metrics Entry - stores individual metric events
@@ -393,6 +394,24 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
                     ", platform='" + platform + '\'' +
                     '}';
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        
+        Fido2MetricsEntry that = (Fido2MetricsEntry) obj;
+        return Objects.equals(id, that.id) &&
+               Objects.equals(metricType, that.metricType) &&
+               Objects.equals(timestamp, that.timestamp) &&
+               Objects.equals(userId, that.userId) &&
+               Objects.equals(operationType, that.operationType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, metricType, timestamp, userId, operationType);
     }
 }
 

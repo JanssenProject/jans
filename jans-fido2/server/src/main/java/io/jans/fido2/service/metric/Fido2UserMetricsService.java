@@ -8,6 +8,7 @@ package io.jans.fido2.service.metric;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2UserMetrics;
+import io.jans.fido2.model.metric.UserMetricsUpdateRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
@@ -47,16 +48,6 @@ public class Fido2UserMetricsService {
     private static final String USER_METRICS_BASE_DN = METRICS_CONFIG.getString("fido2.user.metrics.base.dn");
     private static final double HIGH_FALLBACK_RATE_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.high.fallback.rate.threshold"));
     private static final double MEDIUM_FALLBACK_RATE_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.medium.fallback.rate.threshold"));
-    private static final double LOW_FALLBACK_RATE_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.low.fallback.rate.threshold"));
-    private static final int HIGH_ENGAGEMENT_MIN_OPERATIONS = Integer.parseInt(METRICS_CONFIG.getString("fido2.user.high.engagement.min.operations"));
-    private static final int MEDIUM_ENGAGEMENT_MIN_OPERATIONS = Integer.parseInt(METRICS_CONFIG.getString("fido2.user.medium.engagement.min.operations"));
-    private static final int LOW_ENGAGEMENT_MIN_OPERATIONS = Integer.parseInt(METRICS_CONFIG.getString("fido2.user.low.engagement.min.operations"));
-    private static final int EARLY_ADOPTION_MAX_DAYS = Integer.parseInt(METRICS_CONFIG.getString("fido2.user.early.adoption.max.days"));
-    private static final int GROWTH_ADOPTION_MAX_DAYS = Integer.parseInt(METRICS_CONFIG.getString("fido2.user.growth.adoption.max.days"));
-    private static final int MATURE_ADOPTION_MIN_DAYS = Integer.parseInt(METRICS_CONFIG.getString("fido2.user.mature.adoption.min.days"));
-    private static final double HIGH_RISK_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.high.threshold"));
-    private static final double MEDIUM_RISK_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.medium.threshold"));
-    private static final double LOW_RISK_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.low.threshold"));
     private static final double HIGH_FALLBACK_RISK_FACTOR = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.high.fallback.factor"));
     private static final double MEDIUM_FALLBACK_RISK_FACTOR = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.risk.medium.fallback.factor"));
     private static final double LOW_SUCCESS_RATE_THRESHOLD = Double.parseDouble(METRICS_CONFIG.getString("fido2.user.success.rate.low.threshold"));
@@ -70,38 +61,35 @@ public class Fido2UserMetricsService {
     /**
      * Update user metrics for a registration event
      */
-    public void updateUserRegistrationMetrics(String userId, String username, boolean success, 
-                                            String authenticatorType, String deviceType, 
-                                            String browser, String os, Long durationMs,
-                                            String ipAddress, String userAgent) {
+    public void updateUserRegistrationMetrics(UserMetricsUpdateRequest request) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
 
         CompletableFuture.runAsync(() -> {
             try {
-                Fido2UserMetrics userMetrics = getUserMetrics(userId);
+                Fido2UserMetrics userMetrics = getUserMetrics(request.getUserId());
                 if (userMetrics == null) {
-                    userMetrics = new Fido2UserMetrics(userId, username);
+                    userMetrics = new Fido2UserMetrics(request.getUserId(), request.getUsername());
                     userMetrics.setFirstRegistrationDate(LocalDateTime.now());
                 }
 
-                userMetrics.incrementRegistrations(success);
-                userMetrics.setLastIpAddress(ipAddress);
-                userMetrics.setLastUserAgent(userAgent);
+                userMetrics.incrementRegistrations(request.isSuccess());
+                userMetrics.setLastIpAddress(request.getIpAddress());
+                userMetrics.setLastUserAgent(request.getUserAgent());
 
-                if (success) {
-                    updatePreferredValues(userMetrics, authenticatorType, deviceType, browser, os);
-                    updateAverageDuration(userMetrics, durationMs, true);
+                if (request.isSuccess()) {
+                    updatePreferredValues(userMetrics, request.getAuthenticatorType(), request.getDeviceType(), request.getBrowser(), request.getOs());
+                    updateAverageDuration(userMetrics, request.getDurationMs(), true);
                 }
 
                 userMetrics.updateEngagementLevel();
                 userMetrics.updateAdoptionStage();
                 saveUserMetrics(userMetrics);
 
-                log.debug("Updated user registration metrics for user: {}", userId);
+                log.debug("Updated user registration metrics for user: {}", request.getUserId());
             } catch (Exception e) {
-                log.error("Failed to update user registration metrics for user {}: {}", userId, e.getMessage(), e);
+                log.error("Failed to update user registration metrics for user {}: {}", request.getUserId(), e.getMessage(), e);
             }
         });
     }
@@ -109,36 +97,33 @@ public class Fido2UserMetricsService {
     /**
      * Update user metrics for an authentication event
      */
-    public void updateUserAuthenticationMetrics(String userId, String username, boolean success,
-                                              String authenticatorType, String deviceType,
-                                              String browser, String os, Long durationMs,
-                                              String ipAddress, String userAgent) {
+    public void updateUserAuthenticationMetrics(UserMetricsUpdateRequest request) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
 
         CompletableFuture.runAsync(() -> {
             try {
-                Fido2UserMetrics userMetrics = getUserMetrics(userId);
+                Fido2UserMetrics userMetrics = getUserMetrics(request.getUserId());
                 if (userMetrics == null) {
-                    userMetrics = new Fido2UserMetrics(userId, username);
+                    userMetrics = new Fido2UserMetrics(request.getUserId(), request.getUsername());
                 }
 
-                userMetrics.incrementAuthentications(success);
-                userMetrics.setLastIpAddress(ipAddress);
-                userMetrics.setLastUserAgent(userAgent);
+                userMetrics.incrementAuthentications(request.isSuccess());
+                userMetrics.setLastIpAddress(request.getIpAddress());
+                userMetrics.setLastUserAgent(request.getUserAgent());
 
-                if (success) {
-                    updatePreferredValues(userMetrics, authenticatorType, deviceType, browser, os);
-                    updateAverageDuration(userMetrics, durationMs, false);
+                if (request.isSuccess()) {
+                    updatePreferredValues(userMetrics, request.getAuthenticatorType(), request.getDeviceType(), request.getBrowser(), request.getOs());
+                    updateAverageDuration(userMetrics, request.getDurationMs(), false);
                 }
 
                 userMetrics.updateEngagementLevel();
                 saveUserMetrics(userMetrics);
 
-                log.debug("Updated user authentication metrics for user: {}", userId);
+                log.debug("Updated user authentication metrics for user: {}", request.getUserId());
             } catch (Exception e) {
-                log.error("Failed to update user authentication metrics for user {}: {}", userId, e.getMessage(), e);
+                log.error("Failed to update user authentication metrics for user {}: {}", request.getUserId(), e.getMessage(), e);
             }
         });
     }
@@ -146,8 +131,7 @@ public class Fido2UserMetricsService {
     /**
      * Update user metrics for a fallback event
      */
-    public void updateUserFallbackMetrics(String userId, String username, String fallbackMethod,
-                                        String fallbackReason, String ipAddress, String userAgent) {
+    public void updateUserFallbackMetrics(String userId, String username, String ipAddress, String userAgent) {
         if (!isFido2MetricsEnabled()) {
             return;
         }

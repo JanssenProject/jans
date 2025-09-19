@@ -8,6 +8,7 @@ package io.jans.fido2.service.metric;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2MetricsAggregation;
+import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2UserMetrics;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -15,7 +16,6 @@ import jakarta.inject.Named;
 import org.slf4j.Logger;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -111,28 +111,27 @@ public class Fido2AnalyticsService {
         // Get basic metrics
         Map<String, Object> userAdoption = metricsService.getUserAdoptionMetrics(startTime, endTime);
         Map<String, Object> performance = metricsService.getPerformanceMetrics(startTime, endTime);
-        Map<String, Object> deviceAnalytics = metricsService.getDeviceAnalytics(startTime, endTime);
         Map<String, Object> errorAnalysis = metricsService.getErrorAnalysis(startTime, endTime);
         
         // Key metrics
-        summary.put("totalUniqueUsers", userAdoption.get("totalUniqueUsers"));
-        summary.put("newUsers", userAdoption.get("newUsers"));
-        summary.put("adoptionRate", userAdoption.get("adoptionRate"));
+        summary.put(Fido2MetricsConstants.TOTAL_UNIQUE_USERS, userAdoption.get(Fido2MetricsConstants.TOTAL_UNIQUE_USERS));
+        summary.put(Fido2MetricsConstants.NEW_USERS, userAdoption.get(Fido2MetricsConstants.NEW_USERS));
+        summary.put(Fido2MetricsConstants.ADOPTION_RATE, userAdoption.get(Fido2MetricsConstants.ADOPTION_RATE));
         
         // Performance highlights
-        summary.put("avgRegistrationDuration", performance.get("registrationAvgDuration"));
-        summary.put("avgAuthenticationDuration", performance.get("authenticationAvgDuration"));
+        summary.put("avgRegistrationDuration", performance.get(Fido2MetricsConstants.REGISTRATION_AVG_DURATION));
+        summary.put("avgAuthenticationDuration", performance.get(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION));
         
         // Success rates
-        summary.put("overallSuccessRate", errorAnalysis.get("successRate"));
-        summary.put("failureRate", errorAnalysis.get("failureRate"));
+        summary.put("overallSuccessRate", errorAnalysis.get(Fido2MetricsConstants.SUCCESS_RATE));
+        summary.put("failureRate", errorAnalysis.get(Fido2MetricsConstants.FAILURE_RATE));
         
         // Top insights
         List<String> insights = new ArrayList<>();
         
         // User adoption insights
-        Long totalUsers = (Long) userAdoption.get("totalUniqueUsers");
-        Long newUsers = (Long) userAdoption.get("newUsers");
+        Long totalUsers = (Long) userAdoption.get(Fido2MetricsConstants.TOTAL_UNIQUE_USERS);
+        Long newUsers = (Long) userAdoption.get(Fido2MetricsConstants.NEW_USERS);
         if (totalUsers != null && newUsers != null && totalUsers > 0) {
             double adoptionRate = (double) newUsers / totalUsers;
             if (adoptionRate > STRONG_ADOPTION_RATE_THRESHOLD) {

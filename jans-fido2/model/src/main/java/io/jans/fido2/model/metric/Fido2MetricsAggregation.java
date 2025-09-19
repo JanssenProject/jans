@@ -176,11 +176,11 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
     // Additional Analytics
     @AttributeName(name = "jansSessionMetrics")
     @JsonObject
-    private Map<String, Object> sessionMetrics;
+    private transient Map<String, Object> sessionMetrics;
 
     @AttributeName(name = "jansCustomMetrics")
     @JsonObject
-    private Map<String, Object> customMetrics;
+    private transient Map<String, Object> customMetrics;
 
     @AttributeName(name = "jansLastUpdated")
     private LocalDateTime lastUpdated;

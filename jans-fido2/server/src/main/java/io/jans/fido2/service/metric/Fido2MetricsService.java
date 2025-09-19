@@ -8,6 +8,7 @@ package io.jans.fido2.service.metric;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2MetricsAggregation;
+import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricsEntry;
 import io.jans.orm.PersistenceEntryManager;
@@ -339,24 +340,24 @@ public class Fido2MetricsService {
             .map(Fido2MetricsEntry::getUserId)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
-        metrics.put("totalUniqueUsers", uniqueUsers.size());
+        metrics.put(Fido2MetricsConstants.TOTAL_UNIQUE_USERS, uniqueUsers.size());
 
         // New users (first registration)
         Set<String> newUsers = entries.stream()
-            .filter(e -> "REGISTRATION".equals(e.getOperationType()) && "SUCCESS".equals(e.getStatus()))
+            .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()) && Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
             .map(Fido2MetricsEntry::getUserId)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
-        metrics.put("newUsers", newUsers.size());
+        metrics.put(Fido2MetricsConstants.NEW_USERS, newUsers.size());
 
         // Returning users
         Set<String> returningUsers = new HashSet<>(uniqueUsers);
         returningUsers.removeAll(newUsers);
-        metrics.put("returningUsers", returningUsers.size());
+        metrics.put(Fido2MetricsConstants.RETURNING_USERS, returningUsers.size());
 
         // Adoption rate
         if (!uniqueUsers.isEmpty()) {
-            metrics.put("adoptionRate", (double) newUsers.size() / uniqueUsers.size());
+            metrics.put(Fido2MetricsConstants.ADOPTION_RATE, (double) newUsers.size() / uniqueUsers.size());
         }
 
         return metrics;
