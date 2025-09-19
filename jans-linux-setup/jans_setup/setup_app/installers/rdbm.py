@@ -8,6 +8,7 @@ import shutil
 import random
 import glob
 
+from pathlib import Path
 from string import Template
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
@@ -137,7 +138,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     self.run(['postgresql-setup', 'initdb'])
                     Config.backend_service = 'postgresql.service'
                 elif base.clone_type == 'deb':
-                    self.run([paths.cmd_chmod, '640', '/etc/ssl/private/ssl-cert-snakeoil.key'])
                     Config.backend_service = 'postgresql.service'
 
                 self.restart('postgresql')
@@ -150,20 +150,81 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 for cmd in (cmd_create_db, cmd_create_user, cmd_grant_previlages, cmd_alter_db):
                     self.run(cmd, shell=True)
 
-                if base.clone_type == 'rpm':
-                    hba_file_path_query = self.run('''su - postgres -c "psql -U postgres -d postgres -t -c \\"SHOW hba_file;\\""''', shell=True)
-                    if hba_file_path_query and hba_file_path_query.strip():
-                        self.stop('postgresql')
-                        hba_file_path = hba_file_path_query.strip()
-                        hba_file_content = self.readFile(hba_file_path)
-                        hba_file_content = 'host\t{0}\t{1}\t127.0.0.1/32\tmd5\nhost\t{0}\t{1}\t::1/128\tmd5\n'.format(Config.rdbm_db, Config.rdbm_user) + hba_file_content
-                        self.writeFile(hba_file_path, hba_file_content)
-                        self.start('postgresql')
+                self.postgresql_config()
+
+                self.stop('postgresql')
+                self.start('postgresql')
 
                 self.enable('postgresql')
 
         self.dbUtils.bind(force=True)
 
+
+    def postgresql_config(self):
+        hba_file_path_query = self.run('''su - postgres -c "psql -U postgres -d postgres -t -c \\"SHOW hba_file;\\""''', shell=True)
+        if hba_file_path_query and hba_file_path_query.strip():
+            hba_file_path = hba_file_path_query.strip()
+
+            # Allow SSL connection from localhost
+            hba_file_content_s = self.readFile(hba_file_path)
+            hba_file_content = hba_file_content_s.splitlines()
+
+            host_ssl_config = False
+            for i, l in enumerate(hba_file_content):
+                ls = l.strip()
+                if ls.startswith('#'):
+                    continue
+                method_list = ls.split()
+                if method_list:
+                    if method_list[0] in ('host', 'hostssl'):
+                        if method_list[1] == Config.rdbm_db and method_list[2] == Config.rdbm_user and method_list[4] == 'scram-sha-256':
+                            host_ssl_config = True
+                            continue
+                        if method_list[1] in ('all', Config.rdbm_db):
+                            print("Commenting:", ls)
+                            hba_file_content[i] = '#' + ls
+
+            if not host_ssl_config:
+                print("Adding for jans")
+                hba_file_content.append('\n# Added by Janssen setup')
+                hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    127.0.0.1/32    scram-sha-256')
+                hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    ::1/128    scram-sha-256')
+
+            hba_file_content.append('')
+
+            self.writeFile(hba_file_path, '\n'.join(hba_file_content))
+
+
+            path_obj = Path(hba_file_path)
+            conf_dir = path_obj.parent.as_posix()
+            key_fn, crt_fn = self.gen_ca(ca_suffix='postgresql', cert_dir=conf_dir)
+            self.import_cert_into_keystore(crt_fn, 'jans-pgsql.jans.vm_postgres')
+
+            for fn in (key_fn, crt_fn):
+                self.chown(fn, 'postgres', 'postgres')
+                self.run([paths.cmd_chmod, '600', fn])
+
+            conf_file = os.path.join(conf_dir, 'postgresql.conf')
+            conf_file_s = self.readFile(conf_file)
+            conf_file_content = conf_file_s.splitlines()
+            key_value_dict = {'ssl': 'on', 'ssl_cert_file': crt_fn, 'ssl_key_file': key_fn}
+            conf_status =  {k: False for k in key_value_dict}
+
+            for i, l in enumerate(conf_file_content):
+                if l.strip().startswith('#'):
+                    continue
+                n = l.find('=')
+                if n > -1:
+                    skey = l[:n-1].strip()
+                    if skey in key_value_dict:
+                        conf_file_content[i] = f"{skey} = '{key_value_dict[skey]}'"
+                        conf_status[skey] = True
+
+            for skey in conf_status:
+                if not conf_status[skey]:
+                    conf_file_content.append(f"{skey} = '{key_value_dict[skey]}'")
+
+            self.writeFile(conf_file, '\n'.join(conf_file_content))
 
     def get_sql_col_type(self, attrname, table=None):
 
