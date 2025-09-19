@@ -23,6 +23,7 @@ from jans.pycloudlib.persistence.sql import override_sql_ssl_property
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.utils import render_base_properties
 from jans.pycloudlib.persistence.utils import render_salt
+from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import get_random_chars
@@ -85,7 +86,9 @@ def main():
 
     wait_for_persistence(manager)
     override_simple_json_property(sql_prop)
-    override_sql_ssl_property(sql_prop)
+
+    if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
+        override_sql_ssl_property(sql_prop)
 
     shutil.copyfile(
         "/app/templates/jans-saml/quarkus.properties",

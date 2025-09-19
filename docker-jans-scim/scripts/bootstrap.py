@@ -64,7 +64,9 @@ def main():
 
     wait_for_persistence(manager)
     override_simple_json_property(sql_prop)
-    override_sql_ssl_property(sql_prop)
+
+    if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
+        override_sql_ssl_property(sql_prop)
 
     if not os.path.isfile("/etc/certs/web_https.crt"):
         if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):
