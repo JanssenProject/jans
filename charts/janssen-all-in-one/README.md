@@ -224,7 +224,7 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlSslClientCert | string | `""` | Base64-encoded string of client certificate signed by CA. Required if using client cert authentication. |
 | configmap.cnSqlSslClientKey | string | `""` | Base64-encoded string of client key signed by CA. Required if using client cert authentication. |
 | configmap.cnSqlSslEnabled | bool | `false` | Enforce connection to SQL database using SSL. |
-| configmap.cnSqlSslMode | string | `"REQUIRED"` | Mode when connecting to SQL database using SSL. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`. |
+| configmap.cnSqlSslMode | string | `""` | Mode when connecting to SQL database using SSL. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected the secrets . |
 | configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
 | configmap.cnVaultAppRolePath | string | `"approle"` | Path to Vault AppRole. |
