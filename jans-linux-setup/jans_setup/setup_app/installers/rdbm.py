@@ -181,14 +181,16 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                             host_ssl_config = True
                             continue
                         if method_list[1] in ('all', Config.rdbm_db):
-                            print("Commenting:", ls)
                             hba_file_content[i] = '#' + ls
 
             if not host_ssl_config:
-                print("Adding for jans")
+                # get password encryption type
+                cmd_pwd_enc = '''su - postgres -c "psql -U postgres -d postgres -At -c \\"SHOW password_encryption;\\""'''
+                std_out = self.run(cmd_pwd_enc, shell=True)
+                password_encryption_type = std_out.strip()
                 hba_file_content.append('\n# Added by Janssen setup')
-                hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    127.0.0.1/32    scram-sha-256')
-                hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    ::1/128    scram-sha-256')
+                hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    127.0.0.1/32    {password_encryption_type}')
+                hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    ::1/128    {password_encryption_type}')
 
             hba_file_content.append('')
 
