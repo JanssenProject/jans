@@ -112,6 +112,7 @@ pub struct JwtService {
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
     logger: Option<Logger>,
     token_cache: Arc<RwLock<SparKV<Arc<Token>>>>,
+    token_cache_max_ttl: usize,
 }
 
 struct IssuerConfig {
@@ -127,6 +128,7 @@ impl JwtService {
         jwt_config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
+        token_cache_max_ttl_sec: usize,
     ) -> Result<Self, JwtServiceInitError> {
         let mut status_lists = StatusListCache::default();
         let mut issuer_configs = HashMap::default();
@@ -173,6 +175,7 @@ impl JwtService {
             issuer_configs,
             logger,
             token_cache: Arc::new(RwLock::new(SparKV::new())),
+            token_cache_max_ttl: token_cache_max_ttl_sec,
         })
     }
 
@@ -250,9 +253,27 @@ impl JwtService {
             .get_claim("exp")
             .and_then(|exp| exp.value().as_i64())
             .and_then(|exp| {
+                // calculate duration until token expiration
                 let duration = exp - now.timestamp();
                 if duration > 0 {
-                    Some(duration as u64)
+                    // if duration bigger than configured max ttl, use the max ttl
+                    Some(
+                        if self.token_cache_max_ttl > 0
+                            && duration > self.token_cache_max_ttl as i64
+                        {
+                            self.token_cache_max_ttl as i64
+                        } else {
+                            duration
+                        },
+                    )
+                } else {
+                    None
+                }
+            })
+            .or_else(|| {
+                // if no exp claim, use the configured max ttl if set
+                if self.token_cache_max_ttl > 0 {
+                    Some(self.token_cache_max_ttl as i64)
                 } else {
                     None
                 }
@@ -263,9 +284,9 @@ impl JwtService {
                 .token_cache
                 .write()
                 .expect("validated_jwt_cache mutex shouldn't be poisoned")
-                .set_with_ttl(&key, token, Duration::seconds(duration as i64), &[]);
+                .set_with_ttl(&key, token, Duration::seconds(duration), &[]);
         } else {
-            // set with default TTL
+            // set with SparkKV default TTL (5 minutes)
             let _ = self
                 .token_cache
                 .write()
@@ -470,6 +491,7 @@ mod test {
             },
             Some(HashMap::from([("Jans".into(), iss.clone())])),
             None,
+            0,
         )
         .await
         .inspect_err(|e| eprintln!("error msg: {}", e))
