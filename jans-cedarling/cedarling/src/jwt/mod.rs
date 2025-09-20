@@ -270,7 +270,7 @@ impl JwtService {
                     None
                 }
             })
-            .or_else(|| {
+            .or({
                 // if no exp claim, use the configured max ttl if set
                 if self.token_cache_max_ttl > 0 {
                     Some(self.token_cache_max_ttl as i64)
