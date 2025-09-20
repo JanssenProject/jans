@@ -498,6 +498,21 @@ Note that each key in secrets is based on the schema below:
     "type": "string",
     "default": "",
     "description": "Password for Redis user"
+  },
+  "sql_ssl_ca_cert": {
+    "type": "string",
+    "default": "",
+    "description": "SSL root (CA) certificate for the SQL persistence"
+  },
+  "sql_ssl_client_cert": {
+    "type": "string",
+    "default": "",
+    "description": "SSL client certificate for the SQL persistence"
+  },
+  "sql_ssl_client_key": {
+    "type": "string",
+    "default": "",
+    "description": "SSL client key for the SQL persistence"
   }
 }
 ```
