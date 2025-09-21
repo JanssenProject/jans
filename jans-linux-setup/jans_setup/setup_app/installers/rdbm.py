@@ -7,6 +7,7 @@ import sqlalchemy
 import shutil
 import random
 import glob
+import tempfile
 
 from pathlib import Path
 from string import Template
@@ -42,8 +43,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     def install(self):
 
         self.local_install()
-        if Config.rdbm_install_type == InstallTypes.REMOTE and base.argsp.reset_rdbm_db:
-            self.reset_rdbm_db()
+        if Config.rdbm_install_type == InstallTypes.REMOTE:
+            if base.argsp.reset_rdbm_db:
+                self.reset_rdbm_db()
 
         self.prepare_jans_attributes()
         self.create_tables(Config.schema_files)
@@ -87,8 +89,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
 
     def get_rdbm_pw(self):
-        return str(random.randint(10,99)) + random.choice('*_.<->') + self.getPW()
-
+        pws =  str(random.randint(10,99)) + random.choice('*_.<->') + self.getPW()
+        pwsl = [s for s in pws]
+        random.shuffle(pwsl)
+        return ''.join(pwsl)
 
     def local_install(self):
         if not Config.rdbm_password:
@@ -161,6 +165,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
 
     def postgresql_config(self):
+
         hba_file_path_query = self.run('''su - postgres -c "psql -U postgres -d postgres -t -c \\"SHOW hba_file;\\""''', shell=True)
         if hba_file_path_query and hba_file_path_query.strip():
             hba_file_path = hba_file_path_query.strip()
@@ -196,11 +201,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
             self.writeFile(hba_file_path, '\n'.join(hba_file_content))
 
-
             path_obj = Path(hba_file_path)
             conf_dir = path_obj.parent.as_posix()
             key_fn, crt_fn = self.gen_ca(ca_suffix='postgresql', cert_dir=conf_dir)
-            self.import_cert_into_keystore(crt_fn, 'jans-pgsql.jans.vm_postgres')
+            self.import_rootcert(crt_fn)
 
             for fn in (key_fn, crt_fn):
                 self.chown(fn, 'postgres', 'postgres')
@@ -227,6 +231,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     conf_file_content.append(f"{skey} = '{key_value_dict[skey]}'")
 
             self.writeFile(conf_file, '\n'.join(conf_file_content))
+
+    def import_rootcert(self, cert_fn):
+        self.import_cert_into_keystore(cert_fn, f'jans-{Config.rdbm_type}.jans.vm_postgres')
 
     def get_sql_col_type(self, attrname, table=None):
 
@@ -480,6 +487,21 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.dbUtils.import_ldif(ldif_files)
 
     def rdbmProperties(self):
+
+        if Config.rdbm_install_type == InstallTypes.LOCAL:
+            if Config.rdbm_type == 'pgsql':
+                Config.pggsql_enable_ssl == 'true'
+                Config.pggsql_sslmode = 'verify-ca'
+
+        if Config.rdbm_install_type == InstallTypes.REMOTE:
+            if Config.rdbm_type == 'pgsql':
+                Config.pggsql_enable_ssl ='false' if Config.pggsql_sslmode == 'disable' else 'true'
+                if Config.pggsql_sslmode == 'verify-ca' and Config.pgsql_sslrootcert:
+                    with tempfile.NamedTemporaryFile('w') as tmpfo:
+                        tmpfo.write(Config.pgsql_sslrootcert)
+                        tmpfo.flush()
+                        self.import_rootcert(tmpfo.name)
+
         Config.set_rdbm_schema()
         if Config.rdbm_type in ('pgsql', 'mysql'):
             Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
