@@ -78,13 +78,7 @@ public class CedarAuthorizationService extends AuthorizationService implements S
     @Inject 
     CedarlingService cedarlingService;
 
-    public void setUp() throws Exception {
-        adapter = new CedarlingAdapter();
-          // Load Cedarling bootstrap configuration from file
-        String bootstrapJson = this.readFile(BOOTSTRAP_JSON_PATH);
-        adapter.loadFromJson(bootstrapJson);
-        assertNotNull(adapter.getCedarling());
-    }
+
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path) throws WebApplicationException, Exception {
         logger.debug("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",

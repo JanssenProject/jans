@@ -571,10 +571,6 @@ components:
           type: array
           items:
             type: string
-        sessionIdPersistInCache:
-          type: boolean
-        errorReasonEnabled:
-          type: boolean
         fido2Configuration:
           $ref: "#/components/schemas/Fido2Configuration"
     Fido2Configuration:
@@ -592,9 +588,6 @@ components:
           type: integer
           format: int32
         authenticationHistoryExpiration:
-          type: integer
-          format: int32
-        metadataRefreshInterval:
           type: integer
           format: int32
         serverMetadataFolder:

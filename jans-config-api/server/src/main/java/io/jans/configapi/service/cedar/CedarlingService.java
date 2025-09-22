@@ -20,76 +20,48 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import org.slf4j.Logger;
-
+import uniffi.cedarling_uniffi.*;
 
 public class CedarlingService {
-
 
     @Inject
     Logger logger;
 
     @Inject
     CedarlingAdapter adapter;
-
-
-//    private JWTCreator jwtCreator;
-//    private AuthorizeResult result;
-   
-   private static final String AUTHENTICATION_SCHEME = "Bearer ";
-   //public static final String BOOTSTRAP_JSON_PATH = ".src/main/resources/cedar/config-api-cedarling-bootstrap.json";
-   
-
-    public static final String JWT_SECRET = "-very-strong-shared-secret-of-at-least-32-bytes!";
+    
+    private AuthorizeResult result;
+    
+    private static final String AUTHENTICATION_SCHEME = "Bearer ";
     public static final String BOOTSTRAP_JSON_PATH = "./src/test/resources/config/bootstrap.json";
-    public static final String ACCESS_TOKEN_FILE_PATH = "./src/test/resources/config/access_token_payload.json";
-    public static final String ID_TOKEN_FILE_PATH = "./src/test/resources/config/id_token_payload.json";
-    public static final String USER_INFO_FILE_PATH = "./src/test/resources/config/user_info_payload.json";
-
-    public static final String ACTION_FILE_PATH = "./src/test/resources/config/action.txt";
-    public static final String RESOURCE_FILE_PATH = "./src/test/resources/config/resource.json";
-    public static final String CONTEXT_FILE_PATH = "./src/test/resources/config/context.json";
-    public static final String PRINCIPALS_FILE_PATH = "./src/test/resources/config/principals.json";
-
 
     public void setUp() throws Exception {
+        logger.error(" BOOTSTRAP_JSON_PATH:{}", BOOTSTRAP_JSON_PATH);
         adapter = new CedarlingAdapter();
-        jwtCreator = new JWTCreator(JWT_SECRET);
         // Load Cedarling bootstrap configuration from file
-        String bootstrapJson = AppUtils.readFile(BOOTSTRAP_JSON_PATH);
+        String bootstrapJson = AuthUtil.readFile(BOOTSTRAP_JSON_PATH);
+        logger.error(bootstrapJson);
         adapter.loadFromJson(bootstrapJson);
-        assertNotNull(adapter.getCedarling());
+        logger.error(" adapter:{}", adapter);
     }
 
+    public void authorize(String accessToken, String idToken, String userInfo, String action, String resource,
+            String context) throws Exception {
 
-    public void authorize() throws Exception {
-        // Get JWT 
-        String accessTokend = AppUtils.readFile(ACCESS_TOKEN_FILE_PATH);
-        String idTokenPayload = AppUtils.readFile(ID_TOKEN_FILE_PATH);
-        String userInfoPayload = AppUtils.readFile(USER_INFO_FILE_PATH);
-        // Read input files for authorization
-        String action = AppUtils.readFile(ACTION_FILE_PATH);
-        String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
-        String contextJson = AppUtils.readFile(CONTEXT_FILE_PATH);
+        logger.error(" accessToken:{}, idToken:{}, userInfo:{}, action:{}, resource:{}, context:{} ", accessToken,
+                idToken, userInfo, action, resource, context);
+
         // Generate signed JWTs from the payloads
-        Map<String, String> tokens = Map.of(
-                "access_token", jwtCreator.createJwtFromJson(accessTokenPayload),
-                "id_token", jwtCreator.createJwtFromJson(idTokenPayload),
-                "userinfo_token", jwtCreator.createJwtFromJson(userInfoPayload)
-        );
+        Map<String, String> tokens = Map.of("access_token", accessToken, "id_token", idToken, "userinfo_token",
+                userInfo);
 
         // Perform authorization
-        result = adapter.authorize(tokens, action, new JSONObject(resourceJson), new JSONObject(contextJson));
+        result = adapter.authorize(tokens, action, new JSONObject(resource), new JSONObject(context));
 
-        assertNotNull(result);
-        assertNotNull(result.getPerson());
-        assertNotNull(result.getWorkload());
-        assertTrue(result.getDecision());
-        assertNotEquals(adapter.getLogsByRequestIdAndTag(result.getRequestId(), "System").size(), 0);
-        assertNotEquals(adapter.getLogsByRequestId(result.getRequestId()).size(), 0);
+        logger.error(" result:{} ", result);
+
     }
 
-   
-    
     public class JWTCreator {
 
         private final byte[] secret;
@@ -119,10 +91,7 @@ public class CedarlingService {
             JWSSigner signer = new MACSigner(secret);
 
             // Prepare JWS object
-            SignedJWT signedJWT = new SignedJWT(
-                    new JWSHeader(JWSAlgorithm.HS256),
-                    claimsSet
-            );
+            SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimsSet);
 
             // Apply the HMAC signature
             signedJWT.sign(signer);

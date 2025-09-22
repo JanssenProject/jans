@@ -100,7 +100,7 @@
   },
   "cedarAuthConfig": {
     "applicationName": "jans-config-api",
-    "policyStoreFile": "/opt/jans/jetty/jans-config-api/custom/static/"
+    "policyStoreFile": "/opt/jans/jetty/jans-config-api/custom/static/config-api-cedarling-bootstrap.json"
   },
   "assetMgtConfiguration": {
     "assetMgtEnabled": true,
