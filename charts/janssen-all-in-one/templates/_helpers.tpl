@@ -301,6 +301,9 @@ Obfuscate configuration schema (only if configuration key is available)
 {{- $_ := set $secretSchema "redis_password" .Values.redisPassword }}
 {{- if or ( eq .Values.cnPersistenceType "sql" ) ( eq .Values.cnPersistenceType "hybrid" ) }}
 {{- $_ := set $secretSchema "sql_password" .Values.configmap.cnSqldbUserPassword }}
+{{- $_ := set $secretSchema "sql_ssl_ca_cert" .Values.configmap.cnSqlSslCaCert }}
+{{- $_ := set $secretSchema "sql_ssl_client_cert" .Values.configmap.cnSqlSslClientCert }}
+{{- $_ := set $secretSchema "sql_ssl_client_key" .Values.configmap.cnSqlSslClientKey }}
 {{- end }}
 {{- if eq .Values.configSecretAdapter "vault" }}
 {{- $_ := set $secretSchema "vault_role_id" .Values.configmap.cnVaultRoleId }}

@@ -21,7 +21,7 @@ parser.add_argument('--version', action='version', version='%(prog)s ' + __versi
 parser.add_argument('-c', help="Use command line instead of tui", action='store_true')
 parser.add_argument('-d', help="Installation directory")
 parser.add_argument('-f', help="Specify setup.properties file")
-parser.add_argument('-n', help="No interactive prompt before install starts. Run with -f", action='store_true')    
+parser.add_argument('-n', help="No interactive prompt before install starts. Run with -f", action='store_true')
 parser.add_argument('-N', '--no-httpd', help="No apache httpd server", action='store_true')
 parser.add_argument('-u', help="Update hosts file with IP address / hostname", action='store_true')
 parser.add_argument('-csx', help="Collect setup properties, save and exit", action='store_true')
@@ -44,6 +44,7 @@ parser.add_argument('-rdbm-port', help="RDBM port")
 parser.add_argument('-rdbm-db', help="RDBM database")
 parser.add_argument('-rdbm-host', help="RDBM host")
 parser.add_argument('-rdbm-schema', help="Jans Database Schema")
+parser.add_argument('-remote-rdbm-ssl-cert-fn', help="To use SSL connection for remote RDBM server, set path of SSL root certificate file of remote RDBM server")
 
 parser.add_argument('--reset-rdbm-db', help="Deletes all tables on target database. Warning! You will lose all data on target database.", action='store_true')
 
