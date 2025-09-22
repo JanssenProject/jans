@@ -3465,6 +3465,10 @@
             {
               "inum": "1800.01.98",
               "name": "https://jans.io/oauth/config/ssa.write"
+            },
+            {
+              "inum": "",
+              "name": "https://jans.io/auth/ssa.admin"
             }
           ],
           "superScopes": [
