@@ -46,7 +46,7 @@
 		
 
 		<jackson.bom.version>2.13.4.20221013</jackson.bom.version>
-		<jackson.version>2.15.0</jackson.version>
+		<jackson.version>2.19.2</jackson.version>
 		<jackson.databind.version>2.13.4.2</jackson.databind.version>
 		<json.version>20231013</json.version>
 
