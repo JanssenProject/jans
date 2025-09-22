@@ -23,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.OptionalDouble;
 
 /**
  * Service for managing FIDO2 metrics data operations
@@ -477,6 +478,138 @@ public class Fido2MetricsService {
         return analysis;
     }
 
+    /**
+     * Calculate aggregation for a specific time period
+     */
+    private Fido2MetricsAggregation calculateAggregation(String aggregationType, String period, LocalDateTime startTime, LocalDateTime endTime) {
+        try {
+            // Get all entries for the time period
+            List<Fido2MetricsEntry> entries = getMetricsEntriesByTimeRange(startTime, endTime);
+            
+            if (entries.isEmpty()) {
+                return null;
+            }
+
+            Fido2MetricsAggregation aggregation = new Fido2MetricsAggregation(aggregationType, period, startTime, endTime);
+            Map<String, Object> metricsData = new HashMap<>();
+
+            // Calculate registration metrics
+            long registrationAttempts = entries.stream()
+                .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()))
+                .count();
+            
+            long registrationSuccesses = entries.stream()
+                .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()) && 
+                           Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
+                .count();
+            
+            long registrationFailures = registrationAttempts - registrationSuccesses;
+            
+            metricsData.put(Fido2MetricsConstants.REGISTRATION_ATTEMPTS, registrationAttempts);
+            metricsData.put(Fido2MetricsConstants.REGISTRATION_SUCCESSES, registrationSuccesses);
+            metricsData.put(Fido2MetricsConstants.REGISTRATION_FAILURES, registrationFailures);
+            
+            if (registrationAttempts > 0) {
+                metricsData.put(Fido2MetricsConstants.REGISTRATION_SUCCESS_RATE, (double) registrationSuccesses / registrationAttempts);
+            }
+
+            // Calculate authentication metrics
+            long authenticationAttempts = entries.stream()
+                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()))
+                .count();
+            
+            long authenticationSuccesses = entries.stream()
+                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()) && 
+                           Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
+                .count();
+            
+            long authenticationFailures = authenticationAttempts - authenticationSuccesses;
+            
+            metricsData.put(Fido2MetricsConstants.AUTHENTICATION_ATTEMPTS, authenticationAttempts);
+            metricsData.put(Fido2MetricsConstants.AUTHENTICATION_SUCCESSES, authenticationSuccesses);
+            metricsData.put(Fido2MetricsConstants.AUTHENTICATION_FAILURES, authenticationFailures);
+            
+            if (authenticationAttempts > 0) {
+                metricsData.put(Fido2MetricsConstants.AUTHENTICATION_SUCCESS_RATE, (double) authenticationSuccesses / authenticationAttempts);
+            }
+
+            // Calculate fallback events
+            long fallbackEvents = entries.stream()
+                .filter(e -> Fido2MetricsConstants.FALLBACK.equals(e.getOperationType()))
+                .count();
+            metricsData.put(Fido2MetricsConstants.FALLBACK_EVENTS, fallbackEvents);
+
+            // Calculate unique users
+            Set<String> uniqueUsers = entries.stream()
+                .filter(e -> e.getUserId() != null)
+                .map(Fido2MetricsEntry::getUserId)
+                .collect(Collectors.toSet());
+            aggregation.setUniqueUsers((long) uniqueUsers.size());
+
+            // Calculate device types
+            Map<String, Long> deviceTypes = entries.stream()
+                .filter(e -> e.getAuthenticatorType() != null)
+                .collect(Collectors.groupingBy(
+                    Fido2MetricsEntry::getAuthenticatorType,
+                    Collectors.counting()
+                ));
+            metricsData.put(Fido2MetricsConstants.DEVICE_TYPES, deviceTypes);
+
+            // Calculate error counts
+            Map<String, Long> errorCounts = entries.stream()
+                .filter(e -> e.getErrorReason() != null)
+                .collect(Collectors.groupingBy(
+                    Fido2MetricsEntry::getErrorReason,
+                    Collectors.counting()
+                ));
+            metricsData.put(Fido2MetricsConstants.ERROR_COUNTS, errorCounts);
+
+            // Calculate average durations
+            OptionalDouble avgRegistrationDuration = entries.stream()
+                .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()) && 
+                           e.getDurationMs() != null)
+                .mapToLong(Fido2MetricsEntry::getDurationMs)
+                .average();
+            
+            if (avgRegistrationDuration.isPresent()) {
+                metricsData.put(Fido2MetricsConstants.REGISTRATION_AVG_DURATION, avgRegistrationDuration.getAsDouble());
+            }
+
+            OptionalDouble avgAuthenticationDuration = entries.stream()
+                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()) && 
+                           e.getDurationMs() != null)
+                .mapToLong(Fido2MetricsEntry::getDurationMs)
+                .average();
+            
+            if (avgAuthenticationDuration.isPresent()) {
+                metricsData.put(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION, avgAuthenticationDuration.getAsDouble());
+            }
+
+            aggregation.setMetricsData(metricsData);
+            return aggregation;
+
+        } catch (Exception e) {
+            log.error("Failed to calculate aggregation for period {}: {}", period, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private List<Fido2MetricsEntry> getMetricsEntriesByTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        try {
+            Filter filter = Filter.createANDFilter(
+                Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startTime),
+                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endTime)
+            );
+
+            return persistenceEntryManager.findEntries(
+                METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter
+            );
+        } catch (Exception e) {
+            log.error("Failed to retrieve metrics entries for time range: {}", e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
     // ========== HELPER METHODS ==========
 
     private boolean isFido2MetricsEnabled() {
@@ -527,70 +660,4 @@ public class Fido2MetricsService {
         return entry;
     }
 
-    private Fido2MetricsAggregation calculateAggregation(String aggregationType, String timePeriod, 
-                                                        LocalDateTime startTime, LocalDateTime endTime) {
-        try {
-            List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime);
-            
-            if (entries.isEmpty()) {
-                return null;
-            }
-
-            Fido2MetricsAggregation aggregation = new Fido2MetricsAggregation();
-            aggregation.setId(UUID.randomUUID().toString());
-            aggregation.setAggregationType(aggregationType);
-            aggregation.setTimePeriod(timePeriod);
-            aggregation.setStartTime(startTime);
-            aggregation.setEndTime(endTime);
-            aggregation.setLastUpdated(LocalDateTime.now());
-
-            // Calculate registration metrics
-            List<Fido2MetricsEntry> registrationEntries = entries.stream()
-                .filter(e -> "REGISTRATION".equals(e.getOperationType()))
-                .collect(Collectors.toList());
-
-            aggregation.setRegistrationAttempts((long) registrationEntries.size());
-            aggregation.setRegistrationSuccesses(registrationEntries.stream()
-                .filter(e -> Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
-                .count());
-            aggregation.setRegistrationFailures(registrationEntries.stream()
-                .filter(e -> "FAILURE".equals(e.getStatus()))
-                .count());
-
-            // Calculate authentication metrics
-            List<Fido2MetricsEntry> authenticationEntries = entries.stream()
-                .filter(e -> "AUTHENTICATION".equals(e.getOperationType()))
-                .collect(Collectors.toList());
-
-            aggregation.setAuthenticationAttempts((long) authenticationEntries.size());
-            aggregation.setAuthenticationSuccesses(authenticationEntries.stream()
-                .filter(e -> Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
-                .count());
-            aggregation.setAuthenticationFailures(authenticationEntries.stream()
-                .filter(e -> "FAILURE".equals(e.getStatus()))
-                .count());
-
-            // Calculate fallback metrics
-            aggregation.setFallbackEvents(entries.stream()
-                .filter(e -> "FALLBACK".equals(e.getOperationType()))
-                .count());
-
-            // Calculate unique users
-            Set<String> uniqueUsers = entries.stream()
-                .map(Fido2MetricsEntry::getUserId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-            aggregation.setUniqueUsers((long) uniqueUsers.size());
-
-            // Calculate derived metrics
-            aggregation.calculateSuccessRates();
-            aggregation.calculateFallbackRate();
-            aggregation.calculateUserAdoptionRate();
-
-            return aggregation;
-        } catch (Exception e) {
-            log.error("Failed to calculate aggregation: {}", e.getMessage(), e);
-            return null;
-        }
-    }
 }

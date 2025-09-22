@@ -5895,6 +5895,71 @@
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Aggregation Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAggregationType"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Start Time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansStartTime"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics End Time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansEndTime"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Unique Users Count",
+      "equality": "integerMatch",
+      "names": [
+        "jansUniqueUsers"
+      ],
+      "oid": "jansAttr",
+      "ordering": "integerOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Last Updated",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansLastUpdated"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Data JSON",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansMetricsData"
+      ],
+      "oid": "jansAttr",
+      "rdbm_json_column": true,
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
     }
   ],
   "oidMacros": {

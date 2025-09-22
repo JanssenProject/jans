@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -15,16 +15,19 @@ import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import io.jans.fido2.model.metric.Fido2MetricsConstants;
 
 /**
  * FIDO2 Metrics Aggregation - stores summary data for different time periods
+ * Uses JSON storage for metrics data to provide flexibility and reduce schema complexity
  * 
  * @author FIDO2 Team
  */
 @DataEntry
-@ObjectClass("jansFido2MetricsAggregation")
+@ObjectClass(value = "jansFido2MetricsAggregation")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Fido2MetricsAggregation extends Entry implements Serializable {
 
@@ -36,175 +39,42 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
     @AttributeName(name = "jansAggregationType")
     private String aggregationType; // HOURLY, DAILY, WEEKLY, MONTHLY
 
-    @AttributeName(name = "jansTimePeriod")
-    private String timePeriod; // 2024-01-15, 2024-W03, 2024-01, etc.
-
     @AttributeName(name = "jansStartTime")
     private LocalDateTime startTime;
 
     @AttributeName(name = "jansEndTime")
     private LocalDateTime endTime;
 
-    @AttributeName(name = "jansNodeId")
-    private String nodeId;
-
-    @AttributeName(name = "jansApplicationType")
-    private String applicationType;
-
-    // Registration Metrics
-    @AttributeName(name = "jansRegistrationAttempts")
-    private Long registrationAttempts;
-
-    @AttributeName(name = "jansRegistrationSuccesses")
-    private Long registrationSuccesses;
-
-    @AttributeName(name = "jansRegistrationFailures")
-    private Long registrationFailures;
-
-    @AttributeName(name = "jansRegistrationSuccessRate")
-    private Double registrationSuccessRate;
-
-    @AttributeName(name = "jansRegistrationAvgDuration")
-    private Double registrationAvgDuration;
-
-    @AttributeName(name = "jansRegistrationMinDuration")
-    private Long registrationMinDuration;
-
-    @AttributeName(name = "jansRegistrationMaxDuration")
-    private Long registrationMaxDuration;
-
-    // Authentication Metrics
-    @AttributeName(name = "jansAuthenticationAttempts")
-    private Long authenticationAttempts;
-
-    @AttributeName(name = "jansAuthenticationSuccesses")
-    private Long authenticationSuccesses;
-
-    @AttributeName(name = "jansAuthenticationFailures")
-    private Long authenticationFailures;
-
-    @AttributeName(name = "jansAuthenticationSuccessRate")
-    private Double authenticationSuccessRate;
-
-    @AttributeName(name = "jansAuthenticationAvgDuration")
-    private Double authenticationAvgDuration;
-
-    @AttributeName(name = "jansAuthenticationMinDuration")
-    private Long authenticationMinDuration;
-
-    @AttributeName(name = "jansAuthenticationMaxDuration")
-    private Long authenticationMaxDuration;
-
-    // Fallback Metrics
-    @AttributeName(name = "jansFallbackEvents")
-    private Long fallbackEvents;
-
-    @AttributeName(name = "jansFallbackRate")
-    private Double fallbackRate;
-
-    @AttributeName(name = "jansFallbackMethods")
-    @JsonObject
-    private Map<String, Long> fallbackMethods; // PASSWORD: 10, SMS: 5, etc.
-
-    // Device/Platform Metrics
-    @AttributeName(name = "jansDeviceTypes")
-    @JsonObject
-    private Map<String, Long> deviceTypes; // MOBILE: 100, DESKTOP: 200, etc.
-
-    @AttributeName(name = "jansAuthenticatorTypes")
-    @JsonObject
-    private Map<String, Long> authenticatorTypes; // PLATFORM: 150, CROSS_PLATFORM: 50, etc.
-
-    @AttributeName(name = "jansBrowsers")
-    @JsonObject
-    private Map<String, Long> browsers; // CHROME: 200, FIREFOX: 50, etc.
-
-    @AttributeName(name = "jansOperatingSystems")
-    @JsonObject
-    private Map<String, Long> operatingSystems; // WINDOWS: 150, MACOS: 100, etc.
-
-    // Error Analysis
-    @AttributeName(name = "jansErrorCategories")
-    @JsonObject
-    private Map<String, Long> errorCategories; // TIMEOUT: 20, INVALID_INPUT: 15, etc.
-
-    @AttributeName(name = "jansTopErrors")
-    @JsonObject
-    private Map<String, Long> topErrors; // Most common error messages
-
-    // User Metrics
     @AttributeName(name = "jansUniqueUsers")
     private Long uniqueUsers;
-
-    @AttributeName(name = "jansNewUsers")
-    private Long newUsers;
-
-    @AttributeName(name = "jansReturningUsers")
-    private Long returningUsers;
-
-    @AttributeName(name = "jansUserAdoptionRate")
-    private Double userAdoptionRate;
-
-    // Performance Metrics
-    @AttributeName(name = "jansPeakConcurrentOperations")
-    private Integer peakConcurrentOperations;
-
-    @AttributeName(name = "jansAvgConcurrentOperations")
-    private Double avgConcurrentOperations;
-
-    @AttributeName(name = "jansPeakMemoryUsage")
-    private Long peakMemoryUsage;
-
-    @AttributeName(name = "jansAvgMemoryUsage")
-    private Double avgMemoryUsage;
-
-    @AttributeName(name = "jansPeakCpuUsage")
-    private Double peakCpuUsage;
-
-    @AttributeName(name = "jansAvgCpuUsage")
-    private Double avgCpuUsage;
-
-    // Geographic/Network Metrics
-    @AttributeName(name = "jansTopIpAddresses")
-    @JsonObject
-    private Map<String, Long> topIpAddresses;
-
-    @AttributeName(name = "jansGeographicDistribution")
-    @JsonObject
-    private Map<String, Long> geographicDistribution;
-
-    // Additional Analytics
-    @AttributeName(name = "jansSessionMetrics")
-    @JsonObject
-    private transient Map<String, Object> sessionMetrics;
-
-    @AttributeName(name = "jansCustomMetrics")
-    @JsonObject
-    private transient Map<String, Object> customMetrics;
 
     @AttributeName(name = "jansLastUpdated")
     private LocalDateTime lastUpdated;
 
-    @AttributeName(name = "jansDataQuality")
-    private String dataQuality; // HIGH, MEDIUM, LOW
-
-    @AttributeName(name = "jansCompleteness")
-    private Double completeness; // 0.0 to 1.0
+    /**
+     * All metrics data stored as JSON for flexibility
+     * Contains: registrationAttempts, registrationSuccesses, authenticationAttempts, 
+     * authenticationSuccesses, deviceTypes, errorCounts, performanceMetrics, etc.
+     */
+    @AttributeName(name = "jansMetricsData")
+    @JsonObject
+    private Map<String, Object> metricsData;
 
     // Constructors
     public Fido2MetricsAggregation() {
-        this.lastUpdated = LocalDateTime.now();
+        this.metricsData = new HashMap<>();
     }
 
-    public Fido2MetricsAggregation(String aggregationType, String timePeriod, LocalDateTime startTime, LocalDateTime endTime) {
+    public Fido2MetricsAggregation(String aggregationType, String period, LocalDateTime startTime, LocalDateTime endTime) {
+        this();
         this.aggregationType = aggregationType;
-        this.timePeriod = timePeriod;
+        this.id = aggregationType + "_" + period;
         this.startTime = startTime;
         this.endTime = endTime;
         this.lastUpdated = LocalDateTime.now();
     }
 
-    // Getters and Setters
+    // Core getters and setters
     public String getId() {
         return id;
     }
@@ -219,14 +89,6 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
 
     public void setAggregationType(String aggregationType) {
         this.aggregationType = aggregationType;
-    }
-
-    public String getTimePeriod() {
-        return timePeriod;
-    }
-
-    public void setTimePeriod(String timePeriod) {
-        this.timePeriod = timePeriod;
     }
 
     public LocalDateTime getStartTime() {
@@ -245,316 +107,12 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
         this.endTime = endTime;
     }
 
-    public String getNodeId() {
-        return nodeId;
-    }
-
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    public String getApplicationType() {
-        return applicationType;
-    }
-
-    public void setApplicationType(String applicationType) {
-        this.applicationType = applicationType;
-    }
-
-    public Long getRegistrationAttempts() {
-        return registrationAttempts;
-    }
-
-    public void setRegistrationAttempts(Long registrationAttempts) {
-        this.registrationAttempts = registrationAttempts;
-    }
-
-    public Long getRegistrationSuccesses() {
-        return registrationSuccesses;
-    }
-
-    public void setRegistrationSuccesses(Long registrationSuccesses) {
-        this.registrationSuccesses = registrationSuccesses;
-    }
-
-    public Long getRegistrationFailures() {
-        return registrationFailures;
-    }
-
-    public void setRegistrationFailures(Long registrationFailures) {
-        this.registrationFailures = registrationFailures;
-    }
-
-    public Double getRegistrationSuccessRate() {
-        return registrationSuccessRate;
-    }
-
-    public void setRegistrationSuccessRate(Double registrationSuccessRate) {
-        this.registrationSuccessRate = registrationSuccessRate;
-    }
-
-    public Double getRegistrationAvgDuration() {
-        return registrationAvgDuration;
-    }
-
-    public void setRegistrationAvgDuration(Double registrationAvgDuration) {
-        this.registrationAvgDuration = registrationAvgDuration;
-    }
-
-    public Long getRegistrationMinDuration() {
-        return registrationMinDuration;
-    }
-
-    public void setRegistrationMinDuration(Long registrationMinDuration) {
-        this.registrationMinDuration = registrationMinDuration;
-    }
-
-    public Long getRegistrationMaxDuration() {
-        return registrationMaxDuration;
-    }
-
-    public void setRegistrationMaxDuration(Long registrationMaxDuration) {
-        this.registrationMaxDuration = registrationMaxDuration;
-    }
-
-    public Long getAuthenticationAttempts() {
-        return authenticationAttempts;
-    }
-
-    public void setAuthenticationAttempts(Long authenticationAttempts) {
-        this.authenticationAttempts = authenticationAttempts;
-    }
-
-    public Long getAuthenticationSuccesses() {
-        return authenticationSuccesses;
-    }
-
-    public void setAuthenticationSuccesses(Long authenticationSuccesses) {
-        this.authenticationSuccesses = authenticationSuccesses;
-    }
-
-    public Long getAuthenticationFailures() {
-        return authenticationFailures;
-    }
-
-    public void setAuthenticationFailures(Long authenticationFailures) {
-        this.authenticationFailures = authenticationFailures;
-    }
-
-    public Double getAuthenticationSuccessRate() {
-        return authenticationSuccessRate;
-    }
-
-    public void setAuthenticationSuccessRate(Double authenticationSuccessRate) {
-        this.authenticationSuccessRate = authenticationSuccessRate;
-    }
-
-    public Double getAuthenticationAvgDuration() {
-        return authenticationAvgDuration;
-    }
-
-    public void setAuthenticationAvgDuration(Double authenticationAvgDuration) {
-        this.authenticationAvgDuration = authenticationAvgDuration;
-    }
-
-    public Long getAuthenticationMinDuration() {
-        return authenticationMinDuration;
-    }
-
-    public void setAuthenticationMinDuration(Long authenticationMinDuration) {
-        this.authenticationMinDuration = authenticationMinDuration;
-    }
-
-    public Long getAuthenticationMaxDuration() {
-        return authenticationMaxDuration;
-    }
-
-    public void setAuthenticationMaxDuration(Long authenticationMaxDuration) {
-        this.authenticationMaxDuration = authenticationMaxDuration;
-    }
-
-    public Long getFallbackEvents() {
-        return fallbackEvents;
-    }
-
-    public void setFallbackEvents(Long fallbackEvents) {
-        this.fallbackEvents = fallbackEvents;
-    }
-
-    public Double getFallbackRate() {
-        return fallbackRate;
-    }
-
-    public void setFallbackRate(Double fallbackRate) {
-        this.fallbackRate = fallbackRate;
-    }
-
-    public Map<String, Long> getFallbackMethods() {
-        return fallbackMethods;
-    }
-
-    public void setFallbackMethods(Map<String, Long> fallbackMethods) {
-        this.fallbackMethods = fallbackMethods;
-    }
-
-    public Map<String, Long> getDeviceTypes() {
-        return deviceTypes;
-    }
-
-    public void setDeviceTypes(Map<String, Long> deviceTypes) {
-        this.deviceTypes = deviceTypes;
-    }
-
-    public Map<String, Long> getAuthenticatorTypes() {
-        return authenticatorTypes;
-    }
-
-    public void setAuthenticatorTypes(Map<String, Long> authenticatorTypes) {
-        this.authenticatorTypes = authenticatorTypes;
-    }
-
-    public Map<String, Long> getBrowsers() {
-        return browsers;
-    }
-
-    public void setBrowsers(Map<String, Long> browsers) {
-        this.browsers = browsers;
-    }
-
-    public Map<String, Long> getOperatingSystems() {
-        return operatingSystems;
-    }
-
-    public void setOperatingSystems(Map<String, Long> operatingSystems) {
-        this.operatingSystems = operatingSystems;
-    }
-
-    public Map<String, Long> getErrorCategories() {
-        return errorCategories;
-    }
-
-    public void setErrorCategories(Map<String, Long> errorCategories) {
-        this.errorCategories = errorCategories;
-    }
-
-    public Map<String, Long> getTopErrors() {
-        return topErrors;
-    }
-
-    public void setTopErrors(Map<String, Long> topErrors) {
-        this.topErrors = topErrors;
-    }
-
     public Long getUniqueUsers() {
         return uniqueUsers;
     }
 
     public void setUniqueUsers(Long uniqueUsers) {
         this.uniqueUsers = uniqueUsers;
-    }
-
-    public Long getNewUsers() {
-        return newUsers;
-    }
-
-    public void setNewUsers(Long newUsers) {
-        this.newUsers = newUsers;
-    }
-
-    public Long getReturningUsers() {
-        return returningUsers;
-    }
-
-    public void setReturningUsers(Long returningUsers) {
-        this.returningUsers = returningUsers;
-    }
-
-    public Double getUserAdoptionRate() {
-        return userAdoptionRate;
-    }
-
-    public void setUserAdoptionRate(Double userAdoptionRate) {
-        this.userAdoptionRate = userAdoptionRate;
-    }
-
-    public Integer getPeakConcurrentOperations() {
-        return peakConcurrentOperations;
-    }
-
-    public void setPeakConcurrentOperations(Integer peakConcurrentOperations) {
-        this.peakConcurrentOperations = peakConcurrentOperations;
-    }
-
-    public Double getAvgConcurrentOperations() {
-        return avgConcurrentOperations;
-    }
-
-    public void setAvgConcurrentOperations(Double avgConcurrentOperations) {
-        this.avgConcurrentOperations = avgConcurrentOperations;
-    }
-
-    public Long getPeakMemoryUsage() {
-        return peakMemoryUsage;
-    }
-
-    public void setPeakMemoryUsage(Long peakMemoryUsage) {
-        this.peakMemoryUsage = peakMemoryUsage;
-    }
-
-    public Double getAvgMemoryUsage() {
-        return avgMemoryUsage;
-    }
-
-    public void setAvgMemoryUsage(Double avgMemoryUsage) {
-        this.avgMemoryUsage = avgMemoryUsage;
-    }
-
-    public Double getPeakCpuUsage() {
-        return peakCpuUsage;
-    }
-
-    public void setPeakCpuUsage(Double peakCpuUsage) {
-        this.peakCpuUsage = peakCpuUsage;
-    }
-
-    public Double getAvgCpuUsage() {
-        return avgCpuUsage;
-    }
-
-    public void setAvgCpuUsage(Double avgCpuUsage) {
-        this.avgCpuUsage = avgCpuUsage;
-    }
-
-    public Map<String, Long> getTopIpAddresses() {
-        return topIpAddresses;
-    }
-
-    public void setTopIpAddresses(Map<String, Long> topIpAddresses) {
-        this.topIpAddresses = topIpAddresses;
-    }
-
-    public Map<String, Long> getGeographicDistribution() {
-        return geographicDistribution;
-    }
-
-    public void setGeographicDistribution(Map<String, Long> geographicDistribution) {
-        this.geographicDistribution = geographicDistribution;
-    }
-
-    public Map<String, Object> getSessionMetrics() {
-        return sessionMetrics;
-    }
-
-    public void setSessionMetrics(Map<String, Object> sessionMetrics) {
-        this.sessionMetrics = sessionMetrics;
-    }
-
-    public Map<String, Object> getCustomMetrics() {
-        return customMetrics;
-    }
-
-    public void setCustomMetrics(Map<String, Object> customMetrics) {
-        this.customMetrics = customMetrics;
     }
 
     public LocalDateTime getLastUpdated() {
@@ -565,64 +123,182 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
-    public String getDataQuality() {
-        return dataQuality;
+    public Map<String, Object> getMetricsData() {
+        return metricsData;
     }
 
-    public void setDataQuality(String dataQuality) {
-        this.dataQuality = dataQuality;
+    public void setMetricsData(Map<String, Object> metricsData) {
+        this.metricsData = metricsData;
     }
 
-    public Double getCompleteness() {
-        return completeness;
+    // Helper methods for common metrics access
+    public Long getRegistrationAttempts() {
+        return getLongMetric(Fido2MetricsConstants.REGISTRATION_ATTEMPTS);
     }
 
-    public void setCompleteness(Double completeness) {
-        this.completeness = completeness;
+    public void setRegistrationAttempts(Long value) {
+        setMetric(Fido2MetricsConstants.REGISTRATION_ATTEMPTS, value);
     }
 
-    // Helper methods for calculations
-    public void calculateSuccessRates() {
-        if (registrationAttempts != null && registrationAttempts > 0) {
-            this.registrationSuccessRate = (double) registrationSuccesses / registrationAttempts;
+    public Long getRegistrationSuccesses() {
+        return getLongMetric(Fido2MetricsConstants.REGISTRATION_SUCCESSES);
+    }
+
+    public void setRegistrationSuccesses(Long value) {
+        setMetric(Fido2MetricsConstants.REGISTRATION_SUCCESSES, value);
+    }
+
+    public Long getRegistrationFailures() {
+        return getLongMetric(Fido2MetricsConstants.REGISTRATION_FAILURES);
+    }
+
+    public void setRegistrationFailures(Long value) {
+        setMetric(Fido2MetricsConstants.REGISTRATION_FAILURES, value);
+    }
+
+    public Long getAuthenticationAttempts() {
+        return getLongMetric(Fido2MetricsConstants.AUTHENTICATION_ATTEMPTS);
+    }
+
+    public void setAuthenticationAttempts(Long value) {
+        setMetric(Fido2MetricsConstants.AUTHENTICATION_ATTEMPTS, value);
+    }
+
+    public Long getAuthenticationSuccesses() {
+        return getLongMetric(Fido2MetricsConstants.AUTHENTICATION_SUCCESSES);
+    }
+
+    public void setAuthenticationSuccesses(Long value) {
+        setMetric(Fido2MetricsConstants.AUTHENTICATION_SUCCESSES, value);
+    }
+
+    public Long getAuthenticationFailures() {
+        return getLongMetric(Fido2MetricsConstants.AUTHENTICATION_FAILURES);
+    }
+
+    public void setAuthenticationFailures(Long value) {
+        setMetric(Fido2MetricsConstants.AUTHENTICATION_FAILURES, value);
+    }
+
+    public Long getFallbackEvents() {
+        return getLongMetric(Fido2MetricsConstants.FALLBACK_EVENTS);
+    }
+
+    public void setFallbackEvents(Long value) {
+        setMetric(Fido2MetricsConstants.FALLBACK_EVENTS, value);
+    }
+
+    public Double getRegistrationSuccessRate() {
+        return getDoubleMetric(Fido2MetricsConstants.REGISTRATION_SUCCESS_RATE);
+    }
+
+    public void setRegistrationSuccessRate(Double value) {
+        setMetric(Fido2MetricsConstants.REGISTRATION_SUCCESS_RATE, value);
+    }
+
+    public Double getAuthenticationSuccessRate() {
+        return getDoubleMetric(Fido2MetricsConstants.AUTHENTICATION_SUCCESS_RATE);
+    }
+
+    public void setAuthenticationSuccessRate(Double value) {
+        setMetric(Fido2MetricsConstants.AUTHENTICATION_SUCCESS_RATE, value);
+    }
+
+    public Double getRegistrationAvgDuration() {
+        return getDoubleMetric(Fido2MetricsConstants.REGISTRATION_AVG_DURATION);
+    }
+
+    public void setRegistrationAvgDuration(Double value) {
+        setMetric(Fido2MetricsConstants.REGISTRATION_AVG_DURATION, value);
+    }
+
+    public Double getAuthenticationAvgDuration() {
+        return getDoubleMetric(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION);
+    }
+
+    public void setAuthenticationAvgDuration(Double value) {
+        setMetric(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION, value);
+    }
+
+    public Map<String, Long> getDeviceTypes() {
+        return getMapMetric(Fido2MetricsConstants.DEVICE_TYPES);
+    }
+
+    public void setDeviceTypes(Map<String, Long> deviceTypes) {
+        setMetric(Fido2MetricsConstants.DEVICE_TYPES, deviceTypes);
+    }
+
+    public Map<String, Long> getErrorCounts() {
+        return getMapMetric(Fido2MetricsConstants.ERROR_COUNTS);
+    }
+
+    public void setErrorCounts(Map<String, Long> errorCounts) {
+        setMetric(Fido2MetricsConstants.ERROR_COUNTS, errorCounts);
+    }
+
+    // Generic helper methods for metrics access
+    private Long getLongMetric(String key) {
+        if (metricsData == null) {
+            return null;
         }
-        
-        if (authenticationAttempts != null && authenticationAttempts > 0) {
-            this.authenticationSuccessRate = (double) authenticationSuccesses / authenticationAttempts;
+        Object value = metricsData.get(key);
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
         }
+        return null;
     }
 
-    public void calculateFallbackRate() {
-        long totalAttempts = (registrationAttempts != null ? registrationAttempts : 0) + 
-                           (authenticationAttempts != null ? authenticationAttempts : 0);
-        
-        if (totalAttempts > 0 && fallbackEvents != null) {
-            this.fallbackRate = (double) fallbackEvents / totalAttempts;
+    private Double getDoubleMetric(String key) {
+        if (metricsData == null) {
+            return null;
         }
+        Object value = metricsData.get(key);
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        return null;
     }
 
-    public void calculateUserAdoptionRate() {
-        if (uniqueUsers != null && uniqueUsers > 0 && newUsers != null) {
-            this.userAdoptionRate = (double) newUsers / uniqueUsers;
+    @SuppressWarnings("unchecked")
+    private Map<String, Long> getMapMetric(String key) {
+        if (metricsData == null) {
+            return null;
         }
+        Object value = metricsData.get(key);
+        if (value instanceof Map) {
+            return (Map<String, Long>) value;
+        }
+        return null;
     }
 
-    @Override
-    public String toString() {
-        return "Fido2MetricsAggregation{" +
-                "id='" + id + '\'' +
-                ", aggregationType='" + aggregationType + '\'' +
-                ", timePeriod='" + timePeriod + '\'' +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", registrationAttempts=" + registrationAttempts +
-                ", registrationSuccesses=" + registrationSuccesses +
-                ", authenticationAttempts=" + authenticationAttempts +
-                ", authenticationSuccesses=" + authenticationSuccesses +
-                ", fallbackEvents=" + fallbackEvents +
-                ", uniqueUsers=" + uniqueUsers +
-                ", lastUpdated=" + lastUpdated +
-                '}';
+    private void setMetric(String key, Object value) {
+        if (metricsData == null) {
+            metricsData = new HashMap<>();
+        }
+        metricsData.put(key, value);
+    }
+
+    // Convenience method to add to existing metric
+    public void incrementMetric(String key, Long increment) {
+        Long current = getLongMetric(key);
+        setMetric(key, (current != null ? current : 0L) + (increment != null ? increment : 0L));
+    }
+
+    // Convenience method to set performance metrics
+    public void setPerformanceMetrics(Map<String, Object> performanceMetrics) {
+        setMetric(Fido2MetricsConstants.PERFORMANCE_METRICS, performanceMetrics);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getPerformanceMetrics() {
+        if (metricsData == null) {
+            return null;
+        }
+        Object value = metricsData.get(Fido2MetricsConstants.PERFORMANCE_METRICS);
+        if (value instanceof Map) {
+            return (Map<String, Object>) value;
+        }
+        return null;
     }
 
     @Override
@@ -641,5 +317,17 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
     public int hashCode() {
         return Objects.hash(id, aggregationType, startTime, endTime);
     }
-}
 
+    @Override
+    public String toString() {
+        return "Fido2MetricsAggregation{" +
+                "id='" + id + '\'' +
+                ", aggregationType='" + aggregationType + '\'' +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", uniqueUsers=" + uniqueUsers +
+                ", lastUpdated=" + lastUpdated +
+                ", metricsDataSize=" + (metricsData != null ? metricsData.size() : 0) +
+                '}';
+    }
+}

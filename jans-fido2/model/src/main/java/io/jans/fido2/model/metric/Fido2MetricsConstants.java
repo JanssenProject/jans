@@ -26,8 +26,6 @@ public final class Fido2MetricsConstants {
     public static final String ADOPTION_RATE = "adoptionRate";
     public static final String SUCCESS_RATE = "successRate";
     public static final String FAILURE_RATE = "failureRate";
-    public static final String REGISTRATION_AVG_DURATION = "registrationAvgDuration";
-    public static final String AUTHENTICATION_AVG_DURATION = "authenticationAvgDuration";
 
     // Aggregation Types
     public static final String HOURLY = "HOURLY";
@@ -86,4 +84,20 @@ public final class Fido2MetricsConstants {
     public static final String FIDO2_METRICS_ENTRY_BASE_DN = "ou=fido2-metrics,o=jans";
     public static final String FIDO2_METRICS_AGGREGATION_BASE_DN = "ou=fido2-aggregations,o=jans";
     public static final String FIDO2_USER_METRICS_BASE_DN = "ou=fido2-user-metrics,o=jans";
+    
+    // Metrics data keys
+    public static final String REGISTRATION_ATTEMPTS = "registrationAttempts";
+    public static final String REGISTRATION_SUCCESSES = "registrationSuccesses";
+    public static final String REGISTRATION_FAILURES = "registrationFailures";
+    public static final String REGISTRATION_SUCCESS_RATE = "registrationSuccessRate";
+    public static final String REGISTRATION_AVG_DURATION = "registrationAvgDuration";
+    public static final String AUTHENTICATION_ATTEMPTS = "authenticationAttempts";
+    public static final String AUTHENTICATION_SUCCESSES = "authenticationSuccesses";
+    public static final String AUTHENTICATION_FAILURES = "authenticationFailures";
+    public static final String AUTHENTICATION_SUCCESS_RATE = "authenticationSuccessRate";
+    public static final String AUTHENTICATION_AVG_DURATION = "authenticationAvgDuration";
+    public static final String FALLBACK_EVENTS = "fallbackEvents";
+    public static final String DEVICE_TYPES = "deviceTypes";
+    public static final String ERROR_COUNTS = "errorCounts";
+    public static final String PERFORMANCE_METRICS = "performanceMetrics";
 }
