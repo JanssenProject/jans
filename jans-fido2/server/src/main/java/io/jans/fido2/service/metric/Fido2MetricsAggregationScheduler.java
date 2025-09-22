@@ -14,6 +14,7 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -41,6 +42,7 @@ public class Fido2MetricsAggregationScheduler {
      * All statistics are persisted to the database, not kept in memory
      */
     public static class HourlyAggregationJob implements Job {
+        private static final Logger log = LoggerFactory.getLogger(HourlyAggregationJob.class);
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             try {
@@ -56,11 +58,11 @@ public class Fido2MetricsAggregationScheduler {
                     metricsService.createHourlyAggregation(previousHour);
                     
                     // Log completion for monitoring
-                    System.out.println("Hourly aggregation completed for: " + previousHour);
+                    log.info("Hourly aggregation completed for: {}", previousHour);
                 }
             } catch (Exception e) {
                 // Log error but don't fail the job to prevent cluster issues
-                System.err.println("Failed to execute hourly aggregation: " + e.getMessage());
+                log.error("Failed to execute hourly aggregation: {}", e.getMessage(), e);
                 throw new JobExecutionException("Failed to execute hourly aggregation", e);
             }
         }

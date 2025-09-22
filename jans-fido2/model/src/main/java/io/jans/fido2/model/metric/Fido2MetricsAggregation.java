@@ -15,10 +15,10 @@ import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import io.jans.fido2.model.metric.Fido2MetricsConstants;
 
 /**
  * FIDO2 Metrics Aggregation - stores summary data for different time periods
@@ -58,7 +58,7 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
      */
     @AttributeName(name = "jansMetricsData")
     @JsonObject
-    private Map<String, Object> metricsData;
+    private transient Map<String, Object> metricsData;
 
     // Constructors
     public Fido2MetricsAggregation() {
@@ -262,13 +262,13 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
     @SuppressWarnings("unchecked")
     private Map<String, Long> getMapMetric(String key) {
         if (metricsData == null) {
-            return null;
+            return Collections.emptyMap();
         }
         Object value = metricsData.get(key);
         if (value instanceof Map) {
             return (Map<String, Long>) value;
         }
-        return null;
+        return Collections.emptyMap();
     }
 
     private void setMetric(String key, Object value) {
@@ -292,13 +292,13 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
     @SuppressWarnings("unchecked")
     public Map<String, Object> getPerformanceMetrics() {
         if (metricsData == null) {
-            return null;
+            return Collections.emptyMap();
         }
         Object value = metricsData.get(Fido2MetricsConstants.PERFORMANCE_METRICS);
         if (value instanceof Map) {
             return (Map<String, Object>) value;
         }
-        return null;
+        return Collections.emptyMap();
     }
 
     @Override

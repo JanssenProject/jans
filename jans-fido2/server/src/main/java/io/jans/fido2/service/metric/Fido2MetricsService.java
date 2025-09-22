@@ -278,11 +278,9 @@ public class Fido2MetricsService {
                 Filter.createLessOrEqualFilter("jansEndTime", endTime)
             );
 
-            List<Fido2MetricsAggregation> entries = persistenceEntryManager.findEntries(
+            return persistenceEntryManager.findEntries(
                 METRICS_AGGREGATION_BASE_DN, Fido2MetricsAggregation.class, filter
             );
-
-            return entries;
         } catch (Exception e) {
             log.error("Failed to retrieve aggregations: {}", e.getMessage(), e);
             return Collections.emptyList();

@@ -192,11 +192,9 @@ public class Fido2UserMetricsService {
     public List<Fido2UserMetrics> getActiveUsers() {
         try {
             Filter filter = Filter.createEqualityFilter("jansIsActive", true);
-            List<Fido2UserMetrics> entries = persistenceEntryManager.findEntries(
+            return persistenceEntryManager.findEntries(
                 USER_METRICS_BASE_DN, Fido2UserMetrics.class, filter
             );
-
-            return entries;
         } catch (Exception e) {
             log.error("Failed to retrieve active users: {}", e.getMessage(), e);
             return Collections.emptyList();
@@ -209,11 +207,9 @@ public class Fido2UserMetricsService {
     public List<Fido2UserMetrics> getUsersByEngagementLevel(String engagementLevel) {
         try {
             Filter filter = Filter.createEqualityFilter("jansEngagementLevel", engagementLevel);
-            List<Fido2UserMetrics> entries = persistenceEntryManager.findEntries(
+            return persistenceEntryManager.findEntries(
                 USER_METRICS_BASE_DN, Fido2UserMetrics.class, filter
             );
-
-            return entries;
         } catch (Exception e) {
             log.error("Failed to retrieve users by engagement level {}: {}", engagementLevel, e.getMessage(), e);
             return Collections.emptyList();
