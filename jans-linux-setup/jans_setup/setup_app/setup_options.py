@@ -36,8 +36,7 @@ def get_setup_options():
         setupOptions['rdbm_host'] = base.argsp.rdbm_host
         if base.argsp.remote_rdbm_ssl_cert_fn:
             with open(base.argsp.remote_rdbm_ssl_cert_fn) as f:
-                setupOptions['pgsql_sslrootcert'] = f.read()
-            setupOptions['pggsql_sslmode'] = 'verify-ca'
+                setupOptions['rdbm_sslrootcert'] = f.read()
 
     else:
         setupOptions['rdbm_install_type'] = InstallTypes.LOCAL
