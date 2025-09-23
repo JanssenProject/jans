@@ -25,6 +25,110 @@ pub enum MultiIssuerEntityError {
     NoValidTokens,
 }
 
+/// Sanitize issuer name for Cedar compatibility
+fn sanitize_issuer_name(name: &str) -> String {
+    name.replace(['.', ' ', '-'], "_").to_lowercase()
+}
+
+/// Simplify token type for Cedar compatibility
+fn simplify_token_type(mapping: &str) -> String {
+    // Split by namespace separator and use the last part
+    // Keep underscores in token type names as specified in design
+    mapping.split("::").last().unwrap_or(mapping).to_lowercase()
+}
+
+/// Create a Set of Long from a single long value
+fn create_long_set(value: i64) -> RestrictedExpression {
+    RestrictedExpression::new_set(vec![RestrictedExpression::new_long(value)])
+}
+
+/// Create a Set of String from a single string value
+fn create_string_set(value: &str) -> RestrictedExpression {
+    RestrictedExpression::new_set(vec![RestrictedExpression::new_string(value.to_string())])
+}
+
+/// Create a Set of String from an array of strings
+fn create_string_set_array(values: &[String]) -> RestrictedExpression {
+    RestrictedExpression::new_set(
+        values
+            .iter()
+            .map(|s| RestrictedExpression::new_string(s.clone()))
+            .collect::<Vec<_>>(),
+    )
+}
+
+/// Filter out reserved JWT claims that shouldn't be used as entity tags
+/// Reserved claims: iss (issuer), jti (JWT ID), exp (expiration)
+fn filter_reserved_claims(claims: &HashMap<String, Value>) -> HashMap<String, Value> {
+    claims
+        .iter()
+        .filter(|(key, _)| key.as_str() != "iss" && key.as_str() != "jti" && key.as_str() != "exp")
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect()
+}
+
+/// Convert a claim value to a Set of String
+fn convert_claim_to_string_set(value: &Value) -> RestrictedExpression {
+    match value {
+        Value::String(s) => create_string_set(s),
+        Value::Number(n) => create_string_set(&n.to_string()),
+        Value::Bool(b) => create_string_set(&b.to_string()),
+        Value::Array(arr) => {
+            let string_values: Vec<String> = arr
+                .iter()
+                .map(|v| match v {
+                    Value::String(s) => s.clone(),
+                    Value::Number(n) => n.to_string(),
+                    Value::Bool(b) => b.to_string(),
+                    _ => v.to_string(),
+                })
+                .collect();
+            create_string_set_array(&string_values)
+        },
+        _ => create_string_set(&value.to_string()),
+    }
+}
+
+/// Add all JWT claims as string tags (schema-less processing)
+/// According to design doc: "without a schema, all claims default to Set of String for consistency"
+fn add_claims_as_string_tags(
+    tags: &mut HashMap<String, RestrictedExpression>,
+    claims: &HashMap<String, Value>,
+) {
+    // Use the existing build_entity_attrs_without_schema function for consistent conversion
+    match build_entity_attrs_without_schema(claims, None) {
+        Ok(schema_less_attrs) => {
+            tags.extend(schema_less_attrs);
+        },
+        Err(_) => {
+            // Fallback to manual conversion if the function fails
+            for (claim_key, claim_value) in claims {
+                let claim_values = convert_claim_to_string_set(claim_value);
+                tags.insert(claim_key.clone(), claim_values);
+            }
+        },
+    }
+}
+
+/// Determine the entity type for a token dynamically
+fn determine_token_entity_type(token: &Token) -> Result<String, MultiIssuerEntityError> {
+    if let Some(issuer) = token.iss.as_ref() {
+        if let Some(metadata) = issuer.token_metadata.get(&token.name) {
+            return Ok(metadata.entity_type_name.clone());
+        }
+    }
+
+    if token.name.contains("::") {
+        return Ok(token.name.clone());
+    }
+
+    if let Some(default_type) = default_tkn_entity_name(&token.name) {
+        return Ok(default_type.to_string());
+    }
+
+    Ok("Token".to_string())
+}
+
 impl EntityBuilder {
     /// Build individual token entities
     pub fn build_token_entities(
@@ -32,7 +136,7 @@ impl EntityBuilder {
         tokens: &HashMap<String, Token>,
     ) -> Result<HashMap<String, Entity>, MultiIssuerEntityError> {
         let mut token_entities = HashMap::new();
-
+        // TODO: Catches all errors indiscriminately, Log the error
         for (token_name, token) in tokens {
             match self.build_single_token_entity(token) {
                 Ok(entity) => {
@@ -75,33 +179,27 @@ impl EntityBuilder {
         let mut attrs = HashMap::new();
 
         // Add core token attributes
-        attrs.insert(
-            "token_type".to_string(),
-            self.create_string_set(&token.name),
-        );
-        attrs.insert("jti".to_string(), self.create_string_set(&entity_id));
-        attrs.insert("issuer".to_string(), self.create_string_set(issuer));
+        attrs.insert("token_type".to_string(), create_string_set(&token.name));
+        attrs.insert("jti".to_string(), create_string_set(&entity_id));
+        attrs.insert("issuer".to_string(), create_string_set(issuer));
 
         // Add expiration timestamp
         if let Some(exp) = token.get_claim_val("exp").and_then(|v| v.as_i64()) {
-            attrs.insert("exp".to_string(), self.create_long_set(exp));
+            attrs.insert("exp".to_string(), create_long_set(exp));
         }
 
         // Add validation timestamp
         let validated_at = chrono::Utc::now().timestamp_millis();
-        attrs.insert(
-            "validated_at".to_string(),
-            self.create_long_set(validated_at),
-        );
+        attrs.insert("validated_at".to_string(), create_long_set(validated_at));
 
         // Create entity tags for Token claims - support both schema-based and schema-less processing
         let mut tags = HashMap::new();
-        let claims = self.filter_reserved_claims(token.claims_value());
+        let claims = filter_reserved_claims(token.claims_value());
 
         // Determine the actual entity type dynamically, just like the regular entity builder
         let entity_type = if let Some(schema) = &self.schema {
             // Schema-based processing: use schema to determine proper types and required fields
-            let entity_type = self.determine_token_entity_type(token)?;
+            let entity_type = determine_token_entity_type(token)?;
 
             if let Some(token_shape) = schema.get_entity_shape(&entity_type) {
                 // Use the existing build_entity_attrs_with_shape function for schema-based processing
@@ -117,19 +215,19 @@ impl EntityBuilder {
                     },
                     Err(_) => {
                         // Fallback to schema-less processing if schema conversion fails
-                        self.add_claims_as_string_tags(&mut tags, &claims);
+                        add_claims_as_string_tags(&mut tags, &claims);
                     },
                 }
             } else {
                 // No entity shape in schema, fall back to schema-less processing
-                self.add_claims_as_string_tags(&mut tags, &claims);
+                add_claims_as_string_tags(&mut tags, &claims);
             }
 
             entity_type
         } else {
             // Schema-less processing: convert all claims to String Sets
             // According to design doc: "without a schema, all claims default to Set of String for consistency"
-            self.add_claims_as_string_tags(&mut tags, &claims);
+            add_claims_as_string_tags(&mut tags, &claims);
 
             "Token".to_string()
         };
@@ -158,7 +256,7 @@ impl EntityBuilder {
             .ok_or(MultiIssuerEntityError::MissingIssuer)?;
 
         let issuer_simplified = self.resolve_issuer_name(issuer)?;
-        let token_type_simplified = self.simplify_token_type(token_name);
+        let token_type_simplified = simplify_token_type(token_name);
 
         Ok(format!("{}_{}", issuer_simplified, token_type_simplified))
     }
@@ -171,7 +269,7 @@ impl EntityBuilder {
             // Compare both the full URL and just the origin
             if trusted_issuer_url == issuer || trusted_issuer.oidc_endpoint.as_str() == issuer {
                 // Use the trusted issuer's name field
-                return Ok(self.sanitize_issuer_name(&trusted_issuer.name));
+                return Ok(sanitize_issuer_name(&trusted_issuer.name));
             }
         }
 
@@ -187,114 +285,7 @@ impl EntityBuilder {
             .unwrap_or(issuer)
             .to_string();
 
-        Ok(self.sanitize_issuer_name(&hostname))
-    }
-
-    /// Sanitize issuer name for Cedar compatibility
-    fn sanitize_issuer_name(&self, name: &str) -> String {
-        name.replace(['.', ' ', '-'], "_").to_lowercase()
-    }
-
-    /// Simplify token type for Cedar compatibility
-    fn simplify_token_type(&self, mapping: &str) -> String {
-        // Split by namespace separator and use the last part
-        // Keep underscores in token type names as specified in design
-        mapping.split("::").last().unwrap_or(mapping).to_lowercase()
-    }
-
-    /// Add all JWT claims as string tags (schema-less processing)
-    /// According to design doc: "without a schema, all claims default to Set of String for consistency"
-    fn add_claims_as_string_tags(
-        &self,
-        tags: &mut HashMap<String, RestrictedExpression>,
-        claims: &HashMap<String, Value>,
-    ) {
-        // Use the existing build_entity_attrs_without_schema function for consistent conversion
-        match build_entity_attrs_without_schema(claims, None) {
-            Ok(schema_less_attrs) => {
-                tags.extend(schema_less_attrs);
-            },
-            Err(_) => {
-                // Fallback to manual conversion if the function fails
-                for (claim_key, claim_value) in claims {
-                    let claim_values = self.convert_claim_to_string_set(claim_value);
-                    tags.insert(claim_key.clone(), claim_values);
-                }
-            },
-        }
-    }
-
-    /// Convert a claim value to a Set of String
-    fn convert_claim_to_string_set(&self, value: &Value) -> RestrictedExpression {
-        match value {
-            Value::String(s) => self.create_string_set(s),
-            Value::Number(n) => self.create_string_set(&n.to_string()),
-            Value::Bool(b) => self.create_string_set(&b.to_string()),
-            Value::Array(arr) => {
-                let string_values: Vec<String> = arr
-                    .iter()
-                    .map(|v| match v {
-                        Value::String(s) => s.clone(),
-                        Value::Number(n) => n.to_string(),
-                        Value::Bool(b) => b.to_string(),
-                        _ => v.to_string(),
-                    })
-                    .collect();
-                self.create_string_set_array(&string_values)
-            },
-            _ => self.create_string_set(&value.to_string()),
-        }
-    }
-
-    /// Create a Set of String from a single string value
-    fn create_string_set(&self, value: &str) -> RestrictedExpression {
-        self.create_string_set_array(&[value.to_string()])
-    }
-
-    /// Create a Set of String from an array of strings
-    fn create_string_set_array(&self, values: &[String]) -> RestrictedExpression {
-        RestrictedExpression::new_set(
-            values
-                .iter()
-                .map(|s| RestrictedExpression::new_string(s.clone()))
-                .collect::<Vec<_>>(),
-        )
-    }
-
-    /// Create a Set of Long from a single long value
-    fn create_long_set(&self, value: i64) -> RestrictedExpression {
-        RestrictedExpression::new_set(vec![RestrictedExpression::new_long(value)])
-    }
-
-    /// Filter out reserved JWT claims that shouldn't be used as entity tags
-    /// Reserved claims: iss (issuer), jti (JWT ID), exp (expiration)
-    fn filter_reserved_claims(&self, claims: &HashMap<String, Value>) -> HashMap<String, Value> {
-        claims
-            .iter()
-            .filter(|(key, _)| {
-                key.as_str() != "iss" && key.as_str() != "jti" && key.as_str() != "exp"
-            })
-            .map(|(k, v)| (k.clone(), v.clone()))
-            .collect()
-    }
-
-    /// Determine the entity type for a token dynamically
-    fn determine_token_entity_type(&self, token: &Token) -> Result<String, MultiIssuerEntityError> {
-        if let Some(issuer) = token.iss.as_ref() {
-            if let Some(metadata) = issuer.token_metadata.get(&token.name) {
-                return Ok(metadata.entity_type_name.clone());
-            }
-        }
-
-        if token.name.contains("::") {
-            return Ok(token.name.clone());
-        }
-
-        if let Some(default_type) = default_tkn_entity_name(&token.name) {
-            return Ok(default_type.to_string());
-        }
-
-        Ok("Token".to_string())
+        Ok(sanitize_issuer_name(&hostname))
     }
 }
 
@@ -409,23 +400,15 @@ mod tests {
 
     #[test]
     fn test_token_type_simplification() {
-        let builder = create_test_entity_builder();
-
         // Test various token type mappings
+        assert_eq!(simplify_token_type("Jans::Access_Token"), "access_token");
+        assert_eq!(simplify_token_type("Jans::Id_Token"), "id_token");
+        assert_eq!(simplify_token_type("Acme::DolphinToken"), "dolphintoken");
         assert_eq!(
-            builder.simplify_token_type("Jans::Access_Token"),
-            "access_token"
-        );
-        assert_eq!(builder.simplify_token_type("Jans::Id_Token"), "id_token");
-        assert_eq!(
-            builder.simplify_token_type("Acme::DolphinToken"),
-            "dolphintoken"
-        );
-        assert_eq!(
-            builder.simplify_token_type("Custom::Employee_Token"),
+            simplify_token_type("Custom::Employee_Token"),
             "employee_token"
         );
-        assert_eq!(builder.simplify_token_type("SimpleToken"), "simpletoken");
+        assert_eq!(simplify_token_type("SimpleToken"), "simpletoken");
     }
 
     #[test]
