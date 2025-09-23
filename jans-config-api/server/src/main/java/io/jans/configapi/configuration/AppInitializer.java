@@ -11,6 +11,7 @@ import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.model.configuration.AssetMgtConfiguration;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
+import io.jans.configapi.security.service.CedarAuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
 import io.jans.configapi.service.logger.LoggerService;
 import io.jans.exception.ConfigurationException;
@@ -168,9 +169,7 @@ public class AppInitializer {
     @ApplicationScoped
     @Named("authorizationService")
     private AuthorizationService createAuthorizationService() {
-        log.info(
-                "=============  AppInitializer::createAuthorizationService() - configurationFactory.getApiProtectionType():{} ",
-                configurationFactory.getApiProtectionType());
+        log.info("=============  AppInitializer::createAuthorizationService() - configurationFactory.getApiProtectionType():{}, configurationFactory.isCedarAuthEnabled():{} ", configurationFactory.getApiProtectionType(), configurationFactory.isCedarAuthEnabled());
 
         if (StringHelper.isEmpty(configurationFactory.getApiProtectionType())) {
             throw new ConfigurationException("API Protection Type not defined");
@@ -179,7 +178,13 @@ public class AppInitializer {
             // Verify resources available
             apiProtectionService.verifyResources(configurationFactory.getApiProtectionType(),
                     configurationFactory.getApiClientId());
-            return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
+            
+            if(configurationFactory.isCedarAuthEnabled()) {
+                return authorizationServiceInstance.select(CedarAuthorizationService.class).get();
+            }
+            else {
+                return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
+            }
         } catch (Exception ex) {
             if (log.isErrorEnabled()) {
                 log.error("Failed to create AuthorizationService instance - apiProtectionType:{}, exception:{} ",

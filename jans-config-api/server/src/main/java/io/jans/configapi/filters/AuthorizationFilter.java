@@ -63,6 +63,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         log.info("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()="
                 + request.getRequestURI() + " request.toString() " + request.toString());
         log.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
+        log.info("====== this.authorizationService.getClass().getName():{} " + this.authorizationService.getClass().getName());
         log.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
         String issuer = context.getHeaderString(ApiConstants.ISSUER);

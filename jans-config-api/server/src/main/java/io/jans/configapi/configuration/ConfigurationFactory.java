@@ -137,6 +137,7 @@ public class ConfigurationFactory {
     private String apiClientPassword;
     private List<String> apiApprovedIssuer;
     private boolean configOauthEnabled;
+    private boolean cedarAuthEnabled;
 
     @Produces
     @ApplicationScoped
@@ -247,6 +248,14 @@ public class ConfigurationFactory {
 
     public void setConfigOauthEnabled(boolean configOauthEnabled) {
         this.configOauthEnabled = configOauthEnabled;
+    }
+    
+    public boolean isCedarAuthEnabled() {
+        return cedarAuthEnabled;
+    }
+
+    public void setCedarAuthEnabled(boolean cedarAuthEnabled) {
+        this.cedarAuthEnabled = cedarAuthEnabled;
     }
 
     @PostConstruct
@@ -413,6 +422,7 @@ public class ConfigurationFactory {
         this.apiClientId = this.apiAppConfiguration.getApiClientId();
         this.apiClientPassword = this.apiAppConfiguration.getApiClientPassword();
         this.configOauthEnabled = this.apiAppConfiguration.isConfigOauthEnabled();
+        this.cedarAuthEnabled = this.apiAppConfiguration.isCedarAuthEnabled();
 
         if (this.apiAppConfiguration.getCorsConfigurationFilters() != null
                 && !this.apiAppConfiguration.getCorsConfigurationFilters().isEmpty()) {
@@ -421,9 +431,7 @@ public class ConfigurationFactory {
         }
 
         log.debug(
-                "Properties set, this.apiApprovedIssuer:{}, , this.apiProtectionType:{}, this.apiClientId :{}, this.apiClientPassword:{}, this.corsConfigurationFilter:{}, this.configOauthEnabled:{} ",
-                this.apiApprovedIssuer, this.apiProtectionType, this.apiClientId, this.apiClientPassword,
-                this.corsConfigurationFilter, this.configOauthEnabled);
+                "Properties set, this.apiApprovedIssuer:{}, , this.apiProtectionType:{}, this.apiClientId :{}, this.corsConfigurationFilter:{}, this.configOauthEnabled:{}, this.cedarAuthEnabled:{} ", this.apiApprovedIssuer, this.apiProtectionType, this.apiClientId, this.corsConfigurationFilter, this.configOauthEnabled, this.cedarAuthEnabled);
 
         // Populate corsConfigurationFilter object
         CorsConfiguration corsConfiguration = this.getCorsConfiguration();
