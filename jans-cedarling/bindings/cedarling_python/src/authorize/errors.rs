@@ -101,6 +101,13 @@ create_exception!(
     "Error building Role entity for unsigned request"
 );
 
+create_exception!(
+    authorize_errors,
+    MultiIssuerValidationError,
+    AuthorizeError,
+    "Error encountered during multi-issuer token validation"
+);
+
 #[pyclass]
 #[derive()]
 pub struct ErrorPayload(CedarlingAuthorizeError);
@@ -149,7 +156,8 @@ errors_functions! {
     IdTokenTrustMode => IdTokenTrustModeError,
     BuildEntity => BuildEntityError,
     ExecuteRule => ExecuteRuleError,
-    BuildUnsignedRoleEntity => BuildUnsignedRoleEntityError
+    BuildUnsignedRoleEntity => BuildUnsignedRoleEntityError,
+    MultiIssuerValidation => MultiIssuerValidationError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

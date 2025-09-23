@@ -8,7 +8,7 @@ use serde::Deserialize;
 use serde_json::Value;
 use std::{collections::HashMap, sync::Arc};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Token {
     pub name: String,
     pub iss: Option<Arc<TrustedIssuer>>,

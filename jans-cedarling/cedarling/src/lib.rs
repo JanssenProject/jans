@@ -161,6 +161,15 @@ impl Cedarling {
         self.authz.authorize_unsigned(request).await
     }
 
+    /// Authorize multi-issuer request.
+    /// makes authorization decision based on multiple JWT tokens from different issuers
+    pub async fn authorize_multi_issuer(
+        &self,
+        request: AuthorizeMultiIssuerRequest,
+    ) -> Result<AuthorizeResult, AuthorizeError> {
+        self.authz.authorize_multi_issuer(request).await
+    }
+
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
     #[doc(hidden)]
     #[cfg(test)]

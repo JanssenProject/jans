@@ -88,6 +88,7 @@ use crate::JwtConfig;
 use crate::LogLevel;
 use crate::LogWriter;
 use crate::authz::MultiIssuerValidationError;
+use crate::authz::request::TokenInput;
 use crate::common::issuer_utils::normalize_issuer;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
@@ -346,13 +347,13 @@ impl JwtService {
     /// Returns a result containing validated tokens or detailed error information.
     pub fn validate_multi_issuer_tokens(
         &self,
-        tokens: &[crate::authz::request::TokenInput],
-    ) -> Result<Vec<ValidatedJwt>, MultiIssuerValidationError> {
+        tokens: &[TokenInput],
+    ) -> Result<HashMap<String, Token>, MultiIssuerValidationError> {
         if tokens.is_empty() {
             return Err(MultiIssuerValidationError::EmptyTokenArray);
         }
 
-        let mut validated_tokens = Vec::new();
+        let mut validated_tokens = HashMap::new();
         let mut seen_combinations = HashSet::new();
 
         for (index, token) in tokens.iter().enumerate() {
@@ -394,7 +395,24 @@ impl JwtService {
                             ));
                         }
                     } else {
-                        validated_tokens.push(validated_jwt);
+                        // Convert ValidatedJwt to Token
+                        let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
+                            .map_err(|err| {
+                                if let Some(logger) = &self.logger {
+                                    logger.log_any(JwtLogEntry::new(
+                                        format!("failed to deserialize token claims: {err}"),
+                                        Some(LogLevel::ERROR),
+                                    ));
+                                }
+                                MultiIssuerValidationError::TokenValidationFailed
+                            })?;
+
+                        // Create Token with the mapping as the name
+                        let token_name = token.mapping.clone();
+                        let cedar_token =
+                            Token::new(&token_name, claims, validated_jwt.trusted_iss);
+
+                        validated_tokens.insert(token_name, cedar_token);
                     }
                 },
                 Err(err) => {
@@ -528,6 +546,7 @@ mod test {
     use crate::JwtConfig;
     use crate::authz::MultiIssuerValidationError;
     use crate::authz::request::TokenInput;
+    use crate::common::policy_store::{TokenEntityMetadata, ClaimMappings};
     use jsonwebtoken::Algorithm;
     use serde_json::{Value, json};
     use std::collections::{HashMap, HashSet};
@@ -658,7 +677,36 @@ mod test {
             .generate_token_with_hs256sig(&mut id_tkn_claims, None)
             .unwrap();
 
-        let iss = server.trusted_issuer();
+        let mut iss = server.trusted_issuer();
+        // Add token metadata for multi-issuer validation
+        iss.token_metadata.insert(
+            "Jans::Access_Token".to_string(),
+            TokenEntityMetadata {
+                trusted: true,
+                entity_type_name: "Jans::Access_Token".to_string(),
+                principal_mapping: HashSet::new(),
+                token_id: "jti".to_string(),
+                user_id: None,
+                role_mapping: None,
+                workload_id: None,
+                claim_mapping: ClaimMappings::default(),
+                required_claims: HashSet::new(),
+            },
+        );
+        iss.token_metadata.insert(
+            "Jans::Id_Token".to_string(),
+            TokenEntityMetadata {
+                trusted: true,
+                entity_type_name: "Jans::Id_Token".to_string(),
+                principal_mapping: HashSet::new(),
+                token_id: "jti".to_string(),
+                user_id: None,
+                role_mapping: None,
+                workload_id: None,
+                claim_mapping: ClaimMappings::default(),
+                required_claims: HashSet::new(),
+            },
+        );
 
         let jwt_service = JwtService::new(
             &JwtConfig {
@@ -667,7 +715,7 @@ mod test {
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
-            Some(HashMap::from([("Jans".into(), iss)])),
+            Some(HashMap::from([(server.issuer().into(), iss)])),
             None,
         )
         .await
@@ -684,6 +732,10 @@ mod test {
 
         let validated_tokens = result.unwrap();
         assert_eq!(validated_tokens.len(), 2);
+
+        // Verify the tokens have the correct mapping
+        assert!(validated_tokens.contains_key("Jans::Access_Token"));
+        assert!(validated_tokens.contains_key("Jans::Id_Token"));
     }
 
     #[test]
@@ -698,7 +750,7 @@ mod test {
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
-            Some(HashMap::from([("Jans".into(), iss)])),
+            Some(HashMap::from([(server.issuer().into(), iss)])),
             None,
         )
         .await
@@ -723,7 +775,7 @@ mod test {
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
-            Some(HashMap::from([("Jans".into(), iss)])),
+            Some(HashMap::from([(server.issuer().into(), iss)])),
             None,
         )
         .await
@@ -757,7 +809,36 @@ mod test {
             .generate_token_with_hs256sig(&mut valid_claims, None)
             .unwrap();
 
-        let iss = server.trusted_issuer();
+        let mut iss = server.trusted_issuer();
+        // Add token metadata for multi-issuer validation
+        iss.token_metadata.insert(
+            "Jans::Access_Token".to_string(),
+            TokenEntityMetadata {
+                trusted: true,
+                entity_type_name: "Jans::Access_Token".to_string(),
+                principal_mapping: HashSet::new(),
+                token_id: "jti".to_string(),
+                user_id: None,
+                role_mapping: None,
+                workload_id: None,
+                claim_mapping: ClaimMappings::default(),
+                required_claims: HashSet::new(),
+            },
+        );
+        iss.token_metadata.insert(
+            "Jans::Id_Token".to_string(),
+            TokenEntityMetadata {
+                trusted: true,
+                entity_type_name: "Jans::Id_Token".to_string(),
+                principal_mapping: HashSet::new(),
+                token_id: "jti".to_string(),
+                user_id: None,
+                role_mapping: None,
+                workload_id: None,
+                claim_mapping: ClaimMappings::default(),
+                required_claims: HashSet::new(),
+            },
+        );
 
         let jwt_service = JwtService::new(
             &JwtConfig {
@@ -766,7 +847,7 @@ mod test {
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
-            Some(HashMap::from([("Jans".into(), iss)])),
+            Some(HashMap::from([(server.issuer().into(), iss)])),
             None,
         )
         .await
@@ -810,7 +891,22 @@ mod test {
             .generate_token_with_hs256sig(&mut claims2, None)
             .unwrap();
 
-        let iss = server.trusted_issuer();
+        let mut iss = server.trusted_issuer();
+        // Add token metadata for multi-issuer validation
+        iss.token_metadata.insert(
+            "Jans::Access_Token".to_string(),
+            TokenEntityMetadata {
+                trusted: true,
+                entity_type_name: "Jans::Access_Token".to_string(),
+                principal_mapping: HashSet::new(),
+                token_id: "jti".to_string(),
+                user_id: None,
+                role_mapping: None,
+                workload_id: None,
+                claim_mapping: ClaimMappings::default(),
+                required_claims: HashSet::new(),
+            },
+        );
 
         let jwt_service = JwtService::new(
             &JwtConfig {
@@ -819,7 +915,7 @@ mod test {
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
-            Some(HashMap::from([("Jans".into(), iss)])),
+            Some(HashMap::from([(server.issuer().into(), iss)])),
             None,
         )
         .await
@@ -860,7 +956,7 @@ mod test {
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
-            Some(HashMap::from([("Jans".into(), iss)])),
+            Some(HashMap::from([(server.issuer().into(), iss)])),
             None,
         )
         .await

@@ -122,6 +122,56 @@ impl JwtValidator {
         (validator, key)
     }
 
+    /// Creates a new validator for multi-issuer tokens passed through [`crate::Cedarling::authorize_multi_issuer`]
+    pub fn new_multi_issuer_tkn_validator<'a>(
+        iss: Option<&'a str>,
+        tkn_name: &'a str,
+        token_metadata: &TokenEntityMetadata,
+        algorithm: Algorithm,
+        status_lists: StatusListCache,
+        validate_signature: bool,
+        validate_status_list: bool,
+    ) -> (Self, ValidatorInfo<'a>) {
+        let token_kind = TokenKind::AuthorizeMultiIssuer(tkn_name);
+
+        let mut validation = Validation::new(algorithm);
+        if let Some(iss) = iss {
+            validation.set_issuer(&[iss])
+        }
+        validation.validate_exp = token_metadata.required_claims.contains("exp");
+        validation.validate_nbf = token_metadata.required_claims.contains("nbf");
+
+        validation.required_spec_claims.clear();
+        validation.validate_aud = false;
+
+        if !validate_signature {
+            validation.insecure_disable_signature_validation();
+        }
+
+        let required_claims = token_metadata
+            .required_claims
+            .iter()
+            .cloned()
+            .map(|s| s.into_boxed_str())
+            .collect();
+
+        let key = ValidatorInfo {
+            iss,
+            token_kind,
+            algorithm,
+        };
+
+        let validator = JwtValidator {
+            validation,
+            required_claims,
+            validate_signature,
+            validate_status_list,
+            status_list_cache: status_lists,
+        };
+
+        (validator, key)
+    }
+
     /// Creates a new validator for status list tokens
     pub fn new_status_list_tkn_validator(
         iss: Option<&'_ str>,
