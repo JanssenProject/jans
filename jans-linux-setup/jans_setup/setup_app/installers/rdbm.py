@@ -490,7 +490,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         if Config.rdbm_install_type == InstallTypes.LOCAL:
             if Config.rdbm_type == 'pgsql':
-                Config.pggsql_enable_ssl == 'true'
+                Config.pggsql_enable_ssl = 'true'
                 Config.pggsql_sslmode = 'verify-ca'
 
         if Config.rdbm_install_type == InstallTypes.REMOTE:
