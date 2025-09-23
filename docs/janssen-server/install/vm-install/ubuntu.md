@@ -33,9 +33,15 @@ sudo gpg --import automation-jans-public-gpg.asc;
 - Download the release package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
-```
-wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
-```
+    ```
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
+    ```
+
+- Go to `/tmp` directory:
+
+    ```bash
+    cd /tmp
+    ```
 
 - Verify integrity of the downloaded package by verifying published `sha256sum`.  
    
@@ -62,9 +68,17 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 - Download the release package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
-```
-wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
-```
+    ```
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
+    ```
+
+- Go to `/tmp` directory:
+
+    ```bash
+    cd /tmp
+    ```
+
+
 
 - Verify integrity of the downloaded package by verifying published `sha256sum`.   
 
@@ -99,9 +113,17 @@ dpkg -i jans_1.4.0-stable.ubuntu22.04_amd64.deb
 - Download the release package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
-```
-wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb -P /tmp
-```
+    ```
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb -P /tmp
+    ```
+
+- Go to `/tmp` directory:
+
+    ```bash
+    cd /tmp
+    ```
+
+
 
 - Verify integrity of the downloaded package by verifying published `sha256sum`.   
    
@@ -164,7 +186,7 @@ To generate Let’s Encrypt CA certificate follow this [let's encrypt](https://g
 Uninstall process involves two steps and removes all the Janssen Server components.
 
 !!! Note
-For removal of the attached persistence store, please refer to [this note](../install-faq.md#does-the-janssen-server-uninstall-process-remove-the-data-store-as-well).
+    For removal of the attached persistence store, please refer to [this note](../install-faq.md#does-the-janssen-server-uninstall-process-remove-the-data-store-as-well).
 
 1. Delete files installed by Janssen
 1. Remove and purge the `jans` package
