@@ -40,6 +40,8 @@ To load policy store one of the following keys must be provided:
 - **`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`** : property specifies whether to authorize the `USER`, `WORKLOAD` or both when making authorization decisions.
   Use `"===": [{"var": "Jans::User"}, "ALLOW"]` if you only want user authorization. Use `"===": [{"var": "Jans::Workload"}, "ALLOW"]` if you only want workload authorization. [See here](./cedarling-principal-boolean-operations.md) if you want anything more complicated.
 
+- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Allows to limit maximum token cache TTL in seconds. (Token cache is used to avoid decoding and validation same token twice, so it is optimization.) Default value is zero what means disable maximum TTL and will be used `exp` token field to calculate TTL.
+
 **Cedar Entity Mapping properties**
 
 - **`CEDARLING_MAPPING_USER`** : Name of Cedar User schema entity if we don't want to use default. When specified Cedarling try build defined entity (from schema) as user instead of default `User` entity defined in `cedar` schema. Works in namespace defined in the policy store.
