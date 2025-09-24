@@ -150,21 +150,21 @@ impl TokenInput {
 pub struct AuthorizeMultiIssuerRequest {
     /// Array of JWT tokens with explicit type mappings
     pub tokens: Vec<TokenInput>,
-    /// Optional resource being accessed (JSON format)
-    pub resource: Option<EntityData>,
-    /// Optional action being performed (JSON format)
-    pub action: Option<String>,
+    /// Resource being accessed (required for Cedar policy evaluation)
+    pub resource: EntityData,
+    /// Action being performed (required for Cedar policy evaluation)
+    pub action: String,
     /// Optional additional context for policy evaluation (JSON format)
     pub context: Option<Value>,
 }
 
 impl AuthorizeMultiIssuerRequest {
     /// Create a new AuthorizeMultiIssuerRequest
-    pub fn new(tokens: Vec<TokenInput>) -> Self {
+    pub fn new(tokens: Vec<TokenInput>, resource: EntityData, action: String) -> Self {
         Self {
             tokens,
-            resource: None,
-            action: None,
+            resource,
+            action,
             context: None,
         }
     }
@@ -172,8 +172,8 @@ impl AuthorizeMultiIssuerRequest {
     /// Create a new AuthorizeMultiIssuerRequest with all fields
     pub fn new_with_fields(
         tokens: Vec<TokenInput>,
-        resource: Option<EntityData>,
-        action: Option<String>,
+        resource: EntityData,
+        action: String,
         context: Option<Value>,
     ) -> Self {
         Self {
@@ -190,7 +190,6 @@ impl AuthorizeMultiIssuerRequest {
         if self.tokens.is_empty() {
             return Err(MultiIssuerValidationError::EmptyTokenArray);
         }
-
 
         if let Some(ref context) = self.context {
             if !context.is_object() {
@@ -258,11 +257,20 @@ mod tests {
             create_test_token("Jans::Id_Token", "https://example.com", "1234567890"),
         ];
 
-        let request = AuthorizeMultiIssuerRequest::new(tokens.clone());
+        let resource = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Document".to_string(),
+                id: "doc123".to_string(),
+            },
+            attributes: HashMap::new(),
+        };
+
+        let request =
+            AuthorizeMultiIssuerRequest::new(tokens.clone(), resource.clone(), "Read".to_string());
 
         assert_eq!(request.tokens.len(), 2);
-        assert!(request.resource.is_none());
-        assert!(request.action.is_none());
+        assert_eq!(request.resource, resource);
+        assert_eq!(request.action, "Read");
         assert!(request.context.is_none());
     }
 
@@ -274,14 +282,14 @@ mod tests {
             "1234567890",
         )];
 
-        let resource = Some(EntityData {
+        let resource = EntityData {
             cedar_mapping: CedarEntityMapping {
                 entity_type: "Document".to_string(),
                 id: "doc123".to_string(),
             },
             attributes: HashMap::new(),
-        });
-        let action = Some("Read".to_string());
+        };
+        let action = "Read".to_string();
         let context = Some(json!({"location": "miami"}));
 
         let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -304,14 +312,30 @@ mod tests {
             create_test_token("Jans::Id_Token", "https://example.com", "1234567890"),
         ];
 
-        let request = AuthorizeMultiIssuerRequest::new(tokens);
+        let resource = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Document".to_string(),
+                id: "doc123".to_string(),
+            },
+            attributes: HashMap::new(),
+        };
+
+        let request = AuthorizeMultiIssuerRequest::new(tokens, resource, "Read".to_string());
 
         assert!(request.validate().is_ok());
     }
 
     #[test]
     fn test_authorize_multi_issuer_request_validation_empty_tokens() {
-        let request = AuthorizeMultiIssuerRequest::new(vec![]);
+        let resource = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Document".to_string(),
+                id: "doc123".to_string(),
+            },
+            attributes: HashMap::new(),
+        };
+
+        let request = AuthorizeMultiIssuerRequest::new(vec![], resource, "Read".to_string());
 
         let result = request.validate();
         assert!(matches!(
@@ -327,7 +351,15 @@ mod tests {
             "some-payload".to_string(),
         )];
 
-        let request = AuthorizeMultiIssuerRequest::new(tokens);
+        let resource = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Document".to_string(),
+                id: "doc123".to_string(),
+            },
+            attributes: HashMap::new(),
+        };
+
+        let request = AuthorizeMultiIssuerRequest::new(tokens, resource, "Read".to_string());
 
         let result = request.validate();
         // The new validation logic only checks JSON fields
@@ -343,11 +375,19 @@ mod tests {
             "1234567890",
         )];
 
+        let resource = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Document".to_string(),
+                id: "doc123".to_string(),
+            },
+            attributes: HashMap::new(),
+        };
+
         let request = AuthorizeMultiIssuerRequest::new_with_fields(
             tokens,
-            None, // Valid resource (None)
-            Some("Read".to_string()), // Valid action
-            Some(json!(123)), // Invalid context (should be object)
+            resource,           // Valid resource
+            "Read".to_string(), // Valid action
+            Some(json!(123)),   // Invalid context (should be object)
         );
 
         let result = request.validate();
@@ -365,17 +405,17 @@ mod tests {
             "1234567890",
         )];
 
-        let resource = Some(EntityData {
+        let resource = EntityData {
             cedar_mapping: CedarEntityMapping {
                 entity_type: "Document".to_string(),
                 id: "doc123".to_string(),
             },
             attributes: HashMap::new(),
-        });
+        };
         let request = AuthorizeMultiIssuerRequest::new_with_fields(
             tokens,
             resource,
-            Some("Read".to_string()),
+            "Read".to_string(),
             Some(json!({"location": "miami"})),
         );
 

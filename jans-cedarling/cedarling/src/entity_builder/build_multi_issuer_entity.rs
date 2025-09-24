@@ -5,6 +5,8 @@
 
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::*;
+use crate::authz::AuthorizeEntitiesData;
+use crate::authz::request::EntityData;
 use cedar_policy::{Entity, EntityUid, RestrictedExpression};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -130,17 +132,22 @@ fn determine_token_entity_type(token: &Token) -> Result<String, MultiIssuerEntit
 }
 
 impl EntityBuilder {
-    /// Build individual token entities
-    pub fn build_token_entities(
+    /// Build all entities for multi-issuer authorization (tokens, principals, resource, roles)
+    pub fn build_multi_issuer_entities(
         &self,
         tokens: &HashMap<String, Token>,
-    ) -> Result<HashMap<String, Entity>, MultiIssuerEntityError> {
+        resource: &EntityData,
+    ) -> Result<AuthorizeEntitiesData, MultiIssuerEntityError> {
+        let tkn_principal_mappings = TokenPrincipalMappings::default();
+        let mut built_entities = BuiltEntities::from(&self.iss_entities);
+
+        // Build token entities using the existing multi-issuer logic
         let mut token_entities = HashMap::new();
-        // TODO: Catches all errors indiscriminately, Log the error
         for (token_name, token) in tokens {
             match self.build_single_token_entity(token) {
                 Ok(entity) => {
                     if let Ok(entity_key) = self.generate_entity_key(token_name, token) {
+                        built_entities.insert(&entity.uid());
                         token_entities.insert(entity_key, entity);
                     }
                 },
@@ -154,7 +161,46 @@ impl EntityBuilder {
             return Err(MultiIssuerEntityError::NoValidTokens);
         }
 
-        Ok(token_entities)
+        // Build workload entity if configured
+        let workload = if self.config.build_workload {
+            let workload_entity = self
+                .build_workload_entity(tokens, &tkn_principal_mappings, &built_entities)
+                .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
+            Some(workload_entity)
+        } else {
+            None
+        };
+
+        // Build user and roles if configured
+        let (user, roles) = if self.config.build_user {
+            let roles = self
+                .build_role_entities(tokens)
+                .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
+            let role_uids = roles.iter().map(|e| e.uid()).collect();
+            let user = self
+                .build_user_entity(tokens, &tkn_principal_mappings, &built_entities, role_uids)
+                .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
+            (Some(user), roles)
+        } else {
+            (None, Vec::new())
+        };
+
+        // Build resource entity
+        let resource = self
+            .build_resource_entity(resource)
+            .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
+
+        let issuers = self.iss_entities.values().cloned().collect();
+
+        Ok(AuthorizeEntitiesData {
+            issuers,
+            tokens: token_entities,
+            workload,
+            user,
+            roles,
+            resource,
+            default_entities: self.default_entities.clone(),
+        })
     }
 
     /// Build a single token entity from a validated JWT
@@ -292,6 +338,7 @@ impl EntityBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::authz::request::CedarEntityMapping;
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder_config::{EntityBuilderConfig, EntityNames, UnsignedRoleIdSrc};
     use crate::jwt::{Token, TokenClaims};
@@ -364,6 +411,16 @@ mod tests {
 
         let token_claims = TokenClaims::from(all_claims);
         Token::new("Jans::Access_Token", token_claims, None)
+    }
+
+    fn create_test_resource() -> EntityData {
+        EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Resource".to_string(),
+                id: "test_resource".to_string(),
+            },
+            attributes: HashMap::new(),
+        }
     }
 
     #[test]
@@ -455,13 +512,13 @@ mod tests {
         let token2 = create_test_token("https://idp.acme.com/auth", "token2", claims2);
         tokens.insert("Jans::Access_Token2".to_string(), token2);
 
-        let result = builder.build_token_entities(&tokens);
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource());
         assert!(result.is_ok());
 
-        let token_entities = result.unwrap();
-        assert_eq!(token_entities.len(), 2);
-        assert!(token_entities.contains_key("acme_access_token"));
-        assert!(token_entities.contains_key("acme_access_token2"));
+        let entities_data = result.unwrap();
+        assert_eq!(entities_data.tokens.len(), 2);
+        assert!(entities_data.tokens.contains_key("acme_access_token"));
+        assert!(entities_data.tokens.contains_key("acme_access_token2"));
     }
 
     #[test]
@@ -495,14 +552,14 @@ mod tests {
         let token3 = Token::new("Jans::Id_Token", token_claims3, None);
         tokens.insert("Jans::Id_Token".to_string(), token3);
 
-        let result = builder.build_token_entities(&tokens);
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource());
         assert!(result.is_ok());
 
-        let token_entities = result.unwrap();
-        assert_eq!(token_entities.len(), 3);
-        assert!(token_entities.contains_key("acme_access_token"));
-        assert!(token_entities.contains_key("dolphin_dolphintoken"));
-        assert!(token_entities.contains_key("acme_id_token"));
+        let entities_data = result.unwrap();
+        assert_eq!(entities_data.tokens.len(), 3);
+        assert!(entities_data.tokens.contains_key("acme_access_token"));
+        assert!(entities_data.tokens.contains_key("dolphin_dolphintoken"));
+        assert!(entities_data.tokens.contains_key("acme_id_token"));
     }
 
     #[test]
@@ -707,14 +764,14 @@ mod tests {
         let token3 = create_test_token("https://idp.dolphin.sea/auth", "token3", claims3);
         tokens.insert("Acme::DolphinToken".to_string(), token3);
 
-        let result = builder.build_token_entities(&tokens);
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource());
         assert!(result.is_ok());
 
-        let token_entities = result.unwrap();
+        let entities_data = result.unwrap();
         // Only 2 valid tokens should be processed
-        assert_eq!(token_entities.len(), 2);
-        assert!(token_entities.contains_key("acme_access_token"));
-        assert!(token_entities.contains_key("dolphin_dolphintoken"));
+        assert_eq!(entities_data.tokens.len(), 2);
+        assert!(entities_data.tokens.contains_key("acme_access_token"));
+        assert!(entities_data.tokens.contains_key("dolphin_dolphintoken"));
     }
 
     #[test]
@@ -737,7 +794,7 @@ mod tests {
         let token2 = Token::new("Jans::Id_Token", token_claims2, None);
         tokens.insert("Jans::Id_Token".to_string(), token2);
 
-        let result = builder.build_token_entities(&tokens);
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource());
         assert!(result.is_err());
 
         // Should return NoValidTokens error when all tokens are invalid
