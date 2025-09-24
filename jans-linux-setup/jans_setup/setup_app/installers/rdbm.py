@@ -518,12 +518,22 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
     def rdbmProperties(self):
 
-        def set_sslmode(verify=True):
-            if verify:
-                if Config.rdbm_type == 'pgsql':
-                    Config.rdbm_sslmode = 'verify-ca'
-                elif Config.rdbm_type == 'mysql':
-                    Config.rdbm_sslmode = 'VERIFY_CA'
+        pgsql_mysql_ssl_modes_mapping = {
+            'disable': 'DISABLED',
+            'require': 'REQUIRED',
+            'verify-ca': 'VERIFY_CA',
+            'verify-full': 'VERIFY_IDENTITY',
+            }
+
+        def set_sslmode(mode='verify-ca'):
+
+            if mode in ('verify-ca', 'verify-full'):
+                Config.rdbm_sslfactory = 'org.postgresql.ssl.DefaultJavaSSLFactory'
+
+            if Config.rdbm_type == 'pgsql':
+                Config.rdbm_sslmode = mode
+            elif Config.rdbm_type == 'mysql':
+                Config.rdbm_sslmode = pgsql_mysql_ssl_modes_mapping[mode]
 
         if Config.rdbm_install_type == InstallTypes.LOCAL:
             set_sslmode()
@@ -535,14 +545,14 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     tmpfo.flush()
                     self.import_rootcert(tmpfo.name)
                 set_sslmode()
+            else:
+                set_sslmode('disable')
 
         Config.rdbm_enable_ssl = 'false' if Config.rdbm_sslmode == 'disable' else 'true' 
 
         Config.set_rdbm_schema()
         if Config.rdbm_type in ('pgsql', 'mysql'):
             Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
-            if Config.rdbm_type == 'mysql' and Config.rdbm_sslmode == 'disable':
-                Config.rdbm_sslmode += 'd'
             src_temp_fn = os.path.join(Config.templateFolder, 'jans-{}.properties'.format(Config.rdbm_type))
             targtet_fn = os.path.join(Config.configFolder, Config.jansRDBMProperties)
             rendered_tmp = self.render_template(src_temp_fn)
