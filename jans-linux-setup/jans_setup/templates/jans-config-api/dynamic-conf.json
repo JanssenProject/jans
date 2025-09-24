@@ -1,7 +1,7 @@
 {
   "serviceName": "jans-config-api",
   "configOauthEnabled": ${configOauthEnabled},
-  "cedarAuthEnabled": ${cedarAuthEnabled},
+  "cedarAuthEnabled": true,
   "disableLoggerTimer": false,
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
