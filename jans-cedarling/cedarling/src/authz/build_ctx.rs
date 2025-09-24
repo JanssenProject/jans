@@ -109,27 +109,14 @@ pub fn build_multi_issuer_context(
     let mut tokens_context = serde_json::Map::new();
 
     // Add individual token entity references to context
-    // Format: {issuer}_{token_type} -> {"type": "ActualEntityType", "id": "entity_id"}
+    // Format: {issuer}_{token_type} -> {"type": "EntityType", "id": "entity_id"}
     for (field_name, entity) in token_entities {
-        // Extract the entity ID from the entity UID by parsing the UID string
-        let uid_string = entity.uid().to_string();
-        // Extract the ID part after the last "::"
-        let entity_id = uid_string
-            .split("::")
-            .last()
-            .unwrap_or("unknown")
-            .to_string();
-
-        // Get the actual entity type from the entity UID
-        let entity_type = entity.uid().type_name().to_string();
-
-        tokens_context.insert(
-            field_name.clone(),
-            json!({
-                "type": entity_type,
-                "id": entity_id
-            }),
-        );
+        // Create entity reference like the existing build_context function
+        let entity_ref = json!({
+            "type": entity.uid().type_name().to_string(),
+            "id": entity.uid().id().as_ref() as &str
+        });
+        tokens_context.insert(field_name.clone(), entity_ref);
     }
 
     // Add total token count as specified in design

@@ -61,6 +61,16 @@ impl Cedarling {
             .block_on(self.instance.authorize_unsigned(request))
     }
 
+    /// Authorize multi-issuer request.
+    /// makes authorization decision based on multiple JWT tokens from different issuers
+    pub fn authorize_multi_issuer(
+        &self,
+        request: crate::authz::request::AuthorizeMultiIssuerRequest,
+    ) -> Result<AuthorizeResult, AuthorizeError> {
+        self.runtime
+            .block_on(self.instance.authorize_multi_issuer(request))
+    }
+
     /// Closes the connections to the Lock Server and pushes all available logs.
     pub fn shut_down(&self) {
         self.runtime.block_on(self.instance.shut_down());
