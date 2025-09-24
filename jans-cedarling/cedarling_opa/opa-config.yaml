@@ -1,0 +1,6 @@
+decision_logs:
+  plugin: println_decision_logger
+plugins:
+  println_decision_logger:
+    stderr: false
+    bootstrap_config: {}
