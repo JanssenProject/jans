@@ -16,7 +16,7 @@ var bootstrapConfig string = `
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
         "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
-        "CEDARLING_LOG_TYPE": "memory",
+        "CEDARLING_LOG_TYPE": "off",
         "CEDARLING_LOG_TTL": 60,
         "CEDARLING_LOG_LEVEL": "DEBUG",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"]
