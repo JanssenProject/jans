@@ -329,6 +329,9 @@ class CtxGenerator:
 
     def transform_sql_ctx(self):
         self.set_secret("sql_password", self.secret_params.get("sql_password", ""))
+        self.set_secret("sql_ssl_ca_cert", self.secret_params.get("sql_ssl_ca_cert", ""), reuse_if_exists=False)
+        self.set_secret("sql_ssl_client_cert", self.secret_params.get("sql_ssl_client_cert", ""), reuse_if_exists=False)
+        self.set_secret("sql_ssl_client_key", self.secret_params.get("sql_ssl_client_key", ""), reuse_if_exists=False)
 
     def transform_misc_ctx(self):
         # pre-populate the rest of configmaps

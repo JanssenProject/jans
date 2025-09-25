@@ -24,7 +24,7 @@ def render_config_props(manager):
         "token_endpoint": f"https://{hostname}/jans-auth/restv1/token",
         "client_id": manager.config.get("kc_scheduler_api_client_id"),
         "client_secret": manager.secret.get("kc_scheduler_api_client_pw"),
-        "scopes": "",
+        "scopes": "https://jans.io/idp/saml.write https://jans.io/idp/saml.readonly https://jans.io/oauth/config/saml.readonly https://jans.io/oauth/config/saml.write",
         "auth_method": "basic",
 
         # keycloak-api

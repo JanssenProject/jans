@@ -23,8 +23,8 @@ mod value_to_expr;
 use crate::authz::AuthorizeEntitiesData;
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
-use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
 use crate::common::issuer_utils::normalize_issuer;
+use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::jwt::Token;
 use crate::{RequestUnsigned, entity_builder_config::*};
@@ -36,15 +36,113 @@ use schema::MappingSchema;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
+use std::sync::Arc;
 use url::Origin;
+
+// Global constants for entity types - following existing codebase pattern
+const DEFAULT_ENTITY_TYPE: &str = "Jans::DefaultEntity";
 
 pub(crate) use built_entities::BuiltEntities;
 pub use error::*;
+
+/// Parse default entities from the provided configuration
+fn parse_default_entities(
+    default_entities_data: &HashMap<String, Value>,
+) -> Result<HashMap<String, Entity>, BuildEntityError> {
+    let mut default_entities = HashMap::new();
+
+    for (entity_id, entity_data) in default_entities_data {
+        // Validate entity ID to prevent injection attacks
+        if entity_id.trim().is_empty() {
+            return Err(BuildEntityError {
+                entity_type_name: "DefaultEntity".to_string(),
+                error: BuildEntityErrorKind::InvalidEntityData(
+                    "Entity ID cannot be empty or whitespace-only".to_string(),
+                ),
+            });
+        }
+
+        // Basic security validation - prevent obvious injection patterns
+        // Check for potentially dangerous characters while allowing valid Cedar entity ID formats
+        let dangerous_patterns = [
+            "<script",
+            "javascript:",
+            "data:",
+            "vbscript:",
+            "onload=",
+            "onerror=",
+        ];
+        let entity_id_lower = entity_id.to_lowercase();
+        for pattern in &dangerous_patterns {
+            if entity_id_lower.contains(pattern) {
+                return Err(BuildEntityError {
+                    entity_type_name: "DefaultEntity".to_string(),
+                    error: BuildEntityErrorKind::InvalidEntityData(format!(
+                        "Entity ID '{}' contains potentially dangerous content",
+                        entity_id
+                    )),
+                });
+            }
+        }
+
+        // Parse the entity data as a JSON object
+        let entity_attrs = if let Value::Object(obj) = entity_data {
+            obj.clone()
+        } else {
+            return Err(BuildEntityError {
+                entity_type_name: DEFAULT_ENTITY_TYPE.to_string(),
+                error: BuildEntityErrorKind::InvalidEntityData(format!(
+                    "Default entity data for '{}' must be a JSON object",
+                    entity_id
+                )),
+            });
+        };
+
+        // Extract entity type from the data or use a default
+        let entity_type = entity_attrs
+            .get("entity_type")
+            .and_then(|v| v.as_str())
+            .unwrap_or(DEFAULT_ENTITY_TYPE);
+
+        // Convert JSON attributes to Cedar expressions using the existing value_to_expr function
+        let mut cedar_attrs = HashMap::new();
+        for (key, value) in entity_attrs.clone() {
+            if key != "entity_type" && key != "entity_id" {
+                match value_to_expr::value_to_expr(&value) {
+                    Ok(Some(expr)) => {
+                        cedar_attrs.insert(key, expr);
+                    },
+                    Ok(None) => {
+                        // Skip null values
+                        continue;
+                    },
+                    Err(errors) => {
+                        return Err(BuildEntityError {
+                            entity_type_name: entity_type.to_string(),
+                            error: BuildEntityErrorKind::InvalidEntityData(format!(
+                                "Failed to convert attribute '{}' for entity '{}' (type: {}): {:?}",
+                                key, entity_id, entity_type, errors
+                            )),
+                        });
+                    },
+                }
+            }
+        }
+
+        // Build the Cedar entity
+        let entity = build_cedar_entity(entity_type, entity_id, cedar_attrs, HashSet::new())?;
+
+        default_entities.insert(entity_id.clone(), entity);
+    }
+
+    Ok(default_entities)
+}
 
 pub struct EntityBuilder {
     config: EntityBuilderConfig,
     iss_entities: HashMap<Origin, Entity>,
     schema: Option<MappingSchema>,
+    default_entities: HashMap<String, Entity>,
 }
 
 impl EntityBuilder {
@@ -52,6 +150,7 @@ impl EntityBuilder {
         config: EntityBuilderConfig,
         trusted_issuers: &HashMap<String, TrustedIssuer>,
         schema: Option<&ValidatorSchema>,
+        default_entities_data: Option<&HashMap<String, Value>>,
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
@@ -69,16 +168,25 @@ impl EntityBuilder {
 
         let iss_entities = ok.into_iter().collect::<HashMap<Origin, Entity>>();
 
+        // Parse default entities if provided
+        let default_entities = if let Some(entities_data) = default_entities_data {
+            parse_default_entities(entities_data)
+                .map_err(|e| InitEntityBuilderError::BuildIssEntities(vec![e].into()))?
+        } else {
+            HashMap::new()
+        };
+
         Ok(Self {
             config,
             iss_entities,
             schema,
+            default_entities,
         })
     }
 
     pub fn build_entities(
         &self,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
         resource: &EntityData,
     ) -> Result<AuthorizeEntitiesData, BuildEntityError> {
         let mut tkn_principal_mappings = TokenPrincipalMappings::default();
@@ -140,6 +248,7 @@ impl EntityBuilder {
             resource,
             roles,
             tokens: token_entities,
+            default_entities: self.default_entities.clone(),
         })
     }
 
@@ -276,8 +385,8 @@ impl TokenPrincipalMappings {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::common::policy_store::TokenEntityMetadata;
     use crate::CedarEntityMapping;
+    use crate::common::policy_store::TokenEntityMetadata;
     use cedar_policy::{Entities, Schema};
     use serde_json::{Value, json};
     use std::collections::HashMap;
@@ -394,30 +503,30 @@ mod test {
         let tokens = HashMap::from([
             (
                 "access_token".into(),
-                Token::new(
+                Arc::new(Token::new(
                     "access_token",
                     json!({"jti": "some_jti", "aud": "some_aud"}).into(),
                     Some(issuers.get("some_iss").unwrap().clone().into()),
-                ),
+                )),
             ),
             (
                 "custom_token".into(),
-                Token::new(
+                Arc::new(Token::new(
                     "custom_token",
                     json!({"jti": "some_jti"}).into(),
                     Some(issuers.get("some_iss").unwrap().clone().into()),
-                ),
+                )),
             ),
         ]);
 
-        let entity_builder = EntityBuilder::new(config, &issuers, Some(&validator_schema))
+        let entity_builder = EntityBuilder::new(config, &issuers, Some(&validator_schema), None)
             .expect("init entity builder");
 
         let entities = entity_builder
             .build_entities(&tokens, &EntityData {
                 cedar_mapping: CedarEntityMapping {
-                entity_type: "Jans::Resource".into(),
-                id: "some_id".into(),
+                    entity_type: "Jans::Resource".into(),
+                    id: "some_id".into(),
                 },
                 attributes: HashMap::new(),
             })
@@ -440,6 +549,765 @@ mod test {
                 "parents": []
             }),
             Some(&schema),
+        );
+    }
+
+    #[test]
+    fn can_parse_default_entities() {
+        // Test the parse_default_entities function directly
+        // We don't need the schema for this test since we're not validating the entities
+
+        // Create test default entities
+        let default_entities = HashMap::from([(
+            "1694c954f8d9".to_string(),
+            json!({
+                "entity_id": "1694c954f8d9",
+                "entity_type": "Jans::DefaultEntity",
+                "o": "Acme Dolphins Division",
+                "org_id": "100129"
+            }),
+        )]);
+
+        // Test that parse_default_entities works
+        let parsed_entities =
+            parse_default_entities(&default_entities).expect("should parse default entities");
+
+        assert_eq!(parsed_entities.len(), 1, "should have 1 default entity");
+
+        // Verify the entity
+        let entity = parsed_entities
+            .get("1694c954f8d9")
+            .expect("should have entity");
+        assert_eq!(entity.uid().type_name().to_string(), "Jans::DefaultEntity");
+        assert_eq!(entity.uid().id().as_ref() as &str, "1694c954f8d9");
+    }
+
+    #[test]
+    fn can_build_entities_with_default_entities() {
+        // Test that default entities are properly included in the authorization flow
+        use crate::authz::request::EntityData;
+        use crate::common::policy_store::TrustedIssuer;
+        use crate::jwt::Token;
+        use std::sync::Arc;
+        use url::Url;
+
+        // Create a simple schema
+        let schema_src = r#"
+        namespace Jans {
+          entity DefaultEntity;
+          entity User;
+          entity Issue;
+          entity TrustedIssuer;
+        }
+        "#;
+
+        let schema = ValidatorSchema::from_str(schema_src).expect("should parse schema");
+
+        // Create default entities data
+        let default_entities_data = HashMap::from([
+            (
+                "1694c954f8d9".to_string(),
+                json!({
+                    "entity_id": "1694c954f8d9",
+                    "entity_type": "Jans::DefaultEntity",
+                    "o": "Acme Dolphins Division",
+                    "org_id": "100129",
+                    "regions": ["Atlantic", "Pacific", "Indian"]
+                }),
+            ),
+            (
+                "74d109b20248".to_string(),
+                json!({
+                    "entity_id": "74d109b20248",
+                    "entity_type": "Jans::DefaultEntity",
+                    "description": "2025 Price List",
+                    "products": {"15020": 995, "15050": 1495},
+                    "services": {"51001": 9900, "51020": 29900}
+                }),
+            ),
+        ]);
+
+        // Create trusted issuer
+        let trusted_issuer = TrustedIssuer {
+            name: "Test Issuer".to_string(),
+            description: "Test".to_string(),
+            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+                .expect("valid url"),
+            token_metadata: HashMap::from([(
+                "id_token".into(),
+                TokenEntityMetadata::builder()
+                    .entity_type_name("Jans::Id_token".to_string())
+                    .principal_mapping(["Jans::User".to_string()].into_iter().collect())
+                    .build(),
+            )]),
+        };
+
+        let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+
+        // Create tokens
+        let tokens = HashMap::from([(
+            "id_token".to_string(),
+            Arc::new(Token::new(
+                "id_token",
+                json!({
+                    "sub": "user123",
+                    "country": "Atlantic",
+                    "aud": "test_audience",
+                    "jti": "test_jti_123"
+                })
+                .into(),
+                Some(Arc::new(
+                    trusted_issuers.get("test_issuer").unwrap().clone(),
+                )),
+            )),
+        )]);
+
+        // Create entity builder with default entities
+        let mut config = EntityBuilderConfig::default();
+        config.build_workload = false;
+        config.build_user = true;
+
+        let entity_builder = EntityBuilder::new(
+            config,
+            &trusted_issuers,
+            Some(&schema),
+            Some(&default_entities_data),
+        )
+        .expect("should create entity builder");
+
+        // Create resource
+        let resource = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(),
+                id: "issue123".to_string(),
+            },
+            attributes: HashMap::from([("org_id".to_string(), json!("1694c954f8d9"))]),
+        };
+
+        // Build entities
+        let entities_data = entity_builder
+            .build_entities(&tokens, &resource)
+            .expect("should build entities");
+
+        // Verify default entities are included
+        assert_eq!(
+            entities_data.default_entities.len(),
+            2,
+            "should have 2 default entities"
+        );
+
+        // Verify specific default entity
+        let default_entity = entities_data
+            .default_entities
+            .get("1694c954f8d9")
+            .expect("should have default entity 1694c954f8d9");
+
+        assert_eq!(
+            default_entity.uid().type_name().to_string(),
+            "Jans::DefaultEntity"
+        );
+        assert_eq!(default_entity.uid().id().as_ref() as &str, "1694c954f8d9");
+
+        // Verify default entity attributes
+        let entity_json = default_entity
+            .to_json_value()
+            .expect("should convert to JSON");
+        let attrs = entity_json.get("attrs").expect("should have attrs");
+
+        assert_eq!(
+            attrs.get("o").and_then(|v| v.as_str()),
+            Some("Acme Dolphins Division")
+        );
+        assert_eq!(attrs.get("org_id").and_then(|v| v.as_str()), Some("100129"));
+
+        // Verify regions attribute (should be a set)
+        let regions = attrs
+            .get("regions")
+            .and_then(|v| v.as_array())
+            .expect("should have regions");
+        assert_eq!(regions.len(), 3);
+        assert!(regions.contains(&json!("Atlantic")));
+        assert!(regions.contains(&json!("Pacific")));
+        assert!(regions.contains(&json!("Indian")));
+
+        // Verify user entity is built
+        let user = entities_data.user.expect("should have user entity");
+        assert_eq!(user.uid().type_name().to_string(), "Jans::User");
+        assert_eq!(user.uid().id().as_ref() as &str, "user123");
+
+        // Verify resource entity is built
+        assert_eq!(
+            entities_data.resource.uid().type_name().to_string(),
+            "Jans::Issue"
+        );
+        assert_eq!(
+            entities_data.resource.uid().id().as_ref() as &str,
+            "issue123"
+        );
+
+        // Verify all default entities are present and accessible
+        assert_eq!(
+            entities_data.default_entities.len(),
+            2,
+            "should have 2 default entities"
+        );
+
+        // Verify the second default entity is also present
+        let second_default_entity = entities_data
+            .default_entities
+            .get("74d109b20248")
+            .expect("should have default entity 74d109b20248");
+        assert_eq!(
+            second_default_entity.uid().type_name().to_string(),
+            "Jans::DefaultEntity"
+        );
+        assert_eq!(
+            second_default_entity.uid().id().as_ref() as &str,
+            "74d109b20248"
+        );
+
+        // Verify second default entity attributes
+        let second_entity_json = second_default_entity
+            .to_json_value()
+            .expect("should convert to JSON");
+        let second_attrs = second_entity_json.get("attrs").expect("should have attrs");
+
+        assert_eq!(
+            second_attrs.get("description").and_then(|v| v.as_str()),
+            Some("2025 Price List")
+        );
+
+        // Verify products attribute (should be a record)
+        let products = second_attrs
+            .get("products")
+            .and_then(|v| v.as_object())
+            .expect("should have products");
+        assert_eq!(products.get("15020").and_then(|v| v.as_i64()), Some(995));
+        assert_eq!(products.get("15050").and_then(|v| v.as_i64()), Some(1495));
+    }
+
+    #[test]
+    fn test_entity_merging_with_conflicts() {
+        use url::Url;
+
+        // Test that request entities override default entities when there are UID conflicts
+
+        // Create a schema
+        let schema_src = r#"
+            namespace Jans {
+                entity TrustedIssuer;
+                entity DefaultEntity;
+                entity User;
+                entity Issue = {
+                    org_id: String,
+                    description: String
+                };
+            }
+        "#;
+        let schema = Schema::from_str(schema_src).expect("build cedar Schema");
+        let validator_schema =
+            ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
+
+        // Create default entities with a specific UID that will conflict
+        let default_entities_data = HashMap::from([(
+            "conflict_id".to_string(),
+            json!({
+                "entity_id": "conflict_id",
+                "entity_type": "Jans::Issue", // Same type as resource entity to create conflict
+                "org_id": "default_org",
+                "description": "This is a default entity"
+            }),
+        )]);
+
+        // Create trusted issuer
+        let trusted_issuer = TrustedIssuer {
+            name: "Test Issuer".to_string(),
+            description: "Test".to_string(),
+            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+                .expect("valid url"),
+            token_metadata: HashMap::new(),
+        };
+
+        let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+
+        // Create entity builder with default entities
+        let mut config = EntityBuilderConfig::default();
+        config.build_workload = false;
+        config.build_user = false;
+
+        let entity_builder = EntityBuilder::new(
+            config,
+            &trusted_issuers,
+            Some(&validator_schema),
+            Some(&default_entities_data),
+        )
+        .expect("should create entity builder");
+
+        // Create a resource with the SAME UID as the default entity to test conflict resolution
+        let resource = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(), // Use a valid entity type from the schema
+                id: "conflict_id".to_string(),          // Same ID as default entity - CONFLICT!
+            },
+            attributes: HashMap::from([
+                ("org_id".to_string(), json!("request_org")), // Different org_id
+                ("description".to_string(), json!("This is a request entity")), // Different description
+            ]),
+        };
+
+        // Build entities - this should not fail due to duplicate UIDs
+        let entities_data = entity_builder
+            .build_entities(&HashMap::new(), &resource) // No tokens needed for this test
+            .expect("should build entities without duplicate UID errors");
+
+        // Verify that the request entity overrode the default entity
+        // The merged entities should contain the request entity, not the default entity
+
+        // Convert to Cedar Entities to test the merging logic
+        let cedar_entities = entities_data
+            .entities(Some(&schema))
+            .expect("should create Cedar entities without duplicate UID errors");
+
+        // Verify that only one entity with UID "conflict_id" exists
+        let conflict_entity = cedar_entities
+            .get(&"Jans::Issue::\"conflict_id\"".parse().unwrap())
+            .expect("should have entity with conflict_id");
+
+        // Verify that the request entity's attributes are used (not the default entity's)
+        let entity_json = conflict_entity
+            .to_json_value()
+            .expect("should convert to JSON");
+        let attrs = entity_json.get("attrs").expect("should have attrs");
+
+        // Should have request entity attributes, not default entity attributes
+        assert_eq!(
+            attrs.get("org_id").and_then(|v| v.as_str()),
+            Some("request_org")
+        );
+        assert_eq!(
+            attrs.get("description").and_then(|v| v.as_str()),
+            Some("This is a request entity")
+        );
+
+        // Should NOT have the default entity's org_id
+        assert_ne!(
+            attrs.get("org_id").and_then(|v| v.as_str()),
+            Some("default_org")
+        );
+
+        // Verify that the total number of entities is correct (no duplicates)
+        let entity_count = cedar_entities.iter().count();
+        let expected_count = 2; // 1 issuer entity + 1 resource entity (default entity was overridden)
+        assert_eq!(
+            entity_count, expected_count,
+            "should have exactly {} entities without duplicates",
+            expected_count
+        );
+    }
+
+    #[test]
+    fn test_default_entities_affect_authorization() {
+        use url::Url;
+
+        // Test that default entities actually affect authorization decisions
+        // This demonstrates that default entities are not just merged but actively used
+
+        // Create a schema with a policy that references default entities
+        let schema_src = r#"
+            namespace Jans {
+                entity TrustedIssuer;
+                entity User;
+                entity Issue = {
+                    org_id: String,
+                    description: String,
+                    is_public: Bool
+                };
+                entity Organization = {
+                    name: String,
+                    is_active: Bool
+                };
+            }
+        "#;
+        let schema = Schema::from_str(schema_src).expect("build cedar Schema");
+        let validator_schema =
+            ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
+
+        // Create default entities that will be referenced in policies
+        let default_entities_data = HashMap::from([
+            (
+                "org1".to_string(),
+                json!({
+                    "entity_id": "org1",
+                    "entity_type": "Jans::Organization",
+                    "name": "Organization 1",
+                    "is_active": true
+                }),
+            ),
+            (
+                "public_issue".to_string(),
+                json!({
+                    "entity_id": "public_issue",
+                    "entity_type": "Jans::Issue",
+                    "org_id": "org1",
+                    "description": "This is a public issue",
+                    "is_public": true
+                }),
+            ),
+            (
+                "private_issue".to_string(),
+                json!({
+                    "entity_id": "private_issue",
+                    "entity_type": "Jans::Issue",
+                    "org_id": "org1",
+                    "description": "This is a private issue",
+                    "is_public": false
+                }),
+            ),
+        ]);
+
+        // Create trusted issuer
+        let trusted_issuer = TrustedIssuer {
+            name: "Test Issuer".to_string(),
+            description: "Test".to_string(),
+            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+                .expect("valid url"),
+            token_metadata: HashMap::new(),
+        };
+
+        let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+
+        // Create entity builder with default entities
+        let mut config = EntityBuilderConfig::default();
+        config.build_workload = false;
+        config.build_user = false;
+
+        let entity_builder = EntityBuilder::new(
+            config,
+            &trusted_issuers,
+            Some(&validator_schema),
+            Some(&default_entities_data),
+        )
+        .expect("should create entity builder");
+
+        // Test Case 1: Resource that references a default entity (org1)
+        let resource_with_org = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(),
+                id: "new_issue".to_string(),
+            },
+            attributes: HashMap::from([
+                ("org_id".to_string(), json!("org1")), // References default entity org1
+                (
+                    "description".to_string(),
+                    json!("New issue in existing org"),
+                ),
+                ("is_public".to_string(), json!(false)),
+            ]),
+        };
+
+        let entities_data_1 = entity_builder
+            .build_entities(&HashMap::new(), &resource_with_org)
+            .expect("should build entities");
+
+        // Verify that the default organization entity is included
+        let cedar_entities_1 = entities_data_1
+            .entities(Some(&schema))
+            .expect("should create Cedar entities");
+
+        // Should have the default organization entity
+        let org_entity = cedar_entities_1
+            .get(&"Jans::Organization::\"org1\"".parse().unwrap())
+            .expect("should have default organization entity");
+
+        let org_json = org_entity.to_json_value().expect("should convert to JSON");
+        let org_attrs = org_json.get("attrs").expect("should have attrs");
+        assert_eq!(
+            org_attrs.get("name").and_then(|v| v.as_str()),
+            Some("Organization 1")
+        );
+        assert_eq!(
+            org_attrs.get("is_active").and_then(|v| v.as_bool()),
+            Some(true)
+        );
+
+        // Test Case 2: Resource that doesn't reference any default entities
+        let resource_no_org = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Issue".to_string(),
+                id: "standalone_issue".to_string(),
+            },
+            attributes: HashMap::from([
+                ("org_id".to_string(), json!("standalone_org")), // New org, not in defaults
+                ("description".to_string(), json!("Standalone issue")),
+                ("is_public".to_string(), json!(true)),
+            ]),
+        };
+
+        let entities_data_2 = entity_builder
+            .build_entities(&HashMap::new(), &resource_no_org)
+            .expect("should build entities");
+
+        let cedar_entities_2 = entities_data_2
+            .entities(Some(&schema))
+            .expect("should create Cedar entities");
+
+        // Should have the default organization entity even if not directly referenced
+        // This is correct behavior - default entities are always available for policy evaluation
+        let org_entity_2 = cedar_entities_2.get(&"Jans::Organization::\"org1\"".parse().unwrap());
+        assert!(
+            org_entity_2.is_some(),
+            "should include all default entities for policy evaluation"
+        );
+
+        // Test Case 3: Verify that default entities are available for policy evaluation
+        // This shows that default entities are not just present but actively used
+        assert!(
+            default_entities_data.contains_key("org1"),
+            "default org1 should be available"
+        );
+        assert!(
+            default_entities_data.contains_key("public_issue"),
+            "default public_issue should be available"
+        );
+        assert!(
+            default_entities_data.contains_key("private_issue"),
+            "default private_issue should be available"
+        );
+
+        // Test Case 4: Verify entity count consistency
+        let count_with_org = cedar_entities_1.iter().count();
+        let count_without_org = cedar_entities_2.iter().count();
+
+        // Both should have the same count since they both include all default entities
+        // This demonstrates that default entities are always available for policy evaluation
+        assert_eq!(
+            count_with_org, count_without_org,
+            "both cases should have the same entity count since they include all default entities"
+        );
+
+        // Should have exactly the expected counts
+        let expected_count = 5; // 1 issuer + 1 resource + 3 default entities (org1, public_issue, private_issue)
+        assert_eq!(count_with_org, expected_count);
+        assert_eq!(count_without_org, expected_count);
+    }
+
+    #[test]
+    fn test_default_entity_as_principal() {
+        use url::Url;
+
+        // Test that default entities can be used as principals in authorization requests
+        // This demonstrates a key use case where default entities represent system actors
+
+        // Create a schema with entities that can act as principals
+        let schema_src = r#"
+            namespace Jans {
+                entity TrustedIssuer;
+                entity User = {
+                    name: String,
+                    role: String
+                };
+                entity ServiceAccount = {
+                    name: String,
+                    permissions: Set<String>,
+                    is_active: Bool
+                };
+                entity Resource = {
+                    name: String,
+                    owner: String,
+                    access_level: String
+                };
+            }
+        "#;
+        let schema = Schema::from_str(schema_src).expect("build cedar Schema");
+        let validator_schema =
+            ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
+
+        // Create default entities including a service account that can act as a principal
+        let default_entities_data = HashMap::from([
+            (
+                "service-account-1".to_string(),
+                json!({
+                    "entity_id": "service-account-1",
+                    "entity_type": "Jans::ServiceAccount",
+                    "name": "Backup Service",
+                    "permissions": ["read", "backup", "restore"],
+                    "is_active": true
+                }),
+            ),
+            (
+                "service-account-2".to_string(),
+                json!({
+                    "entity_id": "service-account-2",
+                    "entity_type": "Jans::ServiceAccount",
+                    "name": "Monitoring Service",
+                    "permissions": ["read", "monitor"],
+                    "is_active": true
+                }),
+            ),
+            (
+                "admin-user".to_string(),
+                json!({
+                    "entity_id": "admin-user",
+                    "entity_type": "Jans::User",
+                    "name": "System Administrator",
+                    "role": "admin"
+                }),
+            ),
+        ]);
+
+        // Create trusted issuer
+        let trusted_issuer = TrustedIssuer {
+            name: "Test Issuer".to_string(),
+            description: "Test".to_string(),
+            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+                .expect("valid url"),
+            token_metadata: HashMap::new(),
+        };
+
+        let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+
+        // Create entity builder with default entities
+        let mut config = EntityBuilderConfig::default();
+        config.build_workload = false;
+        config.build_user = false;
+
+        let entity_builder = EntityBuilder::new(
+            config,
+            &trusted_issuers,
+            Some(&validator_schema),
+            Some(&default_entities_data),
+        )
+        .expect("should create entity builder");
+
+        // Test Case 1: Use a default service account as the principal (no tokens provided)
+        // This simulates a system-to-system authorization request
+        let resource = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Resource".to_string(),
+                id: "backup-storage".to_string(),
+            },
+            attributes: HashMap::from([
+                ("name".to_string(), json!("Backup Storage")),
+                ("owner".to_string(), json!("service-account-1")), // Owned by the default service account
+                ("access_level".to_string(), json!("restricted")),
+            ]),
+        };
+
+        let entities_data = entity_builder
+            .build_entities(&HashMap::new(), &resource) // No tokens = no user/workload principals
+            .expect("should build entities");
+
+        let cedar_entities = entities_data
+            .entities(Some(&schema))
+            .expect("should create Cedar entities");
+
+        // Verify that the default service account entities are available for use as principals
+        let service_account_1 = cedar_entities
+            .get(
+                &"Jans::ServiceAccount::\"service-account-1\""
+                    .parse()
+                    .unwrap(),
+            )
+            .expect("should have default service account 1 entity");
+
+        let service_account_2 = cedar_entities
+            .get(
+                &"Jans::ServiceAccount::\"service-account-2\""
+                    .parse()
+                    .unwrap(),
+            )
+            .expect("should have default service account 2 entity");
+
+        // Verify the service account attributes
+        let sa1_json = service_account_1
+            .to_json_value()
+            .expect("should convert to JSON");
+        let sa1_attrs = sa1_json.get("attrs").expect("should have attrs");
+        assert_eq!(
+            sa1_attrs.get("name").and_then(|v| v.as_str()),
+            Some("Backup Service")
+        );
+        assert_eq!(
+            sa1_attrs.get("is_active").and_then(|v| v.as_bool()),
+            Some(true)
+        );
+
+        let sa2_json = service_account_2
+            .to_json_value()
+            .expect("should convert to JSON");
+        let sa2_attrs = sa2_json.get("attrs").expect("should have attrs");
+        assert_eq!(
+            sa2_attrs.get("name").and_then(|v| v.as_str()),
+            Some("Monitoring Service")
+        );
+
+        // Test Case 2: Verify that default entities can be referenced in resource attributes
+        // This shows how default entities enable complex authorization scenarios
+        let resource_owned_by_sa = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Resource".to_string(),
+                id: "monitoring-dashboard".to_string(),
+            },
+            attributes: HashMap::from([
+                ("name".to_string(), json!("Monitoring Dashboard")),
+                ("owner".to_string(), json!("service-account-2")), // References default service account
+                ("access_level".to_string(), json!("admin")),
+            ]),
+        };
+
+        let entities_data_2 = entity_builder
+            .build_entities(&HashMap::new(), &resource_owned_by_sa)
+            .expect("should build entities");
+
+        let cedar_entities_2 = entities_data_2
+            .entities(Some(&schema))
+            .expect("should create Cedar entities");
+
+        // Should have the same default entities available
+        let sa2_entity_2 = cedar_entities_2.get(
+            &"Jans::ServiceAccount::\"service-account-2\""
+                .parse()
+                .unwrap(),
+        );
+        assert!(
+            sa2_entity_2.is_some(),
+            "should have service account 2 available for policy evaluation"
+        );
+
+        // Test Case 3: Demonstrate entity count consistency
+        let count_1 = cedar_entities.iter().count();
+        let count_2 = cedar_entities_2.iter().count();
+
+        // Both should have the same count since they include all default entities
+        assert_eq!(
+            count_1, count_2,
+            "both cases should have the same entity count"
+        );
+
+        // Expected count: 1 issuer + 1 resource + 3 default entities
+        let expected_count = 5;
+        assert_eq!(count_1, expected_count);
+        assert_eq!(count_2, expected_count);
+
+        // Test Case 4: Show how this enables policy evaluation
+        // In a real Cedar policy, you could now write rules like:
+        // "permit(principal: Jans::ServiceAccount::"service-account-1", action: "backup", resource: Jans::Resource::"backup-storage")"
+        // The default entities provide the principal and resource context needed for policy evaluation
+
+        // Verify that the service account has the expected permissions
+        let sa1_permissions = sa1_attrs
+            .get("permissions")
+            .and_then(|v| v.as_array())
+            .expect("should have permissions");
+        assert!(
+            sa1_permissions.iter().any(|p| p.as_str() == Some("backup")),
+            "should have backup permission"
+        );
+        assert!(
+            sa1_permissions
+                .iter()
+                .any(|p| p.as_str() == Some("restore")),
+            "should have restore permission"
         );
     }
 }

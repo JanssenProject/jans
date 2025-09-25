@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>0.0.0-nightly</version>
+		<version>1.12.0</version>
 	</parent>
 
 	<prerequisites>
@@ -823,8 +823,8 @@
 					<version>${arquillian.jetty.embedded.11.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-webapp</artifactId>
+					<groupId>org.eclipse.jetty.ee9</groupId>
+					<artifactId>jetty-ee9-webapp</artifactId>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
@@ -833,13 +833,13 @@
 					<scope>test</scope>
 				</dependency>
 				<dependency>
-					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-annotations</artifactId>
+					<groupId>org.eclipse.jetty.ee9</groupId>
+					<artifactId>jetty-ee9-annotations</artifactId>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
-					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-plus</artifactId>
+					<groupId>org.eclipse.jetty.ee9</groupId>
+					<artifactId>jetty-ee9-plus</artifactId>
 					<scope>test</scope>
 				</dependency>
                 <dependency>

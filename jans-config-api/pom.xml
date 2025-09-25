@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-config-api-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.0.0-nightly</version>
+	<version>1.12.0</version>
 	<name>jans-config-api-parent</name>
 
 	<distributionManagement>
@@ -29,7 +29,7 @@
 		
 		<resteasy.version>6.2.3.Final</resteasy.version>
 		<jackson.version>2.13.2</jackson.version>
-		<jetty.version>11.0.15</jetty.version>
+		<jetty.version>11.0.25</jetty.version>
 		<weld.version>4.0.3.Final</weld.version>	
 
 		<microprofile.config.version>3.1</microprofile.config.version>

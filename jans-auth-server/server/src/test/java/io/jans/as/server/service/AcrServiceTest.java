@@ -16,7 +16,6 @@ import jakarta.ws.rs.WebApplicationException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
@@ -36,9 +35,6 @@ public class AcrServiceTest {
 
     @InjectMocks
     private AcrService acrService;
-
-    @Mock
-    private Logger log;
 
     @Mock
     private Identity identity;

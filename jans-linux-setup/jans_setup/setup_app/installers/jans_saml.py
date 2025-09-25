@@ -59,7 +59,8 @@ class JansSamlInstaller(BaseInstaller, SetupUtils):
         self.saml_enabled = True
         self.config_generation = True
         self.ignore_validation = True
-        self.idp_root_dir = os.path.join(Config.opt_dir, 'idp/configs/')
+        self.idp_top_dir = os.path.join(Config.opt_dir, 'idp')
+        self.idp_root_dir = os.path.join(self.idp_top_dir, 'configs')
 
         # sample config
         self.idp_config_id = 'keycloak'
@@ -109,15 +110,15 @@ class JansSamlInstaller(BaseInstaller, SetupUtils):
 
 
     def create_folders(self):
-        for saml_dir in (self.idp_root_dir, self.idp_config_root_dir, self.idp_config_data_dir,
+        for saml_dir in (self.idp_top_dir, self.idp_root_dir, self.idp_config_root_dir, self.idp_config_data_dir,
                         self.idp_config_log_dir, self.idp_config_providers_dir,
                         Config.jans_idp_idp_metadata_temp_dir, Config.jans_idp_idp_metadata_root_dir,
                         Config.jans_idp_sp_metadata_root_dir, Config.jans_idp_sp_metadata_temp_dir,
                 ):
             self.createDirs(saml_dir)
+            self.run([paths.cmd_chmod, '0760', saml_dir])
 
-        self.chown(self.idp_root_dir, Config.jetty_user, Config.jetty_group, recursive=True)
-        self.run([paths.cmd_chmod, '0760', saml_dir])
+        self.chown(self.idp_top_dir, Config.jetty_user, Config.jetty_group, recursive=True)
 
     def create_clients(self):
         clients_data = base.readJsonFile(self.clients_json_fn)

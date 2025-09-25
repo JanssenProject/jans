@@ -556,6 +556,17 @@ components:
           format: int32
         metricReporterEnabled:
           type: boolean
+        fido2MetricsEnabled:
+          type: boolean
+        fido2MetricsRetentionDays:
+          type: integer
+          format: int32
+        fido2DeviceInfoCollection:
+          type: boolean
+        fido2ErrorCategorization:
+          type: boolean
+        fido2PerformanceMetrics:
+          type: boolean
         personCustomObjectClassList:
           type: array
           items:
@@ -578,6 +589,9 @@ components:
         userAutoEnrollment:
           type: boolean
         unfinishedRequestExpiration:
+          type: integer
+          format: int32
+        authenticationHistoryExpiration:
           type: integer
           format: int32
         metadataRefreshInterval:

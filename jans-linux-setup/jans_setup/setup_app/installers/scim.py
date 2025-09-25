@@ -34,6 +34,12 @@ class ScimInstaller(JettyInstaller):
         self.ldif_scopes_fn = os.path.join(self.output_folder, 'scopes.ldif')
         self.jans_scim_openapi_fn = os.path.join(Config.data_dir, 'jans-scim-openapi.yaml')
 
+        self.user_scopes = {
+            'https://jans.io/scim/users.read': ('Query user resources', 'Scim users.read', 'oauth'),
+            'https://jans.io/scim/users.write': ('Modify user resources', 'Scim users.write', 'oauth'),
+            'https://jans.io/scim/tokens': ('List and revoke tokens associated to users', 'Scim user tokens', 'oauth')
+                }
+
         if not base.argsp.shell:
             self.extract_files()
 
@@ -67,27 +73,19 @@ class ScimInstaller(JettyInstaller):
 
 
     def create_user_scopes(self):
-        # user read
-        read_dn = self.create_scope({
+        user_scope_dns = []
+        for jansid in self.user_scopes:
+            sdn = self.create_scope({
                 'objectClass': ['top', 'jansScope'],
-                'jansId': ['https://jans.io/scim/users.read'],
-                'jansScopeTyp': ['oauth'],
+                'jansId': [jansid],
+                'jansScopeTyp': [self.user_scopes[jansid][2]],
                 'jansAttrs': ['{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'], 
-                'description': ['Query user resources'], 
-                    'displayName': ['Scim users.read']
+                'description': [self.user_scopes[jansid][0]],
+                'displayName': [self.user_scopes[jansid][1]]
                 }, '1200')
+            user_scope_dns.append(sdn)
 
-        # user write
-        write_dn = self.create_scope({
-                'objectClass': ['top', 'jansScope'],
-                'jansId': ['https://jans.io/scim/users.write'],
-                'jansScopeTyp': ['oauth'],
-                'jansAttrs': ['{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'], 
-                'description': ['Modify user resources'], 
-                    'displayName': ['Scim users.write']
-                }, '1200')
-
-        return [read_dn, write_dn]
+        return user_scope_dns
 
     def generate_configuration(self):
         self.logIt("Generating {} configuration".format(self.service_name))
@@ -99,7 +97,7 @@ class ScimInstaller(JettyInstaller):
 
         scopes_dn = self.create_user_scopes()
         for scope in config_scopes:
-            if scope in ('https://jans.io/scim/users.read', 'https://jans.io/scim/users.write'):
+            if scope in self.user_scopes:
                 continue
             inum = '1200.' + os.urandom(3).hex().upper()
             scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)

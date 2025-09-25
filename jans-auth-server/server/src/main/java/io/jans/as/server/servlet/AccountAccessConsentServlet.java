@@ -1,20 +1,21 @@
 package io.jans.as.server.servlet;
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.token.TokenService;
-import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Timestamp;
@@ -41,19 +42,12 @@ public class AccountAccessConsentServlet extends HttpServlet {
     @Inject
     private ClientService clientService;
 
-    @Override
-    public void init() throws ServletException {
-        log.info("Inside init method of AccountAccess Consent ***********************************************************************");
-    }
+    @Inject
+    private AppConfiguration appConfiguration;
 
-    public static void printJsonObject(JSONObject jsonObj, ServletOutputStream out) throws IOException {
-        for (String keyStr : jsonObj.keySet()) {
-            Object keyvalue = jsonObj.get(keyStr);
-            //Print key and value
-            out.println("key: " + keyStr + " value: " + keyvalue);
-            if (keyvalue instanceof JSONObject)
-                printJsonObject((JSONObject) keyvalue, out);
-        }
+    @Override
+    public void init() {
+        log.info("AccountAccessConsentServlet initialized.");
     }
 
     /**
@@ -64,7 +58,8 @@ public class AccountAccessConsentServlet extends HttpServlet {
      * @param httpResponse   servlet response
      */
     protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) {
-        log.info("Starting processRequest method of AccountAccess Consent ***********************************************************************");
+        log.debug("AccountAccessConsentServlet - Starting processRequest ...");
+
         String authFromReq = null;
         try (PrintWriter out = httpResponse.getWriter()) {
 
@@ -72,9 +67,9 @@ public class AccountAccessConsentServlet extends HttpServlet {
             JSONObject jsonBody = new JSONObject(jsonBodyStr);
 
             httpResponse.setContentType("application/json");
-            String xfapiinteractionid = UUID.randomUUID().toString();
-            httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
+            httpResponse.addHeader("x-fapi-interaction-id", UUID.randomUUID().toString());
             httpResponse.setCharacterEncoding("UTF-8");
+
             JSONObject jsonObj = new JSONObject();
 
             String permissionKey = "";
@@ -89,8 +84,9 @@ public class AccountAccessConsentServlet extends HttpServlet {
                             permissionKey = keyStr1;
                             String tempstr = keyvalue1.toString();
                             String[] temp = tempstr.substring(1, tempstr.length() - 1).split(",");
-                            for (int i = 0; i < temp.length; i++)
-                                permissionValue.put(temp[i].substring(1, temp[i].length() - 1));
+                            for (String s : temp) {
+                                permissionValue.put(s.substring(1, s.length() - 1));
+                            }
                         }
                         if (keyStr1.equals("expirationDateTime")) {
                             jsonObj.put(keyStr1, keyvalue1.toString());
@@ -102,43 +98,48 @@ public class AccountAccessConsentServlet extends HttpServlet {
             authFromReq = servletRequest.getHeader("Authorization");
 
             String clientDn = null;
-            Client cl = null;
+            Client client = null;
             String clientID = null;
-            String ConsentID = null;
+            String consentID = null;
             clientDn = tokenService.getClientDn(authFromReq);
 
-            if (clientDn != null) {
-                log.info("FAPIOBUK: ClientDn from Authoirization(tokenService) *********************************************" + clientDn);
-                cl = clientService.getClientByDn(clientDn);
-                clientID = cl.getClientId();
-            } else
-                log.info("FAPIOBUK: ClientDn is null");
+            if (StringUtils.isNotBlank(clientDn)) {
+                client = clientService.getClientByDn(clientDn);
+                clientID = client.getClientId();
+            }
+
+            log.debug("AccountAccessConsentServlet - processRequest, clientDn: {}", clientDn);
 
             if (clientID != null)
-                ConsentID = UUID.randomUUID().toString() + ":" + clientID;
+                consentID = UUID.randomUUID().toString() + ":" + clientID;
             else {
-                ConsentID = UUID.randomUUID().toString();
+                consentID = UUID.randomUUID().toString();
                 log.info("FAPIOBUK: ClientID is null");
             }
-            jsonObj.put("links", new JSONObject().put("self", "/open-banking/v3.1/aisp/account-access-consents/" + ConsentID));
+            jsonObj.put(capitalize("links"), new JSONObject().put(capitalize("self"), "/open-banking/v3.1/aisp/account-access-consents/" + consentID));
 
             JSONObject data = new JSONObject();
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            data.put("creationDateTime", timestamp.getTime());
-            data.put("status", "AwaitingAuthorisation");
+            data.put(capitalize("creationDateTime"), timestamp.getTime());
+            data.put(capitalize("status"), "AwaitingAuthorisation");
             data.put(permissionKey, permissionValue);
-            data.put("consentId", ConsentID);
-            data.put("statusUpdateDateTime", timestamp.getTime());
-            jsonObj.put("data", data);
+            data.put(capitalize("consentId"), consentID);
+            data.put(capitalize("statusUpdateDateTime"), timestamp.getTime());
+            jsonObj.put(capitalize("data"), data);
 
             out.print(jsonObj.toString());
             httpResponse.setStatus(201, "Created");
 
             out.flush();
-            log.info("Finished processRequest method of AccoutAccess Consent ***********************************************************************");
+            log.debug("AccountAccessConsentServlet - Finished processRequest.");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String capitalize(String key) {
+        final boolean uppercase = BooleanUtils.isTrue(appConfiguration.getUppercaseResponseKeysInAccountAccessConsent());
+        return uppercase ? StringUtils.capitalize(key) : key;
     }
 
 
@@ -173,6 +174,6 @@ public class AccountAccessConsentServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Account Access Consent";
+        return "AccountAccessConsentServlet";
     }
 }

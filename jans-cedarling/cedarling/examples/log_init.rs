@@ -60,6 +60,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
         lock_config: None,
+        max_default_entities: None,
+        max_base64_size: None,
+        token_cache_max_ttl_secs: 60,
     })
     .await?;
 

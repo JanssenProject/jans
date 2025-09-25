@@ -172,7 +172,7 @@ class Plugin(DialogUtils):
 
         self.tabs['static'] = HSplit([
                                 self.app.getTitledText(_("Authenticator Certificates Folder"), name='authenticatorCertsFolder', value=fido2_static_config.get('authenticatorCertsFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'authenticatorCertsFolder'), style='class:outh-scope-text',widget_style=cli_style.black_bg_widget),
-                                self.app.getTitledText(_("MDS Access Token"), name='mdsAccessToken', value=fido2_static_config.get('mdsAccessToken',''), jans_help=self.app.get_help_from_schema(static_schema, 'mdsAccessToken'), style='class:outh-scope-text',widget_style=cli_style.black_bg_widget),
+
                                 self.app.getTitledText(_("MDS TOC Certificates Folder"), name='mdsCertsFolder', value=fido2_static_config.get('mdsCertsFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'mdsCertsFolder'), style='class:outh-scope-text',widget_style=cli_style.black_bg_widget),
                                 self.app.getTitledText(_("MDS TOC Files Folder"), name='mdsTocsFolder', value=fido2_static_config.get('mdsTocsFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'mdsTocsFolder'), style='class:outh-scope-text',widget_style=cli_style.black_bg_widget),
                                 self.app.getTitledCheckBox(_("Check U2f Attestations"), name='checkU2fAttestations', checked=fido2_static_config.get('checkU2fAttestations'), jans_help=self.app.get_help_from_schema(static_schema, 'checkU2fAttestations'), style=cli_style.check_box,widget_style=cli_style.black_bg_widget),

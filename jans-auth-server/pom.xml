@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-auth-server-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.0.0-nightly</version>
+	<version>1.12.0</version>
 	<name>Jans authentication server parent</name>
     <distributionManagement>
 	  <repository>
@@ -38,7 +38,7 @@
 
 		<swagger.version>2.2.10</swagger.version>
 
-		<jetty.version>11.0.15</jetty.version>
+		<jetty.version>12.0.25</jetty.version>
 
         <arquillian.version>1.4.0.Final</arquillian.version>
         <arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
@@ -271,8 +271,8 @@
             </dependency>
 
 	        <dependency>
-	            <groupId>org.eclipse.jetty</groupId>
-	            <artifactId>jetty-webapp</artifactId>
+	            <groupId>org.eclipse.jetty.ee9</groupId>
+	            <artifactId>jetty-ee9-webapp</artifactId>
 	            <version>${jetty.version}</version>
 	            <scope>provided</scope>
 	        </dependency>
@@ -286,16 +286,16 @@
 
 	        <dependency>
 	            <!-- Jetty annotations needed for Servlet 3.1 support -->
-	            <groupId>org.eclipse.jetty</groupId>
-	            <artifactId>jetty-annotations</artifactId>
+	            <groupId>org.eclipse.jetty.ee9</groupId>
+	            <artifactId>jetty-ee9-annotations</artifactId>
 	            <version>${jetty.version}</version>
 	            <scope>provided</scope>
 	        </dependency>
 
 	        <dependency>
 	            <!-- Jetty plus and naming required for testing resource injections -->
-	            <groupId>org.eclipse.jetty</groupId>
-	            <artifactId>jetty-plus</artifactId>
+	            <groupId>org.eclipse.jetty.ee9</groupId>
+	            <artifactId>jetty-ee9-plus</artifactId>
 	            <version>${jetty.version}</version>
 	            <scope>provided</scope>
 	        </dependency>

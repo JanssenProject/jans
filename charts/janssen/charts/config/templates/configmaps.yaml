@@ -66,6 +66,8 @@ data:
   CN_SQL_DB_NAME: {{ .Values.configmap.cnSqlDbName }}
   CN_SQL_DB_USER: {{ .Values.configmap.cnSqlDbUser }}
   CN_SQL_DB_TIMEZONE: {{ .Values.configmap.cnSqlDbTimezone }}
+  CN_SQL_SSL_ENABLED: {{ .Values.configmap.cnSqlSslEnabled | quote }}
+  CN_SQL_SSL_MODE: {{ .Values.configmap.cnSqlSslMode }}
   CN_CONFIG_ADAPTER: {{ .Values.global.configAdapterName }}
   CN_SECRET_ADAPTER: {{ .Values.global.configSecretAdapter }}
   CN_CONFIG_KUBERNETES_NAMESPACE: {{ .Release.Namespace | quote }}

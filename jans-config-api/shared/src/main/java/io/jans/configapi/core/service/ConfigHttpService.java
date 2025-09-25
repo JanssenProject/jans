@@ -6,10 +6,14 @@
 
 package io.jans.configapi.core.service;
 
+import io.jans.configapi.core.util.Jackson;
 import io.jans.model.net.HttpServiceResponse;
 import io.jans.util.StringHelper;
 
 import java.io.File;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -30,12 +34,18 @@ import javax.net.ssl.SSLContext;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -46,6 +56,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -63,6 +74,7 @@ import org.apache.http.util.EntityUtils;
 @ApplicationScoped
 public class ConfigHttpService implements Serializable {
 
+    private static final String OPENID_CONFIGURATION_URL = "/.well-known/openid-configuration";
     private static final long serialVersionUID = -2398422090669045605L;
     protected transient Logger log = LogManager.getLogger(getClass());
     private static final String CON_STATS_STR = "Connection manager stats: {}";
@@ -77,6 +89,10 @@ public class ConfigHttpService implements Serializable {
         connectionManager.setDefaultMaxPerRoute(50); // Increase default max connection per route to 50
 
         this.base64 = new Base64();
+    }
+
+    public static String getOpenidConfigurationUrl() {
+        return OPENID_CONFIGURATION_URL;
     }
 
     public CloseableHttpClient getHttpsClientTrustAll()
@@ -154,11 +170,6 @@ public class ConfigHttpService implements Serializable {
 
         HttpPost httpPost = new HttpPost(uri);
 
-        if (StringHelper.isEmpty(authType)) {
-            authType = "Basic ";
-        } else {
-            authType = authType + " ";
-        }
         if (StringHelper.isNotEmpty(authCode)) {
             httpPost.setHeader("Authorization", authType + authCode);
         }
@@ -261,6 +272,48 @@ public class ConfigHttpService implements Serializable {
 
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) {
         return executeGet(httpClient, requestUri, null, null);
+    }
+
+    public HttpServiceResponse executeDelete(String requestUri, Map<String, String> headers, Map<String, String> data) {
+        HttpClient httpClient = this.getHttpsClient();
+        return executeDelete(httpClient, requestUri, headers, data);
+    }
+
+    public HttpServiceResponse executeDelete(HttpClient httpClient, String requestUri, Map<String, String> headers,
+            Map<String, String> parameters) {
+
+        if (parameters != null && !parameters.isEmpty()) {
+            StringBuilder query = new StringBuilder();
+            int i = 0;
+            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext();) {
+                String key = iterator.next();
+                String value = parameters.get(key);
+                if (StringUtils.isNotBlank(value)) {
+                    String delim = (i == 0) ? "?" : "&";
+                    query.append(delim + URLEncoder.encode(key, StandardCharsets.UTF_8) + "=");
+                    query.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+                    i++;
+                }
+            }
+            requestUri = requestUri + query.toString();
+            log.info("\n\n\n Final Delete requestUri:{}", requestUri);
+        }
+
+        HttpDelete httpDelete = new HttpDelete(requestUri);
+        if (headers != null) {
+            for (Entry<String, String> headerEntry : headers.entrySet()) {
+                httpDelete.setHeader(headerEntry.getKey(), headerEntry.getValue());
+            }
+        }
+        try {
+            HttpResponse httpResponse = httpClient.execute(httpDelete);
+            log.info("HttpDelete httpResponse:{}", httpResponse);
+            return new HttpServiceResponse(httpDelete, httpResponse);
+        } catch (IOException ex) {
+            log.error("Failed to execute get request", ex);
+        }
+
+        return null;
     }
 
     public byte[] getResponseContent(HttpResponse httpResponse) throws IOException {
@@ -378,4 +431,116 @@ public class ConfigHttpService implements Serializable {
         return buildDefaultRoutePlanner(proxy, -1, null);
     }
 
+    public JsonNode getResponseJsonNode(HttpServiceResponse serviceResponse) throws JsonProcessingException {
+        JsonNode jsonNode = null;
+
+        if (serviceResponse == null) {
+            return jsonNode;
+        }
+
+        return getResponseJsonNode(getResponseEntityString(serviceResponse), "response");
+    }
+    
+    public String getResponseEntityString(HttpServiceResponse serviceResponse) {
+        String jsonString = null;
+
+        if (serviceResponse == null) {
+            return jsonString;
+        }
+        HttpResponse httpResponse = serviceResponse.getHttpResponse();
+        if (httpResponse != null) {
+            HttpEntity entity = httpResponse.getEntity();
+            log.debug("entity:{}, httpResponse.getStatusLine().getStatusCode():{}", entity,
+                    httpResponse.getStatusLine().getStatusCode());
+            if (entity == null) {
+                return jsonString;
+            }
+            try {
+                jsonString = EntityUtils.toString(entity, "UTF-8");
+            } catch (Exception ex) {
+                log.error("Error while getting entity using EntityUtils is ", ex);
+            }
+
+            if (httpResponse.getStatusLine() != null
+                    && httpResponse.getStatusLine().getStatusCode() == Status.OK.getStatusCode()) {
+                return jsonString;
+            } else {
+                throw new WebApplicationException(httpResponse.getStatusLine().getStatusCode() + ":" + jsonString);
+            }
+        }
+        return jsonString;
+    }
+
+    public JsonNode getResponseJsonNode(String jsonSring, String nodeName) throws JsonProcessingException {
+        JsonNode jsonNode = null;
+
+        if (StringUtils.isBlank(jsonSring)) {
+            return jsonNode;
+        }
+        jsonNode = Jackson.asJsonNode(jsonSring);
+        if (StringUtils.isNotBlank(nodeName) && jsonNode != null && jsonNode.get(nodeName) != null) {
+            jsonNode = jsonNode.get("response");
+        }
+        return jsonNode;
+    }
+
+    public Status getResponseStatus(HttpServiceResponse serviceResponse) {
+        Status status = Status.INTERNAL_SERVER_ERROR;
+
+        if (serviceResponse == null || serviceResponse.getHttpResponse() == null || serviceResponse.getHttpResponse().getStatusLine()== null) {
+            return status;
+        }
+
+        int statusCode = serviceResponse.getHttpResponse().getStatusLine().getStatusCode();
+
+        status = Status.fromStatusCode(statusCode);
+        if (status == null) {
+            status = Status.INTERNAL_SERVER_ERROR;
+        }
+        return status;
+    }
+
+    public StringBuilder readEntity(HttpEntity httpEntity) throws IOException {
+
+        StringBuilder result = new StringBuilder();
+
+        if (httpEntity == null) {
+            return result;
+        }
+        try (InputStream inputStream = httpEntity.getContent();
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+            log.error("Response:{}", result);
+        }
+
+        return result;
+    }
+
+    public String getContent(HttpEntity httpEntity) {
+        String jsonString = null;
+        InputStream inputStream = null;
+        try {
+
+            if (httpEntity == null) {
+                return jsonString;
+            }
+            inputStream = httpEntity.getContent();
+            log.trace("  httpEntity.getContentLength():{}, httpEntity.getContent():{}", httpEntity.getContentLength(),
+                    httpEntity.getContent());
+
+            jsonString = IOUtils.toString(httpEntity.getContent(), StandardCharsets.UTF_8);
+            log.debug("Data jsonString:{}", jsonString);
+
+        } catch (Exception ex) {
+            throw new WebApplicationException("Failed to read data '{" + httpEntity + "}'", ex);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        return jsonString;
+    }
+ 
 }
