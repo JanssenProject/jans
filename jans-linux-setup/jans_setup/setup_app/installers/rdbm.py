@@ -137,6 +137,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     for cmd in sql_cmd_list:
                         self.run(f'mysql {user_passwd_str}-e "{cmd}"', shell=True)
 
+                self.mysql_config()
+
+                self.stop(Config.backend_service)
+                self.start(Config.backend_service)
+                self.enable(Config.backend_service)
+
             elif Config.rdbm_type == 'pgsql':
                 if base.clone_type == 'rpm':
                     self.run(['postgresql-setup', 'initdb'])
@@ -158,10 +164,34 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
                 self.stop('postgresql')
                 self.start('postgresql')
-
                 self.enable('postgresql')
 
         self.dbUtils.bind(force=True)
+
+    def mysql_config(self):
+        if base.os_type == 'suse':
+            conf_file = '/etc/my.cnf'
+        elif base.clone_type == 'rpm':
+            conf_file = '/etc/my.cnf.d/mysql-server.cnf'
+        else:
+            conf_file = '/etc/mysql/mysql.conf.d/mysqld.cnf'
+
+        # enforce SSL
+        conf_file_s = self.readFile(conf_file)
+        conf_file_content = conf_file_s.splitlines()
+        ssl_key_s = 'require_secure_transport'
+        for i, l in enumerate(conf_file_content):
+            if l.strip().startswith(ssl_key_s):
+                conf_file_content[i] = f'{ssl_key_s} = ON'
+                break
+        else:
+            conf_file_content.append(f'{ssl_key_s} = ON')
+
+        self.writeFile(conf_file, '\n'.join(conf_file_content))
+
+        mysql_data1_dir = '/var/lib/mysql'
+        cert_fn = os.path.join(mysql_data1_dir, 'ca.pem')
+        self.import_rootcert(cert_fn)
 
 
     def postgresql_config(self):
@@ -233,7 +263,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             self.writeFile(conf_file, '\n'.join(conf_file_content))
 
     def import_rootcert(self, cert_fn):
-        self.import_cert_into_keystore(cert_fn, f'jans-{Config.rdbm_type}.jans.vm_postgres')
+        self.import_cert_into_keystore(cert_fn, f'jans_{Config.rdbm_type}')
 
     def get_sql_col_type(self, attrname, table=None):
 
@@ -488,19 +518,37 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
     def rdbmProperties(self):
 
-        if Config.rdbm_install_type == InstallTypes.LOCAL:
+        pgsql_mysql_ssl_modes_mapping = {
+            'disable': 'DISABLED',
+            'require': 'REQUIRED',
+            'verify-ca': 'VERIFY_CA',
+            'verify-full': 'VERIFY_IDENTITY',
+            }
+
+        def set_sslmode(mode='verify-ca'):
+
+            if mode in ('verify-ca', 'verify-full'):
+                Config.rdbm_sslfactory = 'org.postgresql.ssl.DefaultJavaSSLFactory'
+
             if Config.rdbm_type == 'pgsql':
-                Config.pggsql_enable_ssl == 'true'
-                Config.pggsql_sslmode = 'verify-ca'
+                Config.rdbm_sslmode = mode
+            elif Config.rdbm_type == 'mysql':
+                Config.rdbm_sslmode = pgsql_mysql_ssl_modes_mapping[mode]
+
+        if Config.rdbm_install_type == InstallTypes.LOCAL:
+            set_sslmode()
 
         if Config.rdbm_install_type == InstallTypes.REMOTE:
-            if Config.rdbm_type == 'pgsql':
-                Config.pggsql_enable_ssl ='false' if Config.pggsql_sslmode == 'disable' else 'true'
-                if Config.pggsql_sslmode == 'verify-ca' and Config.pgsql_sslrootcert:
-                    with tempfile.NamedTemporaryFile('w') as tmpfo:
-                        tmpfo.write(Config.pgsql_sslrootcert)
-                        tmpfo.flush()
-                        self.import_rootcert(tmpfo.name)
+            if Config.get('rdbm_sslrootcert'):
+                with tempfile.NamedTemporaryFile('w') as tmpfo:
+                    tmpfo.write(Config.rdbm_sslrootcert)
+                    tmpfo.flush()
+                    self.import_rootcert(tmpfo.name)
+                set_sslmode()
+            else:
+                set_sslmode('disable')
+
+        Config.rdbm_enable_ssl = 'false' if Config.rdbm_sslmode == 'disable' else 'true' 
 
         Config.set_rdbm_schema()
         if Config.rdbm_type in ('pgsql', 'mysql'):

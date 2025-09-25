@@ -424,12 +424,9 @@ class PropertiesUtils(SetupUtils):
                 Config.set_rdbm_schema()
                 Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
 
-                if Config.rdbm_type == 'pgsql':
-                    use_ssl = self.getYNPrompt("  Use SSS to connect RDBM")
-                    if use_ssl:
-                        Config.pgsql_sslrootcert = self.getPrompt("  Paste RDBM SSL Root Certificate:")
-                        if Config.pgsql_sslrootcert:
-                            Config.pggsql_sslmode = 'verify-ca'
+                use_ssl = self.getYNPrompt("  Use SSL to connect RDBM")
+                if use_ssl:
+                    Config.rdbm_sslrootcert = self.getPrompt("  Paste RDBM SSL Root Certificate:")
 
                 result = dbUtils.sqlconnection()
 
@@ -507,26 +504,23 @@ class PropertiesUtils(SetupUtils):
                 Config.set_rdbm_schema()
                 Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
 
-                if Config.rdbm_type == 'pgsql':
-                    use_ssl = self.getYNPrompt("  Use SSL to connect RDBM")
-                    if use_ssl:
-                        print("  Paste RDBM SSL Root Certificate:")
-                        print("  Enter single dot (.) to finish entering")
-                        cert_lines = []
-                        cert_end = '-----END CERTIFICATE-----'
-                        for line in sys.stdin:
-                            if line.rstrip() in (cert_end, '.'):
-                                if line.rstrip() == cert_end:
-                                    cert_lines.append(line)
-                                break
-                            cert_lines.append(line)
-                        Config.pgsql_sslrootcert = ''.join(cert_lines)
-                        if Config.pgsql_sslrootcert:
-                            Config.pggsql_sslmode = 'verify-ca'
+                use_ssl = self.getYNPrompt("  Use SSL to connect RDBM")
+                if use_ssl:
+                    print("  Paste RDBM SSL Root Certificate:")
+                    print("  Enter single dot (.) to finish entering")
+                    cert_lines = []
+                    cert_end = '-----END CERTIFICATE-----'
+                    for line in sys.stdin:
+                        if line.rstrip() in (cert_end, '.'):
+                            if line.rstrip() == cert_end:
+                                cert_lines.append(line)
+                            break
+                        cert_lines.append(line)
+                    Config.rdbm_sslrootcert = ''.join(cert_lines)
 
                 try:
                     if Config.rdbm_type == 'mysql':
-                        conn = pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port)
+                        conn = pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port, ssl={'verify_mode': None})
                         if 'mariadb' in conn.server_version.lower():
                             print("  {}MariaDB is not supported. Please use MySQL Server. {}".format(colors.FAIL, colors.ENDC))
                             continue
