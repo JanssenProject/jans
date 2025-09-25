@@ -254,6 +254,11 @@ pub struct BootstrapConfigRaw {
     /// Allow interaction with a Lock server with invalid certificates. Used for testing.
     #[serde(rename = "CEDARLING_LOCK_ACCEPT_INVALID_CERTS", default)]
     pub accept_invalid_certs: FeatureToggle,
+
+    /// Allows to limit maximum token cache TTL in seconds.
+    /// Zero means no token cache TTL limit.
+    #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
+    pub token_cache_max_ttl: usize,
 }
 
 impl BootstrapConfigRaw {
