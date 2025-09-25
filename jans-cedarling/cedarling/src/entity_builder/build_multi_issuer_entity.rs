@@ -5,8 +5,6 @@
 
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::*;
-use crate::authz::AuthorizeEntitiesData;
-use crate::authz::request::EntityData;
 use cedar_policy::{Entity, EntityUid, RestrictedExpression};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -37,11 +35,6 @@ fn simplify_token_type(mapping: &str) -> String {
     // Split by namespace separator and use the last part
     // Keep underscores in token type names as specified in design
     mapping.split("::").last().unwrap_or(mapping).to_lowercase()
-}
-
-/// Create a Set of Long from a single long value
-fn create_long_set(value: i64) -> RestrictedExpression {
-    RestrictedExpression::new_set(vec![RestrictedExpression::new_long(value)])
 }
 
 /// Create a Set of String from a single string value
@@ -91,44 +84,23 @@ fn convert_claim_to_string_set(value: &Value) -> RestrictedExpression {
     }
 }
 
-/// Add all JWT claims as string tags (schema-less processing)
-/// According to design doc: "without a schema, all claims default to Set of String for consistency"
-fn add_claims_as_string_tags(
-    tags: &mut HashMap<String, RestrictedExpression>,
-    claims: &HashMap<String, Value>,
-) {
-    // Use the existing build_entity_attrs_without_schema function for consistent conversion
-    match build_entity_attrs_without_schema(claims, None) {
-        Ok(schema_less_attrs) => {
-            tags.extend(schema_less_attrs);
-        },
-        Err(_) => {
-            // Fallback to manual conversion if the function fails
-            for (claim_key, claim_value) in claims {
-                let claim_values = convert_claim_to_string_set(claim_value);
-                tags.insert(claim_key.clone(), claim_values);
-            }
-        },
-    }
-}
-
 /// Determine the entity type for a token dynamically
-fn determine_token_entity_type(token: &Token) -> Result<String, MultiIssuerEntityError> {
+fn determine_token_entity_type(token: &Token) -> String {
     if let Some(issuer) = token.iss.as_ref() {
         if let Some(metadata) = issuer.token_metadata.get(&token.name) {
-            return Ok(metadata.entity_type_name.clone());
+            return metadata.entity_type_name.clone();
         }
     }
 
     if token.name.contains("::") {
-        return Ok(token.name.clone());
+        return token.name.clone();
     }
 
     if let Some(default_type) = default_tkn_entity_name(&token.name) {
-        return Ok(default_type.to_string());
+        return default_type.to_string();
     }
 
-    Ok("Token".to_string())
+    "Token".to_string()
 }
 
 impl EntityBuilder {
@@ -138,7 +110,6 @@ impl EntityBuilder {
         tokens: &HashMap<String, Token>,
         resource: &EntityData,
     ) -> Result<AuthorizeEntitiesData, MultiIssuerEntityError> {
-        let tkn_principal_mappings = TokenPrincipalMappings::default();
         let mut built_entities = BuiltEntities::from(&self.iss_entities);
 
         // Build token entities using the existing multi-issuer logic
@@ -161,30 +132,6 @@ impl EntityBuilder {
             return Err(MultiIssuerEntityError::NoValidTokens);
         }
 
-        // Build workload entity if configured
-        let workload = if self.config.build_workload {
-            let workload_entity = self
-                .build_workload_entity(tokens, &tkn_principal_mappings, &built_entities)
-                .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
-            Some(workload_entity)
-        } else {
-            None
-        };
-
-        // Build user and roles if configured
-        let (user, roles) = if self.config.build_user {
-            let roles = self
-                .build_role_entities(tokens)
-                .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
-            let role_uids = roles.iter().map(|e| e.uid()).collect();
-            let user = self
-                .build_user_entity(tokens, &tkn_principal_mappings, &built_entities, role_uids)
-                .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
-            (Some(user), roles)
-        } else {
-            (None, Vec::new())
-        };
-
         // Build resource entity
         let resource = self
             .build_resource_entity(resource)
@@ -195,9 +142,9 @@ impl EntityBuilder {
         Ok(AuthorizeEntitiesData {
             issuers,
             tokens: token_entities,
-            workload,
-            user,
-            roles,
+            workload: None,
+            user: None,
+            roles: Vec::new(),
             resource,
             default_entities: self.default_entities.clone(),
         })
@@ -225,58 +172,42 @@ impl EntityBuilder {
         let mut attrs = HashMap::new();
 
         // Add core token attributes
-        attrs.insert("token_type".to_string(), create_string_set(&token.name));
-        attrs.insert("jti".to_string(), create_string_set(&entity_id));
-        attrs.insert("issuer".to_string(), create_string_set(issuer));
+        attrs.insert(
+            "token_type".to_string(),
+            RestrictedExpression::new_string(token.name.clone()),
+        );
+        attrs.insert(
+            "jti".to_string(),
+            RestrictedExpression::new_string(entity_id.clone()),
+        );
+        attrs.insert(
+            "issuer".to_string(),
+            RestrictedExpression::new_string(issuer.to_string()),
+        );
 
         // Add expiration timestamp
         if let Some(exp) = token.get_claim_val("exp").and_then(|v| v.as_i64()) {
-            attrs.insert("exp".to_string(), create_long_set(exp));
+            attrs.insert("exp".to_string(), RestrictedExpression::new_long(exp));
         }
 
         // Add validation timestamp
         let validated_at = chrono::Utc::now().timestamp_millis();
-        attrs.insert("validated_at".to_string(), create_long_set(validated_at));
+        attrs.insert(
+            "validated_at".to_string(),
+            RestrictedExpression::new_long(validated_at),
+        );
 
         // Create entity tags for Token claims - support both schema-based and schema-less processing
         let mut tags = HashMap::new();
         let claims = filter_reserved_claims(token.claims_value());
 
-        // Determine the actual entity type dynamically, just like the regular entity builder
-        let entity_type = if let Some(schema) = &self.schema {
-            // Schema-based processing: use schema to determine proper types and required fields
-            let entity_type = determine_token_entity_type(token)?;
+        // Add all JWT claims as string tags (schema-less processing)
+        for (claim_key, claim_value) in claims {
+            let value = convert_claim_to_string_set(&claim_value);
+            tags.insert(claim_key, value);
+        }
 
-            if let Some(token_shape) = schema.get_entity_shape(&entity_type) {
-                // Use the existing build_entity_attrs_with_shape function for schema-based processing
-                match build_entity_attrs_with_shape(
-                    &claims,
-                    &BuiltEntities::default(),
-                    token_shape,
-                    None,
-                ) {
-                    Ok(schema_attrs) => {
-                        // All claims are already filtered, so we can use them directly as tags
-                        tags.extend(schema_attrs);
-                    },
-                    Err(_) => {
-                        // Fallback to schema-less processing if schema conversion fails
-                        add_claims_as_string_tags(&mut tags, &claims);
-                    },
-                }
-            } else {
-                // No entity shape in schema, fall back to schema-less processing
-                add_claims_as_string_tags(&mut tags, &claims);
-            }
-
-            entity_type
-        } else {
-            // Schema-less processing: convert all claims to String Sets
-            // According to design doc: "without a schema, all claims default to Set of String for consistency"
-            add_claims_as_string_tags(&mut tags, &claims);
-
-            "Token".to_string()
-        };
+        let entity_type = determine_token_entity_type(token);
 
         // Create the Cedar entity using the existing build_cedar_entity function
         // Note: build_cedar_entity doesn't support tags, so we need to use Entity::new_with_tags directly

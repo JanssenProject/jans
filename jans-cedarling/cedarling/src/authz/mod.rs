@@ -353,114 +353,64 @@ impl Authz {
             &action,
         )?;
 
-        let workload_principal = entities_data.workload.as_ref().map(|e| e.uid()).to_owned();
-        let person_principal = entities_data.user.as_ref().map(|e| e.uid()).to_owned();
         let resource_uid = entities_data.resource.uid();
+
+        let principal = EntityUid::from_str("Acme::User::\"some_jti\"").unwrap();
 
         let entities = entities_data.entities(Some(&schema.schema))?;
 
-        let (workload_authz_result, workload_authz_info, workload_entity_claims) =
-            if let Some(workload) = workload_principal.clone() {
-                let principal = workload;
+        let authz_result = self
+            .execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: principal.clone(),
+                action: action.clone(),
+                resource: resource_uid.clone(),
+                context,
+            })
+            .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
 
-                let authz_result = self
-                    .execute_authorize(ExecuteAuthorizeParameters {
-                        entities: &entities,
-                        principal: principal.clone(),
-                        action: action.clone(),
-                        resource: resource_uid.clone(),
-                        context: context.clone(),
-                    })
-                    .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
-
-                let authz_info = AuthorizeInfo {
-                    principal: principal.to_string(),
-                    diagnostics: Diagnostics::new(
-                        authz_result.diagnostics(),
-                        &self.config.policy_store.policies,
-                    ),
-                    decision: authz_result.decision().into(),
-                };
-
-                let workload_entity_claims = get_entity_claims(
-                    self.config
-                        .authorization
-                        .decision_log_workload_claims
-                        .as_slice(),
-                    &entities,
-                    principal,
-                );
-
-                (
-                    Some(authz_result),
-                    Some(authz_info),
-                    Some(workload_entity_claims),
-                )
-            } else {
-                (None, None, None)
-            };
-
-        // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
-        let (user_authz_result, user_authz_info, user_entity_claims) =
-            if let Some(user) = person_principal.clone() {
-                let principal = user;
-
-                let authz_result = self
-                    .execute_authorize(ExecuteAuthorizeParameters {
-                        entities: &entities,
-                        principal: principal.clone(),
-                        action: action.clone(),
-                        resource: resource_uid.clone(),
-                        context: context.clone(),
-                    })
-                    .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
-
-                let authz_info = AuthorizeInfo {
-                    principal: principal.to_string(),
-                    diagnostics: Diagnostics::new(
-                        authz_result.diagnostics(),
-                        &self.config.policy_store.policies,
-                    ),
-                    decision: authz_result.decision().into(),
-                };
-
-                let user_entity_claims = get_entity_claims(
-                    self.config
-                        .authorization
-                        .decision_log_user_claims
-                        .as_slice(),
-                    &entities,
-                    principal,
-                );
-
-                (
-                    Some(authz_result),
-                    Some(authz_info),
-                    Some(user_entity_claims),
-                )
-            } else {
-                (None, None, None)
-            };
+        let authz_info = AuthorizeInfo {
+            principal: principal.to_string(),
+            diagnostics: Diagnostics::new(
+                authz_result.diagnostics(),
+                &self.config.policy_store.policies,
+            ),
+            decision: authz_result.decision().into(),
+        };
 
         let result = AuthorizeResult::new(
             &self.config.authorization.principal_bool_operator,
-            workload_principal,
-            person_principal,
-            workload_authz_result,
-            user_authz_result,
+            Some(principal.clone()),
+            None, // No person principal for multi-issuer
+            Some(authz_result),
+            None, // No person result for multi-issuer
             request_id,
         )?;
 
+        // measure time how long request executes
         let since_start = Utc::now().signed_duration_since(start_time);
-        let decision_time_micro_sec = since_start.num_microseconds().unwrap_or(i64::MAX);
+        let decision_time_micro_sec = since_start.num_microseconds().unwrap_or({
+            //overflow (exceeding 2^63 microseconds in either direction)
+            i64::MAX
+        });
 
+        // FROM THIS POINT WE ONLY MAKE LOGS
+
+        // getting entities as json
         let mut entities_raw_json = Vec::new();
         let cursor = Cursor::new(&mut entities_raw_json);
+
         entities.write_to_json(cursor)?;
         let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
             .map_err(AuthorizeError::EntitiesToJson)?;
 
-        // Create token logging info
+        // Log policy evaluation errors if any exist
+        self.log_policy_evaluation_errors(
+            &authz_info.diagnostics,
+            "workload principal",
+            request_id,
+        );
+
         let tokens_logging_info = LogTokensInfo::new(
             &validated_tokens,
             self.config
@@ -469,44 +419,36 @@ impl Authz {
                 .as_str(),
         );
 
-        let user_authz_diagnostic = user_authz_info
-            .as_ref()
-            .map(|auth_info| &auth_info.diagnostics);
-
-        let workload_authz_diagnostic = workload_authz_info
-            .as_ref()
-            .map(|auth_info| &auth_info.diagnostics);
-
-        // Log policy evaluation errors if any exist
-        if let Some(diagnostics) = user_authz_diagnostic {
-            self.log_policy_evaluation_errors(diagnostics, "user principal", request_id);
-        }
-
-        if let Some(diagnostics) = workload_authz_diagnostic {
-            self.log_policy_evaluation_errors(diagnostics, "workload principal", request_id);
-        }
-
         // Decision log
+        // we log decision log before debug log, to avoid cloning diagnostic info
         self.config.log_service.as_ref().log_any(&DecisionLogEntry {
             base: BaseLogEntry::new(LogType::Decision, request_id),
             policystore_id: self.config.policy_store.id.as_str(),
             policystore_version: self.config.policy_store.get_store_version(),
             principal: DecisionLogEntry::principal(
-                result.person.is_some(),
-                result.workload.is_some(),
+                false, // No person principal for multi-issuer
+                true,  // Workload principal for multi-issuer
             ),
-            user: user_entity_claims,
-            workload: workload_entity_claims,
+            user: None, // No user claims for multi-issuer
+            workload: Some(get_entity_claims(
+                self.config
+                    .authorization
+                    .decision_log_workload_claims
+                    .as_slice(),
+                &entities,
+                principal,
+            )),
             lock_client_id: None,
             action: request.action.clone(),
             resource: resource_uid.to_string(),
             decision: result.decision.into(),
             tokens: tokens_logging_info,
             decision_time_micro_sec,
-            diagnostics: DiagnosticsRefs::new(&[user_authz_diagnostic, workload_authz_diagnostic]),
+            diagnostics: DiagnosticsRefs::new(&[Some(&authz_info.diagnostics)]),
         });
 
-        // Debug log
+        // DEBUG LOG
+        // Log all result information about multi-issuer authorization
         self.config.log_service.as_ref().log_any(
             LogEntry::new_with_data(LogType::System, Some(request_id))
                 .set_level(LogLevel::DEBUG)
@@ -515,10 +457,7 @@ impl Authz {
                     context: request.context.clone().unwrap_or(json!({})),
                     resource: resource_uid.to_string(),
                     entities: entities_json,
-                    authorize_info: [user_authz_info, workload_authz_info]
-                        .into_iter()
-                        .flatten()
-                        .collect(),
+                    authorize_info: vec![authz_info],
                     authorized: result.decision,
                 })
                 .set_message("Result of multi-issuer authorize.".to_string()),
