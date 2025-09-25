@@ -84,7 +84,7 @@ public abstract class UserService {
 
     public User getUser(String userId, String... returnAttributes) {
         final String escapedUserId = escapeLog(userId);
-        log.debug("Getting user information from LDAP: userId = {}", escapedUserId);
+        log.debug("Getting user information from DB: userId = {}", escapedUserId);
 
         if (StringHelper.isEmpty(userId)) {
             return null;
