@@ -11,6 +11,7 @@
 use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::policy_store::PolicyStoreWithID;
+use crate::entity_builder::BuiltEntities;
 use crate::entity_builder::*;
 use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
@@ -21,7 +22,8 @@ use crate::log::{
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
-use request::{Request, RequestUnsigned};
+use request::{AuthorizeMultiIssuerRequest, Request, RequestUnsigned};
+use serde_json::json;
 use std::collections::{HashMap, HashSet};
 use std::io::Cursor;
 use std::str::FromStr;
@@ -313,31 +315,155 @@ impl Authz {
 
     /// Evaluate Multi-Issuer Authorization Request
     ///
-    /// This is a draft implementation for processing multiple JWT tokens from different issuers.
-    /// It validates the request format and JWT tokens, then performs authorization evaluation.
+    /// This implementation processes multiple JWT tokens from different issuers.
+    /// It validates the request format and JWT tokens, builds entities, and performs authorization evaluation.
     pub async fn authorize_multi_issuer(
         &self,
-        request: request::AuthorizeMultiIssuerRequest,
+        request: AuthorizeMultiIssuerRequest,
     ) -> Result<AuthorizeResult, AuthorizeError> {
-        // Validate the request format
-        request.validate()?;
+        let start_time = Utc::now();
+        let request_id = gen_uuid7();
 
-        // Validate JWT tokens using the JWT service
-        let _validated_tokens = self
+        // Validate the request structure
+        request
+            .validate()
+            .map_err(AuthorizeError::MultiIssuerValidation)?;
+
+        let schema = &self.config.policy_store.schema;
+
+        let validated_tokens = self
             .config
             .jwt_service
             .validate_multi_issuer_tokens(&request.tokens)
-            .map_err( AuthorizeError::MultiIssuerValidation)?;
+            .map_err(AuthorizeError::MultiIssuerValidation)?;
 
-        // TODO: Convert validated tokens to Token HashMap for entity building
-        // TODO: Build entities from validated tokens
-        // TODO: Perform authorization evaluation
-        // TODO: Return authorization result
+        let entities_data = self
+            .config
+            .entity_builder
+            .build_multi_issuer_entities(&validated_tokens, &request.resource)
+            .map_err(|e| AuthorizeError::MultiIssuerEntity(e.to_string()))?;
 
-        // Placeholder return - this will be implemented in future PRs
-        Err(AuthorizeError::MultiIssuerValidation(
-            MultiIssuerValidationError::EmptyTokenArray,
-        ))
+        let action = cedar_policy::EntityUid::from_str(request.action.as_str())
+            .map_err(AuthorizeError::Action)?;
+
+        let context = build_multi_issuer_context(
+            request.context.clone().unwrap_or(json!({})),
+            &entities_data.tokens,
+            &schema.schema,
+            &action,
+        )?;
+
+        let resource_uid = entities_data.resource.uid();
+
+        let principal = EntityUid::from_str("Acme::Any::\"whoever\"").unwrap();
+
+        let entities = entities_data.entities(Some(&schema.schema))?;
+
+        let authz_result = self
+            .execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: principal.clone(),
+                action: action.clone(),
+                resource: resource_uid.clone(),
+                context,
+            })
+            .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
+
+        let authz_info = AuthorizeInfo {
+            principal: principal.to_string(),
+            diagnostics: Diagnostics::new(
+                authz_result.diagnostics(),
+                &self.config.policy_store.policies,
+            ),
+            decision: authz_result.decision().into(),
+        };
+
+        let result = AuthorizeResult::new(
+            &self.config.authorization.principal_bool_operator,
+            Some(principal.clone()),
+            None, // No person principal for multi-issuer
+            Some(authz_result),
+            None, // No person result for multi-issuer
+            request_id,
+        )?;
+
+        // measure time how long request executes
+        let since_start = Utc::now().signed_duration_since(start_time);
+        let decision_time_micro_sec = since_start.num_microseconds().unwrap_or({
+            //overflow (exceeding 2^63 microseconds in either direction)
+            i64::MAX
+        });
+
+        // FROM THIS POINT WE ONLY MAKE LOGS
+
+        // getting entities as json
+        let mut entities_raw_json = Vec::new();
+        let cursor = Cursor::new(&mut entities_raw_json);
+
+        entities.write_to_json(cursor)?;
+        let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
+            .map_err(AuthorizeError::EntitiesToJson)?;
+
+        // Log policy evaluation errors if any exist
+        self.log_policy_evaluation_errors(
+            &authz_info.diagnostics,
+            "workload principal",
+            request_id,
+        );
+
+        let tokens_logging_info = LogTokensInfo::new(
+            &validated_tokens,
+            self.config
+                .authorization
+                .decision_log_default_jwt_id
+                .as_str(),
+        );
+
+        // Decision log
+        // we log decision log before debug log, to avoid cloning diagnostic info
+        self.config.log_service.as_ref().log_any(&DecisionLogEntry {
+            base: BaseLogEntry::new(LogType::Decision, request_id),
+            policystore_id: self.config.policy_store.id.as_str(),
+            policystore_version: self.config.policy_store.get_store_version(),
+            principal: DecisionLogEntry::principal(
+                false, // No person principal for multi-issuer
+                true,  // Workload principal for multi-issuer
+            ),
+            user: None, // No user claims for multi-issuer
+            workload: Some(get_entity_claims(
+                self.config
+                    .authorization
+                    .decision_log_workload_claims
+                    .as_slice(),
+                &entities,
+                principal,
+            )),
+            lock_client_id: None,
+            action: request.action.clone(),
+            resource: resource_uid.to_string(),
+            decision: result.decision.into(),
+            tokens: tokens_logging_info,
+            decision_time_micro_sec,
+            diagnostics: DiagnosticsRefs::new(&[Some(&authz_info.diagnostics)]),
+        });
+
+        // DEBUG LOG
+        // Log all result information about multi-issuer authorization
+        self.config.log_service.as_ref().log_any(
+            LogEntry::new_with_data(LogType::System, Some(request_id))
+                .set_level(LogLevel::DEBUG)
+                .set_auth_info(AuthorizationLogInfo {
+                    action: request.action.clone(),
+                    context: request.context.clone().unwrap_or(json!({})),
+                    resource: resource_uid.to_string(),
+                    entities: entities_json,
+                    authorize_info: vec![authz_info],
+                    authorized: result.decision,
+                })
+                .set_message("Result of multi-issuer authorize.".to_string()),
+        );
+
+        Ok(result)
     }
 
     /// Evaluate Authorization Request with unsigned data.
@@ -551,6 +677,7 @@ struct ExecuteAuthorizeParameters<'a> {
 }
 
 /// Structure to hold entites created from tokens
+#[derive(Debug)]
 pub struct AuthorizeEntitiesData {
     pub issuers: HashSet<Entity>,
     pub tokens: HashMap<String, Entity>,
