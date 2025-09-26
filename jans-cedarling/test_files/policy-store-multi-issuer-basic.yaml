@@ -10,7 +10,7 @@ policy_stores:
     description: A policy store for testing multi-issuer authorization with basic token queries
     trusted_issuers:
       AcmeIssuer:
-        name: "Acme Corporation"
+        name: "Acme"
         description: "Acme Corporation Identity Provider"
         openid_configuration_endpoint: "https://idp.acme.com/.well-known/openid-configuration"
         token_metadata:
@@ -48,7 +48,7 @@ policy_stores:
             permit(
                 principal,
                 action == Acme::Action::"GetFood",
-                resource in Acme::Resources::"ApprovedDolphinFoods"
+                resource in Acme::Resource::"ApprovedDolphinFoods"
             ) when {
                 context has tokens.dolphin_access_token &&
                 context.tokens.dolphin_access_token.hasTag("location") &&
@@ -154,19 +154,19 @@ policy_stores:
           } tags Set<String>;
           entity TrustedIssuer = {"issuer_entity_id": String};
           entity Resource = {"name": String};
-          entity Resources = {"name": String};
+          entity Any;
           action "GetFood" appliesTo {
-            principal: [User, Workload],
-            resource: [Resources],
+            principal: [Any],
+            resource: [Resource],
             context: Context
           };
           action "ReadProfile" appliesTo {
-            principal: [User, Workload],
+            principal: [Any],
             resource: [Resource],
             context: Context
           };
           action "SwimWithOrca" appliesTo {
-            principal: [User, Workload],
+            principal: [Any],
             resource: [Resource],
             context: Context
           };

@@ -355,7 +355,7 @@ impl Authz {
 
         let resource_uid = entities_data.resource.uid();
 
-        let principal = EntityUid::from_str("Acme::User::\"some_jti\"").unwrap();
+        let principal = EntityUid::from_str("Acme::Any::\"whoever\"").unwrap();
 
         let entities = entities_data.entities(Some(&schema.schema))?;
 

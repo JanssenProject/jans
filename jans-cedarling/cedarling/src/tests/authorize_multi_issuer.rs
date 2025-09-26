@@ -3,9 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::authz::request::{AuthorizeMultiIssuerRequest, EntityData, TokenInput};
-use super::utils::*;
 use super::utils::cedarling_util::get_cedarling_with_callback;
+use super::utils::*;
+use crate::authz::request::{AuthorizeMultiIssuerRequest, EntityData, TokenInput};
 use serde_json::json;
 
 /// Test successful multi-issuer authorization scenarios
@@ -14,18 +14,32 @@ use serde_json::json;
 #[tokio::test]
 async fn test_multi_issuer_authorization_success() {
     // Load the policy store configuration
-    static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store-multi-issuer-basic.yaml");
+    static POLICY_STORE_RAW_YAML: &str =
+        include_str!("../../../test_files/policy-store-multi-issuer-basic.yaml");
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         |config| {
             // Disable workload and user entity building for multi-issuer tests
             // since the policies work with token entities in context, not principal entities
-            config.entity_builder_config.build_workload = true;
+            config.entity_builder_config.build_workload = false;
             config.entity_builder_config.build_user = false;
-            config.authorization_config.use_workload_principal = true;
+            config.authorization_config.use_workload_principal = false;
             config.authorization_config.use_user_principal = false;
-        }
-    ).await;
+
+            // Configure the principal boolean rule to work with Any entity principals
+            // This rule allows authorization if any principal (including Any entities) returns ALLOW
+            config.authorization_config.principal_bool_operator =
+                crate::common::json_rules::JsonRule::new(serde_json::json!({
+                    "or": [
+                        {"===": [{"var": "Acme::Any"}, "ALLOW"]},
+                        {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+                        {"===": [{"var": "Jans::User"}, "ALLOW"]}
+                    ]
+                }))
+                .unwrap();
+        },
+    )
+    .await;
 
     // Test Case 1: Single Dolphin access token with location claim
     let dolphin_access_token = generate_token_using_claims(json!({
@@ -35,7 +49,7 @@ async fn test_multi_issuer_authorization_success() {
         "client_id": "dolphin_client_123",
         "aud": "dolphin_audience",
         "location": ["miami", "orlando"],
-        // "scope": ["read", "write"],
+        "scope": ["read", "write"],
         "exp": 2000000000,
         "iat": 1516239022
     }));
@@ -53,35 +67,35 @@ async fn test_multi_issuer_authorization_success() {
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![
-            TokenInput::new(
-                "Dolphin::Access_Token".to_string(),
-                dolphin_access_token,
-            ),
-            TokenInput::new(
-                "Dolphin::Dolphin_Token".to_string(),
-                dolphin_user_token,
-            ),
+            TokenInput::new("Dolphin::Access_Token".to_string(), dolphin_access_token),
+            TokenInput::new("Dolphin::Dolphin_Token".to_string(), dolphin_user_token),
         ],
-        EntityData::from_json(&json!({
-            "cedar_entity_mapping": {
-                "entity_type": "Acme::Resources",
-                "id": "ApprovedDolphinFoods"
-            },
-            "name": "Approved Dolphin Foods"
-        }).to_string()).expect("Failed to create resource entity"),
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Acme::Resource",
+                    "id": "ApprovedDolphinFoods"
+                },
+                "name": "Approved Dolphin Foods"
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
         "Acme::Action::\"GetFood\"".to_string(),
         None,
     );
 
     let result = cedarling.authorize_multi_issuer(request).await;
-    if let Err(e) = &result {
-        println!("Error in dolphin access token authorization: {:?}", e);
-    }
-    assert!(result.is_ok(), "Dolphin access token authorization should succeed");
-    
+    assert!(
+        result.is_ok(),
+        "Dolphin access token authorization should succeed"
+    );
+
     let authz_result = result.unwrap();
-    println!("Authorization result: {:?}", authz_result);
-    assert!(authz_result.decision, "Authorization should be ALLOW for dolphin access token");
+    assert!(
+        authz_result.decision,
+        "Authorization should be ALLOW for dolphin access token"
+    );
 
     // Test Case 2: Single Acme access token with scope claim
     let acme_access_token = generate_token_using_claims(json!({
@@ -89,7 +103,7 @@ async fn test_multi_issuer_authorization_success() {
         "sub": "acme_user_456",
         "jti": "acme123",
         "client_id": "acme_client_456",
-        // "scope": ["read:wiki", "write:profile"],
+        "scope": ["read:wiki", "write:profile"],
         "aud": "my-client-id",
         "exp": 2000000000,
         "iat": 1516239022
@@ -97,25 +111,35 @@ async fn test_multi_issuer_authorization_success() {
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![TokenInput::new(
-            "access_token".to_string(),
+            "Acme::Access_Token".to_string(),
             acme_access_token,
         )],
-        EntityData::from_json(&json!({
-            "cedar_entity_mapping": {
-                "entity_type": "Acme::Resource",
-                "id": "WikiPages"
-            },
-            "name": "Wiki Pages"
-        }).to_string()).expect("Failed to create resource entity"),
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Acme::Resource",
+                    "id": "WikiPages"
+                },
+                "name": "Wiki Pages"
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
         "Acme::Action::\"ReadProfile\"".to_string(),
         None,
     );
 
     let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(result.is_ok(), "Acme access token authorization should succeed");
-    
+    assert!(
+        result.is_ok(),
+        "Acme access token authorization should succeed"
+    );
+
     let authz_result = result.unwrap();
-    assert!(authz_result.decision, "Authorization should be ALLOW for acme access token");
+    assert!(
+        authz_result.decision,
+        "Authorization should be ALLOW for acme access token"
+    );
 
     // Test Case 3: Single Dolphin custom token with waiver claim
     let dolphin_custom_token = generate_token_using_claims(json!({
@@ -134,22 +158,32 @@ async fn test_multi_issuer_authorization_success() {
             "dolphin_token".to_string(),
             dolphin_custom_token,
         )],
-        EntityData::from_json(&json!({
-            "cedar_entity_mapping": {
-                "entity_type": "Acme::Resource",
-                "id": "MiamiAcquarium"
-            },
-            "name": "Miami Aquarium"
-        }).to_string()).expect("Failed to create resource entity"),
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Acme::Resource",
+                    "id": "MiamiAcquarium"
+                },
+                "name": "Miami Aquarium"
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
         "Acme::Action::\"SwimWithOrca\"".to_string(),
         None,
     );
 
     let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(result.is_ok(), "Dolphin custom token authorization should succeed");
-    
+    assert!(
+        result.is_ok(),
+        "Dolphin custom token authorization should succeed"
+    );
+
     let authz_result = result.unwrap();
-    assert!(authz_result.decision, "Authorization should be ALLOW for dolphin custom token");
+    assert!(
+        authz_result.decision,
+        "Authorization should be ALLOW for dolphin custom token"
+    );
 
     // Test Case 4: Multiple tokens from different issuers
     let acme_multi_token = generate_token_using_claims(json!({
@@ -158,7 +192,7 @@ async fn test_multi_issuer_authorization_success() {
         "jti": "acme_multi_123",
         "client_id": "acme_multi_client_123",
         "aud": "acme_multi_audience",
-        // "scope": ["read:wiki", "write:profile"],
+        "scope": ["read:wiki", "write:profile"],
         "exp": 2000000000,
         "iat": 1516239022
     }));
@@ -176,30 +210,30 @@ async fn test_multi_issuer_authorization_success() {
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![
-            TokenInput::new(
-                "access_token".to_string(),
-                acme_multi_token,
-            ),
-            TokenInput::new(
-                "access_token".to_string(),
-                dolphin_multi_token,
-            ),
+            TokenInput::new("Acme::Access_Token".to_string(), acme_multi_token),
+            TokenInput::new("Dolphin::Access_Token".to_string(), dolphin_multi_token),
         ],
-        EntityData::from_json(&json!({
-            "cedar_entity_mapping": {
-                "entity_type": "Acme::Resource",
-                "id": "WikiPages"
-            },
-            "name": "Wiki Pages"
-        }).to_string()).expect("Failed to create resource entity"),
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Acme::Resource",
+                    "id": "WikiPages"
+                },
+                "name": "Wiki Pages"
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
         "Acme::Action::\"ReadProfile\"".to_string(),
         None,
     );
 
     let result = cedarling.authorize_multi_issuer(request).await;
     assert!(result.is_ok(), "Multi-token authorization should succeed");
-    
-    let authz_result = result.unwrap();
-    assert!(authz_result.decision, "Authorization should be ALLOW for multi-token request");
-}
 
+    let authz_result = result.unwrap();
+    assert!(
+        authz_result.decision,
+        "Authorization should be ALLOW for multi-token request"
+    );
+}
