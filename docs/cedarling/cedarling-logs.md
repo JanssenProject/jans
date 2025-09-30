@@ -80,7 +80,7 @@ pub trait LogStorage {
 
 ## Jans Lock Server
 
-In enterprise deployments, [Janssen Lock Server](../janssen-server/lock/) collects Cedarling
+In enterprise deployments, [Janssen Lock Server](../janssen-server/lock/lock-server.md) collects Cedarling
 logs and can stream to a database or S3 bucket. The Cedarling decision logs provide compliance
 evidence of usage of the domain's externalized policies. The logs are also useful for forensic
 analysis to show everything the attacker attempted, both allowed and denied.
