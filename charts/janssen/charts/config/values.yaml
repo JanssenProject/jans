@@ -31,9 +31,9 @@ configmap:
   cnSqlDbTimezone: UTC
   # -- SQL password  injected in the secrets.
   cnSqldbUserPassword: Test1234#
-  # -- Enforce connection to SQL database using SSL.
+  # -- Enable SSL connection to SQL database.
   cnSqlSslEnabled: false
-  # -- Mode when connecting to SQL database using SSL. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`.
+  # -- Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`.
   cnSqlSslMode: ""
   # -- Base64-encoded string of CA certificate used to sign client/server certificate of MySQL/PostgreSQL server. Required if using client cert authentication.
   cnSqlSslCaCert: ""
