@@ -181,18 +181,21 @@ spec:
         - name: {{ .Release.Name }}-sql-ssl-ca-cert
           secret:
             secretName: {{ .Release.Name }}-sql-ssl
+            optional: true
             items:
               - key: sql_cacert.pem
                 path: sql_cacert.pem
         - name: {{ .Release.Name }}-sql-ssl-client-cert
           secret:
             secretName: {{ .Release.Name }}-sql-ssl
+            optional: true
             items:
               - key: sql_client_cert.pem
                 path: sql_client_cert.pem
         - name: {{ .Release.Name }}-sql-ssl-client-key
           secret:
             secretName: {{ .Release.Name }}-sql-ssl
+            optional: true
             defaultMode: 0440
             items:
               - key: sql_client_key.pem
