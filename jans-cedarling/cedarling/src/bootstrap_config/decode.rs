@@ -139,6 +139,7 @@ impl BootstrapConfig {
             lock_config,
             max_default_entities: raw.max_default_entities,
             max_base64_size: raw.max_base64_size,
+            token_cache_max_ttl_secs: raw.token_cache_max_ttl,
         })
     }
 }

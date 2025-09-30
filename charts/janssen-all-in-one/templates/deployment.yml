@@ -129,6 +129,17 @@ spec:
             mountPath: /scripts/updatelbip.py
             subPath: updatelbip.py
         {{- end }}
+        {{- if .Values.configmap.cnSqlSslEnabled }}
+          - name: {{ .Release.Name }}-sql-ssl-ca-cert
+            mountPath: /etc/certs/sql_cacert.pem
+            subPath: sql_cacert.pem
+          - name: {{ .Release.Name }}-sql-ssl-client-cert
+            mountPath: /etc/certs/sql_client_cert.pem
+            subPath: sql_client_cert.pem
+          - name: {{ .Release.Name }}-sql-ssl-client-key
+            mountPath: /etc/certs/sql_client_key.pem
+            subPath: sql_client_key.pem
+        {{- end }}
         livenessProbe:
 {{- toYaml .Values.livenessProbe | nindent 10 }}
         readinessProbe:
@@ -159,6 +170,27 @@ spec:
         - name: {{ include "janssen-all-in-one.fullname" . }}-updatelbip
           configMap:
             name: {{ .Release.Name }}-updatelbip
+      {{- end }}
+      {{- if .Values.configmap.cnSqlSslEnabled }}
+        - name: {{ .Release.Name }}-sql-ssl-ca-cert
+          secret:
+            secretName: {{ .Release.Name }}-sql-ssl
+            items:
+              - key: sql_cacert.pem
+                path: sql_cacert.pem
+        - name: {{ .Release.Name }}-sql-ssl-client-cert
+          secret:
+            secretName: {{ .Release.Name }}-sql-ssl
+            items:
+              - key: sql_client_cert.pem
+                path: sql_client_cert.pem
+        - name: {{ .Release.Name }}-sql-ssl-client-key
+          secret:
+            secretName: {{ .Release.Name }}-sql-ssl
+            defaultMode: 0640
+            items:
+              - key: sql_client_key.pem
+                path: sql_client_key.pem
       {{- end }}
       {{- if .Values.nodeSelector }}
       nodeSelector:

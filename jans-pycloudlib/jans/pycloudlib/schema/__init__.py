@@ -503,6 +503,30 @@ class SecretSchema(Schema):
         },
     )
 
+    sql_ssl_ca_cert = CertKey(
+        load_default="",
+        dump_default="",
+        metadata={
+            "description": "SSL root (CA) certificate for the SQL persistence",
+        },
+    )
+
+    sql_ssl_client_cert = CertKey(
+        load_default="",
+        dump_default="",
+        metadata={
+            "description": "SSL client certificate for the SQL persistence",
+        },
+    )
+
+    sql_ssl_client_key = CertKey(
+        load_default="",
+        dump_default="",
+        metadata={
+            "description": "SSL client key for the SQL persistence",
+        },
+    )
+
     @post_load
     def transform_data(self, in_data, **kwargs):
         # list of attrs that maybe base64 string and need to be decoded

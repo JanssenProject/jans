@@ -36,6 +36,7 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        token_cache_max_ttl_secs: 60,
     }
 }
 
@@ -85,6 +86,7 @@ pub async fn get_cedarling_with_authorization_conf(
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        token_cache_max_ttl_secs: 60,
     })
     .await
     .expect("bootstrap config should initialize correctly")

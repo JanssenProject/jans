@@ -13584,13 +13584,14 @@ paths:
           description: Success
         "401":
           description: Unauthorized
-        "404":
-          description: Not Found
+        "422":
+          description: Unprocessable Entity
         "500":
           description: InternalServerError
       security:
       - oauth2:
         - https://jans.io/oauth/config/ssa.delete
+        - https://jans.io/auth/ssa.admin
   /api/v1/stat:
     get:
       tags:
@@ -14912,19 +14913,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
+        adminCanView:
+          type: boolean
+        userCanView:
+          type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -17676,9 +17677,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object
