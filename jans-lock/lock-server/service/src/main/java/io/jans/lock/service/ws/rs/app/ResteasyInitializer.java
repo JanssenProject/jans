@@ -22,7 +22,7 @@ import java.util.Set;
 import io.jans.lock.service.filter.AuthorizationProcessingFilter;
 import io.jans.lock.service.ws.rs.ConfigurationRestWebService;
 import io.jans.lock.service.ws.rs.audit.AuditRestWebServiceImpl;
-import io.jans.lock.service.ws.rs.config.ConfigRestWebServiceImpl;
+import io.jans.lock.service.ws.rs.policy.PolicyRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.sse.SseRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.stat.StatRestWebServiceImpl;
 import io.jans.lock.util.ApiAccessConstants;
@@ -64,8 +64,7 @@ import jakarta.ws.rs.core.Application;
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
         @OAuthScope(name = ApiAccessConstants.LOCK_CONFIG_READ_ACCESS, description = "View configuration related information"),
         @OAuthScope(name = ApiAccessConstants.LOCK_CONFIG_ISSUERS_READ_ACCESS, description = "View issuers related information"),
-        @OAuthScope(name = ApiAccessConstants.LOCK_CONFIG_SCHEMA_READ_ACCESS, description = "View schema related information"),
-        @OAuthScope(name = ApiAccessConstants.LOCK_CONFIG_POLICY_READ_ACCESS, description = "View policy related information"),
+        @OAuthScope(name = ApiAccessConstants.LOCK_POLICY_READ_ACCESS, description = "View policy related information"),
         @OAuthScope(name = ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS, description = "Write audit health entries"),
         @OAuthScope(name = ApiAccessConstants.LOCK_LOG_WRITE_ACCESS, description = "Write audit log entries"),
         @OAuthScope(name = ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS, description = "Write telemetry health entries"),
@@ -83,7 +82,7 @@ public class ResteasyInitializer extends Application {
 		classes.add(ConfigurationRestWebService.class);
 
 		classes.add(AuditRestWebServiceImpl.class);
-		classes.add(ConfigRestWebServiceImpl.class);
+		classes.add(PolicyRestWebServiceImpl.class);
 		classes.add(StatRestWebServiceImpl.class);
 
 		classes.add(SseRestWebServiceImpl.class);

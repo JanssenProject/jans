@@ -16,10 +16,12 @@
 
 package io.jans.lock.cedarling.config;
 
+import java.util.Collection;
+
 import org.json.JSONObject;
 
-import io.jans.lock.model.config.CedarlingLogLevel;
-import io.jans.lock.model.config.CedarlingLogType;
+import io.jans.lock.model.config.cedarling.LogLevel;
+import io.jans.lock.model.config.cedarling.LogType;
 
 /**
  * Cedarling BootstrapConfig builder
@@ -35,6 +37,7 @@ public class BootstrapConfig {
 	public static final String CEDARLING_AUDIT_TELEMETRY_INTERVAL = "CEDARLING_AUDIT_TELEMETRY_INTERVAL";
 	public static final String CEDARLING_AUDIT_HEALTH_INTERVAL = "CEDARLING_AUDIT_HEALTH_INTERVAL";
 	public static final String CEDARLING_POLICY_STORE_LOCAL = "CEDARLING_POLICY_STORE_LOCAL";
+	public static final String CEDARLING_POLICY_STORE_LOCAL_ID = "CEDARLING_POLICY_STORE_LOCAL_ID";
 	public static final String CEDARLING_USER_AUTHZ = "CEDARLING_USER_AUTHZ";
 	public static final String CEDARLING_WORKLOAD_AUTHZ = "CEDARLING_WORKLOAD_AUTHZ";
 
@@ -42,8 +45,8 @@ public class BootstrapConfig {
 	private String policyStoreLocal = null;
 	private boolean userAuthz = false;
 	private boolean workloadAuthz = true;
-	private CedarlingLogType logType = CedarlingLogType.MEMORY;
-	private CedarlingLogLevel logLevel = CedarlingLogLevel.DEBUG;
+	private LogType logType = LogType.MEMORY;
+	private LogLevel logLevel = LogLevel.DEBUG;
 	private Integer logTtl;
 
 	private BootstrapConfig() {
@@ -66,16 +69,21 @@ public class BootstrapConfig {
 	public String toJsonConfig() {
 		JSONObject jo = new JSONObject();
 		jo.put(CEDARLING_APPLICATION_NAME, applicationName);
-		jo.put(CEDARLING_WORKLOAD_AUTHZ, workloadAuthz);
-		jo.put(CEDARLING_USER_AUTHZ, userAuthz);
-		jo.put(CEDARLING_POLICY_STORE_LOCAL, policyStoreLocal);
+		jo.put(CEDARLING_WORKLOAD_AUTHZ, toEnabled(workloadAuthz));
+		jo.put(CEDARLING_USER_AUTHZ, toEnabled(userAuthz));
 		jo.put(CEDARLING_AUDIT_HEALTH_INTERVAL, 0);
 		jo.put(CEDARLING_AUDIT_TELEMETRY_INTERVAL, 0);
-		jo.put(CEDARLING_LOG_TYPE, logType);
+		jo.put(CEDARLING_LOG_TYPE, logType.getType());
 		jo.put(CEDARLING_LOG_LEVEL, logLevel);
 		jo.put(CEDARLING_LOG_TTL, logTtl);
+		jo.put(CEDARLING_POLICY_STORE_LOCAL_ID, "lock-server-policy-id");
+		jo.put(CEDARLING_POLICY_STORE_LOCAL, policyStoreLocal);
 
 		return jo.toString();
+	}
+
+	private String toEnabled(boolean value) {
+		return value ? "enabled" : "disabled";
 	}
 
 	public static class Builder {
@@ -83,8 +91,8 @@ public class BootstrapConfig {
 		private String policyStoreLocal = null;
 		private boolean userAuthz = false;
 		private boolean workloadAuthz = true;
-		private CedarlingLogType logType = CedarlingLogType.MEMORY;
-		private CedarlingLogLevel logLevel = CedarlingLogLevel.DEBUG;
+		private LogType logType = LogType.MEMORY;
+		private LogLevel logLevel = LogLevel.DEBUG;
 
 		protected Builder() {
 		}
@@ -109,12 +117,12 @@ public class BootstrapConfig {
 			return this;
 		}
 
-		public Builder logType(CedarlingLogType logType) {
+		public Builder logType(LogType logType) {
 			this.logType = logType;
 			return this;
 		}
 
-		public Builder logLevel(CedarlingLogLevel logLevel) {
+		public Builder logLevel(LogLevel logLevel) {
 			this.logLevel = logLevel;
 			return this;
 		}

@@ -4,7 +4,7 @@ import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 
-public interface ProtectionService {
+public interface OpenIdProtection {
 
     Response processAuthorization(HttpHeaders httpHeaders, ResourceInfo resourceInfo);
 

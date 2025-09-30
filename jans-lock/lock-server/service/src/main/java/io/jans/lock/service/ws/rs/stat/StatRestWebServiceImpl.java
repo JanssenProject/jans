@@ -29,7 +29,6 @@ import io.prometheus.client.exporter.common.TextFormat;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.FormParam;
-import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
@@ -161,7 +160,7 @@ public class StatRestWebServiceImpl extends BaseResource implements StatRestWebS
 			throw e;
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).build();
+			throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, StatErrorResponseType.ACCESS_DENIED, "Server server.");
 		}
 	}
 

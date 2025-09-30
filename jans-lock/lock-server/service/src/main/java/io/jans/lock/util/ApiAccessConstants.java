@@ -18,8 +18,8 @@ public class ApiAccessConstants {
 
     public static final String LOCK_CONFIG_READ_ACCESS = "https://jans.io/oauth/lock-config.readonly";
     public static final String LOCK_CONFIG_ISSUERS_READ_ACCESS = "https://jans.io/lock-server/issuers.readonly";
-    public static final String LOCK_CONFIG_SCHEMA_READ_ACCESS = "https://jans.io/lock-server/schema.readonly";
-    public static final String LOCK_CONFIG_POLICY_READ_ACCESS = "https://jans.io/lock-server/policy.readonly";
+
+    public static final String LOCK_POLICY_READ_ACCESS = "https://jans.io/lock-server/policy.readonly";
 
     public static final String LOCK_HEALTH_WRITE_ACCESS = "https://jans.io/oauth/lock/health.write";
     public static final String LOCK_LOG_WRITE_ACCESS = "https://jans.io/oauth/lock/log.write";
@@ -29,5 +29,7 @@ public class ApiAccessConstants {
     
     public static final String LOCK_STAT_READ_ACCESS = "jans_stat";
     
+    public static final String URI_PATH = "{uri}";
+    public static final String URI = "uri";
 
 }

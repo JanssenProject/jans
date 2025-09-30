@@ -20,18 +20,4 @@ package io.jans.lock.model.config;
  * 
  * @author Yuriy Movchan Date: 10/08/2022
  */
-public enum CedarlingLogType {
-	OFF("off"),
-	MEMORY("memory"),
-	STD_OUT("std_out");
-
-	private final String type;
-
-	private CedarlingLogType(String type) {
-		this.type = type;
-	}
-
-	public String getType() {
-		return type;
-	}
-}
+public enum LockProtectionMode { OAUTH, CEDARLING }

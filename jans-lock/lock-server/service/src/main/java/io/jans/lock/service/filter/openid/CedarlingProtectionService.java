@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,18 +33,22 @@ import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
+import io.jans.lock.cedarling.service.CedarlingAuthorizationService;
+import io.jans.lock.cedarling.service.filter.CedarlingProtection;
+import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.service.OpenIdService;
-import io.jans.lock.service.filter.OpenIdProtection;
 import io.jans.service.security.api.ProtectedApi;
+import io.jans.util.Pair;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
-public class OpenIdProtectionService implements OpenIdProtection {
+public class CedarlingProtectionService implements CedarlingProtection {
 
     @Inject
     private Logger log;
@@ -51,26 +56,23 @@ public class OpenIdProtectionService implements OpenIdProtection {
     @Inject
     private OpenIdService openIdService;
     
-    private IntrospectionService introspectionService;
+    private CedarlingAuthorizationService authorizationService;
     
     private OpenIdConfigurationResponse oidcConfig;
     
     private ObjectMapper mapper;
-
+    
     @PostConstruct
     private void init() {
         try {
             mapper = new ObjectMapper();
             oidcConfig = openIdService.getOpenIdConfiguration();
-            
-            String introspectionEndpoint = oidcConfig.getIntrospectionEndpoint();
-            introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, ClientFactory.instance().createEngine());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    public Response processAuthorization(HttpHeaders headers, ResourceInfo resourceInfo) {
+    public Response processAuthorization(ContainerRequestContext requestContext, HttpHeaders headers, ResourceInfo resourceInfo) {
         try {
             String token = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
             boolean authFound = StringUtils.isNotEmpty(token);
@@ -85,20 +87,15 @@ public class OpenIdProtectionService implements OpenIdProtection {
             token = token.replaceFirst("Bearer\\s+","");
             log.debug("Validating token {}", token);
 
-            List<String> scopes = getRequestedScopes(resourceInfo);
-            log.info("Call requires scopes: {}", scopes);
+            List<Pair<String, String>> requestedOperations = getRequestedOperations(resourceInfo);
+            log.info("Check access to requested opearations: {}", requestedOperations);
+            if (requestedOperations.size() == 0) {
+	            return simpleResponse(INTERNAL_SERVER_ERROR, "Access to operation is not correct");
+            }
 
             Jwt jwt = tokenAsJwt(token);
             if (jwt == null) {
-                // Do standard token validation
-                IntrospectionResponse iresp = null;
-                try {
-                    iresp = introspectionService.introspectToken("Bearer " + token, token);
-                } catch (Exception e) {
-                    log.error(e.getMessage());
-                }
-
-                return processIntrospectionResponse(iresp, scopes);
+                return simpleResponse(FORBIDDEN, "Provided token isn't JWT encoded");
             }
 
             // Process the JWT: validate isuer, expiration and signature
@@ -126,35 +123,29 @@ public class OpenIdProtectionService implements OpenIdProtection {
             boolean valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), 
                     jwt.getHeader().getKeyId(), new JSONObject(jwks), null, signatureAlg);
 
-            List<String> tokenScopes = claims.getClaimAsStringList("scope");    //tokenScopes is never null
-            if (valid && tokenScopes.containsAll(scopes)) {
-            	return null;
+            if (valid) {
+	            boolean authorized = true;
+	            Map<String, String> tokens = getCedarlingTokens(token);
+	            for (Pair<String, String> requestedOperation : requestedOperations) {
+	            	authorized &= authorizationService.authorize(tokens, requestedOperation.getFirst(),
+	            			getCedarlingResource(requestedOperation.getSecond()), getCedarlingCpntext());
+	            	if (!authorized) {
+	            		log.error("Insufficient permissions to access '{}' resource '{}'", requestedOperation.getSecond(), requestedOperation.getFirst());
+	            		break;
+	            	}
+	            }
+	            
+	            if (authorized) {
+	            	return null;
+	            }
             }
  
-            String msg = "Invalid token signature or insufficient scopes";
-            log.error("{}. Token scopes: {}", msg, tokenScopes);
-            
             // See section 3.12 RFC 7644
-            return simpleResponse(FORBIDDEN, msg);
+            return simpleResponse(FORBIDDEN, "Invalid token signature or insufficient scopes");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return simpleResponse(INTERNAL_SERVER_ERROR, e.getMessage());
         }
-    }
-
-    public Response processIntrospectionResponse(IntrospectionResponse iresponse, List<String> scopes) {
-        Response response = null;
-        List<String> tokenScopes = Optional.ofNullable(iresponse).map(IntrospectionResponse::getScope)
-                .orElse(null);
-
-        if (tokenScopes == null || !iresponse.isActive() || !tokenScopes.containsAll(scopes)) {
-            String msg = "Invalid token or insufficient scopes";
-            log.error("{}. Token scopes: {}", msg, tokenScopes);
-            // See section 3.12 RFC 7644
-            response = simpleResponse(Response.Status.FORBIDDEN, msg);
-        }
-
-        return response;
     }
 
     private Jwt tokenAsJwt(String token) {
@@ -169,14 +160,33 @@ public class OpenIdProtectionService implements OpenIdProtection {
         return jwt;
     }
 
-    private List<String> getRequestedScopes(ResourceInfo resourceInfo) {
-        List<String> scopes = new ArrayList<>();
-        scopes.addAll(getScopesFromAnnotation(resourceInfo.getResourceClass()));
-        scopes.addAll(getScopesFromAnnotation(resourceInfo.getResourceMethod()));
+	private Map<String, String> getCedarlingTokens(String accessToken) {
+		return Map.of("access_token", accessToken);
+	}
+
+	private Map<String, Object> getCedarlingResource(String entityType) {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.putAll(
+				Map.of("cedar_entity_mapping",
+						Map.of("entity_type", entityType, "id", entityType.hashCode())
+					)
+			);
+		return map;
+	}
+
+	private Map<String, Object> getCedarlingCpntext() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		return map;
+	}
+
+    private List<Pair<String, String>> getRequestedOperations(ResourceInfo resourceInfo) {
+        List<Pair<String, String>> cedarlingPermissions = new ArrayList<>();
+        cedarlingPermissions.add(getOperationFromAnnotation(resourceInfo.getResourceClass()));
+        cedarlingPermissions.add(getOperationFromAnnotation(resourceInfo.getResourceMethod()));
 
         Method baseMethod = resourceInfo.getResourceMethod();
         for (Class<?> interfaces : resourceInfo.getResourceClass().getInterfaces()) {
-            scopes.addAll(getScopesFromAnnotation(interfaces));
+        	cedarlingPermissions.add(getOperationFromAnnotation(interfaces));
             
             Method method = null;
 			try {
@@ -185,18 +195,23 @@ public class OpenIdProtectionService implements OpenIdProtection {
 				// It's expected behavior
 			}
             if (method != null) {
-                scopes.addAll(getScopesFromAnnotation(method));
+            	cedarlingPermissions.add(getOperationFromAnnotation(method));
             }
 
         }
 
-        return scopes;
+        return cedarlingPermissions;
     }
 
-    private List<String> getScopesFromAnnotation(AnnotatedElement elem) {		
-        return optAnnnotation(elem, ProtectedApi.class).map(ProtectedApi::scopes)
-            .map(Arrays::asList).orElse(Collections.emptyList());
-    }	
+	private Pair<String, String> getOperationFromAnnotation(AnnotatedElement elem) {
+		Optional<ProtectedCedarlingApi> annotation = optAnnnotation(elem, ProtectedCedarlingApi.class);
+		if (annotation.isPresent()) {
+			ProtectedCedarlingApi cedarlingPermission = annotation.get();
+			return new Pair(cedarlingPermission.action(), cedarlingPermission.resource());
+		} else {
+			return null;
+		}
+	}
 
     private static <T extends Annotation> Optional<T> optAnnnotation(AnnotatedElement elem, Class<T> cls) {
         return Optional.ofNullable(elem.getAnnotation(cls));

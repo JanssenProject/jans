@@ -158,7 +158,6 @@ public abstract class BaseHttpService implements Serializable {
 	}
 
 	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType, String authType) {
-	    
         HttpPost httpPost = new HttpPost(uri);
 
         if(StringHelper.isEmpty(authType)) { 
@@ -207,7 +206,17 @@ public abstract class BaseHttpService implements Serializable {
 		try {
 			return new String(base64.encode((value).getBytes(Util.UTF8)), Util.UTF8);
 		} catch (UnsupportedEncodingException ex) {
-	    	log.error("Failed to convert '{}' to base64", value, ex);
+	    	log.error("Failed to encode '{}' to base64", value, ex);
+		}
+
+		return null;
+	}
+
+	public String decodeBase64(String value) {
+		try {
+			return new String(base64.decode((value).getBytes(Util.UTF8)), Util.UTF8);
+		} catch (UnsupportedEncodingException ex) {
+	    	log.error("Failed to decode '{}' from base64", value, ex);
 		}
 
 		return null;

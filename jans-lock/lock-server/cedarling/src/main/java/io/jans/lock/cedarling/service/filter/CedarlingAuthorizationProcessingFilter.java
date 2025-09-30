@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 
-import io.jans.service.security.api.ProtectedCedarlingApi;
-import io.jans.lock.cedarling.CedarlingAuthorizationService;
+import io.jans.lock.cedarling.service.CedarlingAuthorizationService;
+import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -30,7 +30,7 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 	private Logger log;
 	
 	@Inject
-	private CedarlingAuthorizationService cedarlingAuthorizationService;
+	private CedarlingProtection protectionService;
 
 	@Context
 	private HttpHeaders httpHeaders;
@@ -54,7 +54,7 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 		String path = requestContext.getUriInfo().getPath();
 		log.debug("REST call to '{}' intercepted", path);
 
-		Response authorizationResponse = cedarlingAuthorizationService.authorize(requestContext, httpHeaders, resourceInfo);
+		Response authorizationResponse = protectionService.processAuthorization(requestContext, httpHeaders, resourceInfo);
 		if (authorizationResponse == null) {
 			// Actual processing of request proceeds
 			log.debug("Authorization passed");

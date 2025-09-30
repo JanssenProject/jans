@@ -1,4 +1,4 @@
-package io.jans.service.security.api;
+package io.jans.lock.cedarling.service.security.api;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,8 +13,13 @@ import jakarta.ws.rs.NameBinding;
 public @interface ProtectedCedarlingApi {
 	
 	/**
-     * @return Scopes access token should have to access this endpoint
+     * @return action name
      */
-	String[] scopes() default {};
+	String action() default "";
+
+	/**
+     * @return resource name
+     */
+	String resource() default "";
 
 }

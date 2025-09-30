@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [Janssen Project]
+ * Copyright [2024] [Janssen Project]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,10 @@
  * limitations under the License.
  */
 
-package io.jans.lock.model.config;
+package io.jans.lock.cedarling.service.event;
 
 /**
- * 
- * @author Yuriy Movchan Date: 10/08/2022
+ * @author Yuriy Movchan Date: 12/30/2023
  */
-public enum CedarlingLogLevel {
-	FATAL("FATAL"),
-	ERROR("ERROR"),
-	WARN("WARN"),
-	INFO("INFO"),
-	DEBUG("DEBUG"),
-	TRACE("TRACE");
-	
-	private final String type;
-
-	private CedarlingLogLevel(String type) {
-		this.type = type;
-	}
-
-	public String getType() {
-		return type;
-	}
+public class PolicyDownloadEvent {
 }

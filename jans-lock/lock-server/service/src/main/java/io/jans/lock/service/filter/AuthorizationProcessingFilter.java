@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 
+import io.jans.lock.service.filter.openid.OpenIdProtectionService;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
@@ -29,7 +30,7 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 	private Logger log;
 	
 	@Inject
-	private ProtectionService protectionService;
+	private OpenIdProtection protectionService;
 
 	@Context
 	private HttpHeaders httpHeaders;

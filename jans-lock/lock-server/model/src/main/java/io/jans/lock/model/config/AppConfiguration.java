@@ -22,6 +22,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.doc.annotation.DocProperty;
+import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.enterprise.inject.Vetoed;
 
@@ -48,7 +49,7 @@ public class AppConfiguration implements Configuration {
     
     @DocProperty(description = "SCIM Protection Mode")
     @Schema(description = "OpenID issuer URL")
-    private CedarlingLockProtecionMode protectionMode;
+    private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
     
     @DocProperty(description = "Cedarling configuration")
     @Schema(description = "Cedarling configuration")
@@ -150,11 +151,11 @@ public class AppConfiguration implements Configuration {
         this.openIdIssuer = openIdIssuer;
     }
 
-    public CedarlingLockProtecionMode getProtectionMode() {
+    public LockProtectionMode getProtectionMode() {
 		return protectionMode;
 	}
 
-	public void setProtectionMode(CedarlingLockProtecionMode protectionMode) {
+	public void setProtectionMode(LockProtectionMode protectionMode) {
 		this.protectionMode = protectionMode;
 	}
 

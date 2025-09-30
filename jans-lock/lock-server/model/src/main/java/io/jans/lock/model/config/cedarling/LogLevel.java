@@ -14,10 +14,27 @@
  * limitations under the License.
  */
 
-package io.jans.lock.model.config;
+package io.jans.lock.model.config.cedarling;
 
 /**
  * 
  * @author Yuriy Movchan Date: 10/08/2022
  */
-public enum CedarlingLockProtecionMode { OAUTH, CEDARLING }
+public enum LogLevel {
+	FATAL("FATAL"),
+	ERROR("ERROR"),
+	WARN("WARN"),
+	INFO("INFO"),
+	DEBUG("DEBUG"),
+	TRACE("TRACE");
+	
+	private final String type;
+
+	private LogLevel(String type) {
+		this.type = type;
+	}
+
+	public String getType() {
+		return type;
+	}
+}

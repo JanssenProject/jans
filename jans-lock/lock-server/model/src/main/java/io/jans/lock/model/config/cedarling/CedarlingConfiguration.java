@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package io.jans.lock.model.config;
+package io.jans.lock.model.config.cedarling;
+
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -32,17 +34,21 @@ public class CedarlingConfiguration {
 	@Schema(description = "Specify if Cedraling is enabled")
 	private boolean enabled = false;
 
-	@DocProperty(description = "JSON object as string with policy store")
-	@Schema(description = "JSON object as string with policy store")
-	private String policyStoreLocal;
+	@DocProperty(description = "List of Policy Sources")
+    @Schema(description = "List of Policy Sources")
+    private List<PolicySource> policySources;
 
 	@DocProperty(description = "Log type: off, memory, std_out", defaultValue = "std_out")
 	@Schema(description = "Log type: off, memory, std_out")
-	private CedarlingLogType logType = CedarlingLogType.STD_OUT;
+	private LogType logType = LogType.STD_OUT;
 
 	@DocProperty(description = "System Log Level: FATAL, ERROR, WARN, INFO, DEBUG, TRACE", defaultValue = "INFO")
 	@Schema(description = "System Log Level")
-	private CedarlingLogLevel logLevel = CedarlingLogLevel.INFO;
+	private LogLevel logLevel = LogLevel.INFO;
+
+	@DocProperty(description = "External policy store URI")
+	@Schema(description = "External policy store URI")
+	private String externalPolicyStoreUri;
 
 	public boolean isEnabled() {
 		return enabled;
@@ -52,34 +58,42 @@ public class CedarlingConfiguration {
 		this.enabled = enabled;
 	}
 
-	public String getPolicyStoreLocal() {
-		return policyStoreLocal;
+	public List<PolicySource> getPolicySources() {
+		return policySources;
 	}
 
-	public void setPolicyStoreLocal(String policyStoreLocal) {
-		this.policyStoreLocal = policyStoreLocal;
+	public void setPolicySources(List<PolicySource> policySources) {
+		this.policySources = policySources;
 	}
 
-	public CedarlingLogType getLogType() {
+	public LogType getLogType() {
 		return logType;
 	}
 
-	public void setLogType(CedarlingLogType logType) {
+	public void setLogType(LogType logType) {
 		this.logType = logType;
 	}
 
-	public CedarlingLogLevel getLogLevel() {
+	public LogLevel getLogLevel() {
 		return logLevel;
 	}
 
-	public void setLogLevel(CedarlingLogLevel logLevel) {
+	public void setLogLevel(LogLevel logLevel) {
 		this.logLevel = logLevel;
+	}
+
+	public String getExternalPolicyStoreUri() {
+		return externalPolicyStoreUri;
+	}
+
+	public void setExternalPolicyStoreUri(String externalPolicyStoreUri) {
+		this.externalPolicyStoreUri = externalPolicyStoreUri;
 	}
 
 	@Override
 	public String toString() {
-		return "CedarlingConfiguration [policyStoreLocal=" + policyStoreLocal + ", logType=" + logType + ", logLevel="
-				+ logLevel + "]";
+		return "CedarlingConfiguration [enabled=" + enabled + ", policySources=" + policySources + ", logType="
+				+ logType + ", logLevel=" + logLevel + ", externalPolicyStoreUri=" + externalPolicyStoreUri + "]";
 	}
 
 }
