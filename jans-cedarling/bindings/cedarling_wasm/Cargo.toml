@@ -1,6 +1,6 @@
 [package]
 name = "cedarling_wasm"
-version = "1.12.0"
+version = "0.0.0"
 edition = "2021"
 description = "The Cedarling is a performant local authorization service that runs the Rust Cedar Engine"
 license = "Apache-2.0"
@@ -23,7 +23,7 @@ cedarling = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
-wasm-bindgen-test = "0.3.53"
+wasm-bindgen-test = "0.3.49"
 
 [profile.release]
 lto = true
