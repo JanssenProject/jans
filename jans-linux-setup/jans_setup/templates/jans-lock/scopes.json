@@ -6,5 +6,13 @@
     "description": "Permission to access SSE endpoint",
     "jansDefScope": false,
     "jansScopeTyp": "oauth"
+  },
+  {
+    "inum": "4000.01.2",
+    "jansId": "https://jans.io/lock/policy.readonly",
+    "displayName": "Lock API scope",
+    "description": "Permission to access policy endpoint",
+    "jansDefScope": false,
+    "jansScopeTyp": "oauth"
   }
 ]

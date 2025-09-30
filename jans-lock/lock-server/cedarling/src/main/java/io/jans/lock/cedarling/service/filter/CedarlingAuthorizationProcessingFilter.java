@@ -4,8 +4,9 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 
-import io.jans.lock.cedarling.service.CedarlingAuthorizationService;
 import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
+import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.config.LockProtectionMode;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -28,7 +29,10 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 
 	@Inject
 	private Logger log;
-	
+
+	@Inject
+	private AppConfiguration appConfiguration;
+
 	@Inject
 	private CedarlingProtection protectionService;
 
@@ -53,15 +57,17 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 		String path = requestContext.getUriInfo().getPath();
 		log.debug("REST call to '{}' intercepted", path);
+		
+		if (LockProtectionMode.CEDARLING.equals(appConfiguration.getProtectionMode())) {
+			Response authorizationResponse = protectionService.processAuthorization(requestContext, httpHeaders, resourceInfo);
+			if (authorizationResponse == null) {
+				// Actual processing of request proceeds
+				log.debug("Authorization passed");
+			}
 
-		Response authorizationResponse = protectionService.processAuthorization(requestContext, httpHeaders, resourceInfo);
-		if (authorizationResponse == null) {
-			// Actual processing of request proceeds
-			log.debug("Authorization passed");
-		}
-
-		if (authorizationResponse != null) {
-			requestContext.abortWith(authorizationResponse);
+			if (authorizationResponse != null) {
+				requestContext.abortWith(authorizationResponse);
+			}
 		}
 	}
 

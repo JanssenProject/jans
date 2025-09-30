@@ -1,9 +1,6 @@
 package io.jans.lock.service.ws.rs.policy;
 
-import static io.jans.as.model.util.Util.escapeLog;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -11,11 +8,9 @@ import org.slf4j.Logger;
 
 import io.jans.lock.cedarling.service.policy.PolicyDownloadService;
 import io.jans.lock.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
-import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.CommonErrorResponseType;
 import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.service.ws.rs.base.BaseResource;
-import io.jans.lock.util.ServerUtil;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
