@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// Represents a cedarling request
 type Request struct {
 	Tokens   map[string]string
 	Action   string
@@ -33,12 +34,14 @@ func (r Request) MarshalJSON() ([]byte, error) {
 
 }
 
+// Represents a cedarling principal or resource entity
 type EntityData struct {
 	CedarMapping CedarEntityMapping
 	// Payload will be flattened into the JSON object.
 	Payload map[string]any
 }
 
+// Represents type and id for a cedarling entity
 type CedarEntityMapping struct {
 	EntityType string `json:"entity_type"`
 	ID         string `json:"id"`
@@ -64,7 +67,7 @@ func (e *EntityData) UnmarshalJSON(data []byte) error {
 	if cedarMapping, ok := m["cedar_entity_mapping"].(map[string]any); ok {
 		if entityType, ok := cedarMapping["entity_type"].(string); ok {
 			e.CedarMapping.EntityType = entityType
-	}
+		}
 		if id, ok := cedarMapping["id"].(string); ok {
 			e.CedarMapping.ID = id
 		}
@@ -74,6 +77,7 @@ func (e *EntityData) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// Represents the result of an authorization request
 type AuthorizeResult struct {
 	Workload   *CedarResponse           `json:"workload,omitempty"`
 	Person     *CedarResponse           `json:"person,omitempty"`
@@ -82,6 +86,7 @@ type AuthorizeResult struct {
 	RequestID  string                   `json:"request_id"`
 }
 
+// Represents the authorization decision
 type CedarResponse struct {
 	decision DecisionType
 	reason   []string
@@ -176,6 +181,7 @@ func (r CedarResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
+// Represents an unsigned authorization request
 type RequestUnsigned struct {
 	Principals []EntityData
 	Action     string
