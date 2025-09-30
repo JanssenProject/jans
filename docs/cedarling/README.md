@@ -13,29 +13,35 @@ The Cedarling, powered by the Rust Cedar engine, provides a fast, embeddable, an
 self-contained solution for policy-based authorization, designed for both client-side 
 and server-side enforcement. This makes it particularly well-suited for latency-sensitive 
 environments like databases, browser based applications, mobile apps, API gateways, and 
-embedded devices. At less than 2M in size, it's small enough to load into your browser or mobile application. Critically, the Cedarling always avoids costly cloud round-trips for authorization 
-decisions, ensuring predictable sub millisecond performance. The Cedarling never fetches data
-to make a decision--this is a performance killer and would make the PDP unreliable.
+embedded devices. At less than 2M in size, it's small enough to load into your browser or mobile 
+application. When embedded, the Cedarling avoids slow cloud policy decisions, enabling sub-millisecond 
+performance. The Cedarling never fetches data to make a decision--this is a performance killer and 
+would make the PDP unreliable. The application must fetch all data and tokens before it makes 
+an authorization request. 
 
-The Cedarling is designed for maximum deployment flexibility. It can be:
+The Cedarling can be:
 
-* Embedded in browsers using the WebAssembly (WASM) npm package
+* Embedded in browsers using the WASM npm package
 * Embedded in mobile apps using the iOS or Android SDKs
-* Integrated into backend services using the Java, Go, Rust or Python SDKs
-* Deployed as a sidecar 
-* Deployed as a serverless function
+* Integrated into backend services using the Java, Go, Rust, Python or C SDKs
+* Deployed as a sidecar
+* Deployed as a centralized cloud PDP service
 
-![](../assets/cedarling/lock-cedarling-diagram-1.jpg)
+![](../assets/cedarling/cedarling-readme-01.jpg)
 
 The Cedarling is not merely a library--it is an embeddable Policy Decision Point (PDP), 
 which includes an in-memory cache to enable efficient logging. It connects to a Policy 
-Administration Point to obtain its policies and to send its audit log--a log of every 
-decision to allow or deny access to a resource. Finally, it performs JWT validation, 
-and claims mapping. In today's architectures, JWTs provide essential information about the 
-provenance of the principal performing the action on the resource. The payload of a JWT token 
-is a JSON document, and frequently a complex string, like a URI. Through the use of regular 
-expressions, developers can parse strings and map them to Cedar entities. This 
-provides a formal way to map trusted information from the enterprise to policies. 
+Repository to obtain its policies. Enterprises may also want to connects the Cedarling 
+to a hub system to send its audit logs--a record of every decision to allow or deny access 
+to a capability. From the hub system, enterprises can perform threat detection and stream 
+the logs to a SIEM or ITDR.
+
+The supports JWT validation and claims mapping through some of its authorization interfaces. 
+We call this Token Based Access Control--where developers present a collection of tokens to 
+obtain authorization to a capability. JWTs provide trusted contextual information to the 
+Cedarling.  The payload of a JWT token is a JSON document, and frequently a complex string, like a 
+URI. Through the use of regular expressions, developers can parse strings and map them to Cedar 
+entities. This provides a mechanism way to map data from trusted issuers to Cedar policies.
 
 !!! tip "About Cedar"
 
@@ -54,28 +60,6 @@ provides a formal way to map trusted information from the enterprise to policies
 On initialization, the Cedarling loads a "policy store"--a set of policies, a schema, and a list of trusted token issuers. Policy stores are application specific, meaning each store 
 does **not** contain all policies and schema for all applications in your domain. Each policy 
 store has the unique policies and schema needed only for one specific application.
-
-## Token Based Access Control (TBAC) v. Application Asserted identity 
-
-The Cedarling has two different authorization interfaces. One requires the developer to provide
-JWTs to prove the identity of the principal: "It's Bob, and here's the token to prove it!" 
-The other allows the application to assert the identity of the principal: "It's Bob, trust me, 
-I authenticated him." 
-
-It's actually a little more complex than that. The Cedarling allows the developer to pass not 
-one token, but a bundle of tokens. This enables the developer to assert not only the human 
-identity, but the software identities that were involved in the issuance of the token. Token 
-Based Access Control (TBAC), answers the question: _"Given this bundle of tokens, is this action on this resource allowed in this context?"_ Or you could say more simply, _"Does this bundle of tokens authorize this capability?"_  TBAC diverges from RBAC/ABAC because it is not human-identity-centric, it is capabilities centric. 
-
-TBAC helps developers implement security based on JWTs from trusted issuers like identity providers, 
-hardware platforms, and federations. Who is the principal in a TBAC request? A TBAC authorization request may pertain to multiple principals, derived from the JWT tokens. For example, let's say a 
-person uses a mobile application to request data from a service provider. In this case, there are two 
-principals: the person and the mobile application--both of which have unique identities. In our 
-hypothetical case, a business may prevent access to content from a third party mobile application, although allow it for the same User from the company's website. So the User's identity by itself is 
-not sufficient to grant access to a capability. 
-
-Generically, we call the software acting on behalf of the person the "Workload" identity. Humans don't speak tcp/ip! People need digital intermediaries, which need increasing amounts of agency. And 
-software agents are becoming an increasingly important entities in our increasingly AI-centric world. 
 
 ### Cedarling Interfaces
 
@@ -111,6 +95,24 @@ The following diagram is a high level picture of the Cedarling components:
 * **Interfaces** perform actions described above
 * **JWT Engine** is used to validate JWT signatures, JWT content (e.g. `exp`) and to check if the JWT token is revoked (using the Status List JWT) 
 * **Lock Engine** is used for enterprise deployments to load the Policy Store from a trusted source and send logs for central storage. 
+
+## Token Based Access Control (TBAC) v. Application Asserted identity 
+
+The Cedarling has two different authorization interfaces. One requires the developer to provide
+JWTs to prove the identity of the principal: "It's Bob, and here's the token to prove it!" 
+The other allows the application to assert the identity of the principal: "It's Bob, trust me, 
+I authenticated him." 
+
+It's actually a little more complex than that. The Cedarling allows the developer to pass not 
+one token, but several tokens. This enables the developer to assert not only the human 
+identity, but the software identity (or "Workload") that were involved in the issuance of the token. Token 
+Based Access Control (TBAC), answers the question: _"Given this bundle of tokens, is this action on this resource allowed in this context?"_ Or you could say more simply, _"Does this bundle of tokens authorize this capability?"_  While 
+RBAC policies are about roles, ABAC policies are about attributes, TBAC policies are about tokens.
+
+TBAC helps developers implement security based on JWTs from trusted issuers like identity providers, 
+hardware platforms, and federations. One of the Cedarling authorization interfaces automatically creates a 
+User and Workload entity based on the most common OAuth and OpenID tokens. A new Cedarling authorization interface
+will enable reasoning on a collection of tokens from different issuers--watch issue [Jans-11834](https://github.com/JanssenProject/jans/issues/11834)). 
 
 ## Cedarling and Zero Trust
 
