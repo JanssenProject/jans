@@ -39,7 +39,7 @@ configmap:
   cnSqlSslCaCert: ""
   # -- Base64-encoded string of client certificate signed by CA. Required if using client cert authentication.
   cnSqlSslClientCert: ""
-  # -- Base64-encoded string of client key signed by CA. Required if using client cert authentication.
+  # -- Base64-encoded client private key corresponding to the client certificate. Required if using client cert authentication. We advise to not commit real private keys in values.yaml.
   cnSqlSslClientKey: ""
   # -- Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` .
   cnCacheType: NATIVE_PERSISTENCE
