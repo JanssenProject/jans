@@ -165,6 +165,8 @@ class Config:
         self.rdbm_password_enc = ''
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
         self.schema_files = [os.path.join(self.install_dir, 'schema', schemma_fn) for schemma_fn in ('jans_schema.json', 'custom_schema.json')]
+        self.rdbm_sslmode = 'disable'
+        self.rdbm_sslfactory = 'org.postgresql.ssl.NonValidatingFactory'
 
         # Jans components installation status
         self.loadData = True

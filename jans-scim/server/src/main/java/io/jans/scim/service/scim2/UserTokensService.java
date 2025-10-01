@@ -6,7 +6,6 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.scim.model.scim.Client;
 import io.jans.scim.model.scim2.*;
 import io.jans.scim.service.PersonService;
-import io.jans.scim2.client.UserBaseTest;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;

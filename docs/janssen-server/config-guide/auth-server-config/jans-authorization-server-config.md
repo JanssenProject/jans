@@ -134,6 +134,7 @@ It returns all the information of the Jans Authorization server.
     "implicit",
     "urn:ietf:params:oauth:grant-type:token-exchange",
     "urn:ietf:params:oauth:grant-type:device_code",
+    "urn:ietf:params:oauth:grant-type:jwt-bearer",
     "client_credentials",
     "refresh_token",
     "authorization_code",
