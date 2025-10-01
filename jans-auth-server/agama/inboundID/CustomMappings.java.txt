@@ -1,0 +1,31 @@
+package io.jans.inbound;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.UnaryOperator;
+
+/**
+ * Fields of this class can be referenced in the config properties of flow ExternalSiteLogin
+ * (see the flow docs). If you are placing this file in the 'scripts' directory of Agama to avoid
+ * server restarts, insert an instruction like <code>Call io.jans.inbound.CustomMappings#class</code>
+ * at the beginning of the flow's code for changes in this class to take effect immediately. When 
+ * you are done, comment/remove the instruction and optionally put the final version of this class
+ * in a jar file under 'custom/libs' directory
+ */
+public final class CustomMappings {
+    
+    public static final UnaryOperator<Map<String, Object>> SAMPLE_MAPPING = 
+
+        profile -> {
+            Map<String, Object> map = new HashMap<>();
+            //Fill your map as desired with data from input profile. See examples in class io.jans.inbound.Mappings:
+            //https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java
+
+            //value = profile.get("...") 
+            //map.put(Attrs.UID, ... );
+            return map;
+        };
+
+    private CustomMappings() { }
+
+}

@@ -1,0 +1,207 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "janssen-all-in-one.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: auth-server
+    app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
+{{ include "janssen-all-in-one.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.customAnnotations.deployment) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.deployment }}
+{{ toYaml .Values.customAnnotations.deployment | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
+  template:
+    metadata:
+      labels:
+        APP_NAME: auth-server
+        app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
+      {{- if or (.Values.istio.ingress) (.Values.customAnnotations.pod) }}
+      annotations:
+      {{- if .Values.istio.ingress }}
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      {{- end }}
+      {{- if .Values.customAnnotations.pod }}
+      {{ toYaml .Values.customAnnotations.pod | indent 4 }}
+      {{- end }}
+      {{- end }}
+    spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      dnsPolicy: {{ .Values.dnsPolicy | quote }}
+    {{- with .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      {{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "janssen-all-in-one.topology-spread-constraints" . | indent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      containers:
+      - name: {{ include "janssen-all-in-one.name" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        env:
+          - name: CN_AUTH_JAVA_OPTIONS
+            value: {{ include "auth-server.customJavaOptions" . | trim }}
+          - name: CN_FIDO2_JAVA_OPTIONS
+            value: {{ include "fido2.customJavaOptions" . | trim }}
+          - name: CN_CASA_JAVA_OPTIONS
+            value: {{ include "casa.customJavaOptions" . | trim }}
+          - name: CN_CONFIG_API_JAVA_OPTIONS
+            value: {{ include "config-api.customJavaOptions" . | trim }}
+          - name: CN_SAML_JAVA_OPTIONS
+            value: {{ include "saml.customJavaOptions" . | trim }}
+          - name: CN_SCIM_JAVA_OPTIONS
+            value: {{ include "scim.customJavaOptions" . | trim }}
+          {{- include "janssen-all-in-one.usr-envs" . | indent 12 }}
+          {{- include "janssen-all-in-one.usr-secret-envs" . | indent 12 }}
+        securityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+        {{- if or (not .Values.isFqdnRegistered) ( .Values.customScripts) (.Values.customCommand) }}
+        command:
+          {{- if .Values.customCommand }}
+          {{- toYaml .Values.customCommand | nindent 12 }}
+          {{- else }}
+          - /bin/sh
+          - -c
+          - |
+              {{- with .Values.customScripts }}
+              {{- toYaml . | replace "- " "" | nindent 14}}
+              {{- end }}
+              python3 /scripts/tls_generator.py &
+              /app/bin/entrypoint.sh
+          {{- end}}
+        {{- end}}
+        ports:
+        - name: {{ .Values.service.name }}
+          containerPort: {{ .Values.service.port }}
+        {{ if .Values.cnPrometheusPort }}
+        - name: prometheus-port
+          containerPort: {{ .Values.cnPrometheusPort }}
+        {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-config-cm
+        {{ if .Values.usrEnvs.secret }}
+        - secretRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        {{ if .Values.usrEnvs.normal }}
+        - configMapRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        lifecycle:
+{{- toYaml .Values.lifecycle | nindent 10 }}
+        volumeMounts:
+        {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 10 }}
+        {{- end }}
+          - mountPath: /scripts/tls_generator.py
+            name: {{ include "janssen-all-in-one.name" . }}-tls-script
+            subPath: tls_generator.py
+        {{- if not .Values.isFqdnRegistered }}
+          - name: {{ include "janssen-all-in-one.fullname" .}}-updatelbip
+            mountPath: /scripts/updatelbip.py
+            subPath: updatelbip.py
+        {{- end }}
+        {{- if .Values.configmap.cnSqlSslEnabled }}
+          - name: {{ .Release.Name }}-sql-ssl-ca-cert
+            mountPath: /etc/certs/sql_cacert.pem
+            subPath: sql_cacert.pem
+            readOnly: true
+          - name: {{ .Release.Name }}-sql-ssl-client-cert
+            mountPath: /etc/certs/sql_client_cert.pem
+            subPath: sql_client_cert.pem
+            readOnly: true
+          - name: {{ .Release.Name }}-sql-ssl-client-key
+            mountPath: /etc/certs/sql_client_key.pem
+            subPath: sql_client_key.pem
+            readOnly: true
+        {{- end }}
+        livenessProbe:
+{{- toYaml .Values.livenessProbe | nindent 10 }}
+        readinessProbe:
+{{- toYaml .Values.readinessProbe | nindent 10 }}
+        {{- if .Values.testEnviroment }}
+        resources: {}
+        {{- else }}
+        resources:
+{{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+      {{- if not .Values.isFqdnRegistered  }}
+      hostAliases:
+      - ip: {{ .Values.lbIp }}
+        hostnames:
+        - {{ .Values.fqdn }}
+      {{- end }}
+      volumes:
+      {{- with .Values.volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
+        - name: {{ include "janssen-all-in-one.name" . }}-tls-script
+          configMap:
+            name: {{ include "janssen-all-in-one.fullname" . }}-tls-script
+      {{- if not .Values.isFqdnRegistered }}
+        - name: {{ include "janssen-all-in-one.fullname" . }}-updatelbip
+          configMap:
+            name: {{ .Release.Name }}-updatelbip
+      {{- end }}
+      {{- if .Values.configmap.cnSqlSslEnabled }}
+        - name: {{ .Release.Name }}-sql-ssl-ca-cert
+          secret:
+            secretName: {{ .Release.Name }}-sql-ssl
+            optional: true
+            items:
+              - key: sql_cacert.pem
+                path: sql_cacert.pem
+        - name: {{ .Release.Name }}-sql-ssl-client-cert
+          secret:
+            secretName: {{ .Release.Name }}-sql-ssl
+            optional: true
+            items:
+              - key: sql_client_cert.pem
+                path: sql_client_cert.pem
+        - name: {{ .Release.Name }}-sql-ssl-client-key
+          secret:
+            secretName: {{ .Release.Name }}-sql-ssl
+            optional: true
+            defaultMode: 0440
+            items:
+              - key: sql_client_key.pem
+                path: sql_client_key.pem
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}

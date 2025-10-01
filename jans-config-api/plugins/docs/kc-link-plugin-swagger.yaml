@@ -1,0 +1,274 @@
+openapi: 3.0.1
+info:
+  title: Jans Config API - Keycloak Link
+  contact:
+    name: Gluu Support
+    url: https://support.gluu.org
+    email: xxx@gluu.org
+  license:
+    name: Apache 2.0
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: 1.0.0
+servers:
+- url: https://jans.io/
+  description: The Jans server
+tags:
+- name: Keycloak Link - Configuration
+paths:
+  /kc-link/kcLinkConfig:
+    get:
+      tags:
+      - KC Link - Configuration
+      summary: Gets KC Link configuration properties
+      description: Gets KC Link configuration properties
+      operationId: get-kc-link-properties
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppConfiguration"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/kc-link-config.readonly
+    put:
+      tags:
+      - KC Link - Configuration
+      summary: Update KC Link configuration properties
+      description: Update KC Link configuration properties
+      operationId: put-kc-link-properties
+      requestBody:
+        description: GluuAttribute object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppConfiguration"
+            examples:
+              Request example:
+                description: Request example
+                value: ""
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppConfiguration"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/kc-link-config.write
+    patch:
+      tags:
+      - KC Link - Configuration
+      summary: Partially modifies KC Link configuration properties.
+      description: Partially modifies KC Link configuration properties.
+      operationId: patch-kc-link-properties
+      requestBody:
+        description: String representing patch-document.
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/JsonPatch"
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppConfiguration"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/kc-link-config.write
+components:
+  schemas:
+    AppConfiguration:
+      type: object
+      properties:
+        sourceConfigs:
+          type: array
+          items:
+            $ref: "#/components/schemas/GluuLdapConfiguration"
+        inumConfig:
+          $ref: "#/components/schemas/GluuLdapConfiguration"
+        targetConfig:
+          $ref: "#/components/schemas/GluuLdapConfiguration"
+        ldapSearchSizeLimit:
+          type: integer
+          format: int32
+        keyAttributes:
+          type: array
+          items:
+            type: string
+        keyObjectClasses:
+          type: array
+          items:
+            type: string
+        sourceAttributes:
+          type: array
+          items:
+            type: string
+        customLdapFilter:
+          type: string
+        updateMethod:
+          type: string
+        defaultInumServer:
+          type: boolean
+        keepExternalPerson:
+          type: boolean
+        useSearchLimit:
+          type: boolean
+        attributeMapping:
+          type: array
+          items:
+            $ref: "#/components/schemas/LinkAttributeMapping"
+        snapshotFolder:
+          type: string
+        snapshotMaxCount:
+          type: integer
+          format: int32
+        keycloakConfiguration:
+          $ref: "#/components/schemas/KeycloakConfiguration"
+        baseDN:
+          type: string
+        personObjectClassTypes:
+          type: array
+          items:
+            type: string
+        personCustomObjectClass:
+          type: string
+        contactObjectClassTypes:
+          type: array
+          items:
+            type: string
+        allowPersonModification:
+          type: boolean
+        supportedUserStatus:
+          type: array
+          items:
+            type: string
+        loggingLevel:
+          type: string
+        loggingLayout:
+          type: string
+        externalLoggerConfiguration:
+          type: string
+        metricReporterInterval:
+          type: integer
+          format: int32
+        metricReporterKeepDataDays:
+          type: integer
+          format: int32
+        metricReporterEnabled:
+          type: boolean
+        disableJdkLogger:
+          type: boolean
+        cleanServiceInterval:
+          type: integer
+          format: int32
+        keycloakLinkEnabled:
+          type: boolean
+        keycloakLinkServerIpAddress:
+          type: string
+        keycloakLinkPollingInterval:
+          type: string
+        keycloakLinkLastUpdate:
+          type: string
+          format: date-time
+        keycloakLinkLastUpdateCount:
+          type: string
+        keycloakLinkProblemCount:
+          type: string
+        useLocalCache:
+          type: boolean
+    GluuLdapConfiguration:
+      type: object
+      properties:
+        configId:
+          type: string
+        bindDN:
+          type: string
+        bindPassword:
+          type: string
+        servers:
+          type: array
+          items:
+            type: string
+        maxConnections:
+          type: integer
+          format: int32
+        useSSL:
+          type: boolean
+        baseDNs:
+          type: array
+          items:
+            type: string
+        primaryKey:
+          type: string
+        localPrimaryKey:
+          type: string
+        useAnonymousBind:
+          type: boolean
+        enabled:
+          type: boolean
+        version:
+          type: integer
+          format: int32
+        level:
+          type: integer
+          format: int32
+    KeycloakConfiguration:
+      type: object
+      properties:
+        serverUrl:
+          type: string
+        realm:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+        grantType:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+    LinkAttributeMapping:
+      type: object
+      properties:
+        source:
+          type: string
+        destination:
+          type: string
+    JsonPatch:
+      type: object
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "https://{op-hostname}/.../token"
+          scopes:
+            https://jans.io/oauth/kc-link-config.readonly: View Keycloak Link configuration
+              related information
+            https://jans.io/oauth/kc-link-config.write: Manage Keycloak Link configuration
+              related information

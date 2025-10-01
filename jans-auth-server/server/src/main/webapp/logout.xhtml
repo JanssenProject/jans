@@ -1,0 +1,16 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+>
+
+	<f:view transient="true" contentType="text/html" locale="#{language.locale}">
+		<f:metadata>
+			<f:viewAction action="#{identity.logout}" />
+			<f:viewAction action="#{logoutAction.redirect}" />
+	
+			<f:viewParam name="id_token_hint" value="#{logoutAction.idTokenHint}" />
+			<f:viewParam name="post_logout_redirect_uri" value="#{logoutAction.postLogoutRedirectUri}" />
+		</f:metadata>
+	</f:view>
+</html>

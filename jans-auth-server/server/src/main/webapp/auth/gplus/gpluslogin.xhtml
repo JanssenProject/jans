@@ -1,0 +1,202 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:f="http://xmlns.jcp.org/jsf/core"
+				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+				xmlns:h="http://xmlns.jcp.org/jsf/html"
+				template="/WEB-INF/incl/layout/template.xhtml">
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
+	</f:metadata>
+
+	<ui:define name="head">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+		<!-- Google+ script -->
+		<script src="https://apis.google.com/js/client:platform.js?onload=start" async="async" defer="defer"></script>
+
+		<style type="text/css">
+			.login-panel {
+				border-style: solid;
+				border-width: 1px;
+				padding: 1px;
+				background-color: #FFFFFF;
+				border-color: #C4C0B9;
+			}
+
+			.login-panel-header {
+				background-color: #D4CFC7;
+				background-image:
+						url("#{webConfigurationService.getImgLocation()}/panel_header_bg.png");
+				background-position: left top;
+				background-repeat: repeat-x;
+				border-style: solid;
+				border-width: 1px;
+				padding: 2px;
+				border-color: #D4CFC7;
+				color: #000000;
+				font-family: Arial, Verdana, sans-serif;
+				font-size: 11px;
+				font-weight: bold;
+			}
+
+			.login-panel-body {
+				padding: 10px;
+				color: #000000;
+				font-family: Arial, Verdana, sans-serif;
+				font-size: 11px;
+			}
+		</style>
+	</ui:define>
+
+	<ui:define name="pageTitle">#{msgs['gpluslogin.title']}</ui:define>
+
+	<ui:define name="body">
+		<table border="0" align="center">
+			<tr>
+				<td>
+					<div>
+						<h:form id="loginForm">
+
+							<input type="hidden" name="gplus_auth_code" value="" />
+
+							<h:panelGroup rendered="#{not identity.loggedIn}">
+								<div class="login-panel">
+									<div class="login-panel-header">
+										<h:outputText value="#{msgs['login.login']}" />
+									</div>
+									<div class="login-panel-body">
+										<ui:param name="client" value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
+
+										<h:panelGroup rendered='#{!empty client.getLogoUri()}'>
+											<h:graphicImage url='#{client.getLogoUri()}' />
+										</h:panelGroup>
+
+										<p class="info">
+											<h:outputText value="#{msgs['login.pleaseLoginHere']}" />
+										</p>
+
+										<div class="dialog">
+											<h:panelGrid columns="3" border="0" rowClasses="prop"
+														 columnClasses="name,value,hint">
+												<h:outputLabel for="username"
+															   value="#{msgs['login.username']}" />
+												<h:inputText id="username" value="#{credentials.username}"
+															 autocomplete="off" />
+												<h:outputText value="" />
+
+												<h:outputLabel for="password"
+															   value="#{msgs['login.password']}" />
+												<h:inputSecret id="password" value="#{credentials.password}"
+															   autocomplete="off" />
+												<h:outputText value="" />
+
+												<h:outputLabel for="rememberMe"
+															   value="#{msgs['login.rememberMe']}" />
+												<h:selectBooleanCheckbox id="rememberMe"
+																		 value="#{rememberMe.enabled}" />
+												<h:outputText value="" />
+											</h:panelGrid>
+										</div>
+
+										<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
+											<p>
+												<h:outputText value="#{msgs['common.agreePolicy']}" />
+												<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
+														value="#{msgs['common.privacyPolicy']}" />
+												</a>
+											</p>
+										</h:panelGroup>
+
+										<h:panelGroup rendered='#{!empty client.getTosUri()}'>
+											<p>
+												<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
+												<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
+														value="#{msgs['common.termsOfService']}" />
+												</a>
+											</p>
+										</h:panelGroup>
+
+										<div class="actionButtons">
+											<h:commandButton id="loginButton"
+															 value="#{msgs['login.login']}"
+															 action="#{authenticator.authenticate}" />
+										</div>
+									</div>
+								</div>
+								<div class="login-panel">
+									<div id="signinButton">
+										<span class="g-signin"
+											  data-scope="https://www.googleapis.com/auth/plus.login email"
+											  data-requestvisibleactions="http://schemas.google.com/AddActivity"
+											  data-clientId="#{identity.getWorkingParameter('gplus_client_id')}" data-accesstype="offline"
+											  data-callback="onSignInCallback" data-theme="dark"
+											  data-cookiepolicy="single_host_origin"></span>
+									</div>
+								</div>
+							</h:panelGroup>
+						</h:form>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<script type="text/javascript">
+			window.onload = function() {
+				document.getElementById("loginForm:username").focus();
+			};
+		</script>
+
+		<script type="text/javascript">
+			//<![CDATA[
+			var helper = (function() {
+				var authResult = undefined;
+
+				return {
+					/**
+					 * Hides the sign-in button and connects the server-side app after
+					 * the user successfully signs in.
+					 *
+					 * @param {Object} authResult An Object which contains the access token and
+					 *   other authentication information.
+					 */
+					onSignInCallback: function(authResult) {
+//			      for (var field in authResult) {
+//	                        console.log('Auth result field: ' + field + ': ' + authResult[field]);
+//			      }
+						if (authResult['access_token']) {
+							// The user is signed in
+							this.authResult = authResult;
+							$('#gConnect').hide();
+							helper.connectServer();
+						} else if (authResult['error']) {
+							// There was an error, which means the user is not signed in.
+							// As an example, you can troubleshoot by writing to the console:
+							console.log('There was an error: ' + authResult['error']);
+							$('#gConnect').show();
+						}
+					},
+					/**
+					 * Submit login form with tokens to server
+					 * For more information, see:
+					 *   https://developers.google.com/+/web/signin/server-side-flow
+					 */
+					connectServer: function() {
+						$("input[name='gplus_auth_code']").val(this.authResult["code"]);
+						$(":input:submit[id='loginForm:loginButton']").click();
+					},
+				};
+			})();
+
+			/**
+			 * Calls the helper method that handles the authentication flow.
+			 *
+			 * @param {Object} authResult An Object which contains the access token and
+			 *   other authentication information.
+			 */
+			function onSignInCallback(authResult) {
+				helper.onSignInCallback(authResult);
+			}
+			//]]>
+		</script>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,13 @@
+[Unit]
+Description=Janssen Scim service
+After=%(order_jans_scim_service)s
+
+[Service]
+Type=forking
+ExecStart=%(jans_scripts_dir)s/jans-scim start
+ExecStop=%(jans_scripts_dir)s/jans-scim stop
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target

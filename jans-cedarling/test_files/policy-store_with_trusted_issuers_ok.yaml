@@ -1,0 +1,89 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+---
+cedar_version: v4.0.0
+cedar_policies:
+  840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+    description: simple policy example
+    creation_date: '2024-09-20T17:22:39.996050'
+    policy_content:
+      encoding: none
+      content_type: cedar
+      body: |-
+        permit(
+            principal is Jans::Workload,
+            action in [Jans::Action::"Update"],
+            resource is Jans::Issue
+        )when{
+            principal.org_id == resource.org_id
+        };
+cedar_schema:
+  encoding: none
+  content_type: cedar
+  body: |-
+    namespace Jans {
+      type Url = {"host": String, "path": String, "protocol": String};
+      entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};
+      entity Issue = {"org_id": String};
+      entity TrustedIssuer = {"issuer_entity_id": Url};
+      entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String};
+      action "Update" appliesTo {
+        principal: [Workload],
+        resource: [Issue],
+        context: {}
+      };
+    }
+trusted_issuers: 
+  some_unique_issuer_id:
+    name: 'Google'
+    description: 'Consumer IDP'
+    openid_configuration_endpoint: 'https://accounts.google.com/.well-known/openid-configuration'
+    access_tokens:
+        trusted: true
+        token_id: jti
+        user_id: ''
+        role_mapping: ''
+        claim_mapping: {}
+    id_tokens:
+        user_id: 'sub'
+        role_mapping: 'role'
+        claim_mapping:
+          email:
+            parser: 'regex'
+            regex_expression: r'^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$'
+            UID: 
+              attr: 'uid'
+              type: 'string'
+            DOMAIN: 
+              attr: 'domain'
+              type: 'string'
+          profile:
+            parser: 'regex'
+            regex_expression: r'(?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/ (?P<HOST>[^\/:#?]+) (?::(?P<PORT>\d+))?  (?P<PATH>\/[^?#]*)? (?:\?(?P<QUERY>[^#]*))?  (?:#(?P<FRAGMENT>.*))?$'
+            SCHEME: 
+              attr: 'scheme'
+              type: 'string'
+            HOST: 
+              attr: 'host'
+              type: 'string'
+            PORT: 
+              attr: 'port'
+              type: 'string'
+            PATH: 
+              attr: 'path'
+              type: 'string'
+            QUERY: 
+              attr: 'query'
+              type: 'string'
+            FRAGMENT: 
+              attr: 'fragment'
+              type: 'string'
+          dolphin:
+            parser: 'json'
+            type: 'Acme::Dolphin'
+    userinfo_tokens:
+        user_id: ''
+        role_mapping: ''
+        claim_mapping: {}

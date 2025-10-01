@@ -1,0 +1,22 @@
+Flow io.jans.agama.bioid.enroll
+    Basepath ""
+    Configs conf
+    Inputs bioid_enrollment_code login_hint
+bioid = Call io.jans.agama.bioid.BioIdService#new conf
+idp = Call io.jans.agama.bioid.IdentityProcessor#new 
+bioid_verification = Call idp validateBioIdCode login_hint bioid_enrollment_code 
+When bioid_verification is false
+    error_map = {success:false, error: "Failed to verify BioID code"}
+    Finish error_map
+enrolled = Call bioid isEnrolled login_hint 
+When enrolled is false
+    token = Call bioid getBWSToken login_hint "enroll"
+    enroll_map = {token:token, return_url:conf.host, state: "abcdef"}
+    enroll_result = RRF "bioid.ftlh" enroll_map true
+    When enroll_result.error is not null
+        error_map = {success:false, error: "Enrollment failed; please try again later."}
+        Finish error_map
+    success_map = {success:true, data: {userId: login_hint, status: "success"}}
+    Finish success_map
+error_map = {success:true, data: {status: "enrolled", userId: login_hint}}
+Finish error_map

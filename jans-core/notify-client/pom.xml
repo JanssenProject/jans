@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>jans-notify-client</artifactId>
+	<name>Jans notify client</name>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>io.jans</groupId>
+		<artifactId>jans-core-parent</artifactId>
+		<version>0.0.0-nightly</version>
+	</parent>
+
+	<properties>
+		<httpcore.version>4.3.3</httpcore.version>
+		<httpclient.version>4.5.13</httpclient.version>
+	</properties>
+
+	<dependencies>
+		<!-- Resteasy -->
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+		</dependency>
+	   <dependency>
+	        <groupId>org.jboss.resteasy</groupId>
+	        <artifactId>resteasy-jackson2-provider</artifactId>
+	    </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-doc</artifactId>
+        </dependency>
+   	</dependencies>
+</project>

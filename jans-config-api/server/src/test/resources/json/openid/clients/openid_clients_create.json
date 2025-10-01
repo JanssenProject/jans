@@ -1,0 +1,154 @@
+{
+    "clientSecret": "test@123",
+    "clientName": "ABCDE",
+    "description": "sdjkhfjksdfjksdkfj",
+    "applicationType": "web",
+    "subjectType": "pairwise",
+    "initiateLoginUri": "DFGDFDFG",
+    "logoUri": "sdfsdfsdf",
+    "clientUri": "sdfsdf",
+    "tosUri": "fddfdfgdf",
+    "jwksUri": "JKHJKHSDHKJSDFH",
+    "jwks": "JKJKHJKJHK",
+    "expirable": [
+        "on"
+    ],
+    "expirationDate": "2022-07-25T09:30:00.656Z",
+    "softwareStatement": "12",
+    "softwareVersion": "11",
+    "softwareId": "123",
+    "softwareSection": false,
+    "cibaSection": false,
+    "idTokenSignedResponseAlg": "HS256",
+    "idTokenEncryptedResponseAlg": "A128KW",
+    "tokenEndpointAuthMethod": "client_secret_post",
+    "accessTokenSigningAlg": "HS384",
+    "idTokenEncryptedResponseEnc": "A256CBC+HS512",
+    "requestObjectEncryptionAlg": "RSA-OAEP",
+    "requestObjectSigningAlg": "HS256",
+    "requestObjectEncryptionEnc": "A256CBC+HS512",
+    "userInfoEncryptedResponseAlg": "A128KW",
+    "userInfoSignedResponseAlg": "RS256",
+    "userInfoEncryptedResponseEnc": "A128GCM",
+    "idTokenTokenBindingCnf": "dsfsdfdsf",
+    "backchannelUserCodeParameter": true,
+    "refreshTokenLifetime": 2,
+    "defaultMaxAge": 2,
+    "accessTokenLifetime": 12,
+    "backchannelTokenDeliveryMode": "push",
+    "backchannelClientNotificationEndpoint": "sdhjfjhsdf",
+    "frontChannelLogoutUri": "dfdsdgsdg",
+    "policyUri": "sfsdsdf",
+    "sectorIdentifierUri": "HJKFDJHKHJKDS",
+    "redirectUris": [
+        "sdfsdfsdf"
+    ],
+    "claimRedirectUris": [
+        "NBMNSMNBSDMV"
+    ],
+    "authorizedOrigins": [
+        "dgffddfg"
+    ],
+    "requestUris": [
+        "FDDGDFGG"
+    ],
+    "postLogoutRedirectUris": [
+        "sdfsdfds"
+    ],
+    "responseTypes": [
+        "token"
+    ],
+    "grantTypes": [
+        "implicit"
+    ],
+    "contacts": [
+        "ashash@ggg.ccc"
+    ],
+    "defaultAcrValues": [
+        "inum=3000-F75A,ou=scripts,o=jans"
+    ],
+    "scopes": [
+        "inum=10B2,ou=scopes,o=jans"
+    ],
+    "attributes": {
+        "tlsClientAuthSubjectDn": "123",
+        "runIntrospectionScriptBeforeJwtCreation": "true",
+        "keepClientAuthorizationAfterExpiration": false,
+        "allowSpontaneousScopes": "true",
+        "backchannelLogoutSessionRequired": "true",
+        "backchannelLogoutUri": [
+            "dsfsdfsdf"
+        ],
+        "rptClaimsScripts": [],
+        "consentGatheringScripts": [],
+        "spontaneousScopeScriptDns": [],
+        "introspectionScripts": [
+            "inum=A44E-4F3D,ou=scripts,o=jans"
+        ],
+        "postAuthnScripts": [],
+        "additionalAudience": [
+            "dsfsdfsdf"
+        ],
+        "spontaneousScopes": [
+            "inum=1200.6928E4,ou=scopes,o=jans"
+        ],
+        "redirectUrisRegex": "sdfsdf",
+        "parLifetime": 3600,
+        "requirePar": true,
+        "jansDefaultPromptLogin": true,
+        "jansAuthorizedAcr": [
+            "inum=3000-F75A,ou=scripts,o=jans"
+        ],
+        "updateTokenScriptDns": [],
+        "ropcScripts": [],
+        "jansAuthSignedRespAlg": "HS384",
+        "jansAuthEncRespAlg": "A128KW",
+        "jansAuthEncRespEnc": "A128GCM"
+    },
+    "tlsClientAuthSubjectDn": "123",
+    "frontChannelLogoutSessionRequired": true,
+    "runIntrospectionScriptBeforeJwtCreation": "true",
+    "backchannelLogoutSessionRequired": "true",
+    "keepClientAuthorizationAfterExpiration": false,
+    "allowSpontaneousScopes": "true",
+    "spontaneousScopes": [
+        "inum=1200.6928E4,ou=scopes,o=jans"
+    ],
+    "introspectionScripts": [
+        "inum=A44E-4F3D,ou=scripts,o=jans"
+    ],
+    "spontaneousScopeScriptDns": [],
+    "consentGatheringScripts": [],
+    "redirectUrisRegex": "sdfsdf",
+    "parLifetime": "bnxcbmx",
+    "requirePar": true,
+    "updateTokenScriptDns": [],
+    "ropcScripts": [],
+    "authorizationSignedResponseAlg": "HS384",
+    "authorizationEncryptedResponseAlg": "A128KW",
+    "authorizationEncryptedResponseEnc": "A128GCM",
+    "postAuthnScripts": [],
+    "rptClaimsScripts": [],
+    "additionalAudience": [
+        "dsfsdfsdf"
+    ],
+    "backchannelLogoutUri": [
+        "dsfsdfsdf"
+    ],
+    "defaultPromptLogin": true,
+    "jansAuthorizedAcr": [
+        "inum=3000-F75A,ou=scripts,o=jans"
+    ],
+    "customObjectClasses": [],
+    "requireAuthTime": true,
+    "trustedClient": true,
+    "persistClientAuthorizations": true,
+    "includeClaimsInIdToken": true,
+    "rptAsJwt": true,
+    "accessTokenAsJwt": true,
+    "disabled": true,
+    "claimRedirectURIs": [
+        "NBMNSMNBSDMV"
+    ],
+    "action_message": "SDN KD KJDK "
+}

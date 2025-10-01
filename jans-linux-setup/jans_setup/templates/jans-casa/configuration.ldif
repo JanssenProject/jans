@@ -1,0 +1,14 @@
+dn: ou=casa,ou=configuration,o=jans
+objectClass: jansAppConf
+objectClass: top
+ou: casa
+jansConfApp::%(casa_config_base64)s
+
+dn: jansId=%(casa_agama_deployment_id)s,ou=deployments,ou=agama,o=jans
+objectClass: adsPrjDeployment
+objectClass: top
+jansId: %(casa_agama_deployment_id)s
+adsPrjDeplDetails: {"autoconfigure":true,"projectMetadata":{"projectName":"casa"}}
+jansActive: false
+jansStartDate: %(jans_start_date)s
+adsPrjAssets: %(ads_prj_assets_base64)s

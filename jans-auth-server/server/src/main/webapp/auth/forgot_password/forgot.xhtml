@@ -1,0 +1,86 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- this root tag says, "for this page use /WEB-INF/incl/layout/template.xhtml as reusable template -->
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="/WEB-INF/incl/layout/template.xhtml">
+                
+
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
+	</f:metadata>
+    
+    	<!-- defines a fragment called head - it's used to generate the HTML HEAD of resulting markup -->
+	<ui:define name="head">
+		<meta name="description" content="Janssen Project" />
+		<!-- Here we use # {...} which are JSF EL expressions, they bind server values to this markup -->
+		<link href="#{webConfigurationService.getCssLocation()}/bootstrap.min.css" rel="stylesheet"/>
+		<link rel="stylesheet" href="#{webConfigurationService.getCssLocation()}/style.css"/>
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet"/>
+
+		<!--Captcha -->
+		<script>
+			    var num1 = Math.floor(Math.random() * 10);
+			    var num2 = Math.floor(Math.random() * 10);
+			    var resposta = num1 + num2;
+			    window.onload = function () {
+			       document.getElementById("captcha").innerHTML = "What's the result of " + num1 + " + " + num2 + "?";
+			       document.getElementById("ForgotPasswordForm").onsubmit = function (e) {
+				    if (document.getElementById("valida").value != resposta) {
+				       document.getElementById("mensagem").innerHTML = "Wrong answer!";
+				       e.preventDefault();
+				      }
+				    }
+				    }
+
+		</script>
+
+	</ui:define>
+
+	<ui:define name="body">
+		<header class="bs-docs-nav navbar navbar-static-top" id="top">
+			<div class="container">
+				<div class="navbar-header">
+					<a target="_blank" class="navbar-brand">
+					<<ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
+                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
+                            <h:graphicImage url='#{client.getLogoUri()}'/>
+                        </h:panelGroup> </a>
+				</div>
+			</div>
+		</header>
+		<h:form id="ForgotPasswordForm">
+			<div class="bs-docs-section">
+				<div class="container">
+					<div class="step_bx">
+						<h2>Password Reset</h2>
+
+
+						<p>Enter your e-mail:</p>
+						
+						<!-- This form field is referenced in authenticate method of script -->
+						<input class="form-control" id="ForgotPasswordForm:useremail" name="ForgotPasswordForm:useremail"
+							type="text" autocomplete="off" />
+
+								   <p> </p>
+								   <p id="captcha"></p>
+							       <input id="valida" type="text" />
+							       <p id="mensagem"></p>
+						
+							
+
+						<h:commandButton class="btn btn-done" value="Reset Password"
+							action="#{authenticator.authenticate}" type="submit" />
+					</div>
+				</div>
+			</div>		
+
+
+		</h:form>
+	
+	</ui:define>
+	
+</ui:composition>

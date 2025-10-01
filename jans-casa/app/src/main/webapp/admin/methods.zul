@@ -1,0 +1,111 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<?script src="/scripts/Sortable.min.js"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.adm.title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.admin.AuthnMethodsViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.adm.methods_title}</h2>
+                    ${labels.adm.methods_text}
+                </div>
+                
+                <div sclass="${css.panel}">
+                    <z:div children="@load(vm.methods)" sclass="pa2 flex flex-wrap justify-around" id="meme">
+                        <zk:template name="children">
+                            <h:div class="card grow ma2 w4 hover-bg-near-white" style="cursor:grab" ca:data-index="${forEachStatus.index}">
+                                <div class="card-body pa3 flex flex-column justify-between">
+                                    <div class="tr nt1">
+                                        <z:a onClick="@('showDialog', each)" sclass="link blue f7">
+                                            <i class="fas fa-external-link-alt" />
+                                        </z:a>
+                                    </div>
+    
+                                    <h6 class="card-title dark-blue2 f6">${each.name}</h6>
+    
+                                    <div class="tr">
+                                        <z:checkbox mold="switch" label="" checked="@bind(each.enabled)" />
+                                    </div>
+                                </div>
+                            </h:div>
+                        </zk:template>
+                    </z:div>
+                    <div class="ph4 pb2">
+                        <div class="alert alert-success dn" id="feedback-methods" role="alert" />
+                    </div>
+                    <div class="tc">
+                        <z:button label="${labels.general.save}" sclass="${css.primaryButton}" w:onClick="sendSave()" />
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <z:window title="@load(c:cat('Method: ', vm.currentAms.name))" border="normal" mode="modal" visible="@load(vm.currentAms ne null)"
+                  closable="true" onClose="@('closeDialog', event)" sclass="${css.modalWindow}">
+
+            <div sclass="pt1 mb3 f7-cust">
+                <p><span class="i gray">Agama flow: </span><z:label value="@load(vm.currentAms.acr)" /></p>                
+                <p><span class="i gray">Plugin: </span><z:label value="@load(vm.currentAms.description)" /></p>
+                <p><span class="i gray">Class: </span><z:label value="@load(vm.currentAms.className)" /></p>
+
+                <p class="tc db b"><z:label value="${labels.adm.methods_disabled}" visible="@load(not vm.currentAms.enabled)" /></p>              
+            </div>
+
+        </z:window>
+    </z:div>
+    
+    <z:div self="@define(extra)">
+        <style>
+            .z-checkbox-switch > .z-checkbox-mold {
+                margin: 2px;
+                position: relative;
+                width: 42px;
+                height: 24px;
+                transition: .4s;
+                border-radius: 12px;
+                display: inline-block;
+                float: left;
+                cursor: pointer;
+            }
+            .z-checkbox-switch > .z-checkbox-mold:before {
+                content: "";
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                left: 8px;
+                bottom: 4px;
+                transition: .4s;
+                border-radius: 50%;
+            }
+            .z-checkbox-switch-on > .z-checkbox-mold:before {
+                transform: translateX(10px);
+                background-color: white;
+            }
+            .z-checkbox-content {
+                padding-left: 0;
+            }
+        </style>
+        
+        <z:script defer="true">
+            alertRef = $("#feedback-methods")
+            meme = zk.$("$meme")
+            gnomo = Sortable.create(document.getElementById(meme.$n().id), { dataIdAttr: "data-index" })
+        </z:script>
+
+        <z:script>
+            function sendSave() {
+                zAu.send(new zk.Event(meme, "onData", gnomo.toArray(), {toServer:true}))   
+            }
+        </z:script>
+    </z:div>
+
+</zk:zk>

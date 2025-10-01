@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:f="http://xmlns.jcp.org/jsf/core"
+				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+				xmlns:h="http://xmlns.jcp.org/jsf/html"
+				template="/WEB-INF/incl/layout/authorize-extended-template.xhtml">
+	<f:metadata>
+        <f:viewAction action="#{authorizeAction.checkUiLocales}"/>
+        <f:viewAction action="#{consentGatherer.prepareForStep}"/>
+	</f:metadata>
+
+	<ui:param name="_client" value="#{consentGatherer.context.client}" />
+	<ui:param name="_scopes" value="#{consentGatherer.scopes}" />
+
+    <ui:define name="controlButttons">
+    	<h:commandLink id="doNotAllowButton" class="button button-default"
+				   value="#{msgs['authorize.doNotAllow']}"
+				   action="#{consentGatherer.authorize}" />&nbsp;
+		<h:commandLink id="allowButton" class="button button-primary"
+				   value="#{msgs['authorize.allow']}"
+				   action="#{consentGatherer.authorize}" />
+	</ui:define>
+
+</ui:composition>

@@ -1,0 +1,257 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.jans</groupId>
+  <artifactId>kc-jans-scheduler</artifactId>
+  <name>kc-jans-scheduler</name>
+  <packaging>jar</packaging>
+
+  <distributionManagement>
+     <repository>
+       <id>github</id>
+       <name>Github Packages</name>
+       <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+     </repository>
+   </distributionManagement>
+
+  <parent>
+    <groupId>io.jans</groupId>
+    <artifactId>jans-kc-parent</artifactId>
+    <version>0.0.0-nightly</version>
+  </parent>
+
+  <prerequisites>
+    <maven>${maven.min-version}</maven>
+  </prerequisites>
+
+  <dependencies>
+
+    <!-- keycloak dependencies -->
+
+    <!--
+      TODO: Remove this *immediately* after CVEs related to these dependencies
+      are sorted out. These dependencies replace ones required by keycloak-admin-client
+      but contain security vulnerabilities
+    -->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons-io.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-admin-client</artifactId>
+      <scope>compile</scope>
+      <!-- 
+        temporary exclusion for dependencies that contain some vulnerabilities 
+        remove *IMMEDIATELY AFTER dependencies are updated*
+      -->
+      <exclusions>
+        <exclusion>
+          <artifactId>org.jboss.resteasy</artifactId>
+          <groupId>resteasy-multipart-provider</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-core</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <!-- end keycloak dependencies-->
+
+    <!-- logback dependencies -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+    <!-- end logback dependencies -->
+
+    <!-- quartz scheduler dependencies -->
+    <dependency>
+      <groupId>org.quartz-scheduler</groupId>
+      <artifactId>quartz</artifactId>
+    </dependency>
+    <!-- end quartz scheduler dependencies -->
+
+    <!-- fasterxml jackson  dependencies -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <!-- end fasterxml jackson dependencies -->
+
+    <!-- nimbus oidc sdk dependencies -->
+    <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>oauth2-oidc-sdk</artifactId>
+    </dependency>
+    <!-- end nimbus oidc sdk dependencies -->
+
+    <!-- jakarta ws-rs dependencies -->
+    <dependency>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>${jakarta.ws-rs-api.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <!-- end jakarta ws-rs dependencies -->
+    
+    <!-- jakarta annotation-api dependencies -->
+    <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <version>${jakarta.annotation-api.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <!-- end jakarta annotation-api dependencies -->
+
+    <!-- jboss logging dependencies -->
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <!-- end jboss logging dependencies-->
+
+    <!-- dependencies for items with security vulnerabilities -->
+    <!-- end dependencies for items with security vulnerabilities -->
+
+    <!-- jans dependencies -->
+    <dependency>
+      <groupId>io.jans</groupId>
+      <artifactId>jans-core-saml</artifactId>
+    </dependency>
+    <!-- end jans dependencies -->
+    
+  </dependencies>
+
+  <build>
+    <plugins>
+
+    <!-- maven deps plugin -->
+     <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-dependency-plugin</artifactId>
+      <version>${maven-deps-plugin.version}</version>
+      <executions>
+        <execution>
+            <id>copy-job-scheduler-deps</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+                <outputDirectory>${project.build.directory}/deps</outputDirectory>
+                <includeScope>runtime</includeScope>
+                <excludeTransitive>false</excludeTransitive>
+            </configuration>
+        </execution>
+      </executions>
+     </plugin>
+     <!-- end maven deps plugin -->
+
+     <!-- maven assembly plugin -->
+     <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>${maven-assembly-plugin.version}</version>
+        <configuration>
+            <descriptors>
+                <descriptor>src/assembly/dependencies.xml</descriptor>
+            </descriptors>
+            <finalName>${project.artifactId}-${project.version}</finalName>
+        </configuration>
+        <executions>
+            <execution>
+                <id>zip-dependencies</id>
+                <phase>package</phase>
+                <goals>
+                    <goal>single</goal>
+                </goals>
+            </execution>
+        </executions>
+     </plugin>
+     <!-- end maven assembly plugin -->
+
+     <!-- maven compiler plugin -->
+     <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-compiler-plugin</artifactId>
+       <version>${maven-compiler-plugin.version}</version>
+       <configuration>
+        <source>${maven.compiler.source}</source>
+        <target>${maven.compiler.target}</target>
+       </configuration>
+     </plugin>
+     <!-- end maven compiler plugin -->
+
+     <!-- openapi generator plugin -->
+     <plugin>
+      <groupId>org.openapitools</groupId>
+      <artifactId>openapi-generator-maven-plugin</artifactId> 
+      <version>${openapi-generator-plugin.version}</version>
+      <executions>
+
+        <execution>
+          <id>generate-saml-related-apis</id>
+          <goals>
+            <goal>generate</goal>
+          </goals>
+          <configuration>
+            <generatorName>java</generatorName>
+            <inputSpec>${project.basedir}/../../jans-config-api/plugins/docs/kc-saml-plugin-swagger.yaml</inputSpec>
+            <generateApis>true</generateApis>
+            <apisToGenerate>SamlTrustRelationship</apisToGenerate>
+            <configOptions>
+              <sourceFolder>src/main/java/</sourceFolder>
+              <library>resteasy</library>
+              <useJakartaEe>true</useJakartaEe>
+              <openApiNullable>false</openApiNullable>
+              <apiPackage>io.jans.config.api.client</apiPackage>
+              <modelPackage>io.jans.config.api.client.model</modelPackage>
+              <invokerPackage>io.jans.config.api.client</invokerPackage>
+            </configOptions>
+          </configuration>
+        </execution>
+
+        <execution>
+          <id>generate-config-api</id>
+          <goals>
+            <goal>generate</goal>
+          </goals>
+          <configuration>
+            <generatorName>java</generatorName>
+            <inputSpec>${project.basedir}/../../jans-config-api/docs/jans-config-api-swagger.yaml</inputSpec>
+            <generateApis>true</generateApis>
+            <apisToGenerate>Attribute</apisToGenerate>
+            <configOptions>
+              <sourceFolder>src/main/java</sourceFolder>
+              <library>resteasy</library>
+              <useJakartaEe>true</useJakartaEe>
+              <openApiNullable>false</openApiNullable>
+              <apiPackage>io.jans.config.api.client</apiPackage>
+              <modelPackage>io.jans.config.api.client.model</modelPackage>
+              <invokerPackage>io.jans.config.api.client</invokerPackage>
+            </configOptions>
+          </configuration>
+        </execution>
+
+      </executions>
+     </plugin>
+     <!-- end openapi generator plugin-->
+    </plugins>
+  </build>
+</project>

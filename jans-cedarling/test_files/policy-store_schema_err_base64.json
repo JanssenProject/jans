@@ -1,0 +1,37 @@
+{
+    "cedar_version": "v4.0.0",
+    "policy_stores": {
+        "8ec39ee717927663bd9b18246f0479491051bb5af15a": {
+            "cedar_version": "v4.0.0",
+            "cedar_policies": {
+                "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+                    "description": "admin access",
+                    "creation_date": "2024-09-20T17:22:39.996050",
+                    "policy_content": "QGlkKCJhZG1pbiBhY2Nlc3MiKQpwZXJtaXQKKAogcHJpbmNpcGFsID09IEphbnM6OlJvbGU6OiJBZG1pbiIsCiBhY3Rpb24gaW4gW0phbnM6OkFjdGlvbjo6IkNvbXBhcmUiLEphbnM6OkFjdGlvbjo6IkV4ZWN1dGUiXSwKIHJlc291cmNlID09IEphbnM6OkFwcGxpY2F0aW9uOjoiQWRtaW4iCikKd2hlbgp7CiBKYW5zOjpBY2Nlc3NfdG9rZW46OiJhYmMiLnNjb3BlPT0iYWJjIiAmJiBKYW5zOjppZF90b2tlbjo6ImlkeHh4Ii5hbXI9PSJpZHh4eCIgIAp9Ow=="
+                },
+                "b6313811924c9e67f898257cbf017674e08203779ae9": {
+                    "description": "manager access",
+                    "creation_date": "2024-09-20T18:11:26.442574",
+                    "policy_content": "QGlkKCJtYW5hZ2VyIGFjY2VzcyIpCnBlcm1pdAooCiBwcmluY2lwYWwsCiBhY3Rpb24sCiByZXNvdXJjZQopCndoZW4KewogSmFuczo6QWNjZXNzX3Rva2VuOjoieHh4Ii5zY29wZT09Inh4eCIgfHwgSmFuczo6aWRfdG9rZW46OiJpZHh4eCIuYW1yPT0iaWR4eHgiICYmIGNvbnRleHQubmV0d29yay5pc0luUmFuZ2UoaXAoIjIyMi4yMjIuMjIyLjAvMjQiKSkgIAp9Ow=="
+                },
+                "f2b38413cad977ab21616bd4a63c233548491cf25b72": {
+                    "description": "manager access",
+                    "creation_date": "2024-09-20T18:11:37.774401",
+                    "policy_content": "QGlkKCJtYW5hZ2VyIGFjY2VzcyIpCnBlcm1pdAooCiBwcmluY2lwYWwsCiBhY3Rpb24sCiByZXNvdXJjZQopCndoZW4KewogSmFuczo6QWNjZXNzX3Rva2VuOjoieHh4Ii5zY29wZT09Inh4eCIgfHwgSmFuczo6aWRfdG9rZW46OiJpZHh4eCIuYW1yPT0iaWR4eHgiICYmIGNvbnRleHQubmV0d29yay5pc0luUmFuZ2UoaXAoIjIyMi4yMjIuMjIyLjAvMjQiKSkgIAp9Ow=="
+                },
+                "fa6a3f46ab5f741e806deff0f81d0f848af37604500f": {
+                    "description": "without condition",
+                    "creation_date": "2024-09-22T18:18:35.801566",
+                    "policy_content": "QGlkKCJ3aXRob3V0IGNvbmRpdGlvbiIpCnBlcm1pdAooCiBwcmluY2lwYWwgPT0gSmFuczo6Um9sZTo6IkFkbWluIiwKIGFjdGlvbiwKIHJlc291cmNlCikKOw=="
+                },
+                "96deb02f8ce44c46d497d44dbfec80b3b6a64fe22994": {
+                    "description": "forbid",
+                    "creation_date": "2024-09-23T14:51:21.480763",
+                    "policy_content": "QGlkKCJmb3JiaWQiKQpmb3JiaWQKKAogcHJpbmNpcGFsIGluIEphbnM6OlJvbGU6OiJBZG1pbiIsCiBhY3Rpb24gaW4gW0phbnM6OkFjdGlvbjo6IlNlYXJjaCIsSmFuczo6QWN0aW9uOjoiVGFnIl0sCiByZXNvdXJjZSBpbiBKYW5zOjpBcHBsaWNhdGlvbjo6IkFkbWluUG9ydGFsIgopCndoZW4KewogSmFuczo6QWNjZXNzX3Rva2VuOjoieHh4Ii5leHA+MTIzICYmIEphbnM6OkFjY2Vzc190b2tlbjo6ImFhYSIuZXhwPDMyMSB8fCBKYW5zOjpBY2Nlc3NfdG9rZW46OiJhYWEiLmlhdD49MTExICAKfTs="
+                }
+            },
+            "trusted_issuers": {},
+            "cedar_schema": "ewogICJKYW...gfQp9"
+        }
+    }
+}

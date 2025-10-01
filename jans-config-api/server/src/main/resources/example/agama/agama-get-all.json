@@ -1,0 +1,18 @@
+{
+    "start": 0,
+    "totalEntriesCount": 1,
+    "entriesCount": 1,
+    "entries": [
+        {
+            "dn": "agFlowQname=test,ou=flows,ou=agama,o=jans",
+            "qname": "test",
+            "revision": -1,
+            "enabled": false,
+            "metadata": {
+                "timestamp": 1666786067495
+            },
+            "source": "Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
+            "baseDn": "agFlowQname=test,ou=flows,ou=agama,o=jans"
+        }
+    ]
+}

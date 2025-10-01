@@ -1,0 +1,10 @@
+{
+    "alias": "jans-auth-openid-config",
+    "config": {
+        "jans.auth.server.url": "https://${hostname}",
+        "jans.auth.client.id": "${kc_saml_openid_client_id}",
+        "jans.auth.client.secret": "${kc_saml_openid_client_pw}",
+        "jans.auth.issuer": "https://${hostname}",
+        "jans.auth.extra_scopes": null
+    }
+}

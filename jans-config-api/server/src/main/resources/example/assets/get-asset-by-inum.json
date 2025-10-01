@@ -1,0 +1,17 @@
+{
+    "dn": "inum=0b436302-b729-4eb2-b211-335980dcab43,ou=document,o=jans",
+    "selected": false,
+    "inum": "0b436302-b729-4eb2-b211-335980dcab43",
+    "displayName": "mermaid-extra.css",
+    "description": "/opt/jans/jetty/jans-config-api/",
+    "document": ".mermaid {\r\n\toverflow: auto;\r\n}\r\n\r\n.mermaid svg {\r\n\twidth: 1315px;\r\n\theight: 600px;\r\n}\r\n",
+    "jansModuleProperty": [
+        "config-api",
+        "jar",
+        "/opt/jans/jetty/jans-config-api/custom/lib"
+    ],
+    "jansLevel": "1",
+    "jansRevision": "2",
+    "jansEnabled": true,
+    "baseDn": "inum=0b436302-b729-4eb2-b211-335980dcab43,ou=document,o=jans"
+}

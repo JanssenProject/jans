@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="ERROR">
+    <Properties>
+        <Property name="casa.log.console.prefix" value="jans-casa" />
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="$log_prefix%d{dd-MM HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
+        </Console>
+        <RollingFile name="LOG_FILE" fileName="${sys:log.base}/logs/casa.log" filePattern="${sys:log.base}/logs/casa-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="2 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+        </RollingFile>
+        <RollingFile name="TIMERS_FILE" fileName="${sys:log.base}/logs/casa_async_jobs.log" filePattern="${sys:log.base}/logs/casa_async_jobs-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] %C{2} %F:%L- %m%n" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="2 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="io.jans.casa.timer" level="$timer_log_level" additivity="false">
+            <Property name="casa.log.console.group">-timer</Property>
+            <AppenderRef ref="$timer_log_target" />
+        </Logger>
+        <!-- This logger name is required in class io.jans.casa.core.LogService -->
+        <Logger name="io.jans.casa" level="$casa_log_level" additivity="false">
+            <AppenderRef ref="$casa_log_target" />
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+
+</Configuration>

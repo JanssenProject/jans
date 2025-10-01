@@ -1,0 +1,99 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="/WEB-INF/incl/layout/login-template.xhtml">
+    <f:metadata>
+        <f:viewParam name="scope" value="#{selectAccountAction.scope}"/>
+        <f:viewParam name="response_type" value="#{selectAccountAction.responseType}"/>
+        <f:viewParam name="client_id" value="#{selectAccountAction.clientId}"/>
+        <f:viewParam name="redirect_uri" value="#{selectAccountAction.redirectUri}"/>
+        <f:viewParam name="state" value="#{selectAccountAction.state}"/>
+        <f:viewParam name="response_mode" value="#{selectAccountAction.responseMode}"/>
+        <f:viewParam name="nonce" value="#{selectAccountAction.nonce}"/>
+        <f:viewParam name="display" value="#{selectAccountAction.display}"/>
+        <f:viewParam name="max_age" value="#{selectAccountAction.maxAge}"/>
+        <f:viewParam name="ui_locales" value="#{selectAccountAction.uiLocales}"/>
+        <f:viewParam name="id_token_hint" value="#{selectAccountAction.idTokenHint}"/>
+        <f:viewParam name="login_hint" value="#{selectAccountAction.loginHint}"/>
+        <f:viewParam name="acr_values" value="#{selectAccountAction.acrValues}"/>
+        <f:viewParam name="amr_values" value="#{selectAccountAction.amrValues}"/>
+        <f:viewParam name="request" value="#{selectAccountAction.request}"/>
+        <f:viewParam name="request_uri" value="#{selectAccountAction.requestUri}"/>
+        <f:viewParam name="code_challenge" value="#{selectAccountAction.codeChallenge}"/>
+        <f:viewParam name="code_challenge_method" value="#{selectAccountAction.codeChallengeMethod}"/>
+        <f:viewParam name="claims" value="#{selectAccountAction.claims}"/>
+        <f:viewParam name="auth_req_id" value="#{selectAccountAction.authReqId}"/>
+        <f:viewParam name="binding_message" value="#{selectAccountAction.bindingMessage}"/>
+        <f:viewParam name="session_id" value="#{selectAccountAction.sessionId}"/>
+    </f:metadata>
+    <ui:define name="head">
+        <meta name="description" content="Janssen Project"/>
+    </ui:define>
+    <ui:define name="pageTitle">
+        <h:outputText value="#{msgs['selectAccount.pageTitle']}"/>
+    </ui:define>
+    <ui:define name="body">
+        <div class="container">
+            <h:panelGroup rendered="true">
+                <div class="login_bx_1"
+                     style="border-radius: 10px; margin-top: 0; background: white; border: 1px solid #008b8b;">
+                    <h:form id="selectForm">
+                        <div class="row">
+                            <div align="center" class="col-sm-12" style="margin-bottom: 20px;">
+                                <h:outputLabel value="#{msgs['login.selectAccount']}"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div align="center" class="col-sm-12">
+                                <ui:repeat value="#{selectAccountAction.currentSessions}" var="_entry" id="accountButtons">
+                                    <h:commandLink style="background-color: #00BE79; color:white;"
+                                                   styleClass="btn col-sm-12"
+                                                   value="#{selectAccountAction.getName(_entry)}"
+                                                   iconAwesome="fa-sign-in"
+                                                   action="#{selectAccountAction.select()}">
+                                        <f:setPropertyActionListener target="#{selectAccountAction.selectedSessionId}" value="#{_entry.id}" />
+                                    </h:commandLink>&nbsp;
+                                </ui:repeat>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div align="center" class="col-sm-12">
+                                <h:commandLink id="loginButton"
+                                               style="background-color:lightgray; color:black;"
+                                               styleClass="btn col-sm-12" value="#{msgs['login.loginAsAnother']}"
+                                               iconAwesome="fa-sign-in"
+                                               action="#{selectAccountAction.login()}"/>
+                            </div>
+                        </div>
+
+                        <h:inputHidden id="scope" value="#{selectAccountAction.scope}"/>
+                        <h:inputHidden id="response_type" value="#{selectAccountAction.responseType}"/>
+                        <h:inputHidden id="client_id" value="#{selectAccountAction.clientId}"/>
+                        <h:inputHidden id="redirect_uri" value="#{selectAccountAction.redirectUri}"/>
+                        <h:inputHidden id="state" value="#{selectAccountAction.state}"/>
+                        <h:inputHidden id="response_mode" value="#{selectAccountAction.responseMode}"/>
+                        <h:inputHidden id="nonce" value="#{selectAccountAction.nonce}"/>
+                        <h:inputHidden id="display" value="#{selectAccountAction.display}"/>
+                        <h:inputHidden id="max_age" value="#{selectAccountAction.maxAge}"/>
+                        <h:inputHidden id="ui_locales" value="#{selectAccountAction.uiLocales}"/>
+                        <h:inputHidden id="id_token_hint" value="#{selectAccountAction.idTokenHint}"/>
+                        <h:inputHidden id="login_hint" value="#{selectAccountAction.loginHint}"/>
+                        <h:inputHidden id="acr_values" value="#{selectAccountAction.acrValues}"/>
+                        <h:inputHidden id="amr_values" value="#{selectAccountAction.amrValues}"/>
+                        <h:inputHidden id="request" value="#{selectAccountAction.request}"/>
+                        <h:inputHidden id="request_uri" value="#{selectAccountAction.requestUri}"/>
+                        <h:inputHidden id="code_challenge" value="#{selectAccountAction.codeChallenge}"/>
+                        <h:inputHidden id="code_challenge_method" value="#{selectAccountAction.codeChallengeMethod}"/>
+                        <h:inputHidden id="claims" value="#{selectAccountAction.claims}"/>
+                        <h:inputHidden id="auth_req_id" value="#{selectAccountAction.authReqId}"/>
+                        <h:inputHidden id="binding_message" value="#{selectAccountAction.bindingMessage}"/>
+                        <h:inputHidden id="session_id" value="#{selectAccountAction.sessionId}"/>
+                    </h:form>
+                </div>
+            </h:panelGroup>
+        </div>
+    </ui:define>
+</ui:composition>

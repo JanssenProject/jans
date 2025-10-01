@@ -1,0 +1,66 @@
+﻿<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:b="http://bootsfaces.net/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="/WEB-INF/incl/layout/login-template.xhtml">
+
+    <f:metadata>
+        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
+                      if="#{not identity.loggedIn}" />
+    </f:metadata>
+
+
+    <ui:define name="pageTitle">#{msgs['passport.oxAuthPassportLogin']}</ui:define>
+
+    <ui:define name="body">
+        <div class="container">
+            <div class="login_bx_1"
+                 style="border-radius: 10px; margin-top: 0px; background: white; border: 1px solid #008b8b;">
+
+                <noscript>
+                    <b>#{msgs['passport.javascriptRequired']}</b>
+                </noscript>
+
+                <h4>#{msgs['passport.fillMissingData']}</h4>
+                <hr style="background: white;"/>
+                <h:form id="loginForm" onsubmit="return validate()" class="form-horizontal">
+                    <div class="form-group row">
+                        <h:outputLabel style="color: black;" value="#{msgs['passport.email']}"
+                                       styleClass="col-sm-2 col-form-label text-center" for="email" />
+                        <div class="col-sm-10">
+                            <h:inputText id="email" styleClass="form-control" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="offset-md-4 col-md-4">
+                            <b:commandButton style="background-color: #00BE79; color:white;"
+                                             styleClass="btn col-sm-12" value="#{msgs['login.login']}"
+                                             action="#{authenticator.authenticate}" />
+                        </div>
+
+                    </div>
+                </h:form>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+			var invalidEmail = "#{msgs['passport.invalidMailWarn']}";
+
+			function validate() {
+				var mailre = /^[\w-]+[\.]{0,1}[\w-]+@[\w-]+\.\w+[\.\w]*$/;
+				var mail = document.getElementById("loginForm:email").value;
+				var valid = mail.search(mailre) != -1;
+				if (!valid) {
+					alert(invalidEmail);
+				}
+				return valid;
+			}
+			window.onload = function() {
+				document.getElementById("loginForm:email").focus();
+			};
+		</script>
+    </ui:define>
+</ui:composition>

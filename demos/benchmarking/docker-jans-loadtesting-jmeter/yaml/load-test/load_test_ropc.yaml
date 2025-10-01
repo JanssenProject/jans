@@ -1,0 +1,48 @@
+apiVersion: v1
+data:
+  ROPC_CLIENT_ID: "aa4c8edf-1d68-462b-ac49-178c7b1db8fd"
+  ROPC_CLIENT_SECRET: "9c077c8a-dc84-4baa-abde-edc1a343e3e3"
+  USER_NUMBER_STARTING_POINT: "0"
+  USER_NUMBER_ENDING_POINT: "10000000"
+  FQDN: demoexample.jans.io
+  RUN_ROPC_TEST: "true" # or "false"
+kind: ConfigMap
+metadata:
+  labels:
+    app: load-testing-ropc
+  name: load-testing-ropc-cm
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: load-testing-ropc
+  name: load-testing-ropc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-testing-ropc
+  template:
+    metadata:
+      labels:
+        app: load-testing-ropc
+    spec:
+      #hostAliases:
+      #- ip: 35.159.30.85
+      #  hostnames:
+      #  - demoexample.jans.io
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: load-testing-ropc-cm
+        image: ghcr.io/janssenproject/jans/loadtesting-jmeter:0.0.0-nightly
+        imagePullPolicy: Always
+        name: load-testing-ropc
+        resources:
+          requests:
+            memory: "8000Mi"
+            cpu: "1300m"
+          limits:
+            memory: "8000Mi"
+            cpu: "1300m"

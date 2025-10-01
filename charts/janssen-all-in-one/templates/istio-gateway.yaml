@@ -1,0 +1,36 @@
+{{- if and (.Values.istio.ingress) (not .Values.istio.gateways) }}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ .Release.Name }}-global-gtw
+  namespace: {{ .Release.Namespace }}
+{{- if .Values.istio.additionalLabels }}
+  labels:
+{{ toYaml .Values.istio.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.istio.additionalAnnotations }}
+  annotations:
+{{ toYaml .Values.istio.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+      - {{ .Values.fqdn }}
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    hosts:
+      - {{ .Values.fqdn }}
+    tls:
+      mode: SIMPLE # enable https on this port
+      credentialName: {{ .Values.istio.tlsSecretName }}
+{{- end }}

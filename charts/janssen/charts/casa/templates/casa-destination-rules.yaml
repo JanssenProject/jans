@@ -1,0 +1,27 @@
+{{- if .Values.global.istio.enabled }}
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-casa-mtls
+  namespace: {{.Release.Namespace}}
+  labels:
+    APP_NAME: casa
+{{ include "casa.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.casa.customAnnotations.destinationRule) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.casa.customAnnotations.destinationRule }}
+{{ toYaml .Values.global.casa.customAnnotations.destinationRule | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  host: {{ .Values.global.casa.casaServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+{{- end }}

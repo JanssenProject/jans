@@ -1,0 +1,28 @@
+
+# -- Nginx ingress definitions chart
+ingress:
+  enabled: true
+  # -- Enable use of legacy API version networking.k8s.io/v1beta1 to support kubernetes 1.18. This flag should be removed next version release along with nginx-ingress/templates/ingress-legacy.yaml.
+  legacy: false
+  path: /
+  # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
+  additionalLabels: { }
+  # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken
+  # Enable client certificate authentication
+  # nginx.ingress.kubernetes.io/auth-tls-verify-client: "optional"
+  # Create the secret containing the trusted ca certificates
+  # nginx.ingress.kubernetes.io/auth-tls-secret: "janssen/tls-certificate"
+  # Specify the verification depth in the client certificates chain
+  # nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+  # Specify if certificates are passed to upstream server
+  # nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+  additionalAnnotations: { }
+  ingressClassName: nginx
+  hosts:
+  - demoexample.jans.io
+  tls:
+  - secretName: tls-certificate # DON'T change
+    hosts:
+    - demoexample.jans.io
+nameOverride: ""
+fullnameOverride: ""

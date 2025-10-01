@@ -1,0 +1,19 @@
+[package]
+name = "sparkv"
+authors = ["U-Zyn Chua <chua@uzyn.com>"]
+version = "0.1.1"
+edition = "2021"
+description = "Expirable in-memory key-value store"
+keywords = ["key-value", "database", "embedded-database", "ttl", "in-memory"]
+categories = ["database-implementations", "data-structures", "caching"]
+license = "MIT"
+repository = "https://github.com/uzyn/sparkv"
+readme = "README.md"
+homepage = "https://crates.io/crates/sparkv"
+
+[dependencies]
+thiserror = { workspace = true }
+chrono = { workspace = true }
+
+[dev-dependencies]
+serde_json = "*"

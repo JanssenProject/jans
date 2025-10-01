@@ -1,0 +1,10 @@
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native">
+
+    <li>
+        <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}${base}/" data-priority="${priority}">
+            <i class="mh2 fas fa-check-double" />
+            <span class="collapsible-menu-item di">${labels.clients.authorized.menu_label}</span>
+        </a>
+    </li>
+
+</z:zk>

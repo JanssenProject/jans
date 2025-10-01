@@ -1,0 +1,87 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:BulkRequest"
+  ],
+  "Operations": [
+    {
+      "method": "POST",
+      "path": "/Users",
+      "bulkId": "qwerty",
+      "data": {
+        "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+        "userName": "scim_test_bjensen_1"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/Users/bulkId:qwerty",
+      "data": {
+        "active": true,
+        "password": "top-secret",
+        "roles": [{ "value" : "Master of puppets" }]
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/Users/bulkId:qwerty",
+      "data": {
+        "schemas": [
+          "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+        ],
+        "Operations": [
+          {
+            "op": "add",
+            "value": {
+              "nickName": "Babas",
+              "userType": "CEO"
+            }
+          },
+          {
+            "op": "replace",
+            "value": {
+              "displayName": "patched Brava"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/Users/bulkId:qwerty",
+      "data": {
+        "schemas": [
+          "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+        ],
+        "Operations": [
+          {
+            "op": "replace",
+            "path": "name",
+            "value": {
+              "familyName": "re-patched Jensen",
+              "givenName": "re-patched Barbara",
+              "middleName": "re-patched Jane"
+            }
+          },
+          {
+            "op": "replace",
+            "path": "phoneNumbers",
+            "value": [
+              {
+                "value": "re-patch 555 123 4567",
+                "type": "other"
+              },
+              {
+                "value": "re-patch 666 000 1234",
+                "type": "work"
+              }
+            ]
+          },
+          {
+            "op": "remove",
+            "path": "name.middleName"
+          }
+        ]
+      }
+    }
+  ]
+}

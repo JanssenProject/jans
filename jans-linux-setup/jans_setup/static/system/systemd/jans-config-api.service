@@ -1,0 +1,13 @@
+[Unit]
+Description=Janssen Config API service
+After=%(order_jans_config_api_service)s
+
+[Service]
+Type=forking
+ExecStart=%(jans_scripts_dir)s/jans-config-api start
+ExecStop=%(jans_scripts_dir)s/jans-config-api stop
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target

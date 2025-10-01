@@ -1,0 +1,17 @@
+{
+    "Jans": {
+        "entityTypes": {
+            "Access_token": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "aud": {
+                            "type": "EntityOrCommon"
+                        }
+                    }
+                }
+            }
+        },
+        "actions": {}
+    }
+}

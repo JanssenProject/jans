@@ -1,0 +1,6 @@
+setuptools>=70.0.0
+pyasn1==0.4.8
+ruamel.yaml>=0.16.5
+sqlalchemy==1.3.23
+ldap3
+PyMySQL>=1.1.1

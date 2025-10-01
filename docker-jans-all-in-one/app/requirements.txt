@@ -1,0 +1,6 @@
+# pinned to py3-grpcio version to avoid failure on native extension build
+grpcio==1.62.1
+ruamel.yaml==0.18.6
+supervisor==4.2.5
+pluggy==1.4.0
+/tmp/jans/jans-pycloudlib

@@ -1,0 +1,42 @@
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<?init class="io.jans.casa.core.navigation.PageInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/basic.zul"?>
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native">
+
+    <z:div self="@define(content) @insert(extra)" if="${empty pageScope.error}" sclass="pa0 flex justify-center gray f7-cust">
+
+        <div class="flex flex-column min-vh-100 miw-16r mw-60r w-100 bg-washed-blue2 cust-content-rule">
+            <z:include src="/header.zul"/>
+
+            <z:div sclass="flex flex-auto justify-start">
+                <z:include class="flex flex-shrink-0" src="${c:startsWith(desktop.requestPath, '/admin') or
+                            (c:startsWith(desktop.requestPath, '/pl/') and c:indexOf(desktop.requestPath, '/admin/') gt 0) ?
+                            '/admin/menu.zul' : '/menubuttons.zul'}"/>
+
+                <div style="width:1px"></div>
+                <!-- page's center content -->
+                <div class="relative z-1 flex flex-grow-1">
+                    <!-- grow horizontally and vertically as much as possible -->
+                    <div class="flex flex-column justify-between w-100 h-100">
+                        <z:div self="@insert(maincontent)" />
+                        <z:include src="/footer.zul"/>
+                    </div>
+                </div>
+            </z:div>
+        </div>
+
+        <z:script src="/scripts/bootstrap.min.js" />
+        <z:script src="/scripts/font-awesome-5.12.1.all.min.js" />
+        <!-- In practice this call appears in markup earlier than the couple of files above -->
+        <script>
+            initTooltips();
+            regenerateFooter();
+        </script>
+
+    </z:div>
+
+    <z:div self="@define(content)" unless="${empty pageScope.error}">
+        <z:include src="/error-body.zul" />
+    </z:div>
+
+</z:zk>

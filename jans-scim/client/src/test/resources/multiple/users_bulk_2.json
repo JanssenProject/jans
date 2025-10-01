@@ -1,0 +1,53 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:BulkRequest"
+  ],
+  "Operations": [
+    {
+      "method": "POST",
+      "path": "/Users",
+      "bulkId": "one",
+      "data": {
+        "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+        "userName": "scim_test_bjensen_1"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/Users",
+      "bulkId": "two",
+      "data": {
+        "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+        "userName": "scim_test_bjensen_2"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/Users",
+      "bulkId": "three",
+      "data": {
+        "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+        "userName": "scim_test_bjensen_3"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/Users/bulkId:three"
+    },
+    {
+      "method": "DELETE",
+      "path": "/Users/bulkId:two"
+    },
+    {
+      "method": "DELETE",
+      "path": "/Users/bulkId:one"
+    },
+    {
+      "method": "PUT",
+      "path": "/Users/bulkId:one",
+      "data": {
+        "active": true
+      }
+    }
+  ]
+}

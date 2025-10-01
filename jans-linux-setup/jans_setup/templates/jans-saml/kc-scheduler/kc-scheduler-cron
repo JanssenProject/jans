@@ -1,0 +1,1 @@
+*/10 * * * * %(jetty_user)s %(scheduler_dir)s/bin/kc-scheduler.sh >/dev/null 2>%(scheduler_dir)s/logs/scheduler_error.log

@@ -1,0 +1,67 @@
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:zk="zk" xmlns:h="xhtml" xmlns="native">
+
+    <aside class="dn di-ns w-14r br b--light-gray shadow-4 bg-blank cust-menu-rule">
+        <h:ul id="menu" class="list pl0"
+              if="${sessionContext.user ne null}" viewModel="@('io.jans.casa.ui.vm.MenuViewModel')">
+
+            <z:div visible="@load(not empty vm.authnMethods)">
+                <li>
+                    <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}/user.zul">
+                        <i class="mh1 fas fa-tags" /><!-- fa-key fa-address-book fa-address-book-o fa-address-card fa-address-card-o fa-id-badge fa-id-card fa-id-card-o -->
+                        <span class="collapsible-menu-item di">${labels.usr.menu_main2fa}</span>
+                    </a>
+                    <ul class="list pl0">
+                        <z:div children="@load(vm.authnMethods)">
+                            <z:template name="children">
+                                <li>
+                                    <a class="db pv1 pl4 o-80 ${css.menuItem}" href="${c:cat(zkService.contextPath, vm.getAuthnMethodPageUrl(each))}">
+                                        <span class="collapsible-menu-item di">${c:l(each.panelTitleKey)}</span>
+                                    </a>
+                                </li>
+                            </z:template>
+                        </z:div>
+                    </ul>
+                </li>
+            </z:div>
+
+            <zk:zk if="${vm.pst.passResetAvailable}">
+                <li id="pass_reset_menuitem">
+                    <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}/user/pass-reset.zul">
+                        <i class="mh2 fas fa-lock" />
+                        <span class="collapsible-menu-item di">${labels.usr.passreset_title}</span>
+                    </a>
+                </li>
+            </zk:zk>
+
+            <zk:zk if="${vm.pst.passSetAvailable}">
+                <li id="pass_set_menuitem">
+                    <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}/user/pass-set.zul">
+                        <i class="mh2 fas fa-lock" />
+                        <span class="collapsible-menu-item di">${labels.usr.password_set.title}</span>
+                    </a>
+                </li>
+            </zk:zk>
+
+            <zk:zk if="${sessionContext.user.admin}">
+                <li>
+                    <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}/admin.zul">
+                        <i class="mh2 fas fa-sliders-h" /><!-- fa-wrench fa-cog -->
+                        <span class="collapsible-menu-item di">${labels.adm.title}</span>
+                    </a>
+                </li>
+            </zk:zk>
+
+            <!-- plugin's menu items -->
+            <z:div sclass="bt b--moon-gray" if="${not empty vm.pluginMenuItems}" />
+            <z:div children="@load(vm.pluginMenuItems)">
+                <zk:template name="children">
+                    <z:include src="${c:cat3(each.x, '/', each.y.contentsUrl)}">
+                        <zk:attribute name="base">${each.x}</zk:attribute>
+                        <zk:attribute name="priority">${each.y.priority}</zk:attribute>
+                    </z:include>
+                </zk:template>
+            </z:div>
+        </h:ul>
+    </aside>
+
+</z:zk>

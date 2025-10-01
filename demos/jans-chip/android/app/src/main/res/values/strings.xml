@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">jans-chip</string>
+    <string name="enrol_account">"Enrol Account</string>
+    <string name="enrol">"Enrol</string>
+    <string name="janssen">"Janssen</string>
+    <string name="login_button_text">Login</string>
+    <string name="use_saved_passkey">Choose your passkey</string>
+    <!--Registration Error Messages-->
+    <string name="registration_error_msg_empty_username">Please enter your username</string>
+    <!--Login Page - Register Section-->
+    <string name="do_not_have_account">Don\'t have an account?</string>
+    <string name="no_passkey_enrolled">No passkey enrolled.</string>
+    <string name="already_have_login">Already enrolled?</string>
+    <!--Dashboard-->
+    <string name="dashboard_title_welcome">Welcome </string>
+
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="register">Register</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+    <string name="continue_">Continue</string>
+
+    <string name="user_login">"User Login</string>
+    <string name="user_details">"User Details</string>
+
+    <string name="enable_biometric_dialog_title_text">Enable biometric authentication to sign in with your fingerprint or face ID.</string>
+    <string name="enable_biometric_dialog_confirm_btn_text">Enable</string>
+    <string name="enable_biometric_dialog_dismiss_btn_text">Cancel</string>
+
+    <string name="navigate_back">Navigate to the previous screen</string>
+
+    <!--Login-->
+    <string name="icon_password_visible">Password Visible</string>
+    <string name="icon_password_hidden">Password Hidden</string>
+
+    <!--Login Error Messages-->
+    <string name="login_error_msg_empty_email_mobile">Please enter your email or mobile number</string>
+    <string name="login_error_msg_empty_password">Please enter your password</string>
+
+    <!--Registration-->
+
+    <string name="registration_password_label">Password</string>
+    <string name="back_to_login">Back to Login</string>
+    <string name="empty_string"/>
+
+    <!--Registration Error Messages-->
+    <string name="username_already_enrolled">Username already enrolled</string>
+    <string name="registration_error_msg_empty_mobile">Please enter your mobile number</string>
+    <string name="registration_error_msg_empty_password">Please enter your password</string>
+    <string name="registration_error_msg_empty_confirm_password">Please confirm your password</string>
+    <string name="registration_error_msg_password_mismatch">Please enter the same password here as above</string>
+</resources>

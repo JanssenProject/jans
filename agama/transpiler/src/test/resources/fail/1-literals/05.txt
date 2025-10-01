@@ -1,0 +1,8 @@
+Flow flow
+    Basepath ""
+
+x = [
+        1,
+            2 ]
+    
+//Failure reason: in arrays, only commas can be surrounded by new lines

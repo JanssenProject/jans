@@ -1,0 +1,164 @@
+import os
+import glob
+import shutil
+
+from setup_app.utils import base
+from setup_app.static import AppType, InstallOption
+from setup_app.config import Config
+from setup_app.installers.jetty import JettyInstaller
+from setup_app.pylib.ldif4.ldif import LDIFWriter
+
+class ScimInstaller(JettyInstaller):
+
+    source_files = [
+            (os.path.join(Config.dist_jans_dir, 'jans-scim.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-server/{0}/jans-scim-server-{0}.war').format(base.current_app.app_info['jans_version'])),
+            (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+            ]
+
+    def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
+        self.service_name = 'jans-scim'
+        self.needdb = True
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.OPTONAL
+        self.install_var = 'install_scim_server'
+        self.register_progess()
+
+        self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
+        self.output_folder = os.path.join(Config.output_dir, self.service_name)
+
+        self.dynamic_config_fn = os.path.join(self.output_folder, 'dynamic-conf.json')
+        self.static_config_fn = os.path.join(self.output_folder, 'static-conf.json')
+        self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
+        self.ldif_clients_fn = os.path.join(self.output_folder, 'clients.ldif')
+        self.ldif_scopes_fn = os.path.join(self.output_folder, 'scopes.ldif')
+        self.jans_scim_openapi_fn = os.path.join(Config.data_dir, 'jans-scim-openapi.yaml')
+
+        self.user_scopes = {
+            'https://jans.io/scim/users.read': ('Query user resources', 'Scim users.read', 'oauth'),
+            'https://jans.io/scim/users.write': ('Modify user resources', 'Scim users.write', 'oauth'),
+            'https://jans.io/scim/tokens': ('List and revoke tokens associated to users', 'Scim user tokens', 'oauth')
+                }
+
+        if not base.argsp.shell:
+            self.extract_files()
+
+
+    def extract_files(self):
+        base.extract_file(base.current_app.jans_zip, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', Config.data_dir)
+
+
+    def install(self):
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
+        self.enable()
+
+
+    def create_scope(self, scope, inum_base='0001.'):
+        result = self.check_scope(scope['jansId'][0])
+        if result:
+            return result
+
+        if not os.path.exists(self.output_folder):
+            os.makedirs(self.output_folder)
+
+        scope['inum'] = [inum_base + '.' + os.urandom(3).hex().upper()]
+        ldif_scope_fn = os.path.join(self.output_folder, '{}.ldif'.format(scope['inum'][0]))
+        scope_ldif_fd = open(ldif_scope_fn, 'wb')
+        scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'][0])
+        ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
+        ldif_scopes_writer.unparse(scope_dn, scope)
+        scope_ldif_fd.close()
+        self.dbUtils.import_ldif([ldif_scope_fn])
+        return scope_dn
+
+
+    def create_user_scopes(self):
+        user_scope_dns = []
+        for jansid in self.user_scopes:
+            sdn = self.create_scope({
+                'objectClass': ['top', 'jansScope'],
+                'jansId': [jansid],
+                'jansScopeTyp': [self.user_scopes[jansid][2]],
+                'jansAttrs': ['{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'], 
+                'description': [self.user_scopes[jansid][0]],
+                'displayName': [self.user_scopes[jansid][1]]
+                }, '1200')
+            user_scope_dns.append(sdn)
+
+        return user_scope_dns
+
+    def generate_configuration(self):
+        self.logIt("Generating {} configuration".format(self.service_name))
+        cfg_yml = base.read_yaml_file(self.jans_scim_openapi_fn)
+        config_scopes = cfg_yml['components']['securitySchemes']['scim_oauth']['flows']['clientCredentials']['scopes']
+
+        scope_ldif_fd = open(self.ldif_scopes_fn, 'wb')
+        ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
+
+        scopes_dn = self.create_user_scopes()
+        for scope in config_scopes:
+            if scope in self.user_scopes:
+                continue
+            inum = '1200.' + os.urandom(3).hex().upper()
+            scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
+            scopes_dn.append(scope_dn)
+            display_name = 'Scim {}'.format(os.path.basename(scope))
+            ldif_scopes_writer.unparse(
+                    scope_dn, {
+                                'objectClass': ['top', 'jansScope'],
+                                'description': [config_scopes[scope]],
+                                'displayName': [display_name],
+                                'inum': [inum],
+                                'jansId': [scope],
+                                'jansScopeTyp': ['oauth'],
+                                })
+
+        scope_ldif_fd.close()
+
+        client_ldif_fd = open(self.ldif_clients_fn, 'wb')
+        client_scopes_writer = LDIFWriter(client_ldif_fd, cols=1000)
+
+        self.check_clients([('scim_client_id', '1201.')])
+
+        if not Config.get('scim_client_pw'):
+            Config.scim_client_pw = self.getPW()
+            Config.scim_client_encoded_pw = self.obscure(Config.scim_client_pw)
+
+        scim_client_dn = 'inum={},ou=clients,o=jans'.format(Config.scim_client_id)
+        client_scopes_writer.unparse(
+                scim_client_dn, {
+                'objectClass': ['top', 'jansClnt'],
+                'displayName': ['SCIM client'],
+                'jansAccessTknSigAlg': ['RS256'],
+                'jansAppTyp': ['native'],
+                'jansAttrs': ['{}'],
+                'jansGrantTyp': ['client_credentials'],
+                'jansScope': scopes_dn,
+                'jansSubjectTyp': ['pairwise'],
+                'jansTknEndpointAuthMethod': ['client_secret_basic'],
+                'inum': [Config.scim_client_id],
+                'jansClntSecret': [Config.scim_client_encoded_pw],
+                'jansRedirectURI': ['https://{}/.well-known/scim-configuration'.format(Config.hostname)]
+                })
+
+        client_ldif_fd.close()
+
+    def create_folders(self):
+        self.createDirs(self.output_folder)
+
+    def render_import_templates(self):
+
+        self.renderTemplateInOut(self.dynamic_config_fn, self.templates_folder, self.output_folder)
+        self.renderTemplateInOut(self.static_config_fn, self.templates_folder, self.output_folder)
+        Config.templateRenderingDict['scim_dynamic_conf_base64'] = self.generate_base64_ldap_file(self.dynamic_config_fn)
+        Config.templateRenderingDict['scim_static_conf_base64'] = self.generate_base64_ldap_file(self.static_config_fn)
+
+        self.renderTemplateInOut(self.ldif_config_fn, self.templates_folder, self.output_folder)
+
+        self.dbUtils.import_ldif([self.ldif_config_fn, self.ldif_scopes_fn, self.ldif_clients_fn])
+
+    def update_backend(self):
+        self.dbUtils.enable_service('jansScimEnabled')
+
+    def service_post_install_tasks(self):
+        base.current_app.ConfigApiInstaller.install_plugin('scim')

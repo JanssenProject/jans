@@ -1,0 +1,46 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.adm.title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.admin.PassResetViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.adm.pass_settings}</h2>
+
+                    <div class="flex flex-column">
+                        <z:checkbox sclass="pt2" label="${labels.adm.passreset_text}" checked="@bind(vm.passResetEnabled)" />
+
+                        <z:checkbox sclass="pt2" label="${labels.adm.pass_usepolicy}" checked="@bind(vm.passPolicy)" />
+
+                        <div class="tc pt4">
+                            <z:button sclass="${css.primaryButton}" w:onClick="alertRef = $('#feedback-pass-reset')"
+                                    label="${labels.general.save}" onClick="@('update')" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="ph4 mt2">
+            <div class="alert alert-success dn" id="feedback-pass-reset" role="alert" />
+        </div>
+
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <style>
+            label.z-checkbox-content {
+                display: inline;
+            }
+        </style>
+    </z:div>
+
+</zk:zk>

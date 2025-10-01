@@ -1,0 +1,15 @@
+{
+  "enable_pass_reset": true,
+  "oidc_config": {
+    "authz_redirect_uri": "%(casa_redirect_uri)s",
+    "post_logout_uri": "%(casa_redirect_logout_uri)s",
+    "frontchannel_logout_uri": "%(casa_frontchannel_logout_uri)s",
+    "scopes": ["openid", "profile", "user_name", "clientinfo"],
+    "op_host": "%(hostname)s",
+    "client": {
+      "clientId": "%(casa_client_id)s",
+      "clientSecret": "%(casa_client_pw)s",
+      "clientName": "Client for Casa"
+      }
+    }
+}

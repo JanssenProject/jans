@@ -1,0 +1,119 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<!-- Putting these scripts as part of extra section (see at the bottom) gives trouble in FF and Opera -->
+<?script src="/../jans-auth/auth/fido2/js/base64js.js"?>
+<?script src="/../jans-auth/auth/fido2/js/base64url.js"?>
+<?script src="/../jans-auth/auth/fido2/js/webauthn.js"?>
+<?import io.jans.casa.core.pojo.FidoDevice?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.usr.fido2_title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.user.PasskeysViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+        <div class="ph4 mb2">
+            <div class="alert alert-success dn" id="feedback-key-edit" role="alert" />
+        </div>
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.usr.fido2_title}</h2>
+                    <p>${labels.usr.fido2_text}</p>
+                </div>
+
+                <z:div children="@load(vm.devices)">
+                    <zk:template name="children">
+                        <div class="${css.panel} flex justify-between">
+                            <div class="flex items-start">
+                               
+                                <zk:zk if="${FidoDevice.isPlatformAuthenticator(each)}">
+								    <img src="${zkService.contextPath}${assetsService.prefix}/images/touchid.png" />
+								</zk:zk>
+								<zk:zk if="${FidoDevice.isMultideviceAuthenticator(each)}">
+								    <img src="${zkService.contextPath}${assetsService.prefix}/images/passkey.png" />
+								</zk:zk>
+								<zk:zk if="${FidoDevice.isSecurityKey(each)}">
+								    <img src="${zkService.contextPath}${assetsService.prefix}/images/u2fkey.png" />
+								</zk:zk>
+								
+                                <p class="ml3 mb0">
+                                    <z:label sclass="f5 dark-blue2" value="@load(empty each.nickName ? c:l('general.no_named') : each.nickName)" />
+                                    <br />
+                                    <label class="w4 ma0 truncate nb1">${labels.general.added_on}</label>
+                                    <z:label value="@load(each.creationDate) @converter('io.jans.casa.ui.CustomDateConverter',
+                                        format='MMM d, yyyy - hh:mm a', offset = sessionContext.zoneOffset)"/>
+                                </p>
+                            </div>
+                            <div class="pl2 pt2">
+                                <h:button class="${css.editButton} mb2 mr2" w:onClick="alertRef = $('#feedback-key-edit')"
+                                          onClick="@('prepareForUpdate', each)"
+                                          data-original-title="${labels.general.edit}" data-toggle="tooltip" data-placement="top">
+                                    <i class="fas fa-pencil-alt" />
+                                </h:button>
+                                <h:button class="${css.deleteButton} mb2" w:onClick="alertRef = $('#feedback-key-edit')"
+                                          onClick="@('delete', each)"
+                                          data-original-title="${labels.general.delete}" data-toggle="tooltip" data-placement="top">
+                                    <i class="fas fa-trash-alt" />
+                                </h:button>
+                            </div>
+                        </div>
+                    </zk:template>
+                </z:div>
+
+                <div class="${css.panel} bg-near-white">
+                    <h2 class="f5 dark-blue2 pt1">${labels.usr.fido2_add}</h2>
+                    <div class="alert alert-success dn" id="feedback-key" role="alert" />
+
+                    <div class="pb2">
+                        <span class="mr2">${labels.usr.fido2_pressready}</span>
+                        <z:image src="${assetsService.prefix}/images/throbber.gif" visible="@load(vm.uiAwaiting)" />
+                    </div>
+                    <z:button id="readyButton" label="${labels.general.ready}" sclass="${css.primaryButton}"
+                              w:onClick="alertRef = $('#feedback-key'); initialize(this)" onClick="@('triggerAttestationRequest')" />
+					
+                    <z:div sclass="flex flex-wrap pt2" visible="@load(vm.uiEnrolled)">
+                        <div class="relative w5 mt3 pr3">
+                            <z:textbox sclass="focused-text w-100 pb1" onOK="@('add')" value="@bind(vm.newDevice.nickName)" ca:required="required" />
+                            <label class="focused-label">${labels.usr.enter_nick}</label>
+                        </div>
+
+                        <div class="pt2">
+                            <z:button label="${labels.general.add}" sclass="${css.primaryButton} mr2" onClick="@('add')"/>
+                            <z:button label="${labels.general.cancel}" sclass="${css.tertiaryButton}" onClick="@('cancel')"/>
+                        </div>
+                    </z:div>
+                </div>
+                
+                
+                
+            </section>
+        </div>
+
+        <z:window title="${labels.usr.fido2_edit}" border="normal" mode="modal" visible="@load(not empty vm.editingId)"
+                  closable="true" onClose="@('cancelUpdate', event)" sclass="${css.modalWindow}">
+
+            <div sclass="pt1 mb3">
+                <span class="db f7-cust gray">${labels.general.new_nick}</span>
+                <div class="pa1">
+                    <z:textbox sclass="${css.textInput} w-100" value="@bind(vm.newDevice.nickName)" onOK="@('update')"/>
+                </div>
+            </div>
+            <div class="w-100 flex justify-center">
+                <z:button sclass="${css.primaryButton} mr3" label="${labels.general.update}"
+                          w:onClick="alertRef = $('#feedback-key-edit')" onClick="@('update')" />
+                <z:button sclass="${css.tertiaryButton}" label="${labels.general.cancel}" onClick="@('cancelUpdate', event)" />
+            </div>
+
+        </z:window>
+
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <z:script src="/scripts/gluu/fido2-util.js" />
+    </z:div>
+   
+</zk:zk>

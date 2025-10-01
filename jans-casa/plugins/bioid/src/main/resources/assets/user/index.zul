@@ -1,0 +1,28 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.bioid_title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.bioid.vm.BioIdViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+		<div class="ph4 mb2">
+		    <div class="alert alert-success dn" id="feedback-bioid" role="alert" />
+		</div>
+
+        <div class="${css['sectionsWrapper']} pt3">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.bioid_title}</h2>
+                    <p>${labels.bioid_text}</p>
+                        <z:button href="interlude.zul?start=true"
+                            class="${css.primaryButton} lh-tight mr2" target="_blank"
+                            label="Start Enrollment Flow" />
+                </div>
+            </section>
+        </div>
+    </z:div>
+
+</zk:zk>

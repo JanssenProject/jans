@@ -1,0 +1,352 @@
+{
+  "serviceName": "jans-config-api",
+  "configOauthEnabled": ${configOauthEnabled},
+  "disableLoggerTimer": false,
+  "disableAuditLogger": false,
+  "customAttributeValidationEnabled": true,
+  "acrValidationEnabled": true,
+  "apiApprovedIssuer": ["${apiApprovedIssuer}"],
+  "apiProtectionType": "${apiProtectionType}",
+  "apiClientId": "${jca_client_id}",
+  "apiClientPassword": "${jca_client_encoded_pw}",
+  "endpointInjectionEnabled": ${endpointInjectionEnabled},
+  "authIssuerUrl": "${issuer}",
+  "authOpenidConfigurationUrl": "${openIdConfigurationEndpoint}",
+  "authOpenidIntrospectionUrl": "${introspectionEndpoint}",
+  "authOpenidTokenUrl": "${tokenEndpoint}",
+  "authOpenidRevokeUrl": "${tokenRevocationEndpoint}",
+  "disableJdkLogger": true,
+  "loggingLevel": "INFO",
+  "loggingLayout": "text",
+  "externalLoggerConfiguration": "",
+  "maxCount": 200,
+  "acrExclusionList": [
+    "simple_password_auth"
+  ],
+  "exclusiveAuthScopes": [
+    "jans_stat",
+    "https://jans.io/scim/users.read",
+    "https://jans.io/scim/users.write"
+  ],
+  "corsConfigurationFilters": [
+    {
+      "filterName": "CorsFilter",
+      "corsAllowedOrigins": "*",
+      "corsAllowedMethods": "GET,PUT,POST,DELETE,PATCH,HEAD,OPTIONS",
+      "corsAllowedHeaders": "",
+      "corsExposedHeaders": "",
+      "corsSupportCredentials": true,
+      "corsLoggingEnabled": false,
+      "corsPreflightMaxAge": 1800,
+      "corsRequestDecorate": true,
+      "corsEnabled": true
+    }
+  ],
+  "userExclusionAttributes": [
+    "userPassword"
+  ],
+  "userMandatoryAttributes": [
+    "mail",
+    "displayName",
+    "status",
+    "userPassword",
+    "givenName"
+  ],
+  "agamaConfiguration": {
+    "mandatoryAttributes": [
+      "qname",
+      "source"
+    ],
+    "optionalAttributes": [
+      "serialVersionUID",
+      "enabled"
+    ]
+  },
+  "auditLogConf": {
+    "enabled": true,
+	"logData": true,
+    "ignoreHttpMethod": [
+      "GET"
+    ],
+	"ignoreAnnotation": [
+      "ignoreAudit"
+    ],
+    "ignoreObjectMapping": [
+    {
+      "name": "loggingRequest",
+      "text": [
+	  "action=FETCH"
+	  ]
+    },
+    {
+      "name": "ssaRequest",
+      "text": [ ]
+    }
+  ],
+    "headerAttributes": [
+      "User-inum",
+      "jans-client"
+    ],
+    "auditLogFilePath": "/opt/jans/jetty/jans-config-api/logs/",
+    "auditLogFileName": "configapi-audit.log",
+    "auditLogDateFormat": "dd-MM-yyyy"
+  },
+  "dataFormatConversionConf": {
+    "enabled": true,
+    "ignoreHttpMethod": [
+      "@jakarta.ws.rs.GET()"
+    ]
+  },
+  "assetMgtConfiguration": {
+    "assetMgtEnabled": true,
+    "assetServerUploadEnabled": true,
+    "fileExtensionValidationEnabled": true,
+    "moduleNameValidationEnabled": true,
+    "assetDirMapping": [
+      {
+        "directory": "/opt/jans/jetty/%s/custom/config",
+        "type": [
+          "xml"
+        ],
+        "jansServiceModule": [
+          "jans-config-api"
+        ],
+        "description": "Custom xml file for plugins."
+      },
+      {
+        "directory": "/opt/jans/jetty/%s/custom/i18n",
+        "type": [
+          "properties"
+        ],
+        "jansServiceModule": [
+          "jans-auth",
+          "jans-config-api",
+          "jans-scim"
+        ],
+        "description": "Resource bundle file."
+      },
+      {
+        "directory": "/opt/jans/jetty/%s/custom/libs",
+        "type": [
+          "jar"
+        ],
+        "jansServiceModule": [
+          "jans-auth",
+          "jans-config-api",
+          "jans-keycloak-link",
+          "jans-scim",
+          "jans-lock",
+          "jans-link"
+        ],
+        "description": "java archive library."
+      },
+      {
+        "directory": "/opt/jans/jetty/%s/custom/pages",
+        "type": [
+          "xhtml"
+        ],
+        "jansServiceModule": [
+          "jans-auth",
+          "jans-config-api",
+          "jans-scim"
+        ],
+        "description": "Web pages."
+      },
+      {
+        "directory": "/opt/jans/jetty/%s/custom/static",
+        "type": [
+          "js",
+          "css",
+          "png",
+          "gif",
+          "jpg",
+          "jpeg"
+        ],
+        "jansServiceModule": [
+          "jans-auth",
+          "jans-config-api",
+          "jans-scim"
+        ],
+        "description": "Static resources like Java-script, style-sheet and images."
+      },
+      {
+        "directory": "/opt/jans/jetty/%s/plugins",
+        "type": [
+          "jar"
+        ],
+        "jansServiceModule": [
+          "jans-casa"
+        ],
+        "description": "java archive library."
+      },
+      {
+        "directory": "/opt/jans/jetty/%s/static",
+        "type": [
+          "js",
+          "css",
+          "png",
+          "gif",
+          "jpg",
+          "jpeg"
+        ],
+        "jansServiceModule": [
+          "jans-casa"
+        ],
+        "description": "Static resources."
+      },
+      {
+        "directory": "/etc/certs/",
+        "type": [
+          "pkcs12"
+        ],
+        "jansServiceModule": [
+          "jans-auth"
+        ],
+        "description": "Archive file for storing cryptographic objects."
+      },
+      {
+        "directory": "/opt/jans/jetty/jans-auth/%s/fl",
+        "type": [
+          "js",
+          "css",
+          "png",
+          "gif",
+          "jpg",
+          "jpeg"
+        ],
+        "jansServiceModule": [
+          "agama"
+        ],
+        "description": "Agama Static resources."
+      },
+      {
+        "directory": "/opt/jans/jetty/jans-auth/%s/ftl",
+        "type": [
+          "ftl",
+          "ftlh"
+        ],
+        "jansServiceModule": [
+          "agama"
+        ],
+        "description": "Freemarker Template."
+      },
+      {
+        "directory": "/opt/jans/jetty/jans-auth/%s/scripts",
+        "type": [
+          "java",
+          "groovy",
+          "gvy",
+          "gy",
+          "gsh"
+        ],
+        "jansServiceModule": [
+          "agama"
+        ],
+        "description": "Freemarker Template."
+      },
+      {
+        "directory": "/etc/jans/conf/fido2/authenticator_cert",
+        "type": [
+          "pem",
+          "crt"
+        ],
+        "jansServiceModule": [
+          "jans-fido2"
+        ],
+        "description": "Digital certificates."
+      },
+      {
+        "directory": "/etc/jans/conf/fido2/mds/cert",
+        "type": [
+          "crt"
+        ],
+        "jansServiceModule": [
+          "jans-fido2"
+        ],
+        "description": " FIDO Metadata Service (MDS) certificates."
+      },
+      {
+        "directory": "/etc/jans/conf/fido2/mds/toc",
+        "type": [
+          "crt"
+        ],
+        "jansServiceModule": [
+          "jans-fido2"
+        ],
+        "description": " FIDO Metadata Table of Contents file."
+      },
+      {
+        "directory": "/etc/jans/conf/fido2/server_metadata",
+        "type": [
+          "crt"
+        ],
+        "jansServiceModule": [
+          "jans-fido2"
+        ],
+        "description": " FIDO Server Metadata."
+      },
+      {
+        "directory": "/var/jans/keycloak-link-snapshots",
+        "type": [
+          "txt"
+        ],
+        "jansServiceModule": [
+          "jans-keycloak-link"
+        ],
+        "description": "Keycloak link snapshots."
+      },
+      {
+        "directory": "/var/jans/link-snapshots/",
+        "type": [
+          "txt"
+        ],
+        "jansServiceModule": [
+          "jans-link"
+        ],
+        "description": "Link snapshots."
+      }
+    ]
+  },
+  "plugins": [
+    {
+      "name": "admin",
+      "description": "admin-ui plugin",
+      "className": "io.jans.ca.plugin.adminui.rest.ApiApplication"
+    },
+    {
+      "name": "fido2",
+      "description": "fido2 plugin",
+      "className": "io.jans.configapi.plugin.fido2.rest.ApiApplication"
+    },
+    {
+      "name": "scim",
+      "description": "scim plugin",
+      "className": "io.jans.configapi.plugin.scim.rest.ApiApplication"
+    },
+    {
+      "name": "user-management",
+      "description": "user-management plugin",
+      "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication"
+    },
+    {
+      "name": "jans-link",
+      "description": "jans-link plugin",
+      "className": "io.jans.configapi.plugin.link.rest.ApiApplication"
+    },
+    {
+      "name": "saml",
+      "description": "saml plugin",
+      "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
+    },
+    {
+      "name": "kc-link",
+      "description": "kc-link plugin",
+      "className": "io.jans.configapi.plugin.kc.link.rest.ApiApplication"
+    },
+    {
+      "name": "lock",
+      "description": "lock plugin",
+      "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
+    }
+  ]
+}

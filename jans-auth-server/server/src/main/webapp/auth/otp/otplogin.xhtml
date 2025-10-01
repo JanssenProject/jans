@@ -1,0 +1,75 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/login-extended-template.xhtml">
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
+			if="#{not identity.loggedIn}" />
+	</f:metadata>
+
+	<ui:define name="head">
+		<meta name="description" content="Janssen Project" />
+
+		<link
+			href="#{webConfigurationService.getCssLocation()}/bootstrap.min.css"
+			rel="stylesheet" />
+		<link rel="stylesheet"
+			href="#{webConfigurationService.getCssLocation()}/style.css" />
+		<link
+			href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600"
+			rel="stylesheet" />
+	</ui:define>
+
+	<ui:define name="pageTitle">
+		<h:outputText value="#{msgs['otp.pageTitle']}" />
+	</ui:define>
+
+	<ui:define name="body">
+		<h:form id="loginForm">
+			<h:panelGroup rendered="#{not identity.loggedIn}">
+				<div class="container">
+					<div class="step_bx">
+						<h2>#{msgs['otp.verification']}</h2>
+						<p>#{msgs['otp.usedevice']}</p>
+						<img
+							src="#{webConfigurationService.getImgLocation()}/ver_code.png"
+							alt="ver_code" />
+						<h4>#{msgs['otp.entercode']}</h4>
+						<p>#{msgs['otp.getcode']}</p>
+
+						<input class="form-control" id="loginForm:otpCode"
+						    style="margin-top:5px;"
+							name="loginForm:otpCode" type="text" autocomplete="off" /> <br></br>
+						<h:commandButton class="btn btn-primary col-sm-offset-3 col-sm-6"
+							style="margin-bottom:10px;" value="#{msgs['login.login']}"
+							action="#{authenticator.authenticate}" />
+					</div>
+				</div>
+			</h:panelGroup>
+		</h:form>
+		<script type="text/javascript">
+			window.onload = function() {
+				var otpCodeField = document.getElementById("loginForm:otpCode");
+				otpCodeField.focus();
+			};
+		</script>
+		<style type="text/css">
+.container {
+	margin: auto;
+	border-radius: 10px !important;
+	width: 50%;
+	border: 3px;
+	padding: 10px;
+}
+
+.step_bx {
+	width: 100%;
+	border-radius: 5px !important;
+	height: 60%;
+}
+</style>
+	</ui:define>
+</ui:composition>

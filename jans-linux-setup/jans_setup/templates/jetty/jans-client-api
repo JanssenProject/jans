@@ -1,0 +1,12 @@
+JAVA_HOME=%(jre_home)s
+JAVA=$JAVA_HOME/bin/java
+JETTY_HOME=%(jetty_home)s
+JETTY_BASE=%(jetty_base)s/jans-client-api
+JETTY_USER=%(jetty_user)s
+JETTY_ARGS="jetty.http.host=localhost jetty.http.port=8076"
+TMPDIR=%(jetty_dist)s/temp
+
+
+JAVA_OPTIONS="-server -Xms%(jans-client-api_min_heap_mem)sm -Xmx%(jans-client-api_max_heap_mem)sm -XX:+DisableExplicitGC -Djans.base=%(jansBaseFolder)s -Dserver.base=%(jetty_base)s/jans-client-api -Dlog.base=%(jetty_base)s/jans-client-api -Dpython.home=%(jython_home)s"
+
+export PYTHON_HOME=%(jython_home)s

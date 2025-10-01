@@ -1,0 +1,77 @@
+{
+    "Jans": {
+        "commonTypes": {
+            "Url": {
+                "type": "Record",
+                "attributes": {
+                    "host": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    },
+                    "path": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    },
+                    "protocol": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    }
+                }
+            }
+        },
+        "entityTypes": {
+            "Access_token": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "aud": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "exp": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iat": {
+                            "type": "Long"
+                        },
+                        "scope": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            },
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "TrustedIssuer": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "issuer_entity_id": {
+                            "type": "EntityOrCommon",
+                            "name": "Url"
+                        }
+                    }
+                }
+            },
+            "Issue": {},
+            "Role": {}
+        },
+        "actions": {
+            "Update": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Issue"
+                    ],
+                    "principalTypes": [
+                        "Access_token",
+                        "Role"
+                    ]
+                }
+            }
+        }
+    }
+}

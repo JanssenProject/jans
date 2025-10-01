@@ -1,0 +1,79 @@
+{{ if .Values.global.usrEnvs.secret }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-global-user-custom-envs
+  labels:
+    APP_NAME: configurator
+{{ include "config.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.secret) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.secret }}
+{{ toYaml .Values.global.config.customAnnotations.secret | indent 4 }}
+{{- end }}
+{{- end }}
+type: Opaque
+data:
+  {{- range $key, $val := .Values.global.usrEnvs.secret }}
+  {{ $key }}: {{ $val | b64enc }}
+  {{- end}}
+{{- end}}
+{{ if .Values.global.usrEnvs.normal }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-global-user-custom-envs
+  labels:
+    APP_NAME: configurator
+{{ include "config.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.configMap) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.configMap }}
+{{ toYaml .Values.global.config.customAnnotations.configMap | indent 4 }}
+{{- end }}
+{{- end }}
+data:
+  {{- range $key, $val := .Values.global.usrEnvs.normal }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end}}
+{{- end}}
+{{ if .Values.usrEnvs.secret }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-user-custom-envs
+  labels:
+    APP_NAME: configurator
+{{ include "config.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.secret) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.secret }}
+{{ toYaml .Values.global.config.customAnnotations.secret | indent 4 }}
+{{- end }}
+{{- end }}
+type: Opaque
+data:
+  {{- range $key, $val := .Values.usrEnvs.secret }}
+  {{ $key }}: {{ $val | b64enc }}
+  {{- end}}
+{{- end}}

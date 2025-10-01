@@ -1,0 +1,13 @@
+{
+    "displayName": "kc-saml-plugin.jar",
+    "description": "Config api pligin",
+    "document":"",
+    "jansModuleProperty": [
+		"config-api",
+		"jar",
+		"/opt/jans/jetty/jans-config-api/custom/lib"
+	],	
+    "jansLevel": "1",
+    "jansRevision": "1",
+    "jansEnabled": true
+}

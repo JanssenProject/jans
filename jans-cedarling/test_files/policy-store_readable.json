@@ -1,0 +1,37 @@
+{
+    "cedar_version": "v4.0.0",
+    "policy_stores": {
+        "8ec39ee717927663db9b18246f0479419051bb5af15a": {
+            "name": "Jans",
+            "policies": {
+                "840daed85403f35ea76519ed1a18a44778f855bf18fc": {
+                    "cedar_version": "",
+                    "name": "eight forty",
+                    "description": "simple policy example for principal workload",
+                    "creation_date": "2024-09-20T17:22:39.996050",
+                    "policy_content": {
+                        "encoding": "none",
+                        "content_type": "cedar",
+                        "body": "permit(\n    principal is Jans::Workload,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.org_id == resource.org_id\n};"
+                    }
+                },
+                "444da5d85403f3989fd1a18a335ea76519e855bf1cf8": {
+                    "cedar_version": "",
+                    "name": "four forty four",
+                    "description": "simple policy example for principal user",
+                    "creation_date": "2024-09-20T17:22:39.996050",
+                    "policy_content": {
+                        "encoding": "none",
+                        "content_type": "cedar",
+                        "body": "permit(\n    principal is Jans::User,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.country == resource.country\n};"
+                    }
+                }
+            },
+            "schema": {
+                "encoding": "none",
+                "content_type": "cedar",
+                "body": "namespace Jans {\ntype Url = {\"host\": String, \"path\": String, \"protocol\": String};\nentity Access_token = {\"aud\": String, \"exp\": Long, \"iat\": Long, \"iss\": TrustedIssuer, \"jti\": String};\nentity Issue = {\"country\": String, \"org_id\": String};\nentity TrustedIssuer = {\"issuer_entity_id\": Url};\nentity User = {\"country\": String, \"email\": String, \"sub\": String, \"username\": String};\nentity Workload = {\"client_id\": String, \"iss\": TrustedIssuer, \"name\": String, \"org_id\": String};\nentity Id_token = {\"acr\": String, \"amr\": String, \"aud\": Set<String>, \"exp\": Long, \"iat\": Long, \"iss\": TrustedIssuer, \"jti\": String, \"sub\": String};\naction \"Update\" appliesTo {\n  principal: [Workload, User],\n  resource: [Issue],\n  context: {}\n};\n}\n"
+            }
+        }
+    }
+}

@@ -1,0 +1,86 @@
+//This flow reuses project https://github.com/JanssenProject/jans/tree/main/docs/agama-catalog/jans/inboundID 
+//and Casa project (https://github.com/JanssenProject/jans/tree/main/jans-casa/agama/project) to offer
+//either a local 2FA experience or external site login
+//If parameter providerId is passed, the initial prompt screen is skipped and authentication is directly
+//launched against the authentication provider referenced. Note available providers are preliminarly 
+//supplied in the flow configuration. Additionally, if parameter uidRef is passed, the incoming identity  
+//is linked to the user whose uid is currently stored in the Jans Cache by using the given uidRef as
+//lookup key. This makes possible to do account linking from within Casa app, for instance
+Flow io.jans.casa.authn.acctlinking
+    Basepath ""
+    Configs providers
+    Inputs providerId uidRef
+
+When providerId is null
+    //Store a list with minimal info about providers in the cache. This allows to re-use main casa
+    //flow and still have means to access dynamic info from the overriding template acctlinking.ftlh
+    Call io.jans.casa.acctlinking.ProvidersCacher#store "acctlinking_providers" 60 providers
+    
+    obj = Trigger io.jans.casa.authn.main
+        Override templates "kz1vc3/main.ftlh" "acctlinking.ftlh"
+    
+    When obj.aborted is null    //User took usual Casa authentication, terminate as such
+        Finish obj
+        
+    providerId = obj.data.providerId
+
+provider = providers.$providerId
+//See class io.jans.inbound.Provider for reference
+
+When provider is null or provider.enabled is false
+    msg = Call java.lang.String#format "Provider '%s' not recognized. Is it enabled?" providerId
+    obj = { success: false, error: msg }
+    Finish obj
+
+//Launch matching flow and retrieve profile
+Log "Initiating external authentication for identity provider '%'" providerId
+obj = Trigger $provider.flowQname provider
+
+When obj.success is false
+    Finish obj
+
+field = Call io.jans.inbound.Utils#getMappingField provider.mappingClassField
+idProc = Call io.jans.inbound.IdentityProcessor#new provider
+profile = Call idProc applyMapping obj.data field
+
+field = null
+//In profile, every key is associated to a list
+Log "@d Mapped profile is\n" profile
+
+When profile.ID is null or profile.ID.empty is true
+    obj = { success: false, error: "Mapped profile misses value for 'ID'" }
+    Finish obj
+
+When profile.mail is null or profile.mail.empty is true
+    Log "Incoming user has no e-mail value"
+
+    //Prompt for e-mail if necessary
+    When provider.requestForEmail is true
+        obj = RRF "email-prompt.ftlh"
+        mail = obj.email
+        
+        When mail is null
+            obj = { success: false, error: "Unable to complete profile data: e-mail not provided" }
+            Finish obj
+
+        profile.mail = [ mail ]
+
+jansExtUid = Call io.jans.casa.acctlinking.UidUtils#computeExtUid providerId profile.ID[0]
+uid = null
+
+When profile.uid is not null
+    uid = profile.uid[0]
+
+uid = Call io.jans.casa.acctlinking.UidUtils#lookupUid uidRef uid profile.ID[0] "jansExtUid" jansExtUid
+profile.jansExtUid = Call io.jans.casa.acctlinking.UidUtils#attrValuesAdding uid "jansExtUid" jansExtUid
+
+profile.uid = [ uid ]
+Call profile remove "ID"       //ID not part of DB schema - jansExtUid has what is needed
+
+uid | E = Call idProc process profile
+When E is null
+    Finish uid
+
+Log "@e Unable to process the incoming user" E
+obj = { success: false, error: E.message }
+Finish obj

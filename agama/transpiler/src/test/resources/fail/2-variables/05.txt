@@ -1,0 +1,6 @@
+Flow flow
+    Basepath ""
+
+x = y[ z[0] ]
+
+//Failure reason: only a positive number or variable name is allowed for list indexing 

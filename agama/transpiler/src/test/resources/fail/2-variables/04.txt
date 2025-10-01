@@ -1,0 +1,6 @@
+Flow flow
+    Basepath ""
+
+x = y["hi"]
+
+//Failure reason: only a positive number or variable name is allowed for list indexing 

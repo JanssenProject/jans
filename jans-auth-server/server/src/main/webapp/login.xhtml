@@ -1,0 +1,207 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:a="http://xmlns.jcp.org/jsf/passthrough"
+  template="/WEB-INF/incl/layout/login-template.xhtml"
+>
+  <f:metadata>
+    <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" />
+  </f:metadata>
+  <ui:define name="head">
+    <meta name="description" content="Janssen Project" />
+  </ui:define>
+  <ui:define name="pageTitle">
+    <h:outputText value="#{msgs['login.pageTitle']}" />
+  </ui:define>
+  <ui:define name="body">
+    <svg class="absolute-logo" xmlns="http://www.w3.org/2000/svg" id="AppLogo">
+      <defs><style>.cls-1{letter-spacing:0em;}.cls-2,.cls-3,.cls-4{fill:#fff;}.cls-3{font-size:40px;}.cls-3,.cls-4{font-family:CaviarDreams, 'Caviar Dreams',sans-serif;}.cls-5{clip-path:url(#clippath-2);}.cls-6{fill:#fcef00;}.cls-7{clip-path:url(#clippath-1);}.cls-8{fill:#08bb7a;}.cls-9{letter-spacing:.04em;}.cls-10{clip-path:url(#clippath);}.cls-11{fill:none;}.cls-12{letter-spacing:0em;}.cls-13{letter-spacing:0em;}.cls-14{fill:url(#linear-gradient);}.cls-15{letter-spacing:-.01em;}.cls-4{font-size:80px;}</style><clipPath id="clippath"><rect class="cls-11" width="1920" height="1080"/></clipPath><clipPath id="clippath-1"><rect class="cls-11" x="-5" y="-5" width="1930" height="1090"/></clipPath><clipPath id="clippath-2"><rect class="cls-11" x="-5" y="-5" width="1930" height="1090"/></clipPath><linearGradient id="linear-gradient" x1="82.68" y1="31.51" x2="48.72" y2="82.01" gradientTransform="matrix(1, 0, 0, 1, 0, 0)" gradientUnits="userSpaceOnUse"><stop offset=".15" stop-color="#abefd3"/><stop offset=".25" stop-color="#90e6c4"/><stop offset=".51" stop-color="#56d3a4"/><stop offset=".73" stop-color="#2bc68d"/><stop offset=".9" stop-color="#11be7f"/><stop offset="1" stop-color="#08bb7a"/></linearGradient></defs>
+      <g><path class="cls-14" d="M92.25,87.48c-.59,2.17-2.23,2.78-4.1,3.08-6.81,1.08-13.64,1.45-20.51,.69-5.76-.64-11.3-2.02-16.36-4.96-4.26-2.48-7.55-5.89-9.81-10.3-1.76-3.44-3.63-3.81-6.55-1.25-.56,.49-.72,.32-1.04-.15-1.36-2.01-.12-8.99,1.88-10.34,.91-.61,1.95-.8,3.03-.65,1.1,.16,2.2,.33,3.28,.59,2.94,.71,2.92,.73,2.43-2.39-1.68-10.77-4.02-21.41-6.42-32.04-.13-.56-.21-1.12-.37-2,4.55,3.35,8.46,6.92,11.99,10.93,3.53,4.02,6.6,8.36,9.09,13.14,8.53-10.17,17.68-19.26,31.8-21.97-2.46,3.42-4.52,6.6-6.34,9.93-3.8,6.96-6.98,14.2-9.32,21.76-1.57,5.06-1.71,10.28-.05,15.41,1.23,3.8,3.71,6.46,7.47,7.86,3.18,1.19,6.39,2.32,9.89,2.65Zm-9.35-51.97c-12.5,5.66-21.33,14.85-26.36,27.61-1.69,4.29-5.21,6.37-9.74,5.4-1.66-.35-3.27-.92-4.91-1.35-1.13-.3-2.26-.68-3.45-.58-1.58,.13-1.99,2.1-2.16,3.2-.18,1.21,1.1,.34,1.88,.43,2.78,.34,4.77,1.89,6.02,4.33,2.26,4.4,5.73,7.5,10.08,9.72,5.75,2.93,11.96,4.03,18.31,4.44,2.46,.16,4.93,.03,7.45,.03-.16-.58-.48-.73-.78-.91-6.37-3.71-8.52-9.79-8.77-16.61-.17-4.63,.94-9.18,2.31-13.63,2.4-7.79,6.19-14.9,10.54-21.74,.1-.17,.28-.49,.28-.49,0,0-.15-.03-.7,.14Zm-39.83,.5l-.31,.18c.39,1.81,.77,3.63,1.16,5.44,1.58,7.51,2.75,15.09,3.78,22.69,.13,.94,.38,1.27,1.35,1.3,2.42,.08,3.92-1.01,5.01-3.82,.66-1.69,1.2-3.44,2.02-5.04,.72-1.42,.6-2.62-.1-3.97-2.07-3.98-4.85-7.46-7.72-10.87-1.68-2-3.45-3.93-5.18-5.9Z"/><path class="cls-2" d="M218.53,59.39c-2.46,0-4.93,.05-7.39-.05-1.16-.05-1.35,.37-1.27,1.4,.51,6.6,5.93,9.91,12.04,7.3,.7-.3,1.36-.68,2.03-1.05,1.43-.79,2.79-.27,3.26,1.29,.25,.85-.5,1.12-.97,1.45-4.43,3.07-9.25,3.69-14.16,1.57-4.75-2.05-6.36-6.28-6.71-11.1-.15-1.99,.04-3.98,.66-5.9,2.69-8.44,11.77-9.38,16.72-6.62,4.01,2.24,5.22,6.85,5.05,10.52-.05,.97-.55,1.27-1.49,1.25-2.58-.06-5.16-.03-7.74-.04Zm-1.62-2.83c1.81,0,3.63-.09,5.44,.05,1.39,.11,1.38-.57,1.22-1.55-.56-3.3-3.09-5.28-6.64-5.18-3.5,.1-6.34,2.57-6.76,5.74-.12,.93,.31,.93,.96,.92,1.93,0,3.86,0,5.79,.01Z"/><path class="cls-2" d="M140.87,49.67c2.32-2.11,4.82-3.61,8.03-3.58,4.86,.05,8.25,2.91,8.44,7.79,.23,5.68,.05,11.37,.06,17.06,0,.66-.21,.87-.89,.93-3.62,.31-3.62,.33-3.61-3.35,.01-4.11,.04-8.21,.04-12.32,0-3.74-1.07-5.61-3.57-6.3-2.76-.76-6.77,.75-8.29,3.08-.37,.56-.24,1.13-.25,1.69-.03,5.16-.09,10.32-.03,15.48,.01,1.25-.2,1.73-1.6,1.67-2.96-.12-2.97-.03-2.96-2.95,.02-6.92,.04-13.84,.09-20.76,0-.68-.5-1.84,.98-1.69,1.21,.12,2.87-.65,3.1,1.53,.05,.5-.06,1.06,.46,1.71Z"/><path class="cls-2" d="M237.9,50.19c2.53-2.28,5.02-3.79,8.24-3.75,4.86,.05,8.24,2.92,8.44,7.8,.23,5.68,.05,11.37,.06,17.06,0,.67-.22,.86-.9,.92-3.61,.3-3.61,.33-3.6-3.18,.01-4.22,.05-8.44,.04-12.67,0-2.22-.22-4.46-2.45-5.65-2.4-1.28-4.75-.76-7,.58-1.83,1.09-2.85,2.4-2.74,4.78,.21,4.8,0,9.61,.05,14.42,.02,1.26-.23,1.72-1.61,1.66-2.96-.11-2.96-.03-2.95-2.96,.02-6.92,.04-13.84,.09-20.76,0-.68-.49-1.85,.99-1.68,1.14,.13,2.76-.7,3.05,1.36,.08,.56,.16,1.13,.3,2.05Z"/><path class="cls-2" d="M125.46,68.38c-2.73,2.58-5.66,3.89-9.23,3.7-3.2-.17-5.67-1.82-6.41-4.54-.87-3.19,.25-5.86,3.29-7.55,3.26-1.81,6.85-2.38,10.52-2.33,1.31,.02,1.7-.31,1.65-1.64-.23-6.1-4.21-8.31-9.52-5.21-.51,.3-.99,.62-1.48,.95-1.17,.79-1.97,.46-2.81-.62-.91-1.18-.23-1.7,.61-2.35,3.16-2.44,6.76-3.21,10.62-2.67,3.88,.54,6.68,3.66,6.81,7.81,.17,5.63,.04,11.26,.04,16.89,0,.47,.07,1.02-.67,.92-1.02-.14-2.35,.51-2.89-.96-.24-.65-.32-1.37-.54-2.4Zm-.23-5.15c0-.59-.02-1.17,.01-1.76,.03-.66-.22-.97-.91-.95-2.88,.08-5.75,.27-8.37,1.66-1.68,.89-2.3,2.24-1.92,3.93,.23,1.03,.83,1.81,1.78,2.28,3.76,1.85,9.39-1.24,9.4-5.16Z"/><path class="cls-2" d="M170.11,72.25c-2.67,.11-5.09-.65-7.29-2.13-.53-.35-1.44-.62-.8-1.58,.56-.83,.92-2.07,2.33-1.61,.6,.19,1.14,.57,1.7,.89,1.9,1.11,3.93,1.49,6.08,.98,2.01-.48,3.14-1.65,3.32-3.38,.18-1.7-.57-2.85-2.62-3.67-1.57-.63-3.21-1.08-4.81-1.64-4.14-1.47-5.87-3.65-5.64-7.03,.23-3.42,2.81-6.11,6.79-6.75,3.34-.54,6.54-.09,9.32,2.1,.59,.47,1.1,.87,.48,1.7-.55,.74-.86,1.78-2.13,1.21-1.17-.53-2.29-1.18-3.57-1.44-1.66-.34-3.28-.27-4.77,.58-2.32,1.34-2.31,3.93-.03,5.31,1.32,.8,2.83,1.09,4.25,1.63,.93,.35,1.88,.64,2.79,1.03,5.13,2.14,5.93,8.32,1.54,11.77-1.84,1.44-3.89,2.05-6.92,2.03Z"/><path class="cls-2" d="M191.94,72.33c-2.67,.11-5.09-.66-7.29-2.14-.53-.36-1.43-.64-.78-1.58,.57-.83,.93-2.06,2.34-1.59,.6,.2,1.14,.58,1.69,.9,1.96,1.14,4.05,1.5,6.26,.92,1.73-.46,2.9-1.47,3.13-3.35,.24-1.94-.94-2.95-2.48-3.58-1.62-.66-3.32-1.13-4.97-1.72-4.13-1.48-5.86-3.66-5.62-7.04,.24-3.43,2.82-6.1,6.8-6.74,3.34-.54,6.54-.08,9.32,2.11,.6,.47,1.07,.88,.46,1.71-.55,.74-.88,1.77-2.14,1.19-1.17-.53-2.29-1.18-3.57-1.44-1.66-.34-3.29-.27-4.77,.59-2.31,1.35-2.29,3.93,0,5.32,1.27,.77,2.72,1.05,4.08,1.58,.98,.38,1.99,.67,2.96,1.08,5.12,2.14,5.91,8.33,1.52,11.77-1.83,1.44-3.89,2.04-6.93,2.02Z"/><path class="cls-2" d="M103.3,61.11c-.01,4.22,.01,8.44-.05,12.66-.1,5.75-4,7.58-8.89,6.95-1.24-.16-1.25-.93-1.14-1.88,.1-.87,.15-1.54,1.35-1.6,3.43-.16,4.17-.95,4.19-4.38,.05-8.21,.11-16.42,.06-24.62,0-1.49,.39-1.88,1.85-1.81,2.69,.13,2.69,.04,2.68,2.73-.01,3.99-.03,7.97-.04,11.96Z"/><path class="cls-8" d="M101.1,35.63c1.83,.01,3.23,.98,3.18,2.2-.04,1.21-1.51,2.12-3.36,2.08-1.72-.04-3.11-.99-3.1-2.14,0-1.21,1.46-2.16,3.27-2.14Z"/></g>
+    </svg>
+    <div class="container">
+      <h:panelGroup rendered="true">
+        <h:form
+          id="loginForm"
+          class="bg-highlight position-relative d-flex flex-column align-items-center justify-content-center"
+          style="height: 100vh; gap: 2rem"
+        >
+
+          <div class="container">
+            <div class="jans-form-container">
+              <h:messages class="error-text no-padding text-center" />
+              <div class="device-authz-title">
+                <h:outputText value="#{msgs['login.login']}" />
+              </div>
+              <div class="w-100 mt-8">
+                <h:inputText
+                  a:placeholder="#{msgs['login.username']}"
+                  id="username"
+                  name="username"
+                  required="true"
+                  colMd="10"
+                  labelColMd="2"
+                  autocomplete="off"
+                  value="#{credentials.username}"
+                  styleClass="form-control app-input-styles"
+                >
+                </h:inputText>
+              </div>
+              <div class="w-100 mt-7">
+                <h:inputSecret
+                  a:placeholder="#{msgs['login.password']}"
+                  colMd="10"
+                  id="password"
+                  name="password"
+                  labelColMd="2"
+                  value="#{credentials.password}"
+                  autocomplete="off"
+                  styleClass="form-control app-input-styles"
+                >
+                </h:inputSecret>
+              </div>
+<!--              <div class="d-flex align-items-center mt-8" style="gap: 10px">-->
+<!--                <input-->
+<!--                  type="checkbox"-->
+<!--                  value="rememberme"-->
+<!--                  id="rememberme"-->
+<!--                  name="rememberme"-->
+<!--                  class="remember-me__input"-->
+<!--                />-->
+<!--                <h:outputLabel-->
+<!--                  for="rememberme"-->
+<!--                  value="#{msgs['login.rememberMe']}"-->
+<!--                  class="no-margin remember-me-text"-->
+<!--                />-->
+<!--              </div>-->
+              <h:commandButton
+                id="loginButton"
+                style="background-color: #00be79; color: white"
+                styleClass="btn device-authz-continue-btn mt-8"
+                value="    #{msgs['login.login']}"
+                onclick="checkRemembeMe()"
+                iconAwesome="fa-sign-in"
+                action="#{authenticator.authenticate}"
+              />
+              <h:panelGroup
+                layout="block"
+                rendered="#{not empty facesContext.messageList and cookie['X-Correlation-Id'] != null}"
+              >
+                <br />
+                <p class="no-margin" style="font-size: 0.7em">
+                  <strong>Correlation Id: </strong>
+                  <h:outputText value="#{cookie['X-Correlation-Id'].value}" />
+                </p>
+              </h:panelGroup>
+              <h:inputHidden id="platform" />
+            </div>
+          </div>
+<!--          <div class="d-flex flex-column align-items-center">-->
+<!--            <div class="d-flex">-->
+<!--              <p class="text-white no-margin text-lg">Don't have an account?</p>-->
+<!--              <span class="ml-2 login__sign-up&#45;&#45;link text-lg"> Sign Up </span>-->
+<!--            </div>-->
+<!--            <a-->
+<!--              class="text-white text-lg"-->
+<!--              href="/identity/person/passwordReminder.htm"-->
+<!--            >-->
+<!--              <h:outputText value="#{msgs['login.forgotYourPassword']}" />-->
+<!--            </a>-->
+<!--          </div>-->
+        </h:form>
+        <div>
+          <div align="center" class="col-sm-offset-4">
+            <ui:repeat
+              value="#{identity.getWorkingParameter('download_url').entrySet().toArray()}"
+              var="_entry"
+            >
+              <ui:param name="app_name" value="#{_entry.key}" />
+              <ui:param name="app_link" value="#{_entry.value}" />
+              <h:outputLink
+                style="margin-right: 5px"
+                value="#{app_link}"
+                title="#{app_name}"
+              >
+                <h:graphicImage value="img/#{app_name}.png" />
+              </h:outputLink>
+            </ui:repeat>
+          </div>
+          <h:panelGroup
+            layout="block"
+            rendered="#{external_registration_uri != Null}"
+          >
+            <div class="reg_link">
+              <a href="#{external_registration_uri}">
+                <h:outputText value="Register Now " />
+              </a>
+            </div>
+          </h:panelGroup>
+        </div>
+      </h:panelGroup>
+    </div>
+    <script type="text/javascript">
+       		$(document).ready(function () {
+       			$('.other').click(function(){
+       				$('#social_new').toggle();
+       			});
+                   if (localStorage.chkbx &amp;&amp; localStorage.chkbx != '') {
+                       $('#rememberme').attr('checked', 'checked')
+                       document.getElementById("loginForm:username").value = localStorage.usrname;
+                   } else {
+                       $('#rememberme').removeAttr('checked');
+                       document.getElementById("loginForm:username").value = "";
+                   }
+
+                   $('#rememberme').click(function() {
+                       checkRemembeMe();
+                   });
+
+                   fillPlatformField();
+
+      	var userNameField = document.getElementById("loginForm:username");
+      	var passwordField = document.getElementById("loginForm:password");
+
+      	passwordField.value = "";
+      	var userName = '#{!empty authorizeAction.loginHint ? authorizeAction.loginHint : ""}';
+      	if (userName) {
+      		userNameField.value = userName;
+      		passwordField.focus();
+      	} else {
+      		userNameField.focus();
+      	}
+
+      	var displayRegister = #{display_register_action or identity.sessionId.sessionAttributes['display_register_action']};
+      	if (displayRegister) {
+      		var registerButton = document.getElementById("loginForm:registerId");
+      		if (registerButton != null) {
+      			registerButton.style.display = 'inline';
+      		}
+      	}
+       		});
+
+       		function checkRemembeMe() {
+                   if ($('#rememberme').is(':checked')) {
+                       localStorage.usrname = document.getElementById("loginForm:username").value;
+                       localStorage.chkbx = $('#rememberme').val();
+                   } else {
+                       localStorage.usrname = '';
+                       localStorage.chkbx = '';
+                   }
+      }
+
+               function fillPlatformField() {
+                   try {
+                       re = /^([^\.]+\.[^\.]+)\..+/;
+                       result = re.exec(platform.version);
+                       if (result != null) {
+                           platform.version=result[1];
+                       }
+       			    document.getElementById("loginForm:platform").value = JSON.stringify(platform);
+                   } catch (e) {
+                   }
+               }
+    </script>
+  </ui:define>
+</ui:composition>

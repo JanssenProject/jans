@@ -1,0 +1,19 @@
+# Eclipse project files
+.dbeaver
+.settings
+.project
+.classpath
+.pydevproject
+
+# IntelliJ IDEA project files
+.idea
+*.iml
+
+# Maven
+target
+
+# Test
+test-output
+
+# Visual Studio Code project files 
+*.factorypath

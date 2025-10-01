@@ -1,0 +1,18 @@
+{
+  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+  "userName": "scim_test_bjensen_1",
+  "password": "top-secret",
+  "roles": [{ "value" : "Master of puppets" }],
+  "phoneNumbers": [
+    {
+      "value": "555 123 4566",
+      "type": "home",
+      "primary" : true
+    },
+    {
+      "value": "555 123 4568",
+      "type": "other",
+      "primary" : true
+    }
+  ]
+}

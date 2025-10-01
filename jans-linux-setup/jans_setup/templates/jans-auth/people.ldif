@@ -1,0 +1,17 @@
+dn: inum=%(admin_inum)s,ou=people,o=jans
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+inum: %(admin_inum)s
+uid: admin
+givenName: Admin
+middleName: Admin
+nickname: Admin
+sn: User
+userPassword: %(encoded_admin_password)s
+jansStatus: active
+displayName: Default Admin User
+mail: admin@%(hostname)s
+emailVerified: true
+jansAdminUIRole: api-admin
+role: CasaAdmin

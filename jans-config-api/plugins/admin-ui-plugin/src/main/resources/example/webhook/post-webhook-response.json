@@ -1,0 +1,19 @@
+{
+  "dn": "inum=f704922d-e97f-3097-a06a-4a90ddedb87a,ou=auiWebhooks,ou=admin-ui,o=jans",
+  "inum": "f704922d-e97f-3097-a06a-4a90ddedb87a",
+  "displayName": "posts-webhook-1",
+  "description": "posts-webhook description",
+  "url": "https://reqres.in/api/users",
+  "httpRequestBody": {
+    "name": "morpheus",
+    "job": "leader"
+  },
+  "httpMethod": "POST",
+  "jansEnabled": true,
+  "httpHeaders": [{
+    "key": "Content-Type",
+    "value": "application/json"
+  }],
+  "auiFeatureIds": ["jans_link_write"],
+  "baseDn": "inum=f704922d-e97f-3097-a06a-4a90ddedb87a,ou=auiWebhooks,ou=admin-ui,o=jans"
+}

@@ -1,0 +1,360 @@
+swagger: '2.0'
+
+info:
+  version: "1.0.0"
+  title: Jans casa admin API
+  description: Allows to configure Casa programmatically. Note that plugins may also expose endpoints to
+    apply configurations relevant to their topics. Check plugins' docs for more information
+  license:
+    name: Jans Casa
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+
+#Demo server host
+host: test-casa.jans.io
+
+basePath: /casa/rest/config
+
+schemes:
+ - https
+
+security:
+  - config_auth: ['https://jans.io/casa.config']
+  
+consumes:
+  - application/json
+produces:
+  - text/plain
+
+paths:
+
+  /authn-methods/available:
+    get:
+      description: Returns the authentication methods that can be used in Casa whether enabled or not.
+      produces:
+        - application/json 
+
+      responses:
+        200:
+          description: Successful operation. A JSON array is returned. Every method is
+            identified by an acr String
+          schema:
+            type: array
+            items:
+              type: string
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /authn-methods/enabled:
+    get:
+      description: Returns the authentication methods currently enabled for Casa
+      produces:
+        - application/json
+
+      responses:
+        200:
+          description: Successful operation. A JSON array is returned. Every method is
+            identified by an acr String
+          schema:
+            type: array
+            items:
+              type: string
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /authn-methods/disable:
+    post:
+      description: Disables a specific authentication method
+      consumes:
+        - application/x-www-form-urlencoded
+      
+      parameters:
+        -
+          name: acr
+          in: formData
+          description: Identifier of the authentication method to disable
+          required: true
+          type: string
+          
+      responses:
+        200:
+          description: Successful operation. Empty response
+        404:
+          description: acr is not known or method is not found in the list of enabled methods. Empty response
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /log-level:
+    get:
+      description: Returns the current logging level (Any of ERROR, WARN, INFO, DEBUG, or TRACE)
+
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: string
+    post:
+      description: Sets the logging level in use by the application
+      consumes:
+        - application/x-www-form-urlencoded
+      
+      parameters:
+        -
+          name: level
+          in: formData
+          description: Any of ERROR, WARN, INFO, DEBUG, or TRACE
+          required: true
+          type: string
+          
+      responses:
+        200:
+          description: Successful operation. Empty response
+        400:
+          description: The value of level parameter is not recognized 
+          schema:
+            type: string
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /cors:
+    get:
+      description: Returns the CORS domains registered (so Casa REST services can be consumed
+        from the browser)
+      produces:
+        - application/json
+
+      responses:
+        200:
+          description: Successful operation.
+          schema:
+            type: array
+            items:
+              type: string
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          
+    put:
+      description: Replaces the current registered CORS domains with the list passed in the body
+        of the request (as a JSON array of strings)
+      consumes:
+        - application/json
+      
+      parameters:
+        -
+          name: cors
+          in: body
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+
+      responses:
+        200:
+          description: Successful operation. Empty response
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /pwd-reset/enabled:
+    get:
+      description: Returns if password reset feature is enabled
+      produces:
+        - application/json
+
+      responses:
+        200:
+          description: Successful operation. A JSON boolean is returned (ie. true or false). Note that
+            getting true entails availability of the feature is present (see /available endpoint)
+          schema:
+            type: boolean
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /pwd-reset/turn-on:
+    post:
+      description: Enables password reset
+
+      responses:
+        200:
+          description: Successful operation. Empty response
+        400:
+          description: When password reset feature is not available. Error description in response body
+          schema:
+            type: string
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /pwd-reset/turn-off:
+    post:
+      description: Disables password reset
+
+      responses:
+        200:
+          description: Successful operation. Empty response
+        400:
+          description: When password reset feature is not available. Error description in response body
+          schema:
+            type: string
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /plugins:
+    get:
+      description: Returns data about the currently deployed plugins
+      produces:
+        - application/json
+
+      responses:
+        200:
+          description: Successful operation.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PluginDescriptor'
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /plugins/authn-method-impl/{acr}:
+    get:
+      description: Returns data about the currently deployed plugins that implement enrollment
+        logic for a particular authentication method
+      produces:
+        - application/json
+        
+      parameters:
+        -
+          name: acr
+          in: path
+          description: ACR corresponding to the authentication method
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: Successful operation.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PluginDescriptor'
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /plugins/schedule-removal/{id}:
+    post:
+      description: Provokes the internal plugin checker timer to remove this plugin upon its next run
+      produces:
+        - application/json
+        
+      parameters:
+        -
+          name: id
+          in: path
+          description: Identifier of the plugin to remove
+          required: true
+          type: string
+
+      responses:
+        202:
+          description: The plugin has been scheduled for removal. Response body contains the period of 
+            of plugin checker timer, ie. the maximum number of seconds in which the operation will be
+            effective
+          schema:
+            type: integer
+        404:
+          description: The plugin identified by param id is not found. Empty response
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+definitions:
+  PluginDescriptor:
+    type: object
+    required:
+      - pluginId
+    properties:
+      pluginId:
+        type: string
+      version:
+        type: string
+      pluginDescription:
+        type: string
+      pluginClass:
+        type: string
+        description: The fully qualified name of the Java class that implements the plugin
+  OxdConfiguration:
+    type: object
+    required:
+      - settings
+      - client_details      
+    properties:
+      settings:
+        $ref: '#/definitions/OxdSettings'
+      client_details:
+        $ref: '#/definitions/ClientSettings'
+  OxdSettings:
+    type: object
+    required:
+      - protocol
+      - host
+      - port
+      - scopes
+      - frontchannel_logout_uri
+      - post_logout_uri
+      - authz_redirect_uri
+    properties:
+      protocol:
+        type: string
+      host:
+        type: string
+      port:
+        type: string
+      scopes:
+        type: array
+        items:
+          type: string
+      frontchannel_logout_uri:
+        type: string
+      post_logout_uri:
+        type: string
+      authz_redirect_uri:
+        type: string
+  ClientSettings:
+    type: object
+    properties:
+      oxdId:
+        type: string
+      clientId:
+        type: string
+      clientSecret:
+        type: string
+      clientName:
+        type: string
+
+securityDefinitions:
+  config_auth:
+    type: oauth2
+    description: An OAuth2 bearer token in the header must be passed
+    flow: application
+    tokenUrl: https://test-casa.jans.io/jans-aauth/restv1/token
+    scopes: 
+      'https://jans.io/casa.config': Grants access to this API

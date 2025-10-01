@@ -1,0 +1,50 @@
+name: microk8s
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "charts/**"
+      - "automation/startjanssendemo.sh"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "charts/**"
+      - "automation/startjanssendemo.sh"
+  workflow_dispatch:
+    inputs:
+      jans_version:
+        description: 'Janssen helm chart version'
+        required: true
+        default: '0.0.0-nightly'
+permissions:
+  contents: read
+
+jobs:
+  microk8s:
+    strategy:
+      max-parallel: 6
+      matrix:
+        istio: ["true", "false"]
+        persistence-backends: ["MYSQL", "PGSQL"]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+
+    - name: Checkout code
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Test dev setup
+      id: start_up_script
+      run: |
+          ip=$(curl ipinfo.io/ip)
+          chmod u+x automation/startjanssendemo.sh
+          JANS_VERSION=${{ github.event.inputs.jans_version }}
+          JANS_VERSION=${JANS_VERSION:-"0.0.0-nightly"}
+          sudo bash ./automation/startjanssendemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} $JANS_VERSION $ip true ${{ matrix.istio }} 
+          sudo bash ./automation/analyze_test_microk8s_setup.sh "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" ${{ matrix.persistence-backends }}

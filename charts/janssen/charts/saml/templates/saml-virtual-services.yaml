@@ -1,0 +1,43 @@
+{{- if and (.Values.global.istio.ingress) (.Values.global.saml.ingress.samlEnabled) }}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-istio-saml
+  namespace: {{.Release.Namespace}}
+  labels:
+    APP_NAME: saml
+{{ include "saml.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.saml.customAnnotations.virtualService) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.saml.customAnnotations.virtualService }}
+{{ toYaml .Values.global.saml.customAnnotations.virtualService | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+{{- if .Values.global.istio.gateways }}
+  gateways:
+{{ toYaml .Values.global.istio.gateways | indent 2 }}
+{{- else }}
+  gateways:
+  - {{ .Release.Name }}-global-gtw
+{{- end }}
+  hosts:
+  - {{ .Values.global.fqdn }}
+  http:
+  - name: {{ .Release.Name }}-istio-saml
+    match:
+    - uri:
+        prefix: /kc
+    route:
+    - destination:
+        host: {{ .Values.global.saml.samlServiceName }}.{{.Release.Namespace}}.svc.cluster.local
+        port:
+          number: 8083
+      weight: 100
+{{- end }}

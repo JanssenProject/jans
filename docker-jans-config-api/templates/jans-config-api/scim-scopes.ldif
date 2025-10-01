@@ -1,0 +1,21 @@
+dn: inum=1200.2B7428,ou=scopes,o=jans
+description: Query user resources
+displayName: SCIM https://jans.io/scim/users.read
+inum: 1200.2B7428
+jansDefScope: false
+jansId: https://jans.io/scim/users.read
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+jansAttrs: {"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}
+
+dn: inum=1200.0A0198,ou=scopes,o=jans
+description: Modify user resources
+displayName: SCIM https://jans.io/scim/users.write
+inum: 1200.0A0198
+jansDefScope: false
+jansId: https://jans.io/scim/users.write
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+jansAttrs: {"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}

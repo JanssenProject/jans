@@ -1,0 +1,273 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/login-extended-template.xhtml">
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
+			if="#{not identity.loggedIn}" />
+	</f:metadata>
+	<ui:define name="head">
+		<script>
+            var helper = (function() {
+                var authResult = undefined;
+
+                return {
+                    /**
+                     * Resume on getting authentication result from server
+                     */
+                    onSignInCallback: function(authResult) {
+                        console.log('Get authentication result: ' + authResult);
+                        helper.resumeAuthentication(authResult);
+                    },
+
+                    /**
+                     * Send form to server to resume authentication workflow
+                     */
+                    resumeAuthentication: function(authResult) {
+                        $('input#auth_result').val(authResult);
+                        $('form#response').submit();
+                    },
+                };
+            })();
+
+            /**
+             * Calls the helper method that handles the authentication flow.
+             */
+            function onSignInCallback(authResult) {
+                helper.onSignInCallback(authResult);
+            }
+
+            var request = '${identity.getWorkingParameter('super_gluu_request')}';
+            var label = '${identity.getWorkingParameter('super_gluu_label')}';
+            var qr_options = ${identity.getWorkingParameter('super_gluu_qr_options')};
+            var authmethod = '${identity.getWorkingParameter('super_gluu_auth_method')}';
+            
+            $(document).ready(function() {
+            	if (authmethod == "enroll") {
+            		document.getElementById("login").style.display = "none";
+            		document.getElementById("subsequent").style.display = "none";
+            		document.getElementById("enroll").style.display = "";  
+            		
+            		gluu_auth.renderQrCode('#enrollcontainer', request, qr_options, label);
+                    gluu_auth.startProgressBar('#enrollprogressbar', 90, onSignInCallback);
+            	} else if (authmethod == "login"){
+            		document.getElementById("login").style.display = "";
+            		document.getElementById("subsequent").style.display = "none";
+            		document.getElementById("enroll").style.display = "none";
+
+            		gluu_auth.renderQrCode('#container', request, qr_options, label);
+                    gluu_auth.startProgressBar('#progressbar', 90, onSignInCallback);
+            	}else{
+            		document.getElementById("login").style.display = "none";
+            		document.getElementById("subsequent").style.display = "";
+            		document.getElementById("enroll").style.display = "none";
+
+            		gluu_auth.renderQrCode('#susequentcontainer', request, qr_options, label);
+                    gluu_auth.startProgressBar('#susequentprogressbar', 90, onSignInCallback);
+            	}
+                gluu_auth.startSessionChecker(onSignInCallback, 90);
+
+                if (request == '') {
+                    onSignInCallback('error');
+                }
+            });
+
+            function showQrDialog() {
+        		$( '#dialog').dialog({ width: 550 });
+            }
+
+            window.onload = function() {
+            	if ('${identity.getWorkingParameter('show_qr_by_default')}' == 'true') {
+            		showQrDialog();
+            	}
+            };
+        </script>
+
+		<style type="text/css">
+body {
+	width: 100%;
+}
+
+.body {
+	width: 100%;
+}
+
+.qr_bx {
+	max-width: 95%;
+	margin: 10px;
+}
+</style>
+	</ui:define>
+	<ui:define name="pageTitle">oxAuth - Super-Gluu Login</ui:define>
+	<ui:define name="body">
+		<h:panelGroup id="login">
+			<form method="post" id="response"
+				action="#{request.contextPath}/postlogin.htm">
+				<input type="hidden" id="auth_result" name="auth_result" />
+			</form>
+
+			<table border="0" align="center">
+				<tr>
+					<td>
+						<div>
+							<h:form id="loginForm">
+								<h:panelGroup rendered="#{not identity.loggedIn}">
+									<div class="login-panel">
+										<div class="login-panel-header">
+											<h:outputText value="#{msgs['login.login']}" />
+										</div>
+										<div class="login-panel-body">
+											<ui:param name="client"
+												value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
+
+											<h:panelGroup rendered='#{!empty client.getLogoUri()}'>
+												<h:graphicImage url='#{client.getLogoUri()}' />
+											</h:panelGroup>
+
+											<div class="dialog">
+												<p>#{msgs['supergluu.scanQRCode']}</p>
+												<div id="container"></div>
+												<div id="progressbar"></div>
+											</div>
+											<div align="center">
+
+												<h:outputLink
+													value="#{identity.getWorkingParameter('supergluu_android_download_url')}"
+													title="Android"
+													rendered="#{!empty identity.getWorkingParameter('supergluu_android_download_url')}">
+													<h:graphicImage value="../../img/android.png" />
+												</h:outputLink>
+
+												<h:outputLink
+													value="#{identity.getWorkingParameter('supergluu_ios_download_url')}"
+													title="Android"
+													rendered="#{!empty identity.getWorkingParameter('supergluu_ios_download_url')}">
+													<h:graphicImage value="../../img/ios.png" />
+												</h:outputLink>
+
+
+											</div>
+											<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
+												<p>
+													<h:outputText value="#{msgs['common.agreePolicy']}" />
+													<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
+															value="#{msgs['common.privacyPolicy']}" />
+													</a>
+												</p>
+											</h:panelGroup>
+											<div align="center">
+												<ui:repeat
+													value="#{identity.getWorkingParameter('download_url').entrySet().toArray()}"
+													var="_entry">
+													<ui:param name="app_name" value="#{_entry.key}" />
+													<ui:param name="app_link" value="#{_entry.value}" />
+													<h:outputLink value="#{app_link}" title="#{app_name}">
+														<h:graphicImage value="../../img/#{app_name}.png" />
+													</h:outputLink>
+												</ui:repeat>
+											</div>
+
+											<h:panelGroup rendered='#{!empty client.getTosUri()}'>
+												<p>
+													<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
+													<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
+															value="#{msgs['common.termsOfService']}" />
+													</a>
+												</p>
+											</h:panelGroup>
+										</div>
+									</div>
+								</h:panelGroup>
+							</h:form>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</h:panelGroup>
+
+		<h:panelGroup id="enroll" style="width:100%;">
+			<div id="enrollbody" style="width: 100%;">
+				<div class="container" style="width: 100%;">
+					<h2
+						style="font-size: 30px; font-weight: 500; text-align: center; color: black;">#{msgs['supergluu.enroll.enrollyourdevice']}</h2>
+					<br></br>
+					<p
+						style="font-size: 20px; font-weight: 400; text-align: center; color: #1ab26b;">#{msgs['supergluu.enroll.scanqrcode']}</p>
+					<div class="qr_bx">
+						<div class="row">
+							<div class="col-md-6 col-sm-5">
+								<div id="enrollcontainer"></div>
+								<br></br>
+								<div id="enrollprogressbar"></div>
+							</div>
+							<div class="col-md-6 col-sm-7">
+								<div class="paddin_bx">
+									<h3>#{msgs['supergluu.enroll.downloadsupergluu']}</h3>
+									<div class="button">
+										<h:outputLink target="_blank"
+											value="https://play.google.com/store/apps/details?id=gluu.org.super.gluu"
+											class="android">
+											<h:graphicImage value="../../img/android1.png" alt="android" />
+										</h:outputLink>
+										<h:outputLink target="_blank"
+											value="https://itunes.apple.com/us/app/super-gluu/id1093479646?mt=8"
+											class="iphone">
+											<h:graphicImage value="../../img/iphone.png" alt="iphone" />
+										</h:outputLink>
+
+									</div>
+									<p>#{msgs['supergluu.enroll.supergluuisfreesecure']}</p>
+									<div class="links">
+										<a target="_blank"
+											href="#{msgs['supergluu.enroll.website.url']}"><h:outputText
+												value="#{msgs['supergluu.enroll.Website']}" /></a> <span
+											class="seprator">|</span> <a target="_blank"
+											href="#{msgs['supergluu.enroll.Docs.url']}"><h:outputText
+												value="#{msgs['supergluu.enroll.Docs']}" /></a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</h:panelGroup>
+
+		<h:panelGroup id="subsequent" style="margin:10px; padding:10px;">
+			<div class="row" style="margin: 10px; padding: 10px;">
+				<div class="col-md-6 col-sm-5">
+					<div>
+						<span class="icon_01"> <img
+							src="#{webConfigurationService.getImgLocation()}/tube_1.jpg"
+							alt="" />
+						</span>
+						<p style="line-height: 30px;">
+							A Super Gluu push notification has been sent to your <br />
+							registered device. Approve the push to login.
+						</p>
+					</div>
+					<div>
+						<p>Didn't receive the push notification?</p>
+						<a onclick="showQrDialog();" style="cursor: pointer;"
+							target="_blank" class="sigin-a"><span style="color: blue">Scan
+								QR code instead</span></a> <span class="contactadmin"> If you no
+							longer control the device you registered,<br /> <a href="#">contact
+								your Gluu server admin</a> to enroll a new device
+						</span>
+					</div>
+				</div>
+				<div class="col-md-6 col-sm-5" style="margin-left: 50%;">
+					<div id="dialog" style="display: none; margin-left: 50%;"
+						title="Super Gluu QR Code">
+						<div id="susequentcontainer"></div>
+						<br></br>
+						<div id="susequentprogressbar"></div>
+					</div>
+				</div>
+			</div>
+		</h:panelGroup>
+	</ui:define>
+</ui:composition>

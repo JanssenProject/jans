@@ -1,0 +1,238 @@
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: pip
+    directory: /automation
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /demos/benchmarking/docker-jans-loadtesting-jmeter
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /demos/benchmarking/docker-jans-loadtesting-jmeter
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /demos/jans-tarp
+    schedule:
+      interval: daily
+
+
+  - package-ecosystem: docker
+    directory: /docker-jans-all-in-one
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-all-in-one/app
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-auth-server
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-auth-server
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-casa
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-casa
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-cloudtools
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-cloudtools
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-config-api
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-config-api
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-configurator
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-configurator
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-fido2
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-fido2
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-keycloak-link
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-keycloak-link
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-link
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-link
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-monolith
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-persistence-loader
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-persistence-loader
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-saml
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-saml
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-scim
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-scim
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docs
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /jans-auth-server/server/src/main/webapp/js/crypto-js-3.1.9-1
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /jans-linux-setup
+    schedule:
+      interval: daily
+
+  - package-ecosystem: gomod
+    directory: /terraform-provider-jans
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /agama
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-auth-server
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-bom
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-casa
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-config-api
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-core
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-fido2
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-keycloak-integration
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-keycloak-link
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-link
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-orm
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-lock
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-scim
+    schedule:
+      interval: daily

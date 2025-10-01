@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<f:view transient="true" locale="#{language.locale}">
+	<h:head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title><ui:insert name="pageTitle" /></title>
+		<link rel="icon" href="#{request.contextPath}/servlet/favicon" type='image/x-icon' />
+		<link type="text/css" rel="stylesheet"
+			href="#{webConfigurationService.getCssLocation()}/style.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{webConfigurationService.getCssLocation()}/bootstrap.min.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{webConfigurationService.getCssLocation()}/bootstrap-responsive.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{webConfigurationService.getCssLocation()}/bootstrap-reboot.min.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{webConfigurationService.getCssLocation()}/bootstrap-grid.min.css" />
+		<link rel="stylesheet"
+			href="#{webConfigurationService.getCssLocation()}/fontawesome.min.css" />
+		<link rel="stylesheet"
+			href="#{webConfigurationService.getCssLocation()}/authorize.css" />
+		<link type="text/css" rel="stylesheet"
+			href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" />
+		<script
+			src="#{webConfigurationService.getJsLocation()}/jquery-3.6.0.min.js"></script>
+		<script
+			src="#{webConfigurationService.getJsLocation()}/popper.min.js"></script>
+		<script
+			src="#{webConfigurationService.getJsLocation()}/fontawesome.min.js"></script>
+		<script
+			src="#{webConfigurationService.getJsLocation()}/bootstrap.min.js"></script>
+		<script
+			src="#{webConfigurationService.getJsLocation()}/bootstrap.bundle.min.js"></script>
+		<script
+			src="#{webConfigurationService.getJsLocation()}/platform.js"></script>
+		<script
+			src="#{webConfigurationService.getJsLocation()}/jquery-qrcode-0.17.0.min.js"></script>
+		<script
+			src="#{webConfigurationService.getJsLocation()}/gluu-auth.js"></script>
+			<script src="#{webConfigurationService.getJsLocation()}/jquery-ui.min.js"></script>
+		<ui:insert name="head" />
+
+		<style>
+body {
+	margin-bottom: 3% !important;
+}
+
+.footer {
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	color: white;
+	height: 55px;
+	background-color: #00BE79;
+	justify-content: center;
+	margin-left: auto;
+	margin-right: auto;
+}
+</style>
+	</h:head>
+	<h:body>
+		<div>
+			<div class="login-logo">
+				<img style="max-height: 70px; padding-bottom: 2px;" id="AppLogo"
+					src="#{request.contextPath}/servlet/logo" />
+			</div>
+			<div class="bs-docs-section"
+				style="border-top: 2px solid #1ab26b !important; margin-bottom: 5px !important; margin-top: 1px !important; padding-top: 1px !important;"></div>
+		</div>
+		<div class="body">
+			<ui:insert name="body" />
+		</div>
+	</h:body>
+	<footer class="footer" id="appFooter">
+	<div class="row" style="margin-top:20px;">
+		<div class="col-sm-3"></div>
+		<div class="col-sm-6 centered" style="text-align:center;">
+			<p class="centered">
+				&copy; <a target="_blank"
+					href="https://jans.io"><h:outputText
+						value="#{msgs['common.janssenProject']}" escape="false" /></a> | <a
+					target="_blank" href="#{client.policyUri}"><h:outputText
+						value="#{msgs['common.privacyPolicy']}" escape="false" /></a> | <a
+					target="_blank" href="#{client.tosUri}"><h:outputText
+						value="#{msgs['common.termsOfService']}" escape="false" /></a>
+			</p>
+		</div>
+		<div class="col-sm-3"></div>
+	</div>
+	</footer>
+	<script type="text/javascript">
+		//<![CDATA[ 
+		$(document)
+				.ready(
+						function() {
+							$(window)
+									.scroll(
+											function() {
+												if (window.innerHeight < 620) {
+													document
+															.getElementById("appFooter").style.display = "none";
+												} else {
+													document
+															.getElementById("appFooter").style.display = "block";
+												}
+
+											});
+
+							$(window)
+									.on(
+											'resize',
+											function() {
+												var win = $(this);
+												if (win.height() >= 620) {
+													document
+															.getElementById("appFooter").style.display = "block";
+												} else {
+													document
+															.getElementById("appFooter").style.display = "none";
+												}
+											});
+						});
+
+		//]]>
+	</script>
+</f:view>
+</html>

@@ -1,0 +1,217 @@
+openapi: 3.0.1
+info:
+  title: Jans Config API - Jans Link Plugin
+  contact:
+    name: Gluu Support
+    url: https://support.gluu.org
+    email: xxx@gluu.org
+  license:
+    name: Apache 2.0
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: 1.0.0
+servers:
+- url: https://jans.io/
+  description: The Jans server
+tags:
+- name: Jans Link - Configuration
+paths:
+  /jans-link/link-config:
+    get:
+      tags:
+      - Jans Link - Configuration
+      summary: Gets Jans Link App configuration.
+      description: Gets Jans Link App configuration.
+      operationId: get-jans-link-properties
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppConfiguration"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/jans-link.readonly
+    put:
+      tags:
+      - Jans Link - Configuration
+      summary: Updates Jans Link configuration properties.
+      description: Updates Jans Link configuration properties.
+      operationId: put-jans-link-properties
+      requestBody:
+        description: JansLinkConfiguration
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppConfiguration"
+      responses:
+        "200":
+          description: JansLinkConfiguration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppConfiguration"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/jans-link.write
+components:
+  schemas:
+    AppConfiguration:
+      type: object
+      properties:
+        sourceConfigs:
+          type: array
+          items:
+            $ref: "#/components/schemas/GluuLdapConfiguration"
+        inumConfig:
+          $ref: "#/components/schemas/GluuLdapConfiguration"
+        targetConfig:
+          $ref: "#/components/schemas/GluuLdapConfiguration"
+        ldapSearchSizeLimit:
+          type: integer
+          format: int32
+        keyAttributes:
+          type: array
+          items:
+            type: string
+        keyObjectClasses:
+          type: array
+          items:
+            type: string
+        sourceAttributes:
+          type: array
+          items:
+            type: string
+        customLdapFilter:
+          type: string
+        updateMethod:
+          type: string
+        defaultInumServer:
+          type: boolean
+        keepExternalPerson:
+          type: boolean
+        useSearchLimit:
+          type: boolean
+        attributeMapping:
+          type: array
+          items:
+            $ref: "#/components/schemas/LinkAttributeMapping"
+        snapshotFolder:
+          type: string
+        snapshotMaxCount:
+          type: integer
+          format: int32
+        baseDN:
+          type: string
+        personObjectClassTypes:
+          type: array
+          items:
+            type: string
+        personCustomObjectClass:
+          type: string
+        contactObjectClassTypes:
+          type: array
+          items:
+            type: string
+        allowPersonModification:
+          type: boolean
+        supportedUserStatus:
+          type: array
+          items:
+            type: string
+        loggingLevel:
+          type: string
+        loggingLayout:
+          type: string
+        externalLoggerConfiguration:
+          type: string
+        metricReporterInterval:
+          type: integer
+          format: int32
+        metricReporterKeepDataDays:
+          type: integer
+          format: int32
+        metricReporterEnabled:
+          type: boolean
+        disableJdkLogger:
+          type: boolean
+        cleanServiceInterval:
+          type: integer
+          format: int32
+        linkEnabled:
+          type: boolean
+        serverIpAddress:
+          type: string
+        pollingInterval:
+          type: string
+        lastUpdate:
+          type: string
+          format: date-time
+        lastUpdateCount:
+          type: string
+        problemCount:
+          type: string
+        useLocalCache:
+          type: boolean
+    GluuLdapConfiguration:
+      type: object
+      properties:
+        configId:
+          type: string
+        bindDN:
+          type: string
+        bindPassword:
+          type: string
+        servers:
+          type: array
+          items:
+            type: string
+        maxConnections:
+          type: integer
+          format: int32
+        useSSL:
+          type: boolean
+        baseDNs:
+          type: array
+          items:
+            type: string
+        primaryKey:
+          type: string
+        localPrimaryKey:
+          type: string
+        useAnonymousBind:
+          type: boolean
+        enabled:
+          type: boolean
+        version:
+          type: integer
+          format: int32
+        level:
+          type: integer
+          format: int32
+    LinkAttributeMapping:
+      type: object
+      properties:
+        source:
+          type: string
+        destination:
+          type: string
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "https://{op-hostname}/.../token"
+          scopes:
+            https://jans.io/oauth/config/jans-link.readonly: View Jans link configuration
+              related information
+            https://jans.io/oauth/config/jans-link.write: Manage Jans link configuration
+              related information

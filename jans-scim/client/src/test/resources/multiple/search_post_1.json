@@ -1,0 +1,7 @@
+{
+  "schemas": ["urn:ietf:params:scim:api:messages:2.0:SearchRequest"],
+  "attributes": ["displayName"],
+  "filter": "displayName co \"Test\" or displayName co \"Group\"",
+  "startIndex": 1,
+  "count": 10
+}

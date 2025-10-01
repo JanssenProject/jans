@@ -1,0 +1,30 @@
+{
+    "cacheProviderType": "NATIVE_PERSISTENCE",
+    "memcachedConfiguration": {
+        "servers": "localhost:11211",
+        "maxOperationQueueLength": 100000,
+        "bufferSize": 32768,
+        "defaultPutExpiration": 60,
+        "connectionFactoryType": "DEFAULT"
+    },
+    "inMemoryConfiguration": {
+        "defaultPutExpiration": 60
+    },
+    "redisConfiguration": {
+        "redisProviderType": "STANDALONE",
+        "servers": "localhost:6379",
+        "defaultPutExpiration": 60,
+        "useSSL": false,
+        "maxIdleConnections": 10,
+        "maxTotalConnections": 500,
+        "connectionTimeout": 3000,
+        "soTimeout": 3000,
+        "maxRetryAttempts": 5
+    },
+    "nativePersistenceConfiguration": {
+        "defaultPutExpiration": 60,
+        "defaultCleanupBatchSize": 10000,
+        "deleteExpiredOnGetRequest": false,
+        "disableAttemptUpdateBeforeInsert": false
+    }
+}

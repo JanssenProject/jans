@@ -1,0 +1,80 @@
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+# Contact @moabu
+name: Label PRs and Issues
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+    branches:
+      - main
+  issues:
+    types:
+      - opened
+      - edited
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  label:
+    if: github.repository == 'JanssenProject/jans' && startsWith(github.head_ref, 'dependabot/') != true
+    name: label PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        with:
+          egress-policy: audit
+
+      - name: check out code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
+          sudo pip3 install --ignore-installed setuptools --upgrade
+          sudo pip3 install --ignore-installed -r ./automation/requirements.txt
+          sudo apt-get update
+          sudo apt-get install jq
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh
+
+      - name: Update labels
+        run: |
+          git config --global user.name "mo-auto"
+          git config --global user.email "54212639+mo-auto@users.noreply.github.com"
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+          if [[ "${{github.event_name}}" == "issues" ]]; then
+            echo "Activated by an issue event"
+            issue_or_pull_number=$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
+            changed_files="NONE"
+            operation="issue"
+            branch="NONE"
+            title=$(jq --raw-output .issue.title "$GITHUB_EVENT_PATH")
+          else
+            echo "Activated by a PR event"
+            issue_or_pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+            gh pr view $issue_or_pull_number --json files --jq '.files.[].path' > changed_files
+            changed_files=$(paste -s -d, changed_files)
+            operation="pr"
+            branch=${{github.base_ref}}
+            title=$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")
+          fi
+          sudo python3 ./automation/github-labels/label.py ${issue_or_pull_number} ${changed_files} ${branch} ${operation} ${title}
+
+      # Remove once add-project option in gh cli support project beta. Add to labels.py
+      # TODO: Add PR to project
+      - name: Add issue to project
+        if: github.event_name != 'pull_request'
+        run: |
+          gh issue edit $(jq --raw-output .issue.number "$GITHUB_EVENT_PATH") --add-project janssen-issue-dashboard

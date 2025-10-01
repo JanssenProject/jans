@@ -1,0 +1,29 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<?link rel="stylesheet" type="text/css" href="/styles/jquery-ui-1.12.1.min.css"?>
+<?link rel="stylesheet" type="text/css" href="/pl/bioid-plugin/css/uui.css"?>
+<?script src="/pl/bioid-plugin/js/three.min.js" ?>	
+<?script src="/pl/bioid-plugin/js/objLoader.min.js"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+	<h:title self="@define(title)">
+		${zkService.appName} - ${labels.bioid_title}
+	</h:title>
+
+<z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.bioid.vm.BioidViewModel')"
+           self="@define(maincontent)">
+		<z:include src="/back-home.zul" />
+		<div class="ph4 mb2">
+			<div class="alert alert-success dn"
+				id="feedback-bioid" role="alert" />
+		</div>
+
+		
+
+    <z:div self="@define(extra)">
+        <z:script src="/pl/bioid-plugin/js/jquery-3.5.1.min.js"  />
+    	<z:script src="/pl/bioid-plugin/js/getUserMedia.min.js" />
+    	<z:script src="/pl/bioid-plugin/js/bws.capture.js" />
+    	<z:script src="/pl/bioid-plugin/js/uui.js" />
+    </z:div>
+</zk:zk>

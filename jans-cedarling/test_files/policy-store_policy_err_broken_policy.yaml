@@ -1,0 +1,82 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+cedar_version: v4.0.0
+policy_stores:
+  ba1f39115ed86ed760ee0bea1d529b52189e5a117474:
+    cedar_version: v4.0.0
+    name: PolicyStoreOk
+    description: Syntax error in policy
+    cedar_policies:
+      840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+        description: admin access
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            @id("admin access")
+            permit
+            (
+             principal == Jans::Role::"Admin",
+             action in [Jans::Action::"Compare",Jans::Action::"Execute"],
+
+            )
+            when
+            {
+             Jans::Access_token::"abc".scope=="abc" && Jans::Id_token::"idxxx".amr=="idxxx"
+            };
+    cedar_schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+        namespace Jans {
+          type Context = {"browser": __cedar::String, "current_time": __cedar::Long, "device_health": Set < __cedar::String >, "fraud_indicators": Set < __cedar::String >, "geolocation": Set < __cedar::String >, "network": __cedar::ipaddr, "network_type": __cedar::String, "operating_system": __cedar::String};
+          type Url = {"host": __cedar::String, "path": __cedar::String, "protocol": __cedar::String};
+          type email_address = {"domain": __cedar::String, "id": __cedar::String};
+          entity Access_token = {"aud": __cedar::String, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "nbf": __cedar::Long, "scope": __cedar::String};
+          entity Application = {"client": Client, "name": __cedar::String};
+          entity Client = {"client_id": __cedar::String, "iss": TrustedIssuer};
+          entity HTTP_Request = {"accept": Set < __cedar::String >, "header": Set < __cedar::String >, "url": Url};
+          entity Role;
+          entity TrustedIssuer = {"issuer_entity_id": Url};
+          entity User in [Role] = {"email": email_address, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String, "username": __cedar::String};
+          entity Userinfo_token = {"aud": __cedar::String, "birthdate": __cedar::String, "email": email_address, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "name": __cedar::String, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String};
+          entity id_token = {"acr": Set < __cedar::String >, "amr": __cedar::String, "aud": __cedar::String, "azp": __cedar::String, "birthdate": __cedar::String, "email": email_address, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "name": __cedar::String, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String};
+          action "Access" appliesTo {
+            principal: [User, Role],
+            resource: [Application],
+            context: Context
+          };
+          action "DELETE" appliesTo {
+            principal: [Client],
+            resource: [HTTP_Request],
+            context: Context
+          };
+          action "GET" appliesTo {
+            principal: [Client],
+            resource: [HTTP_Request],
+            context: Context
+          };
+          action "HEAD" appliesTo {
+            principal: [Client],
+            resource: [HTTP_Request],
+            context: Context
+          };
+          action "PATCH" appliesTo {
+            principal: [Client],
+            resource: [HTTP_Request],
+            context: Context
+          };
+          action "POST" appliesTo {
+            principal: [Client],
+            resource: [HTTP_Request],
+            context: Context
+          };
+          action "PUT" appliesTo {
+            principal: [Client],
+            resource: [HTTP_Request],
+            context: Context
+          };
+        }

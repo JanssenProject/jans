@@ -1,0 +1,404 @@
+dn: inum=XXXX.AAAA-1111,ou=people,o=jans
+birthdate: 20140101000000Z
+displayName: Test Aaaa 1111
+jansEmail: {"value":"aaaa1111@test.email","type":"work","primary":false,"display":null}
+jansExtId: 11000
+givenName: Aaaa 1111
+inum: XXXX.AAAA-1111
+jansStatus: active
+mail: aaaa1111@test.email
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: aaaa1111
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.AAAA-2222,ou=people,o=jans
+birthdate: 20140210000000Z
+displayName: Test Aaaa 2222
+jansAddress: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":false}
+jansPhotos: {"value":"http://some.gif/AAAA-2222_thumb.gif","display":"AAAA-2222 thumbnail","type":"thumbnail","primary":false}
+jansPhotos: {"value":"http://some.gif/AAAA-2222.gif","display":"AAAA-2222","type":"photo","primary":true}
+jansExtId: 12000
+givenName: Aaaa 2222
+inum: XXXX.AAAA-2222
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: aaaa2222
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.AAAA-3333,ou=people,o=jans
+birthdate: 20140307000000Z
+displayName: Test Aaaa 3333
+jansExtId: 13000
+givenName: Aaaa 3333
+inum: XXXX.AAAA-3333
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: aaaa3333
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.AAAA-4444,ou=people,o=jans
+birthdate: 20140425000000Z
+displayName: Test Aaaa 4444
+jansExtId: 14000
+givenName: Aaaa 4444
+inum: XXXX.AAAA-4444
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: aaaa4444
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.AAAA-5555,ou=people,o=jans
+birthdate: 20140518000000Z
+displayName: Test Aaaa 5555
+jansExtId: 15000
+givenName: Aaaa 5555
+inum: XXXX.AAAA-5555
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: aaaa5555
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.BBBB-1111,ou=people,o=jans
+birthdate: 20150108000000Z
+displayName: Test Bbbb 1111
+jansEmail: {"value":"bbbb1111@test.email","type":"home","primary":true,"display":null}
+jansExtId: 21000
+givenName: Bbbb 1111
+inum: XXXX.BBBB-1111
+jansStatus: active
+mail: bbbb1111@test.email
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: bbbb1111
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.BBBB-2222,ou=people,o=jans
+birthdate: 20150214000000Z
+displayName: Test Bbbb 2222
+jansAddress: {"type":"home","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
+jansExtId: 22000
+givenName: Bbbb 2222
+inum: XXXX.BBBB-2222
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: bbbb2222
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.BBBB-3333,ou=people,o=jans
+birthdate: 20150321000000Z
+displayName: Test Bbbb 3333
+jansExtId: 23000
+givenName: Bbbb 3333
+inum: XXXX.BBBB-3333
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: bbbb3333
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.BBBB-4444,ou=people,o=jans
+birthdate: 20150420000000Z
+displayName: Test Bbbb 4444
+jansExtId: 24000
+givenName: Bbbb 4444
+inum: XXXX.BBBB-4444
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: bbbb4444
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.BBBB-5555,ou=people,o=jans
+birthdate: 20150530000000Z
+displayName: Test Bbbb 5555
+jansExtId: 25000
+givenName: Bbbb 5555
+inum: XXXX.BBBB-5555
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: bbbb5555
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.CCCC-1111,ou=people,o=jans
+birthdate: 20160125000000Z
+displayName: Test Cccc 1111
+jansEmail: {"value":"cccc1111@test.email","type":"work","primary":true,"display":null}
+jansExtId: 31000
+givenName: Cccc 1111
+inum: XXXX.CCCC-1111
+jansStatus: active
+mail: cccc1111@test.email
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: cccc1111
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.CCCC-2222,ou=people,o=jans
+birthdate: 20160119000000Z
+displayName: Test Cccc 2222
+jansAddress: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
+jansExtId: 32000
+givenName: Cccc 2222
+inum: XXXX.CCCC-2222
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: cccc2222
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.CCCC-3333,ou=people,o=jans
+birthdate: 20160229194603Z
+displayName: Test Cccc 3333
+jansExtId: 33000
+givenName: Cccc 3333
+inum: XXXX.CCCC-3333
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: cccc3333
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.CCCC-4444,ou=people,o=jans
+birthdate: 20160315000000Z
+displayName: Test Cccc 4444
+jansExtId: 34000
+givenName: Cccc 4444
+inum: XXXX.CCCC-4444
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: cccc4444
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.CCCC-5555,ou=people,o=jans
+birthdate: 20160413000000Z
+displayName: Test Cccc 5555
+jansExtId: 35000
+givenName: Cccc 5555
+inum: XXXX.CCCC-5555
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: cccc5555
+userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
+
+dn: inum=XXXX.DDDD-1111,ou=people,o=jans
+displayName: Test Dddd 1111
+givenName: Dddd 1111
+inum: XXXX.DDDD-1111
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: dddd1111 *char
+
+dn: inum=XXXX.DDDD-2222,ou=people,o=jans
+displayName: Test Dddd 2222
+givenName: Dddd 2222
+inum: XXXX.DDDD-2222
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: dddd2222 * \ (char
+
+dn: inum=XXXX.DDDD-3333,ou=people,o=jans
+displayName: Test Dddd 3333
+givenName: Dddd 3333
+inum: XXXX.DDDD-3333
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: dddd3333 * \ (char) /
+
+dn: inum=XXXX.DDDD-4444,ou=people,o=jans
+displayName: Test Dddd 4444
+givenName: (special chars\)/*
+inum: XXXX.DDDD-4444
+jansStatus: active
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+sn: FilterTest
+uid: dddd4444
+
+dn: inum=XXXX.EEEE-1111,ou=people,o=jans
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+inum: XXXX.EEEE-1111
+uid: eeee1111
+jansStatus: active
+
+dn: ou=fido2_register,inum=XXXX.EEEE-1111,ou=people,o=jans
+objectClass: organizationalUnit
+objectClass: top
+ou: fido2_register
+
+dn: jansId=590cf1d9-6fc1-453e-adb2-8d13c3689fe6,ou=fido2_register,inum=XXXX.EEEE-1111,ou=people,o=jans
+objectClass: top
+objectClass: jansFido2RegistrationEntry
+jansId: 590cf1d9-6fc1-453e-adb2-8d13c3689fe6
+creationDate: 20210213122333.811Z
+displayName: Black Fido2 key
+jansApp: jgomer2001-diverse-grackle.gluu.info
+jansCodeChallenge: 6PVFB1E_xkZJJoIJU2wB4ClOOjHQdwmWvpJSU1VFQLA
+jansCodeChallengeHash: 76069
+jansPublicKeyId: oxp-kO6agUWzMVDzCerCmQiquYGXa1Jp_kG-tbT3U6GGReH3e-j0mFX6LVI
+ Hsy-3utlE-_D4xW04ScQ-WHev5A
+jansPublicKeyIdHash: 295735
+personInum: XXXX.EEEE-1111
+jansRegistrationData: {"createdDate":1740059276450,"userPresentFlag":true,"upd
+ atedDate":1740059283017,"createdBy":"admin","transports":["usb","nfc","ble"
+ ],"updatedBy":"admin","username":"admin","origin":"jgomer2001-diverse-grack
+ le.gluu.info","userId":"GqJPmyFtuMEU07O3-p3bzBTx88gYintgk5pP9TXqn0w","chall
+ enge":"G-gm3UzfP34-mcr3prJMGGOt1G5ZIjqKH4ujX2qEYko","attestationRequest":"{
+ \"username\":\"admin\",\"displayName\":\"Admin\"}","attestationResponse":"{
+ \"id\":\"oxp-kO6agUWzMVDzCerCmQiquYGXa1Jp_kG-tbT3U6GGReH3e-j0mFX6LVIHsy-3ut
+ lE-_D4xW04ScQ-WHev5A\",\"type\":\"public-key\",\"rawId\":\"oxp-kO6agUWzMVDz
+ CerCmQiquYGXa1Jp_kG-tbT3U6GGReH3e-j0mFX6LVIHsy-3utlE-_D4xW04ScQ-WHev5A\",\"
+ response\":{\"attestationObject\":\"o2NmbXRmcGFja2VkZ2F0dFN0bXSjY2FsZyZjc2l
+ nWEcwRQIhAIiuLmYsaKg3EdgGiz1Rn4Oz9sQKgV1zGhmlUR5-q_mEAiBq8EQhoMgDyPwdXnJfNk
+ Lku7tq0zqFWu27OIYTz0WtCmN4NWOBWQLBMIICvTCCAaWgAwIBAgIEGKxGwDANBgkqhkiG9w0BA
+ QsFADAuMSwwKgYDVQQDEyNZdWJpY28gVTJGIFJvb3QgQ0EgU2VyaWFsIDQ1NzIwMDYzMTAgFw0x
+ NDA4MDEwMDAwMDBaGA8yMDUwMDkwNDAwMDAwMFowbjELMAkGA1UEBhMCU0UxEjAQBgNVBAoMCVl
+ 1YmljbyBBQjEiMCAGA1UECwwZQXV0aGVudGljYXRvciBBdHRlc3RhdGlvbjEnMCUGA1UEAwweWX
+ ViaWNvIFUyRiBFRSBTZXJpYWwgNDEzOTQzNDg4MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEe
+ eo7LHxJcBBiIwzSP-tg5SkxcdSD8QC-hZ1rD4OXAwG1Rs3Ubs_K4-PzD4Hp7WK9Jo1MHr03s7y-
+ kqjCrutOOqNsMGowIgYJKwYBBAGCxAoCBBUxLjMuNi4xLjQuMS40MTQ4Mi4xLjcwEwYLKwYBBAG
+ C5RwCAQEEBAMCBSAwIQYLKwYBBAGC5RwBAQQEEgQQy2lIHo_3QDmT7AonKaFUqDAMBgNVHRMBAf
+ 8EAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQCXnQOX2GD4LuFdMRx5brr7Ivqn4ITZurTGG7tX8-a0w
+ YpIN7hcPE7b5IND9Nal2bHO2orh_tSRKSFzBY5e4cvda9rAdVfGoOjTaCW6FZ5_ta2M2vgEhoz5
+ Do8fiuoXwBa1XCp61JfIlPtx11PXm5pIS2w3bXI7mY0uHUMGvxAzta74zKXLslaLaSQibSKjWKt
+ 9h-SsXy4JGqcVefOlaQlJfXL1Tga6wcO0QTu6Xq-Uw7ZPNPnrpBrLauKDd202RlN4SP7ohL3d9b
+ G6V5hUz_3OusNEBZUn5W3VmPj1ZnFavkMB3RkRMOa58MZAORJT4imAPzrvJ0vtv94_y71C6tZ5a
+ GF1dGhEYXRhWMR_wOyQHBiiFpWcyIN6ty_MYQgehRgTRm3sGuvFv8be30UAAADyy2lIHo_3QDmT
+ 7AonKaFUqABAoxp-kO6agUWzMVDzCerCmQiquYGXa1Jp_kG-tbT3U6GGReH3e-j0mFX6LVIHsy-
+ 3utlE-_D4xW04ScQ-WHev5KUBAgMmIAEhWCACnFClszpSN92hYNqqEsfLT9U5ZR6QjvWAUZ-nqk
+ QKZyJYIDwmUwVGMHp9XpcIFI-a3iaD02F5zQxCwLR8-iMvpmnH\",\"clientDataJSON\":\"e
+ yJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiRy1nbTNVemZQMzQtbWNyM3By
+ Sk1HR090MUc1WklqcUtINHVqWDJxRVlrbyIsIm9yaWdpbiI6Imh0dHBzOi8vamdvbWVyMjAwMS1
+ kaXZlcnNlLWdyYWNrbGUuZ2x1dS5pbmZvIiwiY3Jvc3NPcmlnaW4iOmZhbHNlLCJvdGhlcl9rZX
+ lzX2Nhbl9iZV9hZGRlZF9oZXJlIjoiZG8gbm90IGNvbXBhcmUgY2xpZW50RGF0YUpTT04gYWdha
+ W5zdCBhIHRlbXBsYXRlLiBTZWUgaHR0cHM6Ly9nb28uZ2wveWFiUGV4In0\",\"authenticato
+ rData\":\"f8DskBwYohaVnMiDercvzGEIHoUYE0Zt7Brrxb_G3t9FAAAA8stpSB6P90A5k-wKJ
+ ymhVKgAQKMafpDumoFFszFQ8wnqwpkIqrmBl2tSaf5BvrW091OhhkXh93vo9JhV-i1SB7Mvt7rZ
+ RPvw-MVtOEnEPlh3r-SlAQIDJiABIVggApxQpbM6UjfdoWDaqhLHy0_VOWUekI71gFGfp6pECmc
+ iWCA8JlMFRjB6fV6XCBSPmt4mg9Nhec0MQsC0fPojL6Zpxw\",\"publicKey\":\"MFkwEwYHK
+ oZIzj0CAQYIKoZIzj0DAQcDQgAEApxQpbM6UjfdoWDaqhLHy0_VOWUekI71gFGfp6pECmc8JlMF
+ RjB6fV6XCBSPmt4mg9Nhec0MQsC0fPojL6Zpxw\",\"publicKeyAlgorithm\":-7,\"transp
+ orts\":[\"usb\"]},\"clientExtensionResults\":{},\"authentictatorAttachment\
+ ":null}","uncompressedECPoint":"pQECAyYgASFYIAKcUKWzOlI33aFg2qoSx8tP1TllHpC
+ O9YBRn6eqRApnIlggPCZTBUYwen1elwgUj5reJoPTYXnNDELAtHz6Iy-macc","publicKeyId"
+ :"oxp-kO6agUWzMVDzCerCmQiquYGXa1Jp_kG-tbT3U6GGReH3e-j0mFX6LVIHsy-3utlE-_D4x
+ W04ScQ-WHev5A","type":"public-key","status":"registered","counter":0,"attes
+ tationType":"packed","signatureAlgorithm":-7,"rpId":"jgomer2001-diverse-gra
+ ckle.gluu.info","backupStateFlag":false,"backupEligibilityFlag":false,"atte
+ stedCredentialDataFlag":true,"extensionDataFlag":false,"userVerifiedFlag":t
+ rue,"authentictatorAttachment":"cross-platform","credId":null}
+jansCounter: 0
+jansStatus: registered
+
+dn: jansId=6bf4ea74-c510-45dd-a446-2652cf52a055,ou=fido2_register,inum=XXXX.EEEE-1111,ou=people,o=jans
+objectClass: top
+objectClass: jansFido2RegistrationEntry
+jansId: 6bf4ea74-c510-45dd-a446-2652cf52a055
+creationDate: 20210213122402.477Z
+displayName: Madhu fido device
+jansApp: maduvena-legal-escargot.gluu.info
+jansCodeChallenge: PIyg112NFf9x0wHNC4MwRhRJEsSUvv_ZFCTuAJBoDD8
+jansCodeChallengeHash: 75040
+jansPublicKeyId: VQrVG-1uT794FJsIM0Y1J9HxtrXE0Ad1fni7V47d9nt15O38xRWDak4-_Pm
+ zeWBLyWik_ztUHKz6T-Ylpk8uUw
+jansPublicKeyIdHash: 318190
+personInum: XXXX.EEEE-1111
+jansRegistrationData: {"createdDate":1739971161597,"updatedDate":17399714008
+ 90,"createdBy":"madhumitas.abcd@gmail.com","updatedBy":"madhumitas.abcd@gma
+ il.com","username":"madhumitas.abcd@gmail.com","origin":"maduvena-legal-esc
+ argot.gluu.info","userId":"kYoUFsZtU4f3PI3IatMde2qRozxfQucPvJhYf7MgPMo","ch
+ allenge":"PIyg112NFf9x0wHNC4MwRhRJEsSUvv_ZFCTuAJBoDD8","attestationRequest"
+ :"{\"username\":\"madhumitas.abcd@gmail.com\",\"displayName\":\"aaa\"}","at
+ testationResponse":"{\"id\":\"VQrVG-1uT794FJsIM0Y1J9HxtrXE0Ad1fni7V47d9nt15
+ O38xRWDak4-_PmzeWBLyWik_ztUHKz6T-Ylpk8uUw\",\"type\":\"public-key\",\"rawId
+ \":\"VQrVG-1uT794FJsIM0Y1J9HxtrXE0Ad1fni7V47d9nt15O38xRWDak4-_PmzeWBLyWik_z
+ tUHKz6T-Ylpk8uUw\",\"response\":{\"attestationObject\":\"o2NmbXRoZmlkby11Mm
+ ZnYXR0U3RtdKJjc2lnWEcwRQIgBFAZg8K7z51JR_AbpPUb4UI4k9Isv7HWHfpiKerhqWICIQCfa
+ 8oPpxPz5CTi12raGDzCLILd0yuw0km5nS6CoVhhm2N4NWOBWQLCMIICvjCCAaagAwIBAgIEYQkd
+ yTANBgkqhkiG9w0BAQsFADAuMSwwKgYDVQQDEyNZdWJpY28gVTJGIFJvb3QgQ0EgU2VyaWFsIDQ
+ 1NzIwMDYzMTAgFw0xNDA4MDEwMDAwMDBaGA8yMDUwMDkwNDAwMDAwMFowbzELMAkGA1UEBhMCU0
+ UxEjAQBgNVBAoMCVl1YmljbyBBQjEiMCAGA1UECwwZQXV0aGVudGljYXRvciBBdHRlc3RhdGlvb
+ jEoMCYGA1UEAwwfWXViaWNvIFUyRiBFRSBTZXJpYWwgMTYyNzk4NzQwMTBZMBMGByqGSM49AgEG
+ CCqGSM49AwEHA0IABCyz7Ju3Oa5HPT6UjL2lvLvANAva7974DLE1B3NnnQqEUyUQ2iw-PFt5Zu8
+ 3JRmxXZgv0k_032jY96RImnENU5SjbDBqMCIGCSsGAQQBgsQKAgQVMS4zLjYuMS40LjEuNDE0OD
+ IuMS4xMBMGCysGAQQBguUcAgEBBAQDAgUgMCEGCysGAQQBguUcAQEEBBIEELksP5rAFEBWiH8UC
+ iUBFjswDAYDVR0TAQH_BAIwADANBgkqhkiG9w0BAQsFAAOCAQEAeiNwZGhnULWNozZmDWWVMP3A
+ 9ntSxsuENLIx3o8YG5-WdWSZKA9BXh6if9ZaUWkamzT2Ry3xnQWx7W96u4PesGNro7fem8bmCyW
+ uPGtvOgDfn46av7y5eJEHrU7ov-vowrzN_abeMr2PyYryrY0mphyd-grdzt7bNVdiwaYJ0HDUU0
+ FYrDr0r_dMlCg8OV2afy99YCXWOAkZ-NDkyRXi6pvaUoEYP20wn7tlO0G7vmTxDcffD8KGGXts-
+ iDfB3gqIMqfn5EAobKU6lcZGSu81e691SSLFu_GRzWlA8vjg-tGZmRvuwxSQNkuGHdy3li7sKn5
+ qmCoku93SUjMRt15kmhhdXRoRGF0YVjEgoJxLeE69E4JzeWVCEvpwybxEVtafPEnwDINH0yJgvh
+ BAAAAAAAAAAAAAAAAAAAAAAAAAAAAQFUK1Rvtbk-_eBSbCDNGNSfR8ba1xNAHdX54u1eO3fZ7de
+ Tt_MUVg2pOPvz5s3lgS8lopP87VBys-k_mJaZPLlOlAQIDJiABIVgg1A6CPrYpR5G-mb8HrRseY
+ NxnXLS3-odY6neuNWB8xEciWCAYATaKo82EKj2SbibmqZ0cmu7-Rqxo8h9s1xn4f-Rkyg\",\"c
+ lientDataJSON\":\"eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiUEl5Z
+ zExMk5GZjl4MHdITkM0TXdSaFJKRXNTVXZ2X1pGQ1R1QUpCb0REOCIsIm9yaWdpbiI6Imh0dHBz
+ Oi8vbWFkdXZlbmEtbGVnYWwtZXNjYXJnb3QuZ2x1dS5pbmZvIiwiY3Jvc3NPcmlnaW4iOmZhbHN
+ lfQ\",\"authenticatorData\":\"goJxLeE69E4JzeWVCEvpwybxEVtafPEnwDINH0yJgvhBA
+ AAAAAAAAAAAAAAAAAAAAAAAAAAAQFUK1Rvtbk-_eBSbCDNGNSfR8ba1xNAHdX54u1eO3fZ7deTt
+ _MUVg2pOPvz5s3lgS8lopP87VBys-k_mJaZPLlOlAQIDJiABIVgg1A6CPrYpR5G-mb8HrRseYNx
+ nXLS3-odY6neuNWB8xEciWCAYATaKo82EKj2SbibmqZ0cmu7-Rqxo8h9s1xn4f-Rkyg\",\"pub
+ licKey\":\"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1A6CPrYpR5G-mb8HrRseYNxnXLS3
+ -odY6neuNWB8xEcYATaKo82EKj2SbibmqZ0cmu7-Rqxo8h9s1xn4f-Rkyg\",\"publicKeyAlg
+ orithm\":-7,\"transports\":[\"usb\"]},\"clientExtensionResults\":{},\"authe
+ ntictatorAttachment\":null}","uncompressedECPoint":"pQECAyYgASFYINQOgj62KUe
+ Rvpm_B60bHmDcZ1y0t_qHWOp3rjVgfMRHIlggGAE2iqPNhCo9km4m5qmdHJru_kasaPIfbNcZ-H
+ _kZMo","publicKeyId":"VQrVG-1uT794FJsIM0Y1J9HxtrXE0Ad1fni7V47d9nt15O38xRWDa
+ k4-_PmzeWBLyWik_ztUHKz6T-Ylpk8uUw","type":"public-key","status":"registered
+ ","counter":4,"attestationType":"fido-u2f","signatureAlgorithm":-7,"rpId":"
+ maduvena-legal-escargot.gluu.info","backupStateFlag":false,"backupEligibili
+ tyFlag":false,"attestedCredentialDataFlag":true,"extensionDataFlag":false,"
+ userVerifiedFlag":false,"userPresentFlag":true,"authentictatorAttachment":"
+ cross-platform","credId":null,"transports":["usb","nfc","ble"]}
+jansCounter: 4
+jansStatus: registered

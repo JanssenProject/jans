@@ -1,0 +1,90 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.clients.authorized.menu_label}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.consent.AuthorizedClientsVM')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul"/>
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <h:div class="${css.panel}" style="@load(empty vm.clients ? 'height:16rem' : '')">
+                    <h2 class="f4 dark-blue2">${labels.clients.authorized.title}</h2>
+                    <div class="flex flex-wrap justify-between items-center pb2">
+                        <z:label class="@load(empty vm.clients ? 'pt2 dark-blue2' : '')" value="@load(empty vm.clients ?
+                        c:l('clients.authorized.panel_text_noapps') : c:l2('clients.authorized.panel_text', c:split(c:string(vm.clients.size()),',')))" />
+
+                        <z:button visible="@load(vm.clients.size() gt 1)" label="${labels.clients.authorized.revoke_all}" class="${css.primaryButton} mh3"
+                                  w:onClick="alertRef = $('#feedback-consent')" onClick="@('revokeAll')"/>
+                    </div>
+
+                    <div class="alert alert-success dn" id="feedback-consent" role="alert" />
+                </h:div>
+
+                <h:div id="accordion" class="${css.panel}" visible="@load(not empty vm.clients)" children="@load(vm.clients.entrySet())">
+                    <zk:template name="children">
+
+                        <div class="card br0 ${forEachStatus.index gt 0 ? 'bt-0' : ''}">
+                            <div class="card-header ph3 flex flex-wrap justify-between items-center">
+                                <div class="flex flex-wrap">
+                                    <div width="100px" class="pr3">
+                                        <z:image width="100px" src="@load(each.key.logoURI)" unless="${empty each.key.logoURI}" />
+                                    </div>
+                                    <h:a class="dark-blue2 f5" data-toggle="collapse" href="@load(c:cat('#C', each.key.alternativeID)))">
+                                        ${each.key.displayName}
+                                    </h:a>
+                                </div>
+                                <z:button class="${css.tertiaryButton}" label="${labels.clients.authorized.revoke}" w:onClick="alertRef = $('#feedback-consent')"
+                                          onClick="@('revoke', each.key.inum, each.key.displayName)"/>
+                            </div>
+                            <h:div id="@load(c:cat('C', each.key.alternativeID))" class="${forEachStatus.index eq 0 ? 'show ' : ''} collapse"
+                                   data-parent="#accordion">
+                                <div class="card-body">
+                                    <dl class="mb1">
+                                        <z:div class="flex flex-wrap" visible="@load(not empty each.key.jansClntURI)">
+                                            <dt class="w4">${labels.clients.authorized.homepage}</dt>
+                                            <dd>
+                                                <h:a href="@load(each.key.jansClntURI)" target="_blank">${each.key.jansClntURI}</h:a>
+                                            </dd>
+                                        </z:div>
+                                        <z:div class="flex flex-wrap" visible="@load(not empty vm.getContactEmailsAsCSV(each.key))">
+                                            <dt class="w4">${labels.clients.authorized.emails}</dt>
+                                            <dd>${vm.getContactEmailsAsCSV(each.key)}</dd>
+                                        </z:div>
+                                        <z:div class="flex flex-wrap" visible="@load(not empty each.key.policyURI)">
+                                            <dt class="w4">${labels.clients.authorized.policy}</dt>
+                                            <dd>
+                                                <h:a href="@load(each.key.policyURI)">${each.key.policyURI}</h:a>
+                                            </dd>
+                                        </z:div>
+                                        <z:div class="flex flex-wrap" visible="@load(not empty each.key.tosURI)">
+                                            <dt class="w4">${labels.clients.authorized.tos}</dt>
+                                            <dd>
+                                                <h:a href="@load(each.key.tosURI)">${each.key.tosURI}</h:a>
+                                            </dd>
+                                        </z:div>
+                                    </dl>
+                                    <z:div unless="${empty each.value}">
+                                        <span class="b">${labels.clients.authorized.permissions}</span>
+                                        <h:ul class="mb1" children="@load(each.value)">
+                                            <zk:template name="children">
+                                                <li>${each.description}</li>
+                                            </zk:template>
+                                        </h:ul>
+                                    </z:div>
+
+                                </div>
+                            </h:div>
+                        </div>
+                    </zk:template>
+                </h:div>
+
+            </section>
+        </div>
+
+    </z:div>
+
+</zk:zk>

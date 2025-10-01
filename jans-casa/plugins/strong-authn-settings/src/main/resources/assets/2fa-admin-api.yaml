@@ -1,0 +1,171 @@
+swagger: '2.0'
+
+info:
+  version: "5.0.0"
+  title: 2FA Settings admin API
+  description: Allows to configure 2FA settings programmatically
+  license:
+    name: Gluu Casa
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+
+#Demo server host
+host: test-casa.jans.io
+
+basePath: /casa/rest/pl/strong-authn-settings
+schemes:
+ - https
+
+security:
+  - casa_auth: ['https://jans.io/casa.config']
+  
+consumes:
+  - application/json
+produces:
+  - text/plain
+
+paths:
+  /config:
+    get:
+      description: Returns the current 2FA configuration
+      produces:
+        - application/json
+
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Configuration' 
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /config/basic:
+    post: 
+      description: Sets values for 1) minimum number of credentials enrolled for 2FA to take place,
+        2) whether automatic turn on of 2FA occurs when users fulfils the minimum, and 3) whether users can
+        explicitly turn 2FA on/off
+      parameters:
+        -
+          name: settings
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Basic2FASettings'
+
+      responses:
+        200:
+          description: Successful operation. Empty response body
+        400:
+          description: Inconsistent settings (eg. Trying to set option 2 and 3 to false simultaneously or
+            setting option 1 to a number less than one). Error description in response body
+          schema:
+            type: string
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /config/enforcement-policies:
+    post:
+      description: Sets when 2FA should take place for authenticating users. While an array of 
+        enforcement policies is expected as input, its length is usually equal to one, being 
+        [LOCATION_UNKNOWN, DEVICE_UNKNOWN] the only exception
+      parameters:
+        -
+          name: settings
+          in: body
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/EnforcementPolicy'
+
+      responses:
+        200:
+          description: Successful operation. Empty response body
+        400:
+          description: Inconsistent settings (eg. [LOCATION_UNKNOWN, CUSTOM]). Error description in response body
+          schema:
+            type: string
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+
+  /config/trusted-devices:
+    post:
+      description: Sets the amount of days locations and devices are considered trusted for authentication
+        (ie. no 2FA is required when accessing using the given location or device)
+      parameters:
+        -
+          name: settings
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TrustedDevicesSettings'
+
+      responses:
+        200:
+          description: Successful operation. Empty response body
+        400:
+          description: Inconsistent settings (eg. negative numbers provided). Error description in response body
+          schema:
+            type: string
+        500:
+          description: There was a failure executing the operation. Error description in response body
+          schema:
+            type: string
+      
+definitions:
+  Basic2FASettings:
+    type: object
+    properties:
+      autoEnable:
+        type: boolean
+        default: false
+      allowSelfEnableDisable:
+        type: boolean
+        default: true
+      allowSelectPreferred:
+        type: boolean
+        default: true
+      min_creds:
+        type: integer
+        default: 2
+
+  EnforcementPolicy: &ENFORCEMENTPOLICY
+    type: string
+    description: Check the plugin documentation or 
+      play around with this plugin in a Casa installation to learn more about these settings
+    enum: &ENFORCEMENTPOLICY [EVERY_LOGIN, LOCATION_UNKNOWN, DEVICE_UNKNOWN, CUSTOM]
+
+  TrustedDevicesSettings:
+    type: object
+    properties:
+      location_exp_days:
+        type: integer
+      device_exp_days:
+        type: integer
+        
+  Configuration:
+    type: object
+    properties:
+      basic_2fa_settings:
+        $ref: '#/definitions/Basic2FASettings'
+      policy_2fa:
+        type: array
+        items:
+          $ref: '#/definitions/EnforcementPolicy'
+      trusted_dev_settings:
+        type: array
+        items:
+          $ref: '#/definitions/TrustedDevicesSettings'
+    
+
+securityDefinitions:
+  casa_auth:
+    type: oauth2
+    description: An OAuth2 bearer token in the header must be passed
+    flow: application
+    tokenUrl: https://test-casa.jans.io/jans-auth/restv1/token

@@ -1,0 +1,47 @@
+Flow io.jans.agama.test.invocations4
+    Basepath ""
+
+// call no-args constructor 
+obj1 = Call co.SubTest#new
+obj2 = Call co.SubTest#new
+
+// call methods defined in superclass
+Call obj1 setId "AG"
+Call obj2 setId "AMA"
+s = Call co.Test#sum obj1 obj2
+When s is not "AGAMA"
+    Finish false
+
+//Call overloaded constructor (A)
+hm | E = Call java.util.HashMap#new -1
+When E is null or E.class.name is not "java.lang.IllegalArgumentException"
+    Finish false
+    
+//Call overloaded constructor (B)
+hm2 | E = Call java.util.HashMap#new hm
+When E is null or E.class.name is not "java.lang.NullPointerException"
+    Finish false
+
+//Call overloaded constructor (C)
+hm = Call java.util.Map#of "Paul" "bass" "Ringo" "drums" "John" "guitar" "George" "guitar"
+hm2 = Call java.util.HashMap#new hm
+
+When hm2.class.name is not "java.util.HashMap"
+    Finish false
+
+n = Call hm2 size
+When n is not 4
+    Finish false
+    
+//Call overloaded constructor (D)
+wivesMap = { jhon: "yoko", paul: "linda" }
+hm2 = Call java.util.TreeMap#new wivesMap
+
+When hm2.class.name is not "java.util.TreeMap"
+    Finish false
+
+hasBass = Call hm2 containsKey "paul"
+When hasBass is false
+    Finish false
+
+Finish true

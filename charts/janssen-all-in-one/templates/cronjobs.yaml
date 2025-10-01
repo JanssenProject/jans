@@ -1,0 +1,316 @@
+{{ if index .Values "auth-server-key-rotation" "enabled" -}}
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: {{ include "janssen-all-in-one.fullname" . }}-as-key-rotation
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-as-key-rotation
+{{ include "janssen-all-in-one.labels" . | indent 4 }}
+{{- if (index .Values "auth-server-key-rotation" "additionalLabels") }}
+{{ toYaml (index .Values "auth-server-key-rotation" "additionalLabels") | indent 4 }}
+{{- end }}
+{{- if or (index .Values "auth-server-key-rotation" "additionalAnnotations") (.Values.customAnnotations.cronjob) }}
+  annotations:
+{{- if index .Values "auth-server-key-rotation" "additionalAnnotations" }}
+{{ toYaml (index .Values "auth-server-key-rotation" "additionalAnnotations") | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.cronjob }}
+{{ toYaml .Values.customAnnotations.cronjob | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  {{- if ne (index .Values "auth-server-key-rotation" "cronJobSchedule")  "" }}
+  schedule: {{  index .Values "auth-server-key-rotation" "cronJobSchedule"  | quote }}
+   {{- else }}
+  schedule: "@every {{ index .Values "auth-server-key-rotation" "keysLife" }}h"
+   {{- end }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+        {{- with (index .Values "auth-server-key-rotation" "image" "pullSecrets") }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 8 }}
+        {{- end }}
+          dnsPolicy: {{ index .Values "auth-server-key-rotation" "dnsPolicy" | quote }}
+        {{- with (index .Values "auth-server-key-rotation" "dnsConfig") }}
+          dnsConfig:
+{{ toYaml . | indent 12 }}
+        {{- end }}
+          serviceAccountName: {{ .Values.serviceAccountName }}
+          containers:
+            - name: {{ include "janssen-all-in-one.name" . }}-as-key-rotation
+              {{- if or (index .Values "auth-server-key-rotation" "customScripts") (index .Values "auth-server-key-rotation" "customCommand") }}
+              command:
+                {{- if index .Values "auth-server-key-rotation" "customCommand" }}
+                {{- toYaml (index .Values "auth-server-key-rotation" "customCommand") | nindent 18 }}
+                {{- else }}
+                - /bin/sh
+                - -c
+                - |
+                    {{- with (index .Values "auth-server-key-rotation" "customScripts") }}
+                    {{- toYaml . | replace "- " "" | nindent 20}}
+                    {{- end }}
+                    /app/bin/entrypoint.sh
+                {{- end}}
+              {{- end}}
+              image: "{{ index .Values "auth-server-key-rotation" "image" "repository" }}:{{ index .Values "auth-server-key-rotation" "image" "tag" }}"
+              env:
+                {{- include "janssen-all-in-one.usr-envs" . | indent 16 }}
+                {{- include "janssen-all-in-one.usr-secret-envs" . | indent 16 }}
+              imagePullPolicy: {{ index .Values "auth-server-key-rotation" "image" "pullPolicy" }}
+              lifecycle:
+{{- toYaml (index .Values "auth-server-key-rotation" "lifecycle") | nindent 16 }}
+              volumeMounts:
+              {{- with (index .Values "auth-server-key-rotation" "volumeMounts") }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-config-cm
+                {{ if .Values.usrEnvs.secret }}
+                - secretRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+                {{ if .Values.usrEnvs.normal }}
+                - configMapRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+              {{- if .Values.testEnviroment }}
+              resources: {}
+              {{- else }}
+              resources:
+{{- toYaml (index .Values "auth-server-key-rotation" "resources") | nindent 16 }}
+              {{- end }}
+              args: ["certmanager", "patch", "auth", "--opts", "interval:{{ index .Values "auth-server-key-rotation" "keysLife" }}", "--opts", "key-strategy:{{ index .Values "auth-server-key-rotation" "keysStrategy" }}", "--opts", "privkey-push-delay:{{ index .Values "auth-server-key-rotation" "keysPushDelay" }}", "--opts", "privkey-push-strategy:{{ index .Values "auth-server-key-rotation" "keysPushStrategy" }}"]
+          volumes:
+          {{- with (index .Values "auth-server-key-rotation" "volumes") }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
+          restartPolicy: Never
+          {{- if index .Values "auth-server-key-rotation" "nodeSelector" }}
+          nodeSelector:
+{{- toYaml (index .Values "auth-server-key-rotation" "nodeSelector") | nindent 12 }}
+          {{- end }}
+{{- end }}
+
+---
+
+{{ if and (index .Values "kc-scheduler" "enabled") (.Values.saml.enabled) -}}
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: {{ include "janssen-all-in-one.fullname" . }}-kc-scheduler
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-kc-scheduler
+{{ include "janssen-all-in-one.labels" . | indent 4 }}
+{{- if (index .Values "kc-scheduler" "additionalLabels") }}
+{{ toYaml (index .Values "kc-scheduler" "additionalLabels") | indent 4 }}
+{{- end }}
+{{- if (index .Values "kc-scheduler" "additionalAnnotations") }}
+  annotations:
+{{ toYaml (index .Values "kc-scheduler" "additionalAnnotations") | indent 4 }}
+{{- end }}
+spec:
+  schedule: "@every {{ index .Values "kc-scheduler" "interval" }}m"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+        {{- with (index .Values "kc-scheduler" "image" "pullSecrets") }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 8 }}
+        {{- end }}
+          dnsPolicy: {{ index .Values "kc-scheduler" "dnsPolicy" | quote }}
+        {{- with (index .Values "kc-scheduler" "dnsConfig") }}
+          dnsConfig:
+{{ toYaml . | indent 12 }}
+        {{- end }}
+          containers:
+            - name: {{ include "janssen-all-in-one.name" . }}-kc-scheduler
+              {{- if or (index .Values "kc-scheduler" "customScripts") (index .Values "kc-scheduler" "customCommand") }}
+              command:
+                {{- if index .Values "kc-scheduler" "customCommand" }}
+                {{- toYaml (index .Values "kc-scheduler" "customCommand") | nindent 18 }}
+                {{- else }}
+                - /bin/sh
+                - -c
+                - |
+                    {{- with (index .Values "kc-scheduler" "customScripts") }}
+                    {{- toYaml . | replace "- " "" | nindent 20}}
+                    {{- end }}
+                    /app/bin/entrypoint.sh
+                {{- end}}
+              {{- end}}
+              image: "{{ index .Values "kc-scheduler" "image" "repository" }}:{{ index .Values "kc-scheduler" "image" "tag" }}"
+              env:
+                {{- include "janssen-all-in-one.usr-envs" . | indent 16 }}
+                {{- include "janssen-all-in-one.usr-secret-envs" . | indent 16 }}
+              imagePullPolicy: {{ index .Values "kc-scheduler" "image" "pullPolicy" }}
+              lifecycle:
+{{- toYaml (index .Values "kc-scheduler" "lifecycle") | nindent 16 }}
+              volumeMounts:
+              {{- with (index .Values "kc-scheduler" "volumeMounts") }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-config-cm
+                {{ if .Values.usrEnvs.secret }}
+                - secretRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+                {{ if .Values.usrEnvs.normal }}
+                - configMapRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+              {{- if .Values.testEnviroment }}
+              resources: {}
+              {{- else }}
+              resources:
+{{- toYaml (index .Values "kc-scheduler" "resources") | nindent 16 }}
+              {{- end }}
+              args: ["kc-sync"]
+          volumes:
+          {{- with (index .Values "kc-scheduler" "volumes") }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
+          restartPolicy: Never
+          {{- if not .Values.isFqdnRegistered  }}
+          hostAliases:
+            - ip: {{ .Values.lbIp }}
+              hostnames:
+                - {{ .Values.fqdn }}
+          {{- end }}
+          {{- if index .Values "kc-scheduler" "nodeSelector" }}
+          nodeSelector:
+{{- toYaml (index .Values "kc-scheduler" "nodeSelector") | nindent 12 }}
+          {{- end }}
+{{- end }}
+
+---
+
+{{ if .Values.cleanup.enabled -}}
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: {{ include "janssen-all-in-one.fullname" . }}-cleanup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-cleanup
+{{ include "janssen-all-in-one.labels" . | indent 4 }}
+{{- if (index .Values "cleanup" "additionalLabels") }}
+{{ toYaml (index .Values "cleanup" "additionalLabels") | indent 4 }}
+{{- end }}
+{{- if (index .Values "cleanup" "additionalAnnotations") }}
+  annotations:
+{{ toYaml (index .Values "cleanup" "additionalAnnotations") | indent 4 }}
+{{- end }}
+spec:
+  schedule: "@every {{ index .Values "cleanup" "interval" }}m"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+        {{- with (index .Values "cleanup" "image" "pullSecrets") }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 8 }}
+        {{- end }}
+          dnsPolicy: {{ index .Values "cleanup" "dnsPolicy" | quote }}
+        {{- with (index .Values "cleanup" "dnsConfig") }}
+          dnsConfig:
+{{ toYaml . | indent 12 }}
+        {{- end }}
+          containers:
+            - name: {{ include "janssen-all-in-one.name" . }}-cleanup
+              {{- if or (index .Values "cleanup" "customScripts") (index .Values "cleanup" "customCommand") }}
+              command:
+                {{- if index .Values "cleanup" "customCommand" }}
+                {{- toYaml (index .Values "cleanup" "customCommand") | nindent 18 }}
+                {{- else }}
+                - /bin/sh
+                - -c
+                - |
+                    {{- with (index .Values "cleanup" "customScripts") }}
+                    {{- toYaml . | replace "- " "" | nindent 20}}
+                    {{- end }}
+                    /app/bin/entrypoint.sh
+                {{- end}}
+              {{- end}}
+              image: "{{ index .Values "cleanup" "image" "repository" }}:{{ index .Values "cleanup" "image" "tag" }}"
+              env:
+                {{- include "janssen-all-in-one.usr-envs" . | indent 16 }}
+                {{- include "janssen-all-in-one.usr-secret-envs" . | indent 16 }}
+              imagePullPolicy: {{ index .Values "cleanup" "image" "pullPolicy" }}
+              lifecycle:
+{{- toYaml (index .Values "cleanup" "lifecycle") | nindent 16 }}
+              volumeMounts:
+              {{- with (index .Values "cleanup" "volumeMounts") }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-config-cm
+                {{ if .Values.usrEnvs.secret }}
+                - secretRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+                {{ if .Values.usrEnvs.normal }}
+                - configMapRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+              {{- if .Values.testEnviroment }}
+              resources: {}
+              {{- else }}
+              resources:
+{{- toYaml (index .Values "cleanup" "resources") | nindent 16 }}
+              {{- end }}
+              args: ["cleanup", "--limit", "{{ .Values.cleanup.limit }}"]
+          volumes:
+          {{- with (index .Values "cleanup" "volumes") }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
+          restartPolicy: Never
+          {{- if not .Values.isFqdnRegistered  }}
+          hostAliases:
+            - ip: {{ .Values.lbIp }}
+              hostnames:
+                - {{ .Values.fqdn }}
+          {{- end }}
+          {{- if .Values.cleanup.nodeSelector }}
+          nodeSelector:
+{{- toYaml .Values.cleanup.nodeSelector | nindent 12 }}
+          {{- end }}
+{{- end }}

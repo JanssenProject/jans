@@ -1,0 +1,19 @@
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native">
+
+    <li>
+        <!-- A link pointing to index.zul file relative to this plugin's URL  -->
+        <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}${base}/index.zul">
+
+            <!-- some font-awesome icons adorne the menu item-->
+            <i class="mh2 fas fa-globe" />
+            
+            <!-- 
+            Text of the menu item. The ${labels...} expression refers to a message found in this
+            plugin's resource bundle. See https://docs.jans.io/head/casa/administration/localization/ 
+            -->
+            <span class="collapsible-menu-item di">${labels.hello.title}</span>
+            
+        </a>
+    </li>
+
+</z:zk>

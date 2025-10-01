@@ -1,0 +1,33 @@
+{
+    "keys": [
+        {
+            "descr": "Signature Key: RSA RSASSA-PKCS1-v1_5 using SHA-256",
+            "kty": "RSA",
+            "e": "AQAB",
+            "use": "sig",
+            "kid": "abc3a91b-dd1b-47b0-b7e7-aaf2ec3b9d5e_sig_rs256",
+            "x5c": [
+                "E3+Z7Ie9FVpDIqeBo/xI8/q7CCDxCHTtiTQjGS5j/XV4VcPt7i9mrQsajbndCAmynVw=="
+            ],
+            "name": "id_token RS256 Sign Key",
+            "exp": 1666775666429,
+            "alg": "RS256",
+            "n": "qzu2jRl6UoTnnUJS6zg7ghavupiUQ3Ux4fAH6H7DCXF-cuOgelBjUj_GLPqz5FeOCnQ"
+        },
+		{
+            "descr": "Encryption Key: Elliptic Curve Diffie-Hellman Ephemeral Static key agreement using Concat KDF",
+            "kty": "EC",
+            "use": "enc",
+            "crv": "P-256",
+            "kid": "0870a2b9-1200-42a2-9b12-e2fa89ce3bd0_enc_ecdh-es",
+            "x5c": [
+                "tE24Ofz3eFhtBAIhAINgdWN86TOOEAUXUr2ijmaAPBgn7mGoeg4c7FfyZTxn"
+            ],
+            "name": "id_token ECDH-ES Encryption Key",
+            "x": "NBJAtpZ-jWGjaXDFYgt38",
+            "y": "7n6oS9y5vN2XrTKMKilo",
+            "exp": 1666775666429,
+            "alg": "ECDH-ES"
+        }
+    ]
+}

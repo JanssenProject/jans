@@ -1,0 +1,147 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.jans</groupId>
+  <artifactId>kc-jans-spi</artifactId>
+  <name>kc-jans-spi</name>
+  <packaging>jar</packaging>
+
+  <parent>
+    <groupId>io.jans</groupId>
+    <artifactId>jans-kc-parent</artifactId>
+    <version>0.0.0-nightly</version>
+  </parent>
+
+  <prerequisites>
+    <maven>${maven.min-version}</maven>
+  </prerequisites>
+
+  <dependencies>
+
+    <!-- keycloak dependencies -->
+    <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-core</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-server-spi</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-server-spi-private</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-services</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-saml-core-public</artifactId>
+    </dependency>
+    <!-- end keycloak dependencies-->
+    
+    <!-- jans dependencies -->
+    <dependency>
+      <groupId>io.jans</groupId>
+      <artifactId>jans-core-standalone</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.jans</groupId>
+      <artifactId>jans-core-service</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.jans</groupId>
+      <artifactId>jans-orm-standalone</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.jans</groupId>
+      <artifactId>jans-orm-couchbase</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.jans</groupId>
+      <artifactId>jans-orm-hybrid</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.jans</groupId>
+      <artifactId>jans-orm-ldap</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.jans</groupId>
+      <artifactId>jans-orm-sql</artifactId>
+    </dependency>
+    <!-- end jans dependencies -->
+
+    <!-- log adapter -->
+    <dependency>
+      <groupId>org.jboss.slf4j</groupId>
+      <artifactId>slf4j-jboss-logmanager</artifactId>
+      <version>2.0.1.Final</version>
+    </dependency>
+    <!-- log adapter -->
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-dbcp2</artifactId>
+      <version>2.12.0</version>
+    </dependency>
+
+    <!-- nimbus dependencies -->
+    <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>oauth2-oidc-sdk</artifactId>
+    </dependency>
+    <!-- end nimbus dependencies -->
+
+    <!-- jboss dependencies -->
+    <dependency>
+      <groupId>io.quarkus.resteasy.reactive</groupId>
+      <artifactId>resteasy-reactive</artifactId>
+      <version>3.8.5</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- end jboss dependencies -->
+
+    <!-- commons beanutils dependency -->
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+    </dependency>
+    <!-- commons beanutils dependency -->
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- maven deps plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+      </plugin>
+      <!-- end maven deps plugin-->
+
+      <!-- maven assembly plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+      </plugin>
+      <!-- end maven assembly plugin -->
+
+      <!-- maven compiler plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <!-- end maven compiler plugin -->
+    </plugins>
+  </build>
+</project>

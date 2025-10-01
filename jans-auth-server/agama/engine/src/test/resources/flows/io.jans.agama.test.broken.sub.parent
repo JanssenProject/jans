@@ -1,0 +1,9 @@
+Flow io.jans.agama.test.broken.sub.parent
+    Basepath "" 
+
+| E = Trigger io.jans.agama.test.broken.sub.flow3
+
+When E is null
+    Finish false
+    
+Finish true     //flow should have thrown error

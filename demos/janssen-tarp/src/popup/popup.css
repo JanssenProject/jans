@@ -1,0 +1,10 @@
+body {
+    height: 400px;
+    width: 400px;
+}
+
+
+.logo {
+    /** webpackIgnore: true */
+    background-image: url(../assets/resource/jansTarp.png);
+  }

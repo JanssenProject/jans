@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<parent>
+		<groupId>io.jans</groupId>
+		<artifactId>jans-config-api-parent</artifactId>
+		<version>0.0.0-nightly</version>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>io.jans.jans-config-api.plugins</groupId>
+	<artifactId>plugins</artifactId>
+	<version>0.0.0-nightly</version>
+
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>admin-ui-plugin</module>
+		<module>jans-link-plugin</module>
+		<module>scim-plugin</module>
+		<module>user-mgt-plugin</module>
+		<module>fido2-plugin</module>
+		<module>kc-saml-plugin</module>
+		<module>kc-link-plugin</module>
+	    <module>lock-plugin</module>		
+	</modules>
+
+	<dependencies>
+
+		<!-- CDI -->
+		<dependency>
+			<groupId>org.jboss.weld</groupId>
+			<artifactId>weld-core-impl</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.3.0</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

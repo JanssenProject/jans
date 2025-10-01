@@ -1,0 +1,6 @@
+Flow flow
+    Basepath ""
+
+x = .5
+
+//Failure reason: a digit is expected before decimal separator

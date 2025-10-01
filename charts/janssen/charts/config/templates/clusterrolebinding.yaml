@@ -1,0 +1,50 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-cluster-admin-binding
+  labels:
+    APP_NAME: configurator
+{{ include "config.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.clusterRoleBinding) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.clusterRoleBinding }}
+{{ toYaml .Values.global.config.customAnnotations.clusterRoleBinding | indent 4 }}
+{{- end }}
+{{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: User
+    # change it to your actual account; the email can be fetched using
+    # the following command: `gcloud info | grep Account`
+    name: "ACCOUNT"
+    apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: {{ include "config.name" . }}-load
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-rolebinding
+{{- if .Values.additionalAnnotations }}
+  annotations:
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.global.serviceAccountName }}
+  namespace: {{ .Release.Namespace }}

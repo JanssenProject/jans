@@ -1,0 +1,18 @@
+[
+	{ "op": "add", "path": "/keys/1", "value":{
+            "descr": "Test Key",
+            "kty": "EC",
+            "use": "enc",
+            "crv": "P-256",
+            "kid": "1234a2b9-1200-42a2-9b12-e2fa89ce3bd0_enc_ecdh-es",
+            "x5c": [
+                "tE24Ofz3eFhtBAIhAINgdWN86TOOEAUXUr2ijmaAPBgn7mGoeg4c7FfyZTxn"
+            ],
+            "name": "test-key",
+            "x": "NBJAtpZ-jWGjaXDFYgt38",
+            "y": "7n6oS9y5vN2XrTKMKilo",
+            "exp": 1666775666429,
+            "alg": "ECDH-ES"
+        }
+	}
+] 

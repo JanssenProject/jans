@@ -1,0 +1,55 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-cluster-admin-binding
+  labels:
+    app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
+{{ include "janssen-all-in-one.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.customAnnotations.clusterRoleBinding) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.clusterRoleBinding }}
+{{ toYaml .Values.customAnnotations.clusterRoleBinding | indent 4 }}
+{{- end }}
+{{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: User
+    # change it to your actual account; the email can be fetched using
+    # the following command: `gcloud info | grep Account`
+    name: "ACCOUNT"
+    apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-rolebinding
+{{- if or (.Values.additionalAnnotations) (.Values.customAnnotations.clusterRoleBinding) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.clusterRoleBinding }}
+{{ toYaml .Values.customAnnotations.clusterRoleBinding | indent 4 }}
+{{- end }}
+{{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.serviceAccountName }}
+  namespace: {{ .Release.Namespace }}

@@ -1,0 +1,13 @@
+[Unit]
+Description=Janssen Lock Service
+After=%(order_jans_lock_service)s
+
+[Service]
+Type=forking
+ExecStart=%(jans_scripts_dir)s/jans-lock start
+ExecStop=%(jans_scripts_dir)s/jans-lock stop
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target

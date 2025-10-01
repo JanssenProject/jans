@@ -1,0 +1,13 @@
+[Unit]
+Description=Janssen Fido2 Service
+After=%(order_jans_fido2_service)s
+
+[Service]
+Type=forking
+ExecStart=%(jans_scripts_dir)s/jans-fido2 start
+ExecStop=%(jans_scripts_dir)s/jans-fido2 stop
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target

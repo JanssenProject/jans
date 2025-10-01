@@ -1,0 +1,7 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: jans
+Source: https://jans.io
+
+Files:     *
+Copyright: 2025 The Janssen Project. support@jans.io
+License:   Apache-2.0

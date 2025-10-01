@@ -1,0 +1,22 @@
+[
+    "discovery",
+    "consent_gathering",
+    "ciba_end_user_notification",
+    "id_generator",
+    "idp",
+    "introspection",
+    "persistence_extension",
+    "link_interception",
+    "uma_rpt_policy",
+    "update_token",
+    "scim",
+    "end_session",
+    "config_api_auth",
+    "uma_claims_gathering",
+    "person_authentication",
+    "resource_owner_password_credentials",
+    "authorization_challenge",
+    "client_registration",
+    "dynamic_scope",
+    "application_session"
+]

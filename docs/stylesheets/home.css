@@ -1,0 +1,1312 @@
+/* Janssen Project Landing Page Styles */
+
+/* CSS Custom Properties - Janssen Brand Colors with Theme Support */
+:root {
+  --janssen-green: #00B050;
+  --janssen-green-light: #33C670;
+  --janssen-green-dark: #008A3D;
+  --janssen-green-darker: #006B2D;
+
+  /* Light theme colors */
+  --janssen-text-primary: #2D2D2D;
+  --janssen-text-secondary: #4A4A4A;
+  --janssen-text-light: #6B6B6B;
+  --janssen-bg-primary: #FFFFFF;
+  --janssen-bg-secondary: #F8F9FA;
+  --janssen-border: rgba(0, 176, 80, 0.15);
+  --janssen-shadow: rgba(0, 176, 80, 0.1);
+}
+
+/* Dark theme colors */
+[data-md-color-scheme="slate"] {
+  --janssen-text-primary: #E8E8E8;
+  --janssen-text-secondary: #C5C5C5;
+  --janssen-text-light: #A0A0A0;
+  --janssen-bg-primary: #1A1A1A;
+  --janssen-bg-secondary: #2D2D2D;
+  --janssen-border: rgba(0, 176, 80, 0.3);
+  --janssen-shadow: rgba(0, 176, 80, 0.2);
+}
+
+/* Section Animations */
+@keyframes slideInFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  0% {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Skeleton Loading Animations - Optimized for speed */
+@keyframes skeleton-pulse {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes skeleton-fade {
+  0%, 50% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Skeleton Loading Styles - Faster animations */
+.skeleton {
+  background: linear-gradient(90deg,
+    var(--janssen-bg-secondary) 25%,
+    var(--janssen-border) 50%,
+    var(--janssen-bg-secondary) 75%);
+  background-size: 200px 100%;
+  animation: skeleton-pulse 1s infinite linear;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-text {
+  height: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+}
+
+.skeleton-text.large {
+  height: 1.5rem;
+}
+
+.skeleton-text.small {
+  height: 0.75rem;
+}
+
+.skeleton-title {
+  height: 2rem;
+  width: 60%;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+}
+
+.skeleton-paragraph {
+  height: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+}
+
+.skeleton-paragraph:nth-child(2) {
+  width: 85%;
+}
+
+.skeleton-paragraph:nth-child(3) {
+  width: 70%;
+}
+
+.skeleton-button {
+  height: 2.5rem;
+  width: 120px;
+  border-radius: 0.5rem;
+  margin-right: 1rem;
+}
+
+.skeleton-card {
+  padding: 2rem;
+  border: 1px solid var(--janssen-border);
+  border-radius: 1rem;
+  margin: 1.5rem 0;
+  animation: skeleton-fade 1.2s infinite ease-in-out;
+}
+
+.skeleton-tab {
+  height: 3rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+}
+
+.skeleton-code {
+  height: 6rem;
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+  background: var(--janssen-bg-secondary);
+  border: 1px solid var(--janssen-border);
+}
+
+/* Apply animations to sections */
+.hero-section {
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* Loading States */
+.content-loading .feature-highlight {
+  display: none;
+}
+
+.content-loading .skeleton-card {
+  display: block;
+}
+
+.content-loading .tabbed-set {
+  display: none;
+}
+
+.content-loading .skeleton-tab {
+  display: block;
+}
+
+.content-loading .highlight,
+.content-loading pre {
+  display: none;
+}
+
+.content-loading .skeleton-code {
+  display: block;
+}
+
+/* Enhanced skeleton animations for better visibility */
+.skeleton.skeleton-enhanced {
+  animation: skeleton-pulse 0.8s ease-in-out infinite;
+}
+
+/* Automatic loading states */
+.simulate-loading.content-loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.why-janssen-grid {
+  animation: slideInFromBottom 0.8s ease-out 0.2s both;
+}
+
+.feature-highlight:nth-child(odd) {
+  animation: slideInFromLeft 0.6s ease-out 0.4s both;
+}
+
+.feature-highlight:nth-child(even) {
+  animation: slideInFromRight 0.6s ease-out 0.4s both;
+}
+
+/* Section headings */
+.md-typeset h2 {
+  opacity: 0;
+  animation: slideInFromLeft 0.6s ease-out 0.3s both;
+}
+
+/* Core Components section */
+.tabbed-set {
+  opacity: 0;
+  animation: slideInFromBottom 0.8s ease-out 0.5s both;
+}
+
+/* Quick Start steps */
+.md-typeset h3 {
+  opacity: 0;
+  animation: slideInFromLeft 0.5s ease-out 0.4s both;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--janssen-green-dark);
+  margin-bottom: 1rem;
+  margin-top: 2.5rem;
+}
+
+/* Quick Start Guide specific styling */
+h2:contains("Quick Start Guide") + h3,
+h2 + h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--janssen-green-dark);
+  border-bottom: 2px solid var(--janssen-green);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Quick Start descriptive text */
+.md-typeset h3 + p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--janssen-text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+/* Code blocks and content */
+.highlight,
+.codehilite,
+pre {
+  opacity: 0;
+  animation: slideInFromBottom 0.6s ease-out 0.6s both;
+}
+
+/* Latest Updates and Community sections */
+.md-typeset h3:nth-of-type(even) {
+  animation-delay: 0.7s;
+}
+
+.md-typeset h3:nth-of-type(odd) {
+  animation-delay: 0.5s;
+}
+
+/* Button animations */
+.md-button {
+  opacity: 0;
+  animation: fadeIn 0.6s ease-out 0.8s both;
+}
+
+/* Lists and paragraphs */
+.md-typeset p,
+.md-typeset ul,
+.md-typeset ol {
+  opacity: 0;
+  animation: slideInFromBottom 0.5s ease-out 0.6s both;
+}
+
+/* Full Screen Section Base */
+.section-full-screen {
+  display: block;
+  box-sizing: border-box;
+  position: static;
+  clear: both;
+  background: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Hero Section */
+.hero-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 2rem 1.5rem;
+  background: var(--janssen-bg-primary);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  position: static;
+  border: 1px solid var(--janssen-border);
+  animation: fadeIn 0.8s ease-out;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 2rem 0;
+}
+
+.hero-content {
+  padding: 0.5rem;
+}
+
+.hero-logo {
+  margin-bottom: 1rem;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.main-logo-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.janssen-logo {
+  height: 64px;
+  width: auto;
+  filter: drop-shadow(0 2px 8px rgba(0, 176, 80, 0.2));
+  display: block;
+}
+
+.linux-foundation-footer {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 100;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+}
+
+.foundation-badge-bottom {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 176, 80, 0.3);
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  backdrop-filter: blur(15px);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  text-align: center;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-decoration: none;
+}
+
+.foundation-badge-bottom:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(0, 176, 80, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.linux-foundation-logo-bottom {
+  height: 14px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+
+.foundation-text-bottom {
+  color: var(--janssen-text-primary);
+  font-size: 0.55rem;
+  font-weight: 500;
+  opacity: 0.9;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Dark mode specific styling for Linux Foundation text */
+[data-md-color-scheme="slate"] .foundation-text-bottom {
+  color: #333333;
+  font-weight: 600;
+}
+
+[data-md-color-scheme="slate"] .foundation-badge-bottom {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(0, 176, 80, 0.4);
+}
+
+[data-md-color-scheme="slate"] .foundation-badge-bottom:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(0, 176, 80, 0.6);
+}
+
+.hero-section h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 0.5rem;
+  color: var(--janssen-text-primary);
+  text-shadow: 0 2px 4px var(--janssen-shadow);
+}
+
+.hero-description {
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--janssen-text-secondary);
+  margin-bottom: 1rem;
+  font-weight: 400;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-description strong {
+  color: var(--janssen-green-dark);
+  font-weight: 600;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hero-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.architecture-diagram {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 32px rgba(0, 176, 80, 0.15);
+  background: white;
+  padding: 1rem;
+}
+
+/* Why Janssen Grid Layout */
+.why-janssen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 0;
+  height: auto;
+  align-content: start;
+}
+
+.feature-highlight {
+  background: var(--janssen-bg-primary);
+  border: 1px solid var(--janssen-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px var(--janssen-shadow);
+}
+
+.feature-highlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--janssen-green) 0%, var(--janssen-green-light) 100%);
+  border-radius: 1rem 1rem 0 0;
+}
+
+.feature-highlight:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px var(--janssen-shadow);
+  border-color: var(--janssen-green);
+  background: linear-gradient(135deg, var(--janssen-bg-primary) 0%, var(--janssen-green-light) 10%, var(--janssen-bg-secondary) 100%);
+}
+
+.feature-highlight h3 {
+  color: var(--janssen-green-dark);
+  font-size: 1.1rem;
+  display: block;
+  margin: 0 0 0.75rem 0;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.feature-highlight p {
+  color: var(--janssen-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Grid and Cards System */
+.grid {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  flex: 1;
+}
+
+.grid.cards {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.grid.cards > * {
+  background: var(--janssen-bg-primary);
+  border: 2px solid var(--janssen-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px var(--janssen-shadow);
+  position: relative;
+  min-height: auto;
+}
+
+.grid.cards > *::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--janssen-green) 0%, var(--janssen-green-light) 100%);
+  border-radius: 1rem 1rem 0 0;
+}
+
+.grid.cards > *:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px var(--janssen-shadow);
+  border-color: var(--janssen-green);
+}
+
+/* Override Material Theme Colors for Janssen Branding */
+.md-typeset h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--janssen-green) 0%, var(--janssen-green-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Feature Icons */
+.lg.middle {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  color: var(--janssen-green);
+  display: block;
+  text-align: center;
+  filter: drop-shadow(0 2px 8px rgba(0, 176, 80, 0.2));
+}
+
+/* Buttons */
+.md-button {
+  background: transparent;
+  color: var(--janssen-text-primary);
+  border: 2px solid var(--janssen-border);
+  padding: 0.875rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  text-transform: none;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  margin-right: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  box-shadow: none;
+}
+
+.md-button:hover {
+  background: var(--janssen-bg-secondary);
+  transform: none;
+  box-shadow: none;
+  color: var(--janssen-text-primary);
+  text-decoration: none;
+  border-color: var(--janssen-green);
+}
+
+.md-button--primary {
+  background: var(--janssen-green);
+  color: white;
+  border-color: var(--janssen-green);
+  box-shadow: none;
+}
+
+.md-button--primary:hover {
+  background: var(--janssen-green-dark);
+  color: white;
+  border-color: var(--janssen-green-dark);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Tabs */
+.tabbed-set {
+  margin: 0;
+  border: 1px solid var(--janssen-border);
+  border-radius: 0.5rem;
+  overflow: visible;
+  display: block;
+}
+
+.tabbed-set > input {
+  display: none;
+}
+
+.tabbed-set > .tabbed-labels {
+  display: flex;
+  flex-wrap: wrap;
+  background: var(--janssen-bg-secondary);
+  border-bottom: 1px solid var(--janssen-border);
+  margin: 0;
+}
+
+.tabbed-set > .tabbed-labels > label {
+  padding: 0.25rem 0.5rem;
+  font-weight: 500;
+  font-size: 0.7rem;
+  color: var(--janssen-text-secondary);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 2px solid transparent;
+  border-right: 1px solid rgba(0, 176, 80, 0.1);
+  background: transparent;
+  letter-spacing: 0.02em;
+}
+
+.tabbed-set > .tabbed-labels > label:last-child {
+  border-right: none;
+}
+
+.tabbed-set > .tabbed-labels > label:hover {
+  color: var(--janssen-green);
+  background: var(--janssen-bg-secondary);
+  transform: translateY(-1px);
+}
+
+.tabbed-set > input:checked + label {
+  color: var(--janssen-green-dark);
+  border-bottom-color: var(--janssen-green);
+  background: var(--janssen-bg-primary);
+  font-weight: 600;
+}
+
+.tabbed-content {
+  padding: 0.5rem 0.5rem !important;
+  background: var(--janssen-bg-primary);
+  margin: 0;
+}
+
+/* Force padding for all tabbed content - multiple selectors for specificity */
+.md-typeset .tabbed-set .tabbed-content,
+.tabbed-set .tabbed-content,
+div.tabbed-content {
+  padding: 0.5rem 0.5rem !important;
+  box-sizing: border-box !important;
+}
+
+.md-typeset .tabbed-content > *,
+.tabbed-content > * {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Specific override for code blocks in tabs */
+.tabbed-content .highlight,
+.tabbed-content pre {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Code Blocks */
+.highlight {
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.highlight pre {
+  margin: 0;
+  padding: 1rem;
+  background: var(--md-code-bg-color);
+}
+
+/* Quick Start Cards */
+.grid.cards .highlight {
+  margin-top: 1rem;
+}
+
+.grid.cards h3 {
+  margin-top: 0;
+  color: var(--md-primary-fg-color);
+}
+
+/* Industry Cards */
+.grid.cards .lg.middle {
+  color: var(--md-primary-fg-color);
+  display: block;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Community Section */
+.grid > div {
+  background: var(--md-default-bg-color);
+  padding: 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+}
+
+/* Typography Enhancements */
+.md-typeset .grid.cards h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--janssen-gray-dark);
+}
+
+.md-typeset .grid.cards p {
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+  color: var(--janssen-gray);
+  font-size: 0.95rem;
+}
+
+.md-typeset .grid.cards strong {
+  color: var(--janssen-green-dark);
+  font-weight: 700;
+}
+
+/* Section Headers */
+.md-typeset h2 {
+  color: var(--janssen-gray-dark);
+  font-weight: 700;
+  font-size: 1.75rem;
+  margin: 0 0 2rem 0;
+  text-align: left;
+  position: relative;
+}
+
+.md-typeset h2::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--janssen-green) 0%, var(--janssen-blue) 100%);
+  margin: 1rem 0;
+  border-radius: 2px;
+}
+
+/* Industry Cards Enhancement */
+.grid.cards .lg.middle {
+  background: linear-gradient(135deg, rgba(0, 176, 80, 0.1) 0%, rgba(0, 102, 204, 0.1) 100%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem auto;
+  transition: all 0.3s ease;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 968px) {
+  .hero-section {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .hero-section h1 {
+    font-size: 1.75rem;
+  }
+
+  .architecture-diagram {
+    max-width: 80%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .section-full-screen {
+    padding: 1rem 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .why-janssen-grid {
+    height: auto;
+    margin: 0;
+  }
+
+  .tabbed-set {
+    height: auto;
+    margin: 0;
+  }
+
+  .hero-section {
+    margin-bottom: 1rem;
+  }
+
+  .hero-section h1 {
+    font-size: 1.5rem;
+  }
+
+  .hero-content {
+    padding: 1.5rem;
+  }
+
+  .hero-image {
+    padding: 1.5rem;
+  }
+
+  .janssen-logo {
+    height: 52px;
+  }
+
+  .linux-foundation-footer {
+    bottom: 0.75rem;
+    right: 0.75rem;
+    max-width: calc(100vw - 1.5rem);
+  }
+
+  .foundation-badge-bottom {
+    padding: 0.4rem;
+    gap: 0.2rem;
+    border-radius: 0.5rem;
+  }
+
+  .linux-foundation-logo-bottom {
+    height: 12px;
+  }
+
+  .foundation-text-bottom {
+    font-size: 0.5rem;
+  }
+
+  .grid.cards {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+  }
+
+  .md-button {
+    display: block;
+    text-align: center;
+    margin-right: 0;
+    margin-bottom: 1rem;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .md-typeset h2 {
+    font-size: 2rem;
+  }
+
+  .grid.cards.quick-start {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .grid.cards.quick-start > * strong::before {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .hero-section h1 {
+    font-size: 1.25rem;
+  }
+
+  .hero-description {
+    font-size: 1.1rem;
+  }
+
+  .grid.cards > * {
+    padding: 1.5rem;
+  }
+
+  .janssen-logo {
+    height: 44px;
+  }
+
+  .logo-container {
+    gap: 0.5rem;
+  }
+
+  .linux-foundation-footer {
+    bottom: 0.5rem;
+    right: 0.5rem;
+    max-width: calc(100vw - 1rem);
+  }
+
+  .foundation-badge-bottom {
+    padding: 0.3rem;
+    gap: 0.15rem;
+    border-radius: 0.4rem;
+  }
+
+  .linux-foundation-logo-bottom {
+    height: 10px;
+  }
+
+  .foundation-text-bottom {
+    font-size: 0.45rem;
+  }
+
+  .architecture-diagram {
+    max-width: 100%;
+  }
+
+  .grid.cards.quick-start > * strong {
+    font-size: 1.1rem;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .grid.cards.quick-start > * strong::before {
+    width: 25px;
+    height: 25px;
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-section::after {
+    font-size: 1rem;
+    letter-spacing: 1rem;
+  }
+
+  .tabbed-content h4,
+  .tabbed-content strong {
+    font-size: 1.2rem;
+  }
+
+  .tabbed-set > label {
+    font-size: 0.95rem;
+    padding: 1rem 1.5rem;
+  }
+}
+
+/* Core Components Tab Styling */
+.tabbed-set {
+  margin: 2rem 0;
+  display: block;
+}
+
+.tabbed-set > input:checked + label {
+  color: var(--janssen-green-dark);
+  border-bottom-color: var(--janssen-green);
+  font-weight: 700;
+  background-color: var(--janssen-bg-primary);
+}
+
+.tabbed-set > label {
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 1.2rem 2rem;
+  color: var(--janssen-text-secondary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.02em;
+}
+
+.tabbed-set > label:hover {
+  color: var(--janssen-green);
+  background-color: var(--janssen-bg-secondary);
+  transform: translateY(-1px);
+}
+
+/* Tab content typography improvements */
+.tabbed-content h4,
+.tabbed-content strong {
+  color: var(--md-default-fg-color);
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.4;
+}
+
+.tabbed-content p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--md-default-fg-color--light);
+  margin: 0 0 1.5rem 0;
+}
+
+.tabbed-content ul {
+  margin: 1.5rem 0;
+}
+
+.tabbed-content li {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--md-default-fg-color--light);
+  margin-bottom: 0.5rem;
+}
+
+.tabbed-content .md-button {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  padding: 0.7rem 1.5rem;
+}
+
+.component-image {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px var(--md-shadow-z1);
+  margin: 1rem 0 1.5rem 0;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Setup Guide Reference Links */
+.tabbed-content a[href*="install"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0 0 0;
+  background: linear-gradient(135deg, var(--janssen-green) 0%, var(--janssen-green-light) 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 3px 12px rgba(0, 176, 80, 0.25);
+  border: none;
+  width: fit-content;
+}
+
+.tabbed-content a[href*="install"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 176, 80, 0.3);
+  background: linear-gradient(135deg, var(--janssen-green-dark) 0%, var(--janssen-green) 100%);
+}
+
+.tabbed-content a[href*="install"]::before {
+  content: "→";
+  font-weight: bold;
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+}
+
+.tabbed-content a[href*="install"]:hover::before {
+  transform: translateX(3px);
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.grid.cards > * {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.grid.cards > *:nth-child(1) { animation-delay: 0.1s; }
+.grid.cards > *:nth-child(2) { animation-delay: 0.2s; }
+.grid.cards > *:nth-child(3) { animation-delay: 0.3s; }
+.grid.cards > *:nth-child(4) { animation-delay: 0.4s; }
+.grid.cards > *:nth-child(5) { animation-delay: 0.5s; }
+.grid.cards > *:nth-child(6) { animation-delay: 0.6s; }
+
+/* Component Images */
+.component-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  box-shadow: 0 6px 20px rgba(0, 176, 80, 0.12);
+  margin: 1.5rem 0;
+  border: 2px solid rgba(0, 176, 80, 0.1);
+  transition: all 0.3s ease;
+}
+
+.component-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 176, 80, 0.2);
+}
+
+/* Tab Content Enhancement */
+.tabbed-content {
+  padding: 2rem 0;
+}
+
+.tabbed-content h3 {
+  color: var(--janssen-green-dark);
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.tabbed-content p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--janssen-gray);
+  margin-bottom: 1.5rem;
+}
+
+.tabbed-content ul {
+  margin: 1.5rem 0;
+}
+
+.tabbed-content li {
+  margin-bottom: 0.75rem;
+  color: var(--janssen-gray);
+  font-size: 1.05rem;
+}
+
+/* Smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Remove conflicting scroll behaviors */
+.md-content {
+  overflow-y: visible;
+  height: auto;
+}
+
+.md-content__inner {
+  height: auto;
+  display: block;
+}
+
+/* Ensure sections don't overlap */
+.md-content__inner > .section-full-screen {
+  position: static;
+  clear: both;
+  margin: 0;
+  width: 100%;
+  isolation: isolate;
+}
+
+/* Remove any extra wrapper styling */
+.md-content__inner {
+  overflow: visible;
+}
+
+.md-content {
+  overflow: visible;
+}
+
+/* Enhanced Typography */
+.md-typeset .grid.cards p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.md-typeset .grid.cards h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* Quick Start Section */
+.grid.cards.quick-start {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  counter-reset: step-counter;
+  margin: 1.5rem 0;
+}
+
+.grid.cards.quick-start > * {
+  counter-increment: step-counter;
+  position: relative;
+  border: 1px solid var(--janssen-border);
+  border-radius: 1rem;
+  padding: 1.5rem 1.25rem;
+  background: linear-gradient(135deg, var(--janssen-bg-secondary) 0%, var(--janssen-bg-primary) 100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+  overflow: hidden;
+}
+
+.grid.cards.quick-start > *::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--janssen-green) 0%, var(--janssen-green-light) 100%);
+  border-radius: 1rem 1rem 0 0;
+}
+
+.grid.cards.quick-start > *:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0, 176, 80, 0.2);
+  border-color: var(--janssen-green);
+  background: linear-gradient(135deg, var(--janssen-bg-primary) 0%, var(--janssen-green-light) 5%, var(--janssen-bg-secondary) 100%);
+}
+
+.grid.cards.quick-start > * strong {
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.grid.cards.quick-start > * strong::before {
+  content: counter(step-counter);
+  background: var(--janssen-green);
+  color: white;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+/* Status Indicators */
+.md-typeset .grid.cards strong {
+  color: var(--janssen-green-dark);
+  font-weight: 600;
+}
+
+/* Fix H2 heading spacing to be consistent with other headings */
+.md-typeset h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+  margin-top: 1rem;
+}
+
+.md-content p {
+    font-size: 16px !important;
+    line-height: 1.6;
+    margin-bottom: 1em;
+}
+
+.md-content h1 + p,
+.md-content h2 + p,
+.md-content h3 + p,
+.md-content h4 + p,
+.md-content h5 + p,
+.md-content h6 + p {
+    font-size: 16px !important;
+    margin-top: 0.5em;
+}
+
+.md-content .md-typeset p {
+    font-size: 16px !important;
+    font-weight: normal !important;
+}
+
+.md-content .md-typeset p.lead,
+.md-content .md-typeset p:first-of-type {
+    font-size: 16px !important;
+}
+
+.md-content .md-typeset .admonition p {
+    font-size: 16px !important;
+}

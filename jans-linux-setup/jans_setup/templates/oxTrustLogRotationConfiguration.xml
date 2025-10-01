@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entries>
+    <entry>
+        <prefix>oxtrust</prefix>
+        <location>%(jetty_base)s/identity/logs</location>
+    </entry>
+</entries>

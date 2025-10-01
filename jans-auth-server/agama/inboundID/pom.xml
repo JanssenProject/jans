@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>agama-inbound</artifactId>
+    <packaging>jar</packaging>
+    <!--name>Supporting classes for inbound identity using Agama flows</name-->
+
+	<distributionManagement>
+ 		<repository>
+ 		<id>github</id>
+ 		<name>Github Packages</name>
+ 		<url>https://maven.pkg.github.com/JanssenProject/jans</url>
+ 		</repository>
+   	</distributionManagement>
+
+    <parent>
+        <groupId>io.jans</groupId>
+        <artifactId>jans-auth-server-parent</artifactId>
+        <version>0.0.0-nightly</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
+    <repositories>
+        <repository>
+           <id>github</id>
+           <name>GitHub Packages</name>
+           <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+        </repository>
+        <repository>
+            <id>jans</id>
+            <name>Jans repository</name>
+            <url>https://maven.jans.io/maven</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencies>
+        
+        <!-- SERVLET -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+        </dependency>
+        
+        <!-- JAX-RS -->
+        <dependency>
+            <groupId>org.jboss.spec.javax.ws.rs</groupId>
+            <artifactId>jboss-jaxrs-api_3.0_spec</artifactId>
+            <version>${jboss-jaxrs-api_3.0_spec.version}</version>
+        </dependency>
+        
+        <!-- LOGGING -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>            
+        </dependency>
+
+        <!-- JANSSEN -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-auth-common</artifactId>
+        </dependency>
+
+        <!-- NIMBUS -->
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>oauth2-oidc-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

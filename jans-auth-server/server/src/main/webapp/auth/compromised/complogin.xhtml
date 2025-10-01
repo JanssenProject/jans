@@ -1,0 +1,87 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:f="http://xmlns.jcp.org/jsf/core"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:h="http://xmlns.jcp.org/jsf/html"
+        template="/WEB-INF/incl/layout/login-extended-template.xhtml">
+        <f:metadata>
+                <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}" />
+        </f:metadata>
+
+        <ui:define name="head">
+                <meta name="description" content="Janssen Project" />
+        </ui:define>
+
+        <ui:define name="pageTitle">
+                <h:outputText value="#{msgs['login.pageTitle']}" />
+        </ui:define>
+
+        <ui:define name="body">
+        <div class="bs-docs-section">
+                <div class="container">
+                        <h:panelGroup  rendered="true">
+                        <div class="login_bx">
+                                <div class="row">
+				   <div class="left_form_bx">
+					<p class="info-section" style="color:red">
+					    <h:outputText value="Your password has been compromised! Please answer this question to reset password"/>
+					</p>
+					<h:form id="loginForm"  class="form-horizontal">
+					<h:panelGroup
+								rendered="#{sessionIdService.notSessionIdAuthenticated}">
+
+					<h:messages style="color:red;" />
+
+					  <div class="form-group">
+						<h:outputLabel styleClass="col-sm-3 control-label"      for="loginForm:question" value="#{identity.getWorkingParameter('question_label')}" />
+						<div class="col-sm-9">
+						  <input id="loginForm:question" name="loginForm:question"
+											type="text" autocomplete="off" />
+						</div>
+					  </div>
+
+					  <div class="form-group">
+						<div class="col-sm-offset-3 col-sm-9">
+						  <h:commandButton id="loginButton" styleClass="btn btn-primary"
+												value="Submit"
+												action="#{authenticator.authenticate}" />
+						</div>
+					  </div>
+
+					  </h:panelGroup>
+					</h:form>
+					</div>
+					<h:panelGroup layout="block" rendered="#{external_registration_uri != Null}">
+					<div class="reg_link">
+							<a href="#{external_registration_uri}">
+							 <h:outputText value="Register Now   " />
+							</a>
+					</div>
+					</h:panelGroup>
+				</div>
+                        </div>
+                        </h:panelGroup>
+                </div>
+        </div>
+
+        <div class="foot_bor">
+                <div class="container">
+                        <div class="row">
+                                <div class="col-md-12">
+                                  <div class="padding_spc">
+                                        <p><h:outputText value="#{msgs['common.janssenProject']}" />  | <a target="_blank" href="https://jans.io"><h:outputText value="#{msgs['common.caution']}" escape="false" /></a>
+                                        <h:panelGroup rendered='#{!empty client.policyUri}'>
+                                        | <a target="_blank" href="#{client.policyUri}"><h:outputText value="#{msgs['common.privacyPolicy']}" escape="false" /></a>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered='#{!empty client.tosUri}'>
+                                        | <a target="_blank" href="#{client.tosUri}"><h:outputText value="#{msgs['common.termsOfService']}" escape="false" /></a>
+                                        </h:panelGroup>
+                                        </p>
+                                        </div>
+                                </div>
+                        </div>
+                </div>
+        </div>
+        </ui:define>
+</ui:composition>

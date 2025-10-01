@@ -1,0 +1,14 @@
+# exclude everything
+*
+
+# include required files/directories
+# !certs
+!conf
+!jetty
+!plugins
+!scripts
+!LICENSE
+!requirements.txt
+!templates
+!static
+!contrib

@@ -1,0 +1,146 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.adm.title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.admin.PluginViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul"/>
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.adm.plugins_title2}</h2>
+                    <p>${labels.adm.plugins_text}</p>
+                    <div class="dark-blue2">
+                        <z:label visible="@load(not empty vm.pluginList)" value="${labels.adm.plugins_text2}" />
+                        <z:label visible="@load(empty vm.pluginList)" value="${labels.adm.plugins_empty}" />
+                    </div>
+                </div>
+
+                <div class="${css.panel}">
+                    <h:table class="table table-hover table-sm" visible="@load(not empty vm.pluginList)">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="w-23 w-sm-50 w-md-75 text-secondary">${labels.adm.plugins_pluginId}</th>
+                                <th scope="col" class="dtc-ns text-secondary">${labels.adm.plugins_implements}</th>
+                                <th scope="col" class="w-25 text-secondary"></th>
+                            </tr>
+                        </thead>
+                        <h:tbody children="@load(vm.pluginList)" sclass="f7">
+                            <zk:template name="children">
+                                <h:tr sclass="pointer" onClick="@('showPlugin', each.descriptor.pluginId)">
+                                    <td class="text-secondary w-30"><z:label value="@load(c:cat3(each.descriptor.pluginId, ' ', each.descriptor.version))" /></td>
+                                    <td class="dn dtc-ns text-secondary w-100">
+                                        <z:div children="@load(each.extensions)">
+                                            <zk:template name="children">
+                                                <z:label sclass="db" value="@load(each)" />
+                                            </zk:template>
+                                        </z:div>
+                                    </td>
+                                    <td>
+                                        <z:button label="${labels.adm.plugins_dodelete}" sclass="${css.secondaryButton} lh-tight"
+                                                  w:onClick="prepareAlert()" onClick="@('deletePlugin', each.descriptor.pluginId, each.descriptor.provider)" />
+                                    </td>
+                                </h:tr>
+                            </zk:template>
+                        </h:tbody>
+                    </h:table>
+
+                    <h:div class="tr pb2" if="${vm.engineAvailable}">
+                        <image src="${zkService.contextPath}${assetsService.prefix}/images/throbber-white.gif" id="throbber" class="dn mr2" />
+                        <z:button label="${labels.adm.plugins_upload}" sclass="${css.linkButton} f7-cust"
+                                  upload="zk.progressMonitor,maxsize=50240,multiple=false,accept=application/java-archive"
+                                  onUpload="@('uploaded', event.media)" w:onClick="prepareAlert(); removeFocus(this)"
+                                  ca:data-original-title="${labels.adm.plugins_upload_hint}" ca:data-toggle="tooltip" ca:data-placement="top" />
+                    </h:div>
+
+                    <h:div class="alert alert-warning" role="alert" unless="${vm.engineAvailable}">${labels.adm.plugins.unavailable}</h:div>
+
+                    <div class="alert alert-success dn" id="feedback-plug" role="alert" />
+                </div>
+
+                <z:div sclass="${css.panel}" visible="@load(vm.pluginToShow ne null)">
+                    <z:div sclass="tr">
+                        <z:button label="${labels.general.hide}" sclass="${css.secondaryButton} lh-tight mv2" onClick="@('hidePluginDetails')" />
+                    </z:div>
+                    <div class="card pa3-ns">
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody class="f7">
+                                    <tr>
+                                        <td class="text-secondary">${labels.adm.plugins_pluginId}</td>
+                                        <td><z:label sclass="dark-gray" value="@load(vm.pluginToShow.descriptor.pluginId)" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-secondary">${labels.adm.plugins_version}</td>
+                                        <td><z:label sclass="dark-gray" value="@load(vm.pluginToShow.descriptor.version)" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-secondary">${labels.adm.plugins_path}</td>
+                                        <td><z:label sclass="dark-gray" value="@load(vm.pluginToShow.path)" /></td>
+                                    </tr>
+                                    <td class="text-secondary">${labels.adm.plugins_implements}</td>
+                                    <td>
+                                        <z:div children="@load(vm.pluginToShow.extensions)">
+                                            <zk:template name="children">
+                                                <z:label sclass="db dark-gray" value="@load(each)" />
+                                            </zk:template>
+                                        </z:div>
+                                    </td>
+                                    <tr>
+                                        <td class="text-secondary">${labels.adm.plugins_developer}</td>
+                                        <td><z:label sclass="dark-gray" value="@load(empty vm.pluginToShow.descriptor.provider ? c:l('adm.plugins_nodata') : vm.pluginToShow.descriptor.provider)" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-secondary">${labels.adm.plugins_description}</td>
+                                        <td><z:label sclass="dark-gray" value="@load(empty vm.pluginToShow.descriptor.pluginDescription ? c:l('adm.plugins_nodata') : vm.pluginToShow.descriptor.pluginDescription)" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-secondary">${labels.adm.plugins_license}</td>
+                                        <td><z:label sclass="dark-gray" value="@load(empty vm.pluginToShow.descriptor.license ? c:l('adm.plugins_nodata') : vm.pluginToShow.descriptor.license)" /></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </z:div>
+            </section>
+        </div>
+
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <script>
+            zk.progressMonitor = zk.$extends(zk.Object, {
+                $init : function(uplder, filenm) {
+                    $("#throbber").show();
+                },
+                update : function(sent, total) {
+                    //this can be used to display progress %
+                },
+                destroy : function() {
+                    $("#throbber").hide();
+                }
+            });
+
+            function removeFocus(widget) {
+                //Removes the sticky tooltip from the upload button
+                try {
+                    var elId = widget.$n().id;
+                    $("#" + elId).focusout();
+                } catch (e) {
+                }
+            }
+
+            function prepareAlert() {
+                alertRef = $('#feedback-plug');
+            }
+        </script>
+    </z:div>
+
+</zk:zk>

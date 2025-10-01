@@ -1,0 +1,29 @@
+dn: inum=%(jca_client_id)s,ou=clients,o=jans
+del: false
+displayName: Jans Config Api Client
+inum: %(jca_client_id)s
+jansAccessTknAsJwt: false
+jansAccessTknSigAlg: RS256
+jansAppTyp: web
+jansAttrs: {"tlsClientAuthSubjectDn": "", "runIntrospectionScriptBeforeJwtCreation": false, "keepClientAuthorizationAfterExpiration": false, "allowSpontaneousScopes": false, "spontaneousScopes": [], "spontaneousScopeScriptDns": [], "backchannelLogoutUri": [], "backchannelLogoutSessionRequired": false, "additionalAudience": [], "postAuthnScripts": [], "consentGatheringScripts": [], "introspectionScripts": [], "rptClaimsScripts": []}
+jansClntSecret: %(jca_client_encoded_pw)s
+jansDisabled: false
+jansGrantTyp: authorization_code
+jansGrantTyp: refresh_token
+jansGrantTyp: client_credentials
+jansIdTknSignedRespAlg: RS256
+jansInclClaimsInIdTkn: false
+jansLogoutSessRequired: false
+jansPersistClntAuthzs: true
+jansRespTyp: code
+jansRptAsJwt: false
+jansScope: inum=C4F7,ou=scopes,o=jans
+jansScope: inum=1200.2B7428,ou=scopes,o=jans
+jansScope: inum=1200.0A0198,ou=scopes,o=jans
+jansSubjectTyp: pairwise
+jansTknEndpointAuthMethod: client_secret_basic
+jansTrustedClnt: false
+objectClass: top
+objectClass: jansClnt
+jansRedirectURI: https://%(hostname)s/admin
+jansRedirectURI: http://localhost:4100

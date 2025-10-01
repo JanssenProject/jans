@@ -1,0 +1,50 @@
+//This flow tests if basic Agama variables are properly serialized/deserialized before/after RRF usage
+Flow io.jans.agama.test.vars_and_rrf.agamaValues
+    Basepath ""
+ 
+str = "string"
+bool = true
+number = 1000
+list = [ str, bool, number ]
+map = { str: str, bool: bool, number: number, list: list }
+
+obj = { name: str }
+RRF "ot/page.ftl" obj
+
+//Ensure variables remain intact
+
+When str is not "string" or bool is not true or number is not 1000
+or list.length is not 3
+    Log "Any of str, bool, number, or list variables were lost"
+    Finish false
+
+When map is null or map.str is not str or map.bool is not bool or 
+map.number is not number or map.list.length is not 3
+    Log "Something in the map variable was lost"
+    Finish false
+    
+When obj is null or obj.name is not str
+    Log "Something in the obj variable was lost"
+    Finish false
+
+obj = null
+
+RRF "ot/page.ftl"
+
+//Ensure variables remain intact
+
+When str is not "string" or bool is not true or number is not 1000
+or list.length is not 3
+    Log "Any of str, bool, number, or list variables were lost"
+    Finish false
+
+When map is null or map.str is not str or map.bool is not bool or 
+map.number is not number or map.list.length is not 3
+    Log "Something in the map variable was lost"
+    Finish false
+    
+When obj is not null
+    Log "obj was not nullified"
+    Finish false
+
+Finish true

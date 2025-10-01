@@ -1,0 +1,350 @@
+# Changelog
+
+## [1.0.22](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.21...jans-pycloudlib-v1.0.22) (2024-01-22)
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** specify decoder to load password from file ([#7300](https://github.com/JanssenProject/jans/issues/7300)) ([6b0a450](https://github.com/JanssenProject/jans/commit/6b0a450f03d432ff143ec0d2870456ddda6f9a5d))
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.20...jans-pycloudlib-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* **docker-jans:** automatically update schema of sql/spanner tables ([#6634](https://github.com/JanssenProject/jans/issues/6634)) ([2d86835](https://github.com/JanssenProject/jans/commit/2d868351ec9d8a8649ac804e2584aa7447e6c36f))
+
+
+### Bug Fixes
+
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.19...jans-pycloudlib-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* **jans-pycloudlib:** add lock to prevent race condition ([#6329](https://github.com/JanssenProject/jans/issues/6329)) ([9dd82da](https://github.com/JanssenProject/jans/commit/9dd82da5c87ee829c73a1135ce8740b8353f8ab5))
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** handle operational error when creating table for lock ([#6347](https://github.com/JanssenProject/jans/issues/6347)) ([25633cf](https://github.com/JanssenProject/jans/commit/25633cf9ab019fdf60a65d2c27f2665c359abab7))
+* **jans-pycloudlib:** incorrect persistence entry check for ldap and couchbase ([#6297](https://github.com/JanssenProject/jans/issues/6297)) ([87ac453](https://github.com/JanssenProject/jans/commit/87ac453c121b9bdd2dfd7cb4ebb7b8628f322474))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.18...jans-pycloudlib-v1.0.19) (2023-10-11)
+
+
+### Bug Fixes
+
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.17...jans-pycloudlib-v1.0.18) (2023-09-23)
+
+
+### Bug Fixes
+
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.16...jans-pycloudlib-v1.0.17) (2023-09-17)
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** unwanted secrets pulled from google secrets manager ([#5900](https://github.com/JanssenProject/jans/issues/5900)) ([36cd179](https://github.com/JanssenProject/jans/commit/36cd1798afaa3c1c05246a4a338804d20713cf9f))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
+## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.15...jans-pycloudlib-v1.0.16) (2023-08-02)
+
+
+### Bug Fixes
+
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.14...jans-pycloudlib-v1.0.15) (2023-07-12)
+
+
+### Features
+
+* **docker:** add deletion support for persistence ([#5370](https://github.com/JanssenProject/jans/issues/5370)) ([96be085](https://github.com/JanssenProject/jans/commit/96be0853b2d04a13df15e7e053a89f4607d9c0e1))
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** unable to parse mysql server version ([#5337](https://github.com/JanssenProject/jans/issues/5337)) ([9a3024c](https://github.com/JanssenProject/jans/commit/9a3024c5c3eb02e57f656f80dcf65a2f423e3e72))
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.13...jans-pycloudlib-v1.0.14) (2023-06-12)
+
+
+### Bug Fixes
+
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.12...jans-pycloudlib-v1.0.13) (2023-05-10)
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** service label is missing on subsequent wait function calls ([#4832](https://github.com/JanssenProject/jans/issues/4832)) ([485478b](https://github.com/JanssenProject/jans/commit/485478b31d2fadeae744ce8c9bbd716f0f334c90))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.11...jans-pycloudlib-v1.0.12) (2023-04-18)
+
+
+### Bug Fixes
+
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.10...jans-pycloudlib-v1.0.11) (2023-04-05)
+
+
+### Bug Fixes
+
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
+## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.9...jans-pycloudlib-v1.0.10) (2023-03-16)
+
+
+### Bug Fixes
+
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
+## [1.0.9](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.8...jans-pycloudlib-v1.0.9) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+
+## [1.0.8](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.7...jans-pycloudlib-v1.0.8) (2023-03-01)
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** split aws secrets when payload is larger than 65536 bytes ([#3971](https://github.com/JanssenProject/jans/issues/3971)) ([bd3d59b](https://github.com/JanssenProject/jans/commit/bd3d59b28259982fc803b0dccdbeda07f328bf92))
+
+## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.6...jans-pycloudlib-v1.0.7) (2023-02-22)
+
+
+### Features
+
+* **docker-jans:** change persistence entry check to read configuration ([#3618](https://github.com/JanssenProject/jans/issues/3618)) ([d465c19](https://github.com/JanssenProject/jans/commit/d465c191c8276c5d409e1200ddd7e3a364089e96))
+
+
+### Bug Fixes
+
+* **docker-jans:** handle failure on running API requests to Kubernetes API server in Google Cloud Run ([#3893](https://github.com/JanssenProject/jans/issues/3893)) ([a31dee3](https://github.com/JanssenProject/jans/commit/a31dee3fa43be70c64f267fc86f8162b9b48dce2))
+* **jans-pycloudlib:** avoid overwritten data by using merge strategy for AWS wrappers ([#3832](https://github.com/JanssenProject/jans/issues/3832)) ([cf0d4e3](https://github.com/JanssenProject/jans/commit/cf0d4e3cff9478496fe1e63f9d4113c3dc81abe9))
+* **jans-pycloudlib:** avoid overwritten data by using merge strategy for Google wrappers ([#3826](https://github.com/JanssenProject/jans/issues/3826)) ([809b9db](https://github.com/JanssenProject/jans/commit/809b9dbf08b4ed3ad1b0e545302502bf731298be))
+* **jans-pycloudlib:** split google secrets when payload is larger than 65536 bytes ([#3890](https://github.com/JanssenProject/jans/issues/3890)) ([a86b098](https://github.com/JanssenProject/jans/commit/a86b098699e554f31f170d60de978f7797f76730))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+
+## [1.0.6](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.5...jans-pycloudlib-v1.0.6) (2023-01-09)
+
+
+### Bug Fixes
+
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
+## [1.0.5](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.4...jans-pycloudlib-v1.0.5) (2022-12-01)
+
+
+### Features
+
+* **jans-pycloudlib:** add AWS Secrets Manager support for configuration layers ([#3112](https://github.com/JanssenProject/jans/issues/3112)) ([0522e61](https://github.com/JanssenProject/jans/commit/0522e61809b9052adce4fdb0db77e2d71558144e))
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+
+## [1.0.4](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.3...jans-pycloudlib-v1.0.4) (2022-11-08)
+
+
+### Bug Fixes
+
+* **pycloudlib:** searching values from spanner returns empty set ([#2833](https://github.com/JanssenProject/jans/issues/2833)) ([861a065](https://github.com/JanssenProject/jans/commit/861a0657233f271ffa41c908ce68a2206ed970fd))
+
+
+### Documentation
+
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
+## 1.0.3 (2022-11-01)
+
+
+### Features
+
+* **image:** generate scopes from swagger/openapi files ([#2759](https://github.com/JanssenProject/jans/issues/2759)) ([63722ea](https://github.com/JanssenProject/jans/commit/63722ea7372f33bf2ad2c3ff01b068383e81e746))
+
+
+### Bug Fixes
+
+* **image:** handle vulnerabilities reported by artifacthub scanner ([#2436](https://github.com/JanssenProject/jans/issues/2436)) ([77d8d88](https://github.com/JanssenProject/jans/commit/77d8d888bf414e519345704d033e65fbf4bc4128))
+* **images:** conform to new couchbase persistence configuration ([#2188](https://github.com/JanssenProject/jans/issues/2188)) ([c708542](https://github.com/JanssenProject/jans/commit/c7085427fd298f74e8809ef4d6c39f780fa83776))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+* **pycloudlib:** handle type mismatch for iterable ([#2004](https://github.com/JanssenProject/jans/issues/2004)) ([46e0b2e](https://github.com/JanssenProject/jans/commit/46e0b2e4aff70a97cdcdcd0102dc83d294e45fdc))
+* **pycloudlib:** set default values for JSONB column ([#2651](https://github.com/JanssenProject/jans/issues/2651)) ([9b536ab](https://github.com/JanssenProject/jans/commit/9b536ab2b5d398a41733790f2eeb70339f993fb7))
+
+
+### Documentation
+
+* **pycloudlib:** migrate pycloudlib docs to mkdocstrings ([#2164](https://github.com/JanssenProject/jans/issues/2164)) ([0fb4157](https://github.com/JanssenProject/jans/commit/0fb4157af0666b173e4c262b06afce192630b3ab))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
+## 1.0.2 (2022-08-30)
+
+
+### Features
+
+* introduce new hybrid persistence mapping ([#1505](https://github.com/JanssenProject/jans/issues/1505)) ([a77ab60](https://github.com/JanssenProject/jans/commit/a77ab602d15cb6bdf4751aaa11c2be9485b04a34))
+
+
+### Bug Fixes
+
+* **images:** conform to new couchbase persistence configuration ([#2188](https://github.com/JanssenProject/jans/issues/2188)) ([c708542](https://github.com/JanssenProject/jans/commit/c7085427fd298f74e8809ef4d6c39f780fa83776))
+* **pycloudlib:** handle type mismatch for iterable ([#2004](https://github.com/JanssenProject/jans/issues/2004)) ([46e0b2e](https://github.com/JanssenProject/jans/commit/46e0b2e4aff70a97cdcdcd0102dc83d294e45fdc))
+
+
+### Documentation
+
+* **pycloudlib:** migrate pycloudlib docs to mkdocstrings ([#2164](https://github.com/JanssenProject/jans/issues/2164)) ([0fb4157](https://github.com/JanssenProject/jans/commit/0fb4157af0666b173e4c262b06afce192630b3ab))
+* **pycloudlib:** update docstrings and internal API docs ([#1566](https://github.com/JanssenProject/jans/issues/1566)) ([0f1a2e6](https://github.com/JanssenProject/jans/commit/0f1a2e6761c0522acdfdab3d69adac5c8062e780))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
+## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.0...jans-pycloudlib-v1.0.1) (2022-07-06)
+
+
+### Features
+
+* introduce new hybrid persistence mapping ([#1505](https://github.com/JanssenProject/jans/issues/1505)) ([a77ab60](https://github.com/JanssenProject/jans/commit/a77ab602d15cb6bdf4751aaa11c2be9485b04a34))
+
+
+### Documentation
+
+* **pycloudlib:** update docstrings and internal API docs ([#1566](https://github.com/JanssenProject/jans/issues/1566)) ([0f1a2e6](https://github.com/JanssenProject/jans/commit/0f1a2e6761c0522acdfdab3d69adac5c8062e780))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+
+## 1.0.0 (2022-05-20)
+
+
+### Features
+
+* add helper to create persistence entry from LDIF file ([#1262](https://github.com/JanssenProject/jans/issues/1262)) ([f2e653e](https://github.com/JanssenProject/jans/commit/f2e653ef917efd017195f2330b64e64c333f4699))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0 ([b2895f2](https://github.com/JanssenProject/jans/commit/b2895f224b5772c0724ea0afbdf67a417a5c537c))
+* release 1.0.0-beta.16 ([a083ad6](https://github.com/JanssenProject/jans/commit/a083ad6b1d43201126e8d4f690a55ea1b109524c))
+* release 1.0.0-beta.16 ([90e4bb2](https://github.com/JanssenProject/jans/commit/90e4bb29df040bd9fe5921a054bc4226d34ca1ef))
+* release 1.0.0-beta.16 ([eec2073](https://github.com/JanssenProject/jans/commit/eec2073be9fd25544f31087e171934afb9a71e6d))
+* release 1.0.0-beta.16 ([cd92ead](https://github.com/JanssenProject/jans/commit/cd92ead2ca654383091c4923d3de5619b70fc5b9))
+* release 1.0.0-beta.16 ([7f0a91b](https://github.com/JanssenProject/jans/commit/7f0a91bd90efc1cd7a80047f9cd6b7c6a22417a2))
+* release 1.0.0-beta.16 ([c2ad604](https://github.com/JanssenProject/jans/commit/c2ad604dc29e7401bc4cb0788feaa20e11de0440))
+* release 1.0.0-beta.16 ([a641486](https://github.com/JanssenProject/jans/commit/a6414864712789d1fcf80b823338100aebda030e))
+* release 1.0.0-beta.16 ([94d5791](https://github.com/JanssenProject/jans/commit/94d5791a23fce4ecb8913c16c940cfbbc85fed4c))
+* release 1.0.0-beta.16 ([16de429](https://github.com/JanssenProject/jans/commit/16de4299bc5e9c4a842f279ae0d3ae8282a4ff2c))
+* release 1.0.0-beta.16 ([72915c0](https://github.com/JanssenProject/jans/commit/72915c0e82b9684ac1c59934d5b9a36c2456058d))
+* release 1.0.0-beta.16 ([3ea2b37](https://github.com/JanssenProject/jans/commit/3ea2b37deac3416564614fb6a4e84b056ddbed3f))
+* release 1.0.0-beta.16 ([78a6d39](https://github.com/JanssenProject/jans/commit/78a6d39ffadf9abee18c7be0e14ad3eb6ec2ef1b))
+* release 1.0.0-beta.16 ([11bfa93](https://github.com/JanssenProject/jans/commit/11bfa9368e6ee482cc44240de08c8133d91b3f4c))
+* release 1.0.0-beta.16 ([22b180b](https://github.com/JanssenProject/jans/commit/22b180bba9a08045a6daa7ca8ee2b71abd42a973))
+* release 1.0.0-beta.16 ([b9acd0b](https://github.com/JanssenProject/jans/commit/b9acd0bceeeb54e3c47f869f11d97a22e8dc161f))
+* release 1.0.0-beta.16 ([328cd30](https://github.com/JanssenProject/jans/commit/328cd309ae1655a52709e13ca2f89441c6c965a2))
+* release 1.0.0-beta.16 ([5a84602](https://github.com/JanssenProject/jans/commit/5a84602838fb5d2e667422220fcd44dc53543e23))
+* release 1.0.0-beta.16 ([4923277](https://github.com/JanssenProject/jans/commit/4923277b100b5c814d94b27b88d1809794dfc413))
+* release 1.0.0-beta.16 ([258ba96](https://github.com/JanssenProject/jans/commit/258ba962bd93eb5be4d51e7de3a80da89c2e222f))
+* release 1.0.0-beta.16 ([77c4423](https://github.com/JanssenProject/jans/commit/77c4423d82b697fd91a0e61f40bad6bd9da0dba8))
+
+## [1.0.0-beta.16](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.0-beta.15...jans-pycloudlib-v1.0.0-beta.16) (2022-03-14)
+
+
+### Features
+
+* add validity length (in days) for certs ([#981](https://github.com/JanssenProject/jans/issues/981)) ([abc89dc](https://github.com/JanssenProject/jans/commit/abc89dc6fadae5627a68a97ab4f4f5ceb56af809))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0-beta.16 ([a083ad6](https://github.com/JanssenProject/jans/commit/a083ad6b1d43201126e8d4f690a55ea1b109524c))
+* release 1.0.0-beta.16 ([90e4bb2](https://github.com/JanssenProject/jans/commit/90e4bb29df040bd9fe5921a054bc4226d34ca1ef))
+* release 1.0.0-beta.16 ([eec2073](https://github.com/JanssenProject/jans/commit/eec2073be9fd25544f31087e171934afb9a71e6d))
+* release 1.0.0-beta.16 ([cd92ead](https://github.com/JanssenProject/jans/commit/cd92ead2ca654383091c4923d3de5619b70fc5b9))
+* release 1.0.0-beta.16 ([7f0a91b](https://github.com/JanssenProject/jans/commit/7f0a91bd90efc1cd7a80047f9cd6b7c6a22417a2))
+* release 1.0.0-beta.16 ([c2ad604](https://github.com/JanssenProject/jans/commit/c2ad604dc29e7401bc4cb0788feaa20e11de0440))
+* release 1.0.0-beta.16 ([a641486](https://github.com/JanssenProject/jans/commit/a6414864712789d1fcf80b823338100aebda030e))
+* release 1.0.0-beta.16 ([94d5791](https://github.com/JanssenProject/jans/commit/94d5791a23fce4ecb8913c16c940cfbbc85fed4c))
+* release 1.0.0-beta.16 ([16de429](https://github.com/JanssenProject/jans/commit/16de4299bc5e9c4a842f279ae0d3ae8282a4ff2c))
+* release 1.0.0-beta.16 ([72915c0](https://github.com/JanssenProject/jans/commit/72915c0e82b9684ac1c59934d5b9a36c2456058d))
+* release 1.0.0-beta.16 ([3ea2b37](https://github.com/JanssenProject/jans/commit/3ea2b37deac3416564614fb6a4e84b056ddbed3f))
+* release 1.0.0-beta.16 ([78a6d39](https://github.com/JanssenProject/jans/commit/78a6d39ffadf9abee18c7be0e14ad3eb6ec2ef1b))
+* release 1.0.0-beta.16 ([11bfa93](https://github.com/JanssenProject/jans/commit/11bfa9368e6ee482cc44240de08c8133d91b3f4c))
+* release 1.0.0-beta.16 ([22b180b](https://github.com/JanssenProject/jans/commit/22b180bba9a08045a6daa7ca8ee2b71abd42a973))
+* release 1.0.0-beta.16 ([b9acd0b](https://github.com/JanssenProject/jans/commit/b9acd0bceeeb54e3c47f869f11d97a22e8dc161f))
+* release 1.0.0-beta.16 ([328cd30](https://github.com/JanssenProject/jans/commit/328cd309ae1655a52709e13ca2f89441c6c965a2))
+* release 1.0.0-beta.16 ([5a84602](https://github.com/JanssenProject/jans/commit/5a84602838fb5d2e667422220fcd44dc53543e23))
+* release 1.0.0-beta.16 ([4923277](https://github.com/JanssenProject/jans/commit/4923277b100b5c814d94b27b88d1809794dfc413))
+* release 1.0.0-beta.16 ([258ba96](https://github.com/JanssenProject/jans/commit/258ba962bd93eb5be4d51e7de3a80da89c2e222f))
+* release 1.0.0-beta.16 ([77c4423](https://github.com/JanssenProject/jans/commit/77c4423d82b697fd91a0e61f40bad6bd9da0dba8))
+* release 1.0.0-beta.16 ([688b324](https://github.com/JanssenProject/jans/commit/688b32407b396917695cca787c08e95fe98269a1))
+* release 1.0.0-beta.16 ([4e86f15](https://github.com/JanssenProject/jans/commit/4e86f15fc39ec89d4790ebfaa7d30e7053fef606))
+* release 1.0.0-beta.16 ([8d514ee](https://github.com/JanssenProject/jans/commit/8d514ee63d840627321de2d89e816577dd919914))
+* release 1.0.0-beta.16 ([0899898](https://github.com/JanssenProject/jans/commit/0899898e80ba9b7e6a915574737bdf0756b59a14))
+
+## 1.0.0-beta.15 (2022-03-02)
+
+
+### Bug Fixes
+
+* **pycloudlib:** missing tar option to not restore file timestamp [#613](https://github.com/JanssenProject/jans/issues/613) ([#627](https://github.com/JanssenProject/jans/issues/627)) ([d19fbfd](https://github.com/JanssenProject/jans/commit/d19fbfd6891d03fb0c76073dfa8ba2ffc44a3b9b))
+
+
+### Documentation
+
+* remove sonar badges table from readme ([#694](https://github.com/JanssenProject/jans/issues/694)) ([08f4f1f](https://github.com/JanssenProject/jans/commit/08f4f1fa6d2a35517d15daca613fe47eaf1c682e))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0-beta.15 ([ee5b719](https://github.com/JanssenProject/jans/commit/ee5b719bee5cc4bdaebf81a5103e6a7ab0695dbb))
+* release 1.0.0-beta.15 ([ca6d1c9](https://github.com/JanssenProject/jans/commit/ca6d1c9e2acb5e6422e1cd26ac277dd3eba4e56e))
+* release 1.0.0-beta.15 ([b65bab2](https://github.com/JanssenProject/jans/commit/b65bab20530b7d6736dd404e26649abf47c0fb60))
+
+## [1.0.0-beta.14](https://www.github.com/JanssenProject/jans-cloud-native/compare/jans-pycloudlib-v1.0.0-beta.13...jans-pycloudlib-v1.0.0-beta.14) (2021-12-27)
+
+
+### Features
+
+* deprecate password files in favor of secrets ([#152](https://www.github.com/JanssenProject/jans-cloud-native/issues/152)) ([f415213](https://www.github.com/JanssenProject/jans-cloud-native/commit/f415213cfd992363f3fb85005df16e963a6ed8ff))
+
+
+### Miscellaneous Chores
+
+* change release to 1.0.0-beta.14 ([2d5d61b](https://www.github.com/JanssenProject/jans-cloud-native/commit/2d5d61bc5971da0a087323e544f12206154af43f))
+
+## [1.0.0-beta.13](https://www.github.com/JanssenProject/jans-cloud-native/compare/jans-pycloudlib-v1.0.0-beta.13...jans-pycloudlib-v1.0.0-beta.13) (2021-12-03)
+
+
+### Miscellaneous Chores
+
+* release jans-pycloudlib 1.0.0-beta.13 ([eee2bfc](https://www.github.com/JanssenProject/jans-cloud-native/commit/eee2bfc8e3ae53d38c4f846f101177eee80f4a38))

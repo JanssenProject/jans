@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.jans</groupId>
+    <artifactId>casa-base</artifactId>
+	<version>0.0.0-nightly</version>
+    <packaging>pom</packaging>
+
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
+
+    <prerequisites>
+        <maven>${maven.min-version}</maven>
+    </prerequisites>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.min-version>3.6.3</maven.min-version>
+        <weld.version>4.0.3.Final</weld.version>
+        <pf4j.version>3.10.0</pf4j.version>
+        <log4j.version>2.24.1</log4j.version>
+        <jackson.version>2.18.1</jackson.version>
+        <zk.version>10.1.0-jakarta</zk.version>
+        <ldapsdk.version>6.0.8</ldapsdk.version>
+        <resteasy.version>6.2.12.Final</resteasy.version>
+        <tika.version>3.0.0</tika.version>
+        <bc.version>1.80</bc.version>
+        <!-- SonarCloud integration properties -->
+        <sonar.projectKey>JanssenProject_jans-casa</sonar.projectKey>
+        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+        <sonar.organization>janssenproject</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    </properties>
+
+    <repositories>
+        <repository>
+           <id>github</id>
+           <name>GitHub Packages</name>
+           <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+        </repository>
+        <repository>
+            <id>jans</id>
+            <name>Janssen project repository</name>
+            <url>https://maven.jans.io/maven</url>
+        </repository>
+        <repository>
+            <id>ZK CE</id>
+            <name>ZK CE Repository</name>
+            <url>https://mavensync.zkoss.org/maven2</url>
+        </repository>
+        <repository>
+            <id>jboss</id>
+            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
+
+    <scm>
+        <url>https://github.com/JanssenProject/jans</url>
+        <connection>scm:git:git://github.com/JanssenProject/jans.git</connection>
+        <developerConnection>scm:git:git@github.com:JanssenProject/jans.git</developerConnection>
+    </scm>
+
+    <modules>
+        <module>agama</module>
+        <module>config</module>
+        <module>shared</module>
+        <module>app</module>
+        <module>app-fips</module>
+        <module>plugins/acct-linking</module>
+        <module>plugins/acct-linking/agama</module>
+        <module>plugins/client-authorizations</module>
+        <module>plugins/custom-branding</module>
+        <module>plugins/strong-authn-settings</module>
+        <module>plugins/email_2fa</module>
+        <module>plugins/email_2fa/agama</module>
+        <module>plugins/bioid</module>
+    </modules>
+
+    <dependencyManagement>
+
+        <dependencies>
+            <!-- Workaround for CN -->
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-bom</artifactId>
+                <version>1.74.0</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+
+            <!-- PLUGIN FRAMEWORK -->
+            <dependency>
+                <groupId>org.pf4j</groupId>
+                <artifactId>pf4j</artifactId>
+                <version>${pf4j.version}</version>
+            </dependency>
+
+            <!-- SERVLET -->
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>5.0.0</version>
+            </dependency>
+
+            <!-- WELD -->
+            <dependency>
+                <groupId>org.jboss.weld.servlet</groupId>
+                <artifactId>weld-servlet-shaded</artifactId>
+                <version>${weld.version}</version>
+            </dependency>
+
+            <!-- LDAP SDK -->
+            <dependency>
+                <groupId>com.unboundid</groupId>
+                <artifactId>unboundid-ldapsdk</artifactId>
+                <version>${ldapsdk.version}</version>
+            </dependency>
+
+            <!-- ZK -->
+            <dependency>
+                <groupId>org.zkoss.zk</groupId>
+                <artifactId>zk</artifactId>
+                <version>${zk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.zkoss.common</groupId>
+                <artifactId>zcommon</artifactId>
+                <version>${zk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.zkoss.zk</groupId>
+                <artifactId>zkbind</artifactId>
+                <version>${zk.version}</version>
+            </dependency>
+
+            <!-- JACKSON -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <!-- APACHE TIKA -->
+            <dependency>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-core</artifactId>
+                <version>${tika.version}</version>
+            </dependency>
+
+            <!-- Bouncycastle -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>${bc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcutil-jdk18on</artifactId>
+                <version>${bc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcmail-jdk18on</artifactId>
+                <version>${bc.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.10.1</version>                    
+                    <configuration>
+                        <annotationProcessors>
+                            <annotationProcessor>
+                                io.jans.doc.annotation.DocPropertyProcessor
+                            </annotationProcessor>
+                            <annotationProcessor>
+                                io.jans.doc.annotation.DocFeatureFlagProcessor
+                            </annotationProcessor>
+                            <annotationProcessor>
+                                org.pf4j.processor.ExtensionAnnotationProcessor
+                            </annotationProcessor>
+                        </annotationProcessors>
+                        <compilerArgument>-Amodule=Casa</compilerArgument>
+                        <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.4.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.7</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.8.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.3.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.21.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>4.9.4.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.1.2</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <source>8</source>
+                        <failOnError>false</failOnError>
+                    </configuration>
+                    <version>3.8.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

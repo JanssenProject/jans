@@ -1,0 +1,62 @@
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" entityID="https://moabu-star-cricket.gluu.info/idp/shibboleth">
+<IDPSSODescriptor errorURL="https://moabu-star-cricket.gluu.info/identity/feedback.htm" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+<Extensions>
+<shibmd:Scope regexp="false">moabu-star-cricket.gluu.info</shibmd:Scope>
+</Extensions>
+<KeyDescriptor use="signing">
+<ds:KeyInfo>
+<ds:X509Data>
+<ds:X509Certificate> MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ </ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</KeyDescriptor>
+<KeyDescriptor use="encryption">
+<ds:KeyInfo>
+<ds:X509Data>
+<ds:X509Certificate> MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I </ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</KeyDescriptor>
+<ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://moabu-star-cricket.gluu.info/idp/profile/SAML2/SOAP/ArtifactResolution" index="1"/>
+<SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://moabu-star-cricket.gluu.info/idp/profile/SAML2/Redirect/SLO"/>
+<SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://moabu-star-cricket.gluu.info/idp/profile/SAML2/POST/SLO"/>
+<SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://moabu-star-cricket.gluu.info/idp/profile/SAML2/POST-SimpleSign/SLO"/>
+<SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://moabu-star-cricket.gluu.info/idp/profile/SAML2/SOAP/SLO"/>
+<NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</NameIDFormat>
+<NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
+<NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</NameIDFormat>
+<SingleSignOnService Binding="urn:mace:shibboleth:2.0:profiles:AuthnRequest" Location="https://moabu-star-cricket.gluu.info/idp/profile/SAML2/Unsolicited/SSO"/>
+<SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://moabu-star-cricket.gluu.info/idp/profile/SAML2/POST/SSO"/>
+<SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://moabu-star-cricket.gluu.info/idp/profile/SAML2/POST-SimpleSign/SSO"/>
+<SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://moabu-star-cricket.gluu.info/idp/profile/SAML2/Redirect/SSO"/>
+</IDPSSODescriptor>
+<AttributeAuthorityDescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+<Extensions>
+<shibmd:Scope regexp="false">moabu-star-cricket.gluu.info</shibmd:Scope>
+</Extensions>
+<KeyDescriptor use="signing">
+<ds:KeyInfo>
+<ds:X509Data>
+<ds:X509Certificate> MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ </ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</KeyDescriptor>
+<KeyDescriptor use="encryption">
+<ds:KeyInfo>
+<ds:X509Data>
+<ds:X509Certificate> MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I </ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</KeyDescriptor>
+<AttributeService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding" Location="https://moabu-star-cricket.gluu.info/idp/profile/SAML1/SOAP/AttributeQuery"/>
+<AttributeService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://moabu-star-cricket.gluu.info/idp/profile/SAML2/SOAP/AttributeQuery"/>
+<NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</NameIDFormat>
+<NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
+<NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</NameIDFormat>
+</AttributeAuthorityDescriptor>
+<Organization>
+<OrganizationName xml:lang="en">Gluu IDP Server 2</OrganizationName>
+<OrganizationDisplayName xml:lang="en">Gluu IDP Server 2</OrganizationDisplayName>
+<OrganizationURL xml:lang="en">https://moabu-star-cricket.gluu.info</OrganizationURL>
+</Organization>
+</EntityDescriptor>

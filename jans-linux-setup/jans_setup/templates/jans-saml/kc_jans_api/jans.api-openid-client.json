@@ -1,0 +1,10 @@
+{
+  "clientId": "${jans_idp_client_id}",
+  "name": "Janssen OpenID Api Client",
+  "description": "Janssen OpenID Api Client",
+  "consentRequired": false,
+  "serviceAccountsEnabled": true,
+  "enabled": true,
+  "directAccessGrantsEnabled":true,
+  "secret": "${jans_idp_client_secret}"
+}

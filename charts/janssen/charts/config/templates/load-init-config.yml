@@ -1,0 +1,155 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "config.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: configurator
+{{ include "config.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.job) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.job }}
+{{ toYaml .Values.global.config.customAnnotations.job | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  ttlSecondsAfterFinished: {{ .Values.global.jobTtlSecondsAfterFinished }}
+  template:
+    metadata:
+      name: {{ include "config.name" . }}-job
+      labels:
+        APP_NAME: configurator
+        app: {{ .Release.Name }}-{{ include "config.name" . }}-init-load
+    spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      dnsPolicy: {{ .Values.dnsPolicy | quote }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+      {{- with .Values.volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (include "cn.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
+        - name: {{ include "config.fullname" . }}-tls-script
+          configMap:
+            name: {{ include "config.fullname" . }}-tls-script
+        {{- if .Values.configmap.cnSqlSslEnabled }}
+        - name: {{ .Release.Name }}-sql-ssl-ca-cert
+          secret:
+            secretName: {{ .Release.Name }}-sql-ssl
+            optional: true
+            items:
+              - key: sql_cacert.pem
+                path: sql_cacert.pem
+        - name: {{ .Release.Name }}-sql-ssl-client-cert
+          secret:
+            secretName: {{ .Release.Name }}-sql-ssl
+            optional: true
+            items:
+              - key: sql_client_cert.pem
+                path: sql_client_cert.pem
+        - name: {{ .Release.Name }}-sql-ssl-client-key
+          secret:
+            secretName: {{ .Release.Name }}-sql-ssl
+            optional: true
+            defaultMode: 0440
+            items:
+              - key: sql_client_key.pem
+                path: sql_client_key.pem
+        {{- end }}
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
+      containers:
+      - name: {{ include "config.name" . }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        securityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+        env:
+          {{- include "config.usr-envs" . | indent 12 }}
+          {{- include "config.usr-secret-envs" . | indent 12 }}
+        lifecycle:
+{{- toYaml .Values.lifecycle | nindent 10 }}
+        volumeMounts:
+          {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 10 }}
+          {{- end }}
+          {{- with (include "cn.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 10 }}
+          {{- end }}
+          - mountPath: /scripts/tls_generator.py
+            name: {{ include "config.fullname" . }}-tls-script
+            subPath: tls_generator.py
+          {{- if .Values.configmap.cnSqlSslEnabled }}
+          - name: {{ .Release.Name }}-sql-ssl-ca-cert
+            mountPath: /etc/certs/sql_cacert.pem
+            subPath: sql_cacert.pem
+            readOnly: true
+          - name: {{ .Release.Name }}-sql-ssl-client-cert
+            mountPath: /etc/certs/sql_client_cert.pem
+            subPath: sql_client_cert.pem
+            readOnly: true
+          - name: {{ .Release.Name }}-sql-ssl-client-key
+            mountPath: /etc/certs/sql_client_key.pem
+            subPath: sql_client_key.pem
+            readOnly: true
+          {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-config-cm
+        {{ if .Values.global.usrEnvs.secret }}
+        - secretRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        {{ if .Values.global.usrEnvs.normal }}
+        - configMapRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        resources:
+{{- toYaml .Values.resources | nindent 10 }}
+        command:
+          {{- if .Values.customCommand }}
+          {{- toYaml .Values.customCommand | nindent 12 }}
+          {{- else }}
+          - tini
+          - -g
+          - --
+          - /bin/sh
+          - -c
+          - |
+              {{- with .Values.customScripts }}
+              {{- toYaml . | replace "- " "" | nindent 14}}
+              {{- end }}
+              {{- if .Values.migration.enabled }}
+              /app/scripts/entrypoint.sh migrate --migration-dir {{ .Values.migration.migrationDir | quote }} --data-format {{ .Values.migration.migrationDataFormat | quote }} && /usr/bin/python3 /scripts/tls_generator.py
+              {{- else }}
+              /app/scripts/entrypoint.sh load && /usr/bin/python3 /scripts/tls_generator.py
+              {{- end }}
+              {{- if .Values.global.istio.enabled }}
+              curl -X POST http://localhost:15020/quitquitquit
+              {{- end }}
+          {{- end}}
+      restartPolicy: Never
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,111 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.adm.title}</h:title>
+
+    <z:div if="${empty pageScope.error and sessionContext.user.admin}" viewModel="@('io.jans.casa.plugins.branding.CustomBrandingViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul"/>
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.branding.title}</h2>
+                    <p class="mb0">${labels.branding.text}</p>
+                </div>
+
+                <div class="${css.panel}">
+                    <z:radiogroup id="groupie" />
+
+                    <z:radio label="${labels.branding.use_default}" selected="@load(vm.brandingOption eq 'NONE')" sclass="db pb1" radiogroup="groupie"
+                             onCheck="@('changeBranding', 'NONE')" w:onCheck="alertRef = $('#feedback-branding')" onClick="@('save')" />
+                    <z:radio label="${labels.branding.use_custom}" selected="@load(vm.brandingOption eq 'EXTERNAL_PATH')" sclass="db pb1"
+                             onCheck="@('changeBranding', 'EXTERNAL_PATH')" radiogroup="groupie" onClick="@('save')" />
+
+                    <z:div visible="@load(vm.brandingOption eq 'EXTERNAL_PATH')" sclass="pl4-ns i dark-gray pb1">
+                        <!-- using span allows injecting markup -->
+                        <span>${labels.branding.learn}</span>
+                    </z:div>
+                    <z:radio label="${labels.branding.use_quick}" selected="@load(vm.brandingOption eq 'EXTRA_CSS')" sclass="db pb2"
+                             onCheck="@('changeBranding', 'EXTRA_CSS')" radiogroup="groupie" />
+
+                    <div class="alert alert-success dn" id="feedback-branding" role="alert" />
+                </div>
+
+                <z:div class="${css.panel}" visible="@load(vm.brandingOption eq 'EXTRA_CSS')">
+
+                    <div class="pb3">
+                        <span class="i">${labels.branding.quick_logo}</span>
+                        <div class="pl4-ns pt2">
+                            <z:image src="@load(vm.logo.first)" sclass="bg-light-gray ba b--black b--dashed" />
+                            <z:button class="${css.linkButton} f7 ml3" label="${labels.branding.quick_change}"
+                                      upload="true,maxsize=200,multiple=false" onUpload="@('logoUploaded', event.media)"
+                                      ca:data-original-title="${labels.branding.quick_logo_hint}" ca:data-toggle="tooltip" ca:data-placement="bottom" />
+                        </div>
+                    </div>
+                    <div class="pb3">
+                        <span class="i">${labels.branding.quick_favicon}</span>
+                        <div class="pl4-ns pt2">
+                            <z:image src="@load(vm.favicon.first)" sclass="bg-light-gray ba b--black b--dashed" />
+                            <z:button class="f7 pa0 bw0 br0 blue hover-dark-blue underline-hover bg-transparent btn ml3" label="${labels.branding.quick_change}"
+                                      upload="true,maxsize=80,multiple=false" onUpload="@('faviconUploaded', event.media)"
+                                      ca:data-original-title="${labels.branding.quick_favicon_hint}" ca:data-toggle="tooltip" ca:data-placement="bottom" />
+                        </div>
+                    </div>
+                    <div class="pb3 flex flex-wrap">
+                        <span class="i">${labels.branding.footer_label}</span>
+                        <z:textbox sclass="${css.textInput} mb1 ml3-ns w5" rows="2" value="@bind(vm.snippetHandler.footerInnerHtml)" />
+                    </div>
+                    <div class="pb3 flex items-center">
+                        <span class="i">${labels.branding.quick_header}</span>
+                        <h:input type="color" class="${css.colorPicker} ml3" value="@bind(vm.snippetHandler.headerColor)"
+                                 data-preferred-format="hex" data-show-input="true" />
+                    </div>
+                    <div class="pb3">
+                        <span class="i">${labels.branding.quick_button}</span>
+                        <div class="pl4-ns pt2">
+                            <z:radiogroup id="groupie2" />
+                            <z:radio label="${labels.branding.quick_button_default}" selected="@load(not vm.uiOverrideButtonColors)" sclass="db pb1"
+                                     onCheck="@('buttonColorChanging', false)" radiogroup="groupie2" />
+                            <z:radio label="${labels.branding.quick_button_override}" selected="@load(vm.uiOverrideButtonColors)" sclass="db"
+                                     onCheck="@('buttonColorChanging', true)" radiogroup="groupie2" />
+
+                            <z:div sclass="flex flex-wrap" visible="@load(vm.uiOverrideButtonColors)">
+                                <div class="mt2 mh2 flex items-center">
+                                    <span class="i">${labels.branding.quick_button_primary}</span>
+                                    <h:input type="color" class="${css.colorPicker} ml2" value="@bind(vm.snippetHandler.primaryButtonColor)"
+                                             data-preferred-format="hex" data-show-input="true"/>
+                                </div>
+                                <div class="mt2 mh2 flex items-center">
+                                    <span class="i">${labels.branding.quick_button_tertiary}</span>
+                                    <h:input type="color" class="${css.colorPicker} ml2" value="@bind(vm.snippetHandler.tertiaryButtonColor)"
+                                             data-preferred-format="hex" data-show-input="true"/>
+                                </div>
+                                <div class="mt2 mh2 flex items-center">
+                                    <span class="i">${labels.branding.quick_button_secondary}</span>
+                                    <h:input type="color" class="${css.colorPicker} ml2" value="@bind(vm.snippetHandler.secondaryButtonColor)"
+                                             data-preferred-format="hex" data-show-input="true"/>
+                                </div>
+
+                            </z:div>
+                        </div>
+                    </div>
+                    <z:button label="${labels.branding.quick_save}" sclass="${css.primaryButton} ph2"
+                              w:onClick="alertRef = $('#feedback-branding')" onClick="@('save')" />
+                </z:div>
+            </section>
+        </div>
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <!-- This block is only needed in browsers that do not support input[type="color"] -->
+        <style>
+            @import url('${zkService.contextPath}/styles/spectrum.css');
+        </style>
+        <z:script src="/scripts/spectrum.js" />
+    </z:div>
+
+</zk:zk>

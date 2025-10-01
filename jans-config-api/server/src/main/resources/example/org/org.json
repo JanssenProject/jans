@@ -1,0 +1,11 @@
+{
+    "dn": "o=jans",
+    "displayName": "Jans Server",
+    "description": "Welcome to oxTrust!",
+    "organization": "jans",
+    "managerGroup": "inum=60B7,ou=groups,o=jans",
+    "themeColor": "166309",
+    "shortName": "Jans Server",
+    "organizationTitle": "Gluu",
+    "baseDn": "o=jans"
+}

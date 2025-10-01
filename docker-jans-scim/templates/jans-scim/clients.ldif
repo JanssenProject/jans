@@ -1,0 +1,22 @@
+dn: inum=%(scim_client_id)s,ou=clients,o=jans
+displayName: SCIM client
+inum: %(scim_client_id)s
+jansAccessTknSigAlg: RS256
+jansAppTyp: native
+jansAttrs: {}
+jansClntSecret: %(scim_client_encoded_pw)s
+jansGrantTyp: client_credentials
+jansScope: inum=1200.2B7428,ou=scopes,o=jans
+jansScope: inum=1200.0A0198,ou=scopes,o=jans
+jansScope: inum=1200.E14714,ou=scopes,o=jans
+jansScope: inum=1200.178DAF,ou=scopes,o=jans
+jansScope: inum=1200.57E5E9,ou=scopes,o=jans
+jansScope: inum=1200.D0F7EB,ou=scopes,o=jans
+jansScope: inum=1200.99AD30,ou=scopes,o=jans
+jansScope: inum=1200.D5527D,ou=scopes,o=jans
+jansScope: inum=1200.83383D,ou=scopes,o=jans
+jansScope: inum=1200.0D9EB4,ou=scopes,o=jans
+jansSubjectTyp: pairwise
+jansTknEndpointAuthMethod: client_secret_basic
+objectClass: top
+objectClass: jansClnt

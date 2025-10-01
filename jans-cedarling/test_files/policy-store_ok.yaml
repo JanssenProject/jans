@@ -1,0 +1,132 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+cedar_version: v4.0.0
+policy_stores:
+  a1bf93115de86de760ee0bea1d529b521489e5a11747:
+    cedar_version: v4.0.0
+    name: Jans
+    description: A test policy store where everything is fine.
+    trusted_issuers:
+      Jans123123:
+        name: "Jans"
+        description: "A Test IDP"
+        openid_configuration_endpoint: "https://test.jans.org/.well-known/openid-configuration"
+        token_metadata:
+          access_token:
+            entity_type_name: "Jans::Access_token"
+            workload_id: "client_id"
+            principal_mapping:
+              - "Jans::Workload"
+          id_token:
+            entity_type_name: "Jans::Id_token"
+            principal_mapping:
+              - "Jans::User"
+          userinfo_token:
+            entity_type_name: "Jans::Userinfo_token"
+            user_id: "sub"
+            principal_mapping:
+              - "Jans::User"
+      AnotherIssuer:
+        name: "Another Issuer"
+        description: "This is a placeholder issuer used to test if Cedarling still works with multiple issuers"
+        openid_configuration_endpoint: "https://another.jans.org/.well-known/openid-configuration"
+    policies:
+      840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+        description: simple policy example for principal workload
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::Workload,
+                action in [Jans::Action::"Update"],
+                resource is Jans::Issue
+            )when{
+                principal.access_token.org_id == resource.org_id &&
+                principal.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
+            };
+      444da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+        cedar_version: v4.0.0
+        description: simple policy example for principal user
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::User,
+                action in [Jans::Action::"Update"],
+                resource is Jans::Issue
+            )when{
+                principal.country == resource.country &&
+                principal.id_token.aud.contains("5b4487c4-8db1-409d-a653-f907b8094039") 
+            };
+      555da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+        cedar_version: v4.0.0
+        description: Superuser that can do anything
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+              principal in Jans::Role::"SuperUser",
+                action,
+                resource
+            );
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+        namespace Jans {
+          type Url = {"host": String, "path": String, "protocol": String};
+          entity Issue = {"country": String, "org_id": String};
+          entity Role;
+          entity TrustedIssuer = {"issuer_entity_id": Url};
+          entity User in [Role] = {
+            sub?: String,
+            role?: String,
+            email: String,
+            username: String,
+            country: String,
+            id_token?: Id_token,
+            userinfo_token?: Userinfo_token,
+          };
+          entity Workload = {
+            iss: Jans::TrustedIssuer,
+            aud?: String,
+            client_id?: String,
+            name: String,
+            access_token: Access_token,
+          };
+          entity Access_token = {
+            iss: Jans::TrustedIssuer,
+            jti: String,
+            client_id: String,
+            org_id: String,
+          };
+          entity Id_token = {
+            iss: Jans::TrustedIssuer,
+            sub: String,
+            aud: Set<String>,
+          };
+          entity Userinfo_token  = {
+            iss: Jans::TrustedIssuer,
+            jti: String,
+          };
+          type Context = {
+            user?: User,
+            workload?: Workload,
+            access_token?: Access_token,
+            id_token?: Id_token,
+            userinfo_token?: Userinfo_token,
+          };
+          action "Update" appliesTo {
+            principal: [Workload, User, Role],
+            resource: [Issue],
+            context: Context
+          };
+        }

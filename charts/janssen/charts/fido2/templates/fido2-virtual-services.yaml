@@ -1,0 +1,73 @@
+{{- if .Values.global.istio.ingress }}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-istio-fido2-configuration
+  namespace: {{.Release.Namespace}}
+  labels:
+    APP_NAME: fido2
+{{ include "fido2.labels" . | indent 4}}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.fido2.customAnnotations.virtualService) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.fido2.customAnnotations.virtualService }}
+{{ toYaml .Values.global.fido2.customAnnotations.virtualService | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  hosts:
+  - {{ .Values.global.fqdn }}
+{{- if .Values.global.istio.gateways }}
+  gateways:
+{{ toYaml .Values.global.istio.gateways | indent 2 }}
+{{- else }}
+  gateways:
+  - {{ .Release.Name }}-global-gtw
+{{- end }}
+  http:
+  {{- if .Values.global.fido2.ingress.fido2ConfigEnabled }}
+  - name: {{ .Release.Name }}-istio-fido2-configuration
+    match:
+    - uri:
+        prefix: /.well-known/fido2-configuration
+    rewrite:
+      uri: /jans-fido2/restv1/fido2/configuration
+    route:
+      - destination:
+          host: {{ .Values.global.fido2.fido2ServiceName }}.{{.Release.Namespace}}.svc.cluster.local
+          port:
+            number: 8080
+        weight: 100
+  {{- end }}
+  {{- if .Values.global.fido2.ingress.fido2Enabled }}
+  - name: {{ .Release.Name }}-istio-fido2
+    match:
+    - uri:
+        prefix: "/jans-fido2"
+    route:
+    - destination:
+        host: {{ .Values.global.fido2.fido2ServiceName }}.{{.Release.Namespace}}.svc.cluster.local
+        port:
+          number: 8080
+      weight: 100
+  {{- end }}
+  {{- if .Values.global.fido2.ingress.fido2WebauthnEnabled }}
+  - name: {{ .Release.Name }}-istio-webauthn
+    match:
+    - uri:
+        prefix: /.well-known/webauthn
+    rewrite:
+      uri: /jans-fido2/restv1/webauthn/configuration
+    route:
+      - destination:
+          host: {{ .Values.global.fido2.fido2ServiceName }}.{{.Release.Namespace}}.svc.cluster.local
+          port:
+            number: 8080
+        weight: 100
+  {{- end }}
+{{- end }}

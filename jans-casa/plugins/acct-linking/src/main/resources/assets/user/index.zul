@@ -1,0 +1,96 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.al.title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.acctlinking.vm.AccountsLinkingVM')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul"/>
+
+        <style>
+            /* override default bootstrap styling */
+            .table td, .table th {
+                vertical-align: middle;
+            }
+        </style>
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.al.title}</h2>
+                    <p>
+                        <z:label id="temp" value="${c:l(empty vm.providers ? 'al.nothing_yet' : 'al.intro_text')}" />
+                    </p>
+                    
+                    <div class="alert alert-success dn" id="feedback-social" role="alert" />
+
+                    <h:div unless="${empty vm.providers}" class="pa3 pb1">
+
+                        <z:div sclass="flex items-center flex-column pt2 ph3-ns">
+                            <table class="table table-sm">
+                                <h:tbody children="@load(vm.providers)" sclass="f7 table-striped">
+                                    <zk:template name="children">
+                                        <tr>
+                                            <td>
+                                                <img width="50" 
+                                                    src="${c:cat('/jans-auth/fl/blb4x/', empty each.value.logoImg ? 'none.png' : each.value.logoImg)}" />
+                                            </td>
+                                            <td class="f6 dark-blue2">${each.value.displayName}</td>
+                                            <td>
+                                                <h:span visible="@load(not vm.accounts.containsKey(each.key))">
+                                                    ${labels.al.link_unavailable}
+                                                </h:span>
+                                                <z:div visible="@load(vm.accounts.containsKey(each.key))">
+                                                    ${labels.al.link_status}
+                                                    <z:label class="b" value="@load(vm.accounts.get(each.key))" />
+                                                </z:div>
+                                            </td>
+                                            <td>
+                                                <!-- There can only be one linking process at a time (because every linking triggers an AS
+                                                     authn request. Thus, linking buttons are all disabled when there is linking in progress --> 
+                                                <z:button
+                                                    class="${css.primaryButton} lh-tight mr2"
+                                                    disabled="@load(vm.pendingProvider ne null)" visible="@load(not vm.accounts.containsKey(each.key))"
+                                                    label="@load(c:l(vm.pendingProvider eq each.key ? 'al.buttons.linking' : 'al.buttons.link'))"
+                                                    w:onClick="externalAuthnPop(${not vm.usePopup}, 'interlude.zul?provider=${c:encodeURIComponent(each.key)}')">
+                                                    
+                                                    <zk:attribute unless="${vm.usePopup}" name="href">interlude.zul?provider=${c:encodeURIComponent(each.key)}</zk:attribute>
+                                                    <zk:attribute unless="${vm.usePopup}" name="target">_blank</zk:attribute>
+                                                </z:button>
+                                                
+                                                <z:button label="${labels.al.buttons.cancel}" sclass="${css.secondaryButton} lh-tight" 
+                                                      onClick="@('cancel')" visible="@load(vm.pendingProvider eq each.key)" />
+                                                      
+                                                <z:button label="${labels.al.buttons.remove}" sclass="${css.secondaryButton} lh-tight"
+                                                    visible="@load(vm.accounts.containsKey(each.key))" onClick="@('remove', each.key, vm.accounts.get(each.key))" />
+                                            </td>
+                                        </tr>
+                                    </zk:template>
+                                </h:tbody>
+                            </table>
+                        </z:div>
+                    </h:div>
+
+                </div>
+            </section>
+        </div>
+
+        <z:timer id="timer" delay="2000" repeats="true" onTimer="@command('poll')" />
+
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <script>
+            function externalAuthnPop(ignore, url){
+                if (ignore) return
+
+                let v = window.open(url, "mypopo", "popup=true")
+                if (v == null) {
+                    console.log("Pop-up blocked. Casa Admin can configure this plugin to open 3rd party IDP windows in tabs, not popups") 
+                }
+            }
+        </script>
+    </z:div>
+</zk:zk>

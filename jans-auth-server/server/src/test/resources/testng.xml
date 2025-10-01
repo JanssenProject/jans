@@ -1,0 +1,420 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="jansAuthServer" parallel="false">
+
+	<listeners>
+		<listener class-name="io.jans.as.server.JansUnitTestsListener" />
+	</listeners>
+
+    <test name="Unit Tests" enabled="true">
+        <classes>
+            <class name="io.jans.as.server.filter.HeadersFilterTest" />
+
+            <class name="io.jans.as.server.model.CIBAGrantTest" />
+            <class name="io.jans.as.server.model.authorize.JwtAuthorizationRequestTest" />
+            <class name="io.jans.as.server.model.registration.RegisterParamsValidatorTest" />
+            <class name="io.jans.as.server.model.common.ExecutionContextTest" />
+            <class name="io.jans.as.server.model.common.TxTokenTest" />
+            <class name="io.jans.as.server.model.common.AuthorizationGrantTest" />
+
+            <class name="io.jans.as.server.service.MTLSServiceTest" />
+            <class name="io.jans.as.server.service.ScopeServiceTest" />
+            <class name="io.jans.as.server.service.SpontaneousScopeServiceTest" />
+            <class name="io.jans.as.server.service.RedirectionUriServiceTest" />
+            <class name="io.jans.as.server.service.external.ExternalAuthenticationServiceTest" />
+            <class name="io.jans.as.server.servlet.OpenIdConfigurationTest" />
+            <class name="io.jans.as.server.service.net.UriServiceTest" />
+            <class name="io.jans.as.server.service.GrantServiceTest" />
+            <class name="io.jans.as.server.service.LocalResponseCacheTest" />
+            <class name="io.jans.as.server.service.SessionIdServiceTest" />
+            <class name="io.jans.as.server.service.DiscoveryServiceTest" />
+            <class name="io.jans.as.server.service.AcrServiceTest" />
+
+            <class name="io.jans.as.server.service.token.GlobalTokenRevocationServiceTest" />
+
+            <class name="io.jans.as.server.auth.DpopServiceTest" />
+            <class name="io.jans.as.server.token.ws.rs.TokenExchangeServiceTest" />
+            <class name="io.jans.as.server.token.ws.rs.TxTokenServiceTest" />
+            <class name="io.jans.as.server.token.ws.rs.TxTokenValidatorTest" />
+            <class name="io.jans.as.server.token.ws.rs.TokenRestWebServiceValidatorTest" />
+            <class name="io.jans.as.server.token.ws.rs.TokenRestWebServiceImplTest" />
+            <class name="io.jans.as.server.ws.rs.stat.MonthsTest" />
+
+            <!-- AUTHORIZE -->
+            <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidatorTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImplTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthorizeActionTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthorizationChallengeValidatorTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthzRequestTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthzDetailsServiceTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthorizationChallengeServiceTest" />
+
+            <!-- AuthZEN: Access Evaluation -->
+            <class name="io.jans.as.server.authzen.ws.rs.AccessEvaluationRestWebServiceImplV1Test" />
+            <class name="io.jans.as.server.authzen.ws.rs.AccessEvaluationValidatorTest" />
+
+            <!-- REVOKE -->
+            <class name="io.jans.as.server.revoke.RevokeRestWebServiceImplTest" />
+
+            <!-- REGISTER -->
+            <class name="io.jans.as.server.register.ws.rs.SsaValidationConfigServiceTest" />
+            <class name="io.jans.as.server.register.ws.rs.action.RegisterCreateActionTest" />
+            <class name="io.jans.as.server.register.ws.rs.RegisterServiceTest" />
+            <class name="io.jans.as.server.register.ws.rs.RegisterValidatorTest" />
+            <class name="io.jans.as.server.register.ws.rs.RegisterJsonServiceTest" />
+
+            <!-- SESSION -->
+            <class name="io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImplTest" />
+            <class name="io.jans.as.server.session.ws.rs.EndSessionServiceTest" />
+
+            <!-- USER INFO -->
+            <class name="io.jans.as.server.userinfo.ws.rs.UserInfoServiceTest" />
+
+            <!-- SSA -->
+            <class name="io.jans.as.server.ssa.ws.rs.SsaServiceTest" />
+            <class name="io.jans.as.server.ssa.ws.rs.SsaRestWebServiceImplTest" />
+            <class name="io.jans.as.server.ssa.ws.rs.SsaJsonServiceTest" />
+
+            <!-- Rate Limit -->
+            <class name="io.jans.as.server.rate.RateLimitServiceTest" />
+
+            <!-- UTIL -->
+            <class name="io.jans.as.server.util.ServerUtilTest" />
+        </classes>
+    </test>
+
+    <test name="JsonApplierServerTest" enabled="true">
+        <classes>
+            <class name="io.jans.as.server.json.JsonApplierServerTest" />
+        </classes>
+    </test>
+
+<!--	 Application Type Restriction (embedded) -->
+	<test name="Application Type Restriction (embedded)" enabled="false">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.ApplicationTypeRestrictionEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- Authorization Code Flow test -->
+	<test name="Authorization Code Flow test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.AuthorizationCodeFlowEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- Authorize test -->
+	<test name="Authorize test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.AuthorizeRestWebServiceEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- Authorize with Response Mode test -->
+	<test name="Authorize with Response Mode test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.AuthorizeWithResponseModeEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- Client Authentication Filter test (embedded) -->
+	<test name="Client Authentication Filter test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.ClientAuthenticationFilterEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- Client Info test -->
+	<test name="Client Info test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.ClientInfoRestWebServiceEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- End Session test -->
+	<test name="End Session test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.EndSessionRestWebServiceEmbeddedTest" />
+		</classes>
+	</test>
+    <test name="End Session Backchannel test (embedded)" enabled="true">
+        <classes>
+            <class name="io.jans.as.server.ws.rs.EndSessionBackchannelRestServerTest" />
+        </classes>
+    </test>
+
+	<!-- JWK test -->
+	<test name="JWK test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.JwkRestWebServiceEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- Key Generation test -->
+	<test name="Key Generation test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.comp.KeyGenerationTest" />
+		</classes>
+	</test>
+
+	<!-- OpenID Request Object test -->
+	<test name="OpenID Request Object test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.OpenIDRequestObjectEmbeddedTest" />
+			<class name="io.jans.as.server.ws.rs.OpenIDRequestObjectWithHSAlgEmbeddedTest" />
+			<class name="io.jans.as.server.ws.rs.OpenIDRequestObjectWithRSAlgEmbeddedTest" />
+			<class name="io.jans.as.server.ws.rs.OpenIDRequestObjectWithESAlgEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- Register test -->
+	<test name="Register test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.RegistrationRestWebServiceEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- Request Object Signing Alg Restriction test -->
+	<test name="Request Object Signing Alg Restriction test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.RequestObjectSigningAlgRestrictionEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- Response Types Restriction -->
+	<test name="Response Types Restriction (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.ResponseTypesRestrictionEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- Sector Identifier URL Verification test -->
+	<test name="Sector Identifier URL Verification (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.SectorIdentifierUrlVerificationEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- Token Endpoint Auth Method Restriction test -->
+	<test name="Token Endpoint Auth Method Restriction (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.TokenEndpointAuthMethodRestrictionEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- Token test -->
+	<test name="Token test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.TokenRestWebServiceEmbeddedTest" />
+			<class name="io.jans.as.server.ws.rs.TokenRestWebServiceWithHSAlgEmbeddedTest" />
+			<class name="io.jans.as.server.ws.rs.TokenRestWebServiceWithRSAlgEmbeddedTest" />
+			<class name="io.jans.as.server.ws.rs.TokenRestWebServiceWithESAlgEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- User Authentication Filter test (embedded) -->
+	<test name="User Authentication Filter test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.UserAuthenticationFilterEmbeddedTest" />
+		</classes>
+	</test>
+
+	<!-- User Info test -->
+	<test name="User Info test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.UserInfoRestWebServiceEmbeddedTest" />
+		</classes>
+	</test>
+
+<!--	 Signature test-->
+	<test name="Signature test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.comp.SignatureTest" />
+		</classes>
+	</test>
+
+	<test name="Utility methods test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.comp.UtilityMethodsTest" />
+		</classes>
+	</test>
+
+	<test name="Grant service test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.comp.GrantServiceTest" />
+		</classes>
+	</test>
+
+	<test name="Configuration test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.comp.ConfigurationTest" />
+		</classes>
+	</test>
+
+	<test name="Cross Encryption test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.comp.CrossEncryptionTest" />
+		</classes>
+	</test>
+
+	<test name="Session ID service test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.comp.SessionIdServiceTest" />
+		</classes>
+	</test>
+
+	<test name="Crypto Provider test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.comp.CryptoProviderTest" />
+		</classes>
+	</test>
+
+	<test name="Gluu Configuration test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.jans.ws.rs.GluuConfigurationWSTest" />
+		</classes>
+	</test>
+
+	<test name="UMA. Configuration test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.uma.ws.rs.UmaConfigurationWSTest" />
+		</classes>
+	</test>
+	<test name="UMA. Obtain PAT test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.uma.ws.rs.ObtainPatWSTest" />
+		</classes>
+	</test>
+	<test name="UMA. Obtain RPT test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.uma.ws.rs.ObtainRptWSTest" />
+		</classes>
+	</test>
+	<test name="UMA. Register resource set test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.uma.ws.rs.UmaRegisterResourceWSTest" />
+		</classes>
+	</test>
+	<test name="UMA. Register permission test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.uma.ws.rs.RegisterPermissionWSTest" />
+		</classes>
+	</test>
+	<test name="UMA. Workflow test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.uma.ws.rs.AccessProtectedResourceFlowWSTest" />
+		</classes>
+	</test>
+	<test name="UMA. Scope test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.uma.ws.rs.UmaScopeWSTest" />
+		</classes>
+	</test>
+	<test name="Inum Generation test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.comp.InumGeneratorTest" />
+		</classes>
+	</test>
+	<test name="Introspection endpoint test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.ws.rs.IntrospectionWebServiceEmbeddedTest" />
+		</classes>
+	</test>
+
+	<test name="Locale test (embedded)" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.comp.LocaleTest" />
+		</classes>
+	</test>
+
+	<test name="Remove unused clients test" enabled="true">
+		<classes>
+			<class name="io.jans.as.server.comp.CleanUpClientTest" />
+		</classes>
+	</test>
+
+    <!-- Enable it when client jks is regenerated -->
+    <test name="JWT cross-check test" enabled="true">
+        <classes>
+            <class name="io.jans.as.server.comp.JwtCrossCheckTest" />
+        </classes>
+    </test>
+
+	<parameter name="serverUri" value="https://${test.server.name}" />
+	<parameter name="authorizePath" value="restv1/authorize" />
+	<parameter name="introspectionPath" value="restv1/introspection" />
+	<parameter name="parPath" value="restv1/par" />
+	<parameter name="tokenPath" value="restv1/token" />
+	<parameter name="validateTokenPath" value="restv1/validate" />
+	<parameter name="jwksPath" value="restv1/jwks" />
+	<parameter name="userInfoPath" value="restv1/userinfo" />
+	<parameter name="clientInfoPath" value="restv1/clientinfo" />
+	<parameter name="endSessionPath" value="restv1/end_session" />
+	<parameter name="endSessionPagePath" value="restv1/end_session_page" />
+	<parameter name="registerPath" value="restv1/register" />
+	<parameter name="idGenerationPath" value="restv1/id" />
+	<parameter name="userId" value="${auth.user.uid}" />
+	<parameter name="userSecret" value="${auth.user.password}" />
+	<parameter name="userInum" value="${auth.user.inum}" />
+	<parameter name="userEmail" value="${auth.user.email}" />
+	<parameter name="clientId" value="${auth.client.id}" />
+	<parameter name="clientSecret" value="${auth.client.secret}" />
+	<parameter name="redirectUri" value="https://client.example.com/cb" />
+	<parameter name="redirectUris" value="https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2" />
+	<parameter name="postLogoutRedirectUri" value="https://client.example.com/pl" />
+	<parameter name="ldapAdminPassword" value="${ldap.admin.password}" />
+	<parameter name="audience" value="${test.server.url}/restv1/token" />
+	<parameter name="sectorIdentifierUri" value="https://${test.server.name}/jans-auth/sectoridentifier/${sector.identifier.id}" />
+	<!-- By enabling this block, you require a place to publish files via HTTP or HTTPS -->
+	<!--<parameter name="requestFileBasePath" value="/var/www/html/jans-auth"/> -->
+	<!--<parameter name="requestFileBaseUrl" value="http://localhost/jans-auth"/> -->
+
+	<!-- Gluu -->
+	<parameter name="umaConfigurationPath" value="restv1/.well-known/gluu-configuration" />
+
+	<!-- UMA -->
+	<parameter name="umaConfigurationPath" value="restv1/uma2-configuration" />
+	<parameter name="umaRegisterResourcePath" value="restv1/host/rsrc/resource_set" />
+	<parameter name="umaScopePath" value="restv1/uma/scopes" />
+	<parameter name="umaPermissionPath" value="restv1/host/rsrc_pr" />
+	<parameter name="umaPermissionAuthorizationPath" value="restv1/requester/perm" />
+	<parameter name="umaRptPath" value="restv1/requester/rpt" />
+	<parameter name="umaGatPath" value="restv1/requester/gat" />
+	<parameter name="umaRptStatusPath" value="restv1/rpt/status" />
+	<parameter name="umaUserId" value="${uma.user.uid}" />
+	<parameter name="umaUserSecret" value="${uma.user.password}" />
+	<parameter name="umaPatClientId" value="${uma.pat.client.id}" />
+	<parameter name="umaPatClientSecret" value="${uma.pat.client.secret}" />
+	<parameter name="umaRedirectUri" value="https://client.example.com/cb" />
+	<parameter name="umaClaimsRedirectUri" value="https://client.example.com/cb" />
+
+	<parameter name="contactEmail1" value="${contact.email.1}" />
+	<parameter name="contactEmail2" value="${contact.email.2}" />
+
+	<parameter name="usedClients" value="${test.keep.clients}" />
+
+	<!-- Client Resources -->
+	<parameter name="clientJwksUri" value="https://${test.server.name}/jans-auth-client/test/resources/jwks.json" />
+	<!-- RS256 -->
+	<parameter name="RS256_modulus"
+		value="AJpGcIVu7fmQJLHXeAClhXaJD7SvuABjYiPcT9IbKFWGWj51GgD-CxtyrQGXT0ctGEEsXOzMZM40q-V7GR-5qkJ_OalVTTc_EeKAHao45bZPsPHLxvusNfrfpyhc6JjF2TQhoOqxbgMgQ9L6W9q9fSjgzx-tPlD0d3X0GZOEQ_NYGstZWRRBwHgsxA2IRYtwSH-v76yPpxF9poLIWdnBKtKfSr6UY7p1BrLmMm0DdMhjQLn6j4S_eB-p2WyBwObvsLqO6FdClpZFtGr82Km2uinpHvZ6KJ_MUEW1sijPPI3rIGbaUbLtQJwX5GVynAP5qU2qRVkcsrKt-GeNoz6QNLM" />
+	<parameter name="RS256_privateExponent"
+		value="RkIKAFpyehMRAwTTm8fFriPhSTI1I8ge66HroA3KIpjbBFKkEwue11M0QuM7sXhx8UxYzWaQCfCm0A1tdatCRKJYCivUzHImnPYnjFv5ETvdo2BgMEFPG_86ywD01I5Vyo3-EKPZLAdHnA90QXvGQhWPfieRl6CdvtP5ydqUb39aPazZKzPx4v6hj-7wrrwrQmYq-7li_urR2zhz5HvE_eE66i1xhGTI8VdV9VE2y06Zbzn54qL7kf0nsjvg4X9ERdXv4kkhRwSSc3CExJ-iNbo0n3nQ3KovhpA1FEzd9cwI_2EfLRIvVjJRMTnPHCLmz_8-Htn2Kpi3vV9MWHab8Q" />
+	<!-- RS384 -->
+	<parameter name="RS384_modulus"
+		value="AJ125IzZ0TRSSoVas3jwMWuckyMujoGUUeDd8rLjTSCLlgUb3RiT9MbKfWdeCByme5MZ21lvMu6OmMFn8iDb5erLSBJ8bZFq6ruGIVzU8NI833IahlIO9m6JIR4L_go8Szu-1MYPGUjOKDsxc-Fp3fR-Kb0HFAEEs44t9vL9yMKjNeQeAp7Fo2AukDNEZqvEObP7XWLdJFA-TuAXE1f7o49lMr0y4Tqy2XeDKwfklO0bAnbSryZubRg2E7gjiwaiSYVIFphotLlpCd3N4MU46JjHA2dv1GtIe8749HinwhK1stes3PbZb9Gwm2LyK89iRJ35bCmDLnkwP0rTwTZ2Ul8" />
+	<parameter name="RS384_privateExponent"
+		value="NYqTtADsTaodhLKOi_TAGSMoNLJD6nOQU7GkMIdxVjugSyRqTU0h0eZQNbGXeIZzRlVobESPQOZjsn-xqNKcnvV4EDEW4HdGUXUOKw6MxC_GmnnCamyEBpnCFQFm4_wUaMA-gQnpQwQ2UcpC6Maindu4PXoGp0H9-75NVdpNRUDHO5xY2Ybp2kVv__sUWCKRLK7JaKRA3iGlXFpLPSy9DvmBjy27z1t_z58_vrPrVset7muMwMTwgfDv-EP3NBH4eTg7_Cy952MuhxaUUsHW85LZuv5t_rcoUF8kfDWcclP3a954lAzCbVjdngpvaShNbiTKAf9-bMQKG66v63W54Q" />
+	<!-- RS512 -->
+	<parameter name="RS512_modulus"
+		value="AKuc75KyKNwteumhyN5Kxa4ipQZrE_ouULtMZmCYI3Y32oCv3wWkgmrprBo-yCK292wfn77dNdZ9h5OoY-6sDVG-OKi9uwXpFcopyqIdsYOrw-4FKHxpr_7b--cH6HRmGlSFKVJpwfvIjD9Mu8S9bhNgnXfbKoYLcANU7Vjtacr3MvX-U406eRXLI9lZNr6ViQxSJw3A7yYMo2XYMYhO-FHGOYeV815q7fJFUMoCUMNSWlCx-pUCVGg0PuCKlOhUGIoLqvuFqUnBNd0hoAJCtmqya4_e3DLNzOgr2HOEbX7kQEjpi0XdyQ0fbFTAYO9TpXT2gldnmOElZ4UE2lX8J6M" />
+	<parameter name="RS512_privateExponent"
+		value="doYyFGAFxmOG43tAbv63XthAn5kut_hq-6D9iDMrMsfKmlxdLNl81XhDy_CWaxtw8PU6cCj5uQUDsSB4vGuJ224EVc6ML73WtcR9VdAqPOVRsb9QQfUAf4XRibO1gUbPYpaBfpDaUBonesR1XqDyOGHe_9uXl_KoTzTFpEh8a5eCk9mwz85bb08PxQUut5DFdzPPyTi8_k3m7hry97I0TMbHUTiTqjgFpq2ZqSn4KQz77uft1oMwJLvlNHP6Fs25aVYrgAWw1DfTcCDwPAKxXlCD4ZPfGN2LmxZWCYxj1HLVKmQkrjX-FSgvpHs7YUqzJ19whmrTEtODnhWvZhTucQ" />
+	<!-- ES256 -->
+	<parameter name="ES256_d" value="AIiNVUvr6-ChpOv2F7HNXyS2pYuoLF3ZqF2kTP0XquzB" />
+	<!-- ES384 -->
+	<parameter name="ES384_d" value="S5iDyZaSar7cqcCKYFC1VGVKAXmwdOSHRMrwbrEd_WvmIYi3u8PwHFYAmA0PEwLF" />
+	<!-- ES512 -->
+	<parameter name="ES512_d" value="AbedxoxLdftbJpXMYWlcuJkEF6iRotCxYYbH18NyEuOka_vS5dLV6m6Bhx_y_y9NgTQzP5SGzfpkSpgF6JVG7eFL" />
+
+</suite>

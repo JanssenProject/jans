@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration packages="io.jans.log">
+    <Appenders>
+
+        <RollingFile name="ADMINUI-AUDIT" fileName="${sys:log.base}/logs/adminuiAudit.log" filePattern="${sys:log.base}/logs/adminuiAudit-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="250 MB" />
+            </Policies>
+
+            <DefaultRolloverStrategy max="15" />
+        </RollingFile>
+        <RollingFile name="ADMINUI-LOG" fileName="${sys:log.base}/logs/adminui.log" filePattern="${sys:log.base}/logs/adminui-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="250 MB" />
+            </Policies>
+
+            <DefaultRolloverStrategy max="15" />
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+        <Logger name="io.jans.ca.plugin.adminui.rest.logging" level="${log4j.default.log.level}" additivity="false">
+            <AppenderRef ref="ADMINUI-AUDIT" />
+        </Logger>
+        <Logger name="io.jans.ca.plugin.adminui" level="${log4j.default.log.level}" additivity="false">
+            <AppenderRef ref="ADMINUI-LOG" />
+        </Logger>
+    </Loggers>
+
+</Configuration>

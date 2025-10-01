@@ -1,0 +1,4 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.ReloginInitiator"?>
+<zk:zk xmlns:zk="zk">
+</zk:zk>

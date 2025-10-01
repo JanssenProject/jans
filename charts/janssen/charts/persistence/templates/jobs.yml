@@ -1,0 +1,106 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "persistence.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: persistence-loader
+{{ include "persistence.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.persistence.customAnnotations.job) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.persistence.customAnnotations.job }}
+{{ toYaml .Values.global.persistence.customAnnotations.job | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  ttlSecondsAfterFinished: {{ .Values.global.jobTtlSecondsAfterFinished }}
+  template:
+    metadata:
+      name: {{ include "persistence.name" . }}
+      labels:
+        APP_NAME: persistence-loader
+        app: {{ .Release.Name }}-{{ include "persistence.name" . }}
+    spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      dnsPolicy: {{ .Values.dnsPolicy | quote }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      restartPolicy: Never
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
+      containers:
+      - name: {{ include "persistence.name" . }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        securityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+        env:
+          {{- include "persistence.usr-envs" . | indent 12 }}
+          {{- include "persistence.usr-secret-envs" . | indent 12 }}
+        {{- if or ( .Values.global.istio.enabled ) ( .Values.customScripts ) (.Values.customCommand) }}
+        command:
+          {{- if .Values.customCommand }}
+          {{- toYaml .Values.customCommand | nindent 10 }}
+          {{- else }}
+          - tini
+          - -g
+          - --
+          - /bin/sh
+          - -c
+          - |
+            {{- with .Values.customScripts }}
+            {{- toYaml . | replace "- " "" | nindent 12}}
+            {{- end }}
+            /app/scripts/entrypoint.sh
+            {{- if .Values.global.istio.enabled }}
+            curl -X POST http://localhost:15020/quitquitquit
+            {{- end }}
+          {{- end }}
+        {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-config-cm
+        {{ if .Values.global.usrEnvs.secret }}
+        - secretRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        {{ if .Values.global.usrEnvs.normal }}
+        - configMapRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        lifecycle:
+{{- toYaml .Values.lifecycle | nindent 10 }}
+        volumeMounts:
+          {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 10 }}
+          {{- end }}
+          {{- with (include "cn.config.schema" . | fromYaml).volumeMounts }}
+  {{- toYaml . | nindent 10 }}
+          {{- end }}
+        resources:
+{{- toYaml .Values.resources | nindent 10 }}
+      volumes:
+      {{- with .Values.volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (include "cn.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}

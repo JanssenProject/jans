@@ -1,0 +1,46 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <!-- The ${labels...} expression below refers to a message found in this
+         plugin's resource bundle. See https://docs.jans.io/head/casa/administration/localization/ -->
+        
+    <h:title self="@define(title)">${zkService.appName} - ${labels.sample.method_label}</h:title>
+
+    <!-- Class SampleCredentialVM is this view's handler, aka vm -->
+    
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.sample.vm.SampleCredentialVM')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />        
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.sample.method_title}</h2>
+                    <p class="ma0">${labels.sample.method_text}</p>                    
+                </div>
+
+                <!-- Write the markup that lists the currently enrolled credentials and allows the user  
+                to add and remove them. Take a look at existing Jans Casa enrollment pages for examples.
+                See https://github.com/JanssenProject/jans/tree/main/jans-casa/app/src/main/webapp/user -->
+
+                <div class="${css.panel}">
+                
+                    <h:input type="color" class="${css.colorPicker} mr3" value="@bind(vm.favoriteColor)" />
+                    
+                    <z:button label="${labels.general.save}" sclass="${css.primaryButton}" onClick="@('update')" />
+                </div>
+                
+            </section>
+        </div>
+
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <!-- extra resources like javascript code can be referenced here -->
+        <!--z:script src="my.js" /-->
+    </z:div>
+
+</zk:zk>

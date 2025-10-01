@@ -1,0 +1,71 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/login-extended-template.xhtml">
+
+	<ui:param name="showGlobalMessages" value="false" />
+
+	<ui:define name="body">
+		<div class="container-fluid"
+			style="padding-bottom: 5%; width: 50%; height: 50%;">
+			<div class="row">
+				<div class="text-center col-sm-12">
+					<div class="section">
+						<h1
+							style="font-size: 3em; font-weight: bold; font-family: Arial">
+							OOPS</h1>
+					</div>
+					<div class="section text-center">
+						<p>
+							<h:outputFormat value="#{msgs['error.unexpectedError']}">
+								<f:param value="#{pageService.currentDateTime}" />
+							</h:outputFormat>
+						</p>
+						<div class="body text-center">
+							<h:messages id="globalMessage" styleClass="message text-center"
+								errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
+								globalOnly="true" />
+						</div>
+						<h:panelGroup layout="block" rendered="#{cookie['X-Correlation-Id'] != null}">
+							<br/>
+							<p style="font-size: 0.7em">
+								<strong>Correlation Id: </strong> <h:outputText value="#{cookie['X-Correlation-Id'].value}" />
+							</p>
+						</h:panelGroup>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="footer-copyright text-center py-3"
+			style="background: #1ab26b; position: fixed; left: 0; bottom: 0; width: 100%; text-align: center;">
+			<div class="footer">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="padding_spc"
+							style="padding-bottom: 5px; padding-top: 5px;">
+							<p>
+								<h:outputText value="#{msgs['common.janssenProject']}" />
+								| <a target="_blank"
+									href="https://jans.io"><h:outputText
+										value="#{msgs['common.caution']}" escape="false" /></a>
+								<h:panelGroup rendered='#{!empty client.policyUri}'>
+					| <a target="_blank" href="#{client.policyUri}"><h:outputText
+											value="#{msgs['common.privacyPolicy']}" escape="false" /></a>
+								</h:panelGroup>
+								<h:panelGroup rendered='#{!empty client.tosUri}'>
+					| <a target="_blank" href="#{client.tosUri}"><h:outputText
+											value="#{msgs['common.termsOfService']}" escape="false" /></a>
+								</h:panelGroup>
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</ui:define>
+
+</ui:composition>

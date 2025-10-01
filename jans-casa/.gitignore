@@ -1,0 +1,18 @@
+# Eclipse project files
+.settings
+.project
+.classpath
+.pydevproject
+
+# IntelliJ IDEA project files
+**/.idea
+**/*.iml
+
+# Maven
+**/target
+
+# Mac
+.DS_Store
+
+#Allow Agama lib
+!lib/

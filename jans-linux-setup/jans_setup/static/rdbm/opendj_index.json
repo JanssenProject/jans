@@ -1,0 +1,314 @@
+[
+    {
+        "attribute": "displayName",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "description",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "owner",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "inum",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot", "site"]
+    },
+
+    {
+        "attribute": "uniqueIdentifier",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "uuid",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "clnId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansClntSecretExpAt",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "grtId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "authzCode",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+    {
+        "attribute": "tknCde",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+    {
+        "attribute": "jansSectorIdentifier",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansStatus",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot", "site"]
+    },
+
+    {
+        "attribute": "jansState",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansScrTyp",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot", "site"]
+    },
+
+    {
+        "attribute": "exp",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot", "metric"]
+    },
+
+    {
+        "attribute": "jansLastAccessTime",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansApp",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansReqId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "creationDate",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot", "metric"]
+    },
+
+    {
+        "attribute": "jansStartDate",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot", "metric"]
+    },
+
+    {
+        "attribute": "jansEndDate",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot", "metric"]
+    },
+
+    {
+        "attribute": "jansAppTyp",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot", "metric"]
+    },
+
+    {
+        "attribute": "jansMetricTyp",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot", "metric"]
+    },
+
+    {
+        "attribute": "jansDeviceHashCode",
+        "type": "integer",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansDeviceKeyHandle",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "ssnId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jti",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "sid",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansExtUid",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTicket",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansCodeChallenge",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "chlng",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansCodeChallengeHash",
+        "type": "integer",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansPublicKeyId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansPublicKeyIdHash",
+        "type": "integer",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansAttrs",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansConfCode",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansResourceSetId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansUmaScope",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansUsrId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "del",
+        "type": "boolean",
+        "index": ["equality"],
+        "backend": ["userRoot", "metric"]
+    },
+
+    {
+        "attribute": "jansExtId",
+        "type": "string",
+        "index": ["presence", "equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansUsrDN",
+        "type": "string",
+        "index": ["presence", "equality"],
+        "backend": ["userRoot"]
+    }
+]

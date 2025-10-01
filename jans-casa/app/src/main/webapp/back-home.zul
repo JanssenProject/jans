@@ -1,0 +1,10 @@
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native">
+
+    <div class="${css.contentHeading} bg-green tc">
+        <a class="f6 na2 white hover-white db text-decoration-none" href="${zkService.contextPath}/user.zul">
+            <i class="fas fa-arrow-left" />
+            &amp;nbsp;<z:label value="${c:l(c:indexOf(desktop.requestPath, '/admin/') ge 0 ? 'adm.back_main' : 'general.back_main')}" />
+        </a>
+    </div>
+
+</z:zk>

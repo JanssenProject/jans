@@ -1,0 +1,6 @@
+github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20250502141602-7f63d64e5c12 h1:g3fFfsGihs61pvvTG6mTAYIkLykqy90agOxUc+bVMyI=
+github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20250502141602-7f63d64e5c12/go.mod h1:OaGiJ/j1u73x7oQscdWq9FLG/mD3nDoNv5ZB56+Xies=
+github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20250801160651-b13de197d0e6 h1:oRmn6yCxYkOMT89e2s7tmEXehUuiXNK+1be8qT5yWU4=
+github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20250801160651-b13de197d0e6/go.mod h1:2X4SOXytZUvTkNu5dCLVZW4Jzk54agrWXklfiQ/5VJg=
+github.com/ihciah/rust2go v0.0.0-20250427082441-4d6d8d2c2959 h1:vkmhmStmR6swQqpBsaGy4sqRHt4yP38wVdWmfF2VCN0=
+github.com/ihciah/rust2go v0.0.0-20250427082441-4d6d8d2c2959/go.mod h1:SpcZZoVYDXYhx373JZ1onR8dnEcalKA0H61x/FJ9O0s=

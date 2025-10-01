@@ -1,0 +1,18 @@
+{
+    "projectName": "casa-bioid",
+    "author": "SafinWasi",
+    "type": "Community",
+    "version": "1.0.0",
+    "description": "A helper project for Jans Casa BioID plugin",
+    "noDirectLaunch": [],
+    "configs": {
+        "io.jans.agama.bioid.enroll": {
+            "host": "https://<hostname>/jans-auth/fl/callback",
+            "endpoint": "https://bws.bioid.com/extension/",
+            "appIdentifier": "",
+            "appSecret": "",
+            "storage": "",
+            "partition": ""
+        }
+    }
+}

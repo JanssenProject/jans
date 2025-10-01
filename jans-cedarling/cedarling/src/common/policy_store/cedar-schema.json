@@ -1,0 +1,105 @@
+{
+  "Jans": {
+    "commonTypes": {
+      "Url": {
+        "type": "Record",
+        "attributes": {
+          "host": {
+            "type": "EntityOrCommon",
+            "name": "String"
+          },
+          "path": {
+            "type": "EntityOrCommon",
+            "name": "String"
+          },
+          "protocol": {
+            "type": "EntityOrCommon",
+            "name": "String"
+          }
+        }
+      }
+    },
+    "entityTypes": {
+      "Access_token": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "aud": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "exp": {
+              "type": "EntityOrCommon",
+              "name": "Long"
+            },
+            "iat": {
+              "type": "EntityOrCommon",
+              "name": "Long"
+            },
+            "iss": {
+              "type": "EntityOrCommon",
+              "name": "TrustedIssuer"
+            },
+            "jti": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            }
+          }
+        }
+      },
+      "Issue": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "org_id": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            }
+          }
+        }
+      },
+      "TrustedIssuer": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "issuer_entity_id": {
+              "type": "EntityOrCommon",
+              "name": "Url"
+            }
+          }
+        }
+      },
+      "Workload": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "client_id": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "iss": {
+              "type": "EntityOrCommon",
+              "name": "TrustedIssuer"
+            },
+            "name": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "org_id": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "Update": {
+        "appliesTo": {
+          "resourceTypes": ["Issue"],
+          "principalTypes": ["Workload"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{{- if .Values.global.istio.enabled }}
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-saml-mtls
+  namespace: {{.Release.Namespace}}
+  labels:
+    APP_NAME: saml
+{{ include "saml.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.saml.customAnnotations.destinationRule) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.saml.customAnnotations.destinationRule }}
+{{ toYaml .Values.global.saml.customAnnotations.destinationRule | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  host: {{ .Values.global.saml.samlServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+{{- end }}

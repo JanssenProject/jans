@@ -1,0 +1,18 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/basic.zul"?>
+<zk:zk xmlns:zk="zk" xmlns:h="xhtml" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.usr.logout.title}</h:title>
+
+    <h:div class="f7-cust flex justify-center mv4" self="@define(content)">
+        <div class="w-90 w-75-ns ba bw1 br2 b--light-gray flex flex-column items-center bg-blank">
+            <div class="pa4">
+                <h4>${labels.usr.logout.title}</h4>
+            </div>
+            <div class="pa3">
+                <a href="./" class="link ${css.primaryButton}">${labels.usr.logout.back_home}</a>
+            </div>
+        </div>
+    </h:div>
+
+</zk:zk>

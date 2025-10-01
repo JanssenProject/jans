@@ -1,0 +1,6 @@
+Flow flow
+    Basepath ""
+
+x = { "year": 2022, "color": "blue" }
+
+//Failure reason: map literals are not JSON-like but more like Javascript objects

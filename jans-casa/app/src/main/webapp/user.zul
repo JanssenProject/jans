@@ -1,0 +1,93 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.usr.title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.user.UserMainViewModel')"
+           self="@define(maincontent)">
+        
+        <div class="${css.contentHeading}">
+            <h1 class="f3 dark-blue2">${labels.usr.title}</h1>
+            
+            <p class="f6">${vm.introText}</p>
+
+            <zk:zk if="${vm.has2faRequisites}">
+                <div class="alert alert-warning" role="alert">${labels.usr.warn_lock}</div>
+            </zk:zk>
+            <zk:zk if="${not vm.methodsAvailability}">
+                <div class="alert alert-danger" role="alert">
+                    ${c:l(sessionContext.user.admin ? 'usr.strong.unavailable_admin' : 'usr.strong.unavailable')}
+                </div>
+            </zk:zk>
+        </div>
+
+        <zk:zk if="${vm.has2faRequisites}">
+            <div class="${css['sectionsWrapper']}">
+                <z:include src="user/preferred.zul" />
+
+                <z:div children="@load(vm.widgets)">
+                    <zk:template name="children" var="method">
+
+                        <section class="${css.section}">
+                            <div class="${css.panel}">
+                                <h2 class="f4 dark-blue2">${c:l(method.panelTitleKey)}</h2>
+                                <p>${c:l(method.panelTextKey)}</p>
+
+                                <zk:zk if="${method.getTotalUserCreds(sessionContext.user.id) gt 0}">
+                                    <span class="dark-blue2">${labels.usr.you_added}</span>
+                                </zk:zk>
+                            </div>
+
+                            <z:div children="@load(method.getEnrolledCreds(sessionContext.user.id))">
+                                <zk:template name="children" var="cred">
+                                    <div class="${css.panel} f6 pl4">
+                                        <span class="dark-blue2">${c:escapeXML(empty cred.nickName ? c:l('general.no_named') : cred.nickName)}</span>
+
+                                        <z:label if="${cred.addedOn > 0}" value="@load(c:cat(' - ',c:toLowerCase(c:l('general.added_on'))))" />
+                                        <z:label if="${cred.addedOn > 0}" value="@load(cred.addedOn) @converter('io.jans.casa.ui.CustomDateConverter',
+                                        format='MMM d yyyy', offset = sessionContext.zoneOffset)"  />
+                                    </div>
+                                </zk:template>
+                            </z:div>
+
+                            <div class="${css.panel}">
+                                <div class="pb3">
+                                    <z:button label="${c:l(method.panelButtonKey)}" sclass="${css.primaryButton}" href="${vm.getAuthnMethodPageUrl(method)}" />
+                                </div>
+                                <!-- panelBottomTextKey property could not be referenced as each.panelBottomTextKey (default interface method...) -->
+                                <zk:zk if="${not empty method.getPanelBottomTextKey()}">
+                                    <span class="dark-blue2">${c:l(method.getPanelBottomTextKey())}</span>
+                                </zk:zk>
+                            </div>
+                        </section>
+
+                    </zk:template>
+                </z:div>
+            </div>
+        </zk:zk>
+
+        <zk:zk if="${(vm.pre2faMethods.size() gt 0) and not vm.has2faRequisites}">
+            <div class="${css['sectionsWrapper']}">
+                <section class="${css.section}">
+                    <div class="${css.panel}">
+                        <p class="dark-blue2">${labels.usr.strong.requisite_text}</p>
+
+                        <z:div children="@load(vm.pre2faMethods)" sclass="pa2 flex flex-wrap justify-around">
+                            <zk:template name="children" var="method">
+                                <div class="card grow mv2 w-14r hover-bg-near-white">
+                                    <a class="card-body" href="${zkService.contextPath}${vm.getAuthnMethodPageUrl(method)}">
+                                        <h5 class="card-title dark-blue2">${c:l(method.panelTitleKey)}</h5>
+                                        <p class="gray">${c:l(method.panelTextKey)}</p>
+                                    </a>
+                                </div>
+                            </zk:template>
+                        </z:div>
+                    </div>
+                </section>
+            </div>
+        </zk:zk>
+
+    </z:div>
+
+</zk:zk>

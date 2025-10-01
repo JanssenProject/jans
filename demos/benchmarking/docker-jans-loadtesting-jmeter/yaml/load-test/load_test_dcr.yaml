@@ -1,0 +1,46 @@
+apiVersion: v1
+data:
+  DCR_CLIENT_ID: "aa4c8edf-1d68-462b-ac49-178c7b1db8fd"
+  DCR_CLIENT_SECRET: "9c077c8a-dc84-4baa-abde-edc1a343e3e3"
+  FQDN: demoexample.jans.io
+  RUN_DCR_TEST: "true" # or "false"
+kind: ConfigMap
+metadata:
+  labels:
+    app: load-test-dcr
+  name: load-test-dcr-cm
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: load-test-dcr
+  name: load-test-dcr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-test-dcr
+  template:
+    metadata:
+      labels:
+        app: load-test-dcr
+    spec:
+      #hostAliases:
+      #- ip: 35.159.30.85
+      #  hostnames:
+      #  - demoexample.jans.io
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: load-test-dcr-cm
+        image: ghcr.io/janssenproject/jans/loadtesting-jmeter:0.0.0-nightly
+        imagePullPolicy: Always
+        name: load-test-dcr
+        resources:
+          requests:
+            memory: "2000Mi"
+            cpu: "800m"
+          limits:
+            memory: "2000Mi"
+            cpu: "800m"

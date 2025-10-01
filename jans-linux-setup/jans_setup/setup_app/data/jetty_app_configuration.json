@@ -1,0 +1,99 @@
+{
+  "jans-auth": {
+    "memory": {
+      "max_allowed_mb": 2048,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.25
+    },
+    "jetty": {
+      "modules": "server,resources,http,http-forwarded,threadpool,console-capture,ee9-deploy,ee9-annotations,ee9-websocket-jakarta,ee9-cdi-decorate"
+    },
+    "installed": false,
+    "name": "jans-auth"
+  },
+  "jans-fido2": {
+    "memory": {
+      "max_allowed_mb": 512,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.10
+    },
+    "jetty": {
+      "modules": "server,resources,http,http-forwarded,threadpool,console-capture,ee9-jsp,ee9-deploy,ee9-cdi-decorate"
+    },
+    "installed": false,
+    "name": "jans-fido2"
+  },
+  "jans-scim": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.15
+    },
+    "jetty": {
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
+    },
+    "installed": false,
+    "name": "jans-scim"
+  },
+  "jans-config-api": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.10
+    },
+    "jetty": {
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
+    },
+    "installed": false,
+    "name": "jans-config-api"
+  },
+  "jans-link": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.10
+    },
+    "jetty": {
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
+    },
+    "installed": false,
+    "name": "jans-link"
+  },
+  "jans-casa": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "metaspace_mb": 128,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.10
+    },
+    "jetty": {
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
+    },
+    "installed": false,
+    "name": "jans-casa"
+    },  
+  "jans-keycloak-link": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.10
+    },
+    "jetty": {
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
+    },
+    "installed": false,
+    "name": "jans-keycloak-link"
+  },
+  "jans-lock": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.10
+    },
+    "jetty": {
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
+    },
+    "installed": false,
+    "name": "jans-lock"
+  }
+}

@@ -1,0 +1,6 @@
+Flow io.jans.agama.test.broken.flow3
+    Basepath "" 
+
+a=[ 1, 2, 3]
+y = "two"
+Log a[y]        // This will crash

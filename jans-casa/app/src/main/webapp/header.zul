@@ -1,0 +1,79 @@
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:zk="zk" xmlns="native">
+
+    <header class="flex justify-between pv2 shadow-4 bg-blank cust-header" if="${sessionContext.user ne null}">
+
+        <div class="flex">
+            <!-- logo -->
+            <div class="w1-ns"></div>
+            <div class="w4 mh4-ns tc">
+                <img src="${zkService.contextPath}${assetsService.logoUrl}" />
+            </div>
+            <div class="w1-ns"></div>
+
+            <!-- hamburguer -->
+            <div class="w3 tc">
+                <a href="javascript:partialCollapse()" class="dn di-ns green hover-green f2-cust">
+                    <i class="fas fa-bars" />
+                </a>
+                <a href="javascript:collapse()" class="di dn-ns green hover-green f2-cust">
+                    <i class="fas fa-bars" />
+                </a>
+            </div>
+        </div>
+
+        <!-- notification badge -->
+
+        <!-- drop-down menu -->
+        <nav class="ph3">
+            <z:div class="dropdown" viewModel="@('io.jans.casa.ui.vm.HeaderViewModel')">
+                <a href="javascript:;" class="dropdown-toggle gray hover-dark-gray text-decoration-none" role="button" id="dropdownMenu"
+                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span class="ps-2">
+                        <z:zk if="${empty sessionContext.user.pictureURL}">
+                            <i class="fas fa-user f2-cust pt1" />
+                        </z:zk>
+                        <z:zk unless="${empty sessionContext.user.pictureURL}">
+                            <img src="${sessionContext.user.pictureURL}" class="w2 br-100 miw-2r"/>
+                        </z:zk>
+                    </span>
+                    <span class="dn di-ns f6">
+                        ${c:escapeXML(
+                        empty sessionContext.user.lastName ?
+                        (empty sessionContext.user.givenName ? c:l('general.welcome') : c:cat4(c:l('general.welcome'), ' ', sessionContext.user.givenName, ' '))
+                        : c:cat4(sessionContext.user.givenName, ' ', sessionContext.user.lastName, ' ')
+                        )}
+                        <i class="fas fa-chevron-down f7" style="padding-top:2px" />
+                    </span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end f7 shadow-5 br1 mt2 bw0 miw-2r w4" aria-labelledby="dropdownMenu">
+                    <li class="pv1 pl2 pr3 bg-white-70">
+                        <a class="link hover-green gray db" href="#" target="_blank">
+                            <i class="fas fa-question-circle" />&amp;nbsp; ${labels.general.help}
+                        </a>
+                    </li>
+
+                    <z:div children="@load(vm.contextMenuItems)">
+                        <zk:template name="children">
+                            <z:include src="${c:cat3(each.x, '/', each.y.contentsUrl)}">
+                                <zk:attribute name="base">${each.x}</zk:attribute>
+                                <zk:attribute name="priority">${each.y.priority}</zk:attribute>
+                            </z:include>
+                        </zk:template>
+                    </z:div>
+
+                    <div class="dropdown-divider" />
+
+                    <li class="pv1 pl2 pr3 bg-white-70">
+                        <z:span onClick="@('logoutFromAuthzServer')">
+                            <a class="link hover-green gray db" href="javascript:;">
+                                <i class="fas fa-sign-out-alt" />&amp;nbsp; ${labels.general.logout}
+                            </a>
+                        </z:span>
+                    </li>
+                </ul>
+            </z:div>
+        </nav>
+
+    </header>
+
+</z:zk>

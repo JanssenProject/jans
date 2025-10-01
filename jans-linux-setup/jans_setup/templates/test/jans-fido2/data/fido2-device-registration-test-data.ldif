@@ -1,0 +1,29 @@
+# FIDO2 Device Registration Test Data
+
+# Test user for FIDO2 device registration
+dn: inum=B1F3-AEAE-B798,ou=people,o=jans
+objectClass: top
+objectClass: jansCustomPerson
+objectClass: jansPerson
+uid: test_fido_user
+mail: test_fido_user@test.org
+givenName: Test
+sn: FidoUser
+cn: Test FidoUser
+jansStatus: active
+userPassword: {SSHA}test_fido_password
+inum: B1F3-AEAE-B798
+creationDate: 20240101000000Z
+
+# Test FIDO2 device registration entry
+dn: jansId=test-device-1,ou=fido2_register,inum=B1F3-AEAE-B798,ou=people,o=jans
+objectClass: top
+objectClass: jansFido2RegistrationEntry
+jansId: test-device-1
+displayName: Test Security Key
+jansStatus: registered
+jansApp: https://%(hostname)s
+jansRegistrationData: {"username":"test_fido_user","origin":"https://%(hostname)s","type":"public-key","id":"test-device-1","rawId":"test-device-1","response":{"attestationObject":"test-attestation","clientDataJSON":"test-client-data"},"transports":["usb","nfc"]}
+jansCodeChallenge: test-challenge
+jansCodeChallengeMethod: S256
+creationDate: 20240101000000Z 

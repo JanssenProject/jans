@@ -1,0 +1,1083 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>io.jans</groupId>
+	<artifactId>jans-bom</artifactId>
+	<packaging>pom</packaging>
+	<name>jans-bom</name>
+	<version>0.0.0-nightly</version>
+
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.min-version>3.0.3</maven.min-version>
+
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+
+		<httpcore.version>4.4.16</httpcore.version>
+		<httpclient.version>4.5.14</httpclient.version>
+
+		<resteasy.version>6.2.12.Final</resteasy.version>
+		<richfaces.version>4.5.19-gluu.Final</richfaces.version>
+		<weld.version>4.0.3.Final</weld.version>
+	
+		<org.omnifaces.omnifaces.version>4.0</org.omnifaces.omnifaces.version>
+		<org.glassfish.jakarta.json.version>2.0.1</org.glassfish.jakarta.json.version>
+		<org.hibernate.validator.version>7.0.5.Final</org.hibernate.validator.version>
+		<org.hibernate.validator.cdi.version>7.0.5.Final</org.hibernate.validator.cdi.version>
+		<org.jboss.annotations.api.version>2.0.1.Final</org.jboss.annotations.api.version>
+		
+		<jakarta.ejb.api.version>4.0.1</jakarta.ejb.api.version>
+		<jakarta.mail.api.version>2.1.2</jakarta.mail.api.version>
+		<jakarta.mail.version>2.0.1</jakarta.mail.version>
+
+		<jakarta.websocket.api.version>2.1.0</jakarta.websocket.api.version>
+		<jakarta.xml.bind.api.version>3.0.1</jakarta.xml.bind.api.version>
+		<org.glassfish.jakarta.el.api.version>5.0.0-M1</org.glassfish.jakarta.el.api.version>
+		<jakarta.el.api.version>6.0.1</jakarta.el.api.version>
+		<jakarta.servlet.jsp-api.version>4.0.0</jakarta.servlet.jsp-api.version>
+		
+
+		<jackson.bom.version>2.13.4.20221013</jackson.bom.version>
+		<jackson.version>2.15.0</jackson.version>
+		<jackson.databind.version>2.13.4.2</jackson.databind.version>
+		<json.version>20231013</json.version>
+
+		<log4j.version>2.23.1</log4j.version>
+		<slf4j.version>1.7.36</slf4j.version>
+
+		<guava.version>32.1.1-jre</guava.version>
+	
+		<aws.sns.version>1.12.708</aws.sns.version>
+		<jackrabbit.version>2.22.2</jackrabbit.version>
+
+		<bc.version>1.79</bc.version>
+		<junit.jupiter.version>5.9.2</junit.jupiter.version>
+		<mockito.version>5.1.1</mockito.version>
+
+		<jetty.version>11.0.24</jetty.version>
+	</properties>
+
+	<repositories>
+        <repository>
+           <id>github</id>
+           <name>GitHub Packages</name>
+           <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+        </repository>
+		<repository>
+			<id>central</id>
+			<name>Maven Repository Switchboard</name>
+			<layout>default</layout>
+			<url>https://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
+			<id>bouncycastle</id>
+			<name>Bouncy Castle</name>
+			<url>https://repo1.maven.org/maven2/org/bouncycastle</url>
+		</repository>
+		<repository>
+			<id>jans</id>
+			<name>Janssen project repository</name>
+			<url>https://maven.jans.io/maven</url>
+		</repository>
+		<repository>
+			<id>gluu</id>
+			<name>Gluu repository</name>
+			<url>https://maven.gluu.org/maven</url>
+		</repository>
+		<repository>
+			<id>mulesoft</id>
+			<name>mulesoft</name>
+			<url>https://repository.mulesoft.org/nexus/content/repositories/releases</url>
+		</repository>
+  	</repositories>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Core -->
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-demo-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-jsf-util</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-security-extension-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-exception-extension-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-radius</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-saml</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-util</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-timer-weld</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-cache</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-message</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-document-store</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-annotation</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-filter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-couchbase</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-sql</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-spanner</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-hybrid</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-ldap</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-standalone</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-util</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-doc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-script</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-auth-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-auth-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-auth-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-auth-persistence-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- Google -->
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.google.http-client</groupId>
+			    <artifactId>google-http-client-jackson2</artifactId>
+			    <version>1.42.2</version>
+			</dependency>
+
+			<!-- Security -->
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk18on</artifactId>
+				<version>${bc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk18on</artifactId>
+				<version>${bc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcmail-jdk18on</artifactId>
+				<version>${bc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bc-fips</artifactId>
+				<version>(,1.0.2.4]</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-fips</artifactId>
+				<version>1.0.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcmail-fips</artifactId>
+				<version>1.0.4</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nimbusds</groupId>
+				<artifactId>nimbus-jose-jwt</artifactId>
+				<version>10.0.2</version>
+			</dependency>
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>oauth2-oidc-sdk</artifactId>
+                <version>11.7</version>
+            </dependency>
+
+			<!-- Weld -->
+			<dependency>
+				<groupId>org.jboss.weld</groupId>
+				<artifactId>weld-core-parent</artifactId>
+				<version>${weld.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+			
+			<!-- Jakarta lib required but not part of Weld dependency -->
+			<dependency>
+				<groupId>jakarta.ejb</groupId>
+				<artifactId>jakarta.ejb-api</artifactId>
+				<version>${jakarta.ejb.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.mail</groupId>
+				<artifactId>jakarta.mail-api</artifactId>
+				<version>${jakarta.mail.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.angus</groupId>
+				<artifactId>angus-mail</artifactId>
+				<version>2.0.4</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>jakarta.mail</artifactId>
+				<version>${jakarta.mail.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.websocket</groupId>
+				<artifactId>jakarta.websocket-api</artifactId>
+				<version>${jakarta.websocket.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>${jakarta.xml.bind.api.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>jakarta.ws.rs</groupId>
+			    <artifactId>jakarta.ws.rs-api</artifactId>
+			    <version>3.1.0</version>
+			</dependency>
+
+			<!-- 	<dependency>
+				<groupId>javax.enterprise</groupId>
+				<artifactId>cdi-api</artifactId>
+				<version>2.0.SP1</version>
+				<scope>provided</scope>
+			</dependency> 
+			<dependency>
+				<groupId>javax.inject</groupId>
+				<artifactId>javax.inject</artifactId>
+				<version>1</version>
+			</dependency>-->
+			<!-- <dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>2.0.1.Final</version>
+			</dependency> -->
+			<!-- <dependency>
+				<groupId>javax.el</groupId>
+				<artifactId>el-api</artifactId>
+				<version>${uel-api.version}</version>
+				<scope>provided</scope>
+			</dependency>  -->
+			<!-- <dependency>
+				<groupId>org.glassfish.web</groupId>
+				<artifactId>el-impl</artifactId>
+				<version>${uel-impl.version}</version>
+			</dependency> -->
+			<!-- <dependency>
+				<groupId>com.sun.faces</groupId>
+				<artifactId>jsf-api</artifactId>
+				<version>${jsf-api.version}</version>
+			</dependency> -->
+
+			<!-- glassfish -->	
+			<dependency>
+    			<groupId>org.glassfish</groupId>
+			    <artifactId>jakarta.el</artifactId>
+				<version>${org.glassfish.jakarta.el.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.el</groupId>
+				<artifactId>jakarta.el-api</artifactId>
+				<version>${jakarta.el.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.servlet.jsp</groupId>
+				<artifactId>jakarta.servlet.jsp-api</artifactId>
+				<version>${jakarta.servlet.jsp-api.version}</version>
+			</dependency>
+			<!-- <dependency>
+				<groupId>org.glassfish</groupId>
+				<artifactId>jakarta.faces</artifactId>
+			</dependency> -->
+			<dependency>
+		    	<groupId>org.glassfish</groupId>
+    			<artifactId>jakarta.json</artifactId>
+    			<version>${org.glassfish.jakarta.json.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.jboss.spec.javax.annotation</groupId>
+			    <artifactId>jboss-annotations-api_1.3_spec</artifactId>
+			    <version>${org.jboss.annotations.api.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<!-- 	<dependency>
+				<groupId>javax.websocket</groupId>
+				<artifactId>javax.websocket-api</artifactId>
+				<version>1.1</version>
+			</dependency> -->
+
+			<!-- <dependency>
+				<groupId>javax.persistence</groupId>
+				<artifactId>persistence-api</artifactId>
+				<version>0.0.0-nightly</version>
+			</dependency> -->
+
+			<!-- hibernate -->
+			<dependency>
+			    <groupId>org.hibernate</groupId>
+			    <artifactId>hibernate-validator</artifactId>
+			    <version>${org.hibernate.validator.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.hibernate</groupId>
+			    <artifactId>hibernate-validator-cdi</artifactId>
+			    <version>${org.hibernate.validator.cdi.version}</version>
+			</dependency>
+
+			<!-- omnifaces -->
+			<dependency>
+			    <groupId>org.omnifaces</groupId>
+			    <artifactId>omnifaces</artifactId>
+			    <version>${org.omnifaces.omnifaces.version}</version>
+			</dependency>
+
+			<!-- Richfaces. Deprecated-->
+			<dependency>
+				<groupId>org.richfaces</groupId>
+				<artifactId>richfaces</artifactId>
+				<version>${richfaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.richfaces</groupId>
+				<artifactId>richfaces-core</artifactId>
+				<version>${richfaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.richfaces</groupId>
+				<artifactId>richfaces-a4j</artifactId>
+				<version>${richfaces.version}</version>
+			</dependency>
+
+			<!-- Commons libs -->
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>2.17.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.18.0</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.15</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-exec</artifactId>
+				<version>1.3</version>
+			</dependency>
+			<dependency>
+			    <groupId>commons-beanutils</groupId>
+			    <artifactId>commons-beanutils</artifactId>
+			    <version>1.11.0</version>
+			</dependency>
+   			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-configuration2</artifactId>
+				<version>2.11.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>1.12.0</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-collections</groupId>
+				<artifactId>commons-collections</artifactId>
+				<version>3.2.2</version>
+			</dependency>
+			<dependency>
+				<groupId>io.prometheus</groupId>
+				<artifactId>simpleclient_common</artifactId>
+				<version>0.9.0</version>
+			</dependency>
+            <dependency>
+                <groupId>net.agkn</groupId>
+                <artifactId>hll</artifactId>
+                <version>1.6.0</version>
+            </dependency>
+
+			<!-- Logging -->
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-api</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-1.2-api</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-core</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-jul</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-slf4j-impl</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-iostreams</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>${slf4j.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jul-to-slf4j</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-simple</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+
+			<!-- Jackson -->
+			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson.bom.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jaxb-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson.databind.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.datatype</groupId>
+				<artifactId>jackson-datatype-json-org</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.dataformat</groupId>
+				<artifactId>jackson-dataformat-cbor</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<!-- 	<dependency>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>2.3.3</version>
+			</dependency> -->
+
+			<!-- Jettison -->
+			<dependency>
+				<groupId>org.codehaus.jettison</groupId>
+				<artifactId>jettison</artifactId>
+				<version>1.5.4</version>
+			</dependency>
+
+			<!-- Jython -->
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jython-standalone</artifactId>
+				<version>2.7.3</version>
+			</dependency>
+
+			<!-- Jackrabbit content repository --> 
+			<dependency> 
+			        <groupId>javax.jcr</groupId> 
+			        <artifactId>jcr</artifactId> 
+			        <version>2.0</version> 
+			 </dependency> 
+        		 <dependency>
+			        <groupId>org.apache.jackrabbit</groupId>
+		        	<artifactId>jackrabbit-core</artifactId>
+			        <version>${jackrabbit.version}</version>
+			 </dependency>
+			 <dependency>
+			    	<groupId>org.apache.jackrabbit</groupId>
+			    	<artifactId>jackrabbit-jcr-rmi</artifactId>
+			    	<version>2.21.25</version>
+			 </dependency>
+			 <dependency>
+			    	<groupId>org.apache.jackrabbit</groupId>
+			    	<artifactId>jackrabbit-webdav</artifactId>
+			    	<version>${jackrabbit.version}</version>
+			 </dependency>
+
+			<!-- RestEasy -->
+			<dependency>
+			    <groupId>org.jboss.resteasy</groupId>
+			    <artifactId>resteasy-bom</artifactId>
+			    <version>${resteasy.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
+			<!-- JSON -->
+			<dependency>
+				<groupId>org.json</groupId>
+				<artifactId>json</artifactId>
+				<version>${json.version}</version>
+			</dependency>
+
+			<!-- JSON -->
+			<dependency>
+				<groupId>com.fasterxml</groupId>
+				<artifactId>aalto-xml</artifactId>
+				<version>1.3.0</version>
+			</dependency>
+
+			<!-- Cache -->
+			<dependency>
+				<groupId>net.sf.ehcache</groupId>
+				<artifactId>ehcache-core</artifactId>
+				<version>2.10.9.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>net.jodah</groupId>
+				<artifactId>expiringmap</artifactId>
+				<version>0.5.10</version>
+			</dependency>
+			<dependency>
+				<groupId>net.spy</groupId>
+				<artifactId>spymemcached</artifactId>
+				<version>2.12.3</version>
+			</dependency>
+			<dependency>
+				<groupId>redis.clients</groupId>
+				<artifactId>jedis</artifactId>
+				<version>3.9.0</version>
+			</dependency>
+
+			<!-- HTTP client -->
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${httpclient.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore</artifactId>
+				<version>${httpcore.version}</version>
+			</dependency>
+
+			<!-- SAML -->
+			<dependency>
+				<groupId>org.apache.ws.security</groupId>
+				<artifactId>wss4j</artifactId>
+				<version>1.6.19</version>
+			</dependency>
+			<dependency>
+				<groupId>org.opensaml</groupId>
+				<artifactId>opensaml</artifactId>
+				<version>2.6.4</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.apache.santuario</groupId>
+			    <artifactId>xmlsec</artifactId>
+			    <version>2.2.6</version>
+			</dependency>
+
+			<!-- LDAP -->
+			<dependency>
+				<groupId>com.unboundid</groupId>
+				<artifactId>unboundid-ldapsdk</artifactId>
+				<version>6.0.11</version>
+			</dependency>
+
+			<!-- Couchbase -->
+			<dependency>
+				<groupId>com.couchbase.client</groupId>
+				<artifactId>java-client</artifactId>
+				<version>3.4.11</version>
+			</dependency>
+
+			<!-- SQL JDBC Drivers -->
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-pool2</artifactId>
+				<version>2.12.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-dbcp2</artifactId>
+				<version>2.12.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.mysql</groupId>
+				<artifactId>mysql-connector-j</artifactId>
+				<version>8.4.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java</artifactId>
+				<version>3.25.5</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.postgresql</groupId>
+			    <artifactId>postgresql</artifactId>
+			    <version>42.7.7</version>
+			</dependency>
+
+			<!-- SQL Query -->
+			<dependency>
+			    <groupId>com.querydsl</groupId>
+			    <artifactId>querydsl-sql</artifactId>
+			    <version>5.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.jsqlparser</groupId>
+				<artifactId>jsqlparser</artifactId>
+				<version>4.5</version>
+			</dependency>
+
+			<!-- Cloud Spanner -->
+			<dependency>
+			    <groupId>com.google.cloud</groupId>
+			    <artifactId>google-cloud-spanner</artifactId>
+			    <version>6.77.0</version>
+			</dependency>
+
+			<!-- Metrics -->
+			<dependency>
+				<groupId>io.dropwizard.metrics</groupId>
+				<artifactId>metrics-core</artifactId>
+				<version>4.2.12</version>
+			</dependency>
+
+			<!-- Timer -->
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>2.5.0</version>
+			</dependency>
+
+			<!-- AWS SNS -->
+			<dependency>
+				<groupId>com.amazonaws</groupId>
+				<artifactId>aws-java-sdk-sns</artifactId>
+				<version>${aws.sns.version}</version>
+			</dependency>
+
+			<!-- Other -->
+			<dependency>
+				<groupId>org.reflections</groupId>
+				<artifactId>reflections</artifactId>
+				<version>0.10.2</version>
+			</dependency>
+			<!-- <dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>3.1.0</version>
+				<scope>provided</scope>
+			</dependency> -->
+			<dependency>
+				<groupId>org.dom4j</groupId>
+				<artifactId>dom4j</artifactId>
+				<version>2.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.activation</groupId>
+				<artifactId>activation</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+
+			<!-- Velocity -->
+			<dependency>
+				<groupId>org.apache.velocity</groupId>
+				<artifactId>velocity-engine-core</artifactId>
+				<version>2.3</version>
+			</dependency>
+
+			<!-- Date/time utils -->
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time</artifactId>
+				<version>2.12.0</version>
+			</dependency>
+
+			<!-- Tests -->
+			<dependency>
+				<groupId>org.testng</groupId>
+				<artifactId>testng</artifactId>
+				<version>7.8.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.13.2</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.weld</groupId>
+				<artifactId>weld-junit5</artifactId>
+				<version>4.0.0.Final</version>
+				<scope>test</scope>
+			</dependency>
+			<!-- JUnit Jupiter -->
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-api</artifactId>
+				<version>${junit.jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>${junit.jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-params</artifactId>
+				<version>${junit.jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<!-- Mockito -->
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-inline</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-junit-jupiter</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- java compiler lib -->
+            <dependency>
+                <groupId>net.openhft</groupId>
+                <artifactId>compiler</artifactId>
+                <version>2.23ea0</version>
+            </dependency>
+
+			<!-- Jetty -->
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-deploy</artifactId>
+				<version>12.0.24</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<!--Can be removed once TestNG dependency contains JCommander 1.74 or 
+				newer -->
+			<dependency>
+				<groupId>com.beust</groupId>
+				<artifactId>jcommander</artifactId>
+				<version>1.82</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.seleniumhq.selenium</groupId>
+				<artifactId>htmlunit-driver</artifactId>
+				<version>4.13.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.htmlunit</groupId>
+				<artifactId>htmlunit</artifactId>
+				<version>4.13.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.seleniumhq.selenium</groupId>
+				<artifactId>htmlunit3-driver</artifactId>
+				<version>4.27.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.w3c.css</groupId>
+				<artifactId>sac</artifactId>
+				<version>1.3</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>3.1.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.5.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>3.1.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.3.0</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>test-jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>3.3.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.3.1</version>
+					<configuration>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>4.0.0-M7</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.2.1</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>${jetty.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.8.0</version>
+					<configuration>
+						<failOnError>false</failOnError>
+						<additionalJOption>-Xdoclint:none</additionalJOption>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.owasp</groupId>
+					<artifactId>dependency-check-maven</artifactId>
+					<version>5.2.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.10</version>
+				</plugin>
+				<plugin>
+					<groupId>com.github.spotbugs</groupId>
+					<artifactId>spotbugs-maven-plugin</artifactId>
+					<version>4.7.3.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>buildnumber-maven-plugin</artifactId>
+					<version>3.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

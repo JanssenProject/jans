@@ -1,0 +1,11 @@
+{
+  "app_id": "admin_ui_id",
+  "cedar_entity_mapping": {
+    "entity_type": "Jans::Issue",
+    "id": "admin_ui_id"
+  },
+  "name": "My App",
+  "permission": "view_clients",
+  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+  "loc": "US"
+}

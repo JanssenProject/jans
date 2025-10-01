@@ -1,0 +1,8 @@
+version: 1
+dn: ou=admin-ui,ou=configuration,o=jans
+objectClass: jansAppConf
+objectClass: top
+jansConfDyn: %(role_scope_mappings)s
+jansRevision: 1
+ou: admin-ui
+

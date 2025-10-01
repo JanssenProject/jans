@@ -1,0 +1,7 @@
+permit(
+    principal is Jans::Workload,
+    action in [Jans::Action::"Update"],
+    resource is Jans::Issue
+)when{
+    principal.org_id == resource.org_id
+};

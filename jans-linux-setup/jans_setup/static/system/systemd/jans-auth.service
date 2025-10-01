@@ -1,0 +1,13 @@
+[Unit]
+Description=Janssen Auth Server
+After=%(order_jans_auth_service)s
+
+[Service]
+Type=forking
+ExecStart=%(jans_scripts_dir)s/jans-auth start
+ExecStop=%(jans_scripts_dir)s/jans-auth stop
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target

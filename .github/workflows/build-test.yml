@@ -1,0 +1,315 @@
+name: Janssen Build & Test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "jans-**"
+      - "agama"
+  schedule:
+    - cron: '0 8 * * *'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "jans-**"
+      - "agama"
+  workflow_dispatch:
+    inputs:
+      project:
+        type: choice
+        options:
+          - "jans-bom"
+          - "jans-orm"
+          - "jans-core"
+          - "jans-lock/lock-server"
+          - "agama"
+          - "jans-auth-server"
+          - "jans-link"
+          - "jans-fido2"
+          - "jans-scim"
+          - "jans-keycloak-link"
+          - "jans-config-api"
+          - "jans-keycloak-integration"
+          - "jans-casa"
+          - "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
+        description: 'Service'
+        required: true
+        default: "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
+concurrency:
+  group: run-once
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  cleanup:
+    runs-on: ubuntu-22.04
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+    - name: Get version ID for 0.0.0-nightly
+      id: get_version_id
+      run: |
+        page=1
+        services=""
+        while true; do
+          response=$(gh api -H "Accept: application/vnd.github+json" \
+            /orgs/JanssenProject/packages?package_type=maven\&per_page=100\&page=$page)
+          names=$(echo "$response" | jq -r '.[].name')
+          if [ -z "$names" ]; then
+            break
+          fi
+          services="$services $names"
+          page=$((page + 1))
+        done
+
+        services=$(echo "$services" | tr '\n' ' ' | sed 's/ *$//')
+        echo "Services: $services"
+          for service in $services; do
+            echo "Checking $service"
+            version_id=$(gh api -H "Accept: application/vnd.github+json" \
+              /orgs/JanssenProject/packages/maven/"${service}"/versions \
+              | jq -r '.[] | select(.name == "0.0.0-nightly") | .id')
+            echo "version_id=$version_id" >> $GITHUB_ENV
+            gh api --method DELETE \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /orgs/JanssenProject/packages/maven/"${service}"/versions/"${version_id}" || echo "Failed to delete $service"
+          done
+
+  prep-matrix:
+    needs: cleanup
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        with:
+          egress-policy: audit
+      - id: set-matrix
+        run: |
+            projects="${{ github.event.inputs.project }}"
+            if [ -z "$projects" ]; then
+              projects="jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
+            fi
+            pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+            DIRECTORIES_CHANGED=$(gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep "jans-" || echo "$projects")
+            changed_projects=""
+            for dir in $DIRECTORIES_CHANGED; do
+              for project in $projects; do
+                if [[ "$dir" == "$project" ]]; then
+                  changed_projects="$changed_projects $project"
+                fi
+              done
+            done
+            echo "Changed projects: $changed_projects"
+            matrix="{\"include\":["
+            for project in $changed_projects; do
+              matrix="$matrix{\"service\":\"$project\",\"maven_skip_tests\":true},"
+            done
+            matrix="${matrix%,}]}"
+            echo $matrix
+            echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  build-with-disabled-tests:
+    runs-on: ubuntu-22.04
+    needs: prep-matrix
+    permissions:
+      contents: read
+      packages: write
+    env:
+      VERSION_NAME: main
+      MAVEN_SKIP_TESTS: true
+      PROFILE_NAME: "default"
+
+    strategy:
+      max-parallel: 1
+      matrix: ${{ fromJson(needs.prep-matrix.outputs.matrix) }}
+      fail-fast: false
+
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+    - name: Checkout code
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        ref: ${{ github.event.inputs.branch }}
+
+    - name: Set up Java 17
+      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      with:
+        java-version: '17'
+        distribution: 'adopt'
+
+    - name: Set up Maven
+      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      with:
+        java-version: '17'
+        distribution: 'adopt'
+        cache: 'maven'
+
+    - name: Build ${{ matrix.service }}
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          revision=${{ github.sha }}-nightly
+          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install -Drevision=$revision
+        else
+          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install
+        fi
+
+    - name: Publish to GitHub Packages
+      run: mvn -B deploy -Dmaven.test.skip=${{ matrix.maven_skip_tests }} -Dcfg=${{ env.PROFILE_NAME }}
+      working-directory: ${{ matrix.service }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+
+    - name: Archive results
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: build-results
+        path: ${{ matrix.service }}/target
+
+    - name: Send notification on failure
+      if: failure()
+      run: echo "Build failed"
+
+  run-tests:
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.project == 'jans-bom, jans-orm, jans-core, jans-lock/lock-server, agama, jans-auth-server, jans-link, jans-fido2, jans-scim, jans-keycloak-link, jans-config-api, jans-keycloak-integration, jans-casa')
+    permissions:
+      contents: read
+      packages: write
+    needs: cleanup
+    runs-on: ubuntu-22.04
+    env:
+      MAVEN_SKIP_TESTS: false
+      CONTAINER_NAME_SPANNER: ubuntu20-spanner
+      CONTAINER_NAME_CB: ubuntu20-couchbase
+      CONTAINER_NAME_LDAP: ubuntu20-ldap
+      CONTAINER_NAME_MYSQL: ubuntu20-mysql
+      CONTAINER_NAME_POSTGRESQL: ubuntu20-postgresql
+      DEVELOPMENT_BUILD: true
+      SKIP_FINDBUGS: true
+      DEPENDENCY_CHECK: true
+      VERSION_NAME: main
+      PROFILE_NAME: default
+    strategy:
+      max-parallel: 5
+      matrix:
+        persistence:
+          - "MYSQL"
+          - "PGSQL"
+      fail-fast: false
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+    - name: Checkout code
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        ref: ${{ github.event.inputs.branch }}
+
+    - name: Set up Java 17
+      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      with:
+        java-version: '17'
+        distribution: 'adopt'
+
+    - name: Set up Maven
+      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      with:
+        java-version: '17'
+        distribution: 'adopt'
+        cache: 'maven'
+
+    - name: Set up Go
+      uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+      with:
+        go-version: 1.18
+
+    - name: Import GPG key
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
+      with:
+        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "mo-auto"
+        git config --global user.email "54212639+mo-auto@users.noreply.github.com"
+        git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+
+    - name: Run Jans Monolith
+      env:
+        JANS_FQDN: demoexample.jans.io
+        EXT_IP: $(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+        JANS_BUILD_COMMIT: main
+      run: |
+        export ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+        sudo chmod a+x automation/startjanssenmonolithdemo.sh
+        sudo RUN_TESTS=true bash ./automation/startjanssenmonolithdemo.sh "demoexample.jans.io" "${{ matrix.persistence }}" "$ip" "${{ github.sha }}"
+
+        echo "generating rdbms docs for ${{ matrix.persistence-backends }}..."
+        git clone  https://mo-auto:${{ secrets.MOAUTO_WORKFLOW_TOKEN }}@github.com/JanssenProject/jans.git
+        cd jans
+        git config pull.rebase true
+        git checkout -b cn-jans-update-${{ matrix.persistence-backends }}-auto-generated-docs || echo "Branch exists"
+        git pull origin cn-jans-update-${{ matrix.persistence-backends }}-auto-generated-docs || echo "Nothing to pull"
+        sudo bash ./automation/docs/generate-rdbms-docs.sh "$persistence" || echo "generating rdbms docs failed for ${{ matrix.persistence-backends }}!!!"
+        git add . || echo "generating rdbms docs failed !!!"
+        git commit -a -S -m "docs: auto-generated ${{ matrix.persistence-backends }} docs" || echo "Nothing to commit"
+        git push --set-upstream origin cn-jans-update-${{ matrix.persistence-backends }}-auto-generated-docs || echo "generating rdbms docs failed !!!"
+        MESSAGE="fix(docs): autogenerate ${{ matrix.persistence-backends }} RDBMS docs"
+        gh pr create --body "Auto generated RDBMS docs" --title "${MESSAGE}" || echo "PR exists"
+        cd ..
+        echo "generating rdbms docs for ${{ matrix.persistence-backends }} done"
+
+        export JANS_URL=https://demoexample.jans.io
+        export JANS_CLIENT_ID=9876baac-de39-4c23-8a78-674b59df8c09
+        export JANS_CLIENT_SECRET=1t5Fin3#security
+        export JANS_INSECURE_CLIENT=true
+        export TF_ACC=1
+        cd terraform-provider-jans
+        go install github.com/jstemmer/go-junit-report/v2@latest
+        go test -v 2>&1 ./... | go-junit-report > /tmp/reports/${{ matrix.persistence-backends }}report.xml
+        cd ..
+
+    - name: List Reports
+      run: |
+        ls /tmp/reports/
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: ${{ matrix.persistence }}-test-results
+        path: /tmp/reports
+
+    - name: Publish Test Report ${{ matrix.persistence }}
+      uses: starburstdata/action-testng-report@f245422953fb97ec5075d07782a1b596124b7cc4 # v1.0.5
+      with:
+          report_paths: /tmp/reports/${{ matrix.persistence }}*.xml
+          github_token: ${{ github.token }}
+          fail_if_empty: false
+
+    # - name: Publish Test Report Surefire
+    #   uses: scacap/action-surefire-report@v1
+    #   if: success() || failure()
+    #   with:
+    #     github_token: ${{ github.token }}
+    #     report_paths: /tmp/reports/**.xml

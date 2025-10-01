@@ -1,0 +1,16 @@
+ {
+	"clients": [
+	],
+	"deletable": false,
+	"expired": false,
+	"iconUri": "http://www.qa.org/qa_logo.png",
+	"name": "QAAddedResource",
+	"description": "QAAdded Resource",
+	"resources": [
+		"https://gluu.gasmyr.com/identity/restv1/passport/config"
+	],
+	"rev": "0",
+	"scopes": [
+		"inum=8CAD-B06E,ou=scopes,o=gluu"
+	]
+}

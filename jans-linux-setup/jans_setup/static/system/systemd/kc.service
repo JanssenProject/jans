@@ -1,0 +1,17 @@
+[Unit]
+Description=Keycloak Server
+After=%(order_saml_service)s
+
+[Service]
+Type=simple
+Environment="JAVA_HOME=%(jre_home)s"
+Environment="KEYCLOAK_ADMIN=admin"
+Environment="KEYCLOAK_ADMIN_PASSWORD=admin"
+Environment="JAVA_OPTS_APPEND=-Djans.base=%(jansBaseFolder)s"
+ExecStart=%(idp_config_data_dir)s/bin/kc.sh start-dev
+
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target

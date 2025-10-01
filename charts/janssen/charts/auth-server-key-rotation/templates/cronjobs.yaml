@@ -1,0 +1,109 @@
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: {{ include "auth-server-key-rotation.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: auth-server-key-rotation
+    release: {{ .Release.Name }}
+{{ include "auth-server-key-rotation.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (index .Values.global "auth-server-key-rotation" "customAnnotations" "cronjob") }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if index .Values.global "auth-server-key-rotation" "customAnnotations" "cronjob" }}
+{{ toYaml (index .Values.global "auth-server-key-rotation" "customAnnotations" "cronjob") | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  {{- if ne .Values.cronJobSchedule  "" }}
+  schedule: {{  index .Values.cronJobSchedule | quote }}
+   {{- else }}
+  schedule: "@every {{ .Values.keysLife }}h"
+   {{- end }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+        {{- with .Values.image.pullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 10}}
+        {{- end }}
+          dnsPolicy: {{ .Values.dnsPolicy | quote }}
+        {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.dnsConfig }}
+          dnsConfig:
+{{ toYaml . | indent 12 }}
+        {{- end }}
+          serviceAccountName: {{ .Values.global.serviceAccountName }}
+          containers:
+            - name: {{ include "auth-server-key-rotation.name" . }}
+              {{- if or (.Values.customScripts) (.Values.customCommand) }}
+              command:
+                {{- if .Values.customCommand }}
+                {{- toYaml .Values.customCommand | nindent 18 }}
+                {{- else }}
+                - /bin/sh
+                - -c
+                - |
+                    {{- with .Values.customScripts }}
+                    {{- toYaml . | replace "- " "" | nindent 20}}
+                    {{- end }}
+                    /app/scripts/entrypoint.sh
+                {{- end}}
+              {{- end}}
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              env:
+                {{- include "auth-server-key-rotation.usr-envs" . | indent 16 }}
+                {{- include "auth-server-key-rotation.usr-secret-envs" . | indent 16 }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              lifecycle:
+{{- toYaml .Values.lifecycle | nindent 16 }}
+              volumeMounts:
+              {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with (include "cn.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-config-cm
+                {{ if .Values.global.usrEnvs.secret }}
+                - secretRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+                {{ if .Values.global.usrEnvs.normal }}
+                - configMapRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+              {{- if .Values.global.cloud.testEnviroment }}
+              resources: {}
+              {{- else }}
+              resources:
+{{- toYaml .Values.resources | nindent 16 }}
+              {{- end }}
+              args: ["certmanager", "patch", "auth", "--opts", "interval:{{ .Values.keysLife }}", "--opts", "key-strategy:{{ .Values.keysStrategy }}", "--opts", "privkey-push-delay:{{ .Values.keysPushDelay }}", "--opts", "privkey-push-strategy:{{ .Values.keysPushStrategy }}"]
+          volumes:
+          {{- with .Values.volumes }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with (include "cn.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
+          restartPolicy: Never
+          {{- if .Values.nodeSelector }}
+          nodeSelector:
+{{- toYaml .Values.nodeSelector | nindent 12 }}
+          {{- end }}

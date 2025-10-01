@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Properties>
+        <Property name="lock.log.console.prefix" value="jans-auth-lock" />
+    </Properties>
+    <Appenders>
+        <Console name="Lock_Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="$log_prefix%d{dd-MM-yyyy HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
+        </Console>
+
+        <RollingFile name="JANS_LOCK_FILE" fileName="${sys:log.base}/logs/jans-lock.log" filePattern="${sys:log.base}/logs/jans-lock-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+
+            <Policies>
+                <SizeBasedTriggeringPolicy size="5 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="io.jans.lock" level="$lock_log_level" additivity="false">
+            <AppenderRef ref="$lock_log_target" />
+        </Logger>
+    </Loggers>
+
+</Configuration>

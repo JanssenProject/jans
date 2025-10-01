@@ -1,0 +1,61 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:b="http://bootsfaces.net/ui"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/login-extended-template.xhtml">
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
+			if="#{not identity.loggedIn}" />
+	</f:metadata>
+	<ui:define name="head">
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<script src="./js/Duo-Web-v2.min.js" />
+		<script>
+            Duo.init({
+                'host':'#{identity.getWorkingParameter('duo_host')}',
+                'sig_request':'#{identity.getWorkingParameter('duo_sig_request')}',
+                'post_action':'#{request.contextPath}/postlogin.htm',
+            });
+        </script>
+		<style type="text/css">
+		
+		#duo_iframe {
+    width: 100%;
+    min-width: 304px;
+    max-width: 100%;
+    height: 330px;
+    border: none;
+    border: none;
+	background: white;
+  }
+</style>
+	</ui:define>
+	<ui:define name="pageTitle">#{msgs['duologin.title']}</ui:define>
+	<ui:define name="body">
+		<form method="post" id="duo_form" />
+		<h:form id="loginForm2">
+			<h:panelGroup rendered="#{not identity.loggedIn}">
+				<b:panel title="#{msgs['duologin.login']}" look="primary"
+					style="margin:5% !important; margin-top:5px;" collapsible="false">
+					<div class="login-panel">
+						<ui:param name="client"
+							value="#{clientService.getClient(redirect.parameters['client_id'])}" />
+						<h:panelGroup rendered='#{!empty client.getLogoUri()}'>
+							<h:graphicImage url='#{client.getLogoUri()}' />
+						</h:panelGroup>
+						<iframe id="duo_iframe" width="100%" height="500" frameborder="0"></iframe>
+						<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
+							<p>
+								<a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['duologin.termsPrivacy']}</a>
+							</p>
+						</h:panelGroup>
+					</div>
+				</b:panel>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

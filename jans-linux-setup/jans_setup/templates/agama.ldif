@@ -1,0 +1,19 @@
+dn: ou=agama,o=jans
+objectClass: organizationalUnit
+objectClass: top
+ou: agama
+
+dn: ou=runs,ou=agama,o=jans
+objectClass: organizationalUnit
+objectClass: top
+ou: runs
+
+dn: ou=flows,ou=agama,o=jans
+objectClass: organizationalUnit
+objectClass: top
+ou: flows
+
+dn: ou=deployments,ou=agama,o=jans
+objectClass: organizationalUnit
+objectClass: top
+ou: deployments

@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.casa.casaServiceName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: casa
+{{ include "casa.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.casa.customAnnotations.service) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.casa.customAnnotations.service }}
+{{ toYaml .Values.global.casa.customAnnotations.service | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  {{- if .Values.global.alb.ingress }}
+  type: NodePort
+  {{- end }}
+  ports:
+    - port: {{ .Values.service.port }}
+      name: {{ .Values.service.name }}
+  selector:
+    app: {{ .Release.Name }}-{{ include "casa.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  sessionAffinity: {{ .Values.service.sessionAffinity }}
+  {{- with .Values.service.sessionAffinityConfig }}
+  sessionAffinityConfig:
+{{ toYaml . | indent 4 }}
+  {{- end }}

@@ -1,0 +1,30 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.hello.title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.helloworld.HelloWorldVM')"
+           self="@define(maincontent)">
+
+        <div class="${css['sectionsWrapper']} pt3">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.hello.title}</h2>
+                    <div class="mb2">
+                        <label>
+                            ${labels.hello.user_message} ${sessionContext.user.userName}
+                            <z:textbox class="${css.textInput} ml2" value="@bind(vm.message)" onOK="@('loadOrgName')" />
+                        </label>
+                    </div>
+                    <z:button label="${labels.hello.button_label}" class="${css.primaryButton}" onClick="@('loadOrgName')" />
+                </div>
+
+                <z:div class="${css.panel} w-100 tc" visible="@load(not empty vm.organizationName)">
+                    <z:label class="i f4" value="@load(c:cat3(c:l('hello.org_name'), ' ', c:toUpperCase(vm.organizationName)))" />
+                </z:div>
+            </section>
+        </div>
+    </z:div>
+
+</zk:zk>

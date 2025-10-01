@@ -1,0 +1,54 @@
+dn: inum=ADA6,ou=attributes,o=jans
+description: Scim First custom attribute
+displayName: Scim Custom First
+inum: ADA6
+jansAttrEditTyp: admin
+jansAttrEditTyp: user
+jansAttrName: scimCustomFirst
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansMultivaluedAttr: false
+jansSAML1URI: urn:jans:dir:attribute-def:scimCustomFirst
+jansSAML2URI: urn:oid:scimCustomFirst
+jansAttrViewTyp: admin
+jansScimCustomAttr: true
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+
+dn: inum=70F0,ou=attributes,o=jans
+description: Scim Second custom attribute
+displayName: Scim Custom Second
+inum: 70F0
+jansAttrEditTyp: admin
+jansAttrEditTyp: user
+jansAttrName: scimCustomSecond
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: generalizedTime
+jansMultivaluedAttr: true
+jansSAML1URI: urn:jans:dir:attribute-def:scimCustomSecond
+jansSAML2URI: urn:oid:scimCustomSecond
+jansAttrViewTyp: admin
+jansScimCustomAttr: true
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+
+dn: inum=653A,ou=attributes,o=jans
+description: Scim Third custom attribute
+displayName: Scim Custom Third
+inum: 653A
+jansAttrEditTyp: admin
+jansAttrEditTyp: user
+jansAttrName: scimCustomThird
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: numeric
+jansMultivaluedAttr: false
+jansSAML1URI: urn:jans:dir:attribute-def:scimCustomThird
+jansSAML2URI: urn:oid:scimCustomThird
+jansAttrViewTyp: admin
+jansScimCustomAttr: true
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+

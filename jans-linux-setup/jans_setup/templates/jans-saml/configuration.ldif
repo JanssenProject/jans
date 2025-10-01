@@ -1,0 +1,6 @@
+dn: ou=jans-saml,ou=configuration,o=jans
+jansConfDyn::%(saml_dynamic_conf_base64)s
+jansRevision: 1
+objectClass: top
+objectClass: jansAppConf
+ou: jans-saml

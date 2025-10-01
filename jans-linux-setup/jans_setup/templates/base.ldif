@@ -1,0 +1,188 @@
+dn: o=jans
+description: Welcome to Janssen!
+displayName: %(orgName)s
+jansOrgShortName: %(orgName)s
+jansThemeColor: 166309
+o: jans
+objectClass: top
+objectClass: jansOrganization
+
+dn: ou=people,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: people
+
+dn: ou=groups,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: groups
+
+dn: ou=attributes,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: attributes
+
+dn: ou=scopes,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: scopes
+
+dn: ou=clients,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: clients
+
+dn: ou=stat,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: stat
+
+dn: ou=par,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: par
+
+dn: ou=sessions,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: sessions
+
+dn: ou=tokens,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: tokens
+
+dn: ou=authorizations,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: authorizations
+
+dn: ou=scripts,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: scripts
+
+dn: ou=resetPasswordRequests,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: resetPasswordRequests
+
+dn: ou=uma,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: uma
+
+dn: ou=resources,ou=uma,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: resources
+
+dn: ou=pct,ou=uma,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: pct
+
+dn: ou=push,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: push
+
+dn: ou=application,ou=push,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: application
+
+dn: ou=device,ou=push,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: device
+
+dn: ou=fido2,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: fido2
+
+dn: ou=fido2_register,ou=fido2,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: fido2_register
+
+dn: ou=fido2_auth,ou=fido2,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: fido2_authenticate
+
+dn: ou=metric,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: metric
+
+dn: ou=sector_identifiers,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: sector_identifiers
+
+dn: ou=ciba,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: ciba
+
+dn: ou=trustRelationships,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: trustRelationships
+
+dn: ou=ssa,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: ssa
+
+dn: ou=trusted-idp,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: trusted-idp
+
+dn: ou=archived_jwks,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: archived_jwks
+
+dn: ou=node,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: node
+
+dn: ou=status_index_pool,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: status_index_pool
+
+dn: ou=session_status_index_pool,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: session_status_index_pool
+
+dn: ou=document,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: document
+
+dn: ou=lock,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: lock
+
+dn: ou=health,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: health
+
+dn: ou=log,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: log
+
+dn: ou=telemetry,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: telemetry

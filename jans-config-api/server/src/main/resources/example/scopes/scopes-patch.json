@@ -1,0 +1,2 @@
+
+[{ "op": "replace", "path": "/umaAuthorizationPolicies", "value": ["inum=2DAF-F995,ou=scripts,o=jans"] }]

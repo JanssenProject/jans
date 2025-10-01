@@ -1,0 +1,668 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>io.jans</groupId>
+	<artifactId>jans-auth-server-parent</artifactId>
+	<packaging>pom</packaging>
+	<version>0.0.0-nightly</version>
+	<name>Jans authentication server parent</name>
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<maven.min-version>3.0.3</maven.min-version>
+
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+
+		<jans.bom.version>${project.version}</jans.bom.version>
+
+		<jans-core.version>${project.version}</jans-core.version>
+		<jans-notify.version>${project.version}</jans-notify.version>
+		<jans-fido2.version>${project.version}</jans-fido2.version>
+
+		<jakarta.jms.api.version>2.0.3</jakarta.jms.api.version>
+		<activemq.version>5.16.8</activemq.version>
+
+		<jettison.version>1.5.4</jettison.version>
+
+		<slf4j.version>1.7.25</slf4j.version>
+
+		<swagger.version>2.2.10</swagger.version>
+
+		<jetty.version>12.0.25</jetty.version>
+
+        <arquillian.version>1.4.0.Final</arquillian.version>
+        <arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
+        <arquillian.drone.version>2.0.0.Final</arquillian.drone.version>
+        <arquillian.graphene.version>2.1.0.CR1</arquillian.graphene.version>
+		<arquillian.test.version>1.7.0.Alpha10</arquillian.test.version>
+		<arquillian.jetty.embedded.11.version>1.0.0.CR4</arquillian.jetty.embedded.11.version>
+		<arquillian.ingwar.tools.version>1.2.0</arquillian.ingwar.tools.version>
+
+
+		<shrinkwrap.version>2.1.0</shrinkwrap.version>
+		<!-- argLine property needs to stay as POM property so that JaCoCo plugin can append it at build time -->
+		<argLine>-Xms1024m -Xmx2048m -XX:+DisableExplicitGC</argLine>
+
+		<sonar.projectKey>JanssenProject_jans-auth-server</sonar.projectKey>
+		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+		<sonar.organization>janssenproject</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<weld.version>4.0.3.Final</weld.version>
+		<org.jboss.resteasy.client.microprofile.version>4.7.9.Final</org.jboss.resteasy.client.microprofile.version>
+        <jboss-jaxrs-api_3.0_spec.version>1.0.1.Final</jboss-jaxrs-api_3.0_spec.version>
+    </properties>
+
+	<prerequisites>
+		<maven>${maven.min-version}</maven>
+	</prerequisites>
+
+	<repositories>
+        <repository>
+           <id>github</id>
+           <name>GitHub Packages</name>
+           <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+        </repository>
+		<repository>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+			<id>jans</id>
+			<name>Janssen project repository</name>
+			<url>https://maven.jans.io/maven</url>
+		</repository>
+		<repository>
+			<id>gluu</id>
+			<name>Gluu project repository</name>
+			<url>https://maven.gluu.org/maven</url>
+		</repository>
+		<repository>
+			<id>bouncycastle</id>
+			<name>Bouncy Castle</name>
+			<url>https://repo1.maven.org/maven2/org/bouncycastle</url>
+		</repository>
+		<repository>
+			<id>mulesoft</id>
+			<name>mulesoft</name>
+			<url>https://repository.mulesoft.org/nexus/content/repositories/releases</url>
+		</repository>
+	</repositories>
+
+	<scm>
+		<url>https://github.com/JanssenProject/jans</url>
+		<connection>scm:git:git://github.com/JanssenProject/jans.git</connection>
+		<developerConnection>scm:git:git@github.com:JanssenProject/jans.git</developerConnection>
+	</scm>
+
+	<modules>
+        <module>model</module>
+        <module>agama/model</module>
+        <module>persistence-model</module>
+        <module>test-model</module>
+        <module>client</module>
+        <module>static</module>
+        <module>common</module>
+        <module>agama/engine</module>
+        <module>agama/inboundID</module>
+        <module>server</module>
+        <module>server-fips</module>
+    </modules>
+
+	<dependencyManagement>
+		<dependencies>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-bom</artifactId>
+                <version>${jans.bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+
+            <dependency>
+                <groupId>net.agkn</groupId>
+                <artifactId>hll</artifactId>
+                <version>1.6.0</version>
+            </dependency>
+
+
+			<!-- Weld -->
+			<dependency>
+				<groupId>org.jboss.weld</groupId>
+				<artifactId>weld-core-parent</artifactId>
+				<version>${weld.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
+         	<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
+			<dependency>
+				<groupId>com.wywy</groupId>
+				<artifactId>log4j-plugin-fluency</artifactId>
+				<version>1.3.2</version>
+			</dependency>
+			<!-- jans -->
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-auth-model</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-auth-persistence-model</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-auth-test-model</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-auth-common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-fido2-server</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-fido2-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-auth-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-auth-static</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-notify-client</artifactId>
+				<version>${jans-notify.version}</version>
+			</dependency>
+
+			<!-- Omnifaces -->
+			<!-- <dependency>
+				<groupId>org.omnifaces</groupId>
+				<artifactId>omnifaces</artifactId>
+			</dependency> -->
+
+			<!-- Microsoft -->
+			<dependency>
+				<groupId>com.github.microsoft</groupId>
+				<artifactId>TSS.Java</artifactId>
+				<version>0.3.0</version>
+			</dependency>
+
+			<!-- Jettison -->
+			<dependency>
+				<groupId>org.codehaus.jettison</groupId>
+				<artifactId>jettison</artifactId>
+				<version>${jettison.version}</version>
+			</dependency>
+
+			<!-- JMS -->
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-client</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-pool</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.googlecode.json-simple</groupId>
+				<artifactId>json-simple</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mvel</groupId>
+				<artifactId>mvel2</artifactId>
+				<version>2.4.14.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.antlr</groupId>
+				<artifactId>antlr-runtime</artifactId>
+				<version>3.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-net</groupId>
+				<artifactId>commons-net</artifactId>
+				<version>3.9.0</version>
+			</dependency>
+
+            <!-- Test -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>3.141.59</version>
+			<scope>test</scope>
+		</dependency>
+            <dependency>
+                <groupId>org.bitbucket.b_c</groupId>
+                <artifactId>jose4j</artifactId>
+                <version>0.7.9</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>23.0.0</version>
+            </dependency>
+
+	        <dependency>
+	            <groupId>org.eclipse.jetty.ee9</groupId>
+	            <artifactId>jetty-ee9-webapp</artifactId>
+	            <version>${jetty.version}</version>
+	            <scope>provided</scope>
+	        </dependency>
+
+	        <dependency>
+	            <groupId>org.eclipse.jetty</groupId>
+	            <artifactId>jetty-deploy</artifactId>
+	            <version>${jetty.version}</version>
+	            <scope>provided</scope>
+	        </dependency>
+
+	        <dependency>
+	            <!-- Jetty annotations needed for Servlet 3.1 support -->
+	            <groupId>org.eclipse.jetty.ee9</groupId>
+	            <artifactId>jetty-ee9-annotations</artifactId>
+	            <version>${jetty.version}</version>
+	            <scope>provided</scope>
+	        </dependency>
+
+	        <dependency>
+	            <!-- Jetty plus and naming required for testing resource injections -->
+	            <groupId>org.eclipse.jetty.ee9</groupId>
+	            <artifactId>jetty-ee9-plus</artifactId>
+	            <version>${jetty.version}</version>
+	            <scope>provided</scope>
+	        </dependency>
+
+            <dependency>
+                <groupId>org.jboss.shrinkwrap.resolver</groupId>
+                <artifactId>shrinkwrap-resolver-bom</artifactId>
+                <version>${shrinkwrap.version}</version>
+                <type>pom</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.shrinkwrap.resolver</groupId>
+                <artifactId>shrinkwrap-resolver-depchain</artifactId>
+                <version>${shrinkwrap.version}</version>
+                <type>pom</type>
+                <scope>test</scope>
+			</dependency>
+
+            <dependency>
+                <groupId>org.jboss.arquillian</groupId>
+                <artifactId>arquillian-bom</artifactId>
+                <version>${arquillian.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.arquillian.graphene</groupId>
+                <artifactId>graphene-webdriver</artifactId>
+                <version>${arquillian.graphene.version}</version>
+                <type>pom</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.extension</groupId>
+                <artifactId>arquillian-drone-bom</artifactId>
+                <version>${arquillian.drone.version}</version>
+                <type>pom</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.extension</groupId>
+                <artifactId>arquillian-drone-webdriver-depchain</artifactId>
+                <version>${arquillian.drone.version}</version>
+                <type>pom</type>
+                <scope>test</scope>
+            </dependency>
+			<dependency>
+				<groupId>org.jboss.arquillian.extension</groupId>
+				<artifactId>arquillian-rest-client-impl-3x</artifactId>
+				<version>${arquillian.rest.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+			    <groupId>org.eu.ingwar.tools</groupId>
+			    <artifactId>arquillian-suite-extension</artifactId>
+			    <version>1.2.0</version>
+			    <scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>3.11.2</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-testng</artifactId>
+				<version>0.4.8</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-inline</artifactId>
+				<version>3.8.0</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- Documentation -->
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-client-microprofile</artifactId>
+				<version>${org.jboss.resteasy.client.microprofile.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<!-- Ensures we are compiling at 1.6 level -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.11.0</version>
+					<configuration>
+						<annotationProcessors>
+							<annotationProcessor>
+								io.jans.doc.annotation.DocPropertyProcessor
+							</annotationProcessor>
+							<annotationProcessor>
+								io.jans.doc.annotation.DocFeatureFlagProcessor
+							</annotationProcessor>
+						</annotationProcessors>
+						<compilerArgument>-Amodule=Janssen Auth Server</compilerArgument>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>3.1.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.5.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>3.1.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.3.0</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>test-jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>3.3.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.3.1</version>
+					<configuration>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>4.0.0-M7</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.2.1</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.5.2</version>
+					<configuration>
+						<argLine>@{argLine}</argLine>
+
+						<!-- Needed as we have both junit and testng -->
+						<failIfNoTests>false</failIfNoTests>
+						<trimStackTrace>false</trimStackTrace>
+
+						<!-- exclude selenium tests -->
+						<excludes>
+							<exclude>**/selenium/*</exclude>
+							<exclude>**/webdriver/*</exclude>
+							<exclude>**/xml/*</exclude>
+						</excludes>
+
+						<suiteXmlFiles>
+							<suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
+						</suiteXmlFiles>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>${jetty.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<configuration>
+						<failOnError>false</failOnError>
+					</configuration>
+					<version>3.8.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.owasp</groupId>
+					<artifactId>dependency-check-maven</artifactId>
+					<version>12.1.3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.10</version>
+				</plugin>
+				<plugin>
+					<groupId>com.github.spotbugs</groupId>
+					<artifactId>spotbugs-maven-plugin</artifactId>
+					<version>4.7.3.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>buildnumber-maven-plugin</artifactId>
+					<version>3.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.8.0</version>
+			</plugin>
+
+			<!-- OWASP plugin -->
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>12.1.3</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>aggregate</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<profiles>
+		<profile>
+			<id>set-configuration-name</id>
+			<activation>
+				<property>
+					<name>!cfg</name>
+				</property>
+			</activation>
+			<properties>
+				<cfg>default</cfg>
+			</properties>
+		</profile>
+
+		<profile>
+			<!-- Neded to resolve test dependencies -->
+			<id>set-skip-test-variable</id>
+			<activation>
+				<property>
+					<name>!maven.test.skip</name>
+				</property>
+			</activation>
+			<properties>
+				<maven.test.skip>false</maven.test.skip>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>run-benchmark-tests</id>
+			<activation>
+				<property>
+					<name>benchmark</name>
+				</property>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-surefire-plugin</artifactId>
+							<version>2.17</version>
+							<configuration>
+								<skipTests>false</skipTests>
+								<failIfNoTests>false</failIfNoTests>
+								<trimStackTrace>false</trimStackTrace>
+								<suiteXmlFiles>
+									<suiteXmlFile>target/test-classes/testng-benchmark.xml</suiteXmlFile>
+								</suiteXmlFiles>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+
+		<profile>
+			<id>run-multi-authz-tests</id>
+			<activation>
+				<property>
+					<name>multi-authz</name>
+				</property>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-surefire-plugin</artifactId>
+							<version>2.17</version>
+							<configuration>
+								<skipTests>false</skipTests>
+								<failIfNoTests>false</failIfNoTests>
+								<trimStackTrace>false</trimStackTrace>
+								<suiteXmlFiles>
+									<suiteXmlFile>target/test-classes/testng-multi-authz.xml</suiteXmlFile>
+								</suiteXmlFiles>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+
+		<profile>
+			<id>development-build</id>
+			<activation>
+				<property>
+					<name>development-build</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<properties>
+				<log4j.default.log.level>TRACE</log4j.default.log.level>
+				<weld.debug>true</weld.debug>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>cvss-score</id>
+			<activation>
+				<property>
+					<name>!cvss-score</name>
+				</property>
+			</activation>
+			<properties>
+				<cvss-score>8</cvss-score>
+			</properties>
+		</profile>
+	</profiles>
+
+</project>

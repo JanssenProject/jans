@@ -1,0 +1,49 @@
+name: testcases
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "jans-pycloudlib/jans/**"
+      - "jans-pycloudlib/tests/**"
+      - "jans-pycloudlib/setup.py"
+      - "!**.md"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "jans-pycloudlib/jans/**"
+      - "jans-pycloudlib/tests/**"
+      - "jans-pycloudlib/setup.py"
+      - "!jans-pycloudlib/CHANGELOG.md"
+      - "!jans-pycloudlib/jans/pycloudlib/version.py"
+      - "!**.md"
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
+        python3 -m pip install tox
+    - name: Test with pytest
+      run: |
+        cd ./jans-pycloudlib
+        tox

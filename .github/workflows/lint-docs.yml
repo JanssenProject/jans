@@ -1,0 +1,37 @@
+name: Lint documentation
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - edited
+    paths:
+      - "docs/**"
+permissions:
+  contents: read
+
+jobs:
+  lint_docs:
+    if: github.repository == 'JanssenProject/jans' && github.event_name == 'pull_request'
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Markdown linter
+        continue-on-error: true
+        run: |
+          sudo apt-get install rubygems -y
+          sudo gem install mdl
+          mdl --style automation/markdown/.mdl_style.rb docs/
+
+

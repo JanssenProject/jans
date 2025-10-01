@@ -1,0 +1,22 @@
+//Prompts the user to present his Fido2 credential. It returns a positive value if the operation
+//(assertion) was successful, or a negative value if he decided to use a different credential
+//to authenticate. This flow does not terminate if the assertion fails: the user simply stays  
+//at the page employed to prompt for the credential 
+//The identity of the user to authenticate is provided in userData input param 
+
+Flow io.jans.casa.authn.fido2
+    Basepath "authn"
+    Inputs userData withEscape
+
+jose = Call io.jans.casa.authn.FidoValidator#new
+assertion = Call jose assertionRequest userData.uid
+
+obj = { name: userData.name, escape: withEscape, assertion: assertion }
+obj = RRF "fido-authn.ftlh" obj
+
+When obj.skipped is ""
+    Finish false
+
+Call jose verify obj.tokenResponse
+
+Finish true

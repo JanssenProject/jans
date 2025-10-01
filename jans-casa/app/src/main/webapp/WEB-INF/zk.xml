@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Read the ZK 8 Configuration Reference manual to learn about tags here -->
+<zk>
+    <preference>
+        <name>org.zkoss.zk.ui.WebApp.name</name>
+        <value>Jans Casa</value>
+    </preference>
+
+    <!-- session timeout redirect -->
+    <session-config>
+        <max-requests-per-session>16</max-requests-per-session>
+        <timeout-uri>/session-expired.zul</timeout-uri>
+    </session-config>
+    <session-config>
+        <device-type>mil</device-type>
+        <timeout-uri>/session-expired.zul</timeout-uri>
+    </session-config>
+
+    <library-property>
+        <name>org.zkoss.util.label.web.charset</name>
+        <value>UTF-8</value>
+    </library-property>
+    <library-property>
+        <name>org.zkoss.lang.contextClassLoader.class</name>
+        <value>io.jans.casa.misc.CustomClassLoader</value>
+    </library-property>
+    <library-property>
+        <name>org.zkoss.zul.tablet.meta.viewport.disabled</name>
+        <value>true</value>
+    </library-property>
+
+    <desktop-config>
+        <file-check-period>86400</file-check-period>
+    </desktop-config>
+    <desktop-config>
+        <disable-theme-uri>~./zul/css/zk.wcs</disable-theme-uri>
+    </desktop-config>
+
+    <!-- important listeners -->
+    <listener>
+        <listener-class>io.jans.casa.core.init.ZKInitializer</listener-class>
+    </listener>
+    <listener>
+        <listener-class>io.jans.casa.misc.CssRulesResolver</listener-class>
+    </listener>
+    <listener>
+        <listener-class>io.jans.casa.core.filter.LocaleInterceptor</listener-class>
+    </listener>
+
+</zk>

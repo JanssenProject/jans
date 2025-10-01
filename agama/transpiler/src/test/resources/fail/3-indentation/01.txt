@@ -1,0 +1,7 @@
+Flow flow
+    Basepath ""
+    
+When day is rainy
+Log me
+
+//Failure reason: at least one statement should be indented after When 

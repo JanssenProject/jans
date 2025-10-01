@@ -1,0 +1,10 @@
+{
+  "jans-auth": "Running",
+  "jans-config-api": "Down",
+  "jans-casa": "Not present",
+  "jans-fido2": "Running",
+  "jans-scim": "Running",
+  "jans-link": "Running",
+  "jans-lock": "Running",
+  "keycloak": "Running"
+}

@@ -1,0 +1,59 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.al.title}</h:title>
+
+    <z:div if="${empty pageScope.error and sessionContext.user.admin}"
+            viewModel="@('io.jans.casa.plugins.acctlinking.vm.AccountsLinkingSettingsVM')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.al.title}</h2>
+                </div>
+                <div class="${css.panel}">
+                    <p class="mb0" if="${not empty vm.providers}">${labels.al.adm.intro_text}</p>
+                    
+                    <p class="mb0" if="${vm.providers ne null and empty vm.providers}">${labels.al.adm.no_providers}</p>
+                    
+                    <p class="mb0" if="${vm.providers eq null}">${labels.al.adm.error_retrieve}</p>                   
+                    
+                    <z:div class="pa4" if="${vm.providers eq null}">
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-circle"></i>
+                            ${vm.error}
+                        </div>
+                    </z:div>                   
+                    
+                    <h:table class="mt4 table table-hover table-sm" if="${not empty vm.providers}">
+                        <thead>
+                            <tr>
+                                <th scope="col">${labels.al.adm.name}</th>
+                                <th scope="col">${labels.al.adm.flow}</th>
+                                <th scope="col">${labels.al.adm.mapping}</th>
+                                <th scope="col">${labels.al.adm.status}</th>
+                            </tr>
+                        </thead>
+                        <h:tbody children="@load(vm.providers)" sclass="f7">
+                            <zk:template name="children">
+                                <tr>
+                                    <td>${each.value.displayName}</td>
+                                    <td>${each.value.flowQname}</td>
+                                    <td>${each.value.mappingClassField}</td>
+                                    <td><i class="${c:cat('f5 fas fa-', each.value.enabled ? 'check' : 'times')}"/></td>
+                                </tr>
+                            </zk:template>
+                        </h:tbody>
+                    </h:table>                  
+                </div>                    
+            </section>
+        </div>
+    </z:div>
+    
+</zk:zk>

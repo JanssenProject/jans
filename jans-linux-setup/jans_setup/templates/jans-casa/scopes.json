@@ -1,0 +1,26 @@
+[
+  {
+    "inum": "3000.01.1",
+    "jansId": "https://jans.io/casa.2fa",
+    "displayName": "Casa 2FA",
+    "description": "2FA features management",
+    "jansDefScope": false,
+    "jansScopeTyp": "oauth"
+  },
+  {
+    "inum": "3000.01.2",
+    "jansId": "https://jans.io/casa.config",
+    "displayName": "Casa config",
+    "description": "Casa configuration",
+    "jansDefScope": false,
+    "jansScopeTyp": "oauth"
+  },
+  {
+    "inum": "3000.01.3",
+    "jansId": "https://jans.io/casa.enroll",
+    "displayName": "Casa enrollment",
+    "description": "Casa enrollment operations",
+    "jansDefScope": false,
+    "jansScopeTyp": "oauth"
+  }
+]

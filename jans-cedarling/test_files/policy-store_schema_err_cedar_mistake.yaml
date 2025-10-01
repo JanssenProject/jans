@@ -1,0 +1,154 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+cedar_version: v4.0.0
+policy_stores:
+  a1bf93115de86de760ee0bea1d529b521489e5a11747:
+    cedar_version: v4.0.0
+    policies:
+      840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+        description: admin access
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            @id("admin access")
+            permit
+            (
+             principal == Jans::Role::"Admin",
+             action in [Jans::Action::"Compare",Jans::Action::"Execute"],
+             resource == Jans::Application::"Admin"
+            )
+            when
+            {
+             Jans::Access_token::"abc".scope=="abc" && Jans::Id_token::"idxxx".amr=="idxxx"
+            };
+      b6313811924c9e67f898257cbf017674e08203779ae9:
+        description: manager access
+        creation_date: '2024-09-20T18:11:26.442574'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            @id("manager access")
+            permit
+            (
+              principal,
+              action,
+              resource
+            )
+            when
+            {
+              Jans::Access_token::"xxx".scope=="xxx" || Jans::Id_token::"idxxx".amr=="idxxx" && context.network.isInRange(ip("222.222.222.0/24"))
+            };
+      f2b38413cad977ab21616bd4a63c233548491cf25b72:
+        description: manager access
+        creation_date: '2024-09-20T18:11:37.774401'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            @id("manager access")
+            permit
+            (
+              principal,
+              action,
+              resource
+            )
+            when
+            {
+              Jans::Access_token::"xxx".scope=="xxx" || Jans::Id_token::"idxxx".amr=="idxxx" && context.network.isInRange(ip("222.222.222.0/24"))
+            };
+      fa6a3f46ab5f741e806deff0f81d0f848af37604500f:
+        description: without condition
+        creation_date: '2024-09-22T18:18:35.801566'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            @id("without condition")
+            permit
+            (
+              principal == Jans::Role::"Admin",
+              action,
+              resource
+            )
+            ;
+      96deb02f8ce44c46d497d44dbfec80b3b6a64fe22994:
+        description: forbid
+        creation_date: '2024-09-23T14:51:21.480763'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            @id("forbid")
+            forbid
+            (
+              principal in Jans::Role::"Admin",
+              action in [Jans::Action::"Search",Jans::Action::"Tag"],
+              resource in Jans::Application::"AdminPortal"
+            )
+            when
+            {
+              Jans::Access_token::"xxx".exp>123 && Jans::Access_token::"aaa".exp<321 || Jans::Access_token::"aaa".iat>=111
+            };
+    trusted_issuers: {}
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+        namespace Jans {
+          type Context = {"current_time": __cedar::Long, "device_health": Set < __cedar::String >, "fraud_indicators": Set < __cedar::String >, "geolocation": Set < __cedar::String >, "network": __cedar::ipaddr, "network_type": __cedar::String, "operating_system": __cedar::String, "user_agent": __cedar::String};
+          type Url = {"host": __cedar::String, "path": __cedar::String, "protocol": __cedar::String};
+          type email_address = {"domain": __cedar::String, "id": __cedar::String};
+          entity Access_token = {"aud": __cedar::String, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "nbf": __cedar::Long, "scope": __cedar::String};
+          entity Application = {"client": Client, "name": __cedar::String};
+          entity Client = {"client_id": __cedar::String, "iss": TrustedIssuer};
+          entity Role;
+          entity TrustedIssuer = {"issuer_entity_id": Url};
+          entity User in [Role] = {"email": email_address, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String, "username": __cedar::String};
+          entity Userinfo_token = {"aud": __cedar::String, "birthdate": __cedar::String, "email": email_address, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "name": __cedar::String, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String};
+          entity id_token = {"acr": Set < __cedar::String >, "amr": __cedar::String, "aud": __cedar::String, "azp": __cedar::String, "birthdate": __cedar::String, "email": email_address, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "name": __cedar::String, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String};
+          action "Compare" appliesTo {
+            principal: [User, Role],
+            resource: [Application],
+            context: Context
+          };
+          action "Execute" appliesTo {
+            principal: [User, Role],
+            resource: [Application],
+            context: Context
+          };
+          action "Monitor" appliesTo {
+            principal: [User, Role],
+            resource: [Application],
+            context: Context
+          };
+          action "Read" appliesTo {
+            principal: [User_TypeNotExist, Role],
+            resource: [Application],
+            context: Context
+          };
+          action "Search" appliesTo {
+            principal: [User, Role],
+            resource: [Application],
+            context: Context
+          };
+          action "Share" appliesTo {
+            principal: [User, Role],
+            resource: [Application],
+            context: Context
+          };
+          action "Tag" appliesTo {
+            principal: [User, Role],
+            resource: [Application],
+            context: Context
+          };
+          action "Write" appliesTo {
+            principal: [User, Role],
+            resource: [Application],
+            context: Context
+          };
+        }

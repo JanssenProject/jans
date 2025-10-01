@@ -1,0 +1,10 @@
+dn: ou=configuration,o=jans
+jansCacheConf: {"cacheProviderType": "%(cache_provider_type)s", "memcachedConfiguration": {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":32768, "defaultPutExpiration":60, "connectionFactoryType": "DEFAULT"}, "inMemoryConfiguration": {"defaultPutExpiration":60}, "nativePersistenceConfiguration": {"defaultPutExpiration":60, "defaultCleanupBatchSize": 10000}, "redisConfiguration":{"servers":"localhost:6379", "defaultPutExpiration": 60}}
+jansDocStoreConf: {"documentStoreType":"DB","localConfiguration":{"baseLocation":"/"},"jcaConfiguration":{"serverUrl":"http://localhost:8080/rmi","workspaceName":"default","connectionTimeout":15,"userId":"admin","password":""},"webDavConfiguration":null}
+jansSmtpConf: {"key_store":"%(smtp_jks_fn)s", "key_store_password":"%(smtp_jks_pass_enc)s", "key_store_alias":"%(smtp_alias)s", "signing_algorithm":"%(smtp_signing_alg)s"}
+jansOrgProfileMgt: false
+jansScimEnabled: false
+jansAuthMode: simple_password_auth
+objectClass: top
+objectClass: jansAppConf
+ou: configuration

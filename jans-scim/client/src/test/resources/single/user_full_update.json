@@ -1,0 +1,59 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User",
+    "urn:ietf:params:scim:schemas:extension:gluu:2.0:User"
+  ],
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": {
+    "scimCustomFirst": "Another string single-valued",
+    "scimCustomSecond": [
+      "2016-02-23T15:35:22Z",
+      "2016-02-23T05:16:16Z"
+    ]
+  },
+  "userName": "scim_test_bjensen_1",
+  "emails": [
+    {
+      "value": "bjane@gluu.org",
+      "type": "work",
+      "primary": true
+    },
+    {
+      "value": "barbas@gluu.org",
+      "type": "home",
+      "primary": false
+    }
+  ],
+  "addresses": [
+    {
+      "type": "other",
+      "streetAddress": "123 Evergreen skid row",
+      "locality": "Cartucho",
+      "region": "BO",
+      "postalCode": "54321",
+      "country": "CO",
+      "primary": false
+    },
+    {
+      "type": "work",
+      "streetAddress": "621 East 6th Street Suite 200",
+      "locality": "Austin",
+      "region": "TX",
+      "postalCode": "78701",
+      "country": "US",
+      "formatted": "621 East 6th Street Suite 200  Austin , TX 78701 US",
+      "primary": true
+    }
+  ],
+  "phoneNumbers": [
+    {
+      "value": "555 123 4567",
+      "type": "home"
+    },
+    {
+      "value": "646-345-2346",
+      "type": "work"
+    }
+  ],
+  "userType" : null,
+  "x509Certificates": []
+}

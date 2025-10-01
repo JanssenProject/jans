@@ -1,0 +1,3 @@
+[run]
+omit =
+    */jans/pycloudlib/meta/docker_meta.py

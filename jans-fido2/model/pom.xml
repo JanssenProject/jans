@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>jans-fido2-model</artifactId>
+	<name>Fido2 API Model</name>
+	<packaging>jar</packaging>
+	<url>http://www.gluu.org</url>
+
+	<parent>
+		<groupId>io.jans</groupId>
+		<artifactId>jans-fido2-parent</artifactId>
+		<version>0.0.0-nightly</version>
+	</parent>
+
+	<dependencies>
+			<!-- Gluu -->
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-annotation</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-orm-model</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-auth-model</artifactId>
+            </dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-doc</artifactId>
+			</dependency>
+					
+			<!-- Jackson -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+			</dependency>
+
+			<dependency>
+				<groupId>jakarta.enterprise</groupId>
+				<artifactId>jakarta.enterprise.cdi-api</artifactId>
+			</dependency>
+	</dependencies>
+	
+</project>

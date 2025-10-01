@@ -1,0 +1,26 @@
+{{ if .Values.pdb.enabled -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "scim.fullname" . }}
+  labels:
+    APP_NAME: scim
+{{ include "scim.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.scim.customAnnotations.podDisruptionBudget) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.scim.customAnnotations.podDisruptionBudget }}
+{{ toYaml .Values.global.scim.customAnnotations.podDisruptionBudget | indent 4 }}
+{{- end }}
+{{- end }}  
+spec:
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-{{ include "scim.name" . }}
+{{- end }}

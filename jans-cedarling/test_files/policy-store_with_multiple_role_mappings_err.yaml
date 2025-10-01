@@ -1,0 +1,50 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+---
+cedar_version: v4.0.0
+cedar_policies:
+  840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+    description: simple policy example
+    creation_date: '2024-09-20T17:22:39.996050'
+    policy_content:
+      encoding: none
+      content_type: cedar
+      body: |-
+        permit(
+            principal is Jans::Workload,
+            action in [Jans::Action::"Update"],
+            resource is Jans::Issue
+        ) when {
+            principal.org_id == resource.org_id
+        };
+cedar_schema:
+  encoding: none
+  content_type: cedar
+  body: |-
+    namespace Jans {
+      type Url = {"host": String, "path": String, "protocol": String};
+      entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};
+      entity Issue = {"org_id": String};
+      entity TrustedIssuer = {"issuer_entity_id": Url};
+      entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String};
+      action "Update" appliesTo {
+        principal: [Workload],
+        resource: [Issue],
+        context: {}
+      };
+    }
+trusted_issuers:
+- name: IDP1
+  description: some idp
+  openid_configuration_endpoint: https://www.idp.com/.well-known/openid-configuration
+  token_metadata:
+  - type: Access
+    user_id: aud
+  - type: Id
+    user_id: sub
+    role_mapping: role
+  - type: userinfo
+    user_id: email
+    role_mapping: role

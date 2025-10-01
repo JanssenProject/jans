@@ -1,0 +1,27 @@
+{{- if .Values.global.istio.enabled }}
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-auth-server-mtls
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: auth-server
+{{ include "auth-server.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (index .Values.global "auth-server" "customAnnotations" "destinationRule") }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if index .Values.global "auth-server" "customAnnotations" "destinationRule" }}
+{{ toYaml (index .Values.global "auth-server" "customAnnotations" "destinationRule") | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+{{- end }}

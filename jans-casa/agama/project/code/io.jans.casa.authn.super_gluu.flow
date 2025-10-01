@@ -1,0 +1,44 @@
+Flow io.jans.casa.authn.super_gluu
+    Basepath "authn/sg"
+    Configs conf
+    Inputs userData withEscape
+
+inum = userData.inum
+sgCrap = Call io.jans.casa.authn.SGValidator#new
+qrRequest = Call sgCrap QRRequest "authenticate"
+
+Log "@d Sending mobile notification to user's registered Super Gluu devices"
+realCrap = Call io.jans.casa.notify.SGNotificationsUtil#getInstance
+
+| E = Call realCrap send inum sgCrap.appId qrRequest
+When E is not null
+    Log "@e " E
+    E = null
+
+//Nullify realCrap to avoid its serialization
+realCrap = null
+timeout = conf.timeout
+
+//Show the "we sent you a notification" page even if there were errors
+obj = { timeout: timeout, escape: withEscape }
+data = RRF "notification.ftlh" obj
+
+When data.skipped is ""     //user wants a different thing
+    Finish false
+
+When data."scan-QR" is ""    
+
+    //Show page for QR code scanning
+    obj = { request: qrRequest, timeout: timeout, escape: withEscape }
+    data = RRF "code-scan.ftlh" obj
+    
+    When data.skipped is ""
+        Finish false
+
+error = Call sgCrap validateDevice inum
+
+When error is not null
+    obj = { success: false, error: error }
+    Finish obj
+
+Finish true

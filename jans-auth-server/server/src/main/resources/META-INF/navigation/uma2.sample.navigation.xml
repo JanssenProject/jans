@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_3_0.xsd"
+    version="3.0">
+
+  <navigation-rule>
+    <from-view-id>/uma2/sample/country.xhtml</from-view-id>
+
+    <navigation-case>
+      <from-action>#{gatherer.prepareForStep}</from-action>
+      <from-outcome>invalid_step</from-outcome>
+      <to-view-id>/error.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-action>#{gatherer.prepareForStep}</from-action>
+      <from-outcome>failure</from-outcome>
+      <to-view-id>/error.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <from-view-id>/uma2/sample/city.xhtml</from-view-id>
+
+    <navigation-case>
+      <from-action>#{gatherer.prepareForStep}</from-action>
+      <from-outcome>invalid_step</from-outcome>
+      <to-view-id>/error.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-action>#{gatherer.prepareForStep}</from-action>
+      <from-outcome>failure</from-outcome>
+      <to-view-id>/error.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+</faces-config>

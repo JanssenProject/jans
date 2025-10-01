@@ -1,0 +1,10 @@
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native">
+
+    <li>
+        <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}${base}/admin/index.zul">
+            
+            <span class="collapsible-menu-item di">${labels.sample.title}</span>
+        </a>
+    </li>
+
+</z:zk>

@@ -1,0 +1,26 @@
+{{ if .Values.pdb.enabled -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "casa.fullname" . }}
+  labels:
+    APP_NAME: casa
+{{ include "casa.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.casa.customAnnotations.podDisruptionBudget) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.casa.customAnnotations.podDisruptionBudget }}
+{{ toYaml .Values.global.casa.customAnnotations.podDisruptionBudget | indent 4 }}
+{{- end }}
+{{- end }}  
+spec:
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-{{ include "casa.name" . }}
+{{- end }}

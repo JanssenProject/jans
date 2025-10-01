@@ -1,0 +1,79 @@
+Flow io.jans.casa.authn.main
+    Basepath ""
+    Configs conf
+    
+inutil = Call io.jans.casa.authn.CasaConfig#new
+policies = inutil.policies
+methods = inutil.methods
+
+obj = { captureLocation: inutil.needsCaptureLocation }
+inutil = null
+reinutil = Call io.jans.casa.authn.UserAuthnUtil#new policies
+
+Repeat 3 times max
+    userData = RRF "main.ftlh" obj
+    Call reinutil validate userData.username userData.password
+    
+    Quit When reinutil.validCredentials is true
+    obj.message = "Wrong user name or password"
+    obj.username = userData.username
+
+When reinutil.validCredentials is false
+    Finish false
+
+uid = reinutil.uid
+
+When reinutil.user2FAOn is false    // user has 2FA turned off?
+    Finish uid
+
+reinutil.jsonLocation = userData.location
+reinutil.jsonDevice = userData.device
+
+// Validate session state before proceeding with 2FA
+sessionValid = Call reinutil validateSessionState
+When sessionValid is false
+    // Force fresh authentication by clearing any stale session data
+    Call reinutil clearStaleSessionData
+    prompt2fa = true
+Otherwise
+    prompt2fa = Call reinutil prompt2FA
+
+When prompt2fa is false     //skip 2FA?
+    Call reinutil updateTrustedDevices
+    Finish uid
+
+methods = Call reinutil computeUserMethods methods
+
+When methods.empty is true      //No suitable methods found for this user?
+    Finish uid
+
+userData = { uid: uid, inum: reinutil.inum, name: reinutil.name }
+//reinutil = null
+
+//Launch the flow of first authn method
+method = methods[0]
+
+Repeat 3 times max 
+    
+    Log "Launching flow" method
+    obj | E = Trigger $method userData true
+
+    When E is not null
+        Log "@e Authentication flow % for user % crashed: %" method userData.inum E
+        E = null
+        message = "We had trouble authenticating you"
+    Otherwise
+        When obj.success is true
+            Call reinutil updateTrustedDevices
+            Finish uid
+
+        message = obj.message
+
+    obj = { enrolledMethods: methods, message: message, selector: conf.selector }
+
+    //Show a page for the user to select an alternative type of credential to login
+    obj = RRF "selector.ftlh" obj
+    method = obj.selection
+
+obj = { success: false, error: "Those were too many attempts. Try again later" }
+Finish obj

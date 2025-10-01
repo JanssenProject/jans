@@ -1,0 +1,126 @@
+#! /usr/bin/env python3
+
+import argparse
+import os
+import sys
+import subprocess
+import configparser
+from pathlib import Path
+from collections import OrderedDict
+
+JANS_JETTY_DIR = '/opt/jans/jetty'
+JANS_SERVICES = os.listdir(JANS_JETTY_DIR)
+
+if len(sys.argv) > 1 and sys.argv[1] == 'cli':
+    cli_args = sys.argv[2:]
+    sys.argv = sys.argv[:2]
+
+parser = argparse.ArgumentParser(description="A top-level wrapper script for Janssen")
+subparsers = parser.add_subparsers(dest='command')
+subparsers.add_parser('version', help="shows version of currently installed Janssen Server")
+subparsers.add_parser('cli', help="invokes jans-cli")
+subparsers.add_parser('tui', help="invokes jans text based user interface")
+subparsers.add_parser('logs', help="Shows the log file paths for various Janssen Server modules")
+subparsers.add_parser('status', help="Show status of Janssen Server module services")
+start_service_parser = subparsers.add_parser('start', help="Starts services for Janssen Server ( -service=<service-name> if you want to start just one specific service)")
+start_service_parser.add_argument('-service', choices=JANS_SERVICES)
+stop_service_parser = subparsers.add_parser('stop', help="Stops services for Janssen Server ( -service=<service-name> if you want to stop just one specific service)")
+stop_service_parser.add_argument('-service', choices=JANS_SERVICES)
+restart_service_parser = subparsers.add_parser('restart', help="restarts services for Janssen Server ( -service=<service-name> if you want to restart just one specific service)")
+restart_service_parser.add_argument('-service', choices=JANS_SERVICES)
+health_parser = subparsers.add_parser('health', help="Prints health status of Janssen services and components")
+health_parser.add_argument('-service', choices=JANS_SERVICES)
+subparsers.add_parser('info', help="lists important URLs (like .well-known, Casa etc)")
+argsp = parser.parse_args()
+
+
+def status():
+    subprocess.run('sudo systemctl list-units --all "jans*"', shell=True)
+
+def cli():
+    cli_args.insert(0, '/opt/jans/jans-cli/config-cli.py')
+    subprocess.run(cli_args)
+
+def tui():
+    subprocess.run('/opt/jans/jans-cli/jans_cli_tui.py', shell=True)
+
+def version():
+    subprocess.run('/opt/jans/bin/show_version.py', shell=True)
+
+def logs():
+    jetty_path = Path(JANS_JETTY_DIR).glob('*')
+    for p in jetty_path:
+        if p.is_dir():
+            print(f"Log files for {p.stem}:")
+            for l in p.glob('logs/*.log'):
+                print(f"  {l}")
+            print()
+
+    log_dir = Path.home()
+    cli_ini_fn = log_dir.joinpath('.config/jans-cli.ini')
+    if cli_ini_fn.is_file():
+        config = configparser.ConfigParser()
+        config.read_string(cli_ini_fn.read_text())
+        log_dir = dict(config).get('DEFAULT', {}).get('log_dir', log_dir)
+    print(f"Log files for CLI:")
+    for log in('cli_debug.log', 'cli_cmd.log', 'cli_error.log'):
+        print(f"   {os.path.join(log_dir, log)}")
+
+def service_command(todo):
+    services = [argsp.service] if argsp.service else JANS_SERVICES
+    if todo == 'stop':
+        services = reversed(services)
+    for jservice in services:
+        cmd = f'sudo systemctl {todo} {jservice}'
+        print(f"Executing {cmd}")
+        out = subprocess.getoutput(cmd).strip()
+        if out:
+            print(f"Command output: {out}")
+
+
+def start():
+    service_command('start')
+
+def stop():
+    service_command('stop')
+
+def restart():
+    service_command('restart')
+
+def health():
+    os.system('/opt/jans/bin/jans_services_status.py --as-table')
+    print()
+
+def get_hostname():
+    for http_conf_path in (
+                '/etc/apache2/vhosts.d/_https_jans.conf',
+                '/etc/httpd/conf.d/https_jans.conf',
+                '/etc/apache2/sites-available/https_jans.conf'
+                ):
+        if os.path.isfile(http_conf_path):
+            with open(http_conf_path) as f:
+                for l in f:
+                    ls = l.strip()
+                    if ls.startswith('ServerName'):
+                        server_name = ls[10:].strip()
+                        return server_name
+
+    print("Can't determine server name")
+    sys.exit()
+
+def info():
+    hostname = get_hostname()
+    print("Important URLs")
+    for url in (
+            'jans-auth/.well-known/openid-configuration',
+            'jans-scim/restv1/scim-configuration',
+            'jans-fido2/restv1/configuration'
+            ):
+        jservice = url.split('/')[0]
+        if jservice in JANS_SERVICES:
+            print(f'https://{hostname}/{url}')
+
+if argsp.command:
+    locals()[argsp.command]()
+else:
+    print(parser.print_help())

@@ -1,0 +1,59 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+cedar_version: v4.0.0
+policy_stores:
+  8ec39ee717927663db9b18246f0479419051bb5af15a:
+    name: "Jans"
+    policies:
+      840daed85403f35ea76519ed1a18a44778f855bf18fc:
+        cedar_version: ''
+        name: eight forty
+        description: simple policy example for principal workload
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::Workload,
+                action in [Jans::Action::"Update"],
+                resource is Jans::Issue
+            )when{
+                principal.org_id == resource.org_id
+            };
+      444da5d85403f3989fd1a18a335ea76519e855bf1cf8:
+        cedar_version: ''
+        name: four forty four
+        description: simple policy example for principal user
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::User,
+                action in [Jans::Action::"Update"],
+                resource is Jans::Issue
+            )when{
+                principal.country == resource.country
+            };
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+        namespace Jans {
+        type Url = {"host": String, "path": String, "protocol": String};
+        entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};
+        entity Issue = {"country": String, "org_id": String};
+        entity TrustedIssuer = {"issuer_entity_id": Url};
+        entity User = {"country": String, "email": String, "sub": String, "username": String};
+        entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String};
+        entity Id_token = {"acr": String, "amr": String, "aud": Set<String>, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "sub": String};
+        action "Update" appliesTo {
+          principal: [Workload, User],
+          resource: [Issue],
+          context: {}
+        };
+        }

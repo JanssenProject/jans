@@ -1,0 +1,11 @@
+JAVA_HOME=%(jre_home)s
+JAVA=$JAVA_HOME/bin/java
+JAVA_OPTIONS="-server -Xms%(jans-auth_min_heap_mem)sm -Xmx%(jans-auth_max_heap_mem)sm -XX:+DisableExplicitGC -Djans.base=%(jansBaseFolder)s -Dserver.base=%(jetty_base)s/jans-auth -Dlog.base=%(jetty_base)s/jans-auth -Dpython.home=%(jython_home)s"
+
+JETTY_HOME=%(jetty_home)s
+JETTY_BASE=%(jetty_base)s/jans-auth
+JETTY_USER=%(jetty_user)s
+JETTY_ARGS="jetty.http.host=localhost jetty.http.port=%(jans_auth_port)s"
+TMPDIR=%(jetty_dist)s/temp
+
+export PYTHON_HOME=%(jython_home)s

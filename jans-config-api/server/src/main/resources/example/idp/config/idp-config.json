@@ -1,0 +1,30 @@
+{
+    "applicationName": "saml",
+    "samlTrustRelationshipDn": "ou=trustRelationships,o=jans",
+    "trustedIdpDn": "ou=trusted-idp,o=jans",
+    "enabled": true,
+    "selectedIdp": "keycloak",
+    "serverUrl": "http://localhost:8180",
+    "realm": "master",
+    "clientId": "my-client-1",
+    "clientSecret": "aqOMI7DhNxCFbW0IieBHSrdA6HMTwxiQ",
+    "grantType": "PASSWORD",
+    "username": "admin1",
+    "password": "admin123",
+    "spMetadataUrl": "/realms/%s/broker/%s/endpoint/descriptor",
+    "idpRootDir": "/opt/jans/idp/",
+    "idpMetadataDir": "/opt/idp/configs/keycloak/idp/metadata",
+    "idpMetadataTempDir": "/opt/idp/configs/keycloak/idp/temp_metadata",
+    "idpMetadataFilePattern": "%s-idp-metadata.xml",
+    "idpMetadataFile": "idp-metadata.xml",
+    "spMetadataDir": "/opt/idp/configs/keycloak/sp/metadata",
+    "spMetadataTempDir": "/opt/idp/configs/keycloak/sp/temp_metadata",
+    "spMetadataFilePattern": "%s-sp-metadata.xml",
+    "spMetadataFile": "sp-metadata.xml",
+    "ignoreValidation": false,
+    "idpMetadataMandatoryAttributes": [
+        "nameIDPolicyFormat",
+        "idpEntityId",
+        "singleSignOnServiceUrl"
+    ]
+}

@@ -1,0 +1,20 @@
+apiVersion: v2
+name: casa
+version: 0.0.0-nightly
+kubeVersion: ">=v1.21.0-0"
+description: Jans Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Jans Server.
+type: application
+keywords:
+  - casa
+  - 2FA
+  - passwordless
+home: https://gluu.org/docs/casa/
+sources:
+  - https://gluu.org/casa/
+  - https://github.com/JanssenProject/jans/docker-jans-casa
+maintainers:
+  - name: Mohammad Abudayyeh
+    email: support@jans.io
+    url: https://github.com/moabu
+icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
+appVersion: "0.0.0-nightly"

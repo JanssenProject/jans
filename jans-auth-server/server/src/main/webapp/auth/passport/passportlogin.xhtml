@@ -1,0 +1,344 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:b="http://bootsfaces.net/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/login-extended-template.xhtml">
+
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
+			if="#{not identity.loggedIn}" />
+	</f:metadata>
+
+	<ui:define name="head">
+		<meta name="description" content="Janssen Project" />
+		<style type="text/css">
+body {
+	padding: 0;
+}
+
+.navbar-nav {
+	padding-top: 30px;
+}
+
+ul, ol {
+	margin-bottom: 0;
+}
+
+a {
+	color: #2300cc;
+	transition: all 0.5s ease-in-out 0s;
+}
+
+a:hover, a:focus {
+	color: #079857;
+	text-decoration: none;
+	transition: all 0.5s ease-in-out 0s;
+}
+
+.btn-login {
+	color: #fff;
+	background-color: #00BE79;
+	border-color: #ffffff;
+	min-width: 100px;
+	transition: all 0.5s ease-in-out 0s;
+}
+
+.btn-login:hover, .btn-login:focus {
+	background-color: #00BE79;
+	border-color: #079857;
+	color: #079857;
+	transition: all 0.5s ease-in-out 0s;
+}
+
+.form-control:focus {
+	border-color: #007541;
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px
+		rgba(0, 117, 65, 0.71), inset 0px 0px 3px #007541;
+}
+
+.panel-default>.panel-heading {
+	color: #079857;
+	font-size: 18px;
+}
+
+.input-name {
+	padding-top: 3px;
+}
+
+.panel-order hr {
+	margin: 10px 15px;
+}
+
+.panel-order .panel-body {
+	height: 260px;
+	overflow-y: auto;
+}
+
+.panel-order .panel-body>.row:last-child hr {
+	display: none;
+}
+
+.list-inline>li {
+	margin-bottom: 5px;
+	vertical-align: middle;
+}
+
+.list-inline>li img {
+	max-width: 40px;
+}
+
+.social-wrapper {
+	position: relative;
+	text-align: center;
+	padding: 20px;
+	border: 1px solid #dfdfdf;
+	border-radius: 4px;
+	background-color: #f5f5f5;
+}
+
+#footer {
+	padding: 30px 0 20px;
+	text-align: center;
+	border-top: 0;
+}
+
+/* Media Query */
+@media ( max-width : 979px) {
+	.navbar .container {
+		padding: 0 15px;
+	}
+}
+
+@media ( max-width : 767px) {
+	.navbar {
+		text-align: center;
+	}
+	.navbar-nav {
+		padding-top: 0px;
+	}
+	.navbar-header img {
+		max-width: 130px;
+	}
+	#content.sign-in-page {
+		padding-top: 30px;
+	}
+	.list-inline>li img {
+		max-width: 30px;
+	}
+}
+
+.panel-success > .panel-heading {
+color: white !important;
+background-color: #00BE79 !important;
+border-color: #d6e9c6;
+}
+</style>
+	</ui:define>
+
+	<ui:define name="pageTitle">
+		<h:outputText value="#{msgs['passport.oxAuthPassportLogin']}" />
+	</ui:define>
+
+	<ui:define name="body">
+		<div class="container" style="padding-top: 0px;">
+			<div id="content" class="sign-in-page" style="margin-top:-15px;">
+				<noscript>
+					<b>#{msgs['passport.javascriptRequired']}</b>
+				</noscript>
+				<div class="row">
+					<div class="col-xs-12 col-md-6">
+						<b:panel title="Login" look="success" collapsible="false" iconAwesome="fa-sign-in">
+							<div class="panel panel-default panel-order">
+								<div class="panel-body">
+									<h:form id="loginForm">
+										<h:panelGroup rendered="#{not identity.loggedIn}">
+											<p class="text-danger errormsg" style="display: none"></p>
+											<h:inputHidden id="provider" />
+											<h:messages class="text-danger" />
+											<div class="row form-group">
+												<span class="input-name col-md-3"> <h:outputLabel
+														for="username" value="#{msgs['login.username']}" />
+												</span>
+												<div class="col-md-6">
+													<h:inputText id="username" value="#{credentials.username}"
+														autocomplete="off" class="form-control usernameField" />
+												</div>
+											</div>
+
+											<div class="row form-group">
+												<span class="input-name col-md-3"> <h:outputLabel
+														for="password" value="#{msgs['login.password']}" />
+												</span>
+												<div class="col-md-6">
+													<h:inputSecret id="password"
+														value="#{credentials.password}" autocomplete="off"
+														class="form-control passwordField" />
+
+												</div>
+											</div>
+											<div class="row form-group">
+												<h:outputLabel styleClass="col-sm-3 control-label"
+													for="rememberme" value="#{msgs['login.rememberMe']}" />
+												<div class="col-sm-6">
+													<input type="checkbox" value="rememberme" id="rememberme"
+														class="rememberField" />
+												</div>
+											</div>
+
+											<div class="row form-group">
+												<div id="submit_block" class="col-md-offset-3 col-md-3">
+													<h:commandButton id="loginButton"
+														value="#{msgs['login.login']}"
+														onclick="checkRememberMe();"
+														action="#{authenticator.authenticate}"
+														class="btn btn-login" />
+												</div>
+											</div>
+
+											<div class="row">
+												<div class="col-md-offset-3 col-md-6">
+													<a href="/identity/person/passwordReminder.htm">#{msgs['passport.forgotYourPassword']}</a>
+												</div>
+											</div>
+											<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
+												<p>
+													<h:outputText value="#{msgs['common.agreePolicy']}" />
+													<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
+															value="#{msgs['common.privacyPolicy']}" />
+													</a>
+												</p>
+											</h:panelGroup>
+											<h:panelGroup rendered='#{!empty client.getTosUri()}'>
+												<p>
+													<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
+													<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
+															value="#{msgs['common.termsOfService']}" />
+													</a>
+												</p>
+											</h:panelGroup>
+											<h:panelGroup
+												rendered="#{external_auth_request_uri != Null or external_registration_uri != Null}">
+												<li class="row-fluid submit-container">
+													<div class="gradient contact-button green span2 offset3"
+														style="width: 320px;">
+														<h:panelGroup
+															rendered="#{external_auth_request_uri != Null}">
+															<a id="externalAuthButton"
+																href="#{external_auth_request_uri}"> <input
+																type="button"
+																value="#{msgs['passport.useExternalAuthentication']}" />
+															</a>
+														</h:panelGroup>
+														<h:panelGroup
+															rendered="#{external_registration_uri != Null}">
+															<a id="externalRegistrationButton"
+																href="#{external_registration_uri}"> <input
+																type="button" style="width: 220px;"
+																value="#{msgs['passport.registerNewUser']}" />
+															</a>
+														</h:panelGroup>
+													</div>
+												</li>
+											</h:panelGroup>
+										</h:panelGroup>
+									</h:form>
+								</div>
+							</div>
+						</b:panel>
+					</div>
+					<div class="col-xs-12 col-md-6">
+						<b:panel title="External Providers" look="success" collapsible="false" iconAwesome="fa-cubes">
+							<div visibility="hidden" id="provider_panel">
+								<div class="panel panel-default panel-order">
+									<div class="panel-body" id="add_here">
+										<div id="signinButton"></div>
+									</div>
+								</div>
+							</div>
+						</b:panel>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function idp_redirect(provider) {
+				var form = document.forms.loginForm;
+				form["loginForm:provider"].value = provider;
+				form["loginForm:loginButton"].click();
+			}
+
+			function dynamic_link(provider, logo_img, name) {
+				name = name ? name : provider;
+				if (logo_img == null) {
+					logo_img = "/oxauth/img/glu_icon.png"
+				} else if (logo_img.startsWith("http")) {
+					logo_img = "/oxauth/auth/passport/" + logo_img
+				}
+
+				imgMarkup = '<img style="cursor:pointer;max-width:48px" alt="' + name
+						+ '" onclick="idp_redirect(\'' + provider
+						+ '\')" src="' + logo_img + '"></img>';
+				leftMarkup = '<div style="padding:10px">' + imgMarkup + '</div>';
+				rightMarkup = '<h4>' + name + '</h4>'
+				$('#add_here').append(
+						'<div class="row" style="align-items:center">' + leftMarkup + rightMarkup
+								+ '<hr /></div>');
+			}
+
+			jQuery(document).ready(
+					function() {
+                        let jsonProviders = '${identity.getWorkingParameter('externalProviders')}'
+                        try {
+                            let providers = JSON.parse(jsonProviders)
+
+                            for (let idprv in providers) {
+                                dynamic_link(idprv, providers[idprv].logo_img, providers[idprv].displayName)
+                            }
+                        } catch (e) {
+                        }
+
+						//error message display
+						let errormsg = "?failure="
+						let idxErrormsg = window.location.href.indexOf(errormsg)
+						if (idxErrormsg != -1) {
+							errormsg = window.location.href.substr(idxErrormsg + errormsg.length)
+						
+							history.replaceState({}, 'oxAuth-Login', '/oxauth/auth/passport/passport-login')
+							jQuery('.errormsg').html(decodeURIComponent(errormsg))
+							jQuery('.errormsg').css('display', 'block')
+						}
+
+					});
+		</script>
+		<script type="text/javascript">
+			window.onload = function() {
+			  setTimeout(fillCredential, 1000);
+			}
+			function fillCredential() {
+				var username = window.localStorage.getItem('form-username');
+				var password = window.localStorage.getItem('form-password');
+				$(".usernameField").val(username);
+				$(".passwordField").val(password);
+			}
+
+			function storeCrendential() {
+				var username = $(".usernameField").val();
+				var password = $(".passwordField").val();
+				window.localStorage.setItem('form-username', username);
+				window.localStorage.setItem('form-password', password);
+			}
+			function checkRememberMe() {
+				if ($('.rememberField:checked').val()) {
+					storeCrendential();
+				}
+			}
+		</script>
+
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,101 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.policy.page_title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.strongauthn.vm.PolicyViewModel')"
+           self="@define(maincontent)">
+
+        <zk:zk if="${vm.uiHasPreferredMethod and vm.uiAllowedToSetPolicy}">
+
+            <z:include src="/back-home.zul" />
+
+            <div class="${css['sectionsWrapper']}">
+                <section class="${css.section}">
+
+                    <div class="${css.panel}">
+                        <h2 class="f4 dark-blue2">${labels.policy.title}</h2>
+                        <p>${labels.policy.text}</p>
+                        <div class="f7 dark-blue2 pb2">
+
+                            <z:checkbox label="${labels.policy.EVERY_LOGIN}" id="EVERY_LOGIN" sclass="db"
+                                        checked="@load(vm.enforcementPolicies.contains(self.id))" onCheck="@('checkPolicy', self.checked, self.id)" />
+
+                            <z:checkbox label="${labels.policy.LOCATION_UNKNOWN}" id="LOCATION_UNKNOWN" sclass="db"
+                                        disabled="@load(vm.enforcementPolicies.contains('EVERY_LOGIN'))"
+                                        checked="@load(vm.enforcementPolicies.contains(self.id))" onCheck="@('checkPolicy', self.checked, self.id)" />
+
+                            <z:checkbox label="${labels.policy.DEVICE_UNKNOWN}" id="DEVICE_UNKNOWN" sclass="db"
+                                        disabled="@load(vm.enforcementPolicies.contains('EVERY_LOGIN'))"
+                                        checked="@load(vm.enforcementPolicies.contains(self.id))" onCheck="@('checkPolicy', self.checked, self.id)" />
+                        </div>
+                        <div class="pb3">
+                            <z:button label="${labels.general.save}" sclass="${css.primaryButton} mr3" disabled="@load(empty vm.enforcementPolicies)"
+                                      w:onClick="alertRef = $('#feedback-policy')" onClick="@('updatePolicy')" />
+                            <z:button label="${labels.general.cancel}" sclass="${css.tertiaryButton}" onClick="@('cancel')"/>
+                        </div>
+
+                        <div class="alert alert-success dn" id="feedback-policy" role="alert" />
+                    </div>
+
+                    <z:div class="${css.panel}" visible="@load(vm.enforcementPolicies.contains('LOCATION_UNKNOWN') or vm.enforcementPolicies.contains('DEVICE_UNKNOWN'))">
+
+                        <h3 class="f5 dark-blue2">${labels.trdevices.title}</h3>
+                        <h:p visible="@load(empty vm.trustedDevices)">${labels.trdevices.none}</h:p>
+
+                        <z:div visible="@load(not empty vm.trustedDevices)">
+                            <p>${labels.trdevices.text}</p>
+
+                            <div class="flex justify-center pt2 ph2-ns">
+                                <table class="table table-sm">
+                                    <h:tbody children="@load(vm.trustedDevices)" sclass="f7">
+                                        <zk:template name="children">
+                                            <tr>
+                                                <td>
+                                                    <div class="b">
+                                                        <z:label value="@load(c:cat3(each.browser.name,' ', each.browser.version))" />
+                                                        <z:label value="${labels.trdevices.on}" />
+                                                        <z:label value="@load(c:cat3(each.os.family,' ', each.os.version))"/>
+                                                    </div>
+                                                    <z:div if="${not empty each.origins}">
+                                                        ${labels.trdevices.last_location}
+                                                        <z:label value="@load(c:cat4(each.origins.get(0).city,', ', each.origins.get(0).country,'.'))" />
+                                                        <z:label value="@load(each.origins.get(0).timestamp) @converter('io.jans.casa.ui.CustomDateConverter', format='MMM d, yyyy - hh:mm a')"/>
+                                                    </z:div>
+                                                </td>
+                                                <td width="w2">
+                                                    <h:button class="${css.deleteButton} mb2"
+                                                              w:onClick="deleteClicked(this)" onClick="@('deleteDevice', forEachStatus.index)"
+                                                              data-original-title="${labels.general.delete}" data-toggle="tooltip" data-placement="top">
+                                                        <i class="fas fa-trash-alt" />
+                                                    </h:button>
+                                                </td>
+                                            </tr>
+                                        </zk:template>
+                                    </h:tbody>
+                                </table>
+                            </div>
+                        </z:div>
+                    </z:div>
+                </section>
+            </div>
+        </zk:zk>
+
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <script>
+            function deleteClicked(widget){
+                try {
+
+                    alertRef = $('#feedback-policy');
+                    //This is needed because when deleted, the tooltip hangs around
+                    $('#' + widget.$n().id).tooltip('hide');
+                } catch (e) {
+                }
+            }
+        </script>
+    </z:div>
+
+</zk:zk>

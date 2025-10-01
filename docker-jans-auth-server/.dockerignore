@@ -1,0 +1,12 @@
+# exclude everything
+*
+
+# include required files/directories
+!conf
+!jetty
+!libs
+!scripts
+!LICENSE
+!requirements.txt
+!templates
+!static
