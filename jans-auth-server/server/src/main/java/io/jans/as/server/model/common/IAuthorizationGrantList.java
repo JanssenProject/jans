@@ -33,6 +33,8 @@ public interface IAuthorizationGrantList {
 
     TokenExchangeGrant createTokenExchangeGrant(User user, Client client);
 
+    JwtBearerGrant createJwtBearerGrant(User user, Client client);
+
     CIBAGrant createCIBAGrant(CibaRequestCacheControl request);
 
     AuthorizationCodeGrant getAuthorizationCodeGrant(String authorizationCode);
