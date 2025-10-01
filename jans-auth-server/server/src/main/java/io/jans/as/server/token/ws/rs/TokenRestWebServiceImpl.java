@@ -153,6 +153,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private TxTokenService txTokenService;
 
+    @Inject
+    private JwtGrantService jwtGrantService;
+
     private final ConcurrentMap<String, String> refreshTokenLock = Maps.newConcurrentMap();
 
     @Override
@@ -230,6 +233,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 }
 
                 final JSONObject responseJson = tokenExchangeService.processTokenExchange(scope, idTokenPreProcessing, executionContext);
+                return response(Response.ok().entity(responseJson.toString()), auditLog);
+            } else if (gt == GrantType.JWT_BEARER) {
+                final JSONObject responseJson = jwtGrantService.processJwtBearer(assertion, scope, request, client, idTokenPreProcessing, executionContext);
                 return response(Response.ok().entity(responseJson.toString()), auditLog);
             }
         } catch (WebApplicationException e) {
