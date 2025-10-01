@@ -154,7 +154,7 @@ public enum Algorithm {
     public static Algorithm fromString(String param) {
         if (param != null) {
             for (Algorithm algorithm : Algorithm.values()) {
-                if (param.equals(algorithm.paramName)) {
+                if (param.equalsIgnoreCase(algorithm.paramName)) {
                     return algorithm;
                 }
             }
