@@ -6297,6 +6297,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dpop-proof-replay-mitigations-with-dpop-nonce" class="md-nav__link">
+    <span class="md-ellipsis">
+      DPoP Proof Replay mitigation(s) (with DPoP-Nonce)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#have-questions-in-the-meantime" class="md-nav__link">
     <span class="md-ellipsis">
       Have questions in the meantime?
@@ -14523,6 +14532,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dpop-proof-replay-mitigations-with-dpop-nonce" class="md-nav__link">
+    <span class="md-ellipsis">
+      DPoP Proof Replay mitigation(s) (with DPoP-Nonce)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#have-questions-in-the-meantime" class="md-nav__link">
     <span class="md-ellipsis">
       Have questions in the meantime?
@@ -14677,6 +14695,37 @@ recommended in the
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#dpopnoncecachetime">dpopNonceCacheTime</a></li>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#dpopjktforceforauthorizationcode">dpopJktForceForAuthorizationCode</a></li>
 </ul>
+<h2 id="dpop-proof-replay-mitigations-with-dpop-nonce">DPoP Proof Replay mitigation(s) (with DPoP-Nonce)<a class="headerlink" href="#dpop-proof-replay-mitigations-with-dpop-nonce" title="Permanent link">#</a></h2>
+<p>When a server requires stricter proof, it can issue a <strong>nonce</strong> (a one-time-use value) that the client must include in its next <strong>DPoP proof</strong>. This ensures that proofs cannot be replayed across multiple requests or sessions.</p>
+<p><strong>How It Works</strong></p>
+<ol>
+<li><strong>Client sends a request</strong> with a DPoP proof to the resource server or authorization server.</li>
+<li><strong>Server responds</strong> with a <code>DPoP-Nonce</code> HTTP header if it requires the client to include a nonce in subsequent requests.</li>
+<li>Example:
+     <div class="highlight"><pre><span></span><code>HTTP/1.1 401 Unauthorized
+DPoP-Nonce: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+</code></pre></div></li>
+<li><strong>Client regenerates the DPoP proof</strong>, embedding the nonce into the JWT (<code>nonce</code> claim).</li>
+<li><strong>Client resends the request</strong>, this time including the updated proof with the nonce.</li>
+<li><strong>Server validates</strong> the proof, checking:</li>
+<li>The signature matches the client’s public key.</li>
+<li>The <code>nonce</code> claim matches the server-issued nonce.</li>
+<li>The nonce has not been reused.</li>
+</ol>
+<p><strong>Nonce Claim in DPoP Proof</strong></p>
+<p>When a nonce is required, the DPoP proof JWT must include:</p>
+<ul>
+<li><code>nonce</code> → the exact value from the server’s <code>DPoP-Nonce</code> header.</li>
+</ul>
+<p>Example DPoP JWT payload with nonce:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;htu&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.example.com/resource/123&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;htm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GET&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1696200992</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dbe457f3-8bde-4fc2-8e17-5c94f1a91e32&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;nonce&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJhbGciOiJIUzI1NiIs...&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
 <h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
 <p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
@@ -14704,7 +14753,7 @@ like to contribute to this page in the meantime, you can get started with our <a
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 15, 2025 10:42:28 UTC"><span class="timeago" datetime="2025-01-15T10:42:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 15, 2025 10:42:28 UTC">2025-01-15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 2, 2025 12:07:33 UTC"><span class="timeago" datetime="2025-10-02T12:07:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 2, 2025 12:07:33 UTC">2025-10-02</span>
   </span>
 
     
