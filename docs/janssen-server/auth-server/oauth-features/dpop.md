@@ -109,6 +109,45 @@ Following properties of the Janssen Server can be used to tailor the behavior co
 - [dpopNonceCacheTime](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpopnoncecachetime)
 - [dpopJktForceForAuthorizationCode](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpopjktforceforauthorizationcode)
 
+## DPoP Proof Replay mitigation(s) (with DPoP-Nonce)
+
+When a server requires stricter proof, it can issue a **nonce** (a one-time-use value) that the client must include in its next **DPoP proof**. This ensures that proofs cannot be replayed across multiple requests or sessions.
+
+
+**How It Works**
+
+1. **Client sends a request** with a DPoP proof to the resource server or authorization server.
+2. **Server responds** with a `DPoP-Nonce` HTTP header if it requires the client to include a nonce in subsequent requests.
+   - Example:
+     ```
+     HTTP/1.1 401 Unauthorized
+     DPoP-Nonce: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+     ```
+3. **Client regenerates the DPoP proof**, embedding the nonce into the JWT (`nonce` claim).
+4. **Client resends the request**, this time including the updated proof with the nonce.
+5. **Server validates** the proof, checking:
+   - The signature matches the client’s public key.
+   - The `nonce` claim matches the server-issued nonce.
+   - The nonce has not been reused.
+
+
+**Nonce Claim in DPoP Proof**
+
+When a nonce is required, the DPoP proof JWT must include:
+
+- `nonce` → the exact value from the server’s `DPoP-Nonce` header.
+
+Example DPoP JWT payload with nonce:
+
+```json
+{
+  "htu": "https://api.example.com/resource/123",
+  "htm": "GET",
+  "iat": 1696200992,
+  "jti": "dbe457f3-8bde-4fc2-8e17-5c94f1a91e32",
+  "nonce": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
 
 
 ## Have questions in the meantime?
