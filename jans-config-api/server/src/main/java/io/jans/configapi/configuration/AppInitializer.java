@@ -104,9 +104,9 @@ public class AppInitializer {
         // configuration
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
-        this.createAuthorizationService();
+        AuthorizationService authorizationService = this.createAuthorizationService();
         ApiAppConfiguration apiAppConfiguration = this.configurationFactory.getApiAppConfiguration();
-        log.info("Initialized ApiAppConfiguration:{}", apiAppConfiguration);
+        log.info("Initialized authorizationService.getClass().getCanonicalName():{}, ApiAppConfiguration:{}", authorizationService.getClass().getCanonicalName(), apiAppConfiguration);
 
         // Initialize python interpreter
         pythonService

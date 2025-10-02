@@ -14913,17 +14913,17 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanView:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -14998,6 +14998,8 @@ components:
         requirePar:
           type: boolean
         parForbidPublicClient:
+          type: boolean
+        jwtGrantAllowUserByUidInAssertion:
           type: boolean
         deviceAuthzEndpoint:
           type: string
@@ -15155,6 +15157,7 @@ components:
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         subjectTypesSupported:
           type: array
           items:
@@ -15482,6 +15485,7 @@ components:
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         cssLocation:
           type: string
         jsLocation:
@@ -16331,6 +16335,7 @@ components:
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         applicationType:
           type: string
           enum:
@@ -17693,9 +17698,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object

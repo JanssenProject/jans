@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 @ApplicationScoped
 @Named("cedarAuthorizationService")
 @Alternative
-@Priority(1)
+@Priority(2)
 public class CedarAuthorizationService extends AuthorizationService implements Serializable {
 
     private static final long serialVersionUID = 1L;

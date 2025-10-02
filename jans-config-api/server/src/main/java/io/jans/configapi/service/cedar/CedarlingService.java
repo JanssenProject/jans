@@ -14,6 +14,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,14 +23,14 @@ import java.util.*;
 import org.slf4j.Logger;
 import uniffi.cedarling_uniffi.*;
 
+@ApplicationScoped
 public class CedarlingService {
 
     @Inject
     Logger logger;
 
-    @Inject
-    CedarlingAdapter adapter;
-    
+
+    private CedarlingAdapter adapter;    
     private AuthorizeResult result;
     
     private static final String AUTHENTICATION_SCHEME = "Bearer ";
