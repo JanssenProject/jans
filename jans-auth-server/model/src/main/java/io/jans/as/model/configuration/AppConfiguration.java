@@ -109,6 +109,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value to indicate whether public client is allowed for Pushed Authorisation Request(PAR)", defaultValue = "false")
     private Boolean parForbidPublicClient = false;
 
+    @DocProperty(description = "Boolean value to indicate whether to allow user identification by uid claim from assertion at Token Endpoint", defaultValue = "false")
+    private Boolean jwtGrantAllowUserByUidInAssertion = false;
+
     @DocProperty(description = "URL for the Device Authorization")
     private String deviceAuthzEndpoint;
 
@@ -2043,6 +2046,16 @@ public class AppConfiguration implements Configuration {
 
     public AppConfiguration setParForbidPublicClient(Boolean parForbidPublicClient) {
         this.parForbidPublicClient = parForbidPublicClient;
+        return this;
+    }
+
+    public Boolean getJwtGrantAllowUserByUidInAssertion() {
+        if (jwtGrantAllowUserByUidInAssertion == null) jwtGrantAllowUserByUidInAssertion = false;
+        return jwtGrantAllowUserByUidInAssertion;
+    }
+
+    public AppConfiguration setJwtGrantAllowUserByUidInAssertion(Boolean jwtGrantAllowUserByUidInAssertion) {
+        this.jwtGrantAllowUserByUidInAssertion = jwtGrantAllowUserByUidInAssertion;
         return this;
     }
 
