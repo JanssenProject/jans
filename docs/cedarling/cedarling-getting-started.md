@@ -9,7 +9,7 @@ tags:
 
 **Cedarling** is a lightweight, embeddable Policy Decision Point (PDP) that enables fast, fine-grained, and decentralized access control across modern applications. Built on the Rust-based [Cedar](https://cedarpolicy.com/) engine, Cedarling is designed for both client-side and server-side use, supporting environments like browsers, mobile apps, cloud-native services, and API gateways.
 
-Cedarling supports both [Token-Based Access Control (TBAC)](./cedarling-overview.md#token-based-access-control-tbac) using JWTs and unsigned authorization requests. In both cases, it enforces policies locally for low-latency and consistent Zero Trust security.
+Cedarling supports both [Token-Based Access Control (TBAC)](./cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac) using JWTs and unsigned authorization requests. In both cases, it enforces policies locally for low-latency and consistent Zero Trust security.
 
 You can integrate Cedarling into your application using the following language libraries:
 
@@ -21,7 +21,7 @@ You can integrate Cedarling into your application using the following language l
 - [Golang](./getting-started/go.md)
 - [Java](./getting-started/java.md)
 
-Alternatively, you can use the [Cedarling Sidecar](./cedarling-overview.md) for a drop-in deployment.
+Alternatively, you can use the [Cedarling Sidecar](./cedarling-sidecar-overview.md) for a drop-in deployment.
 
 From here, you can either jump directly to the language-specific examples above or continue reading for a high-level overview of how Cedarling works.
 
