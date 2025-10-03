@@ -39,7 +39,7 @@ public interface PolicyRestWebService {
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@GET
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_POLICY_READ_ACCESS })
-	@ProtectedCedarlingApi(action = "Jans-Lock::Action::\"LIST_POLICIES\"", resource = "Jans::HTTP_Request")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"LIST_POLICIES\"", resource = "Jans::HTTP_Request")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getPoliciesUriList();
 
@@ -53,7 +53,7 @@ public interface PolicyRestWebService {
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@GET
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_POLICY_READ_ACCESS })
-	@ProtectedCedarlingApi(action = "Jans-Lock::Action::\"GET_POLICY\"", resource = "Jans::HTTP_Request")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"GET_POLICY\"", resource = "Jans::HTTP_Request")
 	@Produces(MediaType.APPLICATION_JSON)
     @Path(ApiAccessConstants.URI_PATH)
 	public Response getPolicyByUri(@Parameter(description = "Policy URI") @PathParam(ApiAccessConstants.URI) @NotNull String uri);

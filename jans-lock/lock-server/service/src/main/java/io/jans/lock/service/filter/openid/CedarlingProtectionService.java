@@ -51,6 +51,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
     @Inject
     private OpenIdService openIdService;
     
+    @Inject
     private CedarlingAuthorizationService authorizationService;
     
     private OpenIdConfigurationResponse oidcConfig;
@@ -161,9 +162,11 @@ public class CedarlingProtectionService implements CedarlingProtection {
 
 	private Map<String, Object> getCedarlingResource(String entityType) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
+		int id = entityType.hashCode();
+		id = id > 0 ? id : -id;
 		map.putAll(
 				Map.of("cedar_entity_mapping",
-						Map.of("entity_type", entityType, "id", entityType.hashCode())
+						Map.of("entity_type", entityType, "id", String.valueOf(id))
 					)
 			);
 		return map;
@@ -176,12 +179,12 @@ public class CedarlingProtectionService implements CedarlingProtection {
 
     private List<Pair<String, String>> getRequestedOperations(ResourceInfo resourceInfo) {
         List<Pair<String, String>> cedarlingPermissions = new ArrayList<>();
-        cedarlingPermissions.add(getOperationFromAnnotation(resourceInfo.getResourceClass()));
-        cedarlingPermissions.add(getOperationFromAnnotation(resourceInfo.getResourceMethod()));
+        addCedarlingPermission(cedarlingPermissions, getOperationFromAnnotation(resourceInfo.getResourceClass()));
+        addCedarlingPermission(cedarlingPermissions, getOperationFromAnnotation(resourceInfo.getResourceMethod()));
 
         Method baseMethod = resourceInfo.getResourceMethod();
         for (Class<?> interfaces : resourceInfo.getResourceClass().getInterfaces()) {
-        	cedarlingPermissions.add(getOperationFromAnnotation(interfaces));
+        	addCedarlingPermission(cedarlingPermissions, getOperationFromAnnotation(interfaces));
             
             Method method = null;
 			try {
@@ -190,13 +193,19 @@ public class CedarlingProtectionService implements CedarlingProtection {
 				// It's expected behavior
 			}
             if (method != null) {
-            	cedarlingPermissions.add(getOperationFromAnnotation(method));
+            	addCedarlingPermission(cedarlingPermissions, getOperationFromAnnotation(method));
             }
 
         }
 
         return cedarlingPermissions;
     }
+
+	private void addCedarlingPermission(List<Pair<String, String>> cedarlingPermissions, Pair<String, String> permission) {
+		if (permission != null) {
+			cedarlingPermissions.add(permission);
+		}
+	}
 
 	private Pair<String, String> getOperationFromAnnotation(AnnotatedElement elem) {
 		Optional<ProtectedCedarlingApi> annotation = optAnnnotation(elem, ProtectedCedarlingApi.class);

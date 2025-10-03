@@ -19,6 +19,7 @@ package io.jans.lock.service.ws.rs.app;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.jans.lock.cedarling.service.filter.CedarlingAuthorizationProcessingFilter;
 import io.jans.lock.service.filter.AuthorizationProcessingFilter;
 import io.jans.lock.service.ws.rs.ConfigurationRestWebService;
 import io.jans.lock.service.ws.rs.audit.AuditRestWebServiceImpl;
@@ -62,8 +63,6 @@ import jakarta.ws.rs.core.Application;
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })
 
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
-        @OAuthScope(name = ApiAccessConstants.LOCK_CONFIG_READ_ACCESS, description = "View configuration related information"),
-        @OAuthScope(name = ApiAccessConstants.LOCK_CONFIG_ISSUERS_READ_ACCESS, description = "View issuers related information"),
         @OAuthScope(name = ApiAccessConstants.LOCK_POLICY_READ_ACCESS, description = "View policy related information"),
         @OAuthScope(name = ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS, description = "Write audit health entries"),
         @OAuthScope(name = ApiAccessConstants.LOCK_LOG_WRITE_ACCESS, description = "Write audit log entries"),
@@ -87,6 +86,7 @@ public class ResteasyInitializer extends Application {
 
 		classes.add(SseRestWebServiceImpl.class);
 
+		classes.add(CedarlingAuthorizationProcessingFilter.class);
 		classes.add(AuthorizationProcessingFilter.class);
 
 		return classes;

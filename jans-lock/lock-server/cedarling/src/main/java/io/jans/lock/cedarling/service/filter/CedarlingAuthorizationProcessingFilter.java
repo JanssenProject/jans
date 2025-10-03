@@ -23,7 +23,7 @@ import jakarta.ws.rs.core.Response;
  */
 // To protect JAX-RS resources with this filter add the @ProtectedApi annotation
 @ProtectedCedarlingApi
-@Priority(Priorities.AUTHENTICATION)
+@Priority(Priorities.AUTHENTICATION + 1)
 @Dependent
 public class CedarlingAuthorizationProcessingFilter implements ContainerRequestFilter {
 
