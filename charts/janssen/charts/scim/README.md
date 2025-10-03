@@ -19,7 +19,7 @@ System for Cross-domain Identity Management (SCIM) version 2.0
 
 ## Requirements
 
-Kubernetes: `>=v1.22.0-0`
+Kubernetes: `>=v1.23.0-0`
 
 ## Values
 
