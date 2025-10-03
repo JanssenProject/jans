@@ -77,6 +77,11 @@ public enum AuthorizationGrantType implements HasParamName {
      * Transaction Token grant type
      */
     TX_TOKEN("urn:ietf:params:oauth:grant-type:tx_token"),
+
+    /**
+     * JWT Bearer Grant Type
+     */
+    JWT_BEARER("urn:ietf:params:oauth:grant-type:jwt-bearer"),
     ;
 
     private final String paramName;
