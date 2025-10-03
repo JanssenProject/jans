@@ -11,6 +11,7 @@ import io.jans.fido2.model.metric.Fido2MetricsAggregation;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricsEntry;
+import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -41,7 +42,7 @@ public class Fido2MetricsService {
     private AppConfiguration appConfiguration;
 
     @Inject
-    @Named("fido2MetricsEntryManager")
+    @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     private PersistenceEntryManager persistenceEntryManager;
 
     private static final String METRICS_ENTRY_BASE_DN = "ou=fido2-metrics,o=jans";
