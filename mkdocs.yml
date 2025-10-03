@@ -245,6 +245,7 @@ nav:
       - janssen-server/auth-server/oauth-features/README.md
       - Authorization Code Grant: janssen-server/auth-server/oauth-features/auth-code-grant.md
       - Implicit Grant: janssen-server/auth-server/oauth-features/implicit-grant.md
+      - JWT Grant: janssen-server/auth-server/oauth-features/jwt-grant.md
       - Password Grant: janssen-server/auth-server/oauth-features/password-grant.md
       - Device Grant: janssen-server/auth-server/oauth-features/device-grant.md
       - Client Credential Grant: janssen-server/auth-server/oauth-features/client-credential-grant.md
