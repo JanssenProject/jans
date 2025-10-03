@@ -2,6 +2,7 @@ package io.jans.configapi.service.cedar;
 
 import io.jans.configapi.util.AuthUtil;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
 
 import org.json.JSONObject;
@@ -14,6 +15,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,6 +26,7 @@ import org.slf4j.Logger;
 import uniffi.cedarling_uniffi.*;
 
 @ApplicationScoped
+@Named
 public class CedarlingService {
 
     @Inject
@@ -34,8 +37,10 @@ public class CedarlingService {
     private AuthorizeResult result;
     
     private static final String AUTHENTICATION_SCHEME = "Bearer ";
-    public static final String BOOTSTRAP_JSON_PATH = "./src/test/resources/config/bootstrap.json";
+    public static final String PROTECTION_CONFIGURATION_FILE_NAME = "config-api-rs-protect.json";
+    public static final String BOOTSTRAP_JSON_PATH = "./cedar/config/bootstrap.json";
 
+    @PostConstruct
     public void setUp() throws Exception {
         logger.error(" BOOTSTRAP_JSON_PATH:{}", BOOTSTRAP_JSON_PATH);
         adapter = new CedarlingAdapter();
@@ -48,7 +53,7 @@ public class CedarlingService {
 
     public void authorize(String accessToken, String idToken, String userInfo, String action, String resource,
             String context) throws Exception {
-
+        logger.error("\n *********************************************\n");
         logger.error(" accessToken:{}, idToken:{}, userInfo:{}, action:{}, resource:{}, context:{} ", accessToken,
                 idToken, userInfo, action, resource, context);
 
@@ -60,6 +65,7 @@ public class CedarlingService {
         result = adapter.authorize(tokens, action, new JSONObject(resource), new JSONObject(context));
 
         logger.error(" result:{} ", result);
+        logger.error("\n *********************************************\n");
 
     }
 

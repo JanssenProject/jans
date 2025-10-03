@@ -89,6 +89,8 @@ public class CedarAuthorizationService extends AuthorizationService implements S
             throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
+        //authorize
+        cedarlingService.authorize(token, token, token, resourceInfo.getResourceMethod().getName(), resourceInfo.toString(), path);
         // Validate issuer
         logger.info("Validate issuer");
         if (StringUtils.isNotBlank(issuer) && !authUtil.isValidIssuer(issuer)) {
