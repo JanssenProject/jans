@@ -8,6 +8,10 @@ mod claim_mapping;
 mod test;
 mod token_entity_metadata;
 
+pub mod errors;
+pub mod metadata;
+pub mod source;
+
 use super::{PartitionResult, cedar_schema::CedarSchema};
 use cedar_policy::{Policy, PolicyId};
 use semver::Version;
@@ -17,6 +21,11 @@ use url::Url;
 
 pub(crate) use claim_mapping::ClaimMappings;
 pub use token_entity_metadata::TokenEntityMetadata;
+
+// Re-export for convenience
+pub use errors::{ArchiveError, PolicyStoreError, TokenError, ValidationError};
+pub use metadata::{FileInfo, PolicyStoreInfo, PolicyStoreManifest, PolicyStoreMetadata};
+pub use source::{PolicyStoreFormat, PolicyStoreSource};
 
 /// Default maximum number of entities allowed
 const DEFAULT_MAX_ENTITIES: usize = 1000;
@@ -87,11 +96,11 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
     {
         // First try to deserialize into a Value to get better error messages
         let value = serde_json::Value::deserialize(deserializer)?;
-        
+
         // Check for required fields
-        let obj = value.as_object().ok_or_else(|| {
-            de::Error::custom("policy store must be a JSON object")
-        })?;
+        let obj = value
+            .as_object()
+            .ok_or_else(|| de::Error::custom("policy store must be a JSON object"))?;
 
         // Check cedar_version field
         let cedar_version = obj.get("cedar_version").ok_or_else(|| {
@@ -105,23 +114,19 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
 
         // Now deserialize the actual struct
         let mut store = AgamaPolicyStore {
-            cedar_version: parse_cedar_version(cedar_version).map_err(|e| {
-                de::Error::custom(format!("invalid cedar_version format: {}", e))
-            })?,
+            cedar_version: parse_cedar_version(cedar_version)
+                .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {}", e)))?,
             policy_stores: HashMap::new(),
         };
 
         // Deserialize policy stores
-        let stores_obj = policy_stores.as_object().ok_or_else(|| {
-            de::Error::custom("'policy_stores' must be a JSON object")
-        })?;
+        let stores_obj = policy_stores
+            .as_object()
+            .ok_or_else(|| de::Error::custom("'policy_stores' must be a JSON object"))?;
 
         for (key, value) in stores_obj {
             let policy_store = PolicyStore::deserialize(value).map_err(|e| {
-                de::Error::custom(format!(
-                    "error parsing policy store '{}': {}",
-                    key, e
-                ))
+                de::Error::custom(format!("error parsing policy store '{}': {}", key, e))
             })?;
             store.policy_stores.insert(key.clone(), policy_store);
         }
@@ -185,10 +190,10 @@ impl PolicyStore {
                 max_entities: max_entities.unwrap_or(DEFAULT_MAX_ENTITIES),
                 max_base64_size: max_base64_size.unwrap_or(DEFAULT_MAX_BASE64_SIZE),
             };
-            
+
             validate_default_entities(default_entities, &limits)?;
         }
-        
+
         Ok(())
     }
 }
@@ -436,8 +441,6 @@ impl PoliciesContainer {
     pub fn get_policy_description(&self, id: &str) -> Option<&str> {
         self.raw_policy_info.get(id).map(|v| v.description.as_str())
     }
-
-
 }
 
 /// Custom deserializer for converting base64-encoded policies into a `PolicySet`.
@@ -552,29 +555,39 @@ impl<'de> Deserialize<'de> for PolicyStore {
     {
         // First try to deserialize into a Value to get better error messages
         let value = serde_json::Value::deserialize(deserializer)?;
-        
+
         // Check for required fields
-        let obj = value.as_object().ok_or_else(|| {
-            de::Error::custom("policy store entry must be a JSON object")
-        })?;
+        let obj = value
+            .as_object()
+            .ok_or_else(|| de::Error::custom("policy store entry must be a JSON object"))?;
 
         // Check name field
         let name = obj.get("name").ok_or_else(|| {
             de::Error::custom("missing required field 'name' in policy store entry")
         })?;
-        let name = name.as_str().ok_or_else(|| {
-            de::Error::custom("'name' must be a string")
-        })?;
+        let name = name
+            .as_str()
+            .ok_or_else(|| de::Error::custom("'name' must be a string"))?;
 
         // Check schema field
-        let schema = obj.get("schema").or_else(|| obj.get("cedar_schema")).ok_or_else(|| {
-            de::Error::custom("missing required field 'schema' or 'cedar_schema' in policy store entry")
-        })?;
+        let schema = obj
+            .get("schema")
+            .or_else(|| obj.get("cedar_schema"))
+            .ok_or_else(|| {
+                de::Error::custom(
+                    "missing required field 'schema' or 'cedar_schema' in policy store entry",
+                )
+            })?;
 
         // Check policies field
-        let policies = obj.get("policies").or_else(|| obj.get("cedar_policies")).ok_or_else(|| {
-            de::Error::custom("missing required field 'policies' or 'cedar_policies' in policy store entry")
-        })?;
+        let policies = obj
+            .get("policies")
+            .or_else(|| obj.get("cedar_policies"))
+            .ok_or_else(|| {
+                de::Error::custom(
+                    "missing required field 'policies' or 'cedar_policies' in policy store entry",
+                )
+            })?;
 
         // Now deserialize the actual struct
         let store = PolicyStore {
@@ -685,26 +698,28 @@ mod tests {
 
         // Test valid entities
         let valid_entities = HashMap::from([
-            ("entity1".to_string(), json!("dGVzdA=="),),
-            ("entity2".to_string(), json!("dGVzdDI="),),
+            ("entity1".to_string(), json!("dGVzdA==")),
+            ("entity2".to_string(), json!("dGVzdDI=")),
         ]);
         assert!(validate_default_entities(&valid_entities, &limits).is_ok());
 
         // Test entity count limit
         let too_many_entities = HashMap::from([
-            ("entity1".to_string(), json!("dGVzdA=="),),
-            ("entity2".to_string(), json!("dGVzdDI="),),
-            ("entity3".to_string(), json!("dGVzdDM="),),
+            ("entity1".to_string(), json!("dGVzdA==")),
+            ("entity2".to_string(), json!("dGVzdDI=")),
+            ("entity3".to_string(), json!("dGVzdDM=")),
         ]);
         let result = validate_default_entities(&too_many_entities, &limits);
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Maximum number of default entities (2) exceeded"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("Maximum number of default entities (2) exceeded")
+        );
 
         // Test base64 size limit
         let large_base64 = "dGVzdA==".repeat(20); // Much larger than 100 bytes
-        let large_entities = HashMap::from([
-            ("entity1".to_string(), json!(large_base64),),
-        ]);
+        let large_entities = HashMap::from([("entity1".to_string(), json!(large_base64))]);
         let result = validate_default_entities(&large_entities, &limits);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Base64 string size"));
