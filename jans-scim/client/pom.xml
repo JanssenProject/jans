@@ -42,7 +42,7 @@
                 <configuration>
                     <failOnError>false</failOnError>
                 </configuration>
-                <version>3.11.3</version>
+                <version>3.12.0</version>
             </plugin>
         </plugins>
     </build>

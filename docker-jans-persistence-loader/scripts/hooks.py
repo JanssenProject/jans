@@ -189,6 +189,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
     for grant_type in [
         "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange",
+        "urn:ietf:params:oauth:grant-type:jwt-bearer",
     ]:
         if grant_type not in conf["grantTypesSupported"]:
             conf["grantTypesSupported"].append(grant_type)
@@ -288,6 +289,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange",
+        "urn:ietf:params:oauth:grant-type:jwt-bearer",
         "password",
     ]:
         if grant_type not in conf["grantTypesSupportedByDynamicRegistration"]:
