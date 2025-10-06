@@ -1,7 +1,7 @@
 apiVersion: v2
 name: saml
 version: 0.0.0-nightly
-kubeVersion: ">=v1.21.0-0"
+kubeVersion: ">=v1.23.0-0"
 description: Jans SAML
 type: application
 keywords:
