@@ -14913,19 +14913,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanView:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -15835,6 +15835,8 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -15844,8 +15846,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17514,10 +17514,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -17688,7 +17688,7 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
+        logoutStatusJwt:
           type: boolean
         tokenTypeEnum:
           type: string
@@ -17700,7 +17700,7 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object
