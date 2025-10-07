@@ -19,7 +19,7 @@ Janssen Access and Identity Management Microservices Chart. This chart deploys e
 
 ## Requirements
 
-Kubernetes: `>=v1.22.0-0`
+Kubernetes: `>=v1.23.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
