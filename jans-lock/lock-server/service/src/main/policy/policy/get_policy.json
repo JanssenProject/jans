@@ -1,0 +1,11 @@
+@id("lock_policy_get_by_id")
+permit(
+  principal is Jans::Workload,
+  action in Jans::Action::"GET",
+  resource == Jans::HTTP_Request::"lock_policy_get_by_id"
+)
+when {
+  principal has access_token.scope &&
+  principal.access_token.scope.contains("https://jans.io/oauth/lock/policy.readonly") &&
+  resource has url && resource.url has path && resource.url.path == "/policy"
+};
