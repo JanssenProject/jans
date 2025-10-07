@@ -16,8 +16,6 @@
 
 package io.jans.lock.cedarling.config;
 
-import java.util.Collection;
-
 import org.json.JSONObject;
 
 import io.jans.lock.model.config.cedarling.LogLevel;
@@ -40,11 +38,13 @@ public class BootstrapConfig {
 	public static final String CEDARLING_POLICY_STORE_LOCAL_ID = "CEDARLING_POLICY_STORE_LOCAL_ID";
 	public static final String CEDARLING_USER_AUTHZ = "CEDARLING_USER_AUTHZ";
 	public static final String CEDARLING_WORKLOAD_AUTHZ = "CEDARLING_WORKLOAD_AUTHZ";
+	public static final String CEDARLING_ID_TOKEN_TRUST_MODE = "CEDARLING_ID_TOKEN_TRUST_MODE";
 
 	private String applicationName = "Lock Server";
 	private String policyStoreLocal = null;
 	private boolean userAuthz = false;
 	private boolean workloadAuthz = true;
+	private String idTokenTrustMode = "never";
 	private LogType logType = LogType.MEMORY;
 	private LogLevel logLevel = LogLevel.DEBUG;
 	private Integer logTtl;
@@ -57,6 +57,7 @@ public class BootstrapConfig {
 		this.policyStoreLocal = builder.policyStoreLocal;
 		this.userAuthz = builder.userAuthz;
 		this.workloadAuthz = builder.workloadAuthz;
+		this.idTokenTrustMode = builder.idTokenTrustMode;
 		this.logType = builder.logType;
 		this.logLevel = builder.logLevel;
 		this.logTtl = 120;
@@ -71,6 +72,7 @@ public class BootstrapConfig {
 		jo.put(CEDARLING_APPLICATION_NAME, applicationName);
 		jo.put(CEDARLING_WORKLOAD_AUTHZ, toEnabled(workloadAuthz));
 		jo.put(CEDARLING_USER_AUTHZ, toEnabled(userAuthz));
+		jo.put(CEDARLING_ID_TOKEN_TRUST_MODE, idTokenTrustMode);
 		jo.put(CEDARLING_AUDIT_HEALTH_INTERVAL, 0);
 		jo.put(CEDARLING_AUDIT_TELEMETRY_INTERVAL, 0);
 		jo.put(CEDARLING_LOG_TYPE, logType.getType());
@@ -91,6 +93,7 @@ public class BootstrapConfig {
 		private String policyStoreLocal = null;
 		private boolean userAuthz = false;
 		private boolean workloadAuthz = true;
+		private String idTokenTrustMode = "never";
 		private LogType logType = LogType.MEMORY;
 		private LogLevel logLevel = LogLevel.DEBUG;
 
@@ -115,6 +118,10 @@ public class BootstrapConfig {
 		public Builder workloadAuthz(boolean workloadAuthz) {
 			this.workloadAuthz = workloadAuthz;
 			return this;
+		}
+
+		public String getIdTokenTrustMode() {
+			return idTokenTrustMode;
 		}
 
 		public Builder logType(LogType logType) {

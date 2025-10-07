@@ -32,7 +32,7 @@ import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
-import io.jans.lock.service.OpenIdService;
+import io.jans.lock.cedarling.service.OpenIdService;
 import io.jans.lock.service.filter.OpenIdProtection;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.annotation.PostConstruct;

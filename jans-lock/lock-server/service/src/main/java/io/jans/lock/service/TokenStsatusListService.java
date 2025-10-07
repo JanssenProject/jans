@@ -31,6 +31,7 @@ import io.jans.as.model.jws.JwsSigner;
 import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtHeaderName;
+import io.jans.lock.cedarling.service.OpenIdService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 

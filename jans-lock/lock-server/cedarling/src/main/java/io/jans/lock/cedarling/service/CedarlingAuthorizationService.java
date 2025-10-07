@@ -126,6 +126,10 @@ public class CedarlingAuthorizationService {
 	
 	public boolean authorize(Map<String, String> tokens, String action, JSONObject resource, JSONObject context) {
 		try {
+			if (log.isDebugEnabled()) {
+				log.debug("Before executing authorization request. tokens: {}, action: {}, resource: {}, context: {}",
+						tokens, action, resource, context);
+			}
 			AuthorizeResult res = cedarlingAdapter.authorize(tokens, action, resource, context);
 			
 			if (res == null) {

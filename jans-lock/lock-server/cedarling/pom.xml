@@ -41,6 +41,10 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-service</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-client</artifactId>
+		</dependency>
 
 		<!-- CDI -->
 		<dependency>

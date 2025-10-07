@@ -1,5 +1,6 @@
 package io.jans.lock.service.ws.rs.stat;
 
+import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.model.stat.FlatStatResponse;
 import io.jans.lock.util.ApiAccessConstants;
@@ -40,6 +41,7 @@ public interface StatRestWebService {
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@GET
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_STAT_READ_ACCESS })
+	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id="lock_stat_query", path="/internal/stat")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response statGet(@QueryParam("month") String months, @QueryParam("start-month") String startMonth,
 			@QueryParam("end-month") String endMonth, @QueryParam("format") String format);
@@ -55,6 +57,7 @@ public interface StatRestWebService {
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_STAT_READ_ACCESS })
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_stat_query", path="/internal/stat")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response statPost(@FormParam("month") String months, @FormParam("start-month") String startMonth,
 			@FormParam("end-month") String endMonth, @FormParam("format") String format);

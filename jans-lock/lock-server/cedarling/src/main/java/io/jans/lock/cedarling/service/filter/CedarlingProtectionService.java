@@ -1,4 +1,4 @@
-package io.jans.lock.service.filter.openid;
+package io.jans.lock.cedarling.service.filter;
 
 import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
@@ -28,11 +28,10 @@ import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
+import io.jans.lock.cedarling.model.CedarlingPermission;
 import io.jans.lock.cedarling.service.CedarlingAuthorizationService;
-import io.jans.lock.cedarling.service.filter.CedarlingProtection;
+import io.jans.lock.cedarling.service.OpenIdService;
 import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
-import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.service.OpenIdService;
 import io.jans.util.Pair;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -83,9 +82,9 @@ public class CedarlingProtectionService implements CedarlingProtection {
             token = token.replaceFirst("Bearer\\s+","");
             log.debug("Validating token {}", token);
 
-            List<Pair<String, String>> requestedOperations = getRequestedOperations(resourceInfo);
-            log.info("Check access to requested opearations: {}", requestedOperations);
-            if (requestedOperations.size() == 0) {
+            List<CedarlingPermission> requestedPermissions = getRequestedOperations(resourceInfo);
+            log.info("Check access to requested opearations: {}", requestedPermissions);
+            if (requestedPermissions.size() == 0) {
 	            return simpleResponse(INTERNAL_SERVER_ERROR, "Access to operation is not correct");
             }
 
@@ -122,11 +121,11 @@ public class CedarlingProtectionService implements CedarlingProtection {
             if (valid) {
 	            boolean authorized = true;
 	            Map<String, String> tokens = getCedarlingTokens(token);
-	            for (Pair<String, String> requestedOperation : requestedOperations) {
-	            	authorized &= authorizationService.authorize(tokens, requestedOperation.getFirst(),
-	            			getCedarlingResource(requestedOperation.getSecond()), getCedarlingCpntext());
+	            for (CedarlingPermission requestedPermission : requestedPermissions) {
+	            	authorized &= authorizationService.authorize(tokens, requestedPermission.getAction(),
+	            			getCedarlingResource(requestedPermission), getCedarlingContext());
 	            	if (!authorized) {
-	            		log.error("Insufficient permissions to access '{}' resource '{}'", requestedOperation.getSecond(), requestedOperation.getFirst());
+	            		log.error("Insufficient permissions to access '{}'", requestedPermission);
 	            		break;
 	            	}
 	            }
@@ -160,25 +159,31 @@ public class CedarlingProtectionService implements CedarlingProtection {
 		return Map.of("access_token", accessToken);
 	}
 
-	private Map<String, Object> getCedarlingResource(String entityType) {
+	private Map<String, Object> getCedarlingResource(CedarlingPermission requestedPermission) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		int id = entityType.hashCode();
+		int id = requestedPermission.hashCode();
 		id = id > 0 ? id : -id;
 		map.putAll(
 				Map.of("cedar_entity_mapping",
-						Map.of("entity_type", entityType, "id", String.valueOf(id))
+						Map.of("entity_type", requestedPermission.getResource(), "id", requestedPermission.getId())
 					)
-			);
+		);
+		map.putAll(
+				Map.of("url",
+						Map.of("host", "", "path", requestedPermission.getPath(), "protocol", "")
+					)
+		);
+
 		return map;
 	}
-
-	private Map<String, Object> getCedarlingCpntext() {
+	
+	private Map<String, Object> getCedarlingContext() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		return map;
 	}
 
-    private List<Pair<String, String>> getRequestedOperations(ResourceInfo resourceInfo) {
-        List<Pair<String, String>> cedarlingPermissions = new ArrayList<>();
+    private List<CedarlingPermission> getRequestedOperations(ResourceInfo resourceInfo) {
+        List<CedarlingPermission> cedarlingPermissions = new ArrayList<>();
         addCedarlingPermission(cedarlingPermissions, getOperationFromAnnotation(resourceInfo.getResourceClass()));
         addCedarlingPermission(cedarlingPermissions, getOperationFromAnnotation(resourceInfo.getResourceMethod()));
 
@@ -201,17 +206,17 @@ public class CedarlingProtectionService implements CedarlingProtection {
         return cedarlingPermissions;
     }
 
-	private void addCedarlingPermission(List<Pair<String, String>> cedarlingPermissions, Pair<String, String> permission) {
+	private void addCedarlingPermission(List<CedarlingPermission> cedarlingPermissions, CedarlingPermission permission) {
 		if (permission != null) {
 			cedarlingPermissions.add(permission);
 		}
 	}
 
-	private Pair<String, String> getOperationFromAnnotation(AnnotatedElement elem) {
+	private CedarlingPermission getOperationFromAnnotation(AnnotatedElement elem) {
 		Optional<ProtectedCedarlingApi> annotation = optAnnnotation(elem, ProtectedCedarlingApi.class);
 		if (annotation.isPresent()) {
 			ProtectedCedarlingApi cedarlingPermission = annotation.get();
-			return new Pair(cedarlingPermission.action(), cedarlingPermission.resource());
+			return new CedarlingPermission(cedarlingPermission.action(), cedarlingPermission.resource(), cedarlingPermission.id(), cedarlingPermission.path());
 		} else {
 			return null;
 		}

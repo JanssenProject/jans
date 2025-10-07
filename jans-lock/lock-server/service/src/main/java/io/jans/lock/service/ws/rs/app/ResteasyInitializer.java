@@ -24,7 +24,6 @@ import io.jans.lock.service.filter.AuthorizationProcessingFilter;
 import io.jans.lock.service.ws.rs.ConfigurationRestWebService;
 import io.jans.lock.service.ws.rs.audit.AuditRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.policy.PolicyRestWebServiceImpl;
-import io.jans.lock.service.ws.rs.sse.SseRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.stat.StatRestWebServiceImpl;
 import io.jans.lock.util.ApiAccessConstants;
 import io.jans.lock.util.Constants;
@@ -67,7 +66,6 @@ import jakarta.ws.rs.core.Application;
         @OAuthScope(name = ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS, description = "Write audit health entries"),
         @OAuthScope(name = ApiAccessConstants.LOCK_LOG_WRITE_ACCESS, description = "Write audit log entries"),
         @OAuthScope(name = ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS, description = "Write telemetry health entries"),
-        @OAuthScope(name = ApiAccessConstants.LOCK_SSE_READ_ACCESS, description = "Subscribe to SSE events"),
         @OAuthScope(name = ApiAccessConstants.LOCK_STAT_READ_ACCESS, description = "View stat related information")
         }
 
@@ -83,8 +81,6 @@ public class ResteasyInitializer extends Application {
 		classes.add(AuditRestWebServiceImpl.class);
 		classes.add(PolicyRestWebServiceImpl.class);
 		classes.add(StatRestWebServiceImpl.class);
-
-		classes.add(SseRestWebServiceImpl.class);
 
 		classes.add(CedarlingAuthorizationProcessingFilter.class);
 		classes.add(AuthorizationProcessingFilter.class);

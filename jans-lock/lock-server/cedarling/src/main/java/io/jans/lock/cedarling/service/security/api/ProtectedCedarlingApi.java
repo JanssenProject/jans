@@ -22,4 +22,14 @@ public @interface ProtectedCedarlingApi {
      */
 	String resource() default "";
 
+	/**
+     * @return resource id
+     */
+	String id() default "";
+
+	/**
+     * @return path to resource
+     */
+	String path() default "";
+
 }
