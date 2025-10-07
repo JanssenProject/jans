@@ -1,4 +1,4 @@
-kubeVersion: ">=v1.22.0-0"
+kubeVersion: ">=v1.23.0-0"
 annotations:
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
