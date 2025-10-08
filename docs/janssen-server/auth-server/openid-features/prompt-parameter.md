@@ -34,7 +34,7 @@ public String getCreateUserPage(Object context) {
 }
 ```
 
-- ["CreateUser" custom script](../../developer/scripts/create-user.md)
+- ["CreateUser" custom script](../../../script-catalog/create_user/create-user.md)
 
 
 # Prompt NONE
