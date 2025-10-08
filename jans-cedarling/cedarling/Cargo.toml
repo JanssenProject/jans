@@ -47,6 +47,7 @@ async-trait = "0.1.88"
 futures = "0.3.31"
 wasm-bindgen-futures = { workspace = true }
 config = "0.15.11"
+ahash = { version = "0.8.12", default-features = false, features = ["no-rng"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }
@@ -60,13 +61,14 @@ jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = "1.5.0"
 criterion = { version = "0.5.1", features = ["async_tokio"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
+stats_alloc = "0.1.10"
 
 [target.'cfg(not(any(target_arch = "wasm32", target_os = "windows")))'.dev-dependencies]
 pprof = { version = "0.14.0", features = ["flamegraph"] }
 
 
 [[bench]]
-name = "authz_benchmark"
+name = "authz_authorize_benchmark"
 harness = false
 
 [[bench]]
