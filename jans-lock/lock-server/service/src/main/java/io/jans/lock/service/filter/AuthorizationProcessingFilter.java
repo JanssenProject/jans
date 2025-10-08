@@ -64,9 +64,7 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 			if (authorizationResponse == null) {
 				// Actual processing of request proceeds
 				log.debug("Authorization passed");
-			}
-
-			if (authorizationResponse != null) {
+			} else {
 				requestContext.abortWith(authorizationResponse);
 			}
 		}

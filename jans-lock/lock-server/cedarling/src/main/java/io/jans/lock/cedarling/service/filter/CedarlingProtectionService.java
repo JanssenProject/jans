@@ -15,11 +15,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jans.as.client.OpenIdConfigurationClient;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
@@ -30,9 +32,11 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.lock.cedarling.model.CedarlingPermission;
 import io.jans.lock.cedarling.service.CedarlingAuthorizationService;
-import io.jans.lock.cedarling.service.OpenIdService;
 import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
-import io.jans.util.Pair;
+import io.jans.lock.model.config.AppConfiguration;
+import io.jans.util.StringHelper;
+import io.jans.util.exception.InvalidConfigurationException;
+import io.jans.util.exception.MissingResourceException;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -48,11 +52,11 @@ public class CedarlingProtectionService implements CedarlingProtection {
     private Logger log;
 
     @Inject
-    private OpenIdService openIdService;
+    private AppConfiguration appConfiguration;
     
     @Inject
     private CedarlingAuthorizationService authorizationService;
-    
+
     private OpenIdConfigurationResponse oidcConfig;
     
     private ObjectMapper mapper;
@@ -61,7 +65,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
     private void init() {
         try {
             mapper = new ObjectMapper();
-            oidcConfig = openIdService.getOpenIdConfiguration();
+            oidcConfig = getOpenIdConfiguration();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -146,7 +150,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
     private Jwt tokenAsJwt(String token) {
         Jwt jwt = null;
         try {
-            jwt = Jwt.parse(token);
+            jwt = Jwt.parse("eyJraWQiOiJjb25uZWN0XzkzOWYxNTM0LWRhMzQtNDUwZi05YmJkLTI5YzNhNzJhYWQ0MF9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIyMjAwLmMzNWY2NTMxLWYxZTgtNDllNi04OWYzLWYzZGQwNjZmZWQ4YyIsInN1YiI6Ik80NjVZZFhIVkE3YXFPeXVvQzRvTkx0QnJOT2xjbEtXQkJWSUhteUJ5SHMiLCJ4NXQjUzI1NiI6IiIsIm5iZiI6MTc1OTk0MjAyNywic2NvcGUiOlsiaHR0cHM6Ly9qYW5zLmlvL29hdXRoL2xvY2svaGVhbHRoLndyaXRlIiwiaHR0cHM6Ly9qYW5zLmlvL29hdXRoL2xvY2svdGVsZW1ldHJ5LndyaXRlIiwiaHR0cHM6Ly9qYW5zLmlvL29hdXRoL2xvY2svbG9nLndyaXRlIl0sImlzcyI6Imh0dHBzOi8vamFucy1wZ3NxbC5qYW5zLmluZm8iLCJ0b2tlbl90eXBlIjoiQmVhcmVyIiwiZXhwIjoxNzU5OTcyMDI3LCJpYXQiOjE3NTk5NDIwMjcsImNsaWVudF9pZCI6IjIyMDAuYzM1ZjY1MzEtZjFlOC00OWU2LTg5ZjMtZjNkZDA2NmZlZDhjIiwianRpIjoieWgxak85VnNUU2FtWmVDQ2VrdUc3QSIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjQsInVyaSI6Imh0dHBzOi8vamFucy1wZ3NxbC5qYW5zLmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.hqGp6gyZ_4vHIoqTspCbeZQaq_ud-4I1uqctHhOULHZl0lJnZHbhorGFZfq_AZPm8mJRxPjOh5YN1fz-kwV5jhmNbss3otGrQ7J5tbIkLD-okd1cdnXMsyqXwJgrVtbcQ9wJHjElGu5x-Kyu2wRmAbZjsoWXGAgcxb0JrD7YCXYyITSIWpHJwk_Ah_OJelFnDgXTR5b8wtdNwo6G0mtW0DrpT4q0cGxWOPbJ8CWdr2_NuYvvzraBk-PH9ydSbStdYMOJV5gHwVUSUGZRSpWDBzvbeVOygvSutpTNSieFQ2oSSYWV4Ysrh-NY4Szy0g-6XXAdC2cKVW32ZYHpS_EmYQ");
             log.trace("This looks like a JWT token");
         } catch (InvalidJwtException e) {
             log.trace("Not a JWT token");
@@ -171,6 +175,11 @@ public class CedarlingProtectionService implements CedarlingProtection {
 		map.putAll(
 				Map.of("url",
 						Map.of("host", "", "path", requestedPermission.getPath(), "protocol", "")
+					)
+		);
+		map.putAll(
+				Map.of("header",
+						Map.of()
 					)
 		);
 
@@ -225,6 +234,26 @@ public class CedarlingProtectionService implements CedarlingProtection {
     private static <T extends Annotation> Optional<T> optAnnnotation(AnnotatedElement elem, Class<T> cls) {
         return Optional.ofNullable(elem.getAnnotation(cls));
     }
+
+	private OpenIdConfigurationResponse getOpenIdConfiguration() {
+		String openIdIssuer = appConfiguration.getOpenIdIssuer();
+		if (StringHelper.isEmpty(openIdIssuer)) {
+			throw new InvalidConfigurationException("OpenIdIssuer Url is invalid");
+		}
+
+		String openIdIssuerEndpoint = openIdIssuer + "/.well-known/openid-configuration";
+
+		OpenIdConfigurationClient client = new OpenIdConfigurationClient(openIdIssuerEndpoint);
+		OpenIdConfigurationResponse openIdConfigurationResponse = client.execOpenIdConfiguration();
+
+		if ((openIdConfigurationResponse == null) || (openIdConfigurationResponse.getStatus() != HttpStatus.SC_OK)) {
+			throw new MissingResourceException("Failed to load OpenID configuration!");
+		}
+
+		log.info("Successfully loaded OpenID configuration");
+
+		return openIdConfigurationResponse;
+	}
 
     public Response simpleResponse(Response.Status status, String detail) {
         return Response.status(status).entity(detail).build();

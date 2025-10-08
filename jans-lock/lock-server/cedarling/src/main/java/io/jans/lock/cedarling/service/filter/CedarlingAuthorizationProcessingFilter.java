@@ -63,9 +63,7 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 			if (authorizationResponse == null) {
 				// Actual processing of request proceeds
 				log.debug("Authorization passed");
-			}
-
-			if (authorizationResponse != null) {
+			} else {
 				requestContext.abortWith(authorizationResponse);
 			}
 		}

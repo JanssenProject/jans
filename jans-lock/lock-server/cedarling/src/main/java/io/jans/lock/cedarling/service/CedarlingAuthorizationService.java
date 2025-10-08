@@ -146,7 +146,7 @@ public class CedarlingAuthorizationService {
 
 			return res.getDecision();
 		} catch (Exception ex) {
-			log.error("Failed to execute Cedarling authorize", ex);
+			log.error("Failed to execute Cedarling authorize: tokens: {}, action: {}, resource: {}, context: {}", tokens, action, resource, context, ex);
 		}
 		
 		return false;

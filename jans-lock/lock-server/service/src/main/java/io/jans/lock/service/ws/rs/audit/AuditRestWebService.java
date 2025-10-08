@@ -62,7 +62,7 @@ public interface AuditRestWebService {
 	@Path("/health")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS })
-	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="audit_health_write", path="/audit/health")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_health_write", path="/audit/health")
 	Response processHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 
@@ -79,7 +79,7 @@ public interface AuditRestWebService {
 	@Path("/health/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS })
-	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="audit_health_write", path="/audit/health")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_health_write", path="/audit/health")
 	Response processBulkHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 
@@ -96,7 +96,7 @@ public interface AuditRestWebService {
 	@Path("/log")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_LOG_WRITE_ACCESS })
-	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="audit_log_write", path="/audit/log")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_log_write", path="/audit/log")
 	Response processLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 
@@ -113,7 +113,7 @@ public interface AuditRestWebService {
 	@Path("/log/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_LOG_WRITE_ACCESS })
-	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="audit_log_write", path="/audit/log")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_log_write", path="/audit/log")
 	Response processBulkLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 
@@ -130,7 +130,7 @@ public interface AuditRestWebService {
 	@Path("/telemetry")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS })
-	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="audit_telemetry_write", path="/audit/telemetry")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_telemetry_write", path="/audit/telemetry")
 	Response processTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 
@@ -147,7 +147,7 @@ public interface AuditRestWebService {
 	@Path("/telemetry/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS })
-	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="audit_telemetry_write", path="/audit/telemetry")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_telemetry_write", path="/audit/telemetry")
 	Response processBulkTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 

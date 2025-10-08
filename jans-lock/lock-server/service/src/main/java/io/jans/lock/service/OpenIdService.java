@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.lock.cedarling.service;
+package io.jans.lock.service;
 
 import java.io.Serializable;
 
