@@ -24,6 +24,10 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 wasm-bindgen-test = "0.3.49"
+# overwrite `getrandom` to use `wasm_js` feature
+# is used in `uuid7` crate
+getrandom = { version = "0.3.3", features = ["wasm_js"] }
+
 
 [profile.release]
 lto = true
