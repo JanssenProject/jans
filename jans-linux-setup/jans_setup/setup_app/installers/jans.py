@@ -318,14 +318,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 continue
             self.run([paths.cmd_chmod, '700', scr_path])
 
-        # link jans script to /usr/local/bin
+        # link jans script to /usr/sbin
         self.run([
                 paths.cmd_ln, '-s',
                 os.path.join(
                     Config.jansOptBinFolder,
                     os.path.basename(Config.jansScriptFiles[1])
                 ),
-                '/usr/local/bin'
+                '/usr/sbin'
                 ])
 
 
