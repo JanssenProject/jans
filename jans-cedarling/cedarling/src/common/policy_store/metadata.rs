@@ -6,7 +6,7 @@
 //! Policy store metadata types for identification, versioning, and integrity validation.
 
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// Helper module for serializing Optional DateTime
@@ -81,16 +81,24 @@ pub struct PolicyStoreInfo {
     /// Human-readable name for the policy store
     pub name: String,
     /// Optional description of the policy store
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     /// Semantic version of the policy store content
     #[serde(default)]
     pub version: String,
     /// ISO 8601 timestamp when created
-    #[serde(skip_serializing_if = "Option::is_none", with = "datetime_option")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "datetime_option"
+    )]
     pub created_date: Option<DateTime<Utc>>,
     /// ISO 8601 timestamp when last modified
-    #[serde(skip_serializing_if = "Option::is_none", with = "datetime_option")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "datetime_option"
+    )]
     pub updated_date: Option<DateTime<Utc>>,
 }
 
@@ -123,6 +131,14 @@ mod tests {
 
     #[test]
     fn test_policy_store_metadata_serialization() {
+        // Use a fixed timestamp for deterministic comparison
+        let created = DateTime::parse_from_rfc3339("2024-01-01T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let updated = DateTime::parse_from_rfc3339("2024-01-02T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+
         let metadata = PolicyStoreMetadata {
             cedar_version: "4.4.0".to_string(),
             policy_store: PolicyStoreInfo {
@@ -130,8 +146,8 @@ mod tests {
                 name: "test_store".to_string(),
                 description: Some("A test policy store".to_string()),
                 version: "1.0.0".to_string(),
-                created_date: Some(Utc::now()),
-                updated_date: Some(Utc::now()),
+                created_date: Some(created),
+                updated_date: Some(updated),
             },
         };
 
@@ -140,14 +156,18 @@ mod tests {
         assert!(json.contains("cedar_version"));
         assert!(json.contains("4.4.0"));
 
-        // Test deserialization
+        // Test deserialization - compare whole structure
         let deserialized: PolicyStoreMetadata = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized.cedar_version, metadata.cedar_version);
-        assert_eq!(deserialized.policy_store.name, metadata.policy_store.name);
+        assert_eq!(deserialized, metadata);
     }
 
     #[test]
     fn test_policy_store_manifest_serialization() {
+        // Use a fixed timestamp for deterministic comparison
+        let generated = DateTime::parse_from_rfc3339("2024-01-01T12:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+
         let mut files = HashMap::new();
         files.insert("metadata.json".to_string(), FileInfo {
             size: 245,
@@ -156,7 +176,7 @@ mod tests {
 
         let manifest = PolicyStoreManifest {
             policy_store_id: "test123".to_string(),
-            generated_date: Utc::now(),
+            generated_date: generated,
             files,
         };
 
@@ -165,9 +185,8 @@ mod tests {
         assert!(json.contains("policy_store_id"));
         assert!(json.contains("test123"));
 
-        // Test deserialization
+        // Test deserialization - compare whole structure
         let deserialized: PolicyStoreManifest = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized.policy_store_id, manifest.policy_store_id);
-        assert_eq!(deserialized.files.len(), 1);
+        assert_eq!(deserialized, manifest);
     }
 }
