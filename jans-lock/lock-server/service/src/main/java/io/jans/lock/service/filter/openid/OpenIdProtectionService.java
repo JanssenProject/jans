@@ -161,7 +161,9 @@ public class OpenIdProtectionService implements OpenIdProtection {
         Jwt jwt = null;
         try {
             jwt = Jwt.parse(token);
-            log.trace("This looks like a JWT token");
+            if (log.isTraceEnabled()) {
+            	log.trace("This looks like a JWT token");
+            }
         } catch (InvalidJwtException e) {
             log.trace("Not a JWT token");
         }

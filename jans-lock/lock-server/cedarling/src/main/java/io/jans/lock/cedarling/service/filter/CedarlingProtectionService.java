@@ -150,8 +150,10 @@ public class CedarlingProtectionService implements CedarlingProtection {
     private Jwt tokenAsJwt(String token) {
         Jwt jwt = null;
         try {
-            jwt = Jwt.parse("eyJraWQiOiJjb25uZWN0XzkzOWYxNTM0LWRhMzQtNDUwZi05YmJkLTI5YzNhNzJhYWQ0MF9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIyMjAwLmMzNWY2NTMxLWYxZTgtNDllNi04OWYzLWYzZGQwNjZmZWQ4YyIsInN1YiI6Ik80NjVZZFhIVkE3YXFPeXVvQzRvTkx0QnJOT2xjbEtXQkJWSUhteUJ5SHMiLCJ4NXQjUzI1NiI6IiIsIm5iZiI6MTc1OTk0MjAyNywic2NvcGUiOlsiaHR0cHM6Ly9qYW5zLmlvL29hdXRoL2xvY2svaGVhbHRoLndyaXRlIiwiaHR0cHM6Ly9qYW5zLmlvL29hdXRoL2xvY2svdGVsZW1ldHJ5LndyaXRlIiwiaHR0cHM6Ly9qYW5zLmlvL29hdXRoL2xvY2svbG9nLndyaXRlIl0sImlzcyI6Imh0dHBzOi8vamFucy1wZ3NxbC5qYW5zLmluZm8iLCJ0b2tlbl90eXBlIjoiQmVhcmVyIiwiZXhwIjoxNzU5OTcyMDI3LCJpYXQiOjE3NTk5NDIwMjcsImNsaWVudF9pZCI6IjIyMDAuYzM1ZjY1MzEtZjFlOC00OWU2LTg5ZjMtZjNkZDA2NmZlZDhjIiwianRpIjoieWgxak85VnNUU2FtWmVDQ2VrdUc3QSIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjQsInVyaSI6Imh0dHBzOi8vamFucy1wZ3NxbC5qYW5zLmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.hqGp6gyZ_4vHIoqTspCbeZQaq_ud-4I1uqctHhOULHZl0lJnZHbhorGFZfq_AZPm8mJRxPjOh5YN1fz-kwV5jhmNbss3otGrQ7J5tbIkLD-okd1cdnXMsyqXwJgrVtbcQ9wJHjElGu5x-Kyu2wRmAbZjsoWXGAgcxb0JrD7YCXYyITSIWpHJwk_Ah_OJelFnDgXTR5b8wtdNwo6G0mtW0DrpT4q0cGxWOPbJ8CWdr2_NuYvvzraBk-PH9ydSbStdYMOJV5gHwVUSUGZRSpWDBzvbeVOygvSutpTNSieFQ2oSSYWV4Ysrh-NY4Szy0g-6XXAdC2cKVW32ZYHpS_EmYQ");
-            log.trace("This looks like a JWT token");
+            jwt = Jwt.parse(token);
+            if (log.isTraceEnabled()) {
+            	log.trace("This looks like a JWT token");
+            }
         } catch (InvalidJwtException e) {
             log.trace("Not a JWT token");
         }
