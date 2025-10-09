@@ -110,6 +110,12 @@
 				<version>${project.version}</version>
 			</dependency>
 
+	        <dependency>
+	            <groupId>io.jans</groupId>
+	            <artifactId>cedarling-java</artifactId>
+				<version>${project.version}</version>
+	        </dependency>
+
 			<!-- Swagger -->
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
