@@ -364,8 +364,6 @@ public class ScopeService {
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        logger.trace("Scope pattern and field searchFilter:{}", searchFilter);
-
         logger.debug("Final Scope searchFilter:{}", searchFilter);
 
         PagedResult<CustomScope> pagedResult = persistenceEntryManager.findPagedEntries(getDnForScope(null),

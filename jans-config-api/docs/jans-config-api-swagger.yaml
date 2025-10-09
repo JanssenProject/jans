@@ -14913,11 +14913,7 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
         adminCanEdit:
-          type: boolean
-        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
@@ -14926,6 +14922,10 @@ components:
         userCanAccess:
           type: boolean
         adminCanAccess:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -14998,6 +14998,8 @@ components:
         requirePar:
           type: boolean
         parForbidPublicClient:
+          type: boolean
+        jwtGrantAllowUserByUidInAssertion:
           type: boolean
         deviceAuthzEndpoint:
           type: string
@@ -15155,6 +15157,7 @@ components:
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         subjectTypesSupported:
           type: array
           items:
@@ -15482,6 +15485,7 @@ components:
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         cssLocation:
           type: string
         jsLocation:
@@ -16331,6 +16335,7 @@ components:
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         applicationType:
           type: string
           enum:
@@ -17493,10 +17498,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -17677,9 +17682,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object

@@ -136,6 +136,22 @@ public class UserMgmtService {
             }
             searchFilter = Filter.createORFilter(filters);
         }
+        
+        logger.trace("User pattern searchFilter:{}", searchFilter);
+        List<Filter> fieldValueFilters = new ArrayList<>();
+        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
+            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
+                
+                String[] valueArr = new String[] { entry.getValue() };
+                Filter dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null);
+                logger.error("User dataFilter:{}", dataFilter);
+                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
+            }
+            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                    Filter.createANDFilter(fieldValueFilters));
+        }
+
+        
         logger.info("Users searchFilter:{}", searchFilter);
         PagedResult<User> pagedResult = persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(),
                 User.class, searchFilter, null, searchRequest.getSortBy(),
