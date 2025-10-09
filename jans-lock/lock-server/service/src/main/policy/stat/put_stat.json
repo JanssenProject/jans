@@ -6,6 +6,6 @@ permit(
 )
 when {
   principal has access_token.scope &&
-  principal.access_token.scope.contains("jans_stat") &&
+  principal.access_token.scope.contains("https://jans.io/oauth/lock/stat.readonly") &&
   resource has url && resource.url has path && resource.url.path == "/internal/stat"
 };
