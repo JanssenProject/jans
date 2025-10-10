@@ -8,6 +8,7 @@
 use super::errors::{PolicyStoreError, ValidationError};
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
 use super::source::{PolicyStoreFormat, PolicyStoreSource};
+use super::validator::MetadataValidator;
 use std::fs;
 use std::path::Path;
 
@@ -158,10 +159,8 @@ impl DefaultPolicyStoreLoader {
             ))
         })?;
 
-        serde_json::from_str(&content).map_err(|e| PolicyStoreError::JsonParsing {
-            file: "metadata.json".to_string(),
-            message: e.to_string(),
-        })
+        // Parse and validate metadata
+        MetadataValidator::parse_and_validate(&content).map_err(PolicyStoreError::Validation)
     }
 
     /// Load optional manifest from manifest.json file.
@@ -464,6 +463,7 @@ impl PolicyStoreLoader for DefaultPolicyStoreLoader {
 mod tests {
     use super::*;
     use std::fs;
+    use std::path::PathBuf;
     use tempfile::TempDir;
 
     /// Helper to create a minimal valid policy store directory for testing.
@@ -472,7 +472,7 @@ mod tests {
         let metadata = r#"{
             "cedar_version": "4.4.0",
             "policy_store": {
-                "id": "test123",
+                "id": "abc123def456",
                 "name": "Test Policy Store",
                 "version": "1.0.0"
             }
@@ -696,6 +696,12 @@ permit(
 
         assert!(result.is_err());
         let err = result.unwrap_err();
-        assert!(err.to_string().contains("JSON parsing error"));
+        // Error could be "JSON parsing error" or "Invalid metadata" from validator
+        let err_str = err.to_string();
+        assert!(
+            err_str.contains("JSON") || err_str.contains("parse") || err_str.contains("Invalid"),
+            "Expected JSON/parse error, got: {}",
+            err_str
+        );
     }
 }

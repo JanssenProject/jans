@@ -12,6 +12,7 @@ pub mod errors;
 pub mod loader;
 pub mod metadata;
 pub mod source;
+pub mod validator;
 
 use super::{PartitionResult, cedar_schema::CedarSchema};
 use cedar_policy::{Policy, PolicyId};
@@ -31,6 +32,7 @@ pub use loader::{
 };
 pub use metadata::{FileInfo, PolicyStoreInfo, PolicyStoreManifest, PolicyStoreMetadata};
 pub use source::{PolicyStoreFormat, PolicyStoreSource};
+pub use validator::MetadataValidator;
 /// Default maximum number of entities allowed
 const DEFAULT_MAX_ENTITIES: usize = 1000;
 /// Default maximum size of base64-encoded strings in bytes
