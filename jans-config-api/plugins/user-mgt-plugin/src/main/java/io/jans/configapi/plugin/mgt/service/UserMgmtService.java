@@ -15,9 +15,11 @@ import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.service.auth.AttributeService;
 import io.jans.configapi.service.auth.ConfigurationService;
+import io.jans.configapi.service.auth.DatabaseService;
 import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.CustomObjectAttribute;
@@ -73,6 +75,9 @@ public class UserMgmtService {
 
     @Inject
     ConfigUserService userService;
+    
+    @Inject 
+    DatabaseService databaseService;
 
     private static final String BIRTH_DATE = "birthdate";
 
@@ -145,7 +150,12 @@ public class UserMgmtService {
          
                 logger.error("User entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
                 String[] valueArr = new String[] { entry.getValue() };
+                String attributeType = this.getAttributeType(entry.getKey());
+                logger.error("User entry.getKey():{}, attributeType:{}", entry.getKey(), attributeType);
                 Filter dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null);
+                if(attributeType!=null && attributeType.contains("JSON")) {
+                    dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null).multiValued(3);
+                }
                 logger.error("User dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
@@ -687,5 +697,25 @@ public class UserMgmtService {
         }
         return sb.toString();
     }
+   
+    public String getAttributeType(String attributeName) {
+        logger.info(" Validate attributeName:{}, getPersistenceType():{}, appConfiguration:{}", attributeName, getPersistenceType(), appConfiguration);
+        String type = null;
+        try {
+            
 
+            logger.info("attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, User.class,attributeName)():{}", attributeName, persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
+                    attributeName));
+            AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
+                    attributeName);
+            logger.error("\n attributeName:{}, attributeType():{}", attributeName, attributeType);
+
+            if (attributeType != null) {
+                type = attributeType.getType();
+            }
+        } catch (Exception ex) {
+            throw new InvalidAttributeException("("+attributeName+") is invalid");
+        }
+        return type;
+    }
 }
