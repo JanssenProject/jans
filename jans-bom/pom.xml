@@ -268,7 +268,14 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- Google -->
+			<!-- Cedarling -->
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>cedarling-java</artifactId>
+                <version>${project.version}</version>
+			</dependency>
+
+			<!-- Google -->
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
@@ -330,7 +337,7 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
-			
+
 			<!-- Jakarta lib required but not part of Weld dependency -->
 			<dependency>
 				<groupId>jakarta.ejb</groupId>

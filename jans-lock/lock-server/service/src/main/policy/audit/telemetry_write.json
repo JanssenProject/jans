@@ -1,0 +1,11 @@
+@id("lock_audit_telemetry_write")
+permit(
+  principal is Jans::Workload,
+  action in Jans::Action::"POST",
+  resource == Jans::HTTP_Request::"lock_audit_telemetry_write"
+)
+when {
+  principal has access_token.scope &&
+  principal.access_token.scope.contains("https://jans.io/oauth/lock/telemetry.write") &&
+  resource has url && resource.url has path && resource.url.path == "/audit/telemetry"
+};
