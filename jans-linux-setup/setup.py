@@ -39,7 +39,7 @@ setup(
         "prompt-toolkit==3.0.29",
         "pyasn1==0.4.8",
         "ruamel.yaml>=0.16.5",
-        "sqlalchemy==1.3.23",
+        "sqlalchemy==2.0.44",
         "ldap3",
         "PyMySQL",
         "PyJWT>=2.3.0",
