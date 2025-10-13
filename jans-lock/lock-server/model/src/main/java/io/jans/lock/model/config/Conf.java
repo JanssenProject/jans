@@ -16,6 +16,7 @@
 
 package io.jans.lock.model.config;
 
+import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
@@ -37,6 +38,10 @@ public class Conf {
 	@JsonObject
 	@AttributeName(name = "jansConfDyn")
 	private AppConfiguration dynamic;
+
+	@JsonObject
+	@AttributeName(name = "jansConfPolicy")
+	private CedarlingPolicyConfiguration policyConfiguration;
 
 	@JsonObject
 	@AttributeName(name = "jansConfStatic")
@@ -65,6 +70,14 @@ public class Conf {
 		this.dynamic = dynamic;
 	}
 
+	public CedarlingPolicyConfiguration getPolicyConfiguration() {
+		return policyConfiguration;
+	}
+
+	public void setPolicyConfiguration(CedarlingPolicyConfiguration policyConfiguration) {
+		this.policyConfiguration = policyConfiguration;
+	}
+
 	public StaticConfiguration getStatics() {
 		return statics;
 	}
@@ -91,12 +104,7 @@ public class Conf {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder();
-		sb.append("Conf");
-		sb.append("{dn='").append(dn).append('\'');
-		sb.append(", dynamic='").append(dynamic).append('\'');
-		sb.append(", static='").append(statics).append('\'');
-		sb.append('}');
-		return sb.toString();
+		return "Conf [dn=" + dn + ", dynamic=" + dynamic + ", policyConfiguration=" + policyConfiguration + ", statics="
+				+ statics + ", errors=" + errors + ", revision=" + revision + "]";
 	}
 }

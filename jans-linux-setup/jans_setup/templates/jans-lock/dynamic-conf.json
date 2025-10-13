@@ -1,9 +1,20 @@
 {
   "baseEndpoint": "https://%(hostname)s/%(base_endpoint)s/api/v1",
   "openIdIssuer": "https://%(hostname)s",
-  "tokenChannels": [
-    "jans_token"
-  ],
+  "protectionMode": "CEDARLING",
+  "cedarlingConfiguration": {
+  	"enabled" : true,
+  	"policySources": [
+  		{
+  			"enabled": false,
+  			"authorizationToken": "",
+  			"policyStoreUri": ""
+  		}
+  	],
+  	"logType" : "STD_OUT",
+  	"logLevel" : "INFO",
+  	"externalPolicyStoreUri" : ""
+  }, 
   "clientId": "%(lock_client_id)s",
   "clientPassword": "%(lock_client_encoded_pw)s",
   "tokenUrl": "%(jans_auth_token_endpoint)s",
