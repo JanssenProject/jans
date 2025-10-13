@@ -23,8 +23,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()
         .unwrap();
 
-    // calls Cedarling::authorize
-    call_authorize(&cedarling, &access_token, &id_token, &userinfo_token).await;
+    for _ in 0..1000 {
+        // calls Cedarling::authorize
+        call_authorize(&cedarling, &access_token, &id_token, &userinfo_token).await;
+    }
 
     if let Ok(report) = guard.report().build() {
         println!("report: {:?}", &report);
@@ -74,6 +76,9 @@ async fn init_cedarling() -> Cedarling {
         },
         entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
+        max_default_entities: None,
+        max_base64_size: None,
+        token_cache_max_ttl_secs: 60,
     })
     .await
     .expect("should initialize cedarling")
@@ -105,7 +110,7 @@ async fn call_authorize(
             resource: EntityData {
                 cedar_mapping: CedarEntityMapping {
                     entity_type: "Jans::Issue".to_string(),
-                id: "random_id".to_string(),
+                    id: "random_id".to_string(),
                 },
                 attributes: HashMap::from_iter([
                     (

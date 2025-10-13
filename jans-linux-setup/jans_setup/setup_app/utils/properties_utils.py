@@ -39,6 +39,15 @@ class PropertiesUtils(SetupUtils):
         if itype == int:
             return int(ival)
 
+    def getYNPrompt(self, propmt_text, default='Y'):
+        default = default.lower()
+        prompt_info = 'Y|n' if default == 'y' else 'y|N'
+        user_input = input(f"{propmt_text} [{prompt_info}] : ")
+        user_input = user_input.strip().lower()
+        if default == 'y' and not user_input:
+            return True
+        return user_input == 'y'
+
     def getPrompt(self, prompt, defaultValue=None, itype=None, indent=0):
         try:
             if defaultValue:
@@ -415,6 +424,10 @@ class PropertiesUtils(SetupUtils):
                 Config.set_rdbm_schema()
                 Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
 
+                use_ssl = self.getYNPrompt("  Use SSL to connect RDBM")
+                if use_ssl:
+                    Config.rdbm_sslrootcert = self.getPrompt("  Paste RDBM SSL Root Certificate:")
+
                 result = dbUtils.sqlconnection()
 
                 if result[0]:
@@ -491,9 +504,23 @@ class PropertiesUtils(SetupUtils):
                 Config.set_rdbm_schema()
                 Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
 
+                use_ssl = self.getYNPrompt("  Use SSL to connect RDBM")
+                if use_ssl:
+                    print("  Paste RDBM SSL Root Certificate:")
+                    print("  Enter single dot (.) to finish entering")
+                    cert_lines = []
+                    cert_end = '-----END CERTIFICATE-----'
+                    for line in sys.stdin:
+                        if line.rstrip() in (cert_end, '.'):
+                            if line.rstrip() == cert_end:
+                                cert_lines.append(line)
+                            break
+                        cert_lines.append(line)
+                    Config.rdbm_sslrootcert = ''.join(cert_lines)
+
                 try:
                     if Config.rdbm_type == 'mysql':
-                        conn = pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port)
+                        conn = pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port, ssl={'verify_mode': None})
                         if 'mariadb' in conn.server_version.lower():
                             print("  {}MariaDB is not supported. Please use MySQL Server. {}".format(colors.FAIL, colors.ENDC))
                             continue

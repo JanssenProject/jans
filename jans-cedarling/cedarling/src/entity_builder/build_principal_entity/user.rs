@@ -12,7 +12,7 @@ const USER_ATTR_SRC_TKNS: &[&str] = &["userinfo_token", "id_token"];
 impl EntityBuilder {
     pub fn build_user_entity(
         &self,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
         tkn_principal_mappings: &TokenPrincipalMappings,
         built_entities: &BuiltEntities,
         roles: HashSet<EntityUid>,
@@ -65,7 +65,7 @@ impl UserIdSrcResolver {
     /// The method checks the following tokens and claims in order:
     /// - `userinfo_token.sub`
     /// - `id_token.sub`
-    pub fn resolve(tokens: &HashMap<String, Token>) -> Vec<EntityIdSrc> {
+    pub fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc> {
         const DEFAULT_USER_ID_SRCS: &[PrincipalIdSrc] = &[
             PrincipalIdSrc {
                 token: "userinfo_token",
@@ -117,7 +117,7 @@ mod test {
 
     #[track_caller]
     fn test_build_user(
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
         builder: &EntityBuilder,
         tkn_principal_mappings: &TokenPrincipalMappings,
         expected: Value,
@@ -156,10 +156,12 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -187,7 +189,7 @@ mod test {
             Some(iss),
         );
 
-        let tokens = HashMap::from([("id_token".into(), id_token)]);
+        let tokens = HashMap::from([("id_token".into(), Arc::new(id_token))]);
 
         test_build_user(
             &tokens,
@@ -232,10 +234,12 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -263,7 +267,7 @@ mod test {
             Some(iss),
         );
 
-        let tokens = HashMap::from([("userinfo_token".into(), userinfo_token)]);
+        let tokens = HashMap::from([("userinfo_token".into(), Arc::new(userinfo_token))]);
 
         test_build_user(
             &tokens,
@@ -312,10 +316,12 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             Some(&validator_schema),
+            None,
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -355,8 +361,8 @@ mod test {
         );
 
         let tokens = HashMap::from([
-            ("id_token".into(), id_token),
-            ("userinfo_token".into(), userinfo_token),
+            ("id_token".into(), Arc::new(id_token)),
+            ("userinfo_token".into(), Arc::new(userinfo_token)),
         ]);
 
         test_build_user(
@@ -377,10 +383,6 @@ mod test {
                         "type": "Jans::Userinfo_token",
                         "id": "some_jti",
                     }},
-                    "userinfo_token": {"__entity": {
-                        "type": "Jans::Userinfo_token",
-                        "id": "some_jti",
-                    }},
                 },
                 "parents": [{"type": "Jans::Role", "id": "some_role"}],
             }),
@@ -393,9 +395,11 @@ mod test {
     fn can_build_user_without_schema() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
+            None,
             None,
         )
         .expect("should init entity builder");
@@ -424,7 +428,7 @@ mod test {
             Some(iss),
         );
 
-        let tokens = HashMap::from([("id_token".into(), id_token)]);
+        let tokens = HashMap::from([("id_token".into(), Arc::new(id_token))]);
 
         test_build_user(
             &tokens,

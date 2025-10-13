@@ -1,9 +1,15 @@
 package io.jans.configapi.model.configuration;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.StringUtils;
 
-public class CorsConfigurationFilter {
+public class CorsConfigurationFilter implements Serializable{
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     private String filterName;
     private Boolean corsEnabled;
     private String corsAllowedOrigins;

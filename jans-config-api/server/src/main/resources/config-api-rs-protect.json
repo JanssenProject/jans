@@ -3401,6 +3401,84 @@
           ]
         }
       ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/ssa",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.97",
+              "name": "https://jans.io/oauth/config/ssa.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.98",
+              "name": "https://jans.io/oauth/config/ssa.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "POST"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.98",
+              "name": "https://jans.io/oauth/config/ssa.write"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.02.2",
+              "name": "https://jans.io/oauth/config/openid-write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.99",
+              "name": "https://jans.io/oauth/config/ssa.delete"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.98",
+              "name": "https://jans.io/oauth/config/ssa.write"
+            },
+            {
+              "inum": "",
+              "name": "https://jans.io/auth/ssa.admin"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.3",
+              "name": "https://jans.io/oauth/config/delete-all"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

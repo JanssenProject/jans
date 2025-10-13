@@ -1,12 +1,19 @@
 package io.jans.configapi.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.io.Serializable;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AgamaConfiguration {
+public class AgamaConfiguration implements Serializable{
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     @Schema(description = "List of attributes required to create the Agama Flow.")
     private List<String> mandatoryAttributes;

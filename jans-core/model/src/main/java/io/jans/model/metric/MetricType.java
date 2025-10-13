@@ -44,7 +44,9 @@ public enum MetricType implements AttributeEnum {
 	TOKEN_REFRESH_TOKEN_COUNT("tkn_refresh_token_count",
             "Count successfull issued refresh tokens", CounterMetricData.class, CounterMetricEntry.class),
 	TOKEN_LONG_LIVED_ACCESS_TOKEN_COUNT("tkn_long_lived_access_token_count",
-            "Count successfull issued long lived access tokens", CounterMetricData.class, CounterMetricEntry.class);
+            "Count successfull issued long lived access tokens", CounterMetricData.class, CounterMetricEntry.class),
+
+    ;
 
     private String value;
     private String displayName;

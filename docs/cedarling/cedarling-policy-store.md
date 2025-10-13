@@ -15,6 +15,7 @@ The Policy Store provides:
 1. **Cedar Schema**: The Cedar schema encoded in Base64.
 2. **Cedar Policies**: The Cedar policies encoded in Base64.
 3. **Trusted Issuers**: Details about the trusted issuers (see [below](#trusted-issuers-schema) for syntax).
+4. **Default Entities**: Optional static entities that are loaded at startup and available for all policy evaluations (see [below](#default-entities)).
 
 For a comprehensive JSON schema defining the structure of the policy store, see: [policy_store_schema.json](https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json). You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].
 
@@ -33,7 +34,8 @@ The JSON Schema accepted by Cedarling is defined as follows:
           "description": "DoveCRM policies, schema, and trusted JWT issuers.",
           "policies": { ... },
           "schema": { ... },
-          "trusted_issuers": { ... }
+          "trusted_issuers": { ... },
+          "default_entities": { ... }
       }
   }
 }
@@ -43,6 +45,7 @@ The JSON Schema accepted by Cedarling is defined as follows:
 - **policies** : (*Object*) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
 - **schema** : (*String* | *Object*) Base64 encoded JSON Object. See [schema](#schema) below.
 - **trusted_issuers** : (*Object of {unique_id => IdentitySource}(#trusted-issuer-schema)*) List of metadata for Identity Sources.
+- **default_entities** : (*Object*) Optional map of entity IDs to encoded/default entity payloads. See [Default Entities](#default-entities).
 
 ### `schema`
 
@@ -64,6 +67,52 @@ Where *Object* - An object with `encoding`, `content_type` and `body` keys. For 
 "schema": "cGVybWl0KAogICAgc..."
 ```
 
+## Default Entities
+
+Default entities allow you to preload static entity records that are available to every authorization request. Cedarling loads these at startup alongside policies and schema.
+
+Format:
+
+- Each entry is a simple key-value pair where the key is the entity ID and the value is a Base64-encoded JSON object representing the entity payload.
+
+```json
+"default_entities": {
+  "1694c954f8d9": "eyJlbnRpdHlfaWQiOiIxNjk0Yzk1NGY4ZDkiLCJvIjoiQWNtZSBEb2xwaGlucyBEaXZpc2lvbiIsIm9yZ19pZCI6IjEwMDEyOSIsImRvbWFpbiI6ImFjbWUtZG9scGhpbi5zZWEiLCJyZWdpb25zIjpbIkF0bGFudGljIiwiUGFjaWZpYyIsIkluZGlhbiJdfQ==",
+  "74d109b20248": "eyJlbnRpdHlfaWQiOiI3NGQxMDliMjAyNDgiLCJkZXNjcmlwdGlvbiI6IjIwMjUgUHJpY2UgTGlzdCIsInByb2R1Y3RzIjp7IjE1MDIwIjo5Ljk1LCIxNTA1MCI6MTQuOTV9LCJzZXJ2aWNlcyI6eyI1MTAwMSI6OTkuMCwiNTEwMjAiOjI5OS4wfX0="
+}
+```
+
+Example of the decoded payloads for two default entities:
+
+```json
+{
+  "1694c954f8d9": {
+    "entity_id": "1694c954f8d9",
+    "o": "Acme Dolphins Division",
+    "org_id": "100129",
+    "domain": "acme-dolphin.sea",
+    "regions": ["Atlantic", "Pacific", "Indian"]
+  },
+  "74d109b20248": {
+    "entity_id": "74d109b20248",
+    "description": "2025 Price List",
+    "products": {"15020": 9.95, "15050": 14.95},
+    "services": {"51001": 99.0, "51020": 299.0}
+  }
+}
+```
+
+Notes:
+
+- Cedar policies can reference these entities directly by type and ID, just like any other entity present during evaluation.
+- A common use case is defining an organization entity and writing policies that compare runtime attributes (e.g., `resource.org_id`) to attributes on the default entity.
+
+### Entity Conflict Resolution
+
+When request entities have the same UID as default entities, Cedarling automatically resolves conflicts by giving **request entities precedence** over default entities. This ensures that runtime data can override static configurations while maintaining consistency.
+
+Example: If a resource entity with UID `"org1"` is passed in an authorization request, and a default entity with the same UID exists, the resource entity's attributes will be used instead of the default entity's attributes.
+
 ## Cedar Policies Schema
 
 The `policies` field describes the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with each policy requiring a `unique_policy_id`.
@@ -81,10 +130,10 @@ The `policies` field describes the Cedar policies that will be used in Cedarling
   }
 ```
 
-- **unique_policy_id**: (*String*) A uniqe policy ID used to for tracking and auditing purposes.
+- **unique_policy_id**: (*String*) A unique policy ID used to for tracking and auditing purposes.
 - **name** : (*String*) A name for the policy
 - **description** : (*String*) A brief description of cedar policy
-- **creation_date** :  (*String*) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
+- **creation_date** : (*String*) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
 - **policy_content** : (*String* | *Object*) The Cedar Policy. See [policy_content](#policy_content) below.
 
 ### `policy_content`
@@ -195,6 +244,7 @@ The Token Entity Metadata Schema defines how tokens are mapped, parsed, and tran
 ```json
 {
   "trusted": true,
+  "entity_type_name": "Jans::Access_token",
   "token_id": "jti",
   "workload_id": "aud | client_id",
   "user_id": "sub | uid | email",
@@ -211,7 +261,7 @@ The Token Entity Metadata Schema defines how tokens are mapped, parsed, and tran
 }
 ```
 
-- `"trusted"` (bool, Default: true): Allows to toggling configuration without deleting the object.
+- `"trusted"` (bool, Default: true): Allows toggling configuration without deleting the object.
 - `"entity_type_name"` (string, required): The type name of the Cedar Entity that will be created from the token; for example: "Jans::Access_token".
 - `"principal_mapping"` (array[string], Default: []): Describes where references of the created token entity should be included.
 - `"token_id"` (string, Default: "jti"): The JWT claim that will be used as the ID for the Token Entity.
@@ -313,29 +363,30 @@ Here is a non-normative example of a `cedarling_store.json` file:
             "name": "Google",
             "description": "Consumer IDP",
             "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
-            "access_tokens": {
-              "trusted": true,
-              "entity_type_name": "Jans::Access_token",
-              "token_id": "jti",
-            },
-            "id_tokens": {
-              "trusted": true,
-              "entity_type_name": "Jans::Id_token",
-              "token_id": "jti",
-              "role_mapping": "role",
-            },
-            "userinfo_tokens": {
-              "trusted": true,
-              "entity_type_name": "Jans::Userinfo_token",
-              "token_id": "jti",
-              "role_mapping": "role",
-            },
-            "tx_tokens": {
-              "trusted": true,
-              "entity_type_name": "Jans::Tx_token",
-              "token_id": "jti",
-            },
+            "token_metadata": {
+              "access_token": {
+                "trusted": true,
+                "entity_type_name": "Jans::Access_token",
+                "token_id": "jti"
+              },
+              "id_token": {
+                "trusted": true,
+                "entity_type_name": "Jans::Id_token",
+                "token_id": "jti",
+                "role_mapping": "role"
+              },
+              "userinfo_token": {
+                "trusted": true,
+                "entity_type_name": "Jans::Userinfo_token",
+                "token_id": "jti",
+                "role_mapping": "role"
+              }
+            }
         }
+    },
+    "default_entities": {
+        "1694c954f8d9": "eyJlbnRpdHlfaWQiOiIxNjk0Yzk1NGY4ZDkiLCJvIjoiQWNtZSBEb2xwaGlucyBEaXZpc2lvbiIsIm9yZ19pZCI6IjEwMDEyOSIsImRvbWFpbiI6ImFjbWUtZG9scGhpbi5zZWEiLCJyZWdpb25zIjpbIkF0bGFudGljIiwiUGFjaWZpYyIsIkluZGlhbiJdfQ==",
+        "74d109b20248": "eyJlbnRpdHlfaWQiOiI3NGQxMDliMjAyNDgiLCJkZXNjcmlwdGlvbiI6IjIwMjUgUHJpY2UgTGlzdCIsInByb2R1Y3RzIjp7IjE1MDIwIjo5Ljk1LCIxNTA1MCI6MTQuOTV9LCJzZXJ2aWNlcyI6eyI1MTAwMSI6OTkuMCwiNTEwMjAiOjI5OS4wfX0="
     }
 }
 ```

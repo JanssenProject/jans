@@ -20,7 +20,7 @@ FIDO 2.0 (FIDO2) is an open authentication standard that enables leveraging comm
 
 ## Requirements
 
-Kubernetes: `>=v1.22.0-0`
+Kubernetes: `>=v1.23.0-0`
 
 ## Values
 

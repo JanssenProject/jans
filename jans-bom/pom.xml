@@ -56,7 +56,7 @@
 		<guava.version>32.1.1-jre</guava.version>
 	
 		<aws.sns.version>1.12.708</aws.sns.version>
-		<jackrabbit.version>2.21.13</jackrabbit.version>
+		<jackrabbit.version>2.22.2</jackrabbit.version>
 
 		<bc.version>1.79</bc.version>
 		<junit.jupiter.version>5.9.2</junit.jupiter.version>
@@ -668,7 +668,7 @@
 			 <dependency>
 			    	<groupId>org.apache.jackrabbit</groupId>
 			    	<artifactId>jackrabbit-jcr-rmi</artifactId>
-			    	<version>${jackrabbit.version}</version>
+			    	<version>2.21.25</version>
 			 </dependency>
 			 <dependency>
 			    	<groupId>org.apache.jackrabbit</groupId>

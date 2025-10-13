@@ -102,6 +102,9 @@ public class AttestationService {
 	@Inject
     private NetworkService networkService;
 
+	@Inject
+	private io.jans.fido2.service.shared.MetricService metricService;
+
 	@Context
 	private HttpServletRequest httpRequest;
 	@Context
@@ -115,6 +118,9 @@ public class AttestationService {
     public PublicKeyCredentialCreationOptions options(AttestationOptions attestationOptions) {
 
         log.debug("Attestation options {}", CommonUtilService.toJsonNode(attestationOptions).toString());
+
+        // Start timing for metrics collection
+        long startTime = System.currentTimeMillis();
 
         // Apply external custom scripts
         ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(CommonUtilService.toJsonNode(attestationOptions), httpRequest, httpResponse);
@@ -212,6 +218,13 @@ public class AttestationService {
 		externalFido2InterceptionContext.addToContext(registrationEntry, null);
 		externalFido2InterceptionService.registerAttestationFinish(CommonUtilService.toJsonNode(attestationOptions), externalFido2InterceptionContext);
 
+		// Record metrics for registration attempt
+		try {
+			metricService.recordPasskeyRegistrationAttempt(attestationOptions.getUsername(), httpRequest, startTime);
+		} catch (Exception e) {
+			log.debug("Failed to record registration attempt metrics: {}", e.getMessage());
+		}
+
 		log.debug("Returning from options: "+credentialCreationOptions.toString());
 		return credentialCreationOptions;
 	}
@@ -219,6 +232,12 @@ public class AttestationService {
 	public AttestationOrAssertionResponse verify(AttestationResult attestationResult) {
 		log.debug("Attestation verify {}", CommonUtilService.toJsonNode(attestationResult));
 
+		// Start timing for metrics collection
+		long startTime = System.currentTimeMillis();
+		String username = null;
+		String authenticatorType = null;
+
+		try {
         // Apply external custom scripts
         ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(CommonUtilService.toJsonNode(attestationResult), httpRequest, httpResponse);
         boolean externalInterceptContext = externalFido2InterceptionService.verifyAttestationStart(CommonUtilService.toJsonNode(attestationResult), externalFido2InterceptionContext);
@@ -240,6 +259,9 @@ public class AttestationService {
 				.parallelStream().findAny().orElseThrow(() ->
 					errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CHALLENGE, String.format("Can't find associated attestation request by challenge '%s'", challenge)));
 		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
+		
+		// Set username for metrics
+		username = registrationData.getUsername();
 
 		// Verify domain
 		domainVerifier.verifyDomain(registrationData.getOrigin(), clientDataJSONNode);
@@ -349,7 +371,21 @@ public class AttestationService {
 		externalFido2InterceptionContext.addToContext(registrationEntry, null);
 		externalFido2InterceptionService.verifyAttestationFinish(CommonUtilService.toJsonNode(attestationResult), externalFido2InterceptionContext);
 
+		// Set authenticator type for metrics
+		authenticatorType = registrationData.getAuthentictatorAttachment();
+		
+		// Record metrics for successful registration
+		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType);
+
 		return attestationResultResponse;
+		
+		} catch (Exception e) {
+			// Record metrics for failed registration
+			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
+			
+			// Re-throw the original exception
+			throw e;
+		}
 	}
 
 	private void prepareAuthenticatorSelection(PublicKeyCredentialCreationOptions credentialCreationOptions,
@@ -538,6 +574,31 @@ public class AttestationService {
 				.collect(Collectors.toSet());
 
 		return excludedKeys;
+	}
+	
+	/**
+	 * Record registration success metrics
+	 */
+	private void recordRegistrationSuccessMetrics(String username, HttpServletRequest httpRequest, 
+												  long startTime, String authenticatorType) {
+		try {
+			metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType);
+		} catch (Exception e) {
+			log.debug("Failed to record registration success metrics: {}", e.getMessage());
+		}
+	}
+	
+	/**
+	 * Record registration failure metrics
+	 */
+	private void recordRegistrationFailureMetrics(String username, HttpServletRequest httpRequest, 
+												  long startTime, Exception error, String authenticatorType) {
+		try {
+			String errorReason = error.getMessage() != null ? error.getMessage() : "Unknown error";
+			metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
+		} catch (Exception metricsException) {
+			log.debug("Failed to record registration failure metrics: {}", metricsException.getMessage());
+		}
 	}
 	
 }

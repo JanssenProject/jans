@@ -19,7 +19,7 @@ Janssen Access and Identity Management All-in-One Chart. This chart deploys the 
 
 ## Requirements
 
-Kubernetes: `>=v1.22.0-0`
+Kubernetes: `>=v1.23.0-0`
 
 ## Values
 
@@ -220,6 +220,11 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlDbSchema | string | `""` | Schema name used by SQL database (default to empty-string; if using MySQL, the schema name will be resolved as the database name, whereas in PostgreSQL the schema name will be resolved as `"public"`). |
 | configmap.cnSqlDbTimezone | string | `"UTC"` | SQL database timezone. |
 | configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
+| configmap.cnSqlSslCaCert | string | `""` | Base64-encoded string of CA certificate used to sign client/server certificate of MySQL/PostgreSQL server. Required if using client cert authentication. |
+| configmap.cnSqlSslClientCert | string | `""` | Base64-encoded string of client certificate signed by CA. Required if using client cert authentication. |
+| configmap.cnSqlSslClientKey | string | `""` | Base64-encoded client private key corresponding to the client certificate. Required if using client cert authentication. We advise to not commit real private keys in values.yaml. |
+| configmap.cnSqlSslEnabled | bool | `false` | Enable SSL connection to SQL database. |
+| configmap.cnSqlSslMode | string | `""` | Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected the secrets . |
 | configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
 | configmap.cnVaultAppRolePath | string | `"approle"` | Path to Vault AppRole. |

@@ -20,16 +20,6 @@ Entry = namedtuple("Entry", ["id", "attrs"])
 def _transform_fido2_dynamic_config(conf):
     should_update = False
 
-    # add missing top-level config (if not exist)
-    for k, v in [
-        ("errorReasonEnabled", False),
-        ("sessionIdPersistInCache", False),
-    ]:
-        # update if key not exist
-        if k not in conf:
-            conf[k] = v
-            should_update = True
-
     # add missing fido2Configuration config (if not exist)
     for k, v in [
         ("attestationMode", conf.pop("attestationMode", "monitor")),
@@ -38,7 +28,7 @@ def _transform_fido2_dynamic_config(conf):
         ("enterpriseAttestation", False),
         ("hints", ["security-key", "client-device", "hybrid"]),
         ("rp", conf["fido2Configuration"].pop("requestedParties", [])),
-        ("metadataRefreshInterval", 180),
+
         ("disableMetadataService", conf["fido2Configuration"].pop("skipDownloadMdsEnabled", False)),
     ]:
         # update if key not exist

@@ -6,12 +6,12 @@ import io.jans.as.model.error.DefaultErrorResponse;
 import io.jans.as.model.error.IErrorType;
 import io.jans.fido2.model.assertion.AssertionErrorResponseType;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
-import io.jans.fido2.model.conf.AppConfiguration;
+
 import io.jans.model.error.ErrorMessage;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.apache.commons.lang3.BooleanUtils;
+
 import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +28,11 @@ public class ErrorResponseFactory implements Configuration {
 
     private Fido2ErrorMessages messages;
 
-    private AppConfiguration appConfiguration;
-
     public ErrorResponseFactory() {
     }
 
-    public ErrorResponseFactory(Fido2ErrorMessages messages, AppConfiguration appConfiguration) {
+    public ErrorResponseFactory(Fido2ErrorMessages messages) {
         this.messages = messages;
-        this.appConfiguration = appConfiguration;
     }
 
     public WebApplicationException createWebApplicationException(Response.Status status, IErrorType type, String reason) {
@@ -91,7 +88,7 @@ public class ErrorResponseFactory implements Configuration {
 
     private String errorAsJson(IErrorType type, String reason) {
         final DefaultErrorResponse error = getErrorResponse(type);
-        error.setReason(BooleanUtils.isTrue(appConfiguration.getErrorReasonEnabled()) ? reason : "");
+        error.setReason(reason);
         return error.toJSonString();
     }
 

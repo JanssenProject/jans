@@ -12,7 +12,7 @@ use std::{collections::HashMap, sync::Arc};
 pub struct Token {
     pub name: String,
     pub iss: Option<Arc<TrustedIssuer>>,
-    claims: TokenClaims,
+    pub(crate) claims: TokenClaims,
 }
 
 impl Token {
@@ -91,7 +91,7 @@ impl TokenClaims {
     pub fn with_claim(self, k: String, v: Value) -> Self {
         let mut claims = self;
         claims.claims.insert(k, v);
-        
+
         claims
     }
 }

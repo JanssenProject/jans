@@ -31,7 +31,7 @@ The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/
 - OpenID Connect Core Error Code unmet_authentication_requirements [(spec)](https://openid.net/specs/openid-connect-unmet-authentication-requirements-1_0.html)
 - Transaction Tokens [(spec)](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html)
 - Global Token Revocation [(spec)](https://www.ietf.org/archive/id/draft-parecki-oauth-global-token-revocation-03.html)
-
+- JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants [(spec)](https://datatracker.ietf.org/doc/html/rfc7523)
 
 ## Protocol Overview
 

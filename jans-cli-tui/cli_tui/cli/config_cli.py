@@ -377,9 +377,15 @@ class JCA_CLI:
 
         log_data = copy.deepcopy(data)
         # don't log passwords
+        hpass = '*****'
         for prop in log_data:
             if prop in ('userPassword', 'clientSecret'):
-                log_data[prop] = '*****'
+                log_data[prop] = hpass
+
+        if isinstance(log_data, dict):
+            for cad in log_data.get('customAttributes', []):
+                if cad.get('name') == 'userPassword':
+                    cad['value'] = hpass
 
         cmdl = [sys.executable, __file__, '--operation-id', operation_id]
         if url_suffix:

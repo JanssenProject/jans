@@ -2,13 +2,18 @@ package io.jans.configapi.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.util.Collection;
+import java.io.Serializable;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AuditLogConf {
+public class AuditLogConf implements Serializable{
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     @Schema(description = "Flag to enable and disable audit log.")
     private boolean enabled;
@@ -17,7 +22,13 @@ public class AuditLogConf {
     private boolean logData;
 
     @Schema(description = "HTTP methods for which audit is disabled.")
-    private Collection<String> ignoreHttpMethod;
+    private List<String> ignoreHttpMethod;
+	
+	@Schema(description = "Annotation for which audit is disabled.")
+    private List<String> ignoreAnnotation;
+	
+    @Schema(description = "Object for which audit is disabled.")
+    private List<ObjectDetails> ignoreObjectMapping;
 
     @Schema(description = "List of header HTTP attributes whose value is to be logged.")
     private List<String> headerAttributes;
@@ -30,15 +41,15 @@ public class AuditLogConf {
     
     @Schema(description = "Date format in audit log file.")
     private String auditLogDateFormat;
-    
+
     public boolean isEnabled() {
         return enabled;
     }
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    } 
-    
+    }
+
     public boolean isLogData() {
         return logData;
     }
@@ -47,12 +58,28 @@ public class AuditLogConf {
         this.logData = logData;
     }
 
-    public Collection<String> getIgnoreHttpMethod() {
+    public List<String> getIgnoreHttpMethod() {
         return ignoreHttpMethod;
     }
 
-    public void setIgnoreHttpMethod(Collection<String> ignoreHttpMethod) {
+    public void setIgnoreHttpMethod(List<String> ignoreHttpMethod) {
         this.ignoreHttpMethod = ignoreHttpMethod;
+    }
+
+    public List<String> getIgnoreAnnotation() {
+        return ignoreAnnotation;
+    }
+
+    public void setIgnoreAnnotation(List<String> ignoreAnnotation) {
+        this.ignoreAnnotation = ignoreAnnotation;
+    }
+
+    public List<ObjectDetails> getIgnoreObjectMapping() {
+        return ignoreObjectMapping;
+    }
+
+    public void setIgnoreObjectMapping(List<ObjectDetails> ignoreObjectMapping) {
+        this.ignoreObjectMapping = ignoreObjectMapping;
     }
 
     public List<String> getHeaderAttributes() {
@@ -78,7 +105,7 @@ public class AuditLogConf {
     public void setAuditLogFileName(String auditLogFileName) {
         this.auditLogFileName = auditLogFileName;
     }
-    
+
     public String getAuditLogDateFormat() {
         return auditLogDateFormat;
     }
@@ -90,8 +117,9 @@ public class AuditLogConf {
     @Override
     public String toString() {
         return "AuditLogConf [enabled=" + enabled + ", logData=" + logData + ", ignoreHttpMethod=" + ignoreHttpMethod
+                + ", ignoreAnnotation=" + ignoreAnnotation + ", ignoreObjectMapping=" + ignoreObjectMapping
                 + ", headerAttributes=" + headerAttributes + ", auditLogFilePath=" + auditLogFilePath
                 + ", auditLogFileName=" + auditLogFileName + ", auditLogDateFormat=" + auditLogDateFormat + "]";
     }
-
+    
 }

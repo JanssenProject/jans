@@ -14,7 +14,7 @@ The components of the project include client and server implementations of the O
 
 All these components are deployed using janssen [helm chart](https://github.com/JanssenProject/jans/tree/main/charts/janssen).
 
-You can check the [reference](../../reference/kubernetes/helm-chart.md) guide to view the list of the chart components and values.
+You can check the [reference](../../reference/kubernetes#helm-chart-references) guide to view the list of the chart components and values.
 
 ## Looking for older helm charts?
 

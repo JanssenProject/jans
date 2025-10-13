@@ -34,6 +34,9 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
         lock_config: None,
+        max_default_entities: None,
+        max_base64_size: None,
+        token_cache_max_ttl_secs: 60,
     }
 }
 
@@ -81,6 +84,9 @@ pub async fn get_cedarling_with_authorization_conf(
         authorization_config: auth_conf,
         entity_builder_config: entity_builder_conf,
         lock_config: None,
+        max_default_entities: None,
+        max_base64_size: None,
+        token_cache_max_ttl_secs: 60,
     })
     .await
     .expect("bootstrap config should initialize correctly")

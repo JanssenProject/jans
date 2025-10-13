@@ -46,7 +46,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "OpenID issuer URL")
     @Schema(description = "OpenID issuer URL")
     private String openIdIssuer;
-    
+
     @DocProperty(description = "SCIM Protection Mode")
     @Schema(description = "OpenID issuer URL")
     private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
@@ -54,7 +54,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Cedarling configuration")
     @Schema(description = "Cedarling configuration")
     private CedarlingConfiguration cedarlingConfiguration;
-    
+
     @DocProperty(description = "Active stat enabled")
     @Schema(description = "Active stat enabled")
     private boolean statEnabled;
@@ -123,9 +123,13 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "PubSub consumer service")
     @Schema(description = "PubSub consumer service")
     private String messageConsumerType;
-    
+
     @DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from AS. Default value is false", defaultValue = "false")
     private Boolean errorReasonEnabled = false;
+
+    @DocProperty(description = "Each clean up iteration fetches chunk of expired data per base dn and removes it from storage")
+    @Schema(description = "Each clean up iteration fetches chunk of expired data per base dn and removes it from storage")
+    private int cleanServiceBatchChunkSize;
 
     public String getBaseDN() {
         return baseDN;
@@ -171,19 +175,19 @@ public class AppConfiguration implements Configuration {
 		return statEnabled;
 	}
 
-	public void setStatEnabled(boolean statEnabled) {
-		this.statEnabled = statEnabled;
-	}
+    public void setStatEnabled(boolean statEnabled) {
+        this.statEnabled = statEnabled;
+    }
 
-	public int getStatTimerIntervalInSeconds() {
-		return statTimerIntervalInSeconds;
-	}
+    public int getStatTimerIntervalInSeconds() {
+        return statTimerIntervalInSeconds;
+    }
 
-	public void setStatTimerIntervalInSeconds(int statTimerIntervalInSeconds) {
-		this.statTimerIntervalInSeconds = statTimerIntervalInSeconds;
-	}
+    public void setStatTimerIntervalInSeconds(int statTimerIntervalInSeconds) {
+        this.statTimerIntervalInSeconds = statTimerIntervalInSeconds;
+    }
 
-	public List<String> getTokenChannels() {
+    public List<String> getTokenChannels() {
         return tokenChannels;
     }
 
@@ -296,16 +300,18 @@ public class AppConfiguration implements Configuration {
     }
 
     public String getMessageConsumerType() {
-        if (messageConsumerType == null) messageConsumerType = "DISABLED";
-		return messageConsumerType;
-	}
+        if (messageConsumerType == null)
+            messageConsumerType = "DISABLED";
+        return messageConsumerType;
+    }
 
-	public void setMessageConsumerType(String messageConsumerType) {
-		this.messageConsumerType = messageConsumerType;
-	}
+    public void setMessageConsumerType(String messageConsumerType) {
+        this.messageConsumerType = messageConsumerType;
+    }
 
-	public Boolean getErrorReasonEnabled() {
-        if (errorReasonEnabled == null) errorReasonEnabled = false;
+    public Boolean getErrorReasonEnabled() {
+        if (errorReasonEnabled == null)
+            errorReasonEnabled = false;
         return errorReasonEnabled;
     }
 
@@ -313,18 +319,27 @@ public class AppConfiguration implements Configuration {
         this.errorReasonEnabled = errorReasonEnabled;
     }
 
+    public int getCleanServiceBatchChunkSize() {
+        return cleanServiceBatchChunkSize;
+    }
+
+    public void setCleanServiceBatchChunkSize(int cleanServiceBatchChunkSize) {
+        this.cleanServiceBatchChunkSize = cleanServiceBatchChunkSize;
+    }
+
     @Override
-	public String toString() {
-		return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
-				+ openIdIssuer + ", statEnabled=" + statEnabled + ", statTimerIntervalInSeconds="
-				+ statTimerIntervalInSeconds + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId
-				+ ", clientPassword=" + clientPassword + ", tokenUrl=" + tokenUrl + ", endpointGroups=" + endpointGroups
-				+ ", endpointDetails=" + endpointDetails + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel="
-				+ loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
-				+ externalLoggerConfiguration + ", metricReporterInterval=" + metricReporterInterval
-				+ ", metricReporterKeepDataDays=" + metricReporterKeepDataDays + ", metricReporterEnabled="
-				+ metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval + ", messageConsumerType="
-				+ messageConsumerType + ", errorReasonEnabled=" + errorReasonEnabled + "]";
-	}
+    public String toString() {
+        return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
+                + openIdIssuer + ", statEnabled=" + statEnabled + ", statTimerIntervalInSeconds="
+                + statTimerIntervalInSeconds + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId
+                + ", clientPassword=" + clientPassword + ", tokenUrl=" + tokenUrl + ", endpointGroups=" + endpointGroups
+                + ", endpointDetails=" + endpointDetails + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel="
+                + loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
+                + externalLoggerConfiguration + ", metricReporterInterval=" + metricReporterInterval
+                + ", metricReporterKeepDataDays=" + metricReporterKeepDataDays + ", metricReporterEnabled="
+                + metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval + ", messageConsumerType="
+                + messageConsumerType + ", errorReasonEnabled=" + errorReasonEnabled + ", cleanServiceBatchChunkSize="
+                + cleanServiceBatchChunkSize + "]";
+    }
 
 }

@@ -55,6 +55,7 @@ import org.slf4j.Logger;
                 @Tag(name = "Token"),
                 @Tag(name = "Logs"),
                 @Tag(name = "Database"),
+                @Tag(name = "Software Statement Assertion (SSA)"),
         },
 
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })
@@ -121,7 +122,10 @@ import org.slf4j.Logger;
         @OAuthScope(name = ApiAccessConstants.TOKEN_WRITE_ACCESS, description = "Manage Token details"),
         @OAuthScope(name = ApiAccessConstants.TOKEN_DELETE_ACCESS, description = "Delete Token details"),
         @OAuthScope(name = ApiAccessConstants.APP_DATA_READ_ACCESS, description = "View Config-API related data"),
-        @OAuthScope(name = ApiAccessConstants.JANS_AUDIT_READ_ACCESS, description = "View Audit Log related data")
+        @OAuthScope(name = ApiAccessConstants.JANS_AUDIT_READ_ACCESS, description = "View Audit Log related data"),
+        @OAuthScope(name = ApiAccessConstants.SSA_READ_ACCESS, description = "View SSA details"),
+        @OAuthScope(name = ApiAccessConstants.SSA_WRITE_ACCESS, description = "Manage SSA details"),
+        @OAuthScope(name = ApiAccessConstants.SSA_DELETE_ACCESS, description = "Delete SSA details"),
         }
 
 )))
@@ -169,6 +173,7 @@ public class ApiApplication extends BaseApiApplication {
         classes.add(AgamaRepoResource.class);
         classes.add(AuditLogResource.class);
         classes.add(DatabaseResource.class);
+        classes.add(SsaResource.class);
                 
         log.info("appConfiguration:{}",appConfiguration );
         if(appConfiguration!=null && appConfiguration.getAssetMgtConfiguration()!=null && appConfiguration.getAssetMgtConfiguration().isAssetMgtEnabled()) {

@@ -43,6 +43,21 @@
 		</testResources>
 
 		<plugins>
+			<!-- Ensure dependencies are resolved before compilation -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>resolve-dependencies</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>resolve</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
@@ -112,6 +127,8 @@
             <groupId>io.jans</groupId>
             <artifactId>jans-fido2-model</artifactId>
         </dependency>
+
+
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-orm-core</artifactId>
@@ -226,7 +243,16 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
         </dependency>
-    </dependencies>
+
+		<!-- Base MetricService class dependency -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-service</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+
+	</dependencies>
 	<reporting>
         <plugins>
             <plugin>

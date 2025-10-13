@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use crate::jwt::{Token, TokenClaimTypeError};
 
@@ -13,7 +13,7 @@ use crate::jwt::{Token, TokenClaimTypeError};
 /// # Trust Modes
 ///
 /// There are currently two trust modes:
-/// - None
+/// - Never
 /// - Strict
 ///
 /// # Strict Mode
@@ -24,7 +24,7 @@ use crate::jwt::{Token, TokenClaimTypeError};
 ///     - `userinfo_token.aud` == `access_token.client_id`
 ///     - `userinfo_token.sub` == `id_token.sub`
 pub fn validate_id_tkn_trust_mode(
-    tokens: &HashMap<String, Token>,
+    tokens: &HashMap<String, Arc<Token>>,
 ) -> Result<(), IdTokenTrustModeError> {
     let access_tkn = tokens
         .get("access_token")
@@ -34,7 +34,7 @@ pub fn validate_id_tkn_trust_mode(
         .ok_or(IdTokenTrustModeError::MissingIdToken)?;
 
     let access_tkn_client_id = get_tkn_claim_as_str(access_tkn, "client_id")?;
-    
+
     if !aud_claim_contains_value(id_tkn, &access_tkn_client_id)? {
         return Err(IdTokenTrustModeError::AccessTokenClientIdMismatch);
     }
@@ -43,7 +43,7 @@ pub fn validate_id_tkn_trust_mode(
         Some(token) => token,
         None => return Ok(()),
     };
-    
+
     if !aud_claim_contains_value(userinfo_tkn, &access_tkn_client_id)? {
         return Err(IdTokenTrustModeError::ClientIdUserinfoAudMismatch);
     }
@@ -68,14 +68,15 @@ fn aud_claim_contains_value(
                 },
                 serde_json::Value::Array(arr) => {
                     // Array aud claim - check if it contains the expected value
-                    Ok(arr.iter()
+                    Ok(arr
+                        .iter()
                         .filter_map(|item| item.as_str())
                         .any(|s| s == expected_value))
                 },
                 _ => Err(IdTokenTrustModeError::TokenClaimTypeError(
                     token.name.clone(),
-                    TokenClaimTypeError::type_mismatch("aud", "string or array", claim.value())
-                ))
+                    TokenClaimTypeError::type_mismatch("aud", "string or array", claim.value()),
+                )),
             }
         })
 }
@@ -121,7 +122,7 @@ mod test {
     use super::{IdTokenTrustModeError, validate_id_tkn_trust_mode};
     use crate::jwt::Token;
     use serde_json::json;
-    use std::collections::HashMap;
+    use std::{collections::HashMap, sync::Arc};
 
     #[test]
     fn success_without_userinfo_tkn() {
@@ -130,16 +131,18 @@ mod test {
             serde_json::from_value(json!({"client_id": "some-id-123"}))
                 .expect("valid token claims"),
             None,
-        );
+        )
+        .into();
         let id_token = Token::new(
             "id_token",
             serde_json::from_value(json!({"aud": ["some-id-123"]})).expect("valid token claims"),
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-        ]);
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
+        ])
+        .into();
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
 
@@ -150,7 +153,7 @@ mod test {
             serde_json::from_value(json!({"aud": "some-id-123"})).expect("valid token claims"),
             None,
         );
-        let tokens = HashMap::from([("id_token".to_string(), id_token)]);
+        let tokens = HashMap::from([("id_token".to_string(), Arc::new(id_token))]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::MissingAccessToken),
@@ -172,8 +175,8 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -196,7 +199,7 @@ mod test {
                 .expect("valid token claims"),
             None,
         );
-        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
+        let tokens = HashMap::from([("access_token".to_string(), Arc::new(access_token))]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::MissingIdToken),
@@ -220,8 +223,8 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -250,8 +253,8 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -280,9 +283,9 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
+            ("userinfo_token".to_string(), Arc::new(userinfo_token)),
         ]);
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
@@ -306,9 +309,9 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
+            ("userinfo_token".to_string(), Arc::new(userinfo_token)),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -322,7 +325,6 @@ mod test {
             err
         )
     }
-
 
     #[test]
     fn errors_when_userinfo_tkn_aud_does_not_contain_client_id() {
@@ -343,9 +345,9 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
+            ("userinfo_token".to_string(), Arc::new(userinfo_token)),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(

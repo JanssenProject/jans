@@ -198,6 +198,12 @@ You can run the benchmarks using:
 cargo bench -p cedarling
 ```
 
+After executing benchmarks you can run python script for pretty formatting result:
+
+```sh
+python3 scripts/check_benchmarks.py
+```
+
 ## Profiling
 
 Profiling is done using the [`pprof`](https://crates.io/crates/pprof) crate. We have an example you can run with

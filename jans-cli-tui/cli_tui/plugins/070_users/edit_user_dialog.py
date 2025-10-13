@@ -97,7 +97,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
         widget = JansLabelWidget(
                         title = _(title),
                         values = values,
-                        data = [],
+                        data = data,
                         label_width=100,
                         add_handler=add_handler,
                         jans_name = jans_name

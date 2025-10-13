@@ -54,6 +54,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
         lock_config: None,
+        max_default_entities: None,
+        max_base64_size: None,
+        token_cache_max_ttl_secs: 60,
     })
     .await?;
 
@@ -73,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             resource: EntityData {
                 cedar_mapping: CedarEntityMapping {
                     entity_type: "Jans::Issue".to_string(),
-                id: "random_id".to_string(),
+                    id: "random_id".to_string(),
                 },
                 attributes: HashMap::from_iter([(
                     "org_id".to_string(),

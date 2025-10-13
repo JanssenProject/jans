@@ -75,7 +75,7 @@ impl Authz {
     pub(crate) async fn decode_tokens<'a>(
         &'a self,
         request: &'a Request,
-    ) -> Result<HashMap<String, Token>, AuthorizeError> {
+    ) -> Result<HashMap<String, Arc<Token>>, AuthorizeError> {
         let tokens = self
             .config
             .jwt_service
@@ -485,7 +485,7 @@ impl Authz {
     pub fn build_entities(
         &self,
         request: &Request,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         Ok(self
             .config
@@ -534,21 +534,37 @@ pub struct AuthorizeEntitiesData {
     pub user: Option<Entity>,
     pub roles: Vec<Entity>,
     pub resource: Entity,
+    pub default_entities: HashMap<String, Entity>,
 }
 
 impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
+    ///
+    /// This method merges request entities with default entities, where request entities
+    /// take precedence over default entities in case of UID conflicts.
     fn into_iter(self) -> impl Iterator<Item = Entity> {
-        vec![self.resource]
-            .into_iter()
-            .chain(self.issuers)
-            .chain(self.roles)
-            .chain(self.tokens.into_values())
-            .chain(vec![self.user, self.workload].into_iter().flatten())
+        let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::new();
+
+        // Add default entities first
+        merged_entities.extend(self.default_entities.into_values().map(|e| (e.uid(), e)));
+
+        // Add request entities (these will override default entities if conflicts exist)
+        merged_entities.extend(vec![self.resource].into_iter().map(|e| (e.uid(), e)));
+        merged_entities.extend(self.issuers.into_iter().map(|e| (e.uid(), e)));
+        merged_entities.extend(self.roles.into_iter().map(|e| (e.uid(), e)));
+        merged_entities.extend(self.tokens.into_values().map(|e| (e.uid(), e)));
+        merged_entities.extend(
+            vec![self.user, self.workload]
+                .into_iter()
+                .flatten()
+                .map(|e| (e.uid(), e)),
+        );
+
+        merged_entities.into_values()
     }
 
     /// Collect all entities to [`cedar_policy::Entities`]
-    fn entities(
+    pub(crate) fn entities(
         self,
         schema: Option<&cedar_policy::Schema>,
     ) -> Result<cedar_policy::Entities, cedar_policy::entities_errors::EntitiesError> {
@@ -561,21 +577,37 @@ impl AuthorizeEntitiesData {
     /// - **Token Entities**: e.g., `access_token`, `id_token`, etc.
     /// - **Principal Entities**: e.g., `Workload`, `User`, etc.
     /// - **Role Entities**
+    /// - **Default Entities**: Entities loaded from the policy store configuration
     ///
     /// Only entities that have been built will be included
+    ///
+    /// Note: This method uses the same merging logic as `into_iter()` to ensure consistency
+    /// and avoid duplicate entity UIDs in the context.
     fn built_entities(&self) -> BuiltEntities {
-        let token_entities = self.tokens.values();
-        let principal_entities = [self.workload.as_ref(), self.user.as_ref()]
-            .into_iter()
-            .flatten();
-        let role_entities = self.roles.iter();
+        // Use the same merging logic as into_iter() to ensure consistency
+        let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::new();
 
-        BuiltEntities::from_iter(
-            token_entities
-                .chain(principal_entities)
-                .chain(role_entities)
-                .map(|e| e.uid()),
-        )
+        // Add default entities first
+        merged_entities.extend(self.default_entities.values().map(|e| (e.uid(), e.clone())));
+
+        // Add request entities, overriding any conflicting default entities
+        merged_entities.extend(
+            vec![&self.resource]
+                .into_iter()
+                .map(|e| (e.uid(), e.clone())),
+        );
+        merged_entities.extend(self.issuers.iter().map(|e| (e.uid(), e.clone())));
+        merged_entities.extend(self.roles.iter().map(|e| (e.uid(), e.clone())));
+        merged_entities.extend(self.tokens.values().map(|e| (e.uid(), e.clone())));
+        merged_entities.extend(
+            vec![&self.user, &self.workload]
+                .into_iter()
+                .flatten()
+                .map(|e| (e.uid(), e.clone())),
+        );
+
+        // Return built entities from merged collection
+        BuiltEntities::from_iter(merged_entities.values().map(|e| e.uid()))
     }
 }
 

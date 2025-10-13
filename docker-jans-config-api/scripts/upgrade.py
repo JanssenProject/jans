@@ -141,6 +141,11 @@ def _transform_api_dynamic_config(conf):
         ("auditLogFilePath", "/opt/jans/jetty/jans-config-api/logs/"),
         ("auditLogFileName", "configapi-audit.log"),
         ("auditLogDateFormat", "dd-MM-YYYY"),
+        ("ignoreAnnotation", ["ignoreAudit"]),
+        ("ignoreObjectMapping", [
+            {"name": "loggingRequest", "text": ["action=FETCH"]},
+            {"name": "ssaRequest", "text": []},
+        ]),
     ]:
         if k not in conf["auditLogConf"]:
             conf["auditLogConf"][k] = v

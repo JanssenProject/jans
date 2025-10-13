@@ -4,11 +4,12 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::*;
-use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
 use serde::Deserialize;
 use serde_json::json;
-use std::collections::HashSet;
+use std::hint::black_box;
+use std::{collections::HashSet, time::Duration};
 use test_utils::token_claims::{
     KeyPair, generate_jwks, generate_keypair_hs256, generate_token_using_claims,
     generate_token_using_claims_and_keypair,
@@ -28,7 +29,7 @@ fn without_jwt_validation_benchmark(c: &mut Criterion) {
         prepare_cedarling_request_for_without_jwt_validation().expect("should prepare r:equest");
 
     c.bench_with_input(
-        BenchmarkId::new("authz_without_jwt_validation", "tokio runtime"),
+        BenchmarkId::new("authz_authorize_without_jwt_validation", "tokio runtime"),
         &runtime,
         |b, rt| {
             b.to_async(rt)
@@ -72,7 +73,7 @@ fn with_jwt_validation_hs256_benchmark(c: &mut Criterion) {
         prepare_cedarling_request_for_with_jwt_validation(keys).expect("should prepare request");
 
     c.bench_with_input(
-        BenchmarkId::new("authz_with_jwt_validation_hs256", "tokio runtime"),
+        BenchmarkId::new("authz_authorize_with_jwt_validation_hs256", "tokio runtime"),
         &runtime,
         |b, rt| {
             b.to_async(rt)
@@ -84,11 +85,18 @@ fn with_jwt_validation_hs256_benchmark(c: &mut Criterion) {
     oidc_endpoint.assert();
 }
 
-criterion_group!(
-    authz_benchmark,
-    without_jwt_validation_benchmark,
-    with_jwt_validation_hs256_benchmark,
-);
+fn measurement_config() -> Criterion {
+    Criterion::default()
+        .measurement_time(Duration::from_secs(5))
+        .warm_up_time(Duration::from_secs(5))
+}
+
+criterion_group! {
+    name = authz_benchmark;
+    config = measurement_config();
+    targets = without_jwt_validation_benchmark, with_jwt_validation_hs256_benchmark
+}
+
 criterion_main!(authz_benchmark);
 
 async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCedarlingError> {
@@ -111,6 +119,9 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
         },
         entity_builder_config: EntityBuilderConfig::default().with_workload().with_user(),
         lock_config: None,
+        max_base64_size: None,
+        max_default_entities: None,
+        token_cache_max_ttl_secs: 60,
     };
 
     Cedarling::new(&bootstrap_config).await
@@ -125,6 +136,11 @@ async fn prepare_cedarling_with_jwt_validation(
     // We overwrite the idp endpoint here with out mock server
     policy_store["policy_stores"]["a1bf93115de86de760ee0bea1d529b521489e5a11747"]["trusted_issuers"]
         ["Jans123123"]["openid_configuration_endpoint"] =
+        format!("{}/.well-known/openid-configuration", base_idp_url).into();
+
+    // Also update the AnotherIssuer to use the mock server
+    policy_store["policy_stores"]["a1bf93115de86de760ee0bea1d529b521489e5a11747"]["trusted_issuers"]
+        ["AnotherIssuer"]["openid_configuration_endpoint"] =
         format!("{}/.well-known/openid-configuration", base_idp_url).into();
 
     let bootstrap_config = BootstrapConfig {
@@ -153,6 +169,9 @@ async fn prepare_cedarling_with_jwt_validation(
         },
         entity_builder_config: EntityBuilderConfig::default().with_workload().with_user(),
         lock_config: None,
+        max_base64_size: None,
+        max_default_entities: None,
+        token_cache_max_ttl_secs: 60,
     };
 
     Cedarling::new(&bootstrap_config).await
@@ -236,8 +255,10 @@ pub fn prepare_cedarling_request_for_without_jwt_validation() -> Result<Request,
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },
@@ -325,8 +346,10 @@ pub fn prepare_cedarling_request_for_with_jwt_validation(
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "random_id"
+                },
                 "org_id": "some_long_id",
                 "country": "US"
             },

@@ -7,9 +7,6 @@ tags:
 
 # Getting Started with Cedarling Java
 
-- [Installation](#installation)
-- [Usage](#usage)
-
 ## Installation
 
 ### Using the package manager
