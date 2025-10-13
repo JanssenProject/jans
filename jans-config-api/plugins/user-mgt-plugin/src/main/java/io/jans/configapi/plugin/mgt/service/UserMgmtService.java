@@ -136,12 +136,14 @@ public class UserMgmtService {
             }
             searchFilter = Filter.createORFilter(filters);
         }
-        
-        logger.trace("User pattern searchFilter:{}", searchFilter);
+
+        logger.error("User pattern searchFilter:{}, searchRequest.getFieldValueMap():{}", searchFilter,
+                searchRequest.getFieldValueMap());
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
-                
+         
+                logger.error("User entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
                 String[] valueArr = new String[] { entry.getValue() };
                 Filter dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null);
                 logger.error("User dataFilter:{}", dataFilter);
@@ -151,8 +153,7 @@ public class UserMgmtService {
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        
-        logger.info("Users searchFilter:{}", searchFilter);
+        logger.error("Users searchFilter:{}", searchFilter);
         PagedResult<User> pagedResult = persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(),
                 User.class, searchFilter, null, searchRequest.getSortBy(),
                 SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex(),
@@ -192,7 +193,7 @@ public class UserMgmtService {
             logger.debug("Get user by emailFilter:{} ", emailFilter);
             users = persistenceEntryManager.findEntries(userService.getPeopleBaseDn(), User.class, emailFilter);
             logger.debug("Asset by email:{} are users:{}", email, users);
-        
+
         } catch (Exception ex) {
             logger.error("Failed to load user with email:{}, ex:{}", email, ex);
         }
@@ -275,13 +276,13 @@ public class UserMgmtService {
         if (customAttributes == null || customAttributes.isEmpty()) {
             return user;
         }
-        //validate custom attribute validation
+        // validate custom attribute validation
         validateAttributes(customAttributes);
-        
+
         StringBuilder attributeAdded = new StringBuilder();
         StringBuilder attributeEdited = new StringBuilder();
         StringBuilder attributeDeleted = new StringBuilder();
-                
+
         for (CustomObjectAttribute attribute : customAttributes) {
             CustomObjectAttribute existingAttribute = userService.getCustomAttribute(user, attribute.getName());
             logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
@@ -291,7 +292,8 @@ public class UserMgmtService {
                 boolean result = userService.addUserAttribute(user, attribute.getName(), attribute.getValues(),
                         attribute.isMultiValued());
                 attributeAdded.append(attribute.getName()).append(",");
-                logger.debug("Result of adding CustomAttributes attribute.getName():{} , result:{} ", attribute.getName(), result);
+                logger.debug("Result of adding CustomAttributes attribute.getName():{} , result:{} ",
+                        attribute.getName(), result);
             }
             // remove attribute
             else if (attribute.getValue() == null || attribute.getValues() == null) {
@@ -305,10 +307,10 @@ public class UserMgmtService {
                 attributeEdited.append(attribute.getName()).append(",");
             }
         }
-    
-        logger.info(" *** Attribute added - {} {}",attributeAdded,"***");
-        logger.info(" *** Attribute edited - {} {}",attributeEdited,"***");
-        logger.info(" *** Attribute removed - {} {}",attributeDeleted,"***");
+
+        logger.info(" *** Attribute added - {} {}", attributeAdded, "***");
+        logger.info(" *** Attribute edited - {} {}", attributeEdited, "***");
+        logger.info(" *** Attribute removed - {} {}", attributeDeleted, "***");
         return user;
     }
 
@@ -555,20 +557,19 @@ public class UserMgmtService {
         }
         return customAttributes;
     }
-        
-   public List<JansAttribute> findAttributeByName(String name) {
+
+    public List<JansAttribute> findAttributeByName(String name) {
         return persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                 Filter.createEqualityFilter(AttributeConstants.JANS_ATTR_NAME, name));
     }
-    
+
     public List<JansAttribute> getRequiredAttributes() {
         List<JansAttribute> jansAttributes = null;
         try {
-            Filter requiredFilter = Filter.createANDFilter(
-                    Filter.createEqualityFilter("jansRequired", true),
+            Filter requiredFilter = Filter.createANDFilter(Filter.createEqualityFilter("jansRequired", true),
                     Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "active"));
 
-                    logger.info("requiredFilter:{}", requiredFilter);
+            logger.info("requiredFilter:{}", requiredFilter);
             jansAttributes = persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                     requiredFilter);
             logger.info("Required JansAttribute jansAttributes:{}", jansAttributes);
@@ -578,15 +579,14 @@ public class UserMgmtService {
         }
         return jansAttributes;
     }
-    
-    
+
     public List<String> getJansAttributeName(List<JansAttribute> jansAttributeList) {
         List<String> jansAttributeNameList = null;
 
         if (jansAttributeList == null || jansAttributeList.isEmpty()) {
             return jansAttributeNameList;
         }
-        
+
         jansAttributeNameList = new ArrayList<>();
 
         for (JansAttribute attribute : jansAttributeList) {
@@ -594,7 +594,6 @@ public class UserMgmtService {
         }
         return jansAttributeNameList;
     }
-
 
     private String getDnForAttribute(String inum) {
         String attributesDn = staticConfiguration.getBaseDn().getAttributes();
@@ -638,7 +637,7 @@ public class UserMgmtService {
     private String validateCustomAttributes(CustomObjectAttribute customObjectAttribute,
             AttributeValidation attributeValidation) {
         logger.info("Validate attributeValidation:{}", attributeValidation);
-        
+
         StringBuilder sb = new StringBuilder();
         if (customObjectAttribute == null || attributeValidation == null) {
             return sb.toString();
@@ -656,8 +655,8 @@ public class UserMgmtService {
             String regexpValue = attributeValidation.getRegexp();
             logger.info(
                     "Validate attributeValue.length():{}, attributeValidation.getMinLength():{}, attributeValidation.getMaxLength():{}, attributeValidation.getRegexp():{}",
-                    attributeValue.length(), attributeValidation.getMinLength(),
-                    attributeValidation.getMaxLength(), attributeValidation.getRegexp());
+                    attributeValue.length(), attributeValidation.getMinLength(), attributeValidation.getMaxLength(),
+                    attributeValidation.getRegexp());
 
             // minvalue Validation
             if (minvalue != null && attributeValue.length() < minvalue) {
