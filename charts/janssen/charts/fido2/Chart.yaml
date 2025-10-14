@@ -2,7 +2,7 @@
 apiVersion: v2
 name: fido2
 version: 0.0.0-nightly
-kubeVersion: ">=v1.22.0-0"
+kubeVersion: ">=v1.23.0-0"
 description: FIDO 2.0 (FIDO2) is an open authentication standard that enables leveraging common devices to authenticate to online services in both mobile and desktop environments.
 type: application
 keywords:

@@ -19,7 +19,7 @@ Janssen Access and Identity Management All-in-One Chart. This chart deploys the 
 
 ## Requirements
 
-Kubernetes: `>=v1.22.0-0`
+Kubernetes: `>=v1.23.0-0`
 
 ## Values
 
