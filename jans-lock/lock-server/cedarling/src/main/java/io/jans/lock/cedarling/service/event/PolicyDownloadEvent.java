@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-package io.jans.lock.service.status.cdi.event;
+package io.jans.lock.cedarling.service.event;
 
 /**
- * Status checker event
- *
- * @author Yuriy Movchan Date: 12/12/2023
+ * @author Yuriy Movchan Date: 12/30/2023
  */
-public class StatusCheckerTimerEvent {
-
-	public StatusCheckerTimerEvent() {}
-
+public class PolicyDownloadEvent {
 }
