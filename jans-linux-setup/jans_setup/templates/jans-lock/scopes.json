@@ -9,7 +9,7 @@
   },
   {
     "inum": "4000.01.2",
-    "jansId": "https://jans.io/lock/policy.readonly",
+    "jansId": "https://jans.io/oauth/lock/policy.readonly",
     "displayName": "Lock API scope",
     "description": "Permission to access policy endpoint",
     "jansDefScope": false,

@@ -16,7 +16,7 @@ public class ApiAccessConstants {
 
     public static final String MONTH = "month";
 
-    public static final String LOCK_POLICY_READ_ACCESS = "https://jans.io/lock/policy.readonly";
+    public static final String LOCK_POLICY_READ_ACCESS = "https://jans.io/oauth/lock/policy.readonly";
 
     public static final String LOCK_HEALTH_WRITE_ACCESS = "https://jans.io/oauth/lock/health.write";
     public static final String LOCK_LOG_WRITE_ACCESS = "https://jans.io/oauth/lock/log.write";
