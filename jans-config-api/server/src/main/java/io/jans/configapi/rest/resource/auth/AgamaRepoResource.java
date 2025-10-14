@@ -85,7 +85,7 @@ public class AgamaRepoResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_REPO_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     @Path("/download")
     public Response getAgamaProject(
             @Parameter(description = "Agama project download Link") @QueryParam(value = "downloadLink") String downloadLink)

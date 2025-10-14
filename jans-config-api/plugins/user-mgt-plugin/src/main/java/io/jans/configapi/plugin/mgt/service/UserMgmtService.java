@@ -75,8 +75,8 @@ public class UserMgmtService {
 
     @Inject
     ConfigUserService userService;
-    
-    @Inject 
+
+    @Inject
     DatabaseService databaseService;
 
     private static final String BIRTH_DATE = "birthdate";
@@ -142,28 +142,30 @@ public class UserMgmtService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        logger.error("User pattern searchFilter:{}, searchRequest.getFieldValueMap():{}", searchFilter,
+        logger.trace("User pattern searchFilter:{}, searchRequest.getFieldValueMap():{}", searchFilter,
                 searchRequest.getFieldValueMap());
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
-         
-                logger.error("User entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
+
+                logger.debug("User entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
                 String[] valueArr = new String[] { entry.getValue() };
                 String attributeType = this.getAttributeType(entry.getKey());
-                logger.error("User entry.getKey():{}, attributeType:{}", entry.getKey(), attributeType);
+                logger.trace("User field entry.getKey():{}, attributeType:{}", entry.getKey(), attributeType);
                 Filter dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null);
-                if(attributeType!=null && attributeType.contains("JSON")) {
+                if ((entry.getKey() != null && entry.getKey().equalsIgnoreCase("mobile"))
+                        || (attributeType != null && attributeType.equalsIgnoreCase("jsonb"))) {
                     dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null).multiValued(3);
                 }
-                logger.error("User dataFilter:{}", dataFilter);
+
+                logger.debug("User dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        logger.error("Users searchFilter:{}", searchFilter);
+        logger.info("Users searchFilter:{}", searchFilter);
         PagedResult<User> pagedResult = persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(),
                 User.class, searchFilter, null, searchRequest.getSortBy(),
                 SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex(),
@@ -697,15 +699,17 @@ public class UserMgmtService {
         }
         return sb.toString();
     }
-   
+
     public String getAttributeType(String attributeName) {
-        logger.info(" Validate attributeName:{}, getPersistenceType():{}, appConfiguration:{}", attributeName, getPersistenceType(), appConfiguration);
+        logger.info(" Validate attributeName:{}, getPersistenceType():{}, appConfiguration:{}", attributeName,
+                getPersistenceType(), appConfiguration);
         String type = null;
         try {
-            
 
-            logger.info("attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, User.class,attributeName)():{}", attributeName, persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
-                    attributeName));
+            logger.info(
+                    "attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, User.class,attributeName)():{}",
+                    attributeName,
+                    persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class, attributeName));
             AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
                     attributeName);
             logger.error("\n attributeName:{}, attributeType():{}", attributeName, attributeType);
@@ -714,7 +718,7 @@ public class UserMgmtService {
                 type = attributeType.getType();
             }
         } catch (Exception ex) {
-            throw new InvalidAttributeException("("+attributeName+") is invalid");
+            throw new InvalidAttributeException("(" + attributeName + ") is invalid");
         }
         return type;
     }
