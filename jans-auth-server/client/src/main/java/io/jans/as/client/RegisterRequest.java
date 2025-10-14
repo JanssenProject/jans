@@ -86,6 +86,7 @@ public class RegisterRequest extends BaseRequest {
     private List<String> spontaneousScopeScriptDns;
     private List<String> updateTokenScriptDns;
     private List<String> logoutStatusJwtScriptDns;
+    private List<String> parScriptDns;
     private List<String> postAuthnScriptDns;
     private List<String> tokenExchangeScriptDns;
     private List<String> consentGatheringScriptDns;
@@ -202,6 +203,7 @@ public class RegisterRequest extends BaseRequest {
         this.spontaneousScopeScriptDns = new ArrayList<>();
         this.updateTokenScriptDns = new ArrayList<>();
         this.logoutStatusJwtScriptDns = new ArrayList<>();
+        this.parScriptDns = new ArrayList<>();
         this.postAuthnScriptDns = new ArrayList<>();
         this.tokenExchangeScriptDns = new ArrayList<>();
         this.consentGatheringScriptDns = new ArrayList<>();
@@ -1716,6 +1718,27 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Gets par script dns
+     *
+     * @return par script dns
+     */
+    public List<String> getParScriptDns() {
+        return parScriptDns;
+    }
+
+    /**
+     * Sets par script dns
+     *
+     * @param parScriptDns par script dns
+     *
+     * @return register request
+     */
+    public RegisterRequest setParScriptDns(List<String> parScriptDns) {
+        this.parScriptDns = parScriptDns;
+        return this;
+    }
+
+    /**
      * Gets logout status jwt script dns
      *
      * @return logout status jwt script dns
@@ -1925,6 +1948,7 @@ public class RegisterRequest extends BaseRequest {
         result.setSpontaneousScopeScriptDns(extractListByKey(requestObject, SPONTANEOUS_SCOPE_SCRIPT_DNS.toString()));
         result.setUpdateTokenScriptDns(extractListByKey(requestObject, UPDATE_TOKEN_SCRIPT_DNS.toString()));
         result.setLogoutStatusJwtScriptDns(extractListByKey(requestObject, LOGOUT_STATUS_JWT_SCRIPT_DNS.toString()));
+        result.setParScriptDns(extractListByKey(requestObject, PAR_SCRIPT_DNS.toString()));
         result.setPostAuthnScriptDns(extractListByKey(requestObject, POST_AUTHN_SCRIPT_DNS.toString()));
         result.setTokenExchangeScriptDns(extractListByKey(requestObject, TOKEN_EXCHANGE_SCRIPT_DNS.toString()));
         result.setConsentGatheringScriptDns(extractListByKey(requestObject, CONSENT_GATHERING_SCRIPT_DNS.toString()));
@@ -2255,6 +2279,7 @@ public class RegisterRequest extends BaseRequest {
         applyArray(function, SPONTANEOUS_SCOPE_SCRIPT_DNS, spontaneousScopeScriptDns);
         applyArray(function, UPDATE_TOKEN_SCRIPT_DNS, updateTokenScriptDns);
         applyArray(function, LOGOUT_STATUS_JWT_SCRIPT_DNS, logoutStatusJwtScriptDns);
+        applyArray(function, PAR_SCRIPT_DNS, parScriptDns);
         applyArray(function, POST_AUTHN_SCRIPT_DNS, postAuthnScriptDns);
         applyArray(function, TOKEN_EXCHANGE_SCRIPT_DNS, tokenExchangeScriptDns);
         applyArray(function, CONSENT_GATHERING_SCRIPT_DNS, consentGatheringScriptDns);
