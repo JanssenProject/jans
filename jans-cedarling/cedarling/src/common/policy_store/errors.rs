@@ -109,6 +109,55 @@ pub enum ValidationError {
         expected: String,
         actual: String,
     },
+
+    /// Duplicate policy ID
+    #[error("Duplicate policy ID '{policy_id}' found in files {file1} and {file2}")]
+    DuplicatePolicyId {
+        policy_id: String,
+        file1: String,
+        file2: String,
+    },
+
+    /// Invalid policy ID format
+    #[error("Invalid policy ID format in {file}: {message}")]
+    InvalidPolicyId { file: String, message: String },
+
+    // Specific metadata validation errors
+    /// Empty Cedar version
+    #[error("Cedar version cannot be empty in metadata.json")]
+    EmptyCedarVersion,
+
+    /// Invalid Cedar version format
+    #[error("Invalid Cedar version format in metadata.json: '{version}' - {details}")]
+    InvalidCedarVersion { version: String, details: String },
+
+    /// Empty policy store name
+    #[error("Policy store name cannot be empty in metadata.json")]
+    EmptyPolicyStoreName,
+
+    /// Policy store name too long
+    #[error("Policy store name too long in metadata.json: {length} chars (max 255)")]
+    PolicyStoreNameTooLong { length: usize },
+
+    /// Invalid policy store ID format
+    #[error(
+        "Invalid policy store ID format in metadata.json: '{id}' must be hexadecimal (8-64 chars)"
+    )]
+    InvalidPolicyStoreId { id: String },
+
+    /// Invalid policy store version
+    #[error("Invalid policy store version in metadata.json: '{version}' - {details}")]
+    InvalidPolicyStoreVersion { version: String, details: String },
+
+    /// Policy store description too long
+    #[error("Policy store description too long in metadata.json: {length} chars (max 1000)")]
+    DescriptionTooLong { length: usize },
+
+    /// Invalid timestamp ordering
+    #[error(
+        "Invalid timestamp ordering in metadata.json: updated_date cannot be before created_date"
+    )]
+    InvalidTimestampOrdering,
 }
 
 /// Errors related to archive (.cjar) handling.

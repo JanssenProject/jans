@@ -36,16 +36,13 @@ impl MetadataValidator {
     /// Examples: "4.4.0", "3.0.1", "4.2.5"
     fn validate_cedar_version(version: &str) -> Result<(), ValidationError> {
         if version.is_empty() {
-            return Err(ValidationError::InvalidMetadata {
-                file: "metadata.json".to_string(),
-                message: "cedar_version cannot be empty".to_string(),
-            });
+            return Err(ValidationError::EmptyCedarVersion);
         }
 
         // Parse as semantic version
-        Version::parse(version).map_err(|e| ValidationError::InvalidMetadata {
-            file: "metadata.json".to_string(),
-            message: format!("Invalid cedar_version format '{}': {}", version, e),
+        Version::parse(version).map_err(|e| ValidationError::InvalidCedarVersion {
+            version: version.to_string(),
+            details: e.to_string(),
         })?;
 
         Ok(())
@@ -55,20 +52,13 @@ impl MetadataValidator {
     fn validate_policy_store_info(info: &PolicyStoreInfo) -> Result<(), ValidationError> {
         // Validate name (required)
         if info.name.is_empty() {
-            return Err(ValidationError::InvalidMetadata {
-                file: "metadata.json".to_string(),
-                message: "policy_store.name cannot be empty".to_string(),
-            });
+            return Err(ValidationError::EmptyPolicyStoreName);
         }
 
         // Validate name length (reasonable limit)
         if info.name.len() > 255 {
-            return Err(ValidationError::InvalidMetadata {
-                file: "metadata.json".to_string(),
-                message: format!(
-                    "policy_store.name too long ({} chars, max 255)",
-                    info.name.len()
-                ),
+            return Err(ValidationError::PolicyStoreNameTooLong {
+                length: info.name.len(),
             });
         }
 
@@ -85,23 +75,14 @@ impl MetadataValidator {
         // Validate description length if provided
         if let Some(desc) = &info.description {
             if desc.len() > 1000 {
-                return Err(ValidationError::InvalidMetadata {
-                    file: "metadata.json".to_string(),
-                    message: format!(
-                        "policy_store.description too long ({} chars, max 1000)",
-                        desc.len()
-                    ),
-                });
+                return Err(ValidationError::DescriptionTooLong { length: desc.len() });
             }
         }
 
         // Validate timestamps ordering if both are provided
         if let (Some(created), Some(updated)) = (info.created_date, info.updated_date) {
             if updated < created {
-                return Err(ValidationError::InvalidMetadata {
-                    file: "metadata.json".to_string(),
-                    message: "policy_store.updated_date cannot be before created_date".to_string(),
-                });
+                return Err(ValidationError::InvalidTimestampOrdering);
             }
         }
 
@@ -113,26 +94,9 @@ impl MetadataValidator {
     /// Expected: Hexadecimal string (lowercase or uppercase)
     /// Examples: "abc123", "ABC123", "0123456789abcdef"
     fn validate_policy_store_id(id: &str) -> Result<(), ValidationError> {
-        // Check if all characters are valid hex
-        if !id.chars().all(|c| c.is_ascii_hexdigit()) {
-            return Err(ValidationError::InvalidMetadata {
-                file: "metadata.json".to_string(),
-                message: format!(
-                    "policy_store.id must be a hexadecimal string, found: '{}'",
-                    id
-                ),
-            });
-        }
-
-        // Check reasonable length (hash-like IDs are typically 8-64 chars)
-        if id.len() < 8 || id.len() > 64 {
-            return Err(ValidationError::InvalidMetadata {
-                file: "metadata.json".to_string(),
-                message: format!(
-                    "policy_store.id length must be 8-64 characters, found: {}",
-                    id.len()
-                ),
-            });
+        // Check if all characters are valid hex and length is 8-64 chars
+        if !id.chars().all(|c| c.is_ascii_hexdigit()) || id.len() < 8 || id.len() > 64 {
+            return Err(ValidationError::InvalidPolicyStoreId { id: id.to_string() });
         }
 
         Ok(())
@@ -143,9 +107,9 @@ impl MetadataValidator {
     /// Expected: Semantic version (X.Y.Z or X.Y.Z-prerelease+build)
     /// Examples: "1.0.0", "2.1.3", "1.0.0-alpha", "1.0.0-beta.1+build.123"
     fn validate_policy_store_version(version: &str) -> Result<(), ValidationError> {
-        Version::parse(version).map_err(|e| ValidationError::InvalidMetadata {
-            file: "metadata.json".to_string(),
-            message: format!("Invalid policy_store.version format '{}': {}", version, e),
+        Version::parse(version).map_err(|e| ValidationError::InvalidPolicyStoreVersion {
+            version: version.to_string(),
+            details: e.to_string(),
         })?;
 
         Ok(())
@@ -288,12 +252,10 @@ mod tests {
 
         let result = MetadataValidator::validate(&metadata);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("cedar_version cannot be empty")
-        );
+        assert!(matches!(
+            result.unwrap_err(),
+            ValidationError::EmptyCedarVersion
+        ));
     }
 
     #[test]
@@ -312,12 +274,10 @@ mod tests {
 
         let result = MetadataValidator::validate(&metadata);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("Invalid cedar_version format")
-        );
+        assert!(matches!(
+            result.unwrap_err(),
+            ValidationError::InvalidCedarVersion { .. }
+        ));
     }
 
     #[test]
@@ -336,12 +296,10 @@ mod tests {
 
         let result = MetadataValidator::validate(&metadata);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("name cannot be empty")
-        );
+        assert!(matches!(
+            result.unwrap_err(),
+            ValidationError::EmptyPolicyStoreName
+        ));
     }
 
     #[test]
@@ -360,7 +318,10 @@ mod tests {
 
         let result = MetadataValidator::validate(&metadata);
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("name too long"));
+        assert!(matches!(
+            result.unwrap_err(),
+            ValidationError::PolicyStoreNameTooLong { length: 256 }
+        ));
     }
 
     #[test]
@@ -379,12 +340,10 @@ mod tests {
 
         let result = MetadataValidator::validate(&metadata);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("must be a hexadecimal string")
-        );
+        assert!(matches!(
+            result.unwrap_err(),
+            ValidationError::InvalidPolicyStoreId { .. }
+        ));
     }
 
     #[test]
@@ -403,12 +362,10 @@ mod tests {
 
         let result = MetadataValidator::validate(&metadata);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("length must be 8-64")
-        );
+        assert!(matches!(
+            result.unwrap_err(),
+            ValidationError::InvalidPolicyStoreId { .. }
+        ));
     }
 
     #[test]
@@ -445,12 +402,10 @@ mod tests {
 
         let result = MetadataValidator::validate(&metadata);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("Invalid policy_store.version")
-        );
+        assert!(matches!(
+            result.unwrap_err(),
+            ValidationError::InvalidPolicyStoreVersion { .. }
+        ));
     }
 
     #[test]
@@ -487,12 +442,10 @@ mod tests {
 
         let result = MetadataValidator::validate(&metadata);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("description too long")
-        );
+        assert!(matches!(
+            result.unwrap_err(),
+            ValidationError::DescriptionTooLong { length: 1001 }
+        ));
     }
 
     #[test]
@@ -518,12 +471,10 @@ mod tests {
 
         let result = MetadataValidator::validate(&metadata);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("updated_date cannot be before created_date")
-        );
+        assert!(matches!(
+            result.unwrap_err(),
+            ValidationError::InvalidTimestampOrdering
+        ));
     }
 
     #[test]
@@ -549,13 +500,8 @@ mod tests {
         let json = r#"{ invalid json }"#;
 
         let result = MetadataValidator::parse_and_validate(json);
-        assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("Failed to parse JSON")
-        );
+        let err = result.expect_err("Should fail on invalid JSON");
+        assert!(matches!(err, ValidationError::InvalidMetadata { .. }));
     }
 
     #[test]
@@ -568,13 +514,12 @@ mod tests {
         }"#;
 
         let result = MetadataValidator::parse_and_validate(json);
-        assert!(result.is_err());
-        let err_msg = result.unwrap_err().to_string();
         // The error could be from JSON parsing (missing field) or validation (empty name)
+        let err = result.expect_err("Should fail on missing required field");
+        // Accept either InvalidMetadata (JSON parse error) or EmptyPolicyStoreName (validation error)
         assert!(
-            err_msg.contains("name") || err_msg.contains("missing field"),
-            "Expected error about 'name' field, got: {}",
-            err_msg
+            matches!(err, ValidationError::InvalidMetadata { .. })
+                || matches!(err, ValidationError::EmptyPolicyStoreName)
         );
     }
 
@@ -621,9 +566,10 @@ mod tests {
             },
         };
 
-        let result = metadata.is_compatible_with_cedar("4.4.0");
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        let is_compatible = metadata
+            .is_compatible_with_cedar("4.4.0")
+            .expect("Should successfully check compatibility");
+        assert!(is_compatible);
     }
 
     #[test]
@@ -640,9 +586,10 @@ mod tests {
             },
         };
 
-        let result = metadata.is_compatible_with_cedar("4.4.0");
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        let is_compatible = metadata
+            .is_compatible_with_cedar("4.4.0")
+            .expect("Should successfully check compatibility");
+        assert!(is_compatible);
     }
 
     #[test]
@@ -659,9 +606,10 @@ mod tests {
             },
         };
 
-        let result = metadata.is_compatible_with_cedar("3.0.0");
-        assert!(result.is_ok());
-        assert!(!result.unwrap());
+        let is_compatible = metadata
+            .is_compatible_with_cedar("3.0.0")
+            .expect("Should successfully check compatibility");
+        assert!(!is_compatible);
     }
 
     #[test]
@@ -678,8 +626,9 @@ mod tests {
             },
         };
 
-        let result = metadata.is_compatible_with_cedar("4.4.0");
-        assert!(result.is_ok());
-        assert!(!result.unwrap());
+        let is_compatible = metadata
+            .is_compatible_with_cedar("4.4.0")
+            .expect("Should successfully check compatibility");
+        assert!(!is_compatible);
     }
 }

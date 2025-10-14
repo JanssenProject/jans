@@ -170,15 +170,16 @@ impl DefaultPolicyStoreLoader {
             return Ok(None);
         }
 
-        let content = fs::read_to_string(&manifest_path).map_err(|e| {
+        // Open file and parse JSON directly from reader
+        let file = fs::File::open(&manifest_path).map_err(|e| {
             PolicyStoreError::Io(std::io::Error::new(
                 e.kind(),
-                format!("Failed to read manifest.json: {}", e),
+                format!("Failed to open manifest.json: {}", e),
             ))
         })?;
 
         let manifest =
-            serde_json::from_str(&content).map_err(|e| PolicyStoreError::JsonParsing {
+            serde_json::from_reader(file).map_err(|e| PolicyStoreError::JsonParsing {
                 file: "manifest.json".to_string(),
                 message: e.to_string(),
             })?;
@@ -233,7 +234,11 @@ impl DefaultPolicyStoreLoader {
         let entries = fs::read_dir(&issuers_dir).map_err(|e| {
             PolicyStoreError::Io(std::io::Error::new(
                 e.kind(),
-                format!("Failed to read trusted-issuers directory: {}", e),
+                format!(
+                    "Failed to read trusted-issuers directory at '{}': {}",
+                    issuers_dir.display(),
+                    e
+                ),
             ))
         })?;
 
@@ -288,7 +293,12 @@ impl DefaultPolicyStoreLoader {
         let entries = fs::read_dir(dir).map_err(|e| {
             PolicyStoreError::Io(std::io::Error::new(
                 e.kind(),
-                format!("Failed to read {} directory: {}", file_type, e),
+                format!(
+                    "Failed to read {} directory at '{}': {}",
+                    file_type,
+                    dir.display(),
+                    e
+                ),
             ))
         })?;
 
@@ -343,7 +353,12 @@ impl DefaultPolicyStoreLoader {
         let entries = fs::read_dir(dir).map_err(|e| {
             PolicyStoreError::Io(std::io::Error::new(
                 e.kind(),
-                format!("Failed to read {} directory: {}", file_type, e),
+                format!(
+                    "Failed to read {} directory at '{}': {}",
+                    file_type,
+                    dir.display(),
+                    e
+                ),
             ))
         })?;
 
