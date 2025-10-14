@@ -1,7 +1,7 @@
 [package]
 name = "cedarling_go"
-version = "0.0.0"
-edition = "2021"
+version = "1.13.0"
+edition = "2025"
 
 [lib]
 crate-type = ["cdylib", "staticlib"]
