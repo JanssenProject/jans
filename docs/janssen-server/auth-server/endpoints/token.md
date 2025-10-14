@@ -149,7 +149,7 @@ navigate via `Auth Server`->`Clients`->`Add Client`/`search client`->`Basic`-> `
 Token endpoint response can be further customized using [interception scripts](../../../janssen-server/developer/scripts/README.md).
 Following interception scripts are relevant to token endpoint:
 
-- [Update Token](../../../script-catalog/update_token/update-token.md)
+- [Update Token](../../../script-catalog/update_token/update-token)
 
 Client can configure a particular script to be executed using client configuration. To update configuration using
 [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) navigate via `Auth Server`->`Clients`->`Add Client`/`search`->
