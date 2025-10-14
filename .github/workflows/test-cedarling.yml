@@ -75,18 +75,18 @@ jobs:
     - name: Run WASM tests using chrome
       working-directory: jans-cedarling/bindings/cedarling_wasm
       run: |
-        RUSTFLAGS='-C target-feature=+reference-types' wasm-pack test --headless --chrome
+        wasm-pack test --headless --chrome
 
     - name: Run WASM tests using firefox
       working-directory: jans-cedarling/bindings/cedarling_wasm
       run: |
-        RUSTFLAGS='-C target-feature=+reference-types' wasm-pack test --headless --firefox
+        wasm-pack test --headless --firefox
 
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
       run: |
         rustup component add clippy
-        RUSTFLAGS='-C target-feature=+reference-types' cargo clippy --target wasm32-unknown-unknown -- -Dwarnings
+        cargo clippy --target wasm32-unknown-unknown -- -Dwarnings
 
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
