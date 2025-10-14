@@ -14721,20 +14721,26 @@ else DENY
 end
 </code></pre>
 <h3 id="sample-authzen-request">Sample Authzen request<a class="headerlink" href="#sample-authzen-request" title="Permanent link">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The request shown below is designed against the AuthZen specification and should not be used for a regular cedarling deployment.</p>
+</div>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_bundle&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">&lt;SHA</span><span class="mi">256</span><span class="w"> </span><span class="err">hash</span><span class="w"> </span><span class="err">o</span><span class="kc">f</span><span class="w"> </span><span class="kc">t</span><span class="err">he</span><span class="w"> </span><span class="err">proper</span><span class="kc">t</span><span class="err">ies</span><span class="w"> </span><span class="err">dic</span><span class="kc">t</span><span class="err">io</span><span class="kc">nar</span><span class="err">y&gt;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::HTTP_Request&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
-<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Request&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">&lt;SHA</span><span class="mi">256</span><span class="w"> </span><span class="err">hash</span><span class="w"> </span><span class="err">o</span><span class="kc">f</span><span class="w"> </span><span class="kc">t</span><span class="err">he</span><span class="w"> </span><span class="err">proper</span><span class="kc">t</span><span class="err">ies</span><span class="w"> </span><span class="err">dic</span><span class="kc">t</span><span class="err">io</span><span class="kc">nar</span><span class="err">y&gt;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::HTTP_Request&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;header&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
 <span class="w">      </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http&quot;</span><span class="p">,</span>
@@ -14903,6 +14909,14 @@ SIDECAR_DEBUG_RESPONSE=False
 </ul>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">abort</span><span class="p">,</span> <span class="n">request</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hashlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">sha256</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_hash</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">encoded_str</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">digest</span> <span class="o">=</span> <span class="n">sha256</span><span class="p">(</span><span class="n">encoded_str</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">digest</span>
+
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -14912,27 +14926,34 @@ SIDECAR_DEBUG_RESPONSE=False
     <span class="k">if</span> <span class="n">token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">abort</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
     <span class="n">token_jwt</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">token_jwt</span><span class="p">)</span>
+    <span class="n">subject_properties</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="n">token_jwt</span>
+    <span class="p">}</span>
+    <span class="n">subject_hash</span> <span class="o">=</span> <span class="n">generate_hash</span><span class="p">(</span><span class="n">subject_properties</span><span class="p">)</span>
+    <span class="n">resource_properties</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;entity_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::HTTP_Request&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;some_id&quot;</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;header&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;protocol&quot;</span><span class="p">:</span> <span class="s2">&quot;http&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;www.acme.tld&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/protected&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">resource_hash</span> <span class="o">=</span> <span class="n">generate_hash</span><span class="p">(</span><span class="n">resource_properties</span><span class="p">)</span>
     <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;subject&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;token_bundle&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="n">token_jwt</span>
-            <span class="p">}</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">subject_hash</span><span class="p">,</span>
+            <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="n">subject_properties</span> 
         <span class="p">},</span>
         <span class="s2">&quot;resource&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;entity_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::HTTP_Request&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;some_id&quot;</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;header&quot;</span><span class="p">:</span> <span class="p">{},</span>
-                <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;protocol&quot;</span><span class="p">:</span> <span class="s2">&quot;http&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;www.acme.tld&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/protected&quot;</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">resource_hash</span><span class="p">,</span>
+            <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="n">resource_properties</span> 
         <span class="p">},</span>
         <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::Action::</span><span class="se">\&quot;</span><span class="s2">GET</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
@@ -15098,7 +15119,7 @@ when {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2025 15:11:12 UTC"><span class="timeago" datetime="2025-07-29T15:11:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2025 15:11:12 UTC">2025-07-29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 14, 2025 10:18:10 UTC"><span class="timeago" datetime="2025-10-14T10:18:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 14, 2025 10:18:10 UTC">2025-10-14</span>
   </span>
 
     
