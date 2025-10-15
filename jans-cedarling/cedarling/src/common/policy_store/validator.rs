@@ -506,21 +506,33 @@ mod tests {
 
     #[test]
     fn test_parse_and_validate_missing_required_field() {
+        // Missing the 'name' field entirely - should fail during JSON deserialization
         let json = r#"{
             "cedar_version": "4.4.0",
             "policy_store": {
-                "id": ""
+                "id": "abc123def456"
             }
         }"#;
 
         let result = MetadataValidator::parse_and_validate(json);
-        // The error could be from JSON parsing (missing field) or validation (empty name)
         let err = result.expect_err("Should fail on missing required field");
-        // Accept either InvalidMetadata (JSON parse error) or EmptyPolicyStoreName (validation error)
-        assert!(
-            matches!(err, ValidationError::InvalidMetadata { .. })
-                || matches!(err, ValidationError::EmptyPolicyStoreName)
-        );
+        assert!(matches!(err, ValidationError::InvalidMetadata { .. }));
+    }
+
+    #[test]
+    fn test_parse_and_validate_empty_name_validation() {
+        // Empty name field - should pass JSON parsing but fail validation
+        let json = r#"{
+            "cedar_version": "4.4.0",
+            "policy_store": {
+                "id": "abc123def456",
+                "name": ""
+            }
+        }"#;
+
+        let result = MetadataValidator::parse_and_validate(json);
+        let err = result.expect_err("Should fail on empty name validation");
+        assert!(matches!(err, ValidationError::EmptyPolicyStoreName));
     }
 
     #[test]

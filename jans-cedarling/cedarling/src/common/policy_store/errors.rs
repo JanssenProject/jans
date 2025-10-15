@@ -32,6 +32,34 @@ pub enum PolicyStoreError {
     /// Cedar parsing error
     #[error("Cedar parsing error in {file}: {message}")]
     CedarParsing { file: String, message: String },
+
+    /// Path not found
+    #[error("Path not found: {path}")]
+    PathNotFound { path: String },
+
+    /// Path is not a directory
+    #[error("Path is not a directory: {path}")]
+    NotADirectory { path: String },
+
+    /// Path is not a file
+    #[error("Path is not a file: {path}")]
+    NotAFile { path: String },
+
+    /// Directory read error
+    #[error("Failed to read directory {path}: {message}")]
+    DirectoryReadError { path: String, message: String },
+
+    /// File read error
+    #[error("Failed to read file {path}: {message}")]
+    FileReadError { path: String, message: String },
+
+    /// Empty directory
+    #[error("Directory is empty: {path}")]
+    EmptyDirectory { path: String },
+
+    /// Invalid file name
+    #[error("Invalid file name in {path}: {message}")]
+    InvalidFileName { path: String, message: String },
 }
 
 /// Validation errors for policy store components.
