@@ -13,6 +13,7 @@ pub mod loader;
 pub mod metadata;
 pub mod source;
 pub mod validator;
+pub mod vfs_adapter;
 
 use super::{PartitionResult, cedar_schema::CedarSchema};
 use cedar_policy::{Policy, PolicyId};
@@ -33,6 +34,10 @@ pub use loader::{
 pub use metadata::{FileInfo, PolicyStoreInfo, PolicyStoreManifest, PolicyStoreMetadata};
 pub use source::{PolicyStoreFormat, PolicyStoreSource};
 pub use validator::MetadataValidator;
+pub use vfs_adapter::{MemoryVfs, VfsFileSystem};
+
+#[cfg(not(target_arch = "wasm32"))]
+pub use vfs_adapter::PhysicalVfs;
 /// Default maximum number of entities allowed
 const DEFAULT_MAX_ENTITIES: usize = 1000;
 /// Default maximum size of base64-encoded strings in bytes
