@@ -120,6 +120,8 @@ public class AUIConfigurationService extends BaseService {
         auiConfig.setAllowSmtpKeystoreEdit(appConf.getMainSettings().getUiConfig().getAllowSmtpKeystoreEdit());
         auiConfig.setAdditionalParameters(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAdditionalParameters());
         auiConfig.setCedarlingLogType(CedarlingLogType.fromString(appConf.getMainSettings().getUiConfig().getCedarlingLogType()));
+        auiConfig.setAuiPolicyStoreUrl(appConf.getMainSettings().getUiConfig().getAuiPolicyStoreUrl());
+        auiConfig.setUseRemotePolicyStore(appConf.getMainSettings().getUiConfig().getUseRemotePolicyStore());
         return auiConfig;
     }
 

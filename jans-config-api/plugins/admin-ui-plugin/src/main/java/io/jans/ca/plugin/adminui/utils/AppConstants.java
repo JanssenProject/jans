@@ -21,6 +21,7 @@ public interface AppConstants {
     public static final String WEBHOOK_ID = "webhookId";
     public static final String INUM = "inum";
     public static final String ADMIN_UI_FEATURE_ID = "featureId";
+    public static final String AUTHORIZATION = "Authorization";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_JSON = "application/json";
 

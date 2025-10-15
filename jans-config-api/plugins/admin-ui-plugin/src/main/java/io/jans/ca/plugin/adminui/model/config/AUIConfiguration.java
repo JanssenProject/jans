@@ -43,6 +43,8 @@ public class AUIConfiguration {
     private Boolean allowSmtpKeystoreEdit;
     private List<KeyValuePair> additionalParameters;
     private CedarlingLogType cedarlingLogType;
+    private String auiPolicyStoreUrl;
+    private Boolean useRemotePolicyStore = Boolean.FALSE;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -290,5 +292,21 @@ public class AUIConfiguration {
 
     public void setCedarlingLogType(CedarlingLogType cedarlingLogType) {
         this.cedarlingLogType = cedarlingLogType;
+    }
+
+    public String getAuiPolicyStoreUrl() {
+        return auiPolicyStoreUrl;
+    }
+
+    public void setAuiPolicyStoreUrl(String auiPolicyStoreUrl) {
+        this.auiPolicyStoreUrl = auiPolicyStoreUrl;
+    }
+
+    public Boolean getUseRemotePolicyStore() {
+        return useRemotePolicyStore;
+    }
+
+    public void setUseRemotePolicyStore(Boolean useRemotePolicyStore) {
+        this.useRemotePolicyStore = useRemotePolicyStore;
     }
 }

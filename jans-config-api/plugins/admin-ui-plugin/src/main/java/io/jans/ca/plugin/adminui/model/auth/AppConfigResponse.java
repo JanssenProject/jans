@@ -37,6 +37,10 @@ public class AppConfigResponse {
     private List<KeyValuePair> additionalParameters;
     @Schema(description = "Cedarling log type", accessMode = Schema.AccessMode.READ_WRITE)
     private CedarlingLogType cedarlingLogType;
+    @Schema(description = "Admin UI Policy Store URL", accessMode = Schema.AccessMode.READ_WRITE)
+    private String auiPolicyStoreUrl;
+    @Schema(description = "Use remote Policy Store. If set to false then Admin UI will use default Policy Store.", accessMode = Schema.AccessMode.READ_WRITE)
+    private Boolean useRemotePolicyStore ;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -148,5 +152,21 @@ public class AppConfigResponse {
 
     public void setCedarlingLogType(CedarlingLogType cedarlingLogType) {
         this.cedarlingLogType = cedarlingLogType;
+    }
+
+    public String getAuiPolicyStoreUrl() {
+        return auiPolicyStoreUrl;
+    }
+
+    public void setAuiPolicyStoreUrl(String auiPolicyStoreUrl) {
+        this.auiPolicyStoreUrl = auiPolicyStoreUrl;
+    }
+
+    public Boolean getUseRemotePolicyStore() {
+        return useRemotePolicyStore;
+    }
+
+    public void setUseRemotePolicyStore(Boolean useRemotePolicyStore) {
+        this.useRemotePolicyStore = useRemotePolicyStore;
     }
 }

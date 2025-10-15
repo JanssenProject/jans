@@ -1,5 +1,8 @@
 package io.jans.ca.plugin.adminui.service.adminui;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.jans.as.model.config.adminui.AdminConf;
@@ -8,19 +11,26 @@ import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
 import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
 import io.jans.ca.plugin.adminui.model.auth.AppConfigResponse;
+import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
+import io.jans.ca.plugin.adminui.utils.ClientFactory;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.orm.PersistenceEntryManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,6 +65,8 @@ public class AdminUIService {
             appConfigResponse.setAllowSmtpKeystoreEdit(auiConfiguration.getAllowSmtpKeystoreEdit());
             appConfigResponse.setAdditionalParameters(auiConfiguration.getAdditionalParameters());
             appConfigResponse.setCedarlingLogType(auiConfiguration.getCedarlingLogType());
+            appConfigResponse.setAuiPolicyStoreUrl(auiConfiguration.getAuiPolicyStoreUrl());
+            appConfigResponse.setUseRemotePolicyStore(auiConfiguration.getUseRemotePolicyStore());
 
             return appConfigResponse;
         } catch (Exception e) {
@@ -86,11 +98,59 @@ public class AdminUIService {
                 adminConf.getMainSettings().getUiConfig().setCedarlingLogType(appConfigResponse.getCedarlingLogType().getValue());
                 auiConfigurationService.getAUIConfiguration().setCedarlingLogType(appConfigResponse.getCedarlingLogType());
             }
+            if (appConfigResponse.getAuiPolicyStoreUrl() != null) {
+                adminConf.getMainSettings().getUiConfig().setAuiPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
+                auiConfigurationService.getAUIConfiguration().setAuiPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
+            }
+            if (appConfigResponse.getUseRemotePolicyStore() != null) {
+                adminConf.getMainSettings().getUiConfig().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
+                auiConfigurationService.getAUIConfiguration().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
+            }
             entryManager.merge(adminConf);
             return getAdminUIEditableConfiguration();
         } catch (Exception e) {
             log.error(ErrorResponse.SAVE_ADMIUI_CONFIG_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.SAVE_ADMIUI_CONFIG_ERROR.getDescription());
+        }
+    }
+
+    public GenericResponse getPolicyStore() throws ApplicationException {
+        try {
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            if(auiConfiguration.getUseRemotePolicyStore() && !Strings.isNullOrEmpty(auiConfiguration.getAuiPolicyStoreUrl())) {
+
+                Invocation.Builder request = ClientFactory.instance().getClientBuilder(auiConfiguration.getAuiPolicyStoreUrl());
+                request.header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
+                Response response = request.get();
+
+                log.info("policy store request status code: {}", response.getStatus());
+
+                ObjectMapper mapper = new ObjectMapper();
+                if (response.getStatus() == 200) {
+                    JsonObject entity = response.readEntity(JsonObject.class);
+                    JsonNode jsonNode = mapper.createObjectNode();
+                    return CommonUtils.createGenericResponse(true, 200, "Policy store fetched.", jsonNode);
+                }
+                //getting error
+                String jsonData = response.readEntity(String.class);
+                log.error("{}: {}", ErrorResponse.RETRIEVE_POLICY_STORE_ERROR, jsonData);
+                return CommonUtils.createGenericResponse(false, response.getStatus(), jsonData);
+            } else {
+                Path path = Paths.get("custom/config/admin-ui-policy-store.json");
+                log.error("Absolute path: " + path.toAbsolutePath());
+                // Create ObjectMapper instance
+                ObjectMapper objectMapper = new ObjectMapper();
+                // Read file content as bytes
+                byte[] jsonBytes = Files.readAllBytes(path);
+                // Parse bytes into JsonNode
+                JsonNode policyStoreJsonNode = objectMapper.readTree(jsonBytes);
+                // Print or use the JsonNode
+                log.error(policyStoreJsonNode.toPrettyString());
+                return CommonUtils.createGenericResponse(true, 200, "Policy store fetched.", policyStoreJsonNode);
+            }
+        } catch (Exception e) {
+            log.error(ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription(), e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription());
         }
     }
 
