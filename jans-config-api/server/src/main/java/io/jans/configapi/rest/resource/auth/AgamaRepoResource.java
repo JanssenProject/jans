@@ -77,7 +77,7 @@ public class AgamaRepoResource extends ConfigBaseResource {
                     ApiAccessConstants.AGAMA_REPO_READ_ACCESS, ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Agama project", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class, format = "binary"))),
+            @ApiResponse(responseCode = "200", description = "Agama project", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class, format = "binary"))),
             @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
