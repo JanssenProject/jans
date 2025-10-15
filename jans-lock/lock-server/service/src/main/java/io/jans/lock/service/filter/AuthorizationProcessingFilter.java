@@ -4,10 +4,12 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 
+import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.config.LockProtectionMode;
+import io.jans.lock.service.filter.openid.OpenIdProtectionService;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -28,9 +30,12 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 
 	@Inject
 	private Logger log;
-	
+
 	@Inject
-	private ProtectionService protectionService;
+	private AppConfiguration appConfiguration;
+
+	@Inject
+	private OpenIdProtection protectionService;
 
 	@Context
 	private HttpHeaders httpHeaders;
@@ -53,14 +58,15 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 		String path = requestContext.getUriInfo().getPath();
 		log.debug("REST call to '{}' intercepted", path);
-		Response authorizationResponse = protectionService.processAuthorization(httpHeaders, resourceInfo);
-		if (authorizationResponse == null) {
-			// Actual processing of request proceeds
-			log.debug("Authorization passed");
-		}
 
-		if (authorizationResponse != null) {
-			requestContext.abortWith(authorizationResponse);
+		if (LockProtectionMode.OAUTH.equals(appConfiguration.getProtectionMode()) || (appConfiguration.getProtectionMode() == null)) {
+			Response authorizationResponse = protectionService.processAuthorization(httpHeaders, resourceInfo);
+			if (authorizationResponse == null) {
+				// Actual processing of request proceeds
+				log.debug("Authorization passed");
+			} else {
+				requestContext.abortWith(authorizationResponse);
+			}
 		}
 	}
 

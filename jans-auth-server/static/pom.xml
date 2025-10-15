@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jans-auth-static</artifactId>
-	<version>0.0.0-nightly</version>
+	<version>1.13.0</version>
 	<packaging>jar</packaging>
 
 	<name>jans-auth-static</name>
@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>0.0.0-nightly</version>
+		<version>1.13.0</version>
 	</parent>
 
 	<properties>

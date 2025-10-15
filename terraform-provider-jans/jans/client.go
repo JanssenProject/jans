@@ -1,58 +1,58 @@
 package jans
 
 import (
-	"bytes"
-	"context"
-	"crypto/tls"
-	"encoding/json"
-	"fmt"
-	"io"
-	"mime/multipart"
-	"reflect"
-	"sort"
+        "bytes"
+        "context"
+        "crypto/tls"
+        "encoding/json"
+        "fmt"
+        "io"
+        "mime/multipart"
+        "reflect"
+        "sort"
 
-	"net/http"
-	"net/http/httputil"
-	"net/textproto"
-	"net/url"
+        "net/http"
+        "net/http/httputil"
+        "net/textproto"
+        "net/url"
 )
 
 var (
-	ErrorBadRequest = fmt.Errorf("bad request")
-	ErrorNotFound   = fmt.Errorf("not found")
+        ErrorBadRequest = fmt.Errorf("bad request")
+        ErrorNotFound   = fmt.Errorf("not found")
 )
 
 // requestParams is used as a conveneince struct to pass parameters to the
 // request method.
 type requestParams struct {
-	method      string
-	path        string
-	accept      string
-	contentType string
-	token       string
-	payload     []byte
-	resp        any
-	queryParams map[string]string
+        method      string
+        path        string
+        accept      string
+        contentType string
+        token       string
+        payload     []byte
+        resp        any
+        queryParams map[string]string
 }
 
 // Client is the client via which we can interact with all
 // necessary Jans APIs.
 type Client struct {
-	host          string
-	clientId      string
-	clientSecret  string
-	skipTLSVerify bool
+        host          string
+        clientId      string
+        clientSecret  string
+        skipTLSVerify bool
 }
 
 // NewClient creates a new client, which will connect to a server
 // at the provided host, using the given credentials.
 func NewClient(host, clientId, clientSecret string) (*Client, error) {
-	return &Client{
-		host:          host,
-		clientId:      clientId,
-		clientSecret:  clientSecret,
-		skipTLSVerify: false,
-	}, nil
+        return &Client{
+                host:          host,
+                clientId:      clientId,
+                clientSecret:  clientSecret,
+                skipTLSVerify: false,
+        }, nil
 }
 
 // NewInsecureClient creates a new client, which will connect to a server
@@ -60,84 +60,129 @@ func NewClient(host, clientId, clientSecret string) (*Client, error) {
 // this client will skip TLS verification. This should only be used for
 // development and testing purposes.
 func NewInsecureClient(host, clientId, clientSecret string) (*Client, error) {
-	return &Client{
-		host:          host,
-		clientId:      clientId,
-		clientSecret:  clientSecret,
-		skipTLSVerify: true,
-	}, nil
+        return &Client{
+                host:          host,
+                clientId:      clientId,
+                clientSecret:  clientSecret,
+                skipTLSVerify: true,
+        }, nil
 }
 
 // getToken performs a POST request to the token endpoint for the given scope.
 // The call uses the credentials stored in the client.
 func (c *Client) getToken(ctx context.Context, scope string) (string, error) {
 
-	if c.host == "" {
-		return "", fmt.Errorf("host is not set")
-	}
+        if c.host == "" {
+                return "", fmt.Errorf("host is not set")
+        }
 
-	urlString := fmt.Sprintf("%s/jans-auth/restv1/token", c.host)
+        urlString := fmt.Sprintf("%s/jans-auth/restv1/token", c.host)
 
-	params := url.Values{}
-	params.Add("grant_type", "client_credentials")
-	params.Add("scope", scope)
+        params := url.Values{}
+        params.Add("grant_type", "client_credentials")
+        params.Add("scope", scope)
 
-	req, err := http.NewRequestWithContext(ctx, "POST", urlString, bytes.NewReader([]byte(params.Encode())))
-	if err != nil {
-		return "", fmt.Errorf("could not create request: %w", err)
-	}
+        req, err := http.NewRequestWithContext(ctx, "POST", urlString, bytes.NewReader([]byte(params.Encode())))
+        if err != nil {
+                return "", fmt.Errorf("could not create request: %w", err)
+        }
 
-	req.SetBasicAuth(c.clientId, c.clientSecret)
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+        req.SetBasicAuth(c.clientId, c.clientSecret)
+        req.Header.Add("Accept", "application/json")
+        req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	tr := &http.Transport{}
-	if c.skipTLSVerify {
-		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	}
-	client := &http.Client{Transport: tr}
+        tr := &http.Transport{}
+        if c.skipTLSVerify {
+                tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+        }
+        client := &http.Client{Transport: tr}
 
-	// b, _ := httputil.DumpRequest(req, true)
-	// tflog.Info(ctx, "Request", map[string]any{"req": string(b)})
-	// fmt.Printf("Request:\n%s\n", string(b))
+        // b, _ := httputil.DumpRequest(req, true)
+        // tflog.Info(ctx, "Request", map[string]any{"req": string(b)})
+        // fmt.Printf("Request:\n%s\n", string(b))
 
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("could not perform request: %w", err)
-	}
+        resp, err := client.Do(req)
+        if err != nil {
+                return "", fmt.Errorf("could not perform request: %w", err)
+        }
 
-	// b, _ = httputil.DumpResponse(resp, true)
-	// tflog.Info(ctx, "Response", map[string]any{"resp": string(b)})
-	// fmt.Printf("Response:\n%s\n", string(b))
+        // b, _ = httputil.DumpResponse(resp, true)
+        // tflog.Info(ctx, "Response", map[string]any{"resp": string(b)})
+        // fmt.Printf("Response:\n%s\n", string(b))
 
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("could not read response body: %w", err)
-	}
+        data, err := io.ReadAll(resp.Body)
+        if err != nil {
+                return "", fmt.Errorf("could not read response body: %w", err)
+        }
 
-	if resp.StatusCode != 200 {
-		// fmt.Printf("\n\nResponse data:\n%s\n\n", string(data))
-		return "", fmt.Errorf("did not get correct response code: %v", resp.Status)
-	}
+        if resp.StatusCode != 200 {
+                // fmt.Printf("\n\nResponse data:\n%s\n\n", string(data))
+                return "", fmt.Errorf("did not get correct response code: %v", resp.Status)
+        }
 
-	type tokenResponse struct {
-		AccessToken string `json:"access_token"`
-		Scope       string `json:"scope"`
-		TokenType   string `json:"token_type"`
-		ExpiresIn   int    `json:"expires_in"`
-	}
+        type tokenResponse struct {
+                AccessToken string `json:"access_token"`
+                Scope       string `json:"scope"`
+                TokenType   string `json:"token_type"`
+                ExpiresIn   int    `json:"expires_in"`
+        }
 
-	token := &tokenResponse{}
+        token := &tokenResponse{}
 
-	if err = json.Unmarshal(data, token); err != nil {
-		return "", fmt.Errorf("could not unmarshal response: %w", err)
-	}
+        if err = json.Unmarshal(data, token); err != nil {
+                return "", fmt.Errorf("could not unmarshal response: %w", err)
+        }
 
-	if token.Scope != scope {
-		return "", fmt.Errorf("scope not granted: %s", scope)
-	}
+        // Check if all requested scopes are present in the granted scopes
+        // OAuth allows servers to return scopes in any order
+        requestedScopes := splitScopes(scope)
+        grantedScopes := splitScopes(token.Scope)
+        
+        for _, requested := range requestedScopes {
+                found := false
+                for _, granted := range grantedScopes {
+                        if requested == granted {
+                                found = true
+                                break
+                        }
+                }
+                if !found {
+                        return "", fmt.Errorf("scope not granted: required '%s', got '%s'", scope, token.Scope)
+                }
+        }
 
-	return token.AccessToken, nil
+        return token.AccessToken, nil
+}
+
+// splitScopes splits a space-separated scope string into individual scopes
+func splitScopes(scope string) []string {
+        scopes := []string{}
+        for _, s := range splitBySpace(scope) {
+                if s != "" {
+                        scopes = append(scopes, s)
+                }
+        }
+        return scopes
+}
+
+// splitBySpace splits a string by spaces
+func splitBySpace(s string) []string {
+        result := []string{}
+        current := ""
+        for _, c := range s {
+                if c == ' ' {
+                        if current != "" {
+                                result = append(result, current)
+                                current = ""
+                        }
+                } else {
+                        current += string(c)
+                }
+        }
+        if current != "" {
+                result = append(result, current)
+        }
+        return result
 }
 
 // get performs an HTTP GET request to the given path, using the given token.
@@ -145,20 +190,20 @@ func (c *Client) getToken(ctx context.Context, scope string) (string, error) {
 // has to be of a pointer type.
 func (c *Client) get(ctx context.Context, path, token string, resp any, queryParams ...map[string]string) error {
 
-	params := requestParams{
-		method:      "GET",
-		path:        path,
-		contentType: "application/json",
-		accept:      "application/json",
-		token:       token,
-		resp:        resp,
-	}
+        params := requestParams{
+                method:      "GET",
+                path:        path,
+                contentType: "application/json",
+                accept:      "application/json",
+                token:       token,
+                resp:        resp,
+        }
 
-	if len(queryParams) > 0 {
-		params.queryParams = queryParams[0]
-	}
+        if len(queryParams) > 0 {
+                params.queryParams = queryParams[0]
+        }
 
-	return c.request(ctx, params)
+        return c.request(ctx, params)
 }
 
 // get performs an HTTP GET request to the given path, using the given token.
@@ -166,37 +211,37 @@ func (c *Client) get(ctx context.Context, path, token string, resp any, queryPar
 // has to be of a pointer type.
 func (c *Client) getScim(ctx context.Context, path, token string, resp any) error {
 
-	params := requestParams{
-		method:      "GET",
-		path:        path,
-		contentType: "application/json",
-		accept:      "application/scim+json",
-		token:       token,
-		resp:        resp,
-	}
+        params := requestParams{
+                method:      "GET",
+                path:        path,
+                contentType: "application/json",
+                accept:      "application/scim+json",
+                token:       token,
+                resp:        resp,
+        }
 
-	return c.request(ctx, params)
+        return c.request(ctx, params)
 }
 
 // patch performs an HTTP PATCH request to the given path, using the given
 // token and the provided list of patch requests.
 func (c *Client) patch(ctx context.Context, path, token string, req []PatchRequest) error {
 
-	payload, err := json.Marshal(req)
-	if err != nil {
-		return fmt.Errorf("could not marshal request: %w", err)
-	}
+        payload, err := json.Marshal(req)
+        if err != nil {
+                return fmt.Errorf("could not marshal request: %w", err)
+        }
 
-	params := requestParams{
-		method:      "PATCH",
-		path:        path,
-		contentType: "application/json-patch+json",
-		accept:      "application/json",
-		token:       token,
-		payload:     payload,
-	}
+        params := requestParams{
+                method:      "PATCH",
+                path:        path,
+                contentType: "application/json-patch+json",
+                accept:      "application/json",
+                token:       token,
+                payload:     payload,
+        }
 
-	return c.request(ctx, params)
+        return c.request(ctx, params)
 }
 
 // put performs an HTTP PUT request to the given path, using the given token
@@ -205,22 +250,22 @@ func (c *Client) patch(ctx context.Context, path, token string, req []PatchReque
 // a pointer type.
 func (c *Client) put(ctx context.Context, path, token string, req, resp any) error {
 
-	payload, err := json.Marshal(req)
-	if err != nil {
-		return fmt.Errorf("could not marshal request: %w", err)
-	}
+        payload, err := json.Marshal(req)
+        if err != nil {
+                return fmt.Errorf("could not marshal request: %w", err)
+        }
 
-	params := requestParams{
-		method:      "PUT",
-		path:        path,
-		contentType: "application/json",
-		accept:      "application/json",
-		token:       token,
-		payload:     payload,
-		resp:        resp,
-	}
+        params := requestParams{
+                method:      "PUT",
+                path:        path,
+                contentType: "application/json",
+                accept:      "application/json",
+                token:       token,
+                payload:     payload,
+                resp:        resp,
+        }
 
-	return c.request(ctx, params)
+        return c.request(ctx, params)
 }
 
 // putText performs an HTTP PUT request to the given path, using the given token
@@ -229,17 +274,17 @@ func (c *Client) put(ctx context.Context, path, token string, req, resp any) err
 // a pointer type. Unlike put, putText uses the "text/plain" content type.
 func (c *Client) putText(ctx context.Context, path, token, req string, resp any) error {
 
-	params := requestParams{
-		method:      "PUT",
-		path:        path,
-		contentType: "text/plain",
-		accept:      "application/json",
-		token:       token,
-		payload:     []byte(req),
-		resp:        resp,
-	}
+        params := requestParams{
+                method:      "PUT",
+                path:        path,
+                contentType: "text/plain",
+                accept:      "application/json",
+                token:       token,
+                payload:     []byte(req),
+                resp:        resp,
+        }
 
-	return c.request(ctx, params)
+        return c.request(ctx, params)
 }
 
 // post performs an HTTP POST request to the given path, using the given token
@@ -248,134 +293,134 @@ func (c *Client) putText(ctx context.Context, path, token, req string, resp any)
 // a pointer type.
 func (c *Client) post(ctx context.Context, path, token string, req, resp any) error {
 
-	payload, err := json.Marshal(req)
-	if err != nil {
-		return fmt.Errorf("could not marshal request: %w", err)
-	}
+        payload, err := json.Marshal(req)
+        if err != nil {
+                return fmt.Errorf("could not marshal request: %w", err)
+        }
 
-	params := requestParams{
-		method:      "POST",
-		path:        path,
-		contentType: "application/json",
-		accept:      "application/json",
-		token:       token,
-		payload:     payload,
-		resp:        resp,
-	}
+        params := requestParams{
+                method:      "POST",
+                path:        path,
+                contentType: "application/json",
+                accept:      "application/json",
+                token:       token,
+                payload:     payload,
+                resp:        resp,
+        }
 
-	return c.request(ctx, params)
+        return c.request(ctx, params)
 }
 
 type FormField struct {
-	Typ  string
-	Data io.Reader
+        Typ  string
+        Data io.Reader
 }
 
 type requestParamsOptions func(*requestParams) error
 
 func (c *Client) newParams(method, path string, resp any, options ...requestParamsOptions) (*requestParams, error) {
-	params := &requestParams{
-		method: method,
-		accept: "application/json",
-		path:   path,
-		resp:   resp,
-	}
+        params := &requestParams{
+                method: method,
+                accept: "application/json",
+                path:   path,
+                resp:   resp,
+        }
 
-	for _, o := range options {
-		if err := o(params); err != nil {
-			return nil, err
-		}
-	}
+        for _, o := range options {
+                if err := o(params); err != nil {
+                        return nil, err
+                }
+        }
 
-	return params, nil
+        return params, nil
 }
 
 func (c *Client) withToken(ctx context.Context, url string) requestParamsOptions {
-	return func(params *requestParams) (err error) {
-		params.token, err = c.getToken(ctx, url)
-		return
-	}
+        return func(params *requestParams) (err error) {
+                params.token, err = c.getToken(ctx, url)
+                return
+        }
 }
 
 func (c *Client) withFormData(req map[string]FormField) requestParamsOptions {
-	return func(params *requestParams) (err error) {
-		var b bytes.Buffer
+        return func(params *requestParams) (err error) {
+                var b bytes.Buffer
 
-		w := multipart.NewWriter(&b)
-		defer w.Close()
+                w := multipart.NewWriter(&b)
+                defer w.Close()
 
-		for key, r := range req {
-			var fw io.Writer
+                for key, r := range req {
+                        var fw io.Writer
 
-			switch r.Typ {
-			case "file":
-				if fw, err = w.CreateFormFile(key, "file"); err != nil {
-					return
-				}
-			case "json":
-				h := make(textproto.MIMEHeader)
-				h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, key))
-				h.Set("Content-Type", "application/json")
-				if fw, err = w.CreatePart(h); err != nil {
-					return
-				}
-			}
+                        switch r.Typ {
+                        case "file":
+                                if fw, err = w.CreateFormFile(key, "file"); err != nil {
+                                        return
+                                }
+                        case "json":
+                                h := make(textproto.MIMEHeader)
+                                h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, key))
+                                h.Set("Content-Type", "application/json")
+                                if fw, err = w.CreatePart(h); err != nil {
+                                        return
+                                }
+                        }
 
-			if _, err = io.Copy(fw, r.Data); err != nil {
-				return
-			}
-		}
+                        if _, err = io.Copy(fw, r.Data); err != nil {
+                                return
+                        }
+                }
 
-		w.Close()
+                w.Close()
 
-		params.contentType = w.FormDataContentType()
-		params.payload = b.Bytes()
+                params.contentType = w.FormDataContentType()
+                params.payload = b.Bytes()
 
-		return nil
-	}
+                return nil
+        }
 }
 
 func (c *Client) postFormData(ctx context.Context, path, token string, req map[string]FormField, resp any) (err error) {
-	var b bytes.Buffer
+        var b bytes.Buffer
 
-	w := multipart.NewWriter(&b)
-	defer w.Close()
+        w := multipart.NewWriter(&b)
+        defer w.Close()
 
-	for key, r := range req {
-		var fw io.Writer
+        for key, r := range req {
+                var fw io.Writer
 
-		switch r.Typ {
-		case "file":
-			if fw, err = w.CreateFormFile(key, "file"); err != nil {
-				return
-			}
-		case "json":
-			h := make(textproto.MIMEHeader)
-			h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, key))
-			h.Set("Content-Type", "application/json")
-			if fw, err = w.CreatePart(h); err != nil {
-				return
-			}
-		}
+                switch r.Typ {
+                case "file":
+                        if fw, err = w.CreateFormFile(key, "file"); err != nil {
+                                return
+                        }
+                case "json":
+                        h := make(textproto.MIMEHeader)
+                        h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, key))
+                        h.Set("Content-Type", "application/json")
+                        if fw, err = w.CreatePart(h); err != nil {
+                                return
+                        }
+                }
 
-		if _, err = io.Copy(fw, r.Data); err != nil {
-			return
-		}
-	}
+                if _, err = io.Copy(fw, r.Data); err != nil {
+                        return
+                }
+        }
 
-	w.Close()
+        w.Close()
 
-	params := requestParams{
-		method:      "POST",
-		path:        path,
-		contentType: w.FormDataContentType(),
-		accept:      "application/json",
-		token:       token,
-		payload:     b.Bytes(),
-		resp:        resp,
-	}
+        params := requestParams{
+                method:      "POST",
+                path:        path,
+                contentType: w.FormDataContentType(),
+                accept:      "application/json",
+                token:       token,
+                payload:     b.Bytes(),
+                resp:        resp,
+        }
 
-	return c.request(ctx, params)
+        return c.request(ctx, params)
 }
 
 // post performs an HTTP POST request to the given path, using the given token
@@ -384,53 +429,53 @@ func (c *Client) postFormData(ctx context.Context, path, token string, req map[s
 // a pointer type.
 func (c *Client) postZipFile(ctx context.Context, path, token string, req []byte, resp any) error {
 
-	params := requestParams{
-		method:      "POST",
-		path:        path,
-		contentType: "application/zip",
-		accept:      "application/json",
-		token:       token,
-		payload:     req,
-		resp:        resp,
-	}
+        params := requestParams{
+                method:      "POST",
+                path:        path,
+                contentType: "application/zip",
+                accept:      "application/json",
+                token:       token,
+                payload:     req,
+                resp:        resp,
+        }
 
-	return c.request(ctx, params)
+        return c.request(ctx, params)
 }
 
 // delete performs an HTTP DELETE request to the given path, using the given
 // token.
 func (c *Client) delete(ctx context.Context, path, token string) error {
 
-	params := requestParams{
-		method:      "DELETE",
-		path:        path,
-		contentType: "application/json",
-		accept:      "application/json",
-		token:       token,
-	}
+        params := requestParams{
+                method:      "DELETE",
+                path:        path,
+                contentType: "application/json",
+                accept:      "application/json",
+                token:       token,
+        }
 
-	return c.request(ctx, params)
+        return c.request(ctx, params)
 }
 
 // delete performs an HTTP DELETE request to the given path, using the given
 // token.
 func (c *Client) deleteEntity(ctx context.Context, path, token string, entity any) error {
 
-	payload, err := json.Marshal(entity)
-	if err != nil {
-		return fmt.Errorf("could not marshal request: %w", err)
-	}
+        payload, err := json.Marshal(entity)
+        if err != nil {
+                return fmt.Errorf("could not marshal request: %w", err)
+        }
 
-	req := requestParams{
-		method:      "DELETE",
-		path:        path,
-		contentType: "application/json",
-		accept:      "application/json",
-		token:       token,
-		payload:     payload,
-	}
+        req := requestParams{
+                method:      "DELETE",
+                path:        path,
+                contentType: "application/json",
+                accept:      "application/json",
+                token:       token,
+                payload:     payload,
+        }
 
-	return c.request(ctx, req)
+        return c.request(ctx, req)
 }
 
 // request performs an HTTP request of the requested method to the given path.
@@ -440,103 +485,103 @@ func (c *Client) deleteEntity(ctx context.Context, path, token string, entity an
 // has to be of a pointer type.
 func (c *Client) request(ctx context.Context, params requestParams) error {
 
-	if c.host == "" {
-		return fmt.Errorf("host is not set")
-	}
+        if c.host == "" {
+                return fmt.Errorf("host is not set")
+        }
 
-	if params.path == "" {
-		return fmt.Errorf("no request path provided")
-	}
+        if params.path == "" {
+                return fmt.Errorf("no request path provided")
+        }
 
-	url := fmt.Sprintf("%s%s", c.host, params.path)
+        url := fmt.Sprintf("%s%s", c.host, params.path)
 
-	// fmt.Printf("URL: %s %s\n", params.method, url)
-	// fmt.Printf("Payload:\n%s\n", string(params.payload))
+        // fmt.Printf("URL: %s %s\n", params.method, url)
+        // fmt.Printf("Payload:\n%s\n", string(params.payload))
 
-	req, err := http.NewRequestWithContext(ctx, params.method, url, bytes.NewReader(params.payload))
-	if err != nil {
-		return fmt.Errorf("could not create request: %w", err)
-	}
+        req, err := http.NewRequestWithContext(ctx, params.method, url, bytes.NewReader(params.payload))
+        if err != nil {
+                return fmt.Errorf("could not create request: %w", err)
+        }
 
-	if len(params.queryParams) != 0 {
-		q := req.URL.Query()
-		for k, v := range params.queryParams {
-			q.Add(k, v)
-		}
-		req.URL.RawQuery = q.Encode()
-	}
+        if len(params.queryParams) != 0 {
+                q := req.URL.Query()
+                for k, v := range params.queryParams {
+                        q.Add(k, v)
+                }
+                req.URL.RawQuery = q.Encode()
+        }
 
-	req.Header.Add("Accept", params.accept)
-	req.Header.Add("Content-Type", params.contentType)
-	req.Header.Add("jans-client", "infrastructure-as-code-tool")
-	req.Header.Add("user-inum", c.clientId)
+        req.Header.Add("Accept", params.accept)
+        req.Header.Add("Content-Type", params.contentType)
+        req.Header.Add("jans-client", "infrastructure-as-code-tool")
+        req.Header.Add("user-inum", c.clientId)
 
-	if params.token != "" {
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", params.token))
-	}
+        if params.token != "" {
+                req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", params.token))
+        }
 
-	tr := &http.Transport{}
-	if c.skipTLSVerify {
-		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	}
-	client := &http.Client{Transport: tr}
+        tr := &http.Transport{}
+        if c.skipTLSVerify {
+                tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+        }
+        client := &http.Client{Transport: tr}
 
-	b, _ := httputil.DumpRequest(req, true)
-	// tflog.Info(ctx, "Request", map[string]any{"req": string(b)})
-	fmt.Printf("Request:\n%s\n", string(b))
+        b, _ := httputil.DumpRequest(req, true)
+        // tflog.Info(ctx, "Request", map[string]any{"req": string(b)})
+        fmt.Printf("Request:\n%s\n", string(b))
 
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("could not perform request: %w", err)
-	}
+        resp, err := client.Do(req)
+        if err != nil {
+                return fmt.Errorf("could not perform request: %w", err)
+        }
 
-	b, _ = httputil.DumpResponse(resp, true)
-	// tflog.Info(ctx, "Response", map[string]any{"resp": string(b)})
-	fmt.Printf("Response:\n%s\n", string(b))
+        b, _ = httputil.DumpResponse(resp, true)
+        // tflog.Info(ctx, "Response", map[string]any{"resp": string(b)})
+        fmt.Printf("Response:\n%s\n", string(b))
 
-	if resp.StatusCode == 400 {
-		// try to read error message
-		data, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return ErrorBadRequest
-		}
+        if resp.StatusCode == 400 {
+                // try to read error message
+                data, err := io.ReadAll(resp.Body)
+                if err != nil {
+                        return ErrorBadRequest
+                }
 
-		return fmt.Errorf("%w: %v", ErrorBadRequest, string(data))
-	}
+                return fmt.Errorf("%w: %v", ErrorBadRequest, string(data))
+        }
 
-	if resp.StatusCode == 404 {
-		return ErrorNotFound
-	}
+        if resp.StatusCode == 404 {
+                return ErrorNotFound
+        }
 
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return fmt.Errorf("did not get correct response code: %v", resp.Status)
-	}
+        if resp.StatusCode < 200 || resp.StatusCode > 299 {
+                return fmt.Errorf("did not get correct response code: %v", resp.Status)
+        }
 
-	if params.resp == nil {
-		// fmt.Printf("Response:\n%s\n", "<empty>")
-		return nil
-	}
+        if params.resp == nil {
+                // fmt.Printf("Response:\n%s\n", "<empty>")
+                return nil
+        }
 
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("could not read response body: %w", err)
-	}
+        data, err := io.ReadAll(resp.Body)
+        if err != nil {
+                return fmt.Errorf("could not read response body: %w", err)
+        }
 
-	// fmt.Printf("Response:\n%s\n", string(data))
+        // fmt.Printf("Response:\n%s\n", string(data))
 
-	if len(data) == 0 || params.resp == nil {
-		return nil
-	}
+        if len(data) == 0 || params.resp == nil {
+                return nil
+        }
 
-	// if json.Valid(data) {
-	// 	return fmt.Errorf("response is not valid json")
-	// }
+        // if json.Valid(data) {
+        //      return fmt.Errorf("response is not valid json")
+        // }
 
-	if err = json.Unmarshal(data, params.resp); err != nil {
-		return fmt.Errorf("could not unmarshal response: %w", err)
-	}
+        if err = json.Unmarshal(data, params.resp); err != nil {
+                return fmt.Errorf("could not unmarshal response: %w", err)
+        }
 
-	return nil
+        return nil
 }
 
 // Since some arrays in the JSON we get from the server are unsorted,
@@ -545,54 +590,54 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
 // diverging plans.
 func sortArrays(entity any) {
 
-	if reflect.ValueOf(entity).Kind() != reflect.Ptr {
-		panic("entity is not a pointer")
-	}
+        if reflect.ValueOf(entity).Kind() != reflect.Ptr {
+                panic("entity is not a pointer")
+        }
 
-	t := reflect.TypeOf(entity).Elem()
-	v := reflect.ValueOf(entity).Elem()
+        t := reflect.TypeOf(entity).Elem()
+        v := reflect.ValueOf(entity).Elem()
 
-	if t.Kind() == reflect.Slice {
+        if t.Kind() == reflect.Slice {
 
-		if t.Elem().Kind() == reflect.Struct {
+                if t.Elem().Kind() == reflect.Struct {
 
-			// slices of structs are recursively sorted
-			for i := 0; i < v.Len(); i++ {
-				sortArrays(v.Index(i).Addr().Interface())
-			}
+                        // slices of structs are recursively sorted
+                        for i := 0; i < v.Len(); i++ {
+                                sortArrays(v.Index(i).Addr().Interface())
+                        }
 
-		}
+                }
 
-		// all slices are then sorted themselves. We use
-		// the string representation. More complex sorting
-		// can be added here if needed.
-		sort.Slice(v.Interface(), func(i, j int) bool {
-			a := fmt.Sprintf("%v", v.Index(i).Interface())
-			b := fmt.Sprintf("%v", v.Index(j).Interface())
-			return a < b
-		})
+                // all slices are then sorted themselves. We use
+                // the string representation. More complex sorting
+                // can be added here if needed.
+                sort.Slice(v.Interface(), func(i, j int) bool {
+                        a := fmt.Sprintf("%v", v.Index(i).Interface())
+                        b := fmt.Sprintf("%v", v.Index(j).Interface())
+                        return a < b
+                })
 
-		return
-	}
+                return
+        }
 
-	if v.Kind() != reflect.Struct {
-		panic("entity is not a pointer to struct, nor to a slice")
-	}
+        if v.Kind() != reflect.Struct {
+                panic("entity is not a pointer to struct, nor to a slice")
+        }
 
-	// iterate over all fields of the entity
-	for i := 0; i < v.NumField(); i++ {
+        // iterate over all fields of the entity
+        for i := 0; i < v.NumField(); i++ {
 
-		field := v.Field(i)
+                field := v.Field(i)
 
-		// check if the field is an array
-		if field.Kind() == reflect.Slice {
+                // check if the field is an array
+                if field.Kind() == reflect.Slice {
 
-			sort.Slice(field.Interface(), func(i, j int) bool {
-				a := fmt.Sprintf("%v", field.Index(i).Interface())
-				b := fmt.Sprintf("%v", field.Index(j).Interface())
-				return a < b
-			})
-		}
-	}
+                        sort.Slice(field.Interface(), func(i, j int) bool {
+                                a := fmt.Sprintf("%v", field.Index(i).Interface())
+                                b := fmt.Sprintf("%v", field.Index(j).Interface())
+                                return a < b
+                        })
+                }
+        }
 
 }

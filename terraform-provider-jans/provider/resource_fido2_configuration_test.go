@@ -1,97 +1,99 @@
 package provider
 
 import (
-	"context"
-	"errors"
-	"testing"
+        "context"
+        "errors"
+        "testing"
 
-	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/jans/terraform-provider-jans/jans"
+        "github.com/google/go-cmp/cmp"
+        "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+        "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+        "github.com/jans/terraform-provider-jans/jans"
 )
 
 func TestResourceFido2Config_Mapping(t *testing.T) {
 
-	schema := resourceFido2Configuration()
+        schema := resourceFido2Configuration()
 
-	data := schema.Data(nil)
+        data := schema.Data(nil)
 
-	cfg := jans.JansFido2DynConfiguration{
-		Issuer:                      "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info",
-		BaseEndpoint:                "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info/jans-fido2/restv1",
-		UseLocalCache:               true,
-		DisableJdkLogger:            true,
-		LoggingLevel:                "",
-		LoggingLayout:               "text",
-		ExternalLoggerConfiguration: "",
-		MetricReporterEnabled:       true,
-		MetricReporterInterval:      300,
-		MetricReporterKeepDataDays:  15,
-		PersonCustomObjectClassList: []string{"jansCustomPerson", "jansPerson"},
-		Fido2Configuration: jans.Fido2Configuration{
-			AuthenticatorCertsFolder: "/etc/jans/conf/fido2/authenticator_cert",
-			MdsCertsFolder:           "/etc/jans/conf/fido2/mds/cert",
-			MdsTocsFolder:            "/etc/jans/conf/fido2/mds/toc",
-			ServerMetadataFolder:     "/etc/jans/conf/fido2/server_metadata",
-			RequestedParties: []jans.RequestedParties{
-				{
-					Id:      "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info",
-					Origins: []string{"moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info"},
-				},
-			},
-			DebugUserAutoEnrollment:         false,
-			UnfinishedRequestExpiration:     180,
-			AuthenticationHistoryExpiration: 1296000,
-			EnabledFidoAlgorithms:           []string{"RS256", "ES256"},
-		},
-	}
+        cfg := jans.JansFido2DynConfiguration{
+                Issuer:                      "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info",
+                BaseEndpoint:                "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info/jans-fido2/restv1",
+                UseLocalCache:               true,
+                DisableJdkLogger:            true,
+                LoggingLevel:                "",
+                LoggingLayout:               "text",
+                ExternalLoggerConfiguration: "",
+                MetricReporterEnabled:       true,
+                MetricReporterInterval:      300,
+                MetricReporterKeepDataDays:  15,
+                PersonCustomObjectClassList: []string{"jansCustomPerson", "jansPerson"},
+                Fido2Configuration: jans.Fido2Configuration{
+                        AuthenticatorCertsFolder: "/etc/jans/conf/fido2/authenticator_cert",
+                        MdsCertsFolder:           "/etc/jans/conf/fido2/mds/cert",
+                        MdsTocsFolder:            "/etc/jans/conf/fido2/mds/toc",
+                        ServerMetadataFolder:     "/etc/jans/conf/fido2/server_metadata",
+                        RequestedParties: []jans.RequestedParties{
+                                {
+                                        Id:      "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info",
+                                        Origins: []string{"moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info"},
+                                },
+                        },
+                        DebugUserAutoEnrollment:         false,
+                        UnfinishedRequestExpiration:     180,
+                        AuthenticationHistoryExpiration: 1296000,
+                        EnabledFidoAlgorithms:           []string{"RS256", "ES256"},
+                },
+        }
 
-	if err := toSchemaResource(data, cfg); err != nil {
-		t.Fatal(err)
-	}
+        if err := toSchemaResource(data, cfg); err != nil {
+                t.Fatal(err)
+        }
 
-	newCfg := jans.JansFido2DynConfiguration{}
+        newCfg := jans.JansFido2DynConfiguration{}
 
-	patches, err := patchFromResourceData(data, &newCfg)
-	if err != nil {
-		t.Fatal(err)
-	}
+        patches, err := patchFromResourceData(data, &newCfg)
+        if err != nil {
+                t.Fatal(err)
+        }
 
-	if len(patches) != 21 {
-		t.Errorf("Got %d patches, expected 21", len(patches))
-	}
+        // Note: Empty strings and default boolean values don't generate patches
+        // Expected patches: non-empty strings, non-default bools, ints, and arrays
+        if len(patches) != 17 {
+                t.Errorf("Got %d patches, expected 17", len(patches))
+        }
 
-	if err := fromSchemaResource(data, &newCfg); err != nil {
-		t.Fatal(err)
-	}
+        if err := fromSchemaResource(data, &newCfg); err != nil {
+                t.Fatal(err)
+        }
 
-	if diff := cmp.Diff(cfg, newCfg); diff != "" {
-		t.Errorf("Got different configuration after mapping: %s", diff)
-	}
+        if diff := cmp.Diff(cfg, newCfg); diff != "" {
+                t.Errorf("Got different configuration after mapping: %s", diff)
+        }
 
 }
 
 func TestAccResourceFido2Configuration_basic(t *testing.T) {
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccResourceCheckFido2ConfigurationDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config:           testAccResourceFido2ConfigurationConfig_basic(),
-				ResourceName:     "jans_fido2_configuration.global",
-				ImportState:      true,
-				ImportStateId:    "jans_fido2_configuration.jans_fido2_configuration",
-				ImportStateCheck: testAccResourceCheckFido2ConfigurationImport,
-			},
-		},
-	})
+        resource.Test(t, resource.TestCase{
+                PreCheck:     func() { testAccPreCheck(t) },
+                Providers:    testAccProviders,
+                CheckDestroy: testAccResourceCheckFido2ConfigurationDestroy,
+                Steps: []resource.TestStep{
+                        {
+                                Config:           testAccResourceFido2ConfigurationConfig_basic(),
+                                ResourceName:     "jans_fido2_configuration.global",
+                                ImportState:      true,
+                                ImportStateId:    "jans_fido2_configuration.jans_fido2_configuration",
+                                ImportStateCheck: testAccResourceCheckFido2ConfigurationImport,
+                        },
+                },
+        })
 }
 
 func testAccResourceFido2ConfigurationConfig_basic() string {
-	return `
+        return `
 resource "jans_fido2_configuration" "global" {
 }
 `
@@ -99,51 +101,51 @@ resource "jans_fido2_configuration" "global" {
 
 func testAccResourceCheckFido2ConfigurationImport(states []*terraform.InstanceState) error {
 
-	found := false
-	for _, is := range states {
+        found := false
+        for _, is := range states {
 
-		if is.ID != "jans_fido2_configuration" {
-			continue
-		}
+                if is.ID != "jans_fido2_configuration" {
+                        continue
+                }
 
-		found = true
+                found = true
 
-		if err := checkAttribute(is, "clean_service_batch_chunk_size", "10000"); err != nil {
-			return err
-		}
+                if err := checkAttribute(is, "clean_service_batch_chunk_size", "10000"); err != nil {
+                        return err
+                }
 
-		if err := checkAttribute(is, "logging_level", "INFO"); err != nil {
-			return err
-		}
+                if err := checkAttribute(is, "logging_level", "INFO"); err != nil {
+                        return err
+                }
 
-		break
-	}
+                break
+        }
 
-	if !found {
-		return errors.New("resource not found in states")
-	}
+        if !found {
+                return errors.New("resource not found in states")
+        }
 
-	return nil
+        return nil
 }
 
 func testAccResourceCheckFido2ConfigurationDestroy(s *terraform.State) error {
 
-	// since this is a global resource, delete should not have any effect
+        // since this is a global resource, delete should not have any effect
 
-	c := testAccProvider.Meta().(*jans.Client)
+        c := testAccProvider.Meta().(*jans.Client)
 
-	ctx := context.Background()
+        ctx := context.Background()
 
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "jans_fido2_configuration" {
-			continue
-		}
+        for _, rs := range s.RootModule().Resources {
+                if rs.Type != "jans_fido2_configuration" {
+                        continue
+                }
 
-		_, err := c.GetFido2Configuration(ctx)
-		if err != nil {
-			return err
-		}
-	}
+                _, err := c.GetFido2Configuration(ctx)
+                if err != nil {
+                        return err
+                }
+        }
 
-	return nil
+        return nil
 }

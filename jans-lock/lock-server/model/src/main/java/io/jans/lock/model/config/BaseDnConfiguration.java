@@ -19,7 +19,6 @@ package io.jans.lock.model.config;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.enterprise.inject.Vetoed;
-import jakarta.xml.bind.annotation.XmlElement;
 
 /**
  * 

@@ -193,7 +193,7 @@ class Crypto64:
                     Config.templateRenderingDict[extension_script_name] = base64_script_file
 
 
-    def generate_base64_file(self, fn, num_spaces):
+    def generate_base64_file(self, fn, num_spaces=0):
         self.logIt('Loading file %s' % fn)
         plain_file_b64encoded_text = None
         try:

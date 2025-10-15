@@ -92,6 +92,14 @@
       "type": "TEXT"
     }
   },
+  "jansConfPolicy": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    }
+  },
   "jansConfErrors": {
     "mysql": {
       "type": "TEXT"

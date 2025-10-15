@@ -13,11 +13,16 @@ public enum CommonErrorResponseType implements IErrorType {
      * once, or is otherwise malformed.
      */
     INVALID_REQUEST("invalid_request"),
-    
+
     /**
      * Unknown or not found error.
      */
     UNKNOWN_ERROR("unknown_error"),
+
+    /**
+     * Unknown or not found error.
+     */
+    NOT_FOUND_ERROR("not_found_error"),
     ;
 
     private final String paramName;
