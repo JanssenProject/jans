@@ -39,9 +39,7 @@ public class AdminUIResource {
     static final String PERMISSIONS = "/adminUIPermissions";
     static final String PERMISSION_PATH_VARIABLE = "/{adminUIPermission}";
     static final String PERMISSION_CONST = "adminUIPermission";
-    static final String POLICY_STORE = "policyStore";
     static final String ROLE_PERMISSIONS_MAPPING = "/adminUIRolePermissionsMapping";
-    static final String POLICY_STORE_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/security/policyStore.readonly";
     static final String SCOPE_ROLE_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly";
     static final String SCOPE_ROLE_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write";
     static final String SCOPE_ROLE_DELETE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete";
@@ -120,39 +118,6 @@ public class AdminUIResource {
                     .build();
         } catch (Exception e) {
             log.error(ErrorResponse.SAVE_ADMIUI_CONFIG_ERROR.getDescription(), e);
-            return Response
-                    .serverError()
-                    .entity(CommonUtils.createGenericResponse(false, 500, e.getMessage()))
-                    .build();
-        }
-    }
-
-    @Operation(summary = "Get Admin UI policy store", description = "Get Admin UI policy store", operationId = "get-adminui-policy-store", tags = {
-            "Admin UI - Policy Store"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            POLICY_STORE_READ}))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AppConfigResponse.class, description = "Admin UI editable configuration")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
-    @GET
-    @Path(POLICY_STORE)
-    @Produces(MediaType.APPLICATION_JSON)
-    //@ProtectedApi(scopes = {POLICY_STORE_READ}, groupScopes = {POLICY_STORE_READ}, superScopes = {ADMINUI_CONF_READ})
-    public Response getPolicyStore() {
-        try {
-            log.info("Get Admin UI policy store.");
-            GenericResponse response = adminUIService.getPolicyStore();
-            log.info("Policy Store received.");
-            return Response.ok(response).build();
-        } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_ADMIUI_CONFIG_ERROR.getDescription(), e);
-            return Response
-                    .status(e.getErrorCode())
-                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
-                    .build();
-        } catch (Exception e) {
-            log.error(ErrorResponse.GET_ADMIUI_CONFIG_ERROR.getDescription(), e);
             return Response
                     .serverError()
                     .entity(CommonUtils.createGenericResponse(false, 500, e.getMessage()))

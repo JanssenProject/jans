@@ -2,6 +2,7 @@ package io.jans.ca.plugin.adminui.utils;
 
 public interface AppConstants {
     public static final String ADMIN_UI_CONFIG_DN = "ou=admin-ui,ou=configuration,o=jans";
+    public static final String ADMIN_UI_RESOURCE_SCOPES_MAPPING_DN = "ou=adminUIResourceScopesMapping,ou=admin-ui,o=jans";
     public static final String WEBHOOK_DN = "ou=auiWebhooks,ou=admin-ui,o=jans";
     public static final String ADMIN_UI_FEATURES_DN = "ou=auiFeatures,ou=admin-ui,o=jans";
     public static final String ADS_CONFIG_DN = "ou=agama-developer-studio,ou=configuration,o=jans";
@@ -24,6 +25,7 @@ public interface AppConstants {
     public static final String AUTHORIZATION = "Authorization";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String ADMIN_UI_RESOURCE = "resource";
 
     public static final int LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS = 30;
 
