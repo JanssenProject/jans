@@ -74,6 +74,6 @@ For this it is required:
 
 ## Revoke Interception Script
 
-Endpoint can provide custom behavior via implementing Revoke Token interception [script](../../../script-catalog/revoke_token/revoke-token.md).
+Endpoint can provide custom behavior via implementing Revoke Token interception [script](../../developer/scripts/revoke-token.md).
 
 
