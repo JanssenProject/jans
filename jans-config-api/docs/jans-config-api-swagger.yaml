@@ -439,7 +439,7 @@ paths:
                 additionalProperties:
                   type: object
       responses:
-        "202":
+        "200":
           description: Agama project accepted
           content:
             application/json:
@@ -515,7 +515,7 @@ paths:
         "200":
           description: Agama project
           content:
-            application/json:
+            text/plain:
               schema:
                 type: string
                 format: binary
@@ -14915,17 +14915,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
+        userCanView:
+          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanEdit:
+          type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -15835,6 +15835,8 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -15844,8 +15846,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -16697,10 +16697,6 @@ components:
         configOauthEnabled:
           type: boolean
           description: OAuth authentication enable/disable flag. Default value `true`.
-        cedarAuthEnabled:
-          type: boolean
-          description: Cedar OAuth authentication enable/disable flag. Default value
-            `true`.
         disableLoggerTimer:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
@@ -16806,8 +16802,6 @@ components:
           $ref: "#/components/schemas/AuditLogConf"
         dataFormatConversionConf:
           $ref: "#/components/schemas/DataFormatConversionConf"
-        cedarConfig:
-          $ref: "#/components/schemas/CedarConfig"
         plugins:
           type: array
           description: Details of enabled plugins.
@@ -16879,16 +16873,6 @@ components:
           type: string
           description: Date format in audit log file.
       description: Audit Log configuration details.
-    CedarConfig:
-      type: object
-      properties:
-        applicationName:
-          type: string
-          description: Application Name.
-        policyStoreFilename:
-          type: string
-          description: List of attributes that are optional.
-      description: Cedar Configuration for authorization.
     DataFormatConversionConf:
       type: object
       properties:
@@ -17698,9 +17682,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object

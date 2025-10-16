@@ -22,6 +22,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.doc.annotation.DocProperty;
+import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.enterprise.inject.Vetoed;
 
@@ -45,6 +46,14 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "OpenID issuer URL")
     @Schema(description = "OpenID issuer URL")
     private String openIdIssuer;
+
+    @DocProperty(description = "SCIM Protection Mode")
+    @Schema(description = "OpenID issuer URL")
+    private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
+    
+    @DocProperty(description = "Cedarling configuration")
+    @Schema(description = "Cedarling configuration")
+    private CedarlingConfiguration cedarlingConfiguration;
 
     @DocProperty(description = "Active stat enabled")
     @Schema(description = "Active stat enabled")
@@ -146,9 +155,25 @@ public class AppConfiguration implements Configuration {
         this.openIdIssuer = openIdIssuer;
     }
 
-    public boolean isStatEnabled() {
-        return statEnabled;
-    }
+    public LockProtectionMode getProtectionMode() {
+		return protectionMode;
+	}
+
+	public void setProtectionMode(LockProtectionMode protectionMode) {
+		this.protectionMode = protectionMode;
+	}
+
+	public CedarlingConfiguration getCedarlingConfiguration() {
+		return cedarlingConfiguration;
+	}
+
+	public void setCedarlingConfiguration(CedarlingConfiguration cedarlingConfiguration) {
+		this.cedarlingConfiguration = cedarlingConfiguration;
+	}
+
+	public boolean isStatEnabled() {
+		return statEnabled;
+	}
 
     public void setStatEnabled(boolean statEnabled) {
         this.statEnabled = statEnabled;
