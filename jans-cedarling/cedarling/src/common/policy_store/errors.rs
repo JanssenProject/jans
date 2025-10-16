@@ -22,16 +22,27 @@ pub enum PolicyStoreError {
     Archive(#[from] ArchiveError),
 
     /// JSON parsing error
-    #[error("JSON parsing error in {file}: {message}")]
-    JsonParsing { file: String, message: String },
+    #[error("JSON parsing error in '{file}'")]
+    JsonParsing {
+        file: String,
+        #[source]
+        source: serde_json::Error,
+    },
 
     /// YAML parsing error
-    #[error("YAML parsing error in {file}: {message}")]
-    YamlParsing { file: String, message: String },
+    #[error("YAML parsing error in '{file}'")]
+    YamlParsing {
+        file: String,
+        #[source]
+        source: Box<dyn std::error::Error + Send + Sync>,
+    },
 
     /// Cedar parsing error
-    #[error("Cedar parsing error in {file}: {message}")]
-    CedarParsing { file: String, message: String },
+    #[error("Cedar parsing error in '{file}'")]
+    CedarParsing {
+        file: String,
+        message: String, // Cedar errors don't implement std::error::Error
+    },
 
     /// Path not found
     #[error("Path not found: {path}")]
@@ -46,20 +57,32 @@ pub enum PolicyStoreError {
     NotAFile { path: String },
 
     /// Directory read error
-    #[error("Failed to read directory {path}: {message}")]
-    DirectoryReadError { path: String, message: String },
+    #[error("Failed to read directory '{path}'")]
+    DirectoryReadError {
+        path: String,
+        #[source]
+        source: std::io::Error,
+    },
 
     /// File read error
-    #[error("Failed to read file {path}: {message}")]
-    FileReadError { path: String, message: String },
+    #[error("Failed to read file '{path}'")]
+    FileReadError {
+        path: String,
+        #[source]
+        source: std::io::Error,
+    },
 
     /// Empty directory
     #[error("Directory is empty: {path}")]
     EmptyDirectory { path: String },
 
     /// Invalid file name
-    #[error("Invalid file name in {path}: {message}")]
-    InvalidFileName { path: String, message: String },
+    #[error("Invalid file name in '{path}'")]
+    InvalidFileName {
+        path: String,
+        #[source]
+        source: std::io::Error,
+    },
 }
 
 /// Validation errors for policy store components.
