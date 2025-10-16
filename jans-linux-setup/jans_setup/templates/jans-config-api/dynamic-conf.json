@@ -339,11 +339,6 @@
       "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
     },
     {
-      "name": "kc-link",
-      "description": "kc-link plugin",
-      "className": "io.jans.configapi.plugin.kc.link.rest.ApiApplication"
-    },
-    {
       "name": "lock",
       "description": "lock plugin",
       "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"

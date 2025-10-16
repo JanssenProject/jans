@@ -782,20 +782,6 @@
       "tag": "app-version"
     },
     {
-      "permission": "https://jans.io/oauth/kc-link-config.readonly",
-      "description": "",
-      "defaultPermissionInToken": false,
-      "essentialPermissionInAdminUI": false,
-      "tag": "kc-link-config"
-    },
-    {
-      "permission": "https://jans.io/oauth/kc-link-config.write",
-      "description": "",
-      "defaultPermissionInToken": false,
-      "essentialPermissionInAdminUI": false,
-      "tag": "kc-link-config"
-    },
-    {
       "permission": "https://jans.io/oauth/lock-config.readonly",
       "description": "",
       "defaultPermissionInToken": false,
