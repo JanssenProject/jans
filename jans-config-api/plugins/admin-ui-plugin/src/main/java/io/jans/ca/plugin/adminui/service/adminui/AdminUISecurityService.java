@@ -72,8 +72,8 @@ public class AdminUISecurityService {
     public GenericResponse getPolicyStore() throws ApplicationException {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            //If the eemote Policy Store URL configured
             if(auiConfiguration.getUseRemotePolicyStore() && !Strings.isNullOrEmpty(auiConfiguration.getAuiPolicyStoreUrl())) {
-                log.info("policy store request status code: {}", auiConfiguration.toString());
                 Invocation.Builder request = ClientFactory.getClientBuilder(auiConfiguration.getAuiPolicyStoreUrl());
                 request.header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
                 Response response = request.get();
@@ -91,8 +91,8 @@ public class AdminUISecurityService {
                 log.error("{}: {}", ErrorResponse.RETRIEVE_POLICY_STORE_ERROR, jsonData);
                 return CommonUtils.createGenericResponse(false, response.getStatus(), jsonData);
             } else {
-                Path path = Paths.get("custom/config/admin-ui-policy-store.json");
-                log.error("Absolute path: " + path.toAbsolutePath());
+                Path path = Paths.get(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
+                log.error("Absolute path of default : " + path.toAbsolutePath());
                 // Create ObjectMapper instance
                 ObjectMapper objectMapper = new ObjectMapper();
                 // Read file content as bytes
@@ -114,18 +114,14 @@ public class AdminUISecurityService {
         try {
             final Filter filter = Filter.createPresenceFilter(AppConstants.ADMIN_UI_RESOURCE);
             List<AdminUIResourceScopesMapping> adminUIResourceScopesMappings = entryManager.findEntries(AppConstants.ADMIN_UI_RESOURCE_SCOPES_MAPPING_DN, AdminUIResourceScopesMapping.class, filter);
-            log.error("adminUIResourceScopesMappings: " +adminUIResourceScopesMappings.get(0).getResource());
-            log.error("adminUIResourceScopesMappings: " +adminUIResourceScopesMappings.get(0).getScopes().get(0));
-            log.error("adminUIResourceScopesMappings: " +adminUIResourceScopesMappings.get(1).getResource());
-            log.error("adminUIResourceScopesMappings: " +adminUIResourceScopesMappings.get(1).getScopes().get(0));
             //get resource-scope mapping JsonNode
             JsonNode resourceScopesJson = CommonUtils.toJsonNode(adminUIResourceScopesMappings);
-            log.error("resourceScopesJson: " +resourceScopesJson);
+
             //get policy-store JsonNode
             JsonNode policyStoreJson = getPolicyStore().getResponseObject();
 
             Map<String, Set<String>> principalsToScopesMap = mapPrincipalsToScopes(policyStoreJson, resourceScopesJson);
-            log.error("principalsToScopesMap: " +principalsToScopesMap);
+
             // Convert map keys to list of AdminRole
             List<AdminRole> roles = principalsToScopesMap.keySet().stream()
                     .map(roleName -> {
