@@ -13,7 +13,7 @@
 //! The VFS abstraction allows the policy store loader to work uniformly across
 //! different storage backends without changing the loading logic.
 
-use std::io;
+use std::io::{self, Read};
 use std::path::Path;
 use vfs::{PhysicalFS, VfsPath};
 
@@ -31,9 +31,68 @@ pub struct DirEntry {
 /// Trait for virtual filesystem operations.
 ///
 /// This trait abstracts filesystem operations to enable testing and cross-platform support.
-pub trait VfsFileSystem: Send + Sync {
-    /// Read the entire contents of a file.
-    fn read_file(&self, path: &str) -> io::Result<Vec<u8>>;
+///
+/// # Examples
+///
+/// Using `open_file` with `BufReader` for efficient reading:
+///
+/// ```no_run
+/// use std::io::{BufRead, BufReader};
+/// use cedarling::common::policy_store::{PhysicalVfs, VfsFileSystem};
+///
+/// let vfs = PhysicalVfs::new();
+/// let reader = vfs.open_file("/path/to/file.txt")?;
+/// let buf_reader = BufReader::new(reader);
+///
+/// for line in buf_reader.lines() {
+///     println!("{}", line?);
+/// }
+/// # Ok::<(), std::io::Error>(())
+/// ```
+///
+/// Using `read_file` for small files:
+///
+/// ```no_run
+/// use cedarling::common::policy_store::{PhysicalVfs, VfsFileSystem};
+///
+/// let vfs = PhysicalVfs::new();
+/// let content = vfs.read_file("/path/to/small-file.txt")?;
+/// let text = String::from_utf8(content)?;
+/// # Ok::<(), Box<dyn std::error::Error>>(())
+/// ```
+pub trait VfsFileSystem: Send + Sync + 'static {
+    /// Open a file and return a reader.
+    ///
+    /// This is the primary method for reading files, allowing callers to:
+    /// - Read incrementally (memory efficient for large files)
+    /// - Use standard I/O traits like `BufReader`
+    /// - Control buffer sizes
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use std::io::BufReader;
+    /// use cedarling::common::policy_store::{PhysicalVfs, VfsFileSystem};
+    ///
+    /// let vfs = PhysicalVfs::new();
+    /// let reader = vfs.open_file("/path/to/file.json")?;
+    /// let buf_reader = BufReader::new(reader);
+    ///
+    /// // Can now use serde_json::from_reader, etc.
+    /// # Ok::<(), std::io::Error>(())
+    /// ```
+    fn open_file(&self, path: &str) -> io::Result<Box<dyn Read + Send>>;
+
+    /// Read the entire contents of a file into memory.
+    ///
+    /// This is a convenience method that reads the entire file.
+    /// For large files, consider using `open_file` instead.
+    fn read_file(&self, path: &str) -> io::Result<Vec<u8>> {
+        let mut reader = self.open_file(path)?;
+        let mut buffer = Vec::new();
+        reader.read_to_end(&mut buffer)?;
+        Ok(buffer)
+    }
 
     /// Read directory entries.
     fn read_dir(&self, path: &str) -> io::Result<Vec<DirEntry>>;
@@ -80,15 +139,12 @@ impl Default for PhysicalVfs {
 
 #[cfg(not(target_arch = "wasm32"))]
 impl VfsFileSystem for PhysicalVfs {
-    fn read_file(&self, path: &str) -> io::Result<Vec<u8>> {
+    fn open_file(&self, path: &str) -> io::Result<Box<dyn Read + Send>> {
         let vfs_path = self.get_path(path);
-        let mut file = vfs_path
+        let file = vfs_path
             .open_file()
             .map_err(|e| io::Error::new(io::ErrorKind::NotFound, e))?;
-
-        let mut buffer = Vec::new();
-        std::io::Read::read_to_end(&mut file, &mut buffer)?;
-        Ok(buffer)
+        Ok(Box::new(file))
     }
 
     fn read_dir(&self, path: &str) -> io::Result<Vec<DirEntry>> {
@@ -195,15 +251,12 @@ impl Default for MemoryVfs {
 }
 
 impl VfsFileSystem for MemoryVfs {
-    fn read_file(&self, path: &str) -> io::Result<Vec<u8>> {
+    fn open_file(&self, path: &str) -> io::Result<Box<dyn Read + Send>> {
         let vfs_path = self.get_path(path);
-        let mut file = vfs_path
+        let file = vfs_path
             .open_file()
             .map_err(|e| io::Error::new(io::ErrorKind::NotFound, e))?;
-
-        let mut buffer = Vec::new();
-        std::io::Read::read_to_end(&mut file, &mut buffer)?;
-        Ok(buffer)
+        Ok(Box::new(file))
     }
 
     fn read_dir(&self, path: &str) -> io::Result<Vec<DirEntry>> {
