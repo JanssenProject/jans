@@ -168,17 +168,16 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// Load metadata from metadata.json file.
     fn load_metadata(&self, dir: &str) -> Result<PolicyStoreMetadata, PolicyStoreError> {
         let metadata_path = format!("{}/metadata.json", dir);
-        let bytes =
-            self.vfs
-                .read_file(&metadata_path)
-                .map_err(|e| PolicyStoreError::FileReadError {
-                    path: metadata_path.clone(),
-                    message: e.to_string(),
-                })?;
+        let bytes = self.vfs.read_file(&metadata_path).map_err(|source| {
+            PolicyStoreError::FileReadError {
+                path: metadata_path.clone(),
+                source,
+            }
+        })?;
 
         let content = String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
             path: metadata_path.clone(),
-            message: format!("File is not valid UTF-8: {}", e),
+            source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
         })?;
 
         // Parse and validate metadata
@@ -192,19 +191,18 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             return Ok(None);
         }
 
-        // Read file and parse JSON
-        let bytes =
-            self.vfs
-                .read_file(&manifest_path)
-                .map_err(|e| PolicyStoreError::FileReadError {
-                    path: manifest_path.clone(),
-                    message: e.to_string(),
-                })?;
+        // Open file and parse JSON using from_reader for better performance
+        let reader = self.vfs.open_file(&manifest_path).map_err(|source| {
+            PolicyStoreError::FileReadError {
+                path: manifest_path.clone(),
+                source,
+            }
+        })?;
 
         let manifest =
-            serde_json::from_slice(&bytes).map_err(|e| PolicyStoreError::JsonParsing {
+            serde_json::from_reader(reader).map_err(|source| PolicyStoreError::JsonParsing {
                 file: "manifest.json".to_string(),
-                message: e.to_string(),
+                source,
             })?;
 
         Ok(Some(manifest))
@@ -216,14 +214,14 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         let bytes =
             self.vfs
                 .read_file(&schema_path)
-                .map_err(|e| PolicyStoreError::FileReadError {
+                .map_err(|source| PolicyStoreError::FileReadError {
                     path: schema_path.clone(),
-                    message: e.to_string(),
+                    source,
                 })?;
 
         String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
             path: schema_path.clone(),
-            message: format!("File is not valid UTF-8: {}", e),
+            source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
         })
     }
 
@@ -260,13 +258,12 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             return Ok(Vec::new());
         }
 
-        let entries =
-            self.vfs
-                .read_dir(&issuers_dir)
-                .map_err(|e| PolicyStoreError::DirectoryReadError {
-                    path: issuers_dir.clone(),
-                    message: e.to_string(),
-                })?;
+        let entries = self.vfs.read_dir(&issuers_dir).map_err(|source| {
+            PolicyStoreError::DirectoryReadError {
+                path: issuers_dir.clone(),
+                source,
+            }
+        })?;
 
         let mut issuers = Vec::new();
         for entry in entries {
@@ -285,17 +282,17 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
                     .into());
                 }
 
-                let bytes = self.vfs.read_file(&entry.path).map_err(|e| {
+                let bytes = self.vfs.read_file(&entry.path).map_err(|source| {
                     PolicyStoreError::FileReadError {
                         path: entry.path.clone(),
-                        message: e.to_string(),
+                        source,
                     }
                 })?;
 
                 let content =
                     String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
                         path: entry.path.clone(),
-                        message: format!("File is not valid UTF-8: {}", e),
+                        source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
                     })?;
 
                 issuers.push(IssuerFile {
@@ -314,13 +311,13 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         dir: &str,
         _file_type: &str,
     ) -> Result<Vec<PolicyFile>, PolicyStoreError> {
-        let entries = self
-            .vfs
-            .read_dir(dir)
-            .map_err(|e| PolicyStoreError::DirectoryReadError {
-                path: dir.to_string(),
-                message: e.to_string(),
-            })?;
+        let entries =
+            self.vfs
+                .read_dir(dir)
+                .map_err(|source| PolicyStoreError::DirectoryReadError {
+                    path: dir.to_string(),
+                    source,
+                })?;
 
         let mut files = Vec::new();
         for entry in entries {
@@ -339,17 +336,17 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
                     .into());
                 }
 
-                let bytes = self.vfs.read_file(&entry.path).map_err(|e| {
+                let bytes = self.vfs.read_file(&entry.path).map_err(|source| {
                     PolicyStoreError::FileReadError {
                         path: entry.path.clone(),
-                        message: e.to_string(),
+                        source,
                     }
                 })?;
 
                 let content =
                     String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
                         path: entry.path.clone(),
-                        message: format!("File is not valid UTF-8: {}", e),
+                        source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
                     })?;
 
                 files.push(PolicyFile {
@@ -368,13 +365,13 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         dir: &str,
         _file_type: &str,
     ) -> Result<Vec<EntityFile>, PolicyStoreError> {
-        let entries = self
-            .vfs
-            .read_dir(dir)
-            .map_err(|e| PolicyStoreError::DirectoryReadError {
-                path: dir.to_string(),
-                message: e.to_string(),
-            })?;
+        let entries =
+            self.vfs
+                .read_dir(dir)
+                .map_err(|source| PolicyStoreError::DirectoryReadError {
+                    path: dir.to_string(),
+                    source,
+                })?;
 
         let mut files = Vec::new();
         for entry in entries {
@@ -393,17 +390,17 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
                     .into());
                 }
 
-                let bytes = self.vfs.read_file(&entry.path).map_err(|e| {
+                let bytes = self.vfs.read_file(&entry.path).map_err(|source| {
                     PolicyStoreError::FileReadError {
                         path: entry.path.clone(),
-                        message: e.to_string(),
+                        source,
                     }
                 })?;
 
                 let content =
                     String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
                         path: entry.path.clone(),
-                        message: format!("File is not valid UTF-8: {}", e),
+                        source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
                     })?;
 
                 files.push(EntityFile {
@@ -457,7 +454,10 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
                     .to_str()
                     .ok_or_else(|| PolicyStoreError::InvalidFileName {
                         path: path.display().to_string(),
-                        message: "Path contains invalid UTF-8".to_string(),
+                        source: std::io::Error::new(
+                            std::io::ErrorKind::InvalidInput,
+                            "Path contains invalid UTF-8",
+                        ),
                     })?;
                 self.load_directory(path_str)
             },
@@ -483,7 +483,10 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
                     .to_str()
                     .ok_or_else(|| PolicyStoreError::InvalidFileName {
                         path: path.display().to_string(),
-                        message: "Path contains invalid UTF-8".to_string(),
+                        source: std::io::Error::new(
+                            std::io::ErrorKind::InvalidInput,
+                            "Path contains invalid UTF-8",
+                        ),
                     })?;
                 self.validate_directory_structure(path_str)
             },
