@@ -54,6 +54,8 @@ public abstract class LoggerService {
 
     private final static int DEFAULT_INTERVAL = 15; // 15 seconds
 
+    private final static String OVERRIDE_JAVA_PROPERTY = "log4j2.configurationFile";
+
     @Inject
     private Logger log;
 
@@ -74,6 +76,10 @@ public abstract class LoggerService {
     }
 
     public void initTimer(boolean updateNow) {
+        if (isDisableConfigurationUpdate()) {
+        	return;
+        }
+
         log.info("Initializing Logger Update Timer");
 
         final int delay = 15;
@@ -91,6 +97,10 @@ public abstract class LoggerService {
 
     @Asynchronous
     public void updateLoggerTimerEvent(@Observes @Scheduled LoggerUpdateEvent loggerUpdateEvent) {
+        if (isDisableConfigurationUpdate()) {
+        	return;
+        }
+
         if (this.isActive.get()) {
             return;
         }
@@ -108,6 +118,16 @@ public abstract class LoggerService {
             this.isActive.set(false);
         }
     }
+
+	private boolean isDisableConfigurationUpdate() {
+		if (System.getProperty(OVERRIDE_JAVA_PROPERTY) != null) {
+			log.info("Property log4j2.configurationFile is specifed. Update configuration is turned off");
+
+			return true;
+		}
+
+		return false;
+	}
 
     private void updateLoggerConfiguration() {
     	// Do periodic update to apply changes to new loggers as well
