@@ -8,6 +8,7 @@ import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.util.security.StringEncrypter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,7 +32,7 @@ import java.util.List;
 
 @Path("/admin-ui/security")
 public class AdminUISecurityResource {
-    static final String POLICY_STORE = "/policyStore";
+    static final String POLICY_STORE = "policyStore";
     static final String SYNC_ROLE_SCOPES_MAPPING = "/syncRoleScopesMapping";
     static final String SECURITY_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly";
     static final String SECURITY_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/security.write";
@@ -53,7 +54,7 @@ public class AdminUISecurityResource {
     @GET
     @Path(POLICY_STORE)
     @Produces(MediaType.APPLICATION_JSON)
-    //@ProtectedApi(scopes = {SECURITY_READ}, groupScopes = {SECURITY_WRITE}, superScopes = {ADMINUI_CONF_READ})
+    @ProtectedApi(scopes = {SECURITY_READ}, groupScopes = {SECURITY_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
     public Response getPolicyStore() {
         try {
             log.info("Get Admin UI policy store.");
@@ -88,7 +89,7 @@ public class AdminUISecurityResource {
     @Path(SYNC_ROLE_SCOPES_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {SECURITY_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
-    public Response syncRoleScopeMapping(@Valid @NotNull AdminRole roleArg) {
+    public Response syncRoleScopeMapping() {
         try {
             log.info("Sync Role-to-Scopes mapping from policy-store.");
             GenericResponse response = adminUISecurityService.syncRoleScopeMapping();
@@ -107,5 +108,9 @@ public class AdminUISecurityResource {
                     .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription()))
                     .build();
         }
+    }
+    public static void main(String[] args) throws StringEncrypter.EncryptionException {
+        StringEncrypter se = StringEncrypter.instance("bGkd7ljjR8GSJkybpbPEcU32");
+        System.out.println(se.decrypt("U+4A08q7idg18ABUiWjnKA=="));
     }
 }

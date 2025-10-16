@@ -309,4 +309,43 @@ public class AUIConfiguration {
     public void setUseRemotePolicyStore(Boolean useRemotePolicyStore) {
         this.useRemotePolicyStore = useRemotePolicyStore;
     }
+
+    @Override
+    public String toString() {
+        return "AUIConfiguration{" +
+                "appType='" + appType + '\'' +
+                ", auiWebServerHost='" + auiWebServerHost + '\'' +
+                ", auiWebServerClientId='" + auiWebServerClientId + '\'' +
+                ", auiWebServerClientSecret='" + auiWebServerClientSecret + '\'' +
+                ", auiWebServerScope='" + auiWebServerScope + '\'' +
+                ", auiWebServerAcrValues='" + auiWebServerAcrValues + '\'' +
+                ", auiWebServerRedirectUrl='" + auiWebServerRedirectUrl + '\'' +
+                ", auiWebServerFrontChannelLogoutUrl='" + auiWebServerFrontChannelLogoutUrl + '\'' +
+                ", auiWebServerPostLogoutRedirectUri='" + auiWebServerPostLogoutRedirectUri + '\'' +
+                ", auiWebServerAuthzBaseUrl='" + auiWebServerAuthzBaseUrl + '\'' +
+                ", auiWebServerTokenEndpoint='" + auiWebServerTokenEndpoint + '\'' +
+                ", auiWebServerIntrospectionEndpoint='" + auiWebServerIntrospectionEndpoint + '\'' +
+                ", auiWebServerUserInfoEndpoint='" + auiWebServerUserInfoEndpoint + '\'' +
+                ", auiWebServerEndSessionEndpoint='" + auiWebServerEndSessionEndpoint + '\'' +
+                ", auiBackendApiServerClientId='" + auiBackendApiServerClientId + '\'' +
+                ", auiBackendApiServerClientSecret='" + auiBackendApiServerClientSecret + '\'' +
+                ", auiBackendApiServerScope='" + auiBackendApiServerScope + '\'' +
+                ", auiBackendApiServerAcrValues='" + auiBackendApiServerAcrValues + '\'' +
+                ", auiBackendApiServerRedirectUrl='" + auiBackendApiServerRedirectUrl + '\'' +
+                ", auiBackendApiServerFrontChannelLogoutUrl='" + auiBackendApiServerFrontChannelLogoutUrl + '\'' +
+                ", auiBackendApiServerPostLogoutRedirectUri='" + auiBackendApiServerPostLogoutRedirectUri + '\'' +
+                ", auiBackendApiServerAuthzBaseUrl='" + auiBackendApiServerAuthzBaseUrl + '\'' +
+                ", auiBackendApiServerTokenEndpoint='" + auiBackendApiServerTokenEndpoint + '\'' +
+                ", auiBackendApiServerIntrospectionEndpoint='" + auiBackendApiServerIntrospectionEndpoint + '\'' +
+                ", auiBackendApiServerUserInfoEndpoint='" + auiBackendApiServerUserInfoEndpoint + '\'' +
+                ", auiBackendApiServerEndSessionEndpoint='" + auiBackendApiServerEndSessionEndpoint + '\'' +
+                ", licenseConfiguration=" + licenseConfiguration +
+                ", sessionTimeoutInMins=" + sessionTimeoutInMins +
+                ", allowSmtpKeystoreEdit=" + allowSmtpKeystoreEdit +
+                ", additionalParameters=" + additionalParameters +
+                ", cedarlingLogType=" + cedarlingLogType +
+                ", auiPolicyStoreUrl='" + auiPolicyStoreUrl + '\'' +
+                ", useRemotePolicyStore=" + useRemotePolicyStore +
+                '}';
+    }
 }

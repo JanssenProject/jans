@@ -73,7 +73,7 @@ public class AdminUISecurityService {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             if(auiConfiguration.getUseRemotePolicyStore() && !Strings.isNullOrEmpty(auiConfiguration.getAuiPolicyStoreUrl())) {
-
+                log.info("policy store request status code: {}", auiConfiguration.toString());
                 Invocation.Builder request = ClientFactory.getClientBuilder(auiConfiguration.getAuiPolicyStoreUrl());
                 request.header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
                 Response response = request.get();
@@ -82,8 +82,8 @@ public class AdminUISecurityService {
 
                 ObjectMapper mapper = new ObjectMapper();
                 if (response.getStatus() == 200) {
-                    JsonObject entity = response.readEntity(JsonObject.class);
-                    JsonNode jsonNode = mapper.createObjectNode();
+                    String entity = response.readEntity(String.class);
+                    JsonNode jsonNode = mapper.readValue(entity, JsonNode.class);
                     return CommonUtils.createGenericResponse(true, 200, "Policy store fetched.", jsonNode);
                 }
                 //getting error
@@ -113,7 +113,7 @@ public class AdminUISecurityService {
 
         try {
             final Filter filter = Filter.createPresenceFilter(AppConstants.ADMIN_UI_RESOURCE);
-            List<AdminUIResourceScopesMapping> adminUIResourceScopesMappings = entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AdminUIResourceScopesMapping.class, filter);
+            List<AdminUIResourceScopesMapping> adminUIResourceScopesMappings = entryManager.findEntries(AppConstants.ADMIN_UI_RESOURCE_SCOPES_MAPPING_DN, AdminUIResourceScopesMapping.class, filter);
             //get resource-scope mapping JsonNode
             JsonNode resourceScopesJson = CommonUtils.toJsonNode(adminUIResourceScopesMappings);
             //get policy-store JsonNode
