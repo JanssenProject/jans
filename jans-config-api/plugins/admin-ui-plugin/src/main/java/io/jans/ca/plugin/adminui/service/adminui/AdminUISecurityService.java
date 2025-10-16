@@ -114,12 +114,18 @@ public class AdminUISecurityService {
         try {
             final Filter filter = Filter.createPresenceFilter(AppConstants.ADMIN_UI_RESOURCE);
             List<AdminUIResourceScopesMapping> adminUIResourceScopesMappings = entryManager.findEntries(AppConstants.ADMIN_UI_RESOURCE_SCOPES_MAPPING_DN, AdminUIResourceScopesMapping.class, filter);
+            log.error("adminUIResourceScopesMappings: " +adminUIResourceScopesMappings.get(0).getResource());
+            log.error("adminUIResourceScopesMappings: " +adminUIResourceScopesMappings.get(0).getScopes().get(0));
+            log.error("adminUIResourceScopesMappings: " +adminUIResourceScopesMappings.get(1).getResource());
+            log.error("adminUIResourceScopesMappings: " +adminUIResourceScopesMappings.get(1).getScopes().get(0));
             //get resource-scope mapping JsonNode
             JsonNode resourceScopesJson = CommonUtils.toJsonNode(adminUIResourceScopesMappings);
+            log.error("resourceScopesJson: " +resourceScopesJson);
             //get policy-store JsonNode
             JsonNode policyStoreJson = getPolicyStore().getResponseObject();
 
             Map<String, Set<String>> principalsToScopesMap = mapPrincipalsToScopes(policyStoreJson, resourceScopesJson);
+            log.error("principalsToScopesMap: " +principalsToScopesMap);
             // Convert map keys to list of AdminRole
             List<AdminRole> roles = principalsToScopesMap.keySet().stream()
                     .map(roleName -> {
@@ -130,7 +136,7 @@ public class AdminUISecurityService {
                         return role;
                     })
                     .collect(Collectors.toList());
-
+            adminUIService.resetRoles(roles);
             // Convert map to list of RolePermissionMapping
             List<RolePermissionMapping> rolePermissionMappings = principalsToScopesMap.entrySet().stream()
                     .map(entry -> {
@@ -140,8 +146,18 @@ public class AdminUISecurityService {
                         return rpm;
                     })
                     .collect(Collectors.toList());
+            //removing duplicate permission mapped to roles
+            List<RolePermissionMapping> updatedMappings = rolePermissionMappings.stream()
+                    .map(entry -> {
+                        RolePermissionMapping rpm = new RolePermissionMapping();
+                        Set<String> uniqueElements = new HashSet<>(entry.getPermissions());
+                        rpm.setRole(entry.getRole());
+                        rpm.setPermissions(new ArrayList<>(uniqueElements));
+                        return rpm;
+                    })
+                    .collect(Collectors.toList());
 
-            adminUIService.resetPermissionsToRole(rolePermissionMappings);
+            adminUIService.resetPermissionsToRole(updatedMappings);
             return CommonUtils.createGenericResponse(true, 200, "Sync of role-to-scope mapping from policy-store completed successfully.");
 
         } catch(Exception e) {
