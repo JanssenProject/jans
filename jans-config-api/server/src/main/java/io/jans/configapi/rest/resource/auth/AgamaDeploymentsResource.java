@@ -201,7 +201,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @Operation(summary = "Update an Agama project.", description = "Update an Agama project.", operationId = "put-agama-prj", tags = {
     "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}))
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "202", description = "Agama project accepted", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-post.json"))),
+    @ApiResponse(responseCode = "200", description = "Agama project accepted", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-post.json"))),
     @ApiResponse(responseCode = "400", description = "Bad Request"),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "409", description = "Conflict"),
