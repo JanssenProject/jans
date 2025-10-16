@@ -9,6 +9,7 @@ mod test;
 mod token_entity_metadata;
 
 pub mod errors;
+pub mod loader;
 pub mod metadata;
 pub mod source;
 
@@ -24,9 +25,12 @@ pub use token_entity_metadata::TokenEntityMetadata;
 
 // Re-export for convenience
 pub use errors::{ArchiveError, PolicyStoreError, TokenError, ValidationError};
+pub use loader::{
+    DefaultPolicyStoreLoader, EntityFile, IssuerFile, LoadedPolicyStore, PolicyFile,
+    PolicyStoreLoader,
+};
 pub use metadata::{FileInfo, PolicyStoreInfo, PolicyStoreManifest, PolicyStoreMetadata};
 pub use source::{PolicyStoreFormat, PolicyStoreSource};
-
 /// Default maximum number of entities allowed
 const DEFAULT_MAX_ENTITIES: usize = 1000;
 /// Default maximum size of base64-encoded strings in bytes
