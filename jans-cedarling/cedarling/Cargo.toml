@@ -47,6 +47,7 @@ futures = "0.3.31"
 wasm-bindgen-futures = { workspace = true }
 config = "0.15.11"
 ahash = { version = "0.8.12", default-features = false, features = ["std"] }
+vfs = "0.12"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }
@@ -62,6 +63,7 @@ criterion = { version = "0.7.0", features = ["async_tokio"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 # is used for calculate allocated size
 stats_alloc = "0.1.10"
+tempfile = "3.8"
 
 
 [target.'cfg(not(any(target_arch = "wasm32", target_os = "windows")))'.dev-dependencies]

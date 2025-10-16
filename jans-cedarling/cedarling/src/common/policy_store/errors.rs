@@ -22,16 +22,67 @@ pub enum PolicyStoreError {
     Archive(#[from] ArchiveError),
 
     /// JSON parsing error
-    #[error("JSON parsing error in {file}: {message}")]
-    JsonParsing { file: String, message: String },
+    #[error("JSON parsing error in '{file}'")]
+    JsonParsing {
+        file: String,
+        #[source]
+        source: serde_json::Error,
+    },
 
     /// YAML parsing error
-    #[error("YAML parsing error in {file}: {message}")]
-    YamlParsing { file: String, message: String },
+    #[error("YAML parsing error in '{file}'")]
+    YamlParsing {
+        file: String,
+        #[source]
+        source: Box<dyn std::error::Error + Send + Sync>,
+    },
 
     /// Cedar parsing error
-    #[error("Cedar parsing error in {file}: {message}")]
-    CedarParsing { file: String, message: String },
+    #[error("Cedar parsing error in '{file}'")]
+    CedarParsing {
+        file: String,
+        message: String, // Cedar errors don't implement std::error::Error
+    },
+
+    /// Path not found
+    #[error("Path not found: {path}")]
+    PathNotFound { path: String },
+
+    /// Path is not a directory
+    #[error("Path is not a directory: {path}")]
+    NotADirectory { path: String },
+
+    /// Path is not a file
+    #[error("Path is not a file: {path}")]
+    NotAFile { path: String },
+
+    /// Directory read error
+    #[error("Failed to read directory '{path}'")]
+    DirectoryReadError {
+        path: String,
+        #[source]
+        source: std::io::Error,
+    },
+
+    /// File read error
+    #[error("Failed to read file '{path}'")]
+    FileReadError {
+        path: String,
+        #[source]
+        source: std::io::Error,
+    },
+
+    /// Empty directory
+    #[error("Directory is empty: {path}")]
+    EmptyDirectory { path: String },
+
+    /// Invalid file name
+    #[error("Invalid file name in '{path}'")]
+    InvalidFileName {
+        path: String,
+        #[source]
+        source: std::io::Error,
+    },
 }
 
 /// Validation errors for policy store components.
@@ -109,6 +160,55 @@ pub enum ValidationError {
         expected: String,
         actual: String,
     },
+
+    /// Duplicate policy ID
+    #[error("Duplicate policy ID '{policy_id}' found in files {file1} and {file2}")]
+    DuplicatePolicyId {
+        policy_id: String,
+        file1: String,
+        file2: String,
+    },
+
+    /// Invalid policy ID format
+    #[error("Invalid policy ID format in {file}: {message}")]
+    InvalidPolicyId { file: String, message: String },
+
+    // Specific metadata validation errors
+    /// Empty Cedar version
+    #[error("Cedar version cannot be empty in metadata.json")]
+    EmptyCedarVersion,
+
+    /// Invalid Cedar version format
+    #[error("Invalid Cedar version format in metadata.json: '{version}' - {details}")]
+    InvalidCedarVersion { version: String, details: String },
+
+    /// Empty policy store name
+    #[error("Policy store name cannot be empty in metadata.json")]
+    EmptyPolicyStoreName,
+
+    /// Policy store name too long
+    #[error("Policy store name too long in metadata.json: {length} chars (max 255)")]
+    PolicyStoreNameTooLong { length: usize },
+
+    /// Invalid policy store ID format
+    #[error(
+        "Invalid policy store ID format in metadata.json: '{id}' must be hexadecimal (8-64 chars)"
+    )]
+    InvalidPolicyStoreId { id: String },
+
+    /// Invalid policy store version
+    #[error("Invalid policy store version in metadata.json: '{version}' - {details}")]
+    InvalidPolicyStoreVersion { version: String, details: String },
+
+    /// Policy store description too long
+    #[error("Policy store description too long in metadata.json: {length} chars (max 1000)")]
+    DescriptionTooLong { length: usize },
+
+    /// Invalid timestamp ordering
+    #[error(
+        "Invalid timestamp ordering in metadata.json: updated_date cannot be before created_date"
+    )]
+    InvalidTimestampOrdering,
 }
 
 /// Errors related to archive (.cjar) handling.

@@ -8,7 +8,8 @@
 use super::errors::{PolicyStoreError, ValidationError};
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
 use super::source::{PolicyStoreFormat, PolicyStoreSource};
-use std::fs;
+use super::validator::MetadataValidator;
+use super::vfs_adapter::VfsFileSystem;
 use std::path::Path;
 
 /// Policy store loader trait for loading policy stores from various sources.
@@ -70,14 +71,33 @@ pub struct IssuerFile {
 }
 
 /// Default implementation of policy store loader.
-pub struct DefaultPolicyStoreLoader;
+///
+/// Generic over a VFS implementation to support different storage backends:
+/// - Physical filesystem for native platforms
+/// - Memory filesystem for testing and WASM
+/// - Archive filesystem for .cjar files (future)
+pub struct DefaultPolicyStoreLoader<V: VfsFileSystem> {
+    vfs: V,
+}
 
-impl DefaultPolicyStoreLoader {
-    /// Create a new default policy store loader.
-    pub fn new() -> Self {
-        Self
+impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
+    /// Create a new policy store loader with the given VFS backend.
+    pub fn new(vfs: V) -> Self {
+        Self { vfs }
     }
+}
 
+#[cfg(not(target_arch = "wasm32"))]
+impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
+    /// Create a new policy store loader using the physical filesystem.
+    ///
+    /// This is a convenience constructor for native platforms.
+    pub fn new_physical() -> Self {
+        Self::new(super::vfs_adapter::PhysicalVfs::new())
+    }
+}
+
+impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// Detect format based on source type and path characteristics.
     fn detect_format_internal(source: &PolicyStoreSource) -> PolicyStoreFormat {
         match source {
@@ -96,33 +116,31 @@ impl DefaultPolicyStoreLoader {
     }
 
     /// Validate directory structure for required files and directories.
-    fn validate_directory_structure(dir: &Path) -> Result<(), PolicyStoreError> {
+    fn validate_directory_structure(&self, dir: &str) -> Result<(), PolicyStoreError> {
         // Check if directory exists
-        if !dir.exists() {
-            return Err(PolicyStoreError::Io(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                format!("Directory not found: {}", dir.display()),
-            )));
+        if !self.vfs.exists(dir) {
+            return Err(PolicyStoreError::PathNotFound {
+                path: dir.to_string(),
+            });
         }
 
-        if !dir.is_dir() {
-            return Err(PolicyStoreError::Io(std::io::Error::new(
-                std::io::ErrorKind::InvalidInput,
-                format!("Path is not a directory: {}", dir.display()),
-            )));
+        if !self.vfs.is_dir(dir) {
+            return Err(PolicyStoreError::NotADirectory {
+                path: dir.to_string(),
+            });
         }
 
         // Check for required files
-        let metadata_path = dir.join("metadata.json");
-        if !metadata_path.exists() {
+        let metadata_path = format!("{}/metadata.json", dir);
+        if !self.vfs.exists(&metadata_path) {
             return Err(ValidationError::MissingRequiredFile {
                 file: "metadata.json".to_string(),
             }
             .into());
         }
 
-        let schema_path = dir.join("schema.cedarschema");
-        if !schema_path.exists() {
+        let schema_path = format!("{}/schema.cedarschema", dir);
+        if !self.vfs.exists(&schema_path) {
             return Err(ValidationError::MissingRequiredFile {
                 file: "schema.cedarschema".to_string(),
             }
@@ -130,131 +148,132 @@ impl DefaultPolicyStoreLoader {
         }
 
         // Check for required directories
-        let policies_dir = dir.join("policies");
-        if !policies_dir.exists() {
+        let policies_dir = format!("{}/policies", dir);
+        if !self.vfs.exists(&policies_dir) {
             return Err(ValidationError::MissingRequiredDirectory {
                 directory: "policies".to_string(),
             }
             .into());
         }
 
-        if !policies_dir.is_dir() {
-            return Err(PolicyStoreError::Io(std::io::Error::new(
-                std::io::ErrorKind::InvalidInput,
-                "policies path exists but is not a directory",
-            )));
+        if !self.vfs.is_dir(&policies_dir) {
+            return Err(PolicyStoreError::NotADirectory {
+                path: policies_dir.clone(),
+            });
         }
 
         Ok(())
     }
 
     /// Load metadata from metadata.json file.
-    fn load_metadata(dir: &Path) -> Result<PolicyStoreMetadata, PolicyStoreError> {
-        let metadata_path = dir.join("metadata.json");
-        let content = fs::read_to_string(&metadata_path).map_err(|e| {
-            PolicyStoreError::Io(std::io::Error::new(
-                e.kind(),
-                format!("Failed to read metadata.json: {}", e),
-            ))
+    fn load_metadata(&self, dir: &str) -> Result<PolicyStoreMetadata, PolicyStoreError> {
+        let metadata_path = format!("{}/metadata.json", dir);
+        let bytes = self.vfs.read_file(&metadata_path).map_err(|source| {
+            PolicyStoreError::FileReadError {
+                path: metadata_path.clone(),
+                source,
+            }
         })?;
 
-        serde_json::from_str(&content).map_err(|e| PolicyStoreError::JsonParsing {
-            file: "metadata.json".to_string(),
-            message: e.to_string(),
-        })
+        let content = String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
+            path: metadata_path.clone(),
+            source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
+        })?;
+
+        // Parse and validate metadata
+        MetadataValidator::parse_and_validate(&content).map_err(PolicyStoreError::Validation)
     }
 
     /// Load optional manifest from manifest.json file.
-    fn load_manifest(dir: &Path) -> Result<Option<PolicyStoreManifest>, PolicyStoreError> {
-        let manifest_path = dir.join("manifest.json");
-        if !manifest_path.exists() {
+    fn load_manifest(&self, dir: &str) -> Result<Option<PolicyStoreManifest>, PolicyStoreError> {
+        let manifest_path = format!("{}/manifest.json", dir);
+        if !self.vfs.exists(&manifest_path) {
             return Ok(None);
         }
 
-        let content = fs::read_to_string(&manifest_path).map_err(|e| {
-            PolicyStoreError::Io(std::io::Error::new(
-                e.kind(),
-                format!("Failed to read manifest.json: {}", e),
-            ))
+        // Open file and parse JSON using from_reader for better performance
+        let reader = self.vfs.open_file(&manifest_path).map_err(|source| {
+            PolicyStoreError::FileReadError {
+                path: manifest_path.clone(),
+                source,
+            }
         })?;
 
         let manifest =
-            serde_json::from_str(&content).map_err(|e| PolicyStoreError::JsonParsing {
+            serde_json::from_reader(reader).map_err(|source| PolicyStoreError::JsonParsing {
                 file: "manifest.json".to_string(),
-                message: e.to_string(),
+                source,
             })?;
 
         Ok(Some(manifest))
     }
 
     /// Load schema from schema.cedarschema file.
-    fn load_schema(dir: &Path) -> Result<String, PolicyStoreError> {
-        let schema_path = dir.join("schema.cedarschema");
-        fs::read_to_string(&schema_path).map_err(|e| {
-            PolicyStoreError::Io(std::io::Error::new(
-                e.kind(),
-                format!("Failed to read schema.cedarschema: {}", e),
-            ))
+    fn load_schema(&self, dir: &str) -> Result<String, PolicyStoreError> {
+        let schema_path = format!("{}/schema.cedarschema", dir);
+        let bytes =
+            self.vfs
+                .read_file(&schema_path)
+                .map_err(|source| PolicyStoreError::FileReadError {
+                    path: schema_path.clone(),
+                    source,
+                })?;
+
+        String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
+            path: schema_path.clone(),
+            source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
         })
     }
 
     /// Load all policy files from policies directory.
-    fn load_policies(dir: &Path) -> Result<Vec<PolicyFile>, PolicyStoreError> {
-        let policies_dir = dir.join("policies");
-        Self::load_cedar_files(&policies_dir, "policy")
+    fn load_policies(&self, dir: &str) -> Result<Vec<PolicyFile>, PolicyStoreError> {
+        let policies_dir = format!("{}/policies", dir);
+        self.load_cedar_files(&policies_dir, "policy")
     }
 
     /// Load all template files from templates directory (if exists).
-    fn load_templates(dir: &Path) -> Result<Vec<PolicyFile>, PolicyStoreError> {
-        let templates_dir = dir.join("templates");
-        if !templates_dir.exists() {
+    fn load_templates(&self, dir: &str) -> Result<Vec<PolicyFile>, PolicyStoreError> {
+        let templates_dir = format!("{}/templates", dir);
+        if !self.vfs.exists(&templates_dir) {
             return Ok(Vec::new());
         }
 
-        Self::load_cedar_files(&templates_dir, "template")
+        self.load_cedar_files(&templates_dir, "template")
     }
 
     /// Load all entity files from entities directory (if exists).
-    fn load_entities(dir: &Path) -> Result<Vec<EntityFile>, PolicyStoreError> {
-        let entities_dir = dir.join("entities");
-        if !entities_dir.exists() {
+    fn load_entities(&self, dir: &str) -> Result<Vec<EntityFile>, PolicyStoreError> {
+        let entities_dir = format!("{}/entities", dir);
+        if !self.vfs.exists(&entities_dir) {
             return Ok(Vec::new());
         }
 
-        Self::load_json_files(&entities_dir, "entity")
+        self.load_json_files(&entities_dir, "entity")
     }
 
     /// Load all trusted issuer files from trusted-issuers directory (if exists).
-    fn load_trusted_issuers(dir: &Path) -> Result<Vec<IssuerFile>, PolicyStoreError> {
-        let issuers_dir = dir.join("trusted-issuers");
-        if !issuers_dir.exists() {
+    fn load_trusted_issuers(&self, dir: &str) -> Result<Vec<IssuerFile>, PolicyStoreError> {
+        let issuers_dir = format!("{}/trusted-issuers", dir);
+        if !self.vfs.exists(&issuers_dir) {
             return Ok(Vec::new());
         }
 
-        let entries = fs::read_dir(&issuers_dir).map_err(|e| {
-            PolicyStoreError::Io(std::io::Error::new(
-                e.kind(),
-                format!("Failed to read trusted-issuers directory: {}", e),
-            ))
+        let entries = self.vfs.read_dir(&issuers_dir).map_err(|source| {
+            PolicyStoreError::DirectoryReadError {
+                path: issuers_dir.clone(),
+                source,
+            }
         })?;
 
         let mut issuers = Vec::new();
         for entry in entries {
-            let entry = entry.map_err(|e| {
-                PolicyStoreError::Io(std::io::Error::new(
-                    e.kind(),
-                    "Failed to read directory entry",
-                ))
-            })?;
-
-            let path = entry.path();
-            if path.is_file() {
+            if !entry.is_dir {
                 // Validate .json extension
-                if path.extension().and_then(|s| s.to_str()) != Some("json") {
+                if !entry.name.ends_with(".json") {
                     return Err(ValidationError::InvalidFileExtension {
-                        file: path.display().to_string(),
+                        file: entry.path.clone(),
                         expected: ".json".to_string(),
-                        actual: path
+                        actual: Path::new(&entry.name)
                             .extension()
                             .and_then(|s| s.to_str())
                             .unwrap_or("(none)")
@@ -263,19 +282,21 @@ impl DefaultPolicyStoreLoader {
                     .into());
                 }
 
-                let content = fs::read_to_string(&path).map_err(|e| {
-                    PolicyStoreError::Io(std::io::Error::new(
-                        e.kind(),
-                        format!("Failed to read issuer file: {}", path.display()),
-                    ))
+                let bytes = self.vfs.read_file(&entry.path).map_err(|source| {
+                    PolicyStoreError::FileReadError {
+                        path: entry.path.clone(),
+                        source,
+                    }
                 })?;
 
+                let content =
+                    String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
+                        path: entry.path.clone(),
+                        source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
+                    })?;
+
                 issuers.push(IssuerFile {
-                    name: path
-                        .file_name()
-                        .and_then(|s| s.to_str())
-                        .unwrap_or("unknown")
-                        .to_string(),
+                    name: entry.name,
                     content,
                 });
             }
@@ -285,31 +306,28 @@ impl DefaultPolicyStoreLoader {
     }
 
     /// Helper: Load all .cedar files from a directory.
-    fn load_cedar_files(dir: &Path, file_type: &str) -> Result<Vec<PolicyFile>, PolicyStoreError> {
-        let entries = fs::read_dir(dir).map_err(|e| {
-            PolicyStoreError::Io(std::io::Error::new(
-                e.kind(),
-                format!("Failed to read {} directory: {}", file_type, e),
-            ))
-        })?;
+    fn load_cedar_files(
+        &self,
+        dir: &str,
+        _file_type: &str,
+    ) -> Result<Vec<PolicyFile>, PolicyStoreError> {
+        let entries =
+            self.vfs
+                .read_dir(dir)
+                .map_err(|source| PolicyStoreError::DirectoryReadError {
+                    path: dir.to_string(),
+                    source,
+                })?;
 
         let mut files = Vec::new();
         for entry in entries {
-            let entry = entry.map_err(|e| {
-                PolicyStoreError::Io(std::io::Error::new(
-                    e.kind(),
-                    "Failed to read directory entry",
-                ))
-            })?;
-
-            let path = entry.path();
-            if path.is_file() {
+            if !entry.is_dir {
                 // Validate .cedar extension
-                if path.extension().and_then(|s| s.to_str()) != Some("cedar") {
+                if !entry.name.ends_with(".cedar") {
                     return Err(ValidationError::InvalidFileExtension {
-                        file: path.display().to_string(),
+                        file: entry.path.clone(),
                         expected: ".cedar".to_string(),
-                        actual: path
+                        actual: Path::new(&entry.name)
                             .extension()
                             .and_then(|s| s.to_str())
                             .unwrap_or("(none)")
@@ -318,19 +336,21 @@ impl DefaultPolicyStoreLoader {
                     .into());
                 }
 
-                let content = fs::read_to_string(&path).map_err(|e| {
-                    PolicyStoreError::Io(std::io::Error::new(
-                        e.kind(),
-                        format!("Failed to read {} file: {}", file_type, path.display()),
-                    ))
+                let bytes = self.vfs.read_file(&entry.path).map_err(|source| {
+                    PolicyStoreError::FileReadError {
+                        path: entry.path.clone(),
+                        source,
+                    }
                 })?;
 
+                let content =
+                    String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
+                        path: entry.path.clone(),
+                        source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
+                    })?;
+
                 files.push(PolicyFile {
-                    name: path
-                        .file_name()
-                        .and_then(|s| s.to_str())
-                        .unwrap_or("unknown")
-                        .to_string(),
+                    name: entry.name,
                     content,
                 });
             }
@@ -340,31 +360,28 @@ impl DefaultPolicyStoreLoader {
     }
 
     /// Helper: Load all .json files from a directory.
-    fn load_json_files(dir: &Path, file_type: &str) -> Result<Vec<EntityFile>, PolicyStoreError> {
-        let entries = fs::read_dir(dir).map_err(|e| {
-            PolicyStoreError::Io(std::io::Error::new(
-                e.kind(),
-                format!("Failed to read {} directory: {}", file_type, e),
-            ))
-        })?;
+    fn load_json_files(
+        &self,
+        dir: &str,
+        _file_type: &str,
+    ) -> Result<Vec<EntityFile>, PolicyStoreError> {
+        let entries =
+            self.vfs
+                .read_dir(dir)
+                .map_err(|source| PolicyStoreError::DirectoryReadError {
+                    path: dir.to_string(),
+                    source,
+                })?;
 
         let mut files = Vec::new();
         for entry in entries {
-            let entry = entry.map_err(|e| {
-                PolicyStoreError::Io(std::io::Error::new(
-                    e.kind(),
-                    "Failed to read directory entry",
-                ))
-            })?;
-
-            let path = entry.path();
-            if path.is_file() {
+            if !entry.is_dir {
                 // Validate .json extension
-                if path.extension().and_then(|s| s.to_str()) != Some("json") {
+                if !entry.name.ends_with(".json") {
                     return Err(ValidationError::InvalidFileExtension {
-                        file: path.display().to_string(),
+                        file: entry.path.clone(),
                         expected: ".json".to_string(),
-                        actual: path
+                        actual: Path::new(&entry.name)
                             .extension()
                             .and_then(|s| s.to_str())
                             .unwrap_or("(none)")
@@ -373,19 +390,21 @@ impl DefaultPolicyStoreLoader {
                     .into());
                 }
 
-                let content = fs::read_to_string(&path).map_err(|e| {
-                    PolicyStoreError::Io(std::io::Error::new(
-                        e.kind(),
-                        format!("Failed to read {} file: {}", file_type, path.display()),
-                    ))
+                let bytes = self.vfs.read_file(&entry.path).map_err(|source| {
+                    PolicyStoreError::FileReadError {
+                        path: entry.path.clone(),
+                        source,
+                    }
                 })?;
 
+                let content =
+                    String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
+                        path: entry.path.clone(),
+                        source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
+                    })?;
+
                 files.push(EntityFile {
-                    name: path
-                        .file_name()
-                        .and_then(|s| s.to_str())
-                        .unwrap_or("unknown")
-                        .to_string(),
+                    name: entry.name,
                     content,
                 });
             }
@@ -395,18 +414,18 @@ impl DefaultPolicyStoreLoader {
     }
 
     /// Load a directory-based policy store.
-    fn load_directory(dir: &Path) -> Result<LoadedPolicyStore, PolicyStoreError> {
+    fn load_directory(&self, dir: &str) -> Result<LoadedPolicyStore, PolicyStoreError> {
         // Validate structure first
-        Self::validate_directory_structure(dir)?;
+        self.validate_directory_structure(dir)?;
 
         // Load all components
-        let metadata = Self::load_metadata(dir)?;
-        let manifest = Self::load_manifest(dir)?;
-        let schema = Self::load_schema(dir)?;
-        let policies = Self::load_policies(dir)?;
-        let templates = Self::load_templates(dir)?;
-        let entities = Self::load_entities(dir)?;
-        let trusted_issuers = Self::load_trusted_issuers(dir)?;
+        let metadata = self.load_metadata(dir)?;
+        let manifest = self.load_manifest(dir)?;
+        let schema = self.load_schema(dir)?;
+        let policies = self.load_policies(dir)?;
+        let templates = self.load_templates(dir)?;
+        let entities = self.load_entities(dir)?;
+        let trusted_issuers = self.load_trusted_issuers(dir)?;
 
         Ok(LoadedPolicyStore {
             metadata,
@@ -420,19 +439,31 @@ impl DefaultPolicyStoreLoader {
     }
 }
 
-impl Default for DefaultPolicyStoreLoader {
+#[cfg(not(target_arch = "wasm32"))]
+impl Default for DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
     fn default() -> Self {
-        Self::new()
+        Self::new_physical()
     }
 }
 
-impl PolicyStoreLoader for DefaultPolicyStoreLoader {
+impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
     fn load(&self, source: &PolicyStoreSource) -> Result<LoadedPolicyStore, PolicyStoreError> {
         match source {
-            PolicyStoreSource::Directory(path) => Self::load_directory(path),
+            PolicyStoreSource::Directory(path) => {
+                let path_str = path
+                    .to_str()
+                    .ok_or_else(|| PolicyStoreError::InvalidFileName {
+                        path: path.display().to_string(),
+                        source: std::io::Error::new(
+                            std::io::ErrorKind::InvalidInput,
+                            "Path contains invalid UTF-8",
+                        ),
+                    })?;
+                self.load_directory(path_str)
+            },
             PolicyStoreSource::Archive(_) => {
                 // TODO: Archive loading will be implemented
-                todo!("Archive (.cjar) loading not yet implemented ")
+                todo!("Archive (.cjar) loading will use VFS + zip crate")
             },
             PolicyStoreSource::Legacy(_) => {
                 // TODO: Legacy format integration will be handled
@@ -447,7 +478,18 @@ impl PolicyStoreLoader for DefaultPolicyStoreLoader {
 
     fn validate_structure(&self, source: &PolicyStoreSource) -> Result<(), PolicyStoreError> {
         match source {
-            PolicyStoreSource::Directory(path) => Self::validate_directory_structure(path),
+            PolicyStoreSource::Directory(path) => {
+                let path_str = path
+                    .to_str()
+                    .ok_or_else(|| PolicyStoreError::InvalidFileName {
+                        path: path.display().to_string(),
+                        source: std::io::Error::new(
+                            std::io::ErrorKind::InvalidInput,
+                            "Path contains invalid UTF-8",
+                        ),
+                    })?;
+                self.validate_directory_structure(path_str)
+            },
             PolicyStoreSource::Archive(_) => {
                 // TODO: Archive validation will be implemented
                 todo!("Archive structure validation not yet implemented")
@@ -464,6 +506,7 @@ impl PolicyStoreLoader for DefaultPolicyStoreLoader {
 mod tests {
     use super::*;
     use std::fs;
+    use std::path::PathBuf;
     use tempfile::TempDir;
 
     /// Helper to create a minimal valid policy store directory for testing.
@@ -472,7 +515,7 @@ mod tests {
         let metadata = r#"{
             "cedar_version": "4.4.0",
             "policy_store": {
-                "id": "test123",
+                "id": "abc123def456",
                 "name": "Test Policy Store",
                 "version": "1.0.0"
             }
@@ -508,28 +551,28 @@ permit(
     #[test]
     fn test_format_detection_directory() {
         let source = PolicyStoreSource::Directory(PathBuf::from("/path/to/store"));
-        let loader = DefaultPolicyStoreLoader::new();
+        let loader = DefaultPolicyStoreLoader::new_physical();
         assert_eq!(loader.detect_format(&source), PolicyStoreFormat::Directory);
     }
 
     #[test]
     fn test_format_detection_archive() {
         let source = PolicyStoreSource::Archive(PathBuf::from("/path/to/store.cjar"));
-        let loader = DefaultPolicyStoreLoader::new();
+        let loader = DefaultPolicyStoreLoader::new_physical();
         assert_eq!(loader.detect_format(&source), PolicyStoreFormat::Archive);
     }
 
     #[test]
     fn test_format_detection_legacy() {
         let source = PolicyStoreSource::Legacy("{}".to_string());
-        let loader = DefaultPolicyStoreLoader::new();
+        let loader = DefaultPolicyStoreLoader::new_physical();
         assert_eq!(loader.detect_format(&source), PolicyStoreFormat::Legacy);
     }
 
     #[test]
     fn test_validate_nonexistent_directory() {
         let source = PolicyStoreSource::Directory(PathBuf::from("/nonexistent/path"));
-        let loader = DefaultPolicyStoreLoader::new();
+        let loader = DefaultPolicyStoreLoader::new_physical();
         let result = loader.validate_structure(&source);
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("not found"));
@@ -545,7 +588,7 @@ permit(
         fs::create_dir(dir.join("policies")).unwrap();
 
         let source = PolicyStoreSource::Directory(dir.to_path_buf());
-        let loader = DefaultPolicyStoreLoader::new();
+        let loader = DefaultPolicyStoreLoader::new_physical();
         let result = loader.validate_structure(&source);
 
         assert!(result.is_err());
@@ -563,7 +606,7 @@ permit(
         fs::create_dir(dir.join("policies")).unwrap();
 
         let source = PolicyStoreSource::Directory(dir.to_path_buf());
-        let loader = DefaultPolicyStoreLoader::new();
+        let loader = DefaultPolicyStoreLoader::new_physical();
         let result = loader.validate_structure(&source);
 
         assert!(result.is_err());
@@ -581,7 +624,7 @@ permit(
         fs::write(dir.join("schema.cedarschema"), "test").unwrap();
 
         let source = PolicyStoreSource::Directory(dir.to_path_buf());
-        let loader = DefaultPolicyStoreLoader::new();
+        let loader = DefaultPolicyStoreLoader::new_physical();
         let result = loader.validate_structure(&source);
 
         assert!(result.is_err());
@@ -598,7 +641,7 @@ permit(
         create_test_policy_store(dir).unwrap();
 
         let source = PolicyStoreSource::Directory(dir.to_path_buf());
-        let loader = DefaultPolicyStoreLoader::new();
+        let loader = DefaultPolicyStoreLoader::new_physical();
         let result = loader.validate_structure(&source);
 
         assert!(result.is_ok());
@@ -613,7 +656,7 @@ permit(
         create_test_policy_store(dir).unwrap();
 
         let source = PolicyStoreSource::Directory(dir.to_path_buf());
-        let loader = DefaultPolicyStoreLoader::new();
+        let loader = DefaultPolicyStoreLoader::new_physical();
         let result = loader.load(&source);
 
         assert!(result.is_ok());
@@ -650,7 +693,7 @@ permit(
         fs::write(dir.join("trusted-issuers/issuer1.json"), "{}").unwrap();
 
         let source = PolicyStoreSource::Directory(dir.to_path_buf());
-        let loader = DefaultPolicyStoreLoader::new();
+        let loader = DefaultPolicyStoreLoader::new_physical();
         let result = loader.load(&source);
 
         assert!(result.is_ok());
@@ -672,7 +715,7 @@ permit(
         fs::write(dir.join("policies/bad.txt"), "invalid").unwrap();
 
         let source = PolicyStoreSource::Directory(dir.to_path_buf());
-        let loader = DefaultPolicyStoreLoader::new();
+        let loader = DefaultPolicyStoreLoader::new_physical();
         let result = loader.load(&source);
 
         assert!(result.is_err());
@@ -691,11 +734,17 @@ permit(
         fs::create_dir(dir.join("policies")).unwrap();
 
         let source = PolicyStoreSource::Directory(dir.to_path_buf());
-        let loader = DefaultPolicyStoreLoader::new();
+        let loader = DefaultPolicyStoreLoader::new_physical();
         let result = loader.load(&source);
 
         assert!(result.is_err());
         let err = result.unwrap_err();
-        assert!(err.to_string().contains("JSON parsing error"));
+        // Error could be "JSON parsing error" or "Invalid metadata" from validator
+        let err_str = err.to_string();
+        assert!(
+            err_str.contains("JSON") || err_str.contains("parse") || err_str.contains("Invalid"),
+            "Expected JSON/parse error, got: {}",
+            err_str
+        );
     }
 }
