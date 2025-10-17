@@ -19,7 +19,6 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -34,7 +33,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Singleton
 public class AdminUISecurityService {
@@ -67,12 +65,27 @@ public class AdminUISecurityService {
     private static String RESOURCE_PREFIX= "Gluu::Flex::AdminUI::Resources::";
     private static String ACTION_PREFIX= "Gluu::Flex::AdminUI::Action::";
 
-
+    /**
+     * Retrieves the policy store configuration for the Admin UI.
+     * <p>
+     * This method checks if a remote policy store URL is configured and enabled.
+     * If so, it fetches the policy store from the remote URL using a GET request.
+     * Otherwise, it loads the local default policy store JSON file from the configured file path.
+     * </p>
+     *
+     * <p>
+     * The method returns a {@link GenericResponse} containing the policy store as a {@link JsonNode}
+     * if successful, or an error response if the retrieval fails.
+     * </p>
+     *
+     * @return {@link GenericResponse} containing the policy store data or an error message.
+     * @throws ApplicationException if any unexpected error occurs while fetching or parsing the policy store.
+     */
 
     public GenericResponse getPolicyStore() throws ApplicationException {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-            //If the eemote Policy Store URL configured
+            // If the remote Policy Store URL is configured and enabled
             if(auiConfiguration.getUseRemotePolicyStore() && !Strings.isNullOrEmpty(auiConfiguration.getAuiPolicyStoreUrl())) {
                 Invocation.Builder request = ClientFactory.getClientBuilder(auiConfiguration.getAuiPolicyStoreUrl());
                 request.header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
@@ -83,14 +96,15 @@ public class AdminUISecurityService {
                 ObjectMapper mapper = new ObjectMapper();
                 if (response.getStatus() == 200) {
                     String entity = response.readEntity(String.class);
-                    JsonNode jsonNode = mapper.readValue(entity, JsonNode.class);
-                    return CommonUtils.createGenericResponse(true, 200, "Policy store fetched.", jsonNode);
+                    JsonNode policyStoreJsonNode = mapper.readValue(entity, JsonNode.class);
+                    return CommonUtils.createGenericResponse(true, 200, "Policy store fetched successfully.", policyStoreJsonNode);
                 }
-                //getting error
+                // Handle non-200 responses
                 String jsonData = response.readEntity(String.class);
                 log.error("{}: {}", ErrorResponse.RETRIEVE_POLICY_STORE_ERROR, jsonData);
                 return CommonUtils.createGenericResponse(false, response.getStatus(), jsonData);
             } else {
+                // Load policy store from default local file path
                 Path path = Paths.get(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
                 log.error("Absolute path of default : " + path.toAbsolutePath());
                 // Create ObjectMapper instance
@@ -99,8 +113,6 @@ public class AdminUISecurityService {
                 byte[] jsonBytes = Files.readAllBytes(path);
                 // Parse bytes into JsonNode
                 JsonNode policyStoreJsonNode = objectMapper.readTree(jsonBytes);
-                // Print or use the JsonNode
-                log.error(policyStoreJsonNode.toPrettyString());
                 return CommonUtils.createGenericResponse(true, 200, "Policy store fetched successfully.", policyStoreJsonNode);
             }
         } catch (Exception e) {
@@ -109,20 +121,44 @@ public class AdminUISecurityService {
         }
     }
 
+    /**
+     * Synchronizes role-to-scope mappings in the Admin UI configuration based on the latest policy-store definitions.
+     * <p>
+     * This method performs the following operations:
+     * <ul>
+     *     <li>Fetches all resource-to-scope mappings from persistence (via {@link AdminUIResourceScopesMapping}).</li>
+     *     <li>Retrieves the current policy-store JSON, either from a remote source or local file, using {@link #getPolicyStore()}.</li>
+     *     <li>Uses {@code mapPrincipalsToScopes()} to generate a mapping of principals (roles) to corresponding scopes.</li>
+     *     <li>Creates or updates {@link AdminRole} entries for each principal found in the policy-store.</li>
+     *     <li>Generates {@link RolePermissionMapping} objects that map each role to its associated scopes (permissions).</li>
+     *     <li>Removes any duplicate permissions and updates the Admin UI configuration with the new mappings.</li>
+     * </ul>
+     * </p>
+     *
+     * <p>
+     * This synchronization ensures that access control roles and their permissions within the Admin UI
+     * remain aligned with the definitions specified in the external policy-store.
+     * </p>
+     *
+     * @return {@link GenericResponse} indicating success or failure of the synchronization process.
+     *         On success, it includes a message stating that the sync completed successfully.
+     * @throws ApplicationException if any error occurs while fetching, parsing, or updating the role-to-scope mappings.
+     */
     public GenericResponse syncRoleScopeMapping() throws ApplicationException {
 
         try {
+            // Retrieve all Admin UI resource-scope mappings from persistence
             final Filter filter = Filter.createPresenceFilter(AppConstants.ADMIN_UI_RESOURCE);
             List<AdminUIResourceScopesMapping> adminUIResourceScopesMappings = entryManager.findEntries(AppConstants.ADMIN_UI_RESOURCE_SCOPES_MAPPING_DN, AdminUIResourceScopesMapping.class, filter);
-            //get resource-scope mapping JsonNode
+            // Convert resource-scope mappings to JSON
             JsonNode resourceScopesJson = CommonUtils.toJsonNode(adminUIResourceScopesMappings);
 
-            //get policy-store JsonNode
+            // Retrieve policy-store JSON (remote or local)
             JsonNode policyStoreJson = getPolicyStore().getResponseObject();
-
+            // Map principals (roles) to scopes using policy-store and resource-scope data
             Map<String, Set<String>> principalsToScopesMap = mapPrincipalsToScopes(policyStoreJson, resourceScopesJson);
 
-            // Convert map keys to list of AdminRole
+            // Build list of AdminRole objects for each role found in the mapping
             List<AdminRole> roles = principalsToScopesMap.keySet().stream()
                     .map(roleName -> {
                         AdminRole role = new AdminRole();
@@ -132,8 +168,9 @@ public class AdminUISecurityService {
                         return role;
                     })
                     .collect(Collectors.toList());
+            // Reset roles in the Admin UI configuration
             adminUIService.resetRoles(roles);
-            // Convert map to list of RolePermissionMapping
+            // Build list of RolePermissionMapping objects
             List<RolePermissionMapping> rolePermissionMappings = principalsToScopesMap.entrySet().stream()
                     .map(entry -> {
                         RolePermissionMapping rpm = new RolePermissionMapping();
@@ -142,7 +179,7 @@ public class AdminUISecurityService {
                         return rpm;
                     })
                     .collect(Collectors.toList());
-            //removing duplicate permission mapped to roles
+            // Remove duplicate permissions mapped to roles
             List<RolePermissionMapping> updatedMappings = rolePermissionMappings.stream()
                     .map(entry -> {
                         RolePermissionMapping rpm = new RolePermissionMapping();
@@ -152,9 +189,9 @@ public class AdminUISecurityService {
                         return rpm;
                     })
                     .collect(Collectors.toList());
-
+            // Reset permissions-to-role mappings in Admin UI configuration
             adminUIService.resetPermissionsToRole(updatedMappings);
-            return CommonUtils.createGenericResponse(true, 200, "Sync of role-to-scope mapping from policy-store completed successfully.");
+            return CommonUtils.createGenericResponse(true, 200, "Sync of role-to-scope mappings from the policy store completed successfully.");
 
         } catch(Exception e) {
             log.error(ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription(), e);
