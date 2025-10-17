@@ -22,7 +22,7 @@
 /jans-scim/ @jgomer2001
 /jans-config-api/ @pujavs @yuriyz @yurem
 /jans-cli-tui/ @devrimyatar
-/jans-linux-setup/ @devrimyatar @yuriyz @yurem @yuriyzz
+/jans-linux-setup/ @devrimyatar @yuriyz @yurem @yuriyzz @iromli
 /jans-linux-setup/jans_setup/setup_app/version.py @moabu @mo-auto
 /jans-linux-setup/static/scripts/admin_ui_plugin.py @devrimyatar @duttarnab
 /agama/ @jgomer2001
