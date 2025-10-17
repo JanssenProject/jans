@@ -8,7 +8,7 @@
 //! Blocking client of Cedarling
 
 use crate::{
-    AuthorizeError, AuthorizeResult, BootstrapConfig, InitCedarlingError, LogStorage, Request,
+    AuthorizeError, AuthorizeResult, BootstrapConfig, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, Request,
     RequestUnsigned,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
@@ -66,7 +66,7 @@ impl Cedarling {
     pub fn authorize_multi_issuer(
         &self,
         request: crate::authz::request::AuthorizeMultiIssuerRequest,
-    ) -> Result<AuthorizeResult, AuthorizeError> {
+    ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         self.runtime
             .block_on(self.instance.authorize_multi_issuer(request))
     }

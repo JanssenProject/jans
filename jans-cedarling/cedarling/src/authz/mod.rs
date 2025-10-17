@@ -38,7 +38,7 @@ mod trust_mode;
 
 pub(crate) mod request;
 
-pub use authorize_result::AuthorizeResult;
+pub use authorize_result::{AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use errors::*;
 
 /// Configuration to Authz to initialize service without errors
@@ -142,7 +142,7 @@ impl Authz {
                 let authz_result = self
                     .execute_authorize(ExecuteAuthorizeParameters {
                         entities: &entities,
-                        principal: principal.clone(),
+                        principal: Some(principal.clone()),
                         action: action.clone(),
                         resource: resource_uid.clone(),
                         context: context.clone(),
@@ -184,7 +184,7 @@ impl Authz {
                 let authz_result = self
                     .execute_authorize(ExecuteAuthorizeParameters {
                         entities: &entities,
-                        principal: principal.clone(),
+                        principal: Some(principal.clone()),
                         action: action.clone(),
                         resource: resource_uid.clone(),
                         context: context.clone(),
@@ -317,10 +317,13 @@ impl Authz {
     ///
     /// This implementation processes multiple JWT tokens from different issuers.
     /// It validates the request format and JWT tokens, builds entities, and performs authorization evaluation.
+    /// 
+    /// Unlike traditional authorization which uses workload/user principals, multi-issuer authorization
+    /// evaluates policies based solely on the context (tokens) without requiring a principal.
     pub async fn authorize_multi_issuer(
         &self,
         request: AuthorizeMultiIssuerRequest,
-    ) -> Result<AuthorizeResult, AuthorizeError> {
+    ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         let start_time = Utc::now();
         let request_id = gen_uuid7();
 
@@ -355,22 +358,21 @@ impl Authz {
 
         let resource_uid = entities_data.resource.uid();
 
-        let principal = EntityUid::from_str("Acme::Any::\"whoever\"").unwrap();
-
         let entities = entities_data.entities(Some(&schema.schema))?;
 
+        // Multi-issuer authorization does not use a principal
+        // Authorization is based solely on the context (tokens)
         let authz_result = self
             .execute_authorize(ExecuteAuthorizeParameters {
                 entities: &entities,
-                principal: principal.clone(),
+                principal: None,
                 action: action.clone(),
                 resource: resource_uid.clone(),
                 context,
-            })
-            .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
+            })?;
 
         let authz_info = AuthorizeInfo {
-            principal: principal.to_string(),
+            principal: "None (multi-issuer)".to_string(),
             diagnostics: Diagnostics::new(
                 authz_result.diagnostics(),
                 &self.config.policy_store.policies,
@@ -378,14 +380,7 @@ impl Authz {
             decision: authz_result.decision().into(),
         };
 
-        let result = AuthorizeResult::new(
-            &self.config.authorization.principal_bool_operator,
-            Some(principal.clone()),
-            None, // No person principal for multi-issuer
-            Some(authz_result),
-            None, // No person result for multi-issuer
-            request_id,
-        )?;
+        let result = MultiIssuerAuthorizeResult::new(authz_result.clone(), request_id);
 
         // measure time how long request executes
         let since_start = Utc::now().signed_duration_since(start_time);
@@ -407,7 +402,7 @@ impl Authz {
         // Log policy evaluation errors if any exist
         self.log_policy_evaluation_errors(
             &authz_info.diagnostics,
-            "workload principal",
+            "multi-issuer (no principal)",
             request_id,
         );
 
@@ -427,17 +422,10 @@ impl Authz {
             policystore_version: self.config.policy_store.get_store_version(),
             principal: DecisionLogEntry::principal(
                 false, // No person principal for multi-issuer
-                true,  // Workload principal for multi-issuer
+                false, // No workload principal for multi-issuer
             ),
-            user: None, // No user claims for multi-issuer
-            workload: Some(get_entity_claims(
-                self.config
-                    .authorization
-                    .decision_log_workload_claims
-                    .as_slice(),
-                &entities,
-                principal,
-            )),
+            user: None,     // No user claims for multi-issuer
+            workload: None, // No workload claims for multi-issuer
             lock_client_id: None,
             action: request.action.clone(),
             resource: resource_uid.to_string(),
@@ -518,7 +506,7 @@ impl Authz {
             let auth_result = self
                 .execute_authorize(ExecuteAuthorizeParameters {
                     entities: &entities,
-                    principal: principal_uid.clone(),
+                    principal: Some(principal_uid.clone()),
                     action: action.clone(),
                     resource: resource_uid.clone(),
                     context: context.clone(),
@@ -620,16 +608,20 @@ impl Authz {
         &self,
         parameters: ExecuteAuthorizeParameters,
     ) -> Result<cedar_policy::Response, cedar_policy::RequestValidationError> {
-        let request_principal_workload = cedar_policy::Request::new(
-            parameters.principal,
-            parameters.action,
-            parameters.resource,
-            parameters.context,
-            Some(&self.config.policy_store.schema.schema),
-        )?;
+        let mut request_builder = cedar_policy::Request::builder()
+            .action(parameters.action)
+            .resource(parameters.resource)
+            .context(parameters.context)
+            .schema(&self.config.policy_store.schema.schema);
+
+        if let Some(principal) = parameters.principal {
+            request_builder = request_builder.principal(principal);
+        }
+
+        let request = request_builder.build()?;
 
         let response = self.authorizer.is_authorized(
-            &request_principal_workload,
+            &request,
             self.config.policy_store.policies.get_set(),
             parameters.entities,
         );
@@ -670,7 +662,7 @@ impl Authz {
 /// Helper struct to hold named parameters for [`Authz::execute_authorize`] method.
 struct ExecuteAuthorizeParameters<'a> {
     entities: &'a Entities,
-    principal: EntityUid,
+    principal: Option<EntityUid>,
     action: EntityUid,
     resource: EntityUid,
     context: cedar_policy::Context,

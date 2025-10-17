@@ -66,6 +66,9 @@ pub enum AuthorizeError {
     /// Error encountered while creating [`cedar_policy::Request`] for entity principal
     #[error(transparent)]
     InvalidPrincipal(#[from] InvalidPrincipalError),
+    /// Error encountered while validating the Cedar request
+    #[error("request validation error: {0}")]
+    RequestValidation(#[from] RequestValidationError),
     /// Error encountered while checking if the Entities adhere to the schema
     #[error("failed to validate Cedar entities: {0:?}")]
     ValidateEntities(#[from] EntitiesError),

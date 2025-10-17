@@ -86,6 +86,44 @@ policy_stores:
                 context.tokens.dolphin_dolphin_token.hasTag("waiver") &&
                 context.tokens.dolphin_dolphin_token.getTag("waiver").contains("signed")
             };
+      multi_token_scope_1:
+        description: Allow action if any token from different issuers has required scope
+        creation_date: '2024-12-19T10:00:00.000000'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action == Acme::Action::"ManageDocuments",
+                resource in Acme::Resource::"SharedDocs"
+            ) when {
+                (context has tokens.acme_access_token &&
+                 context.tokens.acme_access_token.hasTag("scope") &&
+                 context.tokens.acme_access_token.getTag("scope").contains("write:documents")) ||
+                (context has tokens.dolphin_access_token &&
+                 context.tokens.dolphin_access_token.hasTag("scope") &&
+                 context.tokens.dolphin_access_token.getTag("scope").contains("write:documents"))
+            };
+      multi_token_scope_2:
+        description: Require tokens from multiple issuers with specific scopes
+        creation_date: '2024-12-19T10:00:00.000000'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action == Acme::Action::"SubmitVote",
+                resource == Acme::Resource::"TradeAssociationElection"
+            ) when {
+                (context has tokens.acme_access_token &&
+                 context.tokens.acme_access_token.hasTag("scope") &&
+                 context.tokens.acme_access_token.getTag("scope").contains("trade:vote")) &&
+                (context has tokens.dolphin_access_token &&
+                 context.tokens.dolphin_access_token.hasTag("member_status") &&
+                 context.tokens.dolphin_access_token.getTag("member_status").contains("verified"))
+            };
       jans_workload_policy:
         description: Jans workload policy for principal workload
         creation_date: '2024-12-19T10:00:00.000000'
@@ -166,6 +204,16 @@ policy_stores:
             context: Context
           };
           action "SwimWithOrca" appliesTo {
+            principal: [Any],
+            resource: [Resource],
+            context: Context
+          };
+          action "ManageDocuments" appliesTo {
+            principal: [Any],
+            resource: [Resource],
+            context: Context
+          };
+          action "SubmitVote" appliesTo {
             principal: [Any],
             resource: [Resource],
             context: Context

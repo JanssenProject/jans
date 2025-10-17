@@ -505,8 +505,8 @@ mod tests {
 
         let entity = builder.build_single_token_entity(&token).unwrap();
 
-        // Check entity type
-        assert_eq!(entity.uid().type_name().to_string(), "Token");
+        // Check entity type - should match the token name
+        assert_eq!(entity.uid().type_name().to_string(), "Jans::Access_Token");
 
         // Check core attributes exist
         assert!(entity.attr("token_type").is_some());

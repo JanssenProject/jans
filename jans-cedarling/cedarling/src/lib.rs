@@ -40,7 +40,7 @@ pub use authz::request::{
     AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, Request, RequestUnsigned,
     TokenInput,
 };
-pub use authz::{AuthorizeError, AuthorizeResult};
+pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
 use init::ServiceFactory;
@@ -166,7 +166,7 @@ impl Cedarling {
     pub async fn authorize_multi_issuer(
         &self,
         request: AuthorizeMultiIssuerRequest,
-    ) -> Result<AuthorizeResult, AuthorizeError> {
+    ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         self.authz.authorize_multi_issuer(request).await
     }
 
