@@ -8,6 +8,7 @@ package io.jans.fido2.service.metric;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2UserMetrics;
+import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.fido2.model.metric.UserMetricsUpdateRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
@@ -37,7 +38,7 @@ public class Fido2UserMetricsService {
     private AppConfiguration appConfiguration;
 
     @Inject
-    @Named("fido2UserMetricsEntryManager")
+    @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     private PersistenceEntryManager persistenceEntryManager;
 
     private static final ResourceBundle METRICS_CONFIG = ResourceBundle.getBundle("fido2-metrics");

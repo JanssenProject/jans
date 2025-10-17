@@ -28,6 +28,7 @@ import io.jans.lock.model.config.BaseDnConfiguration;
 import io.jans.lock.model.config.Conf;
 import io.jans.lock.model.config.Configuration;
 import io.jans.lock.model.config.StaticConfiguration;
+import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
 import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
@@ -118,6 +119,7 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
     
     private PersistenceConfiguration persistenceConfiguration;
 	private AppConfiguration dynamicConf;
+	private CedarlingPolicyConfiguration policyConfiguration;
 	private StaticConfiguration staticConf;
 	private String cryptoConfigurationSalt;
 
@@ -249,6 +251,12 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 
 	@Produces
 	@ApplicationScoped
+	public CedarlingPolicyConfiguration getCedarlingPolicy() {
+		return policyConfiguration;
+	}
+
+	@Produces
+	@ApplicationScoped
 	public StaticConfiguration getStaticConfiguration() {
 		return staticConf;
 	}
@@ -287,6 +295,7 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 				if (this.loaded) {
 					destroy(AppConfiguration.class);
 					destroy(StaticConfiguration.class);
+					destroy(CedarlingPolicyConfiguration.class);
 				}
 
 				this.loaded = true;
@@ -332,6 +341,9 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 	private void initConfigurationConf(Conf conf) {
 		if (conf.getDynamic() != null) {
 			dynamicConf = conf.getDynamic();
+		}
+		if (conf.getPolicyConfiguration() != null) {
+			policyConfiguration = conf.getPolicyConfiguration();
 		}
 		if (conf.getStatics() != null) {
 			staticConf = conf.getStatics();

@@ -439,7 +439,7 @@ paths:
                 additionalProperties:
                   type: object
       responses:
-        "202":
+        "200":
           description: Agama project accepted
           content:
             application/json:
@@ -515,7 +515,7 @@ paths:
         "200":
           description: Agama project
           content:
-            application/json:
+            text/plain:
               schema:
                 type: string
                 format: binary
@@ -14915,13 +14915,13 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
-        userCanView:
+        adminCanEdit:
+          type: boolean
+        userCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
@@ -14998,6 +14998,8 @@ components:
         requirePar:
           type: boolean
         parForbidPublicClient:
+          type: boolean
+        jwtGrantAllowUserByUidInAssertion:
           type: boolean
         deviceAuthzEndpoint:
           type: string
@@ -15155,6 +15157,7 @@ components:
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         subjectTypesSupported:
           type: array
           items:
@@ -15482,6 +15485,7 @@ components:
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         cssLocation:
           type: string
         jsLocation:
@@ -15831,6 +15835,8 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -15840,8 +15846,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -16331,6 +16335,7 @@ components:
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         applicationType:
           type: string
           enum:
@@ -17038,14 +17043,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -17493,10 +17498,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -17677,9 +17682,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object

@@ -40,21 +40,26 @@ end
 
 ### Sample Authzen request
 
+!!! NOTE
+    The request shown below is designed against the AuthZen specification and should not be used for a regular cedarling deployment.
+
 ```json
 {
   "subject": {
     "type": "token_bundle",
-    "id": "some_id",
+    "id": <SHA256 hash of the properties dictionary>,
     "properties": {
       "access_token": ""
     }
   },
   "resource": {
-    "cedar_entity_mapping": {
-      "entity_type": "Jans::HTTP_Request",
-      "id": "some_id"
-    },
+    "type": "Request",
+    "id": <SHA256 hash of the properties dictionary>,
     "properties": {
+      "cedar_entity_mapping": {
+        "entity_type": "Jans::HTTP_Request",
+        "id": "some_id"
+      },
       "header": {},
       "url": {
         "protocol": "http",
@@ -232,6 +237,14 @@ pip install flask requests
 ```python
 from flask import Flask, abort, request
 import requests
+import json
+from hashlib import sha256
+
+def generate_hash(input) -> str:
+    encoded_str = json.dumps(input).encode("utf-8")
+    digest = sha256(encoded_str).hexdigest()
+    return digest
+
 
 app = Flask(__name__)
 
@@ -241,27 +254,34 @@ def protected():
     if token is None:
         abort(403)
     token_jwt = token.split(" ")[1]
+    print(token_jwt)
+    subject_properties = {
+        "access_token": token_jwt
+    }
+    subject_hash = generate_hash(subject_properties)
+    resource_properties = {
+        "cedar_entity_mapping": {
+            "entity_type": "Jans::HTTP_Request",
+            "id": "some_id"
+        },
+        "header": {},
+        "url": {
+            "protocol": "http",
+            "host": "www.acme.tld",
+            "path": "/protected"
+        }
+    }
+    resource_hash = generate_hash(resource_properties)
     payload = {
         "subject": {
             "type": "token_bundle",
-            "id": "some_id",
-            "properties": {
-                "access_token": token_jwt
-            }
+            "id": subject_hash,
+            "properties": subject_properties 
         },
         "resource": {
-            "cedar_entity_mapping": {
-                "entity_type": "Jans::HTTP_Request",
-                "id": "some_id"
-            },
-            "properties": {
-                "header": {},
-                "url": {
-                    "protocol": "http",
-                    "host": "www.acme.tld",
-                    "path": "/protected"
-                }
-            }
+            "type": "type",
+            "id": resource_hash,
+            "properties": resource_properties 
         },
         "action": {
             "name": "Jans::Action::\"GET\""
