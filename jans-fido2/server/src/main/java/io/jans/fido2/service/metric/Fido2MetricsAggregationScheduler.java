@@ -163,6 +163,17 @@ public class Fido2MetricsAggregationScheduler {
     }
 
     /**
+     * Check if specific aggregation type is enabled
+     * Note: For now, all aggregation types are controlled by the main aggregation flag
+     * Individual type flags can be added to AppConfiguration in the future if needed
+     */
+    public boolean isAggregationEnabled(String aggregationType) {
+        // All aggregation types use the main aggregation enabled flag
+        // This ensures backward compatibility and prevents runtime errors
+        return isAggregationEnabled();
+    }
+
+    /**
      * Get aggregation interval in minutes
      */
     public int getAggregationInterval() {

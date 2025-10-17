@@ -659,4 +659,283 @@ public class Fido2MetricsService {
         return entry;
     }
 
+    // ========== TREND ANALYSIS METHODS (GitHub Issue #4) ==========
+
+    /**
+     * Get trend analysis for a specific aggregation type and time period
+     */
+    public Map<String, Object> getTrendAnalysis(String aggregationType, LocalDateTime startTime, LocalDateTime endTime) {
+        try {
+            List<Fido2MetricsAggregation> aggregations = getAggregations(aggregationType, startTime, endTime);
+            
+            if (aggregations.isEmpty()) {
+                return Collections.emptyMap();
+            }
+
+            Map<String, Object> trendAnalysis = new HashMap<>();
+            
+            // Extract data points for trend calculation
+            List<Map<String, Object>> dataPoints = new ArrayList<>();
+            for (Fido2MetricsAggregation agg : aggregations) {
+                Map<String, Object> point = new HashMap<>();
+                point.put("timestamp", agg.getStartTime());
+                point.put("period", agg.getPeriod());
+                point.put("metrics", agg.getMetricsData());
+                dataPoints.add(point);
+            }
+            trendAnalysis.put("dataPoints", dataPoints);
+            
+            // Calculate growth rate
+            double growthRate = calculateGrowthRate(aggregations);
+            trendAnalysis.put("growthRate", growthRate);
+            
+            // Determine trend direction
+            String trendDirection = determineTrendDirection(aggregations);
+            trendAnalysis.put("trendDirection", trendDirection);
+            
+            // Generate insights
+            Map<String, Object> insights = generateTrendInsights(aggregations);
+            trendAnalysis.put("insights", insights);
+            
+            return trendAnalysis;
+            
+        } catch (Exception e) {
+            log.error("Failed to calculate trend analysis: {}", e.getMessage(), e);
+            return Collections.emptyMap();
+        }
+    }
+
+    /**
+     * Get period-over-period comparison
+     */
+    public Map<String, Object> getPeriodOverPeriodComparison(String aggregationType, int periods) {
+        try {
+            LocalDateTime endTime = LocalDateTime.now();
+            LocalDateTime startTime = endTime.minus(periods, 
+                "DAILY".equals(aggregationType) ? java.time.temporal.ChronoUnit.DAYS :
+                "WEEKLY".equals(aggregationType) ? java.time.temporal.ChronoUnit.WEEKS :
+                java.time.temporal.ChronoUnit.MONTHS);
+
+            List<Fido2MetricsAggregation> currentPeriod = getAggregations(aggregationType, startTime, endTime);
+            
+            // Get previous period for comparison
+            LocalDateTime previousEndTime = startTime;
+            LocalDateTime previousStartTime = previousEndTime.minus(periods,
+                "DAILY".equals(aggregationType) ? java.time.temporal.ChronoUnit.DAYS :
+                "WEEKLY".equals(aggregationType) ? java.time.temporal.ChronoUnit.WEEKS :
+                java.time.temporal.ChronoUnit.MONTHS);
+            
+            List<Fido2MetricsAggregation> previousPeriod = getAggregations(aggregationType, previousStartTime, previousEndTime);
+
+            Map<String, Object> comparison = new HashMap<>();
+            comparison.put("currentPeriod", calculatePeriodSummary(currentPeriod));
+            comparison.put("previousPeriod", calculatePeriodSummary(previousPeriod));
+            comparison.put("comparison", calculatePeriodComparison(currentPeriod, previousPeriod));
+            
+            return comparison;
+            
+        } catch (Exception e) {
+            log.error("Failed to calculate period-over-period comparison: {}", e.getMessage(), e);
+            return Collections.emptyMap();
+        }
+    }
+
+    /**
+     * Get aggregation summary for a time period
+     */
+    public Map<String, Object> getAggregationSummary(String aggregationType, LocalDateTime startTime, LocalDateTime endTime) {
+        try {
+            List<Fido2MetricsAggregation> aggregations = getAggregations(aggregationType, startTime, endTime);
+            return calculatePeriodSummary(aggregations);
+        } catch (Exception e) {
+            log.error("Failed to get aggregation summary: {}", e.getMessage(), e);
+            return Collections.emptyMap();
+        }
+    }
+
+    // ========== PRIVATE HELPER METHODS FOR TREND ANALYSIS ==========
+
+    private double calculateGrowthRate(List<Fido2MetricsAggregation> aggregations) {
+        if (aggregations.size() < 2) {
+            return 0.0;
+        }
+        
+        // Sort by start time
+        aggregations.sort((a, b) -> a.getStartTime().compareTo(b.getStartTime()));
+        
+        Fido2MetricsAggregation first = aggregations.get(0);
+        Fido2MetricsAggregation last = aggregations.get(aggregations.size() - 1);
+        
+        Double firstValue = getTotalOperations(first);
+        Double lastValue = getTotalOperations(last);
+        
+        if (firstValue == null || lastValue == null || firstValue == 0) {
+            return 0.0;
+        }
+        
+        return ((lastValue - firstValue) / firstValue) * 100.0;
+    }
+
+    private String determineTrendDirection(List<Fido2MetricsAggregation> aggregations) {
+        double growthRate = calculateGrowthRate(aggregations);
+        
+        if (growthRate > 5.0) {
+            return "INCREASING";
+        } else if (growthRate < -5.0) {
+            return "DECREASING";
+        } else {
+            return "STABLE";
+        }
+    }
+
+    private Map<String, Object> generateTrendInsights(List<Fido2MetricsAggregation> aggregations) {
+        Map<String, Object> insights = new HashMap<>();
+        
+        if (aggregations.isEmpty()) {
+            return insights;
+        }
+        
+        // Calculate average metrics across all aggregations
+        double avgRegistrationSuccessRate = aggregations.stream()
+            .mapToDouble(agg -> {
+                Double val = getRegistrationSuccessRate(agg);
+                return val != null ? val : 0.0;
+            })
+            .average()
+            .orElse(0.0);
+        insights.put("avgRegistrationSuccessRate", avgRegistrationSuccessRate);
+        
+        double avgAuthenticationSuccessRate = aggregations.stream()
+            .mapToDouble(agg -> {
+                Double val = getAuthenticationSuccessRate(agg);
+                return val != null ? val : 0.0;
+            })
+            .average()
+            .orElse(0.0);
+        insights.put("avgAuthenticationSuccessRate", avgAuthenticationSuccessRate);
+        
+        // Peak usage detection
+        Fido2MetricsAggregation peakAggregation = aggregations.stream()
+            .max((a, b) -> Double.compare(getTotalOperations(a), getTotalOperations(b)))
+            .orElse(null);
+        
+        if (peakAggregation != null) {
+            insights.put("peakUsage", Map.of(
+                "period", peakAggregation.getPeriod(),
+                "totalOperations", getTotalOperations(peakAggregation)
+            ));
+        }
+        
+        return insights;
+    }
+
+    private Map<String, Object> calculatePeriodSummary(List<Fido2MetricsAggregation> aggregations) {
+        Map<String, Object> summary = new HashMap<>();
+        
+        if (aggregations.isEmpty()) {
+            return summary;
+        }
+        
+        // Calculate totals
+        long totalRegistrations = aggregations.stream()
+            .mapToLong(agg -> {
+                Long val = getRegistrationAttempts(agg);
+                return val != null ? val : 0L;
+            })
+            .sum();
+        long totalAuthentications = aggregations.stream()
+            .mapToLong(agg -> {
+                Long val = getAuthenticationAttempts(agg);
+                return val != null ? val : 0L;
+            })
+            .sum();
+        long totalFallbacks = aggregations.stream()
+            .mapToLong(agg -> {
+                Long val = getFallbackEvents(agg);
+                return val != null ? val : 0L;
+            })
+            .sum();
+        
+        summary.put("totalRegistrations", totalRegistrations);
+        summary.put("totalAuthentications", totalAuthentications);
+        summary.put("totalFallbacks", totalFallbacks);
+        summary.put("totalOperations", totalRegistrations + totalAuthentications);
+        
+        // Calculate averages
+        double avgRegistrationSuccessRate = aggregations.stream()
+            .mapToDouble(agg -> {
+                Double val = getRegistrationSuccessRate(agg);
+                return val != null ? val : 0.0;
+            })
+            .average()
+            .orElse(0.0);
+        double avgAuthenticationSuccessRate = aggregations.stream()
+            .mapToDouble(agg -> {
+                Double val = getAuthenticationSuccessRate(agg);
+                return val != null ? val : 0.0;
+            })
+            .average()
+            .orElse(0.0);
+        
+        summary.put("avgRegistrationSuccessRate", avgRegistrationSuccessRate);
+        summary.put("avgAuthenticationSuccessRate", avgAuthenticationSuccessRate);
+        
+        return summary;
+    }
+
+    private Map<String, Object> calculatePeriodComparison(List<Fido2MetricsAggregation> current, List<Fido2MetricsAggregation> previous) {
+        Map<String, Object> comparison = new HashMap<>();
+        
+        Map<String, Object> currentSummary = calculatePeriodSummary(current);
+        Map<String, Object> previousSummary = calculatePeriodSummary(previous);
+        
+        // Calculate percentage changes
+        long currentTotal = (Long) currentSummary.getOrDefault("totalOperations", 0L);
+        long previousTotal = (Long) previousSummary.getOrDefault("totalOperations", 0L);
+        
+        if (previousTotal > 0) {
+            double changePercent = ((double) (currentTotal - previousTotal) / previousTotal) * 100.0;
+            comparison.put("totalOperationsChange", changePercent);
+        } else {
+            comparison.put("totalOperationsChange", currentTotal > 0 ? 100.0 : 0.0);
+        }
+        
+        return comparison;
+    }
+
+    // Helper methods to extract values from aggregations
+    private Double getTotalOperations(Fido2MetricsAggregation aggregation) {
+        if (aggregation.getMetricsData() == null) {
+            return 0.0;
+        }
+        
+        Long registrations = aggregation.getLongMetric(Fido2MetricsConstants.REGISTRATION_ATTEMPTS);
+        Long authentications = aggregation.getLongMetric(Fido2MetricsConstants.AUTHENTICATION_ATTEMPTS);
+        
+        long regCount = registrations != null ? registrations : 0L;
+        long authCount = authentications != null ? authentications : 0L;
+        
+        return (double) (regCount + authCount);
+    }
+
+    private Long getRegistrationAttempts(Fido2MetricsAggregation aggregation) {
+        return aggregation.getLongMetric(Fido2MetricsConstants.REGISTRATION_ATTEMPTS);
+    }
+
+    private Long getAuthenticationAttempts(Fido2MetricsAggregation aggregation) {
+        return aggregation.getLongMetric(Fido2MetricsConstants.AUTHENTICATION_ATTEMPTS);
+    }
+
+    private Long getFallbackEvents(Fido2MetricsAggregation aggregation) {
+        return aggregation.getLongMetric(Fido2MetricsConstants.FALLBACK_EVENTS);
+    }
+
+    private Double getRegistrationSuccessRate(Fido2MetricsAggregation aggregation) {
+        return aggregation.getDoubleMetric(Fido2MetricsConstants.REGISTRATION_SUCCESS_RATE);
+    }
+
+    private Double getAuthenticationSuccessRate(Fido2MetricsAggregation aggregation) {
+        return aggregation.getDoubleMetric(Fido2MetricsConstants.AUTHENTICATION_SUCCESS_RATE);
+    }
+
 }
