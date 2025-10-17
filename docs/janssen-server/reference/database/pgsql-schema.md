@@ -116,7 +116,7 @@ tags:
 | --------------------- | --------------------------- | ------------------------ | ---- | ------- | --------------------------------------------------------------------------------------------------- |
 | displayName           | character varying           | 128                      | YES  | None    | preferred name of a person to be used when displaying entries                                       |
 | jansCustomMessage     | character varying           | 128                      | YES  | None    | exclude custom welcome message                                                                      |
-| jansFaviconImage      | character varying           | 64                       | YES  | None    | TODO - Stores URL of favicon                                                                        |
+| jansFaviconImage      | character varying           | 64                       | YES  | None    | Stores URL of favicon image used in the organization's web interface                                |
 | jansLogoImage         | character varying           | 64                       | YES  | None    | Logo used by exclude for default look and feel.                                                     |
 | jansManager           | character varying           | 64                       | YES  | None    | Used to specify if a person has the manager role                                                    |
 | jansManagerGrp        | text                        | None                     | YES  | None    | Used in organizatoin entry to specifies the dn of the group that  has admin priviledges in exclude. |
@@ -340,10 +340,10 @@ tags:
 | jansAttrEditTyp       | jsonb             | None                     | YES  | None    | Specify in exclude who can update an attribute, admin or user                                                                |
 | jansAttrName          | character varying | 64                       | YES  | None    | Specify an identifier for an attribute. May be multi-value  where an attribute has two names, like givenName and first-name. |
 | jansAttrOrigin        | character varying | 64                       | YES  | None    | Specify the person objectclass associated with the attribute,  used for display purposes in exclude.                         |
-| jansAttrSystemEditTyp | character varying | 64                       | YES  | None    | TODO - still required?                                                                                                       |
+| jansAttrSystemEditTyp | character varying | 64                       | YES  | None    | System edit type for attribute. Controls whether attribute can be edited by system administrators only.                     |
 | jansAttrTyp           | character varying | 64                       | YES  | None    | Data type of attribute. Values can be string, photo, numeric, date                                                           |
 | jansClaimName         | character varying | 64                       | YES  | None    | Used by jans in conjunction with jansttributeName to map claims to attributes in LDAP.                                       |
-| jansAttrUsgTyp        | character varying | 64                       | YES  | None    | TODO - Usg? Value can be OpenID                                                                                              |
+| jansAttrUsgTyp        | character varying | 64                       | YES  | None    | Usage type for attribute. Specifies the context where attribute is used (e.g., OpenID, SAML).                              |
 | jansAttrViewTyp       | jsonb             | None                     | YES  | None    | Specify in exclude who can view an attribute, admin or user                                                                  |
 | jansSAML1URI          | character varying | 64                       | YES  | None    | SAML 1 uri of attribute                                                                                                      |
 | jansSAML2URI          | character varying | 64                       | YES  | None    | SAML 2 uri of attribute                                                                                                      |
