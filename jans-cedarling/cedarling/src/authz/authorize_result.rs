@@ -103,6 +103,52 @@ impl Serialize for CedarResponse<'_> {
     }
 }
 
+/// Result of multi-issuer authorization
+/// This is a simpler result structure that doesn't deal with workload/user principals
+#[derive(Debug, Clone, Serialize)]
+pub struct MultiIssuerAuthorizeResult {
+    /// Result of authorization from Cedar policy evaluation
+    #[serde(serialize_with = "serialize_response")]
+    pub response: cedar_policy::Response,
+    
+    /// Result of authorization
+    /// true means `ALLOW`
+    /// false means `Deny`
+    ///
+    /// this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
+    pub decision: bool,
+
+    /// Request ID, generated per each request call, is used to get logs from memory logger
+    pub request_id: String,
+}
+
+/// Custom serializer for cedar_policy::Response
+pub fn serialize_response<S>(
+    value: &cedar_policy::Response,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    CedarResponse(value).serialize(serializer)
+}
+
+impl MultiIssuerAuthorizeResult {
+    /// Create a new MultiIssuerAuthorizeResult
+    pub(crate) fn new(
+        response: cedar_policy::Response,
+        request_id: Uuid,
+    ) -> Self {
+        let decision = response.decision() == Decision::Allow;
+        
+        Self {
+            response,
+            decision,
+            request_id: request_id.to_string(),
+        }
+    }
+}
+
 impl AuthorizeResult {
     /// Builder function for AuthorizeResult
     pub(crate) fn new(

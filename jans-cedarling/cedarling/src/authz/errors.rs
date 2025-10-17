@@ -66,6 +66,9 @@ pub enum AuthorizeError {
     /// Error encountered while creating [`cedar_policy::Request`] for entity principal
     #[error(transparent)]
     InvalidPrincipal(#[from] InvalidPrincipalError),
+    /// Error encountered while validating the Cedar request
+    #[error("request validation error: {0}")]
+    RequestValidation(#[from] RequestValidationError),
     /// Error encountered while checking if the Entities adhere to the schema
     #[error("failed to validate Cedar entities: {0:?}")]
     ValidateEntities(#[from] EntitiesError),
@@ -90,6 +93,9 @@ pub enum AuthorizeError {
     /// Error encountered while validating multi-issuer request
     #[error(transparent)]
     MultiIssuerValidation(#[from] MultiIssuerValidationError),
+    /// Error encountered while building multi-issuer entities
+    #[error("Multi-issuer entity building failed: {0}")]
+    MultiIssuerEntity(String),
 }
 
 /// Error type for ID token trust mode validation
@@ -131,6 +137,9 @@ pub enum BuildContextError {
     InvalidKind(String, String),
     #[error("failed to parse the entity name `{0}`: {1}")]
     ParseEntityName(String, ParseErrors),
+    /// Error encountered while creating Cedar context
+    #[error("failed to create Cedar context: {0}")]
+    ContextCreation(String),
 }
 
 /// Error for creating request role entities
