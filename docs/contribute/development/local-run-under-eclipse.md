@@ -23,7 +23,7 @@ Follow this step-by-step guide to install, configure, and run `Jans CE` and its 
      |- certs\*
      |- jans\*
    |-jans-setup
-   |-jython-2.7.3
+   |-jython-2.7.4
    |-opendj
 ```
 
