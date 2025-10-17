@@ -114,6 +114,13 @@ create_exception!(
     "Error encountered while building multi-issuer entities"
 );
 
+create_exception!(
+    authorize_errors,
+    RequestValidationError,
+    AuthorizeError,
+    "Error encountered while validating the request"
+);
+
 #[pyclass]
 #[derive()]
 pub struct ErrorPayload(CedarlingAuthorizeError);
@@ -164,7 +171,8 @@ errors_functions! {
     ExecuteRule => ExecuteRuleError,
     BuildUnsignedRoleEntity => BuildUnsignedRoleEntityError,
     MultiIssuerValidation => MultiIssuerValidationError,
-    MultiIssuerEntity => MultiIssuerEntityError
+    MultiIssuerEntity => MultiIssuerEntityError,
+    RequestValidation => RequestValidationError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
