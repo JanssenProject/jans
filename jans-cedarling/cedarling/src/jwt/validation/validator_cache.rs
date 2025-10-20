@@ -297,7 +297,7 @@ mod test {
         let mut store = JwtValidatorCache::default();
         let (validator, info) = JwtValidator::new_input_tkn_validator(
             Some("test"),
-            "access_tkn".into(),
+            "access_tkn",
             &TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "AccessToken".into(),

@@ -925,9 +925,11 @@ mod tests {
             claims: crate::jwt::DecodedJwtClaims { inner: claims },
         };
         
-        let mut config = SsaValidationConfig::default();
-        config.validate_grant_types_array = false;
-        config.validate_software_roles_array = false;
+        let config = SsaValidationConfig {
+            validate_grant_types_array: false,
+            validate_software_roles_array: false,
+            ..Default::default()
+        };
         
         let result = validate_ssa_structure_with_config(&decoded_jwt, &config);
         assert!(result.is_ok());

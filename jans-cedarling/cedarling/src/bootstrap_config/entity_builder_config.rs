@@ -16,6 +16,7 @@ const DEFAULT_UNSIGNED_ROLE_ID_SRC: &str = "role";
 pub(crate) const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Jans::Access_token";
 pub(crate) const DEFAULT_ID_TKN_ENTITY_NAME: &str = "Jans::Id_token";
 pub(crate) const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Jans::Userinfo_token";
+pub(crate) const DEFAULT_ENTITY_TYPE_NAME: &str = "Token";
 
 /// Bootstrap Configurations for the JWT to Cedar entity mappings
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

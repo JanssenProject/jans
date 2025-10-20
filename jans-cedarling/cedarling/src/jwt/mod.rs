@@ -287,9 +287,12 @@ impl JwtService {
                 continue;
             }
 
+            // Find the corresponding token metadata key for the entity type name
+            let token_type = self.find_token_metadata_key(&token.mapping);
+
             // Validate JWT using existing single token validation
             match self.validate_single_token(
-                TokenKind::AuthorizeMultiIssuer(&token.mapping),
+                TokenKind::AuthorizeMultiIssuer(token_type),
                 &token.payload,
             ) {
                 Ok(validated_jwt) => {
@@ -367,6 +370,22 @@ impl JwtService {
             .get(&normalize_issuer(iss_claim))
             .map(|config| &config.policy)
             .cloned()
+    }
+
+    /// Find the token metadata key for a given entity type name
+    /// e.g., "Dolphin::Access_Token" -> "access_token"
+    fn find_token_metadata_key<'a>(&'a self, entity_type_name: &'a str) -> &'a str {
+        // Look through all trusted issuers to find the matching entity type name
+        for issuer_config in self.issuer_configs.values() {
+            for (token_key, token_metadata) in &issuer_config.policy.token_metadata {
+                if token_metadata.entity_type_name == entity_type_name {
+                    return token_key;
+                }
+            }
+        }
+        
+        // If not found, return the original mapping (fallback)
+        entity_type_name
     }
 }
 
@@ -614,7 +633,7 @@ mod test {
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
-            Some(HashMap::from([(server.issuer().into(), iss)])),
+            Some(HashMap::from([(server.issuer(), iss)])),
             None,
         )
         .await
@@ -649,7 +668,7 @@ mod test {
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
-            Some(HashMap::from([(server.issuer().into(), iss)])),
+            Some(HashMap::from([(server.issuer(), iss)])),
             None,
         )
         .await
@@ -674,7 +693,7 @@ mod test {
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
-            Some(HashMap::from([(server.issuer().into(), iss)])),
+            Some(HashMap::from([(server.issuer(), iss)])),
             None,
         )
         .await
@@ -746,7 +765,7 @@ mod test {
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
-            Some(HashMap::from([(server.issuer().into(), iss)])),
+            Some(HashMap::from([(server.issuer(), iss)])),
             None,
         )
         .await
@@ -814,7 +833,7 @@ mod test {
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
-            Some(HashMap::from([(server.issuer().into(), iss)])),
+            Some(HashMap::from([(server.issuer(), iss)])),
             None,
         )
         .await
@@ -855,7 +874,7 @@ mod test {
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
-            Some(HashMap::from([(server.issuer().into(), iss)])),
+            Some(HashMap::from([(server.issuer(), iss)])),
             None,
         )
         .await
