@@ -443,10 +443,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// Parse and validate Cedar policies from loaded policy files.
     ///
     /// Extracts policy IDs from @id annotations or filenames and validates syntax.
-    fn parse_policies(
-        &self,
-        policy_files: &[PolicyFile],
-    ) -> Result<Vec<ParsedPolicy>, PolicyStoreError> {
+    fn parse_policies(policy_files: &[PolicyFile]) -> Result<Vec<ParsedPolicy>, PolicyStoreError> {
         let mut parsed_policies = Vec::with_capacity(policy_files.len());
 
         for file in policy_files {
@@ -462,7 +459,6 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// Extracts template IDs from @id annotations or filenames and validates
     /// syntax including slot definitions.
     fn parse_templates(
-        &self,
         template_files: &[PolicyFile],
     ) -> Result<Vec<ParsedTemplate>, PolicyStoreError> {
         let mut parsed_templates = Vec::with_capacity(template_files.len());
@@ -479,7 +475,6 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     ///
     /// Validates no ID conflicts and that all policies/templates can be added.
     fn create_policy_set(
-        &self,
         policies: Vec<ParsedPolicy>,
         templates: Vec<ParsedTemplate>,
     ) -> Result<PolicySet, PolicyStoreError> {
@@ -798,8 +793,6 @@ permit(
 
     #[test]
     fn test_parse_policies_success() {
-        let loader = DefaultPolicyStoreLoader::new_physical();
-
         let policy_files = vec![
             PolicyFile {
                 name: "policy1.cedar".to_string(),
@@ -810,8 +803,11 @@ permit(
                 content: r#"forbid(principal, action, resource);"#.to_string(),
             },
         ];
+        let result =
+            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_policies(
+                &policy_files,
+            );
 
-        let result = loader.parse_policies(&policy_files);
         assert!(result.is_ok());
 
         let parsed = result.unwrap();
@@ -824,8 +820,6 @@ permit(
 
     #[test]
     fn test_parse_policies_with_id_annotation() {
-        let loader = DefaultPolicyStoreLoader::new_physical();
-
         let policy_files = vec![PolicyFile {
             name: "my_policy.cedar".to_string(),
             content: r#"
@@ -839,7 +833,10 @@ permit(
             .to_string(),
         }];
 
-        let result = loader.parse_policies(&policy_files);
+        let result =
+            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_policies(
+                &policy_files,
+            );
         assert!(result.is_ok());
 
         let parsed = result.unwrap();
@@ -849,14 +846,15 @@ permit(
 
     #[test]
     fn test_parse_policies_invalid_syntax() {
-        let loader = DefaultPolicyStoreLoader::new_physical();
-
         let policy_files = vec![PolicyFile {
             name: "invalid.cedar".to_string(),
             content: "this is not valid cedar syntax".to_string(),
         }];
 
-        let result = loader.parse_policies(&policy_files);
+        let result =
+            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_policies(
+                &policy_files,
+            );
         assert!(result.is_err());
 
         if let Err(PolicyStoreError::CedarParsing { file, message }) = result {
@@ -869,14 +867,15 @@ permit(
 
     #[test]
     fn test_parse_templates_success() {
-        let loader = DefaultPolicyStoreLoader::new_physical();
-
         let template_files = vec![PolicyFile {
             name: "template1.cedar".to_string(),
             content: r#"permit(principal == ?principal, action, resource);"#.to_string(),
         }];
 
-        let result = loader.parse_templates(&template_files);
+        let result =
+            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_templates(
+                &template_files,
+            );
         assert!(result.is_ok());
 
         let parsed = result.unwrap();
@@ -887,8 +886,6 @@ permit(
 
     #[test]
     fn test_create_policy_set_integration() {
-        let loader = DefaultPolicyStoreLoader::new_physical();
-
         let policy_files = vec![
             PolicyFile {
                 name: "allow.cedar".to_string(),
@@ -905,10 +902,21 @@ permit(
             content: r#"permit(principal == ?principal, action, resource);"#.to_string(),
         }];
 
-        let policies = loader.parse_policies(&policy_files).unwrap();
-        let templates = loader.parse_templates(&template_files).unwrap();
+        let policies =
+            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_policies(
+                &policy_files,
+            )
+            .unwrap();
+        let templates =
+            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_templates(
+                &template_files,
+            )
+            .unwrap();
 
-        let result = loader.create_policy_set(policies, templates);
+        let result =
+            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::create_policy_set(
+                policies, templates,
+            );
         assert!(result.is_ok());
 
         let policy_set = result.unwrap();
@@ -956,7 +964,11 @@ permit(
         let loaded = loader.load(&source).unwrap();
 
         // Parse the policies
-        let parsed_policies = loader.parse_policies(&loaded.policies).unwrap();
+        let parsed_policies =
+            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_policies(
+                &loaded.policies,
+            )
+            .unwrap();
 
         // Should have 3 policies: 1 from create_test_policy_store helper + 2 from this test
         assert_eq!(parsed_policies.len(), 3);
@@ -968,7 +980,12 @@ permit(
         assert!(ids.contains(&"edit_policy".to_string())); // Derived from filename
 
         // Create a policy set
-        let policy_set = loader.create_policy_set(parsed_policies, vec![]).unwrap();
+        let policy_set =
+            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::create_policy_set(
+                parsed_policies,
+                vec![],
+            )
+            .unwrap();
         assert!(!policy_set.is_empty());
     }
 }
