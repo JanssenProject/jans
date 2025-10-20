@@ -93,7 +93,6 @@ impl PolicyParser {
     /// Templates support slots (e.g., ?principal) and are parsed similarly to policies.
     /// The template ID is extracted from @id() annotation or derived from filename.
     ///
-    /// Note: Cedar does NOT auto-generate template IDs. We explicitly provide
     /// the ID to `Template::parse()` based on annotation or filename.
     pub fn parse_template(
         content: &str,
@@ -364,9 +363,7 @@ mod tests {
         assert!(result.is_ok());
 
         let policy_map = result.unwrap();
-        // Note: Each policy parsed individually gets the same auto-generated ID from Cedar
-        // This is expected behavior - in practice, policies should be parsed together
-        // or use @id annotations for unique identification
+
         assert!(!policy_map.is_empty());
     }
 
