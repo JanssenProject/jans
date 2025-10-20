@@ -5,6 +5,8 @@
 
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::*;
+use crate::log::interface::LogWriter;
+use crate::log::{LogEntry, LogLevel, LogType};
 use cedar_policy::{Entity, EntityUid, RestrictedExpression};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -109,6 +111,7 @@ impl EntityBuilder {
         &self,
         tokens: &HashMap<String, Token>,
         resource: &EntityData,
+        log_service: &impl LogWriter,
     ) -> Result<AuthorizeEntitiesData, MultiIssuerEntityError> {
         let mut built_entities = BuiltEntities::from(&self.iss_entities);
 
@@ -117,24 +120,55 @@ impl EntityBuilder {
         for (token_name, token) in tokens {
             match self.build_single_token_entity(token) {
                 Ok(entity) => {
-                    if let Ok(entity_key) = self.generate_entity_key(token_name, token) {
-                        built_entities.insert(&entity.uid());
-                        token_entities.insert(entity_key, entity);
+                    match self.generate_entity_key(token_name, token) {
+                        Ok(entity_key) => {
+                            built_entities.insert(&entity.uid());
+                            token_entities.insert(entity_key, entity);
+                        },
+                        Err(e) => {
+                            log_service.log_any(
+                                LogEntry::new_with_data(LogType::System, None)
+                                    .set_level(LogLevel::ERROR)
+                                    .set_message(format!("Failed to generate entity key for token '{}'", token_name))
+                                    .set_error(e.to_string()),
+                            );
+                            continue;
+                        },
                     }
                 },
-                _ => {
+                Err(e) => {
+                    log_service.log_any(
+                        LogEntry::new_with_data(LogType::System, None)
+                            .set_level(LogLevel::ERROR)
+                            .set_message(format!("Failed to build token entity for token '{}'", token_name))
+                            .set_error(e.to_string()),
+                    );
                     continue;
                 },
             }
         }
 
         if token_entities.is_empty() {
+            log_service.log_any(
+                LogEntry::new_with_data(LogType::System, None)
+                    .set_level(LogLevel::ERROR)
+                    .set_message("No valid tokens found for multi-issuer authorization".to_string())
+                    .set_error("All tokens failed validation or entity building".to_string()),
+            );
             return Err(MultiIssuerEntityError::NoValidTokens);
         }
 
         // Build resource entity
         let resource = self
             .build_resource_entity(resource)
+            .inspect_err(|e| {
+                log_service.log_any(
+                    LogEntry::new_with_data(LogType::System, None)
+                        .set_level(LogLevel::ERROR)
+                        .set_message("Failed to build resource entity for multi-issuer authorization".to_string())
+                        .set_error(e.to_string()),
+                );
+            })
             .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
 
         let issuers = self.iss_entities.values().cloned().collect();
@@ -273,9 +307,18 @@ mod tests {
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder_config::{EntityBuilderConfig, EntityNames, UnsignedRoleIdSrc};
     use crate::jwt::{Token, TokenClaims};
+    use crate::log::interface::LogWriter;
     use serde_json::json;
     use std::collections::HashMap;
     use url::Url;
+
+    // Test helper: a no-op logger for testing
+    struct TestLogger;
+    impl LogWriter for TestLogger {
+        fn log_any<T>(&self, _entry: T) {
+            // Do nothing in tests
+        }
+    }
 
     fn create_test_entity_builder() -> EntityBuilder {
         let config = EntityBuilderConfig {
@@ -443,7 +486,7 @@ mod tests {
         let token2 = create_test_token("https://idp.acme.com/auth", "token2", claims2);
         tokens.insert("Jans::Access_Token2".to_string(), token2);
 
-        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource());
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &TestLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -483,7 +526,7 @@ mod tests {
         let token3 = Token::new("Jans::Id_Token", token_claims3, None);
         tokens.insert("Jans::Id_Token".to_string(), token3);
 
-        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource());
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &TestLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -695,7 +738,7 @@ mod tests {
         let token3 = create_test_token("https://idp.dolphin.sea/auth", "token3", claims3);
         tokens.insert("Acme::DolphinToken".to_string(), token3);
 
-        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource());
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &TestLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -725,7 +768,7 @@ mod tests {
         let token2 = Token::new("Jans::Id_Token", token_claims2, None);
         tokens.insert("Jans::Id_Token".to_string(), token2);
 
-        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource());
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &TestLogger);
         assert!(result.is_err());
 
         // Should return NoValidTokens error when all tokens are invalid

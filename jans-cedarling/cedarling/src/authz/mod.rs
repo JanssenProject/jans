@@ -343,7 +343,7 @@ impl Authz {
         let entities_data = self
             .config
             .entity_builder
-            .build_multi_issuer_entities(&validated_tokens, &request.resource)
+            .build_multi_issuer_entities(&validated_tokens, &request.resource, self.config.log_service.as_ref())
             .map_err(|e| AuthorizeError::MultiIssuerEntity(e.to_string()))?;
 
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
