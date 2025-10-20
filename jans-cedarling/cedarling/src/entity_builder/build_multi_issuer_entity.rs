@@ -307,18 +307,10 @@ mod tests {
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder_config::{EntityBuilderConfig, EntityNames, UnsignedRoleIdSrc};
     use crate::jwt::{Token, TokenClaims};
-    use crate::log::interface::LogWriter;
+    use crate::log::NopLogger;
     use serde_json::json;
     use std::collections::HashMap;
     use url::Url;
-
-    // Test helper: a no-op logger for testing
-    struct TestLogger;
-    impl LogWriter for TestLogger {
-        fn log_any<T>(&self, _entry: T) {
-            // Do nothing in tests
-        }
-    }
 
     fn create_test_entity_builder() -> EntityBuilder {
         let config = EntityBuilderConfig {
@@ -486,7 +478,7 @@ mod tests {
         let token2 = create_test_token("https://idp.acme.com/auth", "token2", claims2);
         tokens.insert("Jans::Access_Token2".to_string(), token2);
 
-        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &TestLogger);
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -526,7 +518,7 @@ mod tests {
         let token3 = Token::new("Jans::Id_Token", token_claims3, None);
         tokens.insert("Jans::Id_Token".to_string(), token3);
 
-        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &TestLogger);
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -738,7 +730,7 @@ mod tests {
         let token3 = create_test_token("https://idp.dolphin.sea/auth", "token3", claims3);
         tokens.insert("Acme::DolphinToken".to_string(), token3);
 
-        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &TestLogger);
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -768,7 +760,7 @@ mod tests {
         let token2 = Token::new("Jans::Id_Token", token_claims2, None);
         tokens.insert("Jans::Id_Token".to_string(), token2);
 
-        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &TestLogger);
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
         assert!(result.is_err());
 
         // Should return NoValidTokens error when all tokens are invalid
