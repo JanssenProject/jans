@@ -100,7 +100,7 @@ fn determine_token_entity_type(token: &Token) -> String {
         return default_type.to_string();
     }
 
-    "Token".to_string()
+    DEFAULT_ENTITY_TYPE_NAME.to_string()
 }
 
 impl EntityBuilder {
