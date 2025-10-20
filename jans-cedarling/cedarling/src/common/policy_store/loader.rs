@@ -552,6 +552,8 @@ mod tests {
     use std::path::PathBuf;
     use tempfile::TempDir;
 
+    type PhysicalLoader = DefaultPolicyStoreLoader<super::super::vfs_adapter::PhysicalVfs>;
+
     /// Helper to create a minimal valid policy store directory for testing.
     fn create_test_policy_store(dir: &Path) -> std::io::Result<()> {
         // Create metadata.json
@@ -803,10 +805,7 @@ permit(
                 content: r#"forbid(principal, action, resource);"#.to_string(),
             },
         ];
-        let result =
-            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_policies(
-                &policy_files,
-            );
+        let result = PhysicalLoader::parse_policies(&policy_files);
 
         assert!(result.is_ok());
 
@@ -833,10 +832,7 @@ permit(
             .to_string(),
         }];
 
-        let result =
-            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_policies(
-                &policy_files,
-            );
+        let result = PhysicalLoader::parse_policies(&policy_files);
         assert!(result.is_ok());
 
         let parsed = result.unwrap();
@@ -851,10 +847,7 @@ permit(
             content: "this is not valid cedar syntax".to_string(),
         }];
 
-        let result =
-            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_policies(
-                &policy_files,
-            );
+        let result = PhysicalLoader::parse_policies(&policy_files);
         assert!(result.is_err());
 
         if let Err(PolicyStoreError::CedarParsing { file, message }) = result {
@@ -872,10 +865,7 @@ permit(
             content: r#"permit(principal == ?principal, action, resource);"#.to_string(),
         }];
 
-        let result =
-            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_templates(
-                &template_files,
-            );
+        let result = PhysicalLoader::parse_templates(&template_files);
         assert!(result.is_ok());
 
         let parsed = result.unwrap();
@@ -902,21 +892,10 @@ permit(
             content: r#"permit(principal == ?principal, action, resource);"#.to_string(),
         }];
 
-        let policies =
-            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_policies(
-                &policy_files,
-            )
-            .unwrap();
-        let templates =
-            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_templates(
-                &template_files,
-            )
-            .unwrap();
+        let policies = PhysicalLoader::parse_policies(&policy_files).unwrap();
+        let templates = PhysicalLoader::parse_templates(&template_files).unwrap();
 
-        let result =
-            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::create_policy_set(
-                policies, templates,
-            );
+        let result = PhysicalLoader::create_policy_set(policies, templates);
         assert!(result.is_ok());
 
         let policy_set = result.unwrap();
@@ -964,11 +943,7 @@ permit(
         let loaded = loader.load(&source).unwrap();
 
         // Parse the policies
-        let parsed_policies =
-            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::parse_policies(
-                &loaded.policies,
-            )
-            .unwrap();
+        let parsed_policies = PhysicalLoader::parse_policies(&loaded.policies).unwrap();
 
         // Should have 3 policies: 1 from create_test_policy_store helper + 2 from this test
         assert_eq!(parsed_policies.len(), 3);
@@ -980,12 +955,7 @@ permit(
         assert!(ids.contains(&"edit_policy".to_string())); // Derived from filename
 
         // Create a policy set
-        let policy_set =
-            DefaultPolicyStoreLoader::<super::super::vfs_adapter::PhysicalVfs>::create_policy_set(
-                parsed_policies,
-                vec![],
-            )
-            .unwrap();
+        let policy_set = PhysicalLoader::create_policy_set(parsed_policies, vec![]).unwrap();
         assert!(!policy_set.is_empty());
     }
 }
