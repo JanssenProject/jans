@@ -8,7 +8,7 @@
 //! Blocking client of Cedarling
 
 use crate::{
-    AuthorizeError, AuthorizeResult, BootstrapConfig, InitCedarlingError, LogStorage, Request,
+    AuthorizeError, AuthorizeResult, BootstrapConfig, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, Request,
     RequestUnsigned,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
@@ -59,6 +59,16 @@ impl Cedarling {
     ) -> Result<AuthorizeResult, AuthorizeError> {
         self.runtime
             .block_on(self.instance.authorize_unsigned(request))
+    }
+
+    /// Authorize multi-issuer request.
+    /// makes authorization decision based on multiple JWT tokens from different issuers
+    pub fn authorize_multi_issuer(
+        &self,
+        request: crate::authz::request::AuthorizeMultiIssuerRequest,
+    ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
+        self.runtime
+            .block_on(self.instance.authorize_multi_issuer(request))
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.

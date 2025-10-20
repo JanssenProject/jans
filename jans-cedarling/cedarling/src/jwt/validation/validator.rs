@@ -345,8 +345,7 @@ mod test {
 
     #[track_caller]
     fn generate_keys() -> KeyPair {
-        let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
-        keys
+        generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys")
     }
 
     static TEST_TKN_ENTITY_METADATA: LazyLock<TokenEntityMetadata> =
@@ -382,7 +381,7 @@ mod test {
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -423,7 +422,7 @@ mod test {
         tkn_entity_metadata.required_claims = HashSet::from(["exp".into()]);
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -459,7 +458,7 @@ mod test {
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -500,7 +499,7 @@ mod test {
         tkn_entity_metadata.required_claims = HashSet::from(["exp".into(), "nbf".into()]);
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -541,7 +540,7 @@ mod test {
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -585,7 +584,7 @@ mod test {
             HashSet::from(["sub", "name", "iat"].map(|x| x.into()));
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &tkn_entity_metadata,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -610,7 +609,7 @@ mod test {
             HashSet::from(["sub", "name", "iat", "nbf"].map(|x| x.into()));
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &tkn_entity_metadata,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -664,7 +663,7 @@ mod test {
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(&iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             status_lists,
@@ -720,7 +719,7 @@ mod test {
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(&iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             status_lists,

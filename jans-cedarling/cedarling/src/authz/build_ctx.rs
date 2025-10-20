@@ -7,9 +7,11 @@ use super::AuthzConfig;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use crate::entity_builder::BuiltEntities;
+use cedar_policy::Entity;
 use cedar_policy::EntityTypeName;
 use serde_json::{Value, json, map::Entry};
 use smol_str::ToSmolStr;
+use std::collections::HashMap;
 
 use super::errors::BuildContextError;
 
@@ -84,6 +86,54 @@ pub fn build_context(
     let context = merge_json_values(request_context, ctx_entity_refs)?;
     let context: cedar_policy::Context =
         cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
+
+    Ok(context)
+}
+
+/// Constructs the authorization context for multi-issuer requests with token collection
+///
+/// This function implements the design document's token collection context structure:
+/// - Individual token entities are accessible via context.tokens.{issuer}_{token_type}
+/// - All JWT claims are stored as entity tags (Set of String by default)
+/// - Provides ergonomic policy syntax for cross-token validation
+pub fn build_multi_issuer_context(
+    request_context: Value,
+    token_entities: &HashMap<String, Entity>,
+    schema: &cedar_policy::Schema,
+    action: &cedar_policy::EntityUid,
+) -> Result<cedar_policy::Context, BuildContextError> {
+    // Start with the request context
+    let mut context_json = request_context;
+
+    // Create the tokens context as specified in the design document
+    let mut tokens_context = serde_json::Map::new();
+
+    // Add individual token entity references to context
+    // Format: {issuer}_{token_type} -> {"type": "EntityType", "id": "entity_id"}
+    for (field_name, entity) in token_entities {
+        // Create entity reference like the existing build_context function
+        let entity_ref = json!({
+            "type": entity.uid().type_name().to_string(),
+            "id": entity.uid().id().as_ref() as &str
+        });
+        tokens_context.insert(field_name.clone(), entity_ref);
+    }
+
+    // Add total token count as specified in design
+    tokens_context.insert("total_token_count".to_string(), json!(token_entities.len()));
+
+    // Merge with request context
+    if let Some(context_obj) = context_json.as_object_mut() {
+        context_obj.insert("tokens".to_string(), Value::Object(tokens_context));
+    } else {
+        context_json = json!({
+            "tokens": Value::Object(tokens_context)
+        });
+    }
+
+    // Create Cedar context
+    let context = cedar_policy::Context::from_json_value(context_json, Some((schema, action)))
+        .map_err(|e| BuildContextError::ContextCreation(e.to_string()))?;
 
     Ok(context)
 }

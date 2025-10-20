@@ -828,10 +828,12 @@ mod test {
         )]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = true;
-
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: true,
+            ..Default::default()
+        };
+        
         let entity_builder = EntityBuilder::new(
             config,
             &trusted_issuers,
@@ -998,10 +1000,12 @@ mod test {
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = false;
-
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: false,
+            ..Default::default()
+        };
+        
         let entity_builder = EntityBuilder::new(
             config,
             &trusted_issuers,
@@ -1146,10 +1150,12 @@ mod test {
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = false;
-
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: false,
+            ..Default::default()
+        };
+        
         let entity_builder = EntityBuilder::new(
             config,
             &trusted_issuers,
@@ -1338,10 +1344,12 @@ mod test {
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = false;
-
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: false,
+            ..Default::default()
+        };
+        
         let entity_builder = EntityBuilder::new(
             config,
             &trusted_issuers,

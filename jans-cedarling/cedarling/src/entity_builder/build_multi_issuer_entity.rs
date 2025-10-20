@@ -5,6 +5,8 @@
 
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::*;
+use crate::log::interface::LogWriter;
+use crate::log::{LogEntry, LogLevel, LogType};
 use cedar_policy::{Entity, EntityUid, RestrictedExpression};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -35,11 +37,6 @@ fn simplify_token_type(mapping: &str) -> String {
     // Split by namespace separator and use the last part
     // Keep underscores in token type names as specified in design
     mapping.split("::").last().unwrap_or(mapping).to_lowercase()
-}
-
-/// Create a Set of Long from a single long value
-fn create_long_set(value: i64) -> RestrictedExpression {
-    RestrictedExpression::new_set(vec![RestrictedExpression::new_long(value)])
 }
 
 /// Create a Set of String from a single string value
@@ -89,72 +86,102 @@ fn convert_claim_to_string_set(value: &Value) -> RestrictedExpression {
     }
 }
 
-/// Add all JWT claims as string tags (schema-less processing)
-/// According to design doc: "without a schema, all claims default to Set of String for consistency"
-fn add_claims_as_string_tags(
-    tags: &mut HashMap<String, RestrictedExpression>,
-    claims: &HashMap<String, Value>,
-) {
-    // Use the existing build_entity_attrs_without_schema function for consistent conversion
-    match build_entity_attrs_without_schema(claims, None) {
-        Ok(schema_less_attrs) => {
-            tags.extend(schema_less_attrs);
-        },
-        Err(_) => {
-            // Fallback to manual conversion if the function fails
-            for (claim_key, claim_value) in claims {
-                let claim_values = convert_claim_to_string_set(claim_value);
-                tags.insert(claim_key.clone(), claim_values);
-            }
-        },
-    }
-}
-
 /// Determine the entity type for a token dynamically
-fn determine_token_entity_type(token: &Token) -> Result<String, MultiIssuerEntityError> {
+fn determine_token_entity_type(token: &Token) -> String {
     if let Some(issuer) = token.iss.as_ref() {
         if let Some(metadata) = issuer.token_metadata.get(&token.name) {
-            return Ok(metadata.entity_type_name.clone());
+            return metadata.entity_type_name.clone();
         }
     }
 
     if token.name.contains("::") {
-        return Ok(token.name.clone());
+        return token.name.clone();
     }
 
     if let Some(default_type) = default_tkn_entity_name(&token.name) {
-        return Ok(default_type.to_string());
+        return default_type.to_string();
     }
 
-    Ok("Token".to_string())
+    DEFAULT_ENTITY_TYPE_NAME.to_string()
 }
 
 impl EntityBuilder {
-    /// Build individual token entities
-    pub fn build_token_entities(
+    /// Build all entities for multi-issuer authorization (tokens, principals, resource, roles)
+    pub fn build_multi_issuer_entities(
         &self,
         tokens: &HashMap<String, Token>,
-    ) -> Result<HashMap<String, Entity>, MultiIssuerEntityError> {
+        resource: &EntityData,
+        log_service: &impl LogWriter,
+    ) -> Result<AuthorizeEntitiesData, MultiIssuerEntityError> {
+        let mut built_entities = BuiltEntities::from(&self.iss_entities);
+
+        // Build token entities using the existing multi-issuer logic
         let mut token_entities = HashMap::new();
-        // TODO: Catches all errors indiscriminately, Log the error
         for (token_name, token) in tokens {
             match self.build_single_token_entity(token) {
                 Ok(entity) => {
-                    if let Ok(entity_key) = self.generate_entity_key(token_name, token) {
-                        token_entities.insert(entity_key, entity);
+                    match self.generate_entity_key(token_name, token) {
+                        Ok(entity_key) => {
+                            built_entities.insert(&entity.uid());
+                            token_entities.insert(entity_key, entity);
+                        },
+                        Err(e) => {
+                            log_service.log_any(
+                                LogEntry::new_with_data(LogType::System, None)
+                                    .set_level(LogLevel::ERROR)
+                                    .set_message(format!("Failed to generate entity key for token '{}'", token_name))
+                                    .set_error(e.to_string()),
+                            );
+                            continue;
+                        },
                     }
                 },
-                _ => {
+                Err(e) => {
+                    log_service.log_any(
+                        LogEntry::new_with_data(LogType::System, None)
+                            .set_level(LogLevel::ERROR)
+                            .set_message(format!("Failed to build token entity for token '{}'", token_name))
+                            .set_error(e.to_string()),
+                    );
                     continue;
                 },
             }
         }
 
         if token_entities.is_empty() {
+            log_service.log_any(
+                LogEntry::new_with_data(LogType::System, None)
+                    .set_level(LogLevel::ERROR)
+                    .set_message("No valid tokens found for multi-issuer authorization".to_string())
+                    .set_error("All tokens failed validation or entity building".to_string()),
+            );
             return Err(MultiIssuerEntityError::NoValidTokens);
         }
 
-        Ok(token_entities)
+        // Build resource entity
+        let resource = self
+            .build_resource_entity(resource)
+            .inspect_err(|e| {
+                log_service.log_any(
+                    LogEntry::new_with_data(LogType::System, None)
+                        .set_level(LogLevel::ERROR)
+                        .set_message("Failed to build resource entity for multi-issuer authorization".to_string())
+                        .set_error(e.to_string()),
+                );
+            })
+            .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
+
+        let issuers = self.iss_entities.values().cloned().collect();
+
+        Ok(AuthorizeEntitiesData {
+            issuers,
+            tokens: token_entities,
+            workload: None,
+            user: None,
+            roles: Vec::new(),
+            resource,
+            default_entities: self.default_entities.clone(),
+        })
     }
 
     /// Build a single token entity from a validated JWT
@@ -179,58 +206,42 @@ impl EntityBuilder {
         let mut attrs = HashMap::new();
 
         // Add core token attributes
-        attrs.insert("token_type".to_string(), create_string_set(&token.name));
-        attrs.insert("jti".to_string(), create_string_set(&entity_id));
-        attrs.insert("issuer".to_string(), create_string_set(issuer));
+        attrs.insert(
+            "token_type".to_string(),
+            RestrictedExpression::new_string(token.name.clone()),
+        );
+        attrs.insert(
+            "jti".to_string(),
+            RestrictedExpression::new_string(entity_id.clone()),
+        );
+        attrs.insert(
+            "issuer".to_string(),
+            RestrictedExpression::new_string(issuer.to_string()),
+        );
 
         // Add expiration timestamp
         if let Some(exp) = token.get_claim_val("exp").and_then(|v| v.as_i64()) {
-            attrs.insert("exp".to_string(), create_long_set(exp));
+            attrs.insert("exp".to_string(), RestrictedExpression::new_long(exp));
         }
 
         // Add validation timestamp
         let validated_at = chrono::Utc::now().timestamp_millis();
-        attrs.insert("validated_at".to_string(), create_long_set(validated_at));
+        attrs.insert(
+            "validated_at".to_string(),
+            RestrictedExpression::new_long(validated_at),
+        );
 
         // Create entity tags for Token claims - support both schema-based and schema-less processing
         let mut tags = HashMap::new();
         let claims = filter_reserved_claims(token.claims_value());
 
-        // Determine the actual entity type dynamically, just like the regular entity builder
-        let entity_type = if let Some(schema) = &self.schema {
-            // Schema-based processing: use schema to determine proper types and required fields
-            let entity_type = determine_token_entity_type(token)?;
+        // Add all JWT claims as string tags (schema-less processing)
+        for (claim_key, claim_value) in claims {
+            let value = convert_claim_to_string_set(&claim_value);
+            tags.insert(claim_key, value);
+        }
 
-            if let Some(token_shape) = schema.get_entity_shape(&entity_type) {
-                // Use the existing build_entity_attrs_with_shape function for schema-based processing
-                match build_entity_attrs_with_shape(
-                    &claims,
-                    &BuiltEntities::default(),
-                    token_shape,
-                    None,
-                ) {
-                    Ok(schema_attrs) => {
-                        // All claims are already filtered, so we can use them directly as tags
-                        tags.extend(schema_attrs);
-                    },
-                    Err(_) => {
-                        // Fallback to schema-less processing if schema conversion fails
-                        add_claims_as_string_tags(&mut tags, &claims);
-                    },
-                }
-            } else {
-                // No entity shape in schema, fall back to schema-less processing
-                add_claims_as_string_tags(&mut tags, &claims);
-            }
-
-            entity_type
-        } else {
-            // Schema-less processing: convert all claims to String Sets
-            // According to design doc: "without a schema, all claims default to Set of String for consistency"
-            add_claims_as_string_tags(&mut tags, &claims);
-
-            "Token".to_string()
-        };
+        let entity_type = determine_token_entity_type(token);
 
         // Create the Cedar entity using the existing build_cedar_entity function
         // Note: build_cedar_entity doesn't support tags, so we need to use Entity::new_with_tags directly
@@ -292,9 +303,11 @@ impl EntityBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::authz::request::CedarEntityMapping;
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder_config::{EntityBuilderConfig, EntityNames, UnsignedRoleIdSrc};
     use crate::jwt::{Token, TokenClaims};
+    use crate::log::NopLogger;
     use serde_json::json;
     use std::collections::HashMap;
     use url::Url;
@@ -364,6 +377,16 @@ mod tests {
 
         let token_claims = TokenClaims::from(all_claims);
         Token::new("Jans::Access_Token", token_claims, None)
+    }
+
+    fn create_test_resource() -> EntityData {
+        EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Jans::Resource".to_string(),
+                id: "test_resource".to_string(),
+            },
+            attributes: HashMap::new(),
+        }
     }
 
     #[test]
@@ -455,13 +478,13 @@ mod tests {
         let token2 = create_test_token("https://idp.acme.com/auth", "token2", claims2);
         tokens.insert("Jans::Access_Token2".to_string(), token2);
 
-        let result = builder.build_token_entities(&tokens);
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
         assert!(result.is_ok());
 
-        let token_entities = result.unwrap();
-        assert_eq!(token_entities.len(), 2);
-        assert!(token_entities.contains_key("acme_access_token"));
-        assert!(token_entities.contains_key("acme_access_token2"));
+        let entities_data = result.unwrap();
+        assert_eq!(entities_data.tokens.len(), 2);
+        assert!(entities_data.tokens.contains_key("acme_access_token"));
+        assert!(entities_data.tokens.contains_key("acme_access_token2"));
     }
 
     #[test]
@@ -495,14 +518,14 @@ mod tests {
         let token3 = Token::new("Jans::Id_Token", token_claims3, None);
         tokens.insert("Jans::Id_Token".to_string(), token3);
 
-        let result = builder.build_token_entities(&tokens);
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
         assert!(result.is_ok());
 
-        let token_entities = result.unwrap();
-        assert_eq!(token_entities.len(), 3);
-        assert!(token_entities.contains_key("acme_access_token"));
-        assert!(token_entities.contains_key("dolphin_dolphintoken"));
-        assert!(token_entities.contains_key("acme_id_token"));
+        let entities_data = result.unwrap();
+        assert_eq!(entities_data.tokens.len(), 3);
+        assert!(entities_data.tokens.contains_key("acme_access_token"));
+        assert!(entities_data.tokens.contains_key("dolphin_dolphintoken"));
+        assert!(entities_data.tokens.contains_key("acme_id_token"));
     }
 
     #[test]
@@ -517,8 +540,8 @@ mod tests {
 
         let entity = builder.build_single_token_entity(&token).unwrap();
 
-        // Check entity type
-        assert_eq!(entity.uid().type_name().to_string(), "Token");
+        // Check entity type - should match the token name
+        assert_eq!(entity.uid().type_name().to_string(), "Jans::Access_Token");
 
         // Check core attributes exist
         assert!(entity.attr("token_type").is_some());
@@ -707,14 +730,14 @@ mod tests {
         let token3 = create_test_token("https://idp.dolphin.sea/auth", "token3", claims3);
         tokens.insert("Acme::DolphinToken".to_string(), token3);
 
-        let result = builder.build_token_entities(&tokens);
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
         assert!(result.is_ok());
 
-        let token_entities = result.unwrap();
+        let entities_data = result.unwrap();
         // Only 2 valid tokens should be processed
-        assert_eq!(token_entities.len(), 2);
-        assert!(token_entities.contains_key("acme_access_token"));
-        assert!(token_entities.contains_key("dolphin_dolphintoken"));
+        assert_eq!(entities_data.tokens.len(), 2);
+        assert!(entities_data.tokens.contains_key("acme_access_token"));
+        assert!(entities_data.tokens.contains_key("dolphin_dolphintoken"));
     }
 
     #[test]
@@ -737,7 +760,7 @@ mod tests {
         let token2 = Token::new("Jans::Id_Token", token_claims2, None);
         tokens.insert("Jans::Id_Token".to_string(), token2);
 
-        let result = builder.build_token_entities(&tokens);
+        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
         assert!(result.is_err());
 
         // Should return NoValidTokens error when all tokens are invalid
