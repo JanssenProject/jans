@@ -442,20 +442,12 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
     /// Parse and validate Cedar policies from loaded policy files.
     ///
-    /// This method parses each policy file using the PolicyParser,
-    /// extracts policy IDs (from @id annotations or filenames),
-    /// and validates the syntax.
-    ///
-    /// # Arguments
-    /// * `policy_files` - Vector of loaded policy files
-    ///
-    /// # Returns
-    /// Vector of parsed policies with metadata
+    /// Extracts policy IDs from @id annotations or filenames and validates syntax.
     fn parse_policies(
         &self,
         policy_files: &[PolicyFile],
     ) -> Result<Vec<ParsedPolicy>, PolicyStoreError> {
-        let mut parsed_policies = Vec::new();
+        let mut parsed_policies = Vec::with_capacity(policy_files.len());
 
         for file in policy_files {
             let parsed = PolicyParser::parse_policy(&file.content, &file.name)?;
@@ -467,20 +459,13 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
     /// Parse and validate Cedar templates from loaded template files.
     ///
-    /// This method parses each template file using the PolicyParser,
-    /// extracts template IDs (from @id annotations or filenames),
-    /// and validates the syntax including slot definitions.
-    ///
-    /// # Arguments
-    /// * `template_files` - Vector of loaded template files
-    ///
-    /// # Returns
-    /// Vector of parsed templates with metadata
+    /// Extracts template IDs from @id annotations or filenames and validates
+    /// syntax including slot definitions.
     fn parse_templates(
         &self,
         template_files: &[PolicyFile],
     ) -> Result<Vec<ParsedTemplate>, PolicyStoreError> {
-        let mut parsed_templates = Vec::new();
+        let mut parsed_templates = Vec::with_capacity(template_files.len());
 
         for file in template_files {
             let parsed = PolicyParser::parse_template(&file.content, &file.name)?;
@@ -492,15 +477,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
     /// Create a Cedar PolicySet from parsed policies and templates.
     ///
-    /// This validates that all policies and templates can be successfully
-    /// added to a PolicySet, ensuring no ID conflicts or other issues.
-    ///
-    /// # Arguments
-    /// * `policies` - Vector of parsed policies
-    /// * `templates` - Vector of parsed templates
-    ///
-    /// # Returns
-    /// A Cedar PolicySet containing all policies and templates
+    /// Validates no ID conflicts and that all policies/templates can be added.
     fn create_policy_set(
         &self,
         policies: Vec<ParsedPolicy>,
@@ -534,7 +511,7 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
             },
             PolicyStoreSource::Archive(_) => {
                 // TODO: Archive loading will be implemented
-                todo!("Archive (.cjar) loading will use 548VFS + zip crate")
+                todo!("Archive (.cjar) loading will use VFS + zip crate")
             },
             PolicyStoreSource::Legacy(_) => {
                 // TODO: Legacy format integration will be handled
