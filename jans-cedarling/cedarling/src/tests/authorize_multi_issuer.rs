@@ -6,17 +6,16 @@
 use super::utils::cedarling_util::get_cedarling_with_callback;
 use super::utils::*;
 use crate::authz::request::{AuthorizeMultiIssuerRequest, EntityData, TokenInput};
+use crate::Cedarling;
 use serde_json::json;
 
-/// Test successful multi-issuer authorization scenarios
-/// Uses the policy-store-multi-issuer-basic.yaml configuration
-/// Tests both single and multiple token scenarios
-#[tokio::test]
-async fn test_multi_issuer_authorization_success() {
-    // Load the policy store configuration
+/// Helper function to create a Cedarling instance for multi-issuer tests
+/// with the standard configuration that disables workload and user entity building
+async fn get_cedarling_for_multi_issuer_tests() -> Cedarling {
     static POLICY_STORE_RAW_YAML: &str =
         include_str!("../../../test_files/policy-store-multi-issuer-basic.yaml");
-    let cedarling = get_cedarling_with_callback(
+    
+    get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         |config| {
             // Disable workload and user entity building for multi-issuer tests
@@ -27,9 +26,14 @@ async fn test_multi_issuer_authorization_success() {
             config.authorization_config.use_user_principal = false;
         },
     )
-    .await;
+    .await
+}
 
-    // Test Case 1: Single Dolphin access token with location claim
+/// Test single Dolphin access token authorization with location claim
+#[tokio::test]
+async fn test_single_dolphin_access_token_authorization() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
     let dolphin_access_token = generate_token_using_claims(json!({
         "iss": "https://idp.dolphin.sea",
         "sub": "dolphin_user_123",
@@ -84,8 +88,13 @@ async fn test_multi_issuer_authorization_success() {
         authz_result.decision,
         "Authorization should be ALLOW for dolphin access token"
     );
+}
 
-    // Test Case 2: Single Acme access token with scope claim
+/// Test single Acme access token authorization with scope claim
+#[tokio::test]
+async fn test_single_acme_access_token_authorization() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
     let acme_access_token = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_456",
@@ -128,8 +137,13 @@ async fn test_multi_issuer_authorization_success() {
         authz_result.decision,
         "Authorization should be ALLOW for acme access token"
     );
+}
 
-    // Test Case 3: Single Dolphin custom token with waiver claim
+/// Test single Dolphin custom token authorization with waiver claim
+#[tokio::test]
+async fn test_single_dolphin_custom_token_authorization() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
     let dolphin_custom_token = generate_token_using_claims(json!({
         "iss": "https://idp.dolphin.sea",
         "sub": "dolphin_user_789",
@@ -172,8 +186,13 @@ async fn test_multi_issuer_authorization_success() {
         authz_result.decision,
         "Authorization should be ALLOW for dolphin custom token"
     );
+}
 
-    // Test Case 4: Multiple tokens from different issuers
+/// Test multiple tokens from different issuers authorization
+#[tokio::test]
+async fn test_multiple_tokens_from_different_issuers() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
     let acme_multi_token = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_multi",
@@ -226,26 +245,10 @@ async fn test_multi_issuer_authorization_success() {
     );
 }
 
-/// Test multi-token scope requirements scenarios
-/// Tests both OR logic (any token has scope) and AND logic (multiple tokens required)
+/// Test OR logic - Only Acme token has the required scope
 #[tokio::test]
-async fn test_multi_token_scope_requirements() {
-    // Load the policy store configuration
-    static POLICY_STORE_RAW_YAML: &str =
-        include_str!("../../../test_files/policy-store-multi-issuer-basic.yaml");
-    let cedarling = get_cedarling_with_callback(
-        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
-        |config| {
-            // Disable workload and user entity building for multi-issuer tests
-            config.entity_builder_config.build_workload = false;
-            config.entity_builder_config.build_user = false;
-            config.authorization_config.use_workload_principal = false;
-            config.authorization_config.use_user_principal = false;
-        },
-    )
-    .await;
-
-    // Test Case 1: OR Logic - Only Acme token has the required scope
+async fn test_or_logic_acme_token_has_required_scope() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let acme_token_with_scope = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_1",
@@ -286,8 +289,12 @@ async fn test_multi_token_scope_requirements() {
         result.unwrap().decision,
         "Should be ALLOW when Acme token has required scope"
     );
+}
 
-    // Test Case 2: OR Logic - Only Dolphin token has the required scope
+/// Test OR logic - Only Dolphin token has the required scope
+#[tokio::test]
+async fn test_or_logic_dolphin_token_has_required_scope() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let dolphin_token_with_scope = generate_token_using_claims(json!({
         "iss": "https://idp.dolphin.sea",
         "sub": "dolphin_user_2",
@@ -328,8 +335,12 @@ async fn test_multi_token_scope_requirements() {
         result.unwrap().decision,
         "Should be ALLOW when Dolphin token has required scope"
     );
+}
 
-    // Test Case 3: OR Logic - Both tokens have the scope
+/// Test OR logic - Both tokens have the required scope
+#[tokio::test]
+async fn test_or_logic_both_tokens_have_scope() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let acme_token = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_3",
@@ -381,8 +392,12 @@ async fn test_multi_token_scope_requirements() {
         result.unwrap().decision,
         "Should be ALLOW when both tokens have required scope"
     );
+}
 
-    // Test Case 4: OR Logic - Neither token has the scope (should deny)
+/// Test OR logic - Neither token has the required scope (should deny)
+#[tokio::test]
+async fn test_or_logic_neither_token_has_scope() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let acme_token_no_scope = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_4",
@@ -434,8 +449,12 @@ async fn test_multi_token_scope_requirements() {
         !result.unwrap().decision,
         "Should be DENY when neither token has required scope"
     );
+}
 
-    // Test Case 5: AND Logic - Both tokens present with required attributes
+/// Test AND logic - Both tokens present with required attributes
+#[tokio::test]
+async fn test_and_logic_both_tokens_with_required_attributes() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let acme_vote_token = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_5",
@@ -487,8 +506,12 @@ async fn test_multi_token_scope_requirements() {
         result.unwrap().decision,
         "Should be ALLOW when both required tokens are present with correct attributes"
     );
+}
 
-    // Test Case 6: AND Logic - Only one token present (should deny)
+/// Test AND logic - Only one token present (should deny)
+#[tokio::test]
+async fn test_and_logic_only_one_token_present() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let acme_vote_token_only = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_6",
@@ -529,8 +552,12 @@ async fn test_multi_token_scope_requirements() {
         !result.unwrap().decision,
         "Should be DENY when only one of two required tokens is present"
     );
+}
 
-    // Test Case 7: AND Logic - Both tokens present but missing required attributes (should deny)
+/// Test AND logic - Both tokens present but missing required attributes (should deny)
+#[tokio::test]
+async fn test_and_logic_both_tokens_missing_required_attributes() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let acme_wrong_scope = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_7",
@@ -584,26 +611,10 @@ async fn test_multi_token_scope_requirements() {
     );
 }
 
-/// Test custom token type handling
-/// Verifies that the system can handle arbitrary custom token types dynamically
+/// Test custom DolphinToken with waiver claim
 #[tokio::test]
-async fn test_custom_token_type_handling() {
-    // Load the policy store configuration
-    static POLICY_STORE_RAW_YAML: &str =
-        include_str!("../../../test_files/policy-store-multi-issuer-basic.yaml");
-    let cedarling = get_cedarling_with_callback(
-        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
-        |config| {
-            // Disable workload and user entity building for multi-issuer tests
-            config.entity_builder_config.build_workload = false;
-            config.entity_builder_config.build_user = false;
-            config.authorization_config.use_workload_principal = false;
-            config.authorization_config.use_user_principal = false;
-        },
-    )
-    .await;
-
-    // Test Case 1: Custom DolphinToken with waiver claim
+async fn test_custom_dolphin_token_with_waiver() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let dolphin_custom_token = generate_token_using_claims(json!({
         "iss": "https://idp.dolphin.sea",
         "sub": "dolphin_user_1",
@@ -644,8 +655,12 @@ async fn test_custom_token_type_handling() {
         result.unwrap().decision,
         "Should be ALLOW when custom token has required waiver claim"
     );
+}
 
-    // Test Case 2: Custom token without required claim (should deny)
+/// Test custom token without required claim (should deny)
+#[tokio::test]
+async fn test_custom_token_without_required_claim() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let dolphin_token_no_waiver = generate_token_using_claims(json!({
         "iss": "https://idp.dolphin.sea",
         "sub": "dolphin_user_2",
@@ -686,8 +701,12 @@ async fn test_custom_token_type_handling() {
         !result.unwrap().decision,
         "Should be DENY when custom token doesn't have correct waiver"
     );
+}
 
-    // Test Case 3: Multiple custom token types together
+/// Test multiple custom token types together
+#[tokio::test]
+async fn test_multiple_custom_token_types_together() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let acme_access_token = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_3",
@@ -739,8 +758,12 @@ async fn test_custom_token_type_handling() {
         result.unwrap().decision,
         "Should be ALLOW when custom DolphinToken has required waiver"
     );
+}
 
-    // Test Case 4: Custom token type with complex nested claims
+/// Test custom token type with complex nested claims
+#[tokio::test]
+async fn test_custom_token_with_complex_nested_claims() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let custom_token_complex = generate_token_using_claims(json!({
         "iss": "https://idp.dolphin.sea",
         "sub": "dolphin_user_4",
@@ -784,9 +807,13 @@ async fn test_custom_token_type_handling() {
         result.unwrap().decision,
         "Should be ALLOW - policy only checks waiver claim, other claims are preserved as tags"
     );
+}
 
-    // Test Case 5: Mix of standard and custom tokens from multiple issuers
-    // Demonstrates that custom token types work alongside standard token types
+/// Test mix of standard and custom tokens from multiple issuers
+/// Demonstrates that custom token types work alongside standard token types
+#[tokio::test]
+async fn test_mix_of_standard_and_custom_tokens() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let acme_standard = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_5",
@@ -843,25 +870,10 @@ async fn test_custom_token_type_handling() {
     );
 }
 
-/// Test multi-issuer validation scenarios
-/// Tests non-deterministic token detection, graceful degradation, and validation requirements
+/// Test validation - Empty token array should fail
 #[tokio::test]
-async fn test_multi_issuer_validation() {
-    // Load the policy store configuration
-    static POLICY_STORE_RAW_YAML: &str =
-        include_str!("../../../test_files/policy-store-multi-issuer-basic.yaml");
-    let cedarling = get_cedarling_with_callback(
-        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
-        |config| {
-            config.entity_builder_config.build_workload = false;
-            config.entity_builder_config.build_user = false;
-            config.authorization_config.use_workload_principal = false;
-            config.authorization_config.use_user_principal = false;
-        },
-    )
-    .await;
-
-    // Test Case 1: Empty token array should fail
+async fn test_validation_empty_token_array() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![], // Empty tokens array
         EntityData::from_json(
@@ -884,9 +896,13 @@ async fn test_multi_issuer_validation() {
         result.is_err(),
         "Should fail with empty token array"
     );
+}
 
-    // Test Case 2: Non-deterministic tokens - multiple tokens of same type from same issuer
-    // The system uses graceful validation: first token is kept, duplicates are logged and skipped
+/// Test validation - Non-deterministic tokens (multiple tokens of same type from same issuer)
+/// The system uses graceful validation: first token is kept, duplicates are logged and skipped
+#[tokio::test]
+async fn test_validation_non_deterministic_tokens() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let acme_token_1 = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_1",
@@ -939,8 +955,12 @@ async fn test_multi_issuer_validation() {
         result.unwrap().decision,
         "Should be ALLOW - first Acme token has write:documents scope"
     );
+}
 
-    // Test Case 3: Valid multiple tokens - same type from different issuers (should work)
+/// Test validation - Valid multiple tokens with same type from different issuers
+#[tokio::test]
+async fn test_validation_same_type_different_issuers() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let acme_access = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_3",
@@ -992,8 +1012,12 @@ async fn test_multi_issuer_validation() {
         result.unwrap().decision,
         "Should be ALLOW when either issuer's token has required scope"
     );
+}
 
-    // Test Case 4: Different custom token types from same issuer (should work)
+/// Test validation - Different custom token types from same issuer
+#[tokio::test]
+async fn test_validation_different_types_same_issuer() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let dolphin_access_token = generate_token_using_claims(json!({
         "iss": "https://idp.dolphin.sea",
         "sub": "dolphin_user_4",
@@ -1045,8 +1069,12 @@ async fn test_multi_issuer_validation() {
         result.unwrap().decision,
         "Should be ALLOW when Dolphin access token has write:documents scope"
     );
+}
 
-    // Test Case 5: Graceful degradation - invalid token should be ignored
+/// Test validation - Graceful degradation when invalid token is present
+#[tokio::test]
+async fn test_validation_graceful_degradation_invalid_token() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let valid_token = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_5",
@@ -1088,8 +1116,12 @@ async fn test_multi_issuer_validation() {
         result.unwrap().decision,
         "Should be ALLOW - valid Acme token has required scope despite invalid token being present"
     );
+}
 
-    // Test Case 6: TokenInput validation - empty mapping string
+/// Test validation - TokenInput with empty mapping string should fail
+#[tokio::test]
+async fn test_validation_empty_mapping_string() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let token_for_validation = generate_token_using_claims(json!({
         "iss": "https://idp.acme.com",
         "sub": "acme_user_6",
@@ -1124,8 +1156,12 @@ async fn test_multi_issuer_validation() {
         result.is_err(),
         "Should fail when TokenInput has empty mapping string"
     );
+}
 
-    // Test Case 7: TokenInput validation - empty payload
+/// Test validation - TokenInput with empty payload should fail
+#[tokio::test]
+async fn test_validation_empty_payload() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let request_result = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![TokenInput::new("Acme::Access_Token".to_string(), "".to_string())], // Empty payload
         EntityData::from_json(
