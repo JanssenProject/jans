@@ -259,6 +259,9 @@ public class RegisterService {
         if (requestObject.getLogoutStatusJwtScriptDns() != null) {
             client.getAttributes().setLogoutStatusJwtScriptDns(requestObject.getLogoutStatusJwtScriptDns());
         }
+        if (requestObject.getParScriptDns() != null) {
+            client.getAttributes().setParScriptDns(requestObject.getParScriptDns());
+        }
         if (requestObject.getPostAuthnScriptDns() != null) {
             client.getAttributes().setPostAuthnScripts(requestObject.getPostAuthnScriptDns());
         }
