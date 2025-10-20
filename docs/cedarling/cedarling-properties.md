@@ -48,6 +48,7 @@ To load policy store one of the following keys must be provided:
 - **`CEDARLING_MAPPING_WORKLOAD`** : Name of Cedar Workload schema entity
 - **`CEDARLING_MAPPING_ROLE`** : Name of Cedar Role schema entity
 - **`CEDARLING_UNSIGNED_ROLE_ID_SRC`** : The attribute that will be used to create the Role entity when using the unsigned interface. Defaults to `"role"`.
+- **`CEDARLING_MAPPING_TRUSTED_ISSUER`** : Mapping name of cedar schema TrustedIssuer entity.
 
 **The following bootstrap properties are needed to configure log behavior:**
 
