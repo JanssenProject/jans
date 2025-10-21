@@ -232,7 +232,7 @@ const BOOTSTRAP_CONFIG = {
 };
 ```
 
-For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md).
+For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md) or on [our page](https://docs.jans.io/stable/cedarling/cedarling-properties/) .
 
 ```
 
