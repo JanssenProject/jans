@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -65,7 +66,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
     
-    @Operation(summary = "Fetches deployed Agama project based on name.", description = "Fetches deployed Agama project based on name.", operationId = "get-agama-prj-by-name", tags = {
+    @Operation(summary = "Retrieve details of a single deployment by name.", description = "Retrieve details of a single deployment by name.", operationId = "get-agama-prj-by-name", tags = {
     "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_READ_ACCESS} ))
     @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Agama project", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Deployment.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-get.json"))),
@@ -90,7 +91,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
 
-    @Operation(summary = "Deploy an Agama project.", description = "Deploy an Agama project.", operationId = "post-agama-prj", tags = {
+    @Operation(summary = "Add or replace an Agama project to the server.", description = "Add or replace an Agama project to the server.", operationId = "post-agama-prj", tags = {
     "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}))
     @ApiResponses(value = {
     @ApiResponse(responseCode = "202", description = "Agama project accepted", content = @Content(mediaType = "application/zip", schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-post.json"))),
@@ -122,7 +123,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
 
-    @Operation(summary = "Delete a deployed Agama project.", description = "Delete a deployed Agama project.", operationId = "delete-agama-prj", tags = {
+    @Operation(summary = "Undeploy an Agama project from the server.", description = "Undeploy an Agama project from the server.", operationId = "delete-agama-prj", tags = {
     "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {
             ApiAccessConstants.AGAMA_DELETE_ACCESS }))
     @ApiResponses(value = {
@@ -153,7 +154,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
         
     }
 
-    @Operation(summary = "Retrieve the list of configs based on name.", description = "Retrieve the list of configs based on name.", operationId = "get-agama-prj-configs", tags = {
+    @Operation(summary = "Retrieve the configurations associated to flows that belong to the project of interest. The project must have been already processed fully.", description = "Retrieve the configurations associated to flows that belong to the project of interest. The project must have been already processed fully.", operationId = "get-agama-prj-configs", tags = {
     "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_READ_ACCESS}))
     @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Agama projects configs", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-get-configs-all.json"))),
@@ -198,10 +199,11 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
 
-    @Operation(summary = "Update an Agama project.", description = "Update an Agama project.", operationId = "put-agama-prj", tags = {
+    @Operation(summary = "Set or replace the configurations associated to flows that belong to the project. The project must have been already processed fully.", description = "Set or replace the configurations associated to flows that belong to the project. The project must have been already processed fully.", operationId = "put-agama-prj", tags = {
     "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}))
+    @RequestBody(description = "JSON object with configurations associated to flows ", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = HashMap.class), examples = @ExampleObject(name = "Request example", value = "example/agama/put-agama-prj-config.json")))
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Agama project accepted", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-post.json"))),
+    @ApiResponse(responseCode = "200", description = "JSON object with properties values correspond to a boolean indicating the success of the update for the given flow.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/put-agama-prj-config-response.json"))),
     @ApiResponse(responseCode = "400", description = "Bad Request"),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "409", description = "Conflict"),
