@@ -19,8 +19,11 @@ import io.jans.as.server.auth.DpopService;
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidator;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RequestParameterService;
+import io.jans.as.server.service.external.ExternalParService;
+import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.as.server.util.ServerUtil;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +36,7 @@ import jakarta.ws.rs.core.SecurityContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.ThreadContext;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -70,6 +74,9 @@ public class ParRestWebService {
 
     @Inject
     private DpopService dpopService;
+
+    @Inject
+    private ExternalParService externalParService;
 
     @POST
     @Produces({MediaType.APPLICATION_JSON})
@@ -182,13 +189,31 @@ public class ParRestWebService {
             parValidator.validatePkce(par.getAttributes().getCodeChallenge(), par.getAttributes().getCodeChallengeMethod(), state);
             authorizeRestWebServiceValidator.validatePkce(par.getAttributes().getCodeChallenge(), redirectUriResponse, client);
 
+            final ExecutionContext context = new ExecutionContext(httpRequest, httpResponse);
+            context.setClient(client);
+
+            if (!externalParService.createPar(par, ExternalScriptContext.of(context))) {
+                log.debug("Forbidden by external script. It returned 'false'.");
+
+                throw new WebApplicationException(Response
+                        .status(Response.Status.FORBIDDEN)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.SERVER_ERROR, state, ""))
+                        .build());
+            }
+
             parService.persist(par);
 
             ParResponse parResponse = new ParResponse();
             parResponse.setRequestUri(ParService.toOutsideId(par.getId()));
             parResponse.setExpiresIn(par.getTtl()); // set it to TTL instead of lifetime because TTL can be updated during request object validation
 
-            final String responseAsString = ServerUtil.asJson(parResponse);
+            String responseAsString = ServerUtil.asJson(parResponse);
+            JSONObject responseAsObject = new JSONObject(responseAsString);
+
+            if (externalParService.modifyParResponse(responseAsObject, ExternalScriptContext.of(context))) {
+                // change response only if external script returned `true`
+                responseAsString = responseAsObject.toString();
+            }
 
             log.debug("Created PAR {}", responseAsString);
 

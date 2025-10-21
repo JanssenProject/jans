@@ -329,6 +329,7 @@ nav:
       - Access Evaluation: script-catalog/access_evaluation/access-evaluation.md
       - Access Evaluation Discovery: script-catalog/access_evaluation/access-evaluation-discovery.md
       - Logout Status JWT: script-catalog/logout_status_jwt/logout-status-jwt.md
+      - PAR: script-catalog/par/par.md
       - Cookie: script-catalog/cookie/cookie.md
       - Discovery: script-catalog/discovery/discovery.md
       - Select Account: script-catalog/select_account/select-account.md
