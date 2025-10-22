@@ -12,6 +12,7 @@ pub mod errors;
 pub mod loader;
 pub mod metadata;
 pub mod policy_parser;
+pub mod schema_parser;
 pub mod source;
 pub mod validator;
 pub mod vfs_adapter;
@@ -34,6 +35,7 @@ pub use loader::{
 };
 pub use metadata::{FileInfo, PolicyStoreInfo, PolicyStoreManifest, PolicyStoreMetadata};
 pub use policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
+pub use schema_parser::{ParsedSchema, SchemaParser};
 pub use source::{PolicyStoreFormat, PolicyStoreSource};
 pub use validator::MetadataValidator;
 pub use vfs_adapter::{MemoryVfs, VfsFileSystem};
