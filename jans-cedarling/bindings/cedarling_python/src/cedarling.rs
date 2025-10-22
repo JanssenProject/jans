@@ -11,7 +11,9 @@ use pyo3::prelude::*;
 
 use crate::authorize::authorize_result::AuthorizeResult;
 use crate::authorize::errors::authorize_error_to_py;
+use crate::authorize::multi_issuer_authorize_result::MultiIssuerAuthorizeResult;
 use crate::authorize::request::Request;
+use crate::authorize::request_multi_issuer::AuthorizeMultiIssuerRequest;
 use crate::authorize::request_unsigned::RequestUnsigned;
 use crate::config::bootstrap_config::BootstrapConfig;
 use serde_pyobject::to_pyobject;
@@ -117,6 +119,19 @@ impl Cedarling {
         let cedarling_instance = self
             .inner
             .authorize_unsigned(request.borrow().to_cedarling()?)
+            .map_err(authorize_error_to_py)?;
+        Ok(cedarling_instance.into())
+    }
+
+    /// Authorize multi-issuer request.
+    /// Makes authorization decision based on multiple JWT tokens from different issuers.
+    fn authorize_multi_issuer(
+        &self,
+        request: Bound<'_, AuthorizeMultiIssuerRequest>,
+    ) -> Result<MultiIssuerAuthorizeResult, PyErr> {
+        let cedarling_instance = self
+            .inner
+            .authorize_multi_issuer(request.borrow().to_cedarling()?)
             .map_err(authorize_error_to_py)?;
         Ok(cedarling_instance.into())
     }
