@@ -8,10 +8,11 @@
 use super::errors::{PolicyStoreError, ValidationError};
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
 use super::policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
+use super::schema_parser::{ParsedSchema, SchemaParser};
 use super::source::{PolicyStoreFormat, PolicyStoreSource};
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
-use cedar_policy::PolicySet;
+use cedar_policy::{PolicySet, Schema};
 use std::path::Path;
 
 /// Policy store loader trait for loading policy stores from various sources.
@@ -479,6 +480,22 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         templates: Vec<ParsedTemplate>,
     ) -> Result<PolicySet, PolicyStoreError> {
         PolicyParser::create_policy_set(policies, templates)
+    }
+
+    /// Parse and validate a Cedar schema from content.
+    ///
+    /// Uses the Cedar engine to parse and validate the schema syntax and structure.
+    fn parse_schema(content: &str, filename: &str) -> Result<ParsedSchema, PolicyStoreError> {
+        let parsed = SchemaParser::parse_schema(content, filename)?;
+        SchemaParser::validate_schema(&parsed)?;
+        Ok(parsed)
+    }
+
+    /// Extract the Cedar Schema object from a parsed schema.
+    ///
+    /// Returns the validated Cedar Schema that can be used for policy validation.
+    fn get_schema(parsed: &ParsedSchema) -> Result<&Schema, PolicyStoreError> {
+        Ok(&parsed.schema)
     }
 }
 
@@ -957,5 +974,156 @@ permit(
         // Create a policy set
         let policy_set = PhysicalLoader::create_policy_set(parsed_policies, vec![]).unwrap();
         assert!(!policy_set.is_empty());
+    }
+
+    #[test]
+    fn test_load_and_parse_schema_end_to_end() {
+        let temp_dir = TempDir::new().unwrap();
+        let dir = temp_dir.path();
+
+        // Create a complete policy store structure
+        let _ = create_test_policy_store(dir);
+
+        // Update schema with more complex content
+        let schema_content = r#"
+            namespace PhotoApp {
+                entity User = {
+                    "username": String,
+                    "email": String,
+                    "roles": Set<String>
+                };
+                
+                entity Photo = {
+                    "title": String,
+                    "owner": User,
+                    "public": Bool
+                };
+                
+                entity Album = {
+                    "name": String,
+                    "photos": Set<Photo>
+                };
+                
+                action "view" appliesTo {
+                    principal: [User],
+                    resource: [Photo, Album],
+                    context: {
+                        "ip_address": String
+                    }
+                };
+                
+                action "edit" appliesTo {
+                    principal: [User],
+                    resource: [Photo, Album]
+                };
+                
+                action "delete" appliesTo {
+                    principal: [User],
+                    resource: [Photo, Album]
+                };
+            }
+        "#;
+
+        fs::write(dir.join("schema.cedarschema"), schema_content).unwrap();
+
+        // Load the policy store
+        let source = PolicyStoreSource::Directory(dir.to_path_buf());
+        let loader = DefaultPolicyStoreLoader::new_physical();
+        let loaded = loader.load(&source).unwrap();
+
+        // Schema should be loaded
+        assert!(!loaded.schema.is_empty(), "Schema should not be empty");
+
+        // Parse the schema
+        let parsed_schema = PhysicalLoader::parse_schema(&loaded.schema, "schema.cedarschema");
+        assert!(parsed_schema.is_ok());
+
+        let parsed = parsed_schema.unwrap();
+        assert_eq!(parsed.filename, "schema.cedarschema");
+        assert_eq!(parsed.content, schema_content);
+
+        // Validate the schema
+        let validation = SchemaParser::validate_schema(&parsed);
+        assert!(validation.is_ok());
+
+        // Get the Cedar schema object
+        let schema = PhysicalLoader::get_schema(&parsed);
+        assert!(schema.is_ok());
+    }
+
+    #[test]
+    fn test_complete_policy_store_with_schema_and_policies() {
+        let temp_dir = TempDir::new().unwrap();
+        let dir = temp_dir.path();
+
+        // Create a complete policy store structure
+        let _ = create_test_policy_store(dir);
+
+        // Add a comprehensive schema
+        let schema_content = r#"
+            namespace DocumentApp {
+                entity User = {
+                    "id": String,
+                    "name": String
+                };
+                
+                entity Document = {
+                    "id": String,
+                    "title": String,
+                    "owner": User
+                };
+                
+                action "view" appliesTo {
+                    principal: [User],
+                    resource: [Document]
+                };
+                
+                action "edit" appliesTo {
+                    principal: [User],
+                    resource: [Document]
+                };
+            }
+        "#;
+
+        fs::write(dir.join("schema.cedarschema"), schema_content).unwrap();
+
+        // Add policies that reference the schema
+        let policies_dir = dir.join("policies");
+        fs::write(
+            policies_dir.join("allow_owner.cedar"),
+            r#"
+                // @id("allow-owner-edit")
+                permit(
+                    principal,
+                    action == Action::"edit",
+                    resource
+                ) when {
+                    resource.owner == principal
+                };
+            "#,
+        )
+        .unwrap();
+
+        // Load the policy store
+        let source = PolicyStoreSource::Directory(dir.to_path_buf());
+        let loader = DefaultPolicyStoreLoader::new_physical();
+        let loaded = loader.load(&source).unwrap();
+
+        // Parse schema
+        assert!(!loaded.schema.is_empty(), "Schema should not be empty");
+        let parsed_schema = PhysicalLoader::parse_schema(&loaded.schema, "schema.cedarschema");
+        assert!(parsed_schema.is_ok());
+
+        // Parse policies
+        let parsed_policies = PhysicalLoader::parse_policies(&loaded.policies);
+        assert!(parsed_policies.is_ok());
+
+        // Verify they work together
+        let parsed_schema_result = parsed_schema.unwrap();
+        let schema = PhysicalLoader::get_schema(&parsed_schema_result);
+        assert!(schema.is_ok());
+
+        let policy_set = PhysicalLoader::create_policy_set(parsed_policies.unwrap(), vec![]);
+        assert!(policy_set.is_ok());
     }
 }
