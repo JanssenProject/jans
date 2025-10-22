@@ -11,6 +11,7 @@ mod token_entity_metadata;
 pub mod errors;
 pub mod loader;
 pub mod metadata;
+pub mod policy_parser;
 pub mod source;
 pub mod validator;
 pub mod vfs_adapter;
@@ -32,6 +33,7 @@ pub use loader::{
     PolicyStoreLoader,
 };
 pub use metadata::{FileInfo, PolicyStoreInfo, PolicyStoreManifest, PolicyStoreMetadata};
+pub use policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
 pub use source::{PolicyStoreFormat, PolicyStoreSource};
 pub use validator::MetadataValidator;
 pub use vfs_adapter::{MemoryVfs, VfsFileSystem};

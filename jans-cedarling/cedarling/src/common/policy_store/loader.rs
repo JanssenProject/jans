@@ -7,9 +7,11 @@
 
 use super::errors::{PolicyStoreError, ValidationError};
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
+use super::policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
 use super::source::{PolicyStoreFormat, PolicyStoreSource};
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
+use cedar_policy::PolicySet;
 use std::path::Path;
 
 /// Policy store loader trait for loading policy stores from various sources.
@@ -437,6 +439,47 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             trusted_issuers,
         })
     }
+
+    /// Parse and validate Cedar policies from loaded policy files.
+    ///
+    /// Extracts policy IDs from @id annotations or filenames and validates syntax.
+    fn parse_policies(policy_files: &[PolicyFile]) -> Result<Vec<ParsedPolicy>, PolicyStoreError> {
+        let mut parsed_policies = Vec::with_capacity(policy_files.len());
+
+        for file in policy_files {
+            let parsed = PolicyParser::parse_policy(&file.content, &file.name)?;
+            parsed_policies.push(parsed);
+        }
+
+        Ok(parsed_policies)
+    }
+
+    /// Parse and validate Cedar templates from loaded template files.
+    ///
+    /// Extracts template IDs from @id annotations or filenames and validates
+    /// syntax including slot definitions.
+    fn parse_templates(
+        template_files: &[PolicyFile],
+    ) -> Result<Vec<ParsedTemplate>, PolicyStoreError> {
+        let mut parsed_templates = Vec::with_capacity(template_files.len());
+
+        for file in template_files {
+            let parsed = PolicyParser::parse_template(&file.content, &file.name)?;
+            parsed_templates.push(parsed);
+        }
+
+        Ok(parsed_templates)
+    }
+
+    /// Create a Cedar PolicySet from parsed policies and templates.
+    ///
+    /// Validates no ID conflicts and that all policies/templates can be added.
+    fn create_policy_set(
+        policies: Vec<ParsedPolicy>,
+        templates: Vec<ParsedTemplate>,
+    ) -> Result<PolicySet, PolicyStoreError> {
+        PolicyParser::create_policy_set(policies, templates)
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -508,6 +551,8 @@ mod tests {
     use std::fs;
     use std::path::PathBuf;
     use tempfile::TempDir;
+
+    type PhysicalLoader = DefaultPolicyStoreLoader<super::super::vfs_adapter::PhysicalVfs>;
 
     /// Helper to create a minimal valid policy store directory for testing.
     fn create_test_policy_store(dir: &Path) -> std::io::Result<()> {
@@ -746,5 +791,171 @@ permit(
             "Expected JSON/parse error, got: {}",
             err_str
         );
+    }
+
+    #[test]
+    fn test_parse_policies_success() {
+        let policy_files = vec![
+            PolicyFile {
+                name: "policy1.cedar".to_string(),
+                content: r#"permit(principal, action, resource);"#.to_string(),
+            },
+            PolicyFile {
+                name: "policy2.cedar".to_string(),
+                content: r#"forbid(principal, action, resource);"#.to_string(),
+            },
+        ];
+        let result = PhysicalLoader::parse_policies(&policy_files);
+
+        assert!(result.is_ok());
+
+        let parsed = result.unwrap();
+        assert_eq!(parsed.len(), 2);
+        assert_eq!(parsed[0].filename, "policy1.cedar");
+        assert_eq!(parsed[0].id.to_string(), "policy1");
+        assert_eq!(parsed[1].filename, "policy2.cedar");
+        assert_eq!(parsed[1].id.to_string(), "policy2");
+    }
+
+    #[test]
+    fn test_parse_policies_with_id_annotation() {
+        let policy_files = vec![PolicyFile {
+            name: "my_policy.cedar".to_string(),
+            content: r#"
+                // @id("custom-id-123")
+                permit(
+                    principal == User::"alice",
+                    action == Action::"view",
+                    resource == File::"doc.txt"
+                );
+            "#
+            .to_string(),
+        }];
+
+        let result = PhysicalLoader::parse_policies(&policy_files);
+        assert!(result.is_ok());
+
+        let parsed = result.unwrap();
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(parsed[0].id.to_string(), "custom-id-123");
+    }
+
+    #[test]
+    fn test_parse_policies_invalid_syntax() {
+        let policy_files = vec![PolicyFile {
+            name: "invalid.cedar".to_string(),
+            content: "this is not valid cedar syntax".to_string(),
+        }];
+
+        let result = PhysicalLoader::parse_policies(&policy_files);
+        assert!(result.is_err());
+
+        if let Err(PolicyStoreError::CedarParsing { file, message }) = result {
+            assert_eq!(file, "invalid.cedar");
+            assert!(!message.is_empty());
+        } else {
+            panic!("Expected CedarParsing error");
+        }
+    }
+
+    #[test]
+    fn test_parse_templates_success() {
+        let template_files = vec![PolicyFile {
+            name: "template1.cedar".to_string(),
+            content: r#"permit(principal == ?principal, action, resource);"#.to_string(),
+        }];
+
+        let result = PhysicalLoader::parse_templates(&template_files);
+        assert!(result.is_ok());
+
+        let parsed = result.unwrap();
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(parsed[0].filename, "template1.cedar");
+        assert_eq!(parsed[0].id.to_string(), "template1");
+    }
+
+    #[test]
+    fn test_create_policy_set_integration() {
+        let policy_files = vec![
+            PolicyFile {
+                name: "allow.cedar".to_string(),
+                content: r#"permit(principal, action, resource);"#.to_string(),
+            },
+            PolicyFile {
+                name: "deny.cedar".to_string(),
+                content: r#"forbid(principal, action, resource);"#.to_string(),
+            },
+        ];
+
+        let template_files = vec![PolicyFile {
+            name: "user_template.cedar".to_string(),
+            content: r#"permit(principal == ?principal, action, resource);"#.to_string(),
+        }];
+
+        let policies = PhysicalLoader::parse_policies(&policy_files).unwrap();
+        let templates = PhysicalLoader::parse_templates(&template_files).unwrap();
+
+        let result = PhysicalLoader::create_policy_set(policies, templates);
+        assert!(result.is_ok());
+
+        let policy_set = result.unwrap();
+        assert!(!policy_set.is_empty());
+    }
+
+    #[test]
+    fn test_load_and_parse_policies_end_to_end() {
+        let temp_dir = TempDir::new().unwrap();
+        let dir = temp_dir.path();
+
+        // Create a complete policy store structure
+        let _ = create_test_policy_store(dir);
+
+        // Add some Cedar policies
+        let policies_dir = dir.join("policies");
+        fs::write(
+            policies_dir.join("view_policy.cedar"),
+            r#"
+                // @id("allow-view-docs")
+                permit(
+                    principal == User::"alice",
+                    action == Action::"view",
+                    resource == File::"document.txt"
+                );
+            "#,
+        )
+        .unwrap();
+
+        fs::write(
+            policies_dir.join("edit_policy.cedar"),
+            r#"
+                permit(
+                    principal == User::"bob",
+                    action == Action::"edit",
+                    resource == File::"document.txt"
+                );
+            "#,
+        )
+        .unwrap();
+
+        // Load the policy store
+        let source = PolicyStoreSource::Directory(dir.to_path_buf());
+        let loader = DefaultPolicyStoreLoader::new_physical();
+        let loaded = loader.load(&source).unwrap();
+
+        // Parse the policies
+        let parsed_policies = PhysicalLoader::parse_policies(&loaded.policies).unwrap();
+
+        // Should have 3 policies: 1 from create_test_policy_store helper + 2 from this test
+        assert_eq!(parsed_policies.len(), 3);
+
+        // Check that policies have the expected IDs
+        let ids: Vec<String> = parsed_policies.iter().map(|p| p.id.to_string()).collect();
+        assert!(ids.contains(&"test-policy".to_string())); // From helper
+        assert!(ids.contains(&"allow-view-docs".to_string())); // Custom ID
+        assert!(ids.contains(&"edit_policy".to_string())); // Derived from filename
+
+        // Create a policy set
+        let policy_set = PhysicalLoader::create_policy_set(parsed_policies, vec![]).unwrap();
+        assert!(!policy_set.is_empty());
     }
 }
