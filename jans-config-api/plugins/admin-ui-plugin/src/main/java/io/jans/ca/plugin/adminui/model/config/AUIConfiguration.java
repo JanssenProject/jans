@@ -44,6 +44,7 @@ public class AUIConfiguration {
     private List<KeyValuePair> additionalParameters;
     private CedarlingLogType cedarlingLogType;
     private String auiPolicyStoreUrl;
+    private String auiDefaultPolicyStorePath;
     private Boolean useRemotePolicyStore = Boolean.FALSE;
 
     public List<KeyValuePair> getAdditionalParameters() {
@@ -308,6 +309,14 @@ public class AUIConfiguration {
 
     public void setUseRemotePolicyStore(Boolean useRemotePolicyStore) {
         this.useRemotePolicyStore = useRemotePolicyStore;
+    }
+
+    public String getAuiDefaultPolicyStorePath() {
+        return auiDefaultPolicyStorePath;
+    }
+
+    public void setAuiDefaultPolicyStorePath(String auiDefaultPolicyStorePath) {
+        this.auiDefaultPolicyStorePath = auiDefaultPolicyStorePath;
     }
 
     @Override

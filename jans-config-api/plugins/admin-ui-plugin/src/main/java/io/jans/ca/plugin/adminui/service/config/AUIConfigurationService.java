@@ -122,6 +122,7 @@ public class AUIConfigurationService extends BaseService {
         auiConfig.setCedarlingLogType(CedarlingLogType.fromString(appConf.getMainSettings().getUiConfig().getCedarlingLogType()));
         auiConfig.setAuiPolicyStoreUrl(appConf.getMainSettings().getUiConfig().getAuiPolicyStoreUrl());
         auiConfig.setUseRemotePolicyStore(appConf.getMainSettings().getUiConfig().getUseRemotePolicyStore());
+        auiConfig.setAuiDefaultPolicyStorePath(appConf.getMainSettings().getUiConfig().getAuiDefaultPolicyStorePath());
         return auiConfig;
     }
 

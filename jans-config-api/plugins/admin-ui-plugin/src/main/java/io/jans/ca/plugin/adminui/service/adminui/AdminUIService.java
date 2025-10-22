@@ -14,6 +14,7 @@ import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.util.security.StringEncrypter;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
@@ -55,6 +56,7 @@ public class AdminUIService {
             appConfigResponse.setAdditionalParameters(auiConfiguration.getAdditionalParameters());
             appConfigResponse.setCedarlingLogType(auiConfiguration.getCedarlingLogType());
             appConfigResponse.setAuiPolicyStoreUrl(auiConfiguration.getAuiPolicyStoreUrl());
+            appConfigResponse.setAuiDefaultPolicyStorePath(auiConfiguration.getAuiDefaultPolicyStorePath());
             appConfigResponse.setUseRemotePolicyStore(auiConfiguration.getUseRemotePolicyStore());
 
             return appConfigResponse;
@@ -87,11 +89,15 @@ public class AdminUIService {
                 adminConf.getMainSettings().getUiConfig().setCedarlingLogType(appConfigResponse.getCedarlingLogType().getValue());
                 auiConfigurationService.getAUIConfiguration().setCedarlingLogType(appConfigResponse.getCedarlingLogType());
             }
-            if (appConfigResponse.getAuiPolicyStoreUrl() != null) {
+            if (!Strings.isNullOrEmpty(appConfigResponse.getAuiPolicyStoreUrl())) {
                 adminConf.getMainSettings().getUiConfig().setAuiPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
                 auiConfigurationService.getAUIConfiguration().setAuiPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
             }
             if (appConfigResponse.getUseRemotePolicyStore() != null) {
+                adminConf.getMainSettings().getUiConfig().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
+                auiConfigurationService.getAUIConfiguration().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
+            }
+            if (!Strings.isNullOrEmpty(appConfigResponse.getAuiDefaultPolicyStorePath())) {
                 adminConf.getMainSettings().getUiConfig().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
                 auiConfigurationService.getAUIConfiguration().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
             }
@@ -496,5 +502,9 @@ public class AdminUIService {
             log.error(ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
         }
+    }
+    public static void main(String[] args) throws StringEncrypter.EncryptionException {
+        StringEncrypter se = StringEncrypter.instance("e4emGottrVyqhwsIeIu40WWZ");
+        System.out.println(se.decrypt("NVc37PnLywbjSr3227i8+Q=="));
     }
 }

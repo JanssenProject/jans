@@ -39,6 +39,8 @@ public class AppConfigResponse {
     private CedarlingLogType cedarlingLogType;
     @Schema(description = "Admin UI Policy Store URL", accessMode = Schema.AccessMode.READ_WRITE)
     private String auiPolicyStoreUrl;
+    @Schema(description = "Admin UI Default Policy Store path", accessMode = Schema.AccessMode.READ_WRITE)
+    private String auiDefaultPolicyStorePath;
     @Schema(description = "Use remote Policy Store. If set to false then Admin UI will use default Policy Store.", accessMode = Schema.AccessMode.READ_WRITE)
     private Boolean useRemotePolicyStore ;
 
@@ -168,5 +170,13 @@ public class AppConfigResponse {
 
     public void setUseRemotePolicyStore(Boolean useRemotePolicyStore) {
         this.useRemotePolicyStore = useRemotePolicyStore;
+    }
+
+    public String getAuiDefaultPolicyStorePath() {
+        return auiDefaultPolicyStorePath;
+    }
+
+    public void setAuiDefaultPolicyStorePath(String auiDefaultPolicyStorePath) {
+        this.auiDefaultPolicyStorePath = auiDefaultPolicyStorePath;
     }
 }

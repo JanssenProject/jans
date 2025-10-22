@@ -476,9 +476,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AppConfigResponse"
+                $ref: "#/components/schemas/AppConfigResponse"
         "400":
           description: Bad Request
           content:
@@ -514,9 +512,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AppConfigResponse"
+                $ref: "#/components/schemas/AppConfigResponse"
         "400":
           description: Bad Request
           content:
@@ -1701,6 +1697,9 @@ components:
         auiPolicyStoreUrl:
           type: string
           description: Admin UI Policy Store URL
+        auiDefaultPolicyStorePath:
+          type: string
+          description: Admin UI Default Policy Store path
         useRemotePolicyStore:
           type: boolean
           description: Use remote Policy Store. If set to false then Admin UI will

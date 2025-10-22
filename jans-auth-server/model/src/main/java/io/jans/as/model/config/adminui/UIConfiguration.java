@@ -5,6 +5,7 @@ public class UIConfiguration {
     private Boolean allowSmtpKeystoreEdit;
     private String cedarlingLogType;
     private String auiPolicyStoreUrl;
+    private String auiDefaultPolicyStorePath;
     private Boolean useRemotePolicyStore ;
 
     public UIConfiguration() {
@@ -49,5 +50,13 @@ public class UIConfiguration {
 
     public void setUseRemotePolicyStore(Boolean useRemotePolicyStore) {
         this.useRemotePolicyStore = useRemotePolicyStore;
+    }
+
+    public String getAuiDefaultPolicyStorePath() {
+        return auiDefaultPolicyStorePath;
+    }
+
+    public void setAuiDefaultPolicyStorePath(String auiDefaultPolicyStorePath) {
+        this.auiDefaultPolicyStorePath = auiDefaultPolicyStorePath;
     }
 }

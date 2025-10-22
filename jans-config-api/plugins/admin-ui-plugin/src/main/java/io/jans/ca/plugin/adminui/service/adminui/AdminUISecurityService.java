@@ -105,7 +105,12 @@ public class AdminUISecurityService {
                 return CommonUtils.createGenericResponse(false, response.getStatus(), jsonData);
             } else {
                 // Load policy store from default local file path
-                Path path = Paths.get(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
+                String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiDefaultPolicyStorePath())
+                        .filter(path -> !Strings.isNullOrEmpty(path))
+                        .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
+
+                Path path = Paths.get(policyStorePath);
+
                 log.error("Absolute path of default : " + path.toAbsolutePath());
                 // Create ObjectMapper instance
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -163,7 +168,7 @@ public class AdminUISecurityService {
                     .map(roleName -> {
                         AdminRole role = new AdminRole();
                         role.setRole(roleName);
-                        role.setDescription("Auto-created role for " + roleName);
+                        role.setDescription("Role created after parsing policy-store for " + roleName);
                         role.setDeletable(true);
                         return role;
                     })
