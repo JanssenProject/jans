@@ -44,6 +44,10 @@ pub enum PolicyStoreError {
         message: String, // Cedar errors don't implement std::error::Error
     },
 
+    /// Cedar schema error
+    #[error("Cedar schema error in '{file}': {message}")]
+    CedarSchemaError { file: String, message: String },
+
     /// Path not found
     #[error("Path not found: {path}")]
     PathNotFound { path: String },
