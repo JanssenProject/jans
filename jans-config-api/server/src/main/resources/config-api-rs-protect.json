@@ -17,6 +17,10 @@
             {
               "inum": "1800.01.2",
               "name": "https://jans.io/oauth/config/acrs.write"
+            },
+            {
+              "inum": "1800.04.1",
+              "name": "https://jans.io/oauth/config/acrs.admin"
             }
           ],
           "superScopes": [
@@ -36,7 +40,12 @@
               "name": "https://jans.io/oauth/config/acrs.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.1",
+              "name": "https://jans.io/oauth/config/acrs.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -63,6 +72,10 @@
             {
               "inum": "1800.01.4",
               "name": "https://jans.io/oauth/config/attributes.write"
+            },
+            {
+              "inum": "1800.04.2",
+              "name": "https://jans.io/oauth/config/attributes.admin"
             }
           ],
           "superScopes": [
@@ -84,7 +97,12 @@
               "name": "https://jans.io/oauth/config/attributes.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.2",
+              "name": "https://jans.io/oauth/config/attributes.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -102,7 +120,12 @@
               "name": "https://jans.io/oauth/config/attributes.delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.2",
+              "name": "https://jans.io/oauth/config/attributes.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.3",
@@ -129,6 +152,10 @@
             {
               "inum": "1800.01.7",
               "name": "https://jans.io/oauth/config/cache.write"
+            },
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
             }
           ],
           "superScopes": [
@@ -148,7 +175,12 @@
               "name": "https://jans.io/oauth/config/cache.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -175,6 +207,10 @@
             {
               "inum": "1800.01.7",
               "name": "https://jans.io/oauth/config/cache.write"
+            },
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
             }
           ],
           "superScopes": [
@@ -194,7 +230,12 @@
               "name": "https://jans.io/oauth/config/cache.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -212,7 +253,12 @@
               "name": "https://jans.io/oauth/config/cache.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -239,6 +285,10 @@
             {
               "inum": "1800.01.7",
               "name": "https://jans.io/oauth/config/cache.write"
+            },
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
             }
           ],
           "superScopes": [
@@ -258,7 +308,12 @@
               "name": "https://jans.io/oauth/config/cache.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -276,7 +331,12 @@
               "name": "https://jans.io/oauth/config/cache.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -303,6 +363,10 @@
             {
               "inum": "1800.01.7",
               "name": "https://jans.io/oauth/config/cache.write"
+            },
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
             }
           ],
           "superScopes": [
@@ -322,7 +386,12 @@
               "name": "https://jans.io/oauth/config/cache.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -340,7 +409,12 @@
               "name": "https://jans.io/oauth/config/cache.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -367,6 +441,10 @@
             {
               "inum": "1800.01.7",
               "name": "https://jans.io/oauth/config/cache.write"
+            },
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
             }
           ],
           "superScopes": [
@@ -386,7 +464,12 @@
               "name": "https://jans.io/oauth/config/cache.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -404,7 +487,12 @@
               "name": "https://jans.io/oauth/config/cache.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.3",
+              "name": "https://jans.io/oauth/config/cache.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -431,6 +519,10 @@
             {
               "inum": "1800.02.1",
               "name": "https://jans.io/oauth/config/openid-read"
+            },
+            {
+              "inum": "1800.04.4",
+              "name": "https://jans.io/oauth/config/clients.admin"
             }
           ],
           "superScopes": [
@@ -456,6 +548,10 @@
             {
               "inum": "1800.02.2",
               "name": "https://jans.io/oauth/config/openid-write"
+            },
+            {
+              "inum": "1800.04.4",
+              "name": "https://jans.io/oauth/config/clients.admin"
             }
           ],
           "superScopes": [
@@ -479,6 +575,10 @@
             {
               "inum": "1800.02.3",
               "name": "https://jans.io/oauth/config/openid-delete"
+            },
+            {
+              "inum": "1800.04.4",
+              "name": "https://jans.io/oauth/config/clients.admin"
             }
           ],
           "superScopes": [
@@ -507,6 +607,10 @@
             {
               "inum": "1800.01.12",
               "name": "https://jans.io/oauth/jans-auth-server/config/properties.write"
+            },
+            {
+              "inum": "1800.04.5",
+              "name": "https://jans.io/oauth/config/properties.admin"
             }
           ],
           "superScopes": [
@@ -526,7 +630,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/properties.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.5",
+              "name": "https://jans.io/oauth/config/properties.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -553,6 +662,10 @@
             {
               "inum": "1800.01.12",
               "name": "https://jans.io/oauth/jans-auth-server/config/properties.write"
+            },
+            {
+              "inum": "1800.04.6",
+              "name": "https://jans.io/oauth/jans-auth-server/config/properties.admin"
             }
           ],
           "superScopes": [
@@ -581,6 +694,10 @@
             {
               "inum": "1800.01.14",
               "name": "https://jans.io/oauth/config/smtp.write"
+            },
+            {
+              "inum": "1800.04.7",
+              "name": "https://jans.io/oauth/config/smtp.admin"
             }
           ],
           "superScopes": [
@@ -601,7 +718,12 @@
               "name": "https://jans.io/oauth/config/smtp.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.6",
+              "name": "https://jans.io/oauth/config/smtp.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -646,6 +768,10 @@
             {
               "inum": "1800.01.14",
               "name": "https://jans.io/oauth/config/smtp.write"
+            },
+            {
+              "inum": "1800.04.6",
+              "name": "https://jans.io/oauth/config/smtp.admin"
             }
           ],
           "superScopes": [
@@ -674,6 +800,10 @@
             {
               "inum": "1800.01.17",
               "name": "https://jans.io/oauth/config/scripts.write"
+            },
+            {
+              "inum": "1800.04.7",
+              "name": "https://jans.io/oauth/config/scripts.admin"
             }
           ],
           "superScopes": [
@@ -694,7 +824,12 @@
               "name": "https://jans.io/oauth/config/scripts.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.7",
+              "name": "https://jans.io/oauth/config/scripts.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -721,6 +856,10 @@
             {
               "inum": "1800.01.17",
               "name": "https://jans.io/oauth/config/scripts.write"
+            },
+            {
+              "inum": "1800.04.7",
+              "name": "https://jans.io/oauth/config/scripts.admin"
             }
           ],
           "superScopes": [
@@ -749,6 +888,10 @@
             {
               "inum": "1800.01.17",
               "name": "https://jans.io/oauth/config/scripts.write"
+            },
+            {
+              "inum": "1800.04.7",
+              "name": "https://jans.io/oauth/config/scripts.admin"
             }
           ],
           "superScopes": [
@@ -773,7 +916,12 @@
               "name": "https://jans.io/oauth/config/scripts.delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.7",
+              "name": "https://jans.io/oauth/config/scripts.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.3",
@@ -791,7 +939,12 @@
               "name": "https://jans.io/oauth/config/scripts.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.7",
+              "name": "https://jans.io/oauth/config/scripts.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -818,6 +971,10 @@
             {
               "inum": "1800.01.20",
               "name": "https://jans.io/oauth/config/fido2.write"
+            },
+            {
+              "inum": "1800.04.8",
+              "name": "https://jans.io/oauth/config/fido2.admin"
             }
           ],
           "superScopes": [
@@ -837,7 +994,12 @@
               "name": "https://jans.io/oauth/config/fido2.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.8",
+              "name": "https://jans.io/oauth/config/fido2.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -864,6 +1026,10 @@
             {
               "inum": "1800.01.20",
               "name": "https://jans.io/oauth/config/fido2.write"
+            },
+            {
+              "inum": "1800.04.8",
+              "name": "https://jans.io/oauth/config/fido2.admin"
             }
           ],
           "superScopes": [
@@ -884,7 +1050,12 @@
               "name": "https://jans.io/oauth/config/fido2.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.8",
+              "name": "https://jans.io/oauth/config/fido2.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -906,6 +1077,10 @@
             {
               "inum": "1800.01.20",
               "name": "https://jans.io/oauth/config/fido2.write"
+            },
+            {
+              "inum": "1800.04.8",
+              "name": "https://jans.io/oauth/config/fido2.admin"
             }
           ],
           "superScopes": [
@@ -934,6 +1109,10 @@
             {
               "inum": "1800.01.22",
               "name": "https://jans.io/oauth/config/jwks.write"
+            },
+            {
+              "inum": "1800.04.9",
+              "name": "https://jans.io/oauth/config/jwks.admin"
             }
           ],
           "superScopes": [
@@ -954,7 +1133,12 @@
               "name": "https://jans.io/oauth/config/jwks.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.9",
+              "name": "https://jans.io/oauth/config/jwks.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -972,7 +1156,12 @@
               "name": "https://jans.io/oauth/config/jwks.delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.9",
+              "name": "https://jans.io/oauth/config/jwks.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.3",
@@ -999,6 +1188,10 @@
             {
               "inum": "1800.01.25",
               "name": "https://jans.io/oauth/config/database/ldap.write"
+            },
+            {
+              "inum": "1800.04.10",
+              "name": "https://jans.io/oauth/config/ldap.admin"
             }
           ],
           "superScopes": [
@@ -1019,7 +1212,12 @@
               "name": "https://jans.io/oauth/config/database/ldap.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.10",
+              "name": "https://jans.io/oauth/config/ldap.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -1046,6 +1244,10 @@
             {
               "inum": "1800.01.25",
               "name": "https://jans.io/oauth/config/database/ldap.write"
+            },
+            {
+              "inum": "1800.04.10",
+              "name": "https://jans.io/oauth/config/ldap.admin"
             }
           ],
           "superScopes": [
@@ -1065,7 +1267,12 @@
               "name": "https://jans.io/oauth/config/database/ldap.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.10",
+              "name": "https://jans.io/oauth/config/ldap.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -1110,6 +1317,10 @@
             {
               "inum": "1800.01.25",
               "name": "https://jans.io/oauth/config/database/ldap.write"
+            },
+            {
+              "inum": "1800.04.10",
+              "name": "https://jans.io/oauth/config/ldap.admin"
             }
           ],
           "superScopes": [
@@ -1138,6 +1349,10 @@
             {
               "inum": "1800.01.28",
               "name": "https://jans.io/oauth/config/logging.write"
+            },
+            {
+              "inum": "1800.04.11",
+              "name": "https://jans.io/oauth/config/logging.admin"
             }
           ],
           "superScopes": [
@@ -1157,7 +1372,12 @@
               "name": "https://jans.io/oauth/config/logging.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.11",
+              "name": "https://jans.io/oauth/config/logging.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -1184,6 +1404,10 @@
             {
               "inum": "1800.01.30",
               "name": "https://jans.io/oauth/config/scopes.write"
+            },
+            {
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/config/scopes.admin"
             }
           ],
           "superScopes": [
@@ -1204,7 +1428,12 @@
               "name": "https://jans.io/oauth/config/scopes.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/config/scopes.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -1231,6 +1460,10 @@
             {
               "inum": "1800.01.30",
               "name": "https://jans.io/oauth/config/scopes.write"
+            },
+            {
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/config/scopes.admin"
             }
           ],
           "superScopes": [
@@ -1250,7 +1483,12 @@
               "name": "https://jans.io/oauth/config/scopes.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/config/scopes.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -1268,7 +1506,12 @@
               "name": "https://jans.io/oauth/config/scopes.delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/config/scopes.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.3",
@@ -1299,6 +1542,10 @@
             {
               "inum": "1800.02.4",
               "name": "https://jans.io/oauth/config/uma-read"
+            },
+            {
+              "inum": "1800.04.13",
+              "name": "https://jans.io/oauth/config/uma.admin"
             }
           ],
           "superScopes": [
@@ -1323,6 +1570,10 @@
             {
               "inum": "1800.02.5",
               "name": "https://jans.io/oauth/config/uma-write"
+            },
+            {
+              "inum": "1800.04.13",
+              "name": "https://jans.io/oauth/config/uma.admin"
             }
           ],
           "superScopes": [
@@ -1355,6 +1606,10 @@
             {
               "inum": "1800.02.4",
               "name": "https://jans.io/oauth/config/uma-read"
+            },
+            {
+              "inum": "1800.04.13",
+              "name": "https://jans.io/oauth/config/uma.admin"
             }
           ],
           "superScopes": [
@@ -1378,6 +1633,10 @@
             {
               "inum": "1800.02.5",
               "name": "https://jans.io/oauth/config/uma-write"
+            },
+            {
+              "inum": "1800.04.13",
+              "name": "https://jans.io/oauth/config/uma.admin"
             }
           ],
           "superScopes": [
@@ -1401,6 +1660,10 @@
             {
               "inum": "1800.02.6",
               "name": "https://jans.io/oauth/config/uma-delete"
+            },
+            {
+              "inum": "1800.04.13",
+              "name": "https://jans.io/oauth/config/uma.admin"
             }
           ],
           "superScopes": [
@@ -1427,6 +1690,10 @@
             {
               "inum": "",
               "name": "jans_stat"
+            },
+            {
+              "inum": "1800.04.14",
+              "name": "https://jans.io/oauth/config/stats.admin"
             }
           ],
           "groupScopes": [],
@@ -1493,6 +1760,10 @@
             {
               "inum": "1800.01.37",
               "name": "https://jans.io/scim/config.write"
+            },
+            {
+              "inum": "1800.04.15",
+              "name": "https://jans.io/oauth/config/config.admin"
             }
           ],
           "superScopes": [
@@ -1512,7 +1783,12 @@
               "name": "https://jans.io/scim/config.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.15",
+              "name": "https://jans.io/oauth/config/config.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -1539,6 +1815,10 @@
             {
               "inum": "1800.01.39",
               "name": "https://jans.io/oauth/config/organization.write"
+            },
+            {
+              "inum": "1800.04.16",
+              "name": "https://jans.io/oauth/config/organization.admin"
             }
           ],
           "superScopes": [
@@ -1558,7 +1838,12 @@
               "name": "https://jans.io/oauth/config/organization.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.16",
+              "name": "https://jans.io/oauth/config/organization.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -1585,6 +1870,10 @@
             {
               "inum": "1800.01.41",
               "name": "https://jans.io/oauth/config/user.write"
+            },
+            {
+              "inum": "1800.04.17",
+              "name": "https://jans.io/oauth/config/user.admin"
             }
           ],
           "superScopes": [
@@ -1606,7 +1895,12 @@
               "name": "https://jans.io/oauth/config/user.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.17",
+              "name": "https://jans.io/oauth/config/user.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -1624,7 +1918,12 @@
               "name": "https://jans.io/oauth/config/user.delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.17",
+              "name": "https://jans.io/oauth/config/user.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.3",
@@ -1651,6 +1950,10 @@
             {
               "inum": "1800.01.44",
               "name": "https://jans.io/oauth/config/agama.write"
+            },
+            {
+              "inum": "1800.04.18",
+              "name": "https://jans.io/oauth/config/agama.admin"
             }
           ],
           "superScopes": [
@@ -1671,7 +1974,12 @@
               "name": "https://jans.io/oauth/config/agama.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.18",
+              "name": "https://jans.io/oauth/config/agama.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -1689,7 +1997,12 @@
               "name": "https://jans.io/oauth/config/agama.delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.18",
+              "name": "https://jans.io/oauth/config/agama.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.3",
@@ -1716,6 +2029,10 @@
             {
               "inum": "1800.01.44",
               "name": "https://jans.io/oauth/config/agama.write"
+            },
+            {
+              "inum": "1800.04.18",
+              "name": "https://jans.io/oauth/config/agama.admin"
             }
           ],
           "superScopes": [
@@ -1735,7 +2052,12 @@
               "name": "https://jans.io/oauth/config/agama.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.18",
+              "name": "https://jans.io/oauth/config/agama.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -1753,7 +2075,12 @@
               "name": "https://jans.io/oauth/config/agama.delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.18",
+              "name": "https://jans.io/oauth/config/agama.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.3",
@@ -1776,7 +2103,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/session.readonly"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.19",
+              "name": "https://jans.io/oauth/config/session.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.1",
@@ -1796,6 +2128,10 @@
             {
               "inum": "",
               "name": "revoke_session"
+            },
+            {
+              "inum": "1800.04.19",
+              "name": "https://jans.io/oauth/config/session.admin"
             }
           ],
           "groupScopes": [],
@@ -1825,6 +2161,10 @@
             {
               "inum": "1800.04.2",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write"
+            },
+            {
+              "inum": "1800.04.20",
+              "name": "https://jans.io/oauth/config/role.admin"
             }
           ],
           "superScopes": [
@@ -1845,7 +2185,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.20",
+              "name": "https://jans.io/oauth/config/role.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.04.13",
@@ -1872,6 +2217,10 @@
             {
               "inum": "1800.04.2",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write"
+            },
+            {
+              "inum": "1800.04.20",
+              "name": "https://jans.io/oauth/config/role.admin"
             }
           ],
           "superScopes": [
@@ -1891,7 +2240,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.20",
+              "name": "https://jans.io/oauth/config/role.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.04.14",
@@ -1918,6 +2272,10 @@
             {
               "inum": "1800.04.5",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write"
+            },
+            {
+              "inum": "1800.04.21",
+              "name": "https://jans.io/oauth/config/permission.admin"
             }
           ],
           "superScopes": [
@@ -1938,7 +2296,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.21",
+              "name": "https://jans.io/oauth/config/permission.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.04.13",
@@ -1965,6 +2328,10 @@
             {
               "inum": "1800.04.5",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write"
+            },
+            {
+              "inum": "1800.04.21",
+              "name": "https://jans.io/oauth/config/permission.admin"
             }
           ],
           "superScopes": [
@@ -1984,7 +2351,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.21",
+              "name": "https://jans.io/oauth/config/permission.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.04.14",
@@ -2017,6 +2389,10 @@
             {
               "inum": "1800.04.12",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/read-all"
+            },
+            {
+              "inum": "1800.04.22",
+              "name": "https://jans.io/oauth/config/rolePermissionMapping.admin"
             }
           ]
         },
@@ -2031,7 +2407,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.22",
+              "name": "https://jans.io/oauth/config/rolePermissionMapping.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.04.13",
@@ -2058,6 +2439,10 @@
             {
               "inum": "1800.04.8",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write"
+            },
+            {
+              "inum": "1800.04.22",
+              "name": "https://jans.io/oauth/config/rolePermissionMapping.admin"
             }
           ],
           "superScopes": [
@@ -2077,7 +2462,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.22",
+              "name": "https://jans.io/oauth/config/rolePermissionMapping.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.04.14",
@@ -2104,6 +2494,10 @@
             {
               "inum": "1800.04.11",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/license.write"
+            },
+            {
+              "inum": "1800.04.23",
+              "name": "https://jans.io/oauth/config/license.admin"
             }
           ],
           "superScopes": [
@@ -2128,7 +2522,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/license.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.23",
+              "name": "https://jans.io/oauth/config/license.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.04.13",
@@ -2155,6 +2554,10 @@
             {
               "inum": "1800.04.11",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/license.write"
+            },
+            {
+              "inum": "1800.04.23",
+              "name": "https://jans.io/oauth/config/license.admin"
             }
           ],
           "superScopes": [
@@ -2179,7 +2582,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/license.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.23",
+              "name": "https://jans.io/oauth/config/license.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.04.13",
@@ -2202,7 +2610,12 @@
               "name": "https://jans.io/oauth/config/plugin.readonly"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.24",
+              "name": "https://jans.io/oauth/config/plugin.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.1",
@@ -2229,6 +2642,10 @@
             {
               "inum": "1800.01.51",
               "name": "https://jans.io/oauth/config/properties.write"
+            },
+            {
+              "inum": "1800.04.25",
+              "name": "https://jans.io/oauth/config/properties.admin"
             }
           ],
           "superScopes": [
@@ -2248,7 +2665,12 @@
               "name": "https://jans.io/oauth/config/properties.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.25",
+              "name": "https://jans.io/oauth/config/properties.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2271,7 +2693,12 @@
               "name": "https://jans.io/oauth/client/authorizations.readonly"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.26",
+              "name": "https://jans.io/oauth/config/authorizations.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.1",
@@ -2289,7 +2716,12 @@
               "name": "https://jans.io/oauth/client/authorizations.delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.26",
+              "name": "https://jans.io/oauth/config/authorizations.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.3",
@@ -2316,6 +2748,10 @@
             {
               "inum": "1800.01.55",
               "name": "https://jans.io/oauth/config/jans-link.write"
+            },
+            {
+              "inum": "1800.04.27",
+              "name": "https://jans.io/oauth/config/jans-link.admin"
             }
           ],
           "superScopes": [
@@ -2335,7 +2771,12 @@
               "name": "https://jans.io/oauth/config/jans-link.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.27",
+              "name": "https://jans.io/oauth/config/jans-link.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2362,6 +2803,10 @@
             {
               "inum": "1800.01.57",
               "name": "https://jans.io/oauth/config/saml.write"
+            },
+            {
+              "inum": "1800.04.28",
+              "name": "https://jans.io/oauth/config/saml.admin"
             }
           ],
           "superScopes": [
@@ -2383,7 +2828,12 @@
               "name": "https://jans.io/oauth/config/saml.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.28",
+              "name": "https://jans.io/oauth/config/saml.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2410,6 +2860,10 @@
             {
               "inum": "1800.01.59",
               "name": "https://jans.io/oauth/config/saml-config.write"
+            },
+            {
+              "inum": "1800.04.28",
+              "name": "https://jans.io/oauth/config/saml.admin"
             }
           ],
           "superScopes": [
@@ -2431,7 +2885,12 @@
               "name": "https://jans.io/oauth/config/saml-config.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.28",
+              "name": "https://jans.io/oauth/config/saml.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2458,6 +2917,10 @@
             {
               "inum": "1800.01.61",
               "name": "https://jans.io/oauth/config/saml-scope.write"
+            },
+            {
+              "inum": "1800.04.29",
+              "name": "https://jans.io/oauth/config/kc.admin"
             }
           ],
           "superScopes": [
@@ -2479,7 +2942,12 @@
               "name": "https://jans.io/oauth/config/saml-scope.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.29",
+              "name": "https://jans.io/oauth/config/kc.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2506,6 +2974,10 @@
             {
               "inum": "1800.01.63",
               "name": "https://jans.io/idp/config.write"
+            },
+            {
+              "inum": "1800.04.29",
+              "name": "https://jans.io/oauth/config/kc.admin"
             }
           ],
           "superScopes": [
@@ -2527,7 +2999,12 @@
               "name": "https://jans.io/idp/config.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.29",
+              "name": "https://jans.io/oauth/config/kc.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2554,6 +3031,10 @@
             {
               "inum": "1800.01.65",
               "name": "https://jans.io/idp/realm.write"
+            },
+            {
+              "inum": "1800.04.29",
+              "name": "https://jans.io/oauth/config/kc.admin"
             }
           ],
           "superScopes": [
@@ -2576,7 +3057,12 @@
               "name": "https://jans.io/idp/realm.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.29",
+              "name": "https://jans.io/oauth/config/kc.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2603,6 +3089,10 @@
             {
               "inum": "1800.01.67",
               "name": "https://jans.io/idp/saml.write"
+            },
+            {
+              "inum": "1800.04.29",
+              "name": "https://jans.io/oauth/config/kc.admin"
             }
           ],
           "superScopes": [
@@ -2625,7 +3115,12 @@
               "name": "https://jans.io/idp/saml.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.29",
+              "name": "https://jans.io/oauth/config/kc.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2643,7 +3138,12 @@
               "name": "https://jans.io/idp/saml.delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.29",
+              "name": "https://jans.io/oauth/config/kc.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2670,6 +3170,10 @@
             {
               "inum": "1800.01.69",
               "name": "https://jans.io/oauth/config/message.write"
+            },
+            {
+              "inum": "1800.04.30",
+              "name": "https://jans.io/oauth/config/message.admin"
             }
           ],
           "superScopes": [
@@ -2689,7 +3193,12 @@
               "name": "https://jans.io/oauth/config/message.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.30",
+              "name": "https://jans.io/oauth/config/message.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2716,6 +3225,10 @@
             {
               "inum": "1800.01.69",
               "name": "https://jans.io/oauth/config/message.write"
+            },
+            {
+              "inum": "1800.04.30",
+              "name": "https://jans.io/oauth/config/message.admin"
             }
           ],
           "superScopes": [
@@ -2735,7 +3248,12 @@
               "name": "https://jans.io/oauth/config/message.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.30",
+              "name": "https://jans.io/oauth/config/message.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2753,7 +3271,12 @@
               "name": "https://jans.io/oauth/config/message.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.30",
+              "name": "https://jans.io/oauth/config/message.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2780,6 +3303,10 @@
             {
               "inum": "1800.01.69",
               "name": "https://jans.io/oauth/config/message.write"
+            },
+            {
+              "inum": "1800.04.30",
+              "name": "https://jans.io/oauth/config/message.admin"
             }
           ],
           "superScopes": [
@@ -2799,7 +3326,12 @@
               "name": "https://jans.io/oauth/config/message.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.30",
+              "name": "https://jans.io/oauth/config/message.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2817,7 +3349,12 @@
               "name": "https://jans.io/oauth/config/message.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.30",
+              "name": "https://jans.io/oauth/config/message.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2840,7 +3377,12 @@
               "name": "https://jans.io/oauth/config/app-version.readonly"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.31",
+              "name": "https://jans.io/oauth/config/health.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.1",
@@ -2863,7 +3405,12 @@
               "name": "https://jans.io/oauth/config/data.readonly"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.31",
+              "name": "https://jans.io/oauth/config/health.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.1",
@@ -2910,7 +3457,12 @@
               "name": "https://jans.io/oauth/kc-link-config.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.29",
+              "name": "https://jans.io/oauth/config/kc.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2937,6 +3489,10 @@
             {
               "inum": "1800.01.74",
               "name": "https://jans.io/oauth/lock-config.write"
+            },
+            {
+              "inum": "1800.04.32",
+              "name": "https://jans.io/oauth/lock.admin"
             }
           ],
           "superScopes": [
@@ -2957,7 +3513,12 @@
               "name": "https://jans.io/oauth/lock-config.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.32",
+              "name": "https://jans.io/oauth/lock.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -2984,6 +3545,10 @@
             {
               "inum": "1800.01.76",
               "name": "https://jans.io/oauth/config/jans_asset-write"
+            },
+            {
+              "inum": "1800.04.33",
+              "name": "https://jans.io/oauth/config/asset.admin"
             }
           ],
           "superScopes": [
@@ -3003,7 +3568,12 @@
               "name": "https://jans.io/oauth/config/jans_asset-write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.33",
+              "name": "https://jans.io/oauth/config/asset.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -3021,7 +3591,12 @@
               "name": "https://jans.io/oauth/config/jans_asset-delete"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.33",
+              "name": "https://jans.io/oauth/config/asset.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -3048,6 +3623,10 @@
             {
               "inum": "1800.01.79",
               "name": "https://jans.io/oauth/lock/audit.write"
+            },
+            {
+              "inum": "1800.04.32",
+              "name": "https://jans.io/oauth/lock.admin"
             }
           ],
           "superScopes": [
@@ -3067,7 +3646,12 @@
               "name": "https://jans.io/oauth/lock/audit.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.32",
+              "name": "https://jans.io/oauth/lock.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.5",
@@ -3094,6 +3678,10 @@
             {
               "inum": "1800.01.81",
               "name": "https://jans.io/oauth/lock/health.write"
+            },
+            {
+              "inum": "1800.04.32",
+              "name": "https://jans.io/oauth/lock.admin"
             }
           ],
           "superScopes": [
@@ -3113,7 +3701,12 @@
               "name": "https://jans.io/oauth/lock/health.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.32",
+              "name": "https://jans.io/oauth/lock.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.01.79",
@@ -3140,6 +3733,10 @@
             {
               "inum": "1800.01.83",
               "name": "https://jans.io/oauth/lock/log.write"
+            },
+            {
+              "inum": "1800.04.32",
+              "name": "https://jans.io/oauth/lock.admin"
             }
           ],
           "superScopes": [
@@ -3159,7 +3756,12 @@
               "name": "https://jans.io/oauth/lock/log.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.32",
+              "name": "https://jans.io/oauth/lock.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.01.79",
@@ -3186,6 +3788,10 @@
             {
               "inum": "1800.01.85",
               "name": "https://jans.io/oauth/lock/telemetry.write"
+            },
+            {
+              "inum": "1800.04.32",
+              "name": "https://jans.io/oauth/lock.admin"
             }
           ],
           "superScopes": [
@@ -3205,7 +3811,12 @@
               "name": "https://jans.io/oauth/lock/telemetry.write"
             }
           ],
-          "groupScopes": [],
+          "groupScopes": [
+            {
+              "inum": "1800.04.32",
+              "name": "https://jans.io/oauth/lock.admin"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.01.79",
@@ -3232,6 +3843,10 @@
             {
               "inum": "1800.01.88",
               "name": "https://jans.io/oauth/config/token.write"
+            },
+            {
+              "inum": "1800.04.34",
+              "name": "https://jans.io/oauth/token.admin"
             }
           ],
           "superScopes": [
@@ -3257,6 +3872,10 @@
             {
               "inum": "1800.02.2",
               "name": "https://jans.io/oauth/config/openid-write"
+            },
+            {
+              "inum": "1800.04.34",
+              "name": "https://jans.io/oauth/token.admin"
             }
           ],
           "superScopes": [
@@ -3280,6 +3899,10 @@
             {
               "inum": "1800.02.3",
               "name": "https://jans.io/oauth/config/openid-delete"
+            },
+            {
+              "inum": "1800.04.34",
+              "name": "https://jans.io/oauth/token.admin"
             }
           ],
           "superScopes": [
@@ -3308,6 +3931,10 @@
             {
               "inum": "1800.01.92",
               "name": "https://jans.io/oauth/config/agama-repo.write"
+            },
+            {
+              "inum": "1800.04.35",
+              "name": "https://jans.io/oauth/agama.admin"
             }
           ],
           "superScopes": [
@@ -3334,6 +3961,10 @@
             {
               "inum": "",
               "name": "jans_stat"
+            },
+            {
+              "inum": "1800.04.32",
+              "name": "https://jans.io/oauth/lock.admin"
             }
           ],
           "groupScopes": [],
@@ -3363,6 +3994,10 @@
             {
               "inum": "1800.01.28",
               "name": "https://jans.io/oauth/config/logging.write"
+            },
+            {
+              "inum": "1800.04.36",
+              "name": "https://jans.io/oauth/logging.admin"
             }
           ],
           "superScopes": [
@@ -3391,6 +4026,10 @@
             {
               "inum": "1800.01.96",
               "name": "https://jans.io/oauth/config/database.write"
+            },
+            {
+              "inum": "1800.04.37",
+              "name": "https://jans.io/oauth/database.admin"
             }
           ],
           "superScopes": [
@@ -3419,6 +4058,10 @@
             {
               "inum": "1800.01.98",
               "name": "https://jans.io/oauth/config/ssa.write"
+            },
+            {
+              "inum": "1800.04.38",
+              "name": "https://jans.io/oauth/ssa.admin"
             }
           ],
           "superScopes": [
@@ -3442,6 +4085,10 @@
             {
               "inum": "1800.02.2",
               "name": "https://jans.io/oauth/config/openid-write"
+            },
+            {
+              "inum": "1800.04.38",
+              "name": "https://jans.io/oauth/ssa.admin"
             }
           ],
           "superScopes": [
@@ -3469,6 +4116,10 @@
             {
               "inum": "",
               "name": "https://jans.io/auth/ssa.admin"
+            },
+            {
+              "inum": "1800.04.38",
+              "name": "https://jans.io/oauth/ssa.admin"
             }
           ],
           "superScopes": [
