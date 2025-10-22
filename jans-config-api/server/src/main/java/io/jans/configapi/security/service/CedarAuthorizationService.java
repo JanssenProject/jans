@@ -52,8 +52,8 @@ public class CedarAuthorizationService extends AuthorizationService implements S
 
     private static final long serialVersionUID = 1L;
     private static final String AUTHENTICATION_SCHEME = "Bearer ";
-    public static final String BOOTSTRAP_JSON_PATH = ".src/main/resources/cedar/config-api-cedarling-bootstrap.json";
-    
+    public static final String BOOTSTRAP_JSON_PATH = "/opt/jans/jetty/jans-config-api/custom/static/config-api-cedarling-bootstrap.json/opt/jans/jetty/jans-config-api/custom/static/config-api-cedarling-bootstrap.json";
+
     @Inject
     transient Logger logger;
 
@@ -65,7 +65,7 @@ public class CedarAuthorizationService extends AuthorizationService implements S
 
     @Inject
     transient JwtUtil jwtUtil;
-    
+
     @Inject
     private ApiAppConfiguration appConfiguration;
 
@@ -74,14 +74,13 @@ public class CedarAuthorizationService extends AuthorizationService implements S
 
     @Inject
     ExternalInterceptionService externalInterceptionService;
-    
-    @Inject 
-    CedarlingService cedarlingService;
 
+    @Inject
+    CedarlingService cedarlingService;
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path) throws WebApplicationException, Exception {
-        logger.debug("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
+        logger.error("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
                 token, issuer, resourceInfo, method, path);
 
         if (StringUtils.isBlank(token)) {
@@ -89,26 +88,28 @@ public class CedarAuthorizationService extends AuthorizationService implements S
             throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
-        //authorize
-        cedarlingService.authorize(token, token, token, resourceInfo.getResourceMethod().getName(), resourceInfo.toString(), path);
+        // authorize
+        cedarlingService.authorize(token, token, token, resourceInfo.getResourceMethod().getName(),
+                resourceInfo.toString(), path);
         // Validate issuer
-        logger.info("Validate issuer");
+        logger.error("Validate issuer");
         if (StringUtils.isNotBlank(issuer) && !authUtil.isValidIssuer(issuer)) {
             throw new WebApplicationException("Header Issuer is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
         // Check the type of token simple, jwt, reference
-        logger.info("Verify if JWT");
+        logger.error("Verify if JWT");
         String acccessToken = token.substring("Bearer".length()).trim();
         boolean isJwtToken = jwtUtil.isJwt(acccessToken);
 
         if (isJwtToken) {
             try {
-                logger.info("Since token is JWT Validate it");
+                logger.error("Since token is JWT Validate it");
                 jwtUtil.parse(acccessToken);
                 List<String> tokenScopes = jwtUtil.validateToken(acccessToken);
-                logger.debug(" tokenScopes:{} ", tokenScopes);
+                logger.error(" tokenScopes:{} ", tokenScopes);
+
                 // Validate Scopes
                 return this.validateScope(acccessToken, tokenScopes, resourceInfo, issuer);
             } catch (InvalidJwtException exp) {
@@ -118,11 +119,11 @@ public class CedarAuthorizationService extends AuthorizationService implements S
             }
         }
 
-        logger.info("Token is NOT JWT hence introspecting it as Reference token ");
+        logger.error("Token is NOT JWT hence introspecting it as Reference token ");
         IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token,
                 token.substring("Bearer".length()).trim(), issuer);
 
-        logger.trace("oAuth  Authorization introspectionResponse:{}", introspectionResponse);
+        logger.error("oAuth  Authorization introspectionResponse:{}", introspectionResponse);
         if (introspectionResponse == null || !introspectionResponse.isActive()) {
             logger.error("Token is Invalid.");
             throw new WebApplicationException("Token is Invalid.",
@@ -134,33 +135,33 @@ public class CedarAuthorizationService extends AuthorizationService implements S
         acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer);
 
         boolean isAuthorized = externalAuthorization(token, issuer, method, path);
-        logger.debug("Custom authorization - isAuthorized:{}", isAuthorized);
+        logger.error("Custom authorization - isAuthorized:{}", isAuthorized);
 
         return acccessToken;
     }
 
     private String validateScope(String accessToken, List<String> tokenScopes, ResourceInfo resourceInfo, String issuer)
             throws WebApplicationException {
-        logger.info("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
+        logger.error("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
                 tokenScopes, resourceInfo, issuer);
         try {
             // Get resource scope
             Map<ProtectionScopeType, List<String>> resourceScopesByType = getRequestedScopes(resourceInfo);
             List<String> resourceScopes = getAllScopeList(resourceScopesByType);
-            logger.debug("Validate scope, resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType,
+            logger.error("Validate scope, resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType,
                     resourceScopes);
 
             // find missing scopes
             List<String> missingScopes = findMissingScopes(resourceScopesByType, tokenScopes);
-            logger.info("missingScopes:{}", missingScopes);
+            logger.error("missingScopes:{}", missingScopes);
 
             // Check if resource requires auth server specific scope
             List<String> authSpecificScope = getAuthSpecificScopeRequired(resourceInfo);
-            logger.info(" resourceScopes:{}, authSpecificScope:{} ", resourceScopes, authSpecificScope);
+            logger.error(" resourceScopes:{}, authSpecificScope:{} ", resourceScopes, authSpecificScope);
 
             // If No auth scope required OR if token contains the authSpecificScope
             if ((authSpecificScope == null || authSpecificScope.isEmpty())) {
-                logger.info("Validating token scopes as no authSpecificScope required");
+                logger.error("Validating token scopes as no authSpecificScope required");
                 if ((missingScopes != null && !missingScopes.isEmpty())) {
                     logger.error("Insufficient scopes! Required scope:{} -  however token scopes:{}", resourceScopes,
                             tokenScopes);
@@ -181,18 +182,18 @@ public class CedarAuthorizationService extends AuthorizationService implements S
                         + ", however token scopes: " + tokenScopes,
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
-            
-            //If no scope is missing
+
+            // If no scope is missing
             if (missingScopes == null || missingScopes.isEmpty()) {
-                logger.info(" No missing scopes and hence returning original accessToken");
+                logger.error(" No missing scopes and hence returning original accessToken");
                 return AUTHENTICATION_SCHEME + accessToken;
             }
 
-            logger.info("Generating new token with authSpecificScope");
+            logger.error("Generating new token with authSpecificScope");
             // Generate token with required resourceScopes
             resourceScopes.addAll(authSpecificScope);
             accessToken = openIdService.requestAccessToken(authUtil.getClientId(), resourceScopes);
-            logger.debug("Introspecting new accessToken:{}", accessToken);
+            logger.error("Introspecting new accessToken:{}", accessToken);
 
             // Introspect
             IntrospectionResponse introspectionResponse = openIdService
@@ -208,7 +209,7 @@ public class CedarAuthorizationService extends AuthorizationService implements S
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
 
-            logger.info("Token scopes Valid Returning accessToken:{}", accessToken);
+            logger.error("Token scopes Valid Returning accessToken:{}", accessToken);
             return AUTHENTICATION_SCHEME + accessToken;
         } catch (Exception ex) {
             if (logger.isErrorEnabled()) {
@@ -220,7 +221,7 @@ public class CedarAuthorizationService extends AuthorizationService implements S
     }
 
     private boolean externalAuthorization(String token, String issuer, String method, String path) {
-        logger.debug(
+        logger.error(
                 "External Authorization script params -  request:{}, response:{}, token:{}, issuer:{}, method:{}, path:{} ",
                 request, response, token, issuer, method, path);
         Map<String, Object> requestParameters = new HashMap<>();
@@ -234,7 +235,7 @@ public class CedarAuthorizationService extends AuthorizationService implements S
     }
 
     private List<String> findMissingScopes(Map<ProtectionScopeType, List<String>> scopeMap, List<String> tokenScopes) {
-        logger.info("Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
+        logger.error("Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
         List<String> scopeList = new ArrayList<>();
         if (scopeMap == null || scopeMap.isEmpty()) {
             return scopeList;
@@ -242,13 +243,13 @@ public class CedarAuthorizationService extends AuthorizationService implements S
 
         // Super scope
         scopeList = scopeMap.get(ProtectionScopeType.SUPER);
-        logger.debug("SUPER Scopes:{}", scopeList);
+        logger.error("SUPER Scopes:{}", scopeList);
         List<String> missingScopes = null;
         boolean containsScope = false;
         if (scopeList != null && !scopeList.isEmpty()) {
             // check if token contains any of the super scopes
             containsScope = containsAnyElement(scopeList, tokenScopes);
-            logger.debug("Token contains SUPER scopes?:{}", containsScope);
+            logger.error("Token contains SUPER scopes?:{}", containsScope);
 
             // Super scope present so no need to check other types of scope
             if (containsScope) {
@@ -258,11 +259,11 @@ public class CedarAuthorizationService extends AuthorizationService implements S
 
         // Group scope present so no need to check normal scope presence
         scopeList = scopeMap.get(ProtectionScopeType.GROUP);
-        logger.debug("GROUP Scopes:{}", scopeList);
+        logger.error("GROUP Scopes:{}", scopeList);
         if (scopeList != null && !scopeList.isEmpty()) {
             // check if token contains any of the group scopes
             containsScope = containsAnyElement(scopeList, tokenScopes);
-            logger.debug("Token contains GROUP scopes?:{}", containsScope);
+            logger.error("Token contains GROUP scopes?:{}", containsScope);
 
             // Group scope present so no need to check normal scope
             if (containsScope) {
@@ -272,11 +273,11 @@ public class CedarAuthorizationService extends AuthorizationService implements S
 
         // Normal scope
         scopeList = scopeMap.get(ProtectionScopeType.SCOPE);
-        logger.debug("SCOPE Scopes:{}", scopeList);
+        logger.error("SCOPE Scopes:{}", scopeList);
         if (scopeList != null && !scopeList.isEmpty()) {
             // check if token contains all the required scopes
             missingScopes = findMissingElements(scopeList, tokenScopes);
-            logger.debug("SCOPE Missing Scopes:{}", missingScopes);
+            logger.error("SCOPE Missing Scopes:{}", missingScopes);
         }
         return missingScopes;
     }
@@ -284,23 +285,23 @@ public class CedarAuthorizationService extends AuthorizationService implements S
     private CedarConfig getCedarConfig() {
         return this.appConfiguration.getCedarConfig();
     }
-    
+
     private String getAppNameForCedar() {
         String appName = null;
-        if(this.getCedarConfig()!= null) {
+        if (this.getCedarConfig() != null) {
             return this.getCedarConfig().getApplicationName();
         }
         return appName;
     }
-    
+
     private String getPolicyStoreFile() {
         String appName = null;
-        if(this.getCedarConfig()!= null) {
+        if (this.getCedarConfig() != null) {
             return this.getCedarConfig().getApplicationName();
         }
         return appName;
     }
-    
+
     public static String readFile(String filePath) {
         Path path = Paths.get(filePath).toAbsolutePath();
         try {

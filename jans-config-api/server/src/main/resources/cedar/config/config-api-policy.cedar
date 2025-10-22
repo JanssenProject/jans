@@ -1,4 +1,4 @@
-@AcrsRead
+@id("@AcrsRead")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -9,7 +9,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/acrs.readonly","https://jans.io/oauth/config/acrs.write","https://jans.io/oauth/config/read-all"])
 };
 
-@AcrsUpdate
+@id("@AcrsUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT"],
@@ -20,7 +20,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/acrs.write","https://jans.io/oauth/config/write-all"])
 };
 
-@AttributeGet
+@id("@AttributeGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -31,7 +31,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/attributes.readonly","https://jans.io/oauth/config/attributes.write", "https://jans.io/oauth/config/read-all"])
 };
 
-@AttributeUpdate
+@id("AttributeUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -42,8 +42,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/attributes.write","https://jans.io/oauth/config/write-all"])
 };
 
-
-@AttributeDELETE
+@id("@AttributeDELETE")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -55,7 +54,7 @@ when {
 };
 
 
-@CacheGet
+@id("@CacheGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -67,7 +66,7 @@ when {
 };
 
 
-@CachePatch
+@id("@CachePatch")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PATCH"],
@@ -79,7 +78,7 @@ when {
 };
 
 
-@CacheRedisGet
+@id("@CacheRedisGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -91,7 +90,7 @@ when {
 };
 
 
-@CacheRedisUpdate
+@id("@CacheRedisUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -103,7 +102,7 @@ when {
 };
 
 
-@CacheInMemoryGet
+@id("@CacheInMemoryGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -114,7 +113,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/cache.readonly","https://jans.io/oauth/config/cache.write","https://jans.io/oauth/config/read-all"])
 };
 
-@CacheInMemoryUpdate
+@id("@CacheInMemoryUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -126,7 +125,7 @@ when {
 };
 
 
-@CacheNativePersistenceGet
+@id("@CacheNativePersistenceGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -138,7 +137,7 @@ when {
 };
 
 
-@CacheNativePersistenceUpdate
+@id("@CacheNativePersistenceUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -150,7 +149,7 @@ when {
 };
 
 
-@MemcachedPersistenceGet
+@id("@MemcachedPersistenceGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -162,7 +161,7 @@ when {
 };
 
 
-@MemcachedPersistenceUpdate
+@id("@MemcachedPersistenceUpdate")
 permit(
   principal is Jans::Workload,
 action in [Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -174,7 +173,7 @@ when {
 };
 
 
-@ClientsGet
+@id("@ClientsGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -186,7 +185,7 @@ when {
 };
 
 
-@ClientsUpdate
+@id("@ClientsUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -197,7 +196,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/openid/clients.write","https://jans.io/oauth/config/openid-write","https://jans.io/oauth/config/write-all"])
 };
 
-@ClientsDelete
+@id("@ClientsDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -209,7 +208,7 @@ when {
 };
 
 
-@ConfigGet
+@id("@ConfigGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -221,7 +220,7 @@ when {
 };
 
 
-@ConfigPatch
+@id("@ConfigPatch")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PATCH"],
@@ -233,7 +232,7 @@ when {
 };
 
 
-@ConfigPersistenceGet
+@id("@ConfigPersistenceGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -245,7 +244,7 @@ when {
 };
 
 
-@ConfigSmtpGet
+@id("@ConfigSmtpGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -257,7 +256,7 @@ when {
 };
 
 
-@ConfigSmtpUpdate
+@id("@ConfigSmtpUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT"],
@@ -268,7 +267,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/smtp.write","https://jans.io/oauth/config/write-all"])
 };
 
-@ConfigSmtpDelete
+@id("@ConfigSmtpDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -280,7 +279,7 @@ when {
 };
 
 
-@ConfigSmtpTest
+@id("@ConfigSmtpTest")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -292,7 +291,7 @@ when {
 };
 
 
-@ScriptsGet
+@id("@ScriptsGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -304,7 +303,7 @@ when {
 };
 
 
-@ScriptsUpdate
+@id("@ScriptsUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT"],
@@ -316,7 +315,7 @@ when {
 };
 
 
-@ScriptTypeGet
+@id("@ScriptTypeGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -328,7 +327,7 @@ when {
 };
 
 
-@ScriptInumGet
+@id("@ScriptInumGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -340,7 +339,7 @@ when {
 };
 
 
-@ScriptDelete
+@id("@ScriptDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -352,7 +351,7 @@ when {
 };
 
 
-@ScriptPatch
+@id("@ScriptPatch")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PATCH"],
@@ -364,8 +363,7 @@ when {
 };
 
 
-
-@Fido2Get
+@id("@Fido2Get")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -377,7 +375,7 @@ when {
 };
 
 
-@Fido2Put
+@id("@Fido2Put")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT"],
@@ -390,7 +388,7 @@ when {
 
 
 
-@Fido2RegistrationGet
+@id("@Fido2RegistrationGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -402,7 +400,7 @@ when {
 };
 
 
-@Fido2RegistrationUpdate
+@id("@Fido2RegistrationUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -414,7 +412,7 @@ when {
 };
 
 
-@Fido2RegistrationDelete
+@id("@Fido2RegistrationDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -425,7 +423,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/fido2.delete","https://jans.io/oauth/config/fido2.write","https://jans.io/oauth/config/write-all"])
 };
 
-@JwksGet
+@id("@JwksGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -436,7 +434,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/jwks.readonly","https://jans.io/oauth/config/jwks.write","https://jans.io/oauth/config/read-all"])
 };
 
-@JwksUpdate
+@id("@JwksUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -447,7 +445,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/jwks.write","https://jans.io/oauth/config/write-all"])
 };
 
-@JwksDelete
+@id("@JwksDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -459,7 +457,7 @@ when {
 };
 
 
-@LdapGet
+@id("@LdapGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -471,7 +469,7 @@ when {
 };
 
 
-@LdapUpdate
+@id("@LdapUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -483,7 +481,7 @@ when {
 };
 
 
-@LdapGetByName
+@id("@LdapGetByName")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -495,7 +493,7 @@ when {
 };
 
 
-@LdapUpdateByName
+@id("@LdapUpdateByName")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -507,7 +505,7 @@ when {
 };
 
 
-@LdapDeleteByName
+@id("@LdapDeleteByName")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -519,7 +517,7 @@ when {
 };
 
 
-@LdapTest
+@id("@LdapTest")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST"],
@@ -531,7 +529,7 @@ when {
 };
 
 
-@LoggingGet
+@id("@LoggingGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -543,7 +541,7 @@ when {
 };
 
 
-@LoggingPut
+@id("@LoggingPut")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT"],
@@ -555,7 +553,7 @@ when {
 };
 
 
-@ScopeGet
+@id("@ScopeGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -567,7 +565,7 @@ when {
 };
 
 
-@ScopeUpdate
+@id("@ScopeUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT", Jans::Action::"POST"],
@@ -578,7 +576,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/scopes.write","https://jans.io/oauth/config/write-all"])
 };
 
-@ScopeByInumGet
+@id("@ScopeByInumGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -590,7 +588,7 @@ when {
 };
 
 
-@ScopeByInumUpdate
+@id("@ScopeByInumUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PATCH"],
@@ -602,7 +600,7 @@ when {
 };
 
 
-@ScopeByInumDelete
+@id("@ScopeByInumDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -614,7 +612,7 @@ when {
 };
 
 
-@UMAresourcesGet
+@id("@UMAresourcesGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -626,7 +624,7 @@ when {
 };
 
 
-@UMAresourcesUpdate
+@id("@UMAresourcesUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT"],
@@ -638,7 +636,7 @@ when {
 };
 
 
-@UMAresourcesByIdGet
+@id("@UMAresourcesByIdGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -649,7 +647,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/uma/resources.readonly","https://jans.io/oauth/config/uma/resources.write", "https://jans.io/oauth/config/uma-read", "https://jans.io/oauth/config/read-all"])
 };
 
-@UMAresourcesPatchById
+@id("@UMAresourcesPatchById")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PATCH"],
@@ -661,8 +659,7 @@ when {
 };
 
 
-
-@UMAresourcesDeleteById
+@id("@UMAresourcesDeleteById")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -674,7 +671,7 @@ when {
 };
 
 
-@StatGet
+@id("@StatGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -685,7 +682,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/config/stats.readonly", "https://jans.io/oauth/config/read-all"])
 };
 
-@healthGet
+@id("@healthGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -693,7 +690,7 @@ permit(
 );
 
 
-@HealthLiveGet
+@id("@HealthLiveGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -701,14 +698,14 @@ permit(
 );
 
 
-@HealthReadyGet
+@id("@HealthReadyGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
   resource == Jans::HTTP_Request::"/jans-config-api/api/v1/health/ready"
 );
 
-@ScimGet
+@id("@ScimGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -720,7 +717,7 @@ when {
 };
 
 
-@ScimPatch
+@id("@ScimPatch")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PATCH"],
@@ -732,7 +729,7 @@ when {
 };
 
 
-@OrgGet
+@id("@OrgGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -744,7 +741,7 @@ when {
 };
 
 
-@OrgPatch
+@id("@OrgPatch")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PATCH"],
@@ -756,7 +753,7 @@ when {
 };
 
 
-@ConfigUserGet
+@id("@ConfigUserGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -768,7 +765,7 @@ when {
 };
 
 
-@ConfigUserUpdate
+@id("@ConfigUserUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -780,7 +777,7 @@ when {
 };
 
 
-@ConfigUserDelete
+@id("@ConfigUserDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -792,7 +789,7 @@ when {
 };
 
 
-@AgamaGet
+@id("@AgamaGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -804,7 +801,7 @@ when {
 };
 
 
-@AgamaUpdate
+@id("@AgamaUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT"],
@@ -816,7 +813,7 @@ when {
 };
 
 
-@AgamaDelete
+@id("@AgamaDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -828,7 +825,7 @@ when {
 };
 
 
-@AgamaDeploymentGet
+@id("@AgamaDeploymentGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -840,7 +837,7 @@ when {
 };
 
 
-@AgamaDeploymentPost
+@id("@AgamaDeploymentPost")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST"],
@@ -852,7 +849,7 @@ when {
 };
 
 
-@AgamaDeploymentDelete
+@id("@AgamaDeploymentDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -864,7 +861,7 @@ when {
 };
 
 
-@SessionGet
+@id("@SessionGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -876,7 +873,7 @@ when {
 };
 
 
-@SessionDelete
+@id("@SessionDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -888,7 +885,7 @@ when {
 };
 
 
-@AdminUIRolesGet
+@id("@AdminUIRolesGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -900,7 +897,7 @@ when {
  };
 
 
-@AdminUIRolesUpdate
+@id("AdminUIRolesUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT"],
@@ -911,7 +908,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write", "https://jans.io/oauth/jans-auth-server/config/adminui/write-all"])
  };
 
-@AdminUIRolesGetByRole
+@id("@AdminUIRolesGetByRole")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -923,7 +920,7 @@ when {
  };
 
 
-@AdminUIRolesDeleteByRole
+@id("@AdminUIRolesDeleteByRole")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -935,7 +932,7 @@ when {
  };
 
 
-@AdminUIPermissionsGet
+@id("@AdminUIPermissionsGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -947,7 +944,7 @@ when {
  };
 
 
-@AdminUIPermissionsUpdate
+@id("@AdminUIPermissionsUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT"],
@@ -959,7 +956,7 @@ when {
  };
 
  
-@AdminUIPermissionsGet
+@id("@AdminUIPermissionsGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -970,7 +967,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly", "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write", "https://jans.io/oauth/jans-auth-server/config/adminui/read-all"])
 };
 
-@AdminUIPermissionsDelete
+@id("@AdminUIPermissionsDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -982,7 +979,7 @@ when {
 };
 
 
-@AdminUIRolePermissionsMappingGet
+@id("@AdminUIRolePermissionsMappingGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -994,7 +991,7 @@ when {
 };
 
 
-@AdminUIRolePermissionsMappingUpdate
+@id("@AdminUIRolePermissionsMappingUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT"],
@@ -1006,7 +1003,7 @@ when {
 };
 
 
-@AdminUIRolePermissionsMappingGetByAdminUIRole
+@id("@AdminUIRolePermissionsMappingGetByAdminUIRole")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1018,7 +1015,7 @@ when {
 };
 
 
-@AdminUIRolePermissionsMappingDeleteByAdminUIRole
+@id("@AdminUIRolePermissionsMappingDeleteByAdminUIRole")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -1030,7 +1027,7 @@ when {
 };
 
 
-@AdminUILicenseDetailsGet
+@id("@AdminUILicenseDetailsGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1042,7 +1039,7 @@ when {
 };
 
 
-@AdminUIActivateLicensePost
+@id("@AdminUIActivateLicensePost")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST"],
@@ -1054,7 +1051,7 @@ when {
 };
 
 
-@AdminUILicenseIsActiveGet
+@id("@AdminUILicenseIsActiveGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1066,7 +1063,7 @@ when {
 };
 
 
-@AdminUILicenseApiCredentialsPost
+@id("@AdminUILicenseApiCredentialsPost")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST"],
@@ -1077,7 +1074,7 @@ when {
   principal.access_token.scope.containsAny(["https://jans.io/oauth/jans-auth-server/config/adminui/license.write", "https://jans.io/oauth/jans-auth-server/config/adminui/write-all"])
 };
 
-@PluginGet
+@id("@PluginGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1089,7 +1086,7 @@ when {
 };
 
 
-@ConfigApiGet
+@id("@ConfigApiGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1101,7 +1098,7 @@ when {
 };
 
 
-@ConfigApiPatch
+@id("@ConfigApiPatch")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PATCH"],
@@ -1113,7 +1110,7 @@ when {
 };
 
 
-@AuthorizationsGet
+@id("@AuthorizationsGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1125,8 +1122,7 @@ when {
 };
 
 
-
-@AuthorizationsDelete
+@id("@AuthorizationsDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -1138,7 +1134,7 @@ when {
 };
 
 
-@LinkConfigGet
+@id("@LinkConfigGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1150,8 +1146,7 @@ when {
 };
 
 
-
-@LinkConfigUpdate
+@id("@LinkConfigUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT"],
@@ -1163,8 +1158,7 @@ when {
 };
 
 
-
-@TrustRelationshipGet
+@id("@TrustRelationshipGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1176,7 +1170,7 @@ when {
 };
 
 
-@TrustRelationshipUpdate
+@id("@TrustRelationshipUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT", Jans::Action::"DELETE"],
@@ -1188,7 +1182,7 @@ when {
 };
 
 
-@SamlConfigGet
+@id("@SamlConfigGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1200,7 +1194,7 @@ when {
 };
 
 
-@SamlConfigUpdates
+@id("@SamlConfigUpdates")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT", Jans::Action::"DELETE"],
@@ -1212,7 +1206,7 @@ when {
 };
 
 
-@ScopeGet
+@id("@ScopeGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1224,7 +1218,7 @@ when {
 };
 
 
-@ScopeUpdate
+@id("@ScopeUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT", Jans::Action::"DELETE"],
@@ -1236,7 +1230,7 @@ when {
 };
 
 
-@IdpConfigGet
+@id("@IdpConfigGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1248,7 +1242,7 @@ when {
 };
 
 
-@IdpConfigUpdate
+@id("@IdpConfigUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -1260,7 +1254,7 @@ when {
 };
 
 
-@RealmGet
+@id("@RealmGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1272,7 +1266,7 @@ when {
 };
 
 
-@RealmUpdate
+@id("@RealmUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT", Jans::Action::"PATCH", Jans::Action::"DELETE"],
@@ -1284,7 +1278,7 @@ when {
 };
 
 
-@IdpGet
+@id("@IdpGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1296,7 +1290,7 @@ when {
 };
 
 
-@IdpUpdate
+@id("@IdpUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT", Jans::Action::"PATCH", Jans::Action::"DELETE"],
@@ -1308,7 +1302,7 @@ when {
 };
 
 
-@IdpDelete
+@id("@IdpDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -1320,7 +1314,7 @@ when {
 };
 
 
-@ConfigMessageGet
+@id("@ConfigMessageGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1332,7 +1326,7 @@ when {
 };
 
 
-@ConfigMessageUpdate
+@id("@ConfigMessageUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PATCH"],
@@ -1344,7 +1338,7 @@ when {
 };
 
 
-@ConfigMessageRedisGet
+@id("@ConfigMessageRedisGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1356,7 +1350,7 @@ when {
 };
 
 
-@ConfigMessageRedisUpdate
+@id("@ConfigMessageRedisUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -1368,7 +1362,7 @@ when {
 };
 
 
-@ConfigMessagePostgresGet
+@id("@ConfigMessagePostgresGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1380,7 +1374,7 @@ when {
 };
 
 
-@ConfigMessagePostgresPut
+@id("@ConfigMessagePostgresPut")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT"],
@@ -1392,7 +1386,7 @@ when {
 };
 
 
-@ConfigMessagePostgresPatch
+@id("@ConfigMessagePostgresPatch")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PATCH"],
@@ -1404,7 +1398,7 @@ when {
 };
 
 
-@HealthAppVersionGet
+@id("@HealthAppVersionGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1416,7 +1410,7 @@ when {
 };
 
 
-@HealthServiceStatusGet
+@id("@HealthServiceStatusGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1428,7 +1422,7 @@ when {
 };
 
 
-@LinkConfigGet
+@id("@LinkConfigGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1440,7 +1434,7 @@ when {
 };
 
 
-@LinkConfigUpdate
+@id("@LinkConfigUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -1452,7 +1446,7 @@ when {
 };
 
 
-@LockConfigGet
+@id("@LockConfigGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1464,7 +1458,7 @@ when {
 };
 
 
-@LockConfigUpdate
+@id("@LockConfigUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -1476,7 +1470,7 @@ when {
 };
 
 
-@JansAssetsGet
+@id("@JansAssetsGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1488,7 +1482,7 @@ when {
 };
 
 
-@JansAssetsUpdate
+@id("@JansAssetsUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"PUT"],
@@ -1500,7 +1494,7 @@ when {
 };
 
 
-@JansAssetsDelete
+@id("@JansAssetsDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -1512,7 +1506,7 @@ when {
 };
 
 
-@AuditGet
+@id("@AuditGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1524,7 +1518,7 @@ when {
 };
 
 
-@AuditPost
+@id("@AuditPost")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST"],
@@ -1536,8 +1530,7 @@ when {
 };
 
 
-
-@AuditHealthGet
+@id("@AuditHealthGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1549,7 +1542,7 @@ when {
 };
 
 
-@AuditHealthPost
+@id("@AuditHealthPost")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST"],
@@ -1561,7 +1554,7 @@ when {
 };
 
 
-@AuditLogGet
+@id("@AuditLogGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1573,7 +1566,7 @@ when {
 };
 
 
-@AuditLogPost
+@id("@AuditLogPost")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST"],
@@ -1585,7 +1578,7 @@ when {
 };
 
 
-@AuditTelemetryGet
+@id("@AuditTelemetryGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1597,7 +1590,7 @@ when {
 };
 
 
-@AuditTelemetryPost
+@id("@AuditTelemetryPost")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST"],
@@ -1609,7 +1602,7 @@ when {
 };
 
 
-@TokenGet
+@id("@TokenGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1621,7 +1614,7 @@ when {
 };
 
 
-@TokenUpdate
+@id("@TokenUpdate")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST", Jans::Action::"PUT", Jans::Action::"PATCH"],
@@ -1633,7 +1626,7 @@ when {
 };
 
 
-@TokenDelete
+@id("@TokenDelete")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
@@ -1645,7 +1638,7 @@ when {
 };
 
 
-@AgamaRepoGet
+@id("@AgamaRepoGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
@@ -1657,7 +1650,7 @@ when {
 };
 
 
-@LockStatGet
+@id("@LockStatGet")
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],

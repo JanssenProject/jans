@@ -38,7 +38,7 @@ public class CedarlingService {
     
     private static final String AUTHENTICATION_SCHEME = "Bearer ";
     public static final String PROTECTION_CONFIGURATION_FILE_NAME = "config-api-rs-protect.json";
-    public static final String BOOTSTRAP_JSON_PATH = "./cedar/config/bootstrap.json";
+    public static final String BOOTSTRAP_JSON_PATH = "/opt/jans/jetty/jans-config-api/custom/static/config-api-cedarling-bootstrap.json";
 
     @PostConstruct
     public void setUp() throws Exception {
