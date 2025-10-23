@@ -20,10 +20,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -33,6 +30,7 @@ import java.util.List;
 @Path("/admin-ui/security")
 public class AdminUISecurityResource {
     static final String POLICY_STORE = "policyStore";
+    static final String SET_REMOTE_POLICY_STORE_AS_DEFAULT = "setRemotePolicyStoreAsDefault";
     static final String SYNC_ROLE_SCOPES_MAPPING = "/syncRoleScopesMapping";
     static final String SECURITY_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly";
     static final String SECURITY_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/security.write";
@@ -76,10 +74,44 @@ public class AdminUISecurityResource {
         }
     }
 
-    @Operation(summary = "Sync Role-to-Scopes mapping from policy-store", description = "Sync Role-to-Scopes mapping from policy-store", operationId = "sync-role-to-scopes-mapping", tags = {
+    @Operation(summary = "Set remote policy store as default policy store of Admin UI", description = "Set remote policy store as default policy store of Admin UI", operationId = "set-remote-policy-store-as-default", tags = {
             "Admin UI - Cedarling"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SECURITY_WRITE}))
-    @RequestBody(description = "AdminRole object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class)))
+    @RequestBody(description = "Set remote policy store as default policy store of Admin UI", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = GenericResponse.class, description = "Set remote policy store as default policy store of Admin UI")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
+    @PUT
+    @Path(SET_REMOTE_POLICY_STORE_AS_DEFAULT)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ProtectedApi(scopes = {SECURITY_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
+    public Response setRemotePolicyStoreAsDefault() {
+        try {
+            log.info("Set remote policy store as default policy store of Admin UI.");
+            GenericResponse response = adminUISecurityService.setRemotePolicyStoreAsDefault();
+            log.info("Set remote policy store as default policy store of Admin UI");
+            return Response.ok(response).build();
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.REWRITING_DEFAULT_POLICY_STORE_ERROR.getDescription(), e);
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.REWRITING_DEFAULT_POLICY_STORE_ERROR.getDescription(), e);
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription()))
+                    .build();
+        }
+    }
+
+    @Operation(summary = "Sync role-to-scope mappings from the policy store", description = "Sync role-to-scope mappings from the policy store", operationId = "sync-role-to-scopes-mappings", tags = {
+            "Admin UI - Cedarling"}, security = @SecurityRequirement(name = "oauth2", scopes = {
+            SECURITY_WRITE}))
+    @RequestBody(description = "Sync role-to-scope mappings from the policy store", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = GenericResponse.class, description = "Sync Role-to-Scopes mapping from policy-store")))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
@@ -91,9 +123,9 @@ public class AdminUISecurityResource {
     @ProtectedApi(scopes = {SECURITY_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
     public Response syncRoleScopeMapping() {
         try {
-            log.info("Sync Role-to-Scopes mapping from policy-store.");
+            log.info("Sync Role-to-Scopes mappings from the policy-store.");
             GenericResponse response = adminUISecurityService.syncRoleScopeMapping();
-            log.info("Sync Role-to-Scopes mapping from policy-store completed");
+            log.info("Sync Role-to-Scopes mappings from the policy-store completed");
             return Response.ok(response).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription(), e);
@@ -108,9 +140,5 @@ public class AdminUISecurityResource {
                     .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription()))
                     .build();
         }
-    }
-    public static void main(String[] args) throws StringEncrypter.EncryptionException {
-        StringEncrypter se = StringEncrypter.instance("bGkd7ljjR8GSJkybpbPEcU32");
-        System.out.println(se.decrypt("U+4A08q7idg18ABUiWjnKA=="));
     }
 }
