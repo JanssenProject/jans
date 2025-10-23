@@ -26,6 +26,37 @@ pub struct ParsedSchema {
     pub content: String,
 }
 
+impl ParsedSchema {
+    /// Get a reference to the Cedar Schema.
+    ///
+    /// Returns the validated Cedar Schema that can be used for policy validation.
+    pub fn get_schema(&self) -> &Schema {
+        &self.schema
+    }
+
+    /// Validate that the schema is non-empty and well-formed.
+    ///
+    /// Performs additional validation checks beyond basic parsing to ensure
+    /// the schema is not empty. If parsing succeeded, the schema is already
+    /// validated by Cedar for internal consistency.
+    ///
+    /// # Errors
+    /// Returns `PolicyStoreError::CedarSchemaError` if the schema file is empty.
+    pub fn validate(&self) -> Result<(), PolicyStoreError> {
+        // Check that content is not empty
+        if self.content.trim().is_empty() {
+            return Err(PolicyStoreError::CedarSchemaError {
+                file: self.filename.clone(),
+                message: "Schema file is empty".to_string(),
+            });
+        }
+
+        // If parsing succeeded, the schema is already validated by Cedar
+        // The Schema type guarantees internal consistency
+        Ok(())
+    }
+}
+
 /// Schema parser for loading and validating Cedar schemas.
 pub struct SchemaParser;
 
@@ -76,28 +107,6 @@ impl SchemaParser {
             filename: filename.to_string(),
             content: content.to_string(),
         })
-    }
-
-    /// Validate that a schema is non-empty and well-formed.
-    ///
-    /// Performs additional validation checks beyond basic parsing to ensure
-    /// the schema is not empty. If parsing succeeded, the schema is already
-    /// validated by Cedar for internal consistency.
-    ///
-    /// # Errors
-    /// Returns `PolicyStoreError::CedarSchemaError` if the schema file is empty.
-    pub fn validate_schema(parsed: &ParsedSchema) -> Result<(), PolicyStoreError> {
-        // Check that content is not empty
-        if parsed.content.trim().is_empty() {
-            return Err(PolicyStoreError::CedarSchemaError {
-                file: parsed.filename.clone(),
-                message: "Schema file is empty".to_string(),
-            });
-        }
-
-        // If parsing succeeded, the schema is already validated by Cedar
-        // The Schema type guarantees internal consistency
-        Ok(())
     }
 
     /// Format a Cedar schema error into a human-readable message.
@@ -232,7 +241,7 @@ mod tests {
         // Empty schema is actually valid in Cedar, but our validation will catch it
         if result.is_ok() {
             let parsed = result.unwrap();
-            let validation = SchemaParser::validate_schema(&parsed);
+            let validation = parsed.validate();
             assert!(validation.is_err());
         }
     }
@@ -258,7 +267,7 @@ mod tests {
         "#;
 
         let parsed = SchemaParser::parse_schema(content, "test.cedarschema").unwrap();
-        let result = SchemaParser::validate_schema(&parsed);
+        let result = parsed.validate();
         assert!(result.is_ok());
     }
 
@@ -371,7 +380,7 @@ mod tests {
         let result = SchemaParser::parse_schema(content, "whitespace.cedarschema");
         // Empty content might parse successfully, but validation should fail
         if let Ok(parsed) = result {
-            let validation = SchemaParser::validate_schema(&parsed);
+            let validation = parsed.validate();
             assert!(
                 validation.is_err(),
                 "Validation should fail for whitespace-only schema"

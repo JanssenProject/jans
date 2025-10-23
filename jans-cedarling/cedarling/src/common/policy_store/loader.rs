@@ -8,11 +8,10 @@
 use super::errors::{PolicyStoreError, ValidationError};
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
 use super::policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
-use super::schema_parser::{ParsedSchema, SchemaParser};
 use super::source::{PolicyStoreFormat, PolicyStoreSource};
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
-use cedar_policy::{PolicySet, Schema};
+use cedar_policy::PolicySet;
 use std::path::Path;
 
 /// Policy store loader trait for loading policy stores from various sources.
@@ -481,22 +480,6 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     ) -> Result<PolicySet, PolicyStoreError> {
         PolicyParser::create_policy_set(policies, templates)
     }
-
-    /// Parse and validate a Cedar schema from content.
-    ///
-    /// Uses the Cedar engine to parse and validate the schema syntax and structure.
-    fn parse_schema(content: &str, filename: &str) -> Result<ParsedSchema, PolicyStoreError> {
-        let parsed = SchemaParser::parse_schema(content, filename)?;
-        SchemaParser::validate_schema(&parsed)?;
-        Ok(parsed)
-    }
-
-    /// Extract the Cedar Schema object from a parsed schema.
-    ///
-    /// Returns the validated Cedar Schema that can be used for policy validation.
-    fn get_schema(parsed: &ParsedSchema) -> Result<&Schema, PolicyStoreError> {
-        Ok(&parsed.schema)
-    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -564,6 +547,7 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
 
 #[cfg(test)]
 mod tests {
+    use super::super::schema_parser::SchemaParser;
     use super::*;
     use std::fs;
     use std::path::PathBuf;
@@ -1035,20 +1019,17 @@ permit(
         assert!(!loaded.schema.is_empty(), "Schema should not be empty");
 
         // Parse the schema
-        let parsed_schema = PhysicalLoader::parse_schema(&loaded.schema, "schema.cedarschema");
-        assert!(parsed_schema.is_ok());
-
-        let parsed = parsed_schema.unwrap();
+        let parsed = SchemaParser::parse_schema(&loaded.schema, "schema.cedarschema")
+            .expect("Should parse schema");
         assert_eq!(parsed.filename, "schema.cedarschema");
         assert_eq!(parsed.content, schema_content);
 
         // Validate the schema
-        let validation = SchemaParser::validate_schema(&parsed);
-        assert!(validation.is_ok());
+        parsed.validate().expect("Schema should be valid");
 
         // Get the Cedar schema object
-        let schema = PhysicalLoader::get_schema(&parsed);
-        assert!(schema.is_ok());
+        let schema = parsed.get_schema();
+        assert!(!format!("{:?}", schema).is_empty());
     }
 
     #[test]
@@ -1111,19 +1092,22 @@ permit(
 
         // Parse schema
         assert!(!loaded.schema.is_empty(), "Schema should not be empty");
-        let parsed_schema = PhysicalLoader::parse_schema(&loaded.schema, "schema.cedarschema");
-        assert!(parsed_schema.is_ok());
+        let parsed_schema = SchemaParser::parse_schema(&loaded.schema, "schema.cedarschema")
+            .expect("Should parse schema");
+
+        // Validate schema
+        parsed_schema.validate().expect("Schema should be valid");
 
         // Parse policies
-        let parsed_policies = PhysicalLoader::parse_policies(&loaded.policies);
-        assert!(parsed_policies.is_ok());
+        let parsed_policies =
+            PhysicalLoader::parse_policies(&loaded.policies).expect("Should parse policies");
 
         // Verify they work together
-        let parsed_schema_result = parsed_schema.unwrap();
-        let schema = PhysicalLoader::get_schema(&parsed_schema_result);
-        assert!(schema.is_ok());
+        let schema = parsed_schema.get_schema();
+        assert!(!format!("{:?}", schema).is_empty());
 
-        let policy_set = PhysicalLoader::create_policy_set(parsed_policies.unwrap(), vec![]);
-        assert!(policy_set.is_ok());
+        let policy_set = PhysicalLoader::create_policy_set(parsed_policies, vec![])
+            .expect("Should create policy set");
+        assert!(!policy_set.is_empty());
     }
 }
