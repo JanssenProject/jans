@@ -39,8 +39,9 @@ impl TknClaimAttrSrc {
 }
 
 impl EntityRefAttrSrc {
-    pub fn build_expr(&self, id: &str) -> Result<RestrictedExpression, BuildExprError> {
-        let uid = EntityUid::from_str(&format!("{}::\"{}\"", &self.0, id))?;
+    pub fn build_expr(&self, id: &str) -> Result<RestrictedExpression, Box<BuildExprError>> {
+        let uid = EntityUid::from_str(&format!("{}::\"{}\"", &self.0, id))
+            .map_err(|e| Box::new(e.into()))?;
         Ok(RestrictedExpression::new_entity_uid(uid))
     }
 }
@@ -162,6 +163,12 @@ impl BuildExprErrorVec {
     }
 }
 
+impl From<Vec<Box<BuildExprError>>> for BuildExprErrorVec {
+    fn from(errs: Vec<Box<BuildExprError>>) -> Self {
+        Self(errs.into_iter().map(|e| *e).collect())
+    }
+}
+
 impl From<Vec<BuildExprError>> for BuildExprErrorVec {
     fn from(errs: Vec<BuildExprError>) -> Self {
         Self(errs)
@@ -193,19 +200,19 @@ impl Display for BuildExprErrorVec {
 
 impl From<BuildExprError> for BuildExprErrorVec {
     fn from(err: BuildExprError) -> Self {
-        Self(Vec::from([err]))
+        Vec::from([err]).into()
     }
 }
 
 impl From<TypeMismatchError> for BuildExprErrorVec {
     fn from(err: TypeMismatchError) -> Self {
-        Self(Vec::from([BuildExprError::TypeMismatch(err)]))
+        Vec::from([BuildExprError::TypeMismatch(err)]).into()
     }
 }
 
 impl From<cedar_policy::ExpressionConstructionError> for BuildExprErrorVec {
     fn from(err: cedar_policy::ExpressionConstructionError) -> Self {
-        Self(Vec::from([BuildExprError::ConstructExpr(err)]))
+        Vec::from([BuildExprError::ConstructExpr(err)]).into()
     }
 }
 
