@@ -267,8 +267,7 @@ public class Fido2MetricsAggregationScheduler {
             // Verify we still hold the lock
             ClusterNode currentNode = clusterNodeService.getClusterNodeByDn(clusterNode.getDn());
             if (currentNode == null || !clusterNodeService.hasLock(currentNode)) {
-                log.warn("Lost lock on cluster node {}. Attempting to re-allocate...", 
-                    clusterNode != null ? clusterNode.getId() : "null");
+                log.warn("Lost lock on cluster node {}. Attempting to re-allocate...", clusterNode.getId());
                 clusterNode = clusterNodeService.allocate();
                 return clusterNode != null;
             }
