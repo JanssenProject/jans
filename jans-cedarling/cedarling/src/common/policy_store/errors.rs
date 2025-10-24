@@ -26,6 +26,51 @@ pub enum CedarSchemaErrorType {
     NamespaceError(String),
 }
 
+/// Cedar entity-specific errors.
+#[derive(Debug, thiserror::Error)]
+#[allow(dead_code)]
+pub enum CedarEntityErrorType {
+    /// Failed to create entity
+    #[error("Failed to create entity: {0}")]
+    EntityCreationError(String),
+
+    /// Failed to parse entity from JSON
+    #[error("Failed to parse entity from JSON: {0}")]
+    JsonParseError(String),
+
+    /// No entity found after parsing
+    #[error("No entity found after parsing")]
+    NoEntityFound,
+
+    /// Invalid entity UID format
+    #[error("Invalid entity UID format: {0}")]
+    InvalidUidFormat(String),
+
+    /// Invalid entity type name
+    #[error("Invalid entity type name '{0}': {1}")]
+    InvalidTypeName(String, String),
+
+    /// Invalid entity ID
+    #[error("Invalid entity ID: {0}")]
+    InvalidEntityId(String),
+
+    /// Duplicate entity UID detected
+    #[error("Duplicate entity UID '{uid}' found in '{file1}' and '{file2}'")]
+    DuplicateUid {
+        uid: String,
+        file1: String,
+        file2: String,
+    },
+
+    /// Parent entity not found in hierarchy
+    #[error("Parent entity '{parent}' not found for entity '{child}'")]
+    MissingParent { parent: String, child: String },
+
+    /// Failed to create entity store
+    #[error("Failed to create entity store: {0}")]
+    EntityStoreCreation(String),
+}
+
 /// Errors that can occur during policy store operations.
 #[derive(Debug, thiserror::Error)]
 #[allow(dead_code)]
@@ -70,6 +115,13 @@ pub enum PolicyStoreError {
     CedarSchemaError {
         file: String,
         err: CedarSchemaErrorType,
+    },
+
+    /// Cedar entity error
+    #[error("Cedar entity error in '{file}': {err}")]
+    CedarEntityError {
+        file: String,
+        err: CedarEntityErrorType,
     },
 
     /// Path not found
