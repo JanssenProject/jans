@@ -233,7 +233,7 @@ For this guide, we have created a policy store in the
 
 The policy store has two policies. The first grants access to all actions and all resources to the users with the `Teacher` role. The second allows only `Read` permission to students with the `Student` role to any resource. The two policies are as follows:
 
-```
+```cedar
 @id("allow_teacher")
 permit(
   principal in Jans::Role::"Teacher",
@@ -242,7 +242,7 @@ permit(
 );
 ```
 
-```
+```cedar
 @id("allow_student_read")
 permit(
   principal in Jans::Role::"Student",
@@ -389,5 +389,5 @@ To test the negative case, we will do the following:
 1. Modify the user in the IDP to have the `Student` role instead of `Teacher`
 2. Logout from the Cedarling if you are logged in and rerun the authorization flow with the same parameters to obtain new tokens
 3. Run signed authorization using the same inputs
-4. The top level `decision: false` confirms failed authorization. The first policy in the store allowed full access to users in the `Teacher` role, but the second policy only allowed `Read` access, which fails since our request was `Write` access.
+4. The top-level `decision: false` confirms failed authorization. The first policy in the store allowed full access to users in the `Teacher` role, but the second policy only allowed `Read` access, which fails since our request was `Write` access.
 5. Repeat the authorization with action `Jans::Action::"Read"` to confirm that the user has `Read` access but not `Write` access
