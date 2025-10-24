@@ -1699,13 +1699,14 @@
             {
               "inum": "",
               "name": "jans_stat"
-            },
+            }
+          ],
+          "groupScopes": [
             {
               "inum": "1800.04.15",
               "name": "https://jans.io/oauth/config/stats.admin"
             }
           ],
-          "groupScopes": [],
           "superScopes": [
             {
               "inum": "1800.03.1",
