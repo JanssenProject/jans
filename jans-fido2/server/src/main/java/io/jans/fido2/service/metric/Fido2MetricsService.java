@@ -189,7 +189,7 @@ public class Fido2MetricsService {
                 LocalDateTime endTime = startTime.plusDays(1);
 
                 Fido2MetricsAggregation aggregation = calculateAggregation(
-                    "DAILY", 
+                    Fido2MetricsConstants.DAILY, 
                     day.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                     startTime, 
                     endTime
@@ -220,7 +220,7 @@ public class Fido2MetricsService {
                 LocalDateTime endTime = startTime.plusWeeks(1);
 
                 Fido2MetricsAggregation aggregation = calculateAggregation(
-                    "WEEKLY", 
+                    Fido2MetricsConstants.WEEKLY, 
                     week.format(DateTimeFormatter.ofPattern("yyyy-'W'ww")),
                     startTime, 
                     endTime
@@ -710,20 +710,16 @@ public class Fido2MetricsService {
      */
     public Map<String, Object> getPeriodOverPeriodComparison(String aggregationType, int periods) {
         try {
+            java.time.temporal.ChronoUnit chronoUnit = getChronoUnitForAggregationType(aggregationType);
+            
             LocalDateTime endTime = LocalDateTime.now();
-            LocalDateTime startTime = endTime.minus(periods, 
-                "DAILY".equals(aggregationType) ? java.time.temporal.ChronoUnit.DAYS :
-                "WEEKLY".equals(aggregationType) ? java.time.temporal.ChronoUnit.WEEKS :
-                java.time.temporal.ChronoUnit.MONTHS);
+            LocalDateTime startTime = endTime.minus(periods, chronoUnit);
 
             List<Fido2MetricsAggregation> currentPeriod = getAggregations(aggregationType, startTime, endTime);
             
             // Get previous period for comparison
             LocalDateTime previousEndTime = startTime;
-            LocalDateTime previousStartTime = previousEndTime.minus(periods,
-                "DAILY".equals(aggregationType) ? java.time.temporal.ChronoUnit.DAYS :
-                "WEEKLY".equals(aggregationType) ? java.time.temporal.ChronoUnit.WEEKS :
-                java.time.temporal.ChronoUnit.MONTHS);
+            LocalDateTime previousStartTime = previousEndTime.minus(periods, chronoUnit);
             
             List<Fido2MetricsAggregation> previousPeriod = getAggregations(aggregationType, previousStartTime, previousEndTime);
 
@@ -754,6 +750,16 @@ public class Fido2MetricsService {
     }
 
     // ========== PRIVATE HELPER METHODS FOR TREND ANALYSIS ==========
+
+    private java.time.temporal.ChronoUnit getChronoUnitForAggregationType(String aggregationType) {
+        if (Fido2MetricsConstants.DAILY.equals(aggregationType)) {
+            return java.time.temporal.ChronoUnit.DAYS;
+        } else if (Fido2MetricsConstants.WEEKLY.equals(aggregationType)) {
+            return java.time.temporal.ChronoUnit.WEEKS;
+        } else {
+            return java.time.temporal.ChronoUnit.MONTHS;
+        }
+    }
 
     private double calculateGrowthRate(List<Fido2MetricsAggregation> aggregations) {
         if (aggregations.size() < 2) {
@@ -822,7 +828,7 @@ public class Fido2MetricsService {
         if (peakAggregation != null) {
             insights.put("peakUsage", Map.of(
                 "period", peakAggregation.getPeriod(),
-                "totalOperations", getTotalOperations(peakAggregation)
+                Fido2MetricsConstants.TOTAL_OPERATIONS, getTotalOperations(peakAggregation)
             ));
         }
         
@@ -859,7 +865,7 @@ public class Fido2MetricsService {
         summary.put("totalRegistrations", totalRegistrations);
         summary.put("totalAuthentications", totalAuthentications);
         summary.put("totalFallbacks", totalFallbacks);
-        summary.put("totalOperations", totalRegistrations + totalAuthentications);
+        summary.put(Fido2MetricsConstants.TOTAL_OPERATIONS, totalRegistrations + totalAuthentications);
         
         // Calculate averages
         double avgRegistrationSuccessRate = aggregations.stream()
@@ -890,8 +896,8 @@ public class Fido2MetricsService {
         Map<String, Object> previousSummary = calculatePeriodSummary(previous);
         
         // Calculate percentage changes
-        long currentTotal = (Long) currentSummary.getOrDefault("totalOperations", 0L);
-        long previousTotal = (Long) previousSummary.getOrDefault("totalOperations", 0L);
+        long currentTotal = (Long) currentSummary.getOrDefault(Fido2MetricsConstants.TOTAL_OPERATIONS, 0L);
+        long previousTotal = (Long) previousSummary.getOrDefault(Fido2MetricsConstants.TOTAL_OPERATIONS, 0L);
         
         if (previousTotal > 0) {
             double changePercent = ((double) (currentTotal - previousTotal) / previousTotal) * 100.0;

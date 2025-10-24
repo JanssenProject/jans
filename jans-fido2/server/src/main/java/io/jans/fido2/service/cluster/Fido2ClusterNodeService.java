@@ -35,7 +35,7 @@ public class Fido2ClusterNodeService {
     public static final int ATTEMPT_LIMIT = 10;
     public static final long DELAY_AFTER_EXPIRATION = 3 * 60 * 1000L; // 3 minutes
     public static final String CLUSTER_TYPE_FIDO2 = "fido2";
-    public static final String JANS_TYPE_ATTR_NAME = "jansType";
+    private static final String JANS_TYPE = "jansType";
     
     // Unique lock key for this server instance
     public static final String LOCK_KEY = UUID.randomUUID().toString();
@@ -55,8 +55,8 @@ public class Fido2ClusterNodeService {
     public ClusterNode getClusterNodeByDn(String dn) {
         try {
             return entryManager.find(ClusterNode.class, dn);
-        } catch (Exception e) {
-            log.debug("Failed to get cluster node by DN: {}", dn, e);
+        } catch (EntryPersistenceException e) {
+            log.debug("Failed to get cluster node by DN {}: {}", dn, e.getMessage());
             return null;
         }
     }
@@ -67,8 +67,8 @@ public class Fido2ClusterNodeService {
     public ClusterNode getClusterNodeById(Integer id) {
         try {
             return entryManager.find(ClusterNode.class, getDnForClusterNode(id));
-        } catch (Exception e) {
-            log.debug("Failed to get cluster node by ID: {}", id, e);
+        } catch (EntryPersistenceException e) {
+            log.debug("Failed to get cluster node by ID {}: {}", id, e.getMessage());
             return null;
         }
     }
@@ -85,8 +85,8 @@ public class Fido2ClusterNodeService {
 
         try {
             return entryManager.findEntries(clusterNodesBaseDn, ClusterNode.class, getTypeFilter());
-        } catch (Exception e) {
-            log.error("Failed to get all cluster nodes", e);
+        } catch (EntryPersistenceException e) {
+            log.error("Failed to get all cluster nodes: {}", e.getMessage(), e);
             return List.of();
         }
     }
@@ -113,8 +113,8 @@ public class Fido2ClusterNodeService {
             if (pagedResult.getEntriesCount() >= 1) {
                 return pagedResult.getEntries().get(0);
             }
-        } catch (Exception e) {
-            log.debug("Failed to get last cluster node", e);
+        } catch (EntryPersistenceException e) {
+            log.debug("Failed to get last cluster node: {}", e.getMessage());
         }
 
         return null;
@@ -141,8 +141,8 @@ public class Fido2ClusterNodeService {
             );
 
             return entryManager.findEntries(clusterNodesBaseDn, ClusterNode.class, filter);
-        } catch (Exception e) {
-            log.error("Failed to get expired cluster nodes", e);
+        } catch (EntryPersistenceException e) {
+            log.error("Failed to get expired cluster nodes: {}", e.getMessage(), e);
             return List.of();
         }
     }
@@ -231,8 +231,8 @@ public class Fido2ClusterNodeService {
             node.setLastUpdate(new Date());
             log.trace("Refreshing FIDO2 cluster node: {}", node.getId());
             update(node);
-        } catch (Exception e) {
-            log.error("Failed to refresh FIDO2 cluster node: {}", node.getId(), e);
+        } catch (EntryPersistenceException e) {
+            log.error("Failed to refresh FIDO2 cluster node {}: {}", node.getId(), e.getMessage(), e);
         }
     }
 
@@ -253,8 +253,8 @@ public class Fido2ClusterNodeService {
             update(node);
 
             return node;
-        } catch (Exception e) {
-            log.error("Failed to reset FIDO2 cluster node: {}", node.getId(), e);
+        } catch (EntryPersistenceException e) {
+            log.error("Failed to reset FIDO2 cluster node {}: {}", node.getId(), e.getMessage(), e);
             return node;
         }
     }
@@ -284,15 +284,15 @@ public class Fido2ClusterNodeService {
             node.setLastUpdate(pastDate);
             update(node);
             log.info("Released lock for FIDO2 cluster node {}", node.getId());
-        } catch (Exception e) {
-            log.error("Failed to release lock for FIDO2 cluster node: {}", node.getId(), e);
+        } catch (EntryPersistenceException e) {
+            log.error("Failed to release lock for FIDO2 cluster node {}: {}", node.getId(), e.getMessage(), e);
         }
     }
 
     // Private helper methods
 
     private Filter getTypeFilter() {
-        return Filter.createEqualityFilter(JANS_TYPE_ATTR_NAME, CLUSTER_TYPE_FIDO2);
+        return Filter.createEqualityFilter(JANS_TYPE, CLUSTER_TYPE_FIDO2);
     }
 
     private void persist(ClusterNode clusterNode) {

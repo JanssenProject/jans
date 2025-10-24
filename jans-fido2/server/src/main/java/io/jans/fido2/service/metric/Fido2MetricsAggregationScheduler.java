@@ -58,7 +58,7 @@ public class Fido2MetricsAggregationScheduler {
                 Fido2MetricsService metricsService = (Fido2MetricsService) context.getJobDetail()
                     .getJobDataMap().get(Fido2MetricsConstants.METRICS_SERVICE);
                 Fido2MetricsAggregationScheduler scheduler = (Fido2MetricsAggregationScheduler) context.getJobDetail()
-                    .getJobDataMap().get("scheduler");
+                    .getJobDataMap().get(Fido2MetricsConstants.SCHEDULER);
                 
                 if (metricsService != null && scheduler != null) {
                     // Check if this node should perform aggregation (distributed lock check)
@@ -97,7 +97,7 @@ public class Fido2MetricsAggregationScheduler {
                 Fido2MetricsService metricsService = (Fido2MetricsService) context.getJobDetail()
                     .getJobDataMap().get(Fido2MetricsConstants.METRICS_SERVICE);
                 Fido2MetricsAggregationScheduler scheduler = (Fido2MetricsAggregationScheduler) context.getJobDetail()
-                    .getJobDataMap().get("scheduler");
+                    .getJobDataMap().get(Fido2MetricsConstants.SCHEDULER);
                 
                 if (metricsService != null && scheduler != null) {
                     if (!scheduler.shouldPerformAggregation()) {
@@ -129,7 +129,7 @@ public class Fido2MetricsAggregationScheduler {
                 Fido2MetricsService metricsService = (Fido2MetricsService) context.getJobDetail()
                     .getJobDataMap().get(Fido2MetricsConstants.METRICS_SERVICE);
                 Fido2MetricsAggregationScheduler scheduler = (Fido2MetricsAggregationScheduler) context.getJobDetail()
-                    .getJobDataMap().get("scheduler");
+                    .getJobDataMap().get(Fido2MetricsConstants.SCHEDULER);
                 
                 if (metricsService != null && scheduler != null) {
                     if (!scheduler.shouldPerformAggregation()) {
@@ -162,7 +162,7 @@ public class Fido2MetricsAggregationScheduler {
                 Fido2MetricsService metricsService = (Fido2MetricsService) context.getJobDetail()
                     .getJobDataMap().get(Fido2MetricsConstants.METRICS_SERVICE);
                 Fido2MetricsAggregationScheduler scheduler = (Fido2MetricsAggregationScheduler) context.getJobDetail()
-                    .getJobDataMap().get("scheduler");
+                    .getJobDataMap().get(Fido2MetricsConstants.SCHEDULER);
                 
                 if (metricsService != null && scheduler != null) {
                     if (!scheduler.shouldPerformAggregation()) {
@@ -212,16 +212,6 @@ public class Fido2MetricsAggregationScheduler {
                appConfiguration.isFido2MetricsAggregationEnabled();
     }
 
-    /**
-     * Check if specific aggregation type is enabled
-     * Note: For now, all aggregation types are controlled by the main aggregation flag
-     * Individual type flags can be added to AppConfiguration in the future if needed
-     */
-    public boolean isAggregationEnabled(String aggregationType) {
-        // All aggregation types use the main aggregation enabled flag
-        // This ensures backward compatibility and prevents runtime errors
-        return isAggregationEnabled();
-    }
 
     /**
      * Get aggregation interval in minutes
