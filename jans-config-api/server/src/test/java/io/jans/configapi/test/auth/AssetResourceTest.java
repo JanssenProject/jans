@@ -22,8 +22,8 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class AssetResourceTest extends ConfigServerBaseTest {
 	
-	private static final  INVALID_SCOPE = "https://jans.io/oauth/config/attributes.readonly";
-	private static final  SUPER_ADMIN_SCOPE = "https://jans.io/oauth/config/asset.admin";
+	private static final String INVALID_SCOPE = "https://jans.io/oauth/config/attributes.readonly";
+	private static final String SUPER_ADMIN_SCOPE = "https://jans.io/oauth/config/asset.admin";
 
     @Parameters({ "test.issuer", "assetUrl" })
     @Test

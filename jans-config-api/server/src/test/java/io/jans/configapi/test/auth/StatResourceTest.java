@@ -22,10 +22,10 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class StatResourceTest extends ConfigServerBaseTest {
 	
-	private static final  INVALID_SCOPE = "https://jans.io/oauth/config/attributes.readonly";
-	private static final  SUPER_ADMIN_SCOPE = "https://jans.io/oauth/config/stats.admin";
-	private static final  STAT_READONLY_ADMIN_SCOPE = "https://jans.io/oauth/config/stats.readonly";
-    private static final  STAT_SCOPE = "jans_stat";
+	private static final String INVALID_SCOPE = "https://jans.io/oauth/config/attributes.readonly";
+	private static final String SUPER_ADMIN_SCOPE = "https://jans.io/oauth/config/stats.admin";
+	private static final String STAT_READONLY_ADMIN_SCOPE = "https://jans.io/oauth/config/stats.readonly";
+    private static final String STAT_SCOPE = "jans_stat";
 
     @Parameters({ "test.issuer", "statUrl" })
     @Test
