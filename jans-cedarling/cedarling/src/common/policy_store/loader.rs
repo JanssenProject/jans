@@ -1110,4 +1110,231 @@ permit(
             .expect("Should create policy set");
         assert!(!policy_set.is_empty());
     }
+
+    #[test]
+    fn test_load_and_parse_entities_end_to_end() {
+        let temp_dir = TempDir::new().unwrap();
+        let dir = temp_dir.path();
+
+        // Create a complete policy store structure
+        let _ = create_test_policy_store(dir);
+
+        // Create entities directory with entity files
+        let entities_dir = dir.join("entities");
+        fs::create_dir(&entities_dir).unwrap();
+
+        // Add entity files
+        fs::write(
+            entities_dir.join("users.json"),
+            r#"[
+                {
+                    "uid": {"type": "Jans::User", "id": "alice"},
+                    "attrs": {
+                        "email": "alice@example.com",
+                        "role": "admin"
+                    },
+                    "parents": []
+                },
+                {
+                    "uid": {"type": "Jans::User", "id": "bob"},
+                    "attrs": {
+                        "email": "bob@example.com",
+                        "role": "user"
+                    },
+                    "parents": []
+                }
+            ]"#,
+        )
+        .unwrap();
+
+        fs::write(
+            entities_dir.join("roles.json"),
+            r#"{
+                "admin": {
+                    "uid": {"type": "Jans::Role", "id": "admin"},
+                    "attrs": {
+                        "name": "Administrator"
+                    },
+                    "parents": []
+                }
+            }"#,
+        )
+        .unwrap();
+
+        // Load the policy store
+        let source = PolicyStoreSource::Directory(dir.to_path_buf());
+        let loader = DefaultPolicyStoreLoader::new_physical();
+        let loaded = loader.load(&source).unwrap();
+
+        // Entities should be loaded
+        assert!(!loaded.entities.is_empty(), "Entities should be loaded");
+
+        // Parse entities from all files
+        use super::super::entity_parser::EntityParser;
+        let mut all_entities = Vec::new();
+
+        for entity_file in &loaded.entities {
+            let parsed_entities =
+                EntityParser::parse_entities(&entity_file.content, &entity_file.name)
+                    .expect("Should parse entities");
+            all_entities.extend(parsed_entities);
+        }
+
+        // Should have 3 entities total (2 users + 1 role)
+        assert_eq!(all_entities.len(), 3, "Should have 3 entities total");
+
+        // Verify UIDs
+        let uids: Vec<String> = all_entities.iter().map(|e| e.uid.to_string()).collect();
+        assert!(uids.contains(&"Jans::User::\"alice\"".to_string()));
+        assert!(uids.contains(&"Jans::User::\"bob\"".to_string()));
+        assert!(uids.contains(&"Jans::Role::\"admin\"".to_string()));
+
+        // Create entity store
+        let entity_store = EntityParser::create_entities_store(all_entities);
+        assert!(entity_store.is_ok(), "Should create entity store");
+        assert_eq!(
+            entity_store.unwrap().iter().count(),
+            3,
+            "Store should have 3 entities"
+        );
+    }
+
+    #[test]
+    fn test_complete_policy_store_with_entities() {
+        let temp_dir = TempDir::new().unwrap();
+        let dir = temp_dir.path();
+
+        // Create a complete policy store structure
+        let _ = create_test_policy_store(dir);
+
+        // Add entities
+        let entities_dir = dir.join("entities");
+        fs::create_dir(&entities_dir).unwrap();
+
+        fs::write(
+            entities_dir.join("app_entities.json"),
+            r#"[
+                {
+                    "uid": {"type": "Jans::Application", "id": "app1"},
+                    "attrs": {
+                        "name": "My Application",
+                        "owner": "alice"
+                    },
+                    "parents": []
+                },
+                {
+                    "uid": {"type": "Jans::User", "id": "alice"},
+                    "attrs": {
+                        "email": "alice@example.com",
+                        "department": "Engineering"
+                    },
+                    "parents": []
+                }
+            ]"#,
+        )
+        .unwrap();
+
+        // Load the policy store
+        let source = PolicyStoreSource::Directory(dir.to_path_buf());
+        let loader = DefaultPolicyStoreLoader::new_physical();
+        let loaded = loader.load(&source).unwrap();
+
+        // Verify all components are loaded
+        assert_eq!(loaded.metadata.name(), "Test Policy Store");
+        assert!(!loaded.schema.is_empty());
+        assert!(!loaded.policies.is_empty());
+        assert!(!loaded.entities.is_empty());
+
+        // Parse and validate all components
+        use super::super::entity_parser::EntityParser;
+        use super::super::schema_parser::SchemaParser;
+
+        // Schema
+        let parsed_schema = SchemaParser::parse_schema(&loaded.schema, "schema.cedarschema")
+            .expect("Should parse schema");
+        parsed_schema.validate().expect("Schema should be valid");
+
+        // Policies
+        let parsed_policies =
+            PhysicalLoader::parse_policies(&loaded.policies).expect("Should parse policies");
+        let policy_set = PhysicalLoader::create_policy_set(parsed_policies, vec![])
+            .expect("Should create policy set");
+
+        // Entities
+        let mut all_entities = Vec::new();
+        for entity_file in &loaded.entities {
+            let parsed_entities =
+                EntityParser::parse_entities(&entity_file.content, &entity_file.name)
+                    .expect("Should parse entities");
+            all_entities.extend(parsed_entities);
+        }
+
+        let entity_store =
+            EntityParser::create_entities_store(all_entities).expect("Should create entity store");
+
+        // Verify everything works together
+        assert!(!policy_set.is_empty());
+        assert_eq!(entity_store.iter().count(), 2);
+        assert!(!format!("{:?}", parsed_schema.get_schema()).is_empty());
+    }
+
+    #[test]
+    fn test_entity_with_complex_attributes() {
+        let temp_dir = TempDir::new().unwrap();
+        let dir = temp_dir.path();
+
+        // Create a complete policy store structure
+        let _ = create_test_policy_store(dir);
+
+        // Create entities directory with complex attributes
+        let entities_dir = dir.join("entities");
+        fs::create_dir(&entities_dir).unwrap();
+
+        fs::write(
+            entities_dir.join("complex.json"),
+            r#"[
+                {
+                    "uid": {"type": "Jans::User", "id": "alice"},
+                    "attrs": {
+                        "email": "alice@example.com",
+                        "roles": ["admin", "developer"],
+                        "metadata": {
+                            "department": "Engineering",
+                            "level": 5
+                        },
+                        "active": true
+                    },
+                    "parents": []
+                }
+            ]"#,
+        )
+        .unwrap();
+
+        // Load the policy store
+        let source = PolicyStoreSource::Directory(dir.to_path_buf());
+        let loader = DefaultPolicyStoreLoader::new_physical();
+        let loaded = loader.load(&source).unwrap();
+
+        // Parse entities
+        use super::super::entity_parser::EntityParser;
+        let mut all_entities = Vec::new();
+
+        for entity_file in &loaded.entities {
+            let parsed_entities =
+                EntityParser::parse_entities(&entity_file.content, &entity_file.name)
+                    .expect("Should parse entities with complex attributes");
+            all_entities.extend(parsed_entities);
+        }
+
+        assert_eq!(all_entities.len(), 1);
+
+        // Verify attributes are preserved
+        let alice_json = all_entities[0].entity.to_json_value().unwrap();
+        let attrs = alice_json.get("attrs").unwrap();
+
+        assert!(attrs.get("email").is_some());
+        assert!(attrs.get("roles").is_some());
+        assert!(attrs.get("metadata").is_some());
+        assert!(attrs.get("active").is_some());
+    }
 }
