@@ -9,8 +9,8 @@
 //! ensuring they are syntactically correct and semantically valid before being
 //! used for policy validation and evaluation.
 
-use super::errors::PolicyStoreError;
-use cedar_policy::{Schema, SchemaError, SchemaFragment};
+use super::errors::{CedarSchemaErrorType, PolicyStoreError};
+use cedar_policy::{Schema, SchemaFragment};
 use std::str::FromStr;
 
 /// A parsed and validated Cedar schema.
@@ -47,7 +47,7 @@ impl ParsedSchema {
         if self.content.trim().is_empty() {
             return Err(PolicyStoreError::CedarSchemaError {
                 file: self.filename.clone(),
-                message: "Schema file is empty".to_string(),
+                err: CedarSchemaErrorType::EmptySchema,
             });
         }
 
@@ -91,14 +91,14 @@ impl SchemaParser {
         let fragment =
             SchemaFragment::from_str(content).map_err(|e| PolicyStoreError::CedarSchemaError {
                 file: filename.to_string(),
-                message: format!("{}", e),
+                err: CedarSchemaErrorType::ParseError(e.to_string()),
             })?;
 
         // Create schema from the fragment
         let schema = Schema::from_schema_fragments([fragment]).map_err(|e| {
             PolicyStoreError::CedarSchemaError {
                 file: filename.to_string(),
-                message: Self::format_schema_error(&e),
+                err: CedarSchemaErrorType::ValidationError(e.to_string()),
             }
         })?;
 
@@ -107,16 +107,6 @@ impl SchemaParser {
             filename: filename.to_string(),
             content: content.to_string(),
         })
-    }
-
-    /// Format a Cedar schema error into a human-readable message.
-    ///
-    /// Extracts useful information from Cedar's schema errors including
-    /// error type, location, and context when available.
-    fn format_schema_error(error: &SchemaError) -> String {
-        // Cedar's SchemaError provides detailed error information
-        // We format it into a user-friendly message
-        format!("{}", error)
     }
 
     /// Extract namespace declarations from schema content.
@@ -225,12 +215,12 @@ mod tests {
         let result = SchemaParser::parse_schema(content, "invalid.cedarschema");
         assert!(result.is_err());
 
-        if let Err(PolicyStoreError::CedarSchemaError { file, message }) = result {
-            assert_eq!(file, "invalid.cedarschema");
-            assert!(!message.is_empty());
-        } else {
+        let Err(PolicyStoreError::CedarSchemaError { file, err }) = result else {
             panic!("Expected CedarSchemaError");
-        }
+        };
+
+        assert_eq!(file, "invalid.cedarschema");
+        assert!(matches!(err, CedarSchemaErrorType::ParseError(_)));
     }
 
     #[test]
@@ -385,10 +375,13 @@ mod tests {
                 validation.is_err(),
                 "Validation should fail for whitespace-only schema"
             );
-            if let Err(PolicyStoreError::CedarSchemaError { file, message }) = validation {
-                assert_eq!(file, "whitespace.cedarschema");
-                assert!(message.contains("empty"));
-            }
+
+            let Err(PolicyStoreError::CedarSchemaError { file, err }) = validation else {
+                panic!("Expected CedarSchemaError");
+            };
+
+            assert_eq!(file, "whitespace.cedarschema");
+            assert!(matches!(err, CedarSchemaErrorType::EmptySchema));
         }
     }
 

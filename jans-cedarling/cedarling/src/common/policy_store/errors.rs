@@ -5,6 +5,27 @@
 
 //! Error types for policy store operations.
 
+/// Cedar schema-specific errors.
+#[derive(Debug, thiserror::Error)]
+#[allow(dead_code)]
+pub enum CedarSchemaErrorType {
+    /// Schema file is empty
+    #[error("Schema file is empty")]
+    EmptySchema,
+
+    /// Schema parsing failed
+    #[error("Schema parsing failed: {0}")]
+    ParseError(String),
+
+    /// Schema validation failed
+    #[error("Schema validation failed: {0}")]
+    ValidationError(String),
+
+    /// Namespace extraction failed
+    #[error("Namespace extraction failed: {0}")]
+    NamespaceError(String),
+}
+
 /// Errors that can occur during policy store operations.
 #[derive(Debug, thiserror::Error)]
 #[allow(dead_code)]
@@ -45,8 +66,11 @@ pub enum PolicyStoreError {
     },
 
     /// Cedar schema error
-    #[error("Cedar schema error in '{file}': {message}")]
-    CedarSchemaError { file: String, message: String },
+    #[error("Cedar schema error in '{file}': {err}")]
+    CedarSchemaError {
+        file: String,
+        err: CedarSchemaErrorType,
+    },
 
     /// Path not found
     #[error("Path not found: {path}")]
