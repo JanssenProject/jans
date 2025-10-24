@@ -109,7 +109,7 @@ mod fallback {
 
         // This should always be a LogStrategy::StdOut(StdOutLogger)
         let log_strategy = crate::log::LogStrategy::new_with_logger(
-            LogStrategyLogger::StdOut(Box::new(logger)),
+            LogStrategyLogger::StdOut(logger),
             *pdp_id,
             app_name.clone(),
             None,

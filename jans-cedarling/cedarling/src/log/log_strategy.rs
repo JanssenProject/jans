@@ -26,8 +26,8 @@ pub(crate) struct LogStrategy {
 /// It is used to provide a single point of access for logging and same api for different loggers.
 pub(crate) enum LogStrategyLogger {
     Off(NopLogger),
-    MemoryLogger(Box<MemoryLogger>),
-    StdOut(Box<StdOutLogger>),
+    MemoryLogger(MemoryLogger),
+    StdOut(StdOutLogger),
 }
 
 impl LogStrategy {
@@ -40,17 +40,10 @@ impl LogStrategy {
     ) -> Result<Self, InitLockServiceError> {
         let logger = match &config.log_type {
             LogTypeConfig::Off => LogStrategyLogger::Off(NopLogger),
-            LogTypeConfig::Memory(memory_config) => {
-                LogStrategyLogger::MemoryLogger(Box::new(MemoryLogger::new(
-                    memory_config.clone(),
-                    config.log_level,
-                    pdp_id,
-                    app_name.clone(),
-                )))
-            },
-            LogTypeConfig::StdOut => {
-                LogStrategyLogger::StdOut(Box::new(StdOutLogger::new(config.log_level)))
-            },
+            LogTypeConfig::Memory(memory_config) => LogStrategyLogger::MemoryLogger(
+                MemoryLogger::new(memory_config.clone(), config.log_level, pdp_id, app_name.clone()),
+            ),
+            LogTypeConfig::StdOut => LogStrategyLogger::StdOut(StdOutLogger::new(config.log_level)),
         };
         Ok(Self {
             logger,
