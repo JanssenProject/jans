@@ -289,6 +289,31 @@ public class Fido2ClusterNodeService {
         }
     }
 
+    /**
+     * Clean up orphaned locks from previous server instances
+     * Should be called during application startup
+     */
+    public void cleanupOrphanedLocks() {
+        log.info("Cleaning up orphaned FIDO2 cluster node locks...");
+        List<ClusterNode> allNodes = getAllClusterNodes();
+        int cleaned = 0;
+
+        for (ClusterNode node : allNodes) {
+            // If lock key doesn't match current instance and node is not expired
+            if (!LOCK_KEY.equals(node.getLockKey()) && node.getLockKey() != null) {
+                Date expirationDate = new Date(System.currentTimeMillis() - DELAY_AFTER_EXPIRATION);
+                if (node.getLastUpdate() != null && node.getLastUpdate().after(expirationDate)) {
+                    // Force expire this orphaned lock
+                    node.setLastUpdate(new Date(0));
+                    update(node);
+                    cleaned++;
+                }
+            }
+        }
+
+        log.info("Cleaned up {} orphaned FIDO2 cluster node locks", cleaned);
+    }
+
     // Private helper methods
 
     private Filter getTypeFilter() {

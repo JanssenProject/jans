@@ -41,8 +41,8 @@ public class Fido2MetricsAggregationScheduler {
     @Inject
     private Fido2ClusterNodeService clusterNodeService;
 
-    // Cluster node for distributed locking
-    private ClusterNode clusterNode;
+    // Cluster node for distributed locking (volatile for thread visibility)
+    private volatile ClusterNode clusterNode;
 
     /**
      * Job for hourly aggregation
@@ -248,8 +248,9 @@ public class Fido2MetricsAggregationScheduler {
      * Check if this node should perform aggregation
      * In cluster environments, only one node should perform aggregation to avoid conflicts
      * Uses distributed locking via ClusterNode
+     * Synchronized to prevent race conditions between concurrent job threads
      */
-    public boolean shouldPerformAggregation() {
+    public synchronized boolean shouldPerformAggregation() {
         try {
             // If we don't have a cluster node, try to allocate one
             if (clusterNode == null) {
@@ -282,14 +283,19 @@ public class Fido2MetricsAggregationScheduler {
     /**
      * Initialize cluster node for this server instance
      * Called during application startup
+     * Synchronized to prevent race conditions with shouldPerformAggregation()
      */
-    public void initializeClusterNode() {
+    public synchronized void initializeClusterNode() {
         if (!isAggregationEnabled()) {
             log.info("FIDO2 metrics aggregation is disabled");
             return;
         }
 
         try {
+            // First, clean up any orphaned locks from previous server instances
+            clusterNodeService.cleanupOrphanedLocks();
+            
+            // Then allocate a cluster node for this instance
             clusterNode = clusterNodeService.allocate();
             if (clusterNode != null) {
                 log.info("Initialized cluster node {} for FIDO2 metrics aggregation", clusterNode.getId());
@@ -304,8 +310,9 @@ public class Fido2MetricsAggregationScheduler {
     /**
      * Release cluster node lock
      * Called during application shutdown
+     * Synchronized to prevent race conditions with shouldPerformAggregation()
      */
-    public void releaseClusterNode() {
+    public synchronized void releaseClusterNode() {
         if (clusterNode != null) {
             try {
                 clusterNodeService.releaseLock(clusterNode);

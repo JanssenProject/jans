@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Test class for FIDO2 Metrics Trend Analysis functionality (GitHub Issue #4)
+ * Test class for FIDO2 Metrics Trend Analysis functionality (GitHub Issue #11923)
  * 
  * @author FIDO2 Team
  */

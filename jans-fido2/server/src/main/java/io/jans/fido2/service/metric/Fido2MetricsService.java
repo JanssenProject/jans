@@ -712,7 +712,7 @@ public class Fido2MetricsService {
         try {
             java.time.temporal.ChronoUnit chronoUnit = getChronoUnitForAggregationType(aggregationType);
             
-            LocalDateTime endTime = LocalDateTime.now();
+            LocalDateTime endTime = alignEndToBoundary(LocalDateTime.now(), chronoUnit);
             LocalDateTime startTime = endTime.minus(periods, chronoUnit);
 
             List<Fido2MetricsAggregation> currentPeriod = getAggregations(aggregationType, startTime, endTime);
@@ -724,9 +724,9 @@ public class Fido2MetricsService {
             List<Fido2MetricsAggregation> previousPeriod = getAggregations(aggregationType, previousStartTime, previousEndTime);
 
             Map<String, Object> comparison = new HashMap<>();
-            comparison.put("currentPeriod", calculatePeriodSummary(currentPeriod));
-            comparison.put("previousPeriod", calculatePeriodSummary(previousPeriod));
-            comparison.put("comparison", calculatePeriodComparison(currentPeriod, previousPeriod));
+            comparison.put(Fido2MetricsConstants.CURRENT_PERIOD, calculatePeriodSummary(currentPeriod));
+            comparison.put(Fido2MetricsConstants.PREVIOUS_PERIOD, calculatePeriodSummary(previousPeriod));
+            comparison.put(Fido2MetricsConstants.COMPARISON, calculatePeriodComparison(currentPeriod, previousPeriod));
             
             return comparison;
             
@@ -751,13 +751,34 @@ public class Fido2MetricsService {
 
     // ========== PRIVATE HELPER METHODS FOR TREND ANALYSIS ==========
 
+    /**
+     * Align the end time to the start of the current period boundary
+     * This prevents partial/short windows in Period-over-Period comparisons
+     */
+    private LocalDateTime alignEndToBoundary(LocalDateTime ref, java.time.temporal.ChronoUnit unit) {
+        if (unit == java.time.temporal.ChronoUnit.HOURS) {
+            return ref.withMinute(0).withSecond(0).withNano(0);
+        } else if (unit == java.time.temporal.ChronoUnit.DAYS) {
+            return ref.withHour(0).withMinute(0).withSecond(0).withNano(0);
+        } else if (unit == java.time.temporal.ChronoUnit.WEEKS) {
+            return ref.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        } else { // MONTHS
+            return ref.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        }
+    }
+
     private java.time.temporal.ChronoUnit getChronoUnitForAggregationType(String aggregationType) {
-        if (Fido2MetricsConstants.DAILY.equals(aggregationType)) {
+        if (Fido2MetricsConstants.HOURLY.equals(aggregationType)) {
+            return java.time.temporal.ChronoUnit.HOURS;
+        } else if (Fido2MetricsConstants.DAILY.equals(aggregationType)) {
             return java.time.temporal.ChronoUnit.DAYS;
         } else if (Fido2MetricsConstants.WEEKLY.equals(aggregationType)) {
             return java.time.temporal.ChronoUnit.WEEKS;
-        } else {
+        } else if (Fido2MetricsConstants.MONTHLY.equals(aggregationType)) {
             return java.time.temporal.ChronoUnit.MONTHS;
+        } else {
+            // Default to DAYS if unknown
+            return java.time.temporal.ChronoUnit.DAYS;
         }
     }
 

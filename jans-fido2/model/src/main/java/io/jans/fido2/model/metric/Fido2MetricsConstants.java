@@ -102,4 +102,9 @@ public final class Fido2MetricsConstants {
     public static final String ERROR_COUNTS = "errorCounts";
     public static final String PERFORMANCE_METRICS = "performanceMetrics";
     public static final String TOTAL_OPERATIONS = "totalOperations";
+    
+    // Period/Time related
+    public static final String CURRENT_PERIOD = "currentPeriod";
+    public static final String PREVIOUS_PERIOD = "previousPeriod";
+    public static final String COMPARISON = "comparison";
 }
