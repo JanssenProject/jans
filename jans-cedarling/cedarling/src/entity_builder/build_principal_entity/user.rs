@@ -65,7 +65,7 @@ impl UserIdSrcResolver {
     /// The method checks the following tokens and claims in order:
     /// - `userinfo_token.sub`
     /// - `id_token.sub`
-    pub fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc> {
+    pub fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc<'_>> {
         const DEFAULT_USER_ID_SRCS: &[PrincipalIdSrc] = &[
             PrincipalIdSrc {
                 token: "userinfo_token",
