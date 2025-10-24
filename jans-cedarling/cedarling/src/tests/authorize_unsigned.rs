@@ -10,13 +10,14 @@ use tokio::test;
 
 use super::utils::*;
 use crate::authz::request::EntityData;
+use crate::log::interface::LogStorage;
 use crate::{
     JsonRule, RequestUnsigned, cmp_decision, cmp_policy,
     tests::utils::cedarling_util::get_cedarling_with_callback,
 };
-use crate::log::interface::LogStorage;
 
-static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
+static POLICY_STORE_RAW_YAML: &str =
+    include_str!("../../../test_files/policy-store_no_trusted_issuers.yaml");
 
 static OPERATOR_AND: LazyLock<JsonRule> = LazyLock::new(|| {
     JsonRule::new(json!({
@@ -408,27 +409,39 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
         .unwrap(),
     };
 
-    let result = cedarling.authorize_unsigned(request).await.expect("request should be parsed without errors");
-    
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("request should be parsed without errors");
+
     // Verify that logs were created and contain the request ID
     let logs = cedarling.pop_logs();
     assert!(!logs.is_empty(), "Should have created logs");
-    
+
     let request_id = &result.request_id;
     let logs_with_request_id: Vec<&serde_json::Value> = logs
         .iter()
         .filter(|log| log.get("request_id") == Some(&serde_json::json!(request_id)))
         .collect();
-    
-    assert!(!logs_with_request_id.is_empty(), "Should have logs for the request ID");
-    
+
+    assert!(
+        !logs_with_request_id.is_empty(),
+        "Should have logs for the request ID"
+    );
+
     // Verify that logs contain expected content
     for log in &logs_with_request_id {
         // Verify basic log structure
         assert!(log.get("id").is_some(), "Log should have an id field");
-        assert!(log.get("timestamp").is_some(), "Log should have a timestamp field");
-        assert!(log.get("log_kind").is_some(), "Log should have a log_kind field");
-        
+        assert!(
+            log.get("timestamp").is_some(),
+            "Log should have a timestamp field"
+        );
+        assert!(
+            log.get("log_kind").is_some(),
+            "Log should have a log_kind field"
+        );
+
         // Verify log kind is valid
         let log_kind = log.get("log_kind").unwrap();
         assert!(
@@ -436,30 +449,60 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
             "Log kind should be Decision or System, got: {:?}",
             log_kind
         );
-        
+
         // For Decision logs, verify they have required fields
         if log_kind == "Decision" {
-            assert!(log.get("action").is_some(), "Decision log should have an action field");
-            assert!(log.get("resource").is_some(), "Decision log should have a resource field");
-            assert!(log.get("decision").is_some(), "Decision log should have a decision field");
-            assert!(log.get("diagnostics").is_some(), "Decision log should have a diagnostics field");
-            
+            assert!(
+                log.get("action").is_some(),
+                "Decision log should have an action field"
+            );
+            assert!(
+                log.get("resource").is_some(),
+                "Decision log should have a resource field"
+            );
+            assert!(
+                log.get("decision").is_some(),
+                "Decision log should have a decision field"
+            );
+            assert!(
+                log.get("diagnostics").is_some(),
+                "Decision log should have a diagnostics field"
+            );
+
             // Verify the action matches what we requested
             let log_action = log.get("action").unwrap();
-            assert_eq!(log_action, &serde_json::json!("Jans::Action::\"AlwaysDeny\""), "Decision log should have the correct action");
-            
+            assert_eq!(
+                log_action,
+                &serde_json::json!("Jans::Action::\"AlwaysDeny\""),
+                "Decision log should have the correct action"
+            );
+
             // Verify the decision is DENY
             let log_decision = log.get("decision").unwrap();
-            assert_eq!(log_decision, &serde_json::json!("DENY"), "Decision log should show DENY decision");
-            
+            assert_eq!(
+                log_decision,
+                &serde_json::json!("DENY"),
+                "Decision log should show DENY decision"
+            );
+
             // Verify diagnostics structure
             let diagnostics = log.get("diagnostics").unwrap();
-            assert!(diagnostics.get("reason").is_some(), "Diagnostics should have a reason field");
-            assert!(diagnostics.get("errors").is_some(), "Diagnostics should have an errors field");
-            
+            assert!(
+                diagnostics.get("reason").is_some(),
+                "Diagnostics should have a reason field"
+            );
+            assert!(
+                diagnostics.get("errors").is_some(),
+                "Diagnostics should have an errors field"
+            );
+
             // Verify no policy evaluation errors (since AlwaysDeny just denies, doesn't cause errors)
             let errors = diagnostics.get("errors").unwrap();
-            assert_eq!(errors, &serde_json::json!([]), "Diagnostics should show no errors when there are no policy evaluation errors");
+            assert_eq!(
+                errors,
+                &serde_json::json!([]),
+                "Diagnostics should show no errors when there are no policy evaluation errors"
+            );
         }
     }
 }
