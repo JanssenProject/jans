@@ -650,15 +650,6 @@ pub enum AuthorizeError {
 }
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]
-#[display("could not create request user entity principal for {uid}: {err}")]
-pub struct CreateRequestRoleError {
-    /// Error value
-    err: cedar_policy::RequestValidationError,
-    /// Role ID [`EntityUid`] value used for authorization request
-    uid: EntityUid,
-}
-
-#[derive(Debug, derive_more::Error, derive_more::Display)]
 #[display("The request for `{principal}` does not conform to the schema: {err}")]
 pub struct InvalidPrincipalError {
     /// Principal name

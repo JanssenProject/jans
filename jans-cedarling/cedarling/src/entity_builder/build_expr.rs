@@ -29,14 +29,6 @@ impl Attribute {
     }
 }
 
-#[derive(Debug, Error)]
-#[error("type mismatch for key '{key}'. expected: '{expected_type}', but found: '{actual_type}'")]
-pub struct KeyedJsonTypeError {
-    pub key: String,
-    pub expected_type: String,
-    pub actual_type: String,
-}
-
 impl TknClaimAttrSrc {
     pub fn build_expr(
         &self,
