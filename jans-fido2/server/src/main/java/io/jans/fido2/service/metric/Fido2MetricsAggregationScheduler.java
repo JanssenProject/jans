@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Scheduler service for FIDO2 metrics aggregation
@@ -41,8 +42,8 @@ public class Fido2MetricsAggregationScheduler {
     @Inject
     private Fido2ClusterNodeService clusterNodeService;
 
-    // Cluster node for distributed locking (volatile for thread visibility)
-    private volatile ClusterNode clusterNode;
+    // Cluster node for distributed locking (AtomicReference ensures thread-safe operations)
+    private final AtomicReference<ClusterNode> clusterNode = new AtomicReference<>();
 
     /**
      * Job for hourly aggregation
@@ -253,24 +254,27 @@ public class Fido2MetricsAggregationScheduler {
     public synchronized boolean shouldPerformAggregation() {
         try {
             // If we don't have a cluster node, try to allocate one
-            if (clusterNode == null) {
-                clusterNode = clusterNodeService.allocate();
-                if (clusterNode == null) {
+            ClusterNode node = clusterNode.get();
+            if (node == null) {
+                node = clusterNodeService.allocate();
+                if (node == null) {
                     log.debug("Failed to allocate cluster node for FIDO2 metrics aggregation");
                     return false;
                 }
-                log.info("Allocated cluster node {} for FIDO2 metrics aggregation", clusterNode.getId());
+                clusterNode.set(node);
+                log.info("Allocated cluster node {} for FIDO2 metrics aggregation", node.getId());
             }
 
             // Refresh the node to keep the lock alive
-            clusterNodeService.refresh(clusterNode);
+            clusterNodeService.refresh(node);
 
             // Verify we still hold the lock
-            ClusterNode currentNode = clusterNodeService.getClusterNodeByDn(clusterNode.getDn());
+            ClusterNode currentNode = clusterNodeService.getClusterNodeByDn(node.getDn());
             if (currentNode == null || !clusterNodeService.hasLock(currentNode)) {
-                log.warn("Lost lock on cluster node {}. Attempting to re-allocate...", clusterNode.getId());
-                clusterNode = clusterNodeService.allocate();
-                return clusterNode != null;
+                log.warn("Lost lock on cluster node {}. Attempting to re-allocate...", node.getId());
+                node = clusterNodeService.allocate();
+                clusterNode.set(node);
+                return node != null;
             }
 
             return true;
@@ -296,9 +300,10 @@ public class Fido2MetricsAggregationScheduler {
             clusterNodeService.cleanupOrphanedLocks();
             
             // Then allocate a cluster node for this instance
-            clusterNode = clusterNodeService.allocate();
-            if (clusterNode != null) {
-                log.info("Initialized cluster node {} for FIDO2 metrics aggregation", clusterNode.getId());
+            ClusterNode node = clusterNodeService.allocate();
+            clusterNode.set(node);
+            if (node != null) {
+                log.info("Initialized cluster node {} for FIDO2 metrics aggregation", node.getId());
             } else {
                 log.warn("Failed to initialize cluster node for FIDO2 metrics aggregation");
             }
@@ -313,11 +318,12 @@ public class Fido2MetricsAggregationScheduler {
      * Synchronized to prevent race conditions with shouldPerformAggregation()
      */
     public synchronized void releaseClusterNode() {
-        if (clusterNode != null) {
+        ClusterNode node = clusterNode.get();
+        if (node != null) {
             try {
-                clusterNodeService.releaseLock(clusterNode);
-                log.info("Released cluster node {} for FIDO2 metrics aggregation", clusterNode.getId());
-                clusterNode = null;
+                clusterNodeService.releaseLock(node);
+                log.info("Released cluster node {} for FIDO2 metrics aggregation", node.getId());
+                clusterNode.set(null);
             } catch (Exception e) {
                 log.error("Error releasing cluster node", e);
             }
