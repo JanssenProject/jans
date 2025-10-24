@@ -28,11 +28,11 @@ impl StdOutLogger {
     // Create a new StdOutLogger with custom writer.
     // is used in tests.
     #[cfg(test)]
-    pub(crate) fn new_with(writer: Box<dyn Write + Send + Sync>, log_level: LogLevel) -> Self {
-        Self {
+    pub(crate) fn new_with(writer: Box<dyn Write + Send + Sync>, log_level: LogLevel) -> Box<Self> {
+        Box::new(Self {
             writer: Mutex::new(Box::new(writer)),
             log_level,
-        }
+        })
     }
 }
 
