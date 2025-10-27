@@ -368,7 +368,6 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
-        override: true
 
     - name: Build WASM build
       env:
@@ -379,7 +378,6 @@ jobs:
         rustup default stable
         rustup target add wasm32-unknown-unknown
         cargo install wasm-pack
-  
         echo "--- rustc version ---"
         rustc --version
         echo "--- cargo version ---"
@@ -405,7 +403,6 @@ jobs:
           echo "Replaced  $NEW_NPM_VERSION in Cargo.toml"
         fi
   
-        # Build for web target
         wasm-pack build --release --target web --scope janssenproject
         cd pkg
         echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
@@ -596,7 +593,6 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-          override: true
 
       - name: Build rust artifacts
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
@@ -768,7 +764,6 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
-        override: true
 
     - name: Build and release cedarling uniffi build in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
