@@ -28,7 +28,7 @@ use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::jwt::Token;
 use crate::log::interface::LogWriter;
-use crate::log::{BaseLogEntry, LogEntry, LogType, Logger};
+use crate::log::{LogEntry, LogType, Logger};
 use crate::{LogLevel, RequestUnsigned, entity_builder_config::*};
 use build_entity_attrs::*;
 use build_iss_entity::build_iss_entity;
@@ -189,8 +189,8 @@ fn parse_default_entities(
 
             let mut parents_set = HashSet::new();
             for parent in parents_array {
-                if let Value::Object(parent_obj) = parent {
-                    if let (Some(type_v), Some(id_v)) = (
+                if let Value::Object(parent_obj) = parent
+                    && let (Some(type_v), Some(id_v)) = (
                         parent_obj.get("type").and_then(|v| v.as_str()),
                         parent_obj.get("id").and_then(|v| v.as_str()),
                     ) {
@@ -210,7 +210,6 @@ fn parse_default_entities(
                             },
                         }
                     }
-                }
             }
 
             (full_entity_type, cedar_attrs, parents_set)
