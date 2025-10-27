@@ -193,23 +193,27 @@ fn parse_default_entities(
                     && let (Some(type_v), Some(id_v)) = (
                         parent_obj.get("type").and_then(|v| v.as_str()),
                         parent_obj.get("id").and_then(|v| v.as_str()),
-                    ) {
-                        // Add namespace if not present
-                        let full_parent_entity_type = build_entity_type_name(type_v, &namespace);
-                        let parent_uid_str = format!("{}::\"{}\"", full_parent_entity_type, id_v);
-                        match EntityUid::from_str(&parent_uid_str) {
-                            Ok(parent_uid) => {
-                                parents_set.insert(parent_uid);
-                            },
-                            Err(e) => {
-                                let log_entry = LogEntry::new_with_data(LogType::System, None)
-                                    .set_level(LogLevel::WARN)
-                                    .set_message(format!("Could not parse parent UID '{}' for default entity '{}': {}", parent_uid_str, entity_id, e));
+                    )
+                {
+                    // Add namespace if not present
+                    let full_parent_entity_type = build_entity_type_name(type_v, &namespace);
+                    let parent_uid_str = format!("{}::\"{}\"", full_parent_entity_type, id_v);
+                    match EntityUid::from_str(&parent_uid_str) {
+                        Ok(parent_uid) => {
+                            parents_set.insert(parent_uid);
+                        },
+                        Err(e) => {
+                            let log_entry = LogEntry::new_with_data(LogType::System, None)
+                                .set_level(LogLevel::WARN)
+                                .set_message(format!(
+                                    "Could not parse parent UID '{}' for default entity '{}': {}",
+                                    parent_uid_str, entity_id, e
+                                ));
 
-                                logger.log_any(log_entry);
-                            },
-                        }
+                            logger.log_any(log_entry);
+                        },
                     }
+                }
             }
 
             (full_entity_type, cedar_attrs, parents_set)
