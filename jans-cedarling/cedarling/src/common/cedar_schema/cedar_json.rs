@@ -56,7 +56,7 @@ impl CedarSchemaJson {
         &self,
         type_name: &str,
         default_namespace: Option<&str>,
-    ) -> Result<Option<(cedar_policy::EntityTypeName, &Attribute)>, ParseErrors> {
+    ) -> Result<Option<(cedar_policy::EntityTypeName, &Attribute)>, Box<ParseErrors>> {
         let entity_type_name = cedar_policy::EntityTypeName::from_str(type_name)?;
 
         let namespace = entity_type_name.namespace();
@@ -108,7 +108,7 @@ impl CedarSchemaJson {
         &self,
         type_name: &str,
         default_namespace: Option<&str>,
-    ) -> Result<Option<(cedar_policy::EntityTypeName, &EntityType)>, ParseErrors> {
+    ) -> Result<Option<(cedar_policy::EntityTypeName, &EntityType)>, Box<ParseErrors>> {
         let entity_type_name = cedar_policy::EntityTypeName::from_str(type_name)?;
 
         let namespace = entity_type_name.namespace();
@@ -197,26 +197,35 @@ mod test_deserialize_json_cedar_schema {
         let schema = serde_json::from_value::<CedarSchemaJson>(schema).unwrap();
         let namespace = Namespace {
             entity_types: HashMap::from([
-                ("User".into(), EntityType {
-                    member_of: Some(HashSet::from(["UserGroup".into()])),
-                    shape: Some(EntityShape::required(HashMap::from([
-                        ("department".into(), Attribute::string()),
-                        ("jobLevel".into(), Attribute::long()),
-                    ]))),
-                    tags: None,
-                }),
-                ("UserGroup".into(), EntityType {
-                    member_of: None,
-                    shape: None,
-                    tags: None,
-                }),
+                (
+                    "User".into(),
+                    EntityType {
+                        member_of: Some(HashSet::from(["UserGroup".into()])),
+                        shape: Some(EntityShape::required(HashMap::from([
+                            ("department".into(), Attribute::string()),
+                            ("jobLevel".into(), Attribute::long()),
+                        ]))),
+                        tags: None,
+                    },
+                ),
+                (
+                    "UserGroup".into(),
+                    EntityType {
+                        member_of: None,
+                        shape: None,
+                        tags: None,
+                    },
+                ),
             ]),
             common_types: HashMap::new(),
             actions: HashMap::new(),
         };
-        assert_eq!(schema, CedarSchemaJson {
-            namespaces: HashMap::from([("Jans".into(), namespace)])
-        });
+        assert_eq!(
+            schema,
+            CedarSchemaJson {
+                namespaces: HashMap::from([("Jans".into(), namespace)])
+            }
+        );
     }
 
     /// Tests if the entity can be found in the given `default_namespace`
@@ -248,14 +257,17 @@ mod test_deserialize_json_cedar_schema {
             cedar_policy::EntityTypeName::from_str("Jans::Workload")
                 .expect("should parse workload entity type name")
         );
-        assert_eq!(entity_type, &EntityType {
-            member_of: None,
-            shape: Some(EntityShape {
-                required: true,
-                attrs: HashMap::new()
-            }),
-            tags: None,
-        });
+        assert_eq!(
+            entity_type,
+            &EntityType {
+                member_of: None,
+                shape: Some(EntityShape {
+                    required: true,
+                    attrs: HashMap::new()
+                }),
+                tags: None,
+            }
+        );
     }
 
     /// Tests if the entity wont be found if it's not in the `""` namespace or
@@ -305,11 +317,14 @@ mod test_deserialize_json_cedar_schema {
             cedar_policy::EntityTypeName::from_str("Some_entity")
                 .expect("should parse Some_entity entity type name")
         );
-        assert_eq!(entity_type, &EntityType {
-            member_of: None,
-            shape: None,
-            tags: None,
-        });
+        assert_eq!(
+            entity_type,
+            &EntityType {
+                member_of: None,
+                shape: None,
+                tags: None,
+            }
+        );
     }
 
     #[test]

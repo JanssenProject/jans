@@ -61,12 +61,12 @@ fn parse_entity_attrs<'a>(
                 continue;
             }
             Err(errors) => {
-                return Err(BuildEntityError {
-                    entity_type_name: entity_type.to_string(),
-                    error: BuildEntityErrorKind::InvalidEntityData(
+                return Err(BuildEntityError::new(
+                    entity_type.to_string(),
+                    BuildEntityErrorKind::InvalidEntityData(
                         format!("Failed to convert attribute '{}' for entity '{}': {:?}", key, entity_id, errors)
                     ),
-                });
+                ));
             }
         }
     }
@@ -83,12 +83,12 @@ fn parse_default_entities(
     for (entity_id, entity_data) in default_entities_data {
         // Validate entity ID to prevent injection attacks
         if entity_id.trim().is_empty() {
-            return Err(BuildEntityError {
-                entity_type_name: "DefaultEntity".to_string(),
-                error: BuildEntityErrorKind::InvalidEntityData(
+            return Err(BuildEntityError::new(
+                "DefaultEntity".to_string(),
+                BuildEntityErrorKind::InvalidEntityData(
                     "Entity ID cannot be empty or whitespace-only".to_string(),
                 ),
-            });
+            ));
         }
 
         // Basic security validation - prevent obvious injection patterns
@@ -104,13 +104,13 @@ fn parse_default_entities(
         let entity_id_lower = entity_id.to_lowercase();
         for pattern in &dangerous_patterns {
             if entity_id_lower.contains(pattern) {
-                return Err(BuildEntityError {
-                    entity_type_name: "DefaultEntity".to_string(),
-                    error: BuildEntityErrorKind::InvalidEntityData(format!(
+                return Err(BuildEntityError::new(
+                    "DefaultEntity".to_string(),
+                    BuildEntityErrorKind::InvalidEntityData(format!(
                         "Entity ID '{}' contains potentially dangerous content",
                         entity_id
                     )),
-                });
+                ));
             }
         }
 
@@ -118,33 +118,34 @@ fn parse_default_entities(
         let entity_obj = if let Value::Object(obj) = entity_data {
             obj
         } else {
-            return Err(BuildEntityError {
-                entity_type_name: UNKNOWN_ENTITY_TYPE.to_string(),
-                error: BuildEntityErrorKind::InvalidEntityData(
-                    format!("Default entity data for '{}' must be a JSON object", entity_id)
-                ),
-            });
+            return Err(BuildEntityError::new(
+                UNKNOWN_ENTITY_TYPE.to_string(),
+                BuildEntityErrorKind::InvalidEntityData(format!(
+                    "Default entity data for '{}' must be a JSON object",
+                    entity_id
+                )),
+            ));
         };
 
         // Check if this is the new Cedar entity format (with uid, attrs, parents fields)
         let (entity_type, cedar_attrs, parents) = if entity_obj.contains_key("uid") {
             // New Cedar entity format: {"uid": {"type": "...", "id": "..."}, "attrs": {}, "parents": [...]}
             let uid_obj = entity_obj.get("uid").and_then(|v| v.as_object())
-                .ok_or_else(|| BuildEntityError {
-                    entity_type_name: UNKNOWN_ENTITY_TYPE.to_string(),
-                    error: BuildEntityErrorKind::InvalidEntityData(
+                .ok_or_else(|| BuildEntityError::new(
+                     UNKNOWN_ENTITY_TYPE.to_string(),
+                     BuildEntityErrorKind::InvalidEntityData(
                         format!("Default entity '{}' has invalid uid field", entity_id)
                     ),
-                })?;
+                ))?;
 
             let entity_type_from_uid = uid_obj.get("type")
                 .and_then(|v| v.as_str())
-                .ok_or_else(|| BuildEntityError {
-                    entity_type_name: UNKNOWN_ENTITY_TYPE.to_string(),
-                    error: BuildEntityErrorKind::InvalidEntityData(
+                .ok_or_else(|| BuildEntityError::new(
+                    UNKNOWN_ENTITY_TYPE.to_string(),
+                    BuildEntityErrorKind::InvalidEntityData(
                         format!("Default entity '{}' has invalid uid.type field", entity_id)
                     ),
-                })?;
+                ))?;
 
             // Add namespace prefix if not already present
             let full_entity_type = if entity_type_from_uid.contains("::") {
@@ -204,12 +205,12 @@ fn parse_default_entities(
             // Old format with entity_type field
             let entity_type = entity_obj.get("entity_type")
                 .and_then(|v| v.as_str())
-                .ok_or_else(|| BuildEntityError {
-                    entity_type_name: UNKNOWN_ENTITY_TYPE.to_string(),
-                    error: BuildEntityErrorKind::InvalidEntityData(
+                .ok_or_else(|| BuildEntityError::new(
+                    UNKNOWN_ENTITY_TYPE.to_string(),
+                    BuildEntityErrorKind::InvalidEntityData(
                         format!("Default entity '{}' has invalid entity_type field", entity_id)
                     ),
-                })?;
+                ))?;
 
             // Convert JSON attributes to Cedar expressions
             let cedar_attrs = parse_entity_attrs(
@@ -220,12 +221,13 @@ fn parse_default_entities(
 
             (entity_type.to_string(), cedar_attrs, HashSet::new())
         } else {
-            return Err(BuildEntityError {
-                entity_type_name: UNKNOWN_ENTITY_TYPE.to_string(),
-                error: BuildEntityErrorKind::InvalidEntityData(
-                    format!("Default entity '{}' must have either uid field (Cedar format) or entity_type field (legacy format)", entity_id)
-                ),
-            });
+            return Err(BuildEntityError::new(
+                UNKNOWN_ENTITY_TYPE.to_string(),
+                BuildEntityErrorKind::InvalidEntityData(format!(
+                    "Default entity '{}' must have either uid field (Cedar format) or entity_type field (legacy format)",
+                    entity_id
+                )),
+            ));
         };
         
         // Build the Cedar entity
@@ -380,7 +382,9 @@ impl EntityBuilder {
             roles.extend(parents);
         }
 
-        let resource = self.build_resource_entity(&request.resource)?;
+        let resource = self
+            .build_resource_entity(&request.resource)
+            .map_err(Box::new)?;
 
         Ok(BuiltEntitiesUnsigned {
             principals,
@@ -424,9 +428,9 @@ pub fn build_cedar_entity(
     parents: HashSet<EntityUid>,
 ) -> Result<Entity, BuildEntityError> {
     let uid = EntityUid::from_str(&format!("{}::\"{}\"", type_name, id))
-        .map_err(|e| BuildEntityErrorKind::from(e).while_building(type_name))?;
+        .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
     let entity = Entity::new(uid, attrs, parents)
-        .map_err(|e| BuildEntityErrorKind::from(e).while_building(type_name))?;
+        .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
 
     Ok(entity)
 }
@@ -629,13 +633,16 @@ mod test {
             .expect("init entity builder");
 
         let entities = entity_builder
-            .build_entities(&tokens, &EntityData {
-                cedar_mapping: CedarEntityMapping {
-                    entity_type: "Jans::Resource".into(),
-                    id: "some_id".into(),
+            .build_entities(
+                &tokens,
+                &EntityData {
+                    cedar_mapping: CedarEntityMapping {
+                        entity_type: "Jans::Resource".into(),
+                        id: "some_id".into(),
+                    },
+                    attributes: HashMap::new(),
                 },
-                attributes: HashMap::new(),
-            })
+            )
             .expect("build entities");
 
         assert_entity_eq(

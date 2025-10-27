@@ -81,13 +81,6 @@ impl<'a> TokenIdSrcs<'a> {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-#[error("failed to create token entity, `{token_name}`: {err}")]
-pub struct BuildTokenEntityError {
-    pub token_name: String,
-    pub err: BuildEntityError,
-}
-
 #[cfg(test)]
 mod test {
     use super::super::test::*;
