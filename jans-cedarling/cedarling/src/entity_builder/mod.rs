@@ -77,7 +77,7 @@ fn parse_entity_attrs<'a>(
 /// Parse default entities from the provided configuration
 fn parse_default_entities(
     default_entities_data: &HashMap<String, Value>,
-    namespace: &str,
+    namespace: Option<&str>,
 ) -> Result<HashMap<String, Entity>, BuildEntityError> {
     let mut default_entities = HashMap::new();
 
@@ -159,11 +159,7 @@ fn parse_default_entities(
                     })?;
 
             // Add namespace prefix if not already present
-            let full_entity_type = if entity_type_from_uid.contains("::") {
-                entity_type_from_uid.to_string()
-            } else {
-                format!("{}::{}", namespace, entity_type_from_uid)
-            };
+            let full_entity_type = build_entity_type_name(entity_type_from_uid, &namespace);
 
             // Get the entity ID from uid.id if present
             let entity_id_from_uid = uid_obj.get("id")
@@ -196,13 +192,8 @@ fn parse_default_entities(
                         parent_obj.get("id").and_then(|v| v.as_str()),
                     ) {
                         // Add namespace if not present
-                        let full_parent_type = if type_v.contains("::") {
-                            type_v.to_string()
-                        } else {
-                            format!("{}::{}", namespace, type_v)
-                        };
-
-                        let parent_uid_str = format!("{}::\"{}\"", full_parent_type, id_v);
+                        let full_parent_entity_type = build_entity_type_name(type_v, &namespace);
+                        let parent_uid_str = format!("{}::\"{}\"", full_parent_entity_type, id_v);
                         if let Ok(parent_uid) = EntityUid::from_str(&parent_uid_str) {
                             parents_set.insert(parent_uid);
                         }
@@ -255,6 +246,18 @@ fn parse_default_entities(
     Ok(default_entities)
 }
 
+fn build_entity_type_name(entity_type_from_uid: &str, namespace: &Option<&str>) -> String {
+    if entity_type_from_uid.contains("::") {
+        entity_type_from_uid.to_string()
+    } else if let Some(ns) = namespace
+        && !ns.is_empty()
+    {
+        format!("{}::{}", ns, entity_type_from_uid)
+    } else {
+        entity_type_from_uid.to_string()
+    }
+}
+
 pub struct EntityBuilder {
     config: EntityBuilderConfig,
     iss_entities: HashMap<Origin, Entity>,
@@ -288,8 +291,7 @@ impl EntityBuilder {
 
         // Parse default entities if provided
         let default_entities = if let Some(entities_data) = default_entities_data {
-            let ns = namespace.unwrap_or("Unknown");
-            parse_default_entities(entities_data, ns)
+            parse_default_entities(entities_data, namespace)
                 .map_err(|e| InitEntityBuilderError::BuildIssEntities(vec![e].into()))?
         } else {
             HashMap::new()
@@ -694,7 +696,7 @@ mod test {
         )]);
 
         // Test that parse_default_entities works
-        let parsed_entities = parse_default_entities(&default_entities, "Test")
+        let parsed_entities = parse_default_entities(&default_entities, Some("Test"))
             .expect("should parse default entities");
 
         assert_eq!(parsed_entities.len(), 1, "should have 1 default entity");
@@ -1461,7 +1463,7 @@ mod test {
         let default_entities_data = HashMap::from([("2694c954f8d8".to_string(), entity_data)]);
 
         // Use the namespace from the policy store name
-        let namespace = "Gluu::Flex::AdminUI::Resources";
+        let namespace = Some("Gluu::Flex::AdminUI::Resources");
         let parsed_entities = parse_default_entities(&default_entities_data, namespace)
             .expect("should parse default entities");
 
@@ -1507,7 +1509,7 @@ mod test {
 
         let default_entities_data = HashMap::from([("test123".to_string(), entity_data)]);
 
-        let parsed_entities = parse_default_entities(&default_entities_data, "NewNamespace")
+        let parsed_entities = parse_default_entities(&default_entities_data, Some("NewNamespace"))
             .expect("should parse default entities");
 
         let entity = parsed_entities.get("test123").expect("should have entity");
@@ -1529,7 +1531,7 @@ mod test {
 
         let default_entities_data = HashMap::from([("test123".to_string(), entity_data)]);
 
-        let result = parse_default_entities(&default_entities_data, "Test");
+        let result = parse_default_entities(&default_entities_data, Some("Test"));
         assert!(
             result.is_err(),
             "Should return error when uid field is missing"
@@ -1546,7 +1548,7 @@ mod test {
 
         let default_entities_data = HashMap::from([("test123".to_string(), entity_data)]);
 
-        let result = parse_default_entities(&default_entities_data, "Test");
+        let result = parse_default_entities(&default_entities_data, Some("Test"));
         assert!(
             result.is_err(),
             "Should return error when uid is not an object"
@@ -1562,7 +1564,7 @@ mod test {
 
         let default_entities_data = HashMap::from([("test456".to_string(), entity_data_no_type)]);
 
-        let result = parse_default_entities(&default_entities_data, "Test");
+        let result = parse_default_entities(&default_entities_data, Some("Test"));
         assert!(
             result.is_err(),
             "Should return error when uid.type is missing"
@@ -1583,7 +1585,7 @@ mod test {
 
         let default_entities_data = HashMap::from([("test789".to_string(), entity_data)]);
 
-        let parsed_entities = parse_default_entities(&default_entities_data, "Test")
+        let parsed_entities = parse_default_entities(&default_entities_data, Some("Test"))
             .expect("should parse with empty attrs and parents");
 
         let entity = parsed_entities.get("test789").expect("should have entity");
