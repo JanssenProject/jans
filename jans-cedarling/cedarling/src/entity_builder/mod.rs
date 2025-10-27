@@ -27,7 +27,9 @@ use crate::common::issuer_utils::normalize_issuer;
 use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::jwt::Token;
-use crate::{RequestUnsigned, entity_builder_config::*};
+use crate::log::interface::LogWriter;
+use crate::log::{BaseLogEntry, LogEntry, LogType, Logger};
+use crate::{LogLevel, RequestUnsigned, entity_builder_config::*};
 use build_entity_attrs::*;
 use build_iss_entity::build_iss_entity;
 use cedar_policy::{Entity, EntityUid, RestrictedExpression};
@@ -78,6 +80,7 @@ fn parse_entity_attrs<'a>(
 fn parse_default_entities(
     default_entities_data: &HashMap<String, Value>,
     namespace: Option<&str>,
+    logger: Logger,
 ) -> Result<HashMap<String, Entity>, BuildEntityError> {
     let mut default_entities = HashMap::new();
 
@@ -194,8 +197,17 @@ fn parse_default_entities(
                         // Add namespace if not present
                         let full_parent_entity_type = build_entity_type_name(type_v, &namespace);
                         let parent_uid_str = format!("{}::\"{}\"", full_parent_entity_type, id_v);
-                        if let Ok(parent_uid) = EntityUid::from_str(&parent_uid_str) {
-                            parents_set.insert(parent_uid);
+                        match EntityUid::from_str(&parent_uid_str) {
+                            Ok(parent_uid) => {
+                                parents_set.insert(parent_uid);
+                            },
+                            Err(e) => {
+                                let log_entry = LogEntry::new_with_data(LogType::System, None)
+                                    .set_level(LogLevel::WARN)
+                                    .set_message(format!("Could not parse parent UID '{}' for default entity '{}': {}", parent_uid_str, entity_id, e));
+
+                                logger.log_any(log_entry);
+                            },
                         }
                     }
                 }
@@ -272,6 +284,7 @@ impl EntityBuilder {
         schema: Option<&ValidatorSchema>,
         default_entities_data: Option<&HashMap<String, Value>>,
         namespace: Option<&str>,
+        logger: Logger,
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
@@ -291,7 +304,7 @@ impl EntityBuilder {
 
         // Parse default entities if provided
         let default_entities = if let Some(entities_data) = default_entities_data {
-            parse_default_entities(entities_data, namespace)
+            parse_default_entities(entities_data, namespace, logger)
                 .map_err(|e| InitEntityBuilderError::BuildIssEntities(vec![e].into()))?
         } else {
             HashMap::new()
@@ -510,6 +523,7 @@ mod test {
     use super::*;
     use crate::CedarEntityMapping;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::log::TEST_LOGGER;
     use cedar_policy::{Entities, Schema};
     use serde_json::{Value, json};
     use std::collections::HashMap;
@@ -642,9 +656,15 @@ mod test {
             ),
         ]);
 
-        let entity_builder =
-            EntityBuilder::new(config, &issuers, Some(&validator_schema), None, None)
-                .expect("init entity builder");
+        let entity_builder = EntityBuilder::new(
+            config,
+            &issuers,
+            Some(&validator_schema),
+            None,
+            None,
+            TEST_LOGGER.clone(),
+        )
+        .expect("init entity builder");
 
         let entities = entity_builder
             .build_entities(
@@ -696,8 +716,9 @@ mod test {
         )]);
 
         // Test that parse_default_entities works
-        let parsed_entities = parse_default_entities(&default_entities, Some("Test"))
-            .expect("should parse default entities");
+        let parsed_entities =
+            parse_default_entities(&default_entities, Some("Test"), TEST_LOGGER.clone())
+                .expect("should parse default entities");
 
         assert_eq!(parsed_entities.len(), 1, "should have 1 default entity");
 
@@ -800,6 +821,7 @@ mod test {
             Some(&schema),
             Some(&default_entities_data),
             None,
+            TEST_LOGGER.clone(),
         )
         .expect("should create entity builder");
 
@@ -969,6 +991,7 @@ mod test {
             Some(&validator_schema),
             Some(&default_entities_data),
             None,
+            TEST_LOGGER.clone(),
         )
         .expect("should create entity builder");
 
@@ -1116,6 +1139,7 @@ mod test {
             Some(&validator_schema),
             Some(&default_entities_data),
             None,
+            TEST_LOGGER.clone(),
         )
         .expect("should create entity builder");
 
@@ -1307,6 +1331,7 @@ mod test {
             Some(&validator_schema),
             Some(&default_entities_data),
             None,
+            TEST_LOGGER.clone(),
         )
         .expect("should create entity builder");
 
@@ -1464,8 +1489,9 @@ mod test {
 
         // Use the namespace from the policy store name
         let namespace = Some("Gluu::Flex::AdminUI::Resources");
-        let parsed_entities = parse_default_entities(&default_entities_data, namespace)
-            .expect("should parse default entities");
+        let parsed_entities =
+            parse_default_entities(&default_entities_data, namespace, TEST_LOGGER.clone())
+                .expect("should parse default entities");
 
         assert_eq!(parsed_entities.len(), 1, "should have 1 entity");
 
@@ -1509,8 +1535,12 @@ mod test {
 
         let default_entities_data = HashMap::from([("test123".to_string(), entity_data)]);
 
-        let parsed_entities = parse_default_entities(&default_entities_data, Some("NewNamespace"))
-            .expect("should parse default entities");
+        let parsed_entities = parse_default_entities(
+            &default_entities_data,
+            Some("NewNamespace"),
+            TEST_LOGGER.clone(),
+        )
+        .expect("should parse default entities");
 
         let entity = parsed_entities.get("test123").expect("should have entity");
         assert_eq!(
@@ -1531,7 +1561,8 @@ mod test {
 
         let default_entities_data = HashMap::from([("test123".to_string(), entity_data)]);
 
-        let result = parse_default_entities(&default_entities_data, Some("Test"));
+        let result =
+            parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone());
         assert!(
             result.is_err(),
             "Should return error when uid field is missing"
@@ -1548,7 +1579,8 @@ mod test {
 
         let default_entities_data = HashMap::from([("test123".to_string(), entity_data)]);
 
-        let result = parse_default_entities(&default_entities_data, Some("Test"));
+        let result =
+            parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone());
         assert!(
             result.is_err(),
             "Should return error when uid is not an object"
@@ -1564,7 +1596,8 @@ mod test {
 
         let default_entities_data = HashMap::from([("test456".to_string(), entity_data_no_type)]);
 
-        let result = parse_default_entities(&default_entities_data, Some("Test"));
+        let result =
+            parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone());
         assert!(
             result.is_err(),
             "Should return error when uid.type is missing"
@@ -1585,8 +1618,9 @@ mod test {
 
         let default_entities_data = HashMap::from([("test789".to_string(), entity_data)]);
 
-        let parsed_entities = parse_default_entities(&default_entities_data, Some("Test"))
-            .expect("should parse with empty attrs and parents");
+        let parsed_entities =
+            parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone())
+                .expect("should parse with empty attrs and parents");
 
         let entity = parsed_entities.get("test789").expect("should have entity");
         assert_eq!(

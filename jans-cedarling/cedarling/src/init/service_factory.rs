@@ -85,6 +85,8 @@ impl<'a> ServiceFactory<'a> {
             return Ok(entity_builder.clone());
         }
 
+        let logger = self.log_service();
+
         let config = &self.bootstrap_config.entity_builder_config;
         let trusted_issuers = self
             .policy_store()
@@ -100,6 +102,7 @@ impl<'a> ServiceFactory<'a> {
             Some(schema),
             policy_store.default_entities.as_ref(),
             namespace,
+            logger,
         )?;
         let service = Arc::new(entity_builder);
         self.container.entity_builder_service = Some(service.clone());
