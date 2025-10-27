@@ -130,7 +130,7 @@ class JansLockInstaller(JettyInstaller):
                     'creation_date': datetime.datetime.utcnow().isoformat(),
                     'policy_content': self.generate_base64_file(policy_fn)
                 }
-            schema_fn = base.extract_file(base.current_app.jans_zip, 'jans-lock_cedarling/jans-cedarling/schema/cedarling_core.json', tmpdirname)
+            schema_fn = base.extract_file(base.current_app.jans_zip, 'jans-cedarling/schema/cedarling_core.json', tmpdirname)
             policy_tmp['policy_stores']['%(policy_store_id)s']['schema'] = self.generate_base64_file(schema_fn)
 
         policy_tmp['policy_stores']['%(policy_store_id)s']['policies'] = policies
