@@ -363,13 +363,18 @@ jobs:
       with:
         node-version: '20.x'
         registry-url: 'https://registry.npmjs.org'
+
+    - name: Install latest stable Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+
     - name: Build WASM build
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       id: sign-cedarling
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       run: |
-        rustup update stable && rustup default stable
         cargo install wasm-pack
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
@@ -387,7 +392,7 @@ jobs:
           sed -i "s/^version = \".*\"/version = \"${NEW_NPM_VERSION}\"/" Cargo.toml
           echo "Replaced  $NEW_NPM_VERSION in Cargo.toml"
         fi
-
+  
         # Build for web target
         wasm-pack build --release --target web --scope janssenproject
         cd pkg
@@ -395,7 +400,7 @@ jobs:
         npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
         npm publish --provenance --access=public --tag "${NPM_TAG}"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
         cd ..
-
+  
         # Build for Node.js target with modified version
         NODEJS_VERSION="${TAG}-nodejs"
         if [ "${TAG}" == "0.0.0" ]; then
@@ -574,18 +579,16 @@ jobs:
         uses: actions/setup-go@v5
         with:
             go-version: '1.24'
+
+      - name: Install latest stable Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
       - name: Build rust artifacts
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
         shell: bash
         run: |
-          if [[ "${{ runner.os }}" == "macOS" ]]; then
-            brew install rustup-init
-            rustup-init -y
-          elif [[ "${{ runner.os }}" == "Windows" ]]; then
-            choco install rustup.install
-          fi
-          rustup update stable && rustup default stable
-          
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${{ inputs.target_tag }}"
           else
@@ -627,7 +630,7 @@ jobs:
           if [ "${TAG}" == "nightly" ]; then
             TAG="0.0.0"
           fi
-
+  
           FILE_LIB=""
           case "${{ matrix.name }}" in
             ubuntu22)
@@ -644,12 +647,12 @@ jobs:
               FILE_LIB="cedarling_go-${TAG}.lib"
               ;;
           esac
-
+  
           gpg --armor --detach-sign $FILE || echo "Failed to sign $FILE"
           if [ -n "$FILE_LIB" ]; then
             gpg --armor --detach-sign $FILE_LIB || echo "Failed to sign $FILE_LIB"
           fi
-
+  
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
           gh release upload "${VERSION}" $FILE $FILE.asc --clobber
           if [ -n "$FILE_LIB" ]; then
@@ -747,10 +750,15 @@ jobs:
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
         git_user_signingkey: true
         git_commit_gpgsign: true
+
+    - name: Install latest stable Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+
     - name: Build and release cedarling uniffi build in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       run: |
-        rustup update stable && rustup default stable
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
@@ -765,13 +773,12 @@ jobs:
         cp ../../target/release/libcedarling_uniffi.so libcedarling_uniffi-${TAG}.so
         FILE="libcedarling_uniffi-${TAG}.so"
         gpg --armor --detach-sign $FILE || echo "Failed to sign"
-
+  
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" $FILE $FILE.asc
     - name: Build kotlin binding in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       run: |
-        rustup update stable && rustup default stable
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
@@ -784,9 +791,9 @@ jobs:
         
         cargo build -r -p cedarling_uniffi
         cargo run --bin uniffi-bindgen generate --library ${{ github.workspace }}/jans-cedarling/target/release/libcedarling_uniffi.so --language kotlin --out-dir ./
-        zip -r cedarling_uniffi-kotlin-${TAG}.zip uniffi
+        zip -r ceda\rling_uniffi-kotlin-${TAG}.zip uniffi
         FILE="cedarling_uniffi-kotlin-${TAG}.zip"
         gpg --armor --detach-sign $FILE || echo "Failed to sign"
-
+  
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" $FILE $FILE.asc
