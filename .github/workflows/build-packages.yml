@@ -364,14 +364,10 @@ jobs:
         node-version: '20.x'
         registry-url: 'https://registry.npmjs.org'
 
-    - name: Install wasm-pack binary
-      run: |
-        WASM_PACK_VERSION="v0.13.1"
-        BIN_DIR="$HOME/.local/bin"
-        mkdir -p $BIN_DIR
-        curl -L "https://github.com/rustwasm/wasm-pack/releases/download/${WASM_PACK_VERSION}/wasm-pack-${WASM_PACK_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
-          | tar -xz -C $BIN_DIR --strip-components=1 "wasm-pack-${WASM_PACK_VERSION}-x86_64-unknown-linux-musl/wasm-pack"
-        echo "$BIN_DIR" >> $GITHUB_PATH
+    - name: Install latest stable Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
 
     - name: Build WASM build
       env:
@@ -379,8 +375,16 @@ jobs:
       id: sign-cedarling
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       run: |
-        which wasm-pack
+        cargo install wasm-pack
+  
+        echo "--- rustc version ---"
+        rustc --version
+        echo "--- cargo version ---"
+        cargo --version
+        echo "--- wasm-pack version ---"
         wasm-pack --version
+        echo "---------------------"
+  
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
         else
@@ -796,7 +800,7 @@ jobs:
         
         cargo build -r -p cedarling_uniffi
         cargo run --bin uniffi-bindgen generate --library ${{ github.workspace }}/jans-cedarling/target/release/libcedarling_uniffi.so --language kotlin --out-dir ./
-        zip -r ceda\rling_uniffi-kotlin-${TAG}.zip uniffi
+        zip -r cedarling_uniffi-kotlin-${TAG}.zip uniffi
         FILE="cedarling_uniffi-kotlin-${TAG}.zip"
         gpg --armor --detach-sign $FILE || echo "Failed to sign"
   
