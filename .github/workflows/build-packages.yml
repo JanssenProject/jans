@@ -368,6 +368,7 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
+        override: true
 
     - name: Build WASM build
       env:
@@ -595,6 +596,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
+          override: true
 
       - name: Build rust artifacts
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
@@ -766,6 +768,7 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
+        override: true
 
     - name: Build and release cedarling uniffi build in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
