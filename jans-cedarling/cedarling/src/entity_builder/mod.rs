@@ -39,15 +39,16 @@ use std::str::FromStr;
 use std::sync::Arc;
 use url::Origin;
 
-// Global constants for entity types - following existing codebase pattern
-const DEFAULT_ENTITY_TYPE: &str = "Jans::DefaultEntity";
-
 pub(crate) use built_entities::BuiltEntities;
 pub use error::*;
+
+/// Constant for unknown entity type in error messages
+const UNKNOWN_ENTITY_TYPE: &str = "Unknown";
 
 /// Parse default entities from the provided configuration
 fn parse_default_entities(
     default_entities_data: &HashMap<String, Value>,
+    namespace: &str,
 ) -> Result<HashMap<String, Entity>, BuildEntityError> {
     let mut default_entities = HashMap::new();
 
@@ -86,51 +87,155 @@ fn parse_default_entities(
         }
 
         // Parse the entity data as a JSON object
-        let entity_attrs = if let Value::Object(obj) = entity_data {
-            obj.clone()
+        let entity_obj = if let Value::Object(obj) = entity_data {
+            obj
         } else {
             return Err(BuildEntityError {
-                entity_type_name: DEFAULT_ENTITY_TYPE.to_string(),
-                error: BuildEntityErrorKind::InvalidEntityData(format!(
-                    "Default entity data for '{}' must be a JSON object",
-                    entity_id
-                )),
+                entity_type_name: UNKNOWN_ENTITY_TYPE.to_string(),
+                error: BuildEntityErrorKind::InvalidEntityData(
+                    format!("Default entity data for '{}' must be a JSON object", entity_id)
+                ),
             });
         };
 
-        // Extract entity type from the data or use a default
-        let entity_type = entity_attrs
-            .get("entity_type")
-            .and_then(|v| v.as_str())
-            .unwrap_or(DEFAULT_ENTITY_TYPE);
+        // Check if this is the new Cedar entity format (with uid, attrs, parents fields)
+        let (entity_type, cedar_attrs, parents) = if entity_obj.contains_key("uid") {
+            // New Cedar entity format: {"uid": {"type": "...", "id": "..."}, "attrs": {}, "parents": [...]}
+            let uid_obj = entity_obj.get("uid").and_then(|v| v.as_object())
+                .ok_or_else(|| BuildEntityError {
+                    entity_type_name: UNKNOWN_ENTITY_TYPE.to_string(),
+                    error: BuildEntityErrorKind::InvalidEntityData(
+                        format!("Default entity '{}' has invalid uid field", entity_id)
+                    ),
+                })?;
 
-        // Convert JSON attributes to Cedar expressions using the existing value_to_expr function
-        let mut cedar_attrs = HashMap::new();
-        for (key, value) in entity_attrs.clone() {
-            if key != "entity_type" && key != "entity_id" {
-                match value_to_expr::value_to_expr(&value) {
+            let entity_type_from_uid = uid_obj.get("type")
+                .and_then(|v| v.as_str())
+                .ok_or_else(|| BuildEntityError {
+                    entity_type_name: UNKNOWN_ENTITY_TYPE.to_string(),
+                    error: BuildEntityErrorKind::InvalidEntityData(
+                        format!("Default entity '{}' has invalid uid.type field", entity_id)
+                    ),
+                })?;
+
+            // Add namespace prefix if not already present
+            let full_entity_type = if entity_type_from_uid.contains("::") {
+                entity_type_from_uid.to_string()
+            } else {
+                format!("{}::{}", namespace, entity_type_from_uid)
+            };
+
+            // Get the entity ID from uid.id if present
+            let entity_id_from_uid = uid_obj.get("id")
+                .and_then(|v| v.as_str())
+                .unwrap_or(entity_id);
+
+            // Parse attributes from attrs field
+            let empty_map = serde_json::Map::new();
+            let attrs_obj = entity_obj.get("attrs")
+                .and_then(|v| v.as_object())
+                .unwrap_or(&empty_map);
+            
+            let mut cedar_attrs = HashMap::new();
+            for (key, value) in attrs_obj {
+                match value_to_expr::value_to_expr(value) {
                     Ok(Some(expr)) => {
-                        cedar_attrs.insert(key, expr);
+                        cedar_attrs.insert(key.clone(), expr);
                     },
                     Ok(None) => {
-                        // Skip null values
                         continue;
                     },
                     Err(errors) => {
                         return Err(BuildEntityError {
-                            entity_type_name: entity_type.to_string(),
-                            error: BuildEntityErrorKind::InvalidEntityData(format!(
-                                "Failed to convert attribute '{}' for entity '{}' (type: {}): {:?}",
-                                key, entity_id, entity_type, errors
-                            )),
+                            entity_type_name: full_entity_type.clone(),
+                            error: BuildEntityErrorKind::InvalidEntityData(
+                                format!("Failed to convert attribute '{}' for entity '{}': {:?}", key, entity_id_from_uid, errors)
+                            ),
                         });
-                    },
+                    }
                 }
             }
-        }
 
+            // Parse parents from parents field
+            let empty_vec: Vec<Value> = vec![];
+            let parents_array = entity_obj.get("parents")
+                .and_then(|v| v.as_array())
+                .unwrap_or(&empty_vec);
+            
+            let mut parents_set = HashSet::new();
+            for parent in parents_array {
+                if let Value::Object(parent_obj) = parent {
+                    if let (Some(type_v), Some(id_v)) = (
+                        parent_obj.get("type").and_then(|v| v.as_str()),
+                        parent_obj.get("id").and_then(|v| v.as_str())
+                    ) {
+                        // Add namespace if not present
+                        let full_parent_type = if type_v.contains("::") {
+                            type_v.to_string()
+                        } else {
+                            format!("{}::{}", namespace, type_v)
+                        };
+                        
+                        let parent_uid_str = format!("{}::\"{}\"", full_parent_type, id_v);
+                        if let Ok(parent_uid) = EntityUid::from_str(&parent_uid_str) {
+                            parents_set.insert(parent_uid);
+                        }
+                    }
+                }
+            }
+
+            (full_entity_type, cedar_attrs, parents_set)
+        } else if entity_obj.contains_key("entity_type") {
+            // Old format with entity_type field
+            let entity_type = entity_obj.get("entity_type")
+                .and_then(|v| v.as_str())
+                .ok_or_else(|| BuildEntityError {
+                    entity_type_name: UNKNOWN_ENTITY_TYPE.to_string(),
+                    error: BuildEntityErrorKind::InvalidEntityData(
+                        format!("Default entity '{}' has invalid entity_type field", entity_id)
+                    ),
+                })?;
+
+            // Convert JSON attributes to Cedar expressions
+            let mut cedar_attrs = HashMap::new();
+            for (key, value) in entity_obj {
+                if key != "entity_type" && key != "entity_id" {
+                    match value_to_expr::value_to_expr(value) {
+                        Ok(Some(expr)) => {
+                            cedar_attrs.insert(key.clone(), expr);
+                        },
+                        Ok(None) => {
+                            continue;
+                        },
+                        Err(errors) => {
+                            return Err(BuildEntityError {
+                                entity_type_name: entity_type.to_string(),
+                                error: BuildEntityErrorKind::InvalidEntityData(
+                                    format!("Failed to convert attribute '{}' for entity '{}': {:?}", key, entity_id, errors)
+                                ),
+                            });
+                        }
+                    }
+                }
+            }
+
+            (entity_type.to_string(), cedar_attrs, HashSet::new())
+        } else {
+            return Err(BuildEntityError {
+                entity_type_name: UNKNOWN_ENTITY_TYPE.to_string(),
+                error: BuildEntityErrorKind::InvalidEntityData(
+                    format!("Default entity '{}' must have either uid field (Cedar format) or entity_type field (legacy format)", entity_id)
+                ),
+            });
+        };
+        
         // Build the Cedar entity
-        let entity = build_cedar_entity(entity_type, entity_id, cedar_attrs, HashSet::new())?;
+        let entity = build_cedar_entity(
+            &entity_type,
+            entity_id,
+            cedar_attrs,
+            parents,
+        )?;
 
         default_entities.insert(entity_id.clone(), entity);
     }
@@ -151,6 +256,7 @@ impl EntityBuilder {
         trusted_issuers: &HashMap<String, TrustedIssuer>,
         schema: Option<&ValidatorSchema>,
         default_entities_data: Option<&HashMap<String, Value>>,
+        namespace: Option<&str>,
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
@@ -170,7 +276,8 @@ impl EntityBuilder {
 
         // Parse default entities if provided
         let default_entities = if let Some(entities_data) = default_entities_data {
-            parse_default_entities(entities_data)
+            let ns = namespace.unwrap_or("Unknown");
+            parse_default_entities(entities_data, ns)
                 .map_err(|e| InitEntityBuilderError::BuildIssEntities(vec![e].into()))?
         } else {
             HashMap::new()
@@ -519,7 +626,7 @@ mod test {
             ),
         ]);
 
-        let entity_builder = EntityBuilder::new(config, &issuers, Some(&validator_schema), None)
+        let entity_builder = EntityBuilder::new(config, &issuers, Some(&validator_schema), None, None)
             .expect("init entity builder");
 
         let entities = entity_builder
@@ -570,7 +677,7 @@ mod test {
 
         // Test that parse_default_entities works
         let parsed_entities =
-            parse_default_entities(&default_entities).expect("should parse default entities");
+            parse_default_entities(&default_entities, "Test").expect("should parse default entities");
 
         assert_eq!(parsed_entities.len(), 1, "should have 1 default entity");
 
@@ -672,6 +779,7 @@ mod test {
             &trusted_issuers,
             Some(&schema),
             Some(&default_entities_data),
+            None,
         )
         .expect("should create entity builder");
 
@@ -840,6 +948,7 @@ mod test {
             &trusted_issuers,
             Some(&validator_schema),
             Some(&default_entities_data),
+            None,
         )
         .expect("should create entity builder");
 
@@ -986,6 +1095,7 @@ mod test {
             &trusted_issuers,
             Some(&validator_schema),
             Some(&default_entities_data),
+            None,
         )
         .expect("should create entity builder");
 
@@ -1176,6 +1286,7 @@ mod test {
             &trusted_issuers,
             Some(&validator_schema),
             Some(&default_entities_data),
+            None,
         )
         .expect("should create entity builder");
 
@@ -1309,5 +1420,53 @@ mod test {
                 .any(|p| p.as_str() == Some("restore")),
             "should have restore permission"
         );
+    }
+
+    #[test]
+    fn test_parse_cedar_entity_format_with_admin_ui_namespace() {
+        // Test with the exact entity format from the reported issue
+        // This tests the Cedar entity JSON format with uid, attrs, and parents fields
+        let entity_data = json!({
+            "uid": {
+                "type": "Features",
+                "id": "License"
+            },
+            "attrs": {},
+            "parents": [
+                {
+                    "type": "ParentResource",
+                    "id": "AuthServerAndConfiguration"
+                }
+            ]
+        });
+
+        let default_entities_data = HashMap::from([
+            ("2694c954f8d8".to_string(), entity_data)
+        ]);
+
+        // Use the namespace from the policy store name
+        let namespace = "Gluu::Flex::AdminUI::Resources";
+        let parsed_entities = parse_default_entities(&default_entities_data, namespace)
+            .expect("should parse default entities");
+
+        assert_eq!(parsed_entities.len(), 1, "should have 1 entity");
+        
+        let entity = parsed_entities.get("2694c954f8d8").expect("should have entity");
+        let uid_str = entity.uid().to_string();
+        
+        // Verify the namespace was added correctly to both the entity type and parent type
+        println!("Parsed entity UID: {}", uid_str);
+        assert!(
+            uid_str.contains("Features"),
+            "Entity should contain Features type"
+        );
+        
+        // Check that entity has correct namespace prefix
+        assert!(
+            uid_str.contains("Gluu::Flex::AdminUI::Resources::Features"),
+            "Entity should have correct namespace, got: {}", uid_str
+        );
+        
+        println!("✓ Successfully parsed Cedar entity format with namespace: {}", uid_str);
     }
 }

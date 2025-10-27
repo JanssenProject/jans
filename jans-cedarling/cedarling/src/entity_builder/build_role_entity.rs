@@ -99,6 +99,7 @@ mod test {
             &HashMap::new(),
             Some(&validator_schema),
             None,
+            None,
         )
         .expect("should init entity builder");
 
@@ -142,6 +143,7 @@ mod test {
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
+            None,
             None,
         )
         .expect("should init entity builder");
@@ -196,6 +198,7 @@ mod test {
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
+            None,
             None,
         )
         .expect("should init entity builder");

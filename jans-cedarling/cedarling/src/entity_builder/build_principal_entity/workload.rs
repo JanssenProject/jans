@@ -171,6 +171,7 @@ mod test {
             &issuers,
             Some(&validator_schema),
             None,
+            None,
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -246,6 +247,7 @@ mod test {
             &issuers,
             Some(&validator_schema),
             None,
+            None,
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -304,6 +306,7 @@ mod test {
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
             &issuers,
+            None,
             None,
             None,
         )

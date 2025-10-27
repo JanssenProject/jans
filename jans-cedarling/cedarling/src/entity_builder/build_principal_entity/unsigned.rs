@@ -111,6 +111,7 @@ mod test {
             &HashMap::new(),
             Some(&validator_schema),
             None,
+            None,
         )
         .expect("should init entity builder");
 

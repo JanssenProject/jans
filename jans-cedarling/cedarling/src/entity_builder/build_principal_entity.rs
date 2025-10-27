@@ -128,6 +128,7 @@ mod test {
             &issuers,
             Some(&validator_schema),
             None,
+            None,
         )
         .expect("should init entity builder");
 
