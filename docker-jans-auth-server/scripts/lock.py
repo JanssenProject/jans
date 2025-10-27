@@ -151,6 +151,10 @@ class LockPersistenceSetup:
         # pre-populate lock_error_base64
         with open("/app/templates/jans-lock/errors.json") as f:
             ctx["lock_error_base64"] = generate_base64_contents(f.read())
+
+        # pre-populate new attribute called lock_policy_conf_base64 (empty by default, will be updated via upgrade script)
+        ctx["lock_policy_conf_base64"] = ""
+
         return ctx
 
     @cached_property
