@@ -71,7 +71,7 @@ impl WorkloadIdSrcResolver {
     /// - `access_token.aud`
     /// - `access_token.client_id`
     /// - `id_token.aud`
-    pub fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc> {
+    pub fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc<'_>> {
         const DEFAULT_WORKLOAD_ID_SRCS: &[PrincipalIdSrc] = &[
             PrincipalIdSrc {
                 token: "access_token",
