@@ -27,7 +27,7 @@
 
 		<jans.bom.version>${project.version}</jans.bom.version>
         
-		<jacoco.version>0.8.13</jacoco.version>
+		<jacoco.version>0.8.14</jacoco.version>
 
 		<sonar.projectKey>JanssenProject_jans-scim</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -184,7 +184,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.9.6.0</version>
+					<version>4.9.8.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
