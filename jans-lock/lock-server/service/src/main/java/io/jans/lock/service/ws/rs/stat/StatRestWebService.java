@@ -1,5 +1,6 @@
 package io.jans.lock.service.ws.rs.stat;
 
+import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.model.stat.FlatStatResponse;
 import io.jans.lock.util.ApiAccessConstants;
@@ -35,10 +36,12 @@ public interface StatRestWebService {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FlatStatResponse.class, description = "StatFound"))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
+			@ApiResponse(responseCode = "403", description = "Future stat is disabled on server", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "ForbiddenException"))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@GET
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_STAT_READ_ACCESS })
+	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id="lock_stat_query", path="/internal/stat")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response statGet(@QueryParam("month") String months, @QueryParam("start-month") String startMonth,
 			@QueryParam("end-month") String endMonth, @QueryParam("format") String format);
@@ -49,10 +52,12 @@ public interface StatRestWebService {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FlatStatResponse.class, description = "StatFound"))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
+			@ApiResponse(responseCode = "403", description = "Future stat is disabled on server", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "ForbiddenException"))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_STAT_READ_ACCESS })
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_stat_query", path="/internal/stat")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response statPost(@FormParam("month") String months, @FormParam("start-month") String startMonth,
 			@FormParam("end-month") String endMonth, @FormParam("format") String format);

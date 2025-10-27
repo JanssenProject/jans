@@ -10,7 +10,7 @@
 	<parent>
 		<artifactId>jans-lock-server-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.12.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<dependencies>
@@ -34,7 +34,6 @@
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-core-jakarta</artifactId>
-			<version>2.2.10</version>
 		</dependency>
 
 		<!-- Documentation -->

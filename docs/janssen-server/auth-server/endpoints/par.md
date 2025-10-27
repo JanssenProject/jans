@@ -81,6 +81,98 @@ Some configuration properties are configured on client level to allow more granu
 - `par_lifetime` - PAR object lifetime in seconds. If value is not specified then defaults to `600` value.
 - `require_par`  - specified whether all authorization requests made by this client to Authorization Endpoint must be PAR. If `true` and authorization request is not PAR then error is returned back by Authorization Server. 
 
+## PAR Custom script
+
+The ParType interception script has the following method(s):
+
+|Method |Method description|
+|:-----|:------|
+| `def createPar(self, par, context)`| Used to modify PAR object before it is persisted. `par` is `io.jans.as.persistence.model.Par`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`|
+| `def modifyParResponse(self, response, context)`| Used to modify response from `/par` endpoint. 
+`response` is `org.json.JSONObject`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`|
+
+
+## Script Type: Java 
+
+
+```java
+
+import io.jans.as.server.service.external.context.ExternalScriptContext;
+import io.jans.model.SimpleCustomProperty;
+import io.jans.model.custom.script.model.CustomScript;
+import io.jans.model.custom.script.type.par.ParType;
+import io.jans.service.custom.script.CustomScriptManager;
+import jakarta.ws.rs.core.Response;
+import org.jboss.resteasy.spi.NoLogWebApplicationException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+
+/**
+ * @author Yuriy Z
+ */
+public class Par implements ParType {
+
+    private static final Logger scriptLogger = LoggerFactory.getLogger(CustomScriptManager.class);
+
+    @Override
+    public boolean createPar(Object par, Object context) {
+        ExternalScriptContext scriptContext = (ExternalScriptContext) context;
+
+        io.jans.as.persistence.model.Par parObject = (io.jans.as.persistence.model.Par) par;
+        parObject.getAttributes().setScope("openid profile");
+
+        if ("bad".equalsIgnoreCase(scriptContext.getExecutionContext().getClient().getClientId())) {
+            scriptContext.setWebApplicationException(
+                    new NoLogWebApplicationException(Response
+                            .status(Response.Status.FORBIDDEN)
+                            .entity("Forbidden by custom script.")
+                            .build()));
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean modifyParResponse(Object responseAsJsonObject, Object context) {
+        ExternalScriptContext scriptContext = (ExternalScriptContext) context;
+
+        JSONObject json = (JSONObject) responseAsJsonObject;
+        json.accumulate("custom_key", "custom_value");
+        return true;
+    }
+
+    @Override
+    public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
+        scriptLogger.info("Initialized PAR Java custom script.");
+        return true;
+    }
+
+    @Override
+    public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
+        scriptLogger.info("Initialized PAR Java custom script.");
+        return true;
+    }
+
+    @Override
+    public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
+        scriptLogger.info("Destroyed PAR Java custom script.");
+        return false;
+    }
+
+    @Override
+    public int getApiVersion() {
+        return 11;
+    }
+}
+
+
+```
+
+
+
 ## Have questions in the meantime?
 
 You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.

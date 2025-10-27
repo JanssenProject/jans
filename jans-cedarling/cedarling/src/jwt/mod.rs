@@ -78,24 +78,29 @@ mod validation;
 #[allow(dead_code)]
 mod test_utils;
 
+use chrono::DateTime;
+use chrono::Duration;
+pub use decode::*;
 pub use error::*;
 pub use token::{Token, TokenClaimTypeError, TokenClaims};
-pub use decode::*;
 
 use crate::JwtConfig;
 use crate::LogLevel;
 use crate::LogWriter;
-use crate::common::policy_store::TrustedIssuer;
 use crate::common::issuer_utils::normalize_issuer;
+use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
+use chrono::Utc;
 use http_utils::*;
 use key_service::*;
 use log_entry::*;
+use serde_json::json;
+use sparkv::SparKV;
 use status_list::*;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::RwLock;
 use validation::*;
-use serde_json::json;
 
 /// The value of the `iss` claim from a JWT
 type IssClaim = String;
@@ -106,6 +111,8 @@ pub struct JwtService {
     key_service: Arc<KeyService>,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
     logger: Option<Logger>,
+    token_cache: Arc<RwLock<SparKV<Arc<Token>>>>,
+    token_cache_max_ttl: usize,
 }
 
 struct IssuerConfig {
@@ -121,6 +128,7 @@ impl JwtService {
         jwt_config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
+        token_cache_max_ttl_sec: usize,
     ) -> Result<Self, JwtServiceInitError> {
         let mut status_lists = StatusListCache::default();
         let mut issuer_configs = HashMap::default();
@@ -166,51 +174,125 @@ impl JwtService {
             key_service,
             issuer_configs,
             logger,
+            token_cache: Arc::new(RwLock::new(SparKV::new())),
+            token_cache_max_ttl: token_cache_max_ttl_sec,
         })
     }
 
     pub async fn validate_tokens<'a>(
         &'a self,
         tokens: &'a HashMap<String, String>,
-    ) -> Result<HashMap<String, Token>, JwtProcessingError> {
+    ) -> Result<HashMap<String, Arc<Token>>, JwtProcessingError> {
         let mut validated_tokens = HashMap::new();
         const ID_TOKEN_NAME: &str = "id_token";
 
+        let now = Utc::now();
+
+        // clear expired tokens from cache
+        self.token_cache
+            .write()
+            .expect("validated_jwt_cache mutex shouldn't be poisoned")
+            .clear_expired();
+
         for (token_name, jwt) in tokens.iter() {
-            let validated_jwt = match self.validate_single_token(token_name.clone(), jwt) {
-                Ok(jwt) => jwt,
-                Err(err) => {
-                    if matches!(err, ValidateJwtError::MissingValidator(_)) {
-                        self.logger
-                            .log_any(JwtLogEntry::new(err.to_string(), Some(LogLevel::WARN)));
-                        continue;
-                    } else {
-                        return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err));
-                    }
-                },
+            let token = if let Some(validated_token) = self.find_token_in_cache(jwt) {
+                validated_token
+            } else {
+                // validate token and save to cache
+                let validated_jwt = match self.validate_single_token(token_name.clone(), jwt) {
+                    Ok(jwt) => jwt,
+                    Err(err) => {
+                        if matches!(err, ValidateJwtError::MissingValidator(_)) {
+                            self.logger
+                                .log_any(JwtLogEntry::new(err.to_string(), Some(LogLevel::WARN)));
+                            continue;
+                        } else {
+                            return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err));
+                        }
+                    },
+                };
+
+                let mut claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
+                    .map_err(|err| {
+                        self.logger.log_any(JwtLogEntry::new(
+                            format!("failed to deserialize token claims: {err}"),
+                            Some(LogLevel::ERROR),
+                        ));
+                        err
+                    })
+                    .map_err(JwtProcessingError::StringDeserialization)?;
+
+                if token_name == ID_TOKEN_NAME {
+                    claims = fix_aud_claim_value_to_array(claims);
+                };
+
+                let token = Arc::new(Token::new(token_name, claims, validated_jwt.trusted_iss));
+                self.save_token_in_cache(jwt, token.clone(), now);
+                token
             };
 
-            let mut claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
-                .map_err(|err| {
-                    self.logger.log_any(JwtLogEntry::new(
-                        format!("failed to deserialize token claims: {err}"),
-                        Some(LogLevel::ERROR),
-                    ));
-                    err
-                })
-                .map_err(JwtProcessingError::StringDeserialization)?;
-
-            if token_name == ID_TOKEN_NAME {
-                claims = fix_aud_claim_value_to_array(claims);
-            }
-
-            validated_tokens.insert(
-                token_name.to_string(),
-                Token::new(token_name, claims, validated_jwt.trusted_iss),
-            );
+            validated_tokens.insert(token_name.to_string(), token);
         }
 
         Ok(validated_tokens)
+    }
+
+    fn find_token_in_cache(&self, jwt: &str) -> Option<Arc<Token>> {
+        self.token_cache
+            .read()
+            .expect("validated_jwt_cache mutex shouldn't be poisoned")
+            .get(&hash_str(jwt))
+            .map(|v| v.to_owned())
+    }
+
+    fn save_token_in_cache(&self, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
+        let key = hash_str(jwt);
+
+        let cache_duration_opt = token
+            .claims
+            .get_claim("exp")
+            .and_then(|exp| exp.value().as_i64())
+            .and_then(|exp| {
+                // calculate duration until token expiration
+                let duration = exp - now.timestamp();
+                if duration > 0 {
+                    // if duration bigger than configured max ttl, use the max ttl
+                    Some(
+                        if self.token_cache_max_ttl > 0
+                            && duration > self.token_cache_max_ttl as i64
+                        {
+                            self.token_cache_max_ttl as i64
+                        } else {
+                            duration
+                        },
+                    )
+                } else {
+                    None
+                }
+            })
+            .or({
+                // if no exp claim, use the configured max ttl if set
+                if self.token_cache_max_ttl > 0 {
+                    Some(self.token_cache_max_ttl as i64)
+                } else {
+                    None
+                }
+            });
+
+        if let Some(duration) = cache_duration_opt {
+            let _ = self
+                .token_cache
+                .write()
+                .expect("validated_jwt_cache mutex shouldn't be poisoned")
+                .set_with_ttl(&key, token, Duration::seconds(duration), &[]);
+        } else {
+            // set with SparkKV default TTL (5 minutes)
+            let _ = self
+                .token_cache
+                .write()
+                .expect("validated_jwt_cache mutex shouldn't be poisoned")
+                .set(&key, token, &[]);
+        }
     }
 
     fn validate_single_token(
@@ -231,7 +313,7 @@ impl JwtService {
             token_kind: TokenKind::AuthzRequestInput(&token_name),
             algorithm: decoded_jwt.header.alg,
         };
-        let validator = self
+        let validator: Arc<RwLock<JwtValidator>> = self
             .validators
             .get(&validator_key)
             .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
@@ -258,8 +340,7 @@ impl JwtService {
     fn get_issuer_ref(&self, iss_claim: &str) -> Option<Arc<TrustedIssuer>> {
         self.issuer_configs
             .get(&normalize_issuer(iss_claim))
-            .map(|config| &config.policy)
-            .cloned()
+            .map(|config| config.policy.clone())
     }
 }
 
@@ -332,6 +413,26 @@ fn fix_aud_claim_value_to_array(claims: TokenClaims) -> TokenClaims {
     claims
 }
 
+/// Hash a string using `ahash` and return the hash value as a string
+/// This is used to create a key for caching tokens
+/// The hash value is used instead of the original string to have shorter keys for SparKV which utilizes BTree.
+fn hash_str(s: &str) -> String {
+    use std::sync::LazyLock;
+    static HASHER_KEYS: LazyLock<(u64, u64, u64, u64)> = LazyLock::new(|| {
+        (
+            rand::random(),
+            rand::random(),
+            rand::random(),
+            rand::random(),
+        )
+    });
+
+    let hasher =
+        ahash::RandomState::with_seeds(HASHER_KEYS.0, HASHER_KEYS.1, HASHER_KEYS.2, HASHER_KEYS.3);
+
+    hasher.hash_one(s).to_string()
+}
+
 #[cfg(test)]
 mod test {
     use super::test_utils::*;
@@ -390,6 +491,7 @@ mod test {
             },
             Some(HashMap::from([("Jans".into(), iss.clone())])),
             None,
+            0,
         )
         .await
         .inspect_err(|e| eprintln!("error msg: {}", e))
@@ -413,7 +515,7 @@ mod test {
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(access_tkn_claims)
             .expect("Should create expected access_token claims");
         assert_eq!(
-            token,
+            token.as_ref(),
             &Token::new("access_token", expected_claims.into(), Some(iss.clone()))
         );
 
@@ -424,7 +526,7 @@ mod test {
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(id_tkn_claims)
             .expect("Should create expected id_token claims");
         assert_eq!(
-            token,
+            token.as_ref(),
             &Token::new("id_token", expected_claims.into(), Some(iss.clone()))
         );
 
@@ -435,7 +537,7 @@ mod test {
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(userinfo_tkn_claims)
             .expect("Should create expected userinfo_token claims");
         assert_eq!(
-            token,
+            token.as_ref(),
             &Token::new("userinfo_token", expected_claims.into(), Some(iss))
         );
     }

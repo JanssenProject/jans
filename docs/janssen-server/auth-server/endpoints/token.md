@@ -134,6 +134,7 @@ Token endpoint supports below mentioned grant types.
 - [Token Exchange](../oauth-features/token-exchange.md)
 - [Transaction Tokens](../tokens/oauth-tx-tokens.md)
 - [Device Grant](../oauth-features/device-grant.md)
+- [JWT Grant](../oauth-features/jwt-grant.md)
 - [CIBA](./backchannel-authentication.md)
 
 Client can configure all the possible grant types it can request from token endpoint during client configuration.

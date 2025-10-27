@@ -75,7 +75,7 @@ impl Authz {
     pub(crate) async fn decode_tokens<'a>(
         &'a self,
         request: &'a Request,
-    ) -> Result<HashMap<String, Token>, AuthorizeError> {
+    ) -> Result<HashMap<String, Arc<Token>>, AuthorizeError> {
         let tokens = self
             .config
             .jwt_service
@@ -485,7 +485,7 @@ impl Authz {
     pub fn build_entities(
         &self,
         request: &Request,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         Ok(self
             .config
@@ -539,22 +539,27 @@ pub struct AuthorizeEntitiesData {
 
 impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
-    /// 
+    ///
     /// This method merges request entities with default entities, where request entities
     /// take precedence over default entities in case of UID conflicts.
     fn into_iter(self) -> impl Iterator<Item = Entity> {
         let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::new();
-        
+
         // Add default entities first
         merged_entities.extend(self.default_entities.into_values().map(|e| (e.uid(), e)));
-        
+
         // Add request entities (these will override default entities if conflicts exist)
         merged_entities.extend(vec![self.resource].into_iter().map(|e| (e.uid(), e)));
         merged_entities.extend(self.issuers.into_iter().map(|e| (e.uid(), e)));
         merged_entities.extend(self.roles.into_iter().map(|e| (e.uid(), e)));
         merged_entities.extend(self.tokens.into_values().map(|e| (e.uid(), e)));
-        merged_entities.extend(vec![self.user, self.workload].into_iter().flatten().map(|e| (e.uid(), e)));
-        
+        merged_entities.extend(
+            vec![self.user, self.workload]
+                .into_iter()
+                .flatten()
+                .map(|e| (e.uid(), e)),
+        );
+
         merged_entities.into_values()
     }
 
@@ -575,23 +580,32 @@ impl AuthorizeEntitiesData {
     /// - **Default Entities**: Entities loaded from the policy store configuration
     ///
     /// Only entities that have been built will be included
-    /// 
+    ///
     /// Note: This method uses the same merging logic as `into_iter()` to ensure consistency
     /// and avoid duplicate entity UIDs in the context.
     fn built_entities(&self) -> BuiltEntities {
         // Use the same merging logic as into_iter() to ensure consistency
         let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::new();
-        
+
         // Add default entities first
         merged_entities.extend(self.default_entities.values().map(|e| (e.uid(), e.clone())));
-        
+
         // Add request entities, overriding any conflicting default entities
-        merged_entities.extend(vec![&self.resource].into_iter().map(|e| (e.uid(), e.clone())));
+        merged_entities.extend(
+            vec![&self.resource]
+                .into_iter()
+                .map(|e| (e.uid(), e.clone())),
+        );
         merged_entities.extend(self.issuers.iter().map(|e| (e.uid(), e.clone())));
         merged_entities.extend(self.roles.iter().map(|e| (e.uid(), e.clone())));
         merged_entities.extend(self.tokens.values().map(|e| (e.uid(), e.clone())));
-        merged_entities.extend(vec![&self.user, &self.workload].into_iter().flatten().map(|e| (e.uid(), e.clone())));
-        
+        merged_entities.extend(
+            vec![&self.user, &self.workload]
+                .into_iter()
+                .flatten()
+                .map(|e| (e.uid(), e.clone())),
+        );
+
         // Return built entities from merged collection
         BuiltEntities::from_iter(merged_entities.values().map(|e| e.uid()))
     }

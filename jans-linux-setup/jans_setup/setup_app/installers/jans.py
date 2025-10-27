@@ -67,7 +67,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 for prompt_str, install_var in (
                         ('Install Fido2 Server', 'install_fido2'),
                         ('Install Scim Server', 'install_scim_server'),
-                        ('Install Jans KC Link Server', 'install_jans_keycloak_link'),
                         ('Install Jans Casa', 'install_casa'),
                         ('Install Jans Lock', 'install_jans_lock'),
                         ('Install Jans KC', 'install_jans_saml')):
@@ -318,14 +317,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 continue
             self.run([paths.cmd_chmod, '700', scr_path])
 
-        # link jans script to /usr/local/bin
+        # link jans script to /usr/sbin
         self.run([
                 paths.cmd_ln, '-s',
                 os.path.join(
                     Config.jansOptBinFolder,
                     os.path.basename(Config.jansScriptFiles[1])
                 ),
-                '/usr/local/bin'
+                '/usr/sbin'
                 ])
 
 
@@ -651,7 +650,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-lock', 'install_jans_lock_as_server'),
                         ('opa', 'install_opa'),
                         ('saml', 'install_jans_saml'),
-                        ('jans-keycloak-link', 'install_jans_keycloak_link'),
                         ('kc-scheduler', 'install_jans_saml'),
                         ]
         service_listr = service_list[:]

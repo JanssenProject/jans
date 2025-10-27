@@ -1,6 +1,10 @@
 import os
 import glob
+import json
 import shutil
+import datetime
+import tempfile
+
 from pathlib import Path
 
 from setup_app import paths
@@ -46,6 +50,9 @@ class JansLockInstaller(JettyInstaller):
         self.config_ldif = os.path.join(self.output_dir, 'config.ldif')
         self.base_endpoint = 'jans-lock' if Config.get('install_jans_lock_as_server') else 'jans-auth'
         self.clients_ldif_fn = os.path.join(self.output_dir, 'clients.ldif')
+        self.policy_conf_tmp_fn = os.path.join(self.template_dir, 'policy_conf_tmp.json')
+        self.policy_conf_json = os.path.join(self.output_dir, 'jans_policy_conf.json')
+
 
     def install(self):
         if Config.get('install_jans_lock_as_server'):
@@ -105,13 +112,39 @@ class JansLockInstaller(JettyInstaller):
             plugin_class_path = os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, plugin_name)
             self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
 
+    def create_policy_template(self):
+        Config.templateRenderingDict['local_trusted_issuer_id'] = os.urandom(22).hex()
+        Config.templateRenderingDict['policy_store_id'] = self.getPW(21)
+
+        output_tmp_fn = os.path.join(self.template_dir, os.path.basename(self.policy_conf_json))
+        policy_tmp = base.readJsonFile(self.policy_conf_tmp_fn)
+
+        policies = {}
+        #extract policies to temporary directory
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            base.extract_from_zip(base.current_app.jans_zip, 'jans-lock/lock-server/service/src/main/policy', tmpdirname)
+            for policy_fn in glob.glob(os.path.join(tmpdirname, '**/*.json')):
+                policy_id = os.urandom(22).hex()
+                policies[policy_id] = {
+                    'description': os.path.splitext(os.path.basename(policy_fn))[0],
+                    'creation_date': datetime.datetime.utcnow().isoformat(),
+                    'policy_content': self.generate_base64_file(policy_fn)
+                }
+            schema_fn = base.extract_file(base.current_app.jans_zip, 'jans-lock_cedarling/jans-cedarling/schema/cedarling_core.json', tmpdirname)
+            policy_tmp['policy_stores']['%(policy_store_id)s']['schema'] = self.generate_base64_file(schema_fn)
+
+        policy_tmp['policy_stores']['%(policy_store_id)s']['policies'] = policies
+        self.writeFile(output_tmp_fn, json.dumps(policy_tmp, indent=2))
+
     def render_import_templates(self):
-        for tmp in (self.dynamic_conf_json, self.error_json, self.static_conf_json):
+        self.create_policy_template()
+        for tmp in (self.dynamic_conf_json, self.error_json, self.static_conf_json, self.policy_conf_json):
             self.renderTemplateInOut(tmp, self.template_dir, self.output_dir)
 
         Config.templateRenderingDict['lock_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
         Config.templateRenderingDict['lock_error_base64'] = self.generate_base64_file(self.error_json, 1)
         Config.templateRenderingDict['lock_static_conf_base64'] = self.generate_base64_file(self.static_conf_json, 1)
+        Config.templateRenderingDict['lock_policy_conf_base64'] = self.generate_base64_file(self.policy_conf_json, 1)
 
         self.renderTemplateInOut(self.config_ldif, self.template_dir, self.output_dir)
 

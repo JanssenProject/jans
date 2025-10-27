@@ -3,7 +3,7 @@
 # ==============
 
 # original Janssen base version
-ARG BASE_VERSION=1.12.0-1
+ARG BASE_VERSION=0.0.0-nightly
 
 # the following ARGs set default base images
 # they can be overriden in build process via --build-arg option
@@ -60,7 +60,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=44567396b3c7ba2e39ecfcbd0467709ecb847bec
+ENV JANS_SOURCE_VERSION=408db95b458691c2b307b51fe180f9cc61b4eb95
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -184,7 +184,7 @@ RUN mkdir -p /opt/jans/configurator/db \
 COPY app /app
 
 # CN version as env var (with suffix if any, i.e. SNAPSHOT)
-ENV CN_VERSION=1.12.0-1
+ENV CN_VERSION=0.0.0-nightly
 
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app
@@ -243,7 +243,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.12.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen All-in-One" \
     org.opencontainers.image.description=""
 

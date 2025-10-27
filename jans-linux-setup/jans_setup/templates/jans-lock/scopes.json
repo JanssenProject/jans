@@ -1,9 +1,17 @@
 [
   {
     "inum": "4000.01.1",
-    "jansId": "https://jans.io/oauth/lock/sse.readonly",
+    "jansId": "https://jans.io/oauth/lock/stat.readonly",
     "displayName": "Lock API scope",
-    "description": "Permission to access SSE endpoint",
+    "description": "Permission to access stat endpoint",
+    "jansDefScope": false,
+    "jansScopeTyp": "oauth"
+  },
+  {
+    "inum": "4000.01.2",
+    "jansId": "https://jans.io/oauth/lock/policy.readonly",
+    "displayName": "Lock API scope",
+    "description": "Permission to access policy endpoint",
     "jansDefScope": false,
     "jansScopeTyp": "oauth"
   }

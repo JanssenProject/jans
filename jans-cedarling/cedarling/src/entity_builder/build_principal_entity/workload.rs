@@ -6,7 +6,7 @@
 use super::*;
 
 use cedar_policy::Entity;
-use std::collections::{HashSet};
+use std::collections::HashSet;
 
 const WORKLOAD_ATTR_SRC_TKNS: &[&str] = &["access_token"];
 
@@ -15,7 +15,7 @@ impl EntityBuilder {
     // either the 'aud' or 'client_id' claim eventually
     pub fn build_workload_entity(
         &self,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
         tkn_principal_mappings: &TokenPrincipalMappings,
         built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildEntityError> {
@@ -71,7 +71,7 @@ impl WorkloadIdSrcResolver {
     /// - `access_token.aud`
     /// - `access_token.client_id`
     /// - `id_token.aud`
-    pub fn resolve(tokens: &HashMap<String, Token>) -> Vec<EntityIdSrc> {
+    pub fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc> {
         const DEFAULT_WORKLOAD_ID_SRCS: &[PrincipalIdSrc] = &[
             PrincipalIdSrc {
                 token: "access_token",
@@ -134,7 +134,7 @@ mod test {
         expected: Value,
         schema: Option<&Schema>,
     ) {
-        let tokens = HashMap::from([(token.name.clone(), token)]);
+        let tokens = HashMap::from([(token.name.clone(), Arc::new(token))]);
         let mut built_entities = BuiltEntities::from(&builder.iss_entities);
         built_entities.insert(
             &EntityUid::from_str("Jans::Access_token::\"some_jti\"").expect("a valid EntityUid"),

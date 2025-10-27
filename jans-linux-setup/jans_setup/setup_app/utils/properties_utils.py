@@ -303,19 +303,6 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_link')
 
 
-    def prompt_for_jans_keycloak_link(self):
-        if Config.installed_instance and Config.install_jans_keycloak_link:
-            return
-
-        prompt_to_install = self.getPrompt("Install Jans KC Link Server?",
-                                            self.getDefaultOption(Config.install_jans_keycloak_link)
-                                            )[0].lower()
-
-        Config.install_jans_keycloak_link = prompt_to_install == 'y'
-
-        if Config.installed_instance and Config.install_jans_keycloak_link:
-            Config.addPostSetupService.append('install_jans_keycloak_link')
-
     def prompt_for_casa(self):
         if Config.installed_instance and Config.install_casa:
             return
@@ -424,12 +411,9 @@ class PropertiesUtils(SetupUtils):
                 Config.set_rdbm_schema()
                 Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
 
-                if Config.rdbm_type == 'pgsql':
-                    use_ssl = self.getYNPrompt("  Use SSS to connect RDBM")
-                    if use_ssl:
-                        Config.pgsql_sslrootcert = self.getPrompt("  Paste RDBM SSL Root Certificate:")
-                        if Config.pgsql_sslrootcert:
-                            Config.pggsql_sslmode = 'verify-ca'
+                use_ssl = self.getYNPrompt("  Use SSL to connect RDBM")
+                if use_ssl:
+                    Config.rdbm_sslrootcert = self.getPrompt("  Paste RDBM SSL Root Certificate:")
 
                 result = dbUtils.sqlconnection()
 
@@ -507,26 +491,23 @@ class PropertiesUtils(SetupUtils):
                 Config.set_rdbm_schema()
                 Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
 
-                if Config.rdbm_type == 'pgsql':
-                    use_ssl = self.getYNPrompt("  Use SSL to connect RDBM")
-                    if use_ssl:
-                        print("  Paste RDBM SSL Root Certificate:")
-                        print("  Enter single dot (.) to finish entering")
-                        cert_lines = []
-                        cert_end = '-----END CERTIFICATE-----'
-                        for line in sys.stdin:
-                            if line.rstrip() in (cert_end, '.'):
-                                if line.rstrip() == cert_end:
-                                    cert_lines.append(line)
-                                break
-                            cert_lines.append(line)
-                        Config.pgsql_sslrootcert = ''.join(cert_lines)
-                        if Config.pgsql_sslrootcert:
-                            Config.pggsql_sslmode = 'verify-ca'
+                use_ssl = self.getYNPrompt("  Use SSL to connect RDBM")
+                if use_ssl:
+                    print("  Paste RDBM SSL Root Certificate:")
+                    print("  Enter single dot (.) to finish entering")
+                    cert_lines = []
+                    cert_end = '-----END CERTIFICATE-----'
+                    for line in sys.stdin:
+                        if line.rstrip() in (cert_end, '.'):
+                            if line.rstrip() == cert_end:
+                                cert_lines.append(line)
+                            break
+                        cert_lines.append(line)
+                    Config.rdbm_sslrootcert = ''.join(cert_lines)
 
                 try:
                     if Config.rdbm_type == 'mysql':
-                        conn = pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port)
+                        conn = pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port, ssl={'verify_mode': None})
                         if 'mariadb' in conn.server_version.lower():
                             print("  {}MariaDB is not supported. Please use MySQL Server. {}".format(colors.FAIL, colors.ENDC))
                             continue
@@ -651,7 +632,6 @@ class PropertiesUtils(SetupUtils):
             self.promptForScimServer()
             self.promptForFido2Server()
             #self.prompt_for_jans_link()
-            self.prompt_for_jans_keycloak_link()
             self.prompt_for_casa()
             self.pompt_for_jans_lock()
             self.prompt_for_jans_saml()
