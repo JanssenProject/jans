@@ -375,6 +375,7 @@ jobs:
       id: sign-cedarling
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       run: |
+        rustup default stable
         rustup target add wasm32-unknown-unknown
         cargo install wasm-pack
   
@@ -769,6 +770,7 @@ jobs:
     - name: Build and release cedarling uniffi build in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       run: |
+        rustup default stable
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
