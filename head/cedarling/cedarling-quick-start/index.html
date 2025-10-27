@@ -14804,19 +14804,24 @@ stage.</p>
 </ol>
 <div class="highlight"><span class="filename">Principal</span><pre><span></span><code><span class="w">    </span><span class="p">[</span>
 <span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;SupremeRuler&quot;</span><span class="p">]</span>
+<span class="w">        </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Teacher&quot;</span>
+<span class="w">        </span><span class="p">]</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">]</span>
 </code></pre></div>
 <div class="highlight"><span class="filename">Actions</span><pre><span></span><code><span class="err">Ja</span><span class="kc">ns</span><span class="p">::</span><span class="err">Ac</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="p">::</span><span class="s2">&quot;Read&quot;</span>
 </code></pre></div>
 <div class="highlight"><span class="filename">Resource</span><pre><span></span><code><span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;resource&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::SecretDocument&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">      </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::SecretDocument&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 <p>Leave the <code>Context</code> blank.</p>
@@ -14835,10 +14840,12 @@ shown below.</p>
 <code>Principal</code> entity and test the authorization.</p>
 <div class="highlight"><span class="filename">Principal</span><pre><span></span><code><span class="p">[</span>
 <span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">]</span>
 </code></pre></div>
@@ -14885,7 +14892,7 @@ implement role-based access control (RBAC). </p>
   in place.<ul>
 <li>Allow dynamic client registration</li>
 <li>Allow registered clients to request the <code>role</code> scope</li>
-<li>Have a user with the <code>role</code> claim set to the value <code>SupremeRuler</code> and 
+<li>Have a user with the <code>role</code> claim set to the value <code>Teacher</code> and 
   return this claim in the userinfo token</li>
 </ul>
 </li>
@@ -14893,15 +14900,20 @@ implement role-based access control (RBAC). </p>
 <h3 id="step-1-create-cedar-policy-and-schema">Step-1: Create Cedar Policy and Schema<a class="headerlink" href="#step-1-create-cedar-policy-and-schema" title="Permanent link">#</a></h3>
 <p>For this guide, we have created a policy store in the 
 <a href="https://github.com/JanssenProject/CedarlingQuickstart">demo GitHub repository</a>. </p>
-<p>The policy store has a <a href="https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/refs/heads/main/tarpDemo/76acfe86fb09731682f92c4fbf7d2e066813ce639404.policy">policy</a> 
-that grants access to all actions and all the resources, 
-to the users with the <code>SupremeRuler</code> role. The policy is as follows:</p>
-<div class="highlight"><pre><span></span><code>@id(&quot;allow_supreme_ruler&quot;)
+<p>The policy store has two policies. The first grants access to all actions and all resources to the users with the <code>Teacher</code> role. The second allows only <code>Read</code> permission to students with the <code>Student</code> role to any resource. The two policies are as follows:</p>
+<div class="highlight"><pre><span></span><code>@id(&quot;allow_teacher&quot;)
 permit(
-  principal in Jans::Role::&quot;SupremeRuler&quot;,
+  principal in Jans::Role::&quot;Teacher&quot;,
   action,
   resource
 );
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>@id(&quot;allow_student_read&quot;)
+permit(
+  principal in Jans::Role::&quot;Student&quot;,
+  action in [Jans::Action::&quot;Read&quot;],
+  resource
+)
 </code></pre></div>
 <h3 id="step-2-update-the-idp-information">Step-2 Update the IDP information<a class="headerlink" href="#step-2-update-the-idp-information" title="Permanent link">#</a></h3>
 <p>The policy store in the demo repository has information about the IDP that 
@@ -15006,18 +15018,19 @@ to evaluate the authorization request.</p>
 <li>
 <p>Click the <code>Trigger auth flow</code> button</p>
 </li>
-<li>Login using username and password of a user who has the <code>SupremeRuler</code> role assigned in the IDP</li>
+<li>Login using username and password of a user who has the <code>Teacher</code> role assigned in the IDP</li>
 <li>Click <code>Allow</code> on the consent screen</li>
 <li>If the authentication is successful, Tarp will show you a page with token details </li>
 <li>Move to <code>Cedarling</code> tab and select <code>Cedarling Signed Authz Form</code> tab</li>
 <li>Use the details below as an input to this form:<ul>
 <li>Principal: select all 3 tokens. In TBAC approach here, we are passing tokens (i.e signed JWTs) in place of JSON string.</li>
-<li>Action: <code>Jans::Action::"Read"</code></li>
+<li>Action: <code>Jans::Action::"Write"</code></li>
 <li>Resource:
     <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;resource&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::SecretDocument&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">  </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::SecretDocument&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></li>
 <li>Leave the <code>context</code> as default</li>
@@ -15032,6 +15045,14 @@ to evaluate the authorization request.</p>
 </code></pre></div></li>
 </ol>
 <p>The top-level <code>decision: true</code> confirms successful authorization.</p>
+<p>To test the negative case, we will do the following:</p>
+<ol>
+<li>Modify the user in the IDP to have the <code>Student</code> role instead of <code>Teacher</code></li>
+<li>Logout from the Cedarling if you are logged in and rerun the authorization flow with the same parameters to obtain new tokens</li>
+<li>Run signed authorization using the same inputs</li>
+<li>The top-level <code>decision: false</code> confirms failed authorization. The first policy in the store allowed full access to users in the <code>Teacher</code> role, but the second policy only allowed <code>Read</code> access, which fails since our request was <code>Write</code> access.</li>
+<li>Repeat the authorization with action <code>Jans::Action::"Read"</code> to confirm that the user has <code>Read</code> access but not <code>Write</code> access</li>
+</ol>
 
 
 
@@ -15054,7 +15075,7 @@ to evaluate the authorization request.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 19, 2025 09:12:56 UTC"><span class="timeago" datetime="2025-08-19T09:12:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 19, 2025 09:12:56 UTC">2025-08-19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 27, 2025 04:35:28 UTC"><span class="timeago" datetime="2025-10-27T04:35:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 27, 2025 04:35:28 UTC">2025-10-27</span>
   </span>
 
     
