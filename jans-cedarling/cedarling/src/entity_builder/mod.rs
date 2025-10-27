@@ -45,6 +45,34 @@ pub use error::*;
 /// Constant for unknown entity type in error messages
 const UNKNOWN_ENTITY_TYPE: &str = "Unknown";
 
+/// Helper function to parse entity attributes from a key-value iterator
+fn parse_entity_attrs<'a>(
+    attrs_iter: impl Iterator<Item = (&'a String, &'a Value)>,
+    entity_type: &str,
+    entity_id: &str,
+) -> Result<HashMap<String, RestrictedExpression>, BuildEntityError> {
+    let mut cedar_attrs = HashMap::new();
+    for (key, value) in attrs_iter {
+        match value_to_expr::value_to_expr(value) {
+            Ok(Some(expr)) => {
+                cedar_attrs.insert(key.clone(), expr);
+            }
+            Ok(None) => {
+                continue;
+            }
+            Err(errors) => {
+                return Err(BuildEntityError {
+                    entity_type_name: entity_type.to_string(),
+                    error: BuildEntityErrorKind::InvalidEntityData(
+                        format!("Failed to convert attribute '{}' for entity '{}': {:?}", key, entity_id, errors)
+                    ),
+                });
+            }
+        }
+    }
+    Ok(cedar_attrs)
+}
+
 /// Parse default entities from the provided configuration
 fn parse_default_entities(
     default_entities_data: &HashMap<String, Value>,
@@ -128,6 +156,7 @@ fn parse_default_entities(
             // Get the entity ID from uid.id if present
             let entity_id_from_uid = uid_obj.get("id")
                 .and_then(|v| v.as_str())
+                // Fall back to the HashMap key if uid.id is not specified
                 .unwrap_or(entity_id);
 
             // Parse attributes from attrs field
@@ -136,25 +165,11 @@ fn parse_default_entities(
                 .and_then(|v| v.as_object())
                 .unwrap_or(&empty_map);
             
-            let mut cedar_attrs = HashMap::new();
-            for (key, value) in attrs_obj {
-                match value_to_expr::value_to_expr(value) {
-                    Ok(Some(expr)) => {
-                        cedar_attrs.insert(key.clone(), expr);
-                    },
-                    Ok(None) => {
-                        continue;
-                    },
-                    Err(errors) => {
-                        return Err(BuildEntityError {
-                            entity_type_name: full_entity_type.clone(),
-                            error: BuildEntityErrorKind::InvalidEntityData(
-                                format!("Failed to convert attribute '{}' for entity '{}': {:?}", key, entity_id_from_uid, errors)
-                            ),
-                        });
-                    }
-                }
-            }
+            let cedar_attrs = parse_entity_attrs(
+                attrs_obj.iter(),
+                &full_entity_type,
+                entity_id_from_uid,
+            )?;
 
             // Parse parents from parents field
             let empty_vec: Vec<Value> = vec![];
@@ -197,27 +212,11 @@ fn parse_default_entities(
                 })?;
 
             // Convert JSON attributes to Cedar expressions
-            let mut cedar_attrs = HashMap::new();
-            for (key, value) in entity_obj {
-                if key != "entity_type" && key != "entity_id" {
-                    match value_to_expr::value_to_expr(value) {
-                        Ok(Some(expr)) => {
-                            cedar_attrs.insert(key.clone(), expr);
-                        },
-                        Ok(None) => {
-                            continue;
-                        },
-                        Err(errors) => {
-                            return Err(BuildEntityError {
-                                entity_type_name: entity_type.to_string(),
-                                error: BuildEntityErrorKind::InvalidEntityData(
-                                    format!("Failed to convert attribute '{}' for entity '{}': {:?}", key, entity_id, errors)
-                                ),
-                            });
-                        }
-                    }
-                }
-            }
+            let cedar_attrs = parse_entity_attrs(
+                entity_obj.iter().filter(|(key, _)| key != &"entity_type" && key != &"entity_id"),
+                entity_type,
+                entity_id,
+            )?;
 
             (entity_type.to_string(), cedar_attrs, HashSet::new())
         } else {
@@ -1468,5 +1467,124 @@ mod test {
         );
         
         println!("✓ Successfully parsed Cedar entity format with namespace: {}", uid_str);
+    }
+
+    #[test]
+    fn test_parse_entity_with_existing_namespace() {
+        // Test that entity with uid.type already containing "::" does not get double-prefixed
+        let entity_data = json!({
+            "uid": {
+                "type": "Existing::Namespace::Features",
+                "id": "TestFeature"
+            },
+            "attrs": {
+                "attribute": "value"
+            }
+        });
+
+        let default_entities_data = HashMap::from([
+            ("test123".to_string(), entity_data)
+        ]);
+
+        let parsed_entities = parse_default_entities(&default_entities_data, "NewNamespace")
+            .expect("should parse default entities");
+
+        let entity = parsed_entities.get("test123").expect("should have entity");
+        assert_eq!(
+            entity.uid().type_name().to_string(),
+            "Existing::Namespace::Features",
+            "Existing namespace should not be double-prefixed"
+        );
+    }
+
+    #[test]
+    fn test_parse_error_missing_uid() {
+        // Test entity missing uid field
+        let entity_data = json!({
+            "attrs": {
+                "attribute": "value"
+            }
+        });
+
+        let default_entities_data = HashMap::from([
+            ("test123".to_string(), entity_data)
+        ]);
+
+        let result = parse_default_entities(&default_entities_data, "Test");
+        assert!(
+            result.is_err(),
+            "Should return error when uid field is missing"
+        );
+    }
+
+    #[test]
+    fn test_parse_error_invalid_uid_structure() {
+        // Test entity with uid that is not an object
+        let entity_data = json!({
+            "uid": "not-an-object",
+            "attrs": {}
+        });
+
+        let default_entities_data = HashMap::from([
+            ("test123".to_string(), entity_data)
+        ]);
+
+        let result = parse_default_entities(&default_entities_data, "Test");
+        assert!(
+            result.is_err(),
+            "Should return error when uid is not an object"
+        );
+
+        // Test entity with uid missing type field
+        let entity_data_no_type = json!({
+            "uid": {
+                "id": "test"
+            },
+            "attrs": {}
+        });
+
+        let default_entities_data = HashMap::from([
+            ("test456".to_string(), entity_data_no_type)
+        ]);
+
+        let result = parse_default_entities(&default_entities_data, "Test");
+        assert!(
+            result.is_err(),
+            "Should return error when uid.type is missing"
+        );
+    }
+
+    #[test]
+    fn test_parse_entity_with_empty_attrs_and_parents() {
+        // Test entity with empty attrs and empty parents
+        let entity_data = json!({
+            "uid": {
+                "type": "EmptyTest",
+                "id": "test789"
+            },
+            "attrs": {},
+            "parents": []
+        });
+
+        let default_entities_data = HashMap::from([
+            ("test789".to_string(), entity_data)
+        ]);
+
+        let parsed_entities = parse_default_entities(&default_entities_data, "Test")
+            .expect("should parse with empty attrs and parents");
+
+        let entity = parsed_entities.get("test789").expect("should have entity");
+        assert_eq!(
+            entity.uid().type_name().to_string(),
+            "Test::EmptyTest",
+            "Entity type should have namespace prefix"
+        );
+        let entity_json = entity.to_json_value().expect("should convert to JSON");
+        let attrs = entity_json.get("attrs").expect("should have attrs");
+        assert_eq!(
+            attrs.as_object().unwrap().len(),
+            0,
+            "Entity should have empty attrs"
+        );
     }
 }
