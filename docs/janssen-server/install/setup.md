@@ -87,7 +87,7 @@ usage: jans_setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [
                      [--download-exit] [-jans-app-version JANS_APP_VERSION] [-jans-build JANS_BUILD]
                      [-setup-branch SETUP_BRANCH] [--disable-config-api-security] [--cli-test-client]
                      [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT] [-disable-script DISABLE_SCRIPT]
-                     [-java-version {11,17}] [-stm] [-w] [-t] [-x] [--allow-pre-released-features] [--no-data]
+                     [-java-version {11,17}] [-w] [-t] [-x] [--allow-pre-released-features] [--no-data]
                      [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-link]
                      [--with-casa] [--install-jans-saml] [--install-jans-lock]
                      [--install-opa] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
@@ -146,7 +146,6 @@ Below are the optional arguments:
 | -enable-script ENABLE_SCRIPT | inum of script to enable |
 | -disable-script DISABLE_SCRIPT | inum of script to disable |
 | -disable-selinux | Disable SELinux |
-| -stm, --enable-scim-test-mode | Enable Scim Test Mode |
 | -w | Get the development head war files |
 | -t | Load test data |
 | -x | Load test data and exit |
