@@ -27,7 +27,7 @@ def get_instance_path(parent_dir=""):
 def parse_bool_env(var_name: str, default: str = "False") -> bool:
     """Parse boolean environment variable."""
     value = os.getenv(var_name, default)
-    return value == "True"
+    return value.lower() in ("true", "1", "yes")
 
 class BaseConfig:
     API_TITLE = "Cedarling Sidecar"
