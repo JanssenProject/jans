@@ -62,11 +62,10 @@ impl CedarSchemaJson {
         let namespace = entity_type_name.namespace();
         let basename = entity_type_name.basename();
 
-        if !namespace.is_empty() {
-            if let Some(entity_schema) = self.get_comon_type_from_namespace(&namespace, basename) {
+        if !namespace.is_empty()
+            && let Some(entity_schema) = self.get_comon_type_from_namespace(&namespace, basename) {
                 return Ok(Some((entity_type_name, entity_schema)));
             }
-        }
 
         // If namespace is empty (in type_name), look for the type in the default namespace.
         if let Some(namespace) = default_namespace {
@@ -91,11 +90,10 @@ impl CedarSchemaJson {
     }
 
     fn get_comon_type_from_namespace(&self, namespace: &str, basename: &str) -> Option<&Attribute> {
-        if let Some(namespace) = self.namespaces.get(namespace) {
-            if let Some(entity_type) = namespace.common_types.get(basename) {
+        if let Some(namespace) = self.namespaces.get(namespace)
+            && let Some(entity_type) = namespace.common_types.get(basename) {
                 return Some(entity_type);
             }
-        }
         None
     }
 
@@ -114,23 +112,21 @@ impl CedarSchemaJson {
         let namespace = entity_type_name.namespace();
         let basename = entity_type_name.basename();
 
-        if !namespace.is_empty() {
-            if let Some(entity_schema) = self.get_entity_schema_from_namespace(&namespace, basename)
+        if !namespace.is_empty()
+            && let Some(entity_schema) = self.get_entity_schema_from_namespace(&namespace, basename)
             {
                 return Ok(Some((entity_type_name, entity_schema)));
             }
-        }
 
         // If namespace is empty (in type_name), look for the type in the default namespace.
-        if let Some(namespace) = default_namespace {
-            if let Some(entity_schema) = self.get_entity_schema_from_namespace(namespace, basename)
+        if let Some(namespace) = default_namespace
+            && let Some(entity_schema) = self.get_entity_schema_from_namespace(namespace, basename)
             {
                 let entity_type_name =
                     cedar_policy::EntityTypeName::from_str(&join_namespace(namespace, type_name))?;
 
                 return Ok(Some((entity_type_name, entity_schema)));
             }
-        }
 
         // If the type is not found in the default namespace, look for it in the empty namespace.
         if let Some(entity_schema) =
@@ -149,11 +145,10 @@ impl CedarSchemaJson {
         namespace: &str,
         basename: &str,
     ) -> Option<&EntityType> {
-        if let Some(namespace) = self.namespaces.get(namespace) {
-            if let Some(entity_type) = namespace.entity_types.get(basename) {
+        if let Some(namespace) = self.namespaces.get(namespace)
+            && let Some(entity_type) = namespace.entity_types.get(basename) {
                 return Some(entity_type);
             }
-        }
         None
     }
 }
