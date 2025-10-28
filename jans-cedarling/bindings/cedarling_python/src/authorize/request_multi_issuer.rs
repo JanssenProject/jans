@@ -9,7 +9,7 @@ use super::entity_data::EntityData;
 use super::token_input::TokenInput;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::{PyDict};
 use serde_pyobject::from_pyobject;
 
 /// AuthorizeMultiIssuerRequest
@@ -43,7 +43,7 @@ use serde_pyobject::from_pyobject;
 #[pyclass(get_all, set_all)]
 pub struct AuthorizeMultiIssuerRequest {
     /// List of TokenInput objects
-    pub tokens: Py<PyList>,
+    pub tokens: Vec<TokenInput>,
     /// cedar_policy resource data
     pub resource: EntityData,
     /// cedar_policy action
@@ -57,7 +57,7 @@ impl AuthorizeMultiIssuerRequest {
     #[new]
     #[pyo3(signature = (tokens, resource, action, context=None))]
     fn new(
-        tokens: Py<PyList>,
+        tokens: Vec<TokenInput>,
         resource: EntityData,
         action: String,
         context: Option<Py<PyDict>>,
@@ -73,17 +73,7 @@ impl AuthorizeMultiIssuerRequest {
 
 impl AuthorizeMultiIssuerRequest {
     pub fn to_cedarling(&self) -> Result<cedarling::AuthorizeMultiIssuerRequest, PyErr> {
-        let tokens = Python::with_gil(|py| -> Result<Vec<cedarling::TokenInput>, PyErr> {
-            let tokens_list = self.tokens.clone_ref(py).into_bound(py);
-            let mut result = Vec::new();
-            
-            for item in tokens_list.iter() {
-                let token_input: TokenInput = item.extract()?;
-                result.push(token_input.into());
-            }
-            
-            Ok(result)
-        })?;
+        let tokens = self.tokens.clone().into_iter().map(Into::into).collect();
 
         let context = if let Some(ref ctx) = self.context {
             Some(Python::with_gil(|py| -> Result<serde_json::Value, PyErr> {

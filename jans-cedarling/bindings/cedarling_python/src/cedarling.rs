@@ -42,6 +42,17 @@ use serde_pyobject::to_pyobject;
 ///     Execute authorize request
 ///     :param request: Request struct for authorize.
 ///
+/// .. method:: authorize_unsigned(self, request: RequestUnsigned) -> AuthorizeResult
+///
+///     Authorize request with unsigned data.
+///     :param request: RequestUnsigned struct for authorize.
+///
+/// .. method:: authorize_multi_issuer(self, request: AuthorizeMultiIssuerRequest) -> MultiIssuerAuthorizeResult
+///
+///     Authorize multi-issuer request.
+///     Makes authorization decision based on multiple JWT tokens from different issuers.
+///     :param request: AuthorizeMultiIssuerRequest struct for authorize.
+///
 /// .. method:: pop_logs(self) -> List[dict]
 ///
 ///     Retrieves and removes all logs from storage.

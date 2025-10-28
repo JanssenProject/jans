@@ -86,6 +86,24 @@ func (c *Cedarling) AuthorizeUnsigned(request RequestUnsigned) (AuthorizeResult,
 	return authorize_result, nil
 }
 
+func (c *Cedarling) AuthorizeMultiIssuer(request AuthorizeMultiIssuerRequest) (MultiIssuerAuthorizeResult, error) {
+	request_json, err := json.Marshal(request)
+	if err != nil {
+		return MultiIssuerAuthorizeResult{}, err
+	}
+	result := internal.CallAuthorizeMultiIssuer(c.instance_id, string(request_json))
+	err = result.Error()
+	if err != nil {
+		return MultiIssuerAuthorizeResult{}, err
+	}
+	var authorize_result MultiIssuerAuthorizeResult
+	err = json.Unmarshal([]byte(result.JsonValue()), &authorize_result)
+	if err != nil {
+		return MultiIssuerAuthorizeResult{}, err
+	}
+	return authorize_result, nil
+}
+
 func (c *Cedarling) PopLogs() []string {
 	return internal.CallPopLogs(c.instance_id)
 }

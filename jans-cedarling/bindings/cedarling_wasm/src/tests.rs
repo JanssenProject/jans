@@ -600,3 +600,258 @@ async fn test_authorize_unsigned() {
         "Decision for Jans::TestPrincipal3::\"3\" should be Deny"
     );
 }
+
+/// Test multi-issuer authorization with valid tokens.
+#[wasm_bindgen_test]
+async fn test_authorize_multi_issuer_success() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    // Create token inputs with explicit mappings for multi-issuer
+    let access_token = generate_token_using_claims(json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
+        "iss": "https://test.jans.org",
+        "token_type": "Bearer",
+        "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "acr": "basic",
+        "x5t#S256": "",
+        "scope": ["openid", "profile"],
+        "org_id": "some_long_id",
+        "auth_time": 1724830746,
+        "exp": 1724945978,
+        "iat": 1724832259,
+        "jti": "lxTmCVRFTxOjJgvEEpozMQ",
+        "name": "Default Admin User",
+        "status": {
+            "status_list": {
+                "idx": 201,
+                "uri": "https://test.jans.org/jans-auth/restv1/status_list"
+            }
+        }
+    }));
+
+    let id_token = generate_token_using_claims(json!({
+        "acr": "basic",
+        "amr": "10",
+        "aud": ["5b4487c4-8db1-409d-a653-f907b8094039"],
+        "exp": 1724835859,
+        "iat": 1724832259,
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "iss": "https://test.jans.org",
+        "jti": "sk3T40NYSYuk5saHZNpkZw",
+        "nonce": "c3872af9-a0f5-4c3f-a1af-f9d0e8846e81",
+        "sid": "6a7fe50a-d810-454d-be5d-549d29595a09",
+        "jansOpenIDConnectVersion": "openidconnect-1.0",
+        "c_hash": "pGoK6Y_RKcWHkUecM9uw6Q",
+        "auth_time": 1724830746,
+        "grant": "authorization_code",
+        "status": {
+            "status_list": {
+                "idx": 202,
+                "uri": "https://test.jans.org/jans-auth/restv1/status_list"
+            }
+        },
+        "role": "Admin"
+    }));
+
+    let userinfo_token = generate_token_using_claims(json!({
+        "country": "US",
+        "email": "user@example.com",
+        "username": "UserNameExample",
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "iss": "https://test.jans.org",
+        "given_name": "Admin",
+        "middle_name": "Admin",
+        "inum": "8d1cde6a-1447-4766-b3c8-16663e13b458",
+        "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "updated_at": 1724778591,
+        "name": "Default Admin User",
+        "nickname": "Admin",
+        "family_name": "User",
+        "jti": "faiYvaYIT0cDAT7Fow0pQw",
+        "jansAdminUIRole": ["api-admin"],
+        "exp": 1724945978
+    }));
+
+    let multi_issuer_request = json!({
+        "tokens": [
+            {
+                "mapping": "Jans::Access_Token",
+                "payload": access_token
+            },
+            {
+                "mapping": "Jans::Id_Token",
+                "payload": id_token
+            },
+            {
+                "mapping": "Jans::Userinfo_Token",
+                "payload": userinfo_token
+            }
+        ],
+        "resource": {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        },
+        "action": "Jans::Action::\"Update\"",
+        "context": {}
+    });
+
+    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
+        .expect("Multi-issuer request should be converted to JsValue");
+
+    let result = instance
+        .authorize_multi_issuer(js_request)
+        .await
+        .expect("authorize_multi_issuer request should be executed");
+
+    assert!(result.decision, "decision should be allowed");
+    assert!(!result.request_id.is_empty(), "request_id should be present");
+}
+
+/// Test multi-issuer authorization with invalid token.
+#[wasm_bindgen_test]
+async fn test_authorize_multi_issuer_with_invalid_token() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    // Create request with an invalid token
+    let multi_issuer_request = json!({
+        "tokens": [
+            {
+                "mapping": "Jans::Access_Token",
+                "payload": "invalid.jwt.token"
+            }
+        ],
+        "resource": {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        },
+        "action": "Jans::Action::\"Update\"",
+        "context": {}
+    });
+
+    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
+        .expect("Multi-issuer request should be converted to JsValue");
+
+    // This should fail due to invalid token
+    let result = instance.authorize_multi_issuer(js_request).await;
+    assert!(result.is_err(), "should fail with invalid token");
+}
+
+/// Test multi-issuer authorization with empty tokens list.
+#[wasm_bindgen_test]
+async fn test_authorize_multi_issuer_with_empty_tokens() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    // Create request with empty tokens
+    let multi_issuer_request = json!({
+        "tokens": [],
+        "resource": {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        },
+        "action": "Jans::Action::\"Update\"",
+        "context": {}
+    });
+
+    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
+        .expect("Multi-issuer request should be converted to JsValue");
+
+    // This should fail due to empty tokens
+    let result = instance.authorize_multi_issuer(js_request).await;
+    assert!(result.is_err(), "should fail with empty tokens");
+}
+
+/// Test multi-issuer authorization with context.
+#[wasm_bindgen_test]
+async fn test_authorize_multi_issuer_with_context() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let access_token = generate_token_using_claims(json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "iss": "https://test.jans.org",
+        "org_id": "some_long_id",
+        "exp": 1724945978,
+        "iat": 1724832259
+    }));
+
+    // Create request with context
+    let multi_issuer_request = json!({
+        "tokens": [
+            {
+                "mapping": "Jans::Access_Token",
+                "payload": access_token
+            }
+        ],
+        "resource": {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        },
+        "action": "Jans::Action::\"Update\"",
+        "context": {
+            "some_context": "value"
+        }
+    });
+
+    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
+        .expect("Multi-issuer request should be converted to JsValue");
+
+    let result = instance
+        .authorize_multi_issuer(js_request)
+        .await
+        .expect("authorize_multi_issuer request should be executed with context");
+
+    assert!(result.decision, "decision should be allowed");
+}
