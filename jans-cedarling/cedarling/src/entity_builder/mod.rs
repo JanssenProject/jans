@@ -220,7 +220,7 @@ fn parse_default_entities(
                         .set_level(LogLevel::WARN)
                         .set_message(format!(
                             "In default entity parent array json value should be object, skip: {}",
-                            parent.to_string()
+                            parent
                         ));
 
                     logger.log_any(log_entry);
