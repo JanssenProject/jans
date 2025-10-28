@@ -253,6 +253,122 @@ if result.Decision {
 }
 ```
 
+#### Multi-Issuer Authorization
+
+Multi-issuer authorization allows you to make authorization decisions based on multiple JWT tokens from different issuers in a single request without requiring traditional User/Workload principals.
+
+**1. Create tokens with explicit type mappings:**
+
+```go
+tokens := []cedarling_go.TokenInput{
+    {
+        Mapping: "Jans::Access_Token",
+        Payload: "eyJhbGciOiJIUzI1NiIs...",
+    },
+    {
+        Mapping: "Jans::Id_Token",
+        Payload: "eyJhbGciOiJFZERTQSIs...",
+    },
+    {
+        Mapping: "Acme::DolphinToken",  // Custom token type
+        Payload: "ey1b6cfMef21084633a7...",
+    },
+}
+```
+
+**2. Define the resource:**
+
+```go
+resource := cedarling_go.EntityData{
+    CedarMapping: cedarling_go.CedarMapping{
+        EntityType: "Jans::Document",
+        ID:         "doc_123",
+    },
+    Payload: map[string]any{
+        "owner":          "alice@example.com",
+        "classification": "confidential",
+    },
+}
+```
+
+**3. Build the multi-issuer request:**
+
+```go
+request := cedarling_go.AuthorizeMultiIssuerRequest{
+    Tokens:   tokens,
+    Action:   `Jans::Action::"Read"`,
+    Resource: resource,
+    Context: map[string]any{
+        "ip_address": "54.9.21.201",
+        "time":       time.Now().Unix(),
+    },
+}
+```
+
+**4. Authorize:**
+
+```go
+result, err := instance.AuthorizeMultiIssuer(request)
+if err != nil {
+    // Handle error
+    fmt.Printf("Authorization failed: %v\n", err)
+    return
+}
+
+if result.Decision {
+    fmt.Println("Access granted")
+    fmt.Printf("Request ID: %s\n", result.RequestID)
+    
+    // Access detailed Cedar response
+    fmt.Printf("Cedar decision: %s\n", result.Response.Decision().ToString())
+    
+    // Get diagnostic information
+    diagnostics := result.Response.Diagnostics()
+    if len(diagnostics.Reason()) > 0 {
+        fmt.Printf("Policies used: %v\n", diagnostics.Reason())
+    }
+    if len(diagnostics.Errors()) > 0 {
+        fmt.Printf("Errors: %v\n", diagnostics.Errors())
+    }
+} else {
+    fmt.Println("Access denied")
+}
+```
+
+**Key differences from standard authorization:**
+- No User/Workload principals - authorization based purely on token entities
+- Supports multiple tokens from different issuers in a single request
+- Tokens referenced in policies as `context.tokens.{issuer}_{token_type}`
+- Custom token types supported via `Mapping` field
+
+**Policy Example for Multi-Issuer:**
+
+```cedar
+// Require token from specific issuer with claim
+permit(
+  principal,
+  action == Jans::Action::"Read",
+  resource in Jans::Document
+) when {
+  context has tokens.acme_access_token &&
+  context.tokens.acme_access_token.hasTag("scope") &&
+  context.tokens.acme_access_token.getTag("scope").contains("read:documents")
+};
+
+// Require tokens from multiple issuers
+permit(
+  principal,
+  action == Trade::Action::"Vote",
+  resource in Trade::Election
+) when {
+  context has tokens.trade_association_access_token &&
+  context.tokens.trade_association_access_token.hasTag("member_status") &&
+  context.tokens.trade_association_access_token.getTag("member_status").contains("Corporate Member") &&
+  context has tokens.company_access_token &&
+  context.tokens.company_access_token.hasTag("employee_id")
+};
+```
+
 ### Logging
 
 Retrieve logs stored in memory:
@@ -271,3 +387,9 @@ logs := instance.GetLogsByTag("info")
 ## Defined API
 
 Auto-generated documentation is available on [pkg.go.dev](https://pkg.go.dev/github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go).
+
+## See Also
+
+- [Multi-Issuer Authorization Details](../cedarling-authz.md#multi-issuer-authorization-authorize_multi_issuer)
+- [JWT Mapping for Multi-Issuer](../cedarling-jwt-mapping.md#multi-issuer-jwt-mapping-authorize_multi_issuer)
+- [Policy Store Configuration](../cedarling-policy-store.md#multi-issuer-token-entities)

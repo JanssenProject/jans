@@ -68,14 +68,12 @@ application.
 
 ### Cedarling Interfaces
 
-At a high level, developers interact with the Cedarling using four core interfaces:
+At a high level, developers interact with the Cedarling using five core interfaces:
 
-* **Initialization** (`init`) – Loads the policy store and retrieves configuration 
-  settings.
-* **Authorization** (`authz`) – Evaluates policies by sending a bundle of JWTs to 
-  specify the principal.
-* **Authorization** (`authz_unsigned`) – Evaluates policies with an application-asserted 
-  principal.
+* **Initialization** (`init`) – Loads the policy store and retrieves configuration settings.
+* **Authorization** (`authorize`) – Evaluates policies by sending a bundle of JWTs to specify the principal.
+* **Authorization** (`authorize_unsigned`) – Evaluates policies with an application asserted principal.
+* **Multi-Issuer Authorization** (`authorize_multi_issuer`) – Evaluates policies based on multiple JWT tokens from different issuers without requiring traditional user/workload principals.
 * **Logging** (`log`) – Retrieves decision and system logs for auditing. 
 
 Developers call the `init` interface on startup of their application, causing the 
@@ -93,9 +91,10 @@ The `authorize_unsigned` variant is used when JWTs have already been validated b
 application, or when working with non-token based principals. It follows the same 
 evaluation logic but skips JWT validation steps.
 
-The `log` interface enables developers to retrieve decision and system logs from 
-Cedarling's in-memory cache. See the Cedarling [log](./cedarling-logs) documentation for 
-more information. 
+The `authorize_multi_issuer` method is designed for scenarios where applications need to evaluate authorization based on multiple JWT tokens from different issuers in a single request. Unlike the standard `authorize` method which creates traditional User and Workload principals, this method evaluates policies based purely on the token entities themselves. Each token is validated, converted to a Cedar entity, and made available in the policy evaluation context. This approach is particularly useful for federation scenarios, API gateways handling tokens from multiple identity providers, or applications where authorization depends on capabilities asserted by different issuers rather than a single user identity. Policies can reference individual tokens using predictable naming conventions like `context.tokens.acme_access_token` or `context.tokens.google_id_token`.
+
+The `log` interface enables developers to retrieve decision and system logs from the Cedarling's 
+in-memory cache. See the Cedarling [log](./cedarling-logs) documentation for more information. 
 
 ### Cedarling Components
 

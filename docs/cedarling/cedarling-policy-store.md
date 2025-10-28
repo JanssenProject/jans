@@ -391,6 +391,218 @@ Here is a non-normative example of a `cedarling_store.json` file:
 }
 ```
 
+## Multi-Issuer Token Entities
+
+When using the `authorize_multi_issuer` method, Cedarling creates token entities dynamically without requiring predefined User/Workload principals. This section describes how these token entities are structured and made available in policies.
+
+### Token Entity Structure
+
+Each validated token in a multi-issuer authorization request becomes a Cedar entity with the following structure:
+
+```cedar
+entity Token = {
+  "token_type": String,        // e.g., "Jans::Access_Token", "Acme::DolphinToken"
+  "jti": String,               // Unique token identifier
+  "issuer": String,            // JWT issuer claim
+  "exp": Long,                 // Token expiration timestamp
+  "validated_at": Long         // Timestamp when token was validated
+} tags String;
+```
+
+**Important**: All JWT claims are stored as **entity tags** on the Token entity. By default, claims are stored as **Sets of Strings** to provide a consistent interface regardless of whether a claim has zero, one, or multiple values.
+
+### Accessing Token Claims in Policies
+
+JWT claims are accessed using Cedar's tag syntax:
+
+```cedar
+// Check if token has a claim
+context.tokens.acme_access_token.hasTag("scope")
+
+// Get claim value (returns a Set)
+context.tokens.acme_access_token.getTag("scope")
+
+// Check if Set contains specific value
+context.tokens.acme_access_token.getTag("scope").contains("read:profile")
+```
+
+**Examples of claim access**:
+
+```cedar
+// Single-valued claim (stored as single-element Set)
+context.tokens.acme_access_token.hasTag("sub") &&
+context.tokens.acme_access_token.getTag("sub").contains("user123")
+
+// Multi-valued claim (stored as Set)
+context.tokens.acme_access_token.hasTag("scope") &&
+context.tokens.acme_access_token.getTag("scope").contains("read:profile")
+
+// Audience claim (typically multi-valued)
+context.tokens.acme_access_token.hasTag("aud") &&
+context.tokens.acme_access_token.getTag("aud").contains("my-client-id")
+
+// Custom claim
+context.tokens.dolphin_acme_dolphin_token.hasTag("waiver") &&
+context.tokens.dolphin_acme_dolphin_token.getTag("waiver").contains("signed")
+```
+
+### Token Collection in Context
+
+Validated tokens are organized into a `tokens` collection in the Cedar context using predictable naming:
+
+```cedar
+entity Tokens = {
+  // Format: {issuer_name}_{token_type}
+  "acme_access_token": Token,           // Access token from Acme
+  "acme_id_token": Token,               // ID token from Acme
+  "google_id_token": Token,             // ID token from Google
+  "dolphin_acme_dolphin_token": Token,  // Custom token type from Dolphin
+  "total_token_count": Long,            // Number of validated tokens
+};
+```
+
+The naming follows this pattern:
+- **Issuer name**: From trusted issuer metadata `name` field, or hostname from JWT `iss` claim
+- **Token type**: Extracted from the `mapping` field (e.g., "Jans::Access_Token" → "access_token")
+- Both converted to lowercase with underscores replacing special characters
+
+### Schema Support
+
+#### Without Schema (Default)
+When no Cedar schema is defined for Token entities:
+- All claims are stored as `Set<String>`
+- Provides consistent interface for all claim types
+- Simpler for rapid development
+
+#### With Schema (Enhanced Type Safety)
+When a Cedar schema defines the Token entity:
+- Claims can use specific types (DateTime, Long, Boolean, Record)
+- Enables proper type casting during entity creation
+- Better for production deployments
+
+Example schema for multi-issuer tokens:
+
+```cedar
+namespace Jans {
+  entity Access_Token = {
+    "token_type": String,
+    "jti": String,
+    "issuer": String,
+    "exp": Long,
+    "validated_at": Long,
+    "iat": Long,
+    "scope": Set<String>,
+    "aud": Set<String>,
+    "client_id": String
+  } tags String;
+  
+  entity Id_Token = {
+    "token_type": String,
+    "jti": String,
+    "issuer": String,
+    "exp": Long,
+    "validated_at": Long,
+    "iat": Long,
+    "sub": String,
+    "email": String,
+    "email_verified": Boolean
+  } tags String;
+}
+
+namespace Acme {
+  entity DolphinToken = {
+    "token_type": String,
+    "jti": String,
+    "issuer": String,
+    "exp": Long,
+    "validated_at": Long,
+    "waiver": String,
+    "location": String,
+    "clearance_level": Long
+  } tags String;
+}
+```
+
+### Policy Examples Using Token Entities
+
+**Simple token validation**:
+```cedar
+permit(
+  principal,
+  action == Jans::Action::"Read",
+  resource in Jans::Document
+) when {
+  context has tokens.acme_access_token &&
+  context.tokens.acme_access_token.hasTag("scope") &&
+  context.tokens.acme_access_token.getTag("scope").contains("read:documents")
+};
+```
+
+**Multi-issuer validation**:
+```cedar
+permit(
+  principal,
+  action == Trade::Action::"Vote",
+  resource in Trade::Election
+) when {
+  // Require token from trade association
+  context has tokens.trade_association_access_token &&
+  context.tokens.trade_association_access_token.hasTag("member_status") &&
+  context.tokens.trade_association_access_token.getTag("member_status").contains("Corporate Member") &&
+  // AND token from employer
+  context has tokens.company_access_token &&
+  context.tokens.company_access_token.hasTag("employee_id")
+};
+```
+
+**Custom token type**:
+```cedar
+permit(
+  principal,
+  action == Acme::Action::"SwimWithDolphin",
+  resource == Acme::Aquarium::"Miami"
+) when {
+  context has tokens.dolphin_acme_dolphin_token &&
+  context.tokens.dolphin_acme_dolphin_token.hasTag("waiver") &&
+  context.tokens.dolphin_acme_dolphin_token.getTag("waiver").contains("signed") &&
+  context.tokens.dolphin_acme_dolphin_token.hasTag("clearance_level") &&
+  context.tokens.dolphin_acme_dolphin_token.getTag("clearance_level").contains(5)
+};
+```
+
+### Trusted Issuer Configuration for Multi-Issuer
+
+The `name` field in trusted issuer configuration is critical for multi-issuer authorization:
+
+```json
+"trusted_issuers": {
+  "acme_issuer_id": {
+    "name": "Acme",  // Used in token collection naming: "acme_access_token"
+    "description": "Acme Corporation IDP",
+    "openid_configuration_endpoint": "https://idp.acme.com/.well-known/openid-configuration",
+    "token_metadata": {
+      "access_token": {
+        "entity_type_name": "Jans::Access_Token",
+        "token_id": "jti"
+      }
+    }
+  },
+  "dolphin_issuer_id": {
+    "name": "Dolphin",  // Used in token collection naming: "dolphin_acme_dolphin_token"
+    "description": "Dolphin Service Provider",
+    "openid_configuration_endpoint": "https://idp.dolphin.sea/.well-known/openid-configuration",
+    "token_metadata": {
+      "dolphin_token": {
+        "entity_type_name": "Acme::DolphinToken",
+        "token_id": "jti"
+      }
+    }
+  }
+}
+```
+
+The `name` field ensures predictable and secure token entity naming in the policy evaluation context.
+
 ## Policy and Schema Authoring
 
 You can hand create your Cedar policies and schema in
