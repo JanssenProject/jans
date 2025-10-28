@@ -88,7 +88,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=ca1becee5964eb9a8737a743925b34d24617a64f
+ENV JANS_SOURCE_VERSION=408db95b458691c2b307b51fe180f9cc61b4eb95
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -102,6 +102,8 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && git sparse-checkout add jans-linux-setup/jans_setup \
     && git sparse-checkout add jans-pycloudlib \
     && git sparse-checkout add jans-config-api/plugins/docs \
+    && git sparse-checkout add jans-lock/lock-server/service/src/main/policy \
+    && git sparse-checkout add jans-cedarling/schema \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
@@ -116,7 +118,9 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
     && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico \
-    && cp jans-config-api/plugins/docs/lock-plugin-swagger.yaml /app/templates/jans-lock/
+    && cp jans-config-api/plugins/docs/lock-plugin-swagger.yaml /app/templates/jans-lock/ \
+    && cp -R jans-lock/lock-server/service/src/main/policy /app/templates/jans-lock/policy \
+    && cp jans-cedarling/schema/cedarling_core.json /app/templates/jans-lock/cedarling_core.json
 
 # ======
 # Python

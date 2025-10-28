@@ -155,7 +155,7 @@ mod test {
             ref error,
         } if
             entity_type_name == "Test" &&
-            matches!(error, BuildEntityErrorKind::MissingEntityId(_))
+            matches!(&**error, BuildEntityErrorKind::MissingEntityId(_))
         ));
 
         // Case where there's available sources but the token is missing the claim
@@ -178,7 +178,7 @@ mod test {
             ref error,
         } if
             entity_type_name == "Test" &&
-            matches!(error, BuildEntityErrorKind::MissingEntityId(_))
+            matches!(&**error, BuildEntityErrorKind::MissingEntityId(_))
         ));
     }
 }

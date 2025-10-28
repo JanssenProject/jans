@@ -3098,7 +3098,7 @@
           ],
           "superScopes": [
             {
-              "inum": "1800.03.6",
+              "inum": "1800.01.78",
               "name": "https://jans.io/oauth/lock/audit.readonly"
             }
           ]
@@ -3116,7 +3116,7 @@
           "groupScopes": [],
           "superScopes": [
             {
-              "inum": "1800.03.7",
+              "inum": "1800.01.79",
               "name": "https://jans.io/oauth/lock/audit.write"
             }
           ]
@@ -3144,7 +3144,7 @@
           ],
           "superScopes": [
             {
-              "inum": "1800.03.6",
+              "inum": "1800.01.78",
               "name": "https://jans.io/oauth/lock/audit.readonly"
             }
           ]
@@ -3162,7 +3162,7 @@
           "groupScopes": [],
           "superScopes": [
             {
-              "inum": "1800.03.7",
+              "inum": "1800.01.79",
               "name": "https://jans.io/oauth/lock/audit.write"
             }
           ]
@@ -3190,7 +3190,7 @@
           ],
           "superScopes": [
             {
-              "inum": "1800.03.6",
+              "inum": "1800.01.78",
               "name": "https://jans.io/oauth/lock/audit.readonly"
             }
           ]
@@ -3208,7 +3208,7 @@
           "groupScopes": [],
           "superScopes": [
             {
-              "inum": "1800.03.7",
+              "inum": "1800.01.79",
               "name": "https://jans.io/oauth/lock/audit.write"
             }
           ]
@@ -3355,13 +3355,13 @@
           ],
           "scopes": [
             {
-              "inum": "1800.01.93",
+              "inum": "1800.01.27",
               "name": "https://jans.io/oauth/config/logging.readonly"
             }
           ],
           "groupScopes": [
             {
-              "inum": "1800.01.94",
+              "inum": "1800.01.28",
               "name": "https://jans.io/oauth/config/logging.write"
             }
           ],
