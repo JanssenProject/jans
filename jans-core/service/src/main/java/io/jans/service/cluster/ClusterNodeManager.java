@@ -103,7 +103,7 @@ public abstract class ClusterNodeManager {
     }
 
     private void checkNodeNotNull() {
-        Preconditions.checkNotNull(node, "Failed to allocate cluster node.");
+        Preconditions.checkState(node != null, "Cluster node is not allocated.");
     }
 
 }
