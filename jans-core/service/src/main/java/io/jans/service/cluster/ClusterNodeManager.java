@@ -87,11 +87,18 @@ public abstract class ClusterNodeManager {
         }
     }
 
-    private void updateNode() {
-        checkNodeNotNull();
-        clusterNodeService.refresh(node);
-    }
-
+	private void updateNode() {
+		if (node == null) {
+			node = clusterNodeService.allocate();
+			if (node != null) {
+				log.info("Assigned cluster node id '{}' for this instance (late allocation)", node.getId());
+			} else {
+				log.error("Allocation failed during periodic update.");
+			}
+			return;
+		}
+		clusterNodeService.refresh(node);
+	}
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("Stopped cluster manager");
