@@ -161,7 +161,7 @@ public abstract class ClusterNodeService {
     // all logs must be INFO here, because allocate method is called during initialization before
     // LoggerService set loggingLevel from config.
     public ClusterNode allocate() {
-        log.info("Allocating node, getLockkey() {}... ", getLockkey());
+        log.info("Allocating node, getLockKey() {}... ", getLockKey());
 
         // Try to use existing expired entry (node is expired if not used for 3 minutes)
         List<ClusterNode> expiredNodes = getClusterNodesExpired();
@@ -174,7 +174,7 @@ public abstract class ClusterNodeService {
 
                 expiredNode.setCreationDate(currentTime);
                 expiredNode.setLastUpdate(currentTime);
-                expiredNode.setLockKey(getLockkey());
+                expiredNode.setLockKey(getLockKey());
 
                 update(expiredNode);
 
@@ -182,12 +182,12 @@ public abstract class ClusterNodeService {
                 ClusterNode lockedNode = getClusterNodeByDn(expiredNode.getDn());
 
                 // If lock is ours reset entry and return it
-                if (getLockkey().equals(lockedNode.getLockKey())) {
-                    log.info("Re-using existing node {}, getLockkey() {}", lockedNode.getId(), getLockkey());
+                if (getLockKey().equals(lockedNode.getLockKey())) {
+                    log.info("Re-using existing node {}, getLockKey() {}", lockedNode.getId(), getLockKey());
                     return lockedNode;
                 }
 
-                log.info("Failed to lock node {}, getLockkey() {}", lockedNode.getId(), getLockkey());
+                log.info("Failed to lock node {}, getLockKey() {}", lockedNode.getId(), getLockKey());
             } catch (EntryPersistenceException ex) {
                 log.debug("Unexpected error happened during entry lock", ex);
             }
@@ -199,7 +199,7 @@ public abstract class ClusterNodeService {
             log.info("Attempting to persist new node. Attempt {} out of {} ...", attempt, ATTEMPT_LIMIT);
 
             ClusterNode lastClusterNode = getClusterNodeLast();
-            log.info("lastClusterNode - {}, getLockkey() {}", lastClusterNode != null ? lastClusterNode.getId() : -1, getLockkey());
+            log.info("lastClusterNode - {}, getLockKey() {}", lastClusterNode != null ? lastClusterNode.getId() : -1, getLockKey());
 
             Integer lastClusterNodeIndex = lastClusterNode == null ? 0 : lastClusterNode.getId() + 1;
 
@@ -211,7 +211,7 @@ public abstract class ClusterNodeService {
             node.setCreationDate(currentTime);
             node.setLastUpdate(currentTime);
             node.setType(getClusterNodeType());
-            node.setLockKey(getLockkey());
+            node.setLockKey(getLockKey());
 
             // Do persist operation in try/catch for safety and do not throw error to upper levels
             try {
@@ -221,14 +221,14 @@ public abstract class ClusterNodeService {
                 ClusterNode lockedNode = getClusterNodeByDn(node.getDn());
 
                 // if lock is ours return it
-                if (getLockkey().equals(lockedNode.getLockKey())) {
+                if (getLockKey().equals(lockedNode.getLockKey())) {
                     log.info("Successfully created new cluster node {}", node);
                     return lockedNode;
                 } else {
                     log.info("Locked key does not match. nodeLockKey {} of node {}", lockedNode.getLockKey(), lockedNode.getId());
                 }
             } catch (EntryPersistenceException ex) {
-                log.debug("Unexpected error happened during entry lock, getLockkey() " + getLockKey(), ex);
+                log.debug("Unexpected error happened during entry lock, getLockKey() " + getLockKey(), ex);
             }
 
             attempt++;
