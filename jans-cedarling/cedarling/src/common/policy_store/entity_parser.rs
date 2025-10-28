@@ -10,7 +10,7 @@
 //! parent relationships.
 
 use super::errors::{CedarEntityErrorType, PolicyStoreError};
-use cedar_policy::{Entities, Entity, EntityId, EntityTypeName, EntityUid};
+use cedar_policy::{Entities, Entity, EntityId, EntityTypeName, EntityUid, Schema};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use std::collections::{HashMap, HashSet};
@@ -38,9 +38,9 @@ pub struct ParsedEntity {
 pub struct RawEntityJson {
     /// Entity unique identifier
     pub uid: EntityUidJson,
-    /// Entity attributes (optional)
+    /// Entity attributes as a map of attribute names to values (optional)
     #[serde(default)]
-    pub attrs: JsonValue,
+    pub attrs: HashMap<String, JsonValue>,
     /// Parent entity UIDs for hierarchy (optional)
     #[serde(default)]
     pub parents: Vec<EntityUidJson>,
@@ -63,6 +63,7 @@ impl EntityParser {
     /// Parse a single Cedar entity from JSON content.
     ///
     /// Validates the entity structure, parses the UID, attributes, and parent relationships.
+    /// Optionally validates entity attributes against a schema.
     ///
     /// # Errors
     /// Returns `PolicyStoreError` if:
@@ -70,10 +71,21 @@ impl EntityParser {
     /// - Entity structure is invalid
     /// - UID format is invalid
     /// - Parent UID format is invalid
-    pub fn parse_entity(content: &str, filename: &str) -> Result<ParsedEntity, PolicyStoreError> {
+    /// - Schema validation fails (if schema provided)
+    pub fn parse_entity(
+        content: &str,
+        filename: &str,
+        schema: Option<&Schema>,
+    ) -> Result<ParsedEntity, PolicyStoreError> {
+        let json_value: JsonValue =
+            serde_json::from_str(content).map_err(|e| PolicyStoreError::JsonParsing {
+                file: filename.to_string(),
+                source: e,
+            })?;
+
         // Parse the JSON structure
         let raw_entity: RawEntityJson =
-            serde_json::from_str(content).map_err(|e| PolicyStoreError::JsonParsing {
+            serde_json::from_value(json_value).map_err(|e| PolicyStoreError::JsonParsing {
                 file: filename.to_string(),
                 source: e,
             })?;
@@ -81,56 +93,49 @@ impl EntityParser {
         // Parse the entity UID
         let uid = Self::parse_entity_uid(&raw_entity.uid, filename)?;
 
-        // Parse parent UIDs
-        let parents: HashSet<EntityUid> = raw_entity
+        // Parse parent UIDs (for hierarchy validation only)
+        let _parents: HashSet<EntityUid> = raw_entity
             .parents
             .iter()
             .map(|parent_uid| Self::parse_entity_uid(parent_uid, filename))
             .collect::<Result<HashSet<_>, _>>()?;
 
-        // Convert attributes to Cedar format
-        // Cedar expects attributes as a JSON value that can be converted to RestrictedExpression
-        let entity = if raw_entity.attrs.is_null()
-            || raw_entity.attrs == JsonValue::Object(Default::default())
-        {
-            // Empty attributes
-            Entity::new(uid.clone(), HashMap::new(), parents).map_err(|e| {
-                PolicyStoreError::CedarEntityError {
-                    file: filename.to_string(),
-                    err: CedarEntityErrorType::EntityCreationError(e.to_string()),
-                }
+        // Use Cedar's from_json_value to parse the entity with attributes
+        // This properly handles attribute conversion to RestrictedExpression
+        let entity_json = serde_json::json!([{
+            "uid": {
+                "type": raw_entity.uid.entity_type,
+                "id": raw_entity.uid.id
+            },
+            "attrs": raw_entity.attrs,
+            "parents": raw_entity.parents
+        }]);
+
+        // Parse with optional schema validation
+        let entities_store = Entities::from_json_value(entity_json, schema).map_err(|e| {
+            PolicyStoreError::CedarEntityError {
+                file: filename.to_string(),
+                err: CedarEntityErrorType::JsonParseError(format!(
+                    "Failed to parse entity{}: {}",
+                    if schema.is_some() {
+                        " (schema validation failed)"
+                    } else {
+                        ""
+                    },
+                    e
+                )),
+            }
+        })?;
+
+        // Extract the single entity
+        let entity = entities_store
+            .iter()
+            .next()
+            .ok_or_else(|| PolicyStoreError::CedarEntityError {
+                file: filename.to_string(),
+                err: CedarEntityErrorType::NoEntityFound,
             })?
-        } else {
-            // Parse entity from JSON (Cedar's native format)
-            // Cedar's from_json_value expects an array of entities
-            let entity_json = serde_json::json!([{
-                "uid": {
-                    "type": raw_entity.uid.entity_type,
-                    "id": raw_entity.uid.id
-                },
-                "attrs": raw_entity.attrs,
-                "parents": raw_entity.parents
-            }]);
-
-            let entities_store = Entities::from_json_value(entity_json, None).map_err(|e| {
-                PolicyStoreError::CedarEntityError {
-                    file: filename.to_string(),
-                    err: CedarEntityErrorType::JsonParseError(e.to_string()),
-                }
-            })?;
-
-            // Extract the single entity (there should only be one)
-            let entity = entities_store
-                .iter()
-                .next()
-                .ok_or_else(|| PolicyStoreError::CedarEntityError {
-                    file: filename.to_string(),
-                    err: CedarEntityErrorType::NoEntityFound,
-                })?
-                .clone();
-
-            entity
-        };
+            .clone();
 
         Ok(ParsedEntity {
             entity,
@@ -147,6 +152,7 @@ impl EntityParser {
     pub fn parse_entities(
         content: &str,
         filename: &str,
+        schema: Option<&Schema>,
     ) -> Result<Vec<ParsedEntity>, PolicyStoreError> {
         let json_value: JsonValue =
             serde_json::from_str(content).map_err(|e| PolicyStoreError::JsonParsing {
@@ -165,7 +171,7 @@ impl EntityParser {
                             source: e,
                         }
                     })?;
-                    let parsed = Self::parse_entity(&entity_str, filename)?;
+                    let parsed = Self::parse_entity(&entity_str, filename, schema)?;
                     parsed_entities.push(parsed);
                 }
                 Ok(parsed_entities)
@@ -180,7 +186,7 @@ impl EntityParser {
                             source: e,
                         }
                     })?;
-                    let parsed = Self::parse_entity(&entity_str, filename)?;
+                    let parsed = Self::parse_entity(&entity_str, filename, schema)?;
                     parsed_entities.push(parsed);
                 }
                 Ok(parsed_entities)
@@ -322,7 +328,7 @@ mod tests {
             "parents": []
         }"#;
 
-        let result = EntityParser::parse_entity(content, "user1.json");
+        let result = EntityParser::parse_entity(content, "user1.json", None);
         if let Err(ref e) = result {
             eprintln!("Error parsing entity: {}", e);
         }
@@ -355,7 +361,7 @@ mod tests {
             ]
         }"#;
 
-        let result = EntityParser::parse_entity(content, "user2.json");
+        let result = EntityParser::parse_entity(content, "user2.json", None);
         assert!(result.is_ok(), "Should parse entity with parents");
 
         let parsed = result.unwrap();
@@ -378,7 +384,7 @@ mod tests {
             "parents": []
         }"#;
 
-        let result = EntityParser::parse_entity(content, "jans_user.json");
+        let result = EntityParser::parse_entity(content, "jans_user.json", None);
         assert!(result.is_ok(), "Should parse entity with namespace");
 
         let parsed = result.unwrap();
@@ -396,7 +402,7 @@ mod tests {
             "parents": []
         }"#;
 
-        let result = EntityParser::parse_entity(content, "resource.json");
+        let result = EntityParser::parse_entity(content, "resource.json", None);
         assert!(result.is_ok(), "Should parse entity with empty attrs");
     }
 
@@ -404,7 +410,7 @@ mod tests {
     fn test_parse_entity_invalid_json() {
         let content = "{ invalid json }";
 
-        let result = EntityParser::parse_entity(content, "invalid.json");
+        let result = EntityParser::parse_entity(content, "invalid.json", None);
         assert!(result.is_err(), "Should fail on invalid JSON");
 
         if let Err(PolicyStoreError::JsonParsing { file, .. }) = result {
@@ -425,7 +431,7 @@ mod tests {
             "parents": []
         }"#;
 
-        let result = EntityParser::parse_entity(content, "invalid_type.json");
+        let result = EntityParser::parse_entity(content, "invalid_type.json", None);
         assert!(result.is_err(), "Should fail on invalid entity type");
     }
 
@@ -444,7 +450,7 @@ mod tests {
             }
         ]"#;
 
-        let result = EntityParser::parse_entities(content, "users.json");
+        let result = EntityParser::parse_entities(content, "users.json", None);
         assert!(result.is_ok(), "Should parse entity array");
 
         let parsed = result.unwrap();
@@ -466,7 +472,7 @@ mod tests {
             }
         }"#;
 
-        let result = EntityParser::parse_entities(content, "users.json");
+        let result = EntityParser::parse_entities(content, "users.json", None);
         assert!(result.is_ok(), "Should parse entity object");
 
         let parsed = result.unwrap();
@@ -639,5 +645,42 @@ mod tests {
 
         let store = result.unwrap();
         assert_eq!(store.iter().count(), 2, "Store should have 2 entities");
+    }
+
+    #[test]
+    fn test_parse_entity_with_schema_validation() {
+        use cedar_policy::{Schema, SchemaFragment};
+        use std::str::FromStr;
+
+        // Create a schema that defines User entity type
+        let schema_src = r#"
+            entity User = {
+                name: String,
+                age: Long
+            };
+        "#;
+
+        let fragment = SchemaFragment::from_str(schema_src).expect("Should parse schema");
+        let schema = Schema::from_schema_fragments([fragment]).expect("Should create schema");
+
+        // Valid entity matching schema
+        let valid_content = r#"{
+            "uid": {
+                "type": "User",
+                "id": "alice"
+            },
+            "attrs": {
+                "name": "Alice",
+                "age": 30
+            },
+            "parents": []
+        }"#;
+
+        let result = EntityParser::parse_entity(valid_content, "user.json", Some(&schema));
+        assert!(
+            result.is_ok(),
+            "Should parse entity with valid schema: {:?}",
+            result.err()
+        );
     }
 }

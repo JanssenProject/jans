@@ -1175,7 +1175,7 @@ permit(
 
         for entity_file in &loaded.entities {
             let parsed_entities =
-                EntityParser::parse_entities(&entity_file.content, &entity_file.name)
+                EntityParser::parse_entities(&entity_file.content, &entity_file.name, None)
                     .expect("Should parse entities");
             all_entities.extend(parsed_entities);
         }
@@ -1264,7 +1264,7 @@ permit(
         let mut all_entities = Vec::new();
         for entity_file in &loaded.entities {
             let parsed_entities =
-                EntityParser::parse_entities(&entity_file.content, &entity_file.name)
+                EntityParser::parse_entities(&entity_file.content, &entity_file.name, None)
                     .expect("Should parse entities");
             all_entities.extend(parsed_entities);
         }
@@ -1321,7 +1321,7 @@ permit(
 
         for entity_file in &loaded.entities {
             let parsed_entities =
-                EntityParser::parse_entities(&entity_file.content, &entity_file.name)
+                EntityParser::parse_entities(&entity_file.content, &entity_file.name, None)
                     .expect("Should parse entities with complex attributes");
             all_entities.extend(parsed_entities);
         }
