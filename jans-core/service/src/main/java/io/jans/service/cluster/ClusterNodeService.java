@@ -249,7 +249,7 @@ public abstract class ClusterNodeService {
         node.setCreationDate(currentTime);
         node.setLastUpdate(currentTime);
 
-        log.trace("Reseting node: {}", node);
+        log.trace("Resetting node: {}", node);
         update(node);
 
         return node;
