@@ -77,6 +77,7 @@ mod test {
     use super::super::*;
     use super::*;
     use crate::common::policy_store::TrustedIssuer;
+    use crate::log::TEST_LOGGER;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
@@ -99,6 +100,8 @@ mod test {
             &HashMap::new(),
             Some(&validator_schema),
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
 
@@ -143,6 +146,8 @@ mod test {
             &HashMap::new(),
             Some(&validator_schema),
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
 
@@ -197,6 +202,8 @@ mod test {
             &HashMap::new(),
             Some(&validator_schema),
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
 
