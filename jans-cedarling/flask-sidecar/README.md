@@ -4,7 +4,7 @@ This is a Flask API that implements the [AuthZen](https://openid.github.io/authz
 
 ## Running
 
-To run the API:
+To run the API, you will need either Python3.10 or 3.11 installed.
 
 - Install [poetry](https://python-poetry.org/docs/#installation)
 - Clone the [Janssen](https://github.com/JanssenProject/jans) repository:
@@ -16,7 +16,12 @@ To run the API:
   && git sparse-checkout set jans-cedarling
   ```
 - Navigate to `jans-cedarling/flask-sidecar`
+- Ensure your poetry environment is using one of the supported Python versions (3.10 or 3.11). For example, to use python3.10: `poetry env use python3.10`. This is not necessary if your system already uses one of these versions by default.
 - Run `poetry install` to install dependencies
+- Download the correct version of the binding library:
+  - [3.10](https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp310-cp310-manylinux_2_34_x86_64.whl)
+  - [3.11](https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp311-cp311-manylinux_2_34_x86_64.whl)
+- Install the binding to your local environment: `poetry add ./cedarling_python-0.0.0-[python-version]-manylinux_2_34_x86_64.whl`
 - Navigate to `main/`
 - Run `poetry run flask run` to run the API on `http://127.0.0.1:5000`
 
@@ -29,6 +34,7 @@ For running via poetry, the sidecar supports the following environment variables
 | APP_MODE                        | testing       | development, testing, production |
 | CEDARLING_BOOTSTRAP_CONFIG_FILE | None          | Path to your configuration       |
 | SIDECAR_DEBUG_RESPONSE          | False         | True, False                      |
+| DISABLE_HASH_CHECK              | False         | True, False                      |
 
 - Navigate to `jans/jans-cedarling/flask-sidecar/main` and create a file named `.env`
 - Set environment variables like so:
@@ -72,6 +78,7 @@ Not yet implemented
   	-e APP_MODE='development' \
   	-e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
   	-e SIDECAR_DEBUG_RESPONSE=False \
+	-e DISABLE_HASH_CHECK=False \
   	--mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
   	-p 5000:5000\
   	ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
@@ -82,6 +89,7 @@ Not yet implemented
   docker run \
   	-e APP_MODE='development' \
   	-e SIDECAR_DEBUG_RESPONSE=True \
+	-e DISABLE_HASH_CHECK=False \
   	-e CEDARLING_APPLICATION_NAME=MyApp \
   	-e CEDARLING_POLICY_STORE_ID=abcdef \
   	-e CEDARLING_POLICY_STORE_URI=https://gluu.org \
@@ -140,6 +148,7 @@ Not yet implemented
 ```
 APP_MODE=development
 SIDECAR_DEBUG_RESPONSE=True
+DISABLE_HASH_CHECK=True
 CEDARLING_APPLICATION_NAME=MyApp
 CEDARLING_POLICY_STORE_ID=abcdef
 CEDARLING_POLICY_STORE_URI=https://gluu.org

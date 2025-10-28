@@ -128,42 +128,7 @@ Create a file named `bootstrap.json`. You may use the [sample](https://github.co
 
 - Set `CEDARLING_POLICY_STORE_URI` to the URL you copied from Agama Lab.
 - Set `CEDARLING_USER_AUTHZ` to "disabled"
-- Set `CEDARLING_TOKEN_CONFIGS` to the following value:
-
-```json
-{
-  "access_token": {
-    "entity_type_name": "Jans::Access_token",
-    "iss": "disabled",
-    "aud": "disabled",
-    "sub": "disabled",
-    "nbf": "disabled",
-    "exp": "disabled",
-    "jti": "disabled"
-  },
-  "id_token": {
-    "entity_type_name": "Jans::id_token",
-    "iss": "disabled",
-    "aud": "disabled",
-    "sub": "disabled",
-    "nbf": "disabled",
-    "exp": "disabled",
-    "jti": "disabled"
-  },
-  "userinfo_token": {
-    "entity_type_name": "Jans::Userinfo_token",
-    "iss": "disabled",
-    "aud": "disabled",
-    "sub": "disabled",
-    "nbf": "disabled",
-    "exp": "disabled",
-    "jti": "disabled"
-  }
-}
-```
-
 - Set `CEDARLING_MAPPING_WORKLOAD` to `Jans::Workload`
-
 - Set `CEDARLING_ID_TOKEN_TRUST_MODE` to "never"
 
 Pull the Docker image:
@@ -175,7 +140,14 @@ docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
 Run the Docker image, replacing `</absolute/path/to/bootstrap.json>` with the absolute path to your bootstrap file:
 
 ```bash
-docker run -e APP_MODE='development' -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json -e SIDECAR_DEBUG_RESPONSE=True --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json -p 5000:5000 -d ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+docker run -d \
+  -e APP_MODE='development' \
+  -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
+  -e SIDECAR_DEBUG_RESPONSE=True \
+  -e DISABLE_HASH_CHECK=True \
+  --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
+  -p 5000:5000\
+  ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
 ```
 
 The sidecar is now running on [http://127.0.0.1:5000](http://127.0.0.1:5000). Keep track of the output of the previous command,
@@ -207,6 +179,7 @@ poetry run pip install cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.
 APP_MODE=development
 CEDARLING_BOOTSTRAP_CONFIG_FILE=../secrets/bootstrap.json
 SIDECAR_DEBUG_RESPONSE=False
+DISABLE_HASH_CHECK=True
 ```
 
 - Run the sidecar: `poetry run flask run`
