@@ -203,6 +203,7 @@ fn parse_default_entities(
                             parents_set.insert(parent_uid);
                         },
                         Err(e) => {
+                            // log warn that we could not parse uid
                             let log_entry = LogEntry::new_with_data(LogType::System, None)
                                 .set_level(LogLevel::WARN)
                                 .set_message(format!(
@@ -213,6 +214,16 @@ fn parse_default_entities(
                             logger.log_any(log_entry);
                         },
                     }
+                } else {
+                    // log warn that we skip value because it is not object
+                    let log_entry = LogEntry::new_with_data(LogType::System, None)
+                        .set_level(LogLevel::WARN)
+                        .set_message(format!(
+                            "In default entity parent array json value should be object, skip: {}",
+                            parent.to_string()
+                        ));
+
+                    logger.log_any(log_entry);
                 }
             }
 
