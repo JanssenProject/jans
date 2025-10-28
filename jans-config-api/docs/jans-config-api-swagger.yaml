@@ -14952,17 +14952,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanView:
+        adminCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanAccess:
+        userCanAccess:
           type: boolean
-        userCanEdit:
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
-        userCanAccess:
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -16702,10 +16702,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
