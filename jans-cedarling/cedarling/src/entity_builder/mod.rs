@@ -54,12 +54,12 @@ fn parse_default_entities(
     for (entity_id, entity_data) in default_entities_data {
         // Validate entity ID to prevent injection attacks
         if entity_id.trim().is_empty() {
-            return Err(BuildEntityError {
-                entity_type_name: "DefaultEntity".to_string(),
-                error: BuildEntityErrorKind::InvalidEntityData(
+            return Err(BuildEntityError::new(
+                "DefaultEntity".to_string(),
+                BuildEntityErrorKind::InvalidEntityData(
                     "Entity ID cannot be empty or whitespace-only".to_string(),
                 ),
-            });
+            ));
         }
 
         // Basic security validation - prevent obvious injection patterns
@@ -75,13 +75,13 @@ fn parse_default_entities(
         let entity_id_lower = entity_id.to_lowercase();
         for pattern in &dangerous_patterns {
             if entity_id_lower.contains(pattern) {
-                return Err(BuildEntityError {
-                    entity_type_name: "DefaultEntity".to_string(),
-                    error: BuildEntityErrorKind::InvalidEntityData(format!(
+                return Err(BuildEntityError::new(
+                    "DefaultEntity".to_string(),
+                    BuildEntityErrorKind::InvalidEntityData(format!(
                         "Entity ID '{}' contains potentially dangerous content",
                         entity_id
                     )),
-                });
+                ));
             }
         }
 
@@ -89,13 +89,13 @@ fn parse_default_entities(
         let entity_attrs = if let Value::Object(obj) = entity_data {
             obj.clone()
         } else {
-            return Err(BuildEntityError {
-                entity_type_name: DEFAULT_ENTITY_TYPE.to_string(),
-                error: BuildEntityErrorKind::InvalidEntityData(format!(
+            return Err(BuildEntityError::new(
+                DEFAULT_ENTITY_TYPE.to_string(),
+                BuildEntityErrorKind::InvalidEntityData(format!(
                     "Default entity data for '{}' must be a JSON object",
                     entity_id
                 )),
-            });
+            ));
         };
 
         // Extract entity type from the data or use a default
@@ -117,13 +117,13 @@ fn parse_default_entities(
                         continue;
                     },
                     Err(errors) => {
-                        return Err(BuildEntityError {
-                            entity_type_name: entity_type.to_string(),
-                            error: BuildEntityErrorKind::InvalidEntityData(format!(
+                        return Err(BuildEntityError::new(
+                            entity_type.to_string(),
+                            BuildEntityErrorKind::InvalidEntityData(format!(
                                 "Failed to convert attribute '{}' for entity '{}' (type: {}): {:?}",
                                 key, entity_id, entity_type, errors
                             )),
-                        });
+                        ));
                     },
                 }
             }
@@ -274,7 +274,9 @@ impl EntityBuilder {
             roles.extend(parents);
         }
 
-        let resource = self.build_resource_entity(&request.resource)?;
+        let resource = self
+            .build_resource_entity(&request.resource)
+            .map_err(Box::new)?;
 
         Ok(BuiltEntitiesUnsigned {
             principals,
@@ -318,9 +320,9 @@ pub fn build_cedar_entity(
     parents: HashSet<EntityUid>,
 ) -> Result<Entity, BuildEntityError> {
     let uid = EntityUid::from_str(&format!("{}::\"{}\"", type_name, id))
-        .map_err(|e| BuildEntityErrorKind::from(e).while_building(type_name))?;
+        .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
     let entity = Entity::new(uid, attrs, parents)
-        .map_err(|e| BuildEntityErrorKind::from(e).while_building(type_name))?;
+        .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
 
     Ok(entity)
 }
@@ -523,13 +525,16 @@ mod test {
             .expect("init entity builder");
 
         let entities = entity_builder
-            .build_entities(&tokens, &EntityData {
-                cedar_mapping: CedarEntityMapping {
-                    entity_type: "Jans::Resource".into(),
-                    id: "some_id".into(),
+            .build_entities(
+                &tokens,
+                &EntityData {
+                    cedar_mapping: CedarEntityMapping {
+                        entity_type: "Jans::Resource".into(),
+                        id: "some_id".into(),
+                    },
+                    attributes: HashMap::new(),
                 },
-                attributes: HashMap::new(),
-            })
+            )
             .expect("build entities");
 
         assert_entity_eq(
