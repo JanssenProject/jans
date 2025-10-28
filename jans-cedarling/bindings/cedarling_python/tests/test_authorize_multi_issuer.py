@@ -123,9 +123,9 @@ def test_authorize_multi_issuer_with_invalid_token():
     try:
         instance.authorize_multi_issuer(request)
         assert False, "Should have raised an error for invalid token"
-    except (authorize_errors.AuthorizeError, Exception) as e:
-        # Expected to catch an error
-        assert e is not None, "should raise an error"
+    except authorize_errors.MultiIssuerValidationError as e:
+        # Expected to catch a multi-issuer validation error for invalid JWT
+        assert e is not None, "should raise a MultiIssuerValidationError"
 
 
 def test_authorize_multi_issuer_with_empty_tokens():
@@ -147,9 +147,9 @@ def test_authorize_multi_issuer_with_empty_tokens():
     try:
         instance.authorize_multi_issuer(request)
         assert False, "Should have raised an error for empty tokens"
-    except (authorize_errors.AuthorizeError, Exception) as e:
-        # Expected to catch an error
-        assert e is not None, "should raise an error"
+    except authorize_errors.MultiIssuerValidationError as e:
+        # Expected to catch a multi-issuer validation error for empty token array
+        assert e is not None, "should raise a MultiIssuerValidationError"
 
 
 def test_authorize_multi_issuer_with_invalid_resource():
@@ -214,11 +214,24 @@ def test_authorize_multi_issuer_deny_decision():
     
     result = instance.authorize_multi_issuer(request)
     
-    # The decision may be allow or deny depending on policy
-    # Just verify the structure is correct
-    assert hasattr(result, 'is_allowed'), "result should have is_allowed method"
-    assert hasattr(result, 'response'), "result should have response method"
-    assert hasattr(result, 'request_id'), "result should have request_id method"
+    # Verify decision is denied
+    assert not result.is_allowed(), "request should be denied"
+    
+    # Verify response decision is DENY
+    response = result.response()
+    decision = response.decision
+    assert str(decision) == DENY_DECISION_STR, "decision should be DENY"
+    assert decision.value == DENY_DECISION_STR, "decision value should be DENY"
+    
+    # Verify diagnostics
+    diagnostics = response.diagnostics
+    # For DENY decisions, we should have no reasons (no policies granted access)
+    assert len(diagnostics.reason) == 0, "should have no reasons for DENY decision"
+    assert len(diagnostics.errors) == 0, "should have no errors"
+    
+    # Verify request ID is present
+    request_id = result.request_id()
+    assert request_id is not None and request_id != "", "request_id should be present"
 
 
 def test_authorize_multi_issuer_with_context():
@@ -299,9 +312,22 @@ def test_authorize_multi_issuer_with_minimal_context():
     
     result = instance.authorize_multi_issuer(request)
     
-    # Verify the request was processed successfully
-    assert result is not None, "result should not be None"
-    assert hasattr(result, 'is_allowed'), "result should have is_allowed method"
-    assert hasattr(result, 'response'), "result should have response method"
-    assert hasattr(result, 'request_id'), "result should have request_id method"
+    # Verify decision is allowed (same action and tokens as successful test)
+    assert result.is_allowed(), "request should be allowed"
+    
+    # Verify response decision
+    response = result.response()
+    decision = response.decision
+    assert str(decision) == ALLOW_DECISION_STR, "decision should be ALLOW"
+    assert decision.value == ALLOW_DECISION_STR, "decision value should be ALLOW"
+    
+    # Verify diagnostics
+    diagnostics = response.diagnostics
+    # Reason should contain policy IDs that granted access
+    assert len(diagnostics.reason) > 0, "should have at least one reason"
+    assert len(diagnostics.errors) == 0, "should have no errors"
+    
+    # Verify request ID is present
+    request_id = result.request_id()
+    assert request_id is not None and request_id != "", "request_id should be present"
 
