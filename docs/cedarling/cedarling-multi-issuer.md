@@ -715,6 +715,7 @@ if result.is_allowed():
 ```
 
 **Policy**:
+
 ```cedar
 permit(
   principal is Jans::User,
@@ -744,6 +745,7 @@ if result.decision:
 ```
 
 **Policy**:
+
 ```cedar
 permit(
   principal,

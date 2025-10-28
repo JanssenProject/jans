@@ -123,7 +123,6 @@ create_exception!(
 );
 
 #[pyclass]
-#[derive()]
 pub struct ErrorPayload(CedarlingAuthorizeError);
 
 #[pymethods]

@@ -409,7 +409,7 @@ entity Token = {
 } tags String;
 ```
 
-**Important**: All JWT claims are stored as **entity tags** on the Token entity. By default, claims are stored as **Sets of Strings** to provide a consistent interface regardless of whether a claim has zero, one, or multiple values.
++**Important**: Core fields (token_type, jti, issuer, exp, validated_at) are attributes; all other JWT claims are stored as **entity tags** on the Token entity. By default, claims are stored as **Sets of Strings** to provide a consistent interface regardless of whether a claim has zero, one, or multiple values.
 
 ### Accessing Token Claims in Policies
 

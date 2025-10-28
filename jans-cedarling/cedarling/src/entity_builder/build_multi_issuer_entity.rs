@@ -224,7 +224,7 @@ impl EntityBuilder {
         }
 
         // Add validation timestamp
-        let validated_at = chrono::Utc::now().timestamp_millis();
+        let validated_at = chrono::Utc::now().timestamp();
         attrs.insert(
             "validated_at".to_string(),
             RestrictedExpression::new_long(validated_at),
