@@ -131,7 +131,7 @@ public abstract class ClusterNodeService {
      *
      * @return list of ClusterNodes
      */
-    public List<ClusterNode> getClusterNodesLived() {
+    public List<ClusterNode> getClusterNodesLive() {
         String clusterNodesBaseDn = getBaseClusterNodeDn();
         if (StringUtils.isBlank(clusterNodesBaseDn)) {
             throw new ConfigurationException("ou=node is not configured in static configuration of AS (jansConfStatic).");
