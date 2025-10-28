@@ -191,10 +191,9 @@ impl AuthorizeMultiIssuerRequest {
             return Err(MultiIssuerValidationError::EmptyTokenArray);
         }
 
-        if let Some(ref context) = self.context {
-            if !context.is_object() {
-                return Err(MultiIssuerValidationError::InvalidContextJson);
-            }
+        if let Some(ref context) = self.context
+            && !context.is_object() {
+            return Err(MultiIssuerValidationError::InvalidContextJson);
         }
 
         Ok(())

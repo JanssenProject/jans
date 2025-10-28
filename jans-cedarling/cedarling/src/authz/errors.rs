@@ -98,6 +98,18 @@ pub enum AuthorizeError {
     MultiIssuerEntity(String),
 }
 
+impl From<Box<EntitiesError>> for AuthorizeError {
+    fn from(err: Box<EntitiesError>) -> Self {
+        AuthorizeError::ValidateEntities(*err)
+    }
+}
+
+impl From<Box<RequestValidationError>> for AuthorizeError {
+    fn from(err: Box<RequestValidationError>) -> Self {
+        AuthorizeError::RequestValidation(*err)
+    }
+}
+
 /// Error type for ID token trust mode validation
 #[derive(Debug, thiserror::Error)]
 pub enum IdTokenTrustModeError {
@@ -125,7 +137,7 @@ pub enum BuildContextError {
     KeyConflict(String),
     /// Error encountered while deserializing the Context from JSON
     #[error(transparent)]
-    DeserializeFromJson(#[from] ContextJsonError),
+    DeserializeFromJson(#[from] Box<ContextJsonError>),
     /// Error encountered if the action being used as the reference to build the Context
     /// is not in the schema
     #[error("failed to find the action `{0}` in the schema")]
@@ -136,15 +148,22 @@ pub enum BuildContextError {
     #[error("invalid action context type: {0}. expected: {1}")]
     InvalidKind(String, String),
     #[error("failed to parse the entity name `{0}`: {1}")]
-    ParseEntityName(String, ParseErrors),
+    ParseEntityName(String, Box<ParseErrors>),
     /// Error encountered while creating Cedar context
     #[error("failed to create Cedar context: {0}")]
     ContextCreation(String),
 }
 
+impl From<ContextJsonError> for BuildContextError {
+    fn from(err: ContextJsonError) -> Self {
+        BuildContextError::DeserializeFromJson(Box::new(err))
+    }
+}
+
 /// Error for creating request role entities
 #[derive(Debug, derive_more::Error, derive_more::Display)]
 #[display("could not create request user entity principal for {uid}: {err}")]
+#[allow(dead_code)]
 pub struct CreateRequestRoleError {
     /// Error value
     pub err: RequestValidationError,

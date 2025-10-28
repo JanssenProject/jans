@@ -109,7 +109,7 @@ impl Authz {
 
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
-            .map_err(|e| AuthorizeError::Action(Box::new(e)))?;
+            .map_err(AuthorizeError::Action)?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
         let entities_data = self
@@ -147,7 +147,7 @@ impl Authz {
                         resource: resource_uid.clone(),
                         context: context.clone(),
                     })
-                    .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
+                    .map_err(|err| InvalidPrincipalError::new(&principal, *err))?;
 
                 let authz_info = AuthorizeInfo {
                     principal: principal.to_string(),
@@ -189,7 +189,7 @@ impl Authz {
                         resource: resource_uid.clone(),
                         context: context.clone(),
                     })
-                    .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
+                    .map_err(|err| InvalidPrincipalError::new(&principal, *err))?;
 
                 let authz_info = AuthorizeInfo {
                     principal: principal.to_string(),
@@ -406,8 +406,13 @@ impl Authz {
             request_id,
         );
 
+        let validated_tokens_arc: HashMap<String, Arc<Token>> = validated_tokens
+            .into_iter()
+            .map(|(k, v)| (k, Arc::new(v)))
+            .collect();
+
         let tokens_logging_info = LogTokensInfo::new(
-            &validated_tokens,
+            &validated_tokens_arc,
             self.config
                 .authorization
                 .decision_log_default_jwt_id
@@ -470,7 +475,7 @@ impl Authz {
         let schema = &self.config.policy_store.schema;
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
-            .map_err(|e| AuthorizeError::Action(Box::new(e)))?;
+            .map_err(AuthorizeError::Action)?;
 
         let BuiltEntitiesUnsigned {
             principals,
@@ -512,7 +517,7 @@ impl Authz {
                     resource: resource_uid.clone(),
                     context: context.clone(),
                 })
-                .map_err(|err| InvalidPrincipalError::new(principal_uid, err))?;
+                .map_err(|err| InvalidPrincipalError::new(principal_uid, *err))?;
 
             principal_responses.insert(principal_uid.clone(), auth_result);
         }

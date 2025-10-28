@@ -88,10 +88,9 @@ fn convert_claim_to_string_set(value: &Value) -> RestrictedExpression {
 
 /// Determine the entity type for a token dynamically
 fn determine_token_entity_type(token: &Token) -> String {
-    if let Some(issuer) = token.iss.as_ref() {
-        if let Some(metadata) = issuer.token_metadata.get(&token.name) {
-            return metadata.entity_type_name.clone();
-        }
+    if let Some(issuer) = token.iss.as_ref()
+        && let Some(metadata) = issuer.token_metadata.get(&token.name) {
+        return metadata.entity_type_name.clone();
     }
 
     if token.name.contains("::") {
@@ -363,7 +362,7 @@ mod tests {
         };
         trusted_issuers.insert("company".to_string(), company_issuer);
 
-        EntityBuilder::new(config, &trusted_issuers, None, None).unwrap()
+        EntityBuilder::new(config, &trusted_issuers, None, None, None, crate::log::TEST_LOGGER.clone()).unwrap()
     }
 
     fn create_test_token(issuer: &str, jti: &str, claims: HashMap<String, Value>) -> Token {
@@ -610,7 +609,7 @@ mod tests {
         };
 
         let trusted_issuers = HashMap::new();
-        let builder = EntityBuilder::new(config, &trusted_issuers, None, None).unwrap();
+        let builder = EntityBuilder::new(config, &trusted_issuers, None, None, None, crate::log::TEST_LOGGER.clone()).unwrap();
 
         let mut claims = HashMap::new();
         claims.insert("iss".to_string(), json!("https://test.issuer.com"));
@@ -674,7 +673,7 @@ mod tests {
 
         let trusted_issuers = HashMap::new();
         let builder =
-            EntityBuilder::new(config, &trusted_issuers, Some(&validator_schema), None).unwrap();
+            EntityBuilder::new(config, &trusted_issuers, Some(&validator_schema), None, None, crate::log::TEST_LOGGER.clone()).unwrap();
 
         let mut claims = HashMap::new();
         claims.insert("iss".to_string(), json!("https://test.issuer.com"));
@@ -799,7 +798,7 @@ mod tests {
 
         let trusted_issuers = HashMap::new();
         let builder =
-            EntityBuilder::new(config, &trusted_issuers, Some(&validator_schema), None).unwrap();
+            EntityBuilder::new(config, &trusted_issuers, Some(&validator_schema), None, None, crate::log::TEST_LOGGER.clone()).unwrap();
 
         let mut claims = HashMap::new();
         claims.insert("iss".to_string(), json!("https://test.issuer.com"));
