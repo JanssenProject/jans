@@ -294,8 +294,8 @@ request = Request(access_token="token123", action="read", resource=resource, con
 ___
 
 # RequestUnsigned
-Request
-=======
+RequestUnsigned
+===============
 
 A Python wrapper for the Rust `cedarling::RequestUnsigned` struct. Represents
 authorization data for unsigned authorization requests for many principals.
@@ -311,7 +311,7 @@ Example
 -------
 ```python
 # Create a request for authorization
-request = Request(principals=[principal], action="read", resource=resource, context={})
+request = RequestUnsigned(principals=[principal], action="read", resource=resource, context={})
 ```
 ___
 
