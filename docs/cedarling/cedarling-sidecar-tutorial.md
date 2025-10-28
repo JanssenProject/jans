@@ -179,7 +179,7 @@ poetry run pip install cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.
 APP_MODE=development
 CEDARLING_BOOTSTRAP_CONFIG_FILE=../secrets/bootstrap.json
 SIDECAR_DEBUG_RESPONSE=False
-DISABLE_HASH_CHECK=True
+DISABLE_HASH_CHECK=False
 ```
 
 - Run the sidecar: `poetry run flask run`

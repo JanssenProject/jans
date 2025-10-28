@@ -85,6 +85,7 @@ Not yet implemented
   ```
 
 - Alternatively, you may provide environment variables directly via the `-e` flag:
+
   ```bash
   docker run \
     -e APP_MODE='development' \
