@@ -305,6 +305,6 @@ Please refer to [Cedarling Rust Developer Guide](../cedarling-rust.md#api-refere
 ## See Also
 
 - [Cedarling Rust Developer Guide](../cedarling-rust.md)
-- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-tbac-using-cedarling)
+- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../cedarling-quick-start.md#authorization-using-the-cedarling)
 - [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
