@@ -174,6 +174,15 @@ public class Fido2Service extends BaseService {
         AttestationOptions attestationOptions = new AttestationOptions();
         attestationOptions.setUsername(userName);
         attestationOptions.setDisplayName(displayName);
+        
+        // Set authenticatorSelection to allow users to choose authenticator type
+        // This prevents forcing platform authenticators and shows "Select another device" option
+        io.jans.fido2.model.attestation.AuthenticatorSelection authenticatorSelection = 
+            new io.jans.fido2.model.attestation.AuthenticatorSelection();
+        // Don't set authenticatorAttachment - leave it null to allow user choice
+        authenticatorSelection.setUserVerification(io.jans.orm.model.fido2.UserVerification.preferred);
+        authenticatorSelection.setRequireResidentKey(false);
+        attestationOptions.setAuthenticatorSelection(authenticatorSelection);
 
         try (Response response = attestationService.register(attestationOptions)) {
             String content = response.readEntity(String.class);
