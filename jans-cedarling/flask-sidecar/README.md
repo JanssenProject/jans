@@ -78,7 +78,7 @@ Not yet implemented
   	-e APP_MODE='development' \
   	-e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
   	-e SIDECAR_DEBUG_RESPONSE=False \
-	-e DISABLE_HASH_CHECK=False \
+	-e DISABLE_HASH_CHECK=True \
   	--mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
   	-p 5000:5000\
   	ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
@@ -89,7 +89,7 @@ Not yet implemented
   docker run \
   	-e APP_MODE='development' \
   	-e SIDECAR_DEBUG_RESPONSE=True \
-	-e DISABLE_HASH_CHECK=False \
+	-e DISABLE_HASH_CHECK=True \
   	-e CEDARLING_APPLICATION_NAME=MyApp \
   	-e CEDARLING_POLICY_STORE_ID=abcdef \
   	-e CEDARLING_POLICY_STORE_URI=https://gluu.org \
