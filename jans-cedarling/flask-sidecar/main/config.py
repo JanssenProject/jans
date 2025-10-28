@@ -47,6 +47,11 @@ class BaseConfig:
         SIDECAR_DEBUG_RESPONSE = True
     else:
         SIDECAR_DEBUG_RESPONSE = False
+    DISABLE_HASH_CHECK = os.getenv("DISABLE_HASH_CHECK", "False")
+    if DISABLE_HASH_CHECK == "True":
+        DISABLE_HASH_CHECK = True
+    else:
+        DISABLE_HASH_CHECK = False
 
 class TestingConfig(BaseConfig):
     TESTING = True

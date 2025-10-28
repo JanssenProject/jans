@@ -42,6 +42,7 @@ class CedarlingInstance:
     def init_app(self, app: Flask):
         self._bootstrap_config = app.config.get("CEDARLING_BOOTSTRAP_CONFIG", None)
         self.debug_response: bool = app.config.get("SIDECAR_DEBUG_RESPONSE", False)
+        self.disable_hash_check: bool = app.config.get("DISABLE_HASH_CHECK", False)
         app.extensions = getattr(app, "extensions", {})
         app.extensions["cedarling_client"] = self
         self.initialize_cedarling()
@@ -60,6 +61,7 @@ class CedarlingInstance:
     def generate_hash(self, input: DictType) -> str:
         encoded_str = json.dumps(input).encode("utf-8")
         digest = sha256(encoded_str).hexdigest()
+        print(digest)
         return digest
 
 
@@ -88,6 +90,8 @@ class CedarlingInstance:
             i += 1
         if count == 0:
             return False
+        if self.disable_hash_check:
+            return True
         hash = self.generate_hash(subject["properties"])
         id = subject["id"]
         if hash != id:
@@ -95,6 +99,8 @@ class CedarlingInstance:
         return True
 
     def validate_resource(self, resource: DictType) -> bool:
+        if self.disable_hash_check:
+            return True
         hash = self.generate_hash(resource["properties"])
         id = resource["id"]
         return True if hash == id else False
