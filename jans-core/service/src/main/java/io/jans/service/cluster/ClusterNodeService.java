@@ -97,7 +97,7 @@ public abstract class ClusterNodeService {
         }
 
         PagedResult<ClusterNode> pagedResult = entryManager.findPagedEntries(clusterNodesBaseDn, ClusterNode.class,
-                Filter.createEqualityFilter("jansType", getClusterNodeType()), null, "jansNum", SortOrder.DESCENDING,
+                Filter.createEqualityFilter(JANS_TYPE_ATTR_NAME, getClusterNodeType()), null, "jansNum", SortOrder.DESCENDING,
                 0, count, count);
         if (pagedResult.getEntriesCount() >= 1) {
             return pagedResult.getEntries().get(0);
