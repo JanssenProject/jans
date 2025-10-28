@@ -61,7 +61,6 @@ class CedarlingInstance:
     def generate_hash(self, input: DictType) -> str:
         encoded_str = json.dumps(input).encode("utf-8")
         digest = sha256(encoded_str).hexdigest()
-        print(digest)
         return digest
 
 

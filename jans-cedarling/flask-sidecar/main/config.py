@@ -77,6 +77,6 @@ class ConfigLoader:
     def set_config():
         mode = os.environ.get("APP_MODE")
         if mode is not None:
-            print(f"INFO: loads {mode} config")
+            logger.info(f"INFO: loads {mode} config")
             return config.get(mode, TestingConfig)
         return config.get("default")

@@ -49,7 +49,7 @@ Alternatively, you may add cedarling [bootstrap configuration](../docs/cedarling
 
 ```
 APP_MODE=development
-SIDECAR_DEBUG_RESPONSE=True
+SIDECAR_DEBUG_RESPONSE=False
 CEDARLING_APPLICATION_NAME=MyApp
 CEDARLING_POLICY_STORE_ID=abcdef
 CEDARLING_POLICY_STORE_URI=https://gluu.org
@@ -75,28 +75,28 @@ Not yet implemented
 
   ```bash
   docker run -d \
-  	-e APP_MODE='development' \
-  	-e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
-  	-e SIDECAR_DEBUG_RESPONSE=False \
-	-e DISABLE_HASH_CHECK=True \
-  	--mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
-  	-p 5000:5000\
-  	ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+    -e APP_MODE='development' \
+    -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
+    -e SIDECAR_DEBUG_RESPONSE=False \
+    -e DISABLE_HASH_CHECK=False \
+    --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
+    -p 5000:5000\
+    ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
   ```
 
 - Alternatively, you may provide environment variables directly via the `-e` flag:
   ```bash
   docker run \
-  	-e APP_MODE='development' \
-  	-e SIDECAR_DEBUG_RESPONSE=True \
-	-e DISABLE_HASH_CHECK=True \
-  	-e CEDARLING_APPLICATION_NAME=MyApp \
-  	-e CEDARLING_POLICY_STORE_ID=abcdef \
-  	-e CEDARLING_POLICY_STORE_URI=https://gluu.org \
-  	-e CEDARLING_PRINCIPAL_BOOLEAN_OPERATION="{\"or\":[{\"===\":[{\"var\":\"Jans::Workload\"},\"ALLOW\"]},{\"===\":[{\"var\":\"Jans::User\"},\"ALLOW\"]}]}"
-  	-e CEDARLING_ID_TOKEN_TRUST_MODE=never \
-  	-p 5000:5000 \
-  	ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+    -e APP_MODE='development' \
+    -e SIDECAR_DEBUG_RESPONSE=True \
+    -e DISABLE_HASH_CHECK=False \
+    -e CEDARLING_APPLICATION_NAME=MyApp \
+    -e CEDARLING_POLICY_STORE_ID=abcdef \
+    -e CEDARLING_POLICY_STORE_URI=https://gluu.org \
+    -e CEDARLING_PRINCIPAL_BOOLEAN_OPERATION="{\"or\":[{\"===\":[{\"var\":\"Jans::Workload\"},\"ALLOW\"]},{\"===\":[{\"var\":\"Jans::User\"},\"ALLOW\"]}]}"
+    -e CEDARLING_ID_TOKEN_TRUST_MODE=never \
+    -p 5000:5000 \
+    ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
   ```
 - The service is running on `http://0.0.0.0:5000`. OpenAPI documentation is available at `/swagger-ui`
 
@@ -148,7 +148,7 @@ Not yet implemented
 ```
 APP_MODE=development
 SIDECAR_DEBUG_RESPONSE=True
-DISABLE_HASH_CHECK=True
+DISABLE_HASH_CHECK=False
 CEDARLING_APPLICATION_NAME=MyApp
 CEDARLING_POLICY_STORE_ID=abcdef
 CEDARLING_POLICY_STORE_URI=https://gluu.org

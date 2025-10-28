@@ -144,7 +144,7 @@ docker run -d \
   -e APP_MODE='development' \
   -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
   -e SIDECAR_DEBUG_RESPONSE=True \
-  -e DISABLE_HASH_CHECK=True \
+  -e DISABLE_HASH_CHECK=False \
   --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
   -p 5000:5000\
   ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
