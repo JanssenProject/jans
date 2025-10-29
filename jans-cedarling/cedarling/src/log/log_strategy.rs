@@ -34,7 +34,7 @@ pub(crate) enum LogStrategyLogger {
 impl LogStrategy {
     /// Creates a new `LogStrategy` based on the provided configuration.
     /// Initializes the corresponding logger accordingly.
-    pub async fn new(
+    pub fn new(
         config: &LogConfig,
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
