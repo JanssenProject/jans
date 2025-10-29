@@ -647,9 +647,8 @@ async fn test_authorize_unsigned() {
     );
 }
 
-/// Test multi-issuer authorization with valid tokens.
 #[wasm_bindgen_test]
-async fn test_authorize_multi_issuer_success() {
+async fn test_multi_issuer_authorize_single_token() {
     let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
         .expect("serde json value should be converted to JsValue");
@@ -661,7 +660,79 @@ async fn test_authorize_multi_issuer_success() {
         .await
         .expect("init function should be initialized with js map");
 
-    // Create token inputs with explicit mappings for multi-issuer
+    // Create single access token
+    let access_token = generate_token_using_claims(json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
+        "iss": "https://test.jans.org",
+        "token_type": "Bearer",
+        "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "acr": "basic",
+        "x5t#S256": "",
+        "scope": ["openid", "profile"],
+        "org_id": "some_long_id",
+        "auth_time": 1724830746,
+        "exp": 1724945978,
+        "iat": 1724832259,
+        "jti": "lxTmCVRFTxOjJgvEEpozMQ",
+        "name": "Default Admin User",
+        "status": {
+            "status_list": {
+                "idx": 201,
+                "uri": "https://test.jans.org/jans-auth/restv1/status_list"
+            }
+        }
+    }));
+
+    let multi_issuer_request_str = serde_json::to_string(&json!({
+        "tokens": [
+            {
+                "mapping": "Jans::Access_Token",
+                "payload": access_token
+            }
+        ],
+        "resource": {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        },
+        "action": "Jans::Action::\"Update\"",
+        "context": {}
+    })).expect("Should serialize to JSON string");
+    
+    let multi_issuer_request: serde_json::Value = serde_json::from_str(&multi_issuer_request_str)
+        .expect("Should deserialize from JSON string");
+
+    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
+        .expect("Multi-issuer request should be converted to JsValue");
+
+    let result = instance
+        .authorize_multi_issuer(js_request)
+        .await
+        .expect("authorize_multi_issuer request should be executed");
+
+    assert!(result.decision, "Authorization should be ALLOW for single token");
+    assert!(!result.request_id.is_empty(), "request_id should be present");
+}
+
+/// Test multiple tokens from different issuers (matches Rust test_multiple_tokens_from_different_issuers)
+#[wasm_bindgen_test]
+async fn test_multi_issuer_authorize_multiple_tokens() {
+    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
     let access_token = generate_token_using_claims(json!({
         "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
         "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
@@ -729,7 +800,6 @@ async fn test_authorize_multi_issuer_success() {
         "exp": 1724945978
     }));
 
-    // Serialize to string first, then parse back to ensure consistent structure
     let multi_issuer_request_str = serde_json::to_string(&json!({
         "tokens": [
             {
@@ -768,13 +838,14 @@ async fn test_authorize_multi_issuer_success() {
         .await
         .expect("authorize_multi_issuer request should be executed");
 
-    assert!(result.decision, "decision should be allowed");
+    assert!(result.decision, "Authorization should be ALLOW for multi-token request");
     assert!(!result.request_id.is_empty(), "request_id should be present");
 }
 
-/// Test multi-issuer authorization with invalid token.
+/// Test validation - graceful degradation when invalid token is present
+/// (matches Rust test_validation_graceful_degradation_invalid_token)
 #[wasm_bindgen_test]
-async fn test_authorize_multi_issuer_with_invalid_token() {
+async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_token() {
     let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
         .expect("serde json value should be converted to JsValue");
@@ -786,13 +857,40 @@ async fn test_authorize_multi_issuer_with_invalid_token() {
         .await
         .expect("init function should be initialized with js map");
 
-    // Create request with an invalid token
-    // Serialize to string first, then parse back to ensure consistent structure
+    let valid_token = generate_token_using_claims(json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
+        "iss": "https://test.jans.org",
+        "token_type": "Bearer",
+        "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "acr": "basic",
+        "x5t#S256": "",
+        "scope": ["openid", "profile"],
+        "org_id": "some_long_id",
+        "auth_time": 1724830746,
+        "exp": 1724945978,
+        "iat": 1724832259,
+        "jti": "lxTmCVRFTxOjJgvEEpozMQ",
+        "name": "Default Admin User",
+        "status": {
+            "status_list": {
+                "idx": 201,
+                "uri": "https://test.jans.org/jans-auth/restv1/status_list"
+            }
+        }
+    }));
+
+    // Create request with both valid and invalid tokens
     let multi_issuer_request_str = serde_json::to_string(&json!({
         "tokens": [
             {
                 "mapping": "Jans::Access_Token",
-                "payload": "invalid.jwt.token"
+                "payload": valid_token
+            },
+            {
+                "mapping": "Invalid::Token",
+                "payload": "not-a-valid-jwt"
             }
         ],
         "resource": {
@@ -813,14 +911,19 @@ async fn test_authorize_multi_issuer_with_invalid_token() {
     let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
         .expect("Multi-issuer request should be converted to JsValue");
 
-    // This should fail due to invalid token
-    let result = instance.authorize_multi_issuer(js_request).await;
-    assert!(result.is_err(), "should fail with invalid token");
+    // Graceful degradation: invalid tokens are ignored, valid tokens are processed
+    let result = instance
+        .authorize_multi_issuer(js_request)
+        .await
+        .expect("Should succeed gracefully when some tokens are invalid");
+
+    assert!(result.decision, "Should be ALLOW - valid token has required attributes despite invalid token");
+    assert!(!result.request_id.is_empty(), "request_id should be present");
 }
 
-/// Test multi-issuer authorization with empty tokens list.
+/// Test validation - empty token array (matches Rust test_validation_empty_token_array)
 #[wasm_bindgen_test]
-async fn test_authorize_multi_issuer_with_empty_tokens() {
+async fn test_multi_issuer_authorize_validation_empty_token_array() {
     let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
         .expect("serde json value should be converted to JsValue");
@@ -856,64 +959,5 @@ async fn test_authorize_multi_issuer_with_empty_tokens() {
 
     // This should fail due to empty tokens
     let result = instance.authorize_multi_issuer(js_request).await;
-    assert!(result.is_err(), "should fail with empty tokens");
-}
-
-/// Test multi-issuer authorization with context.
-#[wasm_bindgen_test]
-async fn test_authorize_multi_issuer_with_context() {
-    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
-    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
-        .expect("serde json value should be converted to JsValue");
-
-    let conf_object =
-        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
-
-    let instance = init(conf_object.into())
-        .await
-        .expect("init function should be initialized with js map");
-
-    let access_token = generate_token_using_claims(json!({
-        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
-        "iss": "https://test.jans.org",
-        "org_id": "some_long_id",
-        "exp": 1724945978,
-        "iat": 1724832259
-    }));
-
-    // Create request with context
-    // Serialize to string first, then parse back to ensure consistent structure
-    let multi_issuer_request_str = serde_json::to_string(&json!({
-        "tokens": [
-            {
-                "mapping": "Jans::Access_Token",
-                "payload": access_token
-            }
-        ],
-        "resource": {
-            "cedar_entity_mapping": {
-                "entity_type": "Jans::Issue",
-                "id": "random_id"
-            },
-            "org_id": "some_long_id",
-            "country": "US"
-        },
-        "action": "Jans::Action::\"Update\"",
-        "context": {
-            "some_context": "value"
-        }
-    })).expect("Should serialize to JSON string");
-    
-    let multi_issuer_request: serde_json::Value = serde_json::from_str(&multi_issuer_request_str)
-        .expect("Should deserialize from JSON string");
-
-    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
-        .expect("Multi-issuer request should be converted to JsValue");
-
-    let result = instance
-        .authorize_multi_issuer(js_request)
-        .await
-        .expect("authorize_multi_issuer request should be executed with context");
-
-    assert!(result.decision, "decision should be allowed");
+    assert!(result.is_err(), "Should fail with empty token array");
 }

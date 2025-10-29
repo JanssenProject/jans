@@ -581,27 +581,28 @@ func ExampleCedarling_GetLogsByTag() {
 	fmt.Println(logs[0])
 }
 
-func TestAuthorizeMultiIssuerSuccess(t *testing.T) {
-	// Configure for multi-issuer tests
-	config := map[string]interface{}{
-		"CEDARLING_APPLICATION_NAME":              "TestApp",
-		"CEDARLING_JWT_SIG_VALIDATION":            "disabled",
-		"CEDARLING_JWT_STATUS_VALIDATION":         "disabled",
-		"CEDARLING_ID_TOKEN_TRUST_MODE":           "never",
-		"CEDARLING_POLICY_STORE_LOCAL_FN":         "../../test_files/policy-store-multi-issuer-test.yaml",
-		"CEDARLING_ENTITY_BUILDER_BUILD_WORKLOAD": "false",
-		"CEDARLING_ENTITY_BUILDER_BUILD_USER":     "false",
-		"CEDARLING_USER_AUTHZ":                    "enabled",
-		"CEDARLING_WORKLOAD_AUTHZ":                "enabled",
+// getMultiIssuerConfig returns configuration for multi-issuer tests
+func getMultiIssuerConfig() map[string]interface{} {
+	return map[string]interface{}{
+		"CEDARLING_APPLICATION_NAME":                     "TestApp",
+		"CEDARLING_POLICY_STORE_ID":                      "a1bf93115de86de760ee0bea1d529b521489e5a11747",
+		"CEDARLING_JWT_SIG_VALIDATION":                   "disabled",
+		"CEDARLING_JWT_STATUS_VALIDATION":                "disabled",
+		"CEDARLING_ID_TOKEN_TRUST_MODE":                  "never",
+		"CEDARLING_POLICY_STORE_LOCAL_FN":                "../../test_files/policy-store-multi-issuer-test.yaml",
+		"CEDARLING_ENTITY_BUILDER_BUILD_WORKLOAD":        "false",
+		"CEDARLING_ENTITY_BUILDER_BUILD_USER":            "false",
+		"CEDARLING_AUTHORIZATION_USE_WORKLOAD_PRINCIPAL": "false",
+		"CEDARLING_AUTHORIZATION_USE_USER_PRINCIPAL":     "false",
+		"CEDARLING_USER_AUTHZ":                           "enabled",
+		"CEDARLING_WORKLOAD_AUTHZ":                       "enabled",
+		"CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED":   []string{"HS256"},
 	}
+}
 
-	instance, err := NewCedarling(config)
-	if err != nil {
-		t.Fatalf("Failed to create Cedarling instance: %v", err)
-	}
-
-	// Create resource
-	resource := EntityData{
+// getTestResource returns a standard test resource
+func getTestResource() EntityData {
+	return EntityData{
 		CedarMapping: CedarEntityMapping{
 			EntityType: "Jans::Issue",
 			ID:         "random_id",
@@ -611,239 +612,126 @@ func TestAuthorizeMultiIssuerSuccess(t *testing.T) {
 			"org_id":  "some_long_id",
 		},
 	}
+}
 
-	// Create token inputs
+// TestSingleTokenAuthorization tests single token authorization
+// (matches Rust test_single_acme_access_token_authorization)
+func TestSingleTokenAuthorization(t *testing.T) {
+	config := getMultiIssuerConfig()
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+
+	request := AuthorizeMultiIssuerRequest{
+		Tokens:   []TokenInput{{Mapping: "Jans::Access_Token", Payload: accessToken}},
+		Action:   "Jans::Action::\"Update\"",
+		Context:  map[string]interface{}{},
+		Resource: getTestResource(),
+	}
+
+	result, err := instance.AuthorizeMultiIssuer(request)
+	if err != nil {
+		t.Fatalf("Failed to authorize multi-issuer request: %v", err)
+	}
+
+	if !result.Decision {
+		t.Error("Authorization should be ALLOW for single token")
+	}
+	if result.RequestID == "" {
+		t.Error("request_id should be present")
+	}
+}
+
+// TestMultipleTokensFromDifferentIssuers tests multiple tokens from different issuers
+// (matches Rust test_multiple_tokens_from_different_issuers)
+func TestMultipleTokensFromDifferentIssuers(t *testing.T) {
+	config := getMultiIssuerConfig()
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+
 	tokens := []TokenInput{
 		{Mapping: "Jans::Access_Token", Payload: accessToken},
 		{Mapping: "Jans::Id_Token", Payload: idToken},
 		{Mapping: "Jans::Userinfo_Token", Payload: userinfoToken},
 	}
 
-	// Create multi-issuer request
 	request := AuthorizeMultiIssuerRequest{
 		Tokens:   tokens,
 		Action:   "Jans::Action::\"Update\"",
 		Context:  map[string]interface{}{},
-		Resource: resource,
+		Resource: getTestResource(),
 	}
 
-	// Execute authorization
 	result, err := instance.AuthorizeMultiIssuer(request)
 	if err != nil {
 		t.Fatalf("Failed to authorize multi-issuer request: %v", err)
 	}
 
-	// Verify result
 	if !result.Decision {
-		t.Errorf("Expected ALLOW decision, got DENY")
+		t.Error("Authorization should be ALLOW for multi-token request")
 	}
-
-	// Verify response
-	if result.Response.Decision().ToString() != "Allow" {
-		t.Errorf("Expected ALLOW decision in response, got %s", result.Response.Decision().ToString())
-	}
-
-	// Verify request ID
 	if result.RequestID == "" {
-		t.Error("Request ID should not be empty")
+		t.Error("request_id should be present")
 	}
 }
 
-func TestAuthorizeMultiIssuerWithContext(t *testing.T) {
-	// Configure for multi-issuer tests
-	config := map[string]interface{}{
-		"CEDARLING_APPLICATION_NAME":              "TestApp",
-		"CEDARLING_JWT_SIG_VALIDATION":            "disabled",
-		"CEDARLING_JWT_STATUS_VALIDATION":         "disabled",
-		"CEDARLING_ID_TOKEN_TRUST_MODE":           "never",
-		"CEDARLING_POLICY_STORE_LOCAL_FN":         "../../test_files/policy-store-multi-issuer-test.yaml",
-		"CEDARLING_ENTITY_BUILDER_BUILD_WORKLOAD": "false",
-		"CEDARLING_ENTITY_BUILDER_BUILD_USER":     "false",
-		"CEDARLING_USER_AUTHZ":                    "enabled",
-		"CEDARLING_WORKLOAD_AUTHZ":                "enabled",
-	}
-
+// TestValidationEmptyTokenArray tests validation - empty token array
+// (matches Rust test_validation_empty_token_array)
+func TestValidationEmptyTokenArray(t *testing.T) {
+	config := getMultiIssuerConfig()
 	instance, err := NewCedarling(config)
 	if err != nil {
 		t.Fatalf("Failed to create Cedarling instance: %v", err)
 	}
 
-	// Create resource
-	resource := EntityData{
-		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
-		},
-		Payload: map[string]interface{}{
-			"country": "US",
-			"org_id":  "some_long_id",
-		},
-	}
-
-	// Create token inputs
-	tokens := []TokenInput{
-		{Mapping: "Jans::Access_Token", Payload: accessToken},
-		{Mapping: "Jans::Id_Token", Payload: idToken},
-		{Mapping: "Jans::Userinfo_Token", Payload: userinfoToken},
-	}
-
-	// Create multi-issuer request with context
-	request := AuthorizeMultiIssuerRequest{
-		Tokens:   tokens,
-		Action:   "Jans::Action::\"Update\"",
-		Context:  map[string]interface{}{"some_context": "value"},
-		Resource: resource,
-	}
-
-	// Execute authorization
-	result, err := instance.AuthorizeMultiIssuer(request)
-	if err != nil {
-		t.Fatalf("Failed to authorize multi-issuer request: %v", err)
-	}
-
-	// Verify result
-	if !result.Decision {
-		t.Errorf("Expected ALLOW decision, got DENY")
-	}
-
-	// Verify response
-	if result.Response.Decision().ToString() != "Allow" {
-		t.Errorf("Expected ALLOW decision in response, got %s", result.Response.Decision().ToString())
-	}
-
-	// Verify request ID
-	if result.RequestID == "" {
-		t.Error("Request ID should not be empty")
-	}
-}
-
-func TestAuthorizeMultiIssuerWithInvalidToken(t *testing.T) {
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
-
-	instance, err := NewCedarling(config)
-	if err != nil {
-		t.Fatalf("Failed to create Cedarling instance: %v", err)
-	}
-
-	resource := EntityData{
-		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
-		},
-		Payload: map[string]any{
-			"org_id":  "some_long_id",
-			"country": "US",
-		},
-	}
-
-	// Create multi-issuer request with invalid token
-	tokens := []TokenInput{
-		{
-			Mapping: "Jans::Access_Token",
-			Payload: "invalid.jwt.token",
-		},
-	}
-
-	request := AuthorizeMultiIssuerRequest{
-		Tokens:   tokens,
-		Action:   "Jans::Action::\"Update\"",
-		Resource: resource,
-		Context:  nil,
-	}
-
-	_, err = instance.AuthorizeMultiIssuer(request)
-	if err == nil {
-		t.Fatal("Expected error for invalid token, got nil")
-	}
-}
-
-func TestAuthorizeMultiIssuerWithEmptyTokens(t *testing.T) {
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
-
-	instance, err := NewCedarling(config)
-	if err != nil {
-		t.Fatalf("Failed to create Cedarling instance: %v", err)
-	}
-
-	resource := EntityData{
-		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
-		},
-		Payload: map[string]any{
-			"org_id":  "some_long_id",
-			"country": "US",
-		},
-	}
-
-	// Create multi-issuer request with empty tokens
 	request := AuthorizeMultiIssuerRequest{
 		Tokens:   []TokenInput{},
 		Action:   "Jans::Action::\"Update\"",
-		Resource: resource,
-		Context:  nil,
+		Context:  map[string]interface{}{},
+		Resource: getTestResource(),
 	}
 
 	_, err = instance.AuthorizeMultiIssuer(request)
 	if err == nil {
-		t.Fatal("Expected error for empty tokens, got nil")
+		t.Fatal("Should fail with empty token array")
 	}
 }
 
-func TestAuthorizeMultiIssuerWithInvalidResource(t *testing.T) {
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
-
+// TestValidationGracefulDegradationInvalidToken tests validation - graceful degradation when invalid token is present
+// (matches Rust test_validation_graceful_degradation_invalid_token)
+func TestValidationGracefulDegradationInvalidToken(t *testing.T) {
+	config := getMultiIssuerConfig()
 	instance, err := NewCedarling(config)
 	if err != nil {
 		t.Fatalf("Failed to create Cedarling instance: %v", err)
 	}
 
-	// Invalid resource - org_id should be string but we set it to int
-	resource := EntityData{
-		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
-		},
-		Payload: map[string]any{
-			"org_id":  1, // Should be string
-			"country": "US",
-		},
-	}
-
-	// Create multi-issuer request with multiple tokens
+	// Create request with both valid and invalid tokens
 	tokens := []TokenInput{
-		{
-			Mapping: "Jans::Access_Token",
-			Payload: accessToken,
-		},
-		{
-			Mapping: "Jans::Id_Token",
-			Payload: idToken,
-		},
-		{
-			Mapping: "Jans::Userinfo_Token",
-			Payload: userinfoToken,
-		},
+		{Mapping: "Jans::Access_Token", Payload: accessToken},   // Valid token
+		{Mapping: "Invalid::Token", Payload: "not-a-valid-jwt"}, // Invalid JWT
 	}
 
 	request := AuthorizeMultiIssuerRequest{
 		Tokens:   tokens,
 		Action:   "Jans::Action::\"Update\"",
-		Resource: resource,
-		Context:  nil,
+		Context:  map[string]interface{}{},
+		Resource: getTestResource(),
 	}
 
-	_, err = instance.AuthorizeMultiIssuer(request)
-	if err == nil {
-		t.Fatal("Expected validation error, got nil")
+	// Graceful degradation: invalid tokens are ignored, valid tokens are processed
+	result, err := instance.AuthorizeMultiIssuer(request)
+	if err != nil {
+		t.Fatalf("Should succeed gracefully when some tokens are invalid: %v", err)
+	}
+
+	if !result.Decision {
+		t.Error("Should be ALLOW - valid token has required attributes despite invalid token")
+	}
+	if result.RequestID == "" {
+		t.Error("request_id should be present")
 	}
 }

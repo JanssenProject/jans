@@ -19,6 +19,7 @@ Attributes
 
 Example
 -------
+
 ```python
 # Create a multi-issuer authorization request
 tokens = [
@@ -32,6 +33,7 @@ request = AuthorizeMultiIssuerRequest(
     context={"location": "miami"}
 )
 ```
+
 ___
 
 AuthorizeResult
