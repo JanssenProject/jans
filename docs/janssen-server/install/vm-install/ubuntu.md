@@ -33,7 +33,7 @@ sudo gpg --import automation-jans-public-gpg.asc;
 - Download the release package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
-    ```
+    ```shell
     wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
     ```
 

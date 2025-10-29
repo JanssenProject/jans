@@ -43,7 +43,7 @@ Let's see at a glance user attributes.
 |Profile URL|
 |Secret Question|
 |Email Verified|
-|Birthdate| 
+|Birthdate|
 |Time zone info|
 |Phone Number verified|
 |Preferred Username|
