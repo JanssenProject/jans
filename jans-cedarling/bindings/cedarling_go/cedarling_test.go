@@ -582,9 +582,17 @@ func ExampleCedarling_GetLogsByTag() {
 }
 
 func TestAuthorizeMultiIssuerSuccess(t *testing.T) {
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
+	// Configure for multi-issuer tests
+	config := map[string]interface{}{
+		"CEDARLING_APPLICATION_NAME":              "TestApp",
+		"CEDARLING_JWT_SIG_VALIDATION":            "disabled",
+		"CEDARLING_JWT_STATUS_VALIDATION":         "disabled",
+		"CEDARLING_ID_TOKEN_TRUST_MODE":           "never",
+		"CEDARLING_POLICY_STORE_LOCAL_FN":         "../../test_files/policy-store-multi-issuer-test.yaml",
+		"CEDARLING_ENTITY_BUILDER_BUILD_WORKLOAD": "false",
+		"CEDARLING_ENTITY_BUILDER_BUILD_USER":     "false",
+		"CEDARLING_USER_AUTHZ":                    "enabled",
+		"CEDARLING_WORKLOAD_AUTHZ":                "enabled",
 	}
 
 	instance, err := NewCedarling(config)
@@ -592,58 +600,67 @@ func TestAuthorizeMultiIssuerSuccess(t *testing.T) {
 		t.Fatalf("Failed to create Cedarling instance: %v", err)
 	}
 
+	// Create resource
 	resource := EntityData{
 		CedarMapping: CedarEntityMapping{
 			EntityType: "Jans::Issue",
 			ID:         "random_id",
 		},
-		Payload: map[string]any{
-			"org_id":  "some_long_id",
+		Payload: map[string]interface{}{
 			"country": "US",
+			"org_id":  "some_long_id",
 		},
 	}
 
-	// Create multi-issuer request with multiple tokens
+	// Create token inputs
 	tokens := []TokenInput{
-		{
-			Mapping: "Jans::Access_Token",
-			Payload: accessToken,
-		},
-		{
-			Mapping: "Jans::Id_Token",
-			Payload: idToken,
-		},
-		{
-			Mapping: "Jans::Userinfo_Token",
-			Payload: userinfoToken,
-		},
+		{Mapping: "Jans::Access_Token", Payload: accessToken},
+		{Mapping: "Jans::Id_Token", Payload: idToken},
+		{Mapping: "Jans::Userinfo_Token", Payload: userinfoToken},
 	}
 
+	// Create multi-issuer request
 	request := AuthorizeMultiIssuerRequest{
 		Tokens:   tokens,
 		Action:   "Jans::Action::\"Update\"",
+		Context:  map[string]interface{}{},
 		Resource: resource,
-		Context:  nil,
 	}
 
+	// Execute authorization
 	result, err := instance.AuthorizeMultiIssuer(request)
 	if err != nil {
-		t.Fatalf("Multi-issuer authorization failed: %v", err)
+		t.Fatalf("Failed to authorize multi-issuer request: %v", err)
 	}
 
+	// Verify result
 	if !result.Decision {
-		t.Errorf("Expected allow decision, got DENY")
+		t.Errorf("Expected ALLOW decision, got DENY")
 	}
 
-	if result.Response.Decision() != DecisionAllow {
-		t.Errorf("Expected allow decision, got %s", result.Response.Decision().ToString())
+	// Verify response
+	if result.Response.Decision().ToString() != "Allow" {
+		t.Errorf("Expected ALLOW decision in response, got %s", result.Response.Decision().ToString())
+	}
+
+	// Verify request ID
+	if result.RequestID == "" {
+		t.Error("Request ID should not be empty")
 	}
 }
 
 func TestAuthorizeMultiIssuerWithContext(t *testing.T) {
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
+	// Configure for multi-issuer tests
+	config := map[string]interface{}{
+		"CEDARLING_APPLICATION_NAME":              "TestApp",
+		"CEDARLING_JWT_SIG_VALIDATION":            "disabled",
+		"CEDARLING_JWT_STATUS_VALIDATION":         "disabled",
+		"CEDARLING_ID_TOKEN_TRUST_MODE":           "never",
+		"CEDARLING_POLICY_STORE_LOCAL_FN":         "../../test_files/policy-store-multi-issuer-test.yaml",
+		"CEDARLING_ENTITY_BUILDER_BUILD_WORKLOAD": "false",
+		"CEDARLING_ENTITY_BUILDER_BUILD_USER":     "false",
+		"CEDARLING_USER_AUTHZ":                    "enabled",
+		"CEDARLING_WORKLOAD_AUTHZ":                "enabled",
 	}
 
 	instance, err := NewCedarling(config)
@@ -651,55 +668,52 @@ func TestAuthorizeMultiIssuerWithContext(t *testing.T) {
 		t.Fatalf("Failed to create Cedarling instance: %v", err)
 	}
 
+	// Create resource
 	resource := EntityData{
 		CedarMapping: CedarEntityMapping{
 			EntityType: "Jans::Issue",
 			ID:         "random_id",
 		},
-		Payload: map[string]any{
-			"org_id":  "some_long_id",
+		Payload: map[string]interface{}{
 			"country": "US",
+			"org_id":  "some_long_id",
 		},
 	}
 
-	// Create multi-issuer request with multiple tokens and context
+	// Create token inputs
 	tokens := []TokenInput{
-		{
-			Mapping: "Jans::Access_Token",
-			Payload: accessToken,
-		},
-		{
-			Mapping: "Jans::Id_Token",
-			Payload: idToken,
-		},
-		{
-			Mapping: "Jans::Userinfo_Token",
-			Payload: userinfoToken,
-		},
+		{Mapping: "Jans::Access_Token", Payload: accessToken},
+		{Mapping: "Jans::Id_Token", Payload: idToken},
+		{Mapping: "Jans::Userinfo_Token", Payload: userinfoToken},
 	}
 
+	// Create multi-issuer request with context
 	request := AuthorizeMultiIssuerRequest{
 		Tokens:   tokens,
 		Action:   "Jans::Action::\"Update\"",
+		Context:  map[string]interface{}{"some_context": "value"},
 		Resource: resource,
-		Context:  map[string]any{"some_context": "value"},
 	}
 
+	// Execute authorization
 	result, err := instance.AuthorizeMultiIssuer(request)
 	if err != nil {
-		t.Fatalf("Multi-issuer authorization failed: %v", err)
+		t.Fatalf("Failed to authorize multi-issuer request: %v", err)
 	}
 
+	// Verify result
 	if !result.Decision {
-		t.Errorf("Expected allow decision, got DENY")
+		t.Errorf("Expected ALLOW decision, got DENY")
 	}
 
-	if result.Response.Decision() != DecisionAllow {
-		t.Errorf("Expected allow decision, got %s", result.Response.Decision().ToString())
+	// Verify response
+	if result.Response.Decision().ToString() != "Allow" {
+		t.Errorf("Expected ALLOW decision in response, got %s", result.Response.Decision().ToString())
 	}
 
+	// Verify request ID
 	if result.RequestID == "" {
-		t.Errorf("Expected request ID to be present")
+		t.Error("Request ID should not be empty")
 	}
 }
 

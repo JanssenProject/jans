@@ -23,10 +23,48 @@ wasm_bindgen_test_configure!(run_in_browser);
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../../bindings/cedarling_python/example_files/policy-store.json");
 
+// Multi-issuer policy store for multi-issuer tests
+static MULTI_ISSUER_POLICY_STORE_YAML: &str =
+    include_str!("../../../test_files/policy-store-multi-issuer-test.yaml");
+
 static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
     json!({
         "CEDARLING_APPLICATION_NAME": "My App",
         "CEDARLING_POLICY_STORE_LOCAL": POLICY_STORE_RAW_YAML,
+        "CEDARLING_LOG_TYPE": "std_out",
+        "CEDARLING_LOG_LEVEL": "INFO",
+        "CEDARLING_USER_AUTHZ": "enabled",
+        "CEDARLING_WORKLOAD_AUTHZ": "enabled",
+        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+            "and": [
+                {
+                    "===": [
+                        {
+                            "var": "Jans::Workload"
+                        },
+                        "ALLOW"
+                    ]
+                },
+                {
+                    "===": [
+                        {
+                            "var": "Jans::User"
+                        },
+                        "ALLOW"
+                    ]
+                }
+            ]
+        },
+        "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
+        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
+    })
+});
+
+static MULTI_ISSUER_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
+    json!({
+        "CEDARLING_APPLICATION_NAME": "My App",
+        "CEDARLING_POLICY_STORE_LOCAL": MULTI_ISSUER_POLICY_STORE_YAML,
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_USER_AUTHZ": "enabled",
@@ -604,7 +642,7 @@ async fn test_authorize_unsigned() {
 /// Test multi-issuer authorization with valid tokens.
 #[wasm_bindgen_test]
 async fn test_authorize_multi_issuer_success() {
-    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
         .expect("serde json value should be converted to JsValue");
 
@@ -725,7 +763,7 @@ async fn test_authorize_multi_issuer_success() {
 /// Test multi-issuer authorization with invalid token.
 #[wasm_bindgen_test]
 async fn test_authorize_multi_issuer_with_invalid_token() {
-    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
         .expect("serde json value should be converted to JsValue");
 
@@ -767,7 +805,7 @@ async fn test_authorize_multi_issuer_with_invalid_token() {
 /// Test multi-issuer authorization with empty tokens list.
 #[wasm_bindgen_test]
 async fn test_authorize_multi_issuer_with_empty_tokens() {
-    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
         .expect("serde json value should be converted to JsValue");
 
@@ -804,7 +842,7 @@ async fn test_authorize_multi_issuer_with_empty_tokens() {
 /// Test multi-issuer authorization with context.
 #[wasm_bindgen_test]
 async fn test_authorize_multi_issuer_with_context() {
-    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
         .expect("serde json value should be converted to JsValue");
 

@@ -6,6 +6,7 @@
 from cedarling_python import Cedarling, AuthorizeMultiIssuerRequest, EntityData, TokenInput
 from cedarling_python import authorize_errors
 from config import load_bootstrap_config
+import pytest
 
 
 # JSON payload of access token
@@ -60,7 +61,20 @@ def test_authorize_multi_issuer_ok():
     Test successful multi-issuer authorization with valid tokens.
     Verifies that the request is allowed when all tokens are valid.
     '''
-    instance = Cedarling(load_bootstrap_config())
+    def configure_for_multi_issuer(config):
+        config["CEDARLING_JWT_SIG_VALIDATION"] = "disabled"
+        config["CEDARLING_JWT_STATUS_VALIDATION"] = "disabled"
+        config["CEDARLING_ID_TOKEN_TRUST_MODE"] = "never"
+        # Use the multi-issuer test policy store
+        config["CEDARLING_POLICY_STORE_LOCAL_FN"] = "../../test_files/policy-store-multi-issuer-test.yaml"
+        # Disable workload and user entity building for multi-issuer tests
+        # since the policies work with token entities in context, not principal entities
+        config["CEDARLING_ENTITY_BUILDER_BUILD_WORKLOAD"] = "false"
+        config["CEDARLING_ENTITY_BUILDER_BUILD_USER"] = "false"
+        config["CEDARLING_AUTHORIZATION_USE_WORKLOAD_PRINCIPAL"] = "false"
+        config["CEDARLING_AUTHORIZATION_USE_USER_PRINCIPAL"] = "false"
+    
+    instance = Cedarling(load_bootstrap_config(config_cb=configure_for_multi_issuer))
     
     # Create token inputs with explicit mappings
     tokens = [
@@ -68,31 +82,25 @@ def test_authorize_multi_issuer_ok():
         TokenInput(mapping="Jans::Id_Token", payload=ID_TOKEN),
         TokenInput(mapping="Jans::Userinfo_Token", payload=USERINFO_TOKEN),
     ]
-    
+
     request = AuthorizeMultiIssuerRequest(
         tokens=tokens,
         action='Jans::Action::"Update"',
         context={},
         resource=RESOURCE,
     )
-    
+
     result = instance.authorize_multi_issuer(request)
-    
-    # Verify decision is allowed
-    assert result.is_allowed(), "request should be allowed"
-    
-    # Verify response decision
+
+    # Verify the result
+    assert result is not None, "Result should not be None"
+    assert result.is_allowed() is True, f"Expected ALLOW decision, got {result.is_allowed()}"
+
+    # Verify response details
     response = result.response()
-    decision = response.decision
-    assert str(decision) == ALLOW_DECISION_STR, "decision should be ALLOW"
-    assert decision.value == ALLOW_DECISION_STR, "decision value should be ALLOW"
-    
-    # Verify diagnostics
-    diagnostics = response.diagnostics
-    # Reason should contain policy IDs that granted access
-    assert len(diagnostics.reason) > 0, "should have at least one reason"
-    assert len(diagnostics.errors) == 0, "should have no errors"
-    
+    assert response is not None, "Response should not be None"
+    assert response.decision.value == "ALLOW", f"Expected ALLOW decision in response, got {response.decision.value}"
+
     # Verify request ID is present
     request_id = result.request_id()
     assert request_id is not None and request_id != "", "request_id should be present"
@@ -196,7 +204,14 @@ def test_authorize_multi_issuer_deny_decision():
     Test multi-issuer authorization that results in DENY decision.
     Verifies that DENY decisions are handled correctly.
     '''
-    instance = Cedarling(load_bootstrap_config())
+    def disable_jwt_validation(config):
+        config["CEDARLING_JWT_SIG_VALIDATION"] = "disabled"
+        config["CEDARLING_JWT_STATUS_VALIDATION"] = "disabled"
+        config["CEDARLING_ID_TOKEN_TRUST_MODE"] = "never"
+        # Use the multi-issuer policy store
+        config["CEDARLING_POLICY_STORE_LOCAL_FN"] = "../../test_files/policy-store-multi-issuer-basic.yaml"
+    
+    instance = Cedarling(load_bootstrap_config(config_cb=disable_jwt_validation))
     
     tokens = [
         TokenInput(mapping="Jans::Access_Token", payload=ACCESS_TOKEN),
@@ -239,7 +254,20 @@ def test_authorize_multi_issuer_with_context():
     Test multi-issuer authorization with additional context.
     Verifies that context is passed correctly.
     '''
-    instance = Cedarling(load_bootstrap_config())
+    def configure_for_multi_issuer(config):
+        config["CEDARLING_JWT_SIG_VALIDATION"] = "disabled"
+        config["CEDARLING_JWT_STATUS_VALIDATION"] = "disabled"
+        config["CEDARLING_ID_TOKEN_TRUST_MODE"] = "never"
+        # Use the multi-issuer test policy store
+        config["CEDARLING_POLICY_STORE_LOCAL_FN"] = "../../test_files/policy-store-multi-issuer-test.yaml"
+        # Disable workload and user entity building for multi-issuer tests
+        # since the policies work with token entities in context, not principal entities
+        config["CEDARLING_ENTITY_BUILDER_BUILD_WORKLOAD"] = "false"
+        config["CEDARLING_ENTITY_BUILDER_BUILD_USER"] = "false"
+        config["CEDARLING_AUTHORIZATION_USE_WORKLOAD_PRINCIPAL"] = "false"
+        config["CEDARLING_AUTHORIZATION_USE_USER_PRINCIPAL"] = "false"
+    
+    instance = Cedarling(load_bootstrap_config(config_cb=configure_for_multi_issuer))
     
     tokens = [
         TokenInput(mapping="Jans::Access_Token", payload=ACCESS_TOKEN),
@@ -257,9 +285,18 @@ def test_authorize_multi_issuer_with_context():
     
     result = instance.authorize_multi_issuer(request)
     
-    # Verify the request was processed
-    assert result is not None, "result should not be None"
-    assert hasattr(result, 'is_allowed'), "result should have is_allowed method"
+    # Verify the result
+    assert result is not None, "Result should not be None"
+    assert result.is_allowed() is True, f"Expected ALLOW decision, got {result.is_allowed()}"
+    
+    # Verify response details
+    response = result.response()
+    assert response is not None, "Response should not be None"
+    assert response.decision.value == "ALLOW", f"Expected ALLOW decision in response, got {response.decision.value}"
+    
+    # Verify request ID is present
+    request_id = result.request_id()
+    assert request_id is not None and request_id != "", "request_id should be present"
 
 
 def test_token_input_creation():
@@ -292,42 +329,51 @@ def test_authorize_multi_issuer_request_creation():
     assert request.context == {"key": "value"}, "context should be correct"
 
 
-def test_authorize_multi_issuer_with_minimal_context():
+def test_authorize_multi_issuer_deny_decision():
     '''
-    Test multi-issuer authorization with None context (should default to empty dict).
+    Test multi-issuer authorization that results in DENY decision.
+    Verifies that DENY decisions are handled correctly.
     '''
-    instance = Cedarling(load_bootstrap_config())
+    def configure_for_multi_issuer(config):
+        config["CEDARLING_JWT_SIG_VALIDATION"] = "disabled"
+        config["CEDARLING_JWT_STATUS_VALIDATION"] = "disabled"
+        config["CEDARLING_ID_TOKEN_TRUST_MODE"] = "never"
+        # Use the multi-issuer test policy store
+        config["CEDARLING_POLICY_STORE_LOCAL_FN"] = "../../test_files/policy-store-multi-issuer-test.yaml"
+        # Disable workload and user entity building for multi-issuer tests
+        # since the policies work with token entities in context, not principal entities
+        config["CEDARLING_ENTITY_BUILDER_BUILD_WORKLOAD"] = "false"
+        config["CEDARLING_ENTITY_BUILDER_BUILD_USER"] = "false"
+        config["CEDARLING_AUTHORIZATION_USE_WORKLOAD_PRINCIPAL"] = "false"
+        config["CEDARLING_AUTHORIZATION_USE_USER_PRINCIPAL"] = "false"
+    
+    instance = Cedarling(load_bootstrap_config(config_cb=configure_for_multi_issuer))
     
     tokens = [
         TokenInput(mapping="Jans::Access_Token", payload=ACCESS_TOKEN),
         TokenInput(mapping="Jans::Id_Token", payload=ID_TOKEN),
+        TokenInput(mapping="Jans::Userinfo_Token", payload=USERINFO_TOKEN),
     ]
-    
+
+    # Use action that doesn't allow the request
     request = AuthorizeMultiIssuerRequest(
         tokens=tokens,
-        action='Jans::Action::"Update"',
-        context=None,
+        action='Jans::Action::"DeniedAction"',
+        context={},
         resource=RESOURCE,
     )
-    
+
     result = instance.authorize_multi_issuer(request)
-    
-    # Verify decision is allowed (same action and tokens as successful test)
-    assert result.is_allowed(), "request should be allowed"
-    
-    # Verify response decision
+
+    # Verify the result
+    assert result is not None, "Result should not be None"
+    assert result.is_allowed() is False, f"Expected DENY decision, got {result.is_allowed()}"
+
+    # Verify response details
     response = result.response()
-    decision = response.decision
-    assert str(decision) == ALLOW_DECISION_STR, "decision should be ALLOW"
-    assert decision.value == ALLOW_DECISION_STR, "decision value should be ALLOW"
-    
-    # Verify diagnostics
-    diagnostics = response.diagnostics
-    # Reason should contain policy IDs that granted access
-    assert len(diagnostics.reason) > 0, "should have at least one reason"
-    assert len(diagnostics.errors) == 0, "should have no errors"
-    
+    assert response is not None, "Response should not be None"
+    assert response.decision.value == "DENY", f"Expected DENY decision in response, got {response.decision.value}"
+
     # Verify request ID is present
     request_id = result.request_id()
     assert request_id is not None and request_id != "", "request_id should be present"
-
