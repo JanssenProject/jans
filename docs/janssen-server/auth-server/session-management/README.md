@@ -68,8 +68,8 @@ To end another person's session, Jans Auth Server supports [Global Token Revocat
 It is possible to add custom business logic as Jans Auth Server detects
 session events, see:
 
-  * [Application Session](../../developer/scripts/application-session.md)
-  * [End Session](../../developer/scripts/end-session.md)
+  * [Application Session](../../../script-catalog/application_session/application-session.md)
+  * [End Session](../../../script-catalog/end_session/end-session.md)
 
 
 ## Session data structure in Persistence
