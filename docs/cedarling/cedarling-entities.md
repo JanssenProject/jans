@@ -11,7 +11,7 @@ tags:
 
 Cedarling automatically creates the following entities:
 
-- [Trusted Issuer](#trusted-issuer-entity)
+- [Trusted Issuer](#trusted-issuer)
 - [Workload](#workload-entity)
 - [User](#user-entity)
 - [Role](#role-entity)
