@@ -10,6 +10,7 @@ mod token_entity_metadata;
 
 pub mod entity_parser;
 pub mod errors;
+pub mod issuer_parser;
 pub mod loader;
 pub mod metadata;
 pub mod policy_parser;
@@ -34,6 +35,7 @@ pub use errors::{
     ArchiveError, CedarEntityErrorType, CedarSchemaErrorType, PolicyStoreError, TokenError,
     ValidationError,
 };
+pub use issuer_parser::{IssuerParser, ParsedIssuer};
 pub use loader::{
     DefaultPolicyStoreLoader, EntityFile, IssuerFile, LoadedPolicyStore, PolicyFile,
     PolicyStoreLoader,
