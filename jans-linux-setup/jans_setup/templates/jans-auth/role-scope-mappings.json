@@ -13,7 +13,7 @@
       "description": ""
     },
     {
-      "role": "api-admin",
+      "role": "admin",
       "description": ""
     }
   ],
@@ -361,7 +361,7 @@
       "essentialPermissionInAdminUI": false,
       "tag": "openid"
     },
-	{
+    {
       "permission": "https://jans.io/oauth/config/ssa.delete",
       "description": "",
       "defaultPermissionInToken": false,
@@ -1030,11 +1030,11 @@
         "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write",
-		"https://jans.io/oauth/config/ssa.delete"
+        "https://jans.io/oauth/config/ssa.delete"
       ]
     },
     {
-      "role": "api-admin",
+      "role": "admin",
       "permissions": [
         "https://jans.io/oauth/config/attributes.readonly",
         "https://jans.io/oauth/config/attributes.write",
@@ -1106,7 +1106,7 @@
         "https://jans.io/oauth/jans-auth-server/session.delete",
         "revoke_session",
         "https://jans.io/oauth/config/data.readonly",
-		"https://jans.io/oauth/config/ssa.delete"
+        "https://jans.io/oauth/config/ssa.delete"
       ]
     }
   ]
