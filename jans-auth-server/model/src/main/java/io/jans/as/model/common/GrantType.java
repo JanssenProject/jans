@@ -92,6 +92,11 @@ public enum GrantType implements HasParamName, AttributeEnum {
      * Device Authorization Grant Type for OAuth 2.0
      */
     DEVICE_CODE("urn:ietf:params:oauth:grant-type:device_code"),
+
+    /**
+     * JWT Bearer Grant Type
+     */
+    JWT_BEARER("urn:ietf:params:oauth:grant-type:jwt-bearer"),
     ;
 
     private final String value;

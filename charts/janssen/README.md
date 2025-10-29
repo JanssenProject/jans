@@ -19,7 +19,7 @@ Janssen Access and Identity Management Microservices Chart. This chart deploys e
 
 ## Requirements
 
-Kubernetes: `>=v1.22.0-0`
+Kubernetes: `>=v1.23.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
@@ -221,9 +221,9 @@ Kubernetes: `>=v1.22.0-0`
 | config.configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
 | config.configmap.cnSqlSslCaCert | string | `""` | Base64-encoded string of CA certificate used to sign client/server certificate of MySQL/PostgreSQL server. Required if using client cert authentication. |
 | config.configmap.cnSqlSslClientCert | string | `""` | Base64-encoded string of client certificate signed by CA. Required if using client cert authentication. |
-| config.configmap.cnSqlSslClientKey | string | `""` | Base64-encoded string of client key signed by CA. Required if using client cert authentication. |
-| config.configmap.cnSqlSslEnabled | bool | `false` | Enforce connection to SQL database using SSL. |
-| config.configmap.cnSqlSslMode | string | `""` | Mode when connecting to SQL database using SSL. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`. |
+| config.configmap.cnSqlSslClientKey | string | `""` | Base64-encoded client private key corresponding to the client certificate. Required if using client cert authentication. We advise to not commit real private keys in values.yaml. |
+| config.configmap.cnSqlSslEnabled | bool | `false` | Enable SSL connection to SQL database. |
+| config.configmap.cnSqlSslMode | string | `""` | Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`. |
 | config.configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected the secrets . |
 | config.configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
 | config.configmap.cnVaultAppRolePath | string | `"approle"` | Path to the Vault AppRole. |

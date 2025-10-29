@@ -33,7 +33,7 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.lock.service.OpenIdService;
-import io.jans.lock.service.filter.ProtectionService;
+import io.jans.lock.service.filter.OpenIdProtection;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -43,7 +43,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
-public class OpenIdProtectionService implements ProtectionService {
+public class OpenIdProtectionService implements OpenIdProtection {
 
     @Inject
     private Logger log;
@@ -56,7 +56,20 @@ public class OpenIdProtectionService implements ProtectionService {
     private OpenIdConfigurationResponse oidcConfig;
     
     private ObjectMapper mapper;
-    
+
+    @PostConstruct
+    private void init() {
+        try {
+            mapper = new ObjectMapper();
+            oidcConfig = openIdService.getOpenIdConfiguration();
+            
+            String introspectionEndpoint = oidcConfig.getIntrospectionEndpoint();
+            introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, ClientFactory.instance().createEngine());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
     public Response processAuthorization(HttpHeaders headers, ResourceInfo resourceInfo) {
         try {
             String token = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
@@ -148,7 +161,9 @@ public class OpenIdProtectionService implements ProtectionService {
         Jwt jwt = null;
         try {
             jwt = Jwt.parse(token);
-            log.trace("This looks like a JWT token");
+            if (log.isTraceEnabled()) {
+            	log.trace("This looks like a JWT token");
+            }
         } catch (InvalidJwtException e) {
             log.trace("Not a JWT token");
         }
@@ -187,19 +202,6 @@ public class OpenIdProtectionService implements ProtectionService {
 
     private static <T extends Annotation> Optional<T> optAnnnotation(AnnotatedElement elem, Class<T> cls) {
         return Optional.ofNullable(elem.getAnnotation(cls));
-    }
-    
-    @PostConstruct
-    private void init() {
-        try {
-            mapper = new ObjectMapper();
-            oidcConfig = openIdService.getOpenIdConfiguration();
-            
-            String introspectionEndpoint = oidcConfig.getIntrospectionEndpoint();
-            introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, ClientFactory.instance().createEngine());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
     }
 
     public Response simpleResponse(Response.Status status, String detail) {

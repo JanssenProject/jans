@@ -550,6 +550,20 @@ jansRevision: 1
 jansScr::%(logout_status_jwt_logoutstatusjwt)s
 jansScrTyp: logout_status_jwt
 
+dn: inum=0300-BA16,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: PAR Custom Script - Sample in Java
+displayName: par_script_in_java
+inum: 0300-BA16
+jansEnabled: FALSE
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansProgLng: java
+jansRevision: 1
+jansScr::%(par_par)s
+jansScrTyp: par
+
 dn: inum=0300-BA90,ou=scripts,o=jans
 objectClass: jansCustomScr
 objectClass: top

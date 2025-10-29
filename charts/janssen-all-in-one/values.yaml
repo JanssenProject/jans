@@ -53,15 +53,15 @@ configmap:
   cnSqlDbTimezone: UTC
   # -- SQL password  injected the secrets .
   cnSqldbUserPassword: Test1234#
-  # -- Enforce connection to SQL database using SSL.
+  # -- Enable SSL connection to SQL database.
   cnSqlSslEnabled: false
-  # -- Mode when connecting to SQL database using SSL. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`.
+  # -- Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`.
   cnSqlSslMode: ""
   # -- Base64-encoded string of CA certificate used to sign client/server certificate of MySQL/PostgreSQL server. Required if using client cert authentication.
   cnSqlSslCaCert: ""
   # -- Base64-encoded string of client certificate signed by CA. Required if using client cert authentication.
   cnSqlSslClientCert: ""
-  # -- Base64-encoded string of client key signed by CA. Required if using client cert authentication.
+  # -- Base64-encoded client private key corresponding to the client certificate. Required if using client cert authentication. We advise to not commit real private keys in values.yaml.
   cnSqlSslClientKey: ""
   # -- Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` .
   cnCacheType: NATIVE_PERSISTENCE
