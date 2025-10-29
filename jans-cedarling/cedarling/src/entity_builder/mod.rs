@@ -27,7 +27,9 @@ use crate::common::issuer_utils::normalize_issuer;
 use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::jwt::Token;
-use crate::{RequestUnsigned, entity_builder_config::*};
+use crate::log::interface::LogWriter;
+use crate::log::{LogEntry, LogType, Logger};
+use crate::{LogLevel, RequestUnsigned, entity_builder_config::*};
 use build_entity_attrs::*;
 use build_iss_entity::build_iss_entity;
 use cedar_policy::{Entity, EntityUid, RestrictedExpression};
@@ -39,27 +41,58 @@ use std::str::FromStr;
 use std::sync::Arc;
 use url::Origin;
 
-// Global constants for entity types - following existing codebase pattern
-const DEFAULT_ENTITY_TYPE: &str = "Jans::DefaultEntity";
-
 pub(crate) use built_entities::BuiltEntities;
 pub use error::*;
+
+/// Constant for unknown entity type in error messages
+const UNKNOWN_ENTITY_TYPE: &str = "Unknown";
+
+/// Helper function to parse entity attributes from a key-value iterator
+fn parse_entity_attrs<'a>(
+    attrs_iter: impl Iterator<Item = (&'a String, &'a Value)>,
+    entity_type: &str,
+    entity_id: &str,
+) -> Result<HashMap<String, RestrictedExpression>, BuildEntityError> {
+    let mut cedar_attrs = HashMap::new();
+    for (key, value) in attrs_iter {
+        match value_to_expr::value_to_expr(value) {
+            Ok(Some(expr)) => {
+                cedar_attrs.insert(key.clone(), expr);
+            },
+            Ok(None) => {
+                continue;
+            },
+            Err(errors) => {
+                return Err(BuildEntityError::new(
+                    entity_type.to_string(),
+                    BuildEntityErrorKind::InvalidEntityData(format!(
+                        "Failed to convert attribute '{}' for entity '{}': {:?}",
+                        key, entity_id, errors
+                    )),
+                ));
+            },
+        }
+    }
+    Ok(cedar_attrs)
+}
 
 /// Parse default entities from the provided configuration
 fn parse_default_entities(
     default_entities_data: &HashMap<String, Value>,
+    namespace: Option<&str>,
+    logger: Logger,
 ) -> Result<HashMap<String, Entity>, BuildEntityError> {
     let mut default_entities = HashMap::new();
 
     for (entity_id, entity_data) in default_entities_data {
         // Validate entity ID to prevent injection attacks
         if entity_id.trim().is_empty() {
-            return Err(BuildEntityError {
-                entity_type_name: "DefaultEntity".to_string(),
-                error: BuildEntityErrorKind::InvalidEntityData(
+            return Err(BuildEntityError::new(
+                "DefaultEntity".to_string(),
+                BuildEntityErrorKind::InvalidEntityData(
                     "Entity ID cannot be empty or whitespace-only".to_string(),
                 ),
-            });
+            ));
         }
 
         // Basic security validation - prevent obvious injection patterns
@@ -75,67 +108,180 @@ fn parse_default_entities(
         let entity_id_lower = entity_id.to_lowercase();
         for pattern in &dangerous_patterns {
             if entity_id_lower.contains(pattern) {
-                return Err(BuildEntityError {
-                    entity_type_name: "DefaultEntity".to_string(),
-                    error: BuildEntityErrorKind::InvalidEntityData(format!(
+                return Err(BuildEntityError::new(
+                    "DefaultEntity".to_string(),
+                    BuildEntityErrorKind::InvalidEntityData(format!(
                         "Entity ID '{}' contains potentially dangerous content",
                         entity_id
                     )),
-                });
+                ));
             }
         }
 
         // Parse the entity data as a JSON object
-        let entity_attrs = if let Value::Object(obj) = entity_data {
-            obj.clone()
+        let entity_obj = if let Value::Object(obj) = entity_data {
+            obj
         } else {
-            return Err(BuildEntityError {
-                entity_type_name: DEFAULT_ENTITY_TYPE.to_string(),
-                error: BuildEntityErrorKind::InvalidEntityData(format!(
+            return Err(BuildEntityError::new(
+                UNKNOWN_ENTITY_TYPE.to_string(),
+                BuildEntityErrorKind::InvalidEntityData(format!(
                     "Default entity data for '{}' must be a JSON object",
                     entity_id
                 )),
-            });
+            ));
         };
 
-        // Extract entity type from the data or use a default
-        let entity_type = entity_attrs
-            .get("entity_type")
-            .and_then(|v| v.as_str())
-            .unwrap_or(DEFAULT_ENTITY_TYPE);
+        // Check if this is the new Cedar entity format (with uid, attrs, parents fields)
+        let (entity_type, cedar_attrs, parents) = if entity_obj.contains_key("uid") {
+            // New Cedar entity format: {"uid": {"type": "...", "id": "..."}, "attrs": {}, "parents": [...]}
+            let uid_obj = entity_obj
+                .get("uid")
+                .and_then(|v| v.as_object())
+                .ok_or_else(|| {
+                    BuildEntityError::new(
+                        UNKNOWN_ENTITY_TYPE.to_string(),
+                        BuildEntityErrorKind::InvalidEntityData(format!(
+                            "Default entity '{}' has invalid uid field",
+                            entity_id
+                        )),
+                    )
+                })?;
 
-        // Convert JSON attributes to Cedar expressions using the existing value_to_expr function
-        let mut cedar_attrs = HashMap::new();
-        for (key, value) in entity_attrs.clone() {
-            if key != "entity_type" && key != "entity_id" {
-                match value_to_expr::value_to_expr(&value) {
-                    Ok(Some(expr)) => {
-                        cedar_attrs.insert(key, expr);
-                    },
-                    Ok(None) => {
-                        // Skip null values
-                        continue;
-                    },
-                    Err(errors) => {
-                        return Err(BuildEntityError {
-                            entity_type_name: entity_type.to_string(),
-                            error: BuildEntityErrorKind::InvalidEntityData(format!(
-                                "Failed to convert attribute '{}' for entity '{}' (type: {}): {:?}",
-                                key, entity_id, entity_type, errors
+            let entity_type_from_uid =
+                uid_obj
+                    .get("type")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        BuildEntityError::new(
+                            UNKNOWN_ENTITY_TYPE.to_string(),
+                            BuildEntityErrorKind::InvalidEntityData(format!(
+                                "Default entity '{}' has invalid uid.type field",
+                                entity_id
                             )),
-                        });
-                    },
+                        )
+                    })?;
+
+            // Add namespace prefix if not already present
+            let full_entity_type = build_entity_type_name(entity_type_from_uid, &namespace);
+
+            // Get the entity ID from uid.id if present
+            let entity_id_from_uid = uid_obj.get("id")
+                .and_then(|v| v.as_str())
+                // Fall back to the HashMap key if uid.id is not specified
+                .unwrap_or(entity_id);
+
+            // Parse attributes from attrs field
+            let empty_map = serde_json::Map::new();
+            let attrs_obj = entity_obj
+                .get("attrs")
+                .and_then(|v| v.as_object())
+                .unwrap_or(&empty_map);
+
+            let cedar_attrs =
+                parse_entity_attrs(attrs_obj.iter(), &full_entity_type, entity_id_from_uid)?;
+
+            // Parse parents from parents field
+            let empty_vec: Vec<Value> = vec![];
+            let parents_array = entity_obj
+                .get("parents")
+                .and_then(|v| v.as_array())
+                .unwrap_or(&empty_vec);
+
+            let mut parents_set = HashSet::new();
+            for parent in parents_array {
+                if let Value::Object(parent_obj) = parent
+                    && let (Some(type_v), Some(id_v)) = (
+                        parent_obj.get("type").and_then(|v| v.as_str()),
+                        parent_obj.get("id").and_then(|v| v.as_str()),
+                    )
+                {
+                    // Add namespace if not present
+                    let full_parent_entity_type = build_entity_type_name(type_v, &namespace);
+                    let parent_uid_str = format!("{}::\"{}\"", full_parent_entity_type, id_v);
+                    match EntityUid::from_str(&parent_uid_str) {
+                        Ok(parent_uid) => {
+                            parents_set.insert(parent_uid);
+                        },
+                        Err(e) => {
+                            // log warn that we could not parse uid
+                            let log_entry = LogEntry::new_with_data(LogType::System, None)
+                                .set_level(LogLevel::WARN)
+                                .set_message(format!(
+                                    "Could not parse parent UID '{}' for default entity '{}': {}",
+                                    parent_uid_str, entity_id, e
+                                ));
+
+                            logger.log_any(log_entry);
+                        },
+                    }
+                } else {
+                    // log warn that we skip value because it is not object
+                    let log_entry = LogEntry::new_with_data(LogType::System, None)
+                        .set_level(LogLevel::WARN)
+                        .set_message(format!(
+                            "In default entity parent array json value should be object, skip: {}",
+                            parent
+                        ));
+
+                    logger.log_any(log_entry);
                 }
             }
-        }
+
+            (full_entity_type, cedar_attrs, parents_set)
+        } else if entity_obj.contains_key("entity_type") {
+            // Old format with entity_type field
+            let entity_type = entity_obj
+                .get("entity_type")
+                .and_then(|v| v.as_str())
+                .ok_or_else(|| {
+                    BuildEntityError::new(
+                        UNKNOWN_ENTITY_TYPE.to_string(),
+                        BuildEntityErrorKind::InvalidEntityData(format!(
+                            "Default entity '{}' has invalid entity_type field",
+                            entity_id
+                        )),
+                    )
+                })?;
+
+            // Convert JSON attributes to Cedar expressions
+            let cedar_attrs = parse_entity_attrs(
+                entity_obj
+                    .iter()
+                    .filter(|(key, _)| key != &"entity_type" && key != &"entity_id"),
+                entity_type,
+                entity_id,
+            )?;
+
+            (entity_type.to_string(), cedar_attrs, HashSet::new())
+        } else {
+            return Err(BuildEntityError::new(
+                UNKNOWN_ENTITY_TYPE.to_string(),
+                BuildEntityErrorKind::InvalidEntityData(format!(
+                    "Default entity '{}' must have either uid field (Cedar format) or entity_type field (legacy format)",
+                    entity_id
+                )),
+            ));
+        };
 
         // Build the Cedar entity
-        let entity = build_cedar_entity(entity_type, entity_id, cedar_attrs, HashSet::new())?;
+        let entity = build_cedar_entity(&entity_type, entity_id, cedar_attrs, parents)?;
 
         default_entities.insert(entity_id.clone(), entity);
     }
 
     Ok(default_entities)
+}
+
+fn build_entity_type_name(entity_type_from_uid: &str, namespace: &Option<&str>) -> String {
+    if entity_type_from_uid.contains("::") {
+        entity_type_from_uid.to_string()
+    } else if let Some(ns) = namespace
+        && !ns.is_empty()
+    {
+        format!("{}::{}", ns, entity_type_from_uid)
+    } else {
+        entity_type_from_uid.to_string()
+    }
 }
 
 pub struct EntityBuilder {
@@ -151,6 +297,8 @@ impl EntityBuilder {
         trusted_issuers: &HashMap<String, TrustedIssuer>,
         schema: Option<&ValidatorSchema>,
         default_entities_data: Option<&HashMap<String, Value>>,
+        namespace: Option<&str>,
+        logger: Logger,
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
@@ -170,7 +318,7 @@ impl EntityBuilder {
 
         // Parse default entities if provided
         let default_entities = if let Some(entities_data) = default_entities_data {
-            parse_default_entities(entities_data)
+            parse_default_entities(entities_data, namespace, logger)
                 .map_err(|e| InitEntityBuilderError::BuildIssEntities(vec![e].into()))?
         } else {
             HashMap::new()
@@ -274,7 +422,9 @@ impl EntityBuilder {
             roles.extend(parents);
         }
 
-        let resource = self.build_resource_entity(&request.resource)?;
+        let resource = self
+            .build_resource_entity(&request.resource)
+            .map_err(Box::new)?;
 
         Ok(BuiltEntitiesUnsigned {
             principals,
@@ -318,9 +468,9 @@ pub fn build_cedar_entity(
     parents: HashSet<EntityUid>,
 ) -> Result<Entity, BuildEntityError> {
     let uid = EntityUid::from_str(&format!("{}::\"{}\"", type_name, id))
-        .map_err(|e| BuildEntityErrorKind::from(e).while_building(type_name))?;
+        .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
     let entity = Entity::new(uid, attrs, parents)
-        .map_err(|e| BuildEntityErrorKind::from(e).while_building(type_name))?;
+        .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
 
     Ok(entity)
 }
@@ -387,6 +537,7 @@ mod test {
     use super::*;
     use crate::CedarEntityMapping;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::log::TEST_LOGGER;
     use cedar_policy::{Entities, Schema};
     use serde_json::{Value, json};
     use std::collections::HashMap;
@@ -519,17 +670,27 @@ mod test {
             ),
         ]);
 
-        let entity_builder = EntityBuilder::new(config, &issuers, Some(&validator_schema), None)
-            .expect("init entity builder");
+        let entity_builder = EntityBuilder::new(
+            config,
+            &issuers,
+            Some(&validator_schema),
+            None,
+            None,
+            TEST_LOGGER.clone(),
+        )
+        .expect("init entity builder");
 
         let entities = entity_builder
-            .build_entities(&tokens, &EntityData {
-                cedar_mapping: CedarEntityMapping {
-                    entity_type: "Jans::Resource".into(),
-                    id: "some_id".into(),
+            .build_entities(
+                &tokens,
+                &EntityData {
+                    cedar_mapping: CedarEntityMapping {
+                        entity_type: "Jans::Resource".into(),
+                        id: "some_id".into(),
+                    },
+                    attributes: HashMap::new(),
                 },
-                attributes: HashMap::new(),
-            })
+            )
             .expect("build entities");
 
         assert_entity_eq(
@@ -570,7 +731,8 @@ mod test {
 
         // Test that parse_default_entities works
         let parsed_entities =
-            parse_default_entities(&default_entities).expect("should parse default entities");
+            parse_default_entities(&default_entities, Some("Test"), TEST_LOGGER.clone())
+                .expect("should parse default entities");
 
         assert_eq!(parsed_entities.len(), 1, "should have 1 default entity");
 
@@ -672,6 +834,8 @@ mod test {
             &trusted_issuers,
             Some(&schema),
             Some(&default_entities_data),
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should create entity builder");
 
@@ -840,6 +1004,8 @@ mod test {
             &trusted_issuers,
             Some(&validator_schema),
             Some(&default_entities_data),
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should create entity builder");
 
@@ -986,6 +1152,8 @@ mod test {
             &trusted_issuers,
             Some(&validator_schema),
             Some(&default_entities_data),
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should create entity builder");
 
@@ -1176,6 +1344,8 @@ mod test {
             &trusted_issuers,
             Some(&validator_schema),
             Some(&default_entities_data),
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should create entity builder");
 
@@ -1308,6 +1478,176 @@ mod test {
                 .iter()
                 .any(|p| p.as_str() == Some("restore")),
             "should have restore permission"
+        );
+    }
+
+    #[test]
+    fn test_parse_cedar_entity_format_with_admin_ui_namespace() {
+        // Test with the exact entity format from the reported issue
+        // This tests the Cedar entity JSON format with uid, attrs, and parents fields
+        let entity_data = json!({
+            "uid": {
+                "type": "Features",
+                "id": "License"
+            },
+            "attrs": {},
+            "parents": [
+                {
+                    "type": "ParentResource",
+                    "id": "AuthServerAndConfiguration"
+                }
+            ]
+        });
+
+        let default_entities_data = HashMap::from([("2694c954f8d8".to_string(), entity_data)]);
+
+        // Use the namespace from the policy store name
+        let namespace = Some("Gluu::Flex::AdminUI::Resources");
+        let parsed_entities =
+            parse_default_entities(&default_entities_data, namespace, TEST_LOGGER.clone())
+                .expect("should parse default entities");
+
+        assert_eq!(parsed_entities.len(), 1, "should have 1 entity");
+
+        let entity = parsed_entities
+            .get("2694c954f8d8")
+            .expect("should have entity");
+        let uid_str = entity.uid().to_string();
+
+        // Verify the namespace was added correctly to both the entity type and parent type
+        println!("Parsed entity UID: {}", uid_str);
+        assert!(
+            uid_str.contains("Features"),
+            "Entity should contain Features type"
+        );
+
+        // Check that entity has correct namespace prefix
+        assert!(
+            uid_str.contains("Gluu::Flex::AdminUI::Resources::Features"),
+            "Entity should have correct namespace, got: {}",
+            uid_str
+        );
+
+        println!(
+            "✓ Successfully parsed Cedar entity format with namespace: {}",
+            uid_str
+        );
+    }
+
+    #[test]
+    fn test_parse_entity_with_existing_namespace() {
+        // Test that entity with uid.type already containing "::" does not get double-prefixed
+        let entity_data = json!({
+            "uid": {
+                "type": "Existing::Namespace::Features",
+                "id": "TestFeature"
+            },
+            "attrs": {
+                "attribute": "value"
+            }
+        });
+
+        let default_entities_data = HashMap::from([("test123".to_string(), entity_data)]);
+
+        let parsed_entities = parse_default_entities(
+            &default_entities_data,
+            Some("NewNamespace"),
+            TEST_LOGGER.clone(),
+        )
+        .expect("should parse default entities");
+
+        let entity = parsed_entities.get("test123").expect("should have entity");
+        assert_eq!(
+            entity.uid().type_name().to_string(),
+            "Existing::Namespace::Features",
+            "Existing namespace should not be double-prefixed"
+        );
+    }
+
+    #[test]
+    fn test_parse_error_missing_uid() {
+        // Test entity missing uid field
+        let entity_data = json!({
+            "attrs": {
+                "attribute": "value"
+            }
+        });
+
+        let default_entities_data = HashMap::from([("test123".to_string(), entity_data)]);
+
+        let result =
+            parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone());
+        assert!(
+            result.is_err(),
+            "Should return error when uid field is missing"
+        );
+    }
+
+    #[test]
+    fn test_parse_error_invalid_uid_structure() {
+        // Test entity with uid that is not an object
+        let entity_data = json!({
+            "uid": "not-an-object",
+            "attrs": {}
+        });
+
+        let default_entities_data = HashMap::from([("test123".to_string(), entity_data)]);
+
+        let result =
+            parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone());
+        assert!(
+            result.is_err(),
+            "Should return error when uid is not an object"
+        );
+
+        // Test entity with uid missing type field
+        let entity_data_no_type = json!({
+            "uid": {
+                "id": "test"
+            },
+            "attrs": {}
+        });
+
+        let default_entities_data = HashMap::from([("test456".to_string(), entity_data_no_type)]);
+
+        let result =
+            parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone());
+        assert!(
+            result.is_err(),
+            "Should return error when uid.type is missing"
+        );
+    }
+
+    #[test]
+    fn test_parse_entity_with_empty_attrs_and_parents() {
+        // Test entity with empty attrs and empty parents
+        let entity_data = json!({
+            "uid": {
+                "type": "EmptyTest",
+                "id": "test789"
+            },
+            "attrs": {},
+            "parents": []
+        });
+
+        let default_entities_data = HashMap::from([("test789".to_string(), entity_data)]);
+
+        let parsed_entities =
+            parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone())
+                .expect("should parse with empty attrs and parents");
+
+        let entity = parsed_entities.get("test789").expect("should have entity");
+        assert_eq!(
+            entity.uid().type_name().to_string(),
+            "Test::EmptyTest",
+            "Entity type should have namespace prefix"
+        );
+        let entity_json = entity.to_json_value().expect("should convert to JSON");
+        let attrs = entity_json.get("attrs").expect("should have attrs");
+        assert_eq!(
+            attrs.as_object().unwrap().len(),
+            0,
+            "Entity should have empty attrs"
         );
     }
 }
