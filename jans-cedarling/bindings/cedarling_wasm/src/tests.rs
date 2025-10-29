@@ -729,7 +729,8 @@ async fn test_authorize_multi_issuer_success() {
         "exp": 1724945978
     }));
 
-    let multi_issuer_request = json!({
+    // Serialize to string first, then parse back to ensure consistent structure
+    let multi_issuer_request_str = serde_json::to_string(&json!({
         "tokens": [
             {
                 "mapping": "Jans::Access_Token",
@@ -754,7 +755,10 @@ async fn test_authorize_multi_issuer_success() {
         },
         "action": "Jans::Action::\"Update\"",
         "context": {}
-    });
+    })).expect("Should serialize to JSON string");
+    
+    let multi_issuer_request: serde_json::Value = serde_json::from_str(&multi_issuer_request_str)
+        .expect("Should deserialize from JSON string");
 
     let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
         .expect("Multi-issuer request should be converted to JsValue");
@@ -783,7 +787,8 @@ async fn test_authorize_multi_issuer_with_invalid_token() {
         .expect("init function should be initialized with js map");
 
     // Create request with an invalid token
-    let multi_issuer_request = json!({
+    // Serialize to string first, then parse back to ensure consistent structure
+    let multi_issuer_request_str = serde_json::to_string(&json!({
         "tokens": [
             {
                 "mapping": "Jans::Access_Token",
@@ -800,7 +805,10 @@ async fn test_authorize_multi_issuer_with_invalid_token() {
         },
         "action": "Jans::Action::\"Update\"",
         "context": {}
-    });
+    })).expect("Should serialize to JSON string");
+    
+    let multi_issuer_request: serde_json::Value = serde_json::from_str(&multi_issuer_request_str)
+        .expect("Should deserialize from JSON string");
 
     let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
         .expect("Multi-issuer request should be converted to JsValue");
@@ -825,7 +833,8 @@ async fn test_authorize_multi_issuer_with_empty_tokens() {
         .expect("init function should be initialized with js map");
 
     // Create request with empty tokens
-    let multi_issuer_request = json!({
+    // Serialize to string first, then parse back to ensure consistent structure
+    let multi_issuer_request_str = serde_json::to_string(&json!({
         "tokens": [],
         "resource": {
             "cedar_entity_mapping": {
@@ -837,7 +846,10 @@ async fn test_authorize_multi_issuer_with_empty_tokens() {
         },
         "action": "Jans::Action::\"Update\"",
         "context": {}
-    });
+    })).expect("Should serialize to JSON string");
+    
+    let multi_issuer_request: serde_json::Value = serde_json::from_str(&multi_issuer_request_str)
+        .expect("Should deserialize from JSON string");
 
     let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
         .expect("Multi-issuer request should be converted to JsValue");
@@ -870,7 +882,8 @@ async fn test_authorize_multi_issuer_with_context() {
     }));
 
     // Create request with context
-    let multi_issuer_request = json!({
+    // Serialize to string first, then parse back to ensure consistent structure
+    let multi_issuer_request_str = serde_json::to_string(&json!({
         "tokens": [
             {
                 "mapping": "Jans::Access_Token",
@@ -889,7 +902,10 @@ async fn test_authorize_multi_issuer_with_context() {
         "context": {
             "some_context": "value"
         }
-    });
+    })).expect("Should serialize to JSON string");
+    
+    let multi_issuer_request: serde_json::Value = serde_json::from_str(&multi_issuer_request_str)
+        .expect("Should deserialize from JSON string");
 
     let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
         .expect("Multi-issuer request should be converted to JsValue");
