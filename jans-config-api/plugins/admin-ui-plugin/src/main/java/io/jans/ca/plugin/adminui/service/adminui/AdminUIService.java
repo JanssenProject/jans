@@ -503,8 +503,4 @@ public class AdminUIService {
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
         }
     }
-    public static void main(String[] args) throws StringEncrypter.EncryptionException {
-        StringEncrypter se = StringEncrypter.instance("e4emGottrVyqhwsIeIu40WWZ");
-        System.out.println(se.decrypt("NVc37PnLywbjSr3227i8+Q=="));
-    }
 }

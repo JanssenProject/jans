@@ -62,8 +62,11 @@ public class AdminUISecurityService {
             Pattern.compile("action\\s*==\\s*([^;\\n]+)");
     private static final Pattern MULTI_ACTION_PATTERN =
             Pattern.compile("action\\s*in\\s*\\[([^\\]]+)\\]");
-    private static String RESOURCE_PREFIX= "Gluu::Flex::AdminUI::Resources::";
-    private static String ACTION_PREFIX= "Gluu::Flex::AdminUI::Action::";
+
+    private static final String RESOURCE_PREFIX= "Gluu::Flex::AdminUI::Resources::";
+    private static final String ACTION_PREFIX= "Gluu::Flex::AdminUI::Action::";
+    private static final String PARENT_RESOURCE_PREFIX = "ParentResource::";
+    private static final String FEATURES_PREFIX = "Features::";
 
     /**
      * Retrieves the policy store configuration for the Admin UI.
@@ -218,58 +221,94 @@ public class AdminUISecurityService {
      * @throws ApplicationException if any error occurs while fetching, parsing, or updating the role-to-scope mappings.
      */
     public GenericResponse syncRoleScopeMapping() throws ApplicationException {
-
         try {
             // Retrieve all Admin UI resource-scope mappings from persistence
             final Filter filter = Filter.createPresenceFilter(AppConstants.ADMIN_UI_RESOURCE);
-            List<AdminUIResourceScopesMapping> adminUIResourceScopesMappings = entryManager.findEntries(AppConstants.ADMIN_UI_RESOURCE_SCOPES_MAPPING_DN, AdminUIResourceScopesMapping.class, filter);
-            // Convert resource-scope mappings to JSON
-            JsonNode resourceScopesJson = CommonUtils.toJsonNode(adminUIResourceScopesMappings);
+            List<AdminUIResourceScopesMapping> adminUIResourceScopesMappings =
+                    entryManager.findEntries(AppConstants.ADMIN_UI_RESOURCE_SCOPES_MAPPING_DN,
+                            AdminUIResourceScopesMapping.class, filter);
 
-            // Retrieve policy-store JSON (remote or local)
+            // Convert resource-scope mappings to JSON safely
+            JsonNode resourceScopesJson = CommonUtils.toJsonNode(adminUIResourceScopesMappings);
             JsonNode policyStoreJson = getPolicyStore().getResponseObject();
-            // Map principals (roles) to scopes using policy-store and resource-scope data
+
+            // Validate inputs
+            if (resourceScopesJson == null || policyStoreJson == null) {
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                        "Invalid input data for synchronization");
+            }
+
             Map<String, Set<String>> principalsToScopesMap = mapPrincipalsToScopes(policyStoreJson, resourceScopesJson);
 
-            // Build list of AdminRole objects for each role found in the mapping
-            List<AdminRole> roles = principalsToScopesMap.keySet().stream()
-                    .map(roleName -> {
-                        AdminRole role = new AdminRole();
-                        role.setRole(roleName);
-                        role.setDescription("Role created after parsing policy-store for " + roleName);
-                        role.setDeletable(true);
-                        return role;
-                    })
-                    .collect(Collectors.toList());
-            // Reset roles in the Admin UI configuration
-            adminUIService.resetRoles(roles);
-            // Build list of RolePermissionMapping objects
-            List<RolePermissionMapping> rolePermissionMappings = principalsToScopesMap.entrySet().stream()
-                    .map(entry -> {
-                        RolePermissionMapping rpm = new RolePermissionMapping();
-                        rpm.setRole(entry.getKey());
-                        rpm.setPermissions(new ArrayList<>(entry.getValue()));
-                        return rpm;
-                    })
-                    .collect(Collectors.toList());
-            // Remove duplicate permissions mapped to roles
-            List<RolePermissionMapping> updatedMappings = rolePermissionMappings.stream()
-                    .map(entry -> {
-                        RolePermissionMapping rpm = new RolePermissionMapping();
-                        Set<String> uniqueElements = new HashSet<>(entry.getPermissions());
-                        rpm.setRole(entry.getRole());
-                        rpm.setPermissions(new ArrayList<>(uniqueElements));
-                        return rpm;
-                    })
-                    .collect(Collectors.toList());
-            // Reset permissions-to-role mappings in Admin UI configuration
-            adminUIService.resetPermissionsToRole(updatedMappings);
-            return CommonUtils.createGenericResponse(true, 200, "Sync of role-to-scope mappings from the policy store completed successfully.");
+            // Validate mapping results
+            if (principalsToScopesMap.isEmpty()) {
+                log.warn("No principal-to-scope mappings found during synchronization");
+            }
 
-        } catch(Exception e) {
+            List<AdminRole> roles = createAdminRoles(principalsToScopesMap.keySet());
+            List<RolePermissionMapping> rolePermissionMappings = createRolePermissionMappings(principalsToScopesMap);
+
+            // Remove duplicate permissions efficiently
+            List<RolePermissionMapping> updatedMappings = removeDuplicatePermissions(rolePermissionMappings);
+
+            // Update services
+            adminUIService.resetRoles(roles);
+            adminUIService.resetPermissionsToRole(updatedMappings);
+
+            return CommonUtils.createGenericResponse(true, 200,
+                    "Sync of role-to-scope mappings from the policy store completed successfully.");
+
+        } catch (ApplicationException e) {
+            throw e; // Re-throw ApplicationException as is
+        } catch (Exception e) {
             log.error(ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription(), e);
-            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription());
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                    ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription());
         }
+    }
+
+    /**
+     * Extracted method for creating AdminRole objects
+     */
+    private List<AdminRole> createAdminRoles(Set<String> roleNames) {
+        return roleNames.stream()
+                .map(roleName -> {
+                    AdminRole role = new AdminRole();
+                    role.setRole(roleName);
+                    role.setDescription("Role created after parsing policy-store for " + roleName);
+                    role.setDeletable(true);
+                    return role;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Extracted method for creating RolePermissionMapping objects
+     */
+    private List<RolePermissionMapping> createRolePermissionMappings(Map<String, Set<String>> principalsToScopesMap) {
+        return principalsToScopesMap.entrySet().stream()
+                .map(entry -> {
+                    RolePermissionMapping rpm = new RolePermissionMapping();
+                    rpm.setRole(entry.getKey());
+                    rpm.setPermissions(new ArrayList<>(entry.getValue()));
+                    return rpm;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Efficiently remove duplicate permissions using streams
+     */
+    private List<RolePermissionMapping> removeDuplicatePermissions(List<RolePermissionMapping> rolePermissionMappings) {
+        return rolePermissionMappings.stream()
+                .map(entry -> {
+                    RolePermissionMapping rpm = new RolePermissionMapping();
+                    rpm.setRole(entry.getRole());
+                    // Use LinkedHashSet to maintain order while removing duplicates
+                    rpm.setPermissions(new ArrayList<>(new LinkedHashSet<>(entry.getPermissions())));
+                    return rpm;
+                })
+                .collect(Collectors.toList());
     }
 
     /**
@@ -280,22 +319,26 @@ public class AdminUISecurityService {
      * @return Map of principal (sanitized lowercase) to set of scopes
      */
     public static Map<String, Set<String>> mapPrincipalsToScopes(JsonNode policyStoreJson, JsonNode resourcesJson) {
+        if (policyStoreJson == null || resourcesJson == null) {
+            return Collections.emptyMap();
+        }
+
         Map<String, Set<String>> resourceToCaps = buildResourceToScopes(resourcesJson);
-        Set<String> allResourceKeys = resourceToCaps.keySet();
+        Set<String> allResourceKeys = Collections.unmodifiableSet(resourceToCaps.keySet());
         Map<String, Set<String>> principalToScopes = new HashMap<>();
 
         ArrayNode policyStores = getPolicyStoresArray(policyStoreJson);
 
         for (JsonNode policyStore : policyStores) {
             ArrayNode policies = getArrayNode(policyStore, "policies");
-            if (policies == null) continue;
+            if (policies == null || policies.isEmpty()) continue;
 
             for (JsonNode policy : policies) {
                 processPolicy(policy, policyStore, resourceToCaps, allResourceKeys, principalToScopes);
             }
         }
 
-        return principalToScopes;
+        return Collections.unmodifiableMap(principalToScopes);
     }
     /**
      * Processes a single policy to extract principals and map them to scopes.
@@ -305,34 +348,45 @@ public class AdminUISecurityService {
                                       Set<String> allResourceKeys,
                                       Map<String, Set<String>> principalToScopes) {
         String cedarDsl = decodeBase64ToString(policy, "policy_content");
-        if (cedarDsl == null) return;
+        if (cedarDsl == null || cedarDsl.trim().isEmpty()) return;
 
         Set<String> principals = extractPrincipalsFromCedarDsl(cedarDsl);
         if (principals.isEmpty()) return;
 
-        JsonNode schemaNode = decodeBase64ToJson(policyStore, "schema");
-        Set<String> policyResources = extractResourceActionPairs(cedarDsl, schemaNode);
-        Set<String> aggregatedScopes = aggregateScopes(policyResources, resourceToCaps, allResourceKeys);
+        Set<String> policyResources = extractResourceActionPairs(cedarDsl, policyStore);
+        Set<String> aggregatedScopes = aggregateScopes(policyResources, resourceToCaps, allResourceKeys, policyStore);
 
-        // Attach scopes to principals
-        for (String principal : principals) {
-            principalToScopes.computeIfAbsent(principal, k -> new HashSet<>()).addAll(aggregatedScopes);
+        // Only attach scopes if we found valid ones
+        if (!aggregatedScopes.isEmpty()) {
+            for (String principal : principals) {
+                principalToScopes.computeIfAbsent(principal, k -> new HashSet<>()).addAll(aggregatedScopes);
+            }
         }
     }
 
     /**
-     * Aggregates scopes from policy resources using direct matching and schema fallback.
+     * Aggregates scopes from policy resources using direct matching, schema fallback, and default_entities fallback.
      */
     private static Set<String> aggregateScopes(Set<String> policyResources,
                                                Map<String, Set<String>> resourceToCaps,
-                                               Set<String> allResourceKeys) {
+                                               Set<String> allResourceKeys,
+                                               JsonNode policyStore) {
+        if (policyResources == null || policyResources.isEmpty()) {
+            return Collections.emptySet();
+        }
+
         Set<String> aggregatedScopes = new HashSet<>();
 
         for (String rawResource : policyResources) {
-            if (rawResource == null || rawResource.isEmpty()) continue;
+            if (rawResource == null || rawResource.trim().isEmpty()) continue;
 
-            String resourceKey = rawResource.toLowerCase(DEFAULT_LOCALE);
-            findAndAddScopes(resourceKey, resourceToCaps, allResourceKeys, aggregatedScopes);
+            String resourceKey = rawResource.toLowerCase(DEFAULT_LOCALE).trim();
+
+            // Try direct matching first
+            if (!findAndAddScopes(resourceKey, resourceToCaps, allResourceKeys, aggregatedScopes)) {
+                // If direct matching fails, try default_entities fallback
+                findAndAddScopesFromDefaultEntities(resourceKey, resourceToCaps, allResourceKeys, aggregatedScopes, policyStore);
+            }
         }
 
         return aggregatedScopes;
@@ -340,24 +394,148 @@ public class AdminUISecurityService {
 
     /**
      * Finds scopes for a resource key and adds them to the aggregated set.
+     * Returns true if scopes were found, false otherwise.
      */
-    private static void findAndAddScopes(String resourceKey,
-                                         Map<String, Set<String>> resourceToCaps,
-                                         Set<String> allResourceKeys,
-                                         Set<String> aggregatedScopes) {
-        // Direct match
-        if (resourceToCaps.containsKey(resourceKey)) {
-            aggregatedScopes.addAll(resourceToCaps.get(resourceKey));
-            return;
+    private static boolean findAndAddScopes(String resourceKey,
+                                            Map<String, Set<String>> resourceToCaps,
+                                            Set<String> allResourceKeys,
+                                            Set<String> aggregatedScopes) {
+        if (resourceKey == null || resourceKey.trim().isEmpty()) {
+            return false;
         }
 
-        // Case-insensitive match
-        allResourceKeys.stream()
+        // Direct match
+        Set<String> scopes = resourceToCaps.get(resourceKey);
+        if (scopes != null && !scopes.isEmpty()) {
+            aggregatedScopes.addAll(scopes);
+            return true;
+        }
+
+        // Case-insensitive match using stream with early termination
+        return allResourceKeys.stream()
                 .filter(key -> key.equalsIgnoreCase(resourceKey))
                 .findFirst()
-                .ifPresent(matchedKey -> aggregatedScopes.addAll(resourceToCaps.get(matchedKey)));
+                .map(matchedKey -> {
+                    Set<String> matchedScopes = resourceToCaps.get(matchedKey);
+                    if (matchedScopes != null) {
+                        aggregatedScopes.addAll(matchedScopes);
+                    }
+                    return true;
+                })
+                .orElse(false);
     }
 
+    /**
+     * Finds scopes by looking in default_entities for Features with matching parent resources.
+     */
+    private static void findAndAddScopesFromDefaultEntities(String resourceKey,
+                                                            Map<String, Set<String>> resourceToCaps,
+                                                            Set<String> allResourceKeys,
+                                                            Set<String> aggregatedScopes,
+                                                            JsonNode policyStore) {
+        JsonNode defaultEntitiesNode = decodeBase64ToJson(policyStore, "default_entities");
+        if (defaultEntitiesNode == null) return;
+
+        Set<String> featureIds = findFeatureIdsByParentResource(defaultEntitiesNode, resourceKey);
+
+        for (String featureId : featureIds) {
+            // Try to find scopes for each feature ID
+            findAndAddScopes(featureId, resourceToCaps, allResourceKeys, aggregatedScopes);
+        }
+    }
+
+    /**
+     * Finds all Feature entity IDs that have the specified resource in their parents field.
+     */
+    private static Set<String> findFeatureIdsByParentResource(JsonNode defaultEntitiesNode, String targetResource) {
+        Set<String> featureIds = new HashSet<>();
+
+        if (defaultEntitiesNode == null || !defaultEntitiesNode.isObject()) {
+            return featureIds;
+        }
+
+        Iterator<Map.Entry<String, JsonNode>> fields = defaultEntitiesNode.fields();
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> entry = fields.next();
+            String entityId = entry.getKey();
+            JsonNode entityData = decodeEntityData(entry.getValue());
+
+            if (isFeatureWithMatchingParent(entityData, targetResource)) {
+                featureIds.add(entityId.toLowerCase(DEFAULT_LOCALE));
+            }
+        }
+
+        return featureIds;
+    }
+
+    /**
+     * Decodes base64 encoded entity data to JSON.
+     */
+    private static JsonNode decodeEntityData(JsonNode encodedNode) {
+        if (encodedNode == null || !encodedNode.isTextual()) {
+            return null;
+        }
+
+        try {
+            String base64String = encodedNode.asText();
+            byte[] raw = Base64.getDecoder().decode(base64String);
+            String jsonString = new String(raw, StandardCharsets.UTF_8);
+            return MAPPER.readTree(jsonString);
+        } catch (IllegalArgumentException | IOException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Checks if the entity is a Feature type and has the target resource in its parents field.
+     */
+    private static boolean isFeatureWithMatchingParent(JsonNode entityData, String targetResource) {
+        if (entityData == null || !entityData.isObject()) {
+            return false;
+        }
+
+        // Check if it's a Feature type
+        JsonNode typeNode = entityData.path("uid").path("type");
+        if (!typeNode.isTextual() || !"Features".equalsIgnoreCase(typeNode.asText())) {
+            return false;
+        }
+
+        // Check parents field for matching resource
+        JsonNode parentsNode = entityData.path("parents");
+        if (parentsNode.isArray()) {
+            for (JsonNode parentNode : parentsNode) {
+                JsonNode id = parentNode.path("id");
+                if (id.isTextual()) {
+                    String parent = normalizeParentResource(id.asText());
+                    String target = normalizeResource(targetResource);
+
+                    // Check if parent matches the target resource
+                    if (parent.equals(target)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Normalizes parent resource by removing namespace and type prefix.
+     */
+    private static String normalizeParentResource(String parent) {
+        if (parent == null) return null;
+
+        // Remove ParentResource:: prefix if present
+        String normalized = parent.replace("ParentResource::", "");
+
+        // Remove any other namespace prefixes
+        if (normalized.contains("::")) {
+            normalized = normalized.substring(normalized.lastIndexOf("::") + 2);
+        }
+
+        return normalized.toLowerCase(DEFAULT_LOCALE).trim();
+    }
     // ==================== HELPER METHODS ====================
 
     /**
@@ -405,13 +583,13 @@ public class AdminUISecurityService {
     }
 
     /**
-     * Extracts resource-action pairs from Cedar DSL policy.
+     * Extracts resource-action pairs from Cedar DSL policy using default_entities fallback.
      */
-    private static Set<String> extractResourceActionPairs(String policy, JsonNode schemaNode) {
+    private static Set<String> extractResourceActionPairs(String policy, JsonNode policyStore) {
         Set<String> resources = extractResourcesFromPolicy(policy);
         Set<String> actions = extractActionsFromPolicy(policy);
 
-        return buildResourceActionPairs(resources, actions, schemaNode);
+        return buildResourceActionPairs(resources, actions, policyStore);
     }
 
     /**
@@ -474,17 +652,16 @@ public class AdminUISecurityService {
     }
 
     /**
-     * Builds resource-action pairs combining resources and actions.
+     * Builds resource-action pairs combining resources and actions with default_entities fallback.
      */
-    private static Set<String> buildResourceActionPairs(Set<String> resources, Set<String> actions, JsonNode schemaNode) {
+    private static Set<String> buildResourceActionPairs(Set<String> resources, Set<String> actions, JsonNode policyStore) {
         Set<String> pairs = new HashSet<>();
 
         for (String resource : resources) {
-            Map<String, Set<String>> entityTypeToMembers = schemaNode == null ?
-                    Collections.emptyMap() : buildEntityTypeIndex(schemaNode, resource);
+            // Use default_entities to find matching feature entities
+            Set<String> matchingEntities = findMatchingFeatureEntities(policyStore, resource);
 
-            Set<String> resourceSet = entityTypeToMembers.keySet();
-            for (String entity : resourceSet) {
+            for (String entity : matchingEntities) {
                 for (String action : actions) {
                     String pair = (entity + "~" + action).toLowerCase(DEFAULT_LOCALE).replace("\"", "");
                     pairs.add(pair);
@@ -496,10 +673,60 @@ public class AdminUISecurityService {
     }
 
     /**
+     * Finds matching feature entities from default_entities based on parent resource.
+     */
+    private static Set<String> findMatchingFeatureEntities(JsonNode policyStore, String resource) {
+        Set<String> matchingEntities = new HashSet<>();
+
+        // First, add the original resource itself
+        matchingEntities.add(resource);
+
+        // Then look for Features in default_entities that have this resource as parent
+        JsonNode defaultEntitiesNode = getDefaultEntities(policyStore);
+        if (defaultEntitiesNode == null) return matchingEntities;
+
+        Iterator<Map.Entry<String, JsonNode>> fields = defaultEntitiesNode.fields();
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> entry = fields.next();
+            //String entityId = entry.getKey();
+            JsonNode entityData = decodeEntityData(entry.getValue());
+
+            if (isFeatureWithMatchingParent(entityData, resource)) {
+                //matchingEntities.add(entityId);
+                JsonNode uidNode = entityData.path("uid");
+                if (!uidNode.isMissingNode()) {
+                    JsonNode idNode = uidNode.path("id");
+                    if (!idNode.isMissingNode() && idNode.isTextual()) {
+                        String normalizedId = idNode.asText();
+                        matchingEntities.add(normalizedId.toLowerCase(DEFAULT_LOCALE).trim());
+                    }
+                }
+            }
+        }
+
+        return matchingEntities;
+    }
+
+    /**
+     * Gets default_entities as JSON object (not base64 decoded since the field itself is JSON)
+     */
+    private static JsonNode getDefaultEntities(JsonNode policyStore) {
+        JsonNode defaultEntitiesNode = policyStore.path("default_entities");
+        if (defaultEntitiesNode.isMissingNode() || defaultEntitiesNode.isNull() || !defaultEntitiesNode.isObject()) {
+            return null;
+        }
+        return defaultEntitiesNode;
+    }
+
+    /**
      * Normalizes resource by removing namespace prefix.
      */
     private static String normalizeResource(String value) {
-        return value.replace(RESOURCE_PREFIX, "").trim();
+        return value.replace(RESOURCE_PREFIX + PARENT_RESOURCE_PREFIX, "")
+                .replace(RESOURCE_PREFIX + FEATURES_PREFIX, "")
+                .replace("\"", "")
+                .toLowerCase(DEFAULT_LOCALE)
+                .trim();
     }
 
     /**
@@ -615,29 +842,17 @@ public class AdminUISecurityService {
         JsonNode node = parent.path(field);
         if (node.isMissingNode() || node.isNull()) return null;
 
-        String value = node.asText("");
-        return value.isEmpty() ? null : value;
-    }
-
-    /**
-     * Builds entity type index from schema JSON.
-     */
-    private static Map<String, Set<String>> buildEntityTypeIndex(JsonNode schemaJson, String resource) {
-        Map<String, Set<String>> index = new HashMap<>();
-        if (schemaJson == null || resource == null) return index;
-
-        String resourceLower = resource.toLowerCase(DEFAULT_LOCALE);
-        JsonNode entityTypesNode = findEntityTypesNode(schemaJson);
-
-        if (entityTypesNode != null && !entityTypesNode.isMissingNode()) {
-            if (entityTypesNode.isObject()) {
-                processEntityTypesObject(entityTypesNode, resourceLower, index);
-            } else if (entityTypesNode.isArray()) {
-                processEntityTypesArray(entityTypesNode, resourceLower, index);
+        // Handle array and object nodes - convert to JSON string
+        if (node.isArray() || node.isObject()) {
+            try {
+                return MAPPER.writeValueAsString(node);
+            } catch (IOException e) {
+                return null;
             }
         }
 
-        return index;
+        String value = node.asText("");
+        return value.isEmpty() ? null : value;
     }
 
     /**
