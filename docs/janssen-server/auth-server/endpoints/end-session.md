@@ -69,7 +69,7 @@ during client registration or can be edited later. When using
 
 ### Interception Scripts
 
-Response from end session endpoint can be further customized using [end session](../../developer/scripts/end-session.md) 
+Response from end session endpoint can be further customized using [end session](../../../script-catalog/end_session/end-session.md)
 interception script.
 
 This script can be used to customize the HTML response generated from end session endpoint.
