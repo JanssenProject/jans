@@ -112,10 +112,14 @@ stage.
    ```JSON title="Principal"
        [
          {
-           "type": "Jans::User",
-           "id": "some_id",
+           "cedar_entity_mapping": {
+             "entity_type": "Jans::User",
+             "id": "some_id"
+           },
            "sub": "some_sub",
-           "role": ["SupremeRuler"]
+           "role": [
+             "Teacher"
+           ]
          }
        ]
    ```
@@ -126,9 +130,10 @@ stage.
 
    ```JSON title="Resource"
        {
-         "entity_type": "resource",
-         "type": "Jans::SecretDocument",
-         "id": "some_id"
+         "cedar_entity_mapping": {
+           "entity_type": "Jans::SecretDocument",
+           "id": "some_id"
+         }
        }
    ```
 
@@ -155,10 +160,12 @@ Let's check a scenario where authorization is denied. Remove the role from the
 ```JSON title="Principal"
 [
   {
-    "type": "Jans::User",
-    "id": "some_id",
+    "cedar_entity_mapping": {
+      "entity_type": "Jans::User",
+      "id": "some_id"
+    },
     "sub": "some_sub",
-    "role": [""]
+    "role": []
   }
 ]
 ```
@@ -216,7 +223,7 @@ For better understanding of the TBAC flow, see the diagram below.
   in place.
     - Allow dynamic client registration
     - Allow registered clients to request the `role` scope
-    - Have a user with the `role` claim set to the value `SupremeRuler` and 
+    - Have a user with the `role` claim set to the value `Teacher` and 
       return this claim in the userinfo token
 
 ### Step-1: Create Cedar Policy and Schema
@@ -224,17 +231,24 @@ For better understanding of the TBAC flow, see the diagram below.
 For this guide, we have created a policy store in the 
 [demo GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart). 
 
-The policy store has a [policy](https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/refs/heads/main/tarpDemo/76acfe86fb09731682f92c4fbf7d2e066813ce639404.policy) 
-that grants access to all actions and all the resources, 
-to the users with the `SupremeRuler` role. The policy is as follows:
+The policy store has two policies. The first grants access to all actions and all resources to the users with the `Teacher` role. The second allows only `Read` permission to students with the `Student` role to any resource. The two policies are as follows:
 
-```
-@id("allow_supreme_ruler")
+```cedar
+@id("allow_teacher")
 permit(
-  principal in Jans::Role::"SupremeRuler",
+  principal in Jans::Role::"Teacher",
   action,
   resource
 );
+```
+
+```cedar
+@id("allow_student_read")
+permit(
+  principal in Jans::Role::"Student",
+  action in [Jans::Action::"Read"],
+  resource
+)
 ```
 
 ### Step-2 Update the IDP information
@@ -342,19 +356,20 @@ Since we are implementing TBAC, we have to authenticate the user first to get th
       - Check the `Display access and ID token after authentication` checkbox
    
 3. Click the `Trigger auth flow` button
-3. Login using username and password of a user who has the `SupremeRuler` role assigned in the IDP
+3. Login using username and password of a user who has the `Teacher` role assigned in the IDP
 4. Click `Allow` on the consent screen
 5. If the authentication is successful, Tarp will show you a page with token details 
 6. Move to `Cedarling` tab and select `Cedarling Signed Authz Form` tab
 7. Use the details below as an input to this form:
       - Principal: select all 3 tokens. In TBAC approach here, we are passing tokens (i.e signed JWTs) in place of JSON string.
-      - Action: `Jans::Action::"Read"`
+      - Action: `Jans::Action::"Write"`
       - Resource:
         ```json
         {
-          "entity_type": "resource",
-          "type": "Jans::SecretDocument",
-          "id": "some_id"
+          "cedar_entity_mapping": {
+            "entity_type": "Jans::SecretDocument",
+            "id": "some_id"
+          }
         }
         ```
       - Leave the `context` as default
@@ -369,5 +384,10 @@ Since we are implementing TBAC, we have to authenticate the user first to get th
 
 The top-level `decision: true` confirms successful authorization.
 
+To test the negative case, we will do the following:
 
-
+1. Modify the user in the IDP to have the `Student` role instead of `Teacher`
+2. Logout from the Cedarling if you are logged in and rerun the authorization flow with the same parameters to obtain new tokens
+3. Run signed authorization using the same inputs
+4. The top-level `decision: false` confirms failed authorization. The first policy in the store allowed full access to users in the `Teacher` role, but the second policy only allowed `Read` access, which fails since our request was `Write` access.
+5. Repeat the authorization with action `Jans::Action::"Read"` to confirm that the user has `Read` access but not `Write` access

@@ -21,12 +21,12 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import static io.jans.as.server.service.cluster.ClusterNodeService.LOCK_KEY;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.List;
-
-import static io.jans.as.server.service.cluster.ClusterNodeService.LOCK_KEY;
 
 /**
  * @author Yuriy Movchan

@@ -2,14 +2,19 @@
 import contextlib
 import json
 import logging.config
+import pathlib
 import os
 from collections import namedtuple
+from datetime import datetime
+from datetime import UTC
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import get_random_chars
+from jans.pycloudlib.utils import generate_base64_contents
 
 from settings import LOGGING_CONFIG
 from utils import parse_lock_swagger_file
@@ -56,21 +61,24 @@ def _transform_lock_dynamic_config(conf, manager):
             ],
         }),
         ("statEnabled", True),
-        ("messageConsumerType", "DISABLED"),
-        ("policyConsumerType", "DISABLED"),
+        ("protectionMode", "CEDARLING"),
+        ("cedarlingConfiguration", {
+            "enabled": True,
+            "policySources": [
+                {
+                    "enabled": False,
+                    "authorizationToken": "",
+                    "policyStoreUri": ""
+                }
+            ],
+            "logType": "STD_OUT",
+            "logLevel": "INFO",
+            "externalPolicyStoreUri": ""
+        }),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
             should_update = True
-
-    # channel rename
-    if "jans_token" not in conf["tokenChannels"]:
-        conf["tokenChannels"].append("jans_token")
-
-        # remove old channel
-        with contextlib.suppress(ValueError):
-            conf["tokenChannels"].remove("id_token")
-        should_update = True
 
     # base endpoint is changed from jans-lock to jans-auth
     if conf["baseEndpoint"] != f"https://{hostname}/jans-auth/api/v1":
@@ -149,6 +157,7 @@ class Upgrade:
             self.update_lock_client_scopes()
             self.update_lock_error_config()
             self.update_lock_static_config()
+            self.update_lock_policy_config()
 
     def update_lock_dynamic_config(self):
         kwargs = {"table_name": "jansAppConf"}
@@ -258,6 +267,49 @@ class Upgrade:
             entry.attrs["jansConfStatic"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_lock_policy_config(self):
+        kwargs = {"table_name": "jansAppConf"}
+        id_ = doc_id_from_dn("ou=jans-lock,ou=configuration,o=jans")
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        try:
+            entry.attrs["jansConfPolicy"] = json.loads(entry.attrs["jansConfPolicy"])
+            should_update = False
+        except json.decoder.JSONDecodeError:
+            should_update = True
+            entry.attrs["jansConfPolicy"] = {}
+
+        # policy is not empty, skip the process
+        if not should_update:
+            return
+
+        with open("/app/templates/jans-lock/policy_conf_tmp.json") as f:
+            ctx = {
+                "policy_store_id": get_random_chars(22),
+                "local_trusted_issuer_id": os.urandom(22).hex(),
+                "hostname": self.manager.config.get("hostname"),
+            }
+            policy_mapping = json.loads(f.read() % ctx)
+
+        for plc in pathlib.Path("/app/templates/jans-lock/policy").rglob("*.json"):
+            plc_id = os.urandom(22).hex()
+            policy_mapping["policy_stores"][ctx["policy_store_id"]]["policies"][plc_id] = {
+                "description": f"Policy for {plc.stem}",
+                "creation_date": datetime.now(UTC).isoformat(),
+                "policy_content": generate_base64_contents(plc.read_text())
+            }
+
+        with open("/app/templates/jans-lock/cedarling_core.json") as f:
+            policy_mapping["policy_stores"][ctx["policy_store_id"]]["schema"] = generate_base64_contents(f.read())
+
+        entry.attrs["jansConfPolicy"] = json.dumps(policy_mapping)
+        entry.attrs["jansRevision"] += 1
+        self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
 
 def main():  # noqa: D103
