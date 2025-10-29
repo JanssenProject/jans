@@ -157,16 +157,14 @@ impl AuthorizeResult {
         let mut person_result: Option<Response> = None;
 
         for (principal_uid, response) in principal_responses.into_iter() {
-            if let Some(uid) = &workload_uid {
-                if uid == &principal_uid {
+            if let Some(uid) = &workload_uid
+                && uid == &principal_uid {
                     workload_result = Some(response.to_owned());
                 }
-            }
-            if let Some(uid) = &person_uid {
-                if uid == &principal_uid {
+            if let Some(uid) = &person_uid
+                && uid == &principal_uid {
                     person_result = Some(response.to_owned());
                 }
-            }
 
             let principal_typename = principal_uid.type_name().to_smolstr();
             let principal_id = principal_uid.to_smolstr();
