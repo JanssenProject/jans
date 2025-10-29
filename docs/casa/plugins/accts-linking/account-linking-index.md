@@ -44,17 +44,13 @@ In the following, it is assumed you have a VM-based installation of Jans Server 
 
 1. Download the utility jar file `https://maven.jans.io/maven/io/jans/agama-inbound/replace-janssen-version/agama-inbound-replace-janssen-version.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
 
-1. In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: `https://<your-jans-host>/jans-casa/pl/acct-linking/user/interlude.zul`. Replace the name of your Jans server accordingly 
+1. In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: `https://<your-jans-host>/jans-casa/pl/acct-linking/user/interlude.zul`. Replace the name of your Jans server accordingly. Also, add the scope `https://jans.io/oauth/config/agama.readonly` to the list of scopes  
 
 1. Run the following commands to generate the archive of the Agama inbound identity project
     
     ```
-    git clone --depth 1 --branch main --no-checkout https://github.com/JanssenProject/jans.git
-    cd jans
-    git sparse-checkout init --cone
-    git sparse-checkout set docs/agama-catalog/jans/inboundID/project
-    git checkout main
-    cd docs/agama-catalog/jans/inboundID/project
+    git clone --depth 1 https://github.com/JanssenProject/jans.git
+    cd jans/docs/agama-catalog/jans/inboundID/project
     zip -r inbound.zip *
     ```
     
