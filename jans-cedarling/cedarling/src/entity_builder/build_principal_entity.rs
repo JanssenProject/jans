@@ -110,6 +110,7 @@ pub struct PrincipalIdSrc<'a> {
 mod test {
     use super::*;
     use crate::common::policy_store::TrustedIssuer;
+    use crate::log::TEST_LOGGER;
 
     #[test]
     fn err_on_missing_entity_id() {
@@ -128,6 +129,8 @@ mod test {
             &issuers,
             Some(&validator_schema),
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
 
@@ -155,7 +158,7 @@ mod test {
             ref error,
         } if
             entity_type_name == "Test" &&
-            matches!(error, BuildEntityErrorKind::MissingEntityId(_))
+            matches!(&**error, BuildEntityErrorKind::MissingEntityId(_))
         ));
 
         // Case where there's available sources but the token is missing the claim
@@ -178,7 +181,7 @@ mod test {
             ref error,
         } if
             entity_type_name == "Test" &&
-            matches!(error, BuildEntityErrorKind::MissingEntityId(_))
+            matches!(&**error, BuildEntityErrorKind::MissingEntityId(_))
         ));
     }
 }
