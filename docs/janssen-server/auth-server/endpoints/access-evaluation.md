@@ -173,7 +173,7 @@ Please see following snippet below:
     }
 ```
 
-More details in [Access Evaluation Custom Script Page](../../developer/scripts/access-evaluation.md).
+More details in [Access Evaluation Custom Script Page](../../../script-catalog/access_evaluation/access-evaluation.md)
 
 Full sample script can be found [here](../../../script-catalog/access_evaluation/AccessEvaluation.java)
 
