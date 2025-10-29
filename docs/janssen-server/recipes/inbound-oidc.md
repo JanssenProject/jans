@@ -9,7 +9,7 @@ tags:
 
 # Inbound OpenId-Connect Authentication
 
-In this tutorial, we will see how you can integrate any inbound external oauth2 provider authentication in the Janssen server. If you are looking for social login support then check out [passport](../recipes/passportjs.md) module for that.
+In this tutorial, we will see how you can integrate any inbound external oauth2 provider authentication in the Janssen server. If you are looking for social login support then check out [passport](./passportjs.md) module for that.
 
 We will use [interception authentication script](../../script-catalog/person_authentication/oidc/oidc-jans-script.py) which is a [PersonAuthenticationType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java) script for whole flow. Currently, It supports `Authorization Code Flow` and `client_secret_post` token endpoint auth method.
 
