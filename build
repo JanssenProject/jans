@@ -1,0 +1,48 @@
+a4396c9d6d Merge branch 'main' into fix/docs-cedarling-broken-link-12497
+
+---
+
+cc863c8529 chore(deps): bump PyO3/maturin-action from 1.45.0 to 1.49.4 (#12486)
+Bumps [PyO3/maturin-action](https://github.com/pyo3/maturin-action) from 1.45.0 to 1.49.4.
+- [Release notes](https://github.com/pyo3/maturin-action/releases)
+- [Commits](https://github.com/pyo3/maturin-action/compare/ea5bac0f1ccd0ab11c805e2b804bfcb65dac2eab...86b9d133d34bc1b40018696f782949dac11bd380)
+
+---
+updated-dependencies:
+- dependency-name: PyO3/maturin-action
+  dependency-version: 1.49.4
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Co-authored-by: Mohammad Abudayyeh <47318409+moabu@users.noreply.github.com>
+---
+
+451d3d2949 Merge branch 'main' into fix/docs-cedarling-broken-link-12497
+
+---
+
+7cab7b0ead fix(docs): fix link to Persistence Extension documentation (#12452)
+Fix link to Persistence Extension documentation
+
+i have changed the link that throws 404 error
+
+Signed-off-by: B ROHIT SIVA KUMAR <rohitsivakumargowdo6@gmail.com>
+Co-authored-by: Dhaval D <343411+ossdhaval@users.noreply.github.com>
+---
+
+68855f7bf7 Update link for Dynamic Scopes interception script (#12453)
+Fixed the OpenID Userinfo Token
+
+Signed-off-by: B ROHIT SIVA KUMAR <rohitsivakumargowdo6@gmail.com>
+Co-authored-by: Dhaval D <343411+ossdhaval@users.noreply.github.com>
+---
+
+5620612afb Update links in ACRs documentation (#12454)
+Fixed the The OpenID Features/ACR broken links that throw 404
+
+Signed-off-by: B ROHIT SIVA KUMAR <rohitsivakumargowdo6@gmail.com>
+Co-authored-by: Dhaval D <343411+ossdhaval@users.noreply.github.com>
+---
