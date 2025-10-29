@@ -47,8 +47,8 @@ In the following, it is assumed you have a VM-based installation of Jans Server 
 1. In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: `https://<your-jans-host>/jans-casa/pl/acct-linking/user/interlude.zul`. Replace the name of your Jans server accordingly. Also, add the scope `https://jans.io/oauth/config/agama.readonly` to the list of scopes  
 
 1. Run the following commands to generate the archive of the Agama inbound identity project
-    
-    ```
+
+    ```bash
     git clone --depth 1 https://github.com/JanssenProject/jans.git
     cd jans/docs/agama-catalog/jans/inboundID/project
     zip -r inbound.zip *
