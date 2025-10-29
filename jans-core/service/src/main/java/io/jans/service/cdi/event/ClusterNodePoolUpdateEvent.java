@@ -4,10 +4,10 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.server.service.cdi.event;
+package io.jans.service.cdi.event;
 
 /**
  * @author Yuriy Movchan Date: 06/07/2024
  */
-public class TokenPoolUpdateEvent {
+public class ClusterNodePoolUpdateEvent {
 }
