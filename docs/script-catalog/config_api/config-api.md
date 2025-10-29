@@ -107,4 +107,5 @@ class ConfigApiAuthorization(ConfigApiType):
 
 
 ## Sample Scripts
-- [ConfigApiInterception](../../../script-catalog/config_api/config-api-interception/config-api-interception.py)
+-[ConfigApiInterception](../../../../jans-config-api/scripts/config_api_interception/ConfigApiAuthorization.py)
+
