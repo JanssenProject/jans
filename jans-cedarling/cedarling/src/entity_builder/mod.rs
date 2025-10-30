@@ -493,7 +493,7 @@ pub fn build_cedar_entity(
             BuildEntityErrorKind::from(Box::new(e)).while_building(type_name)
         },
     )?;
-    let entity = Entity::new(uid, attrs, parents.clone())
+    let entity = Entity::new(uid, attrs, parents)
         .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
 
     Ok(entity)
