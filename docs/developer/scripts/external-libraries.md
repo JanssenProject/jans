@@ -1,8 +1,8 @@
 # External Libraries Documentation
-[Interception script](../../janssen-server/developer/scripts/README.md)
 
-[pure Java](../../janssen-server/developer/scripts/README.md#using-java-libraries-in-a-script)
+This section provides links to external library integration documentation:
 
-[use external Java libraries](../../janssen-server/developer/scripts/README.md#using-java-libraries-in-a-jython-script)
-
-[external Python libraries](../../janssen-server/developer/scripts/README.md#using-python-libraries-in-a-script)
+- [Interception script](../../janssen-server/developer/scripts/README.md)
+- [Using pure Java](../../janssen-server/developer/scripts/README.md#using-java-libraries-in-a-script)
+- [Using Java libraries in a Jython script](../../janssen-server/developer/scripts/README.md#using-java-libraries-in-a-jython-script)
+- [Using external Python libraries](../../janssen-server/developer/scripts/README.md#using-python-libraries-in-a-script)
