@@ -1698,7 +1698,7 @@ permit(
             let parsed_entities = EntityParser::parse_entities(
                 &entity_file.content,
                 &entity_file.name,
-                parsed_schema,
+                Some(parsed_schema.get_schema()),
             )
             .expect("Should parse entities");
             all_entities.extend(parsed_entities);
