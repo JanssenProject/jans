@@ -10,6 +10,7 @@
 mod build_entity_attrs;
 mod build_expr;
 mod build_iss_entity;
+mod build_multi_issuer_entity;
 mod build_principal_entity;
 mod build_resource_entity;
 mod build_role_entity;
@@ -289,6 +290,7 @@ pub struct EntityBuilder {
     iss_entities: HashMap<Origin, Entity>,
     schema: Option<MappingSchema>,
     default_entities: HashMap<String, Entity>,
+    trusted_issuers: HashMap<String, TrustedIssuer>,
 }
 
 impl EntityBuilder {
@@ -329,6 +331,7 @@ impl EntityBuilder {
             iss_entities,
             schema,
             default_entities,
+            trusted_issuers: trusted_issuers.clone(),
         })
     }
 
@@ -825,10 +828,12 @@ mod test {
         )]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = true;
-
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: true,
+            ..Default::default()
+        };
+        
         let entity_builder = EntityBuilder::new(
             config,
             &trusted_issuers,
@@ -995,10 +1000,12 @@ mod test {
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = false;
-
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: false,
+            ..Default::default()
+        };
+        
         let entity_builder = EntityBuilder::new(
             config,
             &trusted_issuers,
@@ -1143,10 +1150,12 @@ mod test {
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = false;
-
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: false,
+            ..Default::default()
+        };
+        
         let entity_builder = EntityBuilder::new(
             config,
             &trusted_issuers,
@@ -1335,10 +1344,12 @@ mod test {
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = false;
-
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: false,
+            ..Default::default()
+        };
+        
         let entity_builder = EntityBuilder::new(
             config,
             &trusted_issuers,

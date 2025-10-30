@@ -267,6 +267,91 @@ Finally, call the `authorize` function to check whether the principals are allow
 result = cedarling.authorize_unsigned(request);
 ```
 
+#### Multi-Issuer Authorization
+
+Multi-issuer authorization allows you to make authorization decisions based on multiple JWT tokens from different issuers without requiring traditional User/Workload principals.
+
+**1. Create Tokens**
+
+```py
+from cedarling_python import TokenInput
+
+tokens = [
+  TokenInput(
+    mapping="Jans::Access_Token",
+    payload="<access_token_jwt>"
+  ),
+  TokenInput(
+    mapping="Jans::Id_Token",
+    payload="<id_token_jwt>"
+  ),
+  TokenInput(
+    mapping="Acme::DolphinToken",  # Custom token type
+    payload="<custom_token_jwt>"
+  )
+]
+```
+
+**2. Define the Resource**
+
+```py
+resource = EntityData(
+  cedar_entity_mapping=CedarEntityMapping(
+    entity_type="Jans::Document",
+    id="doc_123"
+  ),
+  owner="alice@example.com",
+  classification="confidential"
+)
+```
+
+**3. Define the Action**
+
+```py
+action = 'Jans::Action::"Read"'
+```
+
+**4. Define Context**
+
+```py
+context = {
+  "ip_address": "54.9.21.201",
+  "time": int(time.time())
+}
+```
+
+**5. Build the Request**
+
+```py
+from cedarling_python import AuthorizeMultiIssuerRequest
+
+request = AuthorizeMultiIssuerRequest(
+  tokens=tokens,
+  action=action,
+  resource=resource,
+  context=context
+)
+```
+
+**6. Perform Authorization**
+
+```py
+result = cedarling.authorize_multi_issuer(request)
+
+# Check decision
+if result.decision:
+  print("Access allowed")
+  print(f"Request ID: {result.request_id}")
+else:
+  print("Access denied")
+```
+
+**Key Differences**:
+- No User/Workload principals - authorization based purely on token entities
+- Supports multiple tokens from different issuers in a single request
+- Tokens referenced in policies as `context.tokens.{issuer}_{token_type}`
+- Custom token types supported via `mapping` field
+
 ### Logging
 
 The logs could be retrieved using the `pop_logs` function.
@@ -283,3 +368,5 @@ print(logs)
 - [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-tbac-using-cedarling)
 - [Cedarling Unsigned quickstart](../cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
 - [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
+- [Multi-Issuer Authorization Details](../cedarling-authz.md#multi-issuer-authorization-authorize_multi_issuer)
+- [Python Usage Examples](../python/usage.md)

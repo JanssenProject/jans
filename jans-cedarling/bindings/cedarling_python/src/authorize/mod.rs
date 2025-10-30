@@ -13,9 +13,12 @@ mod decision;
 mod diagnostics;
 mod entity_data;
 pub(crate) mod errors;
+pub(crate) mod multi_issuer_authorize_result;
 mod policy_evaluation_error;
 pub(crate) mod request;
+pub(crate) mod request_multi_issuer;
 pub(crate) mod request_unsigned;
+pub(crate) mod token_input;
 
 pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<policy_evaluation_error::PolicyEvaluationError>()?;
@@ -25,8 +28,11 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<entity_data::CedarEntityMapping>()?;
     m.add_class::<request::Request>()?;
     m.add_class::<request_unsigned::RequestUnsigned>()?;
+    m.add_class::<token_input::TokenInput>()?;
+    m.add_class::<request_multi_issuer::AuthorizeMultiIssuerRequest>()?;
     m.add_class::<authorize_result_response::AuthorizeResultResponse>()?;
     m.add_class::<authorize_result::AuthorizeResult>()?;
+    m.add_class::<multi_issuer_authorize_result::MultiIssuerAuthorizeResult>()?;
 
     let submodule = PyModule::new_bound(m.py(), "authorize_errors")?;
     errors::authorize_errors_module(&submodule)?;

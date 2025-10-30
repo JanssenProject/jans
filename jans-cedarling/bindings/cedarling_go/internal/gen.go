@@ -34,6 +34,7 @@ const void c_G2RCall_new_with_env_instance(const void*, const void*);
 const void c_G2RCall_drop_instance(const void*);
 const void c_G2RCall_authorize(const void*, const void*);
 const void c_G2RCall_authorize_unsigned(const void*, const void*);
+const void c_G2RCall_authorize_multi_issuer(const void*, const void*);
 const void c_G2RCall_pop_logs(const void*, const void*);
 const void c_G2RCall_get_log_by_id(const void*, const void*);
 const void c_G2RCall_get_log_ids(const void*, const void*);
@@ -318,6 +319,22 @@ func (G2RCallImpl) authorize_unsigned(instance_id *uint, request_json *string) R
 	request_json_ref, request_json_buffer := cvt_ref(cntString, refString)(request_json)
 	_internal_params[1] = unsafe.Pointer(&request_json_ref)
 	asmcall.CallFuncG0P2(unsafe.Pointer(C.c_G2RCall_authorize_unsigned), unsafe.Pointer(&_internal_slot), unsafe.Pointer(&_internal_params))
+	runtime.KeepAlive(_internal_slot)
+	runtime.KeepAlive(_internal_params)
+	runtime.KeepAlive(instance_id_buffer)
+	runtime.KeepAlive(request_json_buffer)
+	val := ownResult(*(*C.ResultRef)(_internal_slot[0]))
+	asmcall.CallFuncG0P1(unsafe.Pointer(C.c_rust2go_internal_drop), unsafe.Pointer(_internal_slot[1]))
+	return val
+}
+func (G2RCallImpl) authorize_multi_issuer(instance_id *uint, request_json *string) Result {
+	_internal_slot := [2]unsafe.Pointer{}
+	_internal_params := [2]unsafe.Pointer{}
+	instance_id_ref, instance_id_buffer := cvt_ref(cntC_uintptr_t, refC_uintptr_t)(instance_id)
+	_internal_params[0] = unsafe.Pointer(&instance_id_ref)
+	request_json_ref, request_json_buffer := cvt_ref(cntString, refString)(request_json)
+	_internal_params[1] = unsafe.Pointer(&request_json_ref)
+	asmcall.CallFuncG0P2(unsafe.Pointer(C.c_G2RCall_authorize_multi_issuer), unsafe.Pointer(&_internal_slot), unsafe.Pointer(&_internal_params))
 	runtime.KeepAlive(_internal_slot)
 	runtime.KeepAlive(_internal_params)
 	runtime.KeepAlive(instance_id_buffer)

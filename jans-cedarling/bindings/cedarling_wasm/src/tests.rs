@@ -1,4 +1,3 @@
-
 // This software is available under the Apache-2.0 license.
 // See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
 //
@@ -8,8 +7,8 @@
 #![allow(dead_code)]
 
 use crate::*;
-use cedarling::EntityData;
 use cedarling::bindings::serde_yml;
+use cedarling::{AuthorizeMultiIssuerRequest, EntityData, TokenInput};
 use serde::Deserialize;
 use serde_json::json;
 use std::{collections::HashMap, sync::LazyLock};
@@ -23,10 +22,55 @@ wasm_bindgen_test_configure!(run_in_browser);
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../../bindings/cedarling_python/example_files/policy-store.json");
 
+// Multi-issuer policy store for multi-issuer tests
+static MULTI_ISSUER_POLICY_STORE_YAML: &str =
+    include_str!("../../../test_files/policy-store-multi-issuer-test.yaml");
+
+// Convert YAML policy store to JSON string for CEDARLING_POLICY_STORE_LOCAL
+static MULTI_ISSUER_POLICY_STORE_JSON: LazyLock<String> = LazyLock::new(|| {
+    let yaml_value: serde_yml::Value = serde_yml::from_str(MULTI_ISSUER_POLICY_STORE_YAML)
+        .expect("Multi-issuer policy store YAML should be valid");
+    serde_json::to_string(&yaml_value).expect("Multi-issuer policy store should convert to JSON")
+});
+
 static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
     json!({
         "CEDARLING_APPLICATION_NAME": "My App",
         "CEDARLING_POLICY_STORE_LOCAL": POLICY_STORE_RAW_YAML,
+        "CEDARLING_LOG_TYPE": "std_out",
+        "CEDARLING_LOG_LEVEL": "INFO",
+        "CEDARLING_USER_AUTHZ": "enabled",
+        "CEDARLING_WORKLOAD_AUTHZ": "enabled",
+        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+            "and": [
+                {
+                    "===": [
+                        {
+                            "var": "Jans::Workload"
+                        },
+                        "ALLOW"
+                    ]
+                },
+                {
+                    "===": [
+                        {
+                            "var": "Jans::User"
+                        },
+                        "ALLOW"
+                    ]
+                }
+            ]
+        },
+        "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
+        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
+    })
+});
+
+static MULTI_ISSUER_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
+    json!({
+        "CEDARLING_APPLICATION_NAME": "My App",
+        "CEDARLING_POLICY_STORE_LOCAL": MULTI_ISSUER_POLICY_STORE_JSON.as_str(),
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_USER_AUTHZ": "enabled",
@@ -533,7 +577,7 @@ async fn test_authorize_unsigned() {
             "country": "US"
         }))
         .expect("ResourceData should be deserialized correctly"),
-        context: json!({})
+        context: json!({}),
     };
 
     let result = instance
@@ -599,4 +643,311 @@ async fn test_authorize_unsigned() {
             .decision(),
         "Decision for Jans::TestPrincipal3::\"3\" should be Deny"
     );
+}
+
+#[wasm_bindgen_test]
+async fn test_multi_issuer_authorize_single_token() {
+    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    // Create single access token
+    let access_token = generate_token_using_claims(json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
+        "iss": "https://test.jans.org",
+        "token_type": "Bearer",
+        "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "acr": "basic",
+        "x5t#S256": "",
+        "scope": ["openid", "profile"],
+        "org_id": "some_long_id",
+        "auth_time": 1724830746,
+        "exp": 1724945978,
+        "iat": 1724832259,
+        "jti": "lxTmCVRFTxOjJgvEEpozMQ",
+        "name": "Default Admin User",
+        "status": {
+            "status_list": {
+                "idx": 201,
+                "uri": "https://test.jans.org/jans-auth/restv1/status_list"
+            }
+        }
+    }));
+
+    let multi_issuer_request = AuthorizeMultiIssuerRequest {
+        tokens: vec![TokenInput::new(
+            "Jans::Access_Token".to_string(),
+            access_token,
+        )],
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        }))
+        .expect("Resource should be deserialized correctly"),
+        action: "Jans::Action::\"Update\"".to_string(),
+        context: Some(json!({})),
+    };
+
+    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
+        .expect("Multi-issuer request should be converted to JsValue");
+
+    let result = instance
+        .authorize_multi_issuer(js_request)
+        .await
+        .expect("authorize_multi_issuer request should be executed");
+
+    assert!(
+        result.decision,
+        "Authorization should be ALLOW for single token"
+    );
+    assert!(
+        !result.request_id.is_empty(),
+        "request_id should be present"
+    );
+}
+
+/// Test multiple tokens from different issuers (matches Rust test_multiple_tokens_from_different_issuers)
+#[wasm_bindgen_test]
+async fn test_multi_issuer_authorize_multiple_tokens() {
+    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let access_token = generate_token_using_claims(json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
+        "iss": "https://test.jans.org",
+        "token_type": "Bearer",
+        "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "acr": "basic",
+        "x5t#S256": "",
+        "scope": ["openid", "profile"],
+        "org_id": "some_long_id",
+        "auth_time": 1724830746,
+        "exp": 1724945978,
+        "iat": 1724832259,
+        "jti": "lxTmCVRFTxOjJgvEEpozMQ",
+        "name": "Default Admin User",
+        "status": {
+            "status_list": {
+                "idx": 201,
+                "uri": "https://test.jans.org/jans-auth/restv1/status_list"
+            }
+        }
+    }));
+
+    let id_token = generate_token_using_claims(json!({
+        "acr": "basic",
+        "amr": "10",
+        "aud": ["5b4487c4-8db1-409d-a653-f907b8094039"],
+        "exp": 1724835859,
+        "iat": 1724832259,
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "iss": "https://test.jans.org",
+        "jti": "sk3T40NYSYuk5saHZNpkZw",
+        "nonce": "c3872af9-a0f5-4c3f-a1af-f9d0e8846e81",
+        "sid": "6a7fe50a-d810-454d-be5d-549d29595a09",
+        "jansOpenIDConnectVersion": "openidconnect-1.0",
+        "c_hash": "pGoK6Y_RKcWHkUecM9uw6Q",
+        "auth_time": 1724830746,
+        "grant": "authorization_code",
+        "status": {
+            "status_list": {
+                "idx": 202,
+                "uri": "https://test.jans.org/jans-auth/restv1/status_list"
+            }
+        },
+        "role": "Admin"
+    }));
+
+    let userinfo_token = generate_token_using_claims(json!({
+        "country": "US",
+        "email": "user@example.com",
+        "username": "UserNameExample",
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "iss": "https://test.jans.org",
+        "given_name": "Admin",
+        "middle_name": "Admin",
+        "inum": "8d1cde6a-1447-4766-b3c8-16663e13b458",
+        "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "updated_at": 1724778591,
+        "name": "Default Admin User",
+        "nickname": "Admin",
+        "family_name": "User",
+        "jti": "faiYvaYIT0cDAT7Fow0pQw",
+        "jansAdminUIRole": ["api-admin"],
+        "exp": 1724945978
+    }));
+
+    let multi_issuer_request = AuthorizeMultiIssuerRequest {
+        tokens: vec![
+            TokenInput::new("Jans::Access_Token".to_string(), access_token),
+            TokenInput::new("Jans::Id_Token".to_string(), id_token),
+            TokenInput::new("Jans::Userinfo_Token".to_string(), userinfo_token),
+        ],
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        }))
+        .expect("Resource should be deserialized correctly"),
+        action: "Jans::Action::\"Update\"".to_string(),
+        context: Some(json!({})),
+    };
+
+    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
+        .expect("Multi-issuer request should be converted to JsValue");
+
+    let result = instance
+        .authorize_multi_issuer(js_request)
+        .await
+        .expect("authorize_multi_issuer request should be executed");
+
+    assert!(
+        result.decision,
+        "Authorization should be ALLOW for multi-token request"
+    );
+    assert!(
+        !result.request_id.is_empty(),
+        "request_id should be present"
+    );
+}
+
+/// Test validation - graceful degradation when invalid token is present
+/// (matches Rust test_validation_graceful_degradation_invalid_token)
+#[wasm_bindgen_test]
+async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_token() {
+    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let valid_token = generate_token_using_claims(json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
+        "iss": "https://test.jans.org",
+        "token_type": "Bearer",
+        "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "acr": "basic",
+        "x5t#S256": "",
+        "scope": ["openid", "profile"],
+        "org_id": "some_long_id",
+        "auth_time": 1724830746,
+        "exp": 1724945978,
+        "iat": 1724832259,
+        "jti": "lxTmCVRFTxOjJgvEEpozMQ",
+        "name": "Default Admin User",
+        "status": {
+            "status_list": {
+                "idx": 201,
+                "uri": "https://test.jans.org/jans-auth/restv1/status_list"
+            }
+        }
+    }));
+
+    // Create request with both valid and invalid tokens
+    let multi_issuer_request = AuthorizeMultiIssuerRequest {
+        tokens: vec![
+            TokenInput::new("Jans::Access_Token".to_string(), valid_token),
+            TokenInput::new("Invalid::Token".to_string(), "not-a-valid-jwt".to_string()),
+        ],
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        }))
+        .expect("Resource should be deserialized correctly"),
+        action: "Jans::Action::\"Update\"".to_string(),
+        context: Some(json!({})),
+    };
+
+    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
+        .expect("Multi-issuer request should be converted to JsValue");
+
+    // Graceful degradation: invalid tokens are ignored, valid tokens are processed
+    let result = instance
+        .authorize_multi_issuer(js_request)
+        .await
+        .expect("Should succeed gracefully when some tokens are invalid");
+
+    assert!(
+        result.decision,
+        "Should be ALLOW - valid token has required attributes despite invalid token"
+    );
+    assert!(
+        !result.request_id.is_empty(),
+        "request_id should be present"
+    );
+}
+
+/// Test validation - empty token array (matches Rust test_validation_empty_token_array)
+#[wasm_bindgen_test]
+async fn test_multi_issuer_authorize_validation_empty_token_array() {
+    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    // Create request with empty tokens
+    let multi_issuer_request = AuthorizeMultiIssuerRequest {
+        tokens: vec![],
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        }))
+        .expect("Resource should be deserialized correctly"),
+        action: "Jans::Action::\"Update\"".to_string(),
+        context: Some(json!({})),
+    };
+
+    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
+        .expect("Multi-issuer request should be converted to JsValue");
+
+    // This should fail due to empty tokens
+    let result = instance.authorize_multi_issuer(js_request).await;
+    assert!(result.is_err(), "Should fail with empty token array");
 }

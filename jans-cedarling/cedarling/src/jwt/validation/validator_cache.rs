@@ -3,9 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use crate::common::issuer_utils::normalize_issuer;
 use crate::jwt::log_entry::JwtLogEntry;
 use crate::jwt::{IssuerConfig, StatusListCache};
-use crate::common::issuer_utils::normalize_issuer;
 use crate::log::Logger;
 use crate::{JwtConfig, LogLevel, LogWriter};
 
@@ -47,11 +47,13 @@ impl JwtValidatorCache {
             .as_ref()
             .map(|oidc| normalize_issuer(&oidc.issuer))
             .unwrap_or_else(|| {
-                normalize_issuer(&iss_config
-                    .policy
-                    .oidc_endpoint
-                    .origin()
-                    .ascii_serialization())
+                normalize_issuer(
+                    &iss_config
+                        .policy
+                        .oidc_endpoint
+                        .origin()
+                        .ascii_serialization(),
+                )
             });
 
         for (token_name, tkn_metadata) in iss_config.policy.token_metadata.iter() {
@@ -68,6 +70,20 @@ impl JwtValidatorCache {
 
             for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
                 let (validator, key) = JwtValidator::new_input_tkn_validator(
+                    Some(&iss),
+                    token_name,
+                    tkn_metadata,
+                    algorithm,
+                    status_lists.clone(),
+                    jwt_config.jwt_sig_validation,
+                    jwt_config.jwt_status_validation,
+                );
+
+                self.insert(key, validator);
+            }
+
+            for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
+                let (validator, key) = JwtValidator::new_multi_issuer_tkn_validator(
                     Some(&iss),
                     token_name,
                     tkn_metadata,
@@ -152,6 +168,10 @@ pub enum TokenKind<'a> {
     AuthzRequestInput(&'a str),
     /// A statuslist JWT.
     StatusList,
+    /// A token that's provided by the user through the [`authorize_multi_issuer`] function.
+    ///
+    /// [`authorize_multi_issuer`]: crate::Cedarling::authorize_multi_issuer
+    AuthorizeMultiIssuer(&'a str),
 }
 
 impl Display for TokenKind<'_> {
@@ -159,6 +179,7 @@ impl Display for TokenKind<'_> {
         match self {
             TokenKind::AuthzRequestInput(tkn_name) => write!(f, "{tkn_name}"),
             TokenKind::StatusList => write!(f, "statuslist+jwt"),
+            TokenKind::AuthorizeMultiIssuer(tkn_name) => write!(f, "{tkn_name}"),
         }
     }
 }
@@ -179,6 +200,10 @@ pub enum OwnedTokenKind {
     AuthzRequestInput(String),
     /// A statuslist JWT.
     StatusList,
+    /// A token that's provided by the user through the [`authorize_multi_issuer`] function.
+    ///
+    /// [`authorize_multi_issuer`]: crate::Cedarling::authorize_multi_issuer
+    AuthorizeMultiIssuer(String),
 }
 
 impl From<TokenKind<'_>> for OwnedTokenKind {
@@ -186,6 +211,9 @@ impl From<TokenKind<'_>> for OwnedTokenKind {
         match tkn_kind {
             TokenKind::AuthzRequestInput(tkn_name) => Self::AuthzRequestInput(tkn_name.to_string()),
             TokenKind::StatusList => Self::StatusList,
+            TokenKind::AuthorizeMultiIssuer(tkn_name) => {
+                Self::AuthorizeMultiIssuer(tkn_name.to_string())
+            },
         }
     }
 }
@@ -201,6 +229,10 @@ impl OwnedTokenKind {
                 TokenKind::AuthzRequestInput(tkn_name_str),
             ) => tkn_name_string.as_str() == *tkn_name_str,
             (OwnedTokenKind::StatusList, TokenKind::StatusList) => true,
+            (
+                OwnedTokenKind::AuthorizeMultiIssuer(tkn_name_string),
+                TokenKind::AuthorizeMultiIssuer(tkn_name_str),
+            ) => tkn_name_string.as_str() == *tkn_name_str,
             _ => false,
         }
     }
@@ -265,7 +297,7 @@ mod test {
         let mut store = JwtValidatorCache::default();
         let (validator, info) = JwtValidator::new_input_tkn_validator(
             Some("test"),
-            "access_tkn".into(),
+            "access_tkn",
             &TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "AccessToken".into(),

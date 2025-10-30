@@ -6,6 +6,7 @@
 from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
 from cedarling_python import EntityData, Request, RequestUnsigned
+from cedarling_python import TokenInput, AuthorizeMultiIssuerRequest
 import time
 import yaml
 import os
@@ -331,6 +332,64 @@ def authorize_without_token():
 
     print()
 
+def authorize_multi_issuer():
+    # //// Execute multi-issuer authorization request ////
+
+    # Build resource entity
+    resource = EntityData.from_dict({
+        "cedar_entity_mapping": {
+            "entity_type": "Jans::Application",
+            "id": "some_id"
+        },
+        "app_id": "application_id",
+        "name": "Some Application",
+        "url": {
+            "host": "jans.test",
+            "path": "/protected-endpoint",
+            "protocol": "http"
+        }
+    })
+
+    # Build typed tokens coming potentially from different issuers
+    # Use locally defined sample payloads so this example is self-contained
+    token_a = "eyJhbGciOi...access_token_sample"
+    token_b = "eyJhbGciOi...custom_token_sample"
+    tokens = [
+        TokenInput(mapping="Jans::Access_Token", payload=token_a),
+        # Example of a second issuer/custom token type; replace payload accordingly
+        TokenInput(mapping="Acme::DolphinToken", payload=token_b),
+    ]
+
+    action = 'Jans::Action::"Read"'
+    context = {"location": "miami"}
+
+    request = AuthorizeMultiIssuerRequest(
+        tokens=tokens,
+        action=action,
+        resource=resource,
+        context=context,
+    )
+
+    result = instance.authorize_multi_issuer(request)
+
+    # High-level allowed flag
+    print(f"Multi-issuer allowed: {result.is_allowed()}")
+
+    # Detailed cedar response
+    resp = result.response()
+    print(f"Decision: {resp.decision}")
+    print("Policy IDs used:")
+    for reason in resp.diagnostics.reason:
+        print(reason)
+
+    print(f"Errors during authorization: {len(resp.diagnostics.errors)}")
+    for err in resp.diagnostics.errors:
+        print(err)
+
+    print(f"Request ID: {result.request_id()}")
+    print()
+
+
 
 if __name__ == "__main__":
     print("Running  authorize_with_token:")
@@ -338,3 +397,6 @@ if __name__ == "__main__":
 
     print("!!!\nRunning  authorize_without_token:")
     authorize_without_token()
+
+    print("!!!\nRunning  authorize_multi_issuer:")
+    authorize_multi_issuer()

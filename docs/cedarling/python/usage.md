@@ -209,11 +209,115 @@ Key differences from standard authorization:
 - Results checked per principal type rather than user/workload
 - Faster since it skips token parsing/validation
 
+## Multi-Issuer Authorization (authorize_multi_issuer)
+
+The `authorize_multi_issuer` method enables authorization decisions based on multiple JWT tokens from different issuers without requiring traditional User/Workload principals.
+
+```python
+from cedarling_python import TokenInput, AuthorizeMultiIssuerRequest, EntityData, CedarEntityMapping
+
+# Create resource entity
+resource = EntityData.from_dict({
+    "type": "Jans::Document",
+    "id": "doc-123",
+    "owner": "alice@example.com",
+    "classification": "confidential"
+})
+
+# Create tokens with explicit type mappings
+tokens = [
+    TokenInput(
+        mapping="Jans::Access_Token",
+        payload="eyJhbGciOiJIUzI1NiIs..."
+    ),
+    TokenInput(
+        mapping="Jans::Id_Token",
+        payload="eyJhbGciOiJFZERTQSIs..."
+    ),
+    TokenInput(
+        mapping="Acme::DolphinToken",
+        payload="ey1b6cfMef21084633a7..."
+    )
+]
+
+# Create multi-issuer request
+request = AuthorizeMultiIssuerRequest(
+    tokens=tokens,
+    action='Jans::Action::"Read"',
+    resource=resource,
+    context={
+        "ip_address": "54.9.21.201",
+        "time": int(time.time())
+    }
+)
+
+# Execute authorization
+result = instance.authorize_multi_issuer(request)
+
+# Check decision
+if result.decision:
+    print("Access allowed")
+    print(f"Request ID: {result.request_id}")
+    
+    # Access detailed response
+    print(f"Cedar decision: {result.response.decision()}")
+    
+    # Get diagnostic information
+    diagnostics = result.response.diagnostics()
+    if diagnostics.reason():
+        print(f"Policies used: {list(diagnostics.reason())}")
+    if diagnostics.errors():
+        print(f"Errors: {list(diagnostics.errors())}")
+else:
+    print("Access denied")
+```
+
+### Key differences from standard authorization
+
+| Feature | authorize | authorize_multi_issuer |
+|---------|-----------|------------------------|
+| Principal Model | User/Workload entities | No principals - token-based |
+| Token Sources | Single issuer expected | Multiple issuers supported |
+| Result Type | `AuthorizeResult` | `MultiIssuerAuthorizeResult` |
+| Decision Access | `result.is_allowed()`, `result.workload()`, `result.person()` | `result.decision` (boolean) |
+| Use Case | Standard RBAC/ABAC | Federation, multi-org access |
+
+### Multi-Issuer Policy Example
+
+Policies for multi-issuer authorization reference tokens in context:
+
+```cedar
+// Require token from specific issuer with claim
+permit(
+  principal,
+  action == Jans::Action::"Read",
+  resource in Jans::Document
+) when {
+  context has tokens.acme_access_token &&
+  context.tokens.acme_access_token.hasTag("scope") &&
+  context.tokens.acme_access_token.getTag("scope").contains("read:documents")
+};
+
+// Require tokens from multiple issuers
+permit(
+  principal,
+  action == Trade::Action::"Vote",
+  resource in Trade::Election
+) when {
+  context has tokens.trade_association_access_token &&
+  context.tokens.trade_association_access_token.hasTag("member_status") &&
+  context.tokens.trade_association_access_token.getTag("member_status").contains("Corporate Member") &&
+  context has tokens.company_access_token &&
+  context.tokens.company_access_token.hasTag("employee_id")
+};
+```
+
 ## Exposed functions
 
 The `pyo3` binding exposes these main authorization functions:
 
 - `authorize(request: Request) -> AuthorizationResult`
 - `authorize_unsigned(request: RequestUnsigned) -> AuthorizationResult`
+- `authorize_multi_issuer(request: AuthorizeMultiIssuerRequest) -> MultiIssuerAuthorizeResult`
 
 Full documentation can be found [here](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/PYTHON_TYPES.md).

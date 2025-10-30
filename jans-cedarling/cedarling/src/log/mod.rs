@@ -63,6 +63,9 @@ pub use log_entry::*;
 pub use log_level::*;
 
 #[cfg(test)]
+pub(crate) use nop_logger::NopLogger;
+
+#[cfg(test)]
 mod test;
 
 #[cfg(test)]

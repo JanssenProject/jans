@@ -151,9 +151,9 @@ impl MockEndpoints {
 
     #[track_caller]
     pub fn assert(&self) {
-        self.oidc.as_ref().map(|x| x.assert());
-        self.jwks.as_ref().map(|x| x.assert());
-        self.status_list.as_ref().map(|x| x.assert());
+        if let Some(x) = self.oidc.as_ref() { x.assert() }
+        if let Some(x) = self.jwks.as_ref() { x.assert() }
+        if let Some(x) = self.status_list.as_ref() { x.assert() }
     }
 }
 
@@ -165,18 +165,18 @@ pub enum TokenTypeHeader {
     Jwt,
 }
 
-impl Into<&str> for TokenTypeHeader {
-    fn into(self) -> &'static str {
-        match self {
+impl From<TokenTypeHeader> for &str {
+    fn from(val: TokenTypeHeader) -> Self {
+        match val {
             TokenTypeHeader::StatusListJwt => "statuslist+jwt",
             TokenTypeHeader::Jwt => "JWT",
         }
     }
 }
 
-impl Into<Option<String>> for TokenTypeHeader {
-    fn into(self) -> Option<String> {
-        let typ_str: &str = self.into();
+impl From<TokenTypeHeader> for Option<String> {
+    fn from(val: TokenTypeHeader) -> Self {
+        let typ_str: &str = val.into();
         Some(typ_str.into())
     }
 }
@@ -268,7 +268,7 @@ impl MockServer {
             let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
             let exp = iat + Duration::from_secs(3600); // defaults to 1 hour
             let ttl = ttl
-                .map(|x| Duration::from_secs(x))
+                .map(Duration::from_secs)
                 .unwrap_or_else(|| 
                     // defaults to 5 mins if the ttl is None
                     Duration::from_secs(600)
@@ -317,9 +317,7 @@ impl MockServer {
     }
 
     pub fn status_list_endpoint(&self) -> Option<Url> {
-        if self.endpoints.status_list.is_none() {
-            return None;
-        }
+        self.endpoints.status_list.as_ref()?;
 
         Some(
             Url::parse(&(self.server.url() + MOCK_STATUS_LIST_ENDPOINT))
@@ -328,9 +326,7 @@ impl MockServer {
     }
 
     pub fn openid_config_endpoint(&self) -> Option<Url> {
-        if self.endpoints.oidc.is_none() {
-            return None;
-        }
+        self.endpoints.oidc.as_ref()?;
 
         Some(
             Url::parse(&(self.server.url() + MOCK_OIDC_ENDPOINT)).expect("invalid status list url"),
@@ -338,9 +334,7 @@ impl MockServer {
     }
 
     pub fn jwks_endpoint(&self) -> Option<Url> {
-        if self.endpoints.jwks.is_none() {
-            return None;
-        }
+        self.endpoints.jwks.as_ref()?;
 
         Some(Url::parse(&(self.server.url() + MOCK_JWKS_URI)).expect("invalid status list url"))
     }

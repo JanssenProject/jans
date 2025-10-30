@@ -34,6 +34,14 @@ public class CedarlingAdapter implements AutoCloseable {
         return cedarling.authorizeUnsigned(principals, action, resourceObj, context.toString());
     }
 
+    public MultiIssuerAuthorizeResult authorizeMultiIssuer(List<TokenInput> tokens, String action, JSONObject resource, JSONObject context)
+            throws AuthorizeException, EntityException {
+        // Build EntityData from resource JSON
+        EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
+        String contextStr = context != null ? context.toString() : null;
+        return cedarling.authorizeMultiIssuer(tokens, action, resourceObj, contextStr);
+    }
+
     public String getLogById(String id) throws LogException {
         return cedarling.getLogById(id);
     }

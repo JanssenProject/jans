@@ -90,6 +90,16 @@ export class Cedarling {
    */
   authorize(request: any): Promise<AuthorizeResult>;
   /**
+   * Authorize request for unsigned principals.
+   * makes authorization decision based on the [`RequestUnsigned`]
+   */
+  authorize_unsigned(request: any): Promise<AuthorizeResult>;
+  /**
+   * Authorize multi-issuer request.
+   * Makes authorization decision based on multiple JWT tokens from different issuers
+   */
+  authorize_multi_issuer(request: any): Promise<MultiIssuerAuthorizeResult>;
+  /**
    * Get logs and remove them from the storage.
    * Returns `Array` of `Map`
    */
@@ -140,11 +150,40 @@ export class AuthorizeResult {
    */
   person?: AuthorizeResultResponse;
   /**
+   * Get result for a specific principal
+   */
+  principal(principal: string): AuthorizeResultResponse | undefined;
+  /**
    * Result of authorization
    * true means `ALLOW`
    * false means `Deny`
    *
    * this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
+   */
+  decision: boolean;
+  /**
+   * Request ID of the authorization request
+   */
+  request_id: string;
+}
+
+/**
+ * A WASM wrapper for the Rust `cedarling::MultiIssuerAuthorizeResult` struct.
+ * Represents the result of a multi-issuer authorization request.
+ */
+export class MultiIssuerAuthorizeResult {
+  /**
+   * Convert `MultiIssuerAuthorizeResult` to json string value
+   */
+  json_string(): string;
+  /**
+   * Result of Cedar policy authorization
+   */
+  response: AuthorizeResultResponse;
+  /**
+   * Result of authorization
+   * true means `ALLOW`
+   * false means `Deny`
    */
   decision: boolean;
   /**

@@ -7,7 +7,7 @@
 use cedarling::{self as core, BootstrapConfig, BootstrapConfigRaw, LogStorage};
 use std::sync::Arc;
 mod result;
-use result::*;
+use result::{AuthorizeResult, MultiIssuerAuthorizeResult};
 use serde_json::Value;
 use std::collections::HashMap;
 #[cfg(test)]
@@ -49,6 +49,15 @@ pub enum EntityError {
     JsonConversion(String),
     #[error("JSON conversion failed for payload key: {0}, value: {1}")]
     JsonConversionPayload(String, String),
+}
+
+/// TokenInput for multi-issuer authorization
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct TokenInput {
+    /// Token mapping type (e.g., "Jans::Access_Token", "Acme::DolphinToken")
+    pub mapping: String,
+    /// JWT token string
+    pub payload: String,
 }
 
 #[uniffi::export]
@@ -209,6 +218,47 @@ impl Cedarling {
                 error_msg: e.to_string(),
             }
         })?;
+        Ok(result.into())
+    }
+
+    // Handles multi-issuer authorization request
+    #[uniffi::method]
+    pub fn authorize_multi_issuer(
+        &self,
+        tokens: Vec<TokenInput>,
+        action: String,
+        resource: Arc<EntityData>,
+        context: Option<JsonValue>,
+    ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
+        let core_tokens: Vec<core::TokenInput> = tokens
+            .into_iter()
+            .map(|t| core::TokenInput {
+                mapping: t.mapping,
+                payload: t.payload,
+            })
+            .collect();
+
+        let core_resource = resource.inner.clone();
+
+        let core_context = if let Some(ctx) = context {
+            Some(ctx.try_into().map_err(|_| AuthorizeError::InvalidContext)?)
+        } else {
+            None
+        };
+
+        let core_request = core::AuthorizeMultiIssuerRequest {
+            tokens: core_tokens,
+            resource: core_resource,
+            action,
+            context: core_context,
+        };
+
+        let result = self
+            .inner
+            .authorize_multi_issuer(core_request)
+            .map_err(|e| AuthorizeError::AuthorizationFailed {
+                error_msg: e.to_string(),
+            })?;
         Ok(result.into())
     }
 

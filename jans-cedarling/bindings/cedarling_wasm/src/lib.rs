@@ -4,7 +4,10 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::bindings::cedar_policy;
-use cedarling::{BootstrapConfig, BootstrapConfigRaw, LogStorage, Request, RequestUnsigned};
+use cedarling::{
+    AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, LogStorage, Request,
+    RequestUnsigned,
+};
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
 use serde_wasm_bindgen::Error;
@@ -21,6 +24,45 @@ mod tests;
 #[derive(Clone)]
 pub struct Cedarling {
     instance: cedarling::Cedarling,
+}
+
+/// A WASM wrapper for the Rust `cedarling::MultiIssuerAuthorizeResult` struct.
+/// Represents the result of a multi-issuer authorization request.
+#[wasm_bindgen]
+#[derive(serde::Serialize)]
+pub struct MultiIssuerAuthorizeResult {
+    /// Result of Cedar policy authorization
+    #[wasm_bindgen(getter_with_clone)]
+    pub response: AuthorizeResultResponse,
+
+    /// Result of authorization
+    /// true means `ALLOW`
+    /// false means `Deny`
+    pub decision: bool,
+
+    /// Request ID of the authorization request
+    #[wasm_bindgen(getter_with_clone)]
+    pub request_id: String,
+}
+
+#[wasm_bindgen]
+impl MultiIssuerAuthorizeResult {
+    /// Convert `MultiIssuerAuthorizeResult` to json string value
+    pub fn json_string(&self) -> String {
+        json!(self).to_string()
+    }
+}
+
+impl From<cedarling::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult {
+    fn from(value: cedarling::MultiIssuerAuthorizeResult) -> Self {
+        Self {
+            response: AuthorizeResultResponse {
+                inner: Rc::new(value.response),
+            },
+            decision: value.decision,
+            request_id: value.request_id,
+        }
+    }
 }
 
 /// Create a new instance of the Cedarling application.
@@ -95,6 +137,28 @@ impl Cedarling {
         let result = self
             .instance
             .authorize_unsigned(cedar_request)
+            .await
+            .map_err(Error::new)?;
+        Ok(result.into())
+    }
+
+    /// Authorize multi-issuer request.
+    /// Makes authorization decision based on multiple JWT tokens from different issuers
+    pub async fn authorize_multi_issuer(
+        &self,
+        request: JsValue,
+    ) -> Result<MultiIssuerAuthorizeResult, Error> {
+        // if `request` is map convert to object
+        let request_object: JsValue = if request.is_instance_of::<Map>() {
+            Object::from_entries(&request)?.into()
+        } else {
+            request
+        };
+        let cedar_request: AuthorizeMultiIssuerRequest =
+            serde_wasm_bindgen::from_value(request_object)?;
+        let result = self
+            .instance
+            .authorize_multi_issuer(cedar_request)
             .await
             .map_err(Error::new)?;
         Ok(result.into())

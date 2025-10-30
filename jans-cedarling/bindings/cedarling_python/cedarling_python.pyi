@@ -101,6 +101,9 @@ class Cedarling:
 
     def authorize_unsigned(
         self, request: RequestUnsigned) -> AuthorizeResult: ...
+    
+    def authorize_multi_issuer(
+        self, request: AuthorizeMultiIssuerRequest) -> MultiIssuerAuthorizeResult: ...
 
     def pop_logs(self) -> List[Dict]: ...
 
@@ -202,3 +205,33 @@ class Diagnostics:
 class PolicyEvaluationError:
     id: str
     error: str
+
+@final
+class TokenInput:
+    mapping: str
+    payload: str
+
+    def __init__(self, mapping: str, payload: str) -> None: ...
+
+
+@final
+class AuthorizeMultiIssuerRequest:
+    tokens: List[TokenInput]
+    action: str
+    resource: EntityData
+    context: Dict[str, Any]
+
+    def __init__(self,
+                 tokens: List[TokenInput],
+                 action: str,
+                 resource: EntityData,
+                 context: Dict[str, Any] | None = None) -> None: ...
+
+
+@final
+class MultiIssuerAuthorizeResult:
+    def is_allowed(self) -> bool: ...
+
+    def response(self) -> AuthorizeResultResponse: ...
+
+    def request_id(self) -> str: ...
