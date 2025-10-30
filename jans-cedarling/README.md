@@ -213,3 +213,6 @@ cargo run --example profiling
 ```
 
 that outputs an SVG named `cedarling_profiling_flamegraph`.
+
+Small performance optimization contribution. — Contributed by Gorlesunilkumar
+
