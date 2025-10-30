@@ -762,7 +762,7 @@ mod test {
 
         // Verify the entity
         let entity = parsed_entities
-            .get("1694c954f8d9")
+            .get(&EntityUid::from_str("Jans::DefaultEntity::\"1694c954f8d9\"").unwrap())
             .expect("should have entity");
         assert_eq!(entity.uid().type_name().to_string(), "Jans::DefaultEntity");
         assert_eq!(entity.uid().id().as_ref() as &str, "1694c954f8d9");
@@ -887,7 +887,7 @@ mod test {
         // Verify specific default entity
         let default_entity = entities_data
             .default_entities
-            .get("1694c954f8d9")
+            .get(&EntityUid::from_str("Jans::DefaultEntity::\"1694c954f8d9\"").unwrap())
             .expect("should have default entity 1694c954f8d9");
 
         assert_eq!(
@@ -940,10 +940,11 @@ mod test {
             "should have 2 default entities"
         );
 
+        let uid = EntityUid::from_str("Jans::DefaultEntity::\"74d109b20248\"").unwrap();
         // Verify the second default entity is also present
         let second_default_entity = entities_data
             .default_entities
-            .get("74d109b20248")
+            .get(&uid)
             .expect("should have default entity 74d109b20248");
         assert_eq!(
             second_default_entity.uid().type_name().to_string(),
@@ -1533,9 +1534,9 @@ mod test {
 
         assert_eq!(parsed_entities.len(), 1, "should have 1 entity");
 
-        let entity = parsed_entities
-            .get("2694c954f8d8")
-            .expect("should have entity");
+        let uid =
+            &EntityUid::from_str("Gluu::Flex::AdminUI::Resources::Features::\"License\"").unwrap();
+        let entity = parsed_entities.get(&uid).expect("should have entity");
         let uid_str = entity.uid().to_string();
 
         // Verify the namespace was added correctly to both the entity type and parent type
@@ -1586,7 +1587,9 @@ mod test {
         )
         .expect("should parse default entities");
 
-        let entity = parsed_entities.get("test123").expect("should have entity");
+        let uid: &EntityUid =
+            &EntityUid::from_str("Existing::Namespace::Features::\"TestFeature\"").unwrap();
+        let entity = parsed_entities.get(&uid).expect("should have entity");
 
         let result_entity_json = entity
             .to_json_value()
@@ -1681,7 +1684,8 @@ mod test {
             parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone())
                 .expect("should parse with empty attrs and parents");
 
-        let entity = parsed_entities.get("test789").expect("should have entity");
+        let uid: &EntityUid = &EntityUid::from_str("Test::EmptyTest::\"test789\"").unwrap();
+        let entity = parsed_entities.get(&uid).expect("should have entity");
         assert_eq!(
             entity.uid().type_name().to_string(),
             "Test::EmptyTest",
