@@ -69,11 +69,11 @@ during client registration or can be edited later. When using
 
 ### Interception Scripts
 
-Response from end session endpoint can be further customized using [end session](../../developer/scripts/end-session.md) 
+Response from end session endpoint can be further customized using [end session](../../../script-catalog/end_session/end-session.md)
 interception script.
 
 This script can be used to customize the HTML response generated from end session endpoint.
 
 ## Want to contribute?
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
