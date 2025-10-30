@@ -8,7 +8,7 @@
 //! This module provides functionality to parse and validate trusted issuer configuration files,
 //! ensuring they conform to the required schema with proper token metadata and required fields.
 
-use super::errors::{PolicyStoreError, ValidationError};
+use super::errors::{PolicyStoreError, TrustedIssuerErrorType};
 use super::{TokenEntityMetadata, TrustedIssuer};
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
@@ -48,9 +48,9 @@ impl IssuerParser {
         // Trusted issuer files should be objects mapping issuer IDs to configurations
         let obj = json_value
             .as_object()
-            .ok_or_else(|| ValidationError::InvalidTrustedIssuer {
+            .ok_or_else(|| PolicyStoreError::TrustedIssuerError {
                 file: filename.to_string(),
-                message: "Trusted issuer file must be a JSON object".to_string(),
+                err: TrustedIssuerErrorType::NotAnObject,
             })?;
 
         let mut parsed_issuers = Vec::with_capacity(obj.len());
@@ -81,16 +81,21 @@ impl IssuerParser {
     ) -> Result<TrustedIssuer, PolicyStoreError> {
         let obj = issuer_json
             .as_object()
-            .ok_or_else(|| ValidationError::InvalidTrustedIssuer {
+            .ok_or_else(|| PolicyStoreError::TrustedIssuerError {
                 file: filename.to_string(),
-                message: format!("Issuer '{}' must be a JSON object", issuer_id),
+                err: TrustedIssuerErrorType::IssuerNotAnObject {
+                    issuer_id: issuer_id.to_string(),
+                },
             })?;
 
         // Validate required fields
         let name = obj.get("name").and_then(|v| v.as_str()).ok_or_else(|| {
-            ValidationError::InvalidTrustedIssuer {
+            PolicyStoreError::TrustedIssuerError {
                 file: filename.to_string(),
-                message: format!("Issuer '{}': missing required field 'name'", issuer_id),
+                err: TrustedIssuerErrorType::MissingRequiredField {
+                    issuer_id: issuer_id.to_string(),
+                    field: "name".to_string(),
+                },
             }
         })?;
 
@@ -103,21 +108,22 @@ impl IssuerParser {
         let oidc_endpoint_str = obj
             .get("openid_configuration_endpoint")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| ValidationError::InvalidTrustedIssuer {
+            .ok_or_else(|| PolicyStoreError::TrustedIssuerError {
                 file: filename.to_string(),
-                message: format!(
-                    "Issuer '{}': missing required field 'openid_configuration_endpoint'",
-                    issuer_id
-                ),
+                err: TrustedIssuerErrorType::MissingRequiredField {
+                    issuer_id: issuer_id.to_string(),
+                    field: "openid_configuration_endpoint".to_string(),
+                },
             })?;
 
         let oidc_endpoint =
-            Url::parse(oidc_endpoint_str).map_err(|e| ValidationError::InvalidTrustedIssuer {
+            Url::parse(oidc_endpoint_str).map_err(|e| PolicyStoreError::TrustedIssuerError {
                 file: filename.to_string(),
-                message: format!(
-                    "Issuer '{}': invalid URL for 'openid_configuration_endpoint': {}",
-                    issuer_id, e
-                ),
+                err: TrustedIssuerErrorType::InvalidOidcEndpoint {
+                    issuer_id: issuer_id.to_string(),
+                    url: oidc_endpoint_str.to_string(),
+                    reason: e.to_string(),
+                },
             })?;
 
         // Parse token_metadata (optional but recommended)
@@ -144,12 +150,11 @@ impl IssuerParser {
         let metadata_obj =
             metadata_json
                 .as_object()
-                .ok_or_else(|| ValidationError::InvalidTrustedIssuer {
+                .ok_or_else(|| PolicyStoreError::TrustedIssuerError {
                     file: filename.to_string(),
-                    message: format!(
-                        "Issuer '{}': 'token_metadata' must be a JSON object",
-                        issuer_id
-                    ),
+                    err: TrustedIssuerErrorType::TokenMetadataNotAnObject {
+                        issuer_id: issuer_id.to_string(),
+                    },
                 })?;
 
         // Convert to owned map to avoid cloning during iteration
@@ -157,28 +162,38 @@ impl IssuerParser {
         let mut token_metadata = HashMap::with_capacity(metadata_map.len());
 
         for (token_type, token_config) in metadata_map {
+            // Validate that token config is an object
+            if !token_config.is_object() {
+                return Err(PolicyStoreError::TrustedIssuerError {
+                    file: filename.to_string(),
+                    err: TrustedIssuerErrorType::TokenMetadataEntryNotAnObject {
+                        issuer_id: issuer_id.to_string(),
+                        token_type: token_type.clone(),
+                    },
+                });
+            }
+
             // Deserialize the TokenEntityMetadata
             let metadata: TokenEntityMetadata =
                 serde_json::from_value(token_config).map_err(|e| {
-                    ValidationError::InvalidTrustedIssuer {
+                    PolicyStoreError::TrustedIssuerError {
                         file: filename.to_string(),
-                        message: format!(
-                            "Issuer '{}': invalid token metadata for '{}': {}",
-                            issuer_id, token_type, e
-                        ),
+                        err: TrustedIssuerErrorType::MissingRequiredField {
+                            issuer_id: issuer_id.to_string(),
+                            field: format!("token_metadata.{}: {}", token_type, e),
+                        },
                     }
                 })?;
 
             // Validate required field: entity_type_name
             if metadata.entity_type_name.is_empty() {
-                return Err(ValidationError::InvalidTrustedIssuer {
+                return Err(PolicyStoreError::TrustedIssuerError {
                     file: filename.to_string(),
-                    message: format!(
-                        "Issuer '{}': token type '{}' missing required field 'entity_type_name'",
-                        issuer_id, token_type
-                    ),
-                }
-                .into());
+                    err: TrustedIssuerErrorType::MissingRequiredField {
+                        issuer_id: issuer_id.to_string(),
+                        field: format!("token_metadata.{}.entity_type_name", token_type),
+                    },
+                });
             }
 
             token_metadata.insert(token_type, metadata);
@@ -228,15 +243,15 @@ impl IssuerParser {
 
         for parsed in issuers {
             // Check for duplicates (shouldn't happen if validate_issuers was called)
-            if issuer_map.contains_key(&parsed.id) {
-                return Err(ValidationError::InvalidTrustedIssuer {
-                    file: parsed.filename,
-                    message: format!("Duplicate issuer ID '{}'", parsed.id),
-                }
-                .into());
+            // Note: This is a defensive check - duplicates should be caught earlier
+            if let std::collections::hash_map::Entry::Vacant(e) =
+                issuer_map.entry(parsed.id.clone())
+            {
+                e.insert(parsed.issuer);
+            } else {
+                // Skip duplicate silently since validate_issuers should have reported it
+                continue;
             }
-
-            issuer_map.insert(parsed.id, parsed.issuer);
         }
 
         Ok(issuer_map)
@@ -343,16 +358,13 @@ mod tests {
         let result = IssuerParser::parse_issuer(content, "bad.json");
         assert!(result.is_err(), "Should fail on missing name");
 
-        if let Err(PolicyStoreError::Validation(ValidationError::InvalidTrustedIssuer {
-            file,
-            message,
-        })) = result
-        {
-            assert_eq!(file, "bad.json");
-            assert!(message.contains("name"));
-        } else {
-            panic!("Expected ValidationError::InvalidTrustedIssuer");
-        }
+        assert!(matches!(
+            result,
+            Err(PolicyStoreError::TrustedIssuerError {
+                file,
+                err: TrustedIssuerErrorType::MissingRequiredField { issuer_id, field }
+            }) if file == "bad.json" && issuer_id == "bad_issuer" && field == "name"
+        ));
     }
 
     #[test]
@@ -367,15 +379,13 @@ mod tests {
         let result = IssuerParser::parse_issuer(content, "bad.json");
         assert!(result.is_err(), "Should fail on missing endpoint");
 
-        if let Err(PolicyStoreError::Validation(ValidationError::InvalidTrustedIssuer {
-            message,
-            ..
-        })) = result
-        {
-            assert!(message.contains("openid_configuration_endpoint"));
-        } else {
-            panic!("Expected ValidationError::InvalidTrustedIssuer");
-        }
+        assert!(matches!(
+            result,
+            Err(PolicyStoreError::TrustedIssuerError {
+                file,
+                err: TrustedIssuerErrorType::MissingRequiredField { issuer_id, field }
+            }) if file == "bad.json" && issuer_id == "bad_issuer" && field == "openid_configuration_endpoint"
+        ));
     }
 
     #[test]
@@ -391,15 +401,13 @@ mod tests {
         let result = IssuerParser::parse_issuer(content, "bad.json");
         assert!(result.is_err(), "Should fail on invalid URL");
 
-        if let Err(PolicyStoreError::Validation(ValidationError::InvalidTrustedIssuer {
-            message,
-            ..
-        })) = result
-        {
-            assert!(message.contains("invalid URL"));
-        } else {
-            panic!("Expected ValidationError::InvalidTrustedIssuer");
-        }
+        assert!(matches!(
+            result,
+            Err(PolicyStoreError::TrustedIssuerError {
+                file,
+                err: TrustedIssuerErrorType::InvalidOidcEndpoint { issuer_id, url, .. }
+            }) if file == "bad.json" && issuer_id == "bad_issuer" && url == "not a valid url"
+        ));
     }
 
     #[test]

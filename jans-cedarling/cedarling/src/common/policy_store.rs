@@ -33,7 +33,7 @@ pub use token_entity_metadata::TokenEntityMetadata;
 pub use entity_parser::{EntityParser, ParsedEntity};
 pub use errors::{
     ArchiveError, CedarEntityErrorType, CedarSchemaErrorType, PolicyStoreError, TokenError,
-    ValidationError,
+    TrustedIssuerErrorType, ValidationError,
 };
 pub use issuer_parser::{IssuerParser, ParsedIssuer};
 pub use loader::{

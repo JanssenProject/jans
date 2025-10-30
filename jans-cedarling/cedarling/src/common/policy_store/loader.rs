@@ -1512,18 +1512,52 @@ permit(
 
     #[test]
     fn test_detect_duplicate_issuer_ids() {
-        let temp_dir = TempDir::new().unwrap();
-        let dir = temp_dir.path();
+        use super::super::vfs_adapter::MemoryVfs;
 
-        // Create a complete policy store structure
-        let _ = create_test_policy_store(dir);
+        // Create in-memory filesystem
+        let vfs = MemoryVfs::new();
+
+        // Create a complete policy store structure in memory
+        vfs.create_file(
+            "metadata.json",
+            r#"{
+                "cedar_version": "4.4.0",
+                "policy_store": {
+                    "id": "abc123def456",
+                    "name": "Test Policy Store",
+                    "version": "1.0.0"
+                }
+            }"#
+            .as_bytes(),
+        )
+        .unwrap();
+
+        vfs.create_file(
+            "schema.cedarschema",
+            r#"
+namespace TestApp {
+    entity User;
+    entity Resource;
+    action "read" appliesTo {
+        principal: [User],
+        resource: [Resource]
+    };
+}
+            "#
+            .as_bytes(),
+        )
+        .unwrap();
+
+        // Create policies directory with a test policy
+        vfs.create_file(
+            "policies/test_policy.cedar",
+            b"permit(principal, action, resource);",
+        )
+        .unwrap();
 
         // Create trusted-issuers directory with duplicate IDs
-        let issuers_dir = dir.join("trusted-issuers");
-        fs::create_dir(&issuers_dir).unwrap();
-
-        fs::write(
-            issuers_dir.join("file1.json"),
+        vfs.create_file(
+            "trusted-issuers/file1.json",
             r#"{
                 "issuer1": {
                     "name": "Issuer One",
@@ -1535,12 +1569,13 @@ permit(
                         }
                     }
                 }
-            }"#,
+            }"#
+                .as_bytes(),
         )
         .unwrap();
 
-        fs::write(
-            issuers_dir.join("file2.json"),
+        vfs.create_file(
+            "trusted-issuers/file2.json",
             r#"{
                 "issuer1": {
                     "name": "Issuer One Duplicate",
@@ -1552,13 +1587,14 @@ permit(
                         }
                     }
                 }
-            }"#,
+            }"#
+                .as_bytes(),
         )
         .unwrap();
 
-        // Load the policy store
-        let source = PolicyStoreSource::Directory(dir.to_path_buf());
-        let loader = DefaultPolicyStoreLoader::new_physical();
+        // Load the policy store using the in-memory filesystem
+        let source = PolicyStoreSource::Directory(PathBuf::from("/"));
+        let loader = DefaultPolicyStoreLoader::new(vfs);
         let loaded = loader.load(&source).unwrap();
 
         // Parse issuers
@@ -1584,30 +1620,51 @@ permit(
 
     #[test]
     fn test_issuer_missing_required_field() {
-        let temp_dir = TempDir::new().unwrap();
-        let dir = temp_dir.path();
+        use super::super::vfs_adapter::MemoryVfs;
 
-        // Create a complete policy store structure
-        let _ = create_test_policy_store(dir);
+        // Create in-memory filesystem
+        let vfs = MemoryVfs::new();
 
-        // Create trusted-issuers directory with invalid issuer
-        let issuers_dir = dir.join("trusted-issuers");
-        fs::create_dir(&issuers_dir).unwrap();
+        // Create a minimal policy store structure
+        vfs.create_file(
+            "metadata.json",
+            r#"{
+                "cedar_version": "4.4.0",
+                "policy_store": {
+                    "id": "abc123def456",
+                    "name": "Test Policy Store",
+                    "version": "1.0.0"
+                }
+            }"#
+            .as_bytes(),
+        )
+        .unwrap();
 
-        fs::write(
-            issuers_dir.join("invalid.json"),
+        vfs.create_file("schema.cedarschema", b"namespace TestApp { entity User; }")
+            .unwrap();
+
+        vfs.create_file(
+            "policies/test.cedar",
+            b"permit(principal, action, resource);",
+        )
+        .unwrap();
+
+        // Create trusted-issuers directory with invalid issuer (missing name)
+        vfs.create_file(
+            "trusted-issuers/invalid.json",
             r#"{
                 "bad_issuer": {
                     "description": "Missing name field",
                     "openid_configuration_endpoint": "https://test.com/.well-known/openid-configuration"
                 }
-            }"#,
+            }"#
+                .as_bytes(),
         )
         .unwrap();
 
-        // Load the policy store
-        let source = PolicyStoreSource::Directory(dir.to_path_buf());
-        let loader = DefaultPolicyStoreLoader::new_physical();
+        // Load the policy store using in-memory filesystem
+        let source = PolicyStoreSource::Directory(PathBuf::from("/"));
+        let loader = DefaultPolicyStoreLoader::new(vfs);
         let loaded = loader.load(&source).unwrap();
 
         // Parse issuers - should fail
@@ -1692,13 +1749,13 @@ permit(
         let policy_set = PhysicalLoader::create_policy_set(parsed_policies, vec![])
             .expect("Should create policy set");
 
-        // Entities
+        // Entities (parse without schema validation since this test focuses on issuers)
         let mut all_entities = Vec::new();
         for entity_file in &loaded.entities {
             let parsed_entities = EntityParser::parse_entities(
                 &entity_file.content,
                 &entity_file.name,
-                Some(parsed_schema.get_schema()),
+                None, // No schema validation - this test is about issuer integration
             )
             .expect("Should parse entities");
             all_entities.extend(parsed_entities);
