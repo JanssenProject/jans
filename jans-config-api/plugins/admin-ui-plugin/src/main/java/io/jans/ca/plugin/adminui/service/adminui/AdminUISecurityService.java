@@ -67,6 +67,7 @@ public class AdminUISecurityService {
     private static final String ACTION_PREFIX= "Gluu::Flex::AdminUI::Action::";
     private static final String PARENT_RESOURCE_PREFIX = "ParentResource::";
     private static final String FEATURES_PREFIX = "Features::";
+    private static final String FEATURES_PREFIX_FOR_DEFAULT_ENTITIES = RESOURCE_PREFIX + "Features";
 
     /**
      * Retrieves the policy store configuration for the Admin UI.
@@ -496,7 +497,7 @@ public class AdminUISecurityService {
 
         // Check if it's a Feature type
         JsonNode typeNode = entityData.path("uid").path("type");
-        if (!typeNode.isTextual() || !"Features".equalsIgnoreCase(typeNode.asText())) {
+        if (!typeNode.isTextual() || !FEATURES_PREFIX_FOR_DEFAULT_ENTITIES.equalsIgnoreCase(typeNode.asText())) {
             return false;
         }
 

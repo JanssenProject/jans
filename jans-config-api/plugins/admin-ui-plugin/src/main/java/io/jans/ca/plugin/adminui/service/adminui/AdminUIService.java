@@ -98,8 +98,8 @@ public class AdminUIService {
                 auiConfigurationService.getAUIConfiguration().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
             }
             if (!Strings.isNullOrEmpty(appConfigResponse.getAuiDefaultPolicyStorePath())) {
-                adminConf.getMainSettings().getUiConfig().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
-                auiConfigurationService.getAUIConfiguration().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
+                adminConf.getMainSettings().getUiConfig().setAuiDefaultPolicyStorePath(appConfigResponse.getAuiDefaultPolicyStorePath());
+                auiConfigurationService.getAUIConfiguration().setAuiDefaultPolicyStorePath(appConfigResponse.getAuiDefaultPolicyStorePath());
             }
             entryManager.merge(adminConf);
             return getAdminUIEditableConfiguration();
