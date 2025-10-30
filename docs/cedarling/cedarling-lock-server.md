@@ -46,7 +46,7 @@ After creation, **export the SSA token** and save it securely.
 
 ### 2. Setting up the Interception Script
 
-Next, configure an [*interception script*](../janssen-server/developer/interception-scripts.md) to automatically add the required scopes when a Cedarling client registers.
+Next, configure an [*interception script*](../../../janssen-server/developer/scripts/README.md) to automatically add the required scopes when a Cedarling client registers.
 
 In your server, create a script file at `/opt/jans/jetty/jans-auth/custom/script/add_cedarling_scopes.py` with the following content:
 
@@ -239,7 +239,7 @@ A successful response will contain the following scopes:
 
 > Note:
 >
-> If you want to learn more about configuring the example interception script, see the [reference](../janssen-server/developer/interception-scripts.md).
+> If you want to learn more about configuring the example interception script, see the [reference](../../../janssen-server/developer/scripts/README.md).
 
 ---
 

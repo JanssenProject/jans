@@ -110,7 +110,7 @@ beans. Details and examples of this can be found in this [article](../../janssen
 ### D. Third party libraries for use in the custom script
 Java or Python libraries to be imported and used very easily. Remember, you 
 can import a python library only if it has been written in "pure python".
-More details of this mentioned [here](../../janssen-server/developer/interception-scripts.md#using-python-libraries-in-a-script)
+More details of this mentioned [here](../../../janssen-server/developer/scripts/README.md#using-python-libraries-in-a-script)
 
 
 ### E. Configuring the `acr` parameter in the Jans-auth server:
