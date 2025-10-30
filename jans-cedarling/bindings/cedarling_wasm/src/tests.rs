@@ -1,4 +1,3 @@
-
 // This software is available under the Apache-2.0 license.
 // See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
 //
@@ -8,8 +7,8 @@
 #![allow(dead_code)]
 
 use crate::*;
-use cedarling::EntityData;
 use cedarling::bindings::serde_yml;
+use cedarling::{AuthorizeMultiIssuerRequest, EntityData, TokenInput};
 use serde::Deserialize;
 use serde_json::json;
 use std::{collections::HashMap, sync::LazyLock};
@@ -31,8 +30,7 @@ static MULTI_ISSUER_POLICY_STORE_YAML: &str =
 static MULTI_ISSUER_POLICY_STORE_JSON: LazyLock<String> = LazyLock::new(|| {
     let yaml_value: serde_yml::Value = serde_yml::from_str(MULTI_ISSUER_POLICY_STORE_YAML)
         .expect("Multi-issuer policy store YAML should be valid");
-    serde_json::to_string(&yaml_value)
-        .expect("Multi-issuer policy store should convert to JSON")
+    serde_json::to_string(&yaml_value).expect("Multi-issuer policy store should convert to JSON")
 });
 
 static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
@@ -579,7 +577,7 @@ async fn test_authorize_unsigned() {
             "country": "US"
         }))
         .expect("ResourceData should be deserialized correctly"),
-        context: json!({})
+        context: json!({}),
     };
 
     let result = instance
@@ -685,27 +683,23 @@ async fn test_multi_issuer_authorize_single_token() {
         }
     }));
 
-    let multi_issuer_request_str = serde_json::to_string(&json!({
-        "tokens": [
-            {
-                "mapping": "Jans::Access_Token",
-                "payload": access_token
-            }
-        ],
-        "resource": {
+    let multi_issuer_request = AuthorizeMultiIssuerRequest {
+        tokens: vec![TokenInput::new(
+            "Jans::Access_Token".to_string(),
+            access_token,
+        )],
+        resource: EntityData::deserialize(json!({
             "cedar_entity_mapping": {
                 "entity_type": "Jans::Issue",
                 "id": "random_id"
             },
             "org_id": "some_long_id",
             "country": "US"
-        },
-        "action": "Jans::Action::\"Update\"",
-        "context": {}
-    })).expect("Should serialize to JSON string");
-    
-    let multi_issuer_request: serde_json::Value = serde_json::from_str(&multi_issuer_request_str)
-        .expect("Should deserialize from JSON string");
+        }))
+        .expect("Resource should be deserialized correctly"),
+        action: "Jans::Action::\"Update\"".to_string(),
+        context: Some(json!({})),
+    };
 
     let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
         .expect("Multi-issuer request should be converted to JsValue");
@@ -715,8 +709,14 @@ async fn test_multi_issuer_authorize_single_token() {
         .await
         .expect("authorize_multi_issuer request should be executed");
 
-    assert!(result.decision, "Authorization should be ALLOW for single token");
-    assert!(!result.request_id.is_empty(), "request_id should be present");
+    assert!(
+        result.decision,
+        "Authorization should be ALLOW for single token"
+    );
+    assert!(
+        !result.request_id.is_empty(),
+        "request_id should be present"
+    );
 }
 
 /// Test multiple tokens from different issuers (matches Rust test_multiple_tokens_from_different_issuers)
@@ -800,35 +800,24 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         "exp": 1724945978
     }));
 
-    let multi_issuer_request_str = serde_json::to_string(&json!({
-        "tokens": [
-            {
-                "mapping": "Jans::Access_Token",
-                "payload": access_token
-            },
-            {
-                "mapping": "Jans::Id_Token",
-                "payload": id_token
-            },
-            {
-                "mapping": "Jans::Userinfo_Token",
-                "payload": userinfo_token
-            }
+    let multi_issuer_request = AuthorizeMultiIssuerRequest {
+        tokens: vec![
+            TokenInput::new("Jans::Access_Token".to_string(), access_token),
+            TokenInput::new("Jans::Id_Token".to_string(), id_token),
+            TokenInput::new("Jans::Userinfo_Token".to_string(), userinfo_token),
         ],
-        "resource": {
+        resource: EntityData::deserialize(json!({
             "cedar_entity_mapping": {
                 "entity_type": "Jans::Issue",
                 "id": "random_id"
             },
             "org_id": "some_long_id",
             "country": "US"
-        },
-        "action": "Jans::Action::\"Update\"",
-        "context": {}
-    })).expect("Should serialize to JSON string");
-    
-    let multi_issuer_request: serde_json::Value = serde_json::from_str(&multi_issuer_request_str)
-        .expect("Should deserialize from JSON string");
+        }))
+        .expect("Resource should be deserialized correctly"),
+        action: "Jans::Action::\"Update\"".to_string(),
+        context: Some(json!({})),
+    };
 
     let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
         .expect("Multi-issuer request should be converted to JsValue");
@@ -838,8 +827,14 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         .await
         .expect("authorize_multi_issuer request should be executed");
 
-    assert!(result.decision, "Authorization should be ALLOW for multi-token request");
-    assert!(!result.request_id.is_empty(), "request_id should be present");
+    assert!(
+        result.decision,
+        "Authorization should be ALLOW for multi-token request"
+    );
+    assert!(
+        !result.request_id.is_empty(),
+        "request_id should be present"
+    );
 }
 
 /// Test validation - graceful degradation when invalid token is present
@@ -882,31 +877,23 @@ async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_tok
     }));
 
     // Create request with both valid and invalid tokens
-    let multi_issuer_request_str = serde_json::to_string(&json!({
-        "tokens": [
-            {
-                "mapping": "Jans::Access_Token",
-                "payload": valid_token
-            },
-            {
-                "mapping": "Invalid::Token",
-                "payload": "not-a-valid-jwt"
-            }
+    let multi_issuer_request = AuthorizeMultiIssuerRequest {
+        tokens: vec![
+            TokenInput::new("Jans::Access_Token".to_string(), valid_token),
+            TokenInput::new("Invalid::Token".to_string(), "not-a-valid-jwt".to_string()),
         ],
-        "resource": {
+        resource: EntityData::deserialize(json!({
             "cedar_entity_mapping": {
                 "entity_type": "Jans::Issue",
                 "id": "random_id"
             },
             "org_id": "some_long_id",
             "country": "US"
-        },
-        "action": "Jans::Action::\"Update\"",
-        "context": {}
-    })).expect("Should serialize to JSON string");
-    
-    let multi_issuer_request: serde_json::Value = serde_json::from_str(&multi_issuer_request_str)
-        .expect("Should deserialize from JSON string");
+        }))
+        .expect("Resource should be deserialized correctly"),
+        action: "Jans::Action::\"Update\"".to_string(),
+        context: Some(json!({})),
+    };
 
     let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
         .expect("Multi-issuer request should be converted to JsValue");
@@ -917,8 +904,14 @@ async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_tok
         .await
         .expect("Should succeed gracefully when some tokens are invalid");
 
-    assert!(result.decision, "Should be ALLOW - valid token has required attributes despite invalid token");
-    assert!(!result.request_id.is_empty(), "request_id should be present");
+    assert!(
+        result.decision,
+        "Should be ALLOW - valid token has required attributes despite invalid token"
+    );
+    assert!(
+        !result.request_id.is_empty(),
+        "request_id should be present"
+    );
 }
 
 /// Test validation - empty token array (matches Rust test_validation_empty_token_array)
@@ -936,23 +929,20 @@ async fn test_multi_issuer_authorize_validation_empty_token_array() {
         .expect("init function should be initialized with js map");
 
     // Create request with empty tokens
-    // Serialize to string first, then parse back to ensure consistent structure
-    let multi_issuer_request_str = serde_json::to_string(&json!({
-        "tokens": [],
-        "resource": {
+    let multi_issuer_request = AuthorizeMultiIssuerRequest {
+        tokens: vec![],
+        resource: EntityData::deserialize(json!({
             "cedar_entity_mapping": {
                 "entity_type": "Jans::Issue",
                 "id": "random_id"
             },
             "org_id": "some_long_id",
             "country": "US"
-        },
-        "action": "Jans::Action::\"Update\"",
-        "context": {}
-    })).expect("Should serialize to JSON string");
-    
-    let multi_issuer_request: serde_json::Value = serde_json::from_str(&multi_issuer_request_str)
-        .expect("Should deserialize from JSON string");
+        }))
+        .expect("Resource should be deserialized correctly"),
+        action: "Jans::Action::\"Update\"".to_string(),
+        context: Some(json!({})),
+    };
 
     let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
         .expect("Multi-issuer request should be converted to JsValue");
