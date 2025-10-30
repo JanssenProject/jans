@@ -613,7 +613,7 @@ impl Authz {
     fn execute_authorize(
         &self,
         parameters: ExecuteAuthorizeParameters,
-    ) -> Result<cedar_policy::Response, cedar_policy::RequestValidationError> {
+    ) -> Result<cedar_policy::Response, Box<cedar_policy::RequestValidationError>> {
         let mut request_builder = cedar_policy::Request::builder()
             .action(parameters.action)
             .resource(parameters.resource)
@@ -624,7 +624,7 @@ impl Authz {
             request_builder = request_builder.principal(principal);
         }
 
-        let request = request_builder.build()?;
+        let request = request_builder.build().map_err(Box::new)?;
 
         let response = self.authorizer.is_authorized(
             &request,
