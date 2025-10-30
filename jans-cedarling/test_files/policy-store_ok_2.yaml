@@ -197,3 +197,5 @@ policy_stores:
           context: {}
         };
         }
+    default_entities:
+      "SomeNotRandomID1234": "ewogICAgInVpZCI6IHsKICAgICAgICAidHlwZSI6ICJKYW5zOjpJc3N1ZSIsCiAgICAgICAgImlkIjogIlNvbWVOb3RSYW5kb21JRDEyMzQiCiAgICB9LAogICAgImF0dHJzIjogewogICAgICAgICJvcmdfaWQiOiAic29tZV9sb25nX2lkIiwKICAgICAgICAiY291bnRyeSI6ICJVUyIKICAgIH0sCiAgICAicGFyZW50cyI6IFtdCn0="
