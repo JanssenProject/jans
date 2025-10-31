@@ -26,7 +26,7 @@ public interface AppConstants {
     public static final String AUTHORIZATION = "Authorization";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_JSON = "application/json";
-    public static final String ADMIN_UI_RESOURCE = "resource";
+    public static final String ADMIN_UI_RESOURCE = "jansResource";
 
     public static final int LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS = 30;
 

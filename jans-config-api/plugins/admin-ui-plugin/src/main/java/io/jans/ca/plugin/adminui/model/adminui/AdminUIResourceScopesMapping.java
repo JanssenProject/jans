@@ -6,7 +6,7 @@ import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import java.util.List;
 
-@DataEntry(sortBy = {"resource"})
+@DataEntry(sortBy = {"jansResource"})
 @ObjectClass(value = "adminUIResourceScopesMapping")
 public class AdminUIResourceScopesMapping {
     @DN
@@ -15,11 +15,11 @@ public class AdminUIResourceScopesMapping {
             ignoreDuringUpdate = true
     )
     private String inum;
-    @AttributeName(name = "resource")
+    @AttributeName(name = "jansResource")
     private String resource;
-    @AttributeName(name = "accessType")
+    @AttributeName(name = "jansAccessType")
     private String accessType;
-    @AttributeName(name = "scopes")
+    @AttributeName(name = "jansScope")
     private List<String> scopes;
 
     public String getDn() {
