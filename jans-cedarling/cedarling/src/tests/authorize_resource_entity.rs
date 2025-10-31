@@ -101,7 +101,7 @@ async fn check_default_authorize_resource_entity() {
       },
       "parents": [
         {
-          "type": "Jans::Issue",
+          "type": "Jans::BaseIssue",
           "id": "SomeNotRandomID12345"
         }
       ]
@@ -128,7 +128,7 @@ async fn check_default_authorize_resource_entity() {
 
     let default_resource_entity_value2 = json!({
       "uid": {
-        "type": "Jans::Issue",
+        "type": "Jans::BaseIssue",
         "id": "SomeNotRandomID12345"
       },
       "attrs": {
@@ -139,7 +139,7 @@ async fn check_default_authorize_resource_entity() {
     });
 
     let euid2 = EntityUid::from_json(
-        serde_json::json!({ "__entity": { "type": "Jans::Issue", "id": "SomeNotRandomID12345" } }),
+        serde_json::json!({ "__entity": { "type": "Jans::BaseIssue", "id": "SomeNotRandomID12345" } }),
     )
     .unwrap();
 
