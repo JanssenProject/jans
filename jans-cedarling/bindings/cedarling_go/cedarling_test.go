@@ -2,6 +2,7 @@ package cedarling_go
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -15,7 +16,7 @@ var bootstrapConfig string = `
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
         "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
-        "CEDARLING_LOG_TYPE": "std_out",
+        "CEDARLING_LOG_TYPE": "off",
         "CEDARLING_LOG_TTL": 60,
         "CEDARLING_LOG_LEVEL": "DEBUG",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"]
@@ -175,6 +176,126 @@ func TestAuthorizeSuccess(t *testing.T) {
 	}
 }
 
+func BenchmarkAuthorize(b *testing.B) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		b.Fatalf("Failed to load test config: %v", err)
+	}
+
+	instance, err := NewCedarling(config)
+	if err != nil {
+		b.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+
+	resource := EntityData{
+		CedarMapping: CedarEntityMapping{
+			EntityType: "Jans::Issue",
+			ID:         "random_id",
+		},
+		Payload: map[string]any{
+			"org_id":  "some_long_id",
+			"country": "US",
+		},
+	}
+
+	request := Request{
+		Tokens: map[string]string{
+			"access_token":   accessToken,
+			"id_token":       idToken,
+			"userinfo_token": userinfoToken,
+		},
+		Action:   "Jans::Action::\"Update\"",
+		Resource: resource,
+		// will be mapped to {}
+		Context: nil,
+	}
+	b.ResetTimer()
+	result, err := instance.Authorize(request)
+	if err != nil {
+		b.Fatalf("Authorization failed: %v", err)
+	}
+	if !result.Decision {
+		b.Fatalf("Decision false")
+	}
+}
+
+func BenchmarkAuthorizeUnsigned(b *testing.B) {
+	config, err := loadTestConfig(func(conf map[string]any) {
+		conf["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = `{
+            "and": [
+                {"===": [{"var": "Jans::TestPrincipal1"}, "ALLOW"]},
+                {"===": [{"var": "Jans::TestPrincipal2"}, "ALLOW"]},
+                {"===": [{"var": "Jans::TestPrincipal3"}, "DENY"]}
+            ]
+        }`
+		conf["CEDARLING_POLICY_STORE_LOCAL_FN"] = "../../test_files/policy-store_ok_2.yaml"
+	})
+	if err != nil {
+		b.Fatalf("Failed to load test config: %v", err)
+	}
+
+	instance, err := NewCedarling(config)
+	if err != nil {
+		b.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+
+	resource := EntityData{
+		CedarMapping: CedarEntityMapping{
+			EntityType: "Jans::Issue",
+			ID:         "random_id",
+		},
+		Payload: map[string]any{
+			"org_id":  "some_long_id",
+			"country": "US",
+		},
+	}
+
+	principals := []EntityData{
+		{
+			CedarMapping: CedarEntityMapping{
+				EntityType: "Jans::TestPrincipal1",
+				ID:         "1",
+			},
+			Payload: map[string]any{
+				"is_ok": true,
+			},
+		},
+		{
+			CedarMapping: CedarEntityMapping{
+				EntityType: "Jans::TestPrincipal2",
+				ID:         "2",
+			},
+			Payload: map[string]any{
+				"is_ok": true,
+			},
+		},
+		{
+			CedarMapping: CedarEntityMapping{
+				EntityType: "Jans::TestPrincipal3",
+				ID:         "3",
+			},
+			Payload: map[string]any{
+				"is_ok": false,
+			},
+		},
+	}
+	b.ResetTimer()
+	request := RequestUnsigned{
+		Principals: principals,
+		Action:     "Jans::Action::\"UpdateForTestPrincipals\"",
+		Resource:   resource,
+		// will be mapped to {}
+		Context: nil,
+	}
+
+	result, err := instance.AuthorizeUnsigned(request)
+	if err != nil {
+		b.Fatalf("Authorization failed: %v", err)
+	}
+	if !result.Decision {
+		b.Fatalf("Decision false")
+	}
+}
 func TestAuthorizeUnsignedSuccess(t *testing.T) {
 	config, err := loadTestConfig(func(conf map[string]any) {
 		conf["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = `{
@@ -314,4 +435,145 @@ func TestAuthorizeValidationError(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected validation error, got nil")
 	}
+}
+
+func ExampleNewCedarling() {
+	// load bootstrap config
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		fmt.Printf("Failed to load bootstrap config: %v\n", err)
+	}
+
+	instance, err := NewCedarling(config)
+	if err != nil {
+		fmt.Printf("Failed to create Cedarling instance: %v\n", err)
+	}
+	instance.ShutDown()
+}
+
+func ExampleNewCedarlingWithEnv() {
+	instance, err := NewCedarlingWithEnv(nil)
+	if err != nil {
+		fmt.Printf("Failed to create Cedarling instance: %v\n", err)
+	}
+	instance.ShutDown()
+}
+
+func ExampleCedarling_Authorize() {
+	// load bootstrap configuration
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		fmt.Printf("Failed to load bootstrap config: %v\n", err)
+	}
+
+	instance, err := NewCedarling(config)
+	if err != nil {
+		fmt.Printf("Failed to create Cedarling instance: %v\n", err)
+	}
+	resource := EntityData{
+		CedarMapping: CedarEntityMapping{
+			EntityType: "Jans::Issue",
+			ID:         "random_id",
+		},
+		Payload: map[string]any{
+			"org_id":  "some_long_id",
+			"country": "US",
+		},
+	}
+
+	request := Request{
+		Tokens: map[string]string{
+			"access_token":   "accessTokenJWT",
+			"id_token":       "idTokenJWT",
+			"userinfo_token": "userinfoTokenJWT",
+		},
+		Action:   "Jans::Action::\"Update\"",
+		Resource: resource,
+		// will be mapped to {}
+		Context: nil,
+	}
+
+	result, err := instance.Authorize(request)
+	if err != nil {
+		fmt.Printf("Authorization failed: %v\n", err)
+	}
+	fmt.Println(result.Decision)
+
+}
+
+func ExampleCedarling_AuthorizeUnsigned() {
+	// load bootstrap configuration
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		fmt.Printf("Failed to load bootstrap config: %v\n", err)
+	}
+
+	instance, err := NewCedarling(config)
+	if err != nil {
+		fmt.Printf("Failed to create Cedarling instance: %v\n", err)
+	}
+	resource := EntityData{
+		CedarMapping: CedarEntityMapping{
+			EntityType: "Jans::Issue",
+			ID:         "random_id",
+		},
+		Payload: map[string]any{
+			"org_id":  "some_long_id",
+			"country": "US",
+		},
+	}
+	principals := []EntityData{
+		{
+			CedarMapping: CedarEntityMapping{
+				EntityType: "Jans::Principal",
+				ID:         "1",
+			},
+			Payload: map[string]any{
+				"is_ok": true,
+			},
+		},
+	}
+
+	request := RequestUnsigned{
+		Principals: principals,
+		Action:     "Jans::Action::\"Update\"",
+		Resource:   resource,
+		// will be mapped to {}
+		Context: nil,
+	}
+	result, err := instance.AuthorizeUnsigned(request)
+	if err != nil {
+		fmt.Printf("Authorization failed: %v\n", err)
+	}
+	fmt.Println(result.Decision)
+}
+
+func ExampleCedarling_GetLogIds() {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		fmt.Printf("Failed to load bootstrap config: %v\n", err)
+	}
+	config["CEDARLING_LOG_TYPE"] = "memory" // logs are only stored when running in memory logging mode
+
+	instance, err := NewCedarling(config)
+	if err != nil {
+		fmt.Printf("Failed to create Cedarling instance: %v\n", err)
+	}
+	log_ids := instance.GetLogIds()
+	fmt.Println(log_ids[0])
+}
+
+func ExampleCedarling_GetLogsByTag() {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		fmt.Printf("Failed to load bootstrap config: %v\n", err)
+	}
+	config["CEDARLING_LOG_TYPE"] = "memory" // logs are only stored when running in memory logging mode
+
+	instance, err := NewCedarling(config)
+	if err != nil {
+		fmt.Printf("Failed to create Cedarling instance: %v\n", err)
+	}
+	logs := instance.GetLogsByTag("debug")
+	fmt.Println(logs[0])
 }

@@ -11,6 +11,9 @@ import io.jans.model.net.HttpServiceResponse;
 import io.jans.util.StringHelper;
 
 import java.io.File;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -35,6 +38,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import org.apache.logging.log4j.LogManager;
@@ -163,9 +167,9 @@ public class ConfigHttpService implements Serializable {
 
     public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authCode,
             Map<String, String> headers, String postData, ContentType contentType, String authType) {
-        
+
         HttpPost httpPost = new HttpPost(uri);
-        
+
         if (StringHelper.isNotEmpty(authCode)) {
             httpPost.setHeader("Authorization", authType + authCode);
         }
@@ -436,7 +440,7 @@ public class ConfigHttpService implements Serializable {
 
         return getResponseJsonNode(getResponseEntityString(serviceResponse), "response");
     }
-
+    
     public String getResponseEntityString(HttpServiceResponse serviceResponse) {
         String jsonString = null;
 
@@ -480,4 +484,63 @@ public class ConfigHttpService implements Serializable {
         return jsonNode;
     }
 
+    public Status getResponseStatus(HttpServiceResponse serviceResponse) {
+        Status status = Status.INTERNAL_SERVER_ERROR;
+
+        if (serviceResponse == null || serviceResponse.getHttpResponse() == null || serviceResponse.getHttpResponse().getStatusLine()== null) {
+            return status;
+        }
+
+        int statusCode = serviceResponse.getHttpResponse().getStatusLine().getStatusCode();
+
+        status = Status.fromStatusCode(statusCode);
+        if (status == null) {
+            status = Status.INTERNAL_SERVER_ERROR;
+        }
+        return status;
+    }
+
+    public StringBuilder readEntity(HttpEntity httpEntity) throws IOException {
+
+        StringBuilder result = new StringBuilder();
+
+        if (httpEntity == null) {
+            return result;
+        }
+        try (InputStream inputStream = httpEntity.getContent();
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+            log.error("Response:{}", result);
+        }
+
+        return result;
+    }
+
+    public String getContent(HttpEntity httpEntity) {
+        String jsonString = null;
+        InputStream inputStream = null;
+        try {
+
+            if (httpEntity == null) {
+                return jsonString;
+            }
+            inputStream = httpEntity.getContent();
+            log.trace("  httpEntity.getContentLength():{}, httpEntity.getContent():{}", httpEntity.getContentLength(),
+                    httpEntity.getContent());
+
+            jsonString = IOUtils.toString(httpEntity.getContent(), StandardCharsets.UTF_8);
+            log.debug("Data jsonString:{}", jsonString);
+
+        } catch (Exception ex) {
+            throw new WebApplicationException("Failed to read data '{" + httpEntity + "}'", ex);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        return jsonString;
+    }
+ 
 }

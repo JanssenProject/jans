@@ -326,7 +326,7 @@ public class ConfigurationFactory {
 			staticConf = conf.getStaticConf();
 		}
 		if (conf.getErrors() != null) {
-			errorResponseFactory = new ErrorResponseFactory(conf.getErrors(), conf.getDynamicConf());
+			errorResponseFactory = new ErrorResponseFactory(conf.getErrors());
 		}
 	}
 

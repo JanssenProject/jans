@@ -361,6 +361,13 @@
       "essentialPermissionInAdminUI": false,
       "tag": "openid"
     },
+	{
+      "permission": "https://jans.io/oauth/config/ssa.delete",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "ssa"
+    },
     {
       "permission": "https://jans.io/auth/ssa.admin",
       "description": "",
@@ -775,20 +782,6 @@
       "tag": "app-version"
     },
     {
-      "permission": "https://jans.io/oauth/kc-link-config.readonly",
-      "description": "",
-      "defaultPermissionInToken": false,
-      "essentialPermissionInAdminUI": false,
-      "tag": "kc-link-config"
-    },
-    {
-      "permission": "https://jans.io/oauth/kc-link-config.write",
-      "description": "",
-      "defaultPermissionInToken": false,
-      "essentialPermissionInAdminUI": false,
-      "tag": "kc-link-config"
-    },
-    {
       "permission": "https://jans.io/oauth/lock-config.readonly",
       "description": "",
       "defaultPermissionInToken": false,
@@ -1036,7 +1029,8 @@
         "https://jans.io/oauth/config/data.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly",
-        "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write"
+        "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write",
+		"https://jans.io/oauth/config/ssa.delete"
       ]
     },
     {
@@ -1111,7 +1105,8 @@
         "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write",
         "https://jans.io/oauth/jans-auth-server/session.delete",
         "revoke_session",
-        "https://jans.io/oauth/config/data.readonly"
+        "https://jans.io/oauth/config/data.readonly",
+		"https://jans.io/oauth/config/ssa.delete"
       ]
     }
   ]

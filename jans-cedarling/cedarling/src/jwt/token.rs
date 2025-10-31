@@ -12,7 +12,7 @@ use std::{collections::HashMap, sync::Arc};
 pub struct Token {
     pub name: String,
     pub iss: Option<Arc<TrustedIssuer>>,
-    claims: TokenClaims,
+    pub(crate) claims: TokenClaims,
 }
 
 impl Token {
@@ -32,7 +32,7 @@ impl Token {
         self.iss.as_ref()?.get_claim_mapping(&self.name)
     }
 
-    pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
+    pub fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
         self.claims.get_claim(name)
     }
 
@@ -69,7 +69,7 @@ impl From<Value> for TokenClaims {
 }
 
 impl TokenClaims {
-    pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
+    pub fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
         self.claims.get(name).map(|value| TokenClaim {
             key: name.to_string(),
             value,
@@ -91,7 +91,7 @@ impl TokenClaims {
     pub fn with_claim(self, k: String, v: Value) -> Self {
         let mut claims = self;
         claims.claims.insert(k, v);
-        
+
         claims
     }
 }

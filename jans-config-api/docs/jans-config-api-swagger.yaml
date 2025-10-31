@@ -276,8 +276,8 @@ paths:
     get:
       tags:
       - Agama
-      summary: Fetches deployed Agama project based on name.
-      description: Fetches deployed Agama project based on name.
+      summary: Retrieve details of a single deployment by name.
+      description: Retrieve details of a single deployment by name.
       operationId: get-agama-prj-by-name
       parameters:
       - name: name
@@ -311,8 +311,8 @@ paths:
     post:
       tags:
       - Agama
-      summary: Deploy an Agama project.
-      description: Deploy an Agama project.
+      summary: Add or replace an Agama project to the server.
+      description: Add or replace an Agama project to the server.
       operationId: post-agama-prj
       parameters:
       - name: name
@@ -358,8 +358,8 @@ paths:
     delete:
       tags:
       - Agama
-      summary: Delete a deployed Agama project.
-      description: Delete a deployed Agama project.
+      summary: Undeploy an Agama project from the server.
+      description: Undeploy an Agama project from the server.
       operationId: delete-agama-prj
       parameters:
       - name: name
@@ -386,8 +386,10 @@ paths:
     get:
       tags:
       - Agama
-      summary: Retrieve the list of configs based on name.
-      description: Retrieve the list of configs based on name.
+      summary: Retrieve the configurations associated to flows that belong to the
+        project of interest. The project must have been already processed fully.
+      description: Retrieve the configurations associated to flows that belong to
+        the project of interest. The project must have been already processed fully.
       operationId: get-agama-prj-configs
       parameters:
       - name: name
@@ -417,8 +419,10 @@ paths:
     put:
       tags:
       - Agama
-      summary: Update an Agama project.
-      description: Update an Agama project.
+      summary: Set or replace the configurations associated to flows that belong to
+        the project. The project must have been already processed fully.
+      description: Set or replace the configurations associated to flows that belong
+        to the project. The project must have been already processed fully.
       operationId: put-agama-prj
       parameters:
       - name: name
@@ -428,19 +432,50 @@ paths:
         schema:
           type: string
       requestBody:
-        description: "Agama flow config, key is `name` of config property and `value`\
-          \ is the property value. "
+        description: 'JSON object with configurations associated to flows '
         content:
           application/json:
             schema:
-              type: object
-              additionalProperties:
-                type: object
-                additionalProperties:
-                  type: object
+              type: string
+            examples:
+              Request example:
+                description: Request example
+                value: |
+                  {
+                    "org.gluu.agama.ldap.pw.main": {
+                      "lockConfig": {
+                        "MAX_LOGIN_ATTEMPT": 6,
+                        "ENABLE_LOCK": true,
+                        "LOCK_EXP_TIME": 180
+                      },
+                      "useInternalLdapConfig": false,
+                      "serversConfig": [
+                        {
+                          "configId": "ad_1",
+                          "bindDN": "cn=directory manager",
+                          "bindPassword": "encoded_password/plain_passowrd",
+                          "servers": [
+                            "localhost:1389"
+                          ],
+                          "maxConnections": 3,
+                          "useSSL": false,
+                          "baseDNs": [
+                            "ou=people,o=jans"
+                          ],
+                          "loginAttributes": [
+                            "uid"
+                          ],
+                          "localLoginAttributes": [
+                            "uid"
+                          ]
+                        }
+                      ]
+                    }
+                  }
       responses:
-        "202":
-          description: Agama project accepted
+        "200":
+          description: JSON object with properties values correspond to a boolean
+            indicating the success of the update for the given flow.
           content:
             application/json:
               schema:
@@ -448,7 +483,8 @@ paths:
               examples:
                 Response json example:
                   description: Response json example
-                  value: ""
+                  value: |
+                    {"org.gluu.agama.ldap.pw.main"=true}
         "400":
           description: Bad Request
         "401":
@@ -515,7 +551,7 @@ paths:
         "200":
           description: Agama project
           content:
-            application/json:
+            text/plain:
               schema:
                 type: string
                 format: binary
@@ -13584,13 +13620,14 @@ paths:
           description: Success
         "401":
           description: Unauthorized
-        "404":
-          description: Not Found
+        "422":
+          description: Unprocessable Entity
         "500":
           description: InternalServerError
       security:
       - oauth2:
         - https://jans.io/oauth/config/ssa.delete
+        - https://jans.io/auth/ssa.admin
   /api/v1/stat:
     get:
       tags:
@@ -14912,19 +14949,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
-        userCanAccess:
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanView:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -14997,6 +15034,8 @@ components:
         requirePar:
           type: boolean
         parForbidPublicClient:
+          type: boolean
+        jwtGrantAllowUserByUidInAssertion:
           type: boolean
         deviceAuthzEndpoint:
           type: string
@@ -15154,6 +15193,7 @@ components:
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         subjectTypesSupported:
           type: array
           items:
@@ -15481,6 +15521,7 @@ components:
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         cssLocation:
           type: string
         jsLocation:
@@ -15830,6 +15871,8 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -15839,8 +15882,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -16330,6 +16371,7 @@ components:
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
+            - urn:ietf:params:oauth:grant-type:jwt-bearer
         applicationType:
           type: string
           enum:
@@ -17037,14 +17079,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -17666,6 +17708,8 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -17677,8 +17721,6 @@ components:
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
         accessToken:
-          type: boolean
-        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object

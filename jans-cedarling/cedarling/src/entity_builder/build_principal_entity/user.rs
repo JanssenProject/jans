@@ -12,7 +12,7 @@ const USER_ATTR_SRC_TKNS: &[&str] = &["userinfo_token", "id_token"];
 impl EntityBuilder {
     pub fn build_user_entity(
         &self,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
         tkn_principal_mappings: &TokenPrincipalMappings,
         built_entities: &BuiltEntities,
         roles: HashSet<EntityUid>,
@@ -65,7 +65,7 @@ impl UserIdSrcResolver {
     /// The method checks the following tokens and claims in order:
     /// - `userinfo_token.sub`
     /// - `id_token.sub`
-    pub fn resolve(tokens: &HashMap<String, Token>) -> Vec<EntityIdSrc> {
+    pub fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc<'_>> {
         const DEFAULT_USER_ID_SRCS: &[PrincipalIdSrc] = &[
             PrincipalIdSrc {
                 token: "userinfo_token",
@@ -110,6 +110,7 @@ mod test {
     use super::*;
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder::test::*;
+    use crate::log::TEST_LOGGER;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
@@ -117,7 +118,7 @@ mod test {
 
     #[track_caller]
     fn test_build_user(
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
         builder: &EntityBuilder,
         tkn_principal_mappings: &TokenPrincipalMappings,
         expected: Value,
@@ -162,6 +163,8 @@ mod test {
             &issuers,
             Some(&validator_schema),
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -189,7 +192,7 @@ mod test {
             Some(iss),
         );
 
-        let tokens = HashMap::from([("id_token".into(), id_token)]);
+        let tokens = HashMap::from([("id_token".into(), Arc::new(id_token))]);
 
         test_build_user(
             &tokens,
@@ -240,6 +243,8 @@ mod test {
             &issuers,
             Some(&validator_schema),
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -267,7 +272,7 @@ mod test {
             Some(iss),
         );
 
-        let tokens = HashMap::from([("userinfo_token".into(), userinfo_token)]);
+        let tokens = HashMap::from([("userinfo_token".into(), Arc::new(userinfo_token))]);
 
         test_build_user(
             &tokens,
@@ -322,6 +327,8 @@ mod test {
             &issuers,
             Some(&validator_schema),
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -361,8 +368,8 @@ mod test {
         );
 
         let tokens = HashMap::from([
-            ("id_token".into(), id_token),
-            ("userinfo_token".into(), userinfo_token),
+            ("id_token".into(), Arc::new(id_token)),
+            ("userinfo_token".into(), Arc::new(userinfo_token)),
         ]);
 
         test_build_user(
@@ -401,6 +408,8 @@ mod test {
             &issuers,
             None,
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -428,7 +437,7 @@ mod test {
             Some(iss),
         );
 
-        let tokens = HashMap::from([("id_token".into(), id_token)]);
+        let tokens = HashMap::from([("id_token".into(), Arc::new(id_token))]);
 
         test_build_user(
             &tokens,

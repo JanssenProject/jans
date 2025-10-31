@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.12.0](https://github.com/JanssenProject/jans/compare/v1.11.0...v1.12.0) (2025-09-22)
+
+
+### Features
+
+* **cloud-native:** add support for SSL connection to persistence ([#12198](https://github.com/JanssenProject/jans/issues/12198)) ([65819db](https://github.com/JanssenProject/jans/commit/65819db3d2c0ed5d4bcc55870d3ae410b274bf83))
+* **config-api:** scope update for ssa endpoint ([#12191](https://github.com/JanssenProject/jans/issues/12191)) ([8969c61](https://github.com/JanssenProject/jans/commit/8969c61d3e89bc21b6834dd0916cbebc86ecb168))
+* expose API to manage user tokens ([#12144](https://github.com/JanssenProject/jans/issues/12144)) ([f01c35b](https://github.com/JanssenProject/jans/commit/f01c35b155d7e63896844df5e689f40ac3d3cd96))
+* **jans-linux-setup:** add add password grant type to scim client for testing ([#12142](https://github.com/JanssenProject/jans/issues/12142)) ([2353341](https://github.com/JanssenProject/jans/commit/2353341e241a753d3c3bf1c6adbbf13a2bed2dba))
+* **jans-linux-setup:** PostgreSQL SSL support ([#12195](https://github.com/JanssenProject/jans/issues/12195)) ([5d9ff98](https://github.com/JanssenProject/jans/commit/5d9ff989d5d5c3ad1474c793b36664bc87525523))
+* **jans-pycloudlib:** add low-level support for SSL persistence connection ([#12194](https://github.com/JanssenProject/jans/issues/12194)) ([a9bbd27](https://github.com/JanssenProject/jans/commit/a9bbd274ab49b24e22f4adbdb606152e59da9699))
+
+
+### Bug Fixes
+
+* **config-api:** ssa delete endpoint and fix to admin-ui-permission delete endpoint fix ([#12174](https://github.com/JanssenProject/jans/issues/12174)) ([d354881](https://github.com/JanssenProject/jans/commit/d3548812b30e949635d329a4f1ad8ffd9b1b048d))
+* **jans-cli-tui:** Admin UI Roles ([#12162](https://github.com/JanssenProject/jans/issues/12162)) ([324c07f](https://github.com/JanssenProject/jans/commit/324c07f4131cb1bbc040c9bebb79327c6673e62a))
+* **jans-cli-tui:** error saving auth logging ([#12172](https://github.com/JanssenProject/jans/issues/12172)) ([fd7e117](https://github.com/JanssenProject/jans/commit/fd7e117c0a227a84110c608c0e229acf4739d1a3))
+
+
+### Miscellaneous Chores
+
+* release 1.12.0 ([#12205](https://github.com/JanssenProject/jans/issues/12205)) ([91da377](https://github.com/JanssenProject/jans/commit/91da377bfd956b7427a5bf6807a7216270fb1be8))
+
 ## [1.11.0](https://github.com/JanssenProject/jans/compare/v1.9.0...v1.11.0) (2025-09-11)
 
 

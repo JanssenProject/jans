@@ -13,7 +13,7 @@ use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-#[derive(Debug, PartialEq, Deserialize)]
+#[derive(Debug, PartialEq, Deserialize, Clone)]
 pub struct ValidatedJwt {
     #[serde(flatten)]
     pub claims: Value,
@@ -61,7 +61,7 @@ pub struct RefJwtStatusList {
 /// additional check for requiring custom JWT claims.
 #[derive(Debug, Clone)]
 pub struct JwtValidator {
-    validation: Validation,
+    pub(crate) validation: Validation,
     required_claims: HashSet<Box<str>>,
     validate_signature: bool,
     validate_status_list: bool,
@@ -124,11 +124,11 @@ impl JwtValidator {
 
     /// Creates a new validator for status list tokens
     pub fn new_status_list_tkn_validator(
-        iss: Option<&str>,
+        iss: Option<&'_ str>,
         status_list_uri: Option<String>,
         algorithm: Algorithm,
         validate_signature: bool,
-    ) -> (Self, ValidatorInfo) {
+    ) -> (Self, ValidatorInfo<'_>) {
         let token_kind = TokenKind::StatusList;
 
         let mut validation = Validation::new(algorithm);

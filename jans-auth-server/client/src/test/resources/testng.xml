@@ -56,6 +56,11 @@
             <class name="io.jans.as.client.ws.rs.token.NativeSsoHttpTest"/>
         </classes>
     </test>
+    <test name="JWT Grant Client test (HTTP)" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.token.JwtGrantHttpTest"/>
+        </classes>
+    </test>
 
     <test name="Status List Client test (HTTP)" enabled="true">
         <classes>

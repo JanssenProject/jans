@@ -17,6 +17,7 @@
 	<modules>
 		<module>model</module>
 		<module>client</module>
+		<module>cedarling</module>
 		<module>service</module>
 		<module>server</module>
 		<module>server-fips</module>
@@ -102,6 +103,18 @@
 				<artifactId>jans-lock-service</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-lock-cedarling</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+	        <dependency>
+	            <groupId>io.jans</groupId>
+	            <artifactId>cedarling-java</artifactId>
+				<version>${project.version}</version>
+	        </dependency>
 
 			<!-- Swagger -->
 			<dependency>
