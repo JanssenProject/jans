@@ -17,7 +17,6 @@
 package io.jans.lock.model.config;
 
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -47,10 +46,14 @@ public class AppConfiguration implements Configuration {
     @Schema(description = "OpenID issuer URL")
     private String openIdIssuer;
 
-    @DocProperty(description = "SCIM Protection Mode")
-    @Schema(description = "OpenID issuer URL")
+    @DocProperty(description = "Lock protection type")
+    @Schema(description = "Lock protection type")
     private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
-    
+
+    @DocProperty(description = "Audit persistence mode")
+    @Schema(description = "Audit persistence mode")
+    private AuditPersistenceMode auditPersistenceMode = AuditPersistenceMode.INTERNAL;
+
     @DocProperty(description = "Cedarling configuration")
     @Schema(description = "Cedarling configuration")
     private CedarlingConfiguration cedarlingConfiguration;
@@ -74,18 +77,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Lock client password")
     @Schema(description = "Lock client password")
     private String clientPassword;
-
-    @DocProperty(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
-    @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
-    private String tokenUrl;
-
-    @DocProperty(description = "Endpoint groups")
-    @Schema(description = "Endpoint groups")
-    private Map<String, List<String>> endpointGroups;
-
-    @DocProperty(description = "Jans URL of config-api audit endpoints and corresponding scope details")
-    @Schema(description = "Jans URL of config-api audit endpoints and corresponding scope details")
-    private Map<String, List<String>> endpointDetails;
 
     @DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
     @Schema(description = "Choose whether to disable JDK loggers")
@@ -163,6 +154,14 @@ public class AppConfiguration implements Configuration {
 		this.protectionMode = protectionMode;
 	}
 
+	public AuditPersistenceMode getAuditPersistenceMode() {
+		return auditPersistenceMode;
+	}
+
+	public void setAuditPersistenceMode(AuditPersistenceMode auditPersistenceMode) {
+		this.auditPersistenceMode = auditPersistenceMode;
+	}
+
 	public CedarlingConfiguration getCedarlingConfiguration() {
 		return cedarlingConfiguration;
 	}
@@ -209,30 +208,6 @@ public class AppConfiguration implements Configuration {
 
     public void setClientPassword(String clientPassword) {
         this.clientPassword = clientPassword;
-    }
-
-    public String getTokenUrl() {
-        return tokenUrl;
-    }
-
-    public void setTokenUrl(String tokenUrl) {
-        this.tokenUrl = tokenUrl;
-    }
-
-    public Map<String, List<String>> getEndpointGroups() {
-        return endpointGroups;
-    }
-
-    public void setEndpointGroups(Map<String, List<String>> endpointGroups) {
-        this.endpointGroups = endpointGroups;
-    }
-
-    public Map<String, List<String>> getEndpointDetails() {
-        return endpointDetails;
-    }
-
-    public void setEndpointDetails(Map<String, List<String>> endpointDetails) {
-        this.endpointDetails = endpointDetails;
     }
 
     public Boolean getDisableJdkLogger() {
@@ -328,18 +303,18 @@ public class AppConfiguration implements Configuration {
     }
 
     @Override
-    public String toString() {
-        return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
-                + openIdIssuer + ", statEnabled=" + statEnabled + ", statTimerIntervalInSeconds="
-                + statTimerIntervalInSeconds + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId
-                + ", clientPassword=" + clientPassword + ", tokenUrl=" + tokenUrl + ", endpointGroups=" + endpointGroups
-                + ", endpointDetails=" + endpointDetails + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel="
-                + loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
-                + externalLoggerConfiguration + ", metricReporterInterval=" + metricReporterInterval
-                + ", metricReporterKeepDataDays=" + metricReporterKeepDataDays + ", metricReporterEnabled="
-                + metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval + ", messageConsumerType="
-                + messageConsumerType + ", errorReasonEnabled=" + errorReasonEnabled + ", cleanServiceBatchChunkSize="
-                + cleanServiceBatchChunkSize + "]";
-    }
+	public String toString() {
+		return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
+				+ openIdIssuer + ", protectionMode=" + protectionMode + ", cedarlingConfiguration="
+				+ cedarlingConfiguration + ", statEnabled=" + statEnabled + ", statTimerIntervalInSeconds="
+				+ statTimerIntervalInSeconds + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId
+				+ ", clientPassword=" + clientPassword + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel="
+				+ loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
+				+ externalLoggerConfiguration + ", metricReporterInterval=" + metricReporterInterval
+				+ ", metricReporterKeepDataDays=" + metricReporterKeepDataDays + ", metricReporterEnabled="
+				+ metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval + ", messageConsumerType="
+				+ messageConsumerType + ", errorReasonEnabled=" + errorReasonEnabled + ", cleanServiceBatchChunkSize="
+				+ cleanServiceBatchChunkSize + "]";
+	}
 
 }

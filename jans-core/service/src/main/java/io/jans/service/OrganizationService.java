@@ -27,6 +27,10 @@ public abstract class OrganizationService implements Serializable {
         return baseDn;
     }
 
+    public String getBaseDn() {
+        return "o=jans";
+    }
+
     public abstract ApplicationType getApplicationType();
 
 }

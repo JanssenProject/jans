@@ -16,8 +16,24 @@
 
 package io.jans.lock.model.config;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * 
  * @author Yuriy Movchan Date: 10/08/2022
  */
-public enum LockProtectionMode { OAUTH, CEDARLING }
+public enum LockProtectionMode {
+
+	OAUTH("oauth"), CEDARLING("cedarling");
+
+	private final String mode;
+
+	private LockProtectionMode(String mode) {
+        this.mode = mode;
+    }
+
+	@JsonValue
+	public String getmode() {
+		return mode;
+	}
+}

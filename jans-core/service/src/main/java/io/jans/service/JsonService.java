@@ -9,8 +9,11 @@ package io.jans.service;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+
 import org.slf4j.Logger;
 
 import jakarta.annotation.PostConstruct;
@@ -47,12 +50,20 @@ public class JsonService implements Serializable {
         return mapper.readValue(json, clazz);
     }
 
+    public <T> T jsonToObject(String json, JavaType valueType) throws JsonParseException, JsonMappingException, IOException {
+        return mapper.readValue(json, valueType);
+    }
+
     public <T> String objectToJson(T obj) throws JsonGenerationException, JsonMappingException, IOException {
         return mapper.writeValueAsString(obj);
     }
 
     public <T> String objectToPerttyJson(T obj) throws JsonGenerationException, JsonMappingException, IOException {
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+    }
+    
+    public TypeFactory getTypeFactory() {
+    	return mapper.getTypeFactory();
     }
 
 }

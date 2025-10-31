@@ -36,6 +36,7 @@ public class BaseDnConfiguration {
 	private String scripts;
 	private String metric;
 	private String stat;
+	private String audit;
 
 	public String getConfiguration() {
 		return configuration;
@@ -99,6 +100,14 @@ public class BaseDnConfiguration {
 
 	public void setStat(String stat) {
 		this.stat = stat;
+	}
+
+	public String getAudit() {
+		return audit;
+	}
+
+	public void setAudit(String audit) {
+		this.audit = audit;
 	}
 
 }

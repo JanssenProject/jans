@@ -54,7 +54,7 @@ public class InumService {
 
     public String generateId(String idType) {
         if (externalIdGenerationService.isEnabled()) {
-            final String generatedId = externalIdGenerationService.executeExternalDefaultGenerateIdMethod("oxauth", idType, "");
+            final String generatedId = externalIdGenerationService.executeExternalDefaultGenerateIdMethod("jans-auth", idType, "");
 
             if (StringHelper.isNotEmpty(generatedId)) {
                 return generatedId;
