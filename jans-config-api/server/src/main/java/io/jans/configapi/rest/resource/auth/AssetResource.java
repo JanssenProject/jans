@@ -71,15 +71,19 @@ public class AssetResource extends ConfigBaseResource {
     AssetService assetService;
 
     @Operation(summary = "Gets all Jans assets.", description = "Gets all Jans assets.", operationId = "get-all-assets", tags = {
-            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+            "Jans Assets" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DocumentPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-all-asset.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS,
+            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAssets(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -101,8 +105,11 @@ public class AssetResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Gets an asset by inum - unique identifier", description = "Gets an asset by inum - unique identifier", operationId = "get-asset-by-inum", tags = {
-            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+            "Jans Assets" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-asset-by-inum.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -110,6 +117,7 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS,
             ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getAssetByInum(
@@ -129,8 +137,11 @@ public class AssetResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Fetch asset by name", description = "Fetch asset by name.", operationId = "get-asset-by-name", tags = {
-            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+            "Jans Assets" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DocumentPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-asset-by-name.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -138,7 +149,8 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS,
+            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.NAME + ApiConstants.NAME_PARAM_PATH)
     public Response getAssetByName(
             @Parameter(description = "Asset Name") @PathParam(ApiConstants.NAME) @NotNull String name)
@@ -163,16 +175,20 @@ public class AssetResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Gets asset services", description = "Gets asset services", operationId = "get-asset-services", tags = {
-            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+            "Jans Assets" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type = "enum")))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, 
+    groupScopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS, ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, 
+    superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.SERVICES)
     public Response getJansServices() {
 
@@ -186,8 +202,11 @@ public class AssetResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Get valid asset types", description = "Get valid asset types", operationId = "get-asset-types", tags = {
-            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+            "Jans Assets" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type = "enum")))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -195,7 +214,8 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS,
+            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.ASSET_TYPE)
     public Response getValidAssetTypes() {
 
@@ -206,8 +226,11 @@ public class AssetResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Get valid asset types", description = "Get valid asset types", operationId = "get-asset-dir-mapping", tags = {
-            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+            "Jans Assets" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AssetDirMapping.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -215,7 +238,8 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS,
+            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.ASSET_DIR_MAPPING)
     public Response getAssetDirMapping() {
 
@@ -226,8 +250,10 @@ public class AssetResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Upload new asset", description = "Upload new asset", operationId = "post-new-asset", tags = {
-            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }))
+            "Jans Assets" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String multipart form.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = AssetForm.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/post-asset.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Newly created Asset", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = Document.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/post-asset.json"))),
@@ -238,7 +264,8 @@ public class AssetResource extends ConfigBaseResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @POST
     @Path(ApiConstants.UPLOAD)
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response uploadAsset(@MultipartForm AssetForm assetForm) throws Exception {
         if (log.isInfoEnabled()) {
             log.info("Create Asset details assetForm:{}", assetForm);
@@ -279,8 +306,10 @@ public class AssetResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Update existing asset", description = "Update existing asset", operationId = "put-asset", tags = {
-            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }))
+            "Jans Assets" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String multipart form.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = AssetForm.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/put-asset.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Modified Asset", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = Document.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/put-asset.json"))),
@@ -291,7 +320,8 @@ public class AssetResource extends ConfigBaseResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @PUT
     @Path(ApiConstants.UPLOAD)
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateAsset(@MultipartForm AssetForm assetForm) throws Exception {
         if (log.isInfoEnabled()) {
             log.info("Update Asset details assetForm:{}", assetForm);
@@ -345,8 +375,10 @@ public class AssetResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Load assets on server for a service", description = "Load assets on server for a service", operationId = "load-service-asset", tags = {
-            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }))
+            "Jans Assets" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String multipart form.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = String.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Asset file loaded", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/load-service-assets.json"))),
@@ -357,7 +389,8 @@ public class AssetResource extends ConfigBaseResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @POST
     @Path(ApiConstants.SERVICE + ApiConstants.SERVICE_NAME_PARAM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response loadServiceAsset(
             @Parameter(description = "Service Name") @PathParam(ApiConstants.SERVICE_NAME) @NotNull String serviceName)
             throws Exception {
@@ -382,8 +415,10 @@ public class AssetResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Delete an asset", description = "Delete an asset", operationId = "delete-asset", tags = {
-            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_ASSET_DELETE_ACCESS }))
+            "Jans Assets" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -391,7 +426,9 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_DELETE_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = {
+                    ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteAsset(
             @Parameter(description = "Asset identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (log.isInfoEnabled()) {

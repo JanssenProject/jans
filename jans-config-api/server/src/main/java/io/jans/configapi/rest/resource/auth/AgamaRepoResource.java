@@ -55,9 +55,11 @@ public class AgamaRepoResource extends ConfigBaseResource {
     AgamaRepoService agamaRepoService;
 
     @Operation(summary = "Gets all agama repositories.", description = "Gets all agama repositories.", operationId = "get-agama-repositories", tags = {
-            "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.AGAMA_REPO_READ_ACCESS, ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+            "Agama" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_REPO_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Agama repositories", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-repo-get.json"))),
             @ApiResponse(responseCode = "204", description = "No Content"),
@@ -66,16 +68,19 @@ public class AgamaRepoResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_REPO_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS,
+            ApiAccessConstants.AGAMA_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllAgamaRepositories() {
         return Response.ok(agamaRepoService.getAllAgamaRepositories()).build();
     }
 
     @Operation(summary = "Download agama project.", description = "Download agama project.", operationId = "get-agama-project", tags = {
-            "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.AGAMA_REPO_READ_ACCESS, ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+            "Agama" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_REPO_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Agama project", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class, format = "binary"))),
             @ApiResponse(responseCode = "204", description = "No Content"),
@@ -84,7 +89,8 @@ public class AgamaRepoResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_REPO_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS,
+            ApiAccessConstants.AGAMA_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/download")
     public Response getAgamaProject(

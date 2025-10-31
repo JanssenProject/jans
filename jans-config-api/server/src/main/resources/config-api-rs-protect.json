@@ -2023,7 +2023,39 @@
       ]
     },
     {
-      "path": "/jans-config-api/api/v1/ads-deployment",
+      "path": "/jans-config-api/api/v1/agama/syntax-check",
+      "conditions": [
+        {
+          "httpMethods": [
+            "POST"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.44",
+              "name": "https://jans.io/oauth/config/agama.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.44",
+              "name": "https://jans.io/oauth/config/agama.write"
+            },
+            {
+              "inum": "1800.04.19",
+              "name": "https://jans.io/oauth/config/agama.admin"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/agama-deployment",
       "conditions": [
         {
           "httpMethods": [
@@ -2095,6 +2127,61 @@
             {
               "inum": "1800.03.3",
               "name": "https://jans.io/oauth/config/delete-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/agama-deployment/configs",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.43",
+              "name": "https://jans.io/oauth/config/agama.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.44",
+              "name": "https://jans.io/oauth/config/agama.write"
+            },
+            {
+              "inum": "1800.04.19",
+              "name": "https://jans.io/oauth/config/agama.admin"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "PUT"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.44",
+              "name": "https://jans.io/oauth/config/agama.write"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.04.19",
+              "name": "https://jans.io/oauth/config/agama.admin"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
             }
           ]
         }
@@ -3574,6 +3661,7 @@
         },
         {
           "httpMethods": [
+            "POST",
             "PUT"
           ],
           "scopes": [
@@ -3613,8 +3701,136 @@
           ],
           "superScopes": [
             {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
+              "inum": "1800.03.3",
+              "name": "https://jans.io/oauth/config/delete-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/jans-assets/name",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.75",
+              "name": "https://jans.io/oauth/config/jans_asset-read"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.76",
+              "name": "https://jans.io/oauth/config/jans_asset-write"
+            },
+            {
+              "inum": "1800.04.33",
+              "name": "https://jans.io/oauth/config/asset.admin"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/jans-assets/services",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.75",
+              "name": "https://jans.io/oauth/config/jans_asset-read"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.76",
+              "name": "https://jans.io/oauth/config/jans_asset-write"
+            },
+            {
+              "inum": "1800.04.33",
+              "name": "https://jans.io/oauth/config/asset.admin"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/jans-assets/asset-type",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.75",
+              "name": "https://jans.io/oauth/config/jans_asset-read"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.76",
+              "name": "https://jans.io/oauth/config/jans_asset-write"
+            },
+            {
+              "inum": "1800.04.33",
+              "name": "https://jans.io/oauth/config/asset.admin"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/jans-assets/asset-dir-mapping",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.75",
+              "name": "https://jans.io/oauth/config/jans_asset-read"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.76",
+              "name": "https://jans.io/oauth/config/jans_asset-write"
+            },
+            {
+              "inum": "1800.04.33",
+              "name": "https://jans.io/oauth/config/asset.admin"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
             }
           ]
         }
@@ -3930,6 +4146,38 @@
     },
     {
       "path": "/jans-config-api/api/v1/agama-repo",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.91",
+              "name": "https://jans.io/oauth/config/agama-repo.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.92",
+              "name": "https://jans.io/oauth/config/agama-repo.write"
+            },
+            {
+              "inum": "1800.04.19",
+              "name": "https://jans.io/oauth/config/agama.admin"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/agama-repo/download",
       "conditions": [
         {
           "httpMethods": [

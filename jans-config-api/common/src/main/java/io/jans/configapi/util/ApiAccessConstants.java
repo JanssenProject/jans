@@ -2,6 +2,7 @@ package io.jans.configapi.util;
 
 public class ApiAccessConstants {
 
+    
     private ApiAccessConstants() {
     }
 
@@ -14,6 +15,7 @@ public class ApiAccessConstants {
 
     public static final String ACRS_READ_ACCESS = "https://jans.io/oauth/config/acrs.readonly";
     public static final String ACRS_WRITE_ACCESS = "https://jans.io/oauth/config/acrs.write";
+    public static final String ACRS_ADMIN_ACCESS = "https://jans.io/oauth/config/acrs.admin";
 
     public static final String DATABASE_READ_ACCESS = "https://jans.io/oauth/config/database.readonly";
     public static final String DATABASE_WRITE_ACCESS = "https://jans.io/oauth/config/database.write";
@@ -73,6 +75,7 @@ public class ApiAccessConstants {
     public static final String AGAMA_READ_ACCESS = "https://jans.io/oauth/config/agama.readonly";
     public static final String AGAMA_WRITE_ACCESS = "https://jans.io/oauth/config/agama.write";
     public static final String AGAMA_DELETE_ACCESS = "https://jans.io/oauth/config/agama.delete";
+    public static final String AGAMA_ADMIN_ACCESS = "https://jans.io/oauth/config/agama.admin";
     
     public static final String AGAMA_REPO_READ_ACCESS = "https://jans.io/oauth/config/agama-repo.readonly";
     public static final String AGAMA_REPO_WRITE_ACCESS = "https://jans.io/oauth/config/agama-repo.write";
@@ -110,6 +113,7 @@ public class ApiAccessConstants {
     public static final String JANS_ASSET_READ_ACCESS  = "https://jans.io/oauth/config/jans_asset-read";
     public static final String JANS_ASSET_WRITE_ACCESS = "https://jans.io/oauth/config/jans_asset-write";
     public static final String JANS_ASSET_DELETE_ACCESS = "https://jans.io/oauth/config/jans_asset-delete";
+    public static final String JANS_ASSET_ADMIN_ACCESS = "https://jans.io/oauth/config/asset.admin";
     
     public static final String JANS_AUDIT_READ_ACCESS  = "https://jans.io/oauth/config/audit-read";
     
@@ -118,5 +122,5 @@ public class ApiAccessConstants {
     public static final String SSA_DELETE_ACCESS = "https://jans.io/oauth/config/ssa.delete";
 
 	public static final String AUTH_SSA_ADMIN = "https://jans.io/auth/ssa.admin";
-
+    public static final String HEALTH_ADMIN = "https://jans.io/oauth/config/health.admin";
 }
