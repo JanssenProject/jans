@@ -29,7 +29,7 @@
 		<jans-notify.version>${project.version}</jans-notify.version>
 		<jans-fido2.version>${project.version}</jans-fido2.version>
 
-		<jakarta.jms.api.version>2.0.3</jakarta.jms.api.version>
+		<jakarta.jms.api.version>3.1.0</jakarta.jms.api.version>
 		<activemq.version>5.16.8</activemq.version>
 
 		<jettison.version>1.5.4</jettison.version>
