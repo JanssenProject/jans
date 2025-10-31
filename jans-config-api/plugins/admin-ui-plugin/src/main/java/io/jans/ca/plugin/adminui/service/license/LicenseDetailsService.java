@@ -51,9 +51,6 @@ public class LicenseDetailsService extends BaseService {
     private PersistenceEntryManager entryManager;
 
     //constants
-    public static final String AUTHORIZATION = "Authorization";
-    public static final String CONTENT_TYPE = "Content-Type";
-    public static final String APPLICATION_JSON = "application/json";
     public static final String LICENSE_KEY = "licenseKey";
     public static final String HARDWARE_ID = "hardwareId";
     public static final String BEARER = "Bearer ";
@@ -316,8 +313,8 @@ public class LicenseDetailsService extends BaseService {
             body.put(HARDWARE_ID, licenseConfiguration.getHardwareId());
 
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(checkLicenseUrl);
-            request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
-            request.header(CONTENT_TYPE, APPLICATION_JSON);
+            request.header(AppConstants.AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
+            request.header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
             response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("license request status code: {}", response.getStatus());
@@ -417,7 +414,7 @@ public class LicenseDetailsService extends BaseService {
 
 
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(retriveLicenseUrl);
-            request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
+            request.header(AppConstants.AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
             response = request.get();
 
             log.info("license request status code: {}", response.getStatus());
@@ -495,8 +492,8 @@ public class LicenseDetailsService extends BaseService {
             body.put(HARDWARE_ID, licenseConfiguration.getHardwareId());
 
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(activateLicenseUrl);
-            request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
-            request.header(CONTENT_TYPE, APPLICATION_JSON);
+            request.header(AppConstants.AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
+            request.header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
             response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("license Activation request status code: {}", response.getStatus());
@@ -641,8 +638,8 @@ public class LicenseDetailsService extends BaseService {
             body.put(HARDWARE_ID, licenseConfiguration.getHardwareId());
 
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(trialLicenseUrl);
-            request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
-            request.header(CONTENT_TYPE, APPLICATION_JSON);
+            request.header(AppConstants.AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
+            request.header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
             response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("Generate trial license request status code: {}", response.getStatus());

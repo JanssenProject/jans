@@ -43,6 +43,9 @@ public class AUIConfiguration {
     private Boolean allowSmtpKeystoreEdit;
     private List<KeyValuePair> additionalParameters;
     private CedarlingLogType cedarlingLogType;
+    private String auiPolicyStoreUrl;
+    private String auiDefaultPolicyStorePath;
+    private Boolean useRemotePolicyStore = Boolean.FALSE;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -290,5 +293,68 @@ public class AUIConfiguration {
 
     public void setCedarlingLogType(CedarlingLogType cedarlingLogType) {
         this.cedarlingLogType = cedarlingLogType;
+    }
+
+    public String getAuiPolicyStoreUrl() {
+        return auiPolicyStoreUrl;
+    }
+
+    public void setAuiPolicyStoreUrl(String auiPolicyStoreUrl) {
+        this.auiPolicyStoreUrl = auiPolicyStoreUrl;
+    }
+
+    public Boolean getUseRemotePolicyStore() {
+        return useRemotePolicyStore;
+    }
+
+    public void setUseRemotePolicyStore(Boolean useRemotePolicyStore) {
+        this.useRemotePolicyStore = useRemotePolicyStore;
+    }
+
+    public String getAuiDefaultPolicyStorePath() {
+        return auiDefaultPolicyStorePath;
+    }
+
+    public void setAuiDefaultPolicyStorePath(String auiDefaultPolicyStorePath) {
+        this.auiDefaultPolicyStorePath = auiDefaultPolicyStorePath;
+    }
+
+    @Override
+    public String toString() {
+        return "AUIConfiguration{" +
+                "appType='" + appType + '\'' +
+                ", auiWebServerHost='" + auiWebServerHost + '\'' +
+                ", auiWebServerClientId='" + auiWebServerClientId + '\'' +
+                ", auiWebServerClientSecret='" + auiWebServerClientSecret + '\'' +
+                ", auiWebServerScope='" + auiWebServerScope + '\'' +
+                ", auiWebServerAcrValues='" + auiWebServerAcrValues + '\'' +
+                ", auiWebServerRedirectUrl='" + auiWebServerRedirectUrl + '\'' +
+                ", auiWebServerFrontChannelLogoutUrl='" + auiWebServerFrontChannelLogoutUrl + '\'' +
+                ", auiWebServerPostLogoutRedirectUri='" + auiWebServerPostLogoutRedirectUri + '\'' +
+                ", auiWebServerAuthzBaseUrl='" + auiWebServerAuthzBaseUrl + '\'' +
+                ", auiWebServerTokenEndpoint='" + auiWebServerTokenEndpoint + '\'' +
+                ", auiWebServerIntrospectionEndpoint='" + auiWebServerIntrospectionEndpoint + '\'' +
+                ", auiWebServerUserInfoEndpoint='" + auiWebServerUserInfoEndpoint + '\'' +
+                ", auiWebServerEndSessionEndpoint='" + auiWebServerEndSessionEndpoint + '\'' +
+                ", auiBackendApiServerClientId='" + auiBackendApiServerClientId + '\'' +
+                ", auiBackendApiServerClientSecret='" + auiBackendApiServerClientSecret + '\'' +
+                ", auiBackendApiServerScope='" + auiBackendApiServerScope + '\'' +
+                ", auiBackendApiServerAcrValues='" + auiBackendApiServerAcrValues + '\'' +
+                ", auiBackendApiServerRedirectUrl='" + auiBackendApiServerRedirectUrl + '\'' +
+                ", auiBackendApiServerFrontChannelLogoutUrl='" + auiBackendApiServerFrontChannelLogoutUrl + '\'' +
+                ", auiBackendApiServerPostLogoutRedirectUri='" + auiBackendApiServerPostLogoutRedirectUri + '\'' +
+                ", auiBackendApiServerAuthzBaseUrl='" + auiBackendApiServerAuthzBaseUrl + '\'' +
+                ", auiBackendApiServerTokenEndpoint='" + auiBackendApiServerTokenEndpoint + '\'' +
+                ", auiBackendApiServerIntrospectionEndpoint='" + auiBackendApiServerIntrospectionEndpoint + '\'' +
+                ", auiBackendApiServerUserInfoEndpoint='" + auiBackendApiServerUserInfoEndpoint + '\'' +
+                ", auiBackendApiServerEndSessionEndpoint='" + auiBackendApiServerEndSessionEndpoint + '\'' +
+                ", licenseConfiguration=" + licenseConfiguration +
+                ", sessionTimeoutInMins=" + sessionTimeoutInMins +
+                ", allowSmtpKeystoreEdit=" + allowSmtpKeystoreEdit +
+                ", additionalParameters=" + additionalParameters +
+                ", cedarlingLogType=" + cedarlingLogType +
+                ", auiPolicyStoreUrl='" + auiPolicyStoreUrl + '\'' +
+                ", useRemotePolicyStore=" + useRemotePolicyStore +
+                '}';
     }
 }
