@@ -150,18 +150,38 @@ public class AppConfiguration implements Configuration {
 		return protectionMode;
 	}
 
+	/**
+	 * Set the lock protection mode.
+	 *
+	 * @param protectionMode the lock protection mode to use
+	 */
 	public void setProtectionMode(LockProtectionMode protectionMode) {
 		this.protectionMode = protectionMode;
 	}
 
+	/**
+	 * Retrieves the configured audit persistence mode used for storing audit events.
+	 *
+	 * @return the configured AuditPersistenceMode; defaults to {@link AuditPersistenceMode#INTERNAL} when not explicitly set.
+	 */
 	public AuditPersistenceMode getAuditPersistenceMode() {
 		return auditPersistenceMode;
 	}
 
+	/**
+	 * Sets the audit persistence mode for the application configuration.
+	 *
+	 * @param auditPersistenceMode the audit persistence mode to apply
+	 */
 	public void setAuditPersistenceMode(AuditPersistenceMode auditPersistenceMode) {
 		this.auditPersistenceMode = auditPersistenceMode;
 	}
 
+	/**
+	 * Accesses the Cedarling configuration for the application.
+	 *
+	 * @return the CedarlingConfiguration instance for this application, or null if not configured
+	 */
 	public CedarlingConfiguration getCedarlingConfiguration() {
 		return cedarlingConfiguration;
 	}
@@ -206,10 +226,20 @@ public class AppConfiguration implements Configuration {
         return clientPassword;
     }
 
+    /**
+     * Sets the Lock client password.
+     *
+     * @param clientPassword the client password to use for Lock authentication, or {@code null} to unset it
+     */
     public void setClientPassword(String clientPassword) {
         this.clientPassword = clientPassword;
     }
 
+    /**
+     * Indicates whether JDK loggers are disabled.
+     *
+     * @return `true` if JDK loggers are disabled, `false` otherwise.
+     */
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
     }
@@ -298,11 +328,21 @@ public class AppConfiguration implements Configuration {
         return cleanServiceBatchChunkSize;
     }
 
+    /**
+     * Sets the number of items processed per base DN in each clean-up iteration.
+     *
+     * @param cleanServiceBatchChunkSize the chunk size (number of entries) to process per base DN
+     */
     public void setCleanServiceBatchChunkSize(int cleanServiceBatchChunkSize) {
         this.cleanServiceBatchChunkSize = cleanServiceBatchChunkSize;
     }
 
-    @Override
+    /**
+	 * Provide a human-readable representation of this AppConfiguration and its current properties.
+	 *
+	 * @return a string listing the primary configuration property names and their current values
+	 */
+	@Override
 	public String toString() {
 		return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
 				+ openIdIssuer + ", protectionMode=" + protectionMode + ", cedarlingConfiguration="
