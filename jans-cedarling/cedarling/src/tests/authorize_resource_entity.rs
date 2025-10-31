@@ -11,6 +11,7 @@
 
 use std::sync::LazyLock;
 
+use cedar_policy::EntityUid;
 use test_utils::{SortedJson, assert_eq};
 use tokio::test;
 
@@ -89,22 +90,63 @@ async fn check_default_authorize_resource_entity() {
         .await
         .expect("entities should be build without errors");
 
-    let default_resource_entity_value = json!({
-        "uid": {
-            "type": "Jans::Issue",
-            "id": "SomeNotRandomID1234"
-        },
-        "attrs": {
-            "org_id": "some_long_id",
-            "country": "US"
-        },
-        "parents": []
+    let default_resource_entity_value1 = json!({
+      "uid": {
+        "type": "Jans::Issue",
+        "id": "SomeNotRandomID1234"
+      },
+      "attrs": {
+        "org_id": "some_long_id",
+        "country": "US"
+      },
+      "parents": [
+        {
+          "type": "Jans::Issue",
+          "id": "SomeNotRandomID12345"
+        }
+      ]
     });
 
     // check if resource same as in default entities
     assert_eq!(
         auth_entities.resource.to_json_value().unwrap().sorted(),
-        default_resource_entity_value.sorted(),
+        default_resource_entity_value1.clone().sorted(),
         "result resource entity should be the same as in default entities"
+    );
+
+    let euid1 = EntityUid::from_json(
+        serde_json::json!({ "__entity": { "type": "Jans::Issue", "id": "SomeNotRandomID1234" } }),
+    )
+    .unwrap();
+
+    let entity1 = auth_entities.default_entities.get(&euid1).unwrap();
+    assert_eq!(
+        entity1.to_json_value().unwrap().sorted(),
+        default_resource_entity_value1.sorted(),
+        "default entity should be the same as resource"
+    );
+
+    let default_resource_entity_value2 = json!({
+      "uid": {
+        "type": "Jans::Issue",
+        "id": "SomeNotRandomID12345"
+      },
+      "attrs": {
+        "org_id": "some_long_id",
+        "country": "US"
+      },
+      "parents": []
+    });
+
+    let euid2 = EntityUid::from_json(
+        serde_json::json!({ "__entity": { "type": "Jans::Issue", "id": "SomeNotRandomID12345" } }),
+    )
+    .unwrap();
+
+    let entity2 = auth_entities.default_entities.get(&euid2).unwrap();
+    assert_eq!(
+        entity2.to_json_value().unwrap().sorted(),
+        default_resource_entity_value2.sorted(),
+        "default entity should be the same as resource"
     );
 }
