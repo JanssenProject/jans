@@ -226,6 +226,6 @@ Defined APIs are listed [here](https://janssenproject.github.io/developer-docs/j
 
 ## See Also
 
-- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-tbac-using-cedarling)
+- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
 
