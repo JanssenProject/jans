@@ -50,7 +50,7 @@
 		<jackson.databind.version>2.13.4.2</jackson.databind.version>
 		<json.version>20231013</json.version>
 
-		<log4j.version>2.23.1</log4j.version>
+		<log4j.version>2.25.2</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
 
 		<guava.version>32.1.1-jre</guava.version>
