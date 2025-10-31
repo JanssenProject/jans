@@ -75,6 +75,7 @@ public final class Fido2MetricsConstants {
     
     // Service Names
     public static final String METRICS_SERVICE = "metricsService";
+    public static final String SCHEDULER = "scheduler";
     
     // Benchmark Names
     public static final String REGISTRATION_BENCHMARK = "registrationBenchmark";
@@ -100,4 +101,10 @@ public final class Fido2MetricsConstants {
     public static final String DEVICE_TYPES = "deviceTypes";
     public static final String ERROR_COUNTS = "errorCounts";
     public static final String PERFORMANCE_METRICS = "performanceMetrics";
+    public static final String TOTAL_OPERATIONS = "totalOperations";
+    
+    // Period/Time related
+    public static final String CURRENT_PERIOD = "currentPeriod";
+    public static final String PREVIOUS_PERIOD = "previousPeriod";
+    public static final String COMPARISON = "comparison";
 }

@@ -91,6 +91,17 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
         this.aggregationType = aggregationType;
     }
 
+    /**
+     * Get period identifier (derived from ID)
+     * For example: "DAILY_2024-01-15" returns "2024-01-15"
+     */
+    public String getPeriod() {
+        if (id != null && id.contains("_")) {
+            return id.substring(id.indexOf("_") + 1);
+        }
+        return id;
+    }
+
     public LocalDateTime getStartTime() {
         return startTime;
     }
@@ -237,7 +248,8 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
     }
 
     // Generic helper methods for metrics access
-    private Long getLongMetric(String key) {
+    // Made public to support trend analysis and external metric calculations
+    public Long getLongMetric(String key) {
         if (metricsData == null) {
             return null;
         }
@@ -248,7 +260,7 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
         return null;
     }
 
-    private Double getDoubleMetric(String key) {
+    public Double getDoubleMetric(String key) {
         if (metricsData == null) {
             return null;
         }
