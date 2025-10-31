@@ -193,7 +193,7 @@ jobs:
 
     - name: Upload binaries to release
       id: upload_binaries
-      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
+      uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
@@ -202,7 +202,7 @@ jobs:
         overwrite: true
     - name: Upload sig to release
       id: upload_sigs
-      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
+      uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.asc
@@ -316,7 +316,7 @@ jobs:
 
     - name: Upload setup binaries to release
       continue-on-error: true
-      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
+      uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
@@ -326,7 +326,7 @@ jobs:
 
     - name: Upload CLI binaries to release
       continue-on-error: true
-      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
+      uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz
