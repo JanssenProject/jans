@@ -20,6 +20,12 @@ public abstract class OrganizationService implements Serializable {
 
     public static final int ONE_MINUTE_IN_SECONDS = 60;
 
+    /**
+     * Return the provided organization DN or default to "o=jans" when the input is null.
+     *
+     * @param baseDn the organization distinguished name (DN), or null to use the default
+     * @return the organization DN to use; "o=jans" if {@code baseDn} is null
+     */
     public String getDnForOrganization(String baseDn) {
         if (baseDn == null) {
             baseDn = "o=jans";
@@ -27,10 +33,20 @@ public abstract class OrganizationService implements Serializable {
         return baseDn;
     }
 
+    /**
+     * Return the default base distinguished name used for the organization.
+     *
+     * @return the base DN "o=jans"
+     */
     public String getBaseDn() {
         return "o=jans";
     }
 
-    public abstract ApplicationType getApplicationType();
+    /**
+ * Retrieve the application type associated with this service.
+ *
+ * @return the {@link ApplicationType} indicating the type of application for this implementation
+ */
+public abstract ApplicationType getApplicationType();
 
 }

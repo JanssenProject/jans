@@ -11,10 +11,20 @@ public enum AuditPersistenceMode {
 
 	private final String mode;
 
-	private AuditPersistenceMode(String mode) {
+	/**
+     * Create an enum constant with the specified string representation used for JSON serialization.
+     *
+     * @param mode the string value to use as this enum constant's JSON representation
+     */
+    private AuditPersistenceMode(String mode) {
         this.mode = mode;
     }
 
+	/**
+	 * Mode string used for JSON serialization of the enum constant.
+	 *
+	 * @return the enum's mode string ("internal" or "config-api")
+	 */
 	@JsonValue
 	public String getmode() {
 		return mode;
