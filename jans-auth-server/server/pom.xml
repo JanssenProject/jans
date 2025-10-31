@@ -1047,7 +1047,7 @@
 				<dependency>
 					<groupId>org.jboss.resteasy</groupId>
 					<artifactId>resteasy-servlet-initializer</artifactId>
-					<version>3.0.21.Final</version>
+					<version>7.0.0.Final</version>
 					<scope>test</scope>
 				</dependency>
 			</dependencies>
