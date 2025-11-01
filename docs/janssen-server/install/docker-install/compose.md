@@ -111,10 +111,6 @@ persistence.
 > - If you want to run PostgreSQL in Docker, ensure that your docker-compose.yml defines a pgsql service (for example, using the postgres image).  
 > - If you plan to use an external PostgreSQL database instead, set CN_INSTALL_PGSQL=false and provide connection details (RDBMS_HOST, RDBMS_USER, RDBMS_PASSWORD, RDBMS_DATABASE) in your .env file.
 
-🤖 Prompt for AI Agents
-
-Requested changes must be addressed to merge this pull request.
-Still in progress?
   
 >
 > Running ./up.sh pgsql without an available PostgreSQL service or initialization files will result in a “file not found” error during setup.
