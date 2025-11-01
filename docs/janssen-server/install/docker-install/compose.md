@@ -105,6 +105,13 @@ persistence.
 
     ```bash
     ./up.sh pgsql
+   > Note: When using the PostgreSQL option (./up.sh pgsql), make sure that the PostgreSQL service or initialization files are available.  
+> The setup script looks for the pgsql directory or Docker service when CN_INSTALL_PGSQL=true is set in your environment.  
+>
+> - If you want to run PostgreSQL in Docker, ensure that your docker-compose.yml defines a pgsql service (for example, using the postgres image).  
+> - If you plan to use an external PostgreSQL database instead, set CN_INSTALL_PGSQL=false and provide connection details (CN_DB_HOST, CN_DB_USER, CN_DB_PASSWORD, CN_DB_NAME) in your .env file.  
+>
+> Running ./up.sh pgsql without an available PostgreSQL service or initialization files will result in a “file not found” error during setup.
     ```
 
 
