@@ -29,9 +29,6 @@ public class AuditService {
 	private StaticConfiguration staticConfiguration;
 
 	@Inject
-	private OrganizationService organizationService;
-
-	@Inject
 	private PersistenceEntryManager persistenceEntryManager;
 
 	/**
@@ -131,7 +128,7 @@ public class AuditService {
 	 * @return the generated inum; if uniqueness could not be guaranteed within the retry limit, the last generated candidate
 	 */
 	public String generateInumForEntry(String dnFormat, Class classObj) {
-		String baseDn = organizationService.getBaseDn();
+		String baseDn = staticConfiguration.getBaseDn().getAudit();
 		String newInum = null;
 		String newDn = null;
 

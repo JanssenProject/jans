@@ -171,12 +171,12 @@ public class JsonServiceTest {
     }
 
     @Test
-    public void testObjectToPerttyJson_shouldProducePrettyPrint() throws IOException {
+    public void testobjectToPrettyJson_shouldProducePrettyPrint() throws IOException {
         TestPojo pojo = new TestPojo();
         pojo.setName("John");
         pojo.setAge(30);
         
-        String prettyJson = jsonService.objectToPerttyJson(pojo);
+        String prettyJson = jsonService.objectToPrettyJson(pojo);
         
         assertNotNull(prettyJson);
         assertTrue(prettyJson.contains("\n"));
@@ -185,7 +185,7 @@ public class JsonServiceTest {
     }
 
     @Test
-    public void testObjectToPerttyJson_withNestedObject_shouldFormatNicely() throws IOException {
+    public void testobjectToPrettyJson_withNestedObject_shouldFormatNicely() throws IOException {
         NestedTestPojo pojo = new NestedTestPojo();
         pojo.setName("Parent");
         TestPojo child = new TestPojo();
@@ -193,7 +193,7 @@ public class JsonServiceTest {
         child.setAge(5);
         pojo.setChild(child);
         
-        String prettyJson = jsonService.objectToPerttyJson(pojo);
+        String prettyJson = jsonService.objectToPrettyJson(pojo);
         
         assertNotNull(prettyJson);
         assertTrue(prettyJson.contains("\n"));

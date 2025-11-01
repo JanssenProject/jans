@@ -8,10 +8,10 @@ This directory contains comprehensive unit tests for the Lock Server service lay
 
 - **AuditServiceTest** - Tests for audit entry persistence (log, telemetry, health)
 - **TokenEndpointServiceTest** - Tests for OAuth token management and encryption
-- **AuditEndpointTypeTest** - Tests for audit endpoint type enumeration
 
 ### Model Tests
 
+- **AuditEndpointTypeTest** - Tests for audit endpoint type enumeration
 - **AppConfigurationTest** - Tests for application configuration (protection mode, audit persistence mode)
 - **LockProtectionModeTest** - Tests for lock protection mode enum (OAuth, Cedarling)
 - **AuditPersistenceModeTest** - Tests for audit persistence mode enum (Internal, Config-API)

@@ -85,7 +85,7 @@ public class AuditForwarderService {
                 return null;
             }
 
-            log.debug("Get access token for requestType: {}, accessToken: {}", requestType, token.getAccessToken());
+            log.debug("Obtained access token for requestType: {}", requestType);
             issuedTokens.put(requestType, token, ExpirationPolicy.CREATED, token.getExpiresIn(), TimeUnit.SECONDS);
         }
 
