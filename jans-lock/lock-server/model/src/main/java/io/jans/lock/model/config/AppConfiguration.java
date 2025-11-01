@@ -337,24 +337,19 @@ public class AppConfiguration implements Configuration {
         this.cleanServiceBatchChunkSize = cleanServiceBatchChunkSize;
     }
 
-    /**
-	 * Provide a human-readable representation of this AppConfiguration and its current properties.
-	 *
-	 * @return a string listing the primary configuration property names and their current values
-	 */
-	@Override
+    @Override
 	public String toString() {
 		return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
-				+ openIdIssuer + ", protectionMode=" + protectionMode + ", cedarlingConfiguration="
-				+ cedarlingConfiguration + ", statEnabled=" + statEnabled + ", statTimerIntervalInSeconds="
-				+ statTimerIntervalInSeconds + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId
-				+ ", clientPassword=" + clientPassword + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel="
-				+ loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
-				+ externalLoggerConfiguration + ", metricReporterInterval=" + metricReporterInterval
-				+ ", metricReporterKeepDataDays=" + metricReporterKeepDataDays + ", metricReporterEnabled="
-				+ metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval + ", messageConsumerType="
-				+ messageConsumerType + ", errorReasonEnabled=" + errorReasonEnabled + ", cleanServiceBatchChunkSize="
-				+ cleanServiceBatchChunkSize + "]";
+				+ openIdIssuer + ", protectionMode=" + protectionMode + ", auditPersistenceMode=" + auditPersistenceMode
+				+ ", cedarlingConfiguration=" + cedarlingConfiguration + ", statEnabled=" + statEnabled
+				+ ", statTimerIntervalInSeconds=" + statTimerIntervalInSeconds + ", tokenChannels=" + tokenChannels
+				+ ", clientId=" + clientId + ", clientPassword=" + clientPassword + ", disableJdkLogger="
+				+ disableJdkLogger + ", loggingLevel=" + loggingLevel + ", loggingLayout=" + loggingLayout
+				+ ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", metricReporterInterval="
+				+ metricReporterInterval + ", metricReporterKeepDataDays=" + metricReporterKeepDataDays
+				+ ", metricReporterEnabled=" + metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval
+				+ ", messageConsumerType=" + messageConsumerType + ", errorReasonEnabled=" + errorReasonEnabled
+				+ ", cleanServiceBatchChunkSize=" + cleanServiceBatchChunkSize + "]";
 	}
 
 }

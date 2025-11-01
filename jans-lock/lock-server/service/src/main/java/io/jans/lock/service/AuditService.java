@@ -7,7 +7,6 @@ import io.jans.lock.model.audit.LogEntry;
 import io.jans.lock.model.audit.TelemetryEntry;
 import io.jans.lock.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.service.OrganizationService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 

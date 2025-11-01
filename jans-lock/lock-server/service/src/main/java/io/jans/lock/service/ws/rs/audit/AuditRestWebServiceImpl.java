@@ -16,6 +16,7 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.http.entity.ContentType;
@@ -325,13 +326,17 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 					}
 					break;
 			}
-		} catch (Exception ex) {
+		} catch (IOException ex) {
 			builder.status(Status.BAD_REQUEST);
-			log.error("Failed to parse data", ex);
-			
-			return "Failed to parse data";
-		}
+			log.warn("Failed to parse data", ex);
 
+			return "Failed to parse data";
+		} catch (Exception ex) {
+			builder.status(Status.INTERNAL_SERVER_ERROR);
+			log.error("Failed to persist audit data", ex);
+
+			return "Failed to persist data";
+		}
 		return "";
 	}
 
