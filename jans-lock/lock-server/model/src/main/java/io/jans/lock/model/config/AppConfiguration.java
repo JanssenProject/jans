@@ -46,8 +46,8 @@ public class AppConfiguration implements Configuration {
     @Schema(description = "OpenID issuer URL")
     private String openIdIssuer;
 
-    @DocProperty(description = "Lock protection type")
-    @Schema(description = "Lock protection type")
+    @DocProperty(description = "Protection mode for the Lock server (OAuth or Cedarling)")
+    @Schema(description = "Protection mode for the Lock server (OAuth or Cedarling)")
     private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
 
     @DocProperty(description = "Audit persistence mode")
