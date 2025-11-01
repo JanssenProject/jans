@@ -710,5 +710,11 @@
     "pgsql": {
       "type": "TEXT"
     }
+  },
+  "jansAccessType": {
+    "mysql": {
+      "size": 20,
+      "type": "VARCHAR"
+    }
   }
 }
