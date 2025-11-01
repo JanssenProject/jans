@@ -114,19 +114,19 @@ public class AuditForwarderService {
      * If the downstream request fails or the response is invalid, the method sets the provided ResponseBuilder's status to 400 (BAD_REQUEST) and returns `null`.
      *
      * @param responseBuilder a JAX-RS Response builder whose status may be updated on error
-     * @param requestTypet the audit endpoint type whose configured path determines the target URL
+     * @param requestType the audit endpoint type whose configured path determines the target URL
      * @param postData the payload to post to the endpoint
      * @param contentType the content type of the payload; if null, defaults to application/json
      * @param token the authorization token to include in the request's Authorization header (may be null or blank)
      * @return the response body returned by the endpoint as a string if the request succeeds, `null` otherwise
      */
-    public String post(Response.ResponseBuilder responseBuilder, AuditEndpointType requestTypet, String postData, ContentType contentType, String token) {
-        log.debug("postData - requestTypet: {}, postData: {}", requestTypet, postData);
+    public String post(Response.ResponseBuilder responseBuilder, AuditEndpointType requestType, String postData, ContentType contentType, String token) {
+        log.debug("postData - requestType: {}, postData: {}", requestType, postData);
 
-        String endpointUrl = getEndpointUrl(requestTypet);
+        String endpointUrl = getEndpointUrl(requestType);
 
-        log.debug("Posting data for - requestTypet: {}, endpointPath: {},this.getEndpointUrl(endpointPath): {}", requestTypet,
-        		requestTypet.getPath(), endpointUrl);
+        log.debug("Posting data for - requestType: {}, endpointPath: {},this.getEndpointUrl(endpointPath): {}", requestType,
+        		requestType.getPath(), endpointUrl);
 
         return postData(responseBuilder, endpointUrl, null, token, null, contentType, postData);
     }
@@ -204,16 +204,16 @@ public class AuditForwarderService {
     /**
      * Builds the full endpoint URL for the given audit endpoint type.
      *
-     * @param requestTypet the audit endpoint type whose configured path will be appended to the OpenID issuer
+     * @param requestType the audit endpoint type whose configured path will be appended to the OpenID issuer
      * @return the full endpoint URL composed of the configured OpenID issuer and the endpoint's config path
      */
-    private String getEndpointUrl(AuditEndpointType requestTypet) {
+    private String getEndpointUrl(AuditEndpointType requestType) {
         StringBuilder sb = new StringBuilder();
         sb.append(appConfiguration.getOpenIdIssuer());
         sb.append("/");
-        sb.append(requestTypet.getConfigPath());
+        sb.append(requestType.getConfigPath());
 
-        log.debug("Endpoint: {} configApi endpoint: {}", requestTypet, sb);
+        log.debug("Endpoint: {} configApi endpoint: {}", requestType, sb);
 
         return sb.toString();
     }
