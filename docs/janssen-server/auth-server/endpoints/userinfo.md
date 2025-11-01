@@ -95,7 +95,7 @@ When using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui
 
 ### Interception Scripts
 
-Response from userinfo can be further customized using [dynamic scope](../../developer/scripts/dynamic-scope.md) interception script.
+Response from userinfo can be further customized using [dynamic scope](../../../script-catalog/dynamic_scope/dynamic-scope.md) interception script.
 
 Administrator can attach a dynamic scope script to a dynamic scope using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md). 
 Navigate to `Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`->`Dynamic Scope Script`
