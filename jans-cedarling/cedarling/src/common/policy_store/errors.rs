@@ -71,6 +71,50 @@ pub enum CedarEntityErrorType {
     EntityStoreCreation(String),
 }
 
+/// Trusted issuer-specific errors.
+#[derive(Debug, thiserror::Error)]
+#[allow(dead_code)]
+pub enum TrustedIssuerErrorType {
+    /// Trusted issuer file is not a JSON object
+    #[error("Trusted issuer file must be a JSON object")]
+    NotAnObject,
+
+    /// Issuer configuration is not an object
+    #[error("Issuer '{issuer_id}' must be a JSON object")]
+    IssuerNotAnObject { issuer_id: String },
+
+    /// Missing required field in issuer configuration
+    #[error("Issuer '{issuer_id}': missing required field '{field}'")]
+    MissingRequiredField { issuer_id: String, field: String },
+
+    /// Invalid OIDC endpoint URL
+    #[error("Issuer '{issuer_id}': invalid OIDC endpoint URL '{url}': {reason}")]
+    InvalidOidcEndpoint {
+        issuer_id: String,
+        url: String,
+        reason: String,
+    },
+
+    /// Token metadata is not an object
+    #[error("Issuer '{issuer_id}': token_metadata must be a JSON object")]
+    TokenMetadataNotAnObject { issuer_id: String },
+
+    /// Token metadata entry is not an object
+    #[error("Issuer '{issuer_id}': token_metadata.{token_type} must be a JSON object")]
+    TokenMetadataEntryNotAnObject {
+        issuer_id: String,
+        token_type: String,
+    },
+
+    /// Duplicate issuer ID detected
+    #[error("Duplicate issuer ID '{issuer_id}' found in files '{file1}' and '{file2}'")]
+    DuplicateIssuerId {
+        issuer_id: String,
+        file1: String,
+        file2: String,
+    },
+}
+
 /// Errors that can occur during policy store operations.
 #[derive(Debug, thiserror::Error)]
 #[allow(dead_code)]
@@ -122,6 +166,13 @@ pub enum PolicyStoreError {
     CedarEntityError {
         file: String,
         err: CedarEntityErrorType,
+    },
+
+    /// Trusted issuer error
+    #[error("Trusted issuer error in '{file}': {err}")]
+    TrustedIssuerError {
+        file: String,
+        err: TrustedIssuerErrorType,
     },
 
     /// Path not found

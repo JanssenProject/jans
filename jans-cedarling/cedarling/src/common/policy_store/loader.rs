@@ -1337,4 +1337,448 @@ permit(
         assert!(attrs.get("metadata").is_some());
         assert!(attrs.get("active").is_some());
     }
+
+    #[test]
+    fn test_load_and_parse_trusted_issuers_end_to_end() {
+        let temp_dir = TempDir::new().unwrap();
+        let dir = temp_dir.path();
+
+        // Create a complete policy store structure
+        let _ = create_test_policy_store(dir);
+
+        // Create trusted-issuers directory with issuer files
+        let issuers_dir = dir.join("trusted-issuers");
+        fs::create_dir(&issuers_dir).unwrap();
+
+        // Add issuer configuration
+        fs::write(
+            issuers_dir.join("jans.json"),
+            r#"{
+                "jans_server": {
+                    "name": "Jans Authorization Server",
+                    "description": "Primary Jans OpenID Connect Provider",
+                    "openid_configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
+                    "token_metadata": {
+                        "access_token": {
+                            "trusted": true,
+                            "entity_type_name": "Jans::access_token",
+                            "user_id": "sub",
+                            "role_mapping": "role"
+                        },
+                        "id_token": {
+                            "trusted": true,
+                            "entity_type_name": "Jans::id_token",
+                            "user_id": "sub"
+                        }
+                    }
+                }
+            }"#,
+        )
+        .unwrap();
+
+        fs::write(
+            issuers_dir.join("google.json"),
+            r#"{
+                "google_oauth": {
+                    "name": "Google OAuth",
+                    "description": "Google OAuth 2.0 Provider",
+                    "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
+                    "token_metadata": {
+                        "id_token": {
+                            "trusted": false,
+                            "entity_type_name": "Google::id_token",
+                            "user_id": "email"
+                        }
+                    }
+                }
+            }"#,
+        )
+        .unwrap();
+
+        // Load the policy store
+        let source = PolicyStoreSource::Directory(dir.to_path_buf());
+        let loader = DefaultPolicyStoreLoader::new_physical();
+        let loaded = loader.load(&source).unwrap();
+
+        // Issuers should be loaded
+        assert!(
+            !loaded.trusted_issuers.is_empty(),
+            "Issuers should be loaded"
+        );
+        assert_eq!(
+            loaded.trusted_issuers.len(),
+            2,
+            "Should have 2 issuer files"
+        );
+
+        // Parse issuers from all files
+        use super::super::issuer_parser::IssuerParser;
+        let mut all_issuers = Vec::new();
+
+        for issuer_file in &loaded.trusted_issuers {
+            let parsed_issuers =
+                IssuerParser::parse_issuer(&issuer_file.content, &issuer_file.name)
+                    .expect("Should parse issuers");
+            all_issuers.extend(parsed_issuers);
+        }
+
+        // Should have 2 issuers total (1 jans + 1 google)
+        assert_eq!(all_issuers.len(), 2, "Should have 2 issuers total");
+
+        // Verify issuer IDs
+        let ids: Vec<String> = all_issuers.iter().map(|i| i.id.clone()).collect();
+        assert!(ids.contains(&"jans_server".to_string()));
+        assert!(ids.contains(&"google_oauth".to_string()));
+
+        // Create issuer map
+        let issuer_map = IssuerParser::create_issuer_map(all_issuers);
+        assert!(issuer_map.is_ok(), "Should create issuer map");
+        assert_eq!(issuer_map.unwrap().len(), 2, "Map should have 2 issuers");
+    }
+
+    #[test]
+    fn test_parse_issuer_with_token_metadata() {
+        let temp_dir = TempDir::new().unwrap();
+        let dir = temp_dir.path();
+
+        // Create a complete policy store structure
+        let _ = create_test_policy_store(dir);
+
+        // Create trusted-issuers directory
+        let issuers_dir = dir.join("trusted-issuers");
+        fs::create_dir(&issuers_dir).unwrap();
+
+        // Add issuer with comprehensive token metadata
+        fs::write(
+            issuers_dir.join("comprehensive.json"),
+            r#"{
+                "full_issuer": {
+                    "name": "Full Feature Issuer",
+                    "description": "Issuer with all token types",
+                    "openid_configuration_endpoint": "https://full.test/.well-known/openid-configuration",
+                    "token_metadata": {
+                        "access_token": {
+                            "trusted": true,
+                            "entity_type_name": "App::access_token",
+                            "user_id": "sub",
+                            "role_mapping": "role",
+                            "token_id": "jti"
+                        },
+                        "id_token": {
+                            "trusted": true,
+                            "entity_type_name": "App::id_token",
+                            "user_id": "sub",
+                            "token_id": "jti"
+                        },
+                        "userinfo_token": {
+                            "trusted": true,
+                            "entity_type_name": "App::userinfo_token",
+                            "user_id": "sub"
+                        }
+                    }
+                }
+            }"#,
+        )
+        .unwrap();
+
+        // Load the policy store
+        let source = PolicyStoreSource::Directory(dir.to_path_buf());
+        let loader = DefaultPolicyStoreLoader::new_physical();
+        let loaded = loader.load(&source).unwrap();
+
+        // Parse issuers
+        use super::super::issuer_parser::IssuerParser;
+        let mut all_issuers = Vec::new();
+
+        for issuer_file in &loaded.trusted_issuers {
+            let parsed_issuers =
+                IssuerParser::parse_issuer(&issuer_file.content, &issuer_file.name)
+                    .expect("Should parse issuers");
+            all_issuers.extend(parsed_issuers);
+        }
+
+        assert_eq!(all_issuers.len(), 1);
+
+        let issuer = &all_issuers[0];
+        assert_eq!(issuer.id, "full_issuer");
+        assert_eq!(issuer.issuer.token_metadata.len(), 3);
+
+        // Verify token metadata details
+        let access_token = issuer.issuer.token_metadata.get("access_token").unwrap();
+        assert_eq!(access_token.entity_type_name, "App::access_token");
+        assert_eq!(access_token.user_id, Some("sub".to_string()));
+        assert_eq!(access_token.role_mapping, Some("role".to_string()));
+    }
+
+    #[test]
+    fn test_detect_duplicate_issuer_ids() {
+        use super::super::vfs_adapter::MemoryVfs;
+
+        // Create in-memory filesystem
+        let vfs = MemoryVfs::new();
+
+        // Create a complete policy store structure in memory
+        vfs.create_file(
+            "metadata.json",
+            r#"{
+                "cedar_version": "4.4.0",
+                "policy_store": {
+                    "id": "abc123def456",
+                    "name": "Test Policy Store",
+                    "version": "1.0.0"
+                }
+            }"#
+            .as_bytes(),
+        )
+        .unwrap();
+
+        vfs.create_file(
+            "schema.cedarschema",
+            r#"
+namespace TestApp {
+    entity User;
+    entity Resource;
+    action "read" appliesTo {
+        principal: [User],
+        resource: [Resource]
+    };
+}
+            "#
+            .as_bytes(),
+        )
+        .unwrap();
+
+        // Create policies directory with a test policy
+        vfs.create_file(
+            "policies/test_policy.cedar",
+            b"permit(principal, action, resource);",
+        )
+        .unwrap();
+
+        // Create trusted-issuers directory with duplicate IDs
+        vfs.create_file(
+            "trusted-issuers/file1.json",
+            r#"{
+                "issuer1": {
+                    "name": "Issuer One",
+                    "description": "First instance",
+                    "openid_configuration_endpoint": "https://issuer1.com/.well-known/openid-configuration",
+                    "token_metadata": {
+                        "access_token": {
+                            "entity_type_name": "App::access_token"
+                        }
+                    }
+                }
+            }"#
+                .as_bytes(),
+        )
+        .unwrap();
+
+        vfs.create_file(
+            "trusted-issuers/file2.json",
+            r#"{
+                "issuer1": {
+                    "name": "Issuer One Duplicate",
+                    "description": "Duplicate instance",
+                    "openid_configuration_endpoint": "https://issuer1.com/.well-known/openid-configuration",
+                    "token_metadata": {
+                        "id_token": {
+                            "entity_type_name": "App::id_token"
+                        }
+                    }
+                }
+            }"#
+                .as_bytes(),
+        )
+        .unwrap();
+
+        // Load the policy store using the in-memory filesystem
+        let source = PolicyStoreSource::Directory(PathBuf::from("/"));
+        let loader = DefaultPolicyStoreLoader::new(vfs);
+        let loaded = loader.load(&source).unwrap();
+
+        // Parse issuers
+        use super::super::issuer_parser::IssuerParser;
+        let mut all_issuers = Vec::new();
+
+        for issuer_file in &loaded.trusted_issuers {
+            let parsed_issuers =
+                IssuerParser::parse_issuer(&issuer_file.content, &issuer_file.name)
+                    .expect("Should parse issuers");
+            all_issuers.extend(parsed_issuers);
+        }
+
+        // Detect duplicates
+        let validation = IssuerParser::validate_issuers(&all_issuers);
+        assert!(validation.is_err(), "Should detect duplicate issuer IDs");
+
+        let errors = validation.unwrap_err();
+        assert_eq!(errors.len(), 1, "Should have 1 duplicate error");
+        assert!(errors[0].contains("issuer1"));
+        assert!(errors[0].contains("file1.json") || errors[0].contains("file2.json"));
+    }
+
+    #[test]
+    fn test_issuer_missing_required_field() {
+        use super::super::vfs_adapter::MemoryVfs;
+
+        // Create in-memory filesystem
+        let vfs = MemoryVfs::new();
+
+        // Create a minimal policy store structure
+        vfs.create_file(
+            "metadata.json",
+            r#"{
+                "cedar_version": "4.4.0",
+                "policy_store": {
+                    "id": "abc123def456",
+                    "name": "Test Policy Store",
+                    "version": "1.0.0"
+                }
+            }"#
+            .as_bytes(),
+        )
+        .unwrap();
+
+        vfs.create_file("schema.cedarschema", b"namespace TestApp { entity User; }")
+            .unwrap();
+
+        vfs.create_file(
+            "policies/test.cedar",
+            b"permit(principal, action, resource);",
+        )
+        .unwrap();
+
+        // Create trusted-issuers directory with invalid issuer (missing name)
+        vfs.create_file(
+            "trusted-issuers/invalid.json",
+            r#"{
+                "bad_issuer": {
+                    "description": "Missing name field",
+                    "openid_configuration_endpoint": "https://test.com/.well-known/openid-configuration"
+                }
+            }"#
+                .as_bytes(),
+        )
+        .unwrap();
+
+        // Load the policy store using in-memory filesystem
+        let source = PolicyStoreSource::Directory(PathBuf::from("/"));
+        let loader = DefaultPolicyStoreLoader::new(vfs);
+        let loaded = loader.load(&source).unwrap();
+
+        // Parse issuers - should fail
+        use super::super::issuer_parser::IssuerParser;
+        let result = IssuerParser::parse_issuer(
+            &loaded.trusted_issuers[0].content,
+            &loaded.trusted_issuers[0].name,
+        );
+
+        assert!(result.is_err(), "Should fail on missing required field");
+    }
+
+    #[test]
+    fn test_complete_policy_store_with_issuers() {
+        let temp_dir = TempDir::new().unwrap();
+        let dir = temp_dir.path();
+
+        // Create a complete policy store structure
+        let _ = create_test_policy_store(dir);
+
+        // Add entities
+        let entities_dir = dir.join("entities");
+        fs::create_dir(&entities_dir).unwrap();
+        fs::write(
+            entities_dir.join("users.json"),
+            r#"[
+                {
+                    "uid": {"type": "Jans::User", "id": "alice"},
+                    "attrs": {"email": "alice@example.com"},
+                    "parents": []
+                }
+            ]"#,
+        )
+        .unwrap();
+
+        // Add trusted issuers
+        let issuers_dir = dir.join("trusted-issuers");
+        fs::create_dir(&issuers_dir).unwrap();
+        fs::write(
+            issuers_dir.join("issuer.json"),
+            r#"{
+                "main_issuer": {
+                    "name": "Main Issuer",
+                    "description": "Primary authentication provider",
+                    "openid_configuration_endpoint": "https://auth.test/.well-known/openid-configuration",
+                    "token_metadata": {
+                        "access_token": {
+                            "entity_type_name": "Jans::access_token",
+                            "user_id": "sub"
+                        }
+                    }
+                }
+            }"#,
+        )
+        .unwrap();
+
+        // Load the policy store
+        let source = PolicyStoreSource::Directory(dir.to_path_buf());
+        let loader = DefaultPolicyStoreLoader::new_physical();
+        let loaded = loader.load(&source).unwrap();
+
+        // Verify all components are loaded
+        assert_eq!(loaded.metadata.name(), "Test Policy Store");
+        assert!(!loaded.schema.is_empty());
+        assert!(!loaded.policies.is_empty());
+        assert!(!loaded.entities.is_empty());
+        assert!(!loaded.trusted_issuers.is_empty());
+
+        // Parse and validate all components
+        use super::super::entity_parser::EntityParser;
+        use super::super::issuer_parser::IssuerParser;
+        use super::super::schema_parser::SchemaParser;
+
+        // Schema
+        let parsed_schema = SchemaParser::parse_schema(&loaded.schema, "schema.cedarschema")
+            .expect("Should parse schema");
+        parsed_schema.validate().expect("Schema should be valid");
+
+        // Policies
+        let parsed_policies =
+            PhysicalLoader::parse_policies(&loaded.policies).expect("Should parse policies");
+        let policy_set = PhysicalLoader::create_policy_set(parsed_policies, vec![])
+            .expect("Should create policy set");
+
+        // Entities (parse without schema validation since this test focuses on issuers)
+        let mut all_entities = Vec::new();
+        for entity_file in &loaded.entities {
+            let parsed_entities = EntityParser::parse_entities(
+                &entity_file.content,
+                &entity_file.name,
+                None, // No schema validation - this test is about issuer integration
+            )
+            .expect("Should parse entities");
+            all_entities.extend(parsed_entities);
+        }
+        let entity_store =
+            EntityParser::create_entities_store(all_entities).expect("Should create entity store");
+
+        // Issuers
+        let mut all_issuers = Vec::new();
+        for issuer_file in &loaded.trusted_issuers {
+            let parsed_issuers =
+                IssuerParser::parse_issuer(&issuer_file.content, &issuer_file.name)
+                    .expect("Should parse issuers");
+            all_issuers.extend(parsed_issuers);
+        }
+        let issuer_map =
+            IssuerParser::create_issuer_map(all_issuers).expect("Should create issuer map");
+
+        // Verify everything works together
+        assert!(!policy_set.is_empty());
+        assert_eq!(entity_store.iter().count(), 1);
+        assert!(!format!("{:?}", parsed_schema.get_schema()).is_empty());
+        assert_eq!(issuer_map.len(), 1);
+        assert!(issuer_map.contains_key("main_issuer"));
+    }
 }
