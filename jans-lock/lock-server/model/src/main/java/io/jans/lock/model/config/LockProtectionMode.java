@@ -28,10 +28,20 @@ public enum LockProtectionMode {
 
 	private final String mode;
 
-	private LockProtectionMode(String mode) {
+	/**
+     * Creates a LockProtectionMode with the given string representation.
+     *
+     * @param mode the string value used to represent this enum constant (for JSON serialization)
+     */
+    private LockProtectionMode(String mode) {
         this.mode = mode;
     }
 
+	/**
+	 * The value used when this enum is serialized to JSON.
+	 *
+	 * @return the enum constant's mode string, e.g. "oauth" or "cedarling"
+	 */
 	@JsonValue
 	public String getmode() {
 		return mode;

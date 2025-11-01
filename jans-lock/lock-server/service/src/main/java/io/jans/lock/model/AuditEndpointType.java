@@ -23,6 +23,14 @@ public enum AuditEndpointType {
 	private String path;
 	private String[] scopes;
 
+	/**
+	 * Create an AuditEndpointType with its identifier, endpoint path, configuration path, and allowed OAuth scopes.
+	 *
+	 * @param type       the logical type identifier for the endpoint (e.g., "telemetry", "log")
+	 * @param path       the HTTP endpoint path segment (e.g., "telemetry", "log/bulk")
+	 * @param configPath the configuration store path for this endpoint
+	 * @param scopes     zero or more OAuth scope strings required to access this endpoint
+	 */
 	AuditEndpointType(String type, String path, String configPath, String ... scopes) {
 		this.type = type;
 		this.configPath = configPath;
@@ -30,18 +38,38 @@ public enum AuditEndpointType {
 		this.scopes = scopes;
 	}
 
+	/**
+	 * The endpoint type identifier for this enum constant.
+	 *
+	 * @return the type identifier (for example, "telemetry")
+	 */
 	public String getType() {
 		return type;
 	}
 
+	/**
+	 * Configuration path for this audit endpoint.
+	 *
+	 * @return the configuration path associated with this enum constant
+	 */
 	public String getConfigPath() {
 		return configPath;
 	}
 
+	/**
+	 * Endpoint path used to reach this audit endpoint.
+	 *
+	 * @return the path string for this audit endpoint
+	 */
 	public String getPath() {
 		return path;
 	}
 
+	/**
+	 * Gets the OAuth scopes associated with this audit endpoint.
+	 *
+	 * @return an array of OAuth scope strings associated with this endpoint
+	 */
 	public String[] getScopes() {
 		return scopes;
 	}

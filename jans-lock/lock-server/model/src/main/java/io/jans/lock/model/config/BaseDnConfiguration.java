@@ -38,6 +38,11 @@ public class BaseDnConfiguration {
 	private String stat;
 	private String audit;
 
+	/**
+	 * Gets the base DN for configuration entries.
+	 *
+	 * @return the configuration base DN, or null if not set
+	 */
 	public String getConfiguration() {
 		return configuration;
 	}
@@ -98,14 +103,29 @@ public class BaseDnConfiguration {
 		return stat;
 	}
 
+	/**
+	 * Sets the base DN for statistics entries.
+	 *
+	 * @param stat the base DN to use for statistics
+	 */
 	public void setStat(String stat) {
 		this.stat = stat;
 	}
 
+	/**
+	 * Gets the base DN for audit entries.
+	 *
+	 * @return the audit base DN, or {@code null} if not set
+	 */
 	public String getAudit() {
 		return audit;
 	}
 
+	/**
+	 * Sets the audit base DN.
+	 *
+	 * @param audit the base DN for audit entries
+	 */
 	public void setAudit(String audit) {
 		this.audit = audit;
 	}

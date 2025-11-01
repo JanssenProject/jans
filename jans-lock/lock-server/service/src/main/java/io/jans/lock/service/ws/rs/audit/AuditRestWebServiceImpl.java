@@ -82,6 +82,11 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
     @Inject
     private StatService statService;
 
+    /**
+     * Processes an incoming health audit request and delegates handling to the audit processor.
+     *
+     * @return a Response containing the HTTP response to return for the health audit request
+     */
     @Override
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
@@ -89,6 +94,13 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
         return processAuditRequest(request, AuditEndpointType.HEALTH);
     }
 
+	/**
+	 * Handles incoming bulk health audit requests.
+	 *
+	 * Produces a Response representing the outcome of processing the bulk health audit payload.
+	 *
+	 * @return the Response representing the outcome of processing the bulk health audit request
+	 */
 	@Override
 	public Response processBulkHealthRequest(HttpServletRequest request, HttpServletResponse response,
 			SecurityContext sec) {
@@ -96,34 +108,83 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
         return processAuditRequest(request, AuditEndpointType.HEALTH_BULK);
 	}
 
+    /**
+     * Handle an incoming audit log request for a single log event and process it while reporting statistics.
+     *
+     * @param request the HTTP servlet request containing the log JSON payload
+     * @param response the HTTP servlet response (unused by this method but provided by the servlet layer)
+     * @param sec the security context for the request
+     * @return a JAX-RS Response containing the processing result; `400 BAD_REQUEST` on parse failure, `200 OK` on success
+     */
     @Override
     public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Log request - request: {}", request);
         return processAuditRequest(request, AuditEndpointType.LOG, true, false);
     }
 
+	/**
+	 * Handles an incoming bulk log audit request, reports relevant statistics, and delegates processing.
+	 *
+	 * @param request  the HTTP request containing the bulk log payload
+	 * @param response the HTTP response
+	 * @param sec      the security context for the request
+	 * @return the HTTP response representing the processing result; status indicates success or failure
+	 */
 	@Override
 	public Response processBulkLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Bulk Log request - request: {}", request);
         return processAuditRequest(request, AuditEndpointType.LOG_BULK, true, true);
 	}
 
+    /**
+     * Handle an incoming telemetry audit request.
+     *
+     * @param request the HTTP servlet request containing the telemetry payload
+     * @param response the HTTP servlet response
+     * @param sec the security context for the request
+     * @return a Response representing the result of processing the telemetry audit request
+     */
     @Override
     public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Telemetry request - request: {}", request);
         return processAuditRequest(request, AuditEndpointType.TELEMETRY);
     }
 
+	/**
+	 * Handles an incoming bulk telemetry audit request.
+	 *
+	 * @return a Response representing the result of processing the bulk telemetry audit request
+	 */
 	@Override
 	public Response processBulkTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Bulk Telemetry request - request: {}", request);
         return processAuditRequest(request, AuditEndpointType.TELEMETRY_BULK);
 	}
 
-	private Response processAuditRequest(HttpServletRequest request, AuditEndpointType requestType) {
+	/**
+     * Delegates processing of an audit HTTP request to the main processor using default flags
+     * (do not report statistics, not bulk data).
+     *
+     * @param request     the incoming HTTP servlet request containing the audit JSON payload
+     * @param requestType the audit endpoint type indicating which audit path to process
+     * @return the JAX-RS response produced by processing the audit request
+     */
+    private Response processAuditRequest(HttpServletRequest request, AuditEndpointType requestType) {
     	return processAuditRequest(request, requestType, false, false);
     }
 
+    /**
+     * Process an incoming audit HTTP request: parse its JSON payload, optionally report statistics,
+     * then either forward the payload to the configured audit API or persist it locally, and return
+     * an HTTP response containing the operation result.
+     *
+     * @param request the HTTP request containing the audit JSON payload
+     * @param requestType the audit endpoint type (HEALTH, LOG, TELEMETRY or their bulk variants)
+     * @param reportStat when true, report usage/operation statistics extracted from the payload
+     * @param bulkData when true, treat the payload as an array of entries for bulk reporting
+     * @return a JAX-RS Response whose entity is the result message from forwarding or persistence;
+     *         the response is marked private and no-store with a Pragma: no-cache header
+     */
     private Response processAuditRequest(HttpServletRequest request, AuditEndpointType requestType, boolean reportStat, boolean bulkData) {
         log.info("Processing request - request: {}, requestType: {}", request, requestType);
 
@@ -201,6 +262,13 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 		}
 	}
 
+	/**
+	 * Reports statistics for each element of a JSON array representing bulk audit entries.
+	 *
+	 * If the provided node is not a JSON array, an error is logged and the method still attempts to process its elements.
+	 *
+	 * @param json JSON array of audit entries whose elements will be processed to report statistics
+	 */
 	private void reportBulkStat(JsonNode json) {
 		if (!json.isArray()) {
 			log.error("Failed to calculate stat for bulk log entry: {}", json);
@@ -212,6 +280,17 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 		
 	}
 
+	/**
+	 * Persist audit data for the given request type.
+	 *
+	 * <p>Parses the provided JSON payload into the appropriate audit entry or entries
+	 * based on {@code requestType} and persists them via the audit service.</p>
+	 *
+	 * @param builder     response builder that will be updated to BAD_REQUEST on parse failure
+	 * @param requestType the type of audit endpoint (log, health, telemetry, or their bulk variants)
+	 * @param json        the JSON payload to parse and persist
+	 * @return            an empty string on success, or the message "Failed to parse data" if parsing failed
+	 */
 	private String persistetAuditData(ResponseBuilder builder, AuditEndpointType requestType, String json) {
 		try {
 			switch (requestType) {
