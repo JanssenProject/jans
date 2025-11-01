@@ -159,14 +159,19 @@ public class AuditForwarderService {
             contentType = ContentType.APPLICATION_JSON;
         }
 
-        if (headers == null) {
-            headers = new HashMap<>();
-        }
-        headers.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+		if (headers == null) {
+			headers = new HashMap<>();
+		}
+		headers.put(CONTENT_TYPE, contentType.toString());
         headers.put(AUTHORIZATION, authType + token);
 
         HttpServiceResponse response = httpService.executePost(url, token, headers, postData, contentType, authType);
-
+		if (response == null || response.getHttpResponse() == null) {
+			log.error("Get invalid response from config-api URI {}", url);
+			responseBuilder.status(Status.BAD_REQUEST);
+			return null;
+		}
+        	
         log.debug("response:{}", response);
 
         HttpEntity entity = response.getHttpResponse().getEntity();

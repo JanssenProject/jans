@@ -98,7 +98,7 @@ public class JsonService implements Serializable {
      * @throws com.fasterxml.jackson.databind.JsonMappingException   if mapping between the Java object and JSON fails
      * @throws java.io.IOException                                 if an I/O problem occurs during writing
      */
-    public <T> String objectToPerttyJson(T obj) throws JsonGenerationException, JsonMappingException, IOException {
+    public <T> String objectToPrettyJson(T obj) throws JsonGenerationException, JsonMappingException, IOException {
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
     

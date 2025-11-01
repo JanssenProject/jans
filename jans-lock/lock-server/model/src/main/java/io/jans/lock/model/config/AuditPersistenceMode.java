@@ -26,7 +26,7 @@ public enum AuditPersistenceMode {
 	 * @return the enum's mode string ("internal" or "config-api")
 	 */
 	@JsonValue
-	public String getmode() {
+	public String getMode() {
 		return mode;
 	}
 }

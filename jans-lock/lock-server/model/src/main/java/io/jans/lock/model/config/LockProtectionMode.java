@@ -43,7 +43,7 @@ public enum LockProtectionMode {
 	 * @return the enum constant's mode string, e.g. "oauth" or "cedarling"
 	 */
 	@JsonValue
-	public String getmode() {
+	public String getMode() {
 		return mode;
 	}
 }

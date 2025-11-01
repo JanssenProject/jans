@@ -93,7 +93,7 @@ public class OpenIdProtectionService implements OpenIdProtection {
             }
             
             token = token.replaceFirst("Bearer\\s+","");
-            log.debug("Validating token {}", token);
+            log.debug("Validating bearer token");
 
             List<String> scopes = getRequestedScopes(resourceInfo);
             log.debug("Call requires scopes: {}", scopes);

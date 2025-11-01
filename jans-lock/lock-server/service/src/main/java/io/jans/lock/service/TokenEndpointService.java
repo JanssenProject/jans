@@ -92,7 +92,7 @@ public class TokenEndpointService {
         
         log.trace("Response for Access Token -  tokenResponse: {}", tokenResponse);
         if ((tokenResponse == null) || (tokenResponse.getStatus() != HttpStatus.SC_OK)) {
-            log.error("Failed to get acces token with scopes: ", scope);
+            log.error("Failed to get access token with scopes: {}", scope);
             return null;
         }
 
