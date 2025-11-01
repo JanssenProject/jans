@@ -649,6 +649,20 @@ components:
         openIdIssuer:
           type: string
           description: OpenID issuer URL
+        protectionMode:
+          type: string
+          description: Protection mode for the Lock server (OAuth or Cedarling)
+          enum:
+          - oauth
+          - cedarling
+        auditPersistenceMode:
+          type: string
+          description: Audit persistence mode
+          enum:
+          - internal
+          - config-api
+        cedarlingConfiguration:
+          $ref: "#/components/schemas/CedarlingConfiguration"
         statEnabled:
           type: boolean
           description: Active stat enabled
@@ -668,30 +682,6 @@ components:
         clientPassword:
           type: string
           description: Lock client password
-        tokenUrl:
-          type: string
-          description: Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint
-        endpointGroups:
-          type: object
-          additionalProperties:
-            type: array
-            description: Endpoint groups
-            items:
-              type: string
-              description: Endpoint groups
-          description: Endpoint groups
-        endpointDetails:
-          type: object
-          additionalProperties:
-            type: array
-            description: Jans URL of config-api audit endpoints and corresponding
-              scope details
-            items:
-              type: string
-              description: Jans URL of config-api audit endpoints and corresponding
-                scope details
-          description: Jans URL of config-api audit endpoints and corresponding scope
-            details
         disableJdkLogger:
           type: boolean
           description: Choose whether to disable JDK loggers
@@ -729,6 +719,51 @@ components:
           description: Each clean up iteration fetches chunk of expired data per base
             dn and removes it from storage
           format: int32
+    CedarlingConfiguration:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specify if Cedraling is enabled
+        policySources:
+          type: array
+          description: List of Policy Sources
+          items:
+            $ref: "#/components/schemas/PolicySource"
+        logType:
+          type: string
+          description: "Log type: off, memory, std_out"
+          enum:
+          - "OFF"
+          - MEMORY
+          - STD_OUT
+        logLevel:
+          type: string
+          description: System Log Level
+          enum:
+          - FATAL
+          - ERROR
+          - WARN
+          - INFO
+          - DEBUG
+          - TRACE
+        externalPolicyStoreUri:
+          type: string
+          description: External policy store URI
+      description: Cedarling configuration
+    PolicySource:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specify if policy source is enabled
+        authorizationToken:
+          type: string
+          description: Authorization token to access URI
+        policyStoreUri:
+          type: string
+          description: URI to policy store. Policy store can be either json/zip
+      description: List of Policy Sources
     JsonPatch:
       type: object
     JsonNode:

@@ -43,7 +43,7 @@ public abstract class OrganizationService extends io.jans.service.OrganizationSe
     }
 
     public String getDnForOrganization() {
-        return "o=jans";
+        return getBaseDn();
     }
 
     private BaseCacheService getCacheService() {

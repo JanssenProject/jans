@@ -40,7 +40,7 @@ import jakarta.inject.Inject;
  * @author Yuriy Movchan Date: 01/05/2024
  */
 @ApplicationScoped
-public class TokenStsatusListService {
+public class TokenStatusListService {
 
     public static final String CONTENT_TYPE_STATUSLIST_JSON = "application/statuslist+json";
     public static final String CONTENT_TYPE_STATUSLIST_JWT = "application/statuslist+jwt";
