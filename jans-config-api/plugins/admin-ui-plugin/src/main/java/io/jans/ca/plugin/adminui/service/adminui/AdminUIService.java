@@ -55,9 +55,9 @@ public class AdminUIService {
             appConfigResponse.setAllowSmtpKeystoreEdit(auiConfiguration.getAllowSmtpKeystoreEdit());
             appConfigResponse.setAdditionalParameters(auiConfiguration.getAdditionalParameters());
             appConfigResponse.setCedarlingLogType(auiConfiguration.getCedarlingLogType());
-            appConfigResponse.setAuiPolicyStoreUrl(auiConfiguration.getAuiPolicyStoreUrl());
-            appConfigResponse.setAuiDefaultPolicyStorePath(auiConfiguration.getAuiDefaultPolicyStorePath());
-            appConfigResponse.setUseRemotePolicyStore(auiConfiguration.getUseRemotePolicyStore());
+            appConfigResponse.setAuiPolicyStoreUrl(auiConfiguration.getAuiCedarlingPolicyStoreUrl());
+            appConfigResponse.setAuiDefaultPolicyStorePath(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath());
+            appConfigResponse.setUseRemotePolicyStore(auiConfiguration.getUseCedarlingRemotePolicyStore());
 
             return appConfigResponse;
         } catch (Exception e) {
@@ -91,15 +91,15 @@ public class AdminUIService {
             }
             if (!Strings.isNullOrEmpty(appConfigResponse.getAuiPolicyStoreUrl())) {
                 adminConf.getMainSettings().getUiConfig().setAuiPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
-                auiConfigurationService.getAUIConfiguration().setAuiPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
+                auiConfigurationService.getAUIConfiguration().setAuiCedarlingPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
             }
             if (appConfigResponse.getUseRemotePolicyStore() != null) {
                 adminConf.getMainSettings().getUiConfig().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
-                auiConfigurationService.getAUIConfiguration().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
+                auiConfigurationService.getAUIConfiguration().setUseCedarlingRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
             }
             if (!Strings.isNullOrEmpty(appConfigResponse.getAuiDefaultPolicyStorePath())) {
                 adminConf.getMainSettings().getUiConfig().setAuiDefaultPolicyStorePath(appConfigResponse.getAuiDefaultPolicyStorePath());
-                auiConfigurationService.getAUIConfiguration().setAuiDefaultPolicyStorePath(appConfigResponse.getAuiDefaultPolicyStorePath());
+                auiConfigurationService.getAUIConfiguration().setAuiCedarlingDefaultPolicyStorePath(appConfigResponse.getAuiDefaultPolicyStorePath());
             }
             entryManager.merge(adminConf);
             return getAdminUIEditableConfiguration();

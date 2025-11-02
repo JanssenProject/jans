@@ -43,9 +43,9 @@ public class AUIConfiguration {
     private Boolean allowSmtpKeystoreEdit;
     private List<KeyValuePair> additionalParameters;
     private CedarlingLogType cedarlingLogType;
-    private String auiPolicyStoreUrl;
-    private String auiDefaultPolicyStorePath;
-    private Boolean useRemotePolicyStore = Boolean.FALSE;
+    private String auiCedarlingPolicyStoreUrl;
+    private String auiCedarlingDefaultPolicyStorePath;
+    private Boolean useCedarlingRemotePolicyStore = Boolean.FALSE;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -295,28 +295,28 @@ public class AUIConfiguration {
         this.cedarlingLogType = cedarlingLogType;
     }
 
-    public String getAuiPolicyStoreUrl() {
-        return auiPolicyStoreUrl;
+    public String getAuiCedarlingPolicyStoreUrl() {
+        return auiCedarlingPolicyStoreUrl;
     }
 
-    public void setAuiPolicyStoreUrl(String auiPolicyStoreUrl) {
-        this.auiPolicyStoreUrl = auiPolicyStoreUrl;
+    public void setAuiCedarlingPolicyStoreUrl(String auiCedarlingPolicyStoreUrl) {
+        this.auiCedarlingPolicyStoreUrl = auiCedarlingPolicyStoreUrl;
     }
 
-    public Boolean getUseRemotePolicyStore() {
-        return useRemotePolicyStore;
+    public String getAuiCedarlingDefaultPolicyStorePath() {
+        return auiCedarlingDefaultPolicyStorePath;
     }
 
-    public void setUseRemotePolicyStore(Boolean useRemotePolicyStore) {
-        this.useRemotePolicyStore = useRemotePolicyStore;
+    public void setAuiCedarlingDefaultPolicyStorePath(String auiCedarlingDefaultPolicyStorePath) {
+        this.auiCedarlingDefaultPolicyStorePath = auiCedarlingDefaultPolicyStorePath;
     }
 
-    public String getAuiDefaultPolicyStorePath() {
-        return auiDefaultPolicyStorePath;
+    public Boolean getUseCedarlingRemotePolicyStore() {
+        return useCedarlingRemotePolicyStore;
     }
 
-    public void setAuiDefaultPolicyStorePath(String auiDefaultPolicyStorePath) {
-        this.auiDefaultPolicyStorePath = auiDefaultPolicyStorePath;
+    public void setUseCedarlingRemotePolicyStore(Boolean useCedarlingRemotePolicyStore) {
+        this.useCedarlingRemotePolicyStore = useCedarlingRemotePolicyStore;
     }
 
     @Override
@@ -353,8 +353,9 @@ public class AUIConfiguration {
                 ", allowSmtpKeystoreEdit=" + allowSmtpKeystoreEdit +
                 ", additionalParameters=" + additionalParameters +
                 ", cedarlingLogType=" + cedarlingLogType +
-                ", auiPolicyStoreUrl='" + auiPolicyStoreUrl + '\'' +
-                ", useRemotePolicyStore=" + useRemotePolicyStore +
+                ", auiCedarlingPolicyStoreUrl='" + auiCedarlingPolicyStoreUrl + '\'' +
+                ", auiCedarlingDefaultPolicyStorePath='" + auiCedarlingDefaultPolicyStorePath + '\'' +
+                ", useCedarlingRemotePolicyStore=" + useCedarlingRemotePolicyStore +
                 '}';
     }
 }

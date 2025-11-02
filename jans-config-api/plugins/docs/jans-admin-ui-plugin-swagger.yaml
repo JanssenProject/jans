@@ -18,6 +18,7 @@ tags:
 - name: Admin UI - Role-Permissions Mapping
 - name: Admin UI - License
 - name: Admin UI - Webhooks
+- name: Admin UI - Security
 paths:
   /admin-ui/adminUIPermissions:
     get:

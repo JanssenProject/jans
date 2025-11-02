@@ -38,7 +38,8 @@ tags = { @Tag(name = "Admin UI - Role"),
         @Tag(name = "Admin UI - Permission"),
         @Tag(name = "Admin UI - Role-Permissions Mapping"),
         @Tag(name = "Admin UI - License"),
-        @Tag(name = "Admin UI - Webhooks")},
+        @Tag(name = "Admin UI - Webhooks"),
+        @Tag(name = "Admin UI - Security")},
 
 servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 

@@ -90,8 +90,8 @@ public class AdminUISecurityService {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             // If the remote Policy Store URL is configured and enabled
-            if(auiConfiguration.getUseRemotePolicyStore() && !Strings.isNullOrEmpty(auiConfiguration.getAuiPolicyStoreUrl())) {
-                Invocation.Builder request = ClientFactory.getClientBuilder(auiConfiguration.getAuiPolicyStoreUrl());
+            if(auiConfiguration.getUseCedarlingRemotePolicyStore() && !Strings.isNullOrEmpty(auiConfiguration.getAuiCedarlingPolicyStoreUrl())) {
+                Invocation.Builder request = ClientFactory.getClientBuilder(auiConfiguration.getAuiCedarlingPolicyStoreUrl());
                 request.header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
                 Response response = request.get();
 
@@ -109,7 +109,7 @@ public class AdminUISecurityService {
                 return CommonUtils.createGenericResponse(false, response.getStatus(), jsonData);
             } else {
                 // Load policy store from default local file path
-                String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiDefaultPolicyStorePath())
+                String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
                         .filter(path -> !Strings.isNullOrEmpty(path))
                         .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
 
@@ -142,8 +142,8 @@ public class AdminUISecurityService {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
             // Validate if remote policy store usage is enabled and URL is configured
-            if (!CommonUtils.toPrimitiveOrDefaultFalse(auiConfiguration.getUseRemotePolicyStore()) ||
-                    Strings.isNullOrEmpty(auiConfiguration.getAuiPolicyStoreUrl())) {
+            if (!CommonUtils.toPrimitiveOrDefaultFalse(auiConfiguration.getUseCedarlingRemotePolicyStore()) ||
+                    Strings.isNullOrEmpty(auiConfiguration.getAuiCedarlingPolicyStoreUrl())) {
 
                 return CommonUtils.createGenericResponse(
                         false, 500,
@@ -153,7 +153,7 @@ public class AdminUISecurityService {
 
             // Build the client request for the remote policy store
             Invocation.Builder request = ClientFactory
-                    .getClientBuilder(auiConfiguration.getAuiPolicyStoreUrl())
+                    .getClientBuilder(auiConfiguration.getAuiCedarlingPolicyStoreUrl())
                     .header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
 
             // Execute GET request
@@ -169,7 +169,7 @@ public class AdminUISecurityService {
                     JsonNode policyStoreJson = mapper.readTree(responseEntity);
 
                     // Resolve path for local policy store file
-                    String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiDefaultPolicyStorePath())
+                    String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
                             .filter(path -> !Strings.isNullOrEmpty(path))
                             .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
 
