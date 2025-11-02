@@ -115,7 +115,7 @@ public class AdminUISecurityService {
 
                 Path path = Paths.get(policyStorePath);
 
-                log.error("Absolute path of default : " + path.toAbsolutePath());
+                log.debug("Absolute path of policy-store file: {}", path.toAbsolutePath());
                 // Create ObjectMapper instance
                 ObjectMapper objectMapper = new ObjectMapper();
                 // Read file content as bytes
@@ -142,7 +142,7 @@ public class AdminUISecurityService {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
             // Validate if remote policy store usage is enabled and URL is configured
-            if (!auiConfiguration.getUseRemotePolicyStore() ||
+            if (!CommonUtils.toPrimitiveOrDefaultFalse(auiConfiguration.getUseRemotePolicyStore()) ||
                     Strings.isNullOrEmpty(auiConfiguration.getAuiPolicyStoreUrl())) {
 
                 return CommonUtils.createGenericResponse(
@@ -158,7 +158,6 @@ public class AdminUISecurityService {
 
             // Execute GET request
             try (Response response = request.get()) {
-                //Response response = request.get();
                 int status = response.getStatus();
                 log.info("Policy store request status code: {}", status);
 
@@ -530,7 +529,7 @@ public class AdminUISecurityService {
         if (parent == null) return null;
 
         // Remove ParentResource:: prefix if present
-        String normalized = parent.replace("ParentResource::", "");
+        String normalized = parent.replace(PARENT_RESOURCE_PREFIX, "");
 
         // Remove any other namespace prefixes
         if (normalized.contains("::")) {
@@ -691,11 +690,9 @@ public class AdminUISecurityService {
         Iterator<Map.Entry<String, JsonNode>> fields = defaultEntitiesNode.fields();
         while (fields.hasNext()) {
             Map.Entry<String, JsonNode> entry = fields.next();
-            //String entityId = entry.getKey();
             JsonNode entityData = decodeEntityData(entry.getValue());
 
             if (isFeatureWithMatchingParent(entityData, resource)) {
-                //matchingEntities.add(entityId);
                 JsonNode uidNode = entityData.path("uid");
                 if (!uidNode.isMissingNode()) {
                     JsonNode idNode = uidNode.path("id");
@@ -857,52 +854,6 @@ public class AdminUISecurityService {
         String value = node.asText("");
         return value.isEmpty() ? null : value;
     }
-
-    /**
-     * Finds entityTypes node in schema JSON.
-     */
-    private static JsonNode findEntityTypesNode(JsonNode schemaJson) {
-        // Try direct path first
-        JsonNode resourcesNode = schemaJson.path("Gluu::Flex::AdminUI::Resources");
-        JsonNode entityTypesNode = resourcesNode.has("entityTypes") ?
-                resourcesNode.get("entityTypes") : null;
-
-        // Fallback: search for any "entityTypes" field
-        return entityTypesNode != null ? entityTypesNode : findNodeByFieldName(schemaJson, "entityTypes");
-    }
-
-    /**
-     * Processes entity types from object structure.
-     */
-    private static void processEntityTypesObject(JsonNode entityTypesNode, String resourceLower,
-                                                 Map<String, Set<String>> index) {
-        entityTypesNode.fields().forEachRemaining(entry -> {
-            String entityTypeName = entry.getKey();
-            JsonNode entityTypeNode = entry.getValue();
-
-            if (shouldIncludeEntityType(entityTypeName, entityTypeNode, resourceLower)) {
-                Set<String> members = extractMemberOfTypes(entityTypeNode);
-                index.put(entityTypeName.toLowerCase(DEFAULT_LOCALE), members);
-            }
-        });
-    }
-
-    /**
-     * Processes entity types from array structure.
-     */
-    private static void processEntityTypesArray(JsonNode entityTypesNode, String resourceLower,
-                                                Map<String, Set<String>> index) {
-        for (JsonNode entityTypeNode : entityTypesNode) {
-            String entityTypeName = firstNonEmptyText(entityTypeNode, "name", "entityType", "id");
-            if (entityTypeName == null) continue;
-
-            if (shouldIncludeEntityType(entityTypeName, entityTypeNode, resourceLower)) {
-                Set<String> members = extractMemberOfTypes(entityTypeNode);
-                index.put(entityTypeName.toLowerCase(DEFAULT_LOCALE), members);
-            }
-        }
-    }
-
     /**
      * Determines if entity type should be included based on resource matching.
      */
@@ -924,45 +875,6 @@ public class AdminUISecurityService {
 
         return false;
     }
-
-    /**
-     * Extracts memberOf types from entity type node.
-     */
-    private static Set<String> extractMemberOfTypes(JsonNode entityTypeNode) {
-        Set<String> members = new HashSet<>();
-        JsonNode memberOf = entityTypeNode.path("memberOfTypes");
-
-        if (memberOf.isArray()) {
-            for (JsonNode member : memberOf) {
-                if (member.isTextual()) {
-                    members.add(member.asText().toLowerCase(DEFAULT_LOCALE));
-                }
-            }
-        }
-
-        return members;
-    }
-
-    /**
-     * Finds node by field name using DFS.
-     */
-    private static JsonNode findNodeByFieldName(JsonNode root, String fieldName) {
-        if (root == null) return null;
-
-        Deque<JsonNode> stack = new ArrayDeque<>();
-        stack.push(root);
-
-        while (!stack.isEmpty()) {
-            JsonNode node = stack.pop();
-            if (node.has(fieldName)) return node.get(fieldName);
-            if (node.isContainerNode()) {
-                node.elements().forEachRemaining(stack::push);
-            }
-        }
-
-        return null;
-    }
-
     /**
      * Gets first non-empty text value from multiple possible field names.
      */

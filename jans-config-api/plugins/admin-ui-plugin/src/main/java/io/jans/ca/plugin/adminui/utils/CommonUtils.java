@@ -197,4 +197,15 @@ public class CommonUtils {
     public static JsonNode toJsonNode(Object object) throws JsonProcessingException {
         return objectMapper.valueToTree(object);
     }
+
+    /**
+     * Converts a Boolean object to a boolean primitive.
+     * Returns false if the input Boolean object is null.
+     *
+     * @param booleanObject The Boolean object to convert.
+     * @return The boolean primitive value, or false if the input is null.
+     */
+    public static boolean toPrimitiveOrDefaultFalse(Boolean booleanObject) {
+        return booleanObject != null ? booleanObject : false;
+    }
 }
