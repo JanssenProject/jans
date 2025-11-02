@@ -189,7 +189,7 @@ public class CommonUtils {
     }
 
     /**
-     * Converts any Java object into a JSON string.
+     * Converts any Java object into a JsonNode representation.
      *
      * @param object the Java object to convert
      * @return JSON representation of the object

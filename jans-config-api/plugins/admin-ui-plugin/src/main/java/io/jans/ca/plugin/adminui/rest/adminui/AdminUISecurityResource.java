@@ -77,7 +77,6 @@ public class AdminUISecurityResource {
     @Operation(summary = "Set remote policy store as default policy store of Admin UI", description = "Set remote policy store as default policy store of Admin UI", operationId = "set-remote-policy-store-as-default", tags = {
             "Admin UI - Cedarling"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SECURITY_WRITE}))
-    @RequestBody(description = "Set remote policy store as default policy store of Admin UI", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = GenericResponse.class, description = "Set remote policy store as default policy store of Admin UI")))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
@@ -103,7 +102,7 @@ public class AdminUISecurityResource {
             log.error(ErrorResponse.REWRITING_DEFAULT_POLICY_STORE_ERROR.getDescription(), e);
             return Response
                     .serverError()
-                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription()))
+                    .entity(CommonUtils.createGenericResponse(false, 500, e.getMessage()))
                     .build();
         }
     }
@@ -111,7 +110,6 @@ public class AdminUISecurityResource {
     @Operation(summary = "Sync role-to-scope mappings from the policy store", description = "Sync the role-to-scope mappings from the policy store. If a remote policy store URL is configured and enabled, the mappings will be generated from the remote policy store; otherwise, they will be generated from the default policy store.", operationId = "sync-role-to-scopes-mappings", tags = {
             "Admin UI - Cedarling"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SECURITY_WRITE}))
-    @RequestBody(description = "Sync role-to-scope mappings from the policy store", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = GenericResponse.class, description = "Sync Role-to-Scopes mapping from policy-store")))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
@@ -137,7 +135,7 @@ public class AdminUISecurityResource {
             log.error(ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription(), e);
             return Response
                     .serverError()
-                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription()))
+                    .entity(CommonUtils.createGenericResponse(false, 500, e.getMessage()))
                     .build();
         }
     }

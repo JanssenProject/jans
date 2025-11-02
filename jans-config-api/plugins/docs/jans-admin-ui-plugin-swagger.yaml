@@ -689,12 +689,6 @@ paths:
       summary: Set remote policy store as default policy store of Admin UI
       description: Set remote policy store as default policy store of Admin UI
       operationId: set-remote-policy-store-as-default
-      requestBody:
-        description: Set remote policy store as default policy store of Admin UI
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/GenericResponse"
       responses:
         "200":
           description: Ok
@@ -731,12 +725,6 @@ paths:
         \ from the remote policy store; otherwise, they will be generated from the\
         \ default policy store."
       operationId: sync-role-to-scopes-mappings
-      requestBody:
-        description: Sync role-to-scope mappings from the policy store
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/GenericResponse"
       responses:
         "200":
           description: Ok
@@ -1974,9 +1962,9 @@ components:
               role-permission mapping related information
             https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write: Manage
               role-permission mapping related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly: Delete
+            https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly: View
               admin-ui license related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/license.write: View
+            https://jans.io/oauth/jans-auth-server/config/adminui/license.write: Manage
               admin-ui license related information
             https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly: Read
               only access to Admin UI security

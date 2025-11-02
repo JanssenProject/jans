@@ -20,7 +20,6 @@ import io.jans.util.StringHelper;
 import io.jans.orm.model.PersistenceMetadata;
 
 
-import io.jans.util.security.StringEncrypter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;

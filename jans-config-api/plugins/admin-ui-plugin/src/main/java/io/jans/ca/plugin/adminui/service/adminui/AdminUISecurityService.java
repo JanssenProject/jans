@@ -157,37 +157,39 @@ public class AdminUISecurityService {
                     .header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
 
             // Execute GET request
-            Response response = request.get();
-            int status = response.getStatus();
-            log.info("Policy store request status code: {}", status);
+            try (Response response = request.get()) {
+                //Response response = request.get();
+                int status = response.getStatus();
+                log.info("Policy store request status code: {}", status);
 
-            ObjectMapper mapper = new ObjectMapper();
+                ObjectMapper mapper = new ObjectMapper();
 
-            if (status == 200) {
-                // Parse response entity into JsonNode
-                String responseEntity = response.readEntity(String.class);
-                JsonNode policyStoreJson = mapper.readTree(responseEntity);
+                if (status == 200) {
+                    // Parse response entity into JsonNode
+                    String responseEntity = response.readEntity(String.class);
+                    JsonNode policyStoreJson = mapper.readTree(responseEntity);
 
-                // Resolve path for local policy store file
-                String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiDefaultPolicyStorePath())
-                        .filter(path -> !Strings.isNullOrEmpty(path))
-                        .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
+                    // Resolve path for local policy store file
+                    String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiDefaultPolicyStorePath())
+                            .filter(path -> !Strings.isNullOrEmpty(path))
+                            .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
 
-                // Overwrite local policy store file with remote JSON
-                Path path = Paths.get(policyStorePath);
-                mapper.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), policyStoreJson);
+                    // Overwrite local policy store file with remote JSON
+                    Path path = Paths.get(policyStorePath);
+                    mapper.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), policyStoreJson);
 
-                log.info("Default policy-store overwritten successfully from remote source: {}", policyStorePath);
+                    log.info("Default policy-store overwritten successfully from remote source: {}", policyStorePath);
 
-                return CommonUtils.createGenericResponse(true, 200,
-                        "Policy store fetched and overwritten successfully.");
+                    return CommonUtils.createGenericResponse(true, 200,
+                            "Policy store fetched and overwritten successfully.");
+                }
+
+                // Handle non-200 HTTP responses
+                String errorResponse = response.readEntity(String.class);
+                log.error("{}: {}", ErrorResponse.REWRITING_DEFAULT_POLICY_STORE_ERROR, errorResponse);
+
+                return CommonUtils.createGenericResponse(false, status, errorResponse);
             }
-
-            // Handle non-200 HTTP responses
-            String errorResponse = response.readEntity(String.class);
-            log.error("{}: {}", ErrorResponse.REWRITING_DEFAULT_POLICY_STORE_ERROR, errorResponse);
-
-            return CommonUtils.createGenericResponse(false, status, errorResponse);
 
         } catch (Exception e) {
             log.error(ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription(), e);
