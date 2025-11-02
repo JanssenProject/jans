@@ -1,7 +1,7 @@
 [package]
 name = "cedarling_wasm"
-version = "1.13.0"
-edition = "2025"
+version = "0.0.0"
+edition = "2021"
 description = "The Cedarling is a performant local authorization service that runs the Rust Cedar Engine"
 license = "Apache-2.0"
 repository = "git+https://github.com/JanssenProject/jans.git"

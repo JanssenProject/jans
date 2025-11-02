@@ -87,7 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await;
 
     // Handle authorization result. If there's an error, print it.
-    if let Err(ref e) = &result {
+    if let Err(e) = &result {
         eprintln!("Error while authorizing: {:?}\n\n", e)
     }
 

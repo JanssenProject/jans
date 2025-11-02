@@ -41,7 +41,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=408db95b458691c2b307b51fe180f9cc61b4eb95
+ENV JANS_SOURCE_VERSION=81b0ea05fabcef7d2c6dab6f665e9627d105094c
 
 # cleanup
 RUN rm -rf /tmp/jans
@@ -90,7 +90,7 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/monolith" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.13.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen Monolith Image" \
     org.opencontainers.image.description="Janssen Authorization server"
 
