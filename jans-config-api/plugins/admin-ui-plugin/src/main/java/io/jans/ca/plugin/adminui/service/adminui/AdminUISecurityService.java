@@ -97,10 +97,9 @@ public class AdminUISecurityService {
 
                 log.info("policy store request status code: {}", response.getStatus());
 
-                ObjectMapper mapper = new ObjectMapper();
                 if (response.getStatus() == 200) {
                     String entity = response.readEntity(String.class);
-                    JsonNode policyStoreJsonNode = mapper.readValue(entity, JsonNode.class);
+                    JsonNode policyStoreJsonNode = MAPPER.readValue(entity, JsonNode.class);
                     return CommonUtils.createGenericResponse(true, 200, "Policy store fetched successfully.", policyStoreJsonNode);
                 }
                 // Handle non-200 responses
@@ -116,12 +115,10 @@ public class AdminUISecurityService {
                 Path path = Paths.get(policyStorePath);
 
                 log.debug("Absolute path of policy-store file: {}", path.toAbsolutePath());
-                // Create ObjectMapper instance
-                ObjectMapper objectMapper = new ObjectMapper();
                 // Read file content as bytes
                 byte[] jsonBytes = Files.readAllBytes(path);
                 // Parse bytes into JsonNode
-                JsonNode policyStoreJsonNode = objectMapper.readTree(jsonBytes);
+                JsonNode policyStoreJsonNode = MAPPER.readTree(jsonBytes);
                 return CommonUtils.createGenericResponse(true, 200, "Policy store fetched successfully.", policyStoreJsonNode);
             }
         } catch (Exception e) {
@@ -161,12 +158,10 @@ public class AdminUISecurityService {
                 int status = response.getStatus();
                 log.info("Policy store request status code: {}", status);
 
-                ObjectMapper mapper = new ObjectMapper();
-
                 if (status == 200) {
                     // Parse response entity into JsonNode
                     String responseEntity = response.readEntity(String.class);
-                    JsonNode policyStoreJson = mapper.readTree(responseEntity);
+                    JsonNode policyStoreJson = MAPPER.readTree(responseEntity);
 
                     // Resolve path for local policy store file
                     String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
@@ -175,7 +170,7 @@ public class AdminUISecurityService {
 
                     // Overwrite local policy store file with remote JSON
                     Path path = Paths.get(policyStorePath);
-                    mapper.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), policyStoreJson);
+                    MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), policyStoreJson);
 
                     log.info("Default policy-store overwritten successfully from remote source: {}", policyStorePath);
 

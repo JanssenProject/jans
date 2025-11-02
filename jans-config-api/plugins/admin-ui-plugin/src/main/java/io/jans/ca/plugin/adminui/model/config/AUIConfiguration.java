@@ -325,7 +325,6 @@ public class AUIConfiguration {
                 "appType='" + appType + '\'' +
                 ", auiWebServerHost='" + auiWebServerHost + '\'' +
                 ", auiWebServerClientId='" + auiWebServerClientId + '\'' +
-                ", auiWebServerClientSecret='" + auiWebServerClientSecret + '\'' +
                 ", auiWebServerScope='" + auiWebServerScope + '\'' +
                 ", auiWebServerAcrValues='" + auiWebServerAcrValues + '\'' +
                 ", auiWebServerRedirectUrl='" + auiWebServerRedirectUrl + '\'' +
@@ -337,7 +336,6 @@ public class AUIConfiguration {
                 ", auiWebServerUserInfoEndpoint='" + auiWebServerUserInfoEndpoint + '\'' +
                 ", auiWebServerEndSessionEndpoint='" + auiWebServerEndSessionEndpoint + '\'' +
                 ", auiBackendApiServerClientId='" + auiBackendApiServerClientId + '\'' +
-                ", auiBackendApiServerClientSecret='" + auiBackendApiServerClientSecret + '\'' +
                 ", auiBackendApiServerScope='" + auiBackendApiServerScope + '\'' +
                 ", auiBackendApiServerAcrValues='" + auiBackendApiServerAcrValues + '\'' +
                 ", auiBackendApiServerRedirectUrl='" + auiBackendApiServerRedirectUrl + '\'' +

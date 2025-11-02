@@ -52,8 +52,8 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write", description = "Manage role-permission mapping related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly", description = "View admin-ui license related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/license.write", description = "Manage admin-ui license related information"),
-@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly", description = "Read only access to Admin UI security"),
-@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/security.write", description = "Write access to Admin UI security")
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly", description = "View Admin UI security related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/security.write", description = "Manage Admin UI security related information")
 }
 )))
 public class ApiApplication extends Application {

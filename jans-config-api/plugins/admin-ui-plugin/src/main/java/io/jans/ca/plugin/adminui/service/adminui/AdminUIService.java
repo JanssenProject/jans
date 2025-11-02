@@ -355,7 +355,9 @@ public class AdminUIService {
     public void resetPermissionsToRole(List<RolePermissionMapping> rolePermissionsArgs) throws ApplicationException {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-
+            for (RolePermissionMapping mapping : Optional.ofNullable(rolePermissionsArgs).orElse(Collections.emptyList())) {
+                validateRolePermissionMapping(adminConf, mapping);
+            }
             adminConf.getDynamic().setRolePermissionMapping(rolePermissionsArgs);
             entryManager.merge(adminConf);
 

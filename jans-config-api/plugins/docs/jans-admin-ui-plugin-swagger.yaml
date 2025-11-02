@@ -1967,7 +1967,7 @@ components:
               admin-ui license related information
             https://jans.io/oauth/jans-auth-server/config/adminui/license.write: Manage
               admin-ui license related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly: Read
-              only access to Admin UI security
-            https://jans.io/oauth/jans-auth-server/config/adminui/security.write: Write
-              access to Admin UI security
+            https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly: View
+              Admin UI security related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/security.write: Manage
+              Admin UI security related information
