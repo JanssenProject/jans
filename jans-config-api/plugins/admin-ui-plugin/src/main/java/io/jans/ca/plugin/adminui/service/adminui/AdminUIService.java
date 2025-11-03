@@ -360,8 +360,6 @@ public class AdminUIService {
             }
             adminConf.getDynamic().setRolePermissionMapping(rolePermissionsArgs);
             entryManager.merge(adminConf);
-
-            adminConf.getDynamic().getRolePermissionMapping();
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription());
