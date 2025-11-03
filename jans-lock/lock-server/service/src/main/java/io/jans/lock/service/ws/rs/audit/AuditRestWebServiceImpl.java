@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.lock.model.AuditEndpointType;
+import io.jans.lock.model.app.audit.AuditActionType;
+import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.audit.HealthEntry;
 import io.jans.lock.model.audit.LogEntry;
 import io.jans.lock.model.audit.TelemetryEntry;
@@ -32,10 +34,12 @@ import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.AuditPersistenceMode;
 import io.jans.lock.service.AuditService;
 import io.jans.lock.service.DataMapperService;
+import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.audit.AuditForwarderService;
 import io.jans.lock.service.stat.StatService;
 import io.jans.lock.service.ws.rs.base.BaseResource;
 import io.jans.lock.util.ServerUtil;
+import io.jans.net.InetAddressUtility;
 import io.jans.service.JsonService;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -83,6 +87,9 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
     @Inject
     private StatService statService;
 
+    @Inject
+    private ApplicationAuditLogger applicationAuditLogger;
+
     /**
      * Processes an incoming health audit request and delegates handling to the audit processor.
      *
@@ -92,6 +99,10 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
         log.info("Processing Health request - request: {}", request);
+
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.AUDIT_HEALTH_WRITE);
+        applicationAuditLogger.log(auditLogEntry);
+
         return processAuditRequest(request, AuditEndpointType.HEALTH);
     }
 
@@ -106,6 +117,10 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	public Response processBulkHealthRequest(HttpServletRequest request, HttpServletResponse response,
 			SecurityContext sec) {
         log.info("Processing Bulk Health request - request: {}", request);
+
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.AUDIT_HEALTH_BULK_WRITE);
+        applicationAuditLogger.log(auditLogEntry);
+
         return processAuditRequest(request, AuditEndpointType.HEALTH_BULK);
 	}
 
@@ -120,6 +135,10 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
     @Override
     public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Log request - request: {}", request);
+
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.AUDIT_LOG_WRITE);
+        applicationAuditLogger.log(auditLogEntry);
+
         return processAuditRequest(request, AuditEndpointType.LOG, true, false);
     }
 
@@ -134,6 +153,10 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	@Override
 	public Response processBulkLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Bulk Log request - request: {}", request);
+
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.AUDIT_LOG_BULK_WRITE);
+        applicationAuditLogger.log(auditLogEntry);
+
         return processAuditRequest(request, AuditEndpointType.LOG_BULK, true, true);
 	}
 
@@ -148,6 +171,10 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
     @Override
     public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Telemetry request - request: {}", request);
+
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.AUDIT_TELEMETRY_WRITE);
+        applicationAuditLogger.log(auditLogEntry);
+
         return processAuditRequest(request, AuditEndpointType.TELEMETRY);
     }
 
@@ -159,6 +186,10 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	@Override
 	public Response processBulkTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Bulk Telemetry request - request: {}", request);
+
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.AUDIT_TELEMETRY_BULK_WRITE);
+        applicationAuditLogger.log(auditLogEntry);
+
         return processAuditRequest(request, AuditEndpointType.TELEMETRY_BULK);
 	}
 

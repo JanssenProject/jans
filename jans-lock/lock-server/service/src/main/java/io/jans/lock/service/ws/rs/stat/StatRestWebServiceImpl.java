@@ -12,6 +12,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 
+import io.jans.lock.model.app.audit.AuditActionType;
+import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.StatErrorResponseType;
@@ -19,10 +21,12 @@ import io.jans.lock.model.stat.FlatStatResponse;
 import io.jans.lock.model.stat.Months;
 import io.jans.lock.model.stat.StatResponse;
 import io.jans.lock.model.stat.StatResponseItem;
+import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.stat.StatResponseService;
 import io.jans.lock.service.ws.rs.base.BaseResource;
 import io.jans.lock.util.Constants;
 import io.jans.lock.util.ServerUtil;
+import io.jans.net.InetAddressUtility;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.exporter.common.TextFormat;
@@ -53,11 +57,18 @@ public class StatRestWebServiceImpl extends BaseResource implements StatRestWebS
     @Inject
     private AppConfiguration appConfiguration;
 
+    @Inject
+    private ApplicationAuditLogger applicationAuditLogger;
+
     @Override
     public Response statGet(@QueryParam("month") String months,
                             @QueryParam("start-month") String startMonth,
                             @QueryParam("end-month") String endMonth,
                             @QueryParam("format") String format) {
+
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.SSA_READ);
+        applicationAuditLogger.log(auditLogEntry);
+
         return stat(months, startMonth, endMonth, format);
     }
 
@@ -66,6 +77,10 @@ public class StatRestWebServiceImpl extends BaseResource implements StatRestWebS
                              @FormParam("start-month") String startMonth,
                              @FormParam("end-month") String endMonth,
                              @FormParam("format") String format) {
+
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.SSA_READ);
+        applicationAuditLogger.log(auditLogEntry);
+
         return stat(months, startMonth, endMonth, format);
     }
 

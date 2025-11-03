@@ -13,10 +13,26 @@ import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 /**
  * @author Yuriy Movchan Date: 05/20/2015
  */
 public final class InetAddressUtility {
+
+	private static final String[] HEADERS_TO_TRY = new String[]{
+            "X-Forwarded-For",
+            "Proxy-Client-IP",
+            "WL-Proxy-Client-IP",
+            "HTTP_X_FORWARDED_FOR",
+            "HTTP_X_FORWARDED",
+            "HTTP_X_CLUSTER_CLIENT_IP",
+            "HTTP_CLIENT_IP",
+            "HTTP_FORWARDED_FOR",
+            "HTTP_FORWARDED",
+            "HTTP_VIA",
+            "REMOTE_ADDR"
+    };
 
     private static Pattern VALID_IPV4_PATTERN = null;
     private static Pattern VALID_IPV6_PATTERN = null;
@@ -80,6 +96,21 @@ public final class InetAddressUtility {
         } catch (SocketException e) {
             return null;
         }
+    }
+
+    /**
+     * @param httpRequest interface to provide request information for HTTP servlets.
+     * @return IP address of client
+     * @see <a href="http://stackoverflow.com/a/21884642/5202500">Getting IP address of client</a>
+     */
+    public static String getIpAddress(HttpServletRequest httpRequest) {
+        for (String header : HEADERS_TO_TRY) {
+            String ip = httpRequest.getHeader(header);
+            if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
+                return ip;
+            }
+        }
+        return httpRequest.getRemoteAddr();
     }
 
 }
