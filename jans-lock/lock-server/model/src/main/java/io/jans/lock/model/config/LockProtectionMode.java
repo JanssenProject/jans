@@ -16,8 +16,34 @@
 
 package io.jans.lock.model.config;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * 
  * @author Yuriy Movchan Date: 10/08/2022
  */
-public enum LockProtectionMode { OAUTH, CEDARLING }
+public enum LockProtectionMode {
+
+	OAUTH("oauth"), CEDARLING("cedarling");
+
+	private final String mode;
+
+	/**
+     * Creates a LockProtectionMode with the given string representation.
+     *
+     * @param mode the string value used to represent this enum constant (for JSON serialization)
+     */
+    private LockProtectionMode(String mode) {
+        this.mode = mode;
+    }
+
+	/**
+	 * The value used when this enum is serialized to JSON.
+	 *
+	 * @return the enum constant's mode string, e.g. "oauth" or "cedarling"
+	 */
+	@JsonValue
+	public String getMode() {
+		return mode;
+	}
+}
