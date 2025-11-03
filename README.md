@@ -1,3 +1,4 @@
+rnano README.md
 <h1 align="center"><img src="https://github.com/JanssenProject/jans/blob/main/docs/assets/logo/janssen_project_transparent_630px_182px.png" alt="Janssen Project - Open Source Digital Identity Infrastructure Software"></h1>
 
 ## Welcome to the Janssen Project
