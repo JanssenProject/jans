@@ -7,9 +7,12 @@ package io.jans.lock.service.app.audit;
  */
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 import org.slf4j.Logger;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.lock.model.app.audit.AuditLogEntry;
@@ -32,14 +35,15 @@ public class ApplicationAuditLogger {
 	@PostConstruct
 	public void init() {
 		this.mapper = new ObjectMapper();
-	}
-
-	@PreDestroy
-	public void destroy() {
+		this.mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+		this.mapper.setTimeZone(TimeZone.getTimeZone("UTC"));
+		this.mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 
 	public void log(AuditLogEntry auditLogEntry) {
-		loggingThroughFile(auditLogEntry);
+		if (auditLogEntry != null) {
+			loggingThroughFile(auditLogEntry);
+		}
 	}
 
 	private void loggingThroughFile(AuditLogEntry auditLogEntry) {
@@ -49,7 +53,7 @@ public class ApplicationAuditLogger {
 				log.info(entry);
 			}
 		} catch (IOException e) {
-			log.error("Can't serialize the a[[lication audit log", e);
+			log.error("Can't serialize the application audit log", e);
 		}
 	}
 

@@ -103,14 +103,19 @@ public final class InetAddressUtility {
      * @return IP address of client
      * @see <a href="http://stackoverflow.com/a/21884642/5202500">Getting IP address of client</a>
      */
-    public static String getIpAddress(HttpServletRequest httpRequest) {
-        for (String header : HEADERS_TO_TRY) {
-            String ip = httpRequest.getHeader(header);
-            if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
-                return ip;
-            }
-        }
-        return httpRequest.getRemoteAddr();
-    }
+	public static String getIpAddress(HttpServletRequest httpRequest) {
+		for (String header : HEADERS_TO_TRY) {
+			String ip = httpRequest.getHeader(header);
+			if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
+				// X-Forwarded-For can contain multiple IPs; take the first one
+				int commaIndex = ip.indexOf(',');
+				if (commaIndex > 0) {
+					ip = ip.substring(0, commaIndex).trim();
+				}
+				return ip;
+			}
+		}
+		return httpRequest.getRemoteAddr();
+	}
 
 }
