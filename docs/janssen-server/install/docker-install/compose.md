@@ -1,47 +1,4 @@
 ---
-tags:
-- administration
-- installation
-- quick-start
-- docker compose
-- docker image
----
-# Docker compose
-> **Warning**
-> This image is for testing and development purposes only. Use Janssen [helm charts](https://github.com/JanssenProject/jans/tree/main/charts/janssen) for production setups.
-
-Docker monolith image packaging for Janssen. This image packs janssen services including the auth-server, config-api, fido2, and scim.
-
-## Pre-requisites
-
-- [Docker](https://docs.docker.com/install)
-- [Docker compose](https://docs.docker.com/compose/install/)
-
-## Environment Variables
-
-Installation depends on the set of environment variables shown below. These environment variables can be set to customize installation as per the need. If not set, the installer uses default values.
-
-| ENV                        | Description                                                                                                                                                          | Default                                          |
-|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------|
-| CN_HOSTNAME                | Hostname for the deployment (FQDN)                                                                                                                                   | `demoexample.jans.io`                           |
-| CN_ADMIN_PASS              | Default admin password                                                                                                                                               | `Test1234#`                                     |
-| CN_ORG_NAME                | Name of organization                                                                                                                                                 | `Janssen`                                       |
-| CN_EMAIL                   | Email address of administrator                                                                                                                                       | `support@jans.io`                               |
-| CN_CITY                    | City                                                                                                                                                                 | `Austin`                                        |
-| CN_STATE                   | State                                                                                                                                                                | `TX`                                            |
-| CN_COUNTRY                 | Two-letter country code                                                                                                                                              | `US`                                            |
-| CN_INSTALL_LDAP            | Enable LDAP                                                                                                                                                          | `true`                                          |
-| CN_INSTALL_CONFIG_API      | Enable installation of config-api                                                                                                                                    | `true`                                          |
-| CN_INSTALL_SCIM            | Enable installation of SCIM                                                                                                                                          | `true`                                          |
-| CN_INSTALL_FIDO2           | Enable installation of FIDO2                                                                                                                                         | `true`                                          |
-| CN_INSTALL_CASA            | Enable installation of Casa                                                                                                                                          | `false`                                         |
-| CN_INSTALL_SAML            | Enable installation of SAML                                                                                                                                          | `false`                                         |
-| CN_INSTALL_LOCK            | Enable installation of Lock                                                                                                                                          | `false`                                         |
-| CN_INSTALL_KC_LINK         | Enable installation of KC Link                                                                                                                                       | `false`                                         |
-| CN_INSTALL_MYSQL           | Install MySQL                                                                                                                                                        | `false`                                         |
-| CN_INSTALL_PGSQL           | Install PostgreSQL                                                                                                                                                   | `false`                                         |
-| TEST_USERS_PREFIX_STRING   | Prefix used for test users created during setup                                                                                                                      | `test_user`                                     |
-| CN_INSTALL_NO_PROMPT       | Run setup without prompting for values                                                                                                                               | `true`                                          |
 | CN_OCI_BUILD_ARGS          | Additional build arguments passed to OCI builder                                                                                                                     | ``                                              |
 
 ## Download compose and supporting files
@@ -49,19 +6,22 @@ Installation depends on the set of environment variables shown below. These envi
 Download the compose file for the persistence you want.
 
 === "MySQL"
-    ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
-    ```
+
+```bash
+    wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml
+```
+
 === "PostgreSQL"
-    ```bash 
-    wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml 
-    ```
+
+```bash
+    wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml
+```
 
 Download the script files
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/up.sh \
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/down.sh \
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/up.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/down.sh
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/clean.sh
 ```
 
@@ -78,29 +38,36 @@ It creates two containers, a janssen monolith container and a container for pers
 !!! Troubleshooting Tip
     Sometimes the command below runs into an error regarding TLS handshake timeout while trying to connect
     to docker registry. Try restarting docker services. Root-cause of this error is not known.
-    ```bash
+
+```bash
     service docker restart
-    ```
+```
 
 === "MySQL"
-    ```bash
-    ./up.sh mysql 
-    ```
+
+```bash
+    ./up.sh mysql
+```
+
 === "PostgreSQL"
-    ```bash
+
+```bash
     ./up.sh pgsql
-    ```
+```
 
 To view the containers running
 
 === "MySQL"
-    ```bash
+
+```bash
     docker compose -f jans-mysql-compose.yml ps
-    ```
+```
+
 === "PostgreSQL"
-    ```bash
+
+```bash
     docker compose -f jans-postgres-compose.yml ps
-    ```
+```
 
 To stop the containers.
 
@@ -111,16 +78,18 @@ To stop the containers.
 ## Configure Janssen Server
 
 1. Access the Docker container shell using:
-    ```bash
+
+```bash
     docker compose -f jans-mysql-compose.yml exec jans /bin/bash #This opens a bash terminal in the running container
-    ```
+```
 
 2. You can grab `client_id` and `client_pw`(secret) pairs and other values from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
 
 3. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen as needed. For example you can run the [TUI](https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/):
-    ```bash
+
+```bash
     python3 /opt/jans/jans-cli/config-cli-tui.py
-    ```
+```
 
 ## Access endpoints externally
 
