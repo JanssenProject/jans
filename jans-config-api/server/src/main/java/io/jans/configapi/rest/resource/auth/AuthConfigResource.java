@@ -139,15 +139,21 @@ public class AuthConfigResource extends ConfigBaseResource {
     
     
     @Operation(summary = "Returns feature flags type configured for Jans authorization server.", description = "Returns feature flags type configured for Jans authorization server.", operationId = "get-feature-flag-type", tags = {
-            "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }))
+            "Configuration – Properties" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type="enum")))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type = "enum")))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
+            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS,
+            ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS }, superScopes = {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.FEATURE_FLAGS)
     public Response getFeatureFlagType() {
