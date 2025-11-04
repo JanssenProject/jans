@@ -535,7 +535,7 @@ pub struct AuthorizeEntitiesData {
     pub user: Option<Entity>,
     pub roles: Vec<Entity>,
     pub resource: Entity,
-    pub default_entities: HashMap<String, Entity>,
+    pub default_entities: HashMap<EntityUid, Entity>,
 }
 
 impl AuthorizeEntitiesData {

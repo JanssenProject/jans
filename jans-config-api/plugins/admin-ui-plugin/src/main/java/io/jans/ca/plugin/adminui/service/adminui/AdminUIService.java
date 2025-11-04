@@ -6,7 +6,6 @@ import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.config.adminui.AdminPermission;
 import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
-import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
 import io.jans.ca.plugin.adminui.model.auth.AppConfigResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
@@ -15,6 +14,7 @@ import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.util.security.StringEncrypter;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
@@ -55,6 +55,9 @@ public class AdminUIService {
             appConfigResponse.setAllowSmtpKeystoreEdit(auiConfiguration.getAllowSmtpKeystoreEdit());
             appConfigResponse.setAdditionalParameters(auiConfiguration.getAdditionalParameters());
             appConfigResponse.setCedarlingLogType(auiConfiguration.getCedarlingLogType());
+            appConfigResponse.setAuiPolicyStoreUrl(auiConfiguration.getAuiCedarlingPolicyStoreUrl());
+            appConfigResponse.setAuiDefaultPolicyStorePath(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath());
+            appConfigResponse.setUseRemotePolicyStore(auiConfiguration.getUseCedarlingRemotePolicyStore());
 
             return appConfigResponse;
         } catch (Exception e) {
@@ -85,6 +88,18 @@ public class AdminUIService {
             if (appConfigResponse.getCedarlingLogType() != null) {
                 adminConf.getMainSettings().getUiConfig().setCedarlingLogType(appConfigResponse.getCedarlingLogType().getValue());
                 auiConfigurationService.getAUIConfiguration().setCedarlingLogType(appConfigResponse.getCedarlingLogType());
+            }
+            if (!Strings.isNullOrEmpty(appConfigResponse.getAuiPolicyStoreUrl())) {
+                adminConf.getMainSettings().getUiConfig().setAuiPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
+                auiConfigurationService.getAUIConfiguration().setAuiCedarlingPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
+            }
+            if (appConfigResponse.getUseRemotePolicyStore() != null) {
+                adminConf.getMainSettings().getUiConfig().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
+                auiConfigurationService.getAUIConfiguration().setUseCedarlingRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
+            }
+            if (!Strings.isNullOrEmpty(appConfigResponse.getAuiDefaultPolicyStorePath())) {
+                adminConf.getMainSettings().getUiConfig().setAuiDefaultPolicyStorePath(appConfigResponse.getAuiDefaultPolicyStorePath());
+                auiConfigurationService.getAUIConfiguration().setAuiCedarlingDefaultPolicyStorePath(appConfigResponse.getAuiDefaultPolicyStorePath());
             }
             entryManager.merge(adminConf);
             return getAdminUIEditableConfiguration();
@@ -133,6 +148,20 @@ public class AdminUIService {
             }
             roles.add(roleArg);
             adminConf.getDynamic().setRoles(roles);
+            entryManager.merge(adminConf);
+
+            return adminConf.getDynamic().getRoles();
+        } catch (Exception e) {
+            log.error(ErrorResponse.SAVE_ADMIUI_ROLES_ERROR.getDescription(), e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.SAVE_ADMIUI_ROLES_ERROR.getDescription());
+        }
+    }
+
+    public List<AdminRole> resetRoles(List<AdminRole> roleArgs) throws ApplicationException {
+        try {
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+
+            adminConf.getDynamic().setRoles(roleArgs);
             entryManager.merge(adminConf);
 
             return adminConf.getDynamic().getRoles();
@@ -320,6 +349,20 @@ public class AdminUIService {
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_READING_ROLE_PERMISSION_MAP.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.ERROR_READING_ROLE_PERMISSION_MAP.getDescription());
+        }
+    }
+
+    public void resetPermissionsToRole(List<RolePermissionMapping> rolePermissionsArgs) throws ApplicationException {
+        try {
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+            for (RolePermissionMapping mapping : Optional.ofNullable(rolePermissionsArgs).orElse(Collections.emptyList())) {
+                validateRolePermissionMapping(adminConf, mapping);
+            }
+            adminConf.getDynamic().setRolePermissionMapping(rolePermissionsArgs);
+            entryManager.merge(adminConf);
+        } catch (Exception e) {
+            log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription());
         }
     }
 
