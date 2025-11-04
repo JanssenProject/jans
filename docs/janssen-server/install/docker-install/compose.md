@@ -95,9 +95,9 @@ To shut down the deployment, run:
 
 ## Configure Janssen Server
 
-1. Access the Docker container shell using:
-1. You can grab `client_id` and `client_pw`(secret) pairs and other values from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
-1. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen as needed. For example you can run the [TUI](https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/):
+1. Access the Docker container shell
+1. You can grab `client_id` and `client_pw` (secret) pairs and other values from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
+1. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen as needed. For example you can run the [TUI](https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/)
 
 ```bash
 docker compose -f jans-mysql-compose.yml exec jans /bin/bash #This opens a bash terminal in the running container
