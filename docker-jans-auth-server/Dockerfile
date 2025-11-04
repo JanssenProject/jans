@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-alpine:17.0.12@sha256:83719ee0075de03ecc7a99db489fd72a022e49f09c0e6e6350bcc05310c3caf6
+FROM bellsoft/liberica-openjdk-alpine:17.0.17@sha256:0e8ae43555ad8e2d69431c2078df256c01b625a8a3010e76b5a6baff0d165d2c
 
 # ===============
 # Alpine packages
@@ -29,8 +29,8 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # Jython
 # ======
 
-ARG JYTHON_VERSION=2.7.3
-ARG JYTHON_BUILD_DATE='2022-08-01 17:37'
+ARG JYTHON_VERSION=2.7.4
+ARG JYTHON_BUILD_DATE='2025-10-17 18:14'
 RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
@@ -51,7 +51,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-10-06 08:18'
+ENV CN_BUILD_DATE='2025-11-03 10:28'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
@@ -72,7 +72,7 @@ ARG JSMPP_VERSION=2.3.7
 
 RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
-    && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound jans-lock-service jans-lock-model; \
+    && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound jans-lock-service jans-lock-model jans-lock-cedarling cedarling-java; \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/${custom_lib}/${CN_VERSION}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/_libs"; \
     done
@@ -88,7 +88,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=81b0ea05fabcef7d2c6dab6f665e9627d105094c
+ENV JANS_SOURCE_VERSION=a812b538d43f0e28ad123aed688c7b5a1759e546
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)

@@ -48,7 +48,7 @@ FROM ${JANS_SAML_IMAGE} AS jans-saml-src
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:17.0.12@sha256:83719ee0075de03ecc7a99db489fd72a022e49f09c0e6e6350bcc05310c3caf6
+FROM bellsoft/liberica-openjdk-alpine:17.0.17@sha256:0e8ae43555ad8e2d69431c2078df256c01b625a8a3010e76b5a6baff0d165d2c
 
 # hadolint ignore=DL3018
 RUN apk update \
@@ -60,7 +60,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=81b0ea05fabcef7d2c6dab6f665e9627d105094c
+ENV JANS_SOURCE_VERSION=a812b538d43f0e28ad123aed688c7b5a1759e546
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets

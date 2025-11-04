@@ -15,7 +15,7 @@ RUN apk update \
 
 # JAR files required to generate OpenID Connect keys
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-10-06 08:35'
+ENV CN_BUILD_DATE='2025-11-03 10:27'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
@@ -44,7 +44,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/jani
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=81b0ea05fabcef7d2c6dab6f665e9627d105094c
+ENV JANS_SOURCE_VERSION=a812b538d43f0e28ad123aed688c7b5a1759e546
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets

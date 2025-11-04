@@ -29,8 +29,8 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # Jython
 # ======
 
-ARG JYTHON_VERSION=2.7.3
-ARG JYTHON_BUILD_DATE='2022-08-01 17:37'
+ARG JYTHON_VERSION=2.7.4
+ARG JYTHON_BUILD_DATE='2025-10-17 18:14'
 RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython -e ensurepip \
@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-10-06 08:28'
+ENV CN_BUILD_DATE='2025-11-03 11:54'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
@@ -64,7 +64,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=81b0ea05fabcef7d2c6dab6f665e9627d105094c
+ENV JANS_SOURCE_VERSION=a812b538d43f0e28ad123aed688c7b5a1759e546
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
