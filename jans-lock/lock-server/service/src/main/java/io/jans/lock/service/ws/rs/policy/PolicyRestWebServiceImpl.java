@@ -8,9 +8,13 @@ import org.slf4j.Logger;
 
 import io.jans.lock.cedarling.service.policy.PolicyDownloadService;
 import io.jans.lock.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
+import io.jans.lock.model.app.audit.AuditActionType;
+import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.error.CommonErrorResponseType;
 import io.jans.lock.model.error.ErrorResponseFactory;
+import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.ws.rs.base.BaseResource;
+import io.jans.net.InetAddressUtility;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -34,8 +38,14 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    @Inject
+    private ApplicationAuditLogger applicationAuditLogger;
+
 	@Override
 	public Response getPoliciesUriList() {
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.POLICIES_URI_LIST_READ);
+        applicationAuditLogger.log(auditLogEntry);
+
         if (log.isDebugEnabled()) {
         	log.debug("Request policies URI list");
         }
@@ -61,6 +71,9 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 
 	@Override
 	public Response getPolicyByUri(@NotNull String uri) {
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.POLICY_BY_URI_READ);
+        applicationAuditLogger.log(auditLogEntry);
+
         if (log.isDebugEnabled()) {
         	log.debug("Request policy by URI: {}", uri);
         }
