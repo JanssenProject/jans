@@ -21,20 +21,12 @@ public class AuditLogEntry {
     private final String macAddress;
     private boolean isSuccess;
 
-    private String clientId;
-
-    private String username;
-    private String scope;
-
-    private Object resource;
-
     public AuditLogEntry(String ip, AuditActionType action) {
         this.ip = ip;
         this.action = action;
         this.timestamp = new Date();
         this.macAddress = InetAddressUtility.getMACAddressOrNull();
         this.isSuccess = false;
-		this.resource = null;
     }
 
     public String getIp() {
@@ -60,37 +52,5 @@ public class AuditLogEntry {
     public void setSuccess(boolean success) {
         isSuccess = success;
     }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getScope() {
-        return scope;
-    }
-
-    public void setScope(String scope) {
-        this.scope = scope;
-    }
-
-    public Object getResource() {
-		return resource;
-	}
-
-	public void setResource(Object resource) {
-		this.resource = resource;
-	}
 
 }
