@@ -51,8 +51,8 @@ public class ConfigurationRestWebService extends BaseResource {
 	@Inject
 	private ConfigurationService configurationService;
 
-    @Inject
-    private ApplicationAuditLogger applicationAuditLogger;
+	@Inject
+	private ApplicationAuditLogger applicationAuditLogger;
 
 	@Operation(summary = "Request .well-known data", description = "Request .well-know Lock server configuration", tags = {
 			"Lock - Server Configuration" })
@@ -63,13 +63,19 @@ public class ConfigurationRestWebService extends BaseResource {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response getConfiguration() {
-        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.CONFIGURATION_READ);
-        applicationAuditLogger.log(auditLogEntry);
+		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()),
+				AuditActionType.CONFIGURATION_READ);
 
-		ObjectNode response = configurationService.getLockConfiguration();
+		boolean success = false;
+		try {
+			ObjectNode response = configurationService.getLockConfiguration();
+			ResponseBuilder builder = Response.ok().entity(response.toString());
 
-		ResponseBuilder builder = Response.ok().entity(response.toString());
-		return builder.build();
+			success = true;
+			return builder.build();
+		} finally {
+			applicationAuditLogger.log(auditLogEntry, success);
+		}
 	}
 
 }

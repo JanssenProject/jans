@@ -218,4 +218,12 @@ public class BaseResource {
 		return rootCause;
 	}
 
+	protected boolean getResponseResult(Response response) {
+		if (response == null) {
+			return false;
+		}
+
+		return response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL;
+	}
+
 }

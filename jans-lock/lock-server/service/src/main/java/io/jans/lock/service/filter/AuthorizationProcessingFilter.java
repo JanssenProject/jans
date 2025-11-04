@@ -50,6 +50,9 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 	@Context
 	private ResourceInfo resourceInfo;
 
+	@Context
+    private HttpServletRequest httpRequest;
+
 	/**
 	 * This method performs the protection check of service invocations: it provokes
 	 * returning an early error response if the underlying protection logic does not
@@ -70,9 +73,8 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 			Response authorizationResponse = protectionService.processAuthorization(httpHeaders, resourceInfo);
 	        boolean success = authorizationResponse == null;
 
-	        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress((HttpServletRequest) requestContext.getRequest()), AuditActionType.OPENID_AUTHZ_FILTER);
-			auditLogEntry.setSuccess(success);
-	        applicationAuditLogger.log(auditLogEntry);
+	        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(httpRequest), AuditActionType.OPENID_AUTHZ_FILTER);
+	        applicationAuditLogger.log(auditLogEntry, success);
 
 			if (success) {
 				// Actual processing of request proceeds

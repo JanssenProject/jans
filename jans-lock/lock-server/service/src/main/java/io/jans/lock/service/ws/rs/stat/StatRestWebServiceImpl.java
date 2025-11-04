@@ -67,9 +67,15 @@ public class StatRestWebServiceImpl extends BaseResource implements StatRestWebS
                             @QueryParam("format") String format) {
 
         AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.SSA_READ);
-        applicationAuditLogger.log(auditLogEntry);
 
-        return stat(months, startMonth, endMonth, format);
+        Response response = null;
+        try {
+	        response = stat(months, startMonth, endMonth, format);
+        } finally {
+            applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
+        }
+        
+        return response;
     }
 
     @Override
@@ -79,9 +85,15 @@ public class StatRestWebServiceImpl extends BaseResource implements StatRestWebS
                              @FormParam("format") String format) {
 
         AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.SSA_READ);
-        applicationAuditLogger.log(auditLogEntry);
 
-        return stat(months, startMonth, endMonth, format);
+        Response response = null;
+        try {
+	        response = stat(months, startMonth, endMonth, format);
+        } finally {
+            applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
+        }
+        
+        return response;
     }
 
 	public static String createOpenMetricsResponse(StatResponse statResponse) throws IOException {

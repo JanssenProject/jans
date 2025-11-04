@@ -44,55 +44,67 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 	@Override
 	public Response getPoliciesUriList() {
         AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.POLICIES_URI_LIST_READ);
-        applicationAuditLogger.log(auditLogEntry);
 
-        if (log.isDebugEnabled()) {
-        	log.debug("Request policies URI list");
+        Response response = null;
+        try {
+	        if (log.isDebugEnabled()) {
+	        	log.debug("Request policies URI list");
+	        }
+	
+	        Map<String, LoadedPolicySource> policies = policyDownloadService.getLoadedPolicies();
+	
+	        List<String> uris = new ArrayList<String>(policies.keySet());
+	
+	        if (uris.size() == 0) {
+	        	throw errorResponseFactory.notFoundException(CommonErrorResponseType.NOT_FOUND_ERROR, "There is no policies loaded.");
+	        }
+	
+	        if (log.isTraceEnabled()) {
+				log.trace("Policies URIs: {}", uris);
+			}
+	
+	        if (log.isDebugEnabled()) {
+	        	log.debug("Sending policies list");
+	        }
+	
+	        response = Response.ok().entity(uris).build();
+        } finally {
+            applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
         }
 
-        Map<String, LoadedPolicySource> policies = policyDownloadService.getLoadedPolicies();
-
-        List<String> uris = new ArrayList<String>(policies.keySet());
-
-        if (uris.size() == 0) {
-        	throw errorResponseFactory.notFoundException(CommonErrorResponseType.NOT_FOUND_ERROR, "There is no policies loaded.");
-        }
-
-        if (log.isTraceEnabled()) {
-			log.trace("Policies URIs: {}", uris);
-		}
-
-        if (log.isDebugEnabled()) {
-        	log.debug("Sending policies list");
-        }
-
-        return Response.ok().entity(uris).build();
+        return response;
 	}
 
 	@Override
 	public Response getPolicyByUri(@NotNull String uri) {
         AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.POLICY_BY_URI_READ);
-        applicationAuditLogger.log(auditLogEntry);
 
-        if (log.isDebugEnabled()) {
-        	log.debug("Request policy by URI: {}", uri);
+        Response response = null;
+        try {
+	        if (log.isDebugEnabled()) {
+	        	log.debug("Request policy by URI: {}", uri);
+	        }
+	
+	        if (StringHelper.isEmpty(uri)) {
+	        	throw errorResponseFactory.badRequestException(CommonErrorResponseType.INVALID_REQUEST, "URI is not specified");
+	        }
+	
+	        Map<String, LoadedPolicySource> policies = policyDownloadService.getLoadedPolicies();
+	
+	        if (!policies.containsKey(uri)) {
+	        	throw errorResponseFactory.notFoundException(CommonErrorResponseType.NOT_FOUND_ERROR, String.format("There is no policy: %s.", uri));
+	        }
+	
+	        if (log.isDebugEnabled()) {
+	        	log.debug("Sending policy response for URI: {}", uri);
+	        }
+
+	        response = Response.ok().entity(policies.get(uri).getPolicyJson()).build();
+        } finally {
+            applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
         }
 
-        if (StringHelper.isEmpty(uri)) {
-        	throw errorResponseFactory.badRequestException(CommonErrorResponseType.INVALID_REQUEST, "URI is not specified");
-        }
-
-        Map<String, LoadedPolicySource> policies = policyDownloadService.getLoadedPolicies();
-
-        if (!policies.containsKey(uri)) {
-        	throw errorResponseFactory.notFoundException(CommonErrorResponseType.NOT_FOUND_ERROR, String.format("There is no policy: %s.", uri));
-        }
-
-        if (log.isDebugEnabled()) {
-        	log.debug("Sending policy response for URI: {}", uri);
-        }
-
-        return Response.ok().entity(policies.get(uri).getPolicyJson()).build();
+        return response;
 	}
 
 }
