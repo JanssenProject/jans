@@ -18,9 +18,13 @@ package io.jans.lock.service.ws.rs;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.jans.lock.model.app.audit.AuditActionType;
+import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.core.LockApiError;
+import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.config.ConfigurationService;
 import io.jans.lock.service.ws.rs.base.BaseResource;
+import io.jans.net.InetAddressUtility;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,6 +51,9 @@ public class ConfigurationRestWebService extends BaseResource {
 	@Inject
 	private ConfigurationService configurationService;
 
+    @Inject
+    private ApplicationAuditLogger applicationAuditLogger;
+
 	@Operation(summary = "Request .well-known data", description = "Request .well-know Lock server configuration", tags = {
 			"Lock - Server Configuration" })
 	@ApiResponses(value = {
@@ -56,6 +63,9 @@ public class ConfigurationRestWebService extends BaseResource {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response getConfiguration() {
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.CONFIGURATION_READ);
+        applicationAuditLogger.log(auditLogEntry);
+
 		ObjectNode response = configurationService.getLockConfiguration();
 
 		ResponseBuilder builder = Response.ok().entity(response.toString());
