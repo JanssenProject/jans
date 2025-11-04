@@ -36,14 +36,7 @@ public class AuditLogEntry {
         this.isSuccess = false;
 		this.resource = null;
     }
-/*
-    public void updateAuditLogEntry(AuthorizationGrant authorizationGrant, boolean success) {
-        this.setClientId(authorizationGrant.getClientId());
-        this.setUsername(authorizationGrant.getUserId());
-        this.setScope(StringUtils.join(authorizationGrant.getScopes(), " "));
-        this.setSuccess(success);
-    }
-*/
+
     public String getIp() {
         return ip;
     }
