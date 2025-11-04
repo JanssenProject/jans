@@ -32,6 +32,9 @@ import java.util.regex.Pattern;
 public class CommonUtils {
     @Inject
     Logger log;
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     public static final DateTimeFormatter LS_DATE_FORMAT = DateTimeFormatter.ofPattern("E, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 
 
@@ -183,5 +186,26 @@ public class CommonUtils {
     public static String convertLocalDateToString(LocalDate date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return date.format(formatter);
+    }
+
+    /**
+     * Converts any Java object into a JsonNode representation.
+     *
+     * @param object the Java object to convert
+     * @return JSON representation of the object
+     */
+    public static JsonNode toJsonNode(Object object) throws JsonProcessingException {
+        return objectMapper.valueToTree(object);
+    }
+
+    /**
+     * Converts a Boolean object to a boolean primitive.
+     * Returns false if the input Boolean object is null.
+     *
+     * @param booleanObject The Boolean object to convert.
+     * @return The boolean primitive value, or false if the input is null.
+     */
+    public static boolean toPrimitiveOrDefaultFalse(Boolean booleanObject) {
+        return booleanObject != null ? booleanObject : false;
     }
 }
