@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::*;
-use crate::{EntityData};
+use crate::EntityData;
 
 impl EntityBuilder {
     pub fn build_resource_entity(&self, resource: &EntityData) -> Result<Entity, BuildEntityError> {
@@ -22,17 +22,15 @@ impl EntityBuilder {
         )
         .map_err(|e| BuildEntityErrorKind::from(e).while_building(resource_type_name))?;
 
-        let resource = build_cedar_entity(resource_type_name, &resource.cedar_mapping.id, attrs, HashSet::new())?;
+        let resource = build_cedar_entity(
+            resource_type_name,
+            &resource.cedar_mapping.id,
+            attrs,
+            HashSet::new(),
+        )?;
 
         Ok(resource)
     }
-}
-
-#[derive(Debug, thiserror::Error, PartialEq)]
-#[error("JSON value type mismatch: expected '{expected_type}', but found '{actual_type}'")]
-pub struct JsonTypeError {
-    pub expected_type: String,
-    pub actual_type: String,
 }
 
 #[cfg(test)]
@@ -41,6 +39,7 @@ mod test {
     use super::super::*;
     use super::*;
     use crate::CedarEntityMapping;
+    use crate::log::TEST_LOGGER;
     use serde_json::json;
 
     #[test]
@@ -50,12 +49,14 @@ mod test {
             &HashMap::new(),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let resource_data = EntityData {
             cedar_mapping: CedarEntityMapping {
-            entity_type: "Jans::HTTP_Request".to_string(),
-            id: "some_request".to_string(),
+                entity_type: "Jans::HTTP_Request".to_string(),
+                id: "some_request".to_string(),
             },
             attributes: HashMap::from([
                 ("header".to_string(), json!({"Accept": "test"})),
@@ -96,12 +97,14 @@ mod test {
             &HashMap::new(),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let resource_data = EntityData {
             cedar_mapping: CedarEntityMapping {
-            entity_type: "Jans::HTTP_Request".to_string(),
-            id: "some_request".to_string(),
+                entity_type: "Jans::HTTP_Request".to_string(),
+                id: "some_request".to_string(),
             },
             attributes: HashMap::new(),
         };
