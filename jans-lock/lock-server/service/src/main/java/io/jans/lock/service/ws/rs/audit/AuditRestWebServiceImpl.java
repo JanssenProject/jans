@@ -16,29 +16,33 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-import static io.jans.lock.service.audit.AuditForwarderService.AUDIT_HEALTH;
-import static io.jans.lock.service.audit.AuditForwarderService.AUDIT_HEALTH_BULK;
-import static io.jans.lock.service.audit.AuditForwarderService.AUDIT_LOG;
-import static io.jans.lock.service.audit.AuditForwarderService.AUDIT_LOG_BULK;
-import static io.jans.lock.service.audit.AuditForwarderService.AUDIT_TELEMETRY;
-import static io.jans.lock.service.audit.AuditForwarderService.AUDIT_TELEMETRY_BULK;
+import java.io.IOException;
+import java.util.List;
 
 import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.jans.lock.model.AuditEndpointType;
+import io.jans.lock.model.audit.HealthEntry;
+import io.jans.lock.model.audit.LogEntry;
+import io.jans.lock.model.audit.TelemetryEntry;
+import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.config.AuditPersistenceMode;
+import io.jans.lock.service.AuditService;
 import io.jans.lock.service.DataMapperService;
 import io.jans.lock.service.audit.AuditForwarderService;
 import io.jans.lock.service.stat.StatService;
 import io.jans.lock.service.ws.rs.base.BaseResource;
 import io.jans.lock.util.ServerUtil;
+import io.jans.service.JsonService;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
 
@@ -60,60 +64,129 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 
 	@Inject
     private Logger log;
-    
+
+    @Inject
+    private AppConfiguration appConfiguration;
+
     @Inject
     private DataMapperService dataMapperService;
+    
+    @Inject
+    private JsonService jsonService;
 
     @Inject
     private AuditForwarderService auditForwarderService;
+
+    @Inject
+    private AuditService auditService;
     
     @Inject
     private StatService statService;
 
+    /**
+     * Processes an incoming health audit request and delegates handling to the audit processor.
+     *
+     * @return a Response containing the HTTP response to return for the health audit request
+     */
     @Override
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
         log.info("Processing Health request - request: {}", request);
-        return processAuditRequest(request, AUDIT_HEALTH);
+        return processAuditRequest(request, AuditEndpointType.HEALTH);
     }
 
+	/**
+	 * Handles incoming bulk health audit requests.
+	 *
+	 * Produces a Response representing the outcome of processing the bulk health audit payload.
+	 *
+	 * @return the Response representing the outcome of processing the bulk health audit request
+	 */
 	@Override
 	public Response processBulkHealthRequest(HttpServletRequest request, HttpServletResponse response,
 			SecurityContext sec) {
         log.info("Processing Bulk Health request - request: {}", request);
-        return processAuditRequest(request, AUDIT_HEALTH_BULK);
+        return processAuditRequest(request, AuditEndpointType.HEALTH_BULK);
 	}
 
+    /**
+     * Handle an incoming audit log request for a single log event and process it while reporting statistics.
+     *
+     * @param request the HTTP servlet request containing the log JSON payload
+     * @param response the HTTP servlet response (unused by this method but provided by the servlet layer)
+     * @param sec the security context for the request
+     * @return a JAX-RS Response containing the processing result; `400 BAD_REQUEST` on parse failure, `200 OK` on success
+     */
     @Override
     public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Log request - request: {}", request);
-        return processAuditRequest(request, AUDIT_LOG, true, false);
+        return processAuditRequest(request, AuditEndpointType.LOG, true, false);
     }
 
+	/**
+	 * Handles an incoming bulk log audit request, reports relevant statistics, and delegates processing.
+	 *
+	 * @param request  the HTTP request containing the bulk log payload
+	 * @param response the HTTP response
+	 * @param sec      the security context for the request
+	 * @return the HTTP response representing the processing result; status indicates success or failure
+	 */
 	@Override
 	public Response processBulkLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Bulk Log request - request: {}", request);
-        return processAuditRequest(request, AUDIT_LOG_BULK, true, true);
+        return processAuditRequest(request, AuditEndpointType.LOG_BULK, true, true);
 	}
 
+    /**
+     * Handle an incoming telemetry audit request.
+     *
+     * @param request the HTTP servlet request containing the telemetry payload
+     * @param response the HTTP servlet response
+     * @param sec the security context for the request
+     * @return a Response representing the result of processing the telemetry audit request
+     */
     @Override
     public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Telemetry request - request: {}", request);
-        return processAuditRequest(request, AUDIT_TELEMETRY);
-
+        return processAuditRequest(request, AuditEndpointType.TELEMETRY);
     }
 
+	/**
+	 * Handles an incoming bulk telemetry audit request.
+	 *
+	 * @return a Response representing the result of processing the bulk telemetry audit request
+	 */
 	@Override
 	public Response processBulkTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Bulk Telemetry request - request: {}", request);
-        return processAuditRequest(request, AUDIT_TELEMETRY_BULK);
+        return processAuditRequest(request, AuditEndpointType.TELEMETRY_BULK);
 	}
 
-	private Response processAuditRequest(HttpServletRequest request, String requestType) {
+	/**
+     * Delegates processing of an audit HTTP request to the main processor using default flags
+     * (do not report statistics, not bulk data).
+     *
+     * @param request     the incoming HTTP servlet request containing the audit JSON payload
+     * @param requestType the audit endpoint type indicating which audit path to process
+     * @return the JAX-RS response produced by processing the audit request
+     */
+    private Response processAuditRequest(HttpServletRequest request, AuditEndpointType requestType) {
     	return processAuditRequest(request, requestType, false, false);
     }
 
-    private Response processAuditRequest(HttpServletRequest request, String requestType, boolean reportStat, boolean bulkData) {
+    /**
+     * Process an incoming audit HTTP request: parse its JSON payload, optionally report statistics,
+     * then either forward the payload to the configured audit API or persist it locally, and return
+     * an HTTP response containing the operation result.
+     *
+     * @param request the HTTP request containing the audit JSON payload
+     * @param requestType the audit endpoint type (HEALTH, LOG, TELEMETRY or their bulk variants)
+     * @param reportStat when true, report usage/operation statistics extracted from the payload
+     * @param bulkData when true, treat the payload as an array of entries for bulk reporting
+     * @return a JAX-RS Response whose entity is the result message from forwarding or persistence;
+     *         the response is marked private and no-store with a Pragma: no-cache header
+     */
+    private Response processAuditRequest(HttpServletRequest request, AuditEndpointType requestType, boolean reportStat, boolean bulkData) {
         log.info("Processing request - request: {}, requestType: {}", request, requestType);
 
         JsonNode json = getJsonNode(request);
@@ -129,28 +202,20 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
         	}
         }
 
-        Response response = this.auditForwarderService.post(requestType, json.toString(), ContentType.APPLICATION_JSON);
-        if (response == null) {
-        	throwNotFoundException("Failed to forward request to config-api");
-        }
-
-		log.debug("Get response with status: {}, statusInfo: {}, entityClass: {}", response.getStatus(),
-				response.getStatusInfo(), response.getEntity().getClass());
-
         Response.ResponseBuilder builder = Response.ok();
+
+        String response;
+		if (AuditPersistenceMode.CONFIG_API.equals(appConfiguration.getAuditPersistenceMode())) {
+	        response = auditForwarderService.post(builder, requestType, json.toString(), ContentType.APPLICATION_JSON);
+		} else {
+			response = persistetAuditData(builder, requestType, json.toString());
+		}
+
         builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
         builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
 		
-        String entity = response.readEntity(String.class);
-        builder.entity(entity);
-		log.debug("Response entity: {}", entity);
-
-        if (response.getStatusInfo().equals(Status.OK)) {
-			log.debug(" Status: {}, entity: {}", response.getStatus(), entity);
-        } else {
-			log.error("Error while saving audit data, statusInfo: {}, entity: {}", response.getStatusInfo(), entity);
-            builder.status(response.getStatusInfo());
-        }
+        builder.entity(response);
+		log.debug("Response entity: {}", response);
 
         return builder.build();
     }
@@ -198,6 +263,13 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 		}
 	}
 
+	/**
+	 * Reports statistics for each element of a JSON array representing bulk audit entries.
+	 *
+	 * If the provided node is not a JSON array, an error is logged and the method still attempts to process its elements.
+	 *
+	 * @param json JSON array of audit entries whose elements will be processed to report statistics
+	 */
 	private void reportBulkStat(JsonNode json) {
 		if (!json.isArray()) {
 			log.error("Failed to calculate stat for bulk log entry: {}", json);
@@ -208,4 +280,64 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 		}
 		
 	}
+
+	/**
+	 * Persist audit data for the given request type.
+	 *
+	 * <p>Parses the provided JSON payload into the appropriate audit entry or entries
+	 * based on {@code requestType} and persists them via the audit service.</p>
+	 *
+	 * @param builder     response builder that will be updated to BAD_REQUEST on parse failure
+	 * @param requestType the type of audit endpoint (log, health, telemetry, or their bulk variants)
+	 * @param json        the JSON payload to parse and persist
+	 * @return            an empty string on success, or the message "Failed to parse data" if parsing failed
+	 */
+	private String persistetAuditData(ResponseBuilder builder, AuditEndpointType requestType, String json) {
+		try {
+			switch (requestType) {
+				case LOG:
+					LogEntry logEntry = jsonService.jsonToObject(json, LogEntry.class);
+					auditService.addLogEntry(logEntry);
+					break;
+				case LOG_BULK:
+					List<LogEntry> logEntries = jsonService.jsonToObject(json, jsonService.getTypeFactory().constructCollectionType(List.class, LogEntry.class));
+					for (LogEntry entry : logEntries) {
+						auditService.addLogEntry(entry);
+					}
+					break;
+				case HEALTH:
+					HealthEntry healthEntry = jsonService.jsonToObject(json, HealthEntry.class);
+					auditService.addHealthEntry(healthEntry);
+					break;
+				case HEALTH_BULK:
+					List<HealthEntry> healthEntries = jsonService.jsonToObject(json, jsonService.getTypeFactory().constructCollectionType(List.class, HealthEntry.class));
+					for (HealthEntry entry : healthEntries) {
+						auditService.addHealthEntry(entry);
+					}
+					break;
+				case TELEMETRY:
+					TelemetryEntry telemetryEntry = jsonService.jsonToObject(json, TelemetryEntry.class);
+					auditService.addTelemetryEntry(telemetryEntry);
+					break;
+				case TELEMETRY_BULK:
+					List<TelemetryEntry> telemetryEntries = jsonService.jsonToObject(json, jsonService.getTypeFactory().constructCollectionType(List.class, TelemetryEntry.class));
+					for (TelemetryEntry entry : telemetryEntries) {
+						auditService.addTelemetryEntry(entry);
+					}
+					break;
+			}
+		} catch (IOException ex) {
+			builder.status(Status.BAD_REQUEST);
+			log.warn("Failed to parse data", ex);
+
+			return "Failed to parse data";
+		} catch (Exception ex) {
+			builder.status(Status.INTERNAL_SERVER_ERROR);
+			log.error("Failed to persist audit data", ex);
+
+			return "Failed to persist data";
+		}
+		return "";
+	}
+
 }

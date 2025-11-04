@@ -70,23 +70,33 @@ public class OpenIdProtectionService implements OpenIdProtection {
         }
     }
 
+    /**
+     * Validates the incoming request's access token for the resource and returns an HTTP error response when authorization fails.
+     *
+     * <p>Accepts either a JWT or an opaque token. For opaque tokens, performs token introspection. For JWTs, validates issuer, expiration,
+     * cryptographic signature (HMAC-signed tokens are rejected), and required scopes for the target resource.</p>
+     *
+     * @param headers      HTTP headers containing the Authorization header
+     * @param resourceInfo information about the target resource used to determine required scopes
+     * @return a Response describing the authorization failure (UNAUTHORIZED, FORBIDDEN, or INTERNAL_SERVER_ERROR) or `null` if authorization succeeds
+     */
     public Response processAuthorization(HttpHeaders headers, ResourceInfo resourceInfo) {
         try {
             String token = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
             boolean authFound = StringUtils.isNotEmpty(token);
-            log.info("Authorization header {} found", authFound ? "" : "not");
+            log.debug("Authorization header{} found", authFound ? "" : " not");
             
             if (!authFound) {
-                log.info("Request is missing authorization header");
+                log.debug("Request is missing authorization header");
                 // See section 3.12 RFC 7644
                 return simpleResponse(UNAUTHORIZED, "No authorization header found");
             }
             
             token = token.replaceFirst("Bearer\\s+","");
-            log.debug("Validating token {}", token);
+            log.debug("Validating bearer token");
 
             List<String> scopes = getRequestedScopes(resourceInfo);
-            log.info("Call requires scopes: {}", scopes);
+            log.debug("Call requires scopes: {}", scopes);
 
             Jwt jwt = tokenAsJwt(token);
             if (jwt == null) {
