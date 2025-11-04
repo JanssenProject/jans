@@ -8,10 +8,12 @@ public class ApiAccessConstants {
 
     public static final String JANS_AUTH_CONFIG_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.readonly";
     public static final String JANS_AUTH_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.write";
-
+    public static final String JANS_AUTH_CONFIG_ADMIN_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.admin";
+    
     public static final String ATTRIBUTES_READ_ACCESS = "https://jans.io/oauth/config/attributes.readonly";
     public static final String ATTRIBUTES_WRITE_ACCESS = "https://jans.io/oauth/config/attributes.write";
     public static final String ATTRIBUTES_DELETE_ACCESS = "https://jans.io/oauth/config/attributes.delete";
+    public static final String ATTRIBUTES_ADMIN_ACCESS = "https://jans.io/oauth/config/attributes.admin";
 
     public static final String ACRS_READ_ACCESS = "https://jans.io/oauth/config/acrs.readonly";
     public static final String ACRS_WRITE_ACCESS = "https://jans.io/oauth/config/acrs.write";
@@ -41,6 +43,7 @@ public class ApiAccessConstants {
 
     public static final String LOGGING_READ_ACCESS = "https://jans.io/oauth/config/logging.readonly";
     public static final String LOGGING_WRITE_ACCESS = "https://jans.io/oauth/config/logging.write";
+    public static final String LOGGING_ADMIN_ACCESS = "https://jans.io/oauth/config/logging.admin";
 
     public static final String JWKS_READ_ACCESS = "https://jans.io/oauth/config/jwks.readonly";
     public static final String JWKS_WRITE_ACCESS = "https://jans.io/oauth/config/jwks.write";
@@ -103,6 +106,7 @@ public class ApiAccessConstants {
     
     public static final String CONFIG_READ_ACCESS = "https://jans.io/oauth/config/properties.readonly";
     public static final String CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/properties.write";
+    public static final String CONFIG_ADMIN_ACCESS = "https://jans.io/oauth/config/properties.admin";
     
     public static final String CLIENT_AUTHORIZATIONS_READ_ACCESS = "https://jans.io/oauth/client/authorizations.readonly";
     public static final String CLIENT_AUTHORIZATIONS_DELETE_ACCESS = "https://jans.io/oauth/client/authorizations.delete";
