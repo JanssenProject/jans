@@ -380,39 +380,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/policy.readonly
-  /api/v1/sse:
-    get:
-      tags:
-      - Lock - SSE
-      summary: Subscribe to SSE events
-      description: Subscribe to SSE events
-      operationId: subscribe
-      responses:
-        "200":
-          description: Ok
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/sse.readonly
   /api/v1/internal/stat:
     get:
       tags:
