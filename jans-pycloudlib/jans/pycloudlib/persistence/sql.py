@@ -22,6 +22,7 @@ from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import delete
 from sqlalchemy import event
+from sqlalchemy.engine.url import URL
 from ldif import LDIFParser
 from ldap3.utils import dn as dnutils
 from pymysql.err import ProgrammingError
@@ -330,14 +331,16 @@ class SqlClient(SqlSchemaMixin):
         return self._engine
 
     @property
-    def engine_url(self) -> str:
+    def engine_url(self) -> URL:
         """Engine connection URL."""
-        host = os.environ.get("CN_SQL_DB_HOST", "localhost")
-        port = os.environ.get("CN_SQL_DB_PORT", 3306)
-        database = os.environ.get("CN_SQL_DB_NAME", "jans")
-        user = os.environ.get("CN_SQL_DB_USER", "jans")
-        password = get_sql_password(self.manager)
-        return f"{self.adapter.connector}://{user}:{password}@{host}:{port}/{database}"
+        return URL(
+            drivername=self.adapter.connector,
+            username=os.environ.get("CN_SQL_DB_USER", "jans"),
+            password=get_sql_password(self.manager),
+            host=os.environ.get("CN_SQL_DB_HOST", "localhost"),
+            port=int(os.environ.get("CN_SQL_DB_PORT", "3306")),
+            database=os.environ.get("CN_SQL_DB_NAME", "jans"),
+        )
 
     @property
     def metadata(self) -> MetaData:
