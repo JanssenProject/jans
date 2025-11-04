@@ -9,9 +9,11 @@
 //! including issuer matching, required claims validation, JWKS fetching, and signature verification.
 
 use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
+use crate::jwt::JwtLogEntry;
 use crate::jwt::http_utils::{GetFromUrl, OpenIdConfig};
 use crate::jwt::key_service::{DecodingKeyInfo, KeyService, KeyServiceError};
 use crate::log::Logger;
+use crate::log::interface::LogWriter;
 use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
@@ -73,20 +75,37 @@ pub type Result<T> = std::result::Result<T, TrustedIssuerError>;
 /// - Required claims validation based on token metadata
 /// - JWKS fetching and caching
 /// - JWT signature verification
+use std::time::{Duration, SystemTime};
+
+/// Default JWKS cache duration (1 hour) used when no Cache-Control header is present
+const DEFAULT_JWKS_CACHE_DURATION_SECS: u64 = 3600;
+
+/// Minimum JWKS cache duration (5 minutes) to prevent excessive requests
+const MIN_JWKS_CACHE_DURATION_SECS: u64 = 300;
+
+/// Maximum JWKS cache duration (24 hours) to ensure keys are refreshed regularly
+const MAX_JWKS_CACHE_DURATION_SECS: u64 = 86400;
+
 pub struct TrustedIssuerValidator {
     /// Map of issuer identifiers to their configurations
     trusted_issuers: HashMap<String, Arc<TrustedIssuer>>,
+    /// Reverse lookup map: OIDC base URL -> issuer
+    /// This optimizes issuer lookup when dealing with hundreds of trusted issuers
+    url_to_issuer: HashMap<String, Arc<TrustedIssuer>>,
     /// Key service for managing JWKS keys
     key_service: KeyService,
     /// Cache of fetched OpenID configurations (issuer URL -> config)
     oidc_configs: HashMap<String, Arc<OpenIdConfig>>,
+    /// Timestamp of last JWKS fetch for expiration tracking
+    /// Maps issuer OIDC endpoint to (fetch_time, cache_duration)
+    keys_fetch_time: HashMap<String, (SystemTime, Duration)>,
     /// Optional logger for diagnostic messages
     logger: Option<Logger>,
 }
 
 impl TrustedIssuerValidator {
     /// Creates a new trusted issuer validator with the given trusted issuers.
-    pub fn new(trusted_issuers: HashMap<String, TrustedIssuer>) -> Self {
+    pub(crate) fn new(trusted_issuers: HashMap<String, TrustedIssuer>) -> Self {
         Self::with_logger(trusted_issuers, None)
     }
 
@@ -95,15 +114,37 @@ impl TrustedIssuerValidator {
         trusted_issuers: HashMap<String, TrustedIssuer>,
         logger: Option<Logger>,
     ) -> Self {
-        let trusted_issuers = trusted_issuers
+        let trusted_issuers: HashMap<String, Arc<TrustedIssuer>> = trusted_issuers
             .into_iter()
             .map(|(k, v)| (k, Arc::new(v)))
             .collect();
 
+        // Build reverse lookup map: OIDC base URL -> issuer
+        let mut url_to_issuer = HashMap::with_capacity(trusted_issuers.len());
+        for (id, issuer) in &trusted_issuers {
+            // Extract base URL from OIDC endpoint
+            if let Some(base_url) = issuer
+                .oidc_endpoint
+                .as_str()
+                .strip_suffix("/.well-known/openid-configuration")
+            {
+                let normalized_url = base_url.trim_end_matches('/');
+                url_to_issuer.insert(normalized_url.to_string(), issuer.clone());
+            }
+
+            // Also add the issuer ID if it's a URL format
+            if id.starts_with("http://") || id.starts_with("https://") {
+                let normalized_id = id.trim_end_matches('/');
+                url_to_issuer.insert(normalized_id.to_string(), issuer.clone());
+            }
+        }
+
         Self {
             trusted_issuers,
+            url_to_issuer,
             key_service: KeyService::new(),
             oidc_configs: HashMap::new(),
+            keys_fetch_time: HashMap::new(),
             logger,
         }
     }
@@ -115,28 +156,16 @@ impl TrustedIssuerValidator {
     pub fn find_trusted_issuer(&self, issuer_claim: &str) -> Result<Arc<TrustedIssuer>> {
         // Try exact match first by issuer ID
         if let Some(issuer) = self.trusted_issuers.get(issuer_claim) {
-            return Ok(Arc::clone(issuer));
+            return Ok(issuer.clone());
         }
 
-        // Try matching by OIDC endpoint base URL
-        // Parse the issuer claim as a URL and compare with configured endpoints
+        // Try matching by URL using reverse lookup map (O(1) instead of O(n))
+        // Parse the issuer claim as a URL and normalize it for lookup
         if let Ok(iss_url) = Url::parse(issuer_claim) {
-            for (id, issuer) in &self.trusted_issuers {
-                // Check if the OIDC endpoint starts with the issuer URL
-                if let Some(base) = issuer
-                    .oidc_endpoint
-                    .as_str()
-                    .strip_suffix("/.well-known/openid-configuration")
-                {
-                    if base == iss_url.as_str().trim_end_matches('/') {
-                        return Ok(Arc::clone(issuer));
-                    }
-                }
+            let normalized_url = iss_url.as_str().trim_end_matches('/');
 
-                // Also check if issuer ID matches
-                if id == &iss_url.to_string() {
-                    return Ok(Arc::clone(issuer));
-                }
+            if let Some(issuer) = self.url_to_issuer.get(normalized_url) {
+                return Ok(issuer.clone());
             }
         }
 
@@ -156,7 +185,7 @@ impl TrustedIssuerValidator {
 
         // Check cache first
         if let Some(config) = self.oidc_configs.get(endpoint_str) {
-            return Ok(Arc::clone(config));
+            return Ok(config.clone());
         }
 
         // Fetch from endpoint
@@ -177,13 +206,32 @@ impl TrustedIssuerValidator {
     /// Ensures JWKS keys are loaded for the given issuer.
     ///
     /// Fetches the OpenID configuration and loads keys from the JWKS endpoint.
+    /// Implements automatic key refresh based on cache duration.
     async fn ensure_keys_loaded(&mut self, trusted_issuer: &TrustedIssuer) -> Result<()> {
         let oidc_config = self.get_or_fetch_oidc_config(trusted_issuer).await?;
+        let endpoint_str = trusted_issuer.oidc_endpoint.as_str();
 
-        // Check if we already have keys for this issuer
-        if self.key_service.has_keys() {
-            // TODO: check key expiration
-            // and refresh if needed. For now, we assume keys are valid.
+        // Check if we have keys and if they've expired
+        let should_refresh = if self.key_service.has_keys() {
+            if let Some((fetch_time, cache_duration)) = self.keys_fetch_time.get(endpoint_str) {
+                // Check if keys have expired
+                if let Ok(elapsed) = fetch_time.elapsed() {
+                    // Refresh if elapsed time exceeds cache duration
+                    elapsed >= *cache_duration
+                } else {
+                    // System time went backwards, refresh to be safe
+                    true
+                }
+            } else {
+                // No timestamp recorded, keys are fresh
+                false
+            }
+        } else {
+            // No keys loaded yet
+            true
+        };
+
+        if !should_refresh {
             return Ok(());
         }
 
@@ -192,7 +240,37 @@ impl TrustedIssuerValidator {
             .get_keys_using_oidc(&oidc_config, &self.logger)
             .await?;
 
+        // Determine cache duration
+        let cache_duration = self.determine_cache_duration(trusted_issuer);
+
+        // Record fetch time for expiration tracking
+        self.keys_fetch_time.insert(
+            endpoint_str.to_string(),
+            (SystemTime::now(), cache_duration),
+        );
+
+        // Log key refresh for monitoring
+        self.logger.log_any(JwtLogEntry::new(
+            format!(
+                "JWKS keys loaded for issuer '{}', cache duration: {}s",
+                endpoint_str,
+                cache_duration.as_secs()
+            ),
+            Some(crate::LogLevel::INFO),
+        ));
+
         Ok(())
+    }
+
+    /// Determines the appropriate cache duration for JWKS keys.
+    fn determine_cache_duration(&self, _trusted_issuer: &TrustedIssuer) -> Duration {
+        let cache_secs = DEFAULT_JWKS_CACHE_DURATION_SECS;
+
+        let bounded_secs = cache_secs
+            .max(MIN_JWKS_CACHE_DURATION_SECS)
+            .min(MAX_JWKS_CACHE_DURATION_SECS);
+
+        Duration::from_secs(bounded_secs)
     }
 
     /// Validates that a token contains all required claims based on token metadata.
@@ -254,17 +332,18 @@ impl TrustedIssuerValidator {
         Ok(())
     }
 
-    /// Validates a JWT token against a trusted issuer.
+    /// Validates a JWT token against a trusted issuer with JWKS preloading.
     ///
-    /// This performs the following validations:
+    /// This performs comprehensive validation including:
     /// 1. Extracts the issuer claim from the token
     /// 2. Matches the issuer against configured trusted issuers
-    /// 3. Fetches JWKS if not already cached
-    /// 4. Validates the JWT signature
+    /// 3. Preloads JWKS if not already cached
+    /// 4. Validates the JWT signature using JWKS
     /// 5. Validates required claims based on token metadata
+    /// 6. Validates exp/nbf claims if present
     ///
     /// Returns the validated claims and the matched trusted issuer.
-    pub async fn validate_token(
+    pub async fn preload_and_validate_token(
         &mut self,
         token: &str,
         token_type: &str,
@@ -273,6 +352,7 @@ impl TrustedIssuerValidator {
         let header = decode_header(token)?;
 
         // First, we need to decode without verification to get the issuer claim
+        // and check for exp/nbf to configure validation later
         let mut validation = Validation::new(header.alg);
         validation.insecure_disable_signature_validation();
         validation.validate_exp = false;
@@ -284,6 +364,9 @@ impl TrustedIssuerValidator {
             &DecodingKey::from_secret(&[]), // Dummy key since we disabled validation
             &validation,
         )?;
+
+        let has_exp = unverified_token.claims.get("exp").is_some();
+        let has_nbf = unverified_token.claims.get("nbf").is_some();
 
         // Extract issuer claim
         let issuer_claim = unverified_token
@@ -335,12 +418,9 @@ impl TrustedIssuerValidator {
         let mut validation = Validation::new(header.alg);
         validation.set_issuer(&[issuer_claim]);
 
-        // Optionally validate exp and nbf if they exist in claims
-        validation.validate_exp = unverified_token.claims.get("exp").is_some();
-        validation.validate_nbf = unverified_token.claims.get("nbf").is_some();
+        validation.validate_exp = has_exp;
+        validation.validate_nbf = has_nbf;
 
-        // We've already validated required claims, so we don't need jsonwebtoken
-        // to check for standard claims
         validation.required_spec_claims.clear();
         validation.validate_aud = false;
 
@@ -548,7 +628,6 @@ mod tests {
         let mut header = Header::new(algorithm);
         header.kid = Some(kid.to_string());
 
-        // Use a test key for signing (this would match the mock JWKS)
         let key = EncodingKey::from_secret(b"test_secret_key");
 
         encode(&header, claims, &key).expect("Failed to create test JWT")
@@ -668,7 +747,9 @@ mod tests {
 
         let token = create_test_jwt(&claims, "test-kid", Algorithm::HS256);
 
-        let result = validator.validate_token(&token, "access_token").await;
+        let result = validator
+            .preload_and_validate_token(&token, "access_token")
+            .await;
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
@@ -688,7 +769,9 @@ mod tests {
 
         let token = create_test_jwt(&claims, "test-kid", Algorithm::HS256);
 
-        let result = validator.validate_token(&token, "access_token").await;
+        let result = validator
+            .preload_and_validate_token(&token, "access_token")
+            .await;
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
@@ -725,7 +808,9 @@ mod tests {
 
         let token = create_test_jwt(&claims, "test-kid", Algorithm::HS256);
 
-        let result = validator.validate_token(&token, "access_token").await;
+        let result = validator
+            .preload_and_validate_token(&token, "access_token")
+            .await;
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
@@ -750,7 +835,9 @@ mod tests {
         let token = create_test_jwt(&claims, "test-kid", Algorithm::HS256);
 
         // Request validation for a token type that's not configured
-        let result = validator.validate_token(&token, "userinfo_token").await;
+        let result = validator
+            .preload_and_validate_token(&token, "userinfo_token")
+            .await;
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
@@ -790,7 +877,9 @@ mod tests {
 
         let token = create_test_jwt(&claims, "test-kid", Algorithm::HS256);
 
-        let result = validator.validate_token(&token, "access_token").await;
+        let result = validator
+            .preload_and_validate_token(&token, "access_token")
+            .await;
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
