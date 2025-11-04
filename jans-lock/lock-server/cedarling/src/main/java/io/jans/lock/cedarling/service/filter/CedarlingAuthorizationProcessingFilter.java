@@ -4,12 +4,17 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 
+import io.jans.lock.cedarling.service.app.audit.ApplicationCedarlingAuditLogger;
 import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
+import io.jans.lock.model.app.audit.AuditActionType;
+import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.LockProtectionMode;
+import io.jans.net.InetAddressUtility;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
@@ -35,6 +40,9 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 
 	@Inject
 	private CedarlingProtection protectionService;
+	
+	@Inject
+	private ApplicationCedarlingAuditLogger applicationCedarlingAuditLogger;
 
 	@Context
 	private HttpHeaders httpHeaders;
@@ -60,7 +68,13 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 		
 		if (LockProtectionMode.CEDARLING.equals(appConfiguration.getProtectionMode())) {
 			Response authorizationResponse = protectionService.processAuthorization(requestContext, httpHeaders, resourceInfo);
-			if (authorizationResponse == null) {
+			boolean success = authorizationResponse == null;
+
+	        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress((HttpServletRequest) requestContext.getRequest()), AuditActionType.OPENID_AUTHZ_FILTER);
+			auditLogEntry.setSuccess(success);
+			applicationCedarlingAuditLogger.log(auditLogEntry);
+
+	        if (success) {
 				// Actual processing of request proceeds
 				log.debug("Authorization passed");
 			} else {
