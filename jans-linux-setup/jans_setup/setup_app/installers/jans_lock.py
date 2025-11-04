@@ -107,7 +107,13 @@ class JansLockInstaller(JettyInstaller):
         self.enable()
 
     def install_as_service(self):
-        for plugin in (self.source_files[1][0], self.source_files[3][0], self.source_files[4][0], self.source_files[5][0]):
+        service_plugins = [
+            self.source_files[1][0],  # jans-lock-service.jar
+            self.source_files[3][0],  # jans-lock-model.jar
+            self.source_files[4][0],  # jans-lock-cedarling.jar
+            self.source_files[5][0],  # cedarling-java.jar
+        ]
+        for plugin in service_plugins:
             plugin_name = os.path.basename(plugin)
             self.logIt(f"Adding plugin {plugin_name} to jans-auth")
             self.copyFile(plugin, base.current_app.JansAuthInstaller.custom_lib_dir)
