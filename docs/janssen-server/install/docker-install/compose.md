@@ -15,18 +15,18 @@ This document provides instructions for running Janssen using Docker Compose. It
 
 The following system requirements are as per the single mode deployment:
 
-| Component | CPU Unit | RAM  | Disk Space                |
-|-----------|----------|------|---------------------------|
-| Janssen   | 2.5      | 8 GB | 40 GB                     |
-| MySQL     | 1        | 1 GB | Included in above 40 GB   |
-| PostgreSQL| 1        | 1 GB | Included in above 40 GB   |
+| Component  | CPU Unit | RAM  | Disk Space                |
+|------------|----------|------|---------------------------|
+| Janssen    | 2.5      | 8 GB | 40 GB                     |
+| MySQL      | 1        | 1 GB | Included in above 40 GB   |
+| PostgreSQL | 1        | 1 GB | Included in above 40 GB   |
 
 ## Supported Persistence Backends
 
 The Janssen Docker Compose setup supports two persistence backends:
 
 1. MySQL
-2. PostgreSQL
+1. PostgreSQL
 
 ## Environment Variables
 
@@ -39,10 +39,10 @@ The Janssen Docker Compose setup supports two persistence backends:
 | CN_CITY                    | City to register Janssen with                                                                                                                                       | `Austin`                                        |
 | CN_STATE                   | State to register Janssen with                                                                                                                                      | `TX`                                            |
 | CN_COUNTRY                 | Country to register Janssen with                                                                                                                                    | `US`                                            |
-| TEST_CLIENT_ID             | Test client id                                                                                                                                                       | `9876baac-de39-4c23-8a78-674b59df8c09`          |
-| TEST_CLIENT_SECRET         | Test client secret                                                                                                                                                   | `1t5Fin3#`                                      |
-| TEST_CLIENT_TRUSTED        | Whether client is trusted                                                                                                                                            | `true`                                          |
-| CN_OCI_BUILD_ARGS          | Additional build arguments passed to OCI builder                                                                                                                     | ``                                              |
+| TEST_CLIENT_ID             | Test client id                                                                                                                                                      | `9876baac-de39-4c23-8a78-674b59df8c09`          |
+| TEST_CLIENT_SECRET         | Test client secret                                                                                                                                                  | `1t5Fin3#`                                      |
+| TEST_CLIENT_TRUSTED        | Whether client is trusted                                                                                                                                           | `true`                                          |
+| CN_OCI_BUILD_ARGS          | Additional build arguments passed to OCI builder                                                                                                                    | ``                                              |
 
 ## Download compose and supporting files
 
@@ -96,18 +96,16 @@ To shut down the deployment, run:
 ## Configure Janssen Server
 
 1. Access the Docker container shell using:
-
-    ```bash
-    docker compose -f jans-mysql-compose.yml exec jans /bin/bash #This opens a bash terminal in the running container
-    ```
-
 1. You can grab `client_id` and `client_pw`(secret) pairs and other values from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
-
 1. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen as needed. For example you can run the [TUI](https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/):
 
-    ```bash
-    python3 /opt/jans/jans-cli/config-cli-tui.py
-    ```
+```bash
+docker compose -f jans-mysql-compose.yml exec jans /bin/bash #This opens a bash terminal in the running container
+```
+
+```bash
+python3 /opt/jans/jans-cli/config-cli-tui.py
+```
 
 ## Access endpoints externally
 
