@@ -40,7 +40,7 @@ public class BaseResource {
 	private static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
 
 	@Context
-	UriInfo uriInfo;
+	private UriInfo uriInfo;
 
 	@Context
 	private HttpServletRequest httpRequest;

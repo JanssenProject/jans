@@ -68,11 +68,11 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 	        }
 	
 	        response = Response.ok().entity(uris).build();
+
+	        return response;
         } finally {
             applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
         }
-
-        return response;
 	}
 
 	@Override
@@ -100,11 +100,11 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 	        }
 
 	        response = Response.ok().entity(policies.get(uri).getPolicyJson()).build();
+
+	        return response;
         } finally {
             applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
         }
-
-        return response;
 	}
 
 }

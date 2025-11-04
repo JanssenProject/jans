@@ -100,7 +100,7 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	public Response processHealthRequest(HttpServletRequest request, SecurityContext sec) {
 		log.info("Processing Health request - request: {}", request);
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()),
+		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
 				AuditActionType.AUDIT_HEALTH_WRITE);
 
 		Response response = null;
@@ -126,7 +126,7 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	public Response processBulkHealthRequest(HttpServletRequest request, SecurityContext sec) {
 		log.info("Processing Bulk Health request - request: {}", request);
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()),
+		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
 				AuditActionType.AUDIT_HEALTH_BULK_WRITE);
 
 		Response response = null;
@@ -154,7 +154,7 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	public Response processLogRequest(HttpServletRequest request, SecurityContext sec) {
 		log.info("Processing Log request - request: {}", request);
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()),
+		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
 				AuditActionType.AUDIT_LOG_WRITE);
 
 		Response response = null;
@@ -181,7 +181,7 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	public Response processBulkLogRequest(HttpServletRequest request, SecurityContext sec) {
 		log.info("Processing Bulk Log request - request: {}", request);
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()),
+		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
 				AuditActionType.AUDIT_LOG_BULK_WRITE);
 
 		Response response = null;
@@ -207,7 +207,7 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	public Response processTelemetryRequest(HttpServletRequest request, SecurityContext sec) {
 		log.info("Processing Telemetry request - request: {}", request);
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()),
+		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
 				AuditActionType.AUDIT_TELEMETRY_WRITE);
 
 		Response response = null;
@@ -230,7 +230,7 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	public Response processBulkTelemetryRequest(HttpServletRequest request, SecurityContext sec) {
 		log.info("Processing Bulk Telemetry request - request: {}", request);
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()),
+		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
 				AuditActionType.AUDIT_TELEMETRY_BULK_WRITE);
 
 		Response response = null;
