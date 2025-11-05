@@ -1,6 +1,6 @@
 FROM quay.io/keycloak/keycloak:26.3.3@sha256:6a7217a100bd3e5de4063a27a538ef999a3c5a88c4b4ec0ffc0a642aee7b2597 as kc-src
 
-FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:29cb2ee552c7c7a924b6a1b59802508dc5123e7edad1d65d575bbf07cd05fa6d
+FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
 
 # ===============
 # Alpine packages
@@ -35,25 +35,23 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-j
 # Assets sync
 # ===========
 
+RUN mkdir -p /app/static/rdbm \
+    /app/schema \
+    /app/templates/jans-saml
+
 ENV JANS_SOURCE_VERSION=e726a9e943b3ab29334c85855be0e1de1546a0fb
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
 ARG GIT_CLONE_DEPTH=100
-RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
-    && cd /tmp/jans \
+WORKDIR /tmp/jans
+
+RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans . \
     && git sparse-checkout init --cone \
-    && git checkout ${JANS_SOURCE_VERSION} \
+    && git cat-file -e ${JANS_SOURCE_VERSION} && git checkout ${JANS_SOURCE_VERSION} || sh -c 'echo "invalid revison ${JANS_SOURCE_VERSION}; using latest revision from main branch as fallback" && git checkout main' \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
-    && git sparse-checkout add jans-pycloudlib
-
-RUN mkdir -p /app/static/rdbm \
-    /app/schema \
-    /app/templates/jans-saml
-
-# sync static files from linux-setup
-RUN cd /tmp/jans \
+    && git sparse-checkout add jans-pycloudlib \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
@@ -62,6 +60,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/* /app/templates/jans-saml \
     && cp ${JANS_SETUP_DIR}/templates/*.properties /app/templates/
+
+WORKDIR /
 
 # ======
 # Python

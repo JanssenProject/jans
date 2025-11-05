@@ -94,10 +94,11 @@ ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
 ARG GIT_CLONE_DEPTH=100
-RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
-    && cd /tmp/jans \
+WORKDIR /tmp/jans
+
+RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans . \
     && git sparse-checkout init --cone \
-    && git checkout ${JANS_SOURCE_VERSION} \
+    && git cat-file -e ${JANS_SOURCE_VERSION} && git checkout ${JANS_SOURCE_VERSION} || sh -c 'echo "invalid revison ${JANS_SOURCE_VERSION}; using latest revision from main branch as fallback" && git checkout main' \
     && git sparse-checkout add agama/misc \
     && git sparse-checkout add jans-linux-setup/jans_setup \
     && git sparse-checkout add jans-pycloudlib \
@@ -121,6 +122,8 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && cp jans-config-api/plugins/docs/lock-plugin-swagger.yaml /app/templates/jans-lock/ \
     && cp -R jans-lock/lock-server/service/src/main/policy /app/templates/jans-lock/policy \
     && cp jans-cedarling/schema/cedarling_core.json /app/templates/jans-lock/cedarling_core.json
+
+WORKDIR /
 
 # ======
 # Python

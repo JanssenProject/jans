@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-alpine:17.0.12@sha256:83719ee0075de03ecc7a99db489fd72a022e49f09c0e6e6350bcc05310c3caf6
+FROM bellsoft/liberica-openjdk-alpine:17.0.17@sha256:0e8ae43555ad8e2d69431c2078df256c01b625a8a3010e76b5a6baff0d165d2c
 
 # ===============
 # Alpine packages
@@ -54,6 +54,11 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 # Assets sync
 # ===========
 
+RUN mkdir -p /etc/jans/conf \
+    /app/static/rdbm \
+    /app/schema \
+    /app/templates/jans-scim
+
 ENV JANS_SOURCE_VERSION=e726a9e943b3ab29334c85855be0e1de1546a0fb
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
@@ -61,21 +66,14 @@ ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
 ARG GIT_CLONE_DEPTH=100
-RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
-    && cd /tmp/jans \
+WORKDIR /tmp/jans
+
+RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans . \
     && git sparse-checkout init --cone \
-    && git checkout ${JANS_SOURCE_VERSION} \
+    && git cat-file -e ${JANS_SOURCE_VERSION} && git checkout ${JANS_SOURCE_VERSION} || sh -c 'echo "invalid revison ${JANS_SOURCE_VERSION}; using latest revision from main branch as fallback" && git checkout main' \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
     && git sparse-checkout add ${JANS_SCIM_RESOURCE_DIR} \
-    && git sparse-checkout add jans-pycloudlib
-
-RUN mkdir -p /etc/jans/conf \
-    /app/static/rdbm \
-    /app/schema \
-    /app/templates/jans-scim
-
-# sync static files from linux-setup
-RUN cd /tmp/jans \
+    && git sparse-checkout add jans-pycloudlib \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
@@ -90,6 +88,8 @@ RUN cd /tmp/jans \
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
     && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
+
+WORKDIR /
 
 # ======
 # Python

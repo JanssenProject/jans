@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:29cb2ee552c7c7a924b6a1b59802508dc5123e7edad1d65d575bbf07cd05fa6d
+FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
 
 # ===============
 # Alpine packages
@@ -49,14 +49,17 @@ ENV JANS_SOURCE_VERSION=e726a9e943b3ab29334c85855be0e1de1546a0fb
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
 ARG GIT_CLONE_DEPTH=100
-RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
-    && cd /tmp/jans \
+WORKDIR /tmp/jans
+
+RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans . \
     && git sparse-checkout init --cone \
-    && git checkout ${JANS_SOURCE_VERSION} \
+    && git cat-file -e ${JANS_SOURCE_VERSION} && git checkout ${JANS_SOURCE_VERSION} || sh -c 'echo "invalid revison ${JANS_SOURCE_VERSION}; using latest revision from main branch as fallback" && git checkout main' \
     && git sparse-checkout add jans-pycloudlib \
     && git sparse-checkout add jans-keycloak-integration \
     && mkdir -p /app/templates/kc-scheduler \
     && cp jans-keycloak-integration/job-scheduler/src/main/resources/config.properties.sample /app/templates/kc-scheduler/config.properties
+
+WORKDIR /
 
 # ======
 # Python
