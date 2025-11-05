@@ -62,6 +62,7 @@ ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG GIT_CLONE_DEPTH=100
 RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
+    && git rev-parse ${JANS_SOURCE_VERSION} \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
