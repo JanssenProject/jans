@@ -405,12 +405,7 @@ impl EntityBuilder {
             (None, Vec::new())
         };
 
-        let mut resource = self.build_resource_entity(resource_data)?;
-        if let Some(resource_default_entity) = self.default_entities.get(&resource.uid())
-            && resource_data.attributes.is_empty()
-        {
-            resource = resource_default_entity.clone()
-        }
+        let resource = self.build_resource_entity(resource_data)?;
 
         let issuers = self.iss_entities.values().cloned().collect();
         Ok(AuthorizeEntitiesData {
@@ -857,7 +852,7 @@ mod test {
             build_user: true,
             ..Default::default()
         };
-        
+
         let entity_builder = EntityBuilder::new(
             config,
             &trusted_issuers,
@@ -1030,7 +1025,7 @@ mod test {
             build_user: false,
             ..Default::default()
         };
-        
+
         let entity_builder = EntityBuilder::new(
             config,
             &trusted_issuers,
@@ -1180,7 +1175,7 @@ mod test {
             build_user: false,
             ..Default::default()
         };
-        
+
         let entity_builder = EntityBuilder::new(
             config,
             &trusted_issuers,
@@ -1374,7 +1369,7 @@ mod test {
             build_user: false,
             ..Default::default()
         };
-        
+
         let entity_builder = EntityBuilder::new(
             config,
             &trusted_issuers,

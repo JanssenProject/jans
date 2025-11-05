@@ -54,6 +54,22 @@ policy_stores:
                 context.tokens.dolphin_access_token.hasTag("location") &&
                 context.tokens.dolphin_access_token.getTag("location").contains("miami")
             };
+      basic_token_query_1.1_default_entity:
+        description: Query for default entity Acme::Resource::"1694c954f8a3"
+        creation_date: '2024-12-19T10:00:00.000000'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action == Acme::Action::"GetFood",
+                resource in Acme::Resource::"1694c954f8a3"
+            ) when {
+                context has tokens.dolphin_access_token &&
+                context.tokens.dolphin_access_token.hasTag("location") &&
+                context.tokens.dolphin_access_token.getTag("location").contains("miami")
+            };
       basic_token_query_2:
         description: Query specific token type with scope
         creation_date: '2024-12-19T10:00:00.000000'
