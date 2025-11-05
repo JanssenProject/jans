@@ -26,7 +26,6 @@ pub enum MultiIssuerValidationError {
     #[error("Could not validate tokens.")]
     TokenValidationFailed,
 
-
     #[error("Invalid JSON in context field")]
     InvalidContextJson,
 
@@ -158,17 +157,6 @@ impl From<ContextJsonError> for BuildContextError {
     fn from(err: ContextJsonError) -> Self {
         BuildContextError::DeserializeFromJson(Box::new(err))
     }
-}
-
-/// Error for creating request role entities
-#[derive(Debug, derive_more::Error, derive_more::Display)]
-#[display("could not create request user entity principal for {uid}: {err}")]
-#[allow(dead_code)]
-pub struct CreateRequestRoleError {
-    /// Error value
-    pub err: RequestValidationError,
-    /// Role ID [`EntityUid`] value used for authorization request
-    pub uid: cedar_policy::EntityUid,
 }
 
 /// Error for invalid principal in authorization request
