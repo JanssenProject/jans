@@ -42,7 +42,9 @@ use std::str::FromStr;
 use std::sync::Arc;
 use url::Origin;
 
+pub(crate) use build_multi_issuer_entity::MultiIssuerEntityError;
 pub(crate) use built_entities::BuiltEntities;
+
 pub use error::*;
 
 /// Constant for unknown entity type in error messages

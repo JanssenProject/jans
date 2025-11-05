@@ -317,7 +317,7 @@ impl Authz {
     ///
     /// This implementation processes multiple JWT tokens from different issuers.
     /// It validates the request format and JWT tokens, builds entities, and performs authorization evaluation.
-    /// 
+    ///
     /// Unlike traditional authorization which uses workload/user principals, multi-issuer authorization
     /// evaluates policies based solely on the context (tokens) without requiring a principal.
     pub async fn authorize_multi_issuer(
@@ -343,8 +343,12 @@ impl Authz {
         let entities_data = self
             .config
             .entity_builder
-            .build_multi_issuer_entities(&validated_tokens, &request.resource, self.config.log_service.as_ref())
-            .map_err(|e| AuthorizeError::MultiIssuerEntity(e.to_string()))?;
+            .build_multi_issuer_entities(
+                &validated_tokens,
+                &request.resource,
+                self.config.log_service.as_ref(),
+            )
+            .map_err(AuthorizeError::MultiIssuerEntity)?;
 
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::Action)?;
@@ -362,14 +366,13 @@ impl Authz {
 
         // Multi-issuer authorization does not use a principal
         // Authorization is based solely on the context (tokens)
-        let authz_result = self
-            .execute_authorize(ExecuteAuthorizeParameters {
-                entities: &entities,
-                principal: None,
-                action: action.clone(),
-                resource: resource_uid.clone(),
-                context,
-            })?;
+        let authz_result = self.execute_authorize(ExecuteAuthorizeParameters {
+            entities: &entities,
+            principal: None,
+            action: action.clone(),
+            resource: resource_uid.clone(),
+            context,
+        })?;
 
         let authz_info = AuthorizeInfo {
             principal: "None (multi-issuer)".to_string(),

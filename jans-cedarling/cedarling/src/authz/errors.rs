@@ -8,6 +8,7 @@ use serde_json::Error as SerdeJsonError;
 
 // Re-export commonly used error types
 pub use crate::common::json_rules::ApplyRuleError;
+use crate::entity_builder::MultiIssuerEntityError;
 pub use crate::entity_builder::{
     BuildEntityError, BuildUnsignedEntityError, InitEntityBuilderError,
 };
@@ -94,7 +95,7 @@ pub enum AuthorizeError {
     MultiIssuerValidation(#[from] MultiIssuerValidationError),
     /// Error encountered while building multi-issuer entities
     #[error("Multi-issuer entity building failed: {0}")]
-    MultiIssuerEntity(String),
+    MultiIssuerEntity(MultiIssuerEntityError),
 }
 
 impl From<Box<EntitiesError>> for AuthorizeError {
