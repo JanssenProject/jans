@@ -33,7 +33,7 @@ def _transform_lock_dynamic_config(conf, manager):
     # add missing top-level keys
     hostname = manager.config.get("hostname")
     for missing_key, value in [
-        ("baseEndpoint", f"https://{hostname}/jans-auth/v1"),
+        ("baseEndpoint", f"https://{hostname}/jans-auth/api/v1"),
         ("clientId", manager.config.get("lock_client_id")),
         ("clientPassword", manager.secret.get("lock_client_encoded_pw")),
         ("tokenUrl", f"https://{hostname}/jans-auth/restv1/token"),
