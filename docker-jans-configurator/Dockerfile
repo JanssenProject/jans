@@ -35,7 +35,7 @@ WORKDIR /tmp/jans
 RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans . \
     && git sparse-checkout init --cone \
     && git sparse-checkout add jans-pycloudlib \
-    && git cat-file -e ${JANS_SOURCE_VERSION} && git checkout ${JANS_SOURCE_VERSION} || sh -c 'echo "invalid revision ${JANS_SOURCE_VERSION}; using latest revision from main branch as fallback" && git checkout main'
+    && git checkout ${JANS_SOURCE_VERSION}
 
 WORKDIR /
 

@@ -34,7 +34,7 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && git sparse-checkout add ${JANS_SCRIPT_CATALOG_DIR} \
     && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES} \
     && git sparse-checkout add jans-pycloudlib \
-    && git cat-file -e ${JANS_SOURCE_VERSION} && git checkout ${JANS_SOURCE_VERSION} || sh -c 'echo "invalid revision ${JANS_SOURCE_VERSION}; using latest revision from main branch as fallback" && git checkout main' \
+    && git checkout ${JANS_SOURCE_VERSION} \
     && cp -R ${JANS_SETUP_DIR}/static/extension /app/static/extension \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/opendj_types.json \
     && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \

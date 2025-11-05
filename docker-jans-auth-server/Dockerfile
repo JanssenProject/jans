@@ -104,7 +104,7 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && git sparse-checkout add jans-config-api/plugins/docs \
     && git sparse-checkout add jans-lock/lock-server/service/src/main/policy \
     && git sparse-checkout add jans-cedarling/schema \
-    && git cat-file -e ${JANS_SOURCE_VERSION} && git checkout ${JANS_SOURCE_VERSION} || sh -c 'echo "invalid revision ${JANS_SOURCE_VERSION}; using latest revision from main branch as fallback" && git checkout main' \
+    && git checkout ${JANS_SOURCE_VERSION} \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
