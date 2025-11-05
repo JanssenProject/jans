@@ -13,17 +13,16 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 
 - Download the GPG key zip file , unzip and import GPG key
 
-```shell
+```shell title="Command"
 wget https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
 ```
 
-```shell
+```shell title="Command"
 unzip automation-jans-public-gpg.zip
 ```
 
-```shell
+```shell title="Command"
 sudo gpg --import automation-jans-public-gpg.asc;
-
 ```
 
 ## Install the Package
@@ -33,13 +32,13 @@ sudo gpg --import automation-jans-public-gpg.asc;
 - Download the release package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
-    ```shell
+    ```shell title="Command"
     wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
 
-    ```bash
+    ```bash title="Command"
     cd /tmp
     ```
 
@@ -53,13 +52,13 @@ sudo gpg --import automation-jans-public-gpg.asc;
 
     Output similar to below should confirm the integrity of the downloaded package.
 
-    ```text
+    ```text title="Output"
     jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
     ```
 
 - Install the package
 
-```
+```shell title="Command"
 sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 ```
 
@@ -68,13 +67,13 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 - Download the release package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
-    ```
+    ```shell title="Command"
     wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
 
-    ```bash
+    ```bash title="Command"
     cd /tmp
     ```
 
@@ -92,19 +91,19 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
     ```
     Output similar to below should confirm the integrity of the downloaded package.
 
-    ```text
+    ```text title="Output"
     jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
     ```
 
 - Install the package
 
-```
+```shell title="Command"
 sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 ```
 
 Or, 
 
-```
+```shell title="Command"
 dpkg -i jans_1.4.0-stable.ubuntu22.04_amd64.deb
 ```
 
@@ -113,13 +112,13 @@ dpkg -i jans_1.4.0-stable.ubuntu22.04_amd64.deb
 - Download the release package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
-    ```
+    ```shell
     wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
 
-    ```bash
+    ```bash title="Command"
     cd /tmp
     ```
 
@@ -137,13 +136,13 @@ dpkg -i jans_1.4.0-stable.ubuntu22.04_amd64.deb
 
     Output similar to below should confirm the integrity of the downloaded package.
 
-    ```text
+    ```text title="Output"
     jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb: OK
     ```
 
 - Install the package
 
-```
+```shell title="Command"
 sudo apt install  ./jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb
 ```
 
@@ -151,7 +150,7 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb
 
 - Run the setup script in interactive mode:
 
-```
+```shell title="Command"
 sudo python3 /opt/jans/jans-setup/setup.py
 ```
 
@@ -168,7 +167,7 @@ After the successful completion of setup process, [verify the system health](../
 
 Begin configuration by accessing the TUI with the following command:
 
-```
+```shell title="Command"
 jans tui
 ```
 
@@ -193,13 +192,13 @@ Uninstall process involves two steps and removes all the Janssen Server componen
 
 Use the command below to uninstall the Janssen server
 
-```
+```shell title="Command"
 sudo python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
 You'll see the following confirmation:
 
-```text
+```text title="Output"
 This process is irreversible.
 You will lose all data related to Janssen Server.
 
@@ -233,13 +232,13 @@ Removing /etc/apache2/sites-available/https_jans.conf
 
 The command below removes and purges the `jans` package
 
-```
+```shell title="Command"
 apt-get --purge remove jans
 ```
 
 Which should result in the following:
 
-```
+```text title="Output"
 Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
