@@ -77,13 +77,11 @@ async fn test_single_dolphin_access_token_authorization() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(
-        result.is_ok(),
-        "Dolphin access token authorization should succeed"
-    );
+    let authz_result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Dolphin access token authorization should succeed");
 
-    let authz_result = result.unwrap();
     assert!(
         authz_result.decision,
         "Authorization should be ALLOW for dolphin access token"
@@ -184,13 +182,11 @@ async fn test_single_acme_access_token_authorization() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(
-        result.is_ok(),
-        "Acme access token authorization should succeed"
-    );
+    let authz_result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Acme access token authorization should succeed");
 
-    let authz_result = result.unwrap();
     assert!(
         authz_result.decision,
         "Authorization should be ALLOW for acme access token"
@@ -233,13 +229,11 @@ async fn test_single_dolphin_custom_token_authorization() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(
-        result.is_ok(),
-        "Dolphin custom token authorization should succeed"
-    );
+    let authz_result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Dolphin custom token authorization should succeed");
 
-    let authz_result = result.unwrap();
     assert!(
         authz_result.decision,
         "Authorization should be ALLOW for dolphin custom token"
@@ -293,10 +287,11 @@ async fn test_multiple_tokens_from_different_issuers() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(result.is_ok(), "Multi-token authorization should succeed");
+    let authz_result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Multi-token authorization should succeed");
 
-    let authz_result = result.unwrap();
     assert!(
         authz_result.decision,
         "Authorization should be ALLOW for multi-token request"
@@ -338,13 +333,13 @@ async fn test_or_logic_acme_token_has_required_scope() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Authorization should succeed with Acme token having write:documents scope");
+
     assert!(
-        result.is_ok(),
-        "Authorization should succeed with Acme token having write:documents scope"
-    );
-    assert!(
-        result.unwrap().decision,
+        result.decision,
         "Should be ALLOW when Acme token has required scope"
     );
 }
@@ -384,13 +379,12 @@ async fn test_or_logic_dolphin_token_has_required_scope() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Authorization should succeed with Dolphin token having write:documents scope");
     assert!(
-        result.is_ok(),
-        "Authorization should succeed with Dolphin token having write:documents scope"
-    );
-    assert!(
-        result.unwrap().decision,
+        result.decision,
         "Should be ALLOW when Dolphin token has required scope"
     );
 }
@@ -441,13 +435,13 @@ async fn test_or_logic_both_tokens_have_scope() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Authorization should succeed when both tokens have the scope");
+
     assert!(
-        result.is_ok(),
-        "Authorization should succeed when both tokens have the scope"
-    );
-    assert!(
-        result.unwrap().decision,
+        result.decision,
         "Should be ALLOW when both tokens have required scope"
     );
 }
@@ -498,10 +492,12 @@ async fn test_or_logic_neither_token_has_scope() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(result.is_ok(), "Authorization should execute successfully");
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Authorization should execute successfully");
     assert!(
-        !result.unwrap().decision,
+        !result.decision,
         "Should be DENY when neither token has required scope"
     );
 }
@@ -552,13 +548,12 @@ async fn test_and_logic_both_tokens_with_required_attributes() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Authorization should succeed when both tokens have required attributes");
     assert!(
-        result.is_ok(),
-        "Authorization should succeed when both tokens have required attributes"
-    );
-    assert!(
-        result.unwrap().decision,
+        result.decision,
         "Should be ALLOW when both required tokens are present with correct attributes"
     );
 }
@@ -598,10 +593,12 @@ async fn test_and_logic_only_one_token_present() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(result.is_ok(), "Authorization should execute successfully");
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Authorization should execute successfully");
     assert!(
-        !result.unwrap().decision,
+        !result.decision,
         "Should be DENY when only one of two required tokens is present"
     );
 }
@@ -652,10 +649,12 @@ async fn test_and_logic_both_tokens_missing_required_attributes() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(result.is_ok(), "Authorization should execute successfully");
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Authorization should execute successfully");
     assert!(
-        !result.unwrap().decision,
+        !result.decision,
         "Should be DENY when tokens don't have required attributes"
     );
 }
@@ -695,13 +694,13 @@ async fn test_custom_dolphin_token_with_waiver() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Authorization should succeed with custom DolphinToken");
+
     assert!(
-        result.is_ok(),
-        "Authorization should succeed with custom DolphinToken"
-    );
-    assert!(
-        result.unwrap().decision,
+        result.decision,
         "Should be ALLOW when custom token has required waiver claim"
     );
 }
@@ -741,10 +740,13 @@ async fn test_custom_token_without_required_claim() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(result.is_ok(), "Authorization should execute successfully");
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Authorization should execute successfully");
+
     assert!(
-        !result.unwrap().decision,
+        !result.decision,
         "Should be DENY when custom token doesn't have correct waiver"
     );
 }
@@ -795,13 +797,12 @@ async fn test_multiple_custom_token_types_together() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Authorization should succeed with multiple custom and standard tokens");
     assert!(
-        result.is_ok(),
-        "Authorization should succeed with multiple custom and standard tokens"
-    );
-    assert!(
-        result.unwrap().decision,
+        result.decision,
         "Should be ALLOW when custom DolphinToken has required waiver"
     );
 }
@@ -844,13 +845,11 @@ async fn test_custom_token_with_complex_nested_claims() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(
-        result.is_ok(),
-        "Authorization should succeed with complex custom token containing multiple claims"
+    let result = cedarling.authorize_multi_issuer(request).await.expect(
+        "Authorization should succeed with complex custom token containing multiple claims",
     );
     assert!(
-        result.unwrap().decision,
+        result.decision,
         "Should be ALLOW - policy only checks waiver claim, other claims are preserved as tags"
     );
 }
@@ -905,13 +904,13 @@ async fn test_mix_of_standard_and_custom_tokens() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Authorization should succeed with mix of standard and custom token types");
+
     assert!(
-        result.is_ok(),
-        "Authorization should succeed with mix of standard and custom token types"
-    );
-    assert!(
-        result.unwrap().decision,
+        result.decision,
         "Should be ALLOW - Acme token has write:documents scope"
     );
 }
@@ -988,14 +987,13 @@ async fn test_validation_non_deterministic_tokens() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
-    // Graceful validation: first token is kept, duplicate is skipped with warning
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Should handle non-deterministic tokens gracefully (keep first, skip duplicates)");
+
     assert!(
-        result.is_ok(),
-        "Should handle non-deterministic tokens gracefully (keep first, skip duplicates)"
-    );
-    assert!(
-        result.unwrap().decision,
+        result.decision,
         "Should be ALLOW - first Acme token has write:documents scope"
     );
 }
@@ -1046,13 +1044,13 @@ async fn test_validation_same_type_different_issuers() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Should accept same token type from different issuers");
+
     assert!(
-        result.is_ok(),
-        "Should accept same token type from different issuers"
-    );
-    assert!(
-        result.unwrap().decision,
+        result.decision,
         "Should be ALLOW when either issuer's token has required scope"
     );
 }
@@ -1103,18 +1101,19 @@ async fn test_validation_different_types_same_issuer() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Should accept different token types from same issuer");
+
     assert!(
-        result.is_ok(),
-        "Should accept different token types from same issuer"
-    );
-    assert!(
-        result.unwrap().decision,
+        result.decision,
         "Should be ALLOW when Dolphin access token has write:documents scope"
     );
 }
 
 /// Test validation - Graceful degradation when invalid token is present
+// Graceful degradation: invalid tokens are ignored, valid tokens are processed
 #[tokio::test]
 async fn test_validation_graceful_degradation_invalid_token() {
     let cedarling = get_cedarling_for_multi_issuer_tests().await;
@@ -1149,19 +1148,18 @@ async fn test_validation_graceful_degradation_invalid_token() {
         None,
     );
 
-    let result = cedarling.authorize_multi_issuer(request).await;
-    // Graceful degradation: invalid tokens are ignored, valid tokens are processed
-    assert!(
-        result.is_ok(),
-        "Should succeed gracefully when some tokens are invalid (ignore invalid, process valid)"
+    let result = cedarling.authorize_multi_issuer(request).await.expect(
+        "Should succeed gracefully when some tokens are invalid (ignore invalid, process valid)",
     );
+
     assert!(
-        result.unwrap().decision,
+        result.decision,
         "Should be ALLOW - valid Acme token has required scope despite invalid token being present"
     );
 }
 
 /// Test validation - TokenInput with empty mapping string should fail
+// Graceful degradation: invalid tokens are ignored, valid tokens are processed
 #[tokio::test]
 async fn test_validation_empty_mapping_string() {
     let cedarling = get_cedarling_for_multi_issuer_tests().await;
