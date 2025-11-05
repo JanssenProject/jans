@@ -301,11 +301,11 @@ class Upgrade:
             policy_mapping["policy_stores"][ctx["policy_store_id"]]["policies"][plc_id] = {
                 "description": f"Policy for {plc.stem}",
                 "creation_date": datetime.now(UTC).isoformat(),
-                "policy_content": generate_base64_contents(plc.read_text())
+                "policy_content": generate_base64_contents(plc.read_text(), num_spaces=0)
             }
 
         with open("/app/templates/jans-lock/cedarling_core.json") as f:
-            policy_mapping["policy_stores"][ctx["policy_store_id"]]["schema"] = generate_base64_contents(f.read())
+            policy_mapping["policy_stores"][ctx["policy_store_id"]]["schema"] = generate_base64_contents(f.read(), num_spaces=0)
 
         entry.attrs["jansConfPolicy"] = json.dumps(policy_mapping)
         entry.attrs["jansRevision"] += 1
