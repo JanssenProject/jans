@@ -5,8 +5,8 @@
 
 use super::utils::cedarling_util::get_cedarling_with_callback;
 use super::utils::*;
-use crate::authz::request::{AuthorizeMultiIssuerRequest, EntityData, TokenInput};
 use crate::Cedarling;
+use crate::authz::request::{AuthorizeMultiIssuerRequest, EntityData, TokenInput};
 use serde_json::json;
 
 /// Helper function to create a Cedarling instance for multi-issuer tests
@@ -14,7 +14,7 @@ use serde_json::json;
 async fn get_cedarling_for_multi_issuer_tests() -> Cedarling {
     static POLICY_STORE_RAW_YAML: &str =
         include_str!("../../../test_files/policy-store-multi-issuer-basic.yaml");
-    
+
     get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         |config| {
@@ -84,6 +84,64 @@ async fn test_single_dolphin_access_token_authorization() {
     );
 
     let authz_result = result.unwrap();
+    assert!(
+        authz_result.decision,
+        "Authorization should be ALLOW for dolphin access token"
+    );
+}
+
+/// Test authorize_multi_issuer single Dolphin access token.
+/// And use resource from default entities.
+#[tokio::test]
+async fn test_authorize_multi_issuer_single_token_with_default_resource() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
+    let dolphin_access_token = generate_token_using_claims(json!({
+        "iss": "https://idp.dolphin.sea",
+        "sub": "dolphin_user_123",
+        "jti": "dolphin123",
+        "client_id": "dolphin_client_123",
+        "aud": "dolphin_audience",
+        "location": ["miami", "orlando"],
+        "scope": ["read", "write"],
+        "exp": 2000000000,
+        "iat": 1516239022
+    }));
+
+    // Create a dolphin_token for the user entity
+    let dolphin_user_token = generate_token_using_claims(json!({
+        "iss": "https://idp.dolphin.sea",
+        "sub": "dolphin_user_123",
+        "jti": "dolphin_user_123",
+        "client_id": "dolphin_client_123",
+        "aud": "dolphin_audience",
+        "exp": 2000000000,
+        "iat": 1516239022
+    }));
+
+    let request = AuthorizeMultiIssuerRequest::new_with_fields(
+        vec![
+            TokenInput::new("Dolphin::Access_Token".to_string(), dolphin_access_token),
+            TokenInput::new("Dolphin::Dolphin_Token".to_string(), dolphin_user_token),
+        ],
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Acme::Resource",
+                    "id": "1694c954f8a3"
+                },
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
+        "Acme::Action::\"GetFood\"".to_string(),
+        None,
+    );
+
+    let authz_result = cedarling.authorize_multi_issuer(request).await.expect(
+        "Dolphin access token authorization should succeed, maybe default entity is not loaded",
+    );
+
     assert!(
         authz_result.decision,
         "Authorization should be ALLOW for dolphin access token"
@@ -441,10 +499,7 @@ async fn test_or_logic_neither_token_has_scope() {
     );
 
     let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(
-        result.is_ok(),
-        "Authorization should execute successfully"
-    );
+    assert!(result.is_ok(), "Authorization should execute successfully");
     assert!(
         !result.unwrap().decision,
         "Should be DENY when neither token has required scope"
@@ -544,10 +599,7 @@ async fn test_and_logic_only_one_token_present() {
     );
 
     let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(
-        result.is_ok(),
-        "Authorization should execute successfully"
-    );
+    assert!(result.is_ok(), "Authorization should execute successfully");
     assert!(
         !result.unwrap().decision,
         "Should be DENY when only one of two required tokens is present"
@@ -601,10 +653,7 @@ async fn test_and_logic_both_tokens_missing_required_attributes() {
     );
 
     let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(
-        result.is_ok(),
-        "Authorization should execute successfully"
-    );
+    assert!(result.is_ok(), "Authorization should execute successfully");
     assert!(
         !result.unwrap().decision,
         "Should be DENY when tokens don't have required attributes"
@@ -693,10 +742,7 @@ async fn test_custom_token_without_required_claim() {
     );
 
     let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(
-        result.is_ok(),
-        "Authorization should execute successfully"
-    );
+    assert!(result.is_ok(), "Authorization should execute successfully");
     assert!(
         !result.unwrap().decision,
         "Should be DENY when custom token doesn't have correct waiver"
@@ -892,10 +938,7 @@ async fn test_validation_empty_token_array() {
     );
 
     let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(
-        result.is_err(),
-        "Should fail with empty token array"
-    );
+    assert!(result.is_err(), "Should fail with empty token array");
 }
 
 /// Test validation - Non-deterministic tokens (multiple tokens of same type from same issuer)
@@ -1163,7 +1206,10 @@ async fn test_validation_empty_mapping_string() {
 async fn test_validation_empty_payload() {
     let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let request_result = AuthorizeMultiIssuerRequest::new_with_fields(
-        vec![TokenInput::new("Acme::Access_Token".to_string(), "".to_string())], // Empty payload
+        vec![TokenInput::new(
+            "Acme::Access_Token".to_string(),
+            "".to_string(),
+        )], // Empty payload
         EntityData::from_json(
             &json!({
                 "cedar_entity_mapping": {

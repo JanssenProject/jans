@@ -279,3 +279,5 @@ policy_stores:
             total_token_count: Long
           }
         };
+    default_entities:
+      "1694c954f8a3": "ewogICAgInVpZCI6IHsKICAgICAgICAidHlwZSI6ICJBY21lOjpSZXNvdXJjZSIsCiAgICAgICAgImlkIjogIjE2OTRjOTU0ZjhhMyIKICAgIH0sCiAgICAiYXR0cnMiOiB7CiAgICAgICAgIm5hbWUiOiAiQXBwcm92ZWQgRG9scGhpbiBGb29kcyIKICAgIH0KfQ=="
