@@ -72,7 +72,7 @@ pub enum AuthorizeError {
     #[error("failed to validate Cedar entities: {0:?}")]
     ValidateEntities(#[from] EntitiesError),
     /// Error encountered while parsing all entities to json for logging
-    #[error("could convert entities to json: {0}")]
+    #[error("could not convert entities to json: {0}")]
     EntitiesToJson(SerdeJsonError),
     /// Error encountered while building the context for the request
     #[error("Failed to build context: {0}")]
