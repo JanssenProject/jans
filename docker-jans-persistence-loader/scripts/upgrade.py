@@ -326,9 +326,9 @@ class Upgrade:
 
         should_update = False
 
-        # add jansAdminUIRole and role to default admin user
+        # add jansAdminUIRole and role to default admin user (if missing)
         for attr_name, role_name in [
-            ("jansAdminUIRole", "api-admin"),
+            ("jansAdminUIRole", "admin"),
             ("role", "CasaAdmin"),
         ]:
             if not self.user_backend.client.use_simple_json:
@@ -339,8 +339,24 @@ class Upgrade:
                 new_roles = [role_name]
 
             if not old_roles:
-                entry.attrs[attr_name] = roles
+                entry.attrs[attr_name] = new_roles
                 should_update = True
+
+        # api-admin is changed to admin in jansAdminUIRole column
+        if not self.user_backend.client.use_simple_json:
+            aui_roles = entry.attrs["jansAdminUIRole"]["v"]
+        else:
+            aui_roles = entry.attrs["jansAdminUIRole"]
+
+        if "api-admin" in aui_roles:
+            idx = aui_roles.index("api-admin")
+            aui_roles[idx] = "admin"
+
+            if not self.user_backend.client.use_simple_json:
+                entry.attrs["jansAdminUIRole"]["v"] = aui_roles
+            else:
+                entry.attrs["jansAdminUIRole"] = aui_roles
+            should_update = True
 
         # set lowercased jansStatus
         if entry.attrs["jansStatus"] == "ACTIVE":
