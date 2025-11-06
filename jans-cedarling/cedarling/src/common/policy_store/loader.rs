@@ -98,41 +98,6 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
     pub fn new_physical() -> Self {
         Self::new(super::vfs_adapter::PhysicalVfs::new())
     }
-
-    /// Validate the manifest file against the policy store contents (PhysicalVfs-specific).
-    fn validate_manifest_physical(
-        &self,
-        dir: &str,
-        metadata: &PolicyStoreMetadata,
-        _manifest: &PolicyStoreManifest,
-    ) -> Result<(), PolicyStoreError> {
-        // Create a new PhysicalVfs instance for validation
-        let validator =
-            ManifestValidator::new(super::vfs_adapter::PhysicalVfs::new(), PathBuf::from(dir));
-
-        let result = validator.validate(Some(&metadata.policy_store.id));
-
-        // If validation fails, return the first error
-        if !result.is_valid {
-            if let Some(error) = result.errors.first() {
-                return Err(PolicyStoreError::ManifestError {
-                    err: error.error_type.clone(),
-                });
-            }
-        }
-
-        // Log warnings for unlisted files (if any)
-        if !result.unlisted_files.is_empty() {
-            // Note: In production, these warnings should be logged properly
-            eprintln!(
-                "Warning: {} file(s) found in policy store but not listed in manifest: {:?}",
-                result.unlisted_files.len(),
-                result.unlisted_files
-            );
-        }
-
-        Ok(())
-    }
 }
 
 impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
@@ -489,13 +454,56 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// separately using ManifestValidator directly.
     fn validate_manifest(
         &self,
-        _dir: &str,
-        _metadata: &PolicyStoreMetadata,
-        _manifest: &PolicyStoreManifest,
+        dir: &str,
+        metadata: &PolicyStoreMetadata,
+        manifest: &PolicyStoreManifest,
     ) -> Result<(), PolicyStoreError> {
-        // Manifest validation is implemented in ManifestValidator
-        // For the generic loader, we skip automatic validation since we can't clone V
-        // Users should call ManifestValidator directly if they want validation
+        // Delegate to specialized implementation for PhysicalVfs
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            use std::any::TypeId;
+
+            // Check if V is PhysicalVfs at runtime
+            if TypeId::of::<V>() == TypeId::of::<super::vfs_adapter::PhysicalVfs>() {
+                // Create a new PhysicalVfs instance for validation
+                let validator = ManifestValidator::new(
+                    super::vfs_adapter::PhysicalVfs::new(),
+                    PathBuf::from(dir),
+                );
+
+                let result = validator.validate(Some(&metadata.policy_store.id));
+
+                // If validation fails, return the first error
+                if !result.is_valid {
+                    if let Some(error) = result.errors.first() {
+                        return Err(PolicyStoreError::ManifestError {
+                            err: error.error_type.clone(),
+                        });
+                    }
+                }
+
+                // Log warnings for unlisted files to stderr
+                if !result.unlisted_files.is_empty() {
+                    eprintln!(
+                        "Warning: {} file(s) found in policy store but not listed in manifest: {:?}",
+                        result.unlisted_files.len(),
+                        result.unlisted_files
+                    );
+                }
+
+                return Ok(());
+            }
+        }
+
+        // For other VFS types (MemoryVfs, WASM, custom implementations),
+        // manifest validation is intentionally skipped because:
+        // 1. We cannot create a new instance of generic V (no Clone bound)
+        // 2. We cannot cheaply copy/share the VFS instance (no cheap Clone implementation)
+        // 3. MemoryVfs validation is typically done in tests where users have direct access
+        // 4. WASM environments do not have filesystem access, so validation is not possible
+        //
+        // Users of non-PhysicalVfs types should call ManifestValidator::validate()
+        // directly if they need manifest validation for their specific use case.
         Ok(())
     }
 

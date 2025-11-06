@@ -11,9 +11,10 @@
 use super::errors::{ManifestErrorType, PolicyStoreError};
 use super::metadata::PolicyStoreManifest;
 use super::vfs_adapter::VfsFileSystem;
+use hex;
 use sha2::{Digest, Sha256};
-use std::collections::{HashMap, HashSet};
-use std::path::{Path, PathBuf};
+use std::collections::HashSet;
+use std::path::PathBuf;
 
 /// Result of manifest validation with detailed information.
 #[derive(Debug, Clone, PartialEq)]
@@ -49,19 +50,19 @@ impl ManifestValidationResult {
     }
 
     /// Add an error to the validation result and mark as invalid.
-    pub fn add_error(&mut self, error_type: ManifestErrorType, file: Option<String>) {
+    fn add_error(&mut self, error_type: ManifestErrorType, file: Option<String>) {
         self.is_valid = false;
         self.errors
             .push(ManifestValidationError { error_type, file });
     }
 
     /// Add a validated file.
-    pub fn add_validated_file(&mut self, file: String) {
+    fn add_validated_file(&mut self, file: String) {
         self.validated_files.push(file);
     }
 
     /// Add an unlisted file (warning).
-    pub fn add_unlisted_file(&mut self, file: String) {
+    fn add_unlisted_file(&mut self, file: String) {
         self.unlisted_files.push(file);
     }
 }
@@ -177,12 +178,11 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
             });
         }
 
-        // Compute and validate checksum
-        let actual_checksum =
-            self.compute_checksum(&file_path)
-                .map_err(|_| ManifestErrorType::FileMissing {
-                    file: relative_path.to_string(),
-                })?;
+        // Compute checksum from already-read content
+        let mut hasher = Sha256::new();
+        hasher.update(&content_bytes);
+        let result = hasher.finalize();
+        let actual_checksum = format!("sha256:{}", hex::encode(result));
 
         if actual_checksum != expected_checksum {
             return Err(ManifestErrorType::ChecksumMismatch {
@@ -328,20 +328,21 @@ mod tests {
     use crate::common::policy_store::metadata::FileInfo;
     use crate::common::policy_store::vfs_adapter::MemoryVfs;
     use chrono::Utc;
+    use std::collections::HashMap;
 
     fn create_test_vfs_with_files() -> MemoryVfs {
         let vfs = MemoryVfs::new();
 
         // Create test files
         vfs.create_file("metadata.json", b"{\"test\": \"data\"}")
-            .unwrap();
+            .expect("should create metadata file");
         vfs.create_file(
             "policies/policy1.cedar",
             b"permit(principal, action, resource);",
         )
-        .unwrap();
+        .expect("should create policy file");
         vfs.create_file("schemas/schema1.cedarschema", b"namespace Test {}")
-            .unwrap();
+            .expect("should create schema file");
 
         vfs
     }
@@ -349,10 +350,13 @@ mod tests {
     #[test]
     fn test_compute_checksum() {
         let vfs = MemoryVfs::new();
-        vfs.create_file("/test.txt", b"hello world").unwrap();
+        vfs.create_file("/test.txt", b"hello world")
+            .expect("should create test file");
 
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
-        let checksum = validator.compute_checksum("/test.txt").unwrap();
+        let checksum = validator
+            .compute_checksum("/test.txt")
+            .expect("should compute checksum");
 
         // Expected SHA-256 of "hello world"
         assert_eq!(
@@ -367,9 +371,8 @@ mod tests {
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
 
         let result = validator.load_manifest();
-        assert!(result.is_err());
         assert!(matches!(
-            result.unwrap_err(),
+            result.expect_err("should fail when manifest not found"),
             PolicyStoreError::ManifestError {
                 err: ManifestErrorType::ManifestNotFound
             }
@@ -392,10 +395,10 @@ mod tests {
         }"#;
 
         vfs.create_file("/manifest.json", manifest_json.as_bytes())
-            .unwrap();
+            .expect("should succeed");
 
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
-        let manifest = validator.load_manifest().unwrap();
+        let manifest = validator.load_manifest().expect("should succeed");
 
         assert_eq!(manifest.policy_store_id, "test123");
         assert_eq!(manifest.files.len(), 1);
@@ -409,7 +412,7 @@ mod tests {
         let result = validator.validate_file("missing.txt", "sha256:abc", 100);
         assert!(result.is_err());
         assert!(matches!(
-            result.unwrap_err(),
+            result.expect_err("should fail"),
             ManifestErrorType::FileMissing { .. }
         ));
     }
@@ -417,14 +420,15 @@ mod tests {
     #[test]
     fn test_validate_file_invalid_checksum_format() {
         let vfs = MemoryVfs::new();
-        vfs.create_file("/test.txt", b"hello").unwrap();
+        vfs.create_file("/test.txt", b"hello")
+            .expect("should succeed");
 
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
         let result = validator.validate_file("test.txt", "invalid_format", 5);
 
         assert!(result.is_err());
         assert!(matches!(
-            result.unwrap_err(),
+            result.expect_err("should fail"),
             ManifestErrorType::InvalidChecksumFormat { .. }
         ));
     }
@@ -432,14 +436,15 @@ mod tests {
     #[test]
     fn test_validate_file_size_mismatch() {
         let vfs = MemoryVfs::new();
-        vfs.create_file("/test.txt", b"hello").unwrap();
+        vfs.create_file("/test.txt", b"hello")
+            .expect("should succeed");
 
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
         let result = validator.validate_file("test.txt", "sha256:abc", 100); // Wrong size
 
         assert!(result.is_err());
         assert!(matches!(
-            result.unwrap_err(),
+            result.expect_err("should fail"),
             ManifestErrorType::SizeMismatch { .. }
         ));
     }
@@ -447,14 +452,15 @@ mod tests {
     #[test]
     fn test_validate_file_checksum_mismatch() {
         let vfs = MemoryVfs::new();
-        vfs.create_file("/test.txt", b"hello").unwrap();
+        vfs.create_file("/test.txt", b"hello")
+            .expect("should succeed");
 
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
         let result = validator.validate_file("test.txt", "sha256:wrongchecksum", 5);
 
         assert!(result.is_err());
         assert!(matches!(
-            result.unwrap_err(),
+            result.expect_err("should fail"),
             ManifestErrorType::ChecksumMismatch { .. }
         ));
     }
@@ -463,12 +469,15 @@ mod tests {
     fn test_validate_file_success() {
         let vfs = MemoryVfs::new();
         let content = b"hello world";
-        vfs.create_file("/test.txt", content).unwrap();
+        vfs.create_file("/test.txt", content)
+            .expect("should succeed");
 
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
 
         // Compute correct checksum
-        let checksum = validator.compute_checksum("/test.txt").unwrap();
+        let checksum = validator
+            .compute_checksum("/test.txt")
+            .expect("should succeed");
 
         let result = validator.validate_file("test.txt", &checksum, content.len() as u64);
         assert!(result.is_ok());
@@ -480,20 +489,23 @@ mod tests {
 
         // Create metadata
         let metadata_content = b"{\"test\": \"data\"}";
-        vfs.create_file("/metadata.json", metadata_content).unwrap();
+        vfs.create_file("/metadata.json", metadata_content)
+            .expect("should succeed");
 
         // Create policy
         let policy_content = b"permit(principal, action, resource);";
         vfs.create_file("/policies/policy1.cedar", policy_content)
-            .unwrap();
+            .expect("should succeed");
 
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
 
         // Compute checksums
-        let metadata_checksum = validator.compute_checksum("/metadata.json").unwrap();
+        let metadata_checksum = validator
+            .compute_checksum("/metadata.json")
+            .expect("should succeed");
         let policy_checksum = validator
             .compute_checksum("/policies/policy1.cedar")
-            .unwrap();
+            .expect("should succeed");
 
         // Create manifest
         let mut files = HashMap::new();
@@ -518,11 +530,11 @@ mod tests {
             files,
         };
 
-        let manifest_json = serde_json::to_string(&manifest).unwrap();
+        let manifest_json = serde_json::to_string(&manifest).expect("should succeed");
         validator
             .vfs
             .create_file("/manifest.json", manifest_json.as_bytes())
-            .unwrap();
+            .expect("should succeed");
 
         // Validate
         let result = validator.validate(Some("test123"));
@@ -539,19 +551,22 @@ mod tests {
         let metadata_content = b"{\"test\": \"data\"}";
         let policy_content = b"permit(principal, action, resource);";
 
-        vfs.create_file("/metadata.json", metadata_content).unwrap();
+        vfs.create_file("/metadata.json", metadata_content)
+            .expect("should succeed");
         vfs.create_file("/policies/policy1.cedar", policy_content)
-            .unwrap();
+            .expect("should succeed");
         vfs.create_file("/policies/extra_policy.cedar", policy_content)
-            .unwrap();
+            .expect("should succeed");
 
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
 
         // Create manifest with only metadata.json and policy1.cedar
-        let metadata_checksum = validator.compute_checksum("/metadata.json").unwrap();
+        let metadata_checksum = validator
+            .compute_checksum("/metadata.json")
+            .expect("should succeed");
         let policy_checksum = validator
             .compute_checksum("/policies/policy1.cedar")
-            .unwrap();
+            .expect("should succeed");
 
         let mut files = HashMap::new();
         files.insert(
@@ -575,11 +590,11 @@ mod tests {
             files,
         };
 
-        let manifest_json = serde_json::to_string(&manifest).unwrap();
+        let manifest_json = serde_json::to_string(&manifest).expect("should succeed");
         validator
             .vfs
             .create_file("/manifest.json", manifest_json.as_bytes())
-            .unwrap();
+            .expect("should succeed");
 
         // Validate
         let result = validator.validate(None);
@@ -604,9 +619,9 @@ mod tests {
             files: HashMap::new(),
         };
 
-        let manifest_json = serde_json::to_string(&manifest).unwrap();
+        let manifest_json = serde_json::to_string(&manifest).expect("should succeed");
         vfs.create_file("/manifest.json", manifest_json.as_bytes())
-            .unwrap();
+            .expect("should succeed");
 
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
         let result = validator.validate(Some("wrong_id"));
@@ -638,9 +653,9 @@ mod tests {
             files,
         };
 
-        let manifest_json = serde_json::to_string(&manifest).unwrap();
+        let manifest_json = serde_json::to_string(&manifest).expect("should succeed");
         vfs.create_file("/manifest.json", manifest_json.as_bytes())
-            .unwrap();
+            .expect("should succeed");
 
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
         let result = validator.validate(None);
@@ -658,7 +673,8 @@ mod tests {
     fn test_validate_with_checksum_mismatch() {
         let vfs = MemoryVfs::new();
 
-        vfs.create_file("/test.txt", b"actual content").unwrap();
+        vfs.create_file("/test.txt", b"actual content")
+            .expect("should succeed");
 
         // Create manifest with wrong checksum
         let mut files = HashMap::new();
@@ -676,9 +692,9 @@ mod tests {
             files,
         };
 
-        let manifest_json = serde_json::to_string(&manifest).unwrap();
+        let manifest_json = serde_json::to_string(&manifest).expect("should succeed");
         vfs.create_file("/manifest.json", manifest_json.as_bytes())
-            .unwrap();
+            .expect("should succeed");
 
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
         let result = validator.validate(None);
