@@ -432,6 +432,8 @@ nav:
     - Swift: 'cedarling/getting-started/swift.md'
   - Reference:
     - Terminology: 'cedarling/intro/cedarling-terms.md'
+    - Authorization: 'cedarling/cedarling-authz.md'
+    - Multi-Issuer Authorization: 'cedarling/cedarling-multi-issuer.md'
     - Interfaces: 'cedarling/cedarling-interfaces.md'
     - Policy Store: 'cedarling/cedarling-policy-store.md'
     - Properties: 'cedarling/cedarling-properties.md'
@@ -439,14 +441,10 @@ nav:
     - Logs: 'cedarling/cedarling-logs.md'
     - JWT Validation: 'cedarling/cedarling-jwt-validation.md'
     - JWT Mapping: 'cedarling/cedarling-jwt-mapping.md'
-    - Multi-Issuer Authorization: 'cedarling/cedarling-multi-issuer.md'
     - Lock Configuration: 'cedarling/cedarling-lock-server.md'
     - Cedarling Entities: 'cedarling/cedarling-entities.md'
   - Developer:
     - Rust: 'cedarling/cedarling-rust.md'
-    - Python:
-      - cedarling/python/README.md
-      - How to use: cedarling/python/usage.md
     - Kotlin and Java: 'cedarling/uniffi/cedarling-kotlin.md'
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'

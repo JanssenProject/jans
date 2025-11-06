@@ -462,6 +462,7 @@ entity Tokens = {
 ```
 
 The naming follows this pattern:
+
 - **Issuer name**: From trusted issuer metadata `name` field, or hostname from JWT `iss` claim
 - **Token type**: Extracted from the `mapping` field (e.g., "Jans::Access_Token" → "access_token")
 - Both converted to lowercase with underscores replacing special characters
