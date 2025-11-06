@@ -350,7 +350,7 @@ class Upgrade:
                 aui_roles = aui_attr
 
             if "api-admin" in aui_roles:
-                # replace all occurences of api-admin with admin
+                # replace all occurrences of api-admin with admin
                 aui_roles = [
                     "admin" if role == "api-admin" else role
                     for role in aui_roles
