@@ -357,11 +357,7 @@ class Upgrade:
                 ]
 
                 # remove duplicates while preserving order
-                seen = set()
-                aui_roles = [
-                    role for role in aui_roles
-                    if not (role in seen or seen.add(role))
-                ]
+                aui_roles = list(dict.fromkeys(aui_roles))
 
                 if not self.user_backend.client.use_simple_json:
                     entry.attrs["jansAdminUIRole"]["v"] = aui_roles
