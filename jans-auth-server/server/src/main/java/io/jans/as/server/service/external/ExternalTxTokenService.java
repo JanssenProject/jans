@@ -46,7 +46,7 @@ public class ExternalTxTokenService extends ExternalScriptService {
     public boolean modifyTokenPayload(JsonWebResponse jsonWebResponse, ExternalScriptContext context) {
         List<CustomScriptConfiguration> scripts = getScripts(context.getExecutionContext());
         if (scripts.isEmpty()) {
-            return false;
+            return true;
         }
         log.trace("Executing {} 'modifyTokenPayload' scripts.", scripts.size());
 
@@ -84,7 +84,7 @@ public class ExternalTxTokenService extends ExternalScriptService {
         List<CustomScriptConfiguration> scripts = getScripts(context.getExecutionContext());
         if (scripts.isEmpty()) {
             log.trace("No TxTokenType scripts found.");
-            return false;
+            return true;
         }
 
         log.trace("Executing {} 'modifyResponse' scripts.", scripts.size());
