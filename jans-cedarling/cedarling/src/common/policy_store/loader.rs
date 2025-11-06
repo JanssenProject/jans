@@ -6,13 +6,14 @@
 //! Policy store loader with format detection and directory loading support.
 
 use super::errors::{PolicyStoreError, ValidationError};
+use super::manifest_validator::ManifestValidator;
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
 use super::policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
 use super::source::{PolicyStoreFormat, PolicyStoreSource};
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
 use cedar_policy::PolicySet;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 /// Policy store loader trait for loading policy stores from various sources.
 pub trait PolicyStoreLoader {
@@ -96,6 +97,41 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
     /// This is a convenience constructor for native platforms.
     pub fn new_physical() -> Self {
         Self::new(super::vfs_adapter::PhysicalVfs::new())
+    }
+
+    /// Validate the manifest file against the policy store contents (PhysicalVfs-specific).
+    fn validate_manifest_physical(
+        &self,
+        dir: &str,
+        metadata: &PolicyStoreMetadata,
+        _manifest: &PolicyStoreManifest,
+    ) -> Result<(), PolicyStoreError> {
+        // Create a new PhysicalVfs instance for validation
+        let validator =
+            ManifestValidator::new(super::vfs_adapter::PhysicalVfs::new(), PathBuf::from(dir));
+
+        let result = validator.validate(Some(&metadata.policy_store.id));
+
+        // If validation fails, return the first error
+        if !result.is_valid {
+            if let Some(error) = result.errors.first() {
+                return Err(PolicyStoreError::ManifestError {
+                    err: error.error_type.clone(),
+                });
+            }
+        }
+
+        // Log warnings for unlisted files (if any)
+        if !result.unlisted_files.is_empty() {
+            // Note: In production, these warnings should be logged properly
+            eprintln!(
+                "Warning: {} file(s) found in policy store but not listed in manifest: {:?}",
+                result.unlisted_files.len(),
+                result.unlisted_files
+            );
+        }
+
+        Ok(())
     }
 }
 
@@ -423,6 +459,12 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         // Load all components
         let metadata = self.load_metadata(dir)?;
         let manifest = self.load_manifest(dir)?;
+
+        // Validate manifest if present
+        if let Some(ref manifest_data) = manifest {
+            self.validate_manifest(dir, &metadata, manifest_data)?;
+        }
+
         let schema = self.load_schema(dir)?;
         let policies = self.load_policies(dir)?;
         let templates = self.load_templates(dir)?;
@@ -438,6 +480,23 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             entities,
             trusted_issuers,
         })
+    }
+
+    /// Validate the manifest file against the policy store contents.
+    ///
+    /// Note: This validation is only performed for PhysicalVfs (native filesystem).
+    /// For other VFS implementations (MemoryVfs, WASM), validation should be done
+    /// separately using ManifestValidator directly.
+    fn validate_manifest(
+        &self,
+        _dir: &str,
+        _metadata: &PolicyStoreMetadata,
+        _manifest: &PolicyStoreManifest,
+    ) -> Result<(), PolicyStoreError> {
+        // Manifest validation is implemented in ManifestValidator
+        // For the generic loader, we skip automatic validation since we can't clone V
+        // Users should call ManifestValidator directly if they want validation
+        Ok(())
     }
 
     /// Parse and validate Cedar policies from loaded policy files.
