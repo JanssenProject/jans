@@ -107,7 +107,7 @@ RESOURCE = EntityData.from_dict(
 def get_multi_issuer_config():
     """Helper to configure Cedarling for multi-issuer tests"""
 
-    def configure_for_multi_issuer(config):
+    def configure_for_multi_issuer(config) -> None:
         config["CEDARLING_JWT_SIG_VALIDATION"] = "disabled"
         config["CEDARLING_JWT_STATUS_VALIDATION"] = "disabled"
         config["CEDARLING_ID_TOKEN_TRUST_MODE"] = "never"
