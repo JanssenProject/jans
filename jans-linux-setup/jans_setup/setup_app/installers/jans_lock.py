@@ -28,6 +28,8 @@ class JansLockInstaller(JettyInstaller):
 
                 (os.path.join(Config.dist_jans_dir, 'lock-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/lock-plugin/{0}/lock-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_jans_dir, 'jans-lock-model.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-model/{0}/jans-lock-model-{0}.jar'.format(base.current_app.app_info['jans_version']))),
+                (os.path.join(Config.dist_jans_dir, 'jans-lock-cedarling.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-cedarling/{0}/jans-lock-cedarling-{0}.jar'.format(base.current_app.app_info['jans_version']))),
+                (os.path.join(Config.dist_jans_dir, 'cedarling-java.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/cedarling-java/{0}/cedarling-java-{0}.jar'.format(base.current_app.app_info['jans_version']))),
                 ]
 
     def __init__(self):
@@ -105,7 +107,13 @@ class JansLockInstaller(JettyInstaller):
         self.enable()
 
     def install_as_service(self):
-        for plugin in (self.source_files[1][0], self.source_files[3][0]):
+        service_plugins = [
+            self.source_files[1][0],  # jans-lock-service.jar
+            self.source_files[3][0],  # jans-lock-model.jar
+            self.source_files[4][0],  # jans-lock-cedarling.jar
+            self.source_files[5][0],  # cedarling-java.jar
+        ]
+        for plugin in service_plugins:
             plugin_name = os.path.basename(plugin)
             self.logIt(f"Adding plugin {plugin_name} to jans-auth")
             self.copyFile(plugin, base.current_app.JansAuthInstaller.custom_lib_dir)
