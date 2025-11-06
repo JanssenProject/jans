@@ -409,13 +409,8 @@ impl Authz {
             request_id,
         );
 
-        let validated_tokens_arc: HashMap<String, Arc<Token>> = validated_tokens
-            .into_iter()
-            .map(|(k, v)| (k, Arc::new(v)))
-            .collect();
-
         let tokens_logging_info = LogTokensInfo::new(
-            &validated_tokens_arc,
+            &validated_tokens,
             self.config
                 .authorization
                 .decision_log_default_jwt_id
