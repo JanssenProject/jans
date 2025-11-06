@@ -66,9 +66,8 @@ public class AuthConfigResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS,
-            ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS }, superScopes = {
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
+                    ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAppConfiguration() {
         AppConfiguration appConfiguration = configurationService.find();
         log.debug("AuthConfigResource::getAppConfiguration() appConfiguration:{}", appConfiguration);
@@ -89,9 +88,8 @@ public class AuthConfigResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS }, superScopes = {
-                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchAppConfigurationProperty(@NotNull String jsonPatchString)
             throws JsonPatchException, IOException {
         log.debug("AUTH CONF details to patch - jsonPatchString:{} ", jsonPatchString);
@@ -127,9 +125,8 @@ public class AuthConfigResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS,
-            ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS }, superScopes = {
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
+                    ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.PERSISTENCE)
     public Response getPersistenceDetails() {
         PersistenceConfiguration persistenceConfiguration = configurationService.getPersistenceMetadata();
@@ -152,9 +149,8 @@ public class AuthConfigResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS,
-            ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS }, superScopes = {
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
+                    ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.FEATURE_FLAGS)
     public Response getFeatureFlagType() {
         EnumSet<FeatureFlagType> set = EnumSet.allOf(FeatureFlagType.class);

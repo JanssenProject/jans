@@ -68,8 +68,8 @@ public class AgamaRepoResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_REPO_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS,
-            ApiAccessConstants.AGAMA_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS }, superScopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllAgamaRepositories() {
         return Response.ok(agamaRepoService.getAllAgamaRepositories()).build();
@@ -89,8 +89,8 @@ public class AgamaRepoResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_REPO_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS,
-            ApiAccessConstants.AGAMA_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS }, superScopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/download")
     public Response getAgamaProject(

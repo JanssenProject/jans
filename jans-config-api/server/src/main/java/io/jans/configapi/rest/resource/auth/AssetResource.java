@@ -82,8 +82,8 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS,
-            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAssets(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -117,8 +117,8 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS,
-            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getAssetByInum(
             @Parameter(description = "Asset Inum") @PathParam(ApiConstants.INUM) @NotNull String inum)
@@ -149,8 +149,8 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS,
-            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.NAME + ApiConstants.NAME_PARAM_PATH)
     public Response getAssetByName(
             @Parameter(description = "Asset Name") @PathParam(ApiConstants.NAME) @NotNull String name)
@@ -186,9 +186,9 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, 
-    groupScopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS, ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, 
-    superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.SERVICES)
     public Response getJansServices() {
 
@@ -214,8 +214,8 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS,
-            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.ASSET_TYPE)
     public Response getValidAssetTypes() {
 
@@ -238,8 +238,8 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS,
-            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.ASSET_DIR_MAPPING)
     public Response getAssetDirMapping() {
 
@@ -265,7 +265,8 @@ public class AssetResource extends ConfigBaseResource {
     @POST
     @Path(ApiConstants.UPLOAD)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response uploadAsset(@MultipartForm AssetForm assetForm) throws Exception {
         if (log.isInfoEnabled()) {
             log.info("Create Asset details assetForm:{}", assetForm);
@@ -321,7 +322,8 @@ public class AssetResource extends ConfigBaseResource {
     @PUT
     @Path(ApiConstants.UPLOAD)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateAsset(@MultipartForm AssetForm assetForm) throws Exception {
         if (log.isInfoEnabled()) {
             log.info("Update Asset details assetForm:{}", assetForm);
@@ -390,7 +392,8 @@ public class AssetResource extends ConfigBaseResource {
     @POST
     @Path(ApiConstants.SERVICE + ApiConstants.SERVICE_NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response loadServiceAsset(
             @Parameter(description = "Service Name") @PathParam(ApiConstants.SERVICE_NAME) @NotNull String serviceName)
             throws Exception {
@@ -427,7 +430,7 @@ public class AssetResource extends ConfigBaseResource {
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_DELETE_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = {
+            ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteAsset(
             @Parameter(description = "Asset identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {

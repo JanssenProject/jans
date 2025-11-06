@@ -87,8 +87,8 @@ public class AcrsResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.ACRS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.ACRS_WRITE_ACCESS,
-            ApiAccessConstants.ACRS_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.ACRS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.ACRS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getDefaultAuthenticationMethod() {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
 
@@ -109,8 +109,8 @@ public class AcrsResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "Unauthorized"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.ACRS_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.ACRS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateDefaultAuthenticationMethod(@NotNull AuthenticationMethod authenticationMethod) {
         log.info("ACRS details to  update - authenticationMethod:{}", authenticationMethod);
 
