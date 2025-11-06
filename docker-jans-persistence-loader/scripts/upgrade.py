@@ -343,20 +343,31 @@ class Upgrade:
                 should_update = True
 
         # api-admin is changed to admin in jansAdminUIRole column
-        if not self.user_backend.client.use_simple_json:
-            aui_roles = entry.attrs["jansAdminUIRole"]["v"]
-        else:
-            aui_roles = entry.attrs["jansAdminUIRole"]
-
-        if "api-admin" in aui_roles:
-            idx = aui_roles.index("api-admin")
-            aui_roles[idx] = "admin"
-
+        if aui_attr := entry.attrs.get("jansAdminUIRole"):
             if not self.user_backend.client.use_simple_json:
-                entry.attrs["jansAdminUIRole"]["v"] = aui_roles
+                aui_roles = aui_attr.get("v", [])
             else:
-                entry.attrs["jansAdminUIRole"] = aui_roles
-            should_update = True
+                aui_roles = aui_attr
+
+            if "api-admin" in aui_roles:
+                # replace all occurences of api-admin with admin
+                aui_roles = [
+                    "admin" if role == "api-admin" else role
+                    for role in aui_roles
+                ]
+
+                # remove duplicates while preserving order
+                seen = set()
+                aui_roles = [
+                    role for role in aui_roles
+                    if not (role in seen or seen.add(role))
+                ]
+
+                if not self.user_backend.client.use_simple_json:
+                    entry.attrs["jansAdminUIRole"]["v"] = aui_roles
+                else:
+                    entry.attrs["jansAdminUIRole"] = aui_roles
+                should_update = True
 
         # set lowercased jansStatus
         if entry.attrs["jansStatus"] == "ACTIVE":
