@@ -33,35 +33,12 @@ def _transform_lock_dynamic_config(conf, manager):
     # add missing top-level keys
     hostname = manager.config.get("hostname")
     for missing_key, value in [
-        ("policiesJsonUrisAuthorizationToken", conf.pop("policiesJsonUrisAccessToken", "")),
-        ("policiesZipUris", []),
-        ("policiesZipUrisAuthorizationToken", conf.pop("policiesZipUrisAccessToken", "")),
-        ("baseEndpoint", f"https://{hostname}/jans-auth/v1"),
+        ("baseEndpoint", f"https://{hostname}/jans-auth/api/v1"),
         ("clientId", manager.config.get("lock_client_id")),
         ("clientPassword", manager.secret.get("lock_client_encoded_pw")),
         ("tokenUrl", f"https://{hostname}/jans-auth/restv1/token"),
-        ("endpointDetails", {
-            "jans-config-api/lock/audit/telemetry": [
-                "https://jans.io/oauth/lock/telemetry.readonly",
-                "https://jans.io/oauth/lock/telemetry.write"
-            ],
-            "jans-config-api/lock/audit/log": [
-                "https://jans.io/oauth/lock/log.write"
-            ],
-            "jans-config-api/lock/audit/health": [
-                "https://jans.io/oauth/lock/health.readonly",
-                "https://jans.io/oauth/lock/health.write"
-            ],
-        }),
-        ("endpointGroups", {
-            "audit": [
-                "telemetry",
-                "health",
-                "log"
-            ],
-        }),
         ("statEnabled", True),
-        ("protectionMode", "CEDARLING"),
+        ("protectionMode", "cedarling"),
         ("cedarlingConfiguration", {
             "enabled": True,
             "policySources": [
@@ -75,6 +52,7 @@ def _transform_lock_dynamic_config(conf, manager):
             "logLevel": "INFO",
             "externalPolicyStoreUri": ""
         }),
+        ("auditPersistenceMode", "internal"),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -85,22 +63,21 @@ def _transform_lock_dynamic_config(conf, manager):
         conf["baseEndpoint"] = f"https://{hostname}/jans-auth/api/v1"
         should_update = True
 
-    # new audit endpoint groups
-    for audit_endpoint in ["telemetry/bulk", "health/bulk", "log/bulk"]:
-        if audit_endpoint in conf["endpointGroups"]["audit"]:
-            continue
-        conf["endpointGroups"]["audit"].append(audit_endpoint)
-        should_update = True
+    # some attributes below are removed
+    for rm_attr in [
+        "endpointGroups",
+        "endpointDetails",
+        "policiesJsonUrisAuthorizationToken",
+        "policiesZipUris",
+        "policiesZipUrisAuthorizationToken",
+    ]:
+        if rm_attr in conf:
+            conf.pop(rm_attr, None)
+            should_update = True
 
-    # new endpoint details
-    for k, v in {
-        "jans-config-api/lock/audit/telemetry/bulk": ["https://jans.io/oauth/lock/telemetry.readonly", "https://jans.io/oauth/lock/telemetry.write"],
-        "jans-config-api/lock/audit/log/bulk": ["https://jans.io/oauth/lock/log.write"],
-        "jans-config-api/lock/audit/health/bulk": ["https://jans.io/oauth/lock/health.readonly", "https://jans.io/oauth/lock/health.write"],
-    }.items():
-        if k in conf["endpointDetails"]:
-            continue
-        conf["endpointDetails"][k] = v
+    # protectionMode is changed from CEDARLING to cedarling
+    if conf["protectionMode"] == "CEDARLING":
+        conf["protectionMode"] = "cedarling"
         should_update = True
 
     # return modified config (if any) and update flag
