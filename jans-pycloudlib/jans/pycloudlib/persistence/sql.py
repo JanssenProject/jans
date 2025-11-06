@@ -398,21 +398,23 @@ class SqlClient(SqlSchemaMixin):
             for column in table.c:
                 collation = getattr(column.type, "collation", None)
 
-                # temporarily truncate COLLATION string (if needed)
-                if collation:
-                    column.type.collation = None
+                try:
+                    # temporarily truncate COLLATION string (if needed)
+                    if collation:
+                        column.type.collation = None
 
-                col_type = str(column.type)
+                    col_type = str(column.type)
 
-                # extract the size of DATETIME to match the schema from file
-                if col_type.startswith("DATETIME"):
-                    col_type = f"DATETIME({column.type.fsp})"
+                    # extract the size of DATETIME to match the schema from file
+                    if col_type.startswith("DATETIME") and getattr(column.type, "fsp", None):
+                        col_type = f"DATETIME({column.type.fsp})"
 
-                table_mapping[table_name][column.name] = col_type
+                    table_mapping[table_name][column.name] = col_type
 
-                # preserve the original collation
-                if collation and column.type.collation is None:
-                    column.type.collation = collation
+                finally:
+                    # preserve the original collation
+                    if collation and column.type.collation is None:
+                        column.type.collation = collation
 
         # finalized table mapping
         return dict(table_mapping)
