@@ -393,12 +393,28 @@ class SqlClient(SqlSchemaMixin):
     def get_table_mapping(self) -> dict[str, dict[str, str]]:
         """Get mapping of column name and type from all tables."""
         table_mapping: dict[str, dict[str, str]] = defaultdict(dict)
+
         for table_name, table in self.metadata.tables.items():
             for column in table.c:
-                # truncate COLLATION string
-                if getattr(column.type, "collation", None):
+                collation = getattr(column.type, "collation", None)
+
+                # temporarily truncate COLLATION string (if needed)
+                if collation:
                     column.type.collation = None
-                table_mapping[table_name][column.name] = str(column.type)
+
+                col_type = str(column.type)
+
+                # extract the size of DATETIME to match the schema from file
+                if col_type.startswith("DATETIME"):
+                    col_type = f"DATETIME({column.type.fsp})"
+
+                table_mapping[table_name][column.name] = col_type
+
+                # preserve the original collation
+                if collation and column.type.collation is None:
+                    column.type.collation = collation
+
+        # finalized table mapping
         return dict(table_mapping)
 
     def create_index(self, query: str) -> None:
