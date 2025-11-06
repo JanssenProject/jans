@@ -22,7 +22,7 @@ public class PolicyStoreMapperHelper {
     private static final Pattern RESOURCE_ASSIGNMENT_PATTERN =
             Pattern.compile("resource\\s*(?:==|in|is)\\s*([^;\\n]+)");
     private static final Pattern SINGLE_ACTION_PATTERN =
-            Pattern.compile("action\\s*==\\s*([^;\\n]+)");
+            Pattern.compile("action\\s*(?:==|in)\\s*([A-Za-z0-9_:\\\"']+)");
     private static final Pattern MULTI_ACTION_PATTERN =
             Pattern.compile("action\\s*in\\s*\\[([^\\]]+)\\]");
 
@@ -351,24 +351,23 @@ public class PolicyStoreMapperHelper {
      */
     private static Set<String> extractActionsFromPolicy(String policy) {
         Set<String> actions = new HashSet<>();
+        if (policy == null || policy.isEmpty()) return actions;
 
-        // Single action
-        Matcher singleMatcher = SINGLE_ACTION_PATTERN.matcher(policy);
-        if (singleMatcher.find()) {
-            actions.add(normalizeAction(cleanValue(singleMatcher.group(1))));
+        Matcher matcher = SINGLE_ACTION_PATTERN.matcher(policy);
+        if (matcher.find()) {
+            // Found single action
+            actions.add(normalizeAction(cleanValue(matcher.group(1))));
+        } else {
+            // Try multiple actions
+            matcher = MULTI_ACTION_PATTERN.matcher(policy);
+            if (matcher.find()) {
+                Arrays.stream(matcher.group(1).split(","))
+                        .map(PolicyStoreMapperHelper::cleanValue)
+                        .map(PolicyStoreMapperHelper::normalizeAction)
+                        .filter(cleaned -> !cleaned.isEmpty())
+                        .forEach(actions::add);
+            }
         }
-
-        // Multiple actions
-        Matcher multiMatcher = MULTI_ACTION_PATTERN.matcher(policy);
-        if (multiMatcher.find()) {
-            String actionsString = multiMatcher.group(1);
-            Arrays.stream(actionsString.split(","))
-                    .map(PolicyStoreMapperHelper::cleanValue)
-                    .map(PolicyStoreMapperHelper::normalizeAction)
-                    .filter(cleaned -> !cleaned.isEmpty())
-                    .forEach(actions::add);
-        }
-
         return actions;
     }
 
@@ -452,7 +451,9 @@ public class PolicyStoreMapperHelper {
      * Normalizes action by removing namespace prefix.
      */
     private static String normalizeAction(String value) {
-        return value.replace(ACTION_PREFIX, "").trim();
+        return value.replace(ACTION_PREFIX, "")
+                .replace("\"", "")
+                .trim();
     }
 
     /**

@@ -6,6 +6,8 @@ import com.google.common.base.Strings;
 import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
 import io.jans.ca.plugin.adminui.model.adminui.AdminUIResourceScopesMapping;
+import io.jans.ca.plugin.adminui.model.adminui.CedarlngPolicyStrRetrievalPoint;
+import io.jans.ca.plugin.adminui.model.auth.AppConfigResponse;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
@@ -67,7 +69,8 @@ public class AdminUISecurityService {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             // If the remote Policy Store URL is configured and enabled
-            if(auiConfiguration.getUseCedarlingRemotePolicyStore() && !Strings.isNullOrEmpty(auiConfiguration.getAuiCedarlingPolicyStoreUrl())) {
+            if(auiConfiguration.getCedarlingPolicyStoreRetrievalPoint() == CedarlngPolicyStrRetrievalPoint.REMOTE &&
+                    !Strings.isNullOrEmpty(auiConfiguration.getAuiCedarlingPolicyStoreUrl())) {
                 Invocation.Builder request = ClientFactory.getClientBuilder(auiConfiguration.getAuiCedarlingPolicyStoreUrl());
                 request.header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
                 Response response = request.get();
@@ -116,7 +119,7 @@ public class AdminUISecurityService {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
             // Validate if remote policy store usage is enabled and URL is configured
-            if (!CommonUtils.toPrimitiveOrDefaultFalse(auiConfiguration.getUseCedarlingRemotePolicyStore()) ||
+            if (auiConfiguration.getCedarlingPolicyStoreRetrievalPoint() == CedarlngPolicyStrRetrievalPoint.DEFAULT ||
                     Strings.isNullOrEmpty(auiConfiguration.getAuiCedarlingPolicyStoreUrl())) {
 
                 return CommonUtils.createGenericResponse(
@@ -148,6 +151,10 @@ public class AdminUISecurityService {
                     // Overwrite local policy store file with remote JSON
                     Path path = Paths.get(policyStorePath);
                     MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), policyStoreJson);
+                    //set Cedarling-Policy-Store-Retrieval-Point to default
+                    AppConfigResponse appConfigResponse = new AppConfigResponse();
+                    appConfigResponse.setCedarlingPolicyStoreRetrievalPoint(CedarlngPolicyStrRetrievalPoint.DEFAULT);
+                    adminUIService.editAdminUIEditableConfiguration(appConfigResponse);
 
                     log.info("Default policy-store overwritten successfully from remote source: {}", policyStorePath);
 

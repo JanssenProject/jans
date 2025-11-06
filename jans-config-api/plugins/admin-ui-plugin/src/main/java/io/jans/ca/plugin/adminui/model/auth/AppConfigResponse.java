@@ -3,6 +3,7 @@ package io.jans.ca.plugin.adminui.model.auth;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.as.model.config.adminui.KeyValuePair;
 import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
+import io.jans.ca.plugin.adminui.model.adminui.CedarlngPolicyStrRetrievalPoint;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -41,8 +42,8 @@ public class AppConfigResponse {
     private String auiPolicyStoreUrl;
     @Schema(description = "Admin UI Default Policy Store path", accessMode = Schema.AccessMode.READ_WRITE)
     private String auiDefaultPolicyStorePath;
-    @Schema(description = "Use remote Policy Store. If set to false then Admin UI will use default Policy Store.", accessMode = Schema.AccessMode.READ_WRITE)
-    private Boolean useRemotePolicyStore ;
+    @Schema(description = "Use remote Policy Store. If set to `default` then Admin UI will use default Policy Store.", accessMode = Schema.AccessMode.READ_WRITE)
+    private CedarlngPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint ;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -164,12 +165,12 @@ public class AppConfigResponse {
         this.auiPolicyStoreUrl = auiPolicyStoreUrl;
     }
 
-    public Boolean getUseRemotePolicyStore() {
-        return useRemotePolicyStore;
+    public CedarlngPolicyStrRetrievalPoint getCedarlingPolicyStoreRetrievalPoint() {
+        return cedarlingPolicyStoreRetrievalPoint;
     }
 
-    public void setUseRemotePolicyStore(Boolean useRemotePolicyStore) {
-        this.useRemotePolicyStore = useRemotePolicyStore;
+    public void setCedarlingPolicyStoreRetrievalPoint(CedarlngPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint) {
+        this.cedarlingPolicyStoreRetrievalPoint = cedarlingPolicyStoreRetrievalPoint;
     }
 
     public String getAuiDefaultPolicyStorePath() {

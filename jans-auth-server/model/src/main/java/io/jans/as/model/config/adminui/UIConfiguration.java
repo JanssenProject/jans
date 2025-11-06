@@ -6,7 +6,7 @@ public class UIConfiguration {
     private String cedarlingLogType;
     private String auiPolicyStoreUrl;
     private String auiDefaultPolicyStorePath;
-    private Boolean useRemotePolicyStore ;
+    private String cedarlingPolicyStoreRetrievalPoint ;
 
     public UIConfiguration() {
         //Do not remove
@@ -44,12 +44,12 @@ public class UIConfiguration {
         this.auiPolicyStoreUrl = auiPolicyStoreUrl;
     }
 
-    public Boolean getUseRemotePolicyStore() {
-        return useRemotePolicyStore;
+    public String getCedarlingPolicyStoreRetrievalPoint() {
+        return cedarlingPolicyStoreRetrievalPoint;
     }
 
-    public void setUseRemotePolicyStore(Boolean useRemotePolicyStore) {
-        this.useRemotePolicyStore = useRemotePolicyStore;
+    public void setCedarlingPolicyStoreRetrievalPoint(String cedarlingPolicyStoreRetrievalPoint) {
+        this.cedarlingPolicyStoreRetrievalPoint = cedarlingPolicyStoreRetrievalPoint;
     }
 
     public String getAuiDefaultPolicyStorePath() {

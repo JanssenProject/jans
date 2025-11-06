@@ -1731,10 +1731,13 @@ components:
         auiDefaultPolicyStorePath:
           type: string
           description: Admin UI Default Policy Store path
-        useRemotePolicyStore:
-          type: boolean
-          description: Use remote Policy Store. If set to false then Admin UI will
-            use default Policy Store.
+        cedarlingPolicyStoreRetrievalPoint:
+          type: string
+          description: Use remote Policy Store. If set to `default` then Admin UI
+            will use default Policy Store.
+          enum:
+          - default
+          - remote
     KeyValuePair:
       type: object
       properties:
