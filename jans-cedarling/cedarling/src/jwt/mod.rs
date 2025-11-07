@@ -242,7 +242,7 @@ impl JwtService {
     }
 
     fn find_token_in_cache(&self, kind: &TokenKind, jwt: &str) -> Option<Arc<Token>> {
-        let key = hash_str(format!("{kind}_{jwt}"));
+        let key = hash_jwt_token(kind, jwt);
         self.token_cache
             .read()
             .expect("validated_jwt_cache mutex shouldn't be poisoned")
@@ -257,7 +257,7 @@ impl JwtService {
         token: Arc<Token>,
         now: DateTime<Utc>,
     ) {
-        let key = hash_str(format!("{kind}_{jwt}"));
+        let key = hash_jwt_token(kind, jwt);
 
         let cache_duration_opt = token
             .claims
@@ -574,7 +574,9 @@ fn fix_aud_claim_value_to_array(claims: TokenClaims) -> TokenClaims {
 /// Hash a string using `ahash` and return the hash value as a string
 /// This is used to create a key for caching tokens
 /// The hash value is used instead of the original string to have shorter keys for SparKV which utilizes BTree.
-fn hash_str<T: Hash>(value: T) -> String {
+fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
+    use core::hash::BuildHasher;
+    use std::hash::Hasher;
     use std::sync::LazyLock;
     static HASHER_KEYS: LazyLock<(u64, u64, u64, u64)> = LazyLock::new(|| {
         (
@@ -585,10 +587,14 @@ fn hash_str<T: Hash>(value: T) -> String {
         )
     });
 
-    let hasher =
-        ahash::RandomState::with_seeds(HASHER_KEYS.0, HASHER_KEYS.1, HASHER_KEYS.2, HASHER_KEYS.3);
+    let mut hasher =
+        ahash::RandomState::with_seeds(HASHER_KEYS.0, HASHER_KEYS.1, HASHER_KEYS.2, HASHER_KEYS.3)
+            .build_hasher();
 
-    hasher.hash_one(value).to_string()
+    kind.hash(&mut hasher);
+    jwt.hash(&mut hasher);
+
+    hasher.finish().to_string()
 }
 
 #[cfg(test)]
