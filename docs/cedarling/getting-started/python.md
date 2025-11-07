@@ -346,27 +346,35 @@ else:
   print("Access denied")
 ```
 
-**Key Differences**:
-- No User/Workload principals - authorization based purely on token entities
-- Supports multiple tokens from different issuers in a single request
-- Tokens referenced in policies as `context.tokens.{issuer}_{token_type}`
-- Custom token types supported via `mapping` field
+**Key Differences from standard authentication**:
+
+| Feature | authorize | authorize_multi_issuer |
+|---------|-----------|------------------------|
+| Principal Model | User/Workload entities | No principals - token-based |
+| Token Sources | Single issuer expected | Multiple issuers supported |
+| Result Type | `AuthorizeResult` | `MultiIssuerAuthorizeResult` |
+| Decision Access | `result.is_allowed()`, `result.workload()`, `result.person()` | `result.decision` (boolean) |
+| Use Case | Standard RBAC/ABAC | Federation, multi-org access |
 
 ### Logging
 
 The logs could be retrieved using the `pop_logs` function.
 
 ```py
-logs = cedarling.pop_logs()
-print(logs)
+# Obtain latest logs from cedarling
+logs: dict = cedarling.pop_logs()
+
+# Or obtain by request ID after authorization is performed
+request_id = result.request_id()
+logs: dict = cedarling.get_log_by_id(request_id)
 ```
 
 ---
 
 ## See Also
 
+- [Python interface documentation](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi)
 - [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
 - [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
 - [Multi-Issuer Authorization Details](../cedarling-authz.md#multi-issuer-authorization-authorize_multi_issuer)
-- [Python Usage Examples](../python/usage.md)

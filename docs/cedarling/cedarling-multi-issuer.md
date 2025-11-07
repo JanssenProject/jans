@@ -640,6 +640,7 @@ Configure clear, predictable issuer names in your policy store:
 ### 2. Start Schema-Less for Development
 
 Begin without Cedar schemas for rapid development:
+
 - All claims stored as `Set<String>`
 - Flexible and forgiving during development
 - Add schemas later for production type safety

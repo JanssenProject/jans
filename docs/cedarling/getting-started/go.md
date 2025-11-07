@@ -336,6 +336,7 @@ if result.Decision {
 ```
 
 **Key differences from standard authorization:**
+
 - No User/Workload principals - authorization based purely on token entities
 - Supports multiple tokens from different issuers in a single request
 - Tokens referenced in policies as `context.tokens.{issuer}_{token_type}`
