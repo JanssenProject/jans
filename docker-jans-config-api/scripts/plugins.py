@@ -122,9 +122,9 @@ class AdminUiPlugin:
 
             with open(dst, "w") as f:
                 f.write(tmpl % ctx)
-        except FileNotFoundError as exc:
-            logger.error(f"Unable to find template file of policy store {src}; reason={exc}")
+        except FileNotFoundError:
+            logger.exception("Unable to find template for policy store file at %s", src)
             raise
-        except IOError as exc:
-            logger.error(f"Unable to render policy store file {dst}; reason={exc}")
+        except IOError:
+            logger.exception("Unable to render policy store file at %s", dst)
             raise
