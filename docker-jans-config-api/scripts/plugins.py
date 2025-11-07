@@ -60,6 +60,7 @@ class AdminUiPlugin:
     def setup(self):
         logger.info("Configuring admin-ui plugin")
         self.import_token_server_cert()
+        self.render_policy_store()
 
     def import_token_server_cert(self):
         cert_file = os.environ.get("CN_TOKEN_SERVER_CERT_FILE", "/etc/certs/token_server.crt")
@@ -105,3 +106,16 @@ class AdminUiPlugin:
 
         # download the cert (if possible)
         get_server_certificate(host, port, cert_file)
+
+    def render_policy_store(self):
+        ctx = {
+            "hostname": self.manager.config.get("hostname"),
+        }
+        src = "/app/templates/jans-config-api/adminui-policy-store.json"
+        dst = "/opt/jans/jetty/jans-config-api/custom/config/adminUI/policy-store.json"
+
+        with open(src) as f:
+            tmpl = f.read()
+
+        with open(dst, "w") as f:
+            f.write(tmpl % ctx)
