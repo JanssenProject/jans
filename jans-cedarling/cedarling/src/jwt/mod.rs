@@ -203,7 +203,7 @@ impl JwtService {
                 validated_token
             } else {
                 // validate token and save to cache
-                let validated_jwt = match self.validate_single_token(token_kind.clone(), jwt) {
+                let validated_jwt = match self.validate_single_token(token_kind, jwt) {
                     Ok(jwt) => jwt,
                     Err(err) => {
                         if matches!(err, ValidateJwtError::MissingValidator(_)) {
@@ -396,7 +396,7 @@ impl JwtService {
                 validated_tokens.insert(token_name, cedar_token);
             } else {
                 // Validate JWT using existing single token validation
-                match self.validate_single_token(token_kind.clone(), &token.payload) {
+                match self.validate_single_token(token_kind, &token.payload) {
                     Ok(validated_jwt) => {
                         // Extract issuer for non-deterministic check
                         let issuer = validated_jwt
