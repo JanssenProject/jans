@@ -1733,8 +1733,9 @@ components:
           description: Admin UI Default Policy Store path
         cedarlingPolicyStoreRetrievalPoint:
           type: string
-          description: Use remote Policy Store. If set to `default` then Admin UI
-            will use default Policy Store.
+          description: "Specifies the policy store retrieval point for Admin UI. Set\
+            \ to `default` to use the local default policy store, or `remote` to retrieve\
+            \ policies from the configured remote policy store URL."
           enum:
           - default
           - remote

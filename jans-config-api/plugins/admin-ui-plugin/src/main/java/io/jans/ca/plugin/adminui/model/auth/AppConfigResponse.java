@@ -3,7 +3,7 @@ package io.jans.ca.plugin.adminui.model.auth;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.as.model.config.adminui.KeyValuePair;
 import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
-import io.jans.ca.plugin.adminui.model.adminui.CedarlngPolicyStrRetrievalPoint;
+import io.jans.ca.plugin.adminui.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -42,8 +42,8 @@ public class AppConfigResponse {
     private String auiPolicyStoreUrl;
     @Schema(description = "Admin UI Default Policy Store path", accessMode = Schema.AccessMode.READ_WRITE)
     private String auiDefaultPolicyStorePath;
-    @Schema(description = "Use remote Policy Store. If set to `default` then Admin UI will use default Policy Store.", accessMode = Schema.AccessMode.READ_WRITE)
-    private CedarlngPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint ;
+    @Schema(description = "Specifies the policy store retrieval point for Admin UI. Set to `default` to use the local default policy store, or `remote` to retrieve policies from the configured remote policy store URL.", accessMode = Schema.AccessMode.READ_WRITE)
+    private CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -165,11 +165,11 @@ public class AppConfigResponse {
         this.auiPolicyStoreUrl = auiPolicyStoreUrl;
     }
 
-    public CedarlngPolicyStrRetrievalPoint getCedarlingPolicyStoreRetrievalPoint() {
+    public CedarlingPolicyStrRetrievalPoint getCedarlingPolicyStoreRetrievalPoint() {
         return cedarlingPolicyStoreRetrievalPoint;
     }
 
-    public void setCedarlingPolicyStoreRetrievalPoint(CedarlngPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint) {
+    public void setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint) {
         this.cedarlingPolicyStoreRetrievalPoint = cedarlingPolicyStoreRetrievalPoint;
     }
 

@@ -6,7 +6,7 @@ public class UIConfiguration {
     private String cedarlingLogType;
     private String auiPolicyStoreUrl;
     private String auiDefaultPolicyStorePath;
-    private String cedarlingPolicyStoreRetrievalPoint ;
+    private String cedarlingPolicyStoreRetrievalPoint;
 
     public UIConfiguration() {
         //Do not remove

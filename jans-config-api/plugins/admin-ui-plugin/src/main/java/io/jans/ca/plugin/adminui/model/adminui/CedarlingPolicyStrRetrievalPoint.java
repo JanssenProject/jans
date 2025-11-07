@@ -6,24 +6,24 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum CedarlngPolicyStrRetrievalPoint {
+public enum CedarlingPolicyStrRetrievalPoint {
     DEFAULT("default"),
     REMOTE("remote");
 
     private final String value;
-    private static final Map<String, CedarlngPolicyStrRetrievalPoint> mapByValues = new HashMap<>();
+    private static final Map<String, CedarlingPolicyStrRetrievalPoint> mapByValues = new HashMap<>();
 
     static {
-        for (CedarlngPolicyStrRetrievalPoint enumType : values()) {
+        for (CedarlingPolicyStrRetrievalPoint enumType : values()) {
             mapByValues.put(enumType.getValue(), enumType);
         }
     }
 
-    CedarlngPolicyStrRetrievalPoint() {
+    CedarlingPolicyStrRetrievalPoint() {
         this.value = null;
     }
 
-    CedarlngPolicyStrRetrievalPoint(String value) {
+    CedarlingPolicyStrRetrievalPoint(String value) {
         this.value = value;
     }
 
@@ -32,9 +32,9 @@ public enum CedarlngPolicyStrRetrievalPoint {
     }
 
     @JsonCreator
-    public static CedarlngPolicyStrRetrievalPoint fromString(String param) {
+    public static CedarlingPolicyStrRetrievalPoint fromString(String param) {
         if (param != null) {
-            for (CedarlngPolicyStrRetrievalPoint gt : CedarlngPolicyStrRetrievalPoint.values()) {
+            for (CedarlingPolicyStrRetrievalPoint gt : CedarlingPolicyStrRetrievalPoint.values()) {
                 if (param.equals(gt.value)) {
                     return gt;
                 }
@@ -43,7 +43,7 @@ public enum CedarlngPolicyStrRetrievalPoint {
         return null;
     }
 
-    public static CedarlngPolicyStrRetrievalPoint getByValue(String value) {
+    public static CedarlingPolicyStrRetrievalPoint getByValue(String value) {
         return mapByValues.get(value);
     }
 

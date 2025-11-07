@@ -3,7 +3,7 @@ package io.jans.ca.plugin.adminui.model.config;
 
 import io.jans.as.model.config.adminui.KeyValuePair;
 import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
-import io.jans.ca.plugin.adminui.model.adminui.CedarlngPolicyStrRetrievalPoint;
+import io.jans.ca.plugin.adminui.model.adminui.CedarlingPolicyStrRetrievalPoint;
 
 import java.util.List;
 
@@ -46,7 +46,7 @@ public class AUIConfiguration {
     private CedarlingLogType cedarlingLogType;
     private String auiCedarlingPolicyStoreUrl;
     private String auiCedarlingDefaultPolicyStorePath;
-    private CedarlngPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint = CedarlngPolicyStrRetrievalPoint.DEFAULT;
+    private CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint = CedarlingPolicyStrRetrievalPoint.DEFAULT;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -312,12 +312,14 @@ public class AUIConfiguration {
         this.auiCedarlingDefaultPolicyStorePath = auiCedarlingDefaultPolicyStorePath;
     }
 
-    public CedarlngPolicyStrRetrievalPoint getCedarlingPolicyStoreRetrievalPoint() {
+    public CedarlingPolicyStrRetrievalPoint getCedarlingPolicyStoreRetrievalPoint() {
         return cedarlingPolicyStoreRetrievalPoint;
     }
 
-    public void setCedarlingPolicyStoreRetrievalPoint(CedarlngPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint) {
-        this.cedarlingPolicyStoreRetrievalPoint = cedarlingPolicyStoreRetrievalPoint;
+    public void setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint) {
+        this.cedarlingPolicyStoreRetrievalPoint = cedarlingPolicyStoreRetrievalPoint != null
+                ? cedarlingPolicyStoreRetrievalPoint
+                : CedarlingPolicyStrRetrievalPoint.DEFAULT;
     }
 
     @Override
