@@ -89,7 +89,8 @@ fn convert_claim_to_string_set(value: &Value) -> RestrictedExpression {
 /// Determine the entity type for a token dynamically
 fn determine_token_entity_type(token: &Token) -> String {
     if let Some(issuer) = token.iss.as_ref()
-        && let Some(metadata) = issuer.token_metadata.get(&token.name) {
+        && let Some(metadata) = issuer.token_metadata.get(&token.name)
+    {
         return metadata.entity_type_name.clone();
     }
 
@@ -108,7 +109,7 @@ impl EntityBuilder {
     /// Build all entities for multi-issuer authorization (tokens, principals, resource, roles)
     pub fn build_multi_issuer_entities(
         &self,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
         resource: &EntityData,
         log_service: &impl LogWriter,
     ) -> Result<AuthorizeEntitiesData, MultiIssuerEntityError> {
@@ -118,28 +119,32 @@ impl EntityBuilder {
         let mut token_entities = HashMap::new();
         for (token_name, token) in tokens {
             match self.build_single_token_entity(token) {
-                Ok(entity) => {
-                    match self.generate_entity_key(token_name, token) {
-                        Ok(entity_key) => {
-                            built_entities.insert(&entity.uid());
-                            token_entities.insert(entity_key, entity);
-                        },
-                        Err(e) => {
-                            log_service.log_any(
-                                LogEntry::new_with_data(LogType::System, None)
-                                    .set_level(LogLevel::ERROR)
-                                    .set_message(format!("Failed to generate entity key for token '{}'", token_name))
-                                    .set_error(e.to_string()),
-                            );
-                            continue;
-                        },
-                    }
+                Ok(entity) => match self.generate_entity_key(token_name, token) {
+                    Ok(entity_key) => {
+                        built_entities.insert(&entity.uid());
+                        token_entities.insert(entity_key, entity);
+                    },
+                    Err(e) => {
+                        log_service.log_any(
+                            LogEntry::new_with_data(LogType::System, None)
+                                .set_level(LogLevel::ERROR)
+                                .set_message(format!(
+                                    "Failed to generate entity key for token '{}'",
+                                    token_name
+                                ))
+                                .set_error(e.to_string()),
+                        );
+                        continue;
+                    },
                 },
                 Err(e) => {
                     log_service.log_any(
                         LogEntry::new_with_data(LogType::System, None)
                             .set_level(LogLevel::ERROR)
-                            .set_message(format!("Failed to build token entity for token '{}'", token_name))
+                            .set_message(format!(
+                                "Failed to build token entity for token '{}'",
+                                token_name
+                            ))
                             .set_error(e.to_string()),
                     );
                     continue;
@@ -164,7 +169,10 @@ impl EntityBuilder {
                 log_service.log_any(
                     LogEntry::new_with_data(LogType::System, None)
                         .set_level(LogLevel::ERROR)
-                        .set_message("Failed to build resource entity for multi-issuer authorization".to_string())
+                        .set_message(
+                            "Failed to build resource entity for multi-issuer authorization"
+                                .to_string(),
+                        )
                         .set_error(e.to_string()),
                 );
             })
@@ -362,7 +370,15 @@ mod tests {
         };
         trusted_issuers.insert("company".to_string(), company_issuer);
 
-        EntityBuilder::new(config, &trusted_issuers, None, None, None, crate::log::TEST_LOGGER.clone()).unwrap()
+        EntityBuilder::new(
+            config,
+            &trusted_issuers,
+            None,
+            None,
+            None,
+            crate::log::TEST_LOGGER.clone(),
+        )
+        .unwrap()
     }
 
     fn create_test_token(issuer: &str, jti: &str, claims: HashMap<String, Value>) -> Token {
@@ -477,7 +493,11 @@ mod tests {
         let token2 = create_test_token("https://idp.acme.com/auth", "token2", claims2);
         tokens.insert("Jans::Access_Token2".to_string(), token2);
 
-        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
+        let tokens: HashMap<String, Arc<Token>> =
+            tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
+
+        let result =
+            builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -517,7 +537,11 @@ mod tests {
         let token3 = Token::new("Jans::Id_Token", token_claims3, None);
         tokens.insert("Jans::Id_Token".to_string(), token3);
 
-        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
+        let tokens: HashMap<String, Arc<Token>> =
+            tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
+
+        let result =
+            builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -609,7 +633,15 @@ mod tests {
         };
 
         let trusted_issuers = HashMap::new();
-        let builder = EntityBuilder::new(config, &trusted_issuers, None, None, None, crate::log::TEST_LOGGER.clone()).unwrap();
+        let builder = EntityBuilder::new(
+            config,
+            &trusted_issuers,
+            None,
+            None,
+            None,
+            crate::log::TEST_LOGGER.clone(),
+        )
+        .unwrap();
 
         let mut claims = HashMap::new();
         claims.insert("iss".to_string(), json!("https://test.issuer.com"));
@@ -672,8 +704,15 @@ mod tests {
         };
 
         let trusted_issuers = HashMap::new();
-        let builder =
-            EntityBuilder::new(config, &trusted_issuers, Some(&validator_schema), None, None, crate::log::TEST_LOGGER.clone()).unwrap();
+        let builder = EntityBuilder::new(
+            config,
+            &trusted_issuers,
+            Some(&validator_schema),
+            None,
+            None,
+            crate::log::TEST_LOGGER.clone(),
+        )
+        .unwrap();
 
         let mut claims = HashMap::new();
         claims.insert("iss".to_string(), json!("https://test.issuer.com"));
@@ -729,7 +768,11 @@ mod tests {
         let token3 = create_test_token("https://idp.dolphin.sea/auth", "token3", claims3);
         tokens.insert("Acme::DolphinToken".to_string(), token3);
 
-        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
+        let tokens: HashMap<String, Arc<Token>> =
+            tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
+
+        let result =
+            builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -759,7 +802,11 @@ mod tests {
         let token2 = Token::new("Jans::Id_Token", token_claims2, None);
         tokens.insert("Jans::Id_Token".to_string(), token2);
 
-        let result = builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
+        let tokens: HashMap<String, Arc<Token>> =
+            tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
+
+        let result =
+            builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
         assert!(result.is_err());
 
         // Should return NoValidTokens error when all tokens are invalid
@@ -797,8 +844,15 @@ mod tests {
         };
 
         let trusted_issuers = HashMap::new();
-        let builder =
-            EntityBuilder::new(config, &trusted_issuers, Some(&validator_schema), None, None, crate::log::TEST_LOGGER.clone()).unwrap();
+        let builder = EntityBuilder::new(
+            config,
+            &trusted_issuers,
+            Some(&validator_schema),
+            None,
+            None,
+            crate::log::TEST_LOGGER.clone(),
+        )
+        .unwrap();
 
         let mut claims = HashMap::new();
         claims.insert("iss".to_string(), json!("https://test.issuer.com"));

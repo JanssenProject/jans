@@ -100,6 +100,7 @@ use serde_json::json;
 use sparkv::SparKV;
 use status_list::*;
 use std::collections::{HashMap, HashSet};
+use std::hash::Hash;
 use std::sync::Arc;
 use std::sync::RwLock;
 use validation::*;
@@ -197,11 +198,12 @@ impl JwtService {
             .clear_expired();
 
         for (token_name, jwt) in tokens.iter() {
-            let token = if let Some(validated_token) = self.find_token_in_cache(jwt) {
+            let token_kind = TokenKind::AuthzRequestInput(token_name);
+            let token = if let Some(validated_token) = self.find_token_in_cache(&token_kind, jwt) {
                 validated_token
             } else {
                 // validate token and save to cache
-                let validated_jwt = match self.validate_single_token(TokenKind::AuthzRequestInput(token_name), jwt) {
+                let validated_jwt = match self.validate_single_token(token_kind.clone(), jwt) {
                     Ok(jwt) => jwt,
                     Err(err) => {
                         if matches!(err, ValidateJwtError::MissingValidator(_)) {
@@ -229,7 +231,7 @@ impl JwtService {
                 };
 
                 let token = Arc::new(Token::new(token_name, claims, validated_jwt.trusted_iss));
-                self.save_token_in_cache(jwt, token.clone(), now);
+                self.save_token_in_cache(&token_kind, jwt, token.clone(), now);
                 token
             };
 
@@ -239,16 +241,23 @@ impl JwtService {
         Ok(validated_tokens)
     }
 
-    fn find_token_in_cache(&self, jwt: &str) -> Option<Arc<Token>> {
+    fn find_token_in_cache(&self, kind: &TokenKind, jwt: &str) -> Option<Arc<Token>> {
+        let key = hash_str(format!("{kind}_{jwt}"));
         self.token_cache
             .read()
             .expect("validated_jwt_cache mutex shouldn't be poisoned")
-            .get(&hash_str(jwt))
+            .get(&key)
             .map(|v| v.to_owned())
     }
 
-    fn save_token_in_cache(&self, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
-        let key = hash_str(jwt);
+    fn save_token_in_cache(
+        &self,
+        kind: &TokenKind,
+        jwt: &str,
+        token: Arc<Token>,
+        now: DateTime<Utc>,
+    ) {
+        let key = hash_str(format!("{kind}_{jwt}"));
 
         let cache_duration_opt = token
             .claims
@@ -348,13 +357,21 @@ impl JwtService {
     pub fn validate_multi_issuer_tokens(
         &self,
         tokens: &[TokenInput],
-    ) -> Result<HashMap<String, Token>, MultiIssuerValidationError> {
+    ) -> Result<HashMap<String, Arc<Token>>, MultiIssuerValidationError> {
         if tokens.is_empty() {
             return Err(MultiIssuerValidationError::EmptyTokenArray);
         }
 
         let mut validated_tokens = HashMap::new();
         let mut seen_combinations = HashSet::new();
+
+        // clear expired tokens from cache
+        self.token_cache
+            .write()
+            .expect("validated_jwt_cache mutex shouldn't be poisoned")
+            .clear_expired();
+
+        let now = Utc::now();
 
         for (index, token) in tokens.iter().enumerate() {
             // Basic validation first
@@ -371,61 +388,77 @@ impl JwtService {
             // Find the corresponding token metadata key for the entity type name
             let token_type = self.find_token_metadata_key(&token.mapping);
 
-            // Validate JWT using existing single token validation
-            match self.validate_single_token(
-                TokenKind::AuthorizeMultiIssuer(token_type),
-                &token.payload,
-            ) {
-                Ok(validated_jwt) => {
-                    // Extract issuer for non-deterministic check
-                    let issuer = validated_jwt
-                        .claims
-                        .get("iss")
-                        .and_then(|iss| iss.as_str())
-                        .ok_or(MultiIssuerValidationError::MissingIssuer)?;
+            let token_kind = TokenKind::AuthorizeMultiIssuer(token_type);
+            // Create Token with the mapping as the name
+            let token_name = token.mapping.clone();
 
-                    // Check for non-deterministic tokens (graceful validation)
-                    let combination = format!("{}:{}", issuer, token.mapping);
-                    if !seen_combinations.insert(combination.clone()) {
-                        // Log warning but continue processing
-                        if let Some(logger) = &self.logger {
-                            logger.log_any(JwtLogEntry::new(
+            if let Some(cedar_token) = self.find_token_in_cache(&token_kind, &token.payload) {
+                validated_tokens.insert(token_name, cedar_token);
+            } else {
+                // Validate JWT using existing single token validation
+                match self.validate_single_token(token_kind.clone(), &token.payload) {
+                    Ok(validated_jwt) => {
+                        // Extract issuer for non-deterministic check
+                        let issuer = validated_jwt
+                            .claims
+                            .get("iss")
+                            .and_then(|iss| iss.as_str())
+                            .ok_or(MultiIssuerValidationError::MissingIssuer)?;
+
+                        // Check for non-deterministic tokens (graceful validation)
+                        let combination = format!("{}:{}", issuer, token.mapping);
+                        if !seen_combinations.insert(combination.clone()) {
+                            // Log warning but continue processing
+                            if let Some(logger) = &self.logger {
+                                logger.log_any(JwtLogEntry::new(
                                 format!(
                                     "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
                                     token.mapping, issuer
                                 ),
                                 Some(LogLevel::WARN),
                             ));
+                            }
+                        } else {
+                            // Convert ValidatedJwt to Token
+                            let claims =
+                                serde_json::from_value::<TokenClaims>(validated_jwt.claims)
+                                    .map_err(|err| {
+                                        if let Some(logger) = &self.logger {
+                                            logger.log_any(JwtLogEntry::new(
+                                                format!(
+                                                    "failed to deserialize token claims: {err}"
+                                                ),
+                                                Some(LogLevel::ERROR),
+                                            ));
+                                        }
+                                        MultiIssuerValidationError::TokenValidationFailed
+                                    })?;
+
+                            let cedar_token = Arc::new(Token::new(
+                                &token_name,
+                                claims,
+                                validated_jwt.trusted_iss,
+                            ));
+
+                            self.save_token_in_cache(
+                                &token_kind,
+                                &token.payload,
+                                cedar_token.clone(),
+                                now,
+                            );
+
+                            validated_tokens.insert(token_name, cedar_token);
                         }
-                    } else {
-                        // Convert ValidatedJwt to Token
-                        let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
-                            .map_err(|err| {
-                                if let Some(logger) = &self.logger {
-                                    logger.log_any(JwtLogEntry::new(
-                                        format!("failed to deserialize token claims: {err}"),
-                                        Some(LogLevel::ERROR),
-                                    ));
-                                }
-                                MultiIssuerValidationError::TokenValidationFailed
-                            })?;
-
-                        // Create Token with the mapping as the name
-                        let token_name = token.mapping.clone();
-                        let cedar_token =
-                            Token::new(&token_name, claims, validated_jwt.trusted_iss);
-
-                        validated_tokens.insert(token_name, cedar_token);
-                    }
-                },
-                Err(err) => {
-                    if let Some(logger) = &self.logger {
-                        logger.log_any(JwtLogEntry::new(
-                            format!("Token validation failed at index {}: {}", index, err),
-                            Some(LogLevel::WARN),
-                        ));
-                    }
-                },
+                    },
+                    Err(err) => {
+                        if let Some(logger) = &self.logger {
+                            logger.log_any(JwtLogEntry::new(
+                                format!("Token validation failed at index {}: {}", index, err),
+                                Some(LogLevel::WARN),
+                            ));
+                        }
+                    },
+                }
             }
         }
 
@@ -463,7 +496,7 @@ impl JwtService {
                 }
             }
         }
-        
+
         // If not found, return the original mapping (fallback)
         entity_type_name
     }
@@ -541,7 +574,7 @@ fn fix_aud_claim_value_to_array(claims: TokenClaims) -> TokenClaims {
 /// Hash a string using `ahash` and return the hash value as a string
 /// This is used to create a key for caching tokens
 /// The hash value is used instead of the original string to have shorter keys for SparKV which utilizes BTree.
-fn hash_str(s: &str) -> String {
+fn hash_str<T: Hash>(value: T) -> String {
     use std::sync::LazyLock;
     static HASHER_KEYS: LazyLock<(u64, u64, u64, u64)> = LazyLock::new(|| {
         (
@@ -555,7 +588,7 @@ fn hash_str(s: &str) -> String {
     let hasher =
         ahash::RandomState::with_seeds(HASHER_KEYS.0, HASHER_KEYS.1, HASHER_KEYS.2, HASHER_KEYS.3);
 
-    hasher.hash_one(s).to_string()
+    hasher.hash_one(value).to_string()
 }
 
 #[cfg(test)]
@@ -565,7 +598,7 @@ mod test {
     use crate::JwtConfig;
     use crate::authz::MultiIssuerValidationError;
     use crate::authz::request::TokenInput;
-    use crate::common::policy_store::{TokenEntityMetadata, ClaimMappings};
+    use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata};
     use jsonwebtoken::Algorithm;
     use serde_json::{Value, json};
     use std::collections::{HashMap, HashSet};

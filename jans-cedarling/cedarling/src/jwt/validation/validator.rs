@@ -62,7 +62,7 @@ pub struct RefJwtStatusList {
 #[derive(Debug, Clone)]
 pub struct JwtValidator {
     pub(crate) validation: Validation,
-    required_claims: HashSet<Box<str>>,
+    required_claims: HashSet<String>,
     validate_signature: bool,
     validate_status_list: bool,
     status_list_cache: StatusListCache,
@@ -98,12 +98,7 @@ impl JwtValidator {
             validation.insecure_disable_signature_validation();
         }
 
-        let required_claims = token_metadata
-            .required_claims
-            .iter()
-            .cloned()
-            .map(|s| s.into_boxed_str())
-            .collect();
+        let required_claims = token_metadata.required_claims.iter().cloned().collect();
 
         let key = ValidatorInfo {
             iss,
@@ -148,12 +143,7 @@ impl JwtValidator {
             validation.insecure_disable_signature_validation();
         }
 
-        let required_claims = token_metadata
-            .required_claims
-            .iter()
-            .cloned()
-            .map(|s| s.into_boxed_str())
-            .collect();
+        let required_claims = token_metadata.required_claims.iter().cloned().collect();
 
         let key = ValidatorInfo {
             iss,
@@ -247,9 +237,9 @@ impl JwtValidator {
         let missing_claims = self
             .required_claims
             .iter()
-            .filter(|claim| validated_jwt.claims.get(claim.as_ref()).is_none())
+            .filter(|claim| validated_jwt.claims.get(claim).is_none())
             .cloned()
-            .collect::<Vec<Box<str>>>();
+            .collect::<Vec<String>>();
         if !missing_claims.is_empty() {
             Err(ValidateJwtError::MissingClaims(missing_claims))?
         }
@@ -319,7 +309,7 @@ pub enum ValidateJwtError {
     #[error("failed to validate the JWT: {0}")]
     ValidateJwt(#[from] jwt::errors::Error),
     #[error("validation failed since the JWT is missing the following required claims: {0:#?}")]
-    MissingClaims(Vec<Box<str>>),
+    MissingClaims(Vec<String>),
     #[error("failed to get the status for the JWT: {0}")]
     GetJwtStatus(#[from] JwtStatusError),
     #[error("the token is rejected because it's status is: {0}")]
@@ -625,7 +615,7 @@ mod test {
             matches!(
             err,
             ValidateJwtError::MissingClaims(missing_claims)
-                if missing_claims == ["nbf"].map(|s| s.into())
+                if missing_claims == vec!["nbf".to_string()]
             ),
             "expected an error due to missing `nbf` claim"
         );
