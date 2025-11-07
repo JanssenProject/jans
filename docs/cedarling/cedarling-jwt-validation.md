@@ -43,7 +43,7 @@ On initialization, Cedarling will fetch the latest public keys from the issuers 
 
 ### Example Policy Store
 
-Cedarling only validates tokens issued by [trusted issuers](./cedarling-policy-store.md#trusted-issuer-schema) listed in the policy store. Tokens from issuers not listed in the policy store will be **ignored** and will not be used for [entity creation](./cedarling-entities.md).
+Cedarling only validates tokens issued by [trusted issuers](./cedarling-policy-store.md#trusted-issuers-schema) listed in the policy store. Tokens from issuers not listed in the policy store will be **ignored** and will not be used for [entity creation](./cedarling-entities.md).
 
 To allow an Access token like the one below to be used for authorization:
 

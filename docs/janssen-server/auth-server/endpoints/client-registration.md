@@ -559,7 +559,8 @@ SSA is validated based on `softwareStatementValidationType` which is enum.
 ### Customizing the behavior of the AS using Interception script
 Janssen's allows developers to register a client with the Authorization Server (AS) without any intervention by the administrator. By default, all clients are given the same default scopes and attributes. Through the use of an interception script, this behavior can be modified. These scripts can be used to analyze the registration request and apply customizations to the registered client. For example, a client can be given specific scopes by analyzing the [Software Statement](https://www.rfc-editor.org/rfc/rfc7591.html#section-2.3) that is sent with the registration request.
 
-Further reading [here](../../developer/scripts/client-registration.md)
+Learn more in the [Client Registration Script Guide](../../../script-catalog/client_registration/client-registration.md)
+
 
 ### The Use of Attestation in Dynamic Client Registration
 
