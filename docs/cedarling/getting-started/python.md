@@ -346,12 +346,15 @@ else:
   print("Access denied")
 ```
 
-**Key Differences**:
+**Key Differences from standard authentication**:
 
-- No User/Workload principals - authorization based purely on token entities
-- Supports multiple tokens from different issuers in a single request
-- Tokens referenced in policies as `context.tokens.{issuer}_{token_type}`
-- Custom token types supported via `mapping` field
+| Feature | authorize | authorize_multi_issuer |
+|---------|-----------|------------------------|
+| Principal Model | User/Workload entities | No principals - token-based |
+| Token Sources | Single issuer expected | Multiple issuers supported |
+| Result Type | `AuthorizeResult` | `MultiIssuerAuthorizeResult` |
+| Decision Access | `result.is_allowed()`, `result.workload()`, `result.person()` | `result.decision` (boolean) |
+| Use Case | Standard RBAC/ABAC | Federation, multi-org access |
 
 ### Logging
 
