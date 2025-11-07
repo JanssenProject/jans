@@ -110,7 +110,8 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
 WORKDIR /
 
 # add policy store for admin-ui and cedarling integration
-RUN wget -nv https://github.com/GluuFederation/flex/raw/refs/heads/main/flex-linux-setup/flex_linux_setup/templates/policy-store.json -O /app/templates/jans-config-api/adminui-policy-store.json
+ARG FLEX_SOURCE_VERSION=dc807c4e8678477258e730206ab89da412b13594
+RUN wget -nv https://github.com/GluuFederation/flex/raw/${FLEX_SOURCE_VERSION}/flex-linux-setup/flex_linux_setup/templates/policy-store.json -O /app/templates/jans-config-api/adminui-policy-store.json
 
 # ======
 # Python

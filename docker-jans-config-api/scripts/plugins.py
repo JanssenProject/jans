@@ -108,14 +108,23 @@ class AdminUiPlugin:
         get_server_certificate(host, port, cert_file)
 
     def render_policy_store(self):
+        logger.info("Rendering admin-ui policy store")
+
         ctx = {
             "hostname": self.manager.config.get("hostname"),
         }
         src = "/app/templates/jans-config-api/adminui-policy-store.json"
         dst = "/opt/jans/jetty/jans-config-api/custom/config/adminUI/policy-store.json"
 
-        with open(src) as f:
-            tmpl = f.read()
+        try:
+            with open(src) as f:
+                tmpl = f.read()
 
-        with open(dst, "w") as f:
-            f.write(tmpl % ctx)
+            with open(dst, "w") as f:
+                f.write(tmpl % ctx)
+        except FileNotFoundError as exc:
+            logger.error(f"Unable to find template file of policy store {src}; reason={exc}")
+            raise
+        except IOError as exc:
+            logger.error(f"Unable to render policy store file {dst}; reason={exc}")
+            raise
