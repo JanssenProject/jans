@@ -19,10 +19,6 @@ public enum CedarlingPolicyStrRetrievalPoint {
         }
     }
 
-    CedarlingPolicyStrRetrievalPoint() {
-        this.value = null;
-    }
-
     CedarlingPolicyStrRetrievalPoint(String value) {
         this.value = value;
     }
@@ -33,14 +29,7 @@ public enum CedarlingPolicyStrRetrievalPoint {
 
     @JsonCreator
     public static CedarlingPolicyStrRetrievalPoint fromString(String param) {
-        if (param != null) {
-            for (CedarlingPolicyStrRetrievalPoint gt : CedarlingPolicyStrRetrievalPoint.values()) {
-                if (param.equals(gt.value)) {
-                    return gt;
-                }
-            }
-        }
-        return null;
+        return getByValue(param);
     }
 
     public static CedarlingPolicyStrRetrievalPoint getByValue(String value) {
