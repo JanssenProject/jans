@@ -336,8 +336,8 @@ public class PolicyStoreMapperHelper {
             // Array form: [Resource1, Resource2]
             String arrayContent = resourceValue.substring(1, resourceValue.length() - 1);
             Arrays.stream(arrayContent.split(","))
-                    .map(PolicyStoreMapperHelper::cleanValue)
                     .map(PolicyStoreMapperHelper::normalizeResource)
+                    .map(PolicyStoreMapperHelper::cleanValue)
                     .filter(cleaned -> !cleaned.isEmpty())
                     .forEach(resources::add);
         } else if (!resourceValue.isEmpty()) {
@@ -356,14 +356,14 @@ public class PolicyStoreMapperHelper {
         Matcher matcher = SINGLE_ACTION_PATTERN.matcher(policy);
         if (matcher.find()) {
             // Found single action
-            actions.add(normalizeAction(cleanValue(matcher.group(1))));
+            actions.add(cleanValue(normalizeAction(matcher.group(1))));
         } else {
             // Try multiple actions
             matcher = MULTI_ACTION_PATTERN.matcher(policy);
             if (matcher.find()) {
                 Arrays.stream(matcher.group(1).split(","))
-                        .map(PolicyStoreMapperHelper::cleanValue)
                         .map(PolicyStoreMapperHelper::normalizeAction)
+                        .map(PolicyStoreMapperHelper::cleanValue)
                         .filter(cleaned -> !cleaned.isEmpty())
                         .forEach(actions::add);
             }
@@ -452,7 +452,6 @@ public class PolicyStoreMapperHelper {
      */
     private static String normalizeAction(String value) {
         return value.replace(ACTION_PREFIX, "")
-                .replace("\"", "")
                 .trim();
     }
 
@@ -461,10 +460,7 @@ public class PolicyStoreMapperHelper {
      */
     private static String cleanValue(String value) {
         if (value == null) return null;
-        return value.trim()
-                .replaceAll("^\"|\"$", "")
-                .replaceAll("^'|'$", "")
-                .trim();
+        return value.trim().replaceAll("^[\"']|[\"']$", "");
     }
 
     /**
