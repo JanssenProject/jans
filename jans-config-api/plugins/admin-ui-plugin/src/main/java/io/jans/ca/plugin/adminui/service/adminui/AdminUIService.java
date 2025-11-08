@@ -14,7 +14,6 @@ import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.util.security.StringEncrypter;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;

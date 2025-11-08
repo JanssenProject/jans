@@ -37,6 +37,7 @@ public enum CedarlingPolicyStrRetrievalPoint {
     }
 
     @JsonValue
+    @Override
     public String toString() {
         return value;
     }

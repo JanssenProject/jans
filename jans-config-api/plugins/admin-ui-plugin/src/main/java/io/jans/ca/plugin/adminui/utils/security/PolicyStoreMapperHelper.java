@@ -32,6 +32,9 @@ public class PolicyStoreMapperHelper {
     private static final String FEATURES_PREFIX = "Features::";
     private static final String FEATURES_PREFIX_FOR_DEFAULT_ENTITIES = RESOURCE_PREFIX + "Features";
 
+    private PolicyStoreMapperHelper() {
+        throw new IllegalStateException("Utility class");
+    }
     /**
      * Main entry point for mapping principals to scopes.
      *
@@ -569,27 +572,6 @@ public class PolicyStoreMapperHelper {
 
         String value = node.asText("");
         return value.isEmpty() ? null : value;
-    }
-    /**
-     * Determines if entity type should be included based on resource matching.
-     */
-    private static boolean shouldIncludeEntityType(String entityTypeName, JsonNode entityTypeNode, String resourceLower) {
-        // Direct name match
-        if (entityTypeName.equalsIgnoreCase(resourceLower)) {
-            return true;
-        }
-
-        // MemberOf types match
-        JsonNode memberOf = entityTypeNode.path("memberOfTypes");
-        if (memberOf.isArray()) {
-            for (JsonNode member : memberOf) {
-                if (member.isTextual() && member.asText().equalsIgnoreCase(resourceLower)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
     /**
      * Gets first non-empty text value from multiple possible field names.
