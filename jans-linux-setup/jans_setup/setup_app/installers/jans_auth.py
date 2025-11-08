@@ -21,6 +21,7 @@ from setup_app.installers.jetty import JettyInstaller
 from setup_app.static import AppType, InstallOption, SetupProfiles
 
 Config.jans_auth_port = '8081'
+ HEAD
 try:
     # some setup code
 except Exception as e:
@@ -31,6 +32,10 @@ class JansAuthInstaller(JettyInstaller):
     
     Handles setup, configuration, and deployment of the Janssen Auth component.
     """
+
+
+
+ 9c424da970 (Made Jans Auth port configurable and added logging)
 class JansAuthInstaller(JettyInstaller):
 
     source_files = [
