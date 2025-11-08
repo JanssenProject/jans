@@ -7,7 +7,11 @@ import shutil
 import json
 import tempfile
 import configparser
-
+import logging
+import os
+Config.jans_auth_port = os.getenv("JANS_AUTH_PORT", "8081")
+logging.basicConfig(level=logging.INFO)
+logging.info(f"Jans Auth will start on port {Config.jans_auth_port}")
 from urllib.parse import urlparse
 
 from setup_app import paths
@@ -17,8 +21,16 @@ from setup_app.installers.jetty import JettyInstaller
 from setup_app.static import AppType, InstallOption, SetupProfiles
 
 Config.jans_auth_port = '8081'
-
-
+try:
+    # some setup code
+except Exception as e:
+    logging.error(f"Setup failed: {e}")
+    raise
+class JansAuthInstaller(JettyInstaller):
+    """Installer for the Jans Auth service.
+    
+    Handles setup, configuration, and deployment of the Janssen Auth component.
+    """
 class JansAuthInstaller(JettyInstaller):
 
     source_files = [

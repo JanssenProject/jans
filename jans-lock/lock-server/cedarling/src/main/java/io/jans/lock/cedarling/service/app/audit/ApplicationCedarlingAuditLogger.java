@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.lock.model.app.audit.AuditLogEntry;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -40,11 +39,12 @@ public class ApplicationCedarlingAuditLogger {
 		this.mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 
-    public void log(AuditLogEntry auditLogEntry) {
-    	if (auditLogEntry != null) {
-    		loggingThroughFile(auditLogEntry);
-    	}
-    }
+	public void log(AuditLogEntry auditLogEntry, boolean success) {
+		if (auditLogEntry != null) {
+			auditLogEntry.setSuccess(success);
+			loggingThroughFile(auditLogEntry);
+		}
+	}
 
     private void loggingThroughFile(AuditLogEntry auditLogEntry) {
         try {
