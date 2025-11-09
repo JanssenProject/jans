@@ -3,9 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use crate::BootstrapConfigRaw;
 use derive_more::Deref;
 use serde::{Deserialize, Serialize};
-use crate::BootstrapConfigRaw;
 
 const DEFAULT_USER_ENTITY_NAME: &str = "Jans::User";
 const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Jans::Workload";
@@ -96,8 +96,20 @@ impl EntityBuilderConfig {
         self
     }
 
+    /// Disables building the `Workload` entity
+    pub fn with_no_workload(mut self) -> Self {
+        self.build_workload = false;
+        self
+    }
+
     /// Enables building the `User` entity
     pub fn with_user(mut self) -> Self {
+        self.build_user = true;
+        self
+    }
+
+    /// Disables building the `User` entity
+    pub fn with_no_user(mut self) -> Self {
         self.build_user = true;
         self
     }
@@ -106,10 +118,18 @@ impl EntityBuilderConfig {
 impl From<EntityBuilderConfigRaw> for EntityBuilderConfig {
     fn from(raw: EntityBuilderConfigRaw) -> Self {
         let entity_names = EntityNames {
-            user: raw.mapping_user.unwrap_or_else(|| DEFAULT_USER_ENTITY_NAME.to_string()),
-            workload: raw.mapping_workload.unwrap_or_else(|| DEFAULT_WORKLOAD_ENTITY_NAME.to_string()),
-            role: raw.mapping_role.unwrap_or_else(|| DEFAULT_ROLE_ENTITY_NAME.to_string()),
-            iss: raw.mapping_iss.unwrap_or_else(|| DEFAULT_ISS_ENTITY_NAME.to_string()),
+            user: raw
+                .mapping_user
+                .unwrap_or_else(|| DEFAULT_USER_ENTITY_NAME.to_string()),
+            workload: raw
+                .mapping_workload
+                .unwrap_or_else(|| DEFAULT_WORKLOAD_ENTITY_NAME.to_string()),
+            role: raw
+                .mapping_role
+                .unwrap_or_else(|| DEFAULT_ROLE_ENTITY_NAME.to_string()),
+            iss: raw
+                .mapping_iss
+                .unwrap_or_else(|| DEFAULT_ISS_ENTITY_NAME.to_string()),
         };
 
         Self {
