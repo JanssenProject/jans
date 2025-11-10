@@ -117,7 +117,7 @@ ARG AUI_POLICY_FILE=2fb50e468d9dfefa142d1fce4fa9747efbd3a0f08de5.json
 
 # download policy store file and replace placeholder with parametrized variable
 RUN wget -nv https://raw.githubusercontent.com/GluuFederation/GluuFlexAdminUIPolicyStore/${AUI_POLICY_VERSION}/${AUI_POLICY_FILE} -O /app/templates/jans-config-api/adminui-policy-store.json \
-    && sed -i 's/your-openid-provider.server/\%\(hostname\)s/g' /app/templates/jans-config-api/adminui-policy-store.json
+    && sed -i 's/your-openid-provider.server/%(hostname)s/g' /app/templates/jans-config-api/adminui-policy-store.json
 
 # ======
 # Python
