@@ -39,7 +39,7 @@ A multi-issuer authorization request consists of:
       "payload": "eyJhbGciOiJIUzI1NiIs..."
     },
     {
-      "mapping": "Jans::Id_Token", 
+      "mapping": "Jans::Id_Token",
       "payload": "eyJhbGciOiJFZERTQSIs..."
     },
     {
@@ -133,23 +133,25 @@ Tokens are organized in the context using a deterministic naming algorithm:
 **Pattern**: `{issuer_name}_{token_type}`
 
 **Issuer Name Resolution**:
+
 1. Look up issuer in trusted issuer metadata
 2. Use the `name` field from configuration
 3. If no `name` field, extract hostname from JWT `iss` claim
 4. Convert to lowercase, replace special characters with underscores
 
 **Token Type Resolution**:
+
 1. Extract from `mapping` field (e.g., "Jans::Access_Token")
 2. Split by namespace separator ("::")
 3. Convert to lowercase, preserve underscores
 
 **Examples**:
 
-| JWT Issuer | Trusted Issuer Name | Token Mapping | Result |
-|------------|---------------------|---------------|--------|
-| `https://idp.acme.com/auth` | `"Acme"` | `Jans::Access_Token` | `acme_access_token` |
-| `https://accounts.google.com` | `"Google"` | `Jans::Id_Token` | `google_id_token` |
-| `https://idp.dolphin.sea/auth` | `"Dolphin"` | `Acme::DolphinToken` | `dolphin_acme_dolphin_token` |
+| JWT Issuer                     | Trusted Issuer Name | Token Mapping        | Result                       |
+| ------------------------------ | ------------------- | -------------------- | ---------------------------- |
+| `https://idp.acme.com/auth`    | `"Acme"`            | `Jans::Access_Token` | `acme_access_token`          |
+| `https://accounts.google.com`  | `"Google"`          | `Jans::Id_Token`     | `google_id_token`            |
+| `https://idp.dolphin.sea/auth` | `"Dolphin"`         | `Acme::DolphinToken` | `dolphin_acme_dolphin_token` |
 
 ## Use Cases
 
@@ -158,6 +160,7 @@ Tokens are organized in the context using a deterministic naming algorithm:
 **Scenario**: A collaborative platform accepts tokens from multiple corporate identity providers.
 
 **Requirements**:
+
 - Users can authenticate with their corporate IDP
 - Authorization requires valid token from user's organization
 - Different organizations have different permission structures
@@ -200,7 +203,7 @@ permit(
   context has tokens.acme_corp_access_token &&
   context.tokens.acme_corp_access_token.hasTag("employee_status") &&
   context.tokens.acme_corp_access_token.getTag("employee_status").contains("active") &&
-  
+
   // Verify platform token with sharing scope
   context has tokens.platform_access_token &&
   context.tokens.platform_access_token.hasTag("scope") &&
@@ -213,6 +216,7 @@ permit(
 **Scenario**: An API gateway needs to validate tokens from various upstream microservices.
 
 **Requirements**:
+
 - Each microservice issues its own JWT tokens
 - Gateway validates all tokens before forwarding requests
 - Authorization based on combination of service capabilities
@@ -224,33 +228,33 @@ permit(
 let tokens = [
   {
     mapping: "AuthService::Access_Token",
-    payload: authServiceToken
+    payload: authServiceToken,
   },
   {
     mapping: "PaymentService::Access_Token",
-    payload: paymentServiceToken
+    payload: paymentServiceToken,
   },
   {
     mapping: "UserService::Access_Token",
-    payload: userServiceToken
-  }
+    payload: userServiceToken,
+  },
 ];
 
 let request = {
   tokens: tokens,
-  action: "Gateway::Action::\"ProcessPayment\"",
+  action: 'Gateway::Action::"ProcessPayment"',
   resource: {
     cedar_entity_mapping: {
       entity_type: "Gateway::Transaction",
-      id: "txn-12345"
+      id: "txn-12345",
     },
-    amount: 1000.00,
-    currency: "USD"
+    amount: 1000.0,
+    currency: "USD",
   },
   context: {
     ip_address: request.ip,
-    user_agent: request.headers["user-agent"]
-  }
+    user_agent: request.headers["user-agent"],
+  },
 };
 
 let result = await cedarling.authorize_multi_issuer(request);
@@ -268,11 +272,11 @@ permit(
   // Auth service token with authenticated user
   context has tokens.auth_service_access_token &&
   context.tokens.auth_service_access_token.hasTag("authenticated") &&
-  
+
   // Payment service token with sufficient balance
   context has tokens.payment_service_access_token &&
   context.tokens.payment_service_access_token.hasTag("balance_verified") &&
-  
+
   // User service token with kyc_verified status
   context has tokens.user_service_access_token &&
   context.tokens.user_service_access_token.hasTag("kyc_verified") &&
@@ -285,6 +289,7 @@ permit(
 **Scenario**: A trade association requires tokens from both the association and member organizations for voting.
 
 **Requirements**:
+
 - User must have valid membership token from trade association
 - User must have valid employee token from their organization
 - Organization must be a corporate member
@@ -334,7 +339,7 @@ permit(
   context has tokens.trade_association_member_token &&
   context.tokens.trade_association_member_token.hasTag("member_status") &&
   context.tokens.trade_association_member_token.getTag("member_status").contains("Corporate Member") &&
-  
+
   // Require employee token with voting representative designation
   context has tokens.company_access_token &&
   context.tokens.company_access_token.hasTag("role") &&
@@ -347,6 +352,7 @@ permit(
 **Scenario**: Healthcare system requires multiple consent tokens for accessing medical records.
 
 **Requirements**:
+
 - Patient consent token required
 - Provider credentials token required
 - Facility authorization token required
@@ -361,7 +367,7 @@ tokens = [
         payload=patient_consent_token
     ),
     TokenInput(
-        mapping="Healthcare::ProviderCredentials", 
+        mapping="Healthcare::ProviderCredentials",
         payload=provider_credentials_token
     ),
     TokenInput(
@@ -395,18 +401,18 @@ permit(
   context.tokens.patient_consent.getTag("consent_status").contains("granted") &&
   context.tokens.patient_consent.hasTag("expiry") &&
   context.tokens.patient_consent.getTag("expiry").contains("2025-12-31") &&
-  
+
   // Provider credentials token
   context has tokens.provider_credentials &&
   context.tokens.provider_credentials.hasTag("license_status") &&
   context.tokens.provider_credentials.getTag("license_status").contains("active") &&
   context.tokens.provider_credentials.hasTag("specialty") &&
-  
+
   // Facility authorization token
   context has tokens.facility_auth &&
   context.tokens.facility_auth.hasTag("facility_type") &&
   context.tokens.facility_auth.getTag("facility_type").contains("hospital") &&
-  
+
   // Purpose of use alignment
   context has purpose_of_use &&
   context.purpose_of_use == "TREATMENT"
@@ -418,6 +424,7 @@ permit(
 **Scenario**: A zero-trust architecture uses custom tokens for device attestation, network verification, and user authentication.
 
 **Requirements**:
+
 - Device attestation token from hardware TPM
 - Network security token from network controller
 - User authentication token from IDP
@@ -429,33 +436,33 @@ permit(
 let tokens = [
   {
     mapping: "Security::DeviceAttestation",
-    payload: deviceAttestationToken  // From device TPM
+    payload: deviceAttestationToken, // From device TPM
   },
   {
     mapping: "Security::NetworkToken",
-    payload: networkToken  // From network controller
+    payload: networkToken, // From network controller
   },
   {
     mapping: "Jans::Access_Token",
-    payload: userAccessToken  // From IDP
-  }
+    payload: userAccessToken, // From IDP
+  },
 ];
 
 let result = await cedarling.authorize_multi_issuer({
   tokens: tokens,
-  action: "Security::Action::\"AccessClassified\"",
+  action: 'Security::Action::"AccessClassified"',
   resource: {
     cedar_entity_mapping: {
       entity_type: "Security::Document",
-      id: "classified-123"
+      id: "classified-123",
     },
     classification: "SECRET",
-    compartment: "SPECIAL_ACCESS"
+    compartment: "SPECIAL_ACCESS",
   },
   context: {
     location: "secure_facility",
-    time: Date.now()
-  }
+    time: Date.now(),
+  },
 });
 ```
 
@@ -473,19 +480,19 @@ permit(
   context.tokens.device_attestation.getTag("tpm_verified").contains("true") &&
   context.tokens.device_attestation.hasTag("encryption_level") &&
   context.tokens.device_attestation.getTag("encryption_level").contains("FIPS-140-2") &&
-  
+
   // Network token from secure network
   context has tokens.network_token &&
   context.tokens.network_token.hasTag("network_type") &&
   context.tokens.network_token.getTag("network_type").contains("CLASSIFIED") &&
   context.tokens.network_token.hasTag("segment") &&
   context.tokens.network_token.getTag("segment").contains("HIGH_SIDE") &&
-  
+
   // User access token with clearance
   context has tokens.user_access_token &&
   context.tokens.user_access_token.hasTag("clearance_level") &&
   context.tokens.user_access_token.getTag("clearance_level").contains("SECRET") &&
-  
+
   // Location verification
   context has location &&
   context.location == "secure_facility"
@@ -493,6 +500,65 @@ permit(
 ```
 
 ## Configuration Guide
+
+### Schema Requirements
+
+**IMPORTANT**: Multi-issuer authorization requires specific Cedar schema modifications. Without these changes, authorization will fail with schema validation errors.
+
+#### Required Schema Changes
+
+Multi-issuer authorization creates token entities dynamically and places them in the Cedar context. Your schema must support:
+
+**1. Token Entity Structure**
+
+Token entities must have these required attributes:
+
+```cedar
+entity Access_token = {
+  token_type?: String,      // Required for multi-issuer
+  jti?: String,             // Required for multi-issuer
+  issuer?: String,          // Required for multi-issuer
+  exp?: Long,               // Required for multi-issuer
+  validated_at?: Long,      // Required for multi-issuer
+  // Other JWT claims as optional attributes
+  aud?: String,
+  iat?: Long,
+  scope?: Set<String>,
+  // ...
+} tags Set<String>;         // Required for dynamic JWT claims
+```
+
+**2. Context Structure**
+
+The Context type must include a `tokens` field:
+
+```cedar
+type Context = {
+  network?: String,
+  // ... other context fields
+  tokens?: TokensContext,   // Required for multi-issuer
+};
+
+type TokensContext = {
+  total_token_count: Long,  // Required
+  // Individual token fields added dynamically
+};
+```
+
+**3. Making Attributes Optional**
+
+All token entity attributes (except the core multi-issuer fields) must be optional (`?`) to prevent schema validation errors. This is because multi-issuer tokens may not have all the claims that standard authorization tokens have.
+
+#### Why These Changes Are Needed
+
+- **Dynamic token entities**: Multi-issuer authorization creates token entities on-the-fly without User/Workload principals
+- **Tag-based claims**: JWT claims are stored as entity tags (Set<String> by default) for flexible access
+- **Context structure**: Tokens are organized in `context.tokens.{issuer}_{token_type}` format
+- **Schema validation**: Cedar validates entities against the schema; missing required fields cause errors
+
+#### Updating Core Schema
+
+If you're using the default `cedarling_core.cedarschema` from Agama Lab, it has been updated to support multi-issuer authorization. If you have a custom schema, make sure to apply these changes.
 
 ### Policy Store Configuration
 
@@ -540,45 +606,131 @@ Configure trusted issuers with the `name` field for predictable token naming:
 
 ### Cedar Schema for Multi-Issuer Tokens
 
-Define token entity schemas for enhanced type safety:
+#### Core Token Schema Structure
+
+Each token type (Access_Token, Id_Token, custom tokens) must follow this structure:
 
 ```cedar
 namespace Jans {
-  entity Access_Token = {
-    "token_type": String,
-    "jti": String,
-    "issuer": String,
-    "exp": Long,
-    "validated_at": Long,
-    "scope": Set<String>,
-    "aud": Set<String>,
-    "client_id": String
-  } tags String;
-  
-  entity Id_Token = {
-    "token_type": String,
-    "jti": String,
-    "issuer": String,
-    "exp": Long,
-    "validated_at": Long,
-    "sub": String,
-    "email": String,
-    "email_verified": Boolean
-  } tags String;
-}
+  // Core token entity structure compatible with both standard and multi-issuer authorization
+  entity Access_token = {
+    // Required multi-issuer attributes
+    token_type?: String,        // Entity type name (e.g., "Jans::Access_Token")
+    jti?: String,               // JWT ID - unique token identifier
+    issuer?: String,            // JWT issuer claim
+    exp?: Long,                 // Token expiration timestamp
+    validated_at?: Long,        // Timestamp when token was validated
 
-namespace Custom {
-  entity ServiceToken = {
-    "token_type": String,
-    "jti": String,
-    "issuer": String,
-    "exp": Long,
-    "validated_at": Long,
-    "service_id": String,
-    "permissions": Set<String>
-  } tags String;
+    // Optional JWT claims (make all optional for compatibility)
+    aud?: String,               // Audience
+    iat?: Long,                 // Issued at
+    iss?: TrustedIssuer,        // Issuer entity reference (for standard authz)
+    scope?: Set<String>,        // OAuth scopes
+    client_id?: String,         // Client identifier
+    sub?: String,               // Subject
+    // Add other JWT claims as needed
+  } tags Set<String>;           // Tags store dynamic JWT claims
+
+  entity id_token = {
+    // Required multi-issuer attributes
+    token_type?: String,
+    jti?: String,
+    issuer?: String,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Optional JWT claims
+    aud?: Set<String>,
+    iat?: Long,
+    iss?: TrustedIssuer,
+    sub?: String,
+    email?: email_address,
+    name?: String,
+    phone_number?: String,
+    role?: Set<String>,
+    acr?: String,
+    amr?: Set<String>,
+    // Add other JWT claims as needed
+  } tags Set<String>;
+
+  entity Userinfo_token = {
+    // Required multi-issuer attributes
+    token_type?: String,
+    jti?: String,
+    issuer?: String,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Optional JWT claims
+    aud?: String,
+    iat?: Long,
+    iss?: TrustedIssuer,
+    sub?: String,
+    email?: email_address,
+    name?: String,
+    birthdate?: String,
+    phone_number?: String,
+    role?: Set<String>,
+    // Add other JWT claims as needed
+  } tags Set<String>;
 }
 ```
+
+#### Custom Token Types
+
+For custom token types, follow the same pattern:
+
+```cedar
+namespace Custom {
+  entity ServiceToken = {
+    // Required multi-issuer attributes
+    token_type?: String,
+    jti?: String,
+    issuer?: String,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Custom token-specific attributes
+    service_id?: String,
+    permissions?: Set<String>,
+    service_tier?: String,
+  } tags Set<String>;
+}
+```
+
+#### Complete Context Schema
+
+Define the Context type to include the tokens field:
+
+```cedar
+type Context = {
+  // Standard context fields
+  network?: String,
+  network_type?: String,
+  user_agent?: String,
+  operating_system?: String,
+  device_health?: Set<String>,
+  current_time?: Long,
+  geolocation?: Set<String>,
+  fraud_indicators?: Set<String>,
+
+  // Multi-issuer tokens context (required)
+  tokens?: TokensContext,
+};
+
+type TokensContext = {
+  total_token_count: Long,
+  // Individual token fields are added dynamically by Cedarling
+  // Pattern: {issuer_name}_{token_type} (e.g., acme_access_token)
+};
+```
+
+#### Key Schema Principles
+
+1. **Optional Attributes**: All token attributes must be optional (`?`) to support both standard and multi-issuer authorization
+2. **Tags Declaration**: All token entities must declare `tags Set<String>` for dynamic JWT claim storage
+3. **Context Integration**: The Context type must include an optional `tokens` field
+4. **Consistency**: Use the same attribute names across all token types (token_type, jti, issuer, exp, validated_at)
 
 ## Error Handling
 
@@ -632,8 +784,8 @@ Configure clear, predictable issuer names in your policy store:
 
 ```json
 {
-  "name": "AcmeCorp",  // Good - clear and predictable
-  "name": "Issuer1"    // Bad - unclear what this represents
+  "name": "AcmeCorp", // Good - clear and predictable
+  "name": "Issuer1" // Bad - unclear what this represents
 }
 ```
 
@@ -767,4 +919,3 @@ permit(
 - [Policy Store Configuration](./cedarling-policy-store.md)
 - [Python Examples](./python/usage.md)
 - [Go Examples](./getting-started/go.md)
-

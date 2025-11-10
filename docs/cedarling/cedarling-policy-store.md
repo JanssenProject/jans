@@ -41,19 +41,19 @@ The JSON Schema accepted by Cedarling is defined as follows:
 }
 ```
 
-- **cedar_version** : (*String*) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
-- **policies** : (*Object*) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
-- **schema** : (*String* | *Object*) Base64 encoded JSON Object. See [schema](#schema) below.
-- **trusted_issuers** : (*Object of {unique_id => IdentitySource}(#trusted-issuer-schema)*) List of metadata for Identity Sources.
-- **default_entities** : (*Object*) Optional map of entity IDs to encoded/default entity payloads. See [Default Entities](#default-entities).
+- **cedar_version** : (_String_) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
+- **policies** : (_Object_) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
+- **schema** : (_String_ | _Object_) Base64 encoded JSON Object. See [schema](#schema) below.
+- **trusted_issuers** : (_Object of {unique_id => IdentitySource}(#trusted-issuer-schema)_) List of metadata for Identity Sources.
+- **default_entities** : (_Object_) Optional map of entity IDs to encoded/default entity payloads. See [Default Entities](#default-entities).
 
 ### `schema`
 
-Either *String* or *Object*, where *Object* is preferred.
+Either _String_ or _Object_, where _Object_ is preferred.
 
-Where *Object* - An object with `encoding`, `content_type` and `body` keys. For example:
+Where _Object_ - An object with `encoding`, `content_type` and `body` keys. For example:
 
-``` json
+```json
 "schema": {
     "encoding": "none", // can be one of "none" or "base64"
     "content_type": "cedar", // can be one of "cedar" or "cedar-json"
@@ -61,9 +61,9 @@ Where *Object* - An object with `encoding`, `content_type` and `body` keys. For 
 }
 ```
 
-  Where *String* - The schema in cedar-json format, encoded as Base64. For example:
+Where _String_ - The schema in cedar-json format, encoded as Base64. For example:
 
-``` json
+```json
 "schema": "cGVybWl0KAogICAgc..."
 ```
 
@@ -96,8 +96,8 @@ Example of the decoded payloads for two default entities:
   "74d109b20248": {
     "entity_id": "74d109b20248",
     "description": "2025 Price List",
-    "products": {"15020": 9.95, "15050": 14.95},
-    "services": {"51001": 99.0, "51020": 299.0}
+    "products": { "15020": 9.95, "15050": 14.95 },
+    "services": { "51001": 99.0, "51020": 299.0 }
   }
 }
 ```
@@ -130,19 +130,19 @@ The `policies` field describes the Cedar policies that will be used in Cedarling
   }
 ```
 
-- **unique_policy_id**: (*String*) A unique policy ID used to for tracking and auditing purposes.
-- **name** : (*String*) A name for the policy
-- **description** : (*String*) A brief description of cedar policy
-- **creation_date** : (*String*) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
-- **policy_content** : (*String* | *Object*) The Cedar Policy. See [policy_content](#policy_content) below.
+- **unique_policy_id**: (_String_) A unique policy ID used to for tracking and auditing purposes.
+- **name** : (_String_) A name for the policy
+- **description** : (_String_) A brief description of cedar policy
+- **creation_date** : (_String_) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
+- **policy_content** : (_String_ | _Object_) The Cedar Policy. See [policy_content](#policy_content) below.
 
 ### `policy_content`
 
-Either *String* or *Object*, where *Object* is preferred.
+Either _String_ or _Object_, where _Object_ is preferred.
 
-Where *Object* - An object with `encoding`, `content_type` and `body` keys. For example:
+Where _Object_ - An object with `encoding`, `content_type` and `body` keys. For example:
 
-``` json
+```json
 "policy_content": {
     "encoding": "none", // can be one of "none" or "base64"
     "content_type": "cedar", // ONLY "cedar" for now due to limitations in cedar-policy crate
@@ -150,9 +150,9 @@ Where *Object* - An object with `encoding`, `content_type` and `body` keys. For 
 }
 ```
 
-  Where *String* - The policy in cedar format, encoded as Base64. For example:
+Where _String_ - The policy in cedar format, encoded as Base64. For example:
 
-``` json
+```json
 "policy_content": "cGVybWl0KAogICAgc..."
 ```
 
@@ -231,11 +231,11 @@ This record contains the information needed to validate tokens from this issuer:
 }
 ```
 
-- **name** : (*String*) The name of the trusted issuer.
-- **description** : (*String*) A brief description of the trusted issuer, providing context for administrators.
-- **openid_configuration_endpoint** : (*String*) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
-- **trusted_issuer_id** : (*Object*, *optional*) Metadata related to a particular issuer. You can add as many trusted issuers you want. Furthermore, the name this object is what will be used as the entity ID of the [Trusted Issuer](./cedarling-entities.md#trusted-issuer) that Cedarling automatically creates at startup.
-- **token_metadata** : (*Object*, *optional*) Tokens metadata in a map of *token name* -> *token metadata*. See  [Token Metadata Schema](#token-metadata-schema).
+- **name** : (_String_) The name of the trusted issuer.
+- **description** : (_String_) A brief description of the trusted issuer, providing context for administrators.
+- **openid_configuration_endpoint** : (_String_) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
+- **trusted_issuer_id** : (_Object_, _optional_) Metadata related to a particular issuer. You can add as many trusted issuers you want. Furthermore, the name this object is what will be used as the entity ID of the [Trusted Issuer](./cedarling-entities.md#trusted-issuer) that Cedarling automatically creates at startup.
+- **token_metadata** : (_Object_, _optional_) Tokens metadata in a map of _token name_ -> _token metadata_. See [Token Metadata Schema](#token-metadata-schema).
 
 ### Token Metadata Schema
 
@@ -273,7 +273,7 @@ The Token Entity Metadata Schema defines how tokens are mapped, parsed, and tran
 
 #### Role mapping
 
-- **role_mapping**: (String OR Array of String, *Optional*) Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (`""`).
+- **role_mapping**: (String OR Array of String, _Optional_) Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (`""`).
 
 You can include a `role_mapping` in each token, all of them will be executed by Cedarling.
 If none `role_mapping` defined the `Cedarling` will try to find role in `userinfo` token in field `role`.
@@ -285,7 +285,7 @@ If none `role_mapping` defined the `Cedarling` will try to find role in `userinf
 In regex attribute mapping like `"UID": {"attr": "uid", "type":"String"},`, `type` field can contain possible variants:
 
 - `String` - to string without transformation,
-- `Number` -  parse string to float64 (JSON number) if error returns default value
+- `Number` - parse string to float64 (JSON number) if error returns default value
 - `Boolean` - if string NOT empty map to true else false
 
 Note, use of regex **named capture groups** which is more readable by referring to parts of a regex match by descriptive names rather than numbers. For example, `(?P<name>...)` defines a named capture group where name is the identifier, and ... is the regex pattern for what you want to capture.
@@ -349,45 +349,45 @@ Here is a non-normative example of a `cedarling_store.json` file:
 
 ```json
 {
-    "cedar_version": "v4.0.0",
-    "policies": {
-        "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
-            "description": "simple policy example",
-            "creation_date": "2024-09-20T17:22:39.996050",
-            "policy_content": "cedar_policy_encoded_in_base64"
-        }
-    },
-    "schema": "schema_encoded_in_base64",
-    "trusted_issuers": {
-        "08c6c18a654f492adcf3fe069d729b4d9e6bf82605cb" : {
-            "name": "Google",
-            "description": "Consumer IDP",
-            "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
-            "token_metadata": {
-              "access_token": {
-                "trusted": true,
-                "entity_type_name": "Jans::Access_token",
-                "token_id": "jti"
-              },
-              "id_token": {
-                "trusted": true,
-                "entity_type_name": "Jans::Id_token",
-                "token_id": "jti",
-                "role_mapping": "role"
-              },
-              "userinfo_token": {
-                "trusted": true,
-                "entity_type_name": "Jans::Userinfo_token",
-                "token_id": "jti",
-                "role_mapping": "role"
-              }
-            }
-        }
-    },
-    "default_entities": {
-        "1694c954f8d9": "eyJlbnRpdHlfaWQiOiIxNjk0Yzk1NGY4ZDkiLCJvIjoiQWNtZSBEb2xwaGlucyBEaXZpc2lvbiIsIm9yZ19pZCI6IjEwMDEyOSIsImRvbWFpbiI6ImFjbWUtZG9scGhpbi5zZWEiLCJyZWdpb25zIjpbIkF0bGFudGljIiwiUGFjaWZpYyIsIkluZGlhbiJdfQ==",
-        "74d109b20248": "eyJlbnRpdHlfaWQiOiI3NGQxMDliMjAyNDgiLCJkZXNjcmlwdGlvbiI6IjIwMjUgUHJpY2UgTGlzdCIsInByb2R1Y3RzIjp7IjE1MDIwIjo5Ljk1LCIxNTA1MCI6MTQuOTV9LCJzZXJ2aWNlcyI6eyI1MTAwMSI6OTkuMCwiNTEwMjAiOjI5OS4wfX0="
+  "cedar_version": "v4.0.0",
+  "policies": {
+    "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+      "description": "simple policy example",
+      "creation_date": "2024-09-20T17:22:39.996050",
+      "policy_content": "cedar_policy_encoded_in_base64"
     }
+  },
+  "schema": "schema_encoded_in_base64",
+  "trusted_issuers": {
+    "08c6c18a654f492adcf3fe069d729b4d9e6bf82605cb": {
+      "name": "Google",
+      "description": "Consumer IDP",
+      "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
+      "token_metadata": {
+        "access_token": {
+          "trusted": true,
+          "entity_type_name": "Jans::Access_token",
+          "token_id": "jti"
+        },
+        "id_token": {
+          "trusted": true,
+          "entity_type_name": "Jans::Id_token",
+          "token_id": "jti",
+          "role_mapping": "role"
+        },
+        "userinfo_token": {
+          "trusted": true,
+          "entity_type_name": "Jans::Userinfo_token",
+          "token_id": "jti",
+          "role_mapping": "role"
+        }
+      }
+    }
+  },
+  "default_entities": {
+    "1694c954f8d9": "eyJlbnRpdHlfaWQiOiIxNjk0Yzk1NGY4ZDkiLCJvIjoiQWNtZSBEb2xwaGlucyBEaXZpc2lvbiIsIm9yZ19pZCI6IjEwMDEyOSIsImRvbWFpbiI6ImFjbWUtZG9scGhpbi5zZWEiLCJyZWdpb25zIjpbIkF0bGFudGljIiwiUGFjaWZpYyIsIkluZGlhbiJdfQ==",
+    "74d109b20248": "eyJlbnRpdHlfaWQiOiI3NGQxMDliMjAyNDgiLCJkZXNjcmlwdGlvbiI6IjIwMjUgUHJpY2UgTGlzdCIsInByb2R1Y3RzIjp7IjE1MDIwIjo5Ljk1LCIxNTA1MCI6MTQuOTV9LCJzZXJ2aWNlcyI6eyI1MTAwMSI6OTkuMCwiNTEwMjAiOjI5OS4wfX0="
+  }
 }
 ```
 
@@ -395,21 +395,48 @@ Here is a non-normative example of a `cedarling_store.json` file:
 
 When using the `authorize_multi_issuer` method, Cedarling creates token entities dynamically without requiring predefined User/Workload principals. This section describes how these token entities are structured and made available in policies.
 
+> **⚠️ SCHEMA REQUIREMENT**: Multi-issuer authorization requires specific Cedar schema modifications. Your schema **must** include the multi-issuer token structure or authorization will fail with schema validation errors. See [Schema Requirements](#schema-requirements-for-multi-issuer) below.
+
 ### Token Entity Structure
 
 Each validated token in a multi-issuer authorization request becomes a Cedar entity with the following structure:
 
+**Required Attributes** (stored as entity attributes):
+
+- `token_type` (String): The entity type name (e.g., "Jans::Access_Token", "Acme::DolphinToken")
+- `jti` (String): Unique token identifier from JWT
+- `issuer` (String): JWT issuer claim value
+- `exp` (Long): Token expiration timestamp
+- `validated_at` (Long): Timestamp when Cedarling validated the token
+
+**Optional Attributes** (JWT claims stored as entity tags):
+
+- All other JWT claims are stored as **entity tags** with `Set<String>` type by default
+- Examples: `scope`, `aud`, `sub`, `client_id`, cust
+  om claims
+
+**Complete Example**:
+
 ```cedar
-entity Token = {
-  "token_type": String,        // e.g., "Jans::Access_Token", "Acme::DolphinToken"
-  "jti": String,               // Unique token identifier
-  "issuer": String,            // JWT issuer claim
-  "exp": Long,                 // Token expiration timestamp
-  "validated_at": Long         // Timestamp when token was validated
-} tags String;
+entity Access_token = {
+  "token_type": String,        // Required: Entity type name
+  "jti": String,               // Required: Token ID
+  "issuer": String,            // Required: JWT issuer
+  "exp": Long,                 // Required: Expiration
+  "validated_at": Long,        // Required: Validation timestamp
+  // Optional JWT claims (must be optional)
+  "aud"?: String,
+  "iat"?: Long,
+  "scope"?: Set<String>,
+  // ... other claims
+} tags Set<String>;            // Required: For dynamic claim storage
 ```
 
-+**Important**: Core fields (token_type, jti, issuer, exp, validated_at) are attributes; all other JWT claims are stored as **entity tags** on the Token entity. By default, claims are stored as **Sets of Strings** to provide a consistent interface regardless of whether a claim has zero, one, or multiple values.
+**Important Notes**:
+
+- All token entity attributes (except the five required ones) **must be optional** (`?`) to support tokens with varying claim structures
+- JWT claims not defined as attributes are stored as **entity tags** (Set<String> by default)
+- The `tags Set<String>` declaration is required for dynamic JWT claim access
 
 ### Accessing Token Claims in Policies
 
@@ -467,66 +494,158 @@ The naming follows this pattern:
 - **Token type**: Extracted from the `mapping` field (e.g., "Jans::Access_Token" → "access_token")
 - Both converted to lowercase with underscores replacing special characters
 
-### Schema Support
+### Schema Requirements for Multi-Issuer
 
-#### Without Schema (Default)
-When no Cedar schema is defined for Token entities:
-- All claims are stored as `Set<String>`
-- Provides consistent interface for all claim types
-- Simpler for rapid development
+#### 1. Token Entity Schema
 
-#### With Schema (Enhanced Type Safety)
-When a Cedar schema defines the Token entity:
-- Claims can use specific types (DateTime, Long, Boolean, Record)
-- Enables proper type casting during entity creation
-- Better for production deployments
-
-Example schema for multi-issuer tokens:
+All token entities **must** include these five required attributes and declare tags:
 
 ```cedar
 namespace Jans {
-  entity Access_Token = {
-    "token_type": String,
-    "jti": String,
-    "issuer": String,
-    "exp": Long,
-    "validated_at": Long,
-    "iat": Long,
-    "scope": Set<String>,
-    "aud": Set<String>,
-    "client_id": String
-  } tags String;
-  
-  entity Id_Token = {
-    "token_type": String,
-    "jti": String,
-    "issuer": String,
-    "exp": Long,
-    "validated_at": Long,
-    "iat": Long,
-    "sub": String,
-    "email": String,
-    "email_verified": Boolean
-  } tags String;
-}
+  entity Access_token = {
+    // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
+    token_type?: String,        // Entity type (e.g., "Jans::Access_Token")
+    jti?: String,               // JWT ID - unique token identifier
+    issuer?: String,            // JWT issuer claim
+    exp?: Long,                 // Token expiration timestamp
+    validated_at?: Long,        // Validation timestamp
 
-namespace Acme {
-  entity DolphinToken = {
-    "token_type": String,
-    "jti": String,
-    "issuer": String,
-    "exp": Long,
-    "validated_at": Long,
-    "waiver": String,
-    "location": String,
-    "clearance_level": Long
-  } tags String;
+    // Optional JWT claims - ALL MUST BE OPTIONAL (?)
+    aud?: String,               // Audience
+    iat?: Long,                 // Issued at
+    iss?: TrustedIssuer,        // Issuer entity (for standard authz)
+    scope?: Set<String>,        // OAuth scopes
+    client_id?: String,         // Client ID
+    sub?: String,               // Subject
+    // Add other claims as needed
+  } tags Set<String>;           // *** REQUIRED: For dynamic claims ***
+
+  entity id_token = {
+    // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
+    token_type?: String,
+    jti?: String,
+    issuer?: String,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Optional JWT claims - ALL MUST BE OPTIONAL (?)
+    aud?: Set<String>,
+    iat?: Long,
+    iss?: TrustedIssuer,
+    sub?: String,
+    email?: email_address,
+    name?: String,
+    phone_number?: String,
+    role?: Set<String>,
+    acr?: String,
+    amr?: Set<String>,
+    azp?: String,
+    birthdate?: String,
+    // Add other claims as needed
+  } tags Set<String>;           // *** REQUIRED: For dynamic claims ***
+
+  entity Userinfo_token = {
+    // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
+    token_type?: String,
+    jti?: String,
+    issuer?: String,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Optional JWT claims - ALL MUST BE OPTIONAL (?)
+    aud?: String,
+    iat?: Long,
+    iss?: TrustedIssuer,
+    sub?: String,
+    email?: email_address,
+    name?: String,
+    birthdate?: String,
+    phone_number?: String,
+    role?: Set<String>,
+    // Add other claims as needed
+  } tags Set<String>;           // *** REQUIRED: For dynamic claims ***
 }
 ```
+
+#### 2. Custom Token Types
+
+For custom token types, follow the same pattern:
+
+```cedar
+namespace Acme {
+  entity DolphinToken = {
+    // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
+    token_type?: String,
+    jti?: String,
+    issuer?: String,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Custom token-specific attributes (all optional)
+    waiver?: String,
+    location?: String,
+    clearance_level?: Long,
+  } tags Set<String>;           // *** REQUIRED: For dynamic claims ***
+}
+```
+
+#### 3. Context Type Schema
+
+The Context type **must** include a `tokens` field:
+
+```cedar
+type Context = {
+  // Standard context fields
+  network?: String,
+  network_type?: String,
+  user_agent?: String,
+  operating_system?: String,
+  device_health?: Set<String>,
+  current_time?: Long,
+  geolocation?: Set<String>,
+  fraud_indicators?: Set<String>,
+
+  // *** REQUIRED FOR MULTI-ISSUER ***
+  tokens?: TokensContext,
+};
+
+type TokensContext = {
+  total_token_count: Long,      // Required field
+  // Individual token fields added dynamically:
+  // Pattern: {issuer_name}_{token_type}
+  // Example: acme_access_token, google_id_token
+};
+```
+
+#### Key Requirements
+
+1. **Required Attributes**: Add `token_type`, `jti`, `issuer`, `exp`, `validated_at` to all token entities
+2. **Optional Modifier**: All attributes must be optional (`?`) to support varying token structures
+3. **Tags Declaration**: All token entities must declare `tags Set<String>` for dynamic JWT claims
+4. **Context Update**: Add `tokens?: TokensContext` field to your Context type
+5. **Consistency**: Use the same attribute names across all token entity types
+
+#### Why These Changes Are Required
+
+- **Schema Validation**: Cedar validates all entities against the schema; missing required attributes cause authorization failures
+- **Dynamic Claims**: JWT claims vary by issuer and token type; tags allow flexible claim storage
+- **Context Structure**: Multi-issuer authorization places token entities in `context.tokens.*` which requires schema support
+- **Compatibility**: Optional attributes ensure schema works with both standard and multi-issuer authorization
+
+#### Schema Update Checklist
+
+Before using multi-issuer authorization, verify your schema has:
+
+- [ ] Added five required attributes to all token entities (token_type, jti, issuer, exp, validated_at)
+- [ ] Made all token entity attributes optional (`?`)
+- [ ] Added `tags Set<String>` declaration to all token entities
+- [ ] Added `tokens?: TokensContext` field to Context type
+- [ ] Defined `TokensContext` type with `total_token_count: Long`
 
 ### Policy Examples Using Token Entities
 
 **Simple token validation**:
+
 ```cedar
 permit(
   principal,
@@ -540,6 +659,7 @@ permit(
 ```
 
 **Multi-issuer validation**:
+
 ```cedar
 permit(
   principal,
@@ -557,6 +677,7 @@ permit(
 ```
 
 **Custom token type**:
+
 ```cedar
 permit(
   principal,
@@ -643,18 +764,22 @@ Mandatory entities is: `id_token`, `Role`, `User`, `Access_token`, `Workload`.
 `Context` and `Resource` entities you can pass during authorization request and next entites creating based on the JWT tokens:
 
 - `id_token` - entity based on the `id` JWT token fields.
+
   - ID for entity based in `jti` field.
 
 - `Role` - define role of user.
+
   - Mapping defined in `Token Metadata Schema`.
   - Claim in JWT usually is string or array of string.
   - Each `Role` is parent for `User`. So to check role in policy use operator `in` to check hierarchy.
 
 - `User` - entity based on the `id`and `userinfo` JWT token fields.
+
   - If `id`and `userinfo` JWT token fields has different `sub` value, `userinfo` JWT token will be ignored.
   - ID for entity based in `sub` field. (will be changed in future)
 
 - `Access_token` - entity based on the `access` JWT token fields.
+
   - ID for entity based in `jti` field.
 
 - `Workload` - entity based on the `access` JWT token fields.
