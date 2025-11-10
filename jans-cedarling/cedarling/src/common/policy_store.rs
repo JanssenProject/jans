@@ -58,14 +58,15 @@ fn validate_default_entities(
     // Check base64 size limit for each entity
     for (entity_id, entity_data) in entities {
         if let Some(entity_str) = entity_data.as_str()
-            && entity_str.len() > limits.max_base64_size {
-                return Err(format!(
-                    "Base64 string size ({}) for entity '{}' exceeds maximum allowed size ({})",
-                    entity_str.len(),
-                    entity_id,
-                    limits.max_base64_size
-                ));
-            }
+            && entity_str.len() > limits.max_base64_size
+        {
+            return Err(format!(
+                "Base64 string size ({}) for entity '{}' exceeds maximum allowed size ({})",
+                entity_str.len(),
+                entity_id,
+                limits.max_base64_size
+            ));
+        }
     }
 
     Ok(())
@@ -184,12 +185,39 @@ impl PolicyStore {
                 max_entities: max_entities.unwrap_or(DEFAULT_MAX_ENTITIES),
                 max_base64_size: max_base64_size.unwrap_or(DEFAULT_MAX_BASE64_SIZE),
             };
-            
+
             validate_default_entities(default_entities, &limits)?;
         }
-        
+
         Ok(())
     }
+
+    pub(crate) fn validate_trusted_issuers(&self) -> Result<(), TrustedIssuersValidationError> {
+        // check if iss already present in other policy store
+        let mut oidc_to_trusted_issuer: HashMap<String, String> = HashMap::new();
+
+        for (issuer_name, trusted_issuer) in self.trusted_issuers.iter().flatten() {
+            let oidc_url = trusted_issuer.oidc_endpoint.to_string();
+            if let Some(_previous_issuer_name) = oidc_to_trusted_issuer.get(&oidc_url) {
+                return Err(TrustedIssuersValidationError {
+                    oidc_url: format!(
+                        "openid_configuration_endpoint: '{}' is used for more than one issuer",
+                        oidc_url
+                    ),
+                });
+            } else {
+                oidc_to_trusted_issuer.insert(oidc_url, issuer_name.to_owned());
+            }
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, derive_more::Display, derive_more::Error)]
+#[display("openid_configuration_endpoint: '{oidc_url}' is used for more than one issuer")]
+pub struct TrustedIssuersValidationError {
+    oidc_url: String,
 }
 
 /// Wrapper around [`PolicyStore`] to have access to it and ID of policy store
@@ -435,8 +463,6 @@ impl PoliciesContainer {
     pub fn get_policy_description(&self, id: &str) -> Option<&str> {
         self.raw_policy_info.get(id).map(|v| v.description.as_str())
     }
-
-
 }
 
 /// Custom deserializer for converting base64-encoded policies into a `PolicySet`.
@@ -551,29 +577,39 @@ impl<'de> Deserialize<'de> for PolicyStore {
     {
         // First try to deserialize into a Value to get better error messages
         let value = serde_json::Value::deserialize(deserializer)?;
-        
+
         // Check for required fields
-        let obj = value.as_object().ok_or_else(|| {
-            de::Error::custom("policy store entry must be a JSON object")
-        })?;
+        let obj = value
+            .as_object()
+            .ok_or_else(|| de::Error::custom("policy store entry must be a JSON object"))?;
 
         // Check name field
         let name = obj.get("name").ok_or_else(|| {
             de::Error::custom("missing required field 'name' in policy store entry")
         })?;
-        let name = name.as_str().ok_or_else(|| {
-            de::Error::custom("'name' must be a string")
-        })?;
+        let name = name
+            .as_str()
+            .ok_or_else(|| de::Error::custom("'name' must be a string"))?;
 
         // Check schema field
-        let schema = obj.get("schema").or_else(|| obj.get("cedar_schema")).ok_or_else(|| {
-            de::Error::custom("missing required field 'schema' or 'cedar_schema' in policy store entry")
-        })?;
+        let schema = obj
+            .get("schema")
+            .or_else(|| obj.get("cedar_schema"))
+            .ok_or_else(|| {
+                de::Error::custom(
+                    "missing required field 'schema' or 'cedar_schema' in policy store entry",
+                )
+            })?;
 
         // Check policies field
-        let policies = obj.get("policies").or_else(|| obj.get("cedar_policies")).ok_or_else(|| {
-            de::Error::custom("missing required field 'policies' or 'cedar_policies' in policy store entry")
-        })?;
+        let policies = obj
+            .get("policies")
+            .or_else(|| obj.get("cedar_policies"))
+            .ok_or_else(|| {
+                de::Error::custom(
+                    "missing required field 'policies' or 'cedar_policies' in policy store entry",
+                )
+            })?;
 
         // Now deserialize the actual struct
         let store = PolicyStore {
@@ -684,26 +720,28 @@ mod tests {
 
         // Test valid entities
         let valid_entities = HashMap::from([
-            ("entity1".to_string(), json!("dGVzdA=="),),
-            ("entity2".to_string(), json!("dGVzdDI="),),
+            ("entity1".to_string(), json!("dGVzdA==")),
+            ("entity2".to_string(), json!("dGVzdDI=")),
         ]);
         assert!(validate_default_entities(&valid_entities, &limits).is_ok());
 
         // Test entity count limit
         let too_many_entities = HashMap::from([
-            ("entity1".to_string(), json!("dGVzdA=="),),
-            ("entity2".to_string(), json!("dGVzdDI="),),
-            ("entity3".to_string(), json!("dGVzdDM="),),
+            ("entity1".to_string(), json!("dGVzdA==")),
+            ("entity2".to_string(), json!("dGVzdDI=")),
+            ("entity3".to_string(), json!("dGVzdDM=")),
         ]);
         let result = validate_default_entities(&too_many_entities, &limits);
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Maximum number of default entities (2) exceeded"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("Maximum number of default entities (2) exceeded")
+        );
 
         // Test base64 size limit
         let large_base64 = "dGVzdA==".repeat(20); // Much larger than 100 bytes
-        let large_entities = HashMap::from([
-            ("entity1".to_string(), json!(large_base64),),
-        ]);
+        let large_entities = HashMap::from([("entity1".to_string(), json!(large_base64))]);
         let result = validate_default_entities(&large_entities, &limits);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Base64 string size"));
