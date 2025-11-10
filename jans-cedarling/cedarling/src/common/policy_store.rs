@@ -8,6 +8,7 @@ mod claim_mapping;
 mod test;
 mod token_entity_metadata;
 
+pub mod archive_handler;
 pub mod entity_parser;
 pub mod errors;
 pub mod issuer_parser;
@@ -31,6 +32,7 @@ pub(crate) use claim_mapping::ClaimMappings;
 pub use token_entity_metadata::TokenEntityMetadata;
 
 // Re-export for convenience
+pub use archive_handler::ArchiveHandler;
 pub use entity_parser::{EntityParser, ParsedEntity};
 pub use errors::{
     ArchiveError, CedarEntityErrorType, CedarSchemaErrorType, ManifestErrorType, PolicyStoreError,
