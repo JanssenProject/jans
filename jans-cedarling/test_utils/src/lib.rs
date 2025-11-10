@@ -7,14 +7,17 @@
 
 mod sort_json;
 pub mod token_claims;
-
+#[cfg(not(target_arch = "wasm32"))]
 use mockito::{Mock, Server};
 pub use pretty_assertions::*;
+#[cfg(not(target_arch = "wasm32"))]
 use serde_json::json;
 pub use sort_json::SortedJson;
 
+#[cfg(not(target_arch = "wasm32"))]
 use crate::token_claims::{KeyPair, generate_jwks, generate_keypair_hs256};
 
+#[cfg(not(target_arch = "wasm32"))]
 pub struct MockServer {
     pub keys: KeyPair,
     pub oidc_endpoint: Mock,
@@ -25,6 +28,7 @@ pub struct MockServer {
     mock_server: Server,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn gen_mock_server() -> MockServer {
     // only when we define `mockito::ServerOpts` it different
     // by default it gets random port
