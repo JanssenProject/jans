@@ -9,57 +9,47 @@ use jsonwebtoken::Algorithm;
 use serde_json::json;
 use std::hint::black_box;
 use std::{collections::HashSet, time::Duration};
-use test_utils::token_claims::{
-    KeyPair, generate_jwks, generate_keypair_hs256, generate_token_using_claims_and_keypair,
-};
+use test_utils::token_claims::generate_token_using_claims_and_keypair;
+use test_utils::{MockServer, gen_mock_server};
 use tokio::runtime::Runtime;
 
 const POLICY_STORE: &str = include_str!("../../test_files/policy-store-multi-issuer-basic.yaml");
 
 fn authorize_multi_issuer(c: &mut Criterion) {
-    let mut mock_server = mockito::Server::new();
+    let mock1 = gen_mock_server();
+    let mock2 = gen_mock_server();
+
     let runtime = Runtime::new().expect("init tokio runtime");
 
-    // Setup OpenId config endpoint
-    let oidc = json!({
-        "issuer": mock_server.url(),
-        "jwks_uri": &format!("{}/jwks", mock_server.url()),
-    });
-    let oidc_endpoint = mock_server
-        .mock("GET", "/.well-known/openid-configuration")
-        .with_status(200)
-        .with_header("content-type", "application/json")
-        .with_body(oidc.to_string())
-        .expect_at_least(1)
-        .create();
-
-    // Setup JWKS endpoint
-    let keys = generate_keypair_hs256(Some("some_hs256_key"));
-    let jwks_endpoint = mock_server
-        .mock("GET", "/jwks")
-        .with_status(200)
-        .with_header("content-type", "application/json")
-        .with_body(json!({"keys": generate_jwks(&vec![keys.clone()]).keys}).to_string())
-        .expect_at_least(1)
-        .create();
-
     let cedarling = runtime
-        .block_on(prepare_cedarling_with_jwt_validation(&mock_server.url()))
+        .block_on(prepare_cedarling_with_jwt_validation(
+            &mock1.base_idp_url,
+            &mock2.base_idp_url,
+        ))
         .expect("should initialize Cedarling");
 
-    let request = prepare_cedarling_request_for_multi_issuer_jwt_validation(keys);
+    let request = prepare_cedarling_request_for_multi_issuer_jwt_validation(&mock1, &mock2);
 
     c.bench_with_input(
         BenchmarkId::new("authorize_multi_issuer", "tokio runtime"),
         &runtime,
         |b, rt| {
-            b.to_async(rt)
-                .iter(|| cedarling.authorize_multi_issuer(black_box(request.clone())));
+            b.to_async(rt).iter(|| {
+                let req = black_box(request.clone());
+                async {
+                    let result = cedarling.authorize_multi_issuer(req).await;
+                    match result {
+                        Ok(v) => {
+                            assert!(v.decision, "should be true")
+                        },
+                        Err(e) => {
+                            panic!("{}, {:?}", e.to_string(), e)
+                        },
+                    }
+                }
+            });
         },
     );
-
-    jwks_endpoint.assert();
-    oidc_endpoint.assert();
 }
 
 fn measurement_config() -> Criterion {
@@ -77,23 +67,24 @@ criterion_group! {
 criterion_main!(authz_authorize_multi_issuer_benchmark);
 
 async fn prepare_cedarling_with_jwt_validation(
-    base_idp_url: &str,
+    base_idp_url1: &str,
+    base_idp_url2: &str,
 ) -> Result<Cedarling, InitCedarlingError> {
     let mut policy_store =
         serde_yml::from_str::<serde_yml::Value>(POLICY_STORE).expect("a valid YAML policy store");
 
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["AcmeIssuer"]["openid_configuration_endpoint"] =
-        format!("{}/.well-known/openid-configuration", base_idp_url).into();
+        format!("{}/.well-known/openid-configuration", base_idp_url1).into();
 
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["DolphinIssuer"]
         ["openid_configuration_endpoint"] =
-        format!("{}/.well-known/openid-configuration", base_idp_url).into();
+        format!("{}/.well-known/openid-configuration", base_idp_url2).into();
 
     let bootstrap_config = BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::Off,
-            log_level: LogLevel::DEBUG,
+            log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
             source: cedarling::PolicyStoreSource::Yaml(
@@ -126,53 +117,54 @@ async fn prepare_cedarling_with_jwt_validation(
 }
 
 pub fn prepare_cedarling_request_for_multi_issuer_jwt_validation(
-    keys: KeyPair,
+    mock1: &MockServer,
+    mock2: &MockServer,
 ) -> AuthorizeMultiIssuerRequest {
-    let dolphin_access_token = generate_token_using_claims_and_keypair(
+    let acme_multi_token = generate_token_using_claims_and_keypair(
         &json!({
-            "iss": "https://idp.dolphin.sea",
-            "sub": "dolphin_user_123",
-            "jti": "dolphin123",
-            "client_id": "dolphin_client_123",
-            "aud": "dolphin_audience",
-            "location": ["miami", "orlando"],
-            "scope": ["read", "write"],
+            "iss": mock1.base_idp_url,
+            "sub": "acme_user_multi",
+            "jti": "acme_multi_123",
+            "client_id": "acme_multi_client_123",
+            "aud": "acme_multi_audience",
+            "scope": ["read:wiki", "write:profile"],
             "exp": 2000000000,
             "iat": 1516239022
         }),
-        &keys,
+        &mock1.keys.to_owned(),
     );
 
-    // Create a dolphin_token for the user entity
-    let dolphin_user_token = generate_token_using_claims_and_keypair(
+    let dolphin_multi_token = generate_token_using_claims_and_keypair(
         &json!({
-            "iss": "https://idp.dolphin.sea",
-            "sub": "dolphin_user_123",
-            "jti": "dolphin_user_123",
-            "client_id": "dolphin_client_123",
-            "aud": "dolphin_audience",
+            "iss": mock2.base_idp_url,
+            "sub": "dolphin_user_multi",
+            "jti": "dolphin_multi_456",
+            "client_id": "dolphin_multi_client_456",
+            "aud": "dolphin_multi_audience",
+            "location": ["miami"],
             "exp": 2000000000,
             "iat": 1516239022
         }),
-        &keys,
+        &mock2.keys.to_owned(),
     );
 
     AuthorizeMultiIssuerRequest::new_with_fields(
         vec![
-            TokenInput::new("Dolphin::Access_Token".to_string(), dolphin_access_token),
-            TokenInput::new("Dolphin::Dolphin_Token".to_string(), dolphin_user_token),
+            TokenInput::new("Acme::Access_Token".to_string(), acme_multi_token),
+            TokenInput::new("Dolphin::Access_Token".to_string(), dolphin_multi_token),
         ],
         EntityData::from_json(
             &json!({
                 "cedar_entity_mapping": {
                     "entity_type": "Acme::Resource",
-                    "id": "1694c954f8a3"
+                    "id": "WikiPages"
                 },
+                "name": "Wiki Pages"
             })
             .to_string(),
         )
         .expect("Failed to create resource entity"),
-        "Acme::Action::\"GetFood\"".to_string(),
+        "Acme::Action::\"ReadProfile\"".to_string(),
         None,
     )
 }
