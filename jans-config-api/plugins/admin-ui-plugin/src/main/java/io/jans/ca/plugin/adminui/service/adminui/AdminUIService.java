@@ -14,7 +14,6 @@ import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.util.security.StringEncrypter;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
@@ -57,7 +56,7 @@ public class AdminUIService {
             appConfigResponse.setCedarlingLogType(auiConfiguration.getCedarlingLogType());
             appConfigResponse.setAuiPolicyStoreUrl(auiConfiguration.getAuiCedarlingPolicyStoreUrl());
             appConfigResponse.setAuiDefaultPolicyStorePath(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath());
-            appConfigResponse.setUseRemotePolicyStore(auiConfiguration.getUseCedarlingRemotePolicyStore());
+            appConfigResponse.setCedarlingPolicyStoreRetrievalPoint(auiConfiguration.getCedarlingPolicyStoreRetrievalPoint());
 
             return appConfigResponse;
         } catch (Exception e) {
@@ -93,9 +92,9 @@ public class AdminUIService {
                 adminConf.getMainSettings().getUiConfig().setAuiPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
                 auiConfigurationService.getAUIConfiguration().setAuiCedarlingPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
             }
-            if (appConfigResponse.getUseRemotePolicyStore() != null) {
-                adminConf.getMainSettings().getUiConfig().setUseRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
-                auiConfigurationService.getAUIConfiguration().setUseCedarlingRemotePolicyStore(appConfigResponse.getUseRemotePolicyStore());
+            if (appConfigResponse.getCedarlingPolicyStoreRetrievalPoint() != null) {
+                adminConf.getMainSettings().getUiConfig().setCedarlingPolicyStoreRetrievalPoint(appConfigResponse.getCedarlingPolicyStoreRetrievalPoint().toString());
+                auiConfigurationService.getAUIConfiguration().setCedarlingPolicyStoreRetrievalPoint(appConfigResponse.getCedarlingPolicyStoreRetrievalPoint());
             }
             if (!Strings.isNullOrEmpty(appConfigResponse.getAuiDefaultPolicyStorePath())) {
                 adminConf.getMainSettings().getUiConfig().setAuiDefaultPolicyStorePath(appConfigResponse.getAuiDefaultPolicyStorePath());
