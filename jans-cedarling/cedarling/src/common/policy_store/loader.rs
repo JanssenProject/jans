@@ -5,6 +5,7 @@
 
 //! Policy store loader with format detection and directory loading support.
 
+use super::archive_handler::ArchiveHandler;
 use super::errors::{PolicyStoreError, ValidationError};
 use super::manifest_validator::ManifestValidator;
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
@@ -460,6 +461,41 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         Ok(files)
     }
 
+    /// Load an archive-based policy store from a .cjar file.
+    ///
+    /// This method extracts the archive to a temporary directory and then loads it
+    /// as a directory-based policy store. The temporary directory is automatically
+    /// cleaned up after loading.
+    ///
+    /// # Note
+    ///
+    /// This method is only available for non-WASM targets. For WASM, archives must
+    /// be extracted externally and then loaded as directories.
+    #[cfg(not(target_arch = "wasm32"))]
+    fn load_archive(&self, archive_path: &Path) -> Result<LoadedPolicyStore, PolicyStoreError> {
+        // Create archive handler
+        let mut handler = ArchiveHandler::new();
+
+        // Extract archive to temporary directory
+        let temp_dir_path = handler.extract_archive(archive_path)?;
+
+        // Convert path to string
+        let temp_dir_str =
+            temp_dir_path
+                .to_str()
+                .ok_or_else(|| PolicyStoreError::InvalidFileName {
+                    path: temp_dir_path.display().to_string(),
+                    source: std::io::Error::new(
+                        std::io::ErrorKind::InvalidInput,
+                        "Temporary directory path contains invalid UTF-8",
+                    ),
+                })?;
+
+        // Load as directory
+        // Note: temporary directory will be cleaned up when handler is dropped
+        self.load_directory(temp_dir_str)
+    }
+
     /// Load a directory-based policy store.
     ///
     /// Note: Manifest validation is automatically performed ONLY for PhysicalVfs.
@@ -577,9 +613,17 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
                     })?;
                 self.load_directory(path_str)
             },
+            #[cfg(not(target_arch = "wasm32"))]
+            PolicyStoreSource::Archive(path) => {
+                self.load_archive(path)
+            },
+            #[cfg(target_arch = "wasm32")]
             PolicyStoreSource::Archive(_) => {
-                // TODO: Archive loading will be implemented
-                todo!("Archive (.cjar) loading will use VFS + zip crate")
+                Err(PolicyStoreError::Archive(
+                    super::errors::ArchiveError::InvalidFormat {
+                        message: "Archive loading is not supported on WASM. Extract the archive manually and load as a directory.".to_string(),
+                    },
+                ))
             },
             PolicyStoreSource::Legacy(_) => {
                 // TODO: Legacy format integration will be handled
@@ -606,10 +650,18 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
                     })?;
                 self.validate_directory_structure(path_str)
             },
-            PolicyStoreSource::Archive(_) => {
-                // TODO: Archive validation will be implemented
-                todo!("Archive structure validation not yet implemented")
+            #[cfg(not(target_arch = "wasm32"))]
+            PolicyStoreSource::Archive(path) => {
+                // Validate archive format and structure
+                ArchiveHandler::validate_archive(path)?;
+                Ok(())
             },
+            #[cfg(target_arch = "wasm32")]
+            PolicyStoreSource::Archive(_) => Err(PolicyStoreError::Archive(
+                super::errors::ArchiveError::InvalidFormat {
+                    message: "Archive validation is not supported on WASM".to_string(),
+                },
+            )),
             PolicyStoreSource::Legacy(_) => {
                 // TODO: Legacy format validation will be handled
                 todo!("Legacy format validation not yet implemented")
@@ -1853,5 +1905,237 @@ namespace TestApp {
         assert!(!format!("{:?}", parsed_schema.get_schema()).is_empty());
         assert_eq!(issuer_map.len(), 1);
         assert!(issuer_map.contains_key("main_issuer"));
+    }
+
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn test_load_archive_end_to_end() {
+        use super::super::archive_handler::ArchiveHandler;
+        use std::fs::File;
+        use std::io::Write;
+        use tempfile::TempDir;
+        use zip::CompressionMethod;
+        use zip::write::{ExtendedFileOptions, FileOptions};
+
+        // Create a temporary directory with a complete policy store
+        let temp_dir = TempDir::new().unwrap();
+        let archive_path = temp_dir.path().join("test_policy_store.cjar");
+
+        // Create a .cjar archive with a complete policy store
+        let file = File::create(&archive_path).unwrap();
+        let mut zip = zip::ZipWriter::new(file);
+
+        let options = FileOptions::<ExtendedFileOptions>::default()
+            .compression_method(CompressionMethod::Deflated);
+
+        // Add metadata.json
+        zip.start_file("metadata.json", options.clone()).unwrap();
+        zip.write_all(
+            br#"{
+            "cedar_version": "1.0.0",
+            "policy_store": {
+                "id": "abc123def456",
+                "name": "Test Archive Store",
+                "version": "1.0.0"
+            }
+        }"#,
+        )
+        .unwrap();
+
+        // Add schema
+        zip.start_file("schema.cedarschema", options.clone())
+            .unwrap();
+        zip.write_all(b"namespace TestApp { entity User; }")
+            .unwrap();
+
+        // Add a policy
+        zip.start_file("policies/test_policy.cedar", options.clone())
+            .unwrap();
+        zip.write_all(b"permit(principal, action, resource);")
+            .unwrap();
+
+        // Add an entity
+        zip.start_file("entities/users.json", options.clone())
+            .unwrap();
+        zip.write_all(
+            br#"[{
+            "uid": {"type": "TestApp::User", "id": "alice"},
+            "attrs": {},
+            "parents": []
+        }]"#,
+        )
+        .unwrap();
+
+        zip.finish().unwrap();
+
+        // Test 1: Validate archive structure
+        let loader = DefaultPolicyStoreLoader::new_physical();
+        let source = PolicyStoreSource::Archive(archive_path.clone());
+
+        assert!(loader.validate_structure(&source).is_ok());
+
+        // Test 2: Detect archive format
+        let format = loader.detect_format(&source);
+        assert_eq!(format, PolicyStoreFormat::Archive);
+
+        // Test 3: Load archive
+        let loaded = loader.load(&source).unwrap();
+
+        // Verify metadata
+        assert_eq!(loaded.metadata.name(), "Test Archive Store");
+        assert_eq!(loaded.metadata.policy_store.id, "abc123def456");
+
+        // Verify schema
+        assert!(!loaded.schema.is_empty());
+        assert!(loaded.schema.contains("TestApp"));
+
+        // Verify policies
+        assert_eq!(loaded.policies.len(), 1);
+        assert_eq!(loaded.policies[0].name, "test_policy.cedar");
+
+        // Verify entities
+        assert_eq!(loaded.entities.len(), 1);
+        assert_eq!(loaded.entities[0].name, "users.json");
+
+        // Test 4: Parse and validate components
+        use super::super::entity_parser::EntityParser;
+        use super::super::issuer_parser::IssuerParser;
+        use super::super::schema_parser::SchemaParser;
+
+        // Schema
+        let parsed_schema = SchemaParser::parse_schema(&loaded.schema, "schema.cedarschema")
+            .expect("Should parse schema");
+
+        // Policies
+        let mut all_policies = Vec::new();
+        for policy_file in &loaded.policies {
+            let parsed = super::super::policy_parser::PolicyParser::parse_policy(
+                &policy_file.content,
+                &policy_file.name,
+            )
+            .expect("Should parse policy");
+            all_policies.push(parsed);
+        }
+        let policy_set =
+            super::super::policy_parser::PolicyParser::create_policy_set(all_policies, vec![])
+                .expect("Should create policy set");
+
+        // Entities
+        let mut all_entities = Vec::new();
+        for entity_file in &loaded.entities {
+            let parsed_entities = EntityParser::parse_entities(
+                &entity_file.content,
+                &entity_file.name,
+                Some(parsed_schema.get_schema()),
+            )
+            .expect("Should parse entities");
+            all_entities.extend(parsed_entities);
+        }
+        let entity_store =
+            EntityParser::create_entities_store(all_entities).expect("Should create entity store");
+
+        // Verify everything works together
+        assert!(!policy_set.is_empty());
+        assert_eq!(entity_store.iter().count(), 1);
+        assert!(!format!("{:?}", parsed_schema.get_schema()).is_empty());
+    }
+
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn test_load_invalid_archive() {
+        use std::fs::File;
+        use std::io::Write;
+        use tempfile::TempDir;
+
+        let temp_dir = TempDir::new().unwrap();
+
+        // Test 1: Invalid extension
+        let invalid_ext_path = temp_dir.path().join("test.zip");
+        File::create(&invalid_ext_path).unwrap();
+
+        let loader = DefaultPolicyStoreLoader::new_physical();
+        let source = PolicyStoreSource::Archive(invalid_ext_path);
+        let result = loader.validate_structure(&source);
+
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), PolicyStoreError::Archive(_)));
+
+        // Test 2: Corrupted archive
+        let corrupted_path = temp_dir.path().join("corrupted.cjar");
+        let mut file = File::create(&corrupted_path).unwrap();
+        file.write_all(b"This is not a valid ZIP file").unwrap();
+
+        let source = PolicyStoreSource::Archive(corrupted_path);
+        let result = loader.validate_structure(&source);
+
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), PolicyStoreError::Archive(_)));
+    }
+
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn test_archive_with_manifest() {
+        use super::super::archive_handler::ArchiveHandler;
+        use std::fs::File;
+        use std::io::Write;
+        use tempfile::TempDir;
+        use zip::CompressionMethod;
+        use zip::write::{ExtendedFileOptions, FileOptions};
+
+        let temp_dir = TempDir::new().unwrap();
+        let archive_path = temp_dir.path().join("test_with_manifest.cjar");
+
+        // Create archive with manifest
+        let file = File::create(&archive_path).unwrap();
+        let mut zip = zip::ZipWriter::new(file);
+
+        let options = FileOptions::<ExtendedFileOptions>::default()
+            .compression_method(CompressionMethod::Deflated);
+
+        // Add metadata
+        zip.start_file("metadata.json", options.clone()).unwrap();
+        let metadata_content = br#"{
+            "cedar_version": "1.0.0",
+            "policy_store": {
+                "id": "abc123def456",
+                "name": "Manifest Test",
+                "version": "1.0.0"
+            }
+        }"#;
+        zip.write_all(metadata_content).unwrap();
+
+        // Add schema
+        zip.start_file("schema.cedarschema", options.clone())
+            .unwrap();
+        let schema_content = b"namespace Test { entity User; }";
+        zip.write_all(schema_content).unwrap();
+
+        // Add a minimal policy
+        zip.start_file("policies/policy.cedar", options.clone())
+            .unwrap();
+        zip.write_all(b"permit(principal, action, resource);")
+            .unwrap();
+
+        // Add manifest
+        zip.start_file("manifest.json", options.clone()).unwrap();
+        zip.write_all(
+            br#"{
+            "policy_store_id": "abc123def456",
+            "generated_date": "2024-01-01T00:00:00Z",
+            "files": {}
+        }"#,
+        )
+        .unwrap();
+
+        zip.finish().unwrap();
+
+        // Load archive
+        let loader = DefaultPolicyStoreLoader::new_physical();
+        let source = PolicyStoreSource::Archive(archive_path);
+        let loaded = loader.load(&source).unwrap();
+
+        // Verify manifest was loaded
+        assert!(loaded.manifest.is_some());
+        assert_eq!(loaded.manifest.unwrap().policy_store_id, "abc123def456");
     }
 }
