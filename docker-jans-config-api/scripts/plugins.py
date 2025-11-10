@@ -19,7 +19,6 @@ SUPPORTED_PLUGINS = (
     "kc-saml",
     "lock",
     "jans-link",
-    "kc-link",
 )
 
 
