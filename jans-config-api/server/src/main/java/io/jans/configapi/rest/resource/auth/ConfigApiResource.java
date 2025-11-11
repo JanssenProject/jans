@@ -46,15 +46,19 @@ public class ConfigApiResource extends ConfigBaseResource {
     ConfigApiService configApiService;
 
     @Operation(summary = "Gets config-api configuration properties.", description = "Gets config-api configuration properties.", operationId = "get-config-api-properties", tags = {
-            "Configuration – Config API" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.CONFIG_READ_ACCESS }))
+            "Configuration – Config API" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CONFIG_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiAppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.CONFIG_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.CONFIG_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.CONFIG_WRITE_ACCESS }, superScopes = { ApiAccessConstants.CONFIG_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAppConfiguration() {
         ApiAppConfiguration appConfiguration = configApiService.find();
         log.debug("Config API Configuration:{}", appConfiguration);
@@ -62,8 +66,10 @@ public class ConfigApiResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Partially modifies config-api configuration properties.", description = "Partially modifies config-api Configuration properties.", operationId = "patch-config-api-properties", tags = {
-            "Configuration – Config API" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.CONFIG_WRITE_ACCESS }))
+            "Configuration – Config API" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CONFIG_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/config/config-api-patch.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiAppConfiguration.class))),
@@ -72,7 +78,7 @@ public class ConfigApiResource extends ConfigBaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchAppConfigurationProperty(@NotNull String jsonPatchString)
             throws JsonPatchException, IOException {
         log.debug("Config API - jsonPatchString:{} ", jsonPatchString);

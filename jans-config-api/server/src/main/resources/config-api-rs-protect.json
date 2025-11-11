@@ -507,6 +507,10 @@
             {
               "inum": "1800.01.9",
               "name": "https://jans.io/oauth/config/openid/clients.write"
+            },
+		   {
+              "inum": "1800.02.1",
+              "name": "https://jans.io/oauth/config/openid/openid-read"
             }
           ],
           "superScopes": [
@@ -535,7 +539,7 @@
           "groupScopes": [
             {
               "inum": "1800.02.2",
-              "name": "https://jans.io/oauth/config/openid-write"
+              "name": "https://jans.io/oauth/config/openid/openid-write"
             }
           ],
           "superScopes": [
@@ -562,7 +566,7 @@
           "groupScopes": [
             {
               "inum": "1800.02.3",
-              "name": "https://jans.io/oauth/config/openid-delete"
+              "name": "https://jans.io/oauth/config/openid/openid-delete"
             }
           ],
           "superScopes": [
@@ -1716,6 +1720,19 @@
               "name": "https://jans.io/oauth/config/read-all"
             }
           ]
+        }
+      ]
+    },
+	{
+      "path": "/jans-config-api/api/v1/jans-auth-server/health",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [],
+          "groupScopes": [],
+          "superScopes": []
         }
       ]
     },
@@ -4059,7 +4076,7 @@
           "groupScopes": [
             {
               "inum": "1800.02.2",
-              "name": "https://jans.io/oauth/config/openid-write"
+              "name": "https://jans.io/oauth/config/openid/openid-write"
             }
           ],
           "superScopes": [
@@ -4086,7 +4103,7 @@
           "groupScopes": [
             {
               "inum": "1800.02.3",
-              "name": "https://jans.io/oauth/config/openid-delete"
+              "name": "https://jans.io/oauth/config/openid/openid-delete"
             }
           ],
           "superScopes": [
@@ -4230,7 +4247,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/config/database",
+      "path": "/jans-config-api/api/v1/config/database",
       "conditions": [
         {
           "httpMethods": [
@@ -4304,7 +4321,7 @@
           "groupScopes": [
             {
               "inum": "1800.02.2",
-              "name": "https://jans.io/oauth/config/openid-write"
+              "name": "https://jans.io/oauth/config/openid/openid-write"
             }
           ],
           "superScopes": [

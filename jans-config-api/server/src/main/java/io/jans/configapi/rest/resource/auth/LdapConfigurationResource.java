@@ -49,47 +49,58 @@ public class LdapConfigurationResource extends ConfigBaseResource {
     ConnectionStatus connectionStatus;
 
     @Operation(summary = "Gets list of existing LDAP configurations.", description = "Gets list of existing LDAP configurations.", operationId = "get-config-database-ldap", tags = {
-            "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }))
+            "Database - LDAP configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = GluuLdapConfiguration.class)), examples = @ExampleObject(name = "Response json example", value = "example/auth/database/ldap/ldap-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS } , groupScopes = {
-            ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getLdapConfiguration() {
         List<GluuLdapConfiguration> ldapConfigurationList = this.ldapConfigurationService.findLdapConfigurations();
         return Response.ok(ldapConfigurationList).build();
     }
 
     @Operation(summary = "Gets an LDAP configuration by name.", description = "Gets an LDAP configuration by name.", operationId = "get-config-database-ldap-by-name", tags = {
-            "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }))
+            "Database - LDAP configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/database/ldap/ldap.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ApiConstants.NAME_PARAM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS } , groupScopes = {
-            ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getLdapConfigurationByName(@Parameter(description = "Name of LDAP configuration") @PathParam(ApiConstants.NAME) String name) {
         GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
         return Response.ok(ldapConfiguration).build();
     }
 
     @Operation(summary = "Adds a new LDAP configuration", description = "Adds a new LDAP configuration", operationId = "post-config-database-ldap", tags = {
-            "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS  }))
+            "Database - LDAP configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "GluuLdapConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/auth/database/ldap/ldap.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/auth/database/ldap/ldap.json"))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/database/ldap/ldap.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "406", description = "Not Acceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.DATABASE_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response addLdapConfiguration(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
         logger.debug("LDAP configuration to be added - ldapConfiguration:{} ", ldapConfiguration);
         // Ensure that an LDAP server with same name does not exists.
@@ -107,16 +118,19 @@ public class LdapConfigurationResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Updates LDAP configuration", description = "Updates LDAP configuration", operationId = "put-config-database-ldap", tags = {
-            "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }))
-    @RequestBody(description = "GluuLdapConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class) , examples = @ExampleObject(name = "Request json example", value = "example/auth/database/ldap/ldap.json") ))
+            "Database - LDAP configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+    @RequestBody(description = "GluuLdapConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/auth/database/ldap/ldap.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/auth/database/ldap/ldap.json") )),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/database/ldap/ldap.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.DATABASE_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateLdapConfiguration(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
         logger.debug("LDAP configuration to be updated - ldapConfiguration:{}", ldapConfiguration);
         findLdapConfigurationByName(ldapConfiguration.getConfigId());
@@ -125,8 +139,10 @@ public class LdapConfigurationResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Deletes an LDAP configuration", description = "Deletes an LDAP configuration", operationId = "delete-config-database-ldap-by-name", tags = {
-            "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS }))
+            "Database - LDAP configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "No Content", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -134,7 +150,8 @@ public class LdapConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.NAME_PARAM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS } , groupScopes = {}, 
+    superScopes = { ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
         logger.debug("LDAP configuration to be deleted - name:{}", name);
         findLdapConfigurationByName(name);
@@ -145,18 +162,21 @@ public class LdapConfigurationResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Patches a LDAP configuration by name", description = "Patches a LDAP configuration by name", operationId = "patch-config-database-ldap-by-name", tags = {
-            "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }))
+            "Database - LDAP configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/auth/database/ldap/ldap-patch")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/auth/database/ldap/ldap.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/database/ldap/ldap.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Path(ApiConstants.NAME_PARAM_PATH)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.DATABASE_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchLdapConfigurationByName(@Parameter(description = "Name of LDAP configuration") @PathParam(ApiConstants.NAME) String name,
             @NotNull String requestString) throws JsonPatchException, IOException {
         logger.debug("LDAP configuration to be patched - name:{}, requestString:{} ", name, requestString);
@@ -169,16 +189,21 @@ public class LdapConfigurationResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Tests an LDAP configuration", description = "Tests an LDAP configuration", operationId = "post-config-database-ldap-test", tags = {
-            "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }))
-    @RequestBody(description = "GluuLdapConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class) , examples = @ExampleObject(name = "Request json example", value = "example/auth/database/ldap/ldap-patch.json")))
+            "Database - LDAP configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+    @RequestBody(description = "GluuLdapConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/auth/database/ldap/ldap-patch.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(name = "status", type = "boolean", description = "boolean value true if successful"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Path(ApiConstants.TEST)
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }, groupScopes = {ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response testLdapConfigurationByName(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
         logger.debug("LDAP configuration to be tested - ldapConfiguration:{}", ldapConfiguration);
 

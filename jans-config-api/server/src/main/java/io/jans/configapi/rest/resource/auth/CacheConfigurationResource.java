@@ -77,9 +77,9 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, 
-    groupScopes = { ApiAccessConstants.CACHE_WRITE_ACCESS}, 
-    superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getCacheConfiguration() {
         return Response.ok(loadCacheConfiguration()).build();
     }
@@ -96,8 +96,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, 
-    superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchCacheConfiguration(@NotNull String requestString) {
         logger.debug(" CACHE details to patch - requestString:{}", requestString);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
@@ -122,9 +122,9 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ApiConstants.REDIS)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, 
-    groupScopes = {ApiAccessConstants.CACHE_WRITE_ACCESS}, 
-    superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getRedisConfiguration() {
         return Response.ok(loadCacheConfiguration().getRedisConfiguration()).build();
     }
@@ -141,8 +141,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Path(ApiConstants.REDIS)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, 
-    superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateRedisConfiguration(@NotNull RedisConfiguration redisConfiguration) {
         logger.debug("REDIS CACHE details to update - redisConfiguration:{}", redisConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
@@ -165,8 +165,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @PATCH
     @Path(ApiConstants.REDIS)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, 
-    superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS,  ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchRedisConfiguration(@NotNull String requestString) {
         logger.debug("REDIS CACHE details to patch - requestString:{} ", requestString);
         mergeModifiedCache(cache -> {
@@ -193,9 +193,10 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ApiConstants.IN_MEMORY)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, 
-    groupScopes = {ApiAccessConstants.CACHE_WRITE_ACCESS}, superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESSApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getInMemoryConfiguration() {, 
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    public Response getInMemoryConfiguration() {
         return Response.ok(loadCacheConfiguration().getInMemoryConfiguration()).build();
     }
 
@@ -211,8 +212,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Path(ApiConstants.IN_MEMORY)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {ApiAccessConstants.CACHE_ADMINS_ACCESS}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateInMemoryConfiguration(@NotNull InMemoryConfiguration inMemoryConfiguration) {
         logger.debug("IN_MEMORY CACHE details to update - inMemoryConfiguration:{}", inMemoryConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
@@ -236,8 +237,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @PATCH
     @Path(ApiConstants.IN_MEMORY)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {ApiAccessConstants.CACHE_ADMINS_ACCESS}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchInMemoryConfiguration(@NotNull String requestString) {
         logger.debug("IN_MEMORY CACHE details to patch - requestString:{}", requestString);
         mergeModifiedCache(cache -> {
@@ -264,8 +265,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @GET
     @Path(ApiConstants.NATIVE_PERSISTENCE)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.CACHE_WRITE_ACCESS,
-            ApiAccessConstants.CACHE_ADMINS_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getNativePersistenceConfiguration() {
         return Response.ok(loadCacheConfiguration().getNativePersistenceConfiguration()).build();
     }
@@ -282,8 +283,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Path(ApiConstants.NATIVE_PERSISTENCE)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {ApiAccessConstants.CACHE_ADMINS_ACCESS}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateNativePersistenceConfiguration(
             @NotNull NativePersistenceConfiguration nativePersistenceConfiguration) {
         logger.debug("NATIVE_PERSISTENCE CACHE details to update - nativePersistenceConfiguration:{}",
@@ -308,8 +309,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @PATCH
     @Path(ApiConstants.NATIVE_PERSISTENCE)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {ApiAccessConstants.CACHE_ADMINS_ACCESS}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchNativePersistenceConfiguration(@NotNull String requestString) {
         logger.debug("NATIVE_PERSISTENCE CACHE details to patch - requestString:{} ", requestString);
         mergeModifiedCache(cache -> {
@@ -337,8 +338,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @GET
     @Path(ApiConstants.MEMCACHED)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.CACHE_WRITE_ACCESS,
-            ApiAccessConstants.CACHE_ADMINS_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getMemcachedConfiguration() {
         return Response.ok(loadCacheConfiguration().getMemcachedConfiguration()).build();
     }
@@ -356,8 +357,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Path(ApiConstants.MEMCACHED)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {ApiAccessConstants.CACHE_ADMINS_ACCESS}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateMemcachedConfiguration(@NotNull MemcachedConfiguration memcachedConfiguration) {
         logger.debug("MEMCACHED CACHE details to update - memcachedConfiguration:{} ", memcachedConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
@@ -380,8 +381,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @PATCH
     @Path(ApiConstants.MEMCACHED)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {ApiAccessConstants.CACHE_ADMINS_ACCESS}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.CACHE_ADMINS_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchMemcachedConfiguration(@NotNull String requestString) {
         logger.debug("MEMCACHED CACHE details to patch - requestString:{} ", requestString);
         mergeModifiedCache(cache -> {

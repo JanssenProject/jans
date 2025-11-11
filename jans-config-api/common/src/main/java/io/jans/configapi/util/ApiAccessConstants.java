@@ -22,6 +22,7 @@ public class ApiAccessConstants {
     public static final String DATABASE_READ_ACCESS = "https://jans.io/oauth/config/database.readonly";
     public static final String DATABASE_WRITE_ACCESS = "https://jans.io/oauth/config/database.write";
     public static final String DATABASE_DELETE_ACCESS = "https://jans.io/oauth/config/database.delete";
+    public static final String DATABASE_ADMIN_ACCESS = "https://jans.io/oauth/config/database.admin";
 
     public static final String DATABASE_LDAP_READ_ACCESS = "https://jans.io/oauth/config/database/ldap.readonly";
     public static final String DATABASE_LDAP_WRITE_ACCESS = "https://jans.io/oauth/config/database/ldap.write";
@@ -30,6 +31,7 @@ public class ApiAccessConstants {
     public static final String SCRIPTS_READ_ACCESS = "https://jans.io/oauth/config/scripts.readonly";
     public static final String SCRIPTS_WRITE_ACCESS = "https://jans.io/oauth/config/scripts.write";
     public static final String SCRIPTS_DELETE_ACCESS = "https://jans.io/oauth/config/scripts.delete";
+    public static final String SCRIPTS_ADMIN_ACCESS = "https://jans.io/oauth/config/scripts.admin";
 
     public static final String CACHE_READ_ACCESS = "https://jans.io/oauth/config/cache.readonly";
     public static final String CACHE_WRITE_ACCESS = "https://jans.io/oauth/config/cache.write";
@@ -41,6 +43,7 @@ public class ApiAccessConstants {
     public static final String SMTP_READ_ACCESS = "https://jans.io/oauth/config/smtp.readonly";
     public static final String SMTP_WRITE_ACCESS = "https://jans.io/oauth/config/smtp.write";
     public static final String SMTP_DELETE_ACCESS = "https://jans.io/oauth/config/smtp.delete";
+    public static final String SMTP_ADMIN_ACCESS = "https://jans.io/oauth/config/smtp.admin";
 
     public static final String LOGGING_READ_ACCESS = "https://jans.io/oauth/config/logging.readonly";
     public static final String LOGGING_WRITE_ACCESS = "https://jans.io/oauth/config/logging.write";
@@ -49,10 +52,12 @@ public class ApiAccessConstants {
     public static final String JWKS_READ_ACCESS = "https://jans.io/oauth/config/jwks.readonly";
     public static final String JWKS_WRITE_ACCESS = "https://jans.io/oauth/config/jwks.write";
     public static final String JWKS_DELETE_ACCESS = "https://jans.io/oauth/config/jwks.delete";
+    public static final String JWKS_ADMIN_ACCESS = "https://jans.io/oauth/config/jwks.admin";
 
     public static final String OPENID_CLIENTS_READ_ACCESS = "https://jans.io/oauth/config/openid/clients.readonly";
     public static final String OPENID_CLIENTS_WRITE_ACCESS = "https://jans.io/oauth/config/openid/clients.write";
     public static final String OPENID_CLIENTS_DELETE_ACCESS = "https://jans.io/oauth/config/openid/clients.delete";
+    public static final String OPENID_CLIENTS_ADMIN_ACCESS = "https://jans.io/oauth/config/clients.admin";
    
     public static final String TOKEN_READ_ACCESS = "https://jans.io/oauth/config/token.readonly";
     public static final String TOKEN_WRITE_ACCESS = "https://jans.io/oauth/config/token.write";
@@ -95,7 +100,7 @@ public class ApiAccessConstants {
     public static final String SUPER_ADMIN_DELETE_ACCESS  = "https://jans.io/oauth/config/delete-all";
     
     // Feature Scope
-    public static final String OPENID_READ_ACCESS  = "https://jans.io/oauth/config/openid-read";
+    public static final String OPENID_READ_ACCESS  = "https://jans.io/oauth/config/openid/openid-read";
     public static final String OPENID_WRITE_ACCESS = "https://jans.io/oauth/config/openid/openid-write";
     public static final String OPENID_DELETE_ACCESS = "https://jans.io/oauth/config/openid/openid-delete";
     

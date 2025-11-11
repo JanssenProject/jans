@@ -54,9 +54,8 @@ public class ClientAuthResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.CLIENT_AUTHORIZATIONS_ADMIN_ACCESS }, superScopes = {
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.CLIENT_AUTHORIZATIONS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.USERID_PATH)
     public Response getClientAuthorization(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.USERID) @NotNull String userId) {
@@ -86,9 +85,8 @@ public class ClientAuthResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS }, groupScopes = {
-            ApiAccessConstants.CLIENT_AUTHORIZATIONS_ADMIN_ACCESS }, superScopes = {
-                    ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.CLIENT_AUTHORIZATIONS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.USERID_PATH + ApiConstants.CLIENTID_PATH + ApiConstants.USERNAME_PATH)
     public Response deleteClientAuthorization(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.USERID) @NotNull String userId,
