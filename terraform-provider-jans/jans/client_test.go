@@ -34,7 +34,7 @@ func TestClient(t *testing.T) {
 
         ctx := context.Background()
 
-        accessToken, err := client.getToken(ctx, "https://jans.io/oauth/jans-auth-server/config/properties.readonly")
+        accessToken, err := client.ensureToken(ctx, "https://jans.io/oauth/jans-auth-server/config/properties.readonly")
         if err != nil {
                 t.Fatal(err)
         }
@@ -46,7 +46,7 @@ func TestClient(t *testing.T) {
         ctx, cancel := context.WithCancel(ctx)
         cancel()
 
-        _, err = client.getToken(ctx, "https://jans.io/oauth/jans-auth-server/config/properties.readonly")
+        _, err = client.ensureToken(ctx, "https://jans.io/oauth/jans-auth-server/config/properties.readonly")
         if !errors.Is(err, context.Canceled) {
                 t.Fatal(err)
         }

@@ -10,6 +10,8 @@ import (
         "mime/multipart"
         "reflect"
         "sort"
+        "sync"
+        "time"
 
         "net/http"
         "net/http/httputil"
@@ -22,6 +24,17 @@ var (
         ErrorNotFound   = fmt.Errorf("not found")
 )
 
+// cachedToken stores an access token with its expiration time
+type cachedToken struct {
+        accessToken string
+        expiresAt   time.Time
+}
+
+// isValid checks if the token is still valid with a 30 second safety buffer
+func (t *cachedToken) isValid() bool {
+        return time.Now().Add(30 * time.Second).Before(t.expiresAt)
+}
+
 // requestParams is used as a conveneince struct to pass parameters to the
 // request method.
 type requestParams struct {
@@ -30,6 +43,7 @@ type requestParams struct {
         accept      string
         contentType string
         token       string
+        scope       string
         payload     []byte
         resp        any
         queryParams map[string]string
@@ -42,6 +56,8 @@ type Client struct {
         clientId      string
         clientSecret  string
         skipTLSVerify bool
+        tokenCache    map[string]*cachedToken
+        tokenMutex    sync.RWMutex
 }
 
 // NewClient creates a new client, which will connect to a server
@@ -52,6 +68,7 @@ func NewClient(host, clientId, clientSecret string) (*Client, error) {
                 clientId:      clientId,
                 clientSecret:  clientSecret,
                 skipTLSVerify: false,
+                tokenCache:    make(map[string]*cachedToken),
         }, nil
 }
 
@@ -65,6 +82,7 @@ func NewInsecureClient(host, clientId, clientSecret string) (*Client, error) {
                 clientId:      clientId,
                 clientSecret:  clientSecret,
                 skipTLSVerify: true,
+                tokenCache:    make(map[string]*cachedToken),
         }, nil
 }
 
@@ -151,6 +169,16 @@ func (c *Client) getToken(ctx context.Context, scope string) (string, error) {
                 }
         }
 
+        // Cache the token with its expiration time
+        c.tokenMutex.Lock()
+        c.tokenCache[scope] = &cachedToken{
+                accessToken: token.AccessToken,
+                expiresAt:   time.Now().Add(time.Duration(token.ExpiresIn) * time.Second),
+        }
+        c.tokenMutex.Unlock()
+
+        fmt.Printf("[TOKEN] Obtained new token for scope '%s', expires in %d seconds\n", scope, token.ExpiresIn)
+
         return token.AccessToken, nil
 }
 
@@ -185,10 +213,37 @@ func splitBySpace(s string) []string {
         return result
 }
 
+// ensureToken checks if a valid cached token exists for the given scope.
+// If a valid token exists, it returns the cached token.
+// If no valid token exists or it's about to expire, it fetches a new one.
+func (c *Client) ensureToken(ctx context.Context, scope string) (string, error) {
+        // Check cache with read lock
+        c.tokenMutex.RLock()
+        cached, exists := c.tokenCache[scope]
+        c.tokenMutex.RUnlock()
+
+        if exists && cached.isValid() {
+                fmt.Printf("[TOKEN] Using cached token for scope '%s'\n", scope)
+                return cached.accessToken, nil
+        }
+
+        // Token expired or doesn't exist, get a new one
+        fmt.Printf("[TOKEN] Token missing or expired for scope '%s', fetching new token\n", scope)
+        return c.getToken(ctx, scope)
+}
+
+// invalidateToken removes a token from the cache, forcing a refresh on next use
+func (c *Client) invalidateToken(scope string) {
+        c.tokenMutex.Lock()
+        delete(c.tokenCache, scope)
+        c.tokenMutex.Unlock()
+        fmt.Printf("[TOKEN] Invalidated cached token for scope '%s'\n", scope)
+}
+
 // get performs an HTTP GET request to the given path, using the given token.
 // The response data is unmarshaled into the provided response value, which
-// has to be of a pointer type.
-func (c *Client) get(ctx context.Context, path, token string, resp any, queryParams ...map[string]string) error {
+// has to be of a pointer type. Optionally accepts scope as last parameter for 401 retry support.
+func (c *Client) get(ctx context.Context, path, token, scope string, resp any, queryParams ...map[string]string) error {
 
         params := requestParams{
                 method:      "GET",
@@ -196,6 +251,7 @@ func (c *Client) get(ctx context.Context, path, token string, resp any, queryPar
                 contentType: "application/json",
                 accept:      "application/json",
                 token:       token,
+                scope:       scope,
                 resp:        resp,
         }
 
@@ -206,10 +262,10 @@ func (c *Client) get(ctx context.Context, path, token string, resp any, queryPar
         return c.request(ctx, params)
 }
 
-// get performs an HTTP GET request to the given path, using the given token.
+// getScim performs an HTTP GET request to the given path, using the given token.
 // The response data is unmarshaled into the provided response value, which
 // has to be of a pointer type.
-func (c *Client) getScim(ctx context.Context, path, token string, resp any) error {
+func (c *Client) getScim(ctx context.Context, path, token, scope string, resp any) error {
 
         params := requestParams{
                 method:      "GET",
@@ -217,6 +273,7 @@ func (c *Client) getScim(ctx context.Context, path, token string, resp any) erro
                 contentType: "application/json",
                 accept:      "application/scim+json",
                 token:       token,
+                scope:       scope,
                 resp:        resp,
         }
 
@@ -225,7 +282,7 @@ func (c *Client) getScim(ctx context.Context, path, token string, resp any) erro
 
 // patch performs an HTTP PATCH request to the given path, using the given
 // token and the provided list of patch requests.
-func (c *Client) patch(ctx context.Context, path, token string, req []PatchRequest) error {
+func (c *Client) patch(ctx context.Context, path, token, scope string, req []PatchRequest) error {
 
         payload, err := json.Marshal(req)
         if err != nil {
@@ -238,6 +295,7 @@ func (c *Client) patch(ctx context.Context, path, token string, req []PatchReque
                 contentType: "application/json-patch+json",
                 accept:      "application/json",
                 token:       token,
+                scope:       scope,
                 payload:     payload,
         }
 
@@ -248,7 +306,7 @@ func (c *Client) patch(ctx context.Context, path, token string, req []PatchReque
 // and the provided request entity, which is marshaled into JSON. The response
 // data is unmarshaled into the provided response value, which has to be of
 // a pointer type.
-func (c *Client) put(ctx context.Context, path, token string, req, resp any) error {
+func (c *Client) put(ctx context.Context, path, token, scope string, req, resp any) error {
 
         payload, err := json.Marshal(req)
         if err != nil {
@@ -261,6 +319,7 @@ func (c *Client) put(ctx context.Context, path, token string, req, resp any) err
                 contentType: "application/json",
                 accept:      "application/json",
                 token:       token,
+                scope:       scope,
                 payload:     payload,
                 resp:        resp,
         }
@@ -272,7 +331,7 @@ func (c *Client) put(ctx context.Context, path, token string, req, resp any) err
 // and the provided request entity, which is marshaled into JSON. The response
 // data is unmarshaled into the provided response value, which has to be of
 // a pointer type. Unlike put, putText uses the "text/plain" content type.
-func (c *Client) putText(ctx context.Context, path, token, req string, resp any) error {
+func (c *Client) putText(ctx context.Context, path, token, scope, req string, resp any) error {
 
         params := requestParams{
                 method:      "PUT",
@@ -280,6 +339,7 @@ func (c *Client) putText(ctx context.Context, path, token, req string, resp any)
                 contentType: "text/plain",
                 accept:      "application/json",
                 token:       token,
+                scope:       scope,
                 payload:     []byte(req),
                 resp:        resp,
         }
@@ -291,7 +351,7 @@ func (c *Client) putText(ctx context.Context, path, token, req string, resp any)
 // and the provided request entity, which is marshaled into JSON. The response
 // data is unmarshaled into the provided response value, which has to be of
 // a pointer type.
-func (c *Client) post(ctx context.Context, path, token string, req, resp any) error {
+func (c *Client) post(ctx context.Context, path, token, scope string, req, resp any) error {
 
         payload, err := json.Marshal(req)
         if err != nil {
@@ -304,6 +364,7 @@ func (c *Client) post(ctx context.Context, path, token string, req, resp any) er
                 contentType: "application/json",
                 accept:      "application/json",
                 token:       token,
+                scope:       scope,
                 payload:     payload,
                 resp:        resp,
         }
@@ -337,7 +398,7 @@ func (c *Client) newParams(method, path string, resp any, options ...requestPara
 
 func (c *Client) withToken(ctx context.Context, url string) requestParamsOptions {
         return func(params *requestParams) (err error) {
-                params.token, err = c.getToken(ctx, url)
+                params.token, err = c.ensureToken(ctx, url)
                 return
         }
 }
@@ -380,7 +441,7 @@ func (c *Client) withFormData(req map[string]FormField) requestParamsOptions {
         }
 }
 
-func (c *Client) postFormData(ctx context.Context, path, token string, req map[string]FormField, resp any) (err error) {
+func (c *Client) postFormData(ctx context.Context, path, token, scope string, req map[string]FormField, resp any) (err error) {
         var b bytes.Buffer
 
         w := multipart.NewWriter(&b)
@@ -416,6 +477,7 @@ func (c *Client) postFormData(ctx context.Context, path, token string, req map[s
                 contentType: w.FormDataContentType(),
                 accept:      "application/json",
                 token:       token,
+                scope:       scope,
                 payload:     b.Bytes(),
                 resp:        resp,
         }
@@ -423,11 +485,11 @@ func (c *Client) postFormData(ctx context.Context, path, token string, req map[s
         return c.request(ctx, params)
 }
 
-// post performs an HTTP POST request to the given path, using the given token
+// postZipFile performs an HTTP POST request to the given path, using the given token
 // and the provided request entity, which is marshaled into JSON. The response
 // data is unmarshaled into the provided response value, which has to be of
 // a pointer type.
-func (c *Client) postZipFile(ctx context.Context, path, token string, req []byte, resp any) error {
+func (c *Client) postZipFile(ctx context.Context, path, token, scope string, req []byte, resp any) error {
 
         params := requestParams{
                 method:      "POST",
@@ -435,6 +497,7 @@ func (c *Client) postZipFile(ctx context.Context, path, token string, req []byte
                 contentType: "application/zip",
                 accept:      "application/json",
                 token:       token,
+                scope:       scope,
                 payload:     req,
                 resp:        resp,
         }
@@ -444,7 +507,7 @@ func (c *Client) postZipFile(ctx context.Context, path, token string, req []byte
 
 // delete performs an HTTP DELETE request to the given path, using the given
 // token.
-func (c *Client) delete(ctx context.Context, path, token string) error {
+func (c *Client) delete(ctx context.Context, path, token, scope string) error {
 
         params := requestParams{
                 method:      "DELETE",
@@ -452,14 +515,15 @@ func (c *Client) delete(ctx context.Context, path, token string) error {
                 contentType: "application/json",
                 accept:      "application/json",
                 token:       token,
+                scope:       scope,
         }
 
         return c.request(ctx, params)
 }
 
-// delete performs an HTTP DELETE request to the given path, using the given
+// deleteEntity performs an HTTP DELETE request to the given path, using the given
 // token.
-func (c *Client) deleteEntity(ctx context.Context, path, token string, entity any) error {
+func (c *Client) deleteEntity(ctx context.Context, path, token, scope string, entity any) error {
 
         payload, err := json.Marshal(entity)
         if err != nil {
@@ -472,6 +536,7 @@ func (c *Client) deleteEntity(ctx context.Context, path, token string, entity an
                 contentType: "application/json",
                 accept:      "application/json",
                 token:       token,
+                scope:       scope,
                 payload:     payload,
         }
 
@@ -551,6 +616,64 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
 
         if resp.StatusCode == 404 {
                 return ErrorNotFound
+        }
+
+        if resp.StatusCode == 401 && params.scope != "" {
+                // Token may have expired or been invalidated
+                // Invalidate cached token and retry once with a fresh token
+                fmt.Printf("[TOKEN] Received 401 Unauthorized, invalidating token for scope '%s' and retrying\n", params.scope)
+                c.invalidateToken(params.scope)
+                
+                // Get a fresh token
+                newToken, err := c.ensureToken(ctx, params.scope)
+                if err != nil {
+                        return fmt.Errorf("failed to refresh token after 401: %w", err)
+                }
+                
+                // Update the params with the new token and retry
+                params.token = newToken
+                
+                // Create a new request with the fresh token
+                retryReq, err := http.NewRequestWithContext(ctx, params.method, url, bytes.NewReader(params.payload))
+                if err != nil {
+                        return fmt.Errorf("could not create retry request: %w", err)
+                }
+                
+                if len(params.queryParams) != 0 {
+                        q := retryReq.URL.Query()
+                        for k, v := range params.queryParams {
+                                q.Add(k, v)
+                        }
+                        retryReq.URL.RawQuery = q.Encode()
+                }
+                
+                retryReq.Header.Add("Accept", params.accept)
+                retryReq.Header.Add("Content-Type", params.contentType)
+                retryReq.Header.Add("jans-client", "infrastructure-as-code-tool")
+                retryReq.Header.Add("user-inum", c.clientId)
+                retryReq.Header.Add("Authorization", fmt.Sprintf("Bearer %s", newToken))
+                
+                fmt.Printf("[TOKEN] Retrying request with fresh token\n")
+                resp, err = client.Do(retryReq)
+                if err != nil {
+                        return fmt.Errorf("could not perform retry request: %w", err)
+                }
+                
+                b, _ = httputil.DumpResponse(resp, true)
+                fmt.Printf("Retry Response:\n%s\n", string(b))
+                
+                // Check the retry response status
+                if resp.StatusCode == 400 {
+                        data, err := io.ReadAll(resp.Body)
+                        if err != nil {
+                                return ErrorBadRequest
+                        }
+                        return fmt.Errorf("%w: %v", ErrorBadRequest, string(data))
+                }
+                
+                if resp.StatusCode == 404 {
+                        return ErrorNotFound
+                }
         }
 
         if resp.StatusCode < 200 || resp.StatusCode > 299 {
