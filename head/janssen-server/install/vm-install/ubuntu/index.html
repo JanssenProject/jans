@@ -14654,21 +14654,26 @@
 <ul>
 <li>Download the GPG key zip file , unzip and import GPG key</li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>unzip<span class="w"> </span>automation-jans-public-gpg.zip
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>unzip<span class="w"> </span>automation-jans-public-gpg.zip
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>gpg<span class="w"> </span>--import<span class="w"> </span>automation-jans-public-gpg.asc<span class="p">;</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>gpg<span class="w"> </span>--import<span class="w"> </span>automation-jans-public-gpg.asc<span class="p">;</span>
 </code></pre></div>
 <h2 id="install-the-package">Install the Package<a class="headerlink" href="#install-the-package" title="Permanent link">#</a></h2>
 <h3 id="ubuntu-2404">Ubuntu 24.04<a class="headerlink" href="#ubuntu-2404" title="Permanent link">#</a></h3>
 <ul>
-<li>Download the release package from the Github Janssen Project
-<a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></li>
-</ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
+<li>
+<p>Download the release package from the Github Janssen Project
+<a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
-<ul>
+</li>
+<li>
+<p>Go to <code>/tmp</code> directory:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/tmp
+</code></pre></div>
+</li>
 <li>
 <p>Verify integrity of the downloaded package by verifying published <code>sha256sum</code>.  </p>
 <ul>
@@ -14678,23 +14683,28 @@
 </code></pre></div></li>
 </ul>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><pre><span></span><code>jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 </code></pre></div>
 <h3 id="ubuntu-2204">Ubuntu 22.04<a class="headerlink" href="#ubuntu-2204" title="Permanent link">#</a></h3>
 <ul>
-<li>Download the release package from the Github Janssen Project
-<a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></li>
-</ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
+<li>
+<p>Download the release package from the Github Janssen Project
+<a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
-<ul>
+</li>
+<li>
+<p>Go to <code>/tmp</code> directory:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/tmp
+</code></pre></div>
+</li>
 <li>
 <p>Verify integrity of the downloaded package by verifying published <code>sha256sum</code>.   </p>
 <ul>
@@ -14708,26 +14718,31 @@
 Output similar to below should confirm the integrity of the downloaded package.</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 </code></pre></div>
 <p>Or, </p>
-<div class="highlight"><pre><span></span><code>dpkg -i jans_1.4.0-stable.ubuntu22.04_amd64.deb
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>dpkg<span class="w"> </span>-i<span class="w"> </span>jans_1.4.0-stable.ubuntu22.04_amd64.deb
 </code></pre></div>
 <h3 id="ubuntu-2004">Ubuntu 20.04<a class="headerlink" href="#ubuntu-2004" title="Permanent link">#</a></h3>
 <ul>
-<li>Download the release package from the Github Janssen Project
-<a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></li>
-</ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb -P /tmp
+<li>
+<p>Download the release package from the Github Janssen Project
+<a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></p>
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
-<ul>
+</li>
+<li>
+<p>Go to <code>/tmp</code> directory:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/tmp
+</code></pre></div>
+</li>
 <li>
 <p>Verify integrity of the downloaded package by verifying published <code>sha256sum</code>.   </p>
 <ul>
@@ -14741,20 +14756,20 @@ Output similar to below should confirm the integrity of the downloaded package.<
 </li>
 </ul>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><pre><span></span><code>jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb: OK
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo apt install  ./jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
 <li>Run the setup script in interactive mode:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo python3 /opt/jans/jans-setup/setup.py
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>python3<span class="w"> </span>/opt/jans/jans-setup/setup.py
 </code></pre></div>
 <p>See more detailed <a href="../../setup/">instructions</a> on the setup script if you're
 confused how to answer any of the questions, for details about command line
@@ -14764,7 +14779,7 @@ interactive mode.</p>
 <p>After the successful completion of setup process, <a href="../../install-faq/#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running">verify the system health</a>.</p>
 <h2 id="log-in-to-text-user-interface-tui">Log in to Text User Interface (TUI)<a class="headerlink" href="#log-in-to-text-user-interface-tui" title="Permanent link">#</a></h2>
 <p>Begin configuration by accessing the TUI with the following command:</p>
-<div class="highlight"><pre><span></span><code>jans tui
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
 <p>Full TUI documentation can be found <a href="../../../config-guide/config-tools/jans-tui/">here</a></p>
 <p>If you have selected casa during installation you can access casa using url <code>https://&lt;host&gt;/jans-casa</code></p>
@@ -14775,17 +14790,17 @@ interactive mode.</p>
 <p>Uninstall process involves two steps and removes all the Janssen Server components.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
 <p>For removal of the attached persistence store, please refer to <a href="../../install-faq/#does-the-janssen-server-uninstall-process-remove-the-data-store-as-well">this note</a>.</p>
+</div>
 <ol>
 <li>Delete files installed by Janssen</li>
 <li>Remove and purge the <code>jans</code> package</li>
 </ol>
 <p>Use the command below to uninstall the Janssen server</p>
-<div class="highlight"><pre><span></span><code>sudo python3 /opt/jans/jans-setup/install.py -uninstall
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>python3<span class="w"> </span>/opt/jans/jans-setup/install.py<span class="w"> </span>-uninstall
 </code></pre></div>
 <p>You'll see the following confirmation:</p>
-<div class="highlight"><pre><span></span><code>This process is irreversible.
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>This process is irreversible.
 You will lose all data related to Janssen Server.
 
 
@@ -14816,10 +14831,10 @@ Removing /etc/apache2/sites-enabled/https_jans.conf
 Removing /etc/apache2/sites-available/https_jans.conf
 </code></pre></div>
 <p>The command below removes and purges the <code>jans</code> package</p>
-<div class="highlight"><pre><span></span><code>apt-get --purge remove jans
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>apt-get<span class="w"> </span>--purge<span class="w"> </span>remove<span class="w"> </span>jans
 </code></pre></div>
 <p>Which should result in the following:</p>
-<div class="highlight"><pre><span></span><code>Reading package lists... Done
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
 The following packages were automatically installed and are no longer required:
@@ -14857,7 +14872,7 @@ Checking to make sure service is down...
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 25, 2025 13:15:25 UTC"><span class="timeago" datetime="2025-07-25T13:15:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 25, 2025 13:15:25 UTC">2025-07-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 6, 2025 08:07:09 UTC"><span class="timeago" datetime="2025-11-06T08:07:09+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 6, 2025 08:07:09 UTC">2025-11-06</span>
   </span>
 
     
