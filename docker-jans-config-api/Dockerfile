@@ -55,7 +55,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
 # =======
 
 RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
-    && for plugin in scim admin-ui fido2 user-mgt kc-saml lock jans-link kc-link; \
+    && for plugin in scim admin-ui fido2 user-mgt kc-saml lock jans-link; \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/${plugin}-plugin/${CN_VERSION}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
     done
@@ -71,7 +71,7 @@ RUN mkdir -p /etc/jans/conf \
     /usr/share/java \
     /opt/jans/bin
 
-ENV JANS_SOURCE_VERSION=e726a9e943b3ab29334c85855be0e1de1546a0fb
+ENV JANS_SOURCE_VERSION=04d297c046dd9d8ef54c0544e6187153b7ed87cf
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -108,6 +108,10 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && chmod +x /opt/jans/bin/get_agama_lab_projects.py
 
 WORKDIR /
+
+# add policy store for admin-ui and cedarling integration
+ARG FLEX_SOURCE_VERSION=dc807c4e8678477258e730206ab89da412b13594
+RUN wget -nv https://github.com/GluuFederation/flex/raw/${FLEX_SOURCE_VERSION}/flex-linux-setup/flex_linux_setup/templates/policy-store.json -O /app/templates/jans-config-api/adminui-policy-store.json
 
 # ======
 # Python
@@ -224,7 +228,7 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
 
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-config-api/custom/libs \
-    ${JETTY_BASE}/jans-config-api/custom/config \
+    ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
     ${JETTY_BASE}/jans-config-api/logs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
