@@ -14581,7 +14581,7 @@ looks like below:</p>
 <div class="highlight"><pre><span></span><code>https://jans-dynamic-mysql/jans-auth/restv1/revoke
 </code></pre></div>
 <p>More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/revoke">jans-auth-server module</a>.</p>
+the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/revoke">jans-auth-server module</a>.</p>
 <h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
 <p><code>Token revocation</code> endpoint can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#revoke_token">REVOKE_TOKEN feature flag</a>.
 Use <a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/config-tools/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
@@ -14609,7 +14609,8 @@ However it is possible to allow revoking of any token (which is issued with othe
 - set global AS configuration property <code>allowRevokeForOtherClients</code> to <code>true</code>
 - add <code>revoke_any_token</code> scope to <code>client</code> which performs revoke call  </p>
 <h2 id="revoke-interception-script">Revoke Interception Script<a class="headerlink" href="#revoke-interception-script" title="Permanent link">#</a></h2>
-<p>Endpoint can provide custom behavior via implementing Revoke Token interception <a href="../../developer/scripts/revoke-token.md">script</a>.</p>
+<p>Endpoint can provide custom behavior via implementing Revoke Token interception <a href="../../../../script-catalog/revoke_token/revoke-token/">script</a>
+.</p>
 
 
 
@@ -14632,7 +14633,7 @@ However it is possible to allow revoking of any token (which is issued with othe
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 19, 2025 07:03:06 UTC"><span class="timeago" datetime="2025-08-19T07:03:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 19, 2025 07:03:06 UTC">2025-08-19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 12, 2025 07:31:29 UTC"><span class="timeago" datetime="2025-11-12T07:31:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 12, 2025 07:31:29 UTC">2025-11-12</span>
   </span>
 
     
