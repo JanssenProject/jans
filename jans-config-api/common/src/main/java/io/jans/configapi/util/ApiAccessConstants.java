@@ -39,6 +39,7 @@ public class ApiAccessConstants {
 
     public static final String MESSAGE_READ_ACCESS = "https://jans.io/oauth/config/message.readonly";
     public static final String MESSAGE_WRITE_ACCESS = "https://jans.io/oauth/config/message.write";
+    public static final String MESSAGE_ADMIN_ACCESS = "https://jans.io/oauth/config/message.write";
 
     public static final String SMTP_READ_ACCESS = "https://jans.io/oauth/config/smtp.readonly";
     public static final String SMTP_WRITE_ACCESS = "https://jans.io/oauth/config/smtp.write";
@@ -62,20 +63,24 @@ public class ApiAccessConstants {
     public static final String TOKEN_READ_ACCESS = "https://jans.io/oauth/config/token.readonly";
     public static final String TOKEN_WRITE_ACCESS = "https://jans.io/oauth/config/token.write";
     public static final String TOKEN_DELETE_ACCESS = "https://jans.io/oauth/config/token.delete";
+    public static final String TOKEN_ADMIN_ACCESS = "https://jans.io/oauth/token.admin";
     
     public static final String UMA_RESOURCES_READ_ACCESS = "https://jans.io/oauth/config/uma/resources.readonly";
     public static final String UMA_RESOURCES_WRITE_ACCESS = "https://jans.io/oauth/config/uma/resources.write";
     public static final String UMA_RESOURCES_DELETE_ACCESS = "https://jans.io/oauth/config/uma/resources.delete";
-
+  
     public static final String SCOPES_READ_ACCESS = "https://jans.io/oauth/config/scopes.readonly";
     public static final String SCOPES_WRITE_ACCESS = "https://jans.io/oauth/config/scopes.write";
     public static final String SCOPES_DELETE_ACCESS = "https://jans.io/oauth/config/scopes.delete";
+    public static final String SCOPES_ADMIN_ACCESS = "https://jans.io/oauth/config/scopes.write";
 
     public static final String STATS_USER_READ_ACCESS = "https://jans.io/oauth/config/stats.readonly";
+    public static final String STATS_USER_ASMIN_ACCESS = "https://jans.io/oauth/config/stats.admin";
     public static final String JANS_STAT = "jans_stat";
 
     public static final String ORG_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/organization.readonly";
     public static final String ORG_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/organization.write";
+    public static final String ORG_CONFIG_ADMIN_ACCESS = "https://jans.io/oauth/config/organization.admin";
 
     public static final String USER_READ_ACCESS = "https://jans.io/oauth/config/user.readonly";
     public static final String USER_WRITE_ACCESS = "https://jans.io/oauth/config/user.write";
@@ -93,6 +98,7 @@ public class ApiAccessConstants {
     public static final String JANS_AUTH_SESSION_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/session.readonly";
     public static final String JANS_AUTH_SESSION_DELETE_ACCESS = "https://jans.io/oauth/jans-auth-server/session.delete";
     public static final String JANS_AUTH_REVOKE_SESSION  = "revoke_session";
+    public static final String JANS_AUTH_SESSION_ADMIN_ACCESS = "https://jans.io/oauth/config/session.admin";
     
     // Super Scopes
     public static final String SUPER_ADMIN_READ_ACCESS  = "https://jans.io/oauth/config/read-all";
@@ -107,8 +113,10 @@ public class ApiAccessConstants {
     public static final String UMA_READ_ACCESS  = "https://jans.io/oauth/config/uma-read";
     public static final String UMA_WRITE_ACCESS = "https://jans.io/oauth/config/uma-write";
     public static final String UMA_DELETE_ACCESS = "https://jans.io/oauth/config/uma-delete";
+    public static final String UMA_ADMIN_ACCESS = "https://jans.io/oauth/config/uma.admin";
     
     public static final String PLUGIN_READ_ACCESS = "https://jans.io/oauth/config/plugin.readonly";
+    public static final String PLUGIN_ADMIN_ACCESS = "https://jans.io/oauth/config/plugin.admin";
     
     public static final String CONFIG_READ_ACCESS = "https://jans.io/oauth/config/properties.readonly";
     public static final String CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/properties.write";

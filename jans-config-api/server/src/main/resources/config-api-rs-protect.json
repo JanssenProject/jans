@@ -2225,7 +2225,7 @@
         },
         {
           "httpMethods": [
-            "POST"
+            "DELETE"
           ],
           "scopes": [
             {
@@ -4279,62 +4279,8 @@
       ]
     },
     {
-      "path": "/jans-config-api/api/v1/ssa",
-      "conditions": [
-        {
-          "httpMethods": [
-            "GET"
-          ],
-          "scopes": [
-            {
-              "inum": "1800.01.97",
-              "name": "https://jans.io/oauth/config/ssa.readonly"
-            }
-          ],
-          "groupScopes": [
-            {
-              "inum": "1800.01.98",
-              "name": "https://jans.io/oauth/config/ssa.write"
-            }
-          ],
-          "superScopes": [
-            {
-              "inum": "1800.05.34",
-              "name": "https://jans.io/oauth/ssa.admin"
-            },
-            {
-              "inum": "1800.03.1",
-              "name": "https://jans.io/oauth/config/read-all"
-            }
-          ]
-        },
-        {
-          "httpMethods": [
-            "POST"
-          ],
-          "scopes": [
-            {
-              "inum": "1800.01.98",
-              "name": "https://jans.io/oauth/config/ssa.write"
-            }
-          ],
-          "groupScopes": [
-            {
-              "inum": "1800.02.2",
-              "name": "https://jans.io/oauth/config/openid/openid-write"
-            }
-          ],
-          "superScopes": [
-            {
-              "inum": "1800.05.34",
-              "name": "https://jans.io/oauth/ssa.admin"
-            },
-            {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
-            }
-          ]
-        },
+      "path": "/jans-config-api/api/v1/jans-auth-server/ssa",
+      "conditions": [        
         {
           "httpMethods": [
             "DELETE"
@@ -4343,6 +4289,10 @@
             {
               "inum": "1800.01.99",
               "name": "https://jans.io/oauth/config/ssa.delete"
+            },
+			{
+              "inum": "",
+              "name": "https://jans.io/auth/ssa.admin"
             }
           ],
           "groupScopes": [
@@ -4350,15 +4300,12 @@
               "inum": "1800.01.98",
               "name": "https://jans.io/oauth/config/ssa.write"
             },
-            {
-              "inum": "",
-              "name": "https://jans.io/auth/ssa.admin"
-            }
+            
           ],
           "superScopes": [
             {
               "inum": "1800.05.34",
-              "name": "https://jans.io/oauth/ssa.admin"
+              "name": "https://jans.io/oauth/config/ssa.admin"
             },
             {
               "inum": "1800.03.3",

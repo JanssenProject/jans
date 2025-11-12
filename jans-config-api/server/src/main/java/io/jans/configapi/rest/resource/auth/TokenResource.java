@@ -53,8 +53,11 @@ public class TokenResource extends ConfigBaseResource {
     ClientService clientService;
 
     @Operation(summary = "Get token details by Id.", description = "Get token details by Id.", operationId = "get-token-by-id", tags = {
-            "Token" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.TOKEN_READ_ACCESS }))
+            "Token" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TokenEntity.class), examples = @ExampleObject(name = "Response example", value = "example/token/get-token.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -62,7 +65,8 @@ public class TokenResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.TOKEN_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.TOKEN_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.TOKEN_WRITE_ACCESS }, superScopes = { ApiAccessConstants.TOKEN_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.TOKEN_CODE_PATH + ApiConstants.TOKEN_CODE_PATH_PARAM)
     public Response getTokenById(
             @Parameter(description = "Token identifier") @PathParam(ApiConstants.TOKEN_CODE) @NotNull String tknCde) {
@@ -82,8 +86,11 @@ public class TokenResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Get token details by client.", description = "Get token details by client.", operationId = "get-token-by-client", tags = {
-            "Token" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.TOKEN_READ_ACCESS }))
+            "Token" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TokenEntityPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/token/get-all-token.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -91,7 +98,8 @@ public class TokenResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.TOKEN_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.TOKEN_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.TOKEN_WRITE_ACCESS }, superScopes = { ApiAccessConstants.TOKEN_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.CLIENT + ApiConstants.CLIENTID_PATH)
     public Response getClientToken(
             @Parameter(description = "Client identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId) {
@@ -120,8 +128,11 @@ public class TokenResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Search tokens", description = "Search tokens", operationId = "search-token", tags = {
-            "Token" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.TOKEN_READ_ACCESS }))
+            "Token" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TokenEntityPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/token/get-all-token.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -129,7 +140,8 @@ public class TokenResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.TOKEN_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.TOKEN_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.TOKEN_WRITE_ACCESS }, superScopes = { ApiAccessConstants.TOKEN_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.SEARCH)
     public Response searchTokenEntries(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
@@ -155,8 +167,11 @@ public class TokenResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Revoke client token.", description = "Revoke client token.", operationId = "revoke-token", tags = {
-            "Token" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.TOKEN_DELETE_ACCESS }))
+            "Token" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -164,7 +179,8 @@ public class TokenResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.TOKEN_DELETE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+            ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.TOKEN_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.REVOKE + ApiConstants.TOKEN_CODE_PATH_PARAM)
     public Response revokeClientToken(
             @Parameter(description = "Token Code") @PathParam(ApiConstants.TOKEN_CODE) @NotNull String tknCde) {
