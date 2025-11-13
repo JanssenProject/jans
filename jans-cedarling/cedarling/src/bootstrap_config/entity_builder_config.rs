@@ -110,7 +110,7 @@ impl EntityBuilderConfig {
 
     /// Disables building the `User` entity
     pub fn with_no_user(mut self) -> Self {
-        self.build_user = true;
+        self.build_user = false;
         self
     }
 }
