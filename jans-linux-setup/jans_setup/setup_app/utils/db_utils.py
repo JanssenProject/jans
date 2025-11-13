@@ -83,9 +83,12 @@ class DBUtils:
 
         if Config.rdbm_type == 'mysql':
             bind_uri += '?charset=utf8mb4'
+            connect_args = {'ssl':{'verify_mode': None}}
+        else:
+            connect_args = {}
 
         try:
-            self.engine = sqlalchemy.create_engine(bind_uri)
+            self.engine = sqlalchemy.create_engine(bind_uri, connect_args=connect_args)
             logging.basicConfig(filename=os.path.join(Config.install_dir, 'logs/sqlalchemy.log'))
             logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
             self.local_session = sqlalchemy.orm.sessionmaker(bind=self.engine)

@@ -78,7 +78,7 @@ public class ScimConfigurationWS {
             c2.setSchemasEndpoint(schemaService.getEndpointUrl());
 
             // Convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
-            final String entity = jsonService.objectToPerttyJson(Collections.singletonList(c2));
+            final String entity = jsonService.objectToPrettyJson(Collections.singletonList(c2));
             log.info("SCIM configuration: {}", entity);
 
             return Response.ok(entity).build();

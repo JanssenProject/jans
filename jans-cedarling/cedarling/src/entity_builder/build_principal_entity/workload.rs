@@ -6,7 +6,7 @@
 use super::*;
 
 use cedar_policy::Entity;
-use std::collections::{HashSet};
+use std::collections::HashSet;
 
 const WORKLOAD_ATTR_SRC_TKNS: &[&str] = &["access_token"];
 
@@ -15,7 +15,7 @@ impl EntityBuilder {
     // either the 'aud' or 'client_id' claim eventually
     pub fn build_workload_entity(
         &self,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
         tkn_principal_mappings: &TokenPrincipalMappings,
         built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildEntityError> {
@@ -71,7 +71,7 @@ impl WorkloadIdSrcResolver {
     /// - `access_token.aud`
     /// - `access_token.client_id`
     /// - `id_token.aud`
-    pub fn resolve(tokens: &HashMap<String, Token>) -> Vec<EntityIdSrc> {
+    pub fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc<'_>> {
         const DEFAULT_WORKLOAD_ID_SRCS: &[PrincipalIdSrc] = &[
             PrincipalIdSrc {
                 token: "access_token",
@@ -121,6 +121,7 @@ mod test {
     use super::*;
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder::test::*;
+    use crate::log::TEST_LOGGER;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
@@ -134,7 +135,7 @@ mod test {
         expected: Value,
         schema: Option<&Schema>,
     ) {
-        let tokens = HashMap::from([(token.name.clone(), token)]);
+        let tokens = HashMap::from([(token.name.clone(), Arc::new(token))]);
         let mut built_entities = BuiltEntities::from(&builder.iss_entities);
         built_entities.insert(
             &EntityUid::from_str("Jans::Access_token::\"some_jti\"").expect("a valid EntityUid"),
@@ -171,6 +172,8 @@ mod test {
             &issuers,
             Some(&validator_schema),
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -246,6 +249,8 @@ mod test {
             &issuers,
             Some(&validator_schema),
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -306,6 +311,8 @@ mod test {
             &issuers,
             None,
             None,
+            None,
+            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);

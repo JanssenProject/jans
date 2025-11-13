@@ -66,7 +66,7 @@ response_type=code&client_id=7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc&scope=openid+p
 
 Request is rejected if request's `authorization_details` has types which does not have corresponding `AuthzDetailType` custom script. 
 
-Check more details about [`AuthzDetailType` custom scripts](../../developer/scripts/authz-detail.md)  
+Check more details about [`AuthzDetailType` custom scripts](../../../script-catalog/authz_detail/AuthzDetail.java)  
 
 ### AS Metadata (Discovery)
 

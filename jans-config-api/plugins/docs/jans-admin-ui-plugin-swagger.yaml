@@ -18,6 +18,7 @@ tags:
 - name: Admin UI - Role-Permissions Mapping
 - name: Admin UI - License
 - name: Admin UI - Webhooks
+- name: Admin UI - Cedarling
 paths:
   /admin-ui/adminUIPermissions:
     get:
@@ -128,6 +129,44 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
+    delete:
+      tags:
+      - Admin UI - Permission
+      summary: Delete admin ui permission
+      description: Delete admin ui permission
+      operationId: delete-adminui-permission
+      requestBody:
+        description: AdminPermission object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminPermission"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminPermission"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete
   /admin-ui/adminUIRolePermissionsMapping:
     get:
       tags:
@@ -346,85 +385,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
-  /admin-ui/adminUIPermissions/{adminUIPermission}:
-    get:
-      tags:
-      - Admin UI - Permission
-      summary: Get admin ui permission by permission-name
-      description: Get admin ui permission by permission-name
-      operationId: get-adminui-permission
-      parameters:
-      - name: adminUIPermission
-        in: path
-        description: Admin UI Permission
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AdminPermission"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GenericResponse"
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GenericResponse"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
-    delete:
-      tags:
-      - Admin UI - Permission
-      summary: Delete admin ui permission by permission-name
-      description: Delete admin ui permission by permission-name
-      operationId: delete-adminui-permission
-      parameters:
-      - name: adminUIPermission
-        in: path
-        description: Admin UI Permission
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AdminPermission"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GenericResponse"
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GenericResponse"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete
   /admin-ui/adminUIRoles/{adminUIRole}:
     get:
       tags:
@@ -517,9 +477,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AppConfigResponse"
+                $ref: "#/components/schemas/AppConfigResponse"
         "400":
           description: Bad Request
           content:
@@ -555,9 +513,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AppConfigResponse"
+                $ref: "#/components/schemas/AppConfigResponse"
         "400":
           description: Bad Request
           content:
@@ -654,6 +610,148 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete
+  /admin-ui/adminUIPermissions/{adminUIPermission}:
+    get:
+      tags:
+      - Admin UI - Permission
+      summary: Get admin ui permission by permission-name
+      description: Get admin ui permission by permission-name
+      operationId: get-adminui-permission
+      parameters:
+      - name: adminUIPermission
+        in: path
+        description: Admin UI Permission
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminPermission"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
+  /admin-ui/security/policyStore:
+    get:
+      tags:
+      - Admin UI - Cedarling
+      summary: Get Admin UI policy store
+      description: Get Admin UI policy store
+      operationId: get-adminui-policy-store
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GenericResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly
+  /admin-ui/security/setRemotePolicyStoreAsDefault:
+    put:
+      tags:
+      - Admin UI - Cedarling
+      summary: Set remote policy store as default policy store of Admin UI
+      description: Set remote policy store as default policy store of Admin UI
+      operationId: set-remote-policy-store-as-default
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GenericResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/security.write
+  /admin-ui/security/syncRoleScopesMapping:
+    post:
+      tags:
+      - Admin UI - Cedarling
+      summary: Sync role-to-scope mappings from the policy store
+      description: "Sync the role-to-scope mappings from the policy store. If a remote\
+        \ policy store URL is configured and enabled, the mappings will be generated\
+        \ from the remote policy store; otherwise, they will be generated from the\
+        \ default policy store."
+      operationId: sync-role-to-scopes-mappings
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GenericResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/security.write
   /admin-ui/license/activate:
     post:
       tags:
@@ -1627,6 +1725,20 @@ components:
           enum:
           - "off"
           - std_out
+        auiPolicyStoreUrl:
+          type: string
+          description: Admin UI Policy Store URL
+        auiDefaultPolicyStorePath:
+          type: string
+          description: Admin UI Default Policy Store path
+        cedarlingPolicyStoreRetrievalPoint:
+          type: string
+          description: "Specifies the policy store retrieval point for Admin UI. Set\
+            \ to `default` to use the local default policy store, or `remote` to retrieve\
+            \ policies from the configured remote policy store URL."
+          enum:
+          - default
+          - remote
     KeyValuePair:
       type: object
       properties:
@@ -1855,7 +1967,11 @@ components:
               role-permission mapping related information
             https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write: Manage
               role-permission mapping related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly: Delete
+            https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly: View
               admin-ui license related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/license.write: View
+            https://jans.io/oauth/jans-auth-server/config/adminui/license.write: Manage
               admin-ui license related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly: View
+              Admin UI security related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/security.write: Manage
+              Admin UI security related information

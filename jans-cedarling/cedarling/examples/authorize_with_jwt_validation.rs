@@ -56,6 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        token_cache_max_ttl_secs: 60,
     })
     .await?;
 
@@ -75,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             resource: EntityData {
                 cedar_mapping: CedarEntityMapping {
                     entity_type: "Jans::Issue".to_string(),
-                id: "random_id".to_string(),
+                    id: "random_id".to_string(),
                 },
                 attributes: HashMap::from_iter([(
                     "org_id".to_string(),
@@ -86,7 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await;
 
     // Handle authorization result. If there's an error, print it.
-    if let Err(ref e) = &result {
+    if let Err(e) = &result {
         eprintln!("Error while authorizing: {:?}\n\n", e)
     }
 

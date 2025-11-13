@@ -13,6 +13,7 @@ from collections.abc import Callable
 from functools import cached_property
 from tempfile import NamedTemporaryFile
 
+import javaproperties
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.exc import SAWarning
 from sqlalchemy import create_engine
@@ -21,6 +22,7 @@ from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import delete
 from sqlalchemy import event
+from sqlalchemy.engine.url import URL
 from ldif import LDIFParser
 from ldap3.utils import dn as dnutils
 from pymysql.err import ProgrammingError
@@ -29,6 +31,7 @@ from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
 from jans.pycloudlib.utils import get_password_from_file
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import exec_cmd
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -91,6 +94,18 @@ class PostgresqlAdapter:
         if exc.orig.pgcode not in ["23505"]:
             raise exc
 
+    @property
+    def connect_args(self):
+        opts = {}
+
+        if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
+            opts["sslmode"] = os.environ.get("CN_SQL_SSL_MODE", "require")
+            if opts["sslmode"] in ("verify-ca", "verify-full"):
+                opts["sslrootcert"] = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
+                opts["sslcert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
+                opts["sslkey"] = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
+        return opts
+
 
 class MysqlAdapter:
     """Class for MySQL adapter."""
@@ -139,6 +154,21 @@ class MysqlAdapter:
         # - 1062: duplicate entry
         if exc.orig.args[0] not in [1062]:
             raise exc
+
+    @property
+    def connect_args(self):
+        opts = {}
+
+        if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
+            opts["ssl"] = {}
+            ssl_mode = os.environ.get("CN_SQL_SSL_MODE", "REQUIRED")
+            if ssl_mode in ("VERIFY_CA", "VERIFY_IDENTITY"):
+                opts["ssl"]["ca"] = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
+                opts["ssl"]["cert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
+                opts["ssl"]["key"] = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
+            elif ssl_mode == "REQUIRED":
+                opts["ssl"]["check_hostname"] = False
+        return opts
 
 
 def doc_id_from_dn(dn: str) -> str:
@@ -259,11 +289,39 @@ class SqlClient(SqlSchemaMixin):
         self._metadata: _t.Optional[MetaData] = None
         self._engine = None
 
+        if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
+            self._bootstrap_ssl_assets()
+
+    def _bootstrap_ssl_assets(self):
+        for filepath, secret_name in [
+            (os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem"), "sql_ssl_ca_cert"),
+            (os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem"), "sql_ssl_client_cert"),
+            (os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem"), "sql_ssl_client_key"),
+        ]:
+            if os.path.isfile(filepath):
+                # asset already exists -- either mounted externally or pre-populated internally
+                continue
+
+            if filepath and (contents := self.manager.secret.get(secret_name)):
+                logger.info(f"Detected non-empty {secret_name=}. The secret will be populated into {filepath!r}.")
+
+                with open(filepath, "w") as f:
+                    f.write(contents)
+
+                # client key must be protected using 600 permission
+                if secret_name == "sql_ssl_client_key":  # noqa: B105
+                    os.chmod(filepath, 0o600)
+
     @property
     def engine(self) -> Engine:
         """Lazy init of engine instance object."""
         if not self._engine:
-            self._engine = create_engine(self.engine_url, pool_pre_ping=True, hide_parameters=True)
+            self._engine = create_engine(
+                self.engine_url,
+                pool_pre_ping=True,
+                hide_parameters=True,
+                connect_args=self.adapter.connect_args,
+            )
 
             if self.dialect == "mysql":
                 event.listen(self._engine, "first_connect", set_mysql_strict_mode)
@@ -273,14 +331,16 @@ class SqlClient(SqlSchemaMixin):
         return self._engine
 
     @property
-    def engine_url(self) -> str:
+    def engine_url(self) -> URL:
         """Engine connection URL."""
-        host = os.environ.get("CN_SQL_DB_HOST", "localhost")
-        port = os.environ.get("CN_SQL_DB_PORT", 3306)
-        database = os.environ.get("CN_SQL_DB_NAME", "jans")
-        user = os.environ.get("CN_SQL_DB_USER", "jans")
-        password = get_sql_password(self.manager)
-        return f"{self.adapter.connector}://{user}:{password}@{host}:{port}/{database}"
+        return URL(
+            drivername=self.adapter.connector,
+            username=os.environ.get("CN_SQL_DB_USER", "jans"),
+            password=get_sql_password(self.manager),
+            host=os.environ.get("CN_SQL_DB_HOST", "localhost"),
+            port=int(os.environ.get("CN_SQL_DB_PORT", "3306")),
+            database=os.environ.get("CN_SQL_DB_NAME", "jans"),
+        )
 
     @property
     def metadata(self) -> MetaData:
@@ -333,12 +393,30 @@ class SqlClient(SqlSchemaMixin):
     def get_table_mapping(self) -> dict[str, dict[str, str]]:
         """Get mapping of column name and type from all tables."""
         table_mapping: dict[str, dict[str, str]] = defaultdict(dict)
+
         for table_name, table in self.metadata.tables.items():
             for column in table.c:
-                # truncate COLLATION string
-                if getattr(column.type, "collation", None):
-                    column.type.collation = None
-                table_mapping[table_name][column.name] = str(column.type)
+                collation = getattr(column.type, "collation", None)
+
+                try:
+                    # temporarily truncate COLLATION string (if needed)
+                    if collation:
+                        column.type.collation = None
+
+                    col_type = str(column.type)
+
+                    # extract the size of DATETIME to match the schema from file
+                    if col_type.startswith("DATETIME") and getattr(column.type, "fsp", None):
+                        col_type = f"DATETIME({column.type.fsp})"
+
+                    table_mapping[table_name][column.name] = col_type
+
+                finally:
+                    # preserve the original collation
+                    if collation and column.type.collation is None:
+                        column.type.collation = collation
+
+        # finalized table mapping
         return dict(table_mapping)
 
     def create_index(self, query: str) -> None:
@@ -648,8 +726,8 @@ def sync_sql_password(manager: Manager) -> None:
         manager: An instance of manager class.
     """
     logger.warning(
-        f"Accessing jans.pycloudlib.persistence.sql.sync_sql_password is deprecated; "
-        f"Use jans.pycloudlib.persistence.sql.get_sql_password instead"
+        "Accessing jans.pycloudlib.persistence.sql.sync_sql_password is deprecated; "
+        "Use jans.pycloudlib.persistence.sql.get_sql_password instead"
     )
 
 
@@ -660,7 +738,6 @@ def get_sql_password(manager: Manager | None = None):
 
     # safer method to get credential
     return manager.secret.get("sql_password")
-
 
 
 def preconfigure_simple_json(dbapi_connection, connection_record):
@@ -721,6 +798,7 @@ def override_simple_json_property(sql_prop_file):
         with open(sql_prop_file, "w") as f:
             f.write(txt)
 
+
 def load_sql_overrides():
     if os.path.isfile(SQL_OVERRIDES_FILE):
         with open(SQL_OVERRIDES_FILE) as f:
@@ -731,3 +809,62 @@ def load_sql_overrides():
 def dump_sql_overrides(data):
     with open(SQL_OVERRIDES_FILE, "w") as f:
         f.write(json.dumps(data))
+
+
+def override_sql_ssl_property(sql_prop_file):
+    with open(sql_prop_file) as f:
+        props = javaproperties.loads(f.read())
+
+    if os.environ.get("CN_SQL_DB_DIALECT") in ("pgsql", "postgresql"):
+        # boolean need to be defined as lowercase value
+        props["connection.driver-property.ssl"] = str(as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false"))).lower()
+        props["connection.driver-property.sslmode"] = os.environ.get("CN_SQL_SSL_MODE", "require")
+
+        if props["connection.driver-property.sslmode"] in ("verify-ca", "verify-full"):
+            props["connection.driver-property.sslrootcert"] = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
+            props["connection.driver-property.sslcert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
+
+            # client key need to be converted from PEM to DER format
+            ssl_key = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
+            ssl_key_p8 = os.environ.get("CN_SQL_SSL_KEY_P8_FILE", "/etc/certs/sql_client_key.pkcs8")
+            out, err, code = exec_cmd(f"openssl pkcs8 -topk8 -inform PEM -outform DER -in {ssl_key} -out {ssl_key_p8} -nocrypt")
+
+            if code != 0:
+                # error may not recorded in stderr but available in stdout
+                err = err or out
+                logger.warning(f"Unable to convert key file {ssl_key} to PKCS8 file {ssl_key_p8}; reason={err.decode()}")
+            props["connection.driver-property.sslkey"] = ssl_key_p8
+
+    # mysql dialect
+    else:
+        props["connection.driver-property.sslMode"] = os.environ.get("CN_SQL_SSL_MODE", "REQUIRED")
+        if props["connection.driver-property.sslMode"] in ("VERIFY_CA", "VERIFY_IDENTITY"):
+            # create truststore for CA cert
+            ssl_ca = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
+            ssl_ca_p12 = os.environ.get("CN_SQL_SSL_CACERT_P12_FILE", "/etc/certs/sql_cacert.pkcs12")
+            out, err, code = exec_cmd(f"keytool -importcert -alias mysql-cacert -file {ssl_ca} -keystore {ssl_ca_p12} -storepass changeit -noprompt")
+
+            if code != 0:
+                # error may not recorded in stderr but available in stdout
+                err = err or out
+                logger.warning(f"Unable to convert CA cert file {ssl_ca} to PKCS12 file {ssl_ca_p12}; reason={err.decode()}")
+
+            props["connection.driver-property.trustCertificateKeyStoreUrl"] = f"file://{ssl_ca_p12}"
+            props["connection.driver-property.trustCertificateKeyStorePassword"] = "changeit"
+
+            # create truststore for client cert and key
+            ssl_key = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
+            ssl_cert = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
+            ssl_certkey_p12 = os.environ.get("CN_SQL_SSL_CERTKEY_P12_FILE", "/etc/certs/sql_client_certkey.pkcs12")
+            out, err, code = exec_cmd(f"openssl pkcs12 -export -in {ssl_cert} -inkey {ssl_key} -name mysql-client -passout pass:changeit -out {ssl_certkey_p12}")
+
+            if code != 0:
+                # error may not recorded in stderr but available in stdout
+                err = err or out
+                logger.warning(f"Unable to convert cert file {ssl_cert} and key file {ssl_key} to PKCS12 file {ssl_certkey_p12}; reason={err.decode()}")
+
+            props["connection.driver-property.clientCertificateKeyStoreUrl"] = f"file://{ssl_certkey_p12}"
+            props["connection.driver-property.clientCertificateKeyStorePassword"] = "changeit"
+
+    with open(sql_prop_file, "w") as f:
+        f.write(javaproperties.dumps(props, timestamp=None))

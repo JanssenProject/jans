@@ -82,7 +82,8 @@
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:openid:params:grant-type:ciba",
         "urn:ietf:params:oauth:grant-type:device_code",
-        "urn:ietf:params:oauth:grant-type:token-exchange"
+        "urn:ietf:params:oauth:grant-type:token-exchange",
+        "urn:ietf:params:oauth:grant-type:jwt-bearer"
     ],
     "subjectTypesSupported":[
         "public",
@@ -342,7 +343,8 @@
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:openid:params:grant-type:ciba",
-        "urn:ietf:params:oauth:grant-type:device_code"
+        "urn:ietf:params:oauth:grant-type:device_code",
+        "urn:ietf:params:oauth:grant-type:jwt-bearer"
     ],
     "claimTypesSupported":[
         "normal"

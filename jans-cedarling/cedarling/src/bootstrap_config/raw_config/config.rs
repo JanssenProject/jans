@@ -254,6 +254,11 @@ pub struct BootstrapConfigRaw {
     /// Allow interaction with a Lock server with invalid certificates. Used for testing.
     #[serde(rename = "CEDARLING_LOCK_ACCEPT_INVALID_CERTS", default)]
     pub accept_invalid_certs: FeatureToggle,
+
+    /// Allows to limit maximum token cache TTL in seconds.
+    /// Zero means no token cache TTL limit.
+    #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
+    pub token_cache_max_ttl: usize,
 }
 
 impl BootstrapConfigRaw {
@@ -314,24 +319,32 @@ mod tests {
         for (key, value) in env::vars() {
             let key_clone = key.clone();
             all_vars.push((key, value));
-            env::remove_var(&key_clone);
+            unsafe {
+                env::remove_var(&key_clone);
+            }
         }
 
         // Set new env vars
         for (key, value) in &vars {
-            env::set_var(key, value);
+            unsafe {
+                env::set_var(key, value);
+            }
         }
 
         test();
 
         // Clean up
         for (key, _) in &vars {
-            env::remove_var(key);
+            unsafe {
+                env::remove_var(key);
+            }
         }
 
         // Restore original environment
         for (key, value) in all_vars {
-            env::set_var(&key, value);
+            unsafe {
+                env::set_var(&key, value);
+            }
         }
     }
 

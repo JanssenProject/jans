@@ -382,9 +382,10 @@ class JCA_CLI:
             if prop in ('userPassword', 'clientSecret'):
                 log_data[prop] = hpass
 
-        for cad in log_data.get('customAttributes', []):
-            if cad.get('name') == 'userPassword':
-                cad['value'] = hpass
+        if isinstance(log_data, dict):
+            for cad in log_data.get('customAttributes', []):
+                if cad.get('name') == 'userPassword':
+                    cad['value'] = hpass
 
         cmdl = [sys.executable, __file__, '--operation-id', operation_id]
         if url_suffix:
@@ -734,7 +735,7 @@ class JCA_CLI:
 
         user_info = self.get_user_info()
 
-        if 'api-admin' not in user_info.get('jansAdminUIRole', []):
+        if 'admin' not in user_info.get('jansAdminUIRole', []):
             config['DEFAULT']['user_data'] = ''
             self.raise_error("The logged user do not have valid role.")
 

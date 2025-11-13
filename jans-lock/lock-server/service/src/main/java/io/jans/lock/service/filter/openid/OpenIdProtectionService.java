@@ -33,7 +33,7 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.lock.service.OpenIdService;
-import io.jans.lock.service.filter.ProtectionService;
+import io.jans.lock.service.filter.OpenIdProtection;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -43,7 +43,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
-public class OpenIdProtectionService implements ProtectionService {
+public class OpenIdProtectionService implements OpenIdProtection {
 
     @Inject
     private Logger log;
@@ -56,24 +56,47 @@ public class OpenIdProtectionService implements ProtectionService {
     private OpenIdConfigurationResponse oidcConfig;
     
     private ObjectMapper mapper;
-    
+
+    @PostConstruct
+    private void init() {
+        try {
+            mapper = new ObjectMapper();
+            oidcConfig = openIdService.getOpenIdConfiguration();
+            
+            String introspectionEndpoint = oidcConfig.getIntrospectionEndpoint();
+            introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, ClientFactory.instance().createEngine());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Validates the incoming request's access token for the resource and returns an HTTP error response when authorization fails.
+     *
+     * <p>Accepts either a JWT or an opaque token. For opaque tokens, performs token introspection. For JWTs, validates issuer, expiration,
+     * cryptographic signature (HMAC-signed tokens are rejected), and required scopes for the target resource.</p>
+     *
+     * @param headers      HTTP headers containing the Authorization header
+     * @param resourceInfo information about the target resource used to determine required scopes
+     * @return a Response describing the authorization failure (UNAUTHORIZED, FORBIDDEN, or INTERNAL_SERVER_ERROR) or `null` if authorization succeeds
+     */
     public Response processAuthorization(HttpHeaders headers, ResourceInfo resourceInfo) {
         try {
             String token = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
             boolean authFound = StringUtils.isNotEmpty(token);
-            log.info("Authorization header {} found", authFound ? "" : "not");
+            log.debug("Authorization header{} found", authFound ? "" : " not");
             
             if (!authFound) {
-                log.info("Request is missing authorization header");
+                log.debug("Request is missing authorization header");
                 // See section 3.12 RFC 7644
                 return simpleResponse(UNAUTHORIZED, "No authorization header found");
             }
             
             token = token.replaceFirst("Bearer\\s+","");
-            log.debug("Validating token {}", token);
+            log.debug("Validating bearer token");
 
             List<String> scopes = getRequestedScopes(resourceInfo);
-            log.info("Call requires scopes: {}", scopes);
+            log.debug("Call requires scopes: {}", scopes);
 
             Jwt jwt = tokenAsJwt(token);
             if (jwt == null) {
@@ -148,7 +171,9 @@ public class OpenIdProtectionService implements ProtectionService {
         Jwt jwt = null;
         try {
             jwt = Jwt.parse(token);
-            log.trace("This looks like a JWT token");
+            if (log.isTraceEnabled()) {
+            	log.trace("This looks like a JWT token");
+            }
         } catch (InvalidJwtException e) {
             log.trace("Not a JWT token");
         }
@@ -187,19 +212,6 @@ public class OpenIdProtectionService implements ProtectionService {
 
     private static <T extends Annotation> Optional<T> optAnnnotation(AnnotatedElement elem, Class<T> cls) {
         return Optional.ofNullable(elem.getAnnotation(cls));
-    }
-    
-    @PostConstruct
-    private void init() {
-        try {
-            mapper = new ObjectMapper();
-            oidcConfig = openIdService.getOpenIdConfiguration();
-            
-            String introspectionEndpoint = oidcConfig.getIntrospectionEndpoint();
-            introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, ClientFactory.instance().createEngine());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
     }
 
     public Response simpleResponse(Response.Status status, String detail) {

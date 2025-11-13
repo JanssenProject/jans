@@ -475,23 +475,23 @@ class AuthHandler:
                         logger.info(f"creating new {name}:{jks_fn}")
                         self.meta_client.copy_to_container(container, jks_fn)
 
-                        # as new JKS pushed to container, we need to tell auth-server to reload the private keys
-                        # by increasing jansRevision again; note that as jansRevision may have been modified externally
-                        # we need to ensure we have fresh jansRevision value to increase to
-                        config = self.backend.get_auth_config()
-                        rev = int(config["jansRevision"]) + 1
-                        conf_dynamic.update({
-                            "keySelectionStrategy": self.privkey_push_strategy,
-                        })
+                    # as new JKS pushed to container, we need to tell auth-server to reload the private keys
+                    # by increasing jansRevision again; note that as jansRevision may have been modified externally
+                    # we need to ensure we have fresh jansRevision value to increase to
+                    config = self.backend.get_auth_config()
+                    rev = int(config["jansRevision"]) + 1
+                    conf_dynamic.update({
+                        "keySelectionStrategy": self.privkey_push_strategy,
+                    })
 
-                        logger.info(f"using keySelectionStrategy {self.privkey_push_strategy}")
+                    logger.info(f"using keySelectionStrategy {self.privkey_push_strategy}")
 
-                        self.backend.modify_auth_config(
-                            config["id"],
-                            rev,
-                            conf_dynamic,
-                            keys,
-                        )
+                    self.backend.modify_auth_config(
+                        config["id"],
+                        rev,
+                        conf_dynamic,
+                        keys,
+                    )
         except (TypeError, ValueError,) as exc:
             logger.warning(f"Unable to get public keys; reason={exc}")
 

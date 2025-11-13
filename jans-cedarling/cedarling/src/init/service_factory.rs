@@ -65,7 +65,15 @@ impl<'a> ServiceFactory<'a> {
             let config = &self.bootstrap_config.jwt_config;
             let trusted_issuers = self.policy_store().trusted_issuers.clone();
             let logger = self.log_service();
-            let service = Arc::new(JwtService::new(config, trusted_issuers, Some(logger)).await?);
+            let service = Arc::new(
+                JwtService::new(
+                    config,
+                    trusted_issuers,
+                    Some(logger),
+                    self.bootstrap_config.token_cache_max_ttl_secs,
+                )
+                .await?,
+            );
             self.container.jwt_service = Some(service.clone());
             Ok(service)
         }
@@ -77,6 +85,8 @@ impl<'a> ServiceFactory<'a> {
             return Ok(entity_builder.clone());
         }
 
+        let logger = self.log_service();
+
         let config = &self.bootstrap_config.entity_builder_config;
         let trusted_issuers = self
             .policy_store()
@@ -85,11 +95,14 @@ impl<'a> ServiceFactory<'a> {
             .unwrap_or_default();
         let schema = &self.policy_store().schema.validator_schema;
         let policy_store = &self.policy_store().store;
+        let namespace = Some(policy_store.name.as_str());
         let entity_builder = EntityBuilder::new(
             config.clone(),
             &trusted_issuers,
             Some(schema),
             policy_store.default_entities.as_ref(),
+            namespace,
+            logger,
         )?;
         let service = Arc::new(entity_builder);
         self.container.entity_builder_service = Some(service.clone());
