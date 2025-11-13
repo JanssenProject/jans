@@ -10,7 +10,6 @@ use serde::{Deserialize, Serialize};
 const DEFAULT_USER_ENTITY_NAME: &str = "Jans::User";
 const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Jans::Workload";
 const DEFAULT_ROLE_ENTITY_NAME: &str = "Jans::Role";
-const DEFAULT_ISS_ENTITY_NAME: &str = "Jans::TrustedIssuer";
 const DEFAULT_UNSIGNED_ROLE_ID_SRC: &str = "role";
 
 pub(crate) const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Jans::Access_token";
@@ -59,8 +58,8 @@ pub struct EntityNames {
     pub workload: String,
     /// The entity type name of the `Role` entity
     pub role: String,
-    /// The entity type name of the `TrustedIssuer` entity
-    pub iss: String,
+    // /// The entity type name of the `TrustedIssuer` entity
+    // pub iss: String,
 }
 
 /// Unsigned role ID source
@@ -80,7 +79,6 @@ impl Default for EntityBuilderConfig {
                 user: DEFAULT_USER_ENTITY_NAME.to_string(),
                 workload: DEFAULT_WORKLOAD_ENTITY_NAME.to_string(),
                 role: DEFAULT_ROLE_ENTITY_NAME.to_string(),
-                iss: DEFAULT_ISS_ENTITY_NAME.to_string(),
             },
             build_workload: true,
             build_user: true,
@@ -127,9 +125,6 @@ impl From<EntityBuilderConfigRaw> for EntityBuilderConfig {
             role: raw
                 .mapping_role
                 .unwrap_or_else(|| DEFAULT_ROLE_ENTITY_NAME.to_string()),
-            iss: raw
-                .mapping_iss
-                .unwrap_or_else(|| DEFAULT_ISS_ENTITY_NAME.to_string()),
         };
 
         Self {

@@ -8,6 +8,8 @@ use serde::Deserialize;
 use serde_json::Value;
 use std::{collections::HashMap, sync::Arc};
 
+/// Structure representing a validated JWT token, used to derive a Cedar token entity.
+/// Make sure to provide a `TrustedIssuer`; otherwise, the `iss` field may not be constructed.
 #[derive(Debug, PartialEq, Clone)]
 pub struct Token {
     pub name: String,

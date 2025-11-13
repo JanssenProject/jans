@@ -228,9 +228,10 @@ impl EntityBuilder {
         if let Some(token_iss) = &token.iss {
             attrs.insert(
                 "iss".to_string(),
-                RestrictedExpression::new_entity_uid(
-                    self.trusted_issuer_cedar_uid(&token_iss.name, &issuer.to_string())?,
-                ),
+                RestrictedExpression::new_entity_uid(Self::trusted_issuer_cedar_uid(
+                    &token_iss.name,
+                    &issuer.to_string(),
+                )?),
             );
         }
 
@@ -289,6 +290,8 @@ impl EntityBuilder {
 
     /// Resolve issuer name using trusted issuer metadata or fallback to hostname
     fn resolve_issuer_name(&self, issuer: &str) -> Result<String, MultiIssuerEntityError> {
+        // TODO: utilize HashMap search to avoid iteration over values.
+
         // First, try to find the issuer in trusted issuer metadata
         for trusted_issuer in self.trusted_issuers.values() {
             let trusted_issuer_url = trusted_issuer.oidc_endpoint.origin().ascii_serialization();
@@ -330,7 +333,6 @@ mod tests {
     fn create_test_entity_builder() -> EntityBuilder {
         let config = EntityBuilderConfig {
             entity_names: EntityNames {
-                iss: "Issuer".to_string(),
                 user: "User".to_string(),
                 role: "Role".to_string(),
                 workload: "Workload".to_string(),
@@ -389,7 +391,12 @@ mod tests {
         .unwrap()
     }
 
-    fn create_test_token(issuer: &str, jti: &str, claims: HashMap<String, Value>) -> Token {
+    fn create_test_token(
+        issuer: &str,
+        jti: &str,
+        claims: HashMap<String, Value>,
+        builder: &EntityBuilder,
+    ) -> Token {
         let mut all_claims = claims;
         all_claims.insert("iss".to_string(), json!(issuer));
         all_claims.insert("jti".to_string(), json!(jti));
@@ -398,8 +405,10 @@ mod tests {
             json!(chrono::Utc::now().timestamp() + 3600),
         );
 
+        let trusted_issuer = builder.find_trusted_issuer_by_iss(issuer);
+
         let token_claims = TokenClaims::from(all_claims);
-        Token::new("Jans::Access_Token", token_claims, None)
+        Token::new("Jans::Access_Token", token_claims, trusted_issuer)
     }
 
     fn create_test_resource() -> EntityData {
@@ -463,7 +472,7 @@ mod tests {
 
         let mut claims = HashMap::new();
         claims.insert("sub".to_string(), json!("user123"));
-        let token = create_test_token("https://idp.acme.com/auth", "token123", claims);
+        let token = create_test_token("https://idp.acme.com/auth", "token123", claims, &builder);
 
         let key = builder
             .generate_entity_key("Jans::Access_Token", &token)
@@ -477,7 +486,12 @@ mod tests {
 
         let mut claims = HashMap::new();
         claims.insert("sub".to_string(), json!("user123"));
-        let token = create_test_token("https://unknown.issuer.com/auth", "token123", claims);
+        let token = create_test_token(
+            "https://unknown.issuer.com/auth",
+            "token123",
+            claims,
+            &builder,
+        );
 
         let key = builder
             .generate_entity_key("Custom::Employee_Token", &token)
@@ -493,12 +507,12 @@ mod tests {
 
         let mut claims1 = HashMap::new();
         claims1.insert("sub".to_string(), json!("user1"));
-        let token1 = create_test_token("https://idp.acme.com/auth", "token1", claims1);
+        let token1 = create_test_token("https://idp.acme.com/auth", "token1", claims1, &builder);
         tokens.insert("Jans::Access_Token".to_string(), token1);
 
         let mut claims2 = HashMap::new();
         claims2.insert("sub".to_string(), json!("user2"));
-        let token2 = create_test_token("https://idp.acme.com/auth", "token2", claims2);
+        let token2 = create_test_token("https://idp.acme.com/auth", "token2", claims2, &builder);
         tokens.insert("Jans::Access_Token2".to_string(), token2);
 
         let tokens: HashMap<String, Arc<Token>> =
@@ -523,13 +537,13 @@ mod tests {
         // Token from Acme issuer
         let mut claims1 = HashMap::new();
         claims1.insert("sub".to_string(), json!("user1"));
-        let token1 = create_test_token("https://idp.acme.com/auth", "token1", claims1);
+        let token1 = create_test_token("https://idp.acme.com/auth", "token1", claims1, &builder);
         tokens.insert("Jans::Access_Token".to_string(), token1);
 
         // Token from Dolphin issuer
         let mut claims2 = HashMap::new();
         claims2.insert("sub".to_string(), json!("user2"));
-        let token2 = create_test_token("https://idp.dolphin.sea/auth", "token2", claims2);
+        let token2 = create_test_token("https://idp.dolphin.sea/auth", "token2", claims2, &builder);
         tokens.insert("Acme::DolphinToken".to_string(), token2);
 
         // Token from same issuer but different type
@@ -567,7 +581,7 @@ mod tests {
         claims.insert("sub".to_string(), json!("user123"));
         claims.insert("scope".to_string(), json!(["read:profile", "write:data"]));
         claims.insert("aud".to_string(), json!("my-client"));
-        let token = create_test_token("https://idp.acme.com/auth", "token123", claims);
+        let token = create_test_token("https://idp.acme.com/auth", "token123", claims, &builder);
 
         let entity = builder.build_single_token_entity(&token).unwrap();
 
@@ -577,7 +591,7 @@ mod tests {
         // Check core attributes exist
         assert!(entity.attr("token_type").is_some());
         assert!(entity.attr("jti").is_some());
-        assert!(entity.attr("issuer").is_some());
+        assert!(entity.attr("iss").is_some());
         assert!(entity.attr("validated_at").is_some());
         assert!(entity.attr("exp").is_some());
 
@@ -631,7 +645,6 @@ mod tests {
         // But iss is Trusted Issuer Object
         let config = EntityBuilderConfig {
             entity_names: EntityNames {
-                iss: "Issuer".to_string(),
                 user: "User".to_string(),
                 role: "Role".to_string(),
                 workload: "Workload".to_string(),
@@ -700,7 +713,6 @@ mod tests {
 
         let config = EntityBuilderConfig {
             entity_names: EntityNames {
-                iss: "Issuer".to_string(),
                 user: "User".to_string(),
                 role: "Role".to_string(),
                 workload: "Workload".to_string(),
@@ -764,6 +776,7 @@ mod tests {
                     aud: String,
                     custom_claim: Long
                 };
+                entity TrustedIssuer = {"issuer_entity_id": String};
             }
         "#;
 
@@ -772,7 +785,7 @@ mod tests {
 
         let config = EntityBuilderConfig {
             entity_names: EntityNames {
-                iss: "Issuer".to_string(),
+                // user, role and workload is unused
                 user: "User".to_string(),
                 role: "Role".to_string(),
                 workload: "Workload".to_string(),
@@ -782,7 +795,14 @@ mod tests {
             unsigned_role_id_src: UnsignedRoleIdSrc::default(),
         };
 
-        let trusted_issuers = HashMap::new();
+        let trusted_issuers = HashMap::from_iter(vec![(
+            "Jans".to_string(),
+            TrustedIssuer {
+                name: "Jans".to_string(),
+                oidc_endpoint: Url::parse("https://test.issuer.com").unwrap(),
+                ..Default::default()
+            },
+        )]);
         let builder = EntityBuilder::new(
             config,
             &trusted_issuers,
@@ -791,10 +811,11 @@ mod tests {
             None,
             crate::log::TEST_LOGGER.clone(),
         )
-        .unwrap();
+        .expect("could not build EntityBuilder");
 
+        let iss = "https://test.issuer.com";
         let mut claims = HashMap::new();
-        claims.insert("iss".to_string(), json!("https://test.issuer.com"));
+        claims.insert("iss".to_string(), json!(iss));
         claims.insert("jti".to_string(), json!("test-jti-123"));
         claims.insert("sub".to_string(), json!("user123"));
         claims.insert("scope".to_string(), json!(["read:profile", "write:data"]));
@@ -805,9 +826,15 @@ mod tests {
             json!(chrono::Utc::now().timestamp() + 3600),
         );
         let token_claims = TokenClaims::from(claims);
-        let token = Token::new("Jans::Access_Token", token_claims, None);
+        let token = Token::new(
+            "Jans::Access_Token",
+            token_claims,
+            builder.find_trusted_issuer_by_iss(iss),
+        );
 
         let entity = builder.build_single_token_entity(&token).unwrap();
+
+        println!("entity: {}", entity.to_json_string().unwrap());
 
         // Schema-based processing should preserve types according to schema
         assert!(entity.tag("sub").is_some());
@@ -830,7 +857,7 @@ mod tests {
         // Valid token
         let mut claims1 = HashMap::new();
         claims1.insert("sub".to_string(), json!("user1"));
-        let token1 = create_test_token("https://idp.acme.com/auth", "token1", claims1);
+        let token1 = create_test_token("https://idp.acme.com/auth", "token1", claims1, &builder);
         tokens.insert("Jans::Access_Token".to_string(), token1);
 
         // Invalid token (missing issuer)
@@ -844,7 +871,7 @@ mod tests {
         // Another valid token
         let mut claims3 = HashMap::new();
         claims3.insert("sub".to_string(), json!("user3"));
-        let token3 = create_test_token("https://idp.dolphin.sea/auth", "token3", claims3);
+        let token3 = create_test_token("https://idp.dolphin.sea/auth", "token3", claims3, &builder);
         tokens.insert("Acme::DolphinToken".to_string(), token3);
 
         let tokens: HashMap<String, Arc<Token>> =
@@ -912,7 +939,6 @@ mod tests {
 
         let config = EntityBuilderConfig {
             entity_names: EntityNames {
-                iss: "Issuer".to_string(),
                 user: "User".to_string(),
                 role: "Role".to_string(),
                 workload: "Workload".to_string(),

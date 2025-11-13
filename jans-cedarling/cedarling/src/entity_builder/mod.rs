@@ -326,7 +326,9 @@ impl EntityBuilder {
             .values()
             .map(|iss| {
                 let iss_id = normalize_issuer(&iss.oidc_endpoint.origin().ascii_serialization());
-                build_iss_entity(&config.entity_names.iss, &iss_id, iss, schema.as_ref())
+
+                let iss_type_name = Self::trusted_issuer_cedar_uid(&iss.name, &iss_id)?;
+                build_iss_entity(&iss_type_name.to_string(), &iss_id, iss, schema.as_ref())
             })
             .partition_result();
 
@@ -475,12 +477,27 @@ impl EntityBuilder {
     }
 
     pub fn trusted_issuer_cedar_uid(
-        &self,
         namespace: &str,
         iss_url: &str,
     ) -> Result<EntityUid, BuildEntityError> {
         let iss_id = normalize_issuer(iss_url);
         build_cedar_uid(&format!("{namespace}::TrustedIssuer"), &iss_id)
+    }
+
+    #[cfg(test)]
+    // is used only for testing to get trusted issuer
+    fn find_trusted_issuer_by_iss(&self, issuer: &str) -> Option<Arc<TrustedIssuer>> {
+        // First, try to find the issuer in trusted issuer metadata
+        for trusted_issuer in self.trusted_issuers.values() {
+            let trusted_issuer_url = trusted_issuer.oidc_endpoint.origin().ascii_serialization();
+            // Compare both the full URL and just the origin
+            if trusted_issuer_url == issuer || trusted_issuer.oidc_endpoint.as_str() == issuer {
+                // Use the trusted issuer's name field
+                return Some(Arc::new(trusted_issuer.to_owned()));
+            }
+        }
+
+        None
     }
 }
 
