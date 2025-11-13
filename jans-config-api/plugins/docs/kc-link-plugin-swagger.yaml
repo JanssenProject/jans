@@ -36,6 +36,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/kc-link-config.readonly
+      - oauth2:
+        - https://jans.io/oauth/kc-link-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/kc-link.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     put:
       tags:
       - KC Link - Configuration
@@ -66,6 +72,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/kc-link-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/kc-link.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     patch:
       tags:
       - KC Link - Configuration
@@ -98,6 +108,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/kc-link-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/kc-link.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
 components:
   schemas:
     AppConfiguration:

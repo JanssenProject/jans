@@ -51,16 +51,19 @@ public class SamlConfigResource extends BaseResource {
     SamlConfigService samlConfigService;
 
     @Operation(summary = "Gets SAML configuration properties", description = "Gets SAML configuration properties", operationId = "get-saml-properties", tags = {
-            "SAML - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_CONFIG_READ_ACCESS }))
+            "SAML - Configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SamlAppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.SAML_CONFIG_READ_ACCESS }, groupScopes = {
-            Constants.SAML_CONFIG_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            Constants.SAML_CONFIG_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, })
     public Response getSamlConfiguration() {
         SamlAppConfiguration samlConfiguration = samlConfigService.find();
         logger.info("SAML details samlConfiguration():{}", samlConfiguration);
@@ -68,15 +71,18 @@ public class SamlConfigResource extends BaseResource {
     }
 
     @Operation(summary = "Update SAML configuration properties", description = "Update SAML configuration properties", operationId = "put-saml-properties", tags = {
-            "SAML - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_CONFIG_WRITE_ACCESS }))
+            "SAML - Configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SamlAppConfiguration.class), examples = @ExampleObject(name = "Request example", value = "example/saml/config/saml-put.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SamlAppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @PUT    @ProtectedApi(scopes = { Constants.SAML_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @PUT
+    @ProtectedApi(scopes = { Constants.SAML_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SAML_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateSamlConfiguration(@Valid SamlAppConfiguration samlConfiguration) {
         logger.info("Update SAML details samlConfiguration():{}", samlConfiguration);
         SamlConf conf = samlConfigService.findSamlConf();
@@ -89,8 +95,10 @@ public class SamlConfigResource extends BaseResource {
     }
 
     @Operation(summary = "Partially modifies SAML configuration properties.", description = "Partially modifies SAML Configuration properties.", operationId = "patch-saml-properties", tags = {
-            "SAML - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_CONFIG_WRITE_ACCESS }))
+            "SAML - Configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/saml/config/saml-patch.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SamlAppConfiguration.class))),
@@ -99,7 +107,7 @@ public class SamlConfigResource extends BaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { Constants.SAML_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            Constants.SAML_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchSamlConfiguration(@NotNull String jsonPatchString) throws JsonPatchException, IOException {
         logger.info("Config API - jsonPatchString:{} ", jsonPatchString);
         SamlConf conf = samlConfigService.findSamlConf();

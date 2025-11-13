@@ -111,7 +111,7 @@ public class UserMgmtService {
                     descriptionFilter = Filter.createSubstringFilter(
                             Filter.createLowercaseFilter(AttributeConstants.DESCRIPTION), null, targetArray, null);
                     mailFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.MAIL),
-                            null, targetArray, null);
+                            null, targetArray, null).multiValued(3);
                     givenNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("givenName"), null,
                             targetArray, null);
                     middleNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("middleName"), null,
@@ -127,7 +127,7 @@ public class UserMgmtService {
                             null);
                     descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
                             null);
-                    mailFilter = Filter.createSubstringFilter(AttributeConstants.MAIL, null, targetArray, null);
+                    mailFilter = Filter.createSubstringFilter(AttributeConstants.MAIL, null, targetArray, null).multiValued(3);
                     givenNameFilter = Filter.createSubstringFilter("givenName", null, targetArray, null);
                     middleNameFilter = Filter.createSubstringFilter("middleName", null, targetArray, null);
                     nicknameFilter = Filter.createSubstringFilter("nickname", null, targetArray, null);

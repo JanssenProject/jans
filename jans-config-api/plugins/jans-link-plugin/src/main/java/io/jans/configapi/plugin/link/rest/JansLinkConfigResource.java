@@ -51,15 +51,19 @@ public class JansLinkConfigResource extends BaseResource {
     private EncryptionService encryptionService;
 
     @Operation(summary = "Gets Jans Link App configuration.", description = "Gets Jans Link App configuration.", operationId = "get-jans-link-properties", tags = {
-            "Jans Link - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.JANSLINK_CONFIG_READ_ACCESS }))
+            "Jans Link - Configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANSLINK_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANSLINK_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANSLINK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.JANSLINK_CONFIG_READ_ACCESS }, groupScopes = {
-            Constants.JANSLINK_CONFIG_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            Constants.JANSLINK_CONFIG_WRITE_ACCESS }, superScopes = { Constants.JANSLINK_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getJansLinkConfiguration() {
         AppConfiguration appConfiguration = this.jansLinkService.find();
         logger.debug("Jans Link details appConfiguration():{}", appConfiguration);
@@ -67,8 +71,10 @@ public class JansLinkConfigResource extends BaseResource {
     }
 
     @Operation(summary = "Updates Jans Link configuration properties.", description = "Updates Jans Link configuration properties.", operationId = "put-jans-link-properties", tags = {
-            "Jans Link - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.JANSLINK_CONFIG_WRITE_ACCESS }))
+            "Jans Link - Configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANSLINK_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANSLINK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "JansLinkConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "JansLinkConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
@@ -76,7 +82,7 @@ public class JansLinkConfigResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @ProtectedApi(scopes = { Constants.JANSLINK_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            Constants.JANSLINK_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateJansLinkConfiguration(@NotNull AppConfiguration appConfiguration) throws EncryptionException {
         logger.debug("Jans Link details to be updated - appConfiguration:{} ", appConfiguration);
         checkResourceNotNull(appConfiguration, JANSLINK_CONFIGURATION);

@@ -77,14 +77,19 @@ public class UserResource extends BaseResource {
     UserMgmtService userMgmtSrv;
 
     @Operation(summary = "Gets list of users", description = "Gets list of users", operationId = "get-user", tags = {
-            "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.USER_READ_ACCESS }))
+            "Configuration – User Management" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UserPagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/user/user-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.USER_WRITE_ACCESS }, superScopes = { ApiAccessConstants.USER_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getUsers(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -108,15 +113,20 @@ public class UserResource extends BaseResource {
     }
 
     @Operation(summary = "Get User by Inum", description = "Get User by Inum", operationId = "get-user-by-inum", tags = {
-            "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.USER_READ_ACCESS }))
+            "Configuration – User Management" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "CustomUser identified by inum"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.USER_WRITE_ACCESS }, superScopes = { ApiAccessConstants.USER_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getUserByInum(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
@@ -140,8 +150,10 @@ public class UserResource extends BaseResource {
     }
 
     @Operation(summary = "Create new User", description = "Create new User", operationId = "post-user", tags = {
-            "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.USER_WRITE_ACCESS }))
+            "Configuration – User Management" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "User object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user-post.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Created Object"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
@@ -150,7 +162,8 @@ public class UserResource extends BaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.USER_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createUser(@Valid CustomUser customUser,
             @Parameter(description = "Boolean flag to indicate if attributes to be removed for non-LDAP DB. Default value is true, indicating non-LDAP attributes will be removed from request.") @DefaultValue("true") @QueryParam(value = ApiConstants.REMOVE_NON_LDAP_ATTRIBUTES) boolean removeNonLDAPAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
@@ -198,8 +211,10 @@ public class UserResource extends BaseResource {
     }
 
     @Operation(summary = "Update User", description = "Update User", operationId = "put-user", tags = {
-            "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.USER_WRITE_ACCESS }))
+            "Configuration – User Management" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "User object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
@@ -208,7 +223,8 @@ public class UserResource extends BaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.USER_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateUser(@Valid CustomUser customUser,
             @Parameter(description = "Boolean flag to indicate if attributes to be removed for non-LDAP DB. Default value is true, indicating non-LDAP attributes will be removed from request.") @DefaultValue("true") @QueryParam(value = ApiConstants.REMOVE_NON_LDAP_ATTRIBUTES) boolean removeNonLDAPAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
@@ -258,8 +274,10 @@ public class UserResource extends BaseResource {
     }
 
     @Operation(summary = "Patch user properties by Inum", description = "Patch user properties by Inum", operationId = "patch-user-by-inum", tags = {
-            "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.USER_WRITE_ACCESS }))
+            "Configuration – User Management" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "UserPatchRequest", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UserPatchRequest.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user-patch.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Patched CustomUser Object"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
@@ -268,7 +286,8 @@ public class UserResource extends BaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.USER_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchUser(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
@@ -310,15 +329,18 @@ public class UserResource extends BaseResource {
     }
 
     @Operation(summary = "Delete User", description = "Delete User", operationId = "delete-user", tags = {
-            "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.USER_DELETE_ACCESS }))
+            "Configuration – User Management" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.USER_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteUser(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isInfoEnabled()) {

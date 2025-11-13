@@ -36,6 +36,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans-link.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/jans-link.write
+      - oauth2:
+        - https://jans.io/oauth/config/link.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
     put:
       tags:
       - Jans Link - Configuration
@@ -62,6 +68,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans-link.write
+      - oauth2:
+        - https://jans.io/oauth/config/link.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
 components:
   schemas:
     AppConfiguration:
