@@ -87,11 +87,11 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
     {
         // First try to deserialize into a Value to get better error messages
         let value = serde_json::Value::deserialize(deserializer)?;
-        
+
         // Check for required fields
-        let obj = value.as_object().ok_or_else(|| {
-            de::Error::custom("policy store must be a JSON object")
-        })?;
+        let obj = value
+            .as_object()
+            .ok_or_else(|| de::Error::custom("policy store must be a JSON object"))?;
 
         // Check cedar_version field
         let cedar_version = obj.get("cedar_version").ok_or_else(|| {
@@ -105,23 +105,19 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
 
         // Now deserialize the actual struct
         let mut store = AgamaPolicyStore {
-            cedar_version: parse_cedar_version(cedar_version).map_err(|e| {
-                de::Error::custom(format!("invalid cedar_version format: {}", e))
-            })?,
+            cedar_version: parse_cedar_version(cedar_version)
+                .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {}", e)))?,
             policy_stores: HashMap::new(),
         };
 
         // Deserialize policy stores
-        let stores_obj = policy_stores.as_object().ok_or_else(|| {
-            de::Error::custom("'policy_stores' must be a JSON object")
-        })?;
+        let stores_obj = policy_stores
+            .as_object()
+            .ok_or_else(|| de::Error::custom("'policy_stores' must be a JSON object"))?;
 
         for (key, value) in stores_obj {
             let policy_store = PolicyStore::deserialize(value).map_err(|e| {
-                de::Error::custom(format!(
-                    "error parsing policy store '{}': {}",
-                    key, e
-                ))
+                de::Error::custom(format!("error parsing policy store '{}': {}", key, e))
             })?;
             store.policy_stores.insert(key.clone(), policy_store);
         }
@@ -237,6 +233,7 @@ pub struct PolicyStoreWithID {
 #[derive(Debug, Clone, Deserialize, PartialEq)]
 pub struct TrustedIssuer {
     /// The name of the trusted issuer.
+    /// Name also describe namespace in Cedar policy where entity `TrustedIssuer` is located.
     pub name: String,
     /// A brief description of the trusted issuer.
     pub description: String,

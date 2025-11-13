@@ -25,6 +25,9 @@ pub enum MultiIssuerEntityError {
 
     #[error("No valid tokens found")]
     NoValidTokens,
+
+    #[error("Could not create cedar uid for trusted issuer: {0}")]
+    BuildTrustedIssuerUid(#[from] BuildEntityError),
 }
 
 /// Sanitize issuer name for Cedar compatibility
@@ -221,10 +224,15 @@ impl EntityBuilder {
             "jti".to_string(),
             RestrictedExpression::new_string(entity_id.clone()),
         );
-        attrs.insert(
-            "issuer".to_string(),
-            RestrictedExpression::new_string(issuer.to_string()),
-        );
+
+        if let Some(token_iss) = &token.iss {
+            attrs.insert(
+                "iss".to_string(),
+                RestrictedExpression::new_entity_uid(
+                    self.trusted_issuer_cedar_uid(&token_iss.name, &issuer.to_string())?,
+                ),
+            );
+        }
 
         // Add expiration timestamp
         if let Some(exp) = token.get_claim_val("exp").and_then(|v| v.as_i64()) {
@@ -617,9 +625,79 @@ mod tests {
     }
 
     #[test]
-    fn test_schema_less_processing() {
+    fn test_schema_less_processing_with_trusted_issuer() {
         // Test schema-less processing (no schema provided)
         // According to design doc: "without a schema, all claims default to Set of String for consistency"
+        // But iss is Trusted Issuer Object
+        let config = EntityBuilderConfig {
+            entity_names: EntityNames {
+                iss: "Issuer".to_string(),
+                user: "User".to_string(),
+                role: "Role".to_string(),
+                workload: "Workload".to_string(),
+            },
+            build_user: false,
+            build_workload: false,
+            unsigned_role_id_src: UnsignedRoleIdSrc::default(),
+        };
+
+        let trusted_issuers = HashMap::new();
+        let builder = EntityBuilder::new(
+            config,
+            &trusted_issuers,
+            None,
+            None,
+            None,
+            crate::log::TEST_LOGGER.clone(),
+        )
+        .unwrap();
+
+        let mut claims = HashMap::new();
+        claims.insert("iss".to_string(), json!("https://test.issuer.com"));
+        claims.insert("jti".to_string(), json!("test-jti-123"));
+        claims.insert("sub".to_string(), json!("user123")); // String claim
+        claims.insert("scope".to_string(), json!(["read:profile", "write:data"])); // Array claim
+        claims.insert("aud".to_string(), json!("my-client")); // String claim
+        claims.insert("age".to_string(), json!(25)); // Number claim
+        claims.insert("is_admin".to_string(), json!(true)); // Boolean claim
+        claims.insert(
+            "exp".to_string(),
+            json!(chrono::Utc::now().timestamp() + 3600),
+        );
+        let token_claims = TokenClaims::from(claims);
+        let token = Token::new(
+            "Jans::Access_Token",
+            token_claims,
+            Some(Arc::new(TrustedIssuer {
+                name: "Jans".to_string(),
+                description: "".to_string(),
+                oidc_endpoint: Url::parse("https://example.com/.well-known/openid-configuration")
+                    .expect("url should be parsed"),
+                token_metadata: HashMap::new(),
+            })),
+        );
+
+        let entity = builder.build_single_token_entity(&token).unwrap();
+
+        // In schema-less mode, ALL claims should be converted to String Sets (Set of String)
+        // This includes single values, arrays, numbers, and booleans
+        assert!(entity.tag("sub").is_some()); // String -> Set of String
+        assert!(entity.tag("scope").is_some()); // Array -> Set of String
+        assert!(entity.tag("aud").is_some()); // String -> Set of String
+        assert!(entity.tag("age").is_some()); // Number -> Set of String
+        assert!(entity.tag("is_admin").is_some()); // Boolean -> Set of String
+
+        // Core attributes should still be present
+        assert!(entity.attr("token_type").is_some());
+        assert!(entity.attr("jti").is_some());
+        assert!(entity.attr("iss").is_some());
+    }
+
+    #[test]
+    fn test_schema_less_processing_without_trusted_issuer() {
+        // Test schema-less processing (no schema provided)
+        // According to design doc: "without a schema, all claims default to Set of String for consistency"
+
         let config = EntityBuilderConfig {
             entity_names: EntityNames {
                 iss: "Issuer".to_string(),
@@ -671,7 +749,8 @@ mod tests {
         // Core attributes should still be present
         assert!(entity.attr("token_type").is_some());
         assert!(entity.attr("jti").is_some());
-        assert!(entity.attr("issuer").is_some());
+        // Iss is none so field iss also should be empty
+        assert!(entity.attr("iss").is_none());
     }
 
     #[test]
@@ -739,7 +818,7 @@ mod tests {
         // Core attributes should still be present
         assert!(entity.attr("token_type").is_some());
         assert!(entity.attr("jti").is_some());
-        assert!(entity.attr("issuer").is_some());
+        assert!(entity.attr("iss").is_some());
     }
 
     #[test]

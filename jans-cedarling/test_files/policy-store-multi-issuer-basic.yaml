@@ -161,7 +161,7 @@ policy_stores:
           entity Access_Token = {
             token_type: String,
             jti: String,
-            issuer: String,
+            iss: TrustedIssuer,
             validated_at: Long,
             exp: Long,
             sub?: String,
@@ -172,7 +172,7 @@ policy_stores:
           entity Id_Token = {
             token_type: String,
             jti: String,
-            issuer: String,
+            iss: TrustedIssuer,
             validated_at: Long,
             exp: Long,
             sub?: String,
@@ -225,7 +225,7 @@ policy_stores:
           entity Access_Token = {
             token_type: String,
             jti: String,
-            issuer: String,
+            iss: TrustedIssuer,
             validated_at: Long,
             exp: Long,
             sub?: String,
@@ -235,7 +235,7 @@ policy_stores:
           entity Dolphin_Token = {
             token_type: String,
             jti: String,
-            issuer: String,
+            iss: TrustedIssuer,
             validated_at: Long,
             exp: Long,
             sub?: String,

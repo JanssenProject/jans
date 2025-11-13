@@ -473,6 +473,15 @@ impl EntityBuilder {
 
         build_cedar_entity(type_name, id, attrs, parents)
     }
+
+    pub fn trusted_issuer_cedar_uid(
+        &self,
+        namespace: &str,
+        iss_url: &str,
+    ) -> Result<EntityUid, BuildEntityError> {
+        let iss_id = normalize_issuer(iss_url);
+        build_cedar_uid(&format!("{namespace}::TrustedIssuer"), &iss_id)
+    }
 }
 
 pub struct BuiltEntitiesUnsigned {
@@ -482,17 +491,23 @@ pub struct BuiltEntitiesUnsigned {
     pub built_entities: BuiltEntities,
 }
 
+pub fn build_cedar_uid(type_name: &str, id: &str) -> Result<EntityUid, BuildEntityError> {
+    Ok(
+        EntityUid::from_str(&format!("{}::\"{}\"", type_name, id)).map_err(
+            |e: cedar_policy::ParseErrors| {
+                BuildEntityErrorKind::from(Box::new(e)).while_building(type_name)
+            },
+        )?,
+    )
+}
+
 pub fn build_cedar_entity(
     type_name: &str,
     id: &str,
     attrs: HashMap<String, RestrictedExpression>,
     parents: HashSet<EntityUid>,
 ) -> Result<Entity, BuildEntityError> {
-    let uid = EntityUid::from_str(&format!("{}::\"{}\"", type_name, id)).map_err(
-        |e: cedar_policy::ParseErrors| {
-            BuildEntityErrorKind::from(Box::new(e)).while_building(type_name)
-        },
-    )?;
+    let uid = build_cedar_uid(type_name, id)?;
     let entity = Entity::new(uid, attrs, parents)
         .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
 
