@@ -113,7 +113,7 @@ authentication method listed below:
 Refer to [Client Authentication](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication) section of OpenID
 Connect core specification for more details on these authentication methods.
 
-AS provides ability to customer Client Authentication behavior via [Client Authentication custom script](../../../script-catalog/client_authn/client-authn.md)
+AS provides ability to customize Client Authentication behavior via [Client Authentication custom script](../../../script-catalog/client_authn/client-authn.md)
 
 
 Client can specify the default authentication method. To set default authentication method using
