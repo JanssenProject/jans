@@ -58,8 +58,6 @@ pub struct EntityNames {
     pub workload: String,
     /// The entity type name of the `Role` entity
     pub role: String,
-    // /// The entity type name of the `TrustedIssuer` entity
-    // pub iss: String,
 }
 
 /// Unsigned role ID source

@@ -327,7 +327,7 @@ impl EntityBuilder {
             .map(|iss| {
                 let iss_id = normalize_issuer(&iss.oidc_endpoint.origin().ascii_serialization());
 
-                let iss_type_name = Self::trusted_issuer_cedar_uid(&iss.name, &iss_id)?;
+                let iss_type_name = Self::trusted_issuer_typename(&iss.name);
                 build_iss_entity(&iss_type_name.to_string(), &iss_id, iss, schema.as_ref())
             })
             .partition_result();
@@ -474,6 +474,10 @@ impl EntityBuilder {
             .map_err(|e| BuildEntityErrorKind::from(e).while_building(type_name))?;
 
         build_cedar_entity(type_name, id, attrs, parents)
+    }
+
+    pub fn trusted_issuer_typename(namespace: &str) -> String {
+        format!("{namespace}::TrustedIssuer")
     }
 
     pub fn trusted_issuer_cedar_uid(
@@ -847,7 +851,7 @@ mod test {
 
         // Create trusted issuer
         let trusted_issuer = TrustedIssuer {
-            name: "Test Issuer".to_string(),
+            name: "Jans".to_string(),
             description: "Test".to_string(),
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
@@ -1026,6 +1030,9 @@ mod test {
                     description: String
                 };
             }
+            namespace Jans2 {
+                entity TrustedIssuer;
+            }   
         "#;
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
@@ -1044,7 +1051,7 @@ mod test {
 
         // Create trusted issuer
         let trusted_issuer = TrustedIssuer {
-            name: "Test Issuer".to_string(),
+            name: "Jans2".to_string(),
             description: "Test".to_string(),
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
@@ -1194,7 +1201,7 @@ mod test {
 
         // Create trusted issuer
         let trusted_issuer = TrustedIssuer {
-            name: "Test Issuer".to_string(),
+            name: "Jans".to_string(),
             description: "Test".to_string(),
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
@@ -1388,7 +1395,7 @@ mod test {
 
         // Create trusted issuer
         let trusted_issuer = TrustedIssuer {
-            name: "Test Issuer".to_string(),
+            name: "Jans".to_string(),
             description: "Test".to_string(),
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),

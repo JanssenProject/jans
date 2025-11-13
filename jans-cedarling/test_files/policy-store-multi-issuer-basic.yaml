@@ -178,7 +178,7 @@ policy_stores:
             sub?: String,
             aud?: Set<String>,
           } tags Set<String>;
-          entity TrustedIssuer = {"issuer_entity_id": String};
+          entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
           entity Resource = {"name": String};
           entity Any;
           action "GetFood" appliesTo {
@@ -241,7 +241,7 @@ policy_stores:
             sub?: String,
             waiver?: String,
           } tags Set<String>;
-          entity TrustedIssuer = {"issuer_entity_id": String};
+          entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
         }
         
         namespace Jans {

@@ -986,6 +986,10 @@ mod tests {
         // Core attributes should still be present
         assert!(entity.attr("token_type").is_some());
         assert!(entity.attr("jti").is_some());
-        assert!(entity.attr("issuer").is_some());
+        //
+        assert!(
+            entity.attr("iss").is_none(),
+            "in `Token::new` iss is none, so empty iss should be in result"
+        );
     }
 }
