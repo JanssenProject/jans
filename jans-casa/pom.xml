@@ -92,7 +92,7 @@
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-bom</artifactId>
-                <version>1.74.0</version>
+                <version>1.76.0</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
