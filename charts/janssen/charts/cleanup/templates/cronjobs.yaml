@@ -1,4 +1,4 @@
-{{ if and (index .Values "global" "cleanup" "enabled") (.Values.global.saml.enabled) -}}
+{{ if .Values.global.cleanup.enabled -}}
 kind: CronJob
 apiVersion: batch/v1
 metadata:

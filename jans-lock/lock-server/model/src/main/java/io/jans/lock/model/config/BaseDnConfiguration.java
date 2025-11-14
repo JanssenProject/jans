@@ -19,7 +19,6 @@ package io.jans.lock.model.config;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.enterprise.inject.Vetoed;
-import jakarta.xml.bind.annotation.XmlElement;
 
 /**
  * 
@@ -37,7 +36,13 @@ public class BaseDnConfiguration {
 	private String scripts;
 	private String metric;
 	private String stat;
+	private String audit;
 
+	/**
+	 * Gets the base DN for configuration entries.
+	 *
+	 * @return the configuration base DN, or null if not set
+	 */
 	public String getConfiguration() {
 		return configuration;
 	}
@@ -98,8 +103,31 @@ public class BaseDnConfiguration {
 		return stat;
 	}
 
+	/**
+	 * Sets the base DN for statistics entries.
+	 *
+	 * @param stat the base DN to use for statistics
+	 */
 	public void setStat(String stat) {
 		this.stat = stat;
+	}
+
+	/**
+	 * Gets the base DN for audit entries.
+	 *
+	 * @return the audit base DN, or {@code null} if not set
+	 */
+	public String getAudit() {
+		return audit;
+	}
+
+	/**
+	 * Sets the audit base DN.
+	 *
+	 * @param audit the base DN for audit entries
+	 */
+	public void setAudit(String audit) {
+		this.audit = audit;
 	}
 
 }

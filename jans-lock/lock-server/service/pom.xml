@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>jans-lock-server-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.12.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -74,6 +74,11 @@
 
 		<dependency>
 			<groupId>io.jans</groupId>
+			<artifactId>jans-lock-cedarling</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jans</groupId>
 			<artifactId>jans-core-model</artifactId>
 		</dependency>
 
@@ -86,7 +91,7 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-service</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-auth-model</artifactId>

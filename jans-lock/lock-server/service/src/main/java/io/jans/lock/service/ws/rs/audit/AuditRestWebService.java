@@ -16,6 +16,7 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
+import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.audit.HealthEntry;
 import io.jans.lock.model.audit.LogEntry;
 import io.jans.lock.model.audit.TelemetryEntry;
@@ -61,7 +62,8 @@ public interface AuditRestWebService {
 	@Path("/health")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS })
-	Response processHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_health_write", path="/audit/health")
+	Response processHealthRequest(@Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
 	@Operation(summary = "Bulk save health data", description = "Bulk save health data", tags = {
@@ -77,7 +79,8 @@ public interface AuditRestWebService {
 	@Path("/health/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS })
-	Response processBulkHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_health_write", path="/audit/health")
+	Response processBulkHealthRequest(@Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
 	@Operation(summary = "Save log data", description = "Save log data", tags = {
@@ -93,7 +96,8 @@ public interface AuditRestWebService {
 	@Path("/log")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_LOG_WRITE_ACCESS })
-	Response processLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_log_write", path="/audit/log")
+	Response processLogRequest(@Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
 	@Operation(summary = "Bulk save log data", description = "Bulk save log data", tags = {
@@ -109,7 +113,8 @@ public interface AuditRestWebService {
 	@Path("/log/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_LOG_WRITE_ACCESS })
-	Response processBulkLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_log_write", path="/audit/log")
+	Response processBulkLogRequest(@Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
 	@Operation(summary = "Save telemetry data", description = "Save telemetry data", tags = {
@@ -125,7 +130,8 @@ public interface AuditRestWebService {
 	@Path("/telemetry")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS })
-	Response processTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_telemetry_write", path="/audit/telemetry")
+	Response processTelemetryRequest(@Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
 	@Operation(summary = "Bulk save telemetry data", description = "Bulk save telemetry data", tags = {
@@ -141,7 +147,8 @@ public interface AuditRestWebService {
 	@Path("/telemetry/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS })
-	Response processBulkTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_telemetry_write", path="/audit/telemetry")
+	Response processBulkTelemetryRequest(@Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
 }

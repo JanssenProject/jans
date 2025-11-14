@@ -17,11 +17,11 @@
 package io.jans.lock.model.config;
 
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.doc.annotation.DocProperty;
+import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.enterprise.inject.Vetoed;
 
@@ -46,6 +46,18 @@ public class AppConfiguration implements Configuration {
     @Schema(description = "OpenID issuer URL")
     private String openIdIssuer;
 
+    @DocProperty(description = "Protection mode for the Lock server (OAuth or Cedarling)")
+    @Schema(description = "Protection mode for the Lock server (OAuth or Cedarling)")
+    private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
+
+    @DocProperty(description = "Audit persistence mode")
+    @Schema(description = "Audit persistence mode")
+    private AuditPersistenceMode auditPersistenceMode = AuditPersistenceMode.INTERNAL;
+
+    @DocProperty(description = "Cedarling configuration")
+    @Schema(description = "Cedarling configuration")
+    private CedarlingConfiguration cedarlingConfiguration;
+
     @DocProperty(description = "Active stat enabled")
     @Schema(description = "Active stat enabled")
     private boolean statEnabled;
@@ -65,18 +77,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Lock client password")
     @Schema(description = "Lock client password")
     private String clientPassword;
-
-    @DocProperty(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
-    @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
-    private String tokenUrl;
-
-    @DocProperty(description = "Endpoint groups")
-    @Schema(description = "Endpoint groups")
-    private Map<String, List<String>> endpointGroups;
-
-    @DocProperty(description = "Jans URL of config-api audit endpoints and corresponding scope details")
-    @Schema(description = "Jans URL of config-api audit endpoints and corresponding scope details")
-    private Map<String, List<String>> endpointDetails;
 
     @DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
     @Schema(description = "Choose whether to disable JDK loggers")
@@ -146,9 +146,53 @@ public class AppConfiguration implements Configuration {
         this.openIdIssuer = openIdIssuer;
     }
 
-    public boolean isStatEnabled() {
-        return statEnabled;
-    }
+    public LockProtectionMode getProtectionMode() {
+		return protectionMode;
+	}
+
+	/**
+	 * Set the lock protection mode.
+	 *
+	 * @param protectionMode the lock protection mode to use
+	 */
+	public void setProtectionMode(LockProtectionMode protectionMode) {
+		this.protectionMode = protectionMode;
+	}
+
+	/**
+	 * Retrieves the configured audit persistence mode used for storing audit events.
+	 *
+	 * @return the configured AuditPersistenceMode; defaults to {@link AuditPersistenceMode#INTERNAL} when not explicitly set.
+	 */
+	public AuditPersistenceMode getAuditPersistenceMode() {
+		return auditPersistenceMode;
+	}
+
+	/**
+	 * Sets the audit persistence mode for the application configuration.
+	 *
+	 * @param auditPersistenceMode the audit persistence mode to apply
+	 */
+	public void setAuditPersistenceMode(AuditPersistenceMode auditPersistenceMode) {
+		this.auditPersistenceMode = auditPersistenceMode;
+	}
+
+	/**
+	 * Accesses the Cedarling configuration for the application.
+	 *
+	 * @return the CedarlingConfiguration instance for this application, or null if not configured
+	 */
+	public CedarlingConfiguration getCedarlingConfiguration() {
+		return cedarlingConfiguration;
+	}
+
+	public void setCedarlingConfiguration(CedarlingConfiguration cedarlingConfiguration) {
+		this.cedarlingConfiguration = cedarlingConfiguration;
+	}
+
+	public boolean isStatEnabled() {
+		return statEnabled;
+	}
 
     public void setStatEnabled(boolean statEnabled) {
         this.statEnabled = statEnabled;
@@ -182,34 +226,20 @@ public class AppConfiguration implements Configuration {
         return clientPassword;
     }
 
+    /**
+     * Sets the Lock client password.
+     *
+     * @param clientPassword the client password to use for Lock authentication, or {@code null} to unset it
+     */
     public void setClientPassword(String clientPassword) {
         this.clientPassword = clientPassword;
     }
 
-    public String getTokenUrl() {
-        return tokenUrl;
-    }
-
-    public void setTokenUrl(String tokenUrl) {
-        this.tokenUrl = tokenUrl;
-    }
-
-    public Map<String, List<String>> getEndpointGroups() {
-        return endpointGroups;
-    }
-
-    public void setEndpointGroups(Map<String, List<String>> endpointGroups) {
-        this.endpointGroups = endpointGroups;
-    }
-
-    public Map<String, List<String>> getEndpointDetails() {
-        return endpointDetails;
-    }
-
-    public void setEndpointDetails(Map<String, List<String>> endpointDetails) {
-        this.endpointDetails = endpointDetails;
-    }
-
+    /**
+     * Indicates whether JDK loggers are disabled.
+     *
+     * @return `true` if JDK loggers are disabled, `false` otherwise.
+     */
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
     }
@@ -298,23 +328,28 @@ public class AppConfiguration implements Configuration {
         return cleanServiceBatchChunkSize;
     }
 
+    /**
+     * Sets the number of items processed per base DN in each clean-up iteration.
+     *
+     * @param cleanServiceBatchChunkSize the chunk size (number of entries) to process per base DN
+     */
     public void setCleanServiceBatchChunkSize(int cleanServiceBatchChunkSize) {
         this.cleanServiceBatchChunkSize = cleanServiceBatchChunkSize;
     }
 
     @Override
-    public String toString() {
-        return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
-                + openIdIssuer + ", statEnabled=" + statEnabled + ", statTimerIntervalInSeconds="
-                + statTimerIntervalInSeconds + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId
-                + ", clientPassword=" + clientPassword + ", tokenUrl=" + tokenUrl + ", endpointGroups=" + endpointGroups
-                + ", endpointDetails=" + endpointDetails + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel="
-                + loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
-                + externalLoggerConfiguration + ", metricReporterInterval=" + metricReporterInterval
-                + ", metricReporterKeepDataDays=" + metricReporterKeepDataDays + ", metricReporterEnabled="
-                + metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval + ", messageConsumerType="
-                + messageConsumerType + ", errorReasonEnabled=" + errorReasonEnabled + ", cleanServiceBatchChunkSize="
-                + cleanServiceBatchChunkSize + "]";
-    }
+	public String toString() {
+		return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
+				+ openIdIssuer + ", protectionMode=" + protectionMode + ", auditPersistenceMode=" + auditPersistenceMode
+				+ ", cedarlingConfiguration=" + cedarlingConfiguration + ", statEnabled=" + statEnabled
+				+ ", statTimerIntervalInSeconds=" + statTimerIntervalInSeconds + ", tokenChannels=" + tokenChannels
+				+ ", clientId=" + clientId + ", clientPassword=" + clientPassword + ", disableJdkLogger="
+				+ disableJdkLogger + ", loggingLevel=" + loggingLevel + ", loggingLayout=" + loggingLayout
+				+ ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", metricReporterInterval="
+				+ metricReporterInterval + ", metricReporterKeepDataDays=" + metricReporterKeepDataDays
+				+ ", metricReporterEnabled=" + metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval
+				+ ", messageConsumerType=" + messageConsumerType + ", errorReasonEnabled=" + errorReasonEnabled
+				+ ", cleanServiceBatchChunkSize=" + cleanServiceBatchChunkSize + "]";
+	}
 
 }
