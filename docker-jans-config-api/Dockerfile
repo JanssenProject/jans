@@ -109,9 +109,15 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
 
 WORKDIR /
 
-# add policy store for admin-ui and cedarling integration
-ARG FLEX_SOURCE_VERSION=dc807c4e8678477258e730206ab89da412b13594
-RUN wget -nv https://github.com/GluuFederation/flex/raw/${FLEX_SOURCE_VERSION}/flex-linux-setup/flex_linux_setup/templates/policy-store.json -O /app/templates/jans-config-api/adminui-policy-store.json
+# add default policy store (for admin-ui and cedarling integration) from https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore
+# commit hash from GluuFlexAdminUIPolicyStore
+ARG AUI_POLICY_VERSION=8e5555297feb7686fb45422165b660a9c9467dee
+# policy store filename
+ARG AUI_POLICY_FILE=2fb50e468d9dfefa142d1fce4fa9747efbd3a0f08de5.json
+
+# download policy store file and replace placeholder with parametrized variable
+RUN wget -nv https://raw.githubusercontent.com/GluuFederation/GluuFlexAdminUIPolicyStore/${AUI_POLICY_VERSION}/${AUI_POLICY_FILE} -O /app/templates/jans-config-api/adminui-policy-store.json \
+    && sed -i 's/your-openid-provider.server/%(hostname)s/g' /app/templates/jans-config-api/adminui-policy-store.json
 
 # ======
 # Python
