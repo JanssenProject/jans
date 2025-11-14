@@ -391,25 +391,35 @@ pub enum ValidationError {
 #[derive(Debug, thiserror::Error)]
 #[allow(dead_code)]
 pub enum ArchiveError {
-    /// Invalid archive format
-    #[error("Invalid archive format: {message}")]
-    InvalidFormat { message: String },
+    /// Invalid file extension (expected .cjar)
+    #[error("Invalid file extension: expected '{expected}', found '{found}'")]
+    InvalidExtension { expected: String, found: String },
 
-    /// Archive extraction failed
-    #[error("Failed to extract archive: {message}")]
-    ExtractionFailed { message: String },
+    /// Cannot read archive file
+    #[error("Cannot read archive file '{path}': {source}")]
+    CannotReadFile {
+        path: String,
+        #[source]
+        source: std::io::Error,
+    },
 
-    /// Invalid archive structure
-    #[error("Invalid archive structure: {message}")]
-    InvalidStructure { message: String },
+    /// Invalid ZIP format
+    #[error("Invalid ZIP archive format: {details}")]
+    InvalidZipFormat { details: String },
 
-    /// Archive corruption detected
-    #[error("Archive appears to be corrupted: {message}")]
-    Corrupted { message: String },
+    /// Corrupted archive entry
+    #[error("Corrupted archive entry at index {index}: {details}")]
+    CorruptedEntry { index: usize, details: String },
 
     /// Path traversal attempt detected
-    #[error("Potential path traversal detected in archive: {path}")]
+    #[error("Path traversal attempt detected in archive: '{path}'")]
     PathTraversal { path: String },
+
+    /// Archive loading through PolicyStoreSource not supported (use ArchiveVfs instead)
+    #[error(
+        "Archives cannot be loaded via PolicyStoreSource::Archive. Create an ArchiveVfs and use DefaultPolicyStoreLoader<ArchiveVfs> instead. See module documentation for examples."
+    )]
+    WasmUnsupported,
 }
 
 /// Errors related to JWT token validation.
@@ -476,15 +486,18 @@ mod tests {
 
     #[test]
     fn test_archive_error_messages() {
-        let err = ArchiveError::InvalidFormat {
-            message: "not a zip file".to_string(),
+        let err = ArchiveError::InvalidZipFormat {
+            details: "not a zip file".to_string(),
         };
-        assert_eq!(err.to_string(), "Invalid archive format: not a zip file");
+        assert_eq!(
+            err.to_string(),
+            "Invalid ZIP archive format: not a zip file"
+        );
 
         let err = ArchiveError::PathTraversal {
             path: "../../../etc/passwd".to_string(),
         };
-        assert!(err.to_string().contains("path traversal"));
+        assert!(err.to_string().contains("Path traversal"));
         assert!(err.to_string().contains("../../../etc/passwd"));
     }
 
