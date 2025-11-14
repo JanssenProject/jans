@@ -12,6 +12,7 @@ pub mod entity_parser;
 pub mod errors;
 pub mod issuer_parser;
 pub mod loader;
+pub mod manifest_validator;
 pub mod metadata;
 pub mod policy_parser;
 pub mod schema_parser;
@@ -32,13 +33,16 @@ pub use token_entity_metadata::TokenEntityMetadata;
 // Re-export for convenience
 pub use entity_parser::{EntityParser, ParsedEntity};
 pub use errors::{
-    ArchiveError, CedarEntityErrorType, CedarSchemaErrorType, PolicyStoreError, TokenError,
-    TrustedIssuerErrorType, ValidationError,
+    ArchiveError, CedarEntityErrorType, CedarSchemaErrorType, ManifestErrorType, PolicyStoreError,
+    TokenError, TrustedIssuerErrorType, ValidationError,
 };
 pub use issuer_parser::{IssuerParser, ParsedIssuer};
 pub use loader::{
     DefaultPolicyStoreLoader, EntityFile, IssuerFile, LoadedPolicyStore, PolicyFile,
     PolicyStoreLoader,
+};
+pub use manifest_validator::{
+    ManifestValidationError, ManifestValidationResult, ManifestValidator,
 };
 pub use metadata::{FileInfo, PolicyStoreInfo, PolicyStoreManifest, PolicyStoreMetadata};
 pub use policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};

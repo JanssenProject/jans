@@ -6,13 +6,14 @@
 //! Policy store loader with format detection and directory loading support.
 
 use super::errors::{PolicyStoreError, ValidationError};
+use super::manifest_validator::ManifestValidator;
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
 use super::policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
 use super::source::{PolicyStoreFormat, PolicyStoreSource};
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
 use cedar_policy::PolicySet;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 /// Policy store loader trait for loading policy stores from various sources.
 pub trait PolicyStoreLoader {
@@ -96,6 +97,50 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
     /// This is a convenience constructor for native platforms.
     pub fn new_physical() -> Self {
         Self::new(super::vfs_adapter::PhysicalVfs::new())
+    }
+
+    /// Validate the manifest file against the policy store contents.
+    ///
+    /// This method is only available for PhysicalVfs because:
+    /// - It requires creating a new VFS instance for validation
+    /// - Other VFS types (MemoryVfs, custom implementations) may not support cheap instantiation
+    /// - WASM environments may not have filesystem access for validation
+    ///
+    /// Users of other VFS types should call ManifestValidator::validate() directly
+    /// with their VFS instance if they need manifest validation.
+    ///
+    /// This method is public so it can be called explicitly when needed, following
+    /// the Interface Segregation Principle.
+    pub fn validate_manifest(
+        &self,
+        dir: &str,
+        metadata: &PolicyStoreMetadata,
+        _manifest: &PolicyStoreManifest,
+    ) -> Result<(), PolicyStoreError> {
+        // Create a new PhysicalVfs instance for validation
+        let validator =
+            ManifestValidator::new(super::vfs_adapter::PhysicalVfs::new(), PathBuf::from(dir));
+
+        let result = validator.validate(Some(&metadata.policy_store.id));
+
+        // If validation fails, return the first error
+        if !result.is_valid {
+            if let Some(error) = result.errors.first() {
+                return Err(PolicyStoreError::ManifestError {
+                    err: error.error_type.clone(),
+                });
+            }
+        }
+
+        if !result.unlisted_files.is_empty() {
+            eprintln!(
+                "Warning: {} file(s) found in policy store but not listed in manifest: {:?}",
+                result.unlisted_files.len(),
+                result.unlisted_files
+            );
+        }
+
+        Ok(())
     }
 }
 
@@ -416,6 +461,13 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     }
 
     /// Load a directory-based policy store.
+    ///
+    /// Note: Manifest validation is automatically performed ONLY for PhysicalVfs.
+    /// For other VFS types (MemoryVfs, WASM, custom implementations), users should
+    /// call ManifestValidator::validate() directly if validation is needed.
+    ///
+    /// This design follows the Interface Segregation Principle: manifest validation
+    /// is only available where it makes sense (native filesystem).
     fn load_directory(&self, dir: &str) -> Result<LoadedPolicyStore, PolicyStoreError> {
         // Validate structure first
         self.validate_directory_structure(dir)?;
@@ -423,6 +475,27 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         // Load all components
         let metadata = self.load_metadata(dir)?;
         let manifest = self.load_manifest(dir)?;
+
+        // Validate manifest if present (only for PhysicalVfs)
+        // This uses runtime type checking to avoid leaking PhysicalVfs-specific
+        // behavior into the generic interface
+        #[cfg(not(target_arch = "wasm32"))]
+        if let Some(ref manifest_data) = manifest {
+            use std::any::TypeId;
+
+            // Only validate for PhysicalVfs - this avoids forcing all VFS implementations
+            // to support manifest validation when it may not be meaningful
+            if TypeId::of::<V>() == TypeId::of::<super::vfs_adapter::PhysicalVfs>() {
+                // We need to cast self to the PhysicalVfs-specific type to call validate_manifest
+                // Safety: We've verified V is PhysicalVfs via TypeId check
+                let physical_loader = unsafe {
+                    &*(self as *const Self
+                        as *const DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs>)
+                };
+                physical_loader.validate_manifest(dir, &metadata, manifest_data)?;
+            }
+        }
+
         let schema = self.load_schema(dir)?;
         let policies = self.load_policies(dir)?;
         let templates = self.load_templates(dir)?;
