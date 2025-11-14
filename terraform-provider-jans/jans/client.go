@@ -221,6 +221,11 @@ func splitBySpace(s string) []string {
 // Uses double-checked locking to prevent multiple concurrent goroutines from
 // requesting duplicate tokens when a token expires under load.
 func (c *Client) ensureToken(ctx context.Context, scope string) (string, error) {
+        // Check context first to fail fast if already canceled
+        if err := ctx.Err(); err != nil {
+                return "", err
+        }
+
         // Fast-fail guard: reject empty scope before any lock acquisition
         if scope == "" {
                 return "", fmt.Errorf("scope is empty")
