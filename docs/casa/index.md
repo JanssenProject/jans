@@ -25,7 +25,7 @@ The core use case for Casa is self-service 2FA. If people need to call the helpd
 Out-of-the-box, Casa can be used to enroll and manage the following authenticators:    
 
 - FIDO2 security keys like [Yubikeys](https://www.yubico.com/products/)           
-- OTP hardware cards like [these](https://www.ftsafe.com/Products/Power_Card/Standard) or dongles like [these](https://www.ftsafe.com/Products/OTP/Single_Button_OTP)      
+- OTP hardware cards like [these](https://www.ftsafe.com/Products/Power_Card/Standard) or dongles like [these](https://www.ftsafe.com/Products/OTP/Single_Button_OTP)
 - OTP mobile apps like Google Authenticator, FreeOTP, etc.       
 - Mobile phone numbers able to receive OTPs via SMS   
 - Passwords      

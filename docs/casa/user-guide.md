@@ -88,7 +88,7 @@ To add a new OTP token, navigate to `2FA credentials` > `OTP Tokens`.
 
 ![add-otp-casa](../assets/casa/add-otp-casa.png)
 
-To add a soft OTP token, choose the `Soft token` option and follow the on screen.
+To add a soft OTP token, choose the `Soft token` option and follow the on-screen.
 
 For a hard token, choose the `Hard Token` option.
 
