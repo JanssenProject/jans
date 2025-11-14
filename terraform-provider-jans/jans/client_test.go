@@ -22,6 +22,11 @@ func TestMain(m *testing.M) {
         user = os.Getenv("JANS_CLIENT_ID")
         pass = os.Getenv("JANS_CLIENT_SECRET")
 
+        // Add https:// prefix if not present
+        if host != "" && host[:4] != "http" {
+                host = "https://" + host
+        }
+
         os.Exit(m.Run())
 }
 

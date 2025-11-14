@@ -2,6 +2,7 @@ package jans
 
 import (
         "context"
+        "encoding/json"
         "fmt"
 )
 
@@ -35,28 +36,29 @@ type Scope struct {
         BaseDn                   string            `schema:"base_dn" json:"baseDn,omitempty"`
 }
 
-// GetScopes returns all currently configured scopes.
+// GetScopes returns all currently configured scopes by fetching all pages from the API.
+// It uses pagination to ensure all scopes are retrieved regardless of the total count.
 func (c *Client) GetScopes(ctx context.Context) ([]Scope, error) {
 
         scope := "https://jans.io/oauth/config/scopes.readonly"
-        token, err := c.ensureToken(ctx, scope)
+        
+        // Fetch all entries using pagination (100 per page)
+        rawEntries, err := c.getAllPaginated(ctx, "/jans-config-api/api/v1/scopes", scope, 100)
         if err != nil {
-                return nil, fmt.Errorf("failed to get token: %w", err)
+                return nil, fmt.Errorf("failed to get all scopes: %w", err)
         }
 
-        type response struct {
-                Scopes []Scope `json:"entries"`
+        // Unmarshal the raw entries into Scope structs
+        scopes := make([]Scope, 0, len(rawEntries))
+        for _, rawEntry := range rawEntries {
+                var s Scope
+                if err := json.Unmarshal(rawEntry, &s); err != nil {
+                        return nil, fmt.Errorf("failed to unmarshal scope: %w", err)
+                }
+                scopes = append(scopes, s)
         }
 
-        ret := response{}
-
-        if err := c.get(ctx, "/jans-config-api/api/v1/scopes", token, scope, &ret, map[string]string{
-                "limit": "5",
-        }); err != nil {
-                return nil, fmt.Errorf("get request failed: %w", err)
-        }
-
-        return ret.Scopes, nil
+        return scopes, nil
 }
 
 // GetScope returns the scope with the given inum.

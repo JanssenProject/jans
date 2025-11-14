@@ -35,6 +35,14 @@ func (t *cachedToken) isValid() bool {
         return time.Now().Add(30 * time.Second).Before(t.expiresAt)
 }
 
+// pagedResponse represents a paginated API response structure
+type pagedResponse struct {
+        Start             int             `json:"start"`
+        TotalEntriesCount int             `json:"totalEntriesCount"`
+        EntriesCount      int             `json:"entriesCount"`
+        Entries           json.RawMessage `json:"entries"`
+}
+
 // requestParams is used as a conveneince struct to pass parameters to the
 // request method.
 type requestParams struct {
@@ -260,6 +268,56 @@ func (c *Client) get(ctx context.Context, path, token, scope string, resp any, q
         }
 
         return c.request(ctx, params)
+}
+
+// getAllPaginated fetches all entries from a paginated endpoint by making multiple
+// requests with increasing startIndex values until all entries are retrieved.
+// It returns a slice of raw JSON entries that the caller must unmarshal into the target type.
+func (c *Client) getAllPaginated(ctx context.Context, path, scope string, pageSize int) ([]json.RawMessage, error) {
+        token, err := c.ensureToken(ctx, scope)
+        if err != nil {
+                return nil, fmt.Errorf("failed to get token: %w", err)
+        }
+
+        var allEntries []json.RawMessage
+        startIndex := 1
+        fetchedCount := 0
+
+        for {
+                var page pagedResponse
+                queryParams := map[string]string{
+                        "limit":      fmt.Sprintf("%d", pageSize),
+                        "startIndex": fmt.Sprintf("%d", startIndex),
+                }
+
+                if err := c.get(ctx, path, token, scope, &page, queryParams); err != nil {
+                        return nil, fmt.Errorf("failed to fetch page at index %d: %w", startIndex, err)
+                }
+
+                // Unmarshal the entries array
+                var pageEntries []json.RawMessage
+                if len(page.Entries) > 0 {
+                        if err := json.Unmarshal(page.Entries, &pageEntries); err != nil {
+                                return nil, fmt.Errorf("failed to unmarshal page entries: %w", err)
+                        }
+                        allEntries = append(allEntries, pageEntries...)
+                }
+
+                fetchedCount += page.EntriesCount
+
+                // Stop if we've fetched all entries or the current page was empty
+                if page.TotalEntriesCount > 0 && fetchedCount >= page.TotalEntriesCount {
+                        break
+                }
+                if page.EntriesCount == 0 {
+                        break
+                }
+
+                // Move to next page based on actual entries returned to avoid gaps
+                startIndex += page.EntriesCount
+        }
+
+        return allEntries, nil
 }
 
 // getScim performs an HTTP GET request to the given path, using the given token.
