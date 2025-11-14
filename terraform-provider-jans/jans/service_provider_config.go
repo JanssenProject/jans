@@ -42,7 +42,8 @@ type ServiceProviderConfig struct {
         AuthenticationSchemes []AuthenticationSchemes `schema:"authentication_schemes" json:"authenticationSchemes,omitempty"`
 }
 
-// GetScimAppConfiguration returns the current SCIM App configuration.
+// GetServiceProviderConfig returns the SCIM service provider configuration metadata.
+// This is a public discovery endpoint per RFC 7644.
 func (c *Client) GetServiceProviderConfig(ctx context.Context) (*ServiceProviderConfig, error) {
 
         ret := &ServiceProviderConfig{}

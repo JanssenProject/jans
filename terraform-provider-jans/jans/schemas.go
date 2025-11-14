@@ -29,7 +29,7 @@ type Schema struct {
         Attributes  []SchemaAttribute `schema:"attributes" json:"attributes,omitempty"`
 }
 
-// GetScimAppConfiguration returns the current SCIM App configuration.
+// GetSchemas returns all SCIM schemas. This is a public discovery endpoint per RFC 7644.
 func (c *Client) GetSchemas(ctx context.Context) ([]Schema, error) {
 
         type Response struct {
@@ -48,7 +48,7 @@ func (c *Client) GetSchemas(ctx context.Context) ([]Schema, error) {
         return ret.Resources, nil
 }
 
-// // UpdateScimAppConfiguration updates the SCIM App configuration.
+// GetSchema returns a specific SCIM schema by ID. This is a public discovery endpoint per RFC 7644.
 func (c *Client) GetSchema(ctx context.Context, id string) (*Schema, error) {
 
         if id == "" {

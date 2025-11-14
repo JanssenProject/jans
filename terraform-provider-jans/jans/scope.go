@@ -88,15 +88,15 @@ func (c *Client) CreateScope(ctx context.Context, scope *Scope) (*Scope, error) 
                 return nil, fmt.Errorf("scope is nil")
         }
 
-        scopeAuth := "https://jans.io/oauth/config/scopes.write"
-        token, err := c.ensureToken(ctx, scopeAuth)
+        authScope := "https://jans.io/oauth/config/scopes.write"
+        token, err := c.ensureToken(ctx, authScope)
         if err != nil {
                 return nil, fmt.Errorf("failed to get token: %w", err)
         }
 
         ret := &Scope{}
 
-        if err := c.post(ctx, "/jans-config-api/api/v1/scopes", token, scopeAuth, scope, ret); err != nil {
+        if err := c.post(ctx, "/jans-config-api/api/v1/scopes", token, authScope, scope, ret); err != nil {
                 return nil, fmt.Errorf("post request failed: %w", err)
         }
 
@@ -110,8 +110,8 @@ func (c *Client) UpdateScope(ctx context.Context, scope *Scope) (*Scope, error) 
                 return nil, fmt.Errorf("scope is nil")
         }
 
-        scopeAuth := "https://jans.io/oauth/config/scopes.write"
-        token, err := c.ensureToken(ctx, scopeAuth)
+        authScope := "https://jans.io/oauth/config/scopes.write"
+        token, err := c.ensureToken(ctx, authScope)
         if err != nil {
                 return nil, fmt.Errorf("failed to get token: %w", err)
         }
@@ -120,7 +120,7 @@ func (c *Client) UpdateScope(ctx context.Context, scope *Scope) (*Scope, error) 
 
         ret := &Scope{}
 
-        if err := c.put(ctx, "/jans-config-api/api/v1/scopes", token, scopeAuth, scope, ret); err != nil {
+        if err := c.put(ctx, "/jans-config-api/api/v1/scopes", token, authScope, scope, ret); err != nil {
                 return nil, fmt.Errorf("put request failed: %w", err)
         }
 
