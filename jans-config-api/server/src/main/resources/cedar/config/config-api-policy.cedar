@@ -6,7 +6,7 @@ permit(
 )
 when {
   principal has access_token.scope &&
-  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/acrs.readonly","https://jans.io/oauth/config/acrs.write","https://jans.io/oauth/config/read-all"])
+  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/acrs.readonly","https://jans.io/oauth/config/acrs.write", "https://jans.io/oauth/config/acrs.admin", "https://jans.io/oauth/config/read-all"])
 };
 
 @id("@AcrsUpdate")
@@ -17,7 +17,7 @@ permit(
 )
 when {
   principal has access_token.scope &&
-  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/acrs.write","https://jans.io/oauth/config/write-all"])
+  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/acrs.write","https://jans.io/oauth/config/acrs.admin","https://jans.io/oauth/config/write-all"])
 };
 
 @id("@AttributeGet")
@@ -28,7 +28,7 @@ permit(
 )
 when {
   principal has access_token.scope &&
-  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/attributes.readonly","https://jans.io/oauth/config/attributes.write", "https://jans.io/oauth/config/read-all"])
+  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/attributes.readonly","https://jans.io/oauth/config/attributes.write", "https://jans.io/oauth/config/attributes.admin", "https://jans.io/oauth/config/read-all"])
 };
 
 @id("AttributeUpdate")
@@ -705,6 +705,29 @@ permit(
   resource == Jans::HTTP_Request::"/jans-config-api/api/v1/health/ready"
 );
 
+
+@id("@HealthAppVersionGet")
+permit(
+  principal is Jans::Workload,
+  action in [Jans::Action::"GET"],
+  resource == Jans::HTTP_Request::"/jans-config-api/api/v1/health/app-version"
+)
+when {
+  principal has access_token.scope &&
+  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/app-version.readonly", "https://jans.io/oauth/config/health.admin", "https://jans.io/oauth/config/read-all"])
+};
+
+@id("@HealthServiceStatusGet")
+permit(
+  principal is Jans::Workload,
+  action in [Jans::Action::"GET"],
+  resource == Jans::HTTP_Request::"/jans-config-api/api/v1/health/service-status"
+)
+when {
+  principal has access_token.scope &&
+  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/data.readonly", "https://jans.io/oauth/config/health.admin", "https://jans.io/oauth/config/read-all"])
+};
+
 @id("@ScimGet")
 permit(
   principal is Jans::Workload,
@@ -829,11 +852,11 @@ when {
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"GET"],
-  resource == Jans::HTTP_Request::"/jans-config-api/api/v1/ads-deployment"
+  resource == Jans::HTTP_Request::"/jans-config-api/api/v1/agama-deployment"
 )
 when {
   principal has access_token.scope &&
-  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/agama.readonly", "https://jans.io/oauth/config/agama.write", "https://jans.io/oauth/config/read-all"])
+  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/agama.readonly", "https://jans.io/oauth/config/agama.write", "https://jans.io/oauth/config/agama.admin", "https://jans.io/oauth/config/read-all"])
 };
 
 
@@ -841,11 +864,11 @@ when {
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"POST"],
-  resource == Jans::HTTP_Request::"/jans-config-api/api/v1/ads-deployment"
+  resource == Jans::HTTP_Request::"/jans-config-api/api/v1/agama-deployment"
 )
 when {
   principal has access_token.scope &&
-  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/agama.write", "https://jans.io/oauth/config/write-all"])
+  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/agama.write", "https://jans.io/oauth/config/agama.admin", "https://jans.io/oauth/config/write-all"])
 };
 
 
@@ -853,13 +876,35 @@ when {
 permit(
   principal is Jans::Workload,
   action in [Jans::Action::"DELETE"],
-  resource == Jans::HTTP_Request::"/jans-config-api/api/v1/ads-deployment"
+  resource == Jans::HTTP_Request::"/jans-config-api/api/v1/agama-deployment"
 )
 when {
   principal has access_token.scope &&
-  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/agama.delete", "https://jans.io/oauth/config/delete-all"])
+  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/agama.delete", "https://jans.io/oauth/config/agama.admin",  "https://jans.io/oauth/config/delete-all"])
 };
 
+
+@id("@AgamaDeploymentConfigsGet")
+permit(
+  principal is Jans::Workload,
+  action in [Jans::Action::"GET"],
+  resource == Jans::HTTP_Request::"/jans-config-api/api/v1/agama-deployment/configs"
+)
+when {
+  principal has access_token.scope &&
+  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/agama.readonly", "https://jans.io/oauth/config/agama.write", "https://jans.io/oauth/config/agama.admin", "https://jans.io/oauth/config/read-all"])
+};
+
+@id("@AgamaDeploymentConfigsPut")
+permit(
+  principal is Jans::Workload,
+  action in [Jans::Action::"PUT"],
+  resource == Jans::HTTP_Request::"/jans-config-api/api/v1/agama-deployment/configs"
+)
+when {
+  principal has access_token.scope &&
+  principal.access_token.scope.containsAny(["https://jans.io/oauth/config/agama.write", "https://jans.io/oauth/config/agama.admin", "https://jans.io/oauth/config/write-all"])
+};
 
 @id("@SessionGet")
 permit(
