@@ -32,7 +32,7 @@ pub(crate) use claim_mapping::ClaimMappings;
 pub use token_entity_metadata::TokenEntityMetadata;
 
 // Re-export for convenience
-pub use archive_handler::ArchiveHandler;
+pub use archive_handler::ArchiveVfs;
 pub use entity_parser::{EntityParser, ParsedEntity};
 pub use errors::{
     ArchiveError, CedarEntityErrorType, CedarSchemaErrorType, ManifestErrorType, PolicyStoreError,

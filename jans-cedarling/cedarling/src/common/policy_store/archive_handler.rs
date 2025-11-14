@@ -3,210 +3,349 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Archive handling utilities for .cjar policy store archives.
+//! Archive VFS implementation for .cjar policy store archives.
 //!
-//! This module provides functionality to:
-//! - Validate .cjar archive files
-//! - Extract archives to temporary directories
-//! - Detect and report archive corruption
-//! - Manage temporary directory lifecycle with automatic cleanup
+//! This module provides a VFS implementation backed by ZIP archives, enabling
+//! policy stores to be distributed as single `.cjar` files. The implementation:
+//!
+//! - Works in both native and WASM environments
+//! - Reads files on-demand from the archive (no extraction needed)
+//! - Validates archive format and structure during construction
+//! - Prevents path traversal attacks
+//! - Provides full VfsFileSystem trait implementation
+//!
+//! # Example: Native
+//!
+//! ```no_run
+//! use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
+//!
+//! // Load from file path (native only)
+//! let archive_vfs = ArchiveVfs::from_file_path("policy_store.cjar")?;
+//! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
+//! let loaded = loader.load_directory(".")?;
+//! # Ok::<(), Box<dyn std::error::Error>>(())
+//! ```
+//!
+//! # Example: WASM
+//!
+//! ```no_run
+//! use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
+//!
+//! // Load from bytes (works in WASM)
+//! let archive_bytes: Vec<u8> = fetch_from_network().await?;
+//! let archive_vfs = ArchiveVfs::from_bytes(archive_bytes)?;
+//! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
+//! let loaded = loader.load_directory(".")?;
+//! # Ok::<(), Box<dyn std::error::Error>>(())
+//! # async fn fetch_from_network() -> Result<Vec<u8>, Box<dyn std::error::Error>> { Ok(vec![]) }
+//! ```
 
 use super::errors::ArchiveError;
-use std::fs::File;
-use std::path::{Path, PathBuf};
-use tempfile::TempDir;
+use super::vfs_adapter::{DirEntry, VfsFileSystem};
+use std::io::{Cursor, Read};
+use std::path::Path;
+use std::sync::Mutex;
 use zip::ZipArchive;
 
-/// Handler for .cjar archive extraction and validation.
+#[cfg(not(target_arch = "wasm32"))]
+use std::fs::File;
+
+/// VFS implementation backed by a ZIP archive.
 ///
-/// Provides utilities to:
-/// - Validate archive format and extension
-/// - Extract archives to temporary directories
-/// - Detect corruption and path traversal attempts
-/// - Automatic cleanup of temporary directories
-pub struct ArchiveHandler {
-    /// Temporary directory for extraction (automatically cleaned up on drop)
-    temp_dir: Option<TempDir>,
+/// This implementation reads files on-demand from a ZIP archive without extraction,
+/// making it efficient and WASM-compatible. The archive is validated during construction
+/// to ensure it's a valid .cjar file with no path traversal attempts.
+///
+/// # Thread Safety
+///
+/// This type is `Send + Sync` despite using `Mutex` because the `ZipArchive` is protected
+/// by a mutex. Concurrent access is prevented by the Mutex locking mechanism.
+#[derive(Debug)]
+pub struct ArchiveVfs {
+    /// The ZIP archive reader (wrapped in RefCell for interior mutability)
+    archive: std::sync::Mutex<ZipArchive<Cursor<Vec<u8>>>>,
 }
 
-impl ArchiveHandler {
-    /// Create a new archive handler.
+impl ArchiveVfs {
+    /// Create an ArchiveVfs from a file path (native only).
     ///
-    /// The handler does not create a temporary directory until extraction is performed.
-    pub fn new() -> Self {
-        Self { temp_dir: None }
-    }
-
-    /// Validate that a file is a valid .cjar archive.
-    ///
-    /// Checks:
-    /// 1. File has .cjar extension
-    /// 2. File exists and is readable
-    /// 3. File is a valid ZIP archive
-    /// 4. Archive is not corrupted
+    /// This method:
+    /// 1. Validates the file has .cjar extension
+    /// 2. Reads the entire file into memory
+    /// 3. Validates it's a valid ZIP archive
+    /// 4. Checks for path traversal attempts
     ///
     /// # Errors
     ///
     /// Returns `ArchiveError` if:
     /// - File extension is not .cjar
-    /// - File cannot be opened
-    /// - ZIP format is invalid
+    /// - File cannot be read
+    /// - Archive is not a valid ZIP
+    /// - Archive contains path traversal attempts
     /// - Archive is corrupted
-    pub fn validate_archive(archive_path: &Path) -> Result<(), ArchiveError> {
-        // Check extension
-        if archive_path.extension().and_then(|s| s.to_str()) != Some("cjar") {
-            return Err(ArchiveError::InvalidFormat {
-                message: format!(
-                    "File must have .cjar extension, found: {}",
-                    archive_path
-                        .extension()
-                        .and_then(|s| s.to_str())
-                        .unwrap_or("(none)")
-                ),
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn from_file_path<P: AsRef<Path>>(path: P) -> Result<Self, ArchiveError> {
+        let path = path.as_ref();
+
+        // Validate extension
+        if path.extension().and_then(|s| s.to_str()) != Some("cjar") {
+            return Err(ArchiveError::InvalidExtension {
+                expected: "cjar".to_string(),
+                found: path
+                    .extension()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("(none)")
+                    .to_string(),
             });
         }
 
-        // Try to open as ZIP archive
-        let file = File::open(archive_path).map_err(|e| ArchiveError::InvalidFormat {
-            message: format!("Cannot open archive file: {}", e),
+        // Read file into memory
+        let bytes = std::fs::read(path).map_err(|e| ArchiveError::CannotReadFile {
+            path: path.display().to_string(),
+            source: e,
         })?;
 
-        // Validate ZIP format
-        let mut archive = ZipArchive::new(file).map_err(|e| ArchiveError::InvalidFormat {
-            message: format!("Invalid ZIP format: {}", e),
-        })?;
-
-        // Basic corruption check - try to read file names
-        for i in 0..archive.len() {
-            let file = archive.by_index(i).map_err(|e| ArchiveError::Corrupted {
-                message: format!("Cannot read file entry {}: {}", i, e),
-            })?;
-
-            // Check for path traversal attempts
-            let file_path = file.name();
-            if file_path.contains("..") || Path::new(file_path).is_absolute() {
-                return Err(ArchiveError::PathTraversal {
-                    path: file_path.to_string(),
-                });
-            }
-        }
-
-        Ok(())
+        Self::from_bytes(bytes)
     }
 
-    /// Extract a .cjar archive to a temporary directory.
+    /// Create an ArchiveVfs from bytes (works in WASM and native).
     ///
-    /// The temporary directory is automatically cleaned up when this `ArchiveHandler`
-    /// is dropped, unless `take_temp_dir()` is called to take ownership.
-    ///
-    /// # Returns
-    ///
-    /// Returns the path to the extracted contents.
+    /// This method:
+    /// 1. Validates the bytes form a valid ZIP archive
+    /// 2. Checks for path traversal attempts
+    /// 3. Validates archive structure
     ///
     /// # Errors
     ///
     /// Returns `ArchiveError` if:
-    /// - Archive validation fails
-    /// - Temporary directory creation fails
-    /// - Extraction fails
-    /// - Path traversal is detected
-    pub fn extract_archive(&mut self, archive_path: &Path) -> Result<PathBuf, ArchiveError> {
-        // Validate archive first
-        Self::validate_archive(archive_path)?;
+    /// - Bytes are not a valid ZIP archive
+    /// - Archive contains path traversal attempts
+    /// - Archive is corrupted
+    pub fn from_bytes(bytes: Vec<u8>) -> Result<Self, ArchiveError> {
+        // Create cursor for in-memory access
+        let cursor = Cursor::new(bytes);
 
-        // Create temporary directory
-        let temp_dir = TempDir::new().map_err(|e| ArchiveError::ExtractionFailed {
-            message: format!("Failed to create temporary directory: {}", e),
+        // Open as ZIP archive
+        let mut archive = ZipArchive::new(cursor).map_err(|e| ArchiveError::InvalidZipFormat {
+            details: e.to_string(),
         })?;
 
-        let temp_path = temp_dir.path().to_path_buf();
-
-        // Open archive
-        let file = File::open(archive_path).map_err(|e| ArchiveError::ExtractionFailed {
-            message: format!("Failed to open archive: {}", e),
-        })?;
-
-        let mut archive = ZipArchive::new(file).map_err(|e| ArchiveError::ExtractionFailed {
-            message: format!("Failed to read archive: {}", e),
-        })?;
-
-        // Extract all files
+        // Validate all file names for security
         for i in 0..archive.len() {
-            let mut file = archive
+            let file = archive
                 .by_index(i)
-                .map_err(|e| ArchiveError::ExtractionFailed {
-                    message: format!("Failed to read file entry {}: {}", i, e),
+                .map_err(|e| ArchiveError::CorruptedEntry {
+                    index: i,
+                    details: e.to_string(),
                 })?;
 
             let file_path = file.name();
 
-            // Security: prevent path traversal
+            // Check for path traversal attempts
             if file_path.contains("..") || Path::new(file_path).is_absolute() {
                 return Err(ArchiveError::PathTraversal {
                     path: file_path.to_string(),
                 });
             }
+        }
 
-            let outpath = temp_path.join(file_path);
+        Ok(Self {
+            archive: Mutex::new(archive),
+        })
+    }
 
-            if file.is_dir() {
-                // Create directory
-                std::fs::create_dir_all(&outpath).map_err(|e| ArchiveError::ExtractionFailed {
-                    message: format!("Failed to create directory '{}': {}", outpath.display(), e),
-                })?;
-            } else {
-                // Create parent directories if needed
-                if let Some(parent) = outpath.parent() {
-                    std::fs::create_dir_all(parent).map_err(|e| {
-                        ArchiveError::ExtractionFailed {
-                            message: format!(
-                                "Failed to create parent directory '{}': {}",
-                                parent.display(),
-                                e
-                            ),
-                        }
-                    })?;
+    /// Normalize a path for archive lookup.
+    ///
+    /// Handles:
+    /// - Converting absolute paths to relative
+    /// - Removing leading slashes
+    /// - Converting "." to ""
+    /// - Normalizing path separators
+    fn normalize_path(&self, path: &str) -> String {
+        let path = path.trim_start_matches('/');
+        if path == "." || path.is_empty() {
+            String::new()
+        } else {
+            path.to_string()
+        }
+    }
+
+    /// Check if a path exists in the archive (file or directory).
+    fn path_exists(&self, path: &str) -> bool {
+        let normalized = self.normalize_path(path);
+
+        let mut archive = self.archive.lock().expect("mutex poisoned");
+
+        // Check if it's a file
+        if archive.by_name(&normalized).is_ok() {
+            return true;
+        }
+
+        // Check if it's a directory by looking for entries that start with this prefix
+        let dir_prefix = if normalized.is_empty() {
+            String::new()
+        } else {
+            format!("{}/", normalized)
+        };
+
+        for i in 0..archive.len() {
+            if let Ok(file) = archive.by_index(i) {
+                let file_name = file.name();
+                if file_name == normalized || file_name.starts_with(&dir_prefix) {
+                    return true;
                 }
-
-                // Extract file
-                let mut outfile =
-                    File::create(&outpath).map_err(|e| ArchiveError::ExtractionFailed {
-                        message: format!("Failed to create file '{}': {}", outpath.display(), e),
-                    })?;
-
-                std::io::copy(&mut file, &mut outfile).map_err(|e| {
-                    ArchiveError::ExtractionFailed {
-                        message: format!("Failed to write file '{}': {}", outpath.display(), e),
-                    }
-                })?;
             }
         }
 
-        // Store temp_dir to prevent premature cleanup
-        self.temp_dir = Some(temp_dir);
-
-        Ok(temp_path)
+        false
     }
 
-    /// Get the path to the temporary directory if extraction has been performed.
-    pub fn temp_path(&self) -> Option<PathBuf> {
-        self.temp_dir.as_ref().map(|d| d.path().to_path_buf())
+    /// Check if a path is a directory in the archive.
+    fn is_directory(&self, path: &str) -> bool {
+        let normalized = self.normalize_path(path);
+        let mut archive = self.archive.lock().expect("mutex poisoned");
+        Self::is_directory_locked(&mut archive, &normalized)
     }
 
-    /// Take ownership of the temporary directory, preventing automatic cleanup.
-    ///
-    /// This is useful if you need the extracted files to persist beyond the lifetime
-    /// of the ArchiveHandler. The caller becomes responsible for cleanup.
-    ///
-    /// Returns `None` if no extraction has been performed.
-    pub fn take_temp_dir(mut self) -> Option<TempDir> {
-        self.temp_dir.take()
+    /// Check if a path is a directory (with already-locked archive).
+    /// This is a helper to avoid deadlocks when called from methods that already hold the lock.
+    fn is_directory_locked(archive: &mut ZipArchive<Cursor<Vec<u8>>>, normalized: &str) -> bool {
+        // Root is always a directory
+        if normalized.is_empty() {
+            return true;
+        }
+
+        // Check if there's an explicit directory entry
+        let dir_path_with_slash = format!("{}/", normalized);
+        if let Ok(file) = archive.by_name(&dir_path_with_slash) {
+            return file.is_dir();
+        }
+
+        // Check if any files have this as a prefix (implicit directory)
+        for i in 0..archive.len() {
+            if let Ok(file) = archive.by_index(i) {
+                let file_name = file.name();
+                if file_name.starts_with(&format!("{}/", normalized)) {
+                    return true;
+                }
+            }
+        }
+
+        false
     }
 }
 
-impl Default for ArchiveHandler {
-    fn default() -> Self {
-        Self::new()
+impl VfsFileSystem for ArchiveVfs {
+    fn read_file(&self, path: &str) -> Result<Vec<u8>, std::io::Error> {
+        let normalized = self.normalize_path(path);
+
+        let mut archive = self.archive.lock().expect("mutex poisoned");
+
+        let mut file = archive.by_name(&normalized).map_err(|e| {
+            std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!("File not found in archive: {}: {}", path, e),
+            )
+        })?;
+
+        let mut contents = Vec::new();
+        file.read_to_end(&mut contents)?;
+
+        Ok(contents)
+    }
+
+    fn exists(&self, path: &str) -> bool {
+        self.path_exists(path)
+    }
+
+    fn is_dir(&self, path: &str) -> bool {
+        self.is_directory(path)
+    }
+
+    fn is_file(&self, path: &str) -> bool {
+        let normalized = self.normalize_path(path);
+        let mut archive = self.archive.lock().expect("mutex poisoned");
+
+        if let Ok(file) = archive.by_name(&normalized) {
+            return file.is_file();
+        }
+
+        false
+    }
+
+    fn read_dir(&self, path: &str) -> Result<Vec<DirEntry>, std::io::Error> {
+        let normalized = self.normalize_path(path);
+        let prefix = if normalized.is_empty() {
+            String::new()
+        } else {
+            format!("{}/", normalized)
+        };
+
+        let mut archive = self.archive.lock().expect("mutex poisoned");
+        let mut seen = std::collections::HashSet::new();
+        let mut entry_paths = Vec::new();
+
+        // First pass: collect all unique entry paths
+        for i in 0..archive.len() {
+            let file = archive.by_index(i).map_err(|e| {
+                std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    format!("Failed to read archive entry {}: {}", i, e),
+                )
+            })?;
+
+            let file_name = file.name();
+
+            // Check if this file is in the requested directory
+            if file_name.starts_with(&prefix) || (prefix.is_empty() && !file_name.contains('/')) {
+                let relative = if prefix.is_empty() {
+                    file_name
+                } else {
+                    &file_name[prefix.len()..]
+                };
+
+                // Get the immediate child name (first component)
+                let child_name = if let Some(slash_pos) = relative.find('/') {
+                    &relative[..slash_pos]
+                } else {
+                    relative
+                };
+
+                // Skip empty names and deduplicate
+                if child_name.is_empty() || !seen.insert(child_name.to_string()) {
+                    continue;
+                }
+
+                // Determine the full path for this entry
+                let entry_path = if prefix.is_empty() {
+                    child_name.to_string()
+                } else {
+                    format!("{}{}", prefix, child_name)
+                };
+
+                entry_paths.push((child_name.to_string(), entry_path));
+            }
+        }
+
+        // Second pass: check if each path is a directory
+        let mut entries = Vec::new();
+        for (name, entry_path) in entry_paths {
+            let entry_path_normalized = self.normalize_path(&entry_path);
+            let is_directory = Self::is_directory_locked(&mut archive, &entry_path_normalized);
+
+            entries.push(DirEntry {
+                name,
+                path: entry_path,
+                is_dir: is_directory,
+            });
+        }
+
+        Ok(entries)
+    }
+
+    fn open_file(&self, path: &str) -> Result<Box<dyn Read + Send>, std::io::Error> {
+        let bytes = self.read_file(path)?;
+        Ok(Box::new(Cursor::new(bytes)))
     }
 }
 
@@ -217,77 +356,47 @@ mod tests {
     use zip::CompressionMethod;
     use zip::write::{ExtendedFileOptions, FileOptions};
 
-    /// Helper to create a test .cjar archive
-    fn create_test_cjar(
-        path: &Path,
-        files: Vec<(&str, &str)>,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let file = File::create(path)?;
-        let mut zip = zip::ZipWriter::new(file);
+    /// Helper to create a test .cjar archive in memory
+    fn create_test_archive(files: Vec<(&str, &str)>) -> Vec<u8> {
+        let mut buffer = Vec::new();
+        {
+            let cursor = Cursor::new(&mut buffer);
+            let mut zip = zip::ZipWriter::new(cursor);
 
-        let options = FileOptions::<ExtendedFileOptions>::default()
-            .compression_method(CompressionMethod::Deflated);
+            for (name, content) in files {
+                let options = FileOptions::<ExtendedFileOptions>::default()
+                    .compression_method(CompressionMethod::Deflated);
+                zip.start_file(name, options).unwrap();
+                zip.write_all(content.as_bytes()).unwrap();
+            }
 
-        for (name, content) in files {
-            zip.start_file(name, options.clone())?;
-            zip.write_all(content.as_bytes())?;
+            zip.finish().unwrap();
         }
-
-        zip.finish()?;
-        Ok(())
+        buffer
     }
 
     #[test]
-    fn test_validate_archive_invalid_extension() {
-        let temp_dir = TempDir::new().unwrap();
-        let archive_path = temp_dir.path().join("test.zip");
-        File::create(&archive_path).unwrap();
-
-        let result = ArchiveHandler::validate_archive(&archive_path);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ArchiveError::InvalidFormat { .. }
-        ));
-    }
-
-    #[test]
-    fn test_validate_archive_not_zip() {
-        let temp_dir = TempDir::new().unwrap();
-        let archive_path = temp_dir.path().join("test.cjar");
-
-        // Create a file that's not a ZIP
-        let mut file = File::create(&archive_path).unwrap();
-        file.write_all(b"This is not a ZIP file").unwrap();
-
-        let result = ArchiveHandler::validate_archive(&archive_path);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ArchiveError::InvalidFormat { .. }
-        ));
-    }
-
-    #[test]
-    fn test_validate_archive_valid_cjar() {
-        let temp_dir = TempDir::new().unwrap();
-        let archive_path = temp_dir.path().join("test.cjar");
-
-        create_test_cjar(&archive_path, vec![("metadata.json", "{}")]).unwrap();
-
-        let result = ArchiveHandler::validate_archive(&archive_path);
+    fn test_from_bytes_valid_archive() {
+        let bytes = create_test_archive(vec![("metadata.json", "{}")]);
+        let result = ArchiveVfs::from_bytes(bytes);
         assert!(result.is_ok());
     }
 
     #[test]
-    fn test_validate_archive_path_traversal() {
-        let temp_dir = TempDir::new().unwrap();
-        let archive_path = temp_dir.path().join("malicious.cjar");
+    fn test_from_bytes_invalid_zip() {
+        let bytes = b"This is not a ZIP file".to_vec();
+        let result = ArchiveVfs::from_bytes(bytes);
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ArchiveError::InvalidZipFormat { .. }
+        ));
+    }
 
-        // Create archive with path traversal attempt
-        create_test_cjar(&archive_path, vec![("../../../etc/passwd", "malicious")]).unwrap();
-
-        let result = ArchiveHandler::validate_archive(&archive_path);
+    #[test]
+    fn test_from_bytes_path_traversal() {
+        let bytes = create_test_archive(vec![("../../../etc/passwd", "malicious")]);
+        let result = ArchiveVfs::from_bytes(bytes);
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
@@ -296,116 +405,164 @@ mod tests {
     }
 
     #[test]
-    fn test_extract_archive_success() {
-        let temp_dir = TempDir::new().unwrap();
-        let archive_path = temp_dir.path().join("test.cjar");
+    fn test_read_file_success() {
+        let bytes = create_test_archive(vec![
+            ("metadata.json", r#"{"version":"1.0"}"#),
+            ("schema.cedarschema", "namespace Test;"),
+        ]);
+        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
 
-        create_test_cjar(
-            &archive_path,
-            vec![
-                ("metadata.json", r#"{"version": "1.0"}"#),
-                ("schema.cedarschema", "namespace Test;"),
-                (
-                    "policies/policy1.cedar",
-                    "permit(principal, action, resource);",
-                ),
-            ],
-        )
-        .unwrap();
+        let content = vfs.read_file("metadata.json").unwrap();
+        assert_eq!(String::from_utf8(content).unwrap(), r#"{"version":"1.0"}"#);
 
-        let mut handler = ArchiveHandler::new();
-        let extracted_path = handler.extract_archive(&archive_path).unwrap();
-
-        // Verify files exist
-        assert!(extracted_path.join("metadata.json").exists());
-        assert!(extracted_path.join("schema.cedarschema").exists());
-        assert!(extracted_path.join("policies/policy1.cedar").exists());
-
-        // Verify content
-        let metadata = std::fs::read_to_string(extracted_path.join("metadata.json")).unwrap();
-        assert!(metadata.contains("1.0"));
+        let content = vfs.read_file("schema.cedarschema").unwrap();
+        assert_eq!(String::from_utf8(content).unwrap(), "namespace Test;");
     }
 
     #[test]
-    fn test_extract_archive_with_directories() {
-        let temp_dir = TempDir::new().unwrap();
-        let archive_path = temp_dir.path().join("test.cjar");
+    fn test_read_file_not_found() {
+        let bytes = create_test_archive(vec![("metadata.json", "{}")]);
+        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
 
-        create_test_cjar(
-            &archive_path,
-            vec![
-                ("metadata.json", "{}"),
-                ("policies/policy1.cedar", "policy1"),
-                ("policies/policy2.cedar", "policy2"),
-                ("entities/users.json", "[]"),
-            ],
-        )
-        .unwrap();
-
-        let mut handler = ArchiveHandler::new();
-        let extracted_path = handler.extract_archive(&archive_path).unwrap();
-
-        // Verify directory structure
-        assert!(extracted_path.join("policies").is_dir());
-        assert!(extracted_path.join("entities").is_dir());
-        assert!(extracted_path.join("policies/policy1.cedar").exists());
-        assert!(extracted_path.join("policies/policy2.cedar").exists());
-        assert!(extracted_path.join("entities/users.json").exists());
-    }
-
-    #[test]
-    fn test_extract_archive_blocks_path_traversal() {
-        let temp_dir = TempDir::new().unwrap();
-        let archive_path = temp_dir.path().join("malicious.cjar");
-
-        create_test_cjar(&archive_path, vec![("../../../etc/passwd", "malicious")]).unwrap();
-
-        let mut handler = ArchiveHandler::new();
-        let result = handler.extract_archive(&archive_path);
-
+        let result = vfs.read_file("nonexistent.json");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_exists() {
+        let bytes = create_test_archive(vec![
+            ("metadata.json", "{}"),
+            ("policies/policy1.cedar", "permit();"),
+        ]);
+        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+
+        assert!(vfs.exists("metadata.json"));
+        assert!(vfs.exists("policies/policy1.cedar"));
+        assert!(vfs.exists("policies")); // directory
+        assert!(!vfs.exists("nonexistent.json"));
+    }
+
+    #[test]
+    fn test_is_file() {
+        let bytes = create_test_archive(vec![
+            ("metadata.json", "{}"),
+            ("policies/policy1.cedar", "permit();"),
+        ]);
+        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+
+        assert!(vfs.is_file("metadata.json"));
+        assert!(vfs.is_file("policies/policy1.cedar"));
+        assert!(!vfs.is_file("policies"));
+        assert!(!vfs.is_file("nonexistent.json"));
+    }
+
+    #[test]
+    fn test_is_dir() {
+        let bytes = create_test_archive(vec![
+            ("metadata.json", "{}"),
+            ("policies/policy1.cedar", "permit();"),
+            ("policies/policy2.cedar", "forbid();"),
+        ]);
+        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+
+        assert!(vfs.is_dir("."));
+        assert!(vfs.is_dir("policies"));
+        assert!(!vfs.is_dir("metadata.json"));
+        assert!(!vfs.is_dir("nonexistent"));
+    }
+
+    #[test]
+    fn test_read_dir_root() {
+        let bytes = create_test_archive(vec![
+            ("metadata.json", "{}"),
+            ("schema.cedarschema", "namespace Test;"),
+            ("policies/policy1.cedar", "permit();"),
+        ]);
+        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+
+        let entries = vfs.read_dir(".").unwrap();
+        assert_eq!(entries.len(), 3);
+
+        let names: Vec<_> = entries.iter().map(|e| e.name.as_str()).collect();
+        assert!(names.contains(&"metadata.json"));
+        assert!(names.contains(&"schema.cedarschema"));
+        assert!(names.contains(&"policies"));
+    }
+
+    #[test]
+    fn test_read_dir_subdirectory() {
+        let bytes = create_test_archive(vec![
+            ("policies/policy1.cedar", "permit();"),
+            ("policies/policy2.cedar", "forbid();"),
+            ("policies/nested/policy3.cedar", "deny();"),
+        ]);
+        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+
+        let entries = vfs.read_dir("policies").unwrap();
+        assert_eq!(entries.len(), 3);
+
+        let names: Vec<_> = entries.iter().map(|e| e.name.as_str()).collect();
+        assert!(names.contains(&"policy1.cedar"));
+        assert!(names.contains(&"policy2.cedar"));
+        assert!(names.contains(&"nested"));
+    }
+
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn test_from_file_path_invalid_extension() {
+        use tempfile::TempDir;
+
+        let temp_dir = TempDir::new().unwrap();
+        let archive_path = temp_dir.path().join("test.zip");
+
+        let bytes = create_test_archive(vec![("metadata.json", "{}")]);
+        std::fs::write(&archive_path, bytes).unwrap();
+
+        let result = ArchiveVfs::from_file_path(&archive_path);
         assert!(matches!(
-            result.unwrap_err(),
-            ArchiveError::PathTraversal { .. }
+            result.expect_err("should fail"),
+            ArchiveError::InvalidExtension { .. }
         ));
     }
 
     #[test]
-    fn test_temp_dir_cleanup() {
+    #[cfg(not(target_arch = "wasm32"))]
+    fn test_from_file_path_success() {
+        use tempfile::TempDir;
+
         let temp_dir = TempDir::new().unwrap();
         let archive_path = temp_dir.path().join("test.cjar");
 
-        create_test_cjar(&archive_path, vec![("metadata.json", "{}")]).unwrap();
+        let bytes = create_test_archive(vec![("metadata.json", "{}")]);
+        std::fs::write(&archive_path, bytes).unwrap();
 
-        let extracted_path = {
-            let mut handler = ArchiveHandler::new();
-            let path = handler.extract_archive(&archive_path).unwrap();
-            assert!(path.exists());
-            path
-        }; // handler dropped here
-
-        // Temporary directory should be cleaned up
-        assert!(!extracted_path.exists());
+        let result = ArchiveVfs::from_file_path(&archive_path);
+        assert!(result.is_ok());
     }
 
     #[test]
-    fn test_take_temp_dir_prevents_cleanup() {
-        let temp_dir = TempDir::new().unwrap();
-        let archive_path = temp_dir.path().join("test.cjar");
+    fn test_complex_directory_structure() {
+        let bytes = create_test_archive(vec![
+            ("metadata.json", "{}"),
+            ("policies/allow/policy1.cedar", "permit();"),
+            ("policies/allow/policy2.cedar", "permit();"),
+            ("policies/deny/policy3.cedar", "forbid();"),
+            ("entities/users/admin.json", "{}"),
+            ("entities/users/regular.json", "{}"),
+            ("entities/groups/admins.json", "{}"),
+        ]);
+        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
 
-        create_test_cjar(&archive_path, vec![("metadata.json", "{}")]).unwrap();
+        // Test root
+        let root_entries = vfs.read_dir(".").unwrap();
+        assert_eq!(root_entries.len(), 3); // metadata.json, policies, entities
 
-        let mut handler = ArchiveHandler::new();
-        let _extracted_path = handler.extract_archive(&archive_path).unwrap();
+        // Test policies directory
+        let policies_entries = vfs.read_dir("policies").unwrap();
+        assert_eq!(policies_entries.len(), 2); // allow, deny
 
-        let temp_dir_handle = handler.take_temp_dir().unwrap();
-        let temp_path = temp_dir_handle.path().to_path_buf();
-
-        // Directory still exists because we took ownership
-        assert!(temp_path.exists());
-
-        // Clean up manually
-        drop(temp_dir_handle);
-        assert!(!temp_path.exists());
+        // Test nested allow directory
+        let allow_entries = vfs.read_dir("policies/allow").unwrap();
+        assert_eq!(allow_entries.len(), 2); // policy1.cedar, policy2.cedar
     }
 }
