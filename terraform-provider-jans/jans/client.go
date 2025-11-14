@@ -638,6 +638,35 @@ func (c *Client) deleteEntity(ctx context.Context, path, token, scope string, en
         return c.request(ctx, req)
 }
 
+// createRequest builds an *http.Request from requestParams, setting method, URL, payload,
+// query params, and all necessary headers (Accept, Content-Type, jans-client, user-inum).
+// Authorization header is added only if params.token is non-empty.
+func (c *Client) createRequest(ctx context.Context, params requestParams, url string) (*http.Request, error) {
+        req, err := http.NewRequestWithContext(ctx, params.method, url, bytes.NewReader(params.payload))
+        if err != nil {
+                return nil, fmt.Errorf("could not create request: %w", err)
+        }
+
+        if len(params.queryParams) != 0 {
+                q := req.URL.Query()
+                for k, v := range params.queryParams {
+                        q.Add(k, v)
+                }
+                req.URL.RawQuery = q.Encode()
+        }
+
+        req.Header.Add("Accept", params.accept)
+        req.Header.Add("Content-Type", params.contentType)
+        req.Header.Add("jans-client", "infrastructure-as-code-tool")
+        req.Header.Add("user-inum", c.clientId)
+
+        if params.token != "" {
+                req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", params.token))
+        }
+
+        return req, nil
+}
+
 // request performs an HTTP request of the requested method to the given path.
 // The token is used as authorization header. If the request entity is not nil,
 // it is marshaled into JSON and used as request body. If the response value
@@ -658,26 +687,9 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
         // fmt.Printf("URL: %s %s\n", params.method, url)
         // fmt.Printf("Payload:\n%s\n", string(params.payload))
 
-        req, err := http.NewRequestWithContext(ctx, params.method, url, bytes.NewReader(params.payload))
+        req, err := c.createRequest(ctx, params, url)
         if err != nil {
-                return fmt.Errorf("could not create request: %w", err)
-        }
-
-        if len(params.queryParams) != 0 {
-                q := req.URL.Query()
-                for k, v := range params.queryParams {
-                        q.Add(k, v)
-                }
-                req.URL.RawQuery = q.Encode()
-        }
-
-        req.Header.Add("Accept", params.accept)
-        req.Header.Add("Content-Type", params.contentType)
-        req.Header.Add("jans-client", "infrastructure-as-code-tool")
-        req.Header.Add("user-inum", c.clientId)
-
-        if params.token != "" {
-                req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", params.token))
+                return err
         }
 
         tr := &http.Transport{}
@@ -725,28 +737,14 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
                         return fmt.Errorf("failed to refresh token after 401: %w", err)
                 }
                 
-                // Update the params with the new token and retry
+                // Update the params with the new token
                 params.token = newToken
                 
-                // Create a new request with the fresh token
-                retryReq, err := http.NewRequestWithContext(ctx, params.method, url, bytes.NewReader(params.payload))
+                // Create retry request with fresh token using the same helper
+                retryReq, err := c.createRequest(ctx, params, url)
                 if err != nil {
-                        return fmt.Errorf("could not create retry request: %w", err)
+                        return err
                 }
-                
-                if len(params.queryParams) != 0 {
-                        q := retryReq.URL.Query()
-                        for k, v := range params.queryParams {
-                                q.Add(k, v)
-                        }
-                        retryReq.URL.RawQuery = q.Encode()
-                }
-                
-                retryReq.Header.Add("Accept", params.accept)
-                retryReq.Header.Add("Content-Type", params.contentType)
-                retryReq.Header.Add("jans-client", "infrastructure-as-code-tool")
-                retryReq.Header.Add("user-inum", c.clientId)
-                retryReq.Header.Add("Authorization", fmt.Sprintf("Bearer %s", newToken))
                 
                 fmt.Printf("[TOKEN] Retrying request with fresh token\n")
                 resp, err = client.Do(retryReq)
