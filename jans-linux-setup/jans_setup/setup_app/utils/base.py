@@ -340,6 +340,9 @@ def find_script_names(ldif_file):
     return name_list
 
 def download(url, dst, verbose=False, headers=None):
+    if not headers:
+        headers = [('User-agent', 'Mozilla/5.0')]
+
     pardir, fn = os.path.split(dst)
     if not os.path.exists(pardir):
         logIt("Creating driectory", pardir)
@@ -350,11 +353,9 @@ def download(url, dst, verbose=False, headers=None):
         if verbose:
             print(logs)
 
-
-    if headers:
-        opener = urllib.request.build_opener()
-        opener.addheaders = headers
-        urllib.request.install_opener(opener)
+    opener = urllib.request.build_opener()
+    opener.addheaders = headers
+    urllib.request.install_opener(opener)
 
     mylog("Downloading {} to {}".format(url, dst))
     download_tries = 1

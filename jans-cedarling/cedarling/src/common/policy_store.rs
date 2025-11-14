@@ -88,8 +88,8 @@ fn validate_default_entities(
 
     // Check base64 size limit for each entity
     for (entity_id, entity_data) in entities {
-        if let Some(entity_str) = entity_data.as_str() {
-            if entity_str.len() > limits.max_base64_size {
+        if let Some(entity_str) = entity_data.as_str()
+            && entity_str.len() > limits.max_base64_size {
                 return Err(format!(
                     "Base64 string size ({}) for entity '{}' exceeds maximum allowed size ({})",
                     entity_str.len(),
@@ -97,7 +97,6 @@ fn validate_default_entities(
                     limits.max_base64_size
                 ));
             }
-        }
     }
 
     Ok(())
