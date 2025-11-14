@@ -80,6 +80,7 @@ public class UserMgmtService {
     DatabaseService databaseService;
 
     private static final String BIRTH_DATE = "birthdate";
+    private static final String MOBILE = "mobile";
 
     public String getPeopleBaseDn() {
         return userService.getPeopleBaseDn();
@@ -95,7 +96,7 @@ public class UserMgmtService {
         logger.info("For searching user user useLowercaseFilter?:{}", useLowercaseFilter);
 
         Filter displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter, givenNameFilter,
-                middleNameFilter, nicknameFilter, snFilter, searchFilter = null;
+                middleNameFilter, nicknameFilter, snFilter, mobileFilter, searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
@@ -122,6 +123,8 @@ public class UserMgmtService {
                             null);
                     uidFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, targetArray,
                             null);
+                    mobileFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(MOBILE), null, targetArray,
+                            null).multiValued(3);
                 } else {
                     displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                             null);
@@ -133,16 +136,17 @@ public class UserMgmtService {
                     nicknameFilter = Filter.createSubstringFilter("nickname", null, targetArray, null);
                     snFilter = Filter.createSubstringFilter("sn", null, targetArray, null);
                     uidFilter = Filter.createSubstringFilter("uid", null, targetArray, null);
+                    mobileFilter = Filter.createSubstringFilter(MOBILE, null, targetArray, null).multiValued(3);
                 }
 
                 inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
                 filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, mailFilter, uidFilter,
-                        givenNameFilter, middleNameFilter, nicknameFilter, snFilter, inumFilter));
+                        givenNameFilter, middleNameFilter, nicknameFilter, snFilter, inumFilter, mobileFilter));
             }
             searchFilter = Filter.createORFilter(filters);
         }
 
-        logger.trace("User pattern searchFilter:{}, searchRequest.getFieldValueMap():{}", searchFilter,
+        logger.debug("User pattern searchFilter:{}, searchRequest.getFieldValueMap():{}", searchFilter,
                 searchRequest.getFieldValueMap());
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
@@ -153,7 +157,7 @@ public class UserMgmtService {
                 String attributeType = this.getAttributeType(entry.getKey());
                 logger.trace("User field entry.getKey():{}, attributeType:{}", entry.getKey(), attributeType);
                 Filter dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null);
-                if ((entry.getKey() != null && entry.getKey().equalsIgnoreCase("mobile"))
+                if ((entry.getKey() != null && entry.getKey().equalsIgnoreCase(MOBILE))
                         || (attributeType != null && attributeType.equalsIgnoreCase("jsonb"))) {
                     dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null).multiValued(3);
                 }
