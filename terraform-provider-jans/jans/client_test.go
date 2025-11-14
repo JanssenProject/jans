@@ -4,6 +4,7 @@ import (
         "context"
         "errors"
         "os"
+        "strings"
         "testing"
 )
 
@@ -23,7 +24,7 @@ func TestMain(m *testing.M) {
         pass = os.Getenv("JANS_CLIENT_SECRET")
 
         // Add https:// prefix if not present
-        if host != "" && host[:4] != "http" {
+        if host != "" && !strings.HasPrefix(host, "http") {
                 host = "https://" + host
         }
 

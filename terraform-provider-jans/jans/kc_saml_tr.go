@@ -6,6 +6,7 @@ import (
         "encoding/json"
         "fmt"
         "io"
+        "strings"
 )
 
 type TrustRelationshipForm struct {
@@ -63,16 +64,18 @@ type ProfileConfigurations struct {
 func (c *Client) createTRFormData(tr *TrustRelationship, file io.Reader) (map[string]FormField, error) {
         data := map[string]FormField{}
 
-        tr.SPMetaDataSourceType = "manual"
+        // Create a local copy to avoid mutating the input
+        local := *tr
+        local.SPMetaDataSourceType = "manual"
         if file != nil {
                 data["assetFile"] = FormField{
                         Typ:  "file",
                         Data: file,
                 }
-                tr.SPMetaDataSourceType = "file"
+                local.SPMetaDataSourceType = "file"
         }
 
-        b, err := json.Marshal(tr)
+        b, err := json.Marshal(&local)
         if err != nil {
                 return nil, fmt.Errorf("failed to marshal request: %w", err)
         }
@@ -134,6 +137,7 @@ func (c *Client) UpdateTR(ctx context.Context, tr *TrustRelationship, file io.Re
 
 func (c *Client) DeleteTR(ctx context.Context, inum string) error {
 
+        inum = strings.TrimSpace(inum)
         if inum == "" {
                 return fmt.Errorf("inum is empty")
         }
@@ -167,6 +171,11 @@ func (c *Client) GetTRs(ctx context.Context) ([]TrustRelationship, error) {
 }
 
 func (c *Client) GetTR(ctx context.Context, inum string) (*TrustRelationship, error) {
+
+        inum = strings.TrimSpace(inum)
+        if inum == "" {
+                return nil, fmt.Errorf("inum is empty")
+        }
 
         scope := "https://jans.io/oauth/config/saml.readonly"
         token, err := c.ensureToken(ctx, scope)

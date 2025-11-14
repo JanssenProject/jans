@@ -94,12 +94,13 @@ func NewInsecureClient(host, clientId, clientSecret string) (*Client, error) {
         }, nil
 }
 
-// getToken performs a POST request to the token endpoint for the given scope.
-// The call uses the credentials stored in the client.
-func (c *Client) getToken(ctx context.Context, scope string) (string, error) {
+// fetchToken requests a new OAuth token from the auth server for the given scope.
+// Returns the access token and expiration time in seconds. Does not cache the result.
+// Caller is responsible for caching (and must hold the write lock when caching).
+func (c *Client) fetchToken(ctx context.Context, scope string) (string, int, error) {
 
         if c.host == "" {
-                return "", fmt.Errorf("host is not set")
+                return "", 0, fmt.Errorf("host is not set")
         }
 
         urlString := fmt.Sprintf("%s/jans-auth/restv1/token", c.host)
@@ -110,7 +111,7 @@ func (c *Client) getToken(ctx context.Context, scope string) (string, error) {
 
         req, err := http.NewRequestWithContext(ctx, "POST", urlString, bytes.NewReader([]byte(params.Encode())))
         if err != nil {
-                return "", fmt.Errorf("could not create request: %w", err)
+                return "", 0, fmt.Errorf("could not create request: %w", err)
         }
 
         req.SetBasicAuth(c.clientId, c.clientSecret)
@@ -129,7 +130,7 @@ func (c *Client) getToken(ctx context.Context, scope string) (string, error) {
 
         resp, err := client.Do(req)
         if err != nil {
-                return "", fmt.Errorf("could not perform request: %w", err)
+                return "", 0, fmt.Errorf("could not perform request: %w", err)
         }
 
         // b, _ = httputil.DumpResponse(resp, true)
@@ -138,12 +139,12 @@ func (c *Client) getToken(ctx context.Context, scope string) (string, error) {
 
         data, err := io.ReadAll(resp.Body)
         if err != nil {
-                return "", fmt.Errorf("could not read response body: %w", err)
+                return "", 0, fmt.Errorf("could not read response body: %w", err)
         }
 
         if resp.StatusCode != 200 {
                 // fmt.Printf("\n\nResponse data:\n%s\n\n", string(data))
-                return "", fmt.Errorf("did not get correct response code: %v", resp.Status)
+                return "", 0, fmt.Errorf("did not get correct response code: %v", resp.Status)
         }
 
         type tokenResponse struct {
@@ -156,7 +157,7 @@ func (c *Client) getToken(ctx context.Context, scope string) (string, error) {
         token := &tokenResponse{}
 
         if err = json.Unmarshal(data, token); err != nil {
-                return "", fmt.Errorf("could not unmarshal response: %w", err)
+                return "", 0, fmt.Errorf("could not unmarshal response: %w", err)
         }
 
         // Check if all requested scopes are present in the granted scopes
@@ -173,21 +174,14 @@ func (c *Client) getToken(ctx context.Context, scope string) (string, error) {
                         }
                 }
                 if !found {
-                        return "", fmt.Errorf("scope not granted: required '%s', got '%s'", scope, token.Scope)
+                        return "", 0, fmt.Errorf("scope not granted: required '%s', got '%s'", scope, token.Scope)
                 }
         }
 
-        // Cache the token with its expiration time
-        c.tokenMutex.Lock()
-        c.tokenCache[scope] = &cachedToken{
-                accessToken: token.AccessToken,
-                expiresAt:   time.Now().Add(time.Duration(token.ExpiresIn) * time.Second),
-        }
-        c.tokenMutex.Unlock()
-
         fmt.Printf("[TOKEN] Obtained new token for scope '%s', expires in %d seconds\n", scope, token.ExpiresIn)
 
-        return token.AccessToken, nil
+        // Return token info for caller to cache (caller must hold write lock)
+        return token.AccessToken, token.ExpiresIn, nil
 }
 
 // splitScopes splits a space-separated scope string into individual scopes
@@ -224,8 +218,15 @@ func splitBySpace(s string) []string {
 // ensureToken checks if a valid cached token exists for the given scope.
 // If a valid token exists, it returns the cached token.
 // If no valid token exists or it's about to expire, it fetches a new one.
+// Uses double-checked locking to prevent multiple concurrent goroutines from
+// requesting duplicate tokens when a token expires under load.
 func (c *Client) ensureToken(ctx context.Context, scope string) (string, error) {
-        // Check cache with read lock
+        // Fast-fail guard: reject empty scope before any lock acquisition
+        if scope == "" {
+                return "", fmt.Errorf("scope is empty")
+        }
+
+        // First check: use read lock for fast path
         c.tokenMutex.RLock()
         cached, exists := c.tokenCache[scope]
         c.tokenMutex.RUnlock()
@@ -235,9 +236,31 @@ func (c *Client) ensureToken(ctx context.Context, scope string) (string, error) 
                 return cached.accessToken, nil
         }
 
-        // Token expired or doesn't exist, get a new one
+        // Token expired or doesn't exist, acquire write lock to refresh
+        c.tokenMutex.Lock()
+        defer c.tokenMutex.Unlock()
+
+        // Second check: another goroutine may have refreshed while we waited for write lock
+        cached, exists = c.tokenCache[scope]
+        if exists && cached.isValid() {
+                fmt.Printf("[TOKEN] Using cached token for scope '%s' (refreshed by another goroutine)\n", scope)
+                return cached.accessToken, nil
+        }
+
+        // Still need to refresh - fetch new token while holding write lock
         fmt.Printf("[TOKEN] Token missing or expired for scope '%s', fetching new token\n", scope)
-        return c.getToken(ctx, scope)
+        accessToken, expiresIn, err := c.fetchToken(ctx, scope)
+        if err != nil {
+                return "", err
+        }
+
+        // Cache the token (we already hold the write lock)
+        c.tokenCache[scope] = &cachedToken{
+                accessToken: accessToken,
+                expiresAt:   time.Now().Add(time.Duration(expiresIn) * time.Second),
+        }
+
+        return accessToken, nil
 }
 
 // invalidateToken removes a token from the cache, forcing a refresh on next use
@@ -303,18 +326,26 @@ func (c *Client) getAllPaginated(ctx context.Context, path, scope string, pageSi
                         allEntries = append(allEntries, pageEntries...)
                 }
 
-                fetchedCount += page.EntriesCount
+                // Use actual unmarshaled entries count for accurate pagination
+                n := len(pageEntries)
+                fetchedCount += n
 
                 // Stop if we've fetched all entries or the current page was empty
                 if page.TotalEntriesCount > 0 && fetchedCount >= page.TotalEntriesCount {
                         break
                 }
-                if page.EntriesCount == 0 {
-                        break
-                }
 
-                // Move to next page based on actual entries returned to avoid gaps
-                startIndex += page.EntriesCount
+                // If no entries were unmarshaled, fall back to API count or break if both zero
+                if n == 0 {
+                        if page.EntriesCount == 0 {
+                                break
+                        }
+                        // Fall back to API count to avoid infinite loop
+                        startIndex += page.EntriesCount
+                } else {
+                        // Move to next page based on actual unmarshaled entries to avoid gaps/duplicates
+                        startIndex += n
+                }
         }
 
         return allEntries, nil
@@ -454,9 +485,10 @@ func (c *Client) newParams(method, path string, resp any, options ...requestPara
         return params, nil
 }
 
-func (c *Client) withToken(ctx context.Context, url string) requestParamsOptions {
+func (c *Client) withToken(ctx context.Context, scope string) requestParamsOptions {
         return func(params *requestParams) (err error) {
-                params.token, err = c.ensureToken(ctx, url)
+                params.token, err = c.ensureToken(ctx, scope)
+                params.scope = scope
                 return
         }
 }
