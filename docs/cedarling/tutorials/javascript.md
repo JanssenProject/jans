@@ -465,6 +465,6 @@ export class PolicyEvaluationError {
 
 ## See Also
 
-- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
-- [Cedarling Unsigned quickstart](../cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
-- [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
+- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
+- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)

@@ -12,7 +12,7 @@ tags:
 # Authorization Using The Cedarling
 
 This quick start guide shows how to quickly test authorization of a user action
-using the Cedarling. We will be using [the application asserted identity approach](./README.md#token-based-access-control-tbac-v-application-asserted-identity) 
+using the Cedarling. We will be using [the application asserted identity approach](../README.md#token-based-access-control-tbac-v-application-asserted-identity) 
 in this guide to implement role based access control(RBAC). Refer to [this section](#implement-tbac-using-cedarling) to understand how to use Cedarling
 with TBAC approach.
 
@@ -36,7 +36,7 @@ For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/ja
 In this section, we will see how to implement the role-based access control
 using the Cedarling when
 the information about the principal is supplied by the host application. We can
-call this approach [the application asserted identity approach](./README.md#token-based-access-control-tbac-v-application-asserted-identity).
+call this approach [the application asserted identity approach](../README.md#token-based-access-control-tbac-v-application-asserted-identity).
 
 ### Step-1: Create the Cedar Policy and Schema
 
@@ -184,7 +184,7 @@ The top-level `decision: false` shows Cedarling denying authorization.
 
 ## Implement RBAC using signed tokens (TBAC)
 
-In this guide, we will use [Token-Based Access Control (TBAC)](./README.md#token-based-access-control-tbac-v-application-asserted-identity) to 
+In this guide, we will use [Token-Based Access Control (TBAC)](../README.md#token-based-access-control-tbac-v-application-asserted-identity) to 
 implement role-based access control (RBAC). 
 
 For better understanding of the TBAC flow, see the diagram below. 

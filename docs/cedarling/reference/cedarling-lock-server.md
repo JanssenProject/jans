@@ -32,7 +32,7 @@ jans tui
 Navigate to:
     `Auth Server` > `SSA` > `Add SSA`
 
-![SSA Creation using the Jans TUI!](../assets/cedarling/ssa_creation_tui.png "SSA Creation using the Jans TUI")
+![SSA Creation using the Jans TUI!](../../assets/cedarling/ssa_creation_tui.png "SSA Creation using the Jans TUI")
 
 When creating the SSA, ensure you:
 
