@@ -116,7 +116,7 @@ type Url = {
 
 entity Access_token = {
   "exp": Long,
-  "iss": TrustedIssuer
+  "iss": Jans::TrustedIssuer
 };
 
 entity Issue = {
@@ -126,9 +126,12 @@ entity Issue = {
 
 entity Role;
 
-entity TrustedIssuer = {
-  "issuer_entity_id": Url
-};
+namespace Jans{
+  entity TrustedIssuer = {
+    "issuer_entity_id": Url
+  };
+}
+
 
 entity User in [Role] = {
   "country": String,
@@ -139,7 +142,7 @@ entity User in [Role] = {
 
 entity Workload = {
   "client_id": String,
-  "iss": TrustedIssuer,
+  "iss": Jans::TrustedIssuer,
   "name": String,
   "org_id": String
 };
@@ -161,6 +164,8 @@ action "View" appliesTo {
   context: Context
 };
 ```
+
+Note: The `TrustedIssuer` namespace corresponds to its name.
 
 With this schema, you only need to provide the fields that are not automatically included. For instance, to define the `time` in the context:
 
@@ -358,16 +363,19 @@ The Cedarling uses a predictable algorithm to create token collection field name
 **Pattern**: `{issuer_name}_{token_type}`
 
 **Issuer Name Resolution**:
+
 1. Look up issuer in trusted issuer metadata and use the `name` field
 2. If no `name` field, use hostname from JWT `iss` claim
 3. Convert to lowercase and replace special characters with underscores
 
 **Token Type Resolution**:
+
 1. Extract from mapping field (e.g., "Jans::Access_Token")
 2. Split by namespace separator ("::")
 3. Convert to lowercase, preserving underscores
 
 **Examples**:
+
 - JWT issuer: `https://idp.acme.com/auth`, Trusted issuer name: `"Acme"`, Mapping: `Jans::Access_Token` → `acme_access_token`
 - JWT issuer: `https://login.microsoftonline.com/tenant`, Trusted issuer name: `"Microsoft"`, Mapping: `Jans::Id_Token` → `microsoft_id_token`
 - JWT issuer: `https://idp.dolphin.sea/auth`, Trusted issuer name: `"Dolphin"`, Mapping: `Acme::DolphinToken` → `dolphin_acme_dolphin_token`
@@ -375,11 +383,13 @@ The Cedarling uses a predictable algorithm to create token collection field name
 ### Error Handling
 
 **Graceful Token Validation Failures**:
+
 - Invalid tokens are ignored and logged
 - Authorization continues with remaining valid tokens
 - At least one valid token is required for authorization to proceed
 
 **Non-Deterministic Token Detection**:
+
 - System rejects requests with multiple tokens of the same type from the same issuer
 - Example: Two "Jans::Access_Token" from "Acme" issuer will fail
 - This prevents ambiguous policy evaluation

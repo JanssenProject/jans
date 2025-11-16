@@ -65,7 +65,7 @@ A multi-issuer authorization request consists of:
 
 ### 2. Token Processing Pipeline
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │ 1. Token Input                                          │
 │    Array of tokens with explicit type mappings         │
@@ -113,10 +113,10 @@ Each validated token becomes a Cedar entity:
 entity Token = {
   "token_type": String,        // e.g., "Jans::Access_Token"
   "jti": String,               // Token ID
-  "issuer": String,            // JWT iss claim
+  "iss"?: Jans::TrustedIssuer,  // JWT iss claim
   "exp": Long,                 // Expiration timestamp
   "validated_at": Long         // Validation timestamp
-} tags String;
+} tags Set<String>;
 ```
 
 **All JWT claims are stored as tags** and accessed using Cedar's tag operations:
@@ -142,7 +142,7 @@ Tokens are organized in the context using a deterministic naming algorithm:
 **Token Type Resolution**:
 
 1. Extract from `mapping` field (e.g., "Jans::Access_Token")
-2. Split by namespace separator ("::")
+2. Split by namespace separator ("::"), and use the last segment.
 3. Convert to lowercase, preserve underscores
 
 **Examples**:
@@ -514,18 +514,24 @@ Multi-issuer authorization creates token entities dynamically and places them in
 Token entities must have these required attributes:
 
 ```cedar
-entity Access_token = {
-  token_type?: String,      // Required for multi-issuer
-  jti?: String,             // Required for multi-issuer
-  issuer?: String,          // Required for multi-issuer
-  exp?: Long,               // Required for multi-issuer
-  validated_at?: Long,      // Required for multi-issuer
-  // Other JWT claims as optional attributes
-  aud?: String,
-  iat?: Long,
-  scope?: Set<String>,
-  // ...
-} tags Set<String>;         // Required for dynamic JWT claims
+namespace Jans{
+  entity Access_token = {
+    token_type?: String,        // Required for multi-issuer
+    jti?: String,               // Required for multi-issuer
+    iss?: Jans::TrustedIssuer,  // Required for multi-issuer
+    exp?: Long,                 // Required for multi-issuer
+    validated_at?: Long,        // Required for multi-issuer
+    // Other JWT claims as optional attributes
+    aud?: String,
+    iat?: Long,
+    scope?: Set<String>,
+    // ...
+  } tags Set<String>;         // Required for dynamic JWT claims
+
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
+}
 ```
 
 **2. Context Structure**
@@ -552,7 +558,7 @@ All token entity attributes (except the core multi-issuer fields) must be option
 #### Why These Changes Are Needed
 
 - **Dynamic token entities**: Multi-issuer authorization creates token entities on-the-fly without User/Workload principals
-- **Tag-based claims**: JWT claims are stored as entity tags (Set<String> by default) for flexible access
+- **Tag-based claims**: JWT claims are stored as entity tags (`Set<String>` by default) for flexible access
 - **Context structure**: Tokens are organized in `context.tokens.{issuer}_{token_type}` format
 - **Schema validation**: Cedar validates entities against the schema; missing required fields cause errors
 
@@ -573,7 +579,7 @@ Configure trusted issuers with the `name` field for predictable token naming:
       "openid_configuration_endpoint": "https://idp.acme.com/.well-known/openid-configuration",
       "token_metadata": {
         "access_token": {
-          "entity_type_name": "Jans::Access_Token",
+          "entity_type_name": "AcmeCorp::Access_Token",
           "token_id": "jti"
         }
       }
@@ -584,7 +590,7 @@ Configure trusted issuers with the `name` field for predictable token naming:
       "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
       "token_metadata": {
         "id_token": {
-          "entity_type_name": "Jans::Id_Token",
+          "entity_type_name": "Google::Id_Token",
           "token_id": "jti"
         }
       }
@@ -595,7 +601,7 @@ Configure trusted issuers with the `name` field for predictable token naming:
       "openid_configuration_endpoint": "https://service.example.com/.well-known/openid-configuration",
       "token_metadata": {
         "custom_token": {
-          "entity_type_name": "Custom::ServiceToken",
+          "entity_type_name": "CustomService::ServiceToken",
           "token_id": "jti"
         }
       }
@@ -617,14 +623,13 @@ namespace Jans {
     // Required multi-issuer attributes
     token_type?: String,        // Entity type name (e.g., "Jans::Access_Token")
     jti?: String,               // JWT ID - unique token identifier
-    issuer?: String,            // JWT issuer claim
+    iss?: TrustedIssuer,        // Issuer entity reference (for standard authz)
     exp?: Long,                 // Token expiration timestamp
     validated_at?: Long,        // Timestamp when token was validated
 
     // Optional JWT claims (make all optional for compatibility)
     aud?: String,               // Audience
     iat?: Long,                 // Issued at
-    iss?: TrustedIssuer,        // Issuer entity reference (for standard authz)
     scope?: Set<String>,        // OAuth scopes
     client_id?: String,         // Client identifier
     sub?: String,               // Subject
@@ -635,14 +640,13 @@ namespace Jans {
     // Required multi-issuer attributes
     token_type?: String,
     jti?: String,
-    issuer?: String,
+    iss?: TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
     // Optional JWT claims
     aud?: Set<String>,
     iat?: Long,
-    iss?: TrustedIssuer,
     sub?: String,
     email?: email_address,
     name?: String,
@@ -657,14 +661,13 @@ namespace Jans {
     // Required multi-issuer attributes
     token_type?: String,
     jti?: String,
-    issuer?: String,
+    iss?: TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
     // Optional JWT claims
     aud?: String,
     iat?: Long,
-    iss?: TrustedIssuer,
     sub?: String,
     email?: email_address,
     name?: String,
@@ -673,7 +676,12 @@ namespace Jans {
     role?: Set<String>,
     // Add other JWT claims as needed
   } tags Set<String>;
+
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
 }
+
 ```
 
 #### Custom Token Types
@@ -686,7 +694,7 @@ namespace Custom {
     // Required multi-issuer attributes
     token_type?: String,
     jti?: String,
-    issuer?: String,
+    iss?: Custom::TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
@@ -695,6 +703,10 @@ namespace Custom {
     permissions?: Set<String>,
     service_tier?: String,
   } tags Set<String>;
+
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
 }
 ```
 
@@ -754,8 +766,8 @@ result = cedarling.authorize_multi_issuer(request)
 ```python
 # ERROR: Multiple tokens of same type from same issuer
 tokens = [
-    TokenInput(mapping="Jans::Access_Token", payload="token1"),  # From Acme
-    TokenInput(mapping="Jans::Access_Token", payload="token2"),  # Also from Acme - ERROR!
+    TokenInput(mapping="Jans::Access_Token", payload="token1"),  # From Jans::Access_Token
+    TokenInput(mapping="Jans::Access_Token", payload="token2"),  # Also from Jans::Access_Token - ERROR!
 ]
 
 # This will fail because it's non-deterministic
@@ -791,11 +803,11 @@ Configure clear, predictable issuer names in your policy store:
 
 ### 2. Start Schema-Less for Development
 
-Begin without Cedar schemas for rapid development:
+Begin without Cedar schemas for rapid development:  
 
-- All claims stored as `Set<String>`
-- Flexible and forgiving during development
-- Add schemas later for production type safety
+- All claims stored in tags as `Set<String>`  
+- Flexible and forgiving during development  
+- Add schemas later for production type safety  
 
 ### 3. Implement Comprehensive Logging
 

@@ -405,31 +405,36 @@ Each validated token in a multi-issuer authorization request becomes a Cedar ent
 
 - `token_type` (String): The entity type name (e.g., "Jans::Access_Token", "Acme::DolphinToken")
 - `jti` (String): Unique token identifier from JWT
-- `issuer` (String): JWT issuer claim value
+- `iss` (TrustedIssuer): JWT issuer claim value, derived from iss to TrustedIssuer, can be optional in case if token isn't verified.
 - `exp` (Long): Token expiration timestamp
 - `validated_at` (Long): Timestamp when Cedarling validated the token
 
 **Optional Attributes** (JWT claims stored as entity tags):
 
 - All other JWT claims are stored as **entity tags** with `Set<String>` type by default
-- Examples: `scope`, `aud`, `sub`, `client_id`, cust
-  om claims
+- Examples: `scope`, `aud`, `sub`, `client_id`, custom claims
 
 **Complete Example**:
 
 ```cedar
-entity Access_token = {
-  "token_type": String,        // Required: Entity type name
-  "jti": String,               // Required: Token ID
-  "issuer": String,            // Required: JWT issuer
-  "exp": Long,                 // Required: Expiration
-  "validated_at": Long,        // Required: Validation timestamp
-  // Optional JWT claims (must be optional)
-  "aud"?: String,
-  "iat"?: Long,
-  "scope"?: Set<String>,
-  // ... other claims
-} tags Set<String>;            // Required: For dynamic claim storage
+namespace Jans{
+  entity Access_token = {
+    "token_type": String,        // Required: Entity type name
+    "jti": String,               // Required: Token ID
+    "iss": Jans::TrustedIssuer,  // Required: JWT issuer
+    "exp": Long,                 // Required: Expiration
+    "validated_at": Long,        // Required: Validation timestamp
+    // Optional JWT claims (must be optional)
+    "aud"?: String,
+    "iat"?: Long,
+    "scope"?: Set<String>,
+    // ... other claims
+  } tags Set<String>;            // Required: For dynamic claim storage
+
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
+}
 ```
 
 **Important Notes**:
@@ -488,11 +493,11 @@ entity Tokens = {
 };
 ```
 
-The naming follows this pattern:
+The naming follows this pattern:  
 
-- **Issuer name**: From trusted issuer metadata `name` field, or hostname from JWT `iss` claim
-- **Token type**: Extracted from the `mapping` field (e.g., "Jans::Access_Token" → "access_token")
-- Both converted to lowercase with underscores replacing special characters
+- **Issuer name**: From trusted issuer metadata `name` field, or hostname from JWT `iss` claim  
+- **Token type**: Extracted from the `mapping` field (e.g., "Jans::Access_Token" → "access_token")  
+- Both converted to lowercase with underscores replacing special characters  
 
 ### Schema Requirements for Multi-Issuer
 
@@ -506,14 +511,13 @@ namespace Jans {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
     token_type?: String,        // Entity type (e.g., "Jans::Access_Token")
     jti?: String,               // JWT ID - unique token identifier
-    issuer?: String,            // JWT issuer claim
+    iss?: Jans::TrustedIssuer,  // Issuer entity (for standard authz)
     exp?: Long,                 // Token expiration timestamp
     validated_at?: Long,        // Validation timestamp
 
     // Optional JWT claims - ALL MUST BE OPTIONAL (?)
     aud?: String,               // Audience
     iat?: Long,                 // Issued at
-    iss?: TrustedIssuer,        // Issuer entity (for standard authz)
     scope?: Set<String>,        // OAuth scopes
     client_id?: String,         // Client ID
     sub?: String,               // Subject
@@ -524,14 +528,13 @@ namespace Jans {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
     token_type?: String,
     jti?: String,
-    issuer?: String,
+    iss?: Jans::TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
     // Optional JWT claims - ALL MUST BE OPTIONAL (?)
     aud?: Set<String>,
     iat?: Long,
-    iss?: TrustedIssuer,
     sub?: String,
     email?: email_address,
     name?: String,
@@ -548,14 +551,13 @@ namespace Jans {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
     token_type?: String,
     jti?: String,
-    issuer?: String,
+    iss?: Jans::TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
     // Optional JWT claims - ALL MUST BE OPTIONAL (?)
     aud?: String,
     iat?: Long,
-    iss?: TrustedIssuer,
     sub?: String,
     email?: email_address,
     name?: String,
@@ -564,6 +566,10 @@ namespace Jans {
     role?: Set<String>,
     // Add other claims as needed
   } tags Set<String>;           // *** REQUIRED: For dynamic claims ***
+
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
 }
 ```
 
@@ -577,7 +583,7 @@ namespace Acme {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
     token_type?: String,
     jti?: String,
-    issuer?: String,
+    iss?: Acme::TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
@@ -586,6 +592,10 @@ namespace Acme {
     location?: String,
     clearance_level?: Long,
   } tags Set<String>;           // *** REQUIRED: For dynamic claims ***
+
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
 }
 ```
 
@@ -699,7 +709,7 @@ The `name` field in trusted issuer configuration is critical for multi-issuer au
 ```json
 "trusted_issuers": {
   "acme_issuer_id": {
-    "name": "Acme",  // Used in token collection naming: "acme_access_token"
+    "name": "Acme",  // Used in token collection naming: "acme_access_token" and depict namespace for `TrustedIssuer` cedar type
     "description": "Acme Corporation IDP",
     "openid_configuration_endpoint": "https://idp.acme.com/.well-known/openid-configuration",
     "token_metadata": {
@@ -710,7 +720,7 @@ The `name` field in trusted issuer configuration is critical for multi-issuer au
     }
   },
   "dolphin_issuer_id": {
-    "name": "Dolphin",  // Used in token collection naming: "dolphin_acme_dolphin_token"
+    "name": "Dolphin",  // Used in token collection naming: "dolphin_acme_dolphin_token" and depict namespace for `TrustedIssuer` cedar type
     "description": "Dolphin Service Provider",
     "openid_configuration_endpoint": "https://idp.dolphin.sea/.well-known/openid-configuration",
     "token_metadata": {
@@ -723,11 +733,12 @@ The `name` field in trusted issuer configuration is critical for multi-issuer au
 }
 ```
 
-The `name` field ensures predictable and secure token entity naming in the policy evaluation context.
+**Note**: The `name` field ensures predictable and secure token entity naming in the policy evaluation context.
+And is used as **namespace** for `TrustedIssuer` cedar type.
 
 ## Policy and Schema Authoring
 
-You can hand create your Cedar policies and schema in
+You can manually create your Cedar policies and schema in
 [Visual Studio](https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar).
 Make sure you run the cedar command line tool to validate both your schema and policies.
 
@@ -741,11 +752,14 @@ Here is example of a minimum supported `cedar-policy schema`:
 
 ```cedar-policy_schema
 namespace Jans {
-  entity id_token = {"aud": Set<String>,"iss": String, "sub": String};
+  entity id_token = {"aud": Set<String>,"iss": String, "sub": String, iss?: Jans::TrustedIssuer};
   entity Role;
   entity User in [Role] = {};
-  entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String};
+  entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String, iss?: Jans::TrustedIssuer};
   entity Workload = {};
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
 
   entity Issue = {};
   action "Update" appliesTo {
@@ -755,6 +769,8 @@ namespace Jans {
   };
 }
 ```
+
+**Note**: The principal you use may vary depending on the authorization method.
 
 You can extend all of this entites and add your own.
 
