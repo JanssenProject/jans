@@ -67,6 +67,8 @@ fn with_jwt_validation_hs256_benchmark(c: &mut Criterion) {
 
     mock1.jwks_endpoint.assert();
     mock1.oidc_endpoint.assert();
+    mock2.jwks_endpoint.assert();
+    mock2.oidc_endpoint.assert();
 }
 
 fn measurement_config() -> Criterion {
@@ -120,12 +122,12 @@ async fn prepare_cedarling_with_jwt_validation(
 
     // We overwrite the idp endpoint here with out mock server
     policy_store["policy_stores"]["a1bf93115de86de760ee0bea1d529b521489e5a11747"]["trusted_issuers"]
-        ["Jans123123"]["openid_configuration_endpoint"] =
+        ["Jans"]["openid_configuration_endpoint"] =
         format!("{}/.well-known/openid-configuration", base_idp_url_1).into();
 
     // Also update the AnotherIssuer to use the mock server
     policy_store["policy_stores"]["a1bf93115de86de760ee0bea1d529b521489e5a11747"]["trusted_issuers"]
-        ["AnotherIssuer"]["openid_configuration_endpoint"] =
+        ["Jans2"]["openid_configuration_endpoint"] =
         format!("{}/.well-known/openid-configuration", base_idp_url_2).into();
 
     let bootstrap_config = BootstrapConfig {
