@@ -10,7 +10,7 @@ policy_stores:
     description: A test policy store for multi-issuer authorization testing.
     trusted_issuers:
       JansTestIssuer:
-        name: "Jans Test Issuer"
+        name: "JansTestIssuer"
         description: "Test issuer for multi-issuer authorization"
         openid_configuration_endpoint: "https://test.jans.org/.well-known/openid-configuration"
         token_metadata:
@@ -41,9 +41,9 @@ policy_stores:
                 action in [Jans::Action::"Update"],
                 resource is Jans::Issue
             )when{
-                context has tokens.jans_test_issuer_access_token &&
-                context.tokens.jans_test_issuer_access_token.hasTag("org_id") &&
-                context.tokens.jans_test_issuer_access_token.getTag("org_id").contains(resource.org_id)
+                context has tokens.janstestissuer_access_token &&
+                context.tokens.janstestissuer_access_token.hasTag("org_id") &&
+                context.tokens.janstestissuer_access_token.getTag("org_id").contains(resource.org_id)
             };
       444da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         description: Multi-issuer policy example using context tokens for user
@@ -57,9 +57,9 @@ policy_stores:
                 action in [Jans::Action::"Update"],
                 resource is Jans::Issue
             )when{
-                context has tokens.jans_test_issuer_userinfo_token &&
-                context.tokens.jans_test_issuer_userinfo_token.hasTag("country") &&
-                context.tokens.jans_test_issuer_userinfo_token.getTag("country").contains(resource.country)
+                context has tokens.janstestissuer_userinfo_token &&
+                context.tokens.janstestissuer_userinfo_token.hasTag("country") &&
+                context.tokens.janstestissuer_userinfo_token.getTag("country").contains(resource.country)
             };
     schema:
       encoding: none
@@ -70,8 +70,7 @@ policy_stores:
           entity Access_Token = {
             token_type: String,
             jti: String,
-            issuer: String,
-            iss: TrustedIssuer,
+              iss: JansTestIssuer::TrustedIssuer,
             validated_at: Long,
             exp: Long,
             sub?: String,
@@ -81,8 +80,7 @@ policy_stores:
           entity Id_Token = {
             token_type: String,
             jti: String,
-            issuer: String,
-            iss: TrustedIssuer,
+            iss: JansTestIssuer::TrustedIssuer,
             validated_at: Long,
             exp: Long,
             sub?: String,
@@ -92,8 +90,7 @@ policy_stores:
           entity Userinfo_Token = {
             token_type: String,
             jti: String,
-            issuer: String,
-            iss: TrustedIssuer,
+            iss: JansTestIssuer::TrustedIssuer,
             validated_at: Long,
             exp: Long,
             sub?: String,
@@ -115,12 +112,15 @@ policy_stores:
             context: Context
           };
         }
+        namespace JansTestIssuer {
+          entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
+        }
         
         type Context = {
           tokens: {
-            jans_test_issuer_access_token?: Jans::Access_Token,
-            jans_test_issuer_id_token?: Jans::Id_Token,
-            jans_test_issuer_userinfo_token?: Jans::Userinfo_Token,
+            janstestissuer_access_token?: Jans::Access_Token,
+            janstestissuer_id_token?: Jans::Id_Token,
+            janstestissuer_userinfo_token?: Jans::Userinfo_Token,
             total_token_count: Long
           },
           some_context?: String
