@@ -279,11 +279,11 @@ func (c *Client) ensureToken(ctx context.Context, scope string) (string, error) 
 }
 
 // invalidateToken removes a token from the cache, forcing a refresh on next use
-func (c *Client) invalidateToken(scope string) {
+func (c *Client) invalidateToken(ctx context.Context, scope string) {
         c.tokenMutex.Lock()
         delete(c.tokenCache, scope)
         c.tokenMutex.Unlock()
-        tflog.Debug(context.Background(), "Invalidated cached OAuth token", map[string]any{
+        tflog.Debug(ctx, "Invalidated cached OAuth token", map[string]any{
                 "scope": scope,
         })
 }
@@ -747,7 +747,7 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
                         "scope": params.scope,
                         "path":  params.path,
                 })
-                c.invalidateToken(params.scope)
+                c.invalidateToken(ctx, params.scope)
                 
                 // Get a fresh token
                 newToken, err := c.ensureToken(ctx, params.scope)

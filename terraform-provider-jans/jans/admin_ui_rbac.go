@@ -320,8 +320,8 @@ func (c *Client) DeleteAdminUIRolePermissionMapping(ctx context.Context, roleID 
                 return fmt.Errorf("role is empty")
         }
 
-        rolePermissionMapping, err := c.GetAdminUIRolePermissionMapping(ctx, roleID)
-        if err != nil {
+        // Verify the mapping exists before attempting deletion
+        if _, err := c.GetAdminUIRolePermissionMapping(ctx, roleID); err != nil {
                 return err
         }
 
@@ -331,7 +331,7 @@ func (c *Client) DeleteAdminUIRolePermissionMapping(ctx context.Context, roleID 
                 return fmt.Errorf("failed to get token: %w", err)
         }
 
-        if err := c.deleteEntity(ctx, "/jans-config-api/admin-ui/adminUIRolePermissionsMapping/"+roleID, token, scope, rolePermissionMapping); err != nil {
+        if err := c.delete(ctx, "/jans-config-api/admin-ui/adminUIRolePermissionsMapping/"+roleID, token, scope); err != nil {
                 return fmt.Errorf("delete request failed: %w", err)
         }
 

@@ -31,7 +31,7 @@ func TestCreateConfig(t *testing.T) {
                 IdpMetadataMandatoryAttributes: []string{"name"},
         }
 
-        createdConfig, err := c.CreateKCSAMLConfiguration(ctx, config)
+        _, err = c.CreateKCSAMLConfiguration(ctx, config)
         if err != nil {
                 if strings.Contains(err.Error(), "scope not granted") || strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "Method Not Allowed") {
                         t.Skipf("Keycloak SAML feature not available or scope not granted: %v", err)
@@ -69,10 +69,5 @@ func TestCreateConfig(t *testing.T) {
 
         if diff := cmp.Diff(config, gotConfig); diff != "" {
                 t.Errorf("Config mismatch (-want +got):\n%s", diff)
-        }
-
-        // Verify the created config matches expectations
-        if createdConfig.ApplicationName != "UpdatedAPP" {
-                t.Errorf("Expected ApplicationName 'UpdatedAPP' after patch, got %s", createdConfig.ApplicationName)
         }
 }

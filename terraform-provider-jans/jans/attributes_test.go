@@ -3,10 +3,12 @@ package jans
 import (
         "context"
         "encoding/json"
+        "fmt"
         "net/http"
         "net/http/httptest"
         "strings"
         "testing"
+        "time"
 
         "github.com/google/go-cmp/cmp"
 )
@@ -20,22 +22,26 @@ func TestAttributes(t *testing.T) {
 
         ctx := context.Background()
 
+        // Use a unique test-scoped attribute name to avoid conflicts in shared environments
+        uniqueAttrName := fmt.Sprintf("testCustomAttribute_%d", time.Now().UnixNano())
+
+        // Clean up any leftover test artifacts from previous failed runs
+        // Only delete attributes that match our unique test naming pattern
         attrs, err := client.GetAttributes(ctx)
         if err != nil {
                 t.Fatal(err)
         }
 
         for _, attr := range attrs {
-                if attr.Name == "l" {
-                        if err = client.DeleteAttribute(ctx, attr.Inum); err != nil {
-                                t.Fatal(err)
-                        }
+                // Only delete attributes created by this test suite (with our naming pattern)
+                if strings.HasPrefix(attr.Name, "testCustomAttribute_") {
+                        _ = client.DeleteAttribute(ctx, attr.Inum)
                 }
         }
 
         newAttribute := &Attribute{
                 Inum:           "7AC6",
-                Name:           "testCustomAttribute",
+                Name:           uniqueAttrName,
                 DisplayName:    "Test Custom Attribute",
                 Description:    "Test custom attribute for unit testing",
                 Origin:         "jansCustomPerson",
@@ -111,7 +117,11 @@ func TestClient_GetAttribute(t *testing.T) {
         }))
         defer server.Close()
 
-        client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        if err != nil {
+                t.Fatalf("Failed to create client: %v", err)
+        }
+
         result, err := client.GetAttribute(context.Background(), "TEST")
 
         if err != nil {
@@ -136,7 +146,11 @@ func TestClient_UpdateAttribute(t *testing.T) {
         }))
         defer server.Close()
 
-        client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        if err != nil {
+                t.Fatalf("Failed to create client: %v", err)
+        }
+
         attr := &Attribute{Inum: "TEST", Name: "updated", DisplayName: "Updated"}
         result, err := client.UpdateAttribute(context.Background(), attr)
 
@@ -161,8 +175,12 @@ func TestClient_DeleteAttribute(t *testing.T) {
         }))
         defer server.Close()
 
-        client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-        err := client.DeleteAttribute(context.Background(), "TEST")
+        client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        if err != nil {
+                t.Fatalf("Failed to create client: %v", err)
+        }
+
+        err = client.DeleteAttribute(context.Background(), "TEST")
 
         if err != nil {
                 t.Errorf("Unexpected error: %v", err)
