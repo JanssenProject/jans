@@ -106,38 +106,17 @@ public class UserMgmtService {
                 String[] targetArray = new String[] { assertionValue };
                 logger.info("For searching user - targetArray?:{}", targetArray);
 
-                if (useLowercaseFilter) {
-                    displayNameFilter = Filter.createSubstringFilter(
-                            Filter.createLowercaseFilter(AttributeConstants.DISPLAY_NAME), null, targetArray, null);
-                    descriptionFilter = Filter.createSubstringFilter(
-                            Filter.createLowercaseFilter(AttributeConstants.DESCRIPTION), null, targetArray, null);
-                    mailFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.MAIL),
-                            null, targetArray, null);
-                    givenNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("givenName"), null,
-                            targetArray, null);
-                    middleNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("middleName"), null,
-                            targetArray, null);
-                    nicknameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("nickname"), null,
-                            targetArray, null);
-                    snFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("sn"), null, targetArray,
-                            null);
-                    uidFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, targetArray,
-                            null);
-                    mobileFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(MOBILE), null, targetArray,
-                            null).multiValued(3);
-                } else {
-                    displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
-                            null);
-                    descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
-                            null);
-                    mailFilter = Filter.createSubstringFilter(AttributeConstants.MAIL, null, targetArray, null);
-                    givenNameFilter = Filter.createSubstringFilter("givenName", null, targetArray, null);
-                    middleNameFilter = Filter.createSubstringFilter("middleName", null, targetArray, null);
-                    nicknameFilter = Filter.createSubstringFilter("nickname", null, targetArray, null);
-                    snFilter = Filter.createSubstringFilter("sn", null, targetArray, null);
-                    uidFilter = Filter.createSubstringFilter("uid", null, targetArray, null);
-                    mobileFilter = Filter.createSubstringFilter(MOBILE, null, targetArray, null).multiValued(3);
-                }
+                displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
+                        null);
+                descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
+                        null);
+                mailFilter = Filter.createSubstringFilter(AttributeConstants.MAIL, null, targetArray, null);
+                givenNameFilter = Filter.createSubstringFilter("givenName", null, targetArray, null);
+                middleNameFilter = Filter.createSubstringFilter("middleName", null, targetArray, null);
+                nicknameFilter = Filter.createSubstringFilter("nickname", null, targetArray, null);
+                snFilter = Filter.createSubstringFilter("sn", null, targetArray, null);
+                uidFilter = Filter.createSubstringFilter("uid", null, targetArray, null);
+                mobileFilter = Filter.createSubstringFilter(MOBILE, null, targetArray, null).multiValued(3);
 
                 inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
                 filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, mailFilter, uidFilter,
@@ -179,7 +158,6 @@ public class UserMgmtService {
         List<User> users = this.verifyCustomAttributes(pagedResult.getEntries());
         pagedResult.setEntries(users);
         return pagedResult;
-
     }
 
     public List<User> getUserByName(String name) {
