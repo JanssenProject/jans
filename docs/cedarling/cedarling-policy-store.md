@@ -646,11 +646,11 @@ type TokensContext = {
 
 Before using multi-issuer authorization, verify your schema has:
 
-- [ ] Added five required attributes to all token entities (token_type, jti, issuer, exp, validated_at)
-- [ ] Made all token entity attributes optional (`?`)
-- [ ] Added `tags Set<String>` declaration to all token entities
-- [ ] Added `tokens?: TokensContext` field to Context type
-- [ ] Defined `TokensContext` type with `total_token_count: Long`
+- Added five required attributes to all token entities (token_type, jti, issuer, exp, validated_at)
+- Made all token entity attributes optional (`?`)
+- Added `tags Set<String>` declaration to all token entities
+- Added `tokens?: TokensContext` field to Context type
+- Defined `TokensContext` type with `total_token_count: Long`
 
 ### Policy Examples Using Token Entities
 
