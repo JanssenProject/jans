@@ -2,8 +2,13 @@ package jans
 
 import (
 	"context"
-	"errors"
 	"fmt"
+)
+
+const (
+	scopeLDAPReadonly = "https://jans.io/oauth/config/database/ldap.readonly"
+	scopeLDAPWrite    = "https://jans.io/oauth/config/database/ldap.write"
+	scopeLDAPDelete   = "https://jans.io/oauth/config/database/ldap.delete"
 )
 
 // LDAPDBConfiguration represents a single LDAP configuration
@@ -26,14 +31,14 @@ type LDAPDBConfiguration struct {
 // GetLDAPDBConfigurations returns all LDAP configurations
 func (c *Client) GetLDAPDBConfigurations(ctx context.Context) ([]LDAPDBConfiguration, error) {
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/database/ldap.readonly")
+	token, err := c.ensureToken(ctx, scopeLDAPReadonly)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	ret := []LDAPDBConfiguration{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/config/database/ldap", token, &ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/config/database/ldap", token, scopeLDAPReadonly, &ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -47,15 +52,14 @@ func (c *Client) GetLDAPDBConfiguration(ctx context.Context, name string) (*LDAP
 		return nil, fmt.Errorf("name is empty")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/database/ldap.readonly")
+	token, err := c.ensureToken(ctx, scopeLDAPReadonly)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	ret := &LDAPDBConfiguration{}
 
-	err = c.get(ctx, "/jans-config-api/api/v1/config/database/ldap/"+name, token, ret)
-	if err != nil && !errors.Is(err, ErrorNotFound) {
+	if err := c.get(ctx, "/jans-config-api/api/v1/config/database/ldap/"+name, token, scopeLDAPReadonly, ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -69,14 +73,14 @@ func (c *Client) CreateLDAPDBConfiguration(ctx context.Context, config *LDAPDBCo
 		return nil, fmt.Errorf("config is nil")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/database/ldap.write")
+	token, err := c.ensureToken(ctx, scopeLDAPWrite)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	ret := &LDAPDBConfiguration{}
 
-	if err := c.post(ctx, "/jans-config-api/api/v1/config/database/ldap/", token, config, ret); err != nil {
+	if err := c.post(ctx, "/jans-config-api/api/v1/config/database/ldap/", token, scopeLDAPWrite, config, ret); err != nil {
 		return nil, fmt.Errorf("post request failed: %w", err)
 	}
 
@@ -90,7 +94,7 @@ func (c *Client) UpdateLDAPDBConfiguration(ctx context.Context, config *LDAPDBCo
 		return nil, fmt.Errorf("config is nil")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/database/ldap.write")
+	token, err := c.ensureToken(ctx, scopeLDAPWrite)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
@@ -99,7 +103,7 @@ func (c *Client) UpdateLDAPDBConfiguration(ctx context.Context, config *LDAPDBCo
 
 	ret := &LDAPDBConfiguration{}
 
-	if err := c.put(ctx, "/jans-config-api/api/v1/config/database/ldap/", token, config, ret); err != nil {
+	if err := c.put(ctx, "/jans-config-api/api/v1/config/database/ldap/", token, scopeLDAPWrite, config, ret); err != nil {
 		return nil, fmt.Errorf("put request failed: %w", err)
 	}
 
@@ -113,12 +117,12 @@ func (c *Client) DeleteLDAPDBConfiguration(ctx context.Context, name string) err
 		return fmt.Errorf("name is empty")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/database/ldap.delete")
+	token, err := c.ensureToken(ctx, scopeLDAPDelete)
 	if err != nil {
 		return fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.delete(ctx, "/jans-config-api/api/v1/config/database/ldap/"+name, token); err != nil {
+	if err := c.delete(ctx, "/jans-config-api/api/v1/config/database/ldap/"+name, token, scopeLDAPDelete); err != nil {
 		return fmt.Errorf("delete request failed: %w", err)
 	}
 
