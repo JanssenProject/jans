@@ -108,8 +108,7 @@ You can refer to [here](../../janssen-server/fido/monitoring.md#fido-devices) fo
 
 ## FIDO 2 devices
 
-You can refer to [here](../../janssen-server/fido/monitoring.md#fido2-devices) for this topic.
-
+You can refer to [here](../../janssen-server/fido/monitoring.md#fido-2-devices) for this topic.
 ## Potential performance issues with Group endpoints
 
 In SCIM a group resource basically consists of an identifier, a display name, and a collection of members associated to it. Also, every member is made up of a user identifier, his display name, and other attributes. As a consequence, retrieving group information requires making a correlation with existing user data. Since Gluu database model does not follow a relational database pattern this may entail a considerable amount of user queries when groups contain thousands of members.
