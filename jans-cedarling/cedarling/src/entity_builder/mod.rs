@@ -513,13 +513,11 @@ pub struct BuiltEntitiesUnsigned {
 }
 
 pub fn build_cedar_uid(type_name: &str, id: &str) -> Result<EntityUid, BuildEntityError> {
-    Ok(
-        EntityUid::from_str(&format!("{}::\"{}\"", type_name, id)).map_err(
+    EntityUid::from_str(&format!("{}::\"{}\"", type_name, id)).map_err(
             |e: cedar_policy::ParseErrors| {
                 BuildEntityErrorKind::from(Box::new(e)).while_building(type_name)
             },
-        )?,
-    )
+        )
 }
 
 pub fn build_cedar_entity(

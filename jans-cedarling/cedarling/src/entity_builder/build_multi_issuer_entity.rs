@@ -230,7 +230,7 @@ impl EntityBuilder {
                 "iss".to_string(),
                 RestrictedExpression::new_entity_uid(Self::trusted_issuer_cedar_uid(
                     &token_iss.name,
-                    &issuer.to_string(),
+                    issuer,
                 )?),
             );
         }
