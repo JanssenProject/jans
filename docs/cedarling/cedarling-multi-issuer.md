@@ -761,6 +761,8 @@ tokens = [
 result = cedarling.authorize_multi_issuer(request)
 ```
 
+However, if every token is invalid, Cedarling will raise an error. **It is important that users always handle errors gracefully.**
+
 ### Non-Deterministic Tokens
 
 ```python
@@ -770,8 +772,9 @@ tokens = [
     TokenInput(mapping="Jans::Access_Token", payload="token2"),  # Also from Jans::Access_Token - ERROR!
 ]
 
-# This will fail because it's non-deterministic
+# This non-deterministic.
 # Which token should policies reference?
+# Cedarling processes only the first item and writes log messages for all subsequent items that are skipped.
 ```
 
 ### Trusted Issuer Validation
