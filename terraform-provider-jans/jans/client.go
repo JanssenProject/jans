@@ -302,16 +302,16 @@ func (c *Client) get(ctx context.Context, path, token, scope string, resp any, q
 // requests with increasing startIndex values until all entries are retrieved.
 // It returns a slice of raw JSON entries that the caller must unmarshal into the target type.
 func (c *Client) getAllPaginated(ctx context.Context, path, scope string, pageSize int) ([]json.RawMessage, error) {
-        token, err := c.ensureToken(ctx, scope)
-        if err != nil {
-                return nil, fmt.Errorf("failed to get token: %w", err)
-        }
-
         var allEntries []json.RawMessage
         startIndex := 1
         fetchedCount := 0
 
         for {
+                token, err := c.ensureToken(ctx, scope)
+                if err != nil {
+                        return nil, fmt.Errorf("failed to get token: %w", err)
+                }
+
                 var page pagedResponse
                 queryParams := map[string]string{
                         "limit":      fmt.Sprintf("%d", pageSize),
@@ -706,6 +706,7 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
         if err != nil {
                 return fmt.Errorf("could not perform request: %w", err)
         }
+        defer resp.Body.Close()
 
         b, _ = httputil.DumpResponse(resp, true)
         // tflog.Info(ctx, "Response", map[string]any{"resp": string(b)})
@@ -730,27 +731,29 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
                 // Invalidate cached token and retry once with a fresh token
                 fmt.Printf("[TOKEN] Received 401 Unauthorized, invalidating token for scope '%s' and retrying\n", params.scope)
                 c.invalidateToken(params.scope)
-                
+
                 // Get a fresh token
                 newToken, err := c.ensureToken(ctx, params.scope)
                 if err != nil {
                         return fmt.Errorf("failed to refresh token after 401: %w", err)
                 }
-                
+
                 // Update the params with the new token
                 params.token = newToken
-                
+
                 // Create retry request with fresh token using the same helper
                 retryReq, err := c.createRequest(ctx, params, url)
                 if err != nil {
                         return err
                 }
-                
+
                 fmt.Printf("[TOKEN] Retrying request with fresh token\n")
-                resp, err = client.Do(retryReq)
+                retryResp, err := client.Do(retryReq)
                 if err != nil {
                         return fmt.Errorf("could not perform retry request: %w", err)
                 }
+                defer retryResp.Body.Close()
+                resp = retryResp
                 
                 b, _ = httputil.DumpResponse(resp, true)
                 fmt.Printf("Retry Response:\n%s\n", string(b))
