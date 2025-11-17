@@ -187,7 +187,7 @@ func TestAdminUIRolePermissions(t *testing.T) {
         }
 
         if err := client.CreateAdminUIRolePermissionMapping(ctx, &rolePermissionMapping); err != nil {
-                t.Error(err)
+                t.Fatal(err)
         }
 
         t.Cleanup(func() {
@@ -207,458 +207,680 @@ func TestAdminUIRolePermissions(t *testing.T) {
 // Unit tests for Admin UI RBAC functions
 
 func TestClient_GetAdminUIRoles(t *testing.T) {
-	tests := []struct {
-		name         string
-		responseBody []AdminUIRole
-		expectedErr  bool
-	}{
-		{
-			name: "successful roles retrieval",
-			responseBody: []AdminUIRole{
-				{Role: "admin", Description: "Admin role", Deletable: false},
-				{Role: "user", Description: "User role", Deletable: true},
-			},
-			expectedErr: false,
-		},
-		{
-			name:         "empty roles list",
-			responseBody: []AdminUIRole{},
-			expectedErr:  false,
-		},
-	}
+        tests := []struct {
+                name         string
+                responseBody []AdminUIRole
+                expectedErr  bool
+        }{
+                {
+                        name: "successful roles retrieval",
+                        responseBody: []AdminUIRole{
+                                {Role: "admin", Description: "Admin role", Deletable: false},
+                                {Role: "user", Description: "User role", Deletable: true},
+                        },
+                        expectedErr: false,
+                },
+                {
+                        name:         "empty roles list",
+                        responseBody: []AdminUIRole{},
+                        expectedErr:  false,
+                },
+        }
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path != "/jans-config-api/admin-ui/adminUIRoles" {
-					t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIRoles', got %s", r.URL.Path)
-				}
-				if r.Method != http.MethodGet {
-					t.Errorf("Expected GET method, got %s", r.Method)
-				}
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(tt.responseBody)
-			}))
-			defer server.Close()
+        for _, tt := range tests {
+                t.Run(tt.name, func(t *testing.T) {
+                        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                                if r.URL.Path != "/jans-config-api/admin-ui/adminUIRoles" {
+                                        t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIRoles', got %s", r.URL.Path)
+                                }
+                                if r.Method != http.MethodGet {
+                                        t.Errorf("Expected GET method, got %s", r.Method)
+                                }
+                                w.Header().Set("Content-Type", "application/json")
+                                json.NewEncoder(w).Encode(tt.responseBody)
+                        }))
+                        defer server.Close()
 
-			client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-			if err != nil {
-				t.Fatalf("Failed to create client: %v", err)
-			}
+                        client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                        if err != nil {
+                                t.Fatalf("Failed to create client: %v", err)
+                        }
 
-			result, err := client.GetAdminUIRoles(context.Background())
+                        result, err := client.GetAdminUIRoles(context.Background())
 
-			if tt.expectedErr && err == nil {
-				t.Error("Expected error, got nil")
-			}
-			if !tt.expectedErr && err != nil {
-				t.Errorf("Unexpected error: %v", err)
-			}
-			if !tt.expectedErr && len(result) != len(tt.responseBody) {
-				t.Errorf("Expected %d roles, got %d", len(tt.responseBody), len(result))
-			}
-		})
-	}
+                        if tt.expectedErr && err == nil {
+                                t.Error("Expected error, got nil")
+                        }
+                        if !tt.expectedErr && err != nil {
+                                t.Errorf("Unexpected error: %v", err)
+                        }
+                        if !tt.expectedErr && len(result) != len(tt.responseBody) {
+                                t.Errorf("Expected %d roles, got %d", len(tt.responseBody), len(result))
+                        }
+                })
+        }
+
+        // Negative path: server error
+        t.Run("server error (500)", func(t *testing.T) {
+                server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                        if r.URL.Path != "/jans-config-api/admin-ui/adminUIRoles" {
+                                t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIRoles', got %s", r.URL.Path)
+                        }
+                        if r.Method != http.MethodGet {
+                                t.Errorf("Expected GET method, got %s", r.Method)
+                        }
+                        w.WriteHeader(http.StatusInternalServerError)
+                }))
+                defer server.Close()
+
+                client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                _, err := client.GetAdminUIRoles(context.Background())
+
+                if err == nil {
+                        t.Error("Expected error for 500 status, got nil")
+                }
+        })
+
+        // Negative path: invalid JSON
+        t.Run("invalid JSON response", func(t *testing.T) {
+                server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                        if r.URL.Path != "/jans-config-api/admin-ui/adminUIRoles" {
+                                t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIRoles', got %s", r.URL.Path)
+                        }
+                        if r.Method != http.MethodGet {
+                                t.Errorf("Expected GET method, got %s", r.Method)
+                        }
+                        w.Header().Set("Content-Type", "application/json")
+                        w.Write([]byte("{invalid json}"))
+                }))
+                defer server.Close()
+
+                client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                _, err := client.GetAdminUIRoles(context.Background())
+
+                if err == nil {
+                        t.Error("Expected decoding error for invalid JSON, got nil")
+                }
+        })
 }
 
 func TestClient_GetAdminUIRole(t *testing.T) {
-	tests := []struct {
-		name         string
-		roleID       string
-		responseBody AdminUIRole
-		expectedErr  bool
-	}{
-		{
-			name:   "successful role retrieval",
-			roleID: "admin",
-			responseBody: AdminUIRole{
-				Role:        "admin",
-				Description: "Admin role",
-				Deletable:   false,
-			},
-			expectedErr: false,
-		},
-	}
+        tests := []struct {
+                name         string
+                roleID       string
+                responseBody AdminUIRole
+                expectedErr  bool
+        }{
+                {
+                        name:   "successful role retrieval",
+                        roleID: "admin",
+                        responseBody: AdminUIRole{
+                                Role:        "admin",
+                                Description: "Admin role",
+                                Deletable:   false,
+                        },
+                        expectedErr: false,
+                },
+        }
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-				expectedPath := "/jans-config-api/admin-ui/adminUIRoles/" + tt.roleID
-				if r.URL.Path != expectedPath {
-					t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
-				}
-				if r.Method != http.MethodGet {
-					t.Errorf("Expected GET method, got %s", r.Method)
-				}
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(tt.responseBody)
-			}))
-			defer server.Close()
+        for _, tt := range tests {
+                t.Run(tt.name, func(t *testing.T) {
+                        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                                expectedPath := "/jans-config-api/admin-ui/adminUIRoles/" + tt.roleID
+                                if r.URL.Path != expectedPath {
+                                        t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                                }
+                                if r.Method != http.MethodGet {
+                                        t.Errorf("Expected GET method, got %s", r.Method)
+                                }
+                                w.Header().Set("Content-Type", "application/json")
+                                json.NewEncoder(w).Encode(tt.responseBody)
+                        }))
+                        defer server.Close()
 
-			client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-			if err != nil {
-				t.Fatalf("Failed to create client: %v", err)
-			}
+                        client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                        if err != nil {
+                                t.Fatalf("Failed to create client: %v", err)
+                        }
 
-			result, err := client.GetAdminUIRole(context.Background(), tt.roleID)
+                        result, err := client.GetAdminUIRole(context.Background(), tt.roleID)
 
-			if tt.expectedErr && err == nil {
-				t.Error("Expected error, got nil")
-			}
-			if !tt.expectedErr && err != nil {
-				t.Errorf("Unexpected error: %v", err)
-			}
-			if !tt.expectedErr && result.Role != tt.responseBody.Role {
-				t.Errorf("Expected role %s, got %s", tt.responseBody.Role, result.Role)
-			}
-		})
-	}
+                        if tt.expectedErr && err == nil {
+                                t.Error("Expected error, got nil")
+                        }
+                        if !tt.expectedErr && err != nil {
+                                t.Errorf("Unexpected error: %v", err)
+                        }
+                        if !tt.expectedErr && result.Role != tt.responseBody.Role {
+                                t.Errorf("Expected role %s, got %s", tt.responseBody.Role, result.Role)
+                        }
+                })
+        }
+
+        // Negative path: server error
+        t.Run("server error (500)", func(t *testing.T) {
+                server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                        expectedPath := "/jans-config-api/admin-ui/adminUIRoles/test-role"
+                        if r.URL.Path != expectedPath {
+                                t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                        }
+                        if r.Method != http.MethodGet {
+                                t.Errorf("Expected GET method, got %s", r.Method)
+                        }
+                        w.WriteHeader(http.StatusInternalServerError)
+                }))
+                defer server.Close()
+
+                client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                _, err := client.GetAdminUIRole(context.Background(), "test-role")
+
+                if err == nil {
+                        t.Error("Expected error for 500 status, got nil")
+                }
+        })
+
+        // Negative path: invalid JSON
+        t.Run("invalid JSON response", func(t *testing.T) {
+                server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                        expectedPath := "/jans-config-api/admin-ui/adminUIRoles/test-role"
+                        if r.URL.Path != expectedPath {
+                                t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                        }
+                        if r.Method != http.MethodGet {
+                                t.Errorf("Expected GET method, got %s", r.Method)
+                        }
+                        w.Header().Set("Content-Type", "application/json")
+                        w.Write([]byte("{invalid json}"))
+                }))
+                defer server.Close()
+
+                client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                _, err := client.GetAdminUIRole(context.Background(), "test-role")
+
+                if err == nil {
+                        t.Error("Expected decoding error for invalid JSON, got nil")
+                }
+        })
+
+        // Negative path: not found (404)
+        t.Run("role not found (404)", func(t *testing.T) {
+                server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                        expectedPath := "/jans-config-api/admin-ui/adminUIRoles/nonexistent"
+                        if r.URL.Path != expectedPath {
+                                t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                        }
+                        if r.Method != http.MethodGet {
+                                t.Errorf("Expected GET method, got %s", r.Method)
+                        }
+                        w.WriteHeader(http.StatusNotFound)
+                }))
+                defer server.Close()
+
+                client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                _, err := client.GetAdminUIRole(context.Background(), "nonexistent")
+
+                if !errors.Is(err, ErrorNotFound) {
+                        t.Errorf("Expected ErrorNotFound, got %v", err)
+                }
+        })
 }
 
+
 func TestClient_CreateAdminUIRole(t *testing.T) {
-	tests := []struct {
-		name        string
-		role        *AdminUIRole
-		expectedErr bool
-	}{
-		{
-			name: "successful role creation",
-			role: &AdminUIRole{
-				Role:        "test-role",
-				Description: "Test role",
-				Deletable:   true,
-			},
-			expectedErr: false,
-		},
-		{
-			name:        "nil role",
-			role:        nil,
-			expectedErr: true,
-		},
-	}
+        tests := []struct {
+                name        string
+                role        *AdminUIRole
+                expectedErr bool
+        }{
+                {
+                        name: "successful role creation",
+                        role: &AdminUIRole{
+                                Role:        "test-role",
+                                Description: "Test role",
+                                Deletable:   true,
+                        },
+                        expectedErr: false,
+                },
+                {
+                        name:        "nil role",
+                        role:        nil,
+                        expectedErr: true,
+                },
+        }
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path != "/jans-config-api/admin-ui/adminUIRoles" {
-					t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIRoles', got %s", r.URL.Path)
-				}
-				if r.Method != http.MethodPost {
-					t.Errorf("Expected POST method, got %s", r.Method)
-				}
-				w.WriteHeader(http.StatusCreated)
-			}))
-			defer server.Close()
+        for _, tt := range tests {
+                t.Run(tt.name, func(t *testing.T) {
+                        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                                if r.URL.Path != "/jans-config-api/admin-ui/adminUIRoles" {
+                                        t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIRoles', got %s", r.URL.Path)
+                                }
+                                if r.Method != http.MethodPost {
+                                        t.Errorf("Expected POST method, got %s", r.Method)
+                                }
+                                w.WriteHeader(http.StatusCreated)
+                        }))
+                        defer server.Close()
 
-			client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-			if err != nil {
-				t.Fatalf("Failed to create client: %v", err)
-			}
+                        client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                        if err != nil {
+                                t.Fatalf("Failed to create client: %v", err)
+                        }
 
-			err = client.CreateAdminUIRole(context.Background(), tt.role)
+                        err = client.CreateAdminUIRole(context.Background(), tt.role)
 
-			if tt.expectedErr && err == nil {
-				t.Error("Expected error, got nil")
-			}
-			if !tt.expectedErr && err != nil {
-				t.Errorf("Unexpected error: %v", err)
-			}
-		})
-	}
+                        if tt.expectedErr && err == nil {
+                                t.Error("Expected error, got nil")
+                        }
+                        if !tt.expectedErr && err != nil {
+                                t.Errorf("Unexpected error: %v", err)
+                        }
+                })
+        }
 }
 
 func TestClient_UpdateAdminUIRole(t *testing.T) {
-	tests := []struct {
-		name        string
-		role        *AdminUIRole
-		expectedErr bool
-	}{
-		{
-			name: "successful role update",
-			role: &AdminUIRole{
-				Role:        "test-role",
-				Description: "Updated description",
-				Deletable:   true,
-			},
-			expectedErr: false,
-		},
-		{
-			name:        "nil role",
-			role:        nil,
-			expectedErr: true,
-		},
-	}
+        tests := []struct {
+                name        string
+                role        *AdminUIRole
+                expectedErr bool
+        }{
+                {
+                        name: "successful role update",
+                        role: &AdminUIRole{
+                                Role:        "test-role",
+                                Description: "Updated description",
+                                Deletable:   true,
+                        },
+                        expectedErr: false,
+                },
+                {
+                        name:        "nil role",
+                        role:        nil,
+                        expectedErr: true,
+                },
+        }
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path != "/jans-config-api/admin-ui/adminUIRoles" {
-					t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIRoles', got %s", r.URL.Path)
-				}
-				if r.Method != http.MethodPut {
-					t.Errorf("Expected PUT method, got %s", r.Method)
-				}
-				w.WriteHeader(http.StatusOK)
-			}))
-			defer server.Close()
+        for _, tt := range tests {
+                t.Run(tt.name, func(t *testing.T) {
+                        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                                if r.URL.Path != "/jans-config-api/admin-ui/adminUIRoles" {
+                                        t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIRoles', got %s", r.URL.Path)
+                                }
+                                if r.Method != http.MethodPut {
+                                        t.Errorf("Expected PUT method, got %s", r.Method)
+                                }
+                                w.WriteHeader(http.StatusOK)
+                        }))
+                        defer server.Close()
 
-			client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-			if err != nil {
-				t.Fatalf("Failed to create client: %v", err)
-			}
+                        client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                        if err != nil {
+                                t.Fatalf("Failed to create client: %v", err)
+                        }
 
-			err = client.UpdateAdminUIRole(context.Background(), tt.role)
+                        err = client.UpdateAdminUIRole(context.Background(), tt.role)
 
-			if tt.expectedErr && err == nil {
-				t.Error("Expected error, got nil")
-			}
-			if !tt.expectedErr && err != nil {
-				t.Errorf("Unexpected error: %v", err)
-			}
-		})
-	}
+                        if tt.expectedErr && err == nil {
+                                t.Error("Expected error, got nil")
+                        }
+                        if !tt.expectedErr && err != nil {
+                                t.Errorf("Unexpected error: %v", err)
+                        }
+                })
+        }
 }
 
 func TestClient_DeleteAdminUIRole(t *testing.T) {
-	tests := []struct {
-		name        string
-		roleID      string
-		expectedErr bool
-	}{
-		{
-			name:        "successful role deletion",
-			roleID:      "test-role",
-			expectedErr: false,
-		},
-		{
-			name:        "empty role ID",
-			roleID:      "",
-			expectedErr: true,
-		},
-	}
+        tests := []struct {
+                name        string
+                roleID      string
+                expectedErr bool
+        }{
+                {
+                        name:        "successful role deletion",
+                        roleID:      "test-role",
+                        expectedErr: false,
+                },
+                {
+                        name:        "empty role ID",
+                        roleID:      "",
+                        expectedErr: true,
+                },
+        }
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-				expectedPath := "/jans-config-api/admin-ui/adminUIRoles/" + tt.roleID
-				if r.URL.Path != expectedPath {
-					t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
-				}
-				if r.Method != http.MethodDelete {
-					t.Errorf("Expected DELETE method, got %s", r.Method)
-				}
-				w.WriteHeader(http.StatusNoContent)
-			}))
-			defer server.Close()
+        for _, tt := range tests {
+                t.Run(tt.name, func(t *testing.T) {
+                        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                                expectedPath := "/jans-config-api/admin-ui/adminUIRoles/" + tt.roleID
+                                if r.URL.Path != expectedPath {
+                                        t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                                }
+                                if r.Method != http.MethodDelete {
+                                        t.Errorf("Expected DELETE method, got %s", r.Method)
+                                }
+                                w.WriteHeader(http.StatusNoContent)
+                        }))
+                        defer server.Close()
 
-			client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-			if err != nil {
-				t.Fatalf("Failed to create client: %v", err)
-			}
+                        client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                        if err != nil {
+                                t.Fatalf("Failed to create client: %v", err)
+                        }
 
-			err = client.DeleteAdminUIRole(context.Background(), tt.roleID)
+                        err = client.DeleteAdminUIRole(context.Background(), tt.roleID)
 
-			if tt.expectedErr && err == nil {
-				t.Error("Expected error, got nil")
-			}
-			if !tt.expectedErr && err != nil {
-				t.Errorf("Unexpected error: %v", err)
-			}
-		})
-	}
+                        if tt.expectedErr && err == nil {
+                                t.Error("Expected error, got nil")
+                        }
+                        if !tt.expectedErr && err != nil {
+                                t.Errorf("Unexpected error: %v", err)
+                        }
+                })
+        }
+
+        // Negative path: not found (404)
+        t.Run("role not found (404)", func(t *testing.T) {
+                server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                        expectedPath := "/jans-config-api/admin-ui/adminUIRoles/nonexistent"
+                        if r.URL.Path != expectedPath {
+                                t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                        }
+                        if r.Method != http.MethodDelete {
+                                t.Errorf("Expected DELETE method, got %s", r.Method)
+                        }
+                        w.WriteHeader(http.StatusNotFound)
+                }))
+                defer server.Close()
+
+                client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                err := client.DeleteAdminUIRole(context.Background(), "nonexistent")
+
+                if !errors.Is(err, ErrorNotFound) {
+                        t.Errorf("Expected ErrorNotFound, got %v", err)
+                }
+        })
 }
 
 // Permission tests
 
 func TestClient_GetAdminUIPermissions(t *testing.T) {
-	tests := []struct {
-		name         string
-		responseBody []AdminUIPermission
-		expectedErr  bool
-	}{
-		{
-			name: "successful permissions retrieval",
-			responseBody: []AdminUIPermission{
-				{Permission: "read", Description: "Read permission"},
-				{Permission: "write", Description: "Write permission"},
-			},
-			expectedErr: false,
-		},
-	}
+        tests := []struct {
+                name         string
+                responseBody []AdminUIPermission
+                expectedErr  bool
+        }{
+                {
+                        name: "successful permissions retrieval",
+                        responseBody: []AdminUIPermission{
+                                {Permission: "read", Description: "Read permission"},
+                                {Permission: "write", Description: "Write permission"},
+                        },
+                        expectedErr: false,
+                },
+        }
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path != "/jans-config-api/admin-ui/adminUIPermissions" {
-					t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIPermissions', got %s", r.URL.Path)
-				}
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(tt.responseBody)
-			}))
-			defer server.Close()
+        for _, tt := range tests {
+                t.Run(tt.name, func(t *testing.T) {
+                        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                                if r.URL.Path != "/jans-config-api/admin-ui/adminUIPermissions" {
+                                        t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIPermissions', got %s", r.URL.Path)
+                                }
+                                if r.Method != http.MethodGet {
+                                        t.Errorf("Expected GET method, got %s", r.Method)
+                                }
+                                w.Header().Set("Content-Type", "application/json")
+                                json.NewEncoder(w).Encode(tt.responseBody)
+                        }))
+                        defer server.Close()
 
-			client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-			if err != nil {
-				t.Fatalf("Failed to create client: %v", err)
-			}
+                        client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                        if err != nil {
+                                t.Fatalf("Failed to create client: %v", err)
+                        }
 
-			result, err := client.GetAdminUIPermissions(context.Background())
+                        result, err := client.GetAdminUIPermissions(context.Background())
 
-			if tt.expectedErr && err == nil {
-				t.Error("Expected error, got nil")
-			}
-			if !tt.expectedErr && err != nil {
-				t.Errorf("Unexpected error: %v", err)
-			}
-			if !tt.expectedErr && len(result) != len(tt.responseBody) {
-				t.Errorf("Expected %d permissions, got %d", len(tt.responseBody), len(result))
-			}
-		})
-	}
+                        if tt.expectedErr && err == nil {
+                                t.Error("Expected error, got nil")
+                        }
+                        if !tt.expectedErr && err != nil {
+                                t.Errorf("Unexpected error: %v", err)
+                        }
+                        if !tt.expectedErr && len(result) != len(tt.responseBody) {
+                                t.Errorf("Expected %d permissions, got %d", len(tt.responseBody), len(result))
+                        }
+                })
+        }
 }
 
 func TestClient_GetAdminUIPermission(t *testing.T) {
-	server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-		perm := AdminUIPermission{Permission: "read", Description: "Read permission"}
-		json.NewEncoder(w).Encode(perm)
-	}))
-	defer server.Close()
+        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                expectedPath := "/jans-config-api/admin-ui/adminUIPermissions/read"
+                if r.URL.Path != expectedPath {
+                        t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                }
+                if r.Method != http.MethodGet {
+                        t.Errorf("Expected GET method, got %s", r.Method)
+                }
+                perm := AdminUIPermission{Permission: "read", Description: "Read permission"}
+                json.NewEncoder(w).Encode(perm)
+        }))
+        defer server.Close()
 
-	client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-	result, err := client.GetAdminUIPermission(context.Background(), "read")
+        client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        result, err := client.GetAdminUIPermission(context.Background(), "read")
 
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-	if result.Permission != "read" {
-		t.Errorf("Expected permission 'read', got %s", result.Permission)
-	}
+        if err != nil {
+                t.Errorf("Unexpected error: %v", err)
+        }
+        if result.Permission != "read" {
+                t.Errorf("Expected permission 'read', got %s", result.Permission)
+        }
 }
 
 func TestClient_CreateAdminUIPermission(t *testing.T) {
-	server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusCreated)
-	}))
-	defer server.Close()
+        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                if r.URL.Path != "/jans-config-api/admin-ui/adminUIPermissions" {
+                        t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIPermissions', got %s", r.URL.Path)
+                }
+                if r.Method != http.MethodPost {
+                        t.Errorf("Expected POST method, got %s", r.Method)
+                }
+                w.WriteHeader(http.StatusCreated)
+        }))
+        defer server.Close()
 
-	client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-	perm := &AdminUIPermission{Permission: "test", Description: "Test"}
-	err := client.CreateAdminUIPermission(context.Background(), perm)
+        client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        perm := &AdminUIPermission{Permission: "test", Description: "Test"}
+        err := client.CreateAdminUIPermission(context.Background(), perm)
 
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+        if err != nil {
+                t.Errorf("Unexpected error: %v", err)
+        }
 }
 
 func TestClient_UpdateAdminUIPermission(t *testing.T) {
-	server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	}))
-	defer server.Close()
+        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                if r.URL.Path != "/jans-config-api/admin-ui/adminUIPermissions" {
+                        t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIPermissions', got %s", r.URL.Path)
+                }
+                if r.Method != http.MethodPut {
+                        t.Errorf("Expected PUT method, got %s", r.Method)
+                }
+                w.WriteHeader(http.StatusOK)
+        }))
+        defer server.Close()
 
-	client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-	perm := &AdminUIPermission{Permission: "test", Description: "Updated"}
-	err := client.UpdateAdminUIPermission(context.Background(), perm)
+        client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        perm := &AdminUIPermission{Permission: "test", Description: "Updated"}
+        err := client.UpdateAdminUIPermission(context.Background(), perm)
 
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+        if err != nil {
+                t.Errorf("Unexpected error: %v", err)
+        }
 }
 
 func TestClient_DeleteAdminUIPermission(t *testing.T) {
-	server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	}))
-	defer server.Close()
+        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                expectedPath := "/jans-config-api/admin-ui/adminUIPermissions/test"
+                if r.URL.Path != expectedPath {
+                        t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                }
+                if r.Method != http.MethodDelete {
+                        t.Errorf("Expected DELETE method, got %s", r.Method)
+                }
+                w.WriteHeader(http.StatusNoContent)
+        }))
+        defer server.Close()
 
-	client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-	err := client.DeleteAdminUIPermission(context.Background(), "test")
+        client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        err := client.DeleteAdminUIPermission(context.Background(), "test")
 
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+        if err != nil {
+                t.Errorf("Unexpected error: %v", err)
+        }
 }
 
 // Role-Permission Mapping tests
 
 func TestClient_GetAdminUIRolePermissionMappings(t *testing.T) {
-	server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-		mappings := []AdminUIRolePermissionMapping{
-			{Role: "admin", Permissions: []string{"read", "write"}},
-		}
-		json.NewEncoder(w).Encode(mappings)
-	}))
-	defer server.Close()
+        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                if r.URL.Path != "/jans-config-api/admin-ui/adminUIRolePermissionsMapping" {
+                        t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIRolePermissionsMapping', got %s", r.URL.Path)
+                }
+                if r.Method != http.MethodGet {
+                        t.Errorf("Expected GET method, got %s", r.Method)
+                }
+                mappings := []AdminUIRolePermissionMapping{
+                        {Role: "admin", Permissions: []string{"read", "write"}},
+                }
+                json.NewEncoder(w).Encode(mappings)
+        }))
+        defer server.Close()
 
-	client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-	result, err := client.GetAdminUIRolePermissionMappings(context.Background())
+        client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        result, err := client.GetAdminUIRolePermissionMappings(context.Background())
 
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-	if len(result) != 1 {
-		t.Errorf("Expected 1 mapping, got %d", len(result))
-	}
+        if err != nil {
+                t.Errorf("Unexpected error: %v", err)
+        }
+        if len(result) != 1 {
+                t.Errorf("Expected 1 mapping, got %d", len(result))
+        }
 }
 
 func TestClient_GetAdminUIRolePermissionMapping(t *testing.T) {
-	server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-		mapping := AdminUIRolePermissionMapping{Role: "admin", Permissions: []string{"read"}}
-		json.NewEncoder(w).Encode(mapping)
-	}))
-	defer server.Close()
+        t.Run("successful mapping retrieval", func(t *testing.T) {
+                server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                        expectedPath := "/jans-config-api/admin-ui/adminUIRolePermissionsMapping/admin"
+                        if r.URL.Path != expectedPath {
+                                t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                        }
+                        if r.Method != http.MethodGet {
+                                t.Errorf("Expected GET method, got %s", r.Method)
+                        }
+                        mapping := AdminUIRolePermissionMapping{Role: "admin", Permissions: []string{"read"}}
+                        json.NewEncoder(w).Encode(mapping)
+                }))
+                defer server.Close()
 
-	client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-	result, err := client.GetAdminUIRolePermissionMapping(context.Background(), "admin")
+                client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                result, err := client.GetAdminUIRolePermissionMapping(context.Background(), "admin")
 
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-	if result.Role != "admin" {
-		t.Errorf("Expected role 'admin', got %s", result.Role)
-	}
+                if err != nil {
+                        t.Errorf("Unexpected error: %v", err)
+                }
+                if result.Role != "admin" {
+                        t.Errorf("Expected role 'admin', got %s", result.Role)
+                }
+        })
+
+        t.Run("mapping not found (404)", func(t *testing.T) {
+                server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                        expectedPath := "/jans-config-api/admin-ui/adminUIRolePermissionsMapping/nonexistent"
+                        if r.URL.Path != expectedPath {
+                                t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                        }
+                        if r.Method != http.MethodGet {
+                                t.Errorf("Expected GET method, got %s", r.Method)
+                        }
+                        w.WriteHeader(http.StatusNotFound)
+                }))
+                defer server.Close()
+
+                client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+                _, err := client.GetAdminUIRolePermissionMapping(context.Background(), "nonexistent")
+
+                if !errors.Is(err, ErrorNotFound) {
+                        t.Errorf("Expected ErrorNotFound, got %v", err)
+                }
+        })
 }
 
 func TestClient_CreateAdminUIRolePermissionMapping(t *testing.T) {
-	server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusCreated)
-	}))
-	defer server.Close()
+        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                if r.URL.Path != "/jans-config-api/admin-ui/adminUIRolePermissionsMapping" {
+                        t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIRolePermissionsMapping', got %s", r.URL.Path)
+                }
+                if r.Method != http.MethodPost {
+                        t.Errorf("Expected POST method, got %s", r.Method)
+                }
+                w.WriteHeader(http.StatusCreated)
+        }))
+        defer server.Close()
 
-	client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-	mapping := &AdminUIRolePermissionMapping{Role: "test", Permissions: []string{"read"}}
-	err := client.CreateAdminUIRolePermissionMapping(context.Background(), mapping)
+        client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        mapping := &AdminUIRolePermissionMapping{Role: "test", Permissions: []string{"read"}}
+        err := client.CreateAdminUIRolePermissionMapping(context.Background(), mapping)
 
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+        if err != nil {
+                t.Errorf("Unexpected error: %v", err)
+        }
 }
 
 func TestClient_UpdateAdminUIRolePermissionMapping(t *testing.T) {
-	server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	}))
-	defer server.Close()
+        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                if r.URL.Path != "/jans-config-api/admin-ui/adminUIRolePermissionsMapping" {
+                        t.Errorf("Expected path '/jans-config-api/admin-ui/adminUIRolePermissionsMapping', got %s", r.URL.Path)
+                }
+                if r.Method != http.MethodPut {
+                        t.Errorf("Expected PUT method, got %s", r.Method)
+                }
+                w.WriteHeader(http.StatusOK)
+        }))
+        defer server.Close()
 
-	client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-	mapping := &AdminUIRolePermissionMapping{Role: "test", Permissions: []string{"read", "write"}}
-	err := client.UpdateAdminUIRolePermissionMapping(context.Background(), mapping)
+        client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        mapping := &AdminUIRolePermissionMapping{Role: "test", Permissions: []string{"read", "write"}}
+        err := client.UpdateAdminUIRolePermissionMapping(context.Background(), mapping)
 
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+        if err != nil {
+                t.Errorf("Unexpected error: %v", err)
+        }
 }
 
 func TestClient_DeleteAdminUIRolePermissionMapping(t *testing.T) {
-	server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	}))
-	defer server.Close()
+        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                expectedPath := "/jans-config-api/admin-ui/adminUIRolePermissionsMapping/test"
+                if r.URL.Path != expectedPath {
+                        t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                }
+                // DELETE operation first does a GET to verify existence, then DELETE
+                if r.Method == http.MethodGet {
+                        mapping := AdminUIRolePermissionMapping{Role: "test", Permissions: []string{"read"}}
+                        json.NewEncoder(w).Encode(mapping)
+                } else if r.Method == http.MethodDelete {
+                        w.WriteHeader(http.StatusNoContent)
+                } else {
+                        t.Errorf("Expected GET or DELETE method, got %s", r.Method)
+                }
+        }))
+        defer server.Close()
 
-	client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
-	err := client.DeleteAdminUIRolePermissionMapping(context.Background(), "test")
+        client, _ := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        err := client.DeleteAdminUIRolePermissionMapping(context.Background(), "test")
 
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+        if err != nil {
+                t.Errorf("Unexpected error: %v", err)
+        }
 }

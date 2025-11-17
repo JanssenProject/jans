@@ -5,6 +5,7 @@ import (
         "encoding/json"
         "net/http"
         "net/http/httptest"
+        "strings"
         "testing"
 
         "github.com/google/go-cmp/cmp"
@@ -58,7 +59,7 @@ func TestAttributes(t *testing.T) {
         createdAttribute, err := client.CreateAttribute(ctx, newAttribute)
         if err != nil {
                 // Check if it's a schema validation error - this may be expected in some environments
-                if err.Error() == "post request failed: did not get correct response code: 406 Not Acceptable" {
+                if strings.Contains(err.Error(), "406") {
                         t.Skipf("Cannot create custom attributes in this environment - schema validation failed: %v", err)
                 }
                 t.Fatal(err)
@@ -87,18 +88,20 @@ func TestAttributes(t *testing.T) {
                 t.Errorf("Got different attribute after updating: %v", diff)
         }
 
-        // delete attribute
-        err = client.DeleteAttribute(ctx, createdAttribute.Inum)
-        if err != nil {
-                t.Fatal(err)
-        }
-
+        // Attribute cleanup is handled by t.Cleanup (no explicit deletion needed)
 }
 
 // Unit tests for Attribute operations
 
 func TestClient_GetAttribute(t *testing.T) {
         server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                expectedPath := "/jans-config-api/api/v1/attributes/TEST"
+                if r.URL.Path != expectedPath {
+                        t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                }
+                if r.Method != http.MethodGet {
+                        t.Errorf("Expected GET method, got %s", r.Method)
+                }
                 attr := Attribute{
                         Inum:        "TEST",
                         Name:        "testAttr",
@@ -121,6 +124,10 @@ func TestClient_GetAttribute(t *testing.T) {
 
 func TestClient_UpdateAttribute(t *testing.T) {
         server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                expectedPath := "/jans-config-api/api/v1/attributes/"
+                if r.URL.Path != expectedPath {
+                        t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                }
                 if r.Method != http.MethodPut {
                         t.Errorf("Expected PUT method, got %s", r.Method)
                 }
@@ -143,6 +150,10 @@ func TestClient_UpdateAttribute(t *testing.T) {
 
 func TestClient_DeleteAttribute(t *testing.T) {
         server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                expectedPath := "/jans-config-api/api/v1/attributes/TEST"
+                if r.URL.Path != expectedPath {
+                        t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                }
                 if r.Method != http.MethodDelete {
                         t.Errorf("Expected DELETE method, got %s", r.Method)
                 }

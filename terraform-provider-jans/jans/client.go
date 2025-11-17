@@ -14,9 +14,10 @@ import (
         "time"
 
         "net/http"
-        "net/http/httputil"
         "net/textproto"
         "net/url"
+
+        "github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -178,7 +179,10 @@ func (c *Client) fetchToken(ctx context.Context, scope string) (string, int, err
                 }
         }
 
-        fmt.Printf("[TOKEN] Obtained new token for scope '%s', expires in %d seconds\n", scope, token.ExpiresIn)
+        tflog.Debug(ctx, "Obtained new OAuth token", map[string]any{
+                "scope":      scope,
+                "expires_in": token.ExpiresIn,
+        })
 
         // Return token info for caller to cache (caller must hold write lock)
         return token.AccessToken, token.ExpiresIn, nil
@@ -237,7 +241,9 @@ func (c *Client) ensureToken(ctx context.Context, scope string) (string, error) 
         c.tokenMutex.RUnlock()
 
         if exists && cached.isValid() {
-                fmt.Printf("[TOKEN] Using cached token for scope '%s'\n", scope)
+                tflog.Trace(ctx, "Using cached OAuth token", map[string]any{
+                        "scope": scope,
+                })
                 return cached.accessToken, nil
         }
 
@@ -248,12 +254,16 @@ func (c *Client) ensureToken(ctx context.Context, scope string) (string, error) 
         // Second check: another goroutine may have refreshed while we waited for write lock
         cached, exists = c.tokenCache[scope]
         if exists && cached.isValid() {
-                fmt.Printf("[TOKEN] Using cached token for scope '%s' (refreshed by another goroutine)\n", scope)
+                tflog.Trace(ctx, "Using cached OAuth token refreshed by another goroutine", map[string]any{
+                        "scope": scope,
+                })
                 return cached.accessToken, nil
         }
 
         // Still need to refresh - fetch new token while holding write lock
-        fmt.Printf("[TOKEN] Token missing or expired for scope '%s', fetching new token\n", scope)
+        tflog.Debug(ctx, "OAuth token missing or expired, fetching new token", map[string]any{
+                "scope": scope,
+        })
         accessToken, expiresIn, err := c.fetchToken(ctx, scope)
         if err != nil {
                 return "", err
@@ -273,7 +283,9 @@ func (c *Client) invalidateToken(scope string) {
         c.tokenMutex.Lock()
         delete(c.tokenCache, scope)
         c.tokenMutex.Unlock()
-        fmt.Printf("[TOKEN] Invalidated cached token for scope '%s'\n", scope)
+        tflog.Debug(context.Background(), "Invalidated cached OAuth token", map[string]any{
+                "scope": scope,
+        })
 }
 
 // get performs an HTTP GET request to the given path, using the given token.
@@ -698,9 +710,10 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
         }
         client := &http.Client{Transport: tr}
 
-        b, _ := httputil.DumpRequest(req, true)
-        // tflog.Info(ctx, "Request", map[string]any{"req": string(b)})
-        fmt.Printf("Request:\n%s\n", string(b))
+        tflog.Trace(ctx, "HTTP Request", map[string]any{
+                "method": params.method,
+                "path":   params.path,
+        })
 
         resp, err := client.Do(req)
         if err != nil {
@@ -708,9 +721,10 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
         }
         defer resp.Body.Close()
 
-        b, _ = httputil.DumpResponse(resp, true)
-        // tflog.Info(ctx, "Response", map[string]any{"resp": string(b)})
-        fmt.Printf("Response:\n%s\n", string(b))
+        tflog.Trace(ctx, "HTTP Response", map[string]any{
+                "status": resp.StatusCode,
+                "path":   params.path,
+        })
 
         if resp.StatusCode == 400 {
                 // try to read error message
@@ -729,25 +743,31 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
         if resp.StatusCode == 401 && params.scope != "" {
                 // Token may have expired or been invalidated
                 // Invalidate cached token and retry once with a fresh token
-                fmt.Printf("[TOKEN] Received 401 Unauthorized, invalidating token for scope '%s' and retrying\n", params.scope)
+                tflog.Debug(ctx, "Received 401 Unauthorized, invalidating token and retrying", map[string]any{
+                        "scope": params.scope,
+                        "path":  params.path,
+                })
                 c.invalidateToken(params.scope)
-
+                
                 // Get a fresh token
                 newToken, err := c.ensureToken(ctx, params.scope)
                 if err != nil {
                         return fmt.Errorf("failed to refresh token after 401: %w", err)
                 }
-
+                
                 // Update the params with the new token
                 params.token = newToken
-
+                
                 // Create retry request with fresh token using the same helper
                 retryReq, err := c.createRequest(ctx, params, url)
                 if err != nil {
                         return err
                 }
-
-                fmt.Printf("[TOKEN] Retrying request with fresh token\n")
+                
+                tflog.Debug(ctx, "Retrying request with fresh OAuth token", map[string]any{
+                        "scope": params.scope,
+                        "path":  params.path,
+                })
                 retryResp, err := client.Do(retryReq)
                 if err != nil {
                         return fmt.Errorf("could not perform retry request: %w", err)
@@ -755,8 +775,10 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
                 defer retryResp.Body.Close()
                 resp = retryResp
                 
-                b, _ = httputil.DumpResponse(resp, true)
-                fmt.Printf("Retry Response:\n%s\n", string(b))
+                tflog.Trace(ctx, "HTTP Retry Response", map[string]any{
+                        "status": resp.StatusCode,
+                        "path":   params.path,
+                })
                 
                 // Check the retry response status
                 if resp.StatusCode == 400 {
