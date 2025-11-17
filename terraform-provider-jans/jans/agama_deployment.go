@@ -38,7 +38,8 @@ type AgamaDeployment struct {
 // GetAgamaDeployments returns all currently configured Agama deployments.
 func (c *Client) GetAgamaDeployments(ctx context.Context) ([]AgamaDeployment, error) {
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/agama.readonly")
+	scope := "https://jans.io/oauth/config/agama.readonly"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
@@ -50,7 +51,7 @@ func (c *Client) GetAgamaDeployments(ctx context.Context) ([]AgamaDeployment, er
 	}
 	ret := response{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/agama-deployment", token, &ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/agama-deployment", token, scope, &ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -64,7 +65,10 @@ func (c *Client) GetAgamaDeployment(ctx context.Context, qname string) (*AgamaDe
 		return nil, fmt.Errorf("qname is empty")
 	}
 
-	// workaround for GET returning empty response
+	// API limitation: GET /jans-config-api/api/v1/agama-deployment/{qname} returns empty responses.
+	// As a workaround, we fetch all deployments and scan for the matching qname (O(n) operation).
+	// This is a known API limitation; consider revisiting if deployment counts grow significantly
+	// (either implement client-side caching or request upstream API fix).
 
 	deployments, err := c.GetAgamaDeployments(ctx)
 	if err != nil {
@@ -79,22 +83,6 @@ func (c *Client) GetAgamaDeployment(ctx context.Context, qname string) (*AgamaDe
 	}
 
 	return nil, fmt.Errorf("agama deployment not found: %w", ErrorNotFound)
-
-	// // fallback to GET
-	// token, err := c.getToken(ctx, "https://jans.io/oauth/config/agama.readonly")
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to get token: %w", err)
-	// }
-
-	// ret := &AgamaDeployment{}
-
-	// if err := c.get(ctx, "/jans-config-api/api/v1/agama-deployment/"+qname, token, ret); err != nil {
-	// 	return nil, fmt.Errorf("get request failed: %w", err)
-	// }
-
-	// ret.Name = qname
-
-	// return ret, nil
 }
 
 // CreateAgamaDeployment creates a new Agama flow.
@@ -104,7 +92,8 @@ func (c *Client) CreateAgamaDeployment(ctx context.Context, name string, autocon
 		return fmt.Errorf("agama project name may not be empty")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/agama.write")
+	scope := "https://jans.io/oauth/config/agama.write"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return fmt.Errorf("failed to get token: %w", err)
 	}
@@ -114,32 +103,12 @@ func (c *Client) CreateAgamaDeployment(ctx context.Context, name string, autocon
 		url += "?autoconfigure=true"
 	}
 
-	if err := c.postZipFile(ctx, url, token, data, nil); err != nil {
+	if err := c.postZipFile(ctx, url, token, scope, data, nil); err != nil {
 		return fmt.Errorf("post request failed: %w", err)
 	}
 
 	return nil
 }
-
-// // UpdateAgamaDeployment updates an already existing agama deployment.
-// func (c *Client) UpdateAgamaDeployment(ctx context.Context, name string, data []byte) error {
-
-// 	if name == "" {
-// 		return fmt.Errorf("agama project name may not be empty")
-// 	}
-
-// 	token, err := c.getToken(ctx, "https://jans.io/oauth/config/agama.write")
-// 	if err != nil {
-// 		return fmt.Errorf("failed to get token: %w", err)
-// 	}
-
-// 	// first update the flow attributes
-// 	if err := c.patch(ctx, "/jans-config-api/api/v1/agama/"+flow.Name, token, patches); err != nil {
-// 		return fmt.Errorf("patch request failed: %w", err)
-// 	}
-
-// 	return nil
-// }
 
 // DeleteAgamaFlow deletes an already existing Agama flow.
 func (c *Client) DeleteAgamaDeployment(ctx context.Context, qname string) error {
@@ -148,12 +117,13 @@ func (c *Client) DeleteAgamaDeployment(ctx context.Context, qname string) error 
 		return fmt.Errorf("qname is empty")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/agama.delete")
+	scope := "https://jans.io/oauth/config/agama.delete"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.delete(ctx, "/jans-config-api/api/v1/agama-deployment/"+qname, token); err != nil {
+	if err := c.delete(ctx, "/jans-config-api/api/v1/agama-deployment/"+qname, token, scope); err != nil {
 		return fmt.Errorf("delete request failed: %w", err)
 	}
 

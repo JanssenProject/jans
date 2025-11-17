@@ -288,6 +288,12 @@ total_sessions = 0
 ```
 **Solution**: This is normal if no sessions/tokens exist. Create some by authenticating.
 
+## Additional Resources
+
+- [TESTING_GUIDE.md](../TESTING_GUIDE.md) - Comprehensive testing guide
+- [TEST_QUICK_START.md](../TEST_QUICK_START.md) - Quick start guide
+- [TEST_RESULTS.md](../TEST_RESULTS.md) - Latest test results
+
 ## Support
 
 For issues or questions:
