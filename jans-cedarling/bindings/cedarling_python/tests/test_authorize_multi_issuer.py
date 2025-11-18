@@ -115,10 +115,6 @@ def get_multi_issuer_config():
         config["CEDARLING_POLICY_STORE_LOCAL_FN"] = (
             "../../test_files/policy-store-multi-issuer-test.yaml"
         )
-        # Disable workload and user entity building for multi-issuer tests
-        # since the policies work with token entities in context, not principal entities
-        config["CEDARLING_ENTITY_BUILDER_BUILD_WORKLOAD"] = "false"
-        config["CEDARLING_ENTITY_BUILDER_BUILD_USER"] = "false"
         config["CEDARLING_AUTHORIZATION_USE_WORKLOAD_PRINCIPAL"] = "false"
         config["CEDARLING_AUTHORIZATION_USE_USER_PRINCIPAL"] = "false"
 

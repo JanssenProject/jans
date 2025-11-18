@@ -590,8 +590,6 @@ func getMultiIssuerConfig() map[string]interface{} {
 		"CEDARLING_JWT_STATUS_VALIDATION":                "disabled",
 		"CEDARLING_ID_TOKEN_TRUST_MODE":                  "never",
 		"CEDARLING_POLICY_STORE_LOCAL_FN":                "../../test_files/policy-store-multi-issuer-test.yaml",
-		"CEDARLING_ENTITY_BUILDER_BUILD_WORKLOAD":        "false",
-		"CEDARLING_ENTITY_BUILDER_BUILD_USER":            "false",
 		"CEDARLING_AUTHORIZATION_USE_WORKLOAD_PRINCIPAL": "false",
 		"CEDARLING_AUTHORIZATION_USE_USER_PRINCIPAL":     "false",
 		"CEDARLING_USER_AUTHZ":                           "enabled",
