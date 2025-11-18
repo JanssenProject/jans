@@ -405,7 +405,7 @@ Each validated token in a multi-issuer authorization request becomes a Cedar ent
 
 - `token_type` (String): The entity type name (e.g., "Jans::Access_Token", "Acme::DolphinToken")
 - `jti` (String): Unique token identifier from JWT
-- `iss` (TrustedIssuer): JWT issuer claim value, derived from iss to TrustedIssuer, can be optional in case if token isn't verified.
+- `iss?` (TrustedIssuer): JWT issuer claim value (derived from iss to TrustedIssuer); optional when the token has not been verified or the issuer could not be determined.
 - `exp` (Long): Token expiration timestamp
 - `validated_at` (Long): Timestamp when Cedarling validated the token
 
