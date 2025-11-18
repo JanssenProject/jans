@@ -3,6 +3,7 @@ package io.jans.ca.plugin.adminui.model.config;
 
 import io.jans.as.model.config.adminui.KeyValuePair;
 import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
+import io.jans.ca.plugin.adminui.model.adminui.CedarlingPolicyStrRetrievalPoint;
 
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class AUIConfiguration {
     private CedarlingLogType cedarlingLogType;
     private String auiCedarlingPolicyStoreUrl;
     private String auiCedarlingDefaultPolicyStorePath;
-    private Boolean useCedarlingRemotePolicyStore = Boolean.FALSE;
+    private CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint = CedarlingPolicyStrRetrievalPoint.DEFAULT;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -311,12 +312,14 @@ public class AUIConfiguration {
         this.auiCedarlingDefaultPolicyStorePath = auiCedarlingDefaultPolicyStorePath;
     }
 
-    public Boolean getUseCedarlingRemotePolicyStore() {
-        return useCedarlingRemotePolicyStore;
+    public CedarlingPolicyStrRetrievalPoint getCedarlingPolicyStoreRetrievalPoint() {
+        return cedarlingPolicyStoreRetrievalPoint;
     }
 
-    public void setUseCedarlingRemotePolicyStore(Boolean useCedarlingRemotePolicyStore) {
-        this.useCedarlingRemotePolicyStore = useCedarlingRemotePolicyStore;
+    public void setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint) {
+        this.cedarlingPolicyStoreRetrievalPoint = cedarlingPolicyStoreRetrievalPoint != null
+                ? cedarlingPolicyStoreRetrievalPoint
+                : CedarlingPolicyStrRetrievalPoint.DEFAULT;
     }
 
     @Override
@@ -353,7 +356,7 @@ public class AUIConfiguration {
                 ", cedarlingLogType=" + cedarlingLogType +
                 ", auiCedarlingPolicyStoreUrl='" + auiCedarlingPolicyStoreUrl + '\'' +
                 ", auiCedarlingDefaultPolicyStorePath='" + auiCedarlingDefaultPolicyStorePath + '\'' +
-                ", useCedarlingRemotePolicyStore=" + useCedarlingRemotePolicyStore +
+                ", cedarlingPolicyStoreRetrievalPoint=" + cedarlingPolicyStoreRetrievalPoint +
                 '}';
     }
 }

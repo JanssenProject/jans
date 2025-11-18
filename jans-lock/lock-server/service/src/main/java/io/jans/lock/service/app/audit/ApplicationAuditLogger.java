@@ -39,8 +39,9 @@ public class ApplicationAuditLogger {
 		this.mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 
-	public void log(AuditLogEntry auditLogEntry) {
+	public void log(AuditLogEntry auditLogEntry, boolean success) {
 		if (auditLogEntry != null) {
+			auditLogEntry.setSuccess(success);
 			loggingThroughFile(auditLogEntry);
 		}
 	}

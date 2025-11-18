@@ -64,15 +64,17 @@ public class WellKnownConfiguration extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) throws IOException {
         AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(servletRequest), AuditActionType.CONFIGURATION_READ);
-        applicationAuditLogger.log(auditLogEntry);
 
+        boolean success = false;
     	httpResponse.setContentType("application/json");
         try (PrintWriter out = httpResponse.getWriter()) {
             ObjectNode responde = configurationService.getLockConfiguration();
             out.println(ServerUtil.toPrettyJson(responde).replace("\\/", "/"));
+            success = true;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+        applicationAuditLogger.log(auditLogEntry, success);
     }
 
     /**
