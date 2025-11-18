@@ -14950,9 +14950,9 @@ components:
           type: string
         selected:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
