@@ -82,10 +82,28 @@ public class UserMgmtService {
     private static final String BIRTH_DATE = "birthdate";
     private static final String MOBILE = "mobile";
 
+    /**
+     * Obtain the base Distinguished Name (DN) under which people (user) entries are stored.
+     *
+     * @return the base DN for people entries
+     */
     public String getPeopleBaseDn() {
         return userService.getPeopleBaseDn();
     }
 
+    /**
+     * Builds and executes a paged user search based on the provided SearchRequest.
+     *
+     * Constructs substring OR-filters from assertion values across displayName, description, mail, uid,
+     * givenName, middleName, nickname, sn, inum and mobile (mobile is treated as a multi-valued attribute),
+     * and combines them with per-field filters from the request's fieldValueMap (fields typed as `jsonb` and
+     * the mobile field are treated as multi-valued). The search is executed under the people base DN using
+     * the requested sorting and pagination. Inactive custom attributes are removed from resulting users
+     * before returning.
+     *
+     * @param searchRequest the search parameters including assertion values, field-value map, sorting and pagination
+     * @return a paged result of User objects whose custom attributes have been filtered to exclude inactive attributes
+     */
     public PagedResult<User> searchUsers(SearchRequest searchRequest) {
         if (logger.isInfoEnabled()) {
             logger.info("Search Users with searchRequest:{}, getPeopleBaseDn():{}", escapeLog(searchRequest),
@@ -160,6 +178,12 @@ public class UserMgmtService {
         return pagedResult;
     }
 
+    /**
+     * Retrieve users matching the specified uid that are marked active.
+     *
+     * @param name the uid (login name) to search for
+     * @return the list of matching active User objects, or `null` if an error occurs
+     */
     public List<User> getUserByName(String name) {
         logger.info("Get user by name:{} ", name);
         List<User> users = null;
