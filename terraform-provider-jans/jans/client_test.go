@@ -4,6 +4,7 @@ import (
         "context"
         "errors"
         "os"
+        "strings"
         "testing"
 )
 
@@ -22,6 +23,11 @@ func TestMain(m *testing.M) {
         user = os.Getenv("JANS_CLIENT_ID")
         pass = os.Getenv("JANS_CLIENT_SECRET")
 
+        // Add https:// prefix if not present
+        if host != "" && !strings.HasPrefix(host, "http") {
+                host = "https://" + host
+        }
+
         os.Exit(m.Run())
 }
 
@@ -34,7 +40,7 @@ func TestClient(t *testing.T) {
 
         ctx := context.Background()
 
-        accessToken, err := client.getToken(ctx, "https://jans.io/oauth/jans-auth-server/config/properties.readonly")
+        accessToken, err := client.ensureToken(ctx, "https://jans.io/oauth/jans-auth-server/config/properties.readonly")
         if err != nil {
                 t.Fatal(err)
         }
@@ -46,7 +52,7 @@ func TestClient(t *testing.T) {
         ctx, cancel := context.WithCancel(ctx)
         cancel()
 
-        _, err = client.getToken(ctx, "https://jans.io/oauth/jans-auth-server/config/properties.readonly")
+        _, err = client.ensureToken(ctx, "https://jans.io/oauth/jans-auth-server/config/properties.readonly")
         if !errors.Is(err, context.Canceled) {
                 t.Fatal(err)
         }

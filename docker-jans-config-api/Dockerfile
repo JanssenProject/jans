@@ -40,7 +40,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Config API
 # ==========
 
-ENV CN_VERSION=0.0.0-nightly
+ENV CN_VERSION=1.14.0
 ENV CN_BUILD_DATE='2025-11-03 11:54'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
@@ -71,7 +71,7 @@ RUN mkdir -p /etc/jans/conf \
     /usr/share/java \
     /opt/jans/bin
 
-ENV JANS_SOURCE_VERSION=04d297c046dd9d8ef54c0544e6187153b7ed87cf
+ENV JANS_SOURCE_VERSION=88d8e89acc598b9ddf68659b0a51c3c9e3b712f0
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -109,9 +109,15 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
 
 WORKDIR /
 
-# add policy store for admin-ui and cedarling integration
-ARG FLEX_SOURCE_VERSION=dc807c4e8678477258e730206ab89da412b13594
-RUN wget -nv https://github.com/GluuFederation/flex/raw/${FLEX_SOURCE_VERSION}/flex-linux-setup/flex_linux_setup/templates/policy-store.json -O /app/templates/jans-config-api/adminui-policy-store.json
+# add default policy store (for admin-ui and cedarling integration) from https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore
+# commit hash from GluuFlexAdminUIPolicyStore
+ARG AUI_POLICY_VERSION=f47c0877c5516c281580f190d1a82d04d9d471bf
+# policy store filename
+ARG AUI_POLICY_FILE=2fb50e468d9dfefa142d1fce4fa9747efbd3a0f08de5.json
+
+# download policy store file and replace placeholder with parametrized variable
+RUN wget -nv https://raw.githubusercontent.com/GluuFederation/GluuFlexAdminUIPolicyStore/${AUI_POLICY_VERSION}/${AUI_POLICY_FILE} -O /app/templates/jans-config-api/adminui-policy-store.json \
+    && sed -i 's/your-openid-provider.server/%(hostname)s/g' /app/templates/jans-config-api/adminui-policy-store.json
 
 # ======
 # Python
@@ -222,7 +228,7 @@ EXPOSE $CN_CONFIG_API_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="1.14.0-1" \
     org.opencontainers.image.title="Janssen Config API" \
     org.opencontainers.image.description=""
 

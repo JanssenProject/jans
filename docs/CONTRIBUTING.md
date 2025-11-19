@@ -163,7 +163,7 @@ The current version of CLA can be found
 [here](governance/cla.md). This is just for your reference.
 This same CLA will be signed digitally by following the steps below:
 
-1. The contributor sends an e-mail expressing willingness to contribute and 
+1. The contributor sends an e-mail (`legal@jans.io`) expressing willingness to contribute and 
 sign the CLA. In the email, mention your GitHub account 
 username from which the contributions will be made. If contributions will be
 made on behalf of an organization, then along with the GitHub username, mention the
