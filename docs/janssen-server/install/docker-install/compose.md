@@ -104,7 +104,7 @@ persistence.
 === "PostgreSQL"
 
     ```bash
-    ./up.sh pgsql
+    ./up.sh postgres
     ```
 
 
