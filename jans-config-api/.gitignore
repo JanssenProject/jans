@@ -4,6 +4,7 @@ jans-config-api-access*.log
 .classpath
 .settings/
 bin/
+.externalToolBuilders/
 
 # IntelliJ
 .idea
