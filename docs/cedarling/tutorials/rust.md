@@ -295,7 +295,7 @@ For more detailed logging capabilities, see the [Cedarling Rust Developer Guide]
 
 ## Example
 
-Refer to [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#complete-example) 
+Refer to [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#complete-example)
 for a complete code example.
 
 ## Defined API

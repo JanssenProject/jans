@@ -12,7 +12,7 @@ tags:
 # Authorization Using The Cedarling
 
 This quick start guide shows how to quickly test authorization of a user action
-using the Cedarling. We will be using [the application asserted identity approach](../README.md#token-based-access-control-tbac-v-application-asserted-identity) 
+using the Cedarling. We will be using [the application-asserted identity approach](../README.md#token-based-access-control-tbac-v-application-asserted-identity) 
 in this guide to implement role based access control(RBAC). Refer to [this section](#implement-tbac-using-cedarling) to understand how to use Cedarling
 with TBAC approach.
 

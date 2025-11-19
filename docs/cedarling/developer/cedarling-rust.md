@@ -45,7 +45,7 @@ To build an executable library for Cedarling, follow the instructions
 
 ### Building Examples
 
-The Cedarling project includes several examples that demonstrate different 
+The Cedarling project includes several examples that demonstrate different
 use cases. Follow the steps below to build these examples.
 
 ### Building Examples
@@ -405,7 +405,7 @@ let config = BootstrapConfig {
 
 ## See Also
 
-- [Getting Started with Cedarling Rust](../tutorials//rust.md)
+- [Getting Started with Cedarling Rust](../tutorials/rust.md)
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#authorization-using-the-cedarling)
 - [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
