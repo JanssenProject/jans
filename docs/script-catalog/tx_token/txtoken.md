@@ -36,7 +36,6 @@ The TxTokenType interception script also adds the following method(s):
 | `def modifyTokenPayload(self, jsonWebResponse, context)`                                                                          | Used to modify TxToken object before it is persisted. Returning false from modifyTokenPayload will prevent tx_token creation. <br/> `jsonWebResponse` is `io.jans.as.model.token.JsonWebResponse`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext` |
 | `def modifyResponse(self, response, context)`                                                                                     | Used to modify response from `/token` endpoint for transaction tokens.  <br/>  `response` is `org.json.JSONObject`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`                                                                                |
 
-
 ## Script Type: Java
 
 ```java
