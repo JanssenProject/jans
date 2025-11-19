@@ -188,7 +188,7 @@ public class TxToken implements TxTokenType {
     /**
      *
      * @param context context refers to io.jans.as.server.service.external.context.ExternalScriptContext
-     * @return lifetime of tx_token in seconds. It must be more then 0 or otherwise it will be ignored by server.
+     * @return lifetime of tx_token in seconds. It must be more than 0 or otherwise it will be ignored by server.
      */
     @Override
     public int getTxTokenLifetimeInSeconds(Object context) {
