@@ -44,6 +44,7 @@ public class ServerUtil {
 
 	private static final Logger log = LoggerFactory.getLogger(ServerUtil.class);
 
+
 	public static final String PRAGMA = "Pragma";
 	public static final String NO_CACHE = "no-cache";
 
@@ -97,7 +98,6 @@ public class ServerUtil {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
     }
-    
 
     public static String urlDecode(String str) {
         if (StringUtils.isNotBlank(str)) {
@@ -109,4 +109,5 @@ public class ServerUtil {
         }
         return str;
     }
+
 }

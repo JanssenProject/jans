@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-scim</artifactId>
 	<packaging>pom</packaging>
-	<version>0.0.0-nightly</version>
+	<version>1.14.0</version>
 	<name>SCIM API</name>
 	<url>http://www.gluu.org</url>
 
@@ -145,7 +145,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>3.3.2</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

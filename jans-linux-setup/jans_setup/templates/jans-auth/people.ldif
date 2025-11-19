@@ -13,5 +13,5 @@ jansStatus: active
 displayName: Default Admin User
 mail: admin@%(hostname)s
 emailVerified: true
-jansAdminUIRole: api-admin
+jansAdminUIRole: admin
 role: CasaAdmin

@@ -8,6 +8,7 @@ import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.config.adminui.LicenseConfig;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
+import io.jans.ca.plugin.adminui.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
 import io.jans.ca.plugin.adminui.rest.license.LicenseResource;
@@ -120,6 +121,9 @@ public class AUIConfigurationService extends BaseService {
         auiConfig.setAllowSmtpKeystoreEdit(appConf.getMainSettings().getUiConfig().getAllowSmtpKeystoreEdit());
         auiConfig.setAdditionalParameters(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAdditionalParameters());
         auiConfig.setCedarlingLogType(CedarlingLogType.fromString(appConf.getMainSettings().getUiConfig().getCedarlingLogType()));
+        auiConfig.setAuiCedarlingPolicyStoreUrl(appConf.getMainSettings().getUiConfig().getAuiPolicyStoreUrl());
+        auiConfig.setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint.fromString(appConf.getMainSettings().getUiConfig().getCedarlingPolicyStoreRetrievalPoint()));
+        auiConfig.setAuiCedarlingDefaultPolicyStorePath(appConf.getMainSettings().getUiConfig().getAuiDefaultPolicyStorePath());
         return auiConfig;
     }
 

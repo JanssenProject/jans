@@ -651,10 +651,16 @@ components:
           description: OpenID issuer URL
         protectionMode:
           type: string
-          description: OpenID issuer URL
+          description: Protection mode for the Lock server (OAuth or Cedarling)
           enum:
-          - OAUTH
-          - CEDARLING
+          - oauth
+          - cedarling
+        auditPersistenceMode:
+          type: string
+          description: Audit persistence mode
+          enum:
+          - internal
+          - config-api
         cedarlingConfiguration:
           $ref: "#/components/schemas/CedarlingConfiguration"
         statEnabled:
@@ -676,30 +682,6 @@ components:
         clientPassword:
           type: string
           description: Lock client password
-        tokenUrl:
-          type: string
-          description: Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint
-        endpointGroups:
-          type: object
-          additionalProperties:
-            type: array
-            description: Endpoint groups
-            items:
-              type: string
-              description: Endpoint groups
-          description: Endpoint groups
-        endpointDetails:
-          type: object
-          additionalProperties:
-            type: array
-            description: Jans URL of config-api audit endpoints and corresponding
-              scope details
-            items:
-              type: string
-              description: Jans URL of config-api audit endpoints and corresponding
-                scope details
-          description: Jans URL of config-api audit endpoints and corresponding scope
-            details
         disableJdkLogger:
           type: boolean
           description: Choose whether to disable JDK loggers
