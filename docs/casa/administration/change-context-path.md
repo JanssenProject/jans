@@ -31,8 +31,6 @@ To publish the application at a location other than `/casa`, do the following:
 
     - Add the following directive: `Redirect /casa /<new-context-path>` before all `<Location>` and `<Proxy>` sections
 
-1. Adjust custom script settings: adjust the "supergluu_app_id" property of the `casa` custom script accordingly
-
 1. Wait for around 1 minute (so the server picks the script changes), then restart Casa and Apache services. Use this [page](../../janssen-server/vm-ops/restarting-services.md) as a guide
 
 1. The application should be accessible now at the new URL.

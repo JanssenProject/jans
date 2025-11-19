@@ -31,7 +31,7 @@ RUN pip3 install "poetry==$POETRY_VERSION" gunicorn \
 # ===============
 # Project setup
 # ===============
-ENV JANS_SOURCE_VERSION=88d8e89acc598b9ddf68659b0a51c3c9e3b712f0
+ENV JANS_SOURCE_VERSION=04d297c046dd9d8ef54c0544e6187153b7ed87cf
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
@@ -78,7 +78,7 @@ EXPOSE 5000
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-flask-sidecar" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.14.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="AuthZen Flask API" \
     org.opencontainers.image.description="Flask API that implements the [AuthZen](https://openid.github.io/authzen/) specification with the [cedarling](../) python binding."
 
