@@ -46,8 +46,8 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
     (async () => {
       const scopes = client?.scope.split(" ");
       setAcrValueOption(client?.acrValuesSupported.map((ele) => createOption(ele)));
-      setScopeOptions(scopes.map((ele) => ({name: ele})))
-      
+      setScopeOptions(scopes.map((ele) => ({ name: ele })))
+
     })();
   }, [])
 
@@ -66,7 +66,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
     try {
       setAdditionalParamError('')
       let addParams = e.target.value;
-      if(addParams.trim() === '') {
+      if (addParams.trim() === '') {
         return;
       }
       JSON.parse(addParams);
@@ -82,7 +82,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
       const redirectUrl = client?.redirectUris[0];
       const { secret, hashed } = await Utils.generateRandomChallengePair();
       let scopes = selectedScopes.map((ele) => ele.name).join(" ");
-      if(!(!!scopes && scopes.length > 0)) {
+      if (!(!!scopes && scopes.length > 0)) {
         scopes = client?.scope;
       }
 
@@ -103,12 +103,15 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
       let authzUrl = `${client?.authorizationEndpoint}?${qs.stringify(options)}`;
 
       if (!!additionalParams && additionalParams.trim() != '') {
-        client.additionalParams = additionalParams.trim();
+        const updatedClient = {
+          ...client,
+          additionalParams: additionalParams.trim(),
+        };
         chrome.storage.local.get(["oidcClients"], (result) => {
           let clientArr = []
           if (!!result.oidcClients) {
             clientArr = result.oidcClients;
-            clientArr = clientArr.map(obj => obj.clientId === client.clientId ? client : obj);
+            clientArr = clientArr.map(obj => obj.clientId === updatedClient.clientId ? updatedClient : obj);
             chrome.storage.local.set({ oidcClients: clientArr });
           }
         });
@@ -117,45 +120,45 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
         console.log('Processing additional parameters');
         Object.keys(additionalParamJSON).forEach(key => {
           console.log(key + "~~~" + additionalParamJSON[key]);
-          authzUrl += `&${key}=${additionalParamJSON[key]}`
+          authzUrl += `&${encodeURIComponent(key)}=${encodeURIComponent(additionalParamJSON[key])}`;
         });
       }
 
       console.log('Obtained autorization URL: ' + authzUrl)
 
       const resultUrl: string = await new Promise((resolve, reject) => {
-      chrome.identity.launchWebAuthFlow({
-        url: authzUrl,
-        interactive: true
-      }, (responseUrl) => {
-        if (chrome.runtime.lastError || !responseUrl) {
-          console.error("Authentication failed:", chrome.runtime.lastError || "No redirect URL");
-          reject("Authentication failed:" + chrome.runtime.lastError || "No redirect URL")
-        } else {
-          resolve(responseUrl)
-        }
+        chrome.identity.launchWebAuthFlow({
+          url: authzUrl,
+          interactive: true
+        }, (responseUrl) => {
+          if (chrome.runtime.lastError || !responseUrl) {
+            console.error("Authentication failed:", chrome.runtime.lastError || "No redirect URL");
+            reject(chrome.runtime.lastError || "No redirect URL")
+          } else {
+            resolve(responseUrl)
+          }
+        });
       });
-    });
 
-    if (resultUrl) {
-      const urlParams = new URLSearchParams(new URL(resultUrl).search)
-      const code = urlParams.get('code')
-      const errorDesc = urlParams.get('error_description')
-      if(errorDesc != null) {
-        throw errorDesc;
-      }
-      console.log('code:' + code)
-      if(code == null || code === '') {
-        throw 'Error in authentication. The authorization-code is null.';
-      }
-      const tokenReqData = qs.stringify({
-        redirect_uri: redirectUrl,
-        grant_type: 'authorization_code',
-        code_verifier: secret,
-        client_id: client?.clientId,
-        code,
-        scope: scopes
-      })
+      if (resultUrl) {
+        const urlParams = new URLSearchParams(new URL(resultUrl).search)
+        const code = urlParams.get('code')
+        const errorDesc = urlParams.get('error_description')
+        if (errorDesc != null) {
+          throw errorDesc;
+        }
+        console.log('code:' + code)
+        if (code == null || code === '') {
+          throw new Error('Error in authentication. The authorization-code is null.');
+        }
+        const tokenReqData = qs.stringify({
+          redirect_uri: redirectUrl,
+          grant_type: 'authorization_code',
+          code_verifier: secret,
+          client_id: client?.clientId,
+          code,
+          scope: scopes
+        })
 
         const tokenReqOptions = {
           method: 'POST',
@@ -165,8 +168,8 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
         };
 
         const tokenResponse = await axios(tokenReqOptions);
-        if(tokenResponse == null) {
-          throw 'Error in authentication. The token response is null.';
+        if (tokenResponse == null) {
+          throw new Error('Error in authentication. The token response is null.');
         }
 
         if (
@@ -196,12 +199,20 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
             handleClose();
           });
           notifyOnDataChange();
+        } else {
+          throw new Error(
+            `Error in authentication. Token response does not contain access_token. ${tokenResponse?.data?.error_description ||
+            tokenResponse?.data?.error ||
+            ''
+            }`
+          );
         }
       }
-    } catch(err) {
-      setLoading(false);
+    } catch (err) {
       console.error(err);
-      setErrorMessage(err.toString());
+      setErrorMessage(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -217,7 +228,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
         PaperProps={{
           component: 'form',
           onSubmit: (event) => {
-            event.preventDefault();            
+            event.preventDefault();
           },
         }}
         className="form-container"
@@ -271,11 +282,11 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
               defaultValue={[acrValueOption[0]]}
               onChange={(event, newValue, reason, details) => {
                 if (reason === 'removeOption') {
-                  setSelectedAcr([]);  
+                  setSelectedAcr([]);
                 } else if (reason === 'selectOption') {
-                  setSelectedAcr([{id: undefined, name: details.option.name}]);
-                } else if(reason === 'createOption') {
-                  setSelectedAcr([{id: undefined, name: details.option}]);
+                  setSelectedAcr([{ id: undefined, name: details.option.name }]);
+                } else if (reason === 'createOption') {
+                  setSelectedAcr([{ id: undefined, name: details.option }]);
                 }
               }}
               filterSelectedOptions
@@ -373,8 +384,8 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
                 <TextField {...params} label="Scopes" />
               )}
             />
-            
-            <FormControlLabel control={<Checkbox color="success" onChange={() => setDisplayToken(!displayToken)}/>} label="Display Access Token and ID Token after authentication" />
+
+            <FormControlLabel control={<Checkbox color="success" onChange={() => setDisplayToken(!displayToken)} />} label="Display Access Token and ID Token after authentication" />
           </Stack>
         </DialogContent>
         <DialogActions>
