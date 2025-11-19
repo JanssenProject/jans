@@ -32,9 +32,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
@@ -51,8 +53,8 @@ public class ConfigurationRestWebService extends BaseResource {
 	@Inject
 	private ConfigurationService configurationService;
 
-    @Inject
-    private ApplicationAuditLogger applicationAuditLogger;
+	@Inject
+	private ApplicationAuditLogger applicationAuditLogger;
 
 	@Operation(summary = "Request .well-known data", description = "Request .well-know Lock server configuration", tags = {
 			"Lock - Server Configuration" })
@@ -62,14 +64,20 @@ public class ConfigurationRestWebService extends BaseResource {
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response getConfiguration() {
-        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(getHttpRequest()), AuditActionType.CONFIGURATION_READ);
-        applicationAuditLogger.log(auditLogEntry);
+	public Response getConfiguration(@Context HttpServletRequest request) {
+		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+				AuditActionType.CONFIGURATION_READ);
 
-		ObjectNode response = configurationService.getLockConfiguration();
+		boolean success = false;
+		try {
+			ObjectNode response = configurationService.getLockConfiguration();
+			ResponseBuilder builder = Response.ok().entity(response.toString());
 
-		ResponseBuilder builder = Response.ok().entity(response.toString());
-		return builder.build();
+			success = true;
+			return builder.build();
+		} finally {
+			applicationAuditLogger.log(auditLogEntry, success);
+		}
 	}
 
 }

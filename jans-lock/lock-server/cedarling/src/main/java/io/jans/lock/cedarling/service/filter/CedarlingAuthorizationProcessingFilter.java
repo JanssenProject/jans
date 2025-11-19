@@ -50,6 +50,9 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 	@Context
 	private ResourceInfo resourceInfo;
 
+	@Context
+    private HttpServletRequest httpRequest;
+
 	/**
 	 * This method performs the protection check of service invocations: it provokes
 	 * returning an early error response if the underlying protection logic does not
@@ -70,9 +73,8 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 			Response authorizationResponse = protectionService.processAuthorization(requestContext, httpHeaders, resourceInfo);
 			boolean success = authorizationResponse == null;
 
-	        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress((HttpServletRequest) requestContext.getRequest()), AuditActionType.OPENID_AUTHZ_FILTER);
-			auditLogEntry.setSuccess(success);
-			applicationCedarlingAuditLogger.log(auditLogEntry);
+	        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(httpRequest), AuditActionType.CEDARLING_AUTHZ_FILTER);
+			applicationCedarlingAuditLogger.log(auditLogEntry, success);
 
 	        if (success) {
 				// Actual processing of request proceeds
