@@ -39,7 +39,6 @@ The TxTokenType interception script also adds the following method(s):
 
 ## Script Type: Java
 
-
 ```java
 
 
