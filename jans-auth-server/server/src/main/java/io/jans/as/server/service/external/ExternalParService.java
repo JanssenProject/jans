@@ -49,7 +49,7 @@ public class ExternalParService extends ExternalScriptService {
     public boolean createPar(Par par, ExternalScriptContext context) {
         List<CustomScriptConfiguration> scripts = getScripts(context);
         if (scripts.isEmpty()) {
-            return false;
+            return true;
         }
         log.trace("Executing {} 'createPar' scripts.", scripts.size());
 
