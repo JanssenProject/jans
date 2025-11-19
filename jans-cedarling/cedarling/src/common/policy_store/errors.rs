@@ -415,9 +415,9 @@ pub enum ArchiveError {
     #[error("Path traversal attempt detected in archive: '{path}'")]
     PathTraversal { path: String },
 
-    /// Archive loading through PolicyStoreSource not supported (use ArchiveVfs instead)
+    /// File path-based archive loading not supported in WASM
     #[error(
-        "Archives cannot be loaded via PolicyStoreSource::Archive. Create an ArchiveVfs and use DefaultPolicyStoreLoader<ArchiveVfs> instead. See module documentation for examples."
+        "File path-based archive loading is not supported in WASM. Use ArchiveSource::Url for remote archives, or create an ArchiveVfs::from_buffer() directly with bytes you fetch. See module documentation for examples."
     )]
     WasmUnsupported,
 }

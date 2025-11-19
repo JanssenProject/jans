@@ -39,6 +39,7 @@ pub use errors::{
     TokenError, TrustedIssuerErrorType, ValidationError,
 };
 pub use issuer_parser::{IssuerParser, ParsedIssuer};
+pub use loader::load_policy_store;
 pub use loader::{
     DefaultPolicyStoreLoader, EntityFile, IssuerFile, LoadedPolicyStore, PolicyFile,
     PolicyStoreLoader,
@@ -49,7 +50,7 @@ pub use manifest_validator::{
 pub use metadata::{FileInfo, PolicyStoreInfo, PolicyStoreManifest, PolicyStoreMetadata};
 pub use policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
 pub use schema_parser::{ParsedSchema, SchemaParser};
-pub use source::{PolicyStoreFormat, PolicyStoreSource};
+pub use source::{ArchiveSource, PolicyStoreFormat, PolicyStoreSource};
 pub use validator::MetadataValidator;
 pub use vfs_adapter::{MemoryVfs, VfsFileSystem};
 
@@ -95,14 +96,15 @@ fn validate_default_entities(
     // Check base64 size limit for each entity
     for (entity_id, entity_data) in entities {
         if let Some(entity_str) = entity_data.as_str()
-            && entity_str.len() > limits.max_base64_size {
-                return Err(format!(
-                    "Base64 string size ({}) for entity '{}' exceeds maximum allowed size ({})",
-                    entity_str.len(),
-                    entity_id,
-                    limits.max_base64_size
-                ));
-            }
+            && entity_str.len() > limits.max_base64_size
+        {
+            return Err(format!(
+                "Base64 string size ({}) for entity '{}' exceeds maximum allowed size ({})",
+                entity_str.len(),
+                entity_id,
+                limits.max_base64_size
+            ));
+        }
     }
 
     Ok(())

@@ -8,32 +8,39 @@
 //! This module provides a VFS implementation backed by ZIP archives, enabling
 //! policy stores to be distributed as single `.cjar` files. The implementation:
 //!
-//! - Works in both native and WASM environments
+//! - **Fully WASM-compatible** - `from_buffer()` works in both native and WASM
 //! - Reads files on-demand from the archive (no extraction needed)
 //! - Validates archive format and structure during construction
 //! - Prevents path traversal attacks
 //! - Provides full VfsFileSystem trait implementation
+//!
+//! # WASM Support
+//!
+//! Archives are **fully supported in WASM**:
+//! - Use `ArchiveVfs::from_buffer()` with bytes you fetch (works now)
+//! - Use `ArchiveSource::Url` with `load_policy_store()` (once URL fetching is implemented)
+//! - Only `from_file()` is native-only (requires file system access)
 //!
 //! # Example: Native
 //!
 //! ```no_run
 //! use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
 //!
-//! // Load from file path (native only)
-//! let archive_vfs = ArchiveVfs::from_file_path("policy_store.cjar")?;
+//! // Load from file path (native only - file I/O not available in WASM)
+//! let archive_vfs = ArchiveVfs::from_file("policy_store.cjar")?;
 //! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
 //! let loaded = loader.load_directory(".")?;
 //! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 //!
-//! # Example: WASM
+//! # Example: WASM (or Native)
 //!
 //! ```no_run
 //! use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
 //!
-//! // Load from bytes (works in WASM)
+//! // Load from bytes - works in both native and WASM!
 //! let archive_bytes: Vec<u8> = fetch_from_network().await?;
-//! let archive_vfs = ArchiveVfs::from_bytes(archive_bytes)?;
+//! let archive_vfs = ArchiveVfs::from_buffer(archive_bytes)?;
 //! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
 //! let loaded = loader.load_directory(".")?;
 //! # Ok::<(), Box<dyn std::error::Error>>(())
@@ -42,13 +49,10 @@
 
 use super::errors::ArchiveError;
 use super::vfs_adapter::{DirEntry, VfsFileSystem};
-use std::io::{Cursor, Read};
+use std::io::{Cursor, Read, Seek};
 use std::path::Path;
 use std::sync::Mutex;
 use zip::ZipArchive;
-
-#[cfg(not(target_arch = "wasm32"))]
-use std::fs::File;
 
 /// VFS implementation backed by a ZIP archive.
 ///
@@ -60,73 +64,38 @@ use std::fs::File;
 ///
 /// This type is `Send + Sync` despite using `Mutex` because the `ZipArchive` is protected
 /// by a mutex. Concurrent access is prevented by the Mutex locking mechanism.
+///
+/// # Generic Type Parameter
+///
+/// The generic type `T` must implement `Read + Seek` and represents the underlying
+/// reader for the ZIP archive. Common types:
+/// - `Cursor<Vec<u8>>` - For in-memory archives (WASM-compatible)
+/// - `std::fs::File` - For file-based archives (native only)
 #[derive(Debug)]
-pub struct ArchiveVfs {
-    /// The ZIP archive reader (wrapped in RefCell for interior mutability)
-    archive: std::sync::Mutex<ZipArchive<Cursor<Vec<u8>>>>,
+pub struct ArchiveVfs<T> {
+    /// The ZIP archive reader (wrapped in Mutex for thread safety)
+    archive: Mutex<ZipArchive<T>>,
 }
 
-impl ArchiveVfs {
-    /// Create an ArchiveVfs from a file path (native only).
+impl<T> ArchiveVfs<T>
+where
+    T: Read + Seek,
+{
+    /// Create an ArchiveVfs from a reader.
     ///
     /// This method:
-    /// 1. Validates the file has .cjar extension
-    /// 2. Reads the entire file into memory
-    /// 3. Validates it's a valid ZIP archive
-    /// 4. Checks for path traversal attempts
-    ///
-    /// # Errors
-    ///
-    /// Returns `ArchiveError` if:
-    /// - File extension is not .cjar
-    /// - File cannot be read
-    /// - Archive is not a valid ZIP
-    /// - Archive contains path traversal attempts
-    /// - Archive is corrupted
-    #[cfg(not(target_arch = "wasm32"))]
-    pub fn from_file_path<P: AsRef<Path>>(path: P) -> Result<Self, ArchiveError> {
-        let path = path.as_ref();
-
-        // Validate extension
-        if path.extension().and_then(|s| s.to_str()) != Some("cjar") {
-            return Err(ArchiveError::InvalidExtension {
-                expected: "cjar".to_string(),
-                found: path
-                    .extension()
-                    .and_then(|s| s.to_str())
-                    .unwrap_or("(none)")
-                    .to_string(),
-            });
-        }
-
-        // Read file into memory
-        let bytes = std::fs::read(path).map_err(|e| ArchiveError::CannotReadFile {
-            path: path.display().to_string(),
-            source: e,
-        })?;
-
-        Self::from_bytes(bytes)
-    }
-
-    /// Create an ArchiveVfs from bytes (works in WASM and native).
-    ///
-    /// This method:
-    /// 1. Validates the bytes form a valid ZIP archive
+    /// 1. Validates the reader contains a valid ZIP archive
     /// 2. Checks for path traversal attempts
     /// 3. Validates archive structure
     ///
     /// # Errors
     ///
     /// Returns `ArchiveError` if:
-    /// - Bytes are not a valid ZIP archive
+    /// - Reader does not contain a valid ZIP archive
     /// - Archive contains path traversal attempts
     /// - Archive is corrupted
-    pub fn from_bytes(bytes: Vec<u8>) -> Result<Self, ArchiveError> {
-        // Create cursor for in-memory access
-        let cursor = Cursor::new(bytes);
-
-        // Open as ZIP archive
-        let mut archive = ZipArchive::new(cursor).map_err(|e| ArchiveError::InvalidZipFormat {
+    pub fn from_reader(reader: T) -> Result<Self, ArchiveError> {
+        let mut archive = ZipArchive::new(reader).map_err(|e| ArchiveError::InvalidZipFormat {
             details: e.to_string(),
         })?;
 
@@ -153,7 +122,73 @@ impl ArchiveVfs {
             archive: Mutex::new(archive),
         })
     }
+}
 
+impl ArchiveVfs<std::fs::File> {
+    /// Create an ArchiveVfs from a file path (native only).
+    ///
+    /// This method:
+    /// 1. Validates the file has .cjar extension
+    /// 2. Opens the file
+    /// 3. Validates it's a valid ZIP archive
+    /// 4. Checks for path traversal attempts
+    ///
+    /// # Errors
+    ///
+    /// Returns `ArchiveError` if:
+    /// - File extension is not .cjar
+    /// - File cannot be read
+    /// - Archive is not a valid ZIP
+    /// - Archive contains path traversal attempts
+    /// - Archive is corrupted
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, ArchiveError> {
+        let path = path.as_ref();
+
+        // Validate extension
+        if path.extension().and_then(|s| s.to_str()) != Some("cjar") {
+            return Err(ArchiveError::InvalidExtension {
+                expected: "cjar".to_string(),
+                found: path
+                    .extension()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("(none)")
+                    .to_string(),
+            });
+        }
+
+        let file = std::fs::File::open(path).map_err(|e| ArchiveError::CannotReadFile {
+            path: path.display().to_string(),
+            source: e,
+        })?;
+
+        Self::from_reader(file)
+    }
+}
+
+impl ArchiveVfs<Cursor<Vec<u8>>> {
+    /// Create an ArchiveVfs from bytes (works in WASM and native).
+    ///
+    /// This method:
+    /// 1. Validates the bytes form a valid ZIP archive
+    /// 2. Checks for path traversal attempts
+    /// 3. Validates archive structure
+    ///
+    /// # Errors
+    ///
+    /// Returns `ArchiveError` if:
+    /// - Bytes are not a valid ZIP archive
+    /// - Archive contains path traversal attempts
+    /// - Archive is corrupted
+    pub fn from_buffer(buffer: Vec<u8>) -> Result<Self, ArchiveError> {
+        let cursor = Cursor::new(buffer);
+        Self::from_reader(cursor)
+    }
+}
+
+impl<T> ArchiveVfs<T>
+where
+    T: Read + Seek,
+{
     /// Normalize a path for archive lookup.
     ///
     /// Handles:
@@ -209,7 +244,7 @@ impl ArchiveVfs {
 
     /// Check if a path is a directory (with already-locked archive).
     /// This is a helper to avoid deadlocks when called from methods that already hold the lock.
-    fn is_directory_locked(archive: &mut ZipArchive<Cursor<Vec<u8>>>, normalized: &str) -> bool {
+    fn is_directory_locked(archive: &mut ZipArchive<T>, normalized: &str) -> bool {
         // Root is always a directory
         if normalized.is_empty() {
             return true;
@@ -235,7 +270,10 @@ impl ArchiveVfs {
     }
 }
 
-impl VfsFileSystem for ArchiveVfs {
+impl<T> VfsFileSystem for ArchiveVfs<T>
+where
+    T: Read + Seek + Send + Sync + 'static,
+{
     fn read_file(&self, path: &str) -> Result<Vec<u8>, std::io::Error> {
         let normalized = self.normalize_path(path);
 
@@ -349,6 +387,13 @@ impl VfsFileSystem for ArchiveVfs {
     }
 }
 
+/// Type alias for ArchiveVfs backed by in-memory buffer (WASM-compatible).
+pub type ArchiveVfsBuffer = ArchiveVfs<Cursor<Vec<u8>>>;
+
+#[cfg(not(target_arch = "wasm32"))]
+/// Type alias for ArchiveVfs backed by file (native only).
+pub type ArchiveVfsFile = ArchiveVfs<std::fs::File>;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -376,16 +421,16 @@ mod tests {
     }
 
     #[test]
-    fn test_from_bytes_valid_archive() {
+    fn test_from_buffer_valid_archive() {
         let bytes = create_test_archive(vec![("metadata.json", "{}")]);
-        let result = ArchiveVfs::from_bytes(bytes);
-        assert!(result.is_ok());
+        let _result = ArchiveVfs::from_buffer(bytes)
+            .expect("expect ArchiveVfs initialized correctly from buffer");
     }
 
     #[test]
-    fn test_from_bytes_invalid_zip() {
+    fn test_from_buffer_invalid_zip() {
         let bytes = b"This is not a ZIP file".to_vec();
-        let result = ArchiveVfs::from_bytes(bytes);
+        let result = ArchiveVfs::from_buffer(bytes);
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
@@ -394,9 +439,9 @@ mod tests {
     }
 
     #[test]
-    fn test_from_bytes_path_traversal() {
+    fn test_from_buffer_path_traversal() {
         let bytes = create_test_archive(vec![("../../../etc/passwd", "malicious")]);
-        let result = ArchiveVfs::from_bytes(bytes);
+        let result = ArchiveVfs::from_buffer(bytes);
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
@@ -410,7 +455,7 @@ mod tests {
             ("metadata.json", r#"{"version":"1.0"}"#),
             ("schema.cedarschema", "namespace Test;"),
         ]);
-        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
 
         let content = vfs.read_file("metadata.json").unwrap();
         assert_eq!(String::from_utf8(content).unwrap(), r#"{"version":"1.0"}"#);
@@ -422,7 +467,7 @@ mod tests {
     #[test]
     fn test_read_file_not_found() {
         let bytes = create_test_archive(vec![("metadata.json", "{}")]);
-        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
 
         let result = vfs.read_file("nonexistent.json");
         assert!(result.is_err());
@@ -434,7 +479,7 @@ mod tests {
             ("metadata.json", "{}"),
             ("policies/policy1.cedar", "permit();"),
         ]);
-        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
 
         assert!(vfs.exists("metadata.json"));
         assert!(vfs.exists("policies/policy1.cedar"));
@@ -448,7 +493,7 @@ mod tests {
             ("metadata.json", "{}"),
             ("policies/policy1.cedar", "permit();"),
         ]);
-        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
 
         assert!(vfs.is_file("metadata.json"));
         assert!(vfs.is_file("policies/policy1.cedar"));
@@ -463,7 +508,7 @@ mod tests {
             ("policies/policy1.cedar", "permit();"),
             ("policies/policy2.cedar", "forbid();"),
         ]);
-        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
 
         assert!(vfs.is_dir("."));
         assert!(vfs.is_dir("policies"));
@@ -478,7 +523,7 @@ mod tests {
             ("schema.cedarschema", "namespace Test;"),
             ("policies/policy1.cedar", "permit();"),
         ]);
-        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
 
         let entries = vfs.read_dir(".").unwrap();
         assert_eq!(entries.len(), 3);
@@ -496,7 +541,7 @@ mod tests {
             ("policies/policy2.cedar", "forbid();"),
             ("policies/nested/policy3.cedar", "deny();"),
         ]);
-        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
 
         let entries = vfs.read_dir("policies").unwrap();
         assert_eq!(entries.len(), 3);
@@ -518,7 +563,7 @@ mod tests {
         let bytes = create_test_archive(vec![("metadata.json", "{}")]);
         std::fs::write(&archive_path, bytes).unwrap();
 
-        let result = ArchiveVfs::from_file_path(&archive_path);
+        let result = ArchiveVfs::from_file(&archive_path);
         assert!(matches!(
             result.expect_err("should fail"),
             ArchiveError::InvalidExtension { .. }
@@ -536,7 +581,7 @@ mod tests {
         let bytes = create_test_archive(vec![("metadata.json", "{}")]);
         std::fs::write(&archive_path, bytes).unwrap();
 
-        let result = ArchiveVfs::from_file_path(&archive_path);
+        let result = ArchiveVfs::from_file(&archive_path);
         assert!(result.is_ok());
     }
 
@@ -551,7 +596,7 @@ mod tests {
             ("entities/users/regular.json", "{}"),
             ("entities/groups/admins.json", "{}"),
         ]);
-        let vfs = ArchiveVfs::from_bytes(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
 
         // Test root
         let root_entries = vfs.read_dir(".").unwrap();

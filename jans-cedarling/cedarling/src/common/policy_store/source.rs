@@ -14,9 +14,20 @@ pub enum PolicyStoreSource {
     /// Directory structure format (for development)
     Directory(PathBuf),
     /// Compressed archive format (.cjar file for distribution)
-    Archive(PathBuf),
+    /// Can be a file path or a URL
+    Archive(ArchiveSource),
     /// Legacy JSON/YAML format (backward compatibility)
     Legacy(String),
+}
+
+/// Source for archive-based policy stores.
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+pub enum ArchiveSource {
+    /// Local file path
+    File(PathBuf),
+    /// Remote URL (HTTP/HTTPS)
+    Url(String),
 }
 
 /// Format of a policy store.
@@ -38,7 +49,11 @@ mod tests {
     #[test]
     fn test_policy_store_source_variants() {
         let dir_source = PolicyStoreSource::Directory(PathBuf::from("/path/to/store"));
-        let archive_source = PolicyStoreSource::Archive(PathBuf::from("/path/to/store.cjar"));
+        let archive_file_source =
+            PolicyStoreSource::Archive(ArchiveSource::File(PathBuf::from("/path/to/store.cjar")));
+        let archive_url_source = PolicyStoreSource::Archive(ArchiveSource::Url(
+            "https://example.com/store.cjar".to_string(),
+        ));
         let legacy_source = PolicyStoreSource::Legacy("{}".to_string());
 
         // Verify we can create all variants
@@ -49,11 +64,18 @@ mod tests {
             _ => panic!("Expected Directory variant"),
         }
 
-        match archive_source {
-            PolicyStoreSource::Archive(path) => {
+        match archive_file_source {
+            PolicyStoreSource::Archive(ArchiveSource::File(path)) => {
                 assert_eq!(path.to_str().unwrap(), "/path/to/store.cjar")
             },
-            _ => panic!("Expected Archive variant"),
+            _ => panic!("Expected Archive File variant"),
+        }
+
+        match archive_url_source {
+            PolicyStoreSource::Archive(ArchiveSource::Url(url)) => {
+                assert_eq!(url, "https://example.com/store.cjar")
+            },
+            _ => panic!("Expected Archive Url variant"),
         }
 
         match legacy_source {

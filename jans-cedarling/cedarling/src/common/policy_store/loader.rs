@@ -19,7 +19,7 @@
 //! use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
 //!
 //! // Create archive VFS (validates format during construction)
-//! let archive_vfs = ArchiveVfs::from_file_path("policy_store.cjar")?;
+//! let archive_vfs = ArchiveVfs::from_file("policy_store.cjar")?;
 //!
 //! // Create loader with archive VFS
 //! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
@@ -38,7 +38,7 @@
 //! let archive_bytes: Vec<u8> = fetch_archive_bytes()?;
 //!
 //! // Create archive VFS from bytes
-//! let archive_vfs = ArchiveVfs::from_bytes(archive_bytes)?;
+//! let archive_vfs = ArchiveVfs::from_buffer(archive_bytes)?;
 //!
 //! // Load as normal
 //! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
@@ -52,7 +52,7 @@ use super::errors::{ArchiveError, PolicyStoreError, ValidationError};
 use super::manifest_validator::ManifestValidator;
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
 use super::policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
-use super::source::{PolicyStoreFormat, PolicyStoreSource};
+use super::source::{ArchiveSource, PolicyStoreFormat, PolicyStoreSource};
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
 use cedar_policy::PolicySet;
@@ -68,6 +68,133 @@ pub trait PolicyStoreLoader {
 
     /// Validate the structure of a policy store source.
     fn validate_structure(&self, source: &PolicyStoreSource) -> Result<(), PolicyStoreError>;
+}
+
+/// Load a policy store from any source (VFS-agnostic, async).
+///
+/// This function matches on the `PolicyStoreSource` and creates the appropriate
+/// VFS and loader internally. It supports:
+/// - Directory sources (uses PhysicalVfs) - Native only
+/// - Archive sources from file paths (uses ArchiveVfs<File>) - Native only
+/// - Archive sources from URLs (fetches and uses ArchiveVfs<Cursor<Vec<u8>>>) - Works in both native and WASM (once implemented)
+/// - Legacy sources (to be implemented)
+///
+/// # WASM Support
+///
+/// Archives are fully supported in WASM:
+/// - Use `ArchiveSource::Url` for remote archives (once URL fetching is implemented)
+/// - Or use `ArchiveVfs::from_buffer()` directly with bytes you fetch yourself
+///
+/// # Example (Native)
+///
+/// ```no_run
+/// use cedarling::common::policy_store::{load_policy_store, PolicyStoreSource, source::ArchiveSource};
+/// use std::path::PathBuf;
+///
+/// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+/// // Load from directory (native only)
+/// let loaded = load_policy_store(&PolicyStoreSource::Directory(PathBuf::from("./store"))).await?;
+///
+/// // Load from archive file (native only)
+/// let loaded = load_policy_store(&PolicyStoreSource::Archive(
+///     ArchiveSource::File(PathBuf::from("./store.cjar"))
+/// )).await?;
+///
+/// // Load from archive URL (works in both native and WASM once implemented)
+/// let loaded = load_policy_store(&PolicyStoreSource::Archive(
+///     ArchiveSource::Url("https://example.com/store.cjar".to_string())
+/// )).await?;
+/// # Ok(())
+/// # }
+/// ```
+///
+/// # Example (WASM)
+///
+/// ```no_run
+/// use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader, PolicyStoreSource, source::ArchiveSource};
+///
+/// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+/// // Option 1: Use ArchiveSource::Url (once URL fetching is implemented)
+/// let loaded = load_policy_store(&PolicyStoreSource::Archive(
+///     ArchiveSource::Url("https://example.com/store.cjar".to_string())
+/// )).await?;
+///
+/// // Option 2: Fetch bytes yourself and use ArchiveVfs directly
+/// let archive_bytes: Vec<u8> = fetch_from_network().await?;
+/// let archive_vfs = ArchiveVfs::from_buffer(archive_bytes)?;
+/// let loader = DefaultPolicyStoreLoader::new(archive_vfs);
+/// let loaded = loader.load_directory(".")?;
+/// # Ok(())
+/// # }
+/// # async fn fetch_from_network() -> Result<Vec<u8>, Box<dyn std::error::Error>> { Ok(vec![]) }
+/// ```
+pub async fn load_policy_store(
+    source: &PolicyStoreSource,
+) -> Result<LoadedPolicyStore, PolicyStoreError> {
+    match source {
+        PolicyStoreSource::Directory(path) => {
+            // Use PhysicalVfs for directory sources
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let vfs = super::vfs_adapter::PhysicalVfs::new();
+                let loader = DefaultPolicyStoreLoader::new(vfs);
+                let path_str = path
+                    .to_str()
+                    .ok_or_else(|| PolicyStoreError::PathNotFound {
+                        path: path.display().to_string(),
+                    })?;
+                loader.load_directory(path_str)
+            }
+            #[cfg(target_arch = "wasm32")]
+            {
+                Err(PolicyStoreError::PathNotFound {
+                    path: "Directory loading not supported in WASM".to_string(),
+                })
+            }
+        },
+        PolicyStoreSource::Archive(archive_source) => {
+            match archive_source {
+                ArchiveSource::File(path) => {
+                    // Load archive from file path (native only - file I/O not available in WASM)
+                    #[cfg(not(target_arch = "wasm32"))]
+                    {
+                        use super::archive_handler::ArchiveVfs;
+                        let archive_vfs = ArchiveVfs::from_file(path)?;
+                        let loader = DefaultPolicyStoreLoader::new(archive_vfs);
+                        loader.load_directory(".")
+                    }
+                    #[cfg(target_arch = "wasm32")]
+                    {
+                        // File paths not supported in WASM - use ArchiveSource::Url or ArchiveVfs::from_buffer() directly
+                        Err(PolicyStoreError::Archive(
+                            super::errors::ArchiveError::WasmUnsupported,
+                        ))
+                    }
+                },
+                ArchiveSource::Url(url) => {
+                    // Fetch archive from URL and load from bytes (works in both native and WASM)
+                    // TODO: Implement HTTP fetching using reqwest or HttpClient
+                    // Once implemented, this will work in WASM environments
+                    Err(PolicyStoreError::Archive(
+                        super::errors::ArchiveError::InvalidZipFormat {
+                            details: format!(
+                                "URL loading not yet implemented: {}. This will work in both native and WASM once implemented.",
+                                url
+                            ),
+                        },
+                    ))
+                },
+            }
+        },
+        PolicyStoreSource::Legacy(_) => {
+            // TODO: Implement legacy format loading
+            Err(PolicyStoreError::Validation(
+                super::errors::ValidationError::InvalidPolicyStoreId {
+                    id: "Legacy format not yet implemented".to_string(),
+                },
+            ))
+        },
+    }
 }
 
 /// A loaded policy store with all its components.
@@ -201,13 +328,21 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     fn detect_format_internal(source: &PolicyStoreSource) -> PolicyStoreFormat {
         match source {
             PolicyStoreSource::Directory(_) => PolicyStoreFormat::Directory,
-            PolicyStoreSource::Archive(path) => {
-                // Check if file has .cjar extension
-                if path.extension().and_then(|s| s.to_str()) == Some("cjar") {
-                    PolicyStoreFormat::Archive
-                } else {
-                    // Assume archive format for any zip-like file
-                    PolicyStoreFormat::Archive
+            PolicyStoreSource::Archive(archive_source) => {
+                match archive_source {
+                    ArchiveSource::File(path) => {
+                        // Check if file has .cjar extension
+                        if path.extension().and_then(|s| s.to_str()) == Some("cjar") {
+                            PolicyStoreFormat::Archive
+                        } else {
+                            // Assume archive format for any zip-like file
+                            PolicyStoreFormat::Archive
+                        }
+                    },
+                    ArchiveSource::Url(_) => {
+                        // URLs are assumed to be archives
+                        PolicyStoreFormat::Archive
+                    },
                 }
             },
             PolicyStoreSource::Legacy(_) => PolicyStoreFormat::Legacy,
@@ -642,22 +777,33 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
                     })?;
                 self.load_directory(path_str)
             },
-            PolicyStoreSource::Archive(_) => {
-                // Archives cannot be loaded using PolicyStoreSource::Archive.
-                // Instead, create an ArchiveVfs and use DefaultPolicyStoreLoader<ArchiveVfs>:
-                //
-                // Native:
-                //   let archive_vfs = ArchiveVfs::from_file_path("store.cjar")?;
-                //   let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-                //   let loaded = loader.load_directory(".")?;
-                //
-                // WASM:
-                //   let archive_vfs = ArchiveVfs::from_bytes(archive_bytes)?;
-                //   let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-                //   let loaded = loader.load_directory(".")?;
-                //
-                // This design keeps the loader VFS-agnostic and works in WASM.
-                Err(PolicyStoreError::Archive(ArchiveError::WasmUnsupported))
+            PolicyStoreSource::Archive(archive_source) => {
+                match archive_source {
+                    ArchiveSource::File(path) => {
+                        // For file-based archives, we need to create an ArchiveVfs
+                        // but this method is sync and VFS-specific, so we can't do it here.
+                        // Use the async load_policy_store() function instead for archives.
+                        #[cfg(not(target_arch = "wasm32"))]
+                        {
+                            use super::archive_handler::ArchiveVfs;
+                            let archive_vfs = ArchiveVfs::from_file(path)?;
+                            let archive_loader = DefaultPolicyStoreLoader::new(archive_vfs);
+                            archive_loader.load_directory(".")
+                        }
+                        #[cfg(target_arch = "wasm32")]
+                        {
+                            // File paths not supported in WASM - use ArchiveSource::Url or ArchiveVfs::from_buffer() directly
+                            Err(PolicyStoreError::Archive(ArchiveError::WasmUnsupported))
+                        }
+                    },
+                    ArchiveSource::Url(_) => {
+                        // URL loading requires async, use load_policy_store() instead
+                        Err(PolicyStoreError::Archive(ArchiveError::InvalidZipFormat {
+                            details: "URL loading requires async load_policy_store() function"
+                                .to_string(),
+                        }))
+                    },
+                }
             },
             PolicyStoreSource::Legacy(_) => {
                 // TODO: Legacy format integration will be handled
@@ -684,11 +830,31 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
                     })?;
                 self.validate_directory_structure(path_str)
             },
-            PolicyStoreSource::Archive(_path) => {
-                // Archives cannot be validated using PolicyStoreSource::Archive.
-                // Validation happens during ArchiveVfs construction.
-                // See module documentation for proper usage.
-                Err(PolicyStoreError::Archive(ArchiveError::WasmUnsupported))
+            PolicyStoreSource::Archive(archive_source) => {
+                match archive_source {
+                    ArchiveSource::File(path) => {
+                        // Validate by attempting to create ArchiveVfs
+                        // This will validate extension, ZIP format, and path traversal
+                        #[cfg(not(target_arch = "wasm32"))]
+                        {
+                            use super::archive_handler::ArchiveVfs;
+                            ArchiveVfs::from_file(path)?;
+                            Ok(())
+                        }
+                        #[cfg(target_arch = "wasm32")]
+                        {
+                            // File paths not supported in WASM - use ArchiveSource::Url or ArchiveVfs::from_buffer() directly
+                            Err(PolicyStoreError::Archive(ArchiveError::WasmUnsupported))
+                        }
+                    },
+                    ArchiveSource::Url(_) => {
+                        // URL validation requires async, use load_policy_store() for validation
+                        Err(PolicyStoreError::Archive(ArchiveError::InvalidZipFormat {
+                            details: "URL validation requires async load_policy_store() function"
+                                .to_string(),
+                        }))
+                    },
+                }
             },
             PolicyStoreSource::Legacy(_) => {
                 // TODO: Legacy format validation will be handled
@@ -756,7 +922,8 @@ permit(
 
     #[test]
     fn test_format_detection_archive() {
-        let source = PolicyStoreSource::Archive(PathBuf::from("/path/to/store.cjar"));
+        let source =
+            PolicyStoreSource::Archive(ArchiveSource::File(PathBuf::from("/path/to/store.cjar")));
         let loader = DefaultPolicyStoreLoader::new_physical();
         assert_eq!(loader.detect_format(&source), PolicyStoreFormat::Archive);
     }
@@ -1999,8 +2166,8 @@ namespace TestApp {
         zip.finish().unwrap();
 
         // Step 1: Create ArchiveVfs from file path
-        let archive_vfs = ArchiveVfs::from_file_path(&archive_path)
-            .expect("Should create ArchiveVfs from .cjar file");
+        let archive_vfs =
+            ArchiveVfs::from_file(&archive_path).expect("Should create ArchiveVfs from .cjar file");
 
         // Step 2: Create loader with ArchiveVfs
         let loader = DefaultPolicyStoreLoader::new(archive_vfs);
@@ -2085,7 +2252,7 @@ namespace TestApp {
 
         // Step 1: Create ArchiveVfs from bytes (works in WASM!)
         let archive_vfs =
-            ArchiveVfs::from_bytes(archive_bytes).expect("Should create ArchiveVfs from bytes");
+            ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
 
         // Step 2: Create loader with ArchiveVfs
         let loader = DefaultPolicyStoreLoader::new(archive_vfs);
@@ -2167,8 +2334,7 @@ namespace TestApp {
         zip.finish().unwrap();
 
         // Step 1: Create ArchiveVfs
-        let archive_vfs =
-            ArchiveVfs::from_file_path(&archive_path).expect("Should create ArchiveVfs");
+        let archive_vfs = ArchiveVfs::from_file(&archive_path).expect("Should create ArchiveVfs");
 
         // Step 2: Load policy store
         let loader = DefaultPolicyStoreLoader::new(archive_vfs);
@@ -2183,7 +2349,7 @@ namespace TestApp {
 
         // Step 4: Show that ManifestValidator can work with ArchiveVfs
         let archive_vfs2 =
-            ArchiveVfs::from_file_path(&archive_path).expect("Should create second ArchiveVfs");
+            ArchiveVfs::from_file(&archive_path).expect("Should create second ArchiveVfs");
         let validator = ManifestValidator::new(archive_vfs2, PathBuf::from("."));
 
         // This demonstrates that manifest validation works with ANY VfsFileSystem,
@@ -2254,9 +2420,7 @@ namespace TestApp {
             zip.finish().unwrap();
         }
 
-        // ===== END-TO-END TEST: Archive with nested directory structure =====
-
-        let archive_vfs = ArchiveVfs::from_bytes(archive_bytes).expect("Should create ArchiveVfs");
+        let archive_vfs = ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs");
 
         let loader = DefaultPolicyStoreLoader::new(archive_vfs);
         let loaded = loader.load_directory(".").expect("Should load policies");
@@ -2317,7 +2481,7 @@ namespace TestApp {
         }
 
         // Load using ArchiveVfs
-        let archive_vfs = ArchiveVfs::from_bytes(archive_bytes).unwrap();
+        let archive_vfs = ArchiveVfs::from_buffer(archive_bytes).unwrap();
         let loader = DefaultPolicyStoreLoader::new(archive_vfs);
         let loaded = loader.load_directory(".").unwrap();
 
