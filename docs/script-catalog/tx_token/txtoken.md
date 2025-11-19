@@ -39,7 +39,6 @@ The TxTokenType interception script also adds the following method(s):
 ## Script Type: Java
 
 ```java
-
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.model.SimpleCustomProperty;
