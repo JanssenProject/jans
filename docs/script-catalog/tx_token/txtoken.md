@@ -37,8 +37,6 @@ The TxTokenType interception script also adds the following method(s):
 | `def modifyResponse(self, response, context)`                                                                                     | Used to modify response from `/token` endpoint for transaction tokens.  <br/>  `response` is `org.json.JSONObject`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`        |
 
 
-## Common Use Case
-
 ## Script Type: Java
 
 
