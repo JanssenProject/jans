@@ -33,13 +33,14 @@ type SessionPagedResult struct {
 
 // GetSessions returns all active sessions from the Janssen server
 func (c *Client) GetSessions(ctx context.Context) ([]SessionId, error) {
-        token, err := c.getToken(ctx, "https://jans.io/oauth/jans-auth-server/session.readonly")
+        scope := "https://jans.io/oauth/jans-auth-server/session.readonly"
+        token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return nil, err
         }
 
         var result SessionPagedResult
-        err = c.get(ctx, "/jans-config-api/api/v1/jans-auth-server/session", token, &result)
+        err = c.get(ctx, "/jans-config-api/api/v1/jans-auth-server/session", token, scope, &result)
         if err != nil {
                 return nil, err
         }
@@ -49,13 +50,14 @@ func (c *Client) GetSessions(ctx context.Context) ([]SessionId, error) {
 
 // GetSession returns a specific session by session ID
 func (c *Client) GetSession(ctx context.Context, sid string) (*SessionId, error) {
-        token, err := c.getToken(ctx, "https://jans.io/oauth/jans-auth-server/session.readonly")
+        scope := "https://jans.io/oauth/jans-auth-server/session.readonly"
+        token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return nil, err
         }
 
         var session SessionId
-        err = c.get(ctx, "/jans-config-api/api/v1/jans-auth-server/session/sid/"+sid, token, &session)
+        err = c.get(ctx, "/jans-config-api/api/v1/jans-auth-server/session/sid/"+sid, token, scope, &session)
         if err != nil {
                 return nil, err
         }
@@ -66,10 +68,11 @@ func (c *Client) GetSession(ctx context.Context, sid string) (*SessionId, error)
 // RevokeUserSessions revokes all sessions for a specific user by userDn
 func (c *Client) RevokeUserSessions(ctx context.Context, userDn string) error {
         // Session revocation requires both scopes
-        token, err := c.getToken(ctx, "revoke_session https://jans.io/oauth/jans-auth-server/session.delete")
+        scope := "revoke_session https://jans.io/oauth/jans-auth-server/session.delete"
+        token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return err
         }
 
-        return c.delete(ctx, "/jans-config-api/api/v1/jans-auth-server/session/user/"+userDn, token)
+        return c.delete(ctx, "/jans-config-api/api/v1/jans-auth-server/session/user/"+userDn, token, scope)
 }
