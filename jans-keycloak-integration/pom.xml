@@ -20,7 +20,7 @@
       <maven.compiler.source>17</maven.compiler.source>
       <maven.compiler.target>17</maven.compiler.target>
       <keycloak-admin-client.version>26.0.6</keycloak-admin-client.version>
-      <keycloak-server.version>26.3.3</keycloak-server.version>
+      <keycloak-server.version>26.4.1</keycloak-server.version>
       <nimbus.oauth2-oidc-sdk.version>11.27.1</nimbus.oauth2-oidc-sdk.version>
       <jans.version>${project.version}</jans.version>
       <jakarta.ws-rs-api.version>4.0.0</jakarta.ws-rs-api.version>
