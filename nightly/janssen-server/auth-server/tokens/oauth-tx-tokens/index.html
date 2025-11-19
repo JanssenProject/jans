@@ -4593,6 +4593,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#txtoken-custom-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      TxToken custom script
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#references" class="md-nav__link">
     <span class="md-ellipsis">
       References
@@ -7799,6 +7808,8 @@
       
         
       
+        
+      
     
     
     
@@ -8430,6 +8441,29 @@
   
   <span class="md-ellipsis">
     PAR
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../script-catalog/tx_token/txtoken/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Transaction Token (tx_token)
     
   </span>
   
@@ -14491,6 +14525,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#txtoken-custom-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      TxToken custom script
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#references" class="md-nav__link">
     <span class="md-ellipsis">
       References
@@ -14666,6 +14709,138 @@ transaction token (not regular <code>access_token</code>).</p>
 <li>View full obtain execution log <a href="../../../../assets/log/tx-token-request-run-log.txt">here</a></li>
 <li>View full replace execution log <a href="../../../../assets/log/tx-token-replace-run-log.txt">here</a></li>
 </ul>
+<h3 id="txtoken-custom-script">TxToken custom script<a class="headerlink" href="#txtoken-custom-script" title="Permanent link">#</a></h3>
+<p>Custom script allows to modify TxToken JWT payload claim, response or lifetime.</p>
+<p>The TxTokenType interception script extends the base script type with the <code>init</code>, <code>destroy</code> and <code>getApiVersion</code> methods:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Inherited Methods</th>
+<th style="text-align: left;">Method description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>def init(self, customScript, configurationAttributes)</code></td>
+<td style="text-align: left;">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>def destroy(self, configurationAttributes)</code></td>
+<td style="text-align: left;">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
+<td style="text-align: left;">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>configurationAttributes</code> parameter is <code>java.util.Map&lt;String, SimpleCustomProperty&gt;</code>.</p>
+<p>The TxTokenType interception script also adds the following method(s):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Method</th>
+<th style="text-align: left;">Method description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>def getTxTokenLifetimeInSeconds(self, context)</code></td>
+<td style="text-align: left;">Used to modify Tx Token lifetime in seconds. <br/> <code>context</code> is <code>io.jans.as.server.service.external.context.ExternalScriptContext</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>def modifyTokenPayload(self, jsonWebResponse, context)</code></td>
+<td style="text-align: left;">Used to modify TxToken object before it is persisted. <br/> <code>jsonWebResponse</code> is <code>io.jans.as.model.token.JsonWebResponse</code><br/> <code>context</code> is <code>io.jans.as.server.service.external.context.ExternalScriptContext</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>def modifyResponse(self, response, context)</code></td>
+<td style="text-align: left;">Used to modify response from <code>/token</code> endpoint for transaction tokens.  <br/>  <code>response</code> is <code>org.json.JSONObject</code><br/> <code>context</code> is <code>io.jans.as.server.service.external.context.ExternalScriptContext</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.model.token.JsonWebResponse</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.external.context.ExternalScriptContext</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.token.TxTokenType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.json.JSONObject</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">TxToken</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">TxTokenType</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">scriptLogger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param context context refers to io.jans.as.server.service.external.context.ExternalScriptContext</span>
+<span class="cm">     * @return lifetime of tx_token in seconds. It must be more than 0 or otherwise it will be ignored by server.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getTxTokenLifetimeInSeconds</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">boolean</span><span class="w"> </span><span class="n">condition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// under some condition return 1 day lifetime</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">condition</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="mi">86400</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param jsonWebResponse refers to io.jans.as.model.token.JsonWebResponse</span>
+<span class="cm">     * @param context refers to io.jans.as.server.service.external.context.ExternalScriptContext</span>
+<span class="cm">     * @return true if tx_token should be created or false to forbid tx_token creation.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyTokenPayload</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">jsonWebResponse</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">scriptContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="p">)</span><span class="w"> </span><span class="n">context</span><span class="p">;</span>
+<span class="w">        </span><span class="n">JsonWebResponse</span><span class="w"> </span><span class="n">jwr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">JsonWebResponse</span><span class="p">)</span><span class="w"> </span><span class="n">jsonWebResponse</span><span class="p">;</span>
+<span class="w">        </span><span class="n">jwr</span><span class="p">.</span><span class="na">getClaims</span><span class="p">().</span><span class="na">setClaim</span><span class="p">(</span><span class="s">&quot;custom_claim&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;custom_value&quot;</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * @param responseAsJsonObject - response represented by org.json.JSONObject</span>
+<span class="cm">     * @param context              - script context represented by io.jans.as.server.service.external.context.ExternalScriptContext</span>
+<span class="cm">     * @return true if changes must be applied to final response or false if whatever made in this method has to be cancelled</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyResponse</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">scriptContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="p">)</span><span class="w"> </span><span class="n">context</span><span class="p">;</span>
+
+<span class="w">        </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">JSONObject</span><span class="p">)</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">;</span>
+<span class="w">        </span><span class="n">json</span><span class="p">.</span><span class="na">accumulate</span><span class="p">(</span><span class="s">&quot;custom_key&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;custom_value&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Initialized TxToken Java custom script.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Initialized TxToken Java custom script.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Destroyed TxToken Java custom script.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
 <h3 id="references">References<a class="headerlink" href="#references" title="Permanent link">#</a></h3>
 <ul>
 <li>Transaction Tokens <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html">spec</a></li>
@@ -14692,7 +14867,7 @@ transaction token (not regular <code>access_token</code>).</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2025 11:50:32 UTC"><span class="timeago" datetime="2025-03-25T11:50:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2025 11:50:32 UTC">2025-03-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 19, 2025 18:10:16 UTC"><span class="timeago" datetime="2025-11-19T18:10:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 19, 2025 18:10:16 UTC">2025-11-19</span>
   </span>
 
     
