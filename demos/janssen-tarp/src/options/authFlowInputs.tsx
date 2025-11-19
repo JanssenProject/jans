@@ -132,8 +132,9 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
           interactive: true
         }, (responseUrl) => {
           if (chrome.runtime.lastError || !responseUrl) {
-            console.error("Authentication failed:", chrome.runtime.lastError || "No redirect URL");
-            reject(chrome.runtime.lastError || "No redirect URL")
+            const errorMessage = chrome.runtime.lastError?.message || "No redirect URL";
+            console.error("Authentication failed:", errorMessage);
+            reject(new Error(errorMessage))
           } else {
             resolve(responseUrl)
           }
