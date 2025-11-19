@@ -1784,7 +1784,7 @@
           "groupScopes": [
             {
               "inum": "1800.01.37",
-              "name": "https://jans.io/scim/config.write"
+              "name": "https://jans.io/scim/config.readonly"
             }
           ],
           "superScopes": [
@@ -3593,7 +3593,7 @@
           "superScopes": [
             {
               "inum": "1800.05.31",
-              "name": "https://jans.io/oauth/lock.admin"
+              "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
               "inum": "1800.03.1",
@@ -3616,7 +3616,11 @@
           "superScopes": [
             {
               "inum": "1800.05.31",
-              "name": "https://jans.io/oauth/lock.admin"
+              "name": "https://jans.io/oauth/config/lock.admin"
+            },
+            {
+              "inum": "1800.03.5",
+              "name": "https://jans.io/oauth/lock/write-all"
             },
             {
               "inum": "1800.03.2",
@@ -3853,12 +3857,16 @@
           "superScopes": [
             {
               "inum": "1800.05.31",
-              "name": "https://jans.io/oauth/lock.admin"
+              "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
               "inum": "1800.03.4",
               "name": "https://jans.io/oauth/lock/read-all"
-            }
+            },
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }			
           ]
         },
         {
@@ -3875,11 +3883,15 @@
           "superScopes": [
             {
               "inum": "1800.05.31",
-              "name": "https://jans.io/oauth/lock.admin"
+              "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
               "inum": "1800.03.5",
               "name": "https://jans.io/oauth/lock/write-all"
+            },
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
             }
           ]
         }
@@ -3907,12 +3919,16 @@
           "superScopes": [
             {
               "inum": "1800.05.31",
-              "name": "https://jans.io/oauth/lock.admin"
+              "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
               "inum": "1800.01.78",
-              "name": "https://jans.io/oauth/lock/audit.readonly"
-            }
+              "name": "https://jans.io/oauth/lock/read-all"
+            },
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }	
           ]
         },
         {
@@ -3929,11 +3945,15 @@
           "superScopes": [
             {
               "inum": "1800.05.31",
-              "name": "https://jans.io/oauth/lock.admin"
+              "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
               "inum": "1800.01.79",
-              "name": "https://jans.io/oauth/lock/audit.write"
+              "name": "https://jans.io/oauth/lock/write-all"
+            },
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
             }
           ]
         }
@@ -3961,12 +3981,16 @@
           "superScopes": [
             {
               "inum": "1800.05.31",
-              "name": "https://jans.io/oauth/lock.admin"
+              "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
               "inum": "1800.01.78",
-              "name": "https://jans.io/oauth/lock/audit.readonly"
-            }
+              "name": "https://jans.io/oauth/lock/read-all"
+            },
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }	
           ]
         },
         {
@@ -3983,11 +4007,15 @@
           "superScopes": [
             {
               "inum": "1800.05.31",
-              "name": "https://jans.io/oauth/lock.admin"
+              "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
               "inum": "1800.01.79",
-              "name": "https://jans.io/oauth/lock/audit.write"
+              "name": "https://jans.io/oauth/lock/write-all"
+            },
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
             }
           ]
         }
@@ -4015,12 +4043,16 @@
           "superScopes": [
             {
               "inum": "1800.05.31",
-              "name": "https://jans.io/oauth/lock.admin"
+              "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
               "inum": "1800.01.78",
-              "name": "https://jans.io/oauth/lock/audit.readonly"
-            }
+              "name": "https://jans.io/oauth/lock/read-all"
+            },
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }	
           ]
         },
         {
@@ -4037,11 +4069,15 @@
           "superScopes": [
             {
               "inum": "1800.05.31",
-              "name": "https://jans.io/oauth/lock.admin"
+              "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
               "inum": "1800.01.79",
-              "name": "https://jans.io/oauth/lock/audit.write"
+              "name": "https://jans.io/oauth/lock/write-all"
+            },
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
             }
           ]
         }
@@ -4220,11 +4256,15 @@
           "superScopes": [
             {
               "inum": "1800.05.31",
-              "name": "https://jans.io/oauth/lock.admin"
+              "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
               "inum": "1800.03.1",
               "name": "https://jans.io/oauth/config/read-all"
+            },
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
             }
           ]
         }

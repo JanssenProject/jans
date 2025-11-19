@@ -8,6 +8,7 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.scim.service.ScimConfigService;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.scim.util.Constants;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.scim.model.conf.Conf;
 
@@ -42,14 +43,19 @@ public class ScimConfigResource extends BaseResource {
     ScimConfigService scimConfigService;
 
     @Operation(summary = "Retrieves SCIM App configuration", description = "Retrieves SCIM App configuration", operationId = "get-scim-config", tags = {
-            "SCIM - Config Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/scim/config.readonly" }))
+            "SCIM - Config Management" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SCIM_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SCIM_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SCIM_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { "https://jans.io/scim/config.readonly" })
+    @ProtectedApi(scopes = { Constants.SCIM_READ_ACCESS }, groupScopes = {
+            Constants.SCIM_WRITE_ACCESS }, superScopes = { Constants.SCIM_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAppConfiguration() {
         AppConfiguration appConfiguration = scimConfigService.find();
         log.debug("SCIM appConfiguration:{}", appConfiguration);
@@ -57,8 +63,10 @@ public class ScimConfigResource extends BaseResource {
     }
 
     @Operation(summary = "Patch SCIM App configuration", description = "Patch SCIM App configuration", operationId = "patch-scim-config", tags = {
-            "SCIM - Config Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/scim/config.write" }))
+            "SCIM - Config Management" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SCIM_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SCIM_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
             @ExampleObject(value = "[ {op:replace, path: loggingLevel, value: DEBUG } ]") }))
     @ApiResponses(value = {
@@ -67,7 +75,8 @@ public class ScimConfigResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { "https://jans.io/scim/config.write" })
+    @ProtectedApi(scopes = { Constants.SCIM_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SCIM_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchAppConfigurationProperty(@NotNull String requestString)
             throws IOException, JsonPatchException {
         log.info("AUTH CONF details to patch - requestString:{}", requestString);
