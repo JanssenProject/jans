@@ -1744,6 +1744,11 @@ paths:
                   description: PAR script dns
                   items:
                     type: string
+                tx_token_script_dns:
+                  type: array
+                  description: Transaction Token script dns
+                  items:
+                    type: string
                 logout_status_jwt_script_dns:
                   type: array
                   description: Logout status jwt script dns
@@ -2203,6 +2208,11 @@ paths:
                 par_script_dns:
                   type: array
                   description: PAR script dns
+                  items:
+                    type: string
+                tx_token_script_dns:
+                  type: array
+                  description: Transaction Token script dns
                   items:
                     type: string
                 update_token_script_dns:
