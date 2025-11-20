@@ -69,7 +69,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-war-plugin</artifactId>
-                        <version>3.3.1</version>
+                        <version>3.5.0</version>
                         <configuration>
                             <webResources>
                                 <!-- Duplicity for m2e-wtp plugin -->
