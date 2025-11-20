@@ -22,6 +22,20 @@ const createOption = (label: string) => ({
   name: label,
 });
 const filter = createFilterOptions();
+/**
+ * Renders a dialog that collects optional inputs (additional params, ACR values, scopes, and a display-token toggle)
+ * and initiates an OAuth2/OIDC authorization code flow using the selected client configuration.
+ *
+ * The component handles validating additional-params JSON, building the authorization URL (including any extra params),
+ * launching the web authentication flow, exchanging the authorization code for tokens, fetching user info, and
+ * persisting login details to Chrome local storage. It shows progress and surface errors in the dialog UI.
+ *
+ * @param isOpen - Controls whether the dialog is initially open
+ * @param handleDialog - Callback invoked with a boolean to notify the parent when the dialog opens or closes
+ * @param client - OIDC/OAuth client configuration object (endpoints, clientId, clientSecret, redirectUris, scopes, etc.)
+ * @param notifyOnDataChange - Callback invoked after successful authentication to notify the parent of updated login data
+ * @returns The rendered React fragment containing the authentication inputs dialog
+ */
 export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnDataChange }) {
   const [open, setOpen] = React.useState(isOpen);
   const [errorMessage, setErrorMessage] = React.useState("")
