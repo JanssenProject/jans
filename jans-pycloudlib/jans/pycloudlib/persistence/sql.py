@@ -109,7 +109,7 @@ class PostgresqlAdapter:
                 opts["sslkey"] = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
         return opts
 
-    def upsert_query(self, table: Table, column_mapping: dict[str, _t.Any], update_mapping: dict[str, _t.Any]):
+    def upsert_query(self, table: Table, column_mapping: dict[str, _t.Any], update_mapping: dict[str, _t.Any]) -> _t.Any:
         return postgres_insert(table).values(column_mapping).on_conflict_do_update(
             index_elements=[table.c.doc_id],
             set_=update_mapping,
@@ -179,7 +179,7 @@ class MysqlAdapter:
                 opts["ssl"]["check_hostname"] = False
         return opts
 
-    def upsert_query(self, table: Table, column_mapping: dict[str, _t.Any], update_mapping: dict[str, _t.Any]):
+    def upsert_query(self, table: Table, column_mapping: dict[str, _t.Any], update_mapping: dict[str, _t.Any]) -> _t.Any:
         return mysql_insert(table).values(column_mapping).on_duplicate_key_update(update_mapping)
 
 
@@ -714,16 +714,15 @@ class SqlClient(SqlSchemaMixin):
     def _apply_json_defaults(self, table: Table, column_mapping: dict[str, _t.Any]) -> dict[str, _t.Any]:
         for column in table.c:
             unmapped = column.name not in column_mapping
+            json_default_values: list[_t.Any] | dict[str, _t.Any] = []
 
             if self.dialect == "mysql":
+                # probably using legacy data structure
+                if not self.use_simple_json:
+                    json_default_values = {"v": []}
                 json_type = "json"
-                if self.use_simple_json:
-                    json_default_values = []
-                else:
-                    json_default_values: dict[str, _t.Any] | list[_t.Any] = {"v": []}
             else:
                 json_type = "jsonb"
-                json_default_values = []
 
             is_json = bool(column.type.__class__.__name__.lower() == json_type)
 
