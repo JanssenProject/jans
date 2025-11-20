@@ -113,6 +113,8 @@ pub struct JwtService {
     logger: Option<Logger>,
     token_cache: Arc<RwLock<SparKV<Arc<Token>>>>,
     token_cache_max_ttl: usize,
+    signed_authz_available: bool,
+    jwt_sig_validation_required: bool,
 }
 
 struct IssuerConfig {
@@ -135,7 +137,8 @@ impl JwtService {
         let mut validators = JwtValidatorCache::default();
         let mut key_service = KeyService::new();
 
-        for (issuer_id, iss) in trusted_issuers.unwrap_or_default().into_iter() {
+        let trusted_issuers = trusted_issuers.unwrap_or_default();
+        for (issuer_id, iss) in trusted_issuers.into_iter() {
             // this is what we expect to find in the JWT `iss` claim
             let mut iss_claim = iss.oidc_endpoint.origin().ascii_serialization();
 
@@ -164,8 +167,12 @@ impl JwtService {
 
         // quick check so we don't get surprised if the program runs but can't validate
         // anything
-        if !key_service.has_keys() && jwt_config.jwt_sig_validation {
-            return Err(JwtServiceInitError::KeyServiceMissingKeys);
+        let signed_authz_available = key_service.has_keys();
+        if !signed_authz_available {
+            logger.log_any(JwtLogEntry::new(
+                "signed authorization is unavailable because no trusted issuers or JWKS were configured".to_string(),
+                Some(LogLevel::WARN),
+            ));
         }
         let key_service = Arc::new(key_service);
 
@@ -176,6 +183,8 @@ impl JwtService {
             logger,
             token_cache: Arc::new(RwLock::new(SparKV::new())),
             token_cache_max_ttl: token_cache_max_ttl_sec,
+            signed_authz_available,
+            jwt_sig_validation_required: jwt_config.jwt_sig_validation,
         })
     }
 
@@ -183,6 +192,14 @@ impl JwtService {
         &'a self,
         tokens: &'a HashMap<String, String>,
     ) -> Result<HashMap<String, Arc<Token>>, JwtProcessingError> {
+        if self.jwt_sig_validation_required && !self.signed_authz_available && !tokens.is_empty() {
+            self.logger.log_any(JwtLogEntry::new(
+                "signed authorization was attempted but Cedarling is not configured with trusted issuers or JWKS".to_string(),
+                Some(LogLevel::ERROR),
+            ));
+            return Err(JwtProcessingError::SignedAuthzUnavailable);
+        }
+
         let mut validated_tokens = HashMap::new();
         const ID_TOKEN_NAME: &str = "id_token";
 
