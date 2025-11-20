@@ -131,6 +131,7 @@ public enum CustomScriptType implements AttributeEnum {
     HEALTH_CHECK("health_check", "Health Check", HealthCheckType.class, CustomScript.class, "HealthCheck", new DummyHealthCheck()),
     AUTHZ_DETAIL("authz_detail", "Authorization Detail", AuthzDetailType.class, CustomScript.class, "AuthzDetail", new DummyAuthzDetail()),
     UPDATE_TOKEN("update_token", "Update Token", UpdateTokenType.class, CustomScript.class, "UpdateToken", new DummyUpdateTokenType()),
+    TX_TOKEN("tx_token", "Transaction Token", TxTokenType.class, CustomScript.class, "TxToken", new DummyTxTokenType()),
     LOGOUT_STATUS_JWT("logout_status_jwt", "Logout Status Jwt", LogoutStatusJwtType.class, CustomScript.class, "LogoutStatusJwt", new DummyLogoutStatusJwtType()),
     PAR("par", "Pushed Authorization Request", ParType.class, CustomScript.class, "Par", new DummyParType()),
     CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType()),

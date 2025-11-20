@@ -77,8 +77,8 @@ At a high level, developers interact with the Cedarling using five core interfac
 * **Logging** (`log`) – Retrieves decision and system logs for auditing. 
 
 Developers call the `init` interface on startup of their application, causing the 
-Cedarling to read its [bootstrap properties](./cedarling-properties) and load its 
-[policy store](./cedarling-policy-store). If configured for JWT validation, the Cedarling 
+Cedarling to read its [bootstrap properties](./reference/cedarling-properties.md) and load its 
+[policy store](./reference/cedarling-policy-store.md). If configured for JWT validation, the Cedarling 
 will fetch the most recent issuer public keys and metadata.
 
 The standard `authorize` method answers the question: "Is this action, on this resource, 
@@ -94,7 +94,7 @@ evaluation logic but skips JWT validation steps.
 The `authorize_multi_issuer` method is designed for scenarios where applications need to evaluate authorization based on multiple JWT tokens from different issuers in a single request. Unlike the standard `authorize` method which creates traditional User and Workload principals, this method evaluates policies based purely on the token entities themselves. Each token is validated, converted to a Cedar entity, and made available in the policy evaluation context. This approach is particularly useful for federation scenarios, API gateways handling tokens from multiple identity providers, or applications where authorization depends on capabilities asserted by different issuers rather than a single user identity. Policies can reference individual tokens using predictable naming conventions like `context.tokens.acme_access_token` or `context.tokens.google_id_token`.
 
 The `log` interface enables developers to retrieve decision and system logs from the Cedarling's 
-in-memory cache. See the Cedarling [log](./cedarling-logs) documentation for more information. 
+in-memory cache. See the Cedarling [log](./reference/cedarling-logs.md) documentation for more information. 
 
 ### Cedarling Components
 

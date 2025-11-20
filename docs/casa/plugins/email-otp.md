@@ -64,7 +64,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 1. Create one or more testing users with real e-mail addresses associated to their accounts
 
-1. Log into casa with such users and enroll some credential, like a passkey, SuperGluu, etc. Then turn 2fA for them.
+1. Log into casa with such users and enroll some credential, like a passkey. Then turn 2fA for them.
 
 1. Logout and login again. A new option for receiving OTPs via e-mail will be presented
 

@@ -197,7 +197,6 @@ nav:
       - janssen-server/auth-server/endpoints/README.md
       - OpenID Configuration: janssen-server/auth-server/endpoints/configuration.md
       - Client Registration: janssen-server/auth-server/endpoints/client-registration.md
-      - Client Authentication: janssen-server/auth-server/endpoints/client-authn.md
       - Authorization: janssen-server/auth-server/endpoints/authorization.md
       - Authorization Challenge: janssen-server/auth-server/endpoints/authorization-challenge.md
       - Access Evaluation: janssen-server/auth-server/endpoints/access-evaluation.md
@@ -330,6 +329,7 @@ nav:
       - Access Evaluation Discovery: script-catalog/access_evaluation/access-evaluation-discovery.md
       - Logout Status JWT: script-catalog/logout_status_jwt/logout-status-jwt.md
       - PAR: script-catalog/par/par.md
+      - Transaction Token (tx_token): script-catalog/tx_token/txtoken.md
       - Cookie: script-catalog/cookie/cookie.md
       - Discovery: script-catalog/discovery/discovery.md
       - Select Account: script-catalog/select_account/select-account.md
@@ -420,41 +420,41 @@ nav:
 - 'Cedarling':
   - Overview: 'cedarling/README.md'
   - Quick Start:
-    - Authorization Using Cedarling: 'cedarling/cedarling-quick-start.md'
+    - Authorization Using Cedarling: 'cedarling/quick-start/cedarling-quick-start.md'
   - Tutorials:
-    - 'cedarling/cedarling-getting-started.md'
-    - Javascript: 'cedarling/getting-started/javascript.md'
-    - Python: 'cedarling/getting-started/python.md'
-    - Rust: 'cedarling/getting-started/rust.md'
-    - Golang: 'cedarling/getting-started/go.md'
-    - Java: 'cedarling/getting-started/java.md'
-    - Kotlin: 'cedarling/getting-started/kotlin.md'
-    - Swift: 'cedarling/getting-started/swift.md'
+    - 'cedarling/tutorials/cedarling-getting-started.md'
+    - Javascript: 'cedarling/tutorials/javascript.md'
+    - Python: 'cedarling/tutorials/python.md'
+    - Rust: 'cedarling/tutorials/rust.md'
+    - Golang: 'cedarling/tutorials/go.md'
+    - Java: 'cedarling/tutorials/java.md'
+    - Kotlin: 'cedarling/tutorials/kotlin.md'
+    - Swift: 'cedarling/tutorials/swift.md'
   - Reference:
-    - Terminology: 'cedarling/intro/cedarling-terms.md'
-    - Authorization: 'cedarling/cedarling-authz.md'
-    - Multi-Issuer Authorization: 'cedarling/cedarling-multi-issuer.md'
-    - Interfaces: 'cedarling/cedarling-interfaces.md'
-    - Policy Store: 'cedarling/cedarling-policy-store.md'
-    - Properties: 'cedarling/cedarling-properties.md'
-    - Boolean Operations: 'cedarling/cedarling-principal-boolean-operations.md'
-    - Logs: 'cedarling/cedarling-logs.md'
-    - JWT Validation: 'cedarling/cedarling-jwt-validation.md'
-    - JWT Mapping: 'cedarling/cedarling-jwt-mapping.md'
-    - Lock Configuration: 'cedarling/cedarling-lock-server.md'
-    - Cedarling Entities: 'cedarling/cedarling-entities.md'
+    - Terminology: 'cedarling/reference/cedarling-terms.md'
+    - Authorization: 'cedarling/reference/cedarling-authz.md'
+    - Multi-Issuer Authorization: 'cedarling/reference/cedarling-multi-issuer.md'
+    - Interfaces: 'cedarling/reference/cedarling-interfaces.md'
+    - Policy Store: 'cedarling/reference/cedarling-policy-store.md'
+    - Properties: 'cedarling/reference/cedarling-properties.md'
+    - Boolean Operations: 'cedarling/reference/cedarling-principal-boolean-operations.md'
+    - Logs: 'cedarling/reference/cedarling-logs.md'
+    - JWT Validation: 'cedarling/reference/cedarling-jwt-validation.md'
+    - JWT Mapping: 'cedarling/reference/cedarling-jwt-mapping.md'
+    - Lock Configuration: 'cedarling/reference/cedarling-lock-server.md'
+    - Cedarling Entities: 'cedarling/reference/cedarling-entities.md'
   - Developer:
-    - Rust: 'cedarling/cedarling-rust.md'
+    - Rust: 'cedarling/developer/cedarling-rust.md'
     - Kotlin and Java: 'cedarling/uniffi/cedarling-kotlin.md'
     - Mobile Apps:
-      - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
-      - Android Apps: 'cedarling/uniffi/cedarling-android.md'
-      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'
+      - UniFFI interface: 'cedarling/developer/mobile-apps/cedarling-uniffi.md'
+      - Android Apps: 'cedarling/developer/mobile-apps/cedarling-android.md'
+      - iOS Apps: 'cedarling/developer/mobile-apps/cedarling-ios.md'
     - Sidecar:
-      - Sidecar: 'cedarling/cedarling-sidecar-overview.md'
-      - Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
+      - Sidecar: 'cedarling/developer/sidecar/cedarling-sidecar-overview.md'
+      - Tutorial: 'cedarling/developer/sidecar/cedarling-sidecar-tutorial.md'
   - Integrations:
-    - Krakend: 'cedarling/cedarling-krakend.md'
+    - Krakend: 'cedarling/integrations/cedarling-krakend.md'
 - Agama:
   - Introduction: agama/introduction.md
   - Language reference: agama/language-reference.md

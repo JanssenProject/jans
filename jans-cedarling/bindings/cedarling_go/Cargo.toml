@@ -1,6 +1,6 @@
 [package]
 name = "cedarling_go"
-version = "1.14.0"
+version = "0.0.0"
 edition = "2021"
 
 [lib]
