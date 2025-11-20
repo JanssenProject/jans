@@ -459,25 +459,7 @@ class SqlClient(SqlSchemaMixin):
     def insert_into(self, table_name: str, column_mapping: dict[str, _t.Any]) -> None:
         """Insert a row into a table."""
         table = self.metadata.tables.get(table_name)
-
-        for column in table.c:
-            unmapped = column.name not in column_mapping
-
-            if self.dialect == "mysql":
-                json_type = "json"
-                if self.use_simple_json:
-                    json_default_values = []
-                else:
-                    json_default_values: dict[str, _t.Any] | list[_t.Any] = {"v": []}
-            else:
-                json_type = "jsonb"
-                json_default_values = []
-
-            is_json = bool(column.type.__class__.__name__.lower() == json_type)
-
-            if not all([unmapped, is_json]):
-                continue
-            column_mapping[column.name] = json_default_values
+        column_mapping = self._apply_json_defaults(table, column_mapping)
 
         query = table.insert().values(column_mapping)
         with self.engine.connect() as conn:
@@ -683,6 +665,7 @@ class SqlClient(SqlSchemaMixin):
 
     def upsert(self, table_name: str, column_mapping: dict[str][_t.Any]) -> None:
         table = self.metadata.tables.get(table_name)
+        column_mapping = self._apply_json_defaults(table, column_mapping)
 
         # column mapping for update (doc_id is excluded)
         update_mapping = {
@@ -722,6 +705,29 @@ class SqlClient(SqlSchemaMixin):
 
                 # create or update entry
                 self.upsert(table_name, column_mapping)
+
+    def _apply_json_defaults(self, table, column_mapping):
+        for column in table.c:
+            unmapped = column.name not in column_mapping
+
+            if self.dialect == "mysql":
+                json_type = "json"
+                if self.use_simple_json:
+                    json_default_values = []
+                else:
+                    json_default_values: dict[str, _t.Any] | list[_t.Any] = {"v": []}
+            else:
+                json_type = "jsonb"
+                json_default_values = []
+
+            is_json = bool(column.type.__class__.__name__.lower() == json_type)
+
+            if not all([unmapped, is_json]):
+                continue
+            column_mapping[column.name] = json_default_values
+
+        # finalized column mapping
+        return column_mapping
 
 
 def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
