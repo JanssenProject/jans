@@ -41,11 +41,11 @@ cedarling = { git = "https://github.com/JanssenProject/jans", package = "cedarli
 ### Building Cedarling
 
 To build an executable library for Cedarling, follow the instructions 
-[here](getting-started/rust.md#building-from-source).
+[here](../tutorials/rust.md#building-from-source).
 
 ### Building Examples
 
-The Cedarling project includes several examples that demonstrate different 
+The Cedarling project includes several examples that demonstrate different
 use cases. Follow the steps below to build these examples.
 
 ### Building Examples
@@ -317,7 +317,7 @@ pub fn get_log_by_id(&self, id: &str) -> Option<LogEntry>
 
 ### Bootstrap Properties
 
-Cedarling can be configured using bootstrap properties. See the [bootstrap properties documentation](../cedarling-properties.md) for complete configuration options.
+Cedarling can be configured using bootstrap properties. See the [bootstrap properties documentation](../reference/cedarling-properties.md) for complete configuration options.
 
 ### Environment Variables
 
@@ -405,8 +405,8 @@ let config = BootstrapConfig {
 
 ## See Also
 
-- [Getting Started with Cedarling Rust](getting-started/rust.md)
-- [Cedarling TBAC quickstart](./cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
-- [Cedarling Unsigned quickstart](cedarling-quick-start.md#authorization-using-the-cedarling)
-- [Cedarling Sidecar Tutorial](cedarling-sidecar-tutorial.md)
-- [Cedarling Properties](cedarling-properties.md)
+- [Getting Started with Cedarling Rust](../tutorials/rust.md)
+- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#authorization-using-the-cedarling)
+- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
+- [Cedarling Properties](../reference/cedarling-properties.md)

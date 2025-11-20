@@ -10,7 +10,7 @@ tags:
 
 ## Policy Store
 
-A policy store is a JSON encoded file that contains information for the Cedarling's functions. [Agama Lab](https://cloud.gluu.org/agama-lab) can be used to easily create policy stores. Further information on policy stores can be found [here](../cedarling-policy-store.md)
+A policy store is a JSON encoded file that contains information for the Cedarling's functions. [Agama Lab](https://cloud.gluu.org/agama-lab) can be used to easily create policy stores. Further information on policy stores can be found [here](../reference/cedarling-policy-store.md)
 
 ## Schema
 

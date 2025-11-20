@@ -38,7 +38,7 @@ To use Cedarling Java bindings in Java Maven Project add following
 
 ### Building from Source
 
-Refer to the following [guide](../uniffi/cedarling-kotlin.md#building-from-source) for steps to build the Java binding from source.
+Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for steps to build the Java binding from source.
 
 
 ## Usage
@@ -226,6 +226,6 @@ Defined APIs are listed [here](https://janssenproject.github.io/developer-docs/j
 
 ## See Also
 
-- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-tbac-using-cedarling)
-- [Cedarling Unsigned quickstart](../cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
+- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-tbac-using-cedarling)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
 
