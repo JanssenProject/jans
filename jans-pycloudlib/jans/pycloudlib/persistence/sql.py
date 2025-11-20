@@ -706,7 +706,7 @@ class SqlClient(SqlSchemaMixin):
                 # create or update entry
                 self.upsert(table_name, column_mapping)
 
-    def _apply_json_defaults(self, table, column_mapping):
+    def _apply_json_defaults(self, table, column_mapping) -> dict[str, _t.Any]:
         for column in table.c:
             unmapped = column.name not in column_mapping
 
