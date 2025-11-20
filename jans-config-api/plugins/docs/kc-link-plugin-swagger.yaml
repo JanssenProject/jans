@@ -41,6 +41,8 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/kc-link.admin
       - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
         - https://jans.io/oauth/config/write-all
     put:
       tags:

@@ -71,7 +71,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -79,7 +80,7 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getCacheConfiguration() {
         return Response.ok(loadCacheConfiguration()).build();
     }
@@ -115,7 +116,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Redis cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-redis.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -124,7 +126,7 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @Path(ApiConstants.REDIS)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS})
     public Response getRedisConfiguration() {
         return Response.ok(loadCacheConfiguration().getRedisConfiguration()).build();
     }
@@ -186,7 +188,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "In-Memory configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-in-memory.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -195,7 +198,7 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @Path(ApiConstants.IN_MEMORY)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getInMemoryConfiguration() {
         return Response.ok(loadCacheConfiguration().getInMemoryConfiguration()).build();
     }
@@ -257,7 +260,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Native persistence configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = NativePersistenceConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-native-persistence.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -266,7 +270,7 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @Path(ApiConstants.NATIVE_PERSISTENCE)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getNativePersistenceConfiguration() {
         return Response.ok(loadCacheConfiguration().getNativePersistenceConfiguration()).build();
     }
@@ -330,7 +334,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Memcached configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MemcachedConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-memcached.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -339,7 +344,7 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @Path(ApiConstants.MEMCACHED)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.CACHE_ADMINS_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getMemcachedConfiguration() {
         return Response.ok(loadCacheConfiguration().getMemcachedConfiguration()).build();
     }

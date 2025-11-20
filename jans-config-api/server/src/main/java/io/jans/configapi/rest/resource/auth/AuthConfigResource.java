@@ -59,7 +59,8 @@ public class AuthConfigResource extends ConfigBaseResource {
                             ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = {
                             ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -67,7 +68,8 @@ public class AuthConfigResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
-                    ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getAppConfiguration() {
         AppConfiguration appConfiguration = configurationService.find();
         log.debug("AuthConfigResource::getAppConfiguration() appConfiguration:{}", appConfiguration);
@@ -118,7 +120,8 @@ public class AuthConfigResource extends ConfigBaseResource {
                             ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = {
                             ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Jans Authorization Server persistence type", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersistenceConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/config/auth-config-persistence.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -126,7 +129,8 @@ public class AuthConfigResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
-                    ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.JANS_AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.PERSISTENCE)
     public Response getPersistenceDetails() {
         PersistenceConfiguration persistenceConfiguration = configurationService.getPersistenceMetadata();

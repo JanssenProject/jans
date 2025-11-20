@@ -46,7 +46,8 @@ public class OrganizationResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ORG_CONFIG_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ORG_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ORG_CONFIG_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuOrganization.class), examples = @ExampleObject(name = "Response json example", value = "example/org/org.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -54,7 +55,7 @@ public class OrganizationResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.ORG_CONFIG_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.ORG_CONFIG_WRITE_ACCESS }, superScopes = { ApiAccessConstants.ORG_CONFIG_ADMIN_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getOrganization() {
         return Response.ok(organizationService.getOrganization()).build();
     }

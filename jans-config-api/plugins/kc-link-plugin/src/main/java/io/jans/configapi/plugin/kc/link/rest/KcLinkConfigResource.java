@@ -56,6 +56,7 @@ public class KcLinkConfigResource extends BaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_LINK_CONFIG_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_LINK_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
@@ -64,7 +65,7 @@ public class KcLinkConfigResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { Constants.KC_LINK_CONFIG_READ_ACCESS }, groupScopes = {
             Constants.KC_LINK_CONFIG_WRITE_ACCESS }, superScopes = { Constants.KC_ADMIN_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getkcLinkConf() {
        
         AppConfiguration kcLinkConfiguration = kcLinkConfigService.find();

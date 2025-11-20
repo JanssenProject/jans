@@ -36,6 +36,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/scim/config.readonly
+      - oauth2:
+        - https://jans.io/scim/config.write
+      - oauth2:
+        - https://jans.io/oauth/config/scim.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
     patch:
       tags:
       - SCIM - Config Management
@@ -65,6 +71,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/scim/config.write
+      - oauth2:
+        - https://jans.io/oauth/config/scim.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
 components:
   schemas:
     AppConfiguration:

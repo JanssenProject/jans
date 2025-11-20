@@ -50,14 +50,16 @@ public class PluginResource extends ConfigBaseResource {
             "Plugins" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.PLUGIN_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = PluginConf.class)), examples = @ExampleObject(name = "Response example", value = "example/plugins/plugin-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.PLUGIN_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.PLUGIN_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getPlugins() {
         return Response.ok(getPluginNames()).build();
     }
@@ -66,7 +68,8 @@ public class PluginResource extends ConfigBaseResource {
             "Plugins" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.PLUGIN_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Boolean.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -74,7 +77,8 @@ public class PluginResource extends ConfigBaseResource {
     @GET
     @Path(ApiConstants.PLUGIN_NAME_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.PLUGIN_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.PLUGIN_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response isPluginDeployed(
             @Parameter(description = "Plugin name") @NotNull @PathParam(ApiConstants.PLUGIN_NAME) String pluginName) {
 

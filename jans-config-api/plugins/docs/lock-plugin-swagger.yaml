@@ -62,6 +62,14 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock/health.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /lock/audit/log/search:
     get:
       tags:
@@ -107,6 +115,14 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock/log.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /lock/audit/telemetry/search:
     get:
       tags:
@@ -152,6 +168,14 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock/telemetry.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /lock/audit/health/bulk:
     post:
       tags:
@@ -192,6 +216,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/audit/log/bulk:
     post:
       tags:
@@ -232,6 +262,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/audit/telemetry/bulk:
     post:
       tags:
@@ -272,6 +308,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/audit/health:
     post:
       tags:
@@ -310,6 +352,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/audit/log:
     post:
       tags:
@@ -348,6 +396,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/audit/telemetry:
     post:
       tags:
@@ -386,6 +440,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/lockConfig:
     get:
       tags:
@@ -407,6 +467,16 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock-config.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     put:
       tags:
       - Lock - Configuration
@@ -437,6 +507,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     patch:
       tags:
       - Lock - Configuration
@@ -469,6 +545,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/lockStat:
     get:
       tags:
@@ -520,6 +602,12 @@ paths:
       - oauth2:
         - https://jans.io/oauth/lock/read-all
         - jans_stat
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
 components:
   schemas:
     HealthEntry:

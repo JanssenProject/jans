@@ -83,14 +83,16 @@ public class MessageConfigurationResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }), })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Message configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MessageConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/message/message.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.MESSAGE_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.MESSAGE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.MESSAGE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getMessageConfiguration() {
         return Response.ok(loadMessageConfiguration()).build();
     }
@@ -126,7 +128,8 @@ public class MessageConfigurationResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }), })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Redis message configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisMessageConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/message/message-redis.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -135,7 +138,7 @@ public class MessageConfigurationResource extends ConfigBaseResource {
     @Path(ApiConstants.REDIS)
     @ProtectedApi(scopes = { ApiAccessConstants.MESSAGE_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.MESSAGE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.MESSAGE_ADMIN_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getRedisMessageConfiguration() {
         return Response.ok(loadMessageConfiguration().getRedisConfiguration()).build();
     }
@@ -197,7 +200,8 @@ public class MessageConfigurationResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }), })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Native persistence configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PostgresMessageConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/message/message-redis.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -206,7 +210,7 @@ public class MessageConfigurationResource extends ConfigBaseResource {
     @Path(ApiConstants.POSTGRES)
     @ProtectedApi(scopes = { ApiAccessConstants.MESSAGE_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.MESSAGE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.MESSAGE_ADMIN_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getPostgresConfiguration() {
         return Response.ok(loadMessageConfiguration().getPostgresConfiguration()).build();
     }

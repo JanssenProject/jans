@@ -56,7 +56,8 @@ public class JwksResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JWKS_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JWKS_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/jwks/web-keys-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -64,7 +65,7 @@ public class JwksResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.JWKS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.JWKS_ADMIN_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response get() {
         final String json = configurationService.findConf().getWebKeys().toString();
         log.debug("JWKS json :{}", json);
@@ -157,15 +158,16 @@ public class JwksResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JWKS_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JWKS_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/jwks/jwks-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_READ_ACCESS } , groupScopes = {
-            ApiAccessConstants.JWKS_WRITE_ACCESS }, 
-    superScopes = {ApiAccessConstants.JWKS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JWKS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.JWKS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.KID_PATH)
     public Response getKeyById(@Parameter(description = "The unique identifier for the key") @PathParam(ApiConstants.KID) @NotNull String kid) {
         log.debug("Fetch JWK details by kid:{}", kid);

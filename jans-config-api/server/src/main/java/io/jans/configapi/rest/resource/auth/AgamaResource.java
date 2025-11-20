@@ -35,16 +35,17 @@ public class AgamaResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Agama Syntax Check message", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Exception.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, 
-    groupScopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS}, 
-    superScopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path("/syntax-check/" + ApiConstants.QNAME_PATH)
     public Response doSyntaxCheck(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) String qname, String source) {
 
