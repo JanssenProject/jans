@@ -79,8 +79,8 @@ At a high level, developers interact with the Cedarling using four core interfac
 * **Logging** (`log`) – Retrieves decision and system logs for auditing. 
 
 Developers call the `init` interface on startup of their application, causing the 
-Cedarling to read its [bootstrap properties](./cedarling-properties) and load its 
-[policy store](./cedarling-policy-store). If configured for JWT validation, the Cedarling 
+Cedarling to read its [bootstrap properties](./reference/cedarling-properties.md) and load its 
+[policy store](./reference/cedarling-policy-store.md). If configured for JWT validation, the Cedarling 
 will fetch the most recent issuer public keys and metadata.
 
 The standard `authorize` method answers the question: "Is this action, on this resource, 
@@ -94,7 +94,7 @@ application, or when working with non-token based principals. It follows the sam
 evaluation logic but skips JWT validation steps.
 
 The `log` interface enables developers to retrieve decision and system logs from 
-Cedarling's in-memory cache. See the Cedarling [log](./cedarling-logs) documentation for 
+Cedarling's in-memory cache. See the Cedarling [log](./reference/cedarling-logs.md) documentation for 
 more information. 
 
 ### Cedarling Components

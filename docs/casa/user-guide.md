@@ -82,31 +82,13 @@ Add a nickname and click `Add`. Once added, the new device will appear in a list
 
 ![added-fido2](../assets/casa/view-fido2.png)
 
-### Super Gluu Devices
-
-To add a new Super Gluu device, navigate to `2FA credentials` > `Super Gluu Devices`.
-
-![add-supergluu-casa](../assets/casa/add-supergluu-casa.png)
-
-The Super Gluu enrollment QR code will pop up. Scan it in the Super Gluu app and approve the enrollment.
-
-![enroll-supergluu-casa](../assets/casa/enroll-supergluu-casa.png)
-
-Add a nickname for the device and click `Add`.
-
-![nickname-supergluu-casa](../assets/casa/nickname-supergluu-casa.png)
-
-Once it's added, the new device will appear in a list on the same page. Click the pencil to edit the device's nickname or the trashcan to delete the device.
-
-![view-supergluu-casa](../assets/casa/view-supergluu-casa.png)
-
 ### OTP Tokens
 
 To add a new OTP token, navigate to `2FA credentials` > `OTP Tokens`.
 
 ![add-otp-casa](../assets/casa/add-otp-casa.png)
 
-To add a soft OTP token, choose the `Soft token` option and follow the same steps as [Super Gluu](#super-gluu-devices).
+To add a soft OTP token, choose the `Soft token` option and follow the on-screen.
 
 For a hard token, choose the `Hard Token` option.
 
