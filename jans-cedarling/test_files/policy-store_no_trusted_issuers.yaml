@@ -1,0 +1,182 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+cedar_version: v4.0.0
+policy_stores:
+  a1bf93115de86de760ee0bea1d529b521489e5a11747:
+    cedar_version: v4.0.0
+    name: "Jans"
+    policies:
+      1:
+        description: simple policy example for principal workload, permit when workload org_id same with resource
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::Workload,
+                action in [Jans::Action::"Update",Jans::Action::"UpdateForWorkload",Jans::Action::"UpdateForWorkloadAndRole"],
+                resource is Jans::Issue
+            )when{
+                principal.access_token.org_id == resource.org_id
+            };
+      2:
+        description: simple policy example for principal user, permit if user country same with the issue
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::User,
+                action in [Jans::Action::"Update",Jans::Action::"UpdateForUser",Jans::Action::"UpdateForUserAndRole"],
+                resource is Jans::Issue
+            )when{
+                principal.country == resource.country
+            };
+      3:
+        description: simple policy example for principal role, permit when Admin
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal in Jans::Role::"Admin",
+                action in [Jans::Action::"Update",Jans::Action::"UpdateForRole",Jans::Action::"UpdateForUserAndRole",Jans::Action::"UpdateForWorkloadAndRole"],
+                resource is Jans::Issue
+            );
+      4:
+        description: simple policy example for principal role, forbid for Guest
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            forbid(
+                principal in Jans::Role::"Guest",
+                action in [Jans::Action::"Update",Jans::Action::"UpdateForRole",Jans::Action::"UpdateForUserAndRole",Jans::Action::"UpdateForWorkloadAndRole"],
+                resource is Jans::Issue
+            );
+      5:
+        description: simple policy for principal TestPrincipal-s
+        creation_date: '2025-03-18T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action in [Jans::Action::"UpdateForTestPrincipals"],
+                resource
+            )when{
+              principal.is_ok
+            };
+    schema:
+      encoding: none
+      content_type: cedar
+      # we minimize amount of field in entites to simplify test cases
+      body: |-
+        namespace Jans {
+        type Url = {"host": String, "path": String, "protocol": String};
+        entity TrustedIssuer = {"issuer_entity_id": Url};
+        entity Issue = {"country": String, "org_id": String};
+        entity Role;
+        entity User in [Role] = {
+          sub: String,
+          role?: Set<String>,
+          country: String,
+        };
+        entity Workload = {
+          iss: TrustedIssuer,
+          aud?: String,
+          client_id?: String,
+          access_token: Access_token,
+        };
+        entity Access_token = {
+          iss: TrustedIssuer,
+          aud: String,
+          jti: String,
+          client_id: String,
+          org_id: String,
+        };
+        entity Id_token = {
+          iss: TrustedIssuer,
+          sub: String,
+          aud: Set<String>,
+        };
+        entity Userinfo_token  = {
+          iss: TrustedIssuer,
+          jti: String,
+        };
+        entity TestPrincipal1  = {"is_ok": Bool};
+        entity TestPrincipal2  = {"is_ok": Bool};
+        entity TestPrincipal3  = {"is_ok": Bool};
+        entity Empty;
+        type Context = {
+          user?: User,
+          workload?: Workload,
+          access_token?: Access_token,
+          id_token?: Id_token,
+          userinfo_token?: Userinfo_token,
+        };
+        type ContextWithoutWorkload = {
+          user: User,
+          access_token: Access_token,
+          id_token: Id_token,
+          userinfo_token: Userinfo_token,
+        };
+        type ContextWithoutUser = {
+          workload: Workload,
+          access_token: Access_token,
+          id_token: Id_token,
+          userinfo_token: Userinfo_token,
+        };
+        action "Update" appliesTo {
+          principal: [Workload, User],
+          resource: [Issue],
+          context: Context
+        };
+        action "UpdateForWorkload" appliesTo {
+          principal: [Workload, User],
+          resource: [Issue],
+          context: ContextWithoutUser
+        };
+        action "UpdateForUser" appliesTo {
+          principal: [Workload, User],
+          resource: [Issue],
+          context: ContextWithoutWorkload
+        };
+        action "UpdateForRole" appliesTo {
+          principal: [Role],
+          resource: [Issue],
+          context: Context
+        };
+        action "UpdateForUserAndRole" appliesTo {
+          principal: [Workload, User],
+          resource: [Issue],
+          context: ContextWithoutWorkload
+        };
+        action "UpdateForWorkloadAndRole" appliesTo {
+          principal: [Workload, User],
+          resource: [Issue],
+          context: Context
+        };
+        action "NoApplies" appliesTo {
+          principal: [Empty],
+          resource: [Issue],
+          context: ContextWithoutWorkload
+        };
+        action "AlwaysDeny" appliesTo {
+          principal:  [Workload, User],
+          resource: [Issue],
+          context: {}
+        };
+        action "UpdateForTestPrincipals" appliesTo {
+          principal: [TestPrincipal1, TestPrincipal2, TestPrincipal3],
+          resource: [Issue],
+          context: {}
+        };
+        }
