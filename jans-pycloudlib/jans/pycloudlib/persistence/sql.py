@@ -665,6 +665,11 @@ class SqlClient(SqlSchemaMixin):
 
     def upsert(self, table_name: str, column_mapping: dict[str, _t.Any]) -> None:
         table = self.metadata.tables.get(table_name)
+
+        # doc_id might be required for inserting new entry
+        if "doc_id" not in column_mapping:
+            raise ValueError(f"doc_id is required in column_mapping for upsert operation on {table_name}")
+
         column_mapping = self._apply_json_defaults(table, column_mapping)
 
         # column mapping for update (doc_id is excluded)
