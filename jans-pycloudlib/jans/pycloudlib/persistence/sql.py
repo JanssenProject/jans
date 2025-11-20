@@ -670,13 +670,14 @@ class SqlClient(SqlSchemaMixin):
         if "doc_id" not in column_mapping:
             raise ValueError(f"doc_id is required in column_mapping for upsert operation on {table_name}")
 
-        column_mapping = self._apply_json_defaults(table, column_mapping)
-
         # column mapping for update (doc_id is excluded)
         update_mapping = {
             k: v for k, v in column_mapping.items()
             if k != "doc_id"
         }
+
+        # apply defaults for column mapping used for inserting entry
+        column_mapping = self._apply_json_defaults(table, column_mapping)
 
         with self.engine.connect() as conn:
             query = self.adapter.upsert_query(table, column_mapping, update_mapping)
