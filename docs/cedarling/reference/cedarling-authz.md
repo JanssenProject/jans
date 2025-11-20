@@ -116,7 +116,7 @@ type Url = {
 
 entity Access_token = {
   "exp": Long,
-  "iss": TrustedIssuer
+  "iss": Jans::TrustedIssuer
 };
 
 entity Issue = {
@@ -126,9 +126,12 @@ entity Issue = {
 
 entity Role;
 
-entity TrustedIssuer = {
-  "issuer_entity_id": Url
-};
+namespace Jans{
+  entity TrustedIssuer = {
+    "issuer_entity_id": Url
+  };
+}
+
 
 entity User in [Role] = {
   "country": String,
@@ -139,7 +142,7 @@ entity User in [Role] = {
 
 entity Workload = {
   "client_id": String,
-  "iss": TrustedIssuer,
+  "iss": Jans::TrustedIssuer,
   "name": String,
   "org_id": String
 };
@@ -161,6 +164,8 @@ action "View" appliesTo {
   context: Context
 };
 ```
+
+Note: The `TrustedIssuer` namespace corresponds to its name.
 
 With this schema, you only need to provide the fields that are not automatically included. For instance, to define the `time` in the context:
 
@@ -218,3 +223,181 @@ decision_result = await cedarling.authorize_unsigned(input);
 | Token requirements | Requires valid JWTs | Accepts raw entities |
 | Use case           | Standard auth flows | Custom auth flows    |
 | Security           | Higher (validates)  | Lower (trusts input) |
+
+## Multi-Issuer Authorization (authorize_multi_issuer)
+
+The `authorize_multi_issuer` method enables authorization decisions based on multiple JWT tokens from different issuers in a single request. Unlike the standard `authorize` method which creates User and Workload principals, multi-issuer authorization evaluates policies based purely on token entities themselves.
+
+### Key Differences from Standard Authorization
+
+| Feature                | authorize                          | authorize_multi_issuer                      |
+| ---------------------- | ---------------------------------- | ------------------------------------------- |
+| Principal Model        | User/Workload entities             | No principals - token-based context         |
+| Token Sources          | Single issuer expected             | Multiple issuers supported                  |
+| Token Types            | Fixed (access, id, userinfo)       | Flexible with explicit mapping              |
+| Context Structure      | User/Workload in context           | Individual token entities in context.tokens |
+| Use Case               | Standard RBAC/ABAC flows           | Federation, API gateways, multi-issuer apps |
+| Policy Principal       | `principal is User/Workload`       | Not applicable (principal-less)             |
+| Policy Context Access  | `context.user`, `context.workload` | `context.tokens.{issuer}_{token_type}`      |
+
+### How It Works
+
+1. **Token Input**: Developers provide an array of `TokenInput` objects, each containing:
+   - `mapping`: The Cedar entity type (e.g., "Jans::Access_Token", "Acme::DolphinToken")
+   - `payload`: The JWT token string
+
+2. **Token Validation**: Each token is validated using the existing Cedarling JWT validation capabilities:
+   - Signature verification
+   - Expiration and time-based validation
+   - Status list validation (if configured)
+   - Only tokens from trusted issuers are processed
+
+3. **Entity Creation**: Each valid token becomes a Cedar entity with:
+   - Token metadata (type, jti, issuer, exp, validated_at)
+   - JWT claims stored as entity tags
+   - All claims stored as Sets of strings by default for consistency
+
+4. **Context Building**: Valid tokens are organized into a `tokens` collection with predictable naming:
+   - Field naming: `{issuer_name}_{token_type}`
+   - Example: `context.tokens.acme_access_token`, `context.tokens.google_id_token`
+   - Issuer name comes from trusted issuer metadata or JWT iss claim
+
+5. **Policy Evaluation**: Policies evaluate based on token entities in context without requiring a principal
+
+### Example Usage
+
+```js
+// Create tokens array with explicit mappings
+let tokens = [
+  {
+    mapping: "Jans::Access_Token",
+    payload: "eyJhbGciOiJIUzI1NiIs..."
+  },
+  {
+    mapping: "Jans::Id_Token", 
+    payload: "eyJhbGciOiJFZERTQSIs..."
+  },
+  {
+    mapping: "Acme::DolphinToken",
+    payload: "ey1b6cfMef21084633a7..."
+  }
+];
+
+// Create multi-issuer request
+let request = {
+  tokens: tokens,
+  action: "Jans::Action::\"Read\"",
+  resource: {
+    cedar_entity_mapping: {
+      entity_type: "Jans::Document",
+      id: "doc-123"
+    },
+    owner: "alice@example.com",
+    classification: "confidential"
+  },
+  context: {
+    ip_address: "54.9.21.201",
+    time: Date.now()
+  }
+};
+
+// Execute authorization
+let result = await cedarling.authorize_multi_issuer(request);
+
+// Check decision
+if (result.decision) {
+  console.log("Access allowed");
+} else {
+  console.log("Access denied");
+}
+```
+
+### Policy Examples
+
+Policies for multi-issuer authorization reference tokens directly in the context:
+
+```cedar
+// Policy checking token from specific issuer with claim
+permit(
+  principal,
+  action == Jans::Action::"Read",
+  resource in Jans::Document
+) when {
+  context has tokens.acme_access_token &&
+  context.tokens.acme_access_token.hasTag("scope") &&
+  context.tokens.acme_access_token.getTag("scope").contains("read:documents")
+};
+
+// Policy requiring tokens from multiple issuers
+permit(
+  principal,
+  action == TradeAssociation::Action::"Vote",
+  resource in TradeAssociation::Resource::"Elections"
+) when {
+  // Require token from trade association
+  context has tokens.trade_association_access_token &&
+  context.tokens.trade_association_access_token.hasTag("member_status") &&
+  context.tokens.trade_association_access_token.getTag("member_status").contains("Corporate Member") &&
+  // AND require token from company
+  context has tokens.nexo_access_token &&
+  context.tokens.nexo_access_token.hasTag("scope") &&
+  context.tokens.nexo_access_token.getTag("scope").contains("trade_association_rep")
+};
+
+// Policy with custom token type
+permit(
+  principal,
+  action == Acme::Action::"SwimWithDolphin",
+  resource == Acme::Resource::"MiamiAcquarium"
+) when {
+  context has tokens.dolphin_acme_dolphin_token &&
+  context.tokens.dolphin_acme_dolphin_token.hasTag("waiver") &&
+  context.tokens.dolphin_acme_dolphin_token.getTag("waiver").contains("signed")
+};
+```
+
+### Token Collection Naming Convention
+
+The Cedarling uses a predictable algorithm to create token collection field names:
+
+**Pattern**: `{issuer_name}_{token_type}`
+
+**Issuer Name Resolution**:
+
+1. Look up issuer in trusted issuer metadata and use the `name` field
+2. If no `name` field, use hostname from JWT `iss` claim
+3. Convert to lowercase and replace special characters with underscores
+
+**Token Type Resolution**:
+
+1. Extract from mapping field (e.g., "Jans::Access_Token")
+2. Split by namespace separator ("::")
+3. Convert to lowercase, preserving underscores
+
+**Examples**:
+
+- JWT issuer: `https://idp.acme.com/auth`, Trusted issuer name: `"Acme"`, Mapping: `Jans::Access_Token` → `acme_access_token`
+- JWT issuer: `https://login.microsoftonline.com/tenant`, Trusted issuer name: `"Microsoft"`, Mapping: `Jans::Id_Token` → `microsoft_id_token`
+- JWT issuer: `https://idp.dolphin.sea/auth`, Trusted issuer name: `"Dolphin"`, Mapping: `Acme::DolphinToken` → `dolphin_acme_dolphin_token`
+
+### Error Handling
+
+**Graceful Token Validation Failures**:
+
+- Invalid tokens are ignored and logged
+- Authorization continues with remaining valid tokens
+- At least one valid token is required for authorization to proceed
+
+**Non-Deterministic Token Detection**:
+
+- System rejects requests with multiple tokens of the same type from the same issuer
+- Example: Two "Jans::Access_Token" from "Acme" issuer will fail
+- This prevents ambiguous policy evaluation
+
+### Use Cases
+
+1. **Federation Scenarios**: Applications accepting tokens from multiple identity providers
+2. **API Gateways**: Validating tokens from various upstream services in a single authorization check
+3. **Multi-Organization Access**: Requiring tokens from different organizations for collaborative workflows
+4. **Capability-Based Authorization**: Decisions based on capabilities asserted by different issuers rather than single user identity
+5. **Zero Trust Architectures**: Each token represents a verification from a different trust boundary

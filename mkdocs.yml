@@ -432,6 +432,8 @@ nav:
     - Swift: 'cedarling/tutorials/swift.md'
   - Reference:
     - Terminology: 'cedarling/reference/cedarling-terms.md'
+    - Authorization: 'cedarling/reference/cedarling-authz.md'
+    - Multi-Issuer Authorization: 'cedarling/reference/cedarling-multi-issuer.md'
     - Interfaces: 'cedarling/reference/cedarling-interfaces.md'
     - Policy Store: 'cedarling/reference/cedarling-policy-store.md'
     - Properties: 'cedarling/reference/cedarling-properties.md'
@@ -443,10 +445,7 @@ nav:
     - Cedarling Entities: 'cedarling/reference/cedarling-entities.md'
   - Developer:
     - Rust: 'cedarling/developer/cedarling-rust.md'
-    - Python:
-      - cedarling/developer/python/README.md
-      - How to use: cedarling/developer/python/usage.md
-    - Kotlin and Java: 'cedarling/developer/cedarling-kotlin.md'
+    - Kotlin and Java: 'cedarling/uniffi/cedarling-kotlin.md'
     - Mobile Apps:
       - UniFFI interface: 'cedarling/developer/mobile-apps/cedarling-uniffi.md'
       - Android Apps: 'cedarling/developer/mobile-apps/cedarling-android.md'
