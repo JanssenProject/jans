@@ -24,6 +24,11 @@ def get_instance_path(parent_dir=""):
     instance_path.mkdir(parents=True, exist_ok=True)
     return instance_path.resolve()
 
+def parse_bool_env(var_name: str, default: str = "False") -> bool:
+    """Parse boolean environment variable."""
+    value = os.getenv(var_name, default)
+    return value.lower() in ("true", "1", "yes")
+
 class BaseConfig:
     API_TITLE = "Cedarling Sidecar"
     API_VERSION = "v1"
@@ -42,11 +47,9 @@ class BaseConfig:
     else:
         with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
             CEDARLING_BOOTSTRAP_CONFIG = f.read()
-    SIDECAR_DEBUG_RESPONSE = os.getenv("SIDECAR_DEBUG_RESPONSE", "False")
-    if SIDECAR_DEBUG_RESPONSE == "True":
-        SIDECAR_DEBUG_RESPONSE = True
-    else:
-        SIDECAR_DEBUG_RESPONSE = False
+
+    SIDECAR_DEBUG_RESPONSE = parse_bool_env("SIDECAR_DEBUG_RESPONSE")
+    DISABLE_HASH_CHECK = parse_bool_env("DISABLE_HASH_CHECK")
 
 class TestingConfig(BaseConfig):
     TESTING = True
@@ -72,6 +75,6 @@ class ConfigLoader:
     def set_config():
         mode = os.environ.get("APP_MODE")
         if mode is not None:
-            print(f"INFO: loads {mode} config")
+            logger.info(f"Loads {mode} config")
             return config.get(mode, TestingConfig)
         return config.get("default")

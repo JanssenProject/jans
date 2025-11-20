@@ -52,8 +52,8 @@ Use the instructions provided in jans-cli [LDAP configuration options](../../con
 ### 3. Script-based ACRs
 
 To offer highly flexible and pluggable authentication flows, Janssen Server uses script-based ACRs. These ACRs are
-associated with a corresponding [person authentication script](../../developer/scripts/person-authentication.md). To use these ACRs
-in the authentication flow, the associated [script should be enabled](../../developer/scripts/person-authentication.md#enabling-an-authentication-mechanism).
+associated with a corresponding [person authentication script](../../../script-catalog/person_authentication/person-authentication.md). To use these ACRs
+in the authentication flow, the associated [script should be enabled](../../../script-catalog/person_authentication/person-authentication.md#enabling-an-authentication-mechanism).
 
 ### 4. Agama ACRs
 

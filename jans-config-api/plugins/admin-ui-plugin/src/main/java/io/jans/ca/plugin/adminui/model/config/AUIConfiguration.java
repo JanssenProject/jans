@@ -3,6 +3,7 @@ package io.jans.ca.plugin.adminui.model.config;
 
 import io.jans.as.model.config.adminui.KeyValuePair;
 import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
+import io.jans.ca.plugin.adminui.model.adminui.CedarlingPolicyStrRetrievalPoint;
 
 import java.util.List;
 
@@ -43,6 +44,9 @@ public class AUIConfiguration {
     private Boolean allowSmtpKeystoreEdit;
     private List<KeyValuePair> additionalParameters;
     private CedarlingLogType cedarlingLogType;
+    private String auiCedarlingPolicyStoreUrl;
+    private String auiCedarlingDefaultPolicyStorePath;
+    private CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint = CedarlingPolicyStrRetrievalPoint.DEFAULT;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -290,5 +294,69 @@ public class AUIConfiguration {
 
     public void setCedarlingLogType(CedarlingLogType cedarlingLogType) {
         this.cedarlingLogType = cedarlingLogType;
+    }
+
+    public String getAuiCedarlingPolicyStoreUrl() {
+        return auiCedarlingPolicyStoreUrl;
+    }
+
+    public void setAuiCedarlingPolicyStoreUrl(String auiCedarlingPolicyStoreUrl) {
+        this.auiCedarlingPolicyStoreUrl = auiCedarlingPolicyStoreUrl;
+    }
+
+    public String getAuiCedarlingDefaultPolicyStorePath() {
+        return auiCedarlingDefaultPolicyStorePath;
+    }
+
+    public void setAuiCedarlingDefaultPolicyStorePath(String auiCedarlingDefaultPolicyStorePath) {
+        this.auiCedarlingDefaultPolicyStorePath = auiCedarlingDefaultPolicyStorePath;
+    }
+
+    public CedarlingPolicyStrRetrievalPoint getCedarlingPolicyStoreRetrievalPoint() {
+        return cedarlingPolicyStoreRetrievalPoint;
+    }
+
+    public void setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint) {
+        this.cedarlingPolicyStoreRetrievalPoint = cedarlingPolicyStoreRetrievalPoint != null
+                ? cedarlingPolicyStoreRetrievalPoint
+                : CedarlingPolicyStrRetrievalPoint.DEFAULT;
+    }
+
+    @Override
+    public String toString() {
+        return "AUIConfiguration{" +
+                "appType='" + appType + '\'' +
+                ", auiWebServerHost='" + auiWebServerHost + '\'' +
+                ", auiWebServerClientId='" + auiWebServerClientId + '\'' +
+                ", auiWebServerScope='" + auiWebServerScope + '\'' +
+                ", auiWebServerAcrValues='" + auiWebServerAcrValues + '\'' +
+                ", auiWebServerRedirectUrl='" + auiWebServerRedirectUrl + '\'' +
+                ", auiWebServerFrontChannelLogoutUrl='" + auiWebServerFrontChannelLogoutUrl + '\'' +
+                ", auiWebServerPostLogoutRedirectUri='" + auiWebServerPostLogoutRedirectUri + '\'' +
+                ", auiWebServerAuthzBaseUrl='" + auiWebServerAuthzBaseUrl + '\'' +
+                ", auiWebServerTokenEndpoint='" + auiWebServerTokenEndpoint + '\'' +
+                ", auiWebServerIntrospectionEndpoint='" + auiWebServerIntrospectionEndpoint + '\'' +
+                ", auiWebServerUserInfoEndpoint='" + auiWebServerUserInfoEndpoint + '\'' +
+                ", auiWebServerEndSessionEndpoint='" + auiWebServerEndSessionEndpoint + '\'' +
+                ", auiBackendApiServerClientId='" + auiBackendApiServerClientId + '\'' +
+                ", auiBackendApiServerScope='" + auiBackendApiServerScope + '\'' +
+                ", auiBackendApiServerAcrValues='" + auiBackendApiServerAcrValues + '\'' +
+                ", auiBackendApiServerRedirectUrl='" + auiBackendApiServerRedirectUrl + '\'' +
+                ", auiBackendApiServerFrontChannelLogoutUrl='" + auiBackendApiServerFrontChannelLogoutUrl + '\'' +
+                ", auiBackendApiServerPostLogoutRedirectUri='" + auiBackendApiServerPostLogoutRedirectUri + '\'' +
+                ", auiBackendApiServerAuthzBaseUrl='" + auiBackendApiServerAuthzBaseUrl + '\'' +
+                ", auiBackendApiServerTokenEndpoint='" + auiBackendApiServerTokenEndpoint + '\'' +
+                ", auiBackendApiServerIntrospectionEndpoint='" + auiBackendApiServerIntrospectionEndpoint + '\'' +
+                ", auiBackendApiServerUserInfoEndpoint='" + auiBackendApiServerUserInfoEndpoint + '\'' +
+                ", auiBackendApiServerEndSessionEndpoint='" + auiBackendApiServerEndSessionEndpoint + '\'' +
+                ", licenseConfiguration=" + licenseConfiguration +
+                ", sessionTimeoutInMins=" + sessionTimeoutInMins +
+                ", allowSmtpKeystoreEdit=" + allowSmtpKeystoreEdit +
+                ", additionalParameters=" + additionalParameters +
+                ", cedarlingLogType=" + cedarlingLogType +
+                ", auiCedarlingPolicyStoreUrl='" + auiCedarlingPolicyStoreUrl + '\'' +
+                ", auiCedarlingDefaultPolicyStorePath='" + auiCedarlingDefaultPolicyStorePath + '\'' +
+                ", cedarlingPolicyStoreRetrievalPoint=" + cedarlingPolicyStoreRetrievalPoint +
+                '}';
     }
 }

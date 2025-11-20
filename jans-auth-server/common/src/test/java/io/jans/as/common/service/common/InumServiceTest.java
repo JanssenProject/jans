@@ -96,7 +96,7 @@ public class InumServiceTest {
 
     private void verifyInteractions(String idType){
         verify(externalIdGenerationService).isEnabled();
-        verify(externalIdGenerationService).executeExternalDefaultGenerateIdMethod(eq("oxauth"), eq(idType), eq(""));
+        verify(externalIdGenerationService).executeExternalDefaultGenerateIdMethod(eq("jans-auth"), eq(idType), eq(""));
 
         verifyNoMoreInteractions(externalIdGenerationService,log);
     }

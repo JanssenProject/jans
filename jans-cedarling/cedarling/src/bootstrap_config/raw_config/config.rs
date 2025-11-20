@@ -319,24 +319,32 @@ mod tests {
         for (key, value) in env::vars() {
             let key_clone = key.clone();
             all_vars.push((key, value));
-            env::remove_var(&key_clone);
+            unsafe {
+                env::remove_var(&key_clone);
+            }
         }
 
         // Set new env vars
         for (key, value) in &vars {
-            env::set_var(key, value);
+            unsafe {
+                env::set_var(key, value);
+            }
         }
 
         test();
 
         // Clean up
         for (key, _) in &vars {
-            env::remove_var(key);
+            unsafe {
+                env::remove_var(key);
+            }
         }
 
         // Restore original environment
         for (key, value) in all_vars {
-            env::set_var(&key, value);
+            unsafe {
+                env::set_var(&key, value);
+            }
         }
     }
 

@@ -133,7 +133,7 @@ Please see following snippet below:
     }
 ```
 
-More details in [Authorization Challenge Custom Script Page](../../developer/scripts/authorization-challenge.md).
+More details in [Authorization Challenge Custom Script Page](../../../script-catalog/authorization_challenge/authorization-challenge.md)
 
 Full sample script can be found [here](../../../script-catalog/authorization_challenge/AuthorizationChallenge.java)
 

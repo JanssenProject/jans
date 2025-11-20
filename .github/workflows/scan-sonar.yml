@@ -181,7 +181,7 @@ jobs:
 
       - name: SonarCloud Scan for non-JVM project
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.NON_JVM_PROJECTS, matrix.module)
-        uses: SonarSource/sonarqube-scan-action@v5.3.1
+        uses: SonarSource/sonarqube-scan-action@v6.0.0
         with:
           args: >
             -Dsonar.organization=${{ env.REPO_ORG }}

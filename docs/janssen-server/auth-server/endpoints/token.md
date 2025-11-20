@@ -113,7 +113,8 @@ authentication method listed below:
 Refer to [Client Authentication](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication) section of OpenID
 Connect core specification for more details on these authentication methods.
 
-AS provides ability to customer Client Authentication behavior via [Client Authentication custom script](../../../janssen-server/developer/scripts/client-authn.md)
+AS provides ability to customize Client Authentication behavior via [Client Authentication custom script](../../../script-catalog/client_authn/client-authn.md)
+
 
 Client can specify the default authentication method. To set default authentication method using
 [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md),
@@ -146,10 +147,12 @@ navigate via `Auth Server`->`Clients`->`Add Client`/`search client`->`Basic`-> `
 
 ## Interception Scripts
 
-Token endpoint response can be further customized using [interception scripts](../../developer/interception-scripts.md).
+Token endpoint response can be further customized using [interception scripts](../../../janssen-server/developer/scripts/README.md).
 Following interception scripts are relevant to token endpoint:
 
-- [Update Token](../../developer/scripts/update-token.md)
+
+
+- [Update Token](../../../script-catalog/update_token/update-token.md)
 
 Client can configure a particular script to be executed using client configuration. To update configuration using
 [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) navigate via `Auth Server`->`Clients`->`Add Client`/`search`->

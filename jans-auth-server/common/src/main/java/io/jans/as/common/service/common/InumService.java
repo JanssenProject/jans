@@ -52,9 +52,17 @@ public class InumService {
         return new Pair<>(inum, dn);
     }
 
+    /**
+     * Generate a new identifier for the specified id type.
+     *
+     * Attempts to obtain an identifier from the external id generation service when enabled; if the service does not return a non-empty value, a default identifier is produced.
+     *
+     * @param idType the category of identifier to generate (for example IdType.CLIENTS or IdType.PEOPLE)
+     * @return the generated identifier; the externally generated value when available and non-empty, otherwise a default identifier
+     */
     public String generateId(String idType) {
         if (externalIdGenerationService.isEnabled()) {
-            final String generatedId = externalIdGenerationService.executeExternalDefaultGenerateIdMethod("oxauth", idType, "");
+            final String generatedId = externalIdGenerationService.executeExternalDefaultGenerateIdMethod("jans-auth", idType, "");
 
             if (StringHelper.isNotEmpty(generatedId)) {
                 return generatedId;

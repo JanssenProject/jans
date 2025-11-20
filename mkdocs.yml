@@ -549,7 +549,7 @@ repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
 site_description: Janssen Project Deployment and Operation References
 site_name: Janssen Documentation
-site_url: https://jans.io/docs
+site_url: https://docs.jans.io
 theme:
   custom_dir: docs/overrides
   favicon: assets/janssen_project_favicon_transparent_50px_50px.ico

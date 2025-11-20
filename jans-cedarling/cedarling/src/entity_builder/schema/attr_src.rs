@@ -6,7 +6,7 @@
 use cedar_policy_validator::types::{EntityRecordKind, Primitive, Type};
 use derive_more::derive::Deref;
 use smol_str::{SmolStr, ToSmolStr};
-use std::{collections::HashMap, fmt::Display};
+use std::collections::HashMap;
 use thiserror::Error;
 
 pub type EntityTypeName = SmolStr;
@@ -170,15 +170,6 @@ pub enum BuildAttrSrcErrorKind {
     MissingEntityTypeName,
     #[error("action entities cannot become attributes to other entities")]
     ActionAttrNotAllowed,
-}
-
-#[derive(Debug, Error)]
-pub struct BuildObjectClaimTypeError(Vec<BuildAttrSrcErrorKind>);
-
-impl Display for BuildObjectClaimTypeError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.0.iter().map(|e| e.to_string()))
-    }
 }
 
 impl BuildAttrSrcErrorKind {

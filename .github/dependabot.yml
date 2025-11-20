@@ -98,16 +98,6 @@ updates:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /docker-jans-keycloak-link
-    schedule:
-      interval: daily
-
-  - package-ecosystem: pip
-    directory: /docker-jans-keycloak-link
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
     directory: /docker-jans-link
     schedule:
       interval: daily

@@ -124,11 +124,11 @@ impl JwtValidator {
 
     /// Creates a new validator for status list tokens
     pub fn new_status_list_tkn_validator(
-        iss: Option<&str>,
+        iss: Option<&'_ str>,
         status_list_uri: Option<String>,
         algorithm: Algorithm,
         validate_signature: bool,
-    ) -> (Self, ValidatorInfo) {
+    ) -> (Self, ValidatorInfo<'_>) {
         let token_kind = TokenKind::StatusList;
 
         let mut validation = Validation::new(algorithm);

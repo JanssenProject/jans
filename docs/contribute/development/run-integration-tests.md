@@ -39,7 +39,7 @@ following installation instructions.
   the `-t` switch when invoking the setup script
   from installation instructions.
 
-Use the [VM installation guide](../janssen-server/install/vm-install/README.md) for the 
+Use the [VM installation guide](../../janssen-server/install/vm-install/README.md) for the
 complete set of instructions.
 
 Once the installation is complete, check if the `.well-known` end-points of the

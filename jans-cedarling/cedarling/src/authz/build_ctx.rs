@@ -159,7 +159,7 @@ pub enum BuildContextError {
     KeyConflict(String),
     /// Error encountered while deserializing the Context from JSON
     #[error(transparent)]
-    DeserializeFromJson(#[from] ContextJsonError),
+    DeserializeFromJson(Box<ContextJsonError>),
     /// Error encountered if the action being used as the reference to build the Context
     /// is not in the schema
     #[error("failed to find the action `{0}` in the schema")]
@@ -170,7 +170,13 @@ pub enum BuildContextError {
     #[error("invalid action context type: {0}. expected: {1}")]
     InvalidKind(String, String),
     #[error("failed to parse the entity name `{0}`: {1}")]
-    ParseEntityName(String, ParseErrors),
+    ParseEntityName(String, Box<ParseErrors>),
+}
+
+impl From<ContextJsonError> for BuildContextError {
+    fn from(err: ContextJsonError) -> Self {
+        BuildContextError::DeserializeFromJson(Box::new(err))
+    }
 }
 
 pub fn merge_json_values(mut base: Value, other: Value) -> Result<Value, BuildContextError> {

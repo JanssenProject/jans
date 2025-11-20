@@ -151,7 +151,7 @@ impl<T> SparKV<T> {
     }
 
     /// Return an iterator of (key,value) : (&String,&T).
-    pub fn iter(&self) -> Iter<T> {
+    pub fn iter(&self) -> Iter<'_, T> {
         Iter {
             btree_value_iter: self.data.values(),
         }

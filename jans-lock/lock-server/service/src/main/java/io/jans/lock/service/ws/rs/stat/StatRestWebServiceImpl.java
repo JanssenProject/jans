@@ -12,6 +12,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 
+import io.jans.lock.model.app.audit.AuditActionType;
+import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.StatErrorResponseType;
@@ -19,18 +21,22 @@ import io.jans.lock.model.stat.FlatStatResponse;
 import io.jans.lock.model.stat.Months;
 import io.jans.lock.model.stat.StatResponse;
 import io.jans.lock.model.stat.StatResponseItem;
+import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.stat.StatResponseService;
 import io.jans.lock.service.ws.rs.base.BaseResource;
 import io.jans.lock.util.Constants;
 import io.jans.lock.util.ServerUtil;
+import io.jans.net.InetAddressUtility;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.exporter.common.TextFormat;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 
 /**
@@ -53,20 +59,45 @@ public class StatRestWebServiceImpl extends BaseResource implements StatRestWebS
     @Inject
     private AppConfiguration appConfiguration;
 
+    @Inject
+    private ApplicationAuditLogger applicationAuditLogger;
+
     @Override
-    public Response statGet(@QueryParam("month") String months,
+    public Response statGet(@Context HttpServletRequest request,
+    						@QueryParam("month") String months,
                             @QueryParam("start-month") String startMonth,
                             @QueryParam("end-month") String endMonth,
                             @QueryParam("format") String format) {
-        return stat(months, startMonth, endMonth, format);
+
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request), AuditActionType.SSA_READ);
+
+        Response response = null;
+        try {
+	        response = stat(months, startMonth, endMonth, format);
+        } finally {
+            applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
+        }
+        
+        return response;
     }
 
     @Override
-    public Response statPost(@FormParam("month") String months,
+    public Response statPost(@Context HttpServletRequest request,
+    						 @FormParam("month") String months,
                              @FormParam("start-month") String startMonth,
                              @FormParam("end-month") String endMonth,
                              @FormParam("format") String format) {
-        return stat(months, startMonth, endMonth, format);
+
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request), AuditActionType.SSA_READ);
+
+        Response response = null;
+        try {
+	        response = stat(months, startMonth, endMonth, format);
+        } finally {
+            applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
+        }
+        
+        return response;
     }
 
 	public static String createOpenMetricsResponse(StatResponse statResponse) throws IOException {

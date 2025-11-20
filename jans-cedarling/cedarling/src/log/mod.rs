@@ -65,6 +65,8 @@ pub use log_level::*;
 #[cfg(test)]
 mod test;
 
+#[cfg(test)]
+use std::sync::LazyLock;
 use std::sync::{Arc, Weak};
 
 pub use interface::LogStorage;
@@ -79,6 +81,9 @@ use crate::lock::{InitLockServiceError, LockService};
 pub(crate) type Logger = Arc<LogStrategy>;
 pub(crate) type LoggerWeak = Weak<LogStrategy>;
 
+#[cfg(test)]
+pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(|| init_test_logger());
+
 /// Initialize logger.
 /// entry point for initialize logger
 pub(crate) async fn init_logger(
@@ -87,11 +92,26 @@ pub(crate) async fn init_logger(
     app_name: Option<ApplicationName>,
     lock_config: Option<&LockServiceConfig>,
 ) -> Result<Logger, InitLockServiceError> {
-    let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name).await?);
+    let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name)?);
     let logger_weak = Arc::downgrade(&logger);
     if let Some(lock_config) = lock_config {
         let lock_service = LockService::new(pdp_id, lock_config, Some(logger_weak)).await?;
         logger.set_lock_service(lock_service);
     }
     Ok(logger)
+}
+
+#[cfg(test)]
+pub(crate) fn init_test_logger() -> Logger {
+    Arc::new(
+        LogStrategy::new(
+            &LogConfig {
+                log_level: LogLevel::DEBUG,
+                log_type: crate::LogTypeConfig::StdOut,
+            },
+            PdpID::new(),
+            Some("test".to_string().into()),
+        )
+        .unwrap(),
+    )
 }

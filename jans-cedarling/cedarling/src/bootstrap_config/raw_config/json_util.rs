@@ -41,13 +41,11 @@ where
     let value = Value::deserialize(deserializer)?;
 
     // If it's a string, try to parse it as JSON
-    if let Value::String(s) = &value {
-        if let Some(parsed_value) = to_json(s) {
-            if let Ok(result) = T::deserialize(parsed_value) {
+    if let Value::String(s) = &value
+        && let Some(parsed_value) = to_json(s)
+            && let Ok(result) = T::deserialize(parsed_value) {
                 return Ok(result);
             }
-        }
-    }
 
     // Try normal deserialization
     T::deserialize(value).map_err(serde::de::Error::custom)

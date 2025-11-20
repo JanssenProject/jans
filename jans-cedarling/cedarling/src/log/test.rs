@@ -29,9 +29,7 @@ async fn test_new_log_strategy_off() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config, PdpID::new(), None)
-        .await
-        .expect("build log strategy");
+    let strategy = LogStrategy::new(&config, PdpID::new(), None).expect("build log strategy");
 
     // Assert
     assert!(matches!(strategy.logger(), LogStrategyLogger::Off(_)));
@@ -50,9 +48,7 @@ async fn test_new_log_strategy_memory() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config, PdpID::new(), None)
-        .await
-        .expect("build log strategy");
+    let strategy = LogStrategy::new(&config, PdpID::new(), None).expect("build log strategy");
 
     // Assert
     assert!(matches!(
@@ -70,9 +66,7 @@ async fn test_new_logstrategy_stdout() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config, PdpID::new(), None)
-        .await
-        .expect("build log strategy");
+    let strategy = LogStrategy::new(&config, PdpID::new(), None).expect("build log strategy");
 
     // Assert
     assert!(matches!(strategy.logger(), LogStrategyLogger::StdOut(_)));
@@ -91,9 +85,7 @@ async fn test_log_memory_logger() {
         }),
         log_level: crate::LogLevel::TRACE,
     };
-    let strategy = LogStrategy::new(&config, pdp_id, app_name.clone())
-        .await
-        .expect("build LogStrategy");
+    let strategy = LogStrategy::new(&config, pdp_id, app_name.clone()).expect("build LogStrategy");
     let entry = LogEntry {
         base: BaseLogEntry::new(LogType::Decision, gen_uuid7()),
         auth_info: None,

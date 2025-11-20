@@ -24,6 +24,7 @@ pub(crate) struct LogStrategy {
 
 /// LogStrategy implements strategy pattern for logging.
 /// It is used to provide a single point of access for logging and same api for different loggers.
+#[allow(clippy::large_enum_variant)]
 pub(crate) enum LogStrategyLogger {
     Off(NopLogger),
     MemoryLogger(MemoryLogger),
@@ -33,16 +34,21 @@ pub(crate) enum LogStrategyLogger {
 impl LogStrategy {
     /// Creates a new `LogStrategy` based on the provided configuration.
     /// Initializes the corresponding logger accordingly.
-    pub async fn new(
+    pub fn new(
         config: &LogConfig,
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
     ) -> Result<Self, InitLockServiceError> {
         let logger = match &config.log_type {
             LogTypeConfig::Off => LogStrategyLogger::Off(NopLogger),
-            LogTypeConfig::Memory(memory_config) => LogStrategyLogger::MemoryLogger(
-                MemoryLogger::new(memory_config.clone(), config.log_level, pdp_id, app_name.clone()),
-            ),
+            LogTypeConfig::Memory(memory_config) => {
+                LogStrategyLogger::MemoryLogger(MemoryLogger::new(
+                    memory_config.clone(),
+                    config.log_level,
+                    pdp_id,
+                    app_name.clone(),
+                ))
+            },
             LogTypeConfig::StdOut => LogStrategyLogger::StdOut(StdOutLogger::new(config.log_level)),
         };
         Ok(Self {

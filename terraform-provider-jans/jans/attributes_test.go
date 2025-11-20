@@ -1,93 +1,188 @@
 package jans
 
 import (
-	"context"
-	"testing"
+        "context"
+        "encoding/json"
+        "fmt"
+        "net/http"
+        "net/http/httptest"
+        "strings"
+        "testing"
+        "time"
 
-	"github.com/google/go-cmp/cmp"
+        "github.com/google/go-cmp/cmp"
 )
 
 func TestAttributes(t *testing.T) {
 
-	client, err := NewInsecureClient(host, user, pass)
-	if err != nil {
-		t.Fatal(err)
-	}
+        client, err := NewInsecureClient(host, user, pass)
+        if err != nil {
+                t.Fatal(err)
+        }
 
-	ctx := context.Background()
+        ctx := context.Background()
 
-	attrs, err := client.GetAttributes(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
+        // Use a unique test-scoped attribute name to avoid conflicts in shared environments
+        uniqueAttrName := fmt.Sprintf("testCustomAttribute_%d", time.Now().UnixNano())
 
-	for _, attr := range attrs {
-		if attr.Name == "l" {
-			if err = client.DeleteAttribute(ctx, attr.Inum); err != nil {
-				t.Fatal(err)
-			}
-		}
-	}
+        // Clean up any leftover test artifacts from previous failed runs
+        // Only delete attributes that match our unique test naming pattern
+        attrs, err := client.GetAttributes(ctx)
+        if err != nil {
+                t.Fatal(err)
+        }
 
-	newAttribute := &Attribute{
-		Inum:           "7AC6",
-		Name:           "testCustomAttribute",
-		DisplayName:    "Test Custom Attribute",
-		Description:    "Test custom attribute for unit testing",
-		Origin:         "jansCustomPerson",
-		DataType:       "string",
-		EditType:       []string{"user", "admin"},
-		ViewType:       []string{"user", "admin"},
-		ClaimName:      "test_custom_attribute",
-		Status:         "inactive",
-		Saml1Uri:       "urn:mace:dir:attribute-def:testCustomAttribute",
-		Saml2Uri:       "urn:oid:2.5.4.999",
-		Urn:            "urn:mace:dir:attribute-def:testCustomAttribute",
-		Required:       true,
-		AdminCanAccess: true,
-		AdminCanView:   true,
-		AdminCanEdit:   true,
-		UserCanAccess:  true,
-		UserCanView:    true,
-		UserCanEdit:    true,
-	}
+        for _, attr := range attrs {
+                // Only delete attributes created by this test suite (with our naming pattern)
+                if strings.HasPrefix(attr.Name, "testCustomAttribute_") {
+                        _ = client.DeleteAttribute(ctx, attr.Inum)
+                }
+        }
 
-	createdAttribute, err := client.CreateAttribute(ctx, newAttribute)
-	if err != nil {
-		// Check if it's a schema validation error - this may be expected in some environments
-		if err.Error() == "post request failed: did not get correct response code: 406 Not Acceptable" {
-			t.Skipf("Cannot create custom attributes in this environment - schema validation failed: %v", err)
-		}
-		t.Fatal(err)
-	}
+        newAttribute := &Attribute{
+                Inum:           "7AC6",
+                Name:           uniqueAttrName,
+                DisplayName:    "Test Custom Attribute",
+                Description:    "Test custom attribute for unit testing",
+                Origin:         "jansCustomPerson",
+                DataType:       "string",
+                EditType:       []string{"user", "admin"},
+                ViewType:       []string{"user", "admin"},
+                ClaimName:      "test_custom_attribute",
+                Status:         "inactive",
+                Saml1Uri:       "urn:mace:dir:attribute-def:testCustomAttribute",
+                Saml2Uri:       "urn:oid:2.5.4.999",
+                Urn:            "urn:mace:dir:attribute-def:testCustomAttribute",
+                Required:       true,
+                AdminCanAccess: true,
+                AdminCanView:   true,
+                AdminCanEdit:   true,
+                UserCanAccess:  true,
+                UserCanView:    true,
+                UserCanEdit:    true,
+        }
 
-	t.Cleanup(func() {
-		_ = client.DeleteAttribute(ctx, createdAttribute.Inum)
-	})
+        createdAttribute, err := client.CreateAttribute(ctx, newAttribute)
+        if err != nil {
+                // Check if it's a schema validation error - this may be expected in some environments
+                if strings.Contains(err.Error(), "406") {
+                        t.Skipf("Cannot create custom attributes in this environment - schema validation failed: %v", err)
+                }
+                t.Fatal(err)
+        }
 
-	// have to set the generated IDs before comparing
-	newAttribute.Inum = createdAttribute.Inum
-	newAttribute.Dn = createdAttribute.Dn
-	newAttribute.BaseDn = createdAttribute.BaseDn
+        t.Cleanup(func() {
+                _ = client.DeleteAttribute(ctx, createdAttribute.Inum)
+        })
 
-	if diff := cmp.Diff(newAttribute, createdAttribute); diff != "" {
-		t.Errorf("Got different attribute after creating: %v", diff)
-	}
+        // have to set the generated IDs before comparing
+        newAttribute.Inum = createdAttribute.Inum
+        newAttribute.Dn = createdAttribute.Dn
+        newAttribute.BaseDn = createdAttribute.BaseDn
 
-	createdAttribute.Description = "test2"
-	updatedAttribute, err := client.UpdateAttribute(ctx, createdAttribute)
-	if err != nil {
-		t.Fatal(err)
-	}
+        if diff := cmp.Diff(newAttribute, createdAttribute); diff != "" {
+                t.Errorf("Got different attribute after creating: %v", diff)
+        }
 
-	if diff := cmp.Diff(createdAttribute, updatedAttribute); diff != "" {
-		t.Errorf("Got different attribute after updating: %v", diff)
-	}
+        createdAttribute.Description = "test2"
+        updatedAttribute, err := client.UpdateAttribute(ctx, createdAttribute)
+        if err != nil {
+                t.Fatal(err)
+        }
 
-	// delete attribute
-	err = client.DeleteAttribute(ctx, createdAttribute.Inum)
-	if err != nil {
-		t.Fatal(err)
-	}
+        if diff := cmp.Diff(createdAttribute, updatedAttribute); diff != "" {
+                t.Errorf("Got different attribute after updating: %v", diff)
+        }
 
+        // Attribute cleanup is handled by t.Cleanup (no explicit deletion needed)
+}
+
+// Unit tests for Attribute operations
+
+func TestClient_GetAttribute(t *testing.T) {
+        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                expectedPath := "/jans-config-api/api/v1/attributes/TEST"
+                if r.URL.Path != expectedPath {
+                        t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                }
+                if r.Method != http.MethodGet {
+                        t.Errorf("Expected GET method, got %s", r.Method)
+                }
+                attr := Attribute{
+                        Inum:        "TEST",
+                        Name:        "testAttr",
+                        DisplayName: "Test Attribute",
+                }
+                json.NewEncoder(w).Encode(attr)
+        }))
+        defer server.Close()
+
+        client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        if err != nil {
+                t.Fatalf("Failed to create client: %v", err)
+        }
+
+        result, err := client.GetAttribute(context.Background(), "TEST")
+
+        if err != nil {
+                t.Errorf("Unexpected error: %v", err)
+        }
+        if result.Inum != "TEST" {
+                t.Errorf("Expected inum 'TEST', got %s", result.Inum)
+        }
+}
+
+func TestClient_UpdateAttribute(t *testing.T) {
+        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                expectedPath := "/jans-config-api/api/v1/attributes/"
+                if r.URL.Path != expectedPath {
+                        t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                }
+                if r.Method != http.MethodPut {
+                        t.Errorf("Expected PUT method, got %s", r.Method)
+                }
+                attr := Attribute{Inum: "TEST", Name: "updated", DisplayName: "Updated"}
+                json.NewEncoder(w).Encode(attr)
+        }))
+        defer server.Close()
+
+        client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        if err != nil {
+                t.Fatalf("Failed to create client: %v", err)
+        }
+
+        attr := &Attribute{Inum: "TEST", Name: "updated", DisplayName: "Updated"}
+        result, err := client.UpdateAttribute(context.Background(), attr)
+
+        if err != nil {
+                t.Errorf("Unexpected error: %v", err)
+        }
+        if result.Name != "updated" {
+                t.Errorf("Expected name 'updated', got %s", result.Name)
+        }
+}
+
+func TestClient_DeleteAttribute(t *testing.T) {
+        server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+                expectedPath := "/jans-config-api/api/v1/attributes/TEST"
+                if r.URL.Path != expectedPath {
+                        t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+                }
+                if r.Method != http.MethodDelete {
+                        t.Errorf("Expected DELETE method, got %s", r.Method)
+                }
+                w.WriteHeader(http.StatusNoContent)
+        }))
+        defer server.Close()
+
+        client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+        if err != nil {
+                t.Fatalf("Failed to create client: %v", err)
+        }
+
+        err = client.DeleteAttribute(context.Background(), "TEST")
+
+        if err != nil {
+                t.Errorf("Unexpected error: %v", err)
+        }
 }

@@ -735,7 +735,7 @@ class JCA_CLI:
 
         user_info = self.get_user_info()
 
-        if 'api-admin' not in user_info.get('jansAdminUIRole', []):
+        if 'admin' not in user_info.get('jansAdminUIRole', []):
             config['DEFAULT']['user_data'] = ''
             self.raise_error("The logged user do not have valid role.")
 

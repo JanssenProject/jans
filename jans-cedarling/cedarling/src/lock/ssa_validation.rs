@@ -248,40 +248,32 @@ pub fn validate_ssa_structure_with_config(
     }
     
     // Validate grant_types is an array (if enabled)
-    if config.validate_grant_types_array {
-        if let Some(grant_types) = claims.get("grant_types") {
-            if !grant_types.is_array() {
+    if config.validate_grant_types_array
+        && let Some(grant_types) = claims.get("grant_types")
+            && !grant_types.is_array() {
                 return Err(SsaValidationError::InvalidGrantTypes);
             }
-        }
-    }
     
     // Validate software_roles is an array (if enabled)
-    if config.validate_software_roles_array {
-        if let Some(software_roles) = claims.get("software_roles") {
-            if !software_roles.is_array() {
+    if config.validate_software_roles_array
+        && let Some(software_roles) = claims.get("software_roles")
+            && !software_roles.is_array() {
                 return Err(SsaValidationError::InvalidSoftwareRoles);
             }
-        }
-    }
     
     // Validate exp is a number (if enabled)
-    if config.validate_expiration {
-        if let Some(exp) = claims.get("exp") {
-            if !exp.is_number() {
+    if config.validate_expiration
+        && let Some(exp) = claims.get("exp")
+            && !exp.is_number() {
                 return Err(SsaValidationError::InvalidExpirationTime);
             }
-        }
-    }
     
     // Validate iat is a number (if enabled)
-    if config.validate_issued_at {
-        if let Some(iat) = claims.get("iat") {
-            if !iat.is_number() {
+    if config.validate_issued_at
+        && let Some(iat) = claims.get("iat")
+            && !iat.is_number() {
                 return Err(SsaValidationError::InvalidIssuedAtTime);
             }
-        }
-    }
     
     Ok(())
 }
@@ -323,8 +315,8 @@ fn find_decoding_key(
     
     if let Some(keys) = jwks.get("keys").and_then(|k| k.as_array()) {
         for key in keys {
-            if let Some(key_kid) = key.get("kid").and_then(|k| k.as_str()) {
-                if key_kid == kid {
+            if let Some(key_kid) = key.get("kid").and_then(|k| k.as_str())
+                && key_kid == kid {
                     // Validate that the JWK's algorithm matches the JWT header's algorithm
                     if let Some(jwk_alg) = key.get("alg").and_then(|a| a.as_str()) {
                         let jwt_alg_str = match decoded_jwt.header.alg {
@@ -352,7 +344,6 @@ fn find_decoding_key(
                     
                     return create_decoding_key(key, &decoded_jwt.header.alg);
                 }
-            }
         }
     }
     

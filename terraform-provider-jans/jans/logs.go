@@ -14,7 +14,8 @@ type LogPagedResult struct {
 }
 
 func (c *Client) GetAuditLogs(ctx context.Context, pattern string, startIndex, limit int, startDate, endDate string) (*LogPagedResult, error) {
-        token, err := c.getToken(ctx, "https://jans.io/oauth/config/audit-logging.readonly")
+        scope := "https://jans.io/oauth/config/audit-logging.readonly"
+        token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return nil, err
         }
@@ -37,7 +38,7 @@ func (c *Client) GetAuditLogs(ctx context.Context, pattern string, startIndex, l
         }
 
         var logs LogPagedResult
-        err = c.get(ctx, "/jans-config-api/api/v1/audit", token, &logs, queryParams)
+        err = c.get(ctx, "/jans-config-api/api/v1/audit", token, scope, &logs, queryParams)
         if err != nil {
                 return nil, err
         }

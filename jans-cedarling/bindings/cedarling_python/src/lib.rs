@@ -5,6 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 #![cfg(not(target_arch = "wasm32"))]
+// looks like the problem in usage PyResult from pyo3 and operator `?`
+#![allow(clippy::useless_conversion)]
 
 use pyo3::Bound;
 use pyo3::prelude::*;

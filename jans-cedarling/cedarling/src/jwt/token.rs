@@ -32,7 +32,7 @@ impl Token {
         self.iss.as_ref()?.get_claim_mapping(&self.name)
     }
 
-    pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
+    pub fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
         self.claims.get_claim(name)
     }
 
@@ -69,7 +69,7 @@ impl From<Value> for TokenClaims {
 }
 
 impl TokenClaims {
-    pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
+    pub fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
         self.claims.get(name).map(|value| TokenClaim {
             key: name.to_string(),
             value,
