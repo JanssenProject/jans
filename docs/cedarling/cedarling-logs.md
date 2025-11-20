@@ -20,6 +20,9 @@ There are three different log records produced by the Cedarling:
 * `System` - Startup, debug and other Cedarling messages not related to authz
 * `Metric`- Performance and usage data
 
+!!! note "Async vs. synchronous logging"
+In native builds, Cedarling serializes Decision/System logs on background threads so that policy evaluations are not blocked by JSON encoding. In WASM (and during unit tests) logs are written synchronously to preserve deterministic behavior. Regardless of the runtime, the log contents and retrieval APIs remain the same.
+
 The Cedarling has four logging options, which are configurable via the `CEDARLING_LOG_TYPE`
 bootstrap property:
 
@@ -179,6 +182,8 @@ Example of decision log.
 * `decision`: `ALLOW` or `DENY`
 * `tokens`: Dictionary with the token type and claims which should be included in the log
 * `decision_time_micro_sec`: how long the decision took
+
+Whenever a request ends with a `DENY` and Cedar diagnostics contain errors, Cedarling also emits a separate `ERROR`-level Decision log that summarizes those diagnostics. This makes policy failures immediately visible even if the full debug log is filtered out.
 
 ### Debug Log Sample
 
