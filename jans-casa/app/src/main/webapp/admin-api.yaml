@@ -301,54 +301,6 @@ definitions:
       pluginClass:
         type: string
         description: The fully qualified name of the Java class that implements the plugin
-  OxdConfiguration:
-    type: object
-    required:
-      - settings
-      - client_details      
-    properties:
-      settings:
-        $ref: '#/definitions/OxdSettings'
-      client_details:
-        $ref: '#/definitions/ClientSettings'
-  OxdSettings:
-    type: object
-    required:
-      - protocol
-      - host
-      - port
-      - scopes
-      - frontchannel_logout_uri
-      - post_logout_uri
-      - authz_redirect_uri
-    properties:
-      protocol:
-        type: string
-      host:
-        type: string
-      port:
-        type: string
-      scopes:
-        type: array
-        items:
-          type: string
-      frontchannel_logout_uri:
-        type: string
-      post_logout_uri:
-        type: string
-      authz_redirect_uri:
-        type: string
-  ClientSettings:
-    type: object
-    properties:
-      oxdId:
-        type: string
-      clientId:
-        type: string
-      clientSecret:
-        type: string
-      clientName:
-        type: string
 
 securityDefinitions:
   config_auth:

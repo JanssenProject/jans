@@ -56,17 +56,16 @@ impl CedarSchemaJson {
         &self,
         type_name: &str,
         default_namespace: Option<&str>,
-    ) -> Result<Option<(cedar_policy::EntityTypeName, &Attribute)>, ParseErrors> {
+    ) -> Result<Option<(cedar_policy::EntityTypeName, &Attribute)>, Box<ParseErrors>> {
         let entity_type_name = cedar_policy::EntityTypeName::from_str(type_name)?;
 
         let namespace = entity_type_name.namespace();
         let basename = entity_type_name.basename();
 
-        if !namespace.is_empty() {
-            if let Some(entity_schema) = self.get_comon_type_from_namespace(&namespace, basename) {
+        if !namespace.is_empty()
+            && let Some(entity_schema) = self.get_comon_type_from_namespace(&namespace, basename) {
                 return Ok(Some((entity_type_name, entity_schema)));
             }
-        }
 
         // If namespace is empty (in type_name), look for the type in the default namespace.
         if let Some(namespace) = default_namespace {
@@ -91,11 +90,10 @@ impl CedarSchemaJson {
     }
 
     fn get_comon_type_from_namespace(&self, namespace: &str, basename: &str) -> Option<&Attribute> {
-        if let Some(namespace) = self.namespaces.get(namespace) {
-            if let Some(entity_type) = namespace.common_types.get(basename) {
+        if let Some(namespace) = self.namespaces.get(namespace)
+            && let Some(entity_type) = namespace.common_types.get(basename) {
                 return Some(entity_type);
             }
-        }
         None
     }
 
@@ -108,29 +106,27 @@ impl CedarSchemaJson {
         &self,
         type_name: &str,
         default_namespace: Option<&str>,
-    ) -> Result<Option<(cedar_policy::EntityTypeName, &EntityType)>, ParseErrors> {
+    ) -> Result<Option<(cedar_policy::EntityTypeName, &EntityType)>, Box<ParseErrors>> {
         let entity_type_name = cedar_policy::EntityTypeName::from_str(type_name)?;
 
         let namespace = entity_type_name.namespace();
         let basename = entity_type_name.basename();
 
-        if !namespace.is_empty() {
-            if let Some(entity_schema) = self.get_entity_schema_from_namespace(&namespace, basename)
+        if !namespace.is_empty()
+            && let Some(entity_schema) = self.get_entity_schema_from_namespace(&namespace, basename)
             {
                 return Ok(Some((entity_type_name, entity_schema)));
             }
-        }
 
         // If namespace is empty (in type_name), look for the type in the default namespace.
-        if let Some(namespace) = default_namespace {
-            if let Some(entity_schema) = self.get_entity_schema_from_namespace(namespace, basename)
+        if let Some(namespace) = default_namespace
+            && let Some(entity_schema) = self.get_entity_schema_from_namespace(namespace, basename)
             {
                 let entity_type_name =
                     cedar_policy::EntityTypeName::from_str(&join_namespace(namespace, type_name))?;
 
                 return Ok(Some((entity_type_name, entity_schema)));
             }
-        }
 
         // If the type is not found in the default namespace, look for it in the empty namespace.
         if let Some(entity_schema) =
@@ -149,11 +145,10 @@ impl CedarSchemaJson {
         namespace: &str,
         basename: &str,
     ) -> Option<&EntityType> {
-        if let Some(namespace) = self.namespaces.get(namespace) {
-            if let Some(entity_type) = namespace.entity_types.get(basename) {
+        if let Some(namespace) = self.namespaces.get(namespace)
+            && let Some(entity_type) = namespace.entity_types.get(basename) {
                 return Some(entity_type);
             }
-        }
         None
     }
 }
@@ -197,26 +192,35 @@ mod test_deserialize_json_cedar_schema {
         let schema = serde_json::from_value::<CedarSchemaJson>(schema).unwrap();
         let namespace = Namespace {
             entity_types: HashMap::from([
-                ("User".into(), EntityType {
-                    member_of: Some(HashSet::from(["UserGroup".into()])),
-                    shape: Some(EntityShape::required(HashMap::from([
-                        ("department".into(), Attribute::string()),
-                        ("jobLevel".into(), Attribute::long()),
-                    ]))),
-                    tags: None,
-                }),
-                ("UserGroup".into(), EntityType {
-                    member_of: None,
-                    shape: None,
-                    tags: None,
-                }),
+                (
+                    "User".into(),
+                    EntityType {
+                        member_of: Some(HashSet::from(["UserGroup".into()])),
+                        shape: Some(EntityShape::required(HashMap::from([
+                            ("department".into(), Attribute::string()),
+                            ("jobLevel".into(), Attribute::long()),
+                        ]))),
+                        tags: None,
+                    },
+                ),
+                (
+                    "UserGroup".into(),
+                    EntityType {
+                        member_of: None,
+                        shape: None,
+                        tags: None,
+                    },
+                ),
             ]),
             common_types: HashMap::new(),
             actions: HashMap::new(),
         };
-        assert_eq!(schema, CedarSchemaJson {
-            namespaces: HashMap::from([("Jans".into(), namespace)])
-        });
+        assert_eq!(
+            schema,
+            CedarSchemaJson {
+                namespaces: HashMap::from([("Jans".into(), namespace)])
+            }
+        );
     }
 
     /// Tests if the entity can be found in the given `default_namespace`
@@ -248,14 +252,17 @@ mod test_deserialize_json_cedar_schema {
             cedar_policy::EntityTypeName::from_str("Jans::Workload")
                 .expect("should parse workload entity type name")
         );
-        assert_eq!(entity_type, &EntityType {
-            member_of: None,
-            shape: Some(EntityShape {
-                required: true,
-                attrs: HashMap::new()
-            }),
-            tags: None,
-        });
+        assert_eq!(
+            entity_type,
+            &EntityType {
+                member_of: None,
+                shape: Some(EntityShape {
+                    required: true,
+                    attrs: HashMap::new()
+                }),
+                tags: None,
+            }
+        );
     }
 
     /// Tests if the entity wont be found if it's not in the `""` namespace or
@@ -305,11 +312,14 @@ mod test_deserialize_json_cedar_schema {
             cedar_policy::EntityTypeName::from_str("Some_entity")
                 .expect("should parse Some_entity entity type name")
         );
-        assert_eq!(entity_type, &EntityType {
-            member_of: None,
-            shape: None,
-            tags: None,
-        });
+        assert_eq!(
+            entity_type,
+            &EntityType {
+                member_of: None,
+                shape: None,
+                tags: None,
+            }
+        );
     }
 
     #[test]
