@@ -5,7 +5,7 @@
 
 //! Policy store source and format types.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Source of a policy store, supporting multiple input formats.
 #[derive(Debug, Clone)]
@@ -57,31 +57,27 @@ mod tests {
         let legacy_source = PolicyStoreSource::Legacy("{}".to_string());
 
         // Verify we can create all variants
-        match dir_source {
-            PolicyStoreSource::Directory(path) => {
-                assert_eq!(path.to_str().unwrap(), "/path/to/store")
-            },
-            _ => panic!("Expected Directory variant"),
-        }
+        assert!(matches!(
+            dir_source,
+            PolicyStoreSource::Directory(ref path) if path == Path::new("/path/to/store")
+        ));
 
-        match archive_file_source {
-            PolicyStoreSource::Archive(ArchiveSource::File(path)) => {
-                assert_eq!(path.to_str().unwrap(), "/path/to/store.cjar")
-            },
-            _ => panic!("Expected Archive File variant"),
-        }
+        assert!(matches!(
+            archive_file_source,
+            PolicyStoreSource::Archive(ArchiveSource::File(ref path))
+                if path == Path::new("/path/to/store.cjar")
+        ));
 
-        match archive_url_source {
-            PolicyStoreSource::Archive(ArchiveSource::Url(url)) => {
-                assert_eq!(url, "https://example.com/store.cjar")
-            },
-            _ => panic!("Expected Archive Url variant"),
-        }
+        assert!(matches!(
+            archive_url_source,
+            PolicyStoreSource::Archive(ArchiveSource::Url(ref url))
+                if url == "https://example.com/store.cjar"
+        ));
 
-        match legacy_source {
-            PolicyStoreSource::Legacy(content) => assert_eq!(content, "{}"),
-            _ => panic!("Expected Legacy variant"),
-        }
+        assert!(matches!(
+            legacy_source,
+            PolicyStoreSource::Legacy(ref content) if content == "{}"
+        ));
     }
 
     #[test]

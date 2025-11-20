@@ -324,31 +324,6 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         }
     }
 
-    /// Detect format based on source type and path characteristics.
-    fn detect_format_internal(source: &PolicyStoreSource) -> PolicyStoreFormat {
-        match source {
-            PolicyStoreSource::Directory(_) => PolicyStoreFormat::Directory,
-            PolicyStoreSource::Archive(archive_source) => {
-                match archive_source {
-                    ArchiveSource::File(path) => {
-                        // Check if file has .cjar extension
-                        if path.extension().and_then(|s| s.to_str()) == Some("cjar") {
-                            PolicyStoreFormat::Archive
-                        } else {
-                            // Assume archive format for any zip-like file
-                            PolicyStoreFormat::Archive
-                        }
-                    },
-                    ArchiveSource::Url(_) => {
-                        // URLs are assumed to be archives
-                        PolicyStoreFormat::Archive
-                    },
-                }
-            },
-            PolicyStoreSource::Legacy(_) => PolicyStoreFormat::Legacy,
-        }
-    }
-
     /// Validate directory structure for required files and directories.
     fn validate_directory_structure(&self, dir: &str) -> Result<(), PolicyStoreError> {
         // Check if directory exists
@@ -813,7 +788,11 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
     }
 
     fn detect_format(&self, source: &PolicyStoreSource) -> PolicyStoreFormat {
-        Self::detect_format_internal(source)
+        match source {
+            PolicyStoreSource::Directory(_) => PolicyStoreFormat::Directory,
+            PolicyStoreSource::Archive(_) => PolicyStoreFormat::Archive,
+            PolicyStoreSource::Legacy(_) => PolicyStoreFormat::Legacy,
+        }
     }
 
     fn validate_structure(&self, source: &PolicyStoreSource) -> Result<(), PolicyStoreError> {
