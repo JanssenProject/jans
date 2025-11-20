@@ -58,7 +58,7 @@ web-sys = { workspace = true, features = ["console"] }
 test_utils = { workspace = true }
 rand = "0.8.5"
 jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
-mockito = "1.5.0"
+mockito = { workspace = true }
 criterion = { version = "0.5.1", features = ["async_tokio"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 stats_alloc = "0.1.10"
@@ -73,4 +73,8 @@ harness = false
 
 [[bench]]
 name = "startup_benchmark"
+harness = false
+
+[[bench]]
+name = "authz_authorize_multi_issuer_benchmark"
 harness = false

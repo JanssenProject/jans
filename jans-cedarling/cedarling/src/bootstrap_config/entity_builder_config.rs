@@ -3,19 +3,19 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use crate::BootstrapConfigRaw;
 use derive_more::Deref;
 use serde::{Deserialize, Serialize};
-use crate::BootstrapConfigRaw;
 
 const DEFAULT_USER_ENTITY_NAME: &str = "Jans::User";
 const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Jans::Workload";
 const DEFAULT_ROLE_ENTITY_NAME: &str = "Jans::Role";
-const DEFAULT_ISS_ENTITY_NAME: &str = "Jans::TrustedIssuer";
 const DEFAULT_UNSIGNED_ROLE_ID_SRC: &str = "role";
 
 pub(crate) const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Jans::Access_token";
 pub(crate) const DEFAULT_ID_TKN_ENTITY_NAME: &str = "Jans::Id_token";
 pub(crate) const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Jans::Userinfo_token";
+pub(crate) const DEFAULT_ENTITY_TYPE_NAME: &str = "Token";
 
 /// Bootstrap Configurations for the JWT to Cedar entity mappings
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -58,8 +58,6 @@ pub struct EntityNames {
     pub workload: String,
     /// The entity type name of the `Role` entity
     pub role: String,
-    /// The entity type name of the `TrustedIssuer` entity
-    pub iss: String,
 }
 
 /// Unsigned role ID source
@@ -79,7 +77,6 @@ impl Default for EntityBuilderConfig {
                 user: DEFAULT_USER_ENTITY_NAME.to_string(),
                 workload: DEFAULT_WORKLOAD_ENTITY_NAME.to_string(),
                 role: DEFAULT_ROLE_ENTITY_NAME.to_string(),
-                iss: DEFAULT_ISS_ENTITY_NAME.to_string(),
             },
             build_workload: true,
             build_user: true,
@@ -95,9 +92,21 @@ impl EntityBuilderConfig {
         self
     }
 
+    /// Disables building the `Workload` entity
+    pub fn with_no_workload(mut self) -> Self {
+        self.build_workload = false;
+        self
+    }
+
     /// Enables building the `User` entity
     pub fn with_user(mut self) -> Self {
         self.build_user = true;
+        self
+    }
+
+    /// Disables building the `User` entity
+    pub fn with_no_user(mut self) -> Self {
+        self.build_user = false;
         self
     }
 }
@@ -105,10 +114,15 @@ impl EntityBuilderConfig {
 impl From<EntityBuilderConfigRaw> for EntityBuilderConfig {
     fn from(raw: EntityBuilderConfigRaw) -> Self {
         let entity_names = EntityNames {
-            user: raw.mapping_user.unwrap_or_else(|| DEFAULT_USER_ENTITY_NAME.to_string()),
-            workload: raw.mapping_workload.unwrap_or_else(|| DEFAULT_WORKLOAD_ENTITY_NAME.to_string()),
-            role: raw.mapping_role.unwrap_or_else(|| DEFAULT_ROLE_ENTITY_NAME.to_string()),
-            iss: raw.mapping_iss.unwrap_or_else(|| DEFAULT_ISS_ENTITY_NAME.to_string()),
+            user: raw
+                .mapping_user
+                .unwrap_or_else(|| DEFAULT_USER_ENTITY_NAME.to_string()),
+            workload: raw
+                .mapping_workload
+                .unwrap_or_else(|| DEFAULT_WORKLOAD_ENTITY_NAME.to_string()),
+            role: raw
+                .mapping_role
+                .unwrap_or_else(|| DEFAULT_ROLE_ENTITY_NAME.to_string()),
         };
 
         Self {
