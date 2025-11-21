@@ -115,6 +115,47 @@ pub enum TrustedIssuerErrorType {
     },
 }
 
+/// Manifest validation-specific errors.
+#[derive(Debug, Clone, PartialEq, thiserror::Error)]
+#[allow(dead_code)]
+pub enum ManifestErrorType {
+    /// Manifest file not found
+    #[error("Manifest file not found (manifest.json is required for integrity validation)")]
+    ManifestNotFound,
+
+    /// Manifest parsing failed
+    #[error("Failed to parse manifest: {0}")]
+    ParseError(String),
+
+    /// File listed in manifest is missing from policy store
+    #[error("File '{file}' is listed in manifest but not found in policy store")]
+    FileMissing { file: String },
+
+    /// File checksum mismatch
+    #[error("Checksum mismatch for '{file}': expected '{expected}', computed '{actual}'")]
+    ChecksumMismatch {
+        file: String,
+        expected: String,
+        actual: String,
+    },
+
+    /// Invalid checksum format
+    #[error("Invalid checksum format for '{file}': expected 'sha256:<hex>', found '{checksum}'")]
+    InvalidChecksumFormat { file: String, checksum: String },
+
+    /// File size mismatch
+    #[error("Size mismatch for '{file}': expected {expected} bytes, found {actual} bytes")]
+    SizeMismatch {
+        file: String,
+        expected: u64,
+        actual: u64,
+    },
+
+    /// Policy store ID mismatch
+    #[error("Policy store ID mismatch: manifest expects '{expected}', metadata has '{actual}'")]
+    PolicyStoreIdMismatch { expected: String, actual: String },
+}
+
 /// Errors that can occur during policy store operations.
 #[derive(Debug, thiserror::Error)]
 #[allow(dead_code)]
@@ -174,6 +215,10 @@ pub enum PolicyStoreError {
         file: String,
         err: TrustedIssuerErrorType,
     },
+
+    /// Manifest validation error
+    #[error("Manifest validation error: {err}")]
+    ManifestError { err: ManifestErrorType },
 
     /// Path not found
     #[error("Path not found: {path}")]
@@ -346,25 +391,35 @@ pub enum ValidationError {
 #[derive(Debug, thiserror::Error)]
 #[allow(dead_code)]
 pub enum ArchiveError {
-    /// Invalid archive format
-    #[error("Invalid archive format: {message}")]
-    InvalidFormat { message: String },
+    /// Invalid file extension (expected .cjar)
+    #[error("Invalid file extension: expected '{expected}', found '{found}'")]
+    InvalidExtension { expected: String, found: String },
 
-    /// Archive extraction failed
-    #[error("Failed to extract archive: {message}")]
-    ExtractionFailed { message: String },
+    /// Cannot read archive file
+    #[error("Cannot read archive file '{path}': {source}")]
+    CannotReadFile {
+        path: String,
+        #[source]
+        source: std::io::Error,
+    },
 
-    /// Invalid archive structure
-    #[error("Invalid archive structure: {message}")]
-    InvalidStructure { message: String },
+    /// Invalid ZIP format
+    #[error("Invalid ZIP archive format: {details}")]
+    InvalidZipFormat { details: String },
 
-    /// Archive corruption detected
-    #[error("Archive appears to be corrupted: {message}")]
-    Corrupted { message: String },
+    /// Corrupted archive entry
+    #[error("Corrupted archive entry at index {index}: {details}")]
+    CorruptedEntry { index: usize, details: String },
 
     /// Path traversal attempt detected
-    #[error("Potential path traversal detected in archive: {path}")]
+    #[error("Path traversal attempt detected in archive: '{path}'")]
     PathTraversal { path: String },
+
+    /// File path-based archive loading not supported in WASM
+    #[error(
+        "File path-based archive loading is not supported in WASM. Use ArchiveSource::Url for remote archives, or create an ArchiveVfs::from_buffer() directly with bytes you fetch. See module documentation for examples."
+    )]
+    WasmUnsupported,
 }
 
 /// Errors related to JWT token validation.
@@ -431,15 +486,18 @@ mod tests {
 
     #[test]
     fn test_archive_error_messages() {
-        let err = ArchiveError::InvalidFormat {
-            message: "not a zip file".to_string(),
+        let err = ArchiveError::InvalidZipFormat {
+            details: "not a zip file".to_string(),
         };
-        assert_eq!(err.to_string(), "Invalid archive format: not a zip file");
+        assert_eq!(
+            err.to_string(),
+            "Invalid ZIP archive format: not a zip file"
+        );
 
         let err = ArchiveError::PathTraversal {
             path: "../../../etc/passwd".to_string(),
         };
-        assert!(err.to_string().contains("path traversal"));
+        assert!(err.to_string().contains("Path traversal"));
         assert!(err.to_string().contains("../../../etc/passwd"));
     }
 

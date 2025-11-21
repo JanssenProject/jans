@@ -8,10 +8,12 @@ mod claim_mapping;
 mod test;
 mod token_entity_metadata;
 
+pub mod archive_handler;
 pub mod entity_parser;
 pub mod errors;
 pub mod issuer_parser;
 pub mod loader;
+pub mod manifest_validator;
 pub mod metadata;
 pub mod policy_parser;
 pub mod schema_parser;
@@ -30,20 +32,25 @@ pub(crate) use claim_mapping::ClaimMappings;
 pub use token_entity_metadata::TokenEntityMetadata;
 
 // Re-export for convenience
+pub use archive_handler::ArchiveVfs;
 pub use entity_parser::{EntityParser, ParsedEntity};
 pub use errors::{
-    ArchiveError, CedarEntityErrorType, CedarSchemaErrorType, PolicyStoreError, TokenError,
-    TrustedIssuerErrorType, ValidationError,
+    ArchiveError, CedarEntityErrorType, CedarSchemaErrorType, ManifestErrorType, PolicyStoreError,
+    TokenError, TrustedIssuerErrorType, ValidationError,
 };
 pub use issuer_parser::{IssuerParser, ParsedIssuer};
+pub use loader::load_policy_store;
 pub use loader::{
     DefaultPolicyStoreLoader, EntityFile, IssuerFile, LoadedPolicyStore, PolicyFile,
     PolicyStoreLoader,
 };
+pub use manifest_validator::{
+    ManifestValidationError, ManifestValidationResult, ManifestValidator,
+};
 pub use metadata::{FileInfo, PolicyStoreInfo, PolicyStoreManifest, PolicyStoreMetadata};
 pub use policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
 pub use schema_parser::{ParsedSchema, SchemaParser};
-pub use source::{PolicyStoreFormat, PolicyStoreSource};
+pub use source::{ArchiveSource, PolicyStoreFormat, PolicyStoreSource};
 pub use validator::MetadataValidator;
 pub use vfs_adapter::{MemoryVfs, VfsFileSystem};
 
@@ -89,14 +96,15 @@ fn validate_default_entities(
     // Check base64 size limit for each entity
     for (entity_id, entity_data) in entities {
         if let Some(entity_str) = entity_data.as_str()
-            && entity_str.len() > limits.max_base64_size {
-                return Err(format!(
-                    "Base64 string size ({}) for entity '{}' exceeds maximum allowed size ({})",
-                    entity_str.len(),
-                    entity_id,
-                    limits.max_base64_size
-                ));
-            }
+            && entity_str.len() > limits.max_base64_size
+        {
+            return Err(format!(
+                "Base64 string size ({}) for entity '{}' exceeds maximum allowed size ({})",
+                entity_str.len(),
+                entity_id,
+                limits.max_base64_size
+            ));
+        }
     }
 
     Ok(())
