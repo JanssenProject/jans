@@ -18,13 +18,13 @@ By overriding the interface methods in [PersistenceType](https://github.com/Jans
 4. Compare hashed passwords
 
 !!! note annotate "What is an Entry Manager?"
-    The Janssen server's Peristence Layer can be  MySQL database.
+    The Janssen server's Persistence Layer can be  MySQL database.
     Information about an entity (person, session, client, scripts etc.) constitutes an Entry.
     The Entry Manager (CRUD operations) implementation for each type of Persistence is available in the Janssen server and the relevant Entry Manager (SQLEntryManager, etc.) is created when the server starts up.
 
 ## Usage
 
-The Jans-Auth server contains a [`PeristenceType`](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/persistence_extension/sample-script/PersistenceExtension.py) script.
+The Jans-Auth server contains a [`PersistenceType`](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/persistence_extension/sample-script/PersistenceExtension.py) script.
 
 
 ## Hashed Passwords
