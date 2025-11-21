@@ -14725,10 +14725,10 @@
 
 
 <h1 id="flows-execution-rules">Flows execution rules<a class="headerlink" href="#flows-execution-rules" title="Permanent link">#</a></h1>
-<p>This document regards flow execution details. Engines implementing the Agama framework must account these aspects fully. </p>
+<p>This document regards flow execution details. Engines implementing the Agama framework must account these aspects fully.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The concept of "<em>top-level</em>" flow is used in several places throughout this page. It refers to a flow which has been directly launched from the user browser and hence has no parents (no callers).    </p>
+<p>The concept of "<em>top-level</em>" flow is used in several places throughout this page. It refers to a flow which has been directly launched from the user browser and hence has no parents (no callers).</p>
 </div>
 <h2 id="flows-lifecycle">Flows lifecycle<a class="headerlink" href="#flows-lifecycle" title="Permanent link">#</a></h2>
 <p>From a programming perspective, a flow is a lot like a function or subroutine in a regular program. Once a flow is triggered, it must be executed from top to bottom until a <code>Finish</code> statement is encountered. There are no special requirements on flow initialization or flow structure either.</p>
@@ -14738,7 +14738,7 @@
 <li>has been cancelled</li>
 <li>has timed out</li>
 </ul>
-<p>More on these conditions below. Otherwise, the flow is said to have <strong>finished</strong> and depending on the actual arguments passed to <code>Finish</code>, it can be said the flow finished <em>successfully</em>  or the flow <em>failed</em>. </p>
+<p>More on these conditions below. Otherwise, the flow is said to have <strong>finished</strong> and depending on the actual arguments passed to <code>Finish</code>, it can be said the flow finished <em>successfully</em>  or the flow <em>failed</em>.</p>
 <h2 id="successful-flows">Successful flows<a class="headerlink" href="#successful-flows" title="Permanent link">#</a></h2>
 <p>When a flow finishes successfully, control returns to the caller (parent flow) and execution continues. In the case of a <em>top-level</em> flow, it is up to the concrete engine what to do next. Normally, the arguments passed to the <code>Finish</code> directive will drive the specific behavior, which could for instance authenticate a person.</p>
 <h2 id="failed-flows">Failed flows<a class="headerlink" href="#failed-flows" title="Permanent link">#</a></h2>
@@ -14763,7 +14763,7 @@
 <p>The <code>Timeout</code> directive specifies a maximum allowable execution time for a <em>top-level</em> flow. When a flow exceeds this execution time, engines should display an error page accordingly.</p>
 <h2 id="cancelled-flows">Cancelled flows<a class="headerlink" href="#cancelled-flows" title="Permanent link">#</a></h2>
 <p>Cancellation allows a flow to early interrupt the execution of a given subflow thus enabling the implementation of alternative routing without the need of re-writing subflows. It can only take place upon the execution of a given <code>RRF</code> instruction part of a subflow that has been <code>Trigger</code>ed.</p>
-<p>This feature is better understood via <a href="../../janssen-server/developer/agama/advanced-usages/#cancellation">examples</a> - note the link provided is specific to the Janssen Server engine only. Other engines may implement cancellation in a different way, the only requirement is to preserve the convention that the returned value of a cancelled flow must be of the form: <code>{ aborted: true, data: ..., url: ... }</code>. </p>
+<p>This feature is better understood via <a href="../../janssen-server/developer/agama/advanced-usages/#cancellation">examples</a> - note the link provided is specific to the Janssen Server engine only. Other engines may implement cancellation in a different way, the only requirement is to preserve the convention that the returned value of a cancelled flow must be of the form: <code>{ aborted: true, data: ..., url: ... }</code>.</p>
 <h2 id="launching-flows">Launching flows<a class="headerlink" href="#launching-flows" title="Permanent link">#</a></h2>
 <p>Engines must provide specific mechanisms to launch a given flow in the user's browser and document how to pass input parameters to it and the formats allowed.</p>
 <h2 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">#</a></h2>
@@ -14776,7 +14776,7 @@
 <p>Engines may support one or more templating technologies and file formats for rendering the UI pages.</p>
 <h2 id="foreign-calls">Foreign calls<a class="headerlink" href="#foreign-calls" title="Permanent link">#</a></h2>
 <h3 id="languages-support">Languages support<a class="headerlink" href="#languages-support" title="Permanent link">#</a></h3>
-<p>At least one programming language should be supported by an engine. This feature is critical because Agama DSL was designed to force developers use a distinct, more powerful language when the task at hand cannot be implemented by simple data manipulation or comparison of values. </p>
+<p>At least one programming language should be supported by an engine. This feature is critical because Agama DSL was designed to force developers use a distinct, more powerful language when the task at hand cannot be implemented by simple data manipulation or comparison of values.</p>
 <h3 id="routines-lookup">Routines lookup<a class="headerlink" href="#routines-lookup" title="Permanent link">#</a></h3>
 <p>Engines should define a clear mechanism to lookup the specific routine to be invoked when using the <code>Call</code> directive.</p>
 <p>Actually, the syntax of <code>Call</code> fits well into an object-oriented style. The table bellow illustrates this fact:</p>
@@ -14800,10 +14800,10 @@
 </table>
 <p>In OOP, it is not uncommon to have a method <code>S</code> with several different signatures. The lookup mechanism should account disambiguation techniques, if possible.</p>
 <h3 id="errors">Errors<a class="headerlink" href="#errors" title="Permanent link">#</a></h3>
-<p>In the execution of the call, if an error occurs, the engine should raise an error catchable in Agama code. The structure or data type of this error is an engine-specific detail. Ideally the error should be easily inspected in Agama code so any required further processing is feasible in a flow. </p>
+<p>In the execution of the call, if an error occurs, the engine should raise an error catchable in Agama code. The structure or data type of this error is an engine-specific detail. Ideally the error should be easily inspected in Agama code so any required further processing is feasible in a flow.</p>
 <h3 id="types-compatibility">Types compatibility<a class="headerlink" href="#types-compatibility" title="Permanent link">#</a></h3>
 <p>The arguments conversion/compatibility is also an important topic. Most likely <a href="../language-reference/#data-types">Agama types</a> will not match the (foreign) target language types. This means passing a "native" Agama value as parameter in a method <code>Call</code> requires some form of compatibility with the target type in the  routine (method) signature. When compatibility does not make sense, seems too complex, or impossible, invocation should "crash" by raising some form of error.</p>
-<p>The same analysis has to be done in the other direction: from the target language to Agama. This is for the case where the <code>Call</code> returns a value. Such value should be "manipulable" in Agama code. </p>
+<p>The same analysis has to be done in the other direction: from the target language to Agama. This is for the case where the <code>Call</code> returns a value. Such value should be "manipulable" in Agama code.</p>
 <h3 id="other-considerations">Other considerations<a class="headerlink" href="#other-considerations" title="Permanent link">#</a></h3>
 <p>Engine implementers may consider to offer the ability for developers to supply routines without the need of engine restarts. This aims for an agile development experience.</p>
 
@@ -14828,7 +14828,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 1, 2024 08:56:03 UTC"><span class="timeago" datetime="2024-10-01T08:56:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 1, 2024 08:56:03 UTC">2024-10-01</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 21, 2025 16:33:42 UTC"><span class="timeago" datetime="2025-11-21T16:33:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 21, 2025 16:33:42 UTC">2025-11-21</span>
   </span>
 
     

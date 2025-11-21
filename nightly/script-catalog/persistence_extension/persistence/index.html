@@ -14531,24 +14531,24 @@
 
 
 <h1 id="persistence-script">Persistence Script<a class="headerlink" href="#persistence-script" title="Permanent link">#</a></h1>
-<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
+<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
 <ol>
 <li>Load initialization data from DB or initialize services after the creation of Entry Manager. </li>
 <li>Release resources, terminate services etc. after the destruction of Entry Manager.</li>
-<li>Create hashed passwords </li>
+<li>Create hashed passwords</li>
 <li>Compare hashed passwords</li>
 </ol>
 <div class="admonition note annotate">
 <p class="admonition-title">What is an Entry Manager?</p>
-<p>The Janssen server's Peristence Layer can be  MySQL database. 
-Information about an entity (person, session, client, scripts etc) constitutes an Entry.
-The Entry Manager (CRUD operations) implementation for each type of Persistence is available in the Janssen server and the relevant Entry Manager (SQLEntryManager, etc.) is created when the server starts up. </p>
+<p>The Janssen server's Persistence Layer can be MySQL database.
+Information about an entity (person, session, client, scripts etc.) constitutes an Entry.
+The Entry Manager (CRUD operations) implementation for each type of Persistence is available in the Janssen server and the relevant Entry Manager (SQLEntryManager, etc.) is created when the server starts up.</p>
 </div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<p>The Jans-Auth server contains a <a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/persistence_extension/sample-script/PersistenceExtension.py"><code>PeristenceType</code></a> script.</p>
+<p>The Jans-Auth server contains a <a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/persistence_extension/sample-script/PersistenceExtension.py"><code>PersistenceType</code></a> script.</p>
 <h2 id="hashed-passwords">Hashed Passwords<a class="headerlink" href="#hashed-passwords" title="Permanent link">#</a></h2>
 <p>Hashed passwords can be created using any method from this <a href="https://github.com/JanssenProject/jans/blob/main/jans-orm/core/src/main/java/io/jans/orm/operation/auth/PasswordEncryptionMethod.java">enum</a>, instead of the native/default SSHA256.
-The ORM module of the Janssen server does the following: </p>
+The ORM module of the Janssen server does the following:</p>
 <ol>
 <li>When User entry is persisted and <code>userPassword</code> is specified, ORM calls <code>createHashedPassword</code></li>
 <li>User authenticates and the password is checked, the ORM module invokes <code>compareHashedPasswords</code> </li>
@@ -14644,7 +14644,7 @@ The ORM module of the Janssen server does the following: </p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 8, 2025 09:37:15 UTC"><span class="timeago" datetime="2025-08-08T09:37:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 8, 2025 09:37:15 UTC">2025-08-08</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 21, 2025 16:33:42 UTC"><span class="timeago" datetime="2025-11-21T16:33:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 21, 2025 16:33:42 UTC">2025-11-21</span>
   </span>
 
     
