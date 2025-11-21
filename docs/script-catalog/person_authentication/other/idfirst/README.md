@@ -18,7 +18,7 @@ For numerals 2 and 3 to work properly, all custom scripts to be used (basic, u2f
 by prefixing it with a `#` character and add one with
 
 	`return "/auth/idfirst/alter_login.xhtml"`
-	
+
 in the subroutine "getPageForStep" of every script.
 
 ## Requirements:
