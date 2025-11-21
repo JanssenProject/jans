@@ -18,9 +18,9 @@ By overriding the interface methods in [PersistenceType](https://github.com/Jans
 4. Compare hashed passwords
 
 !!! note annotate "What is an Entry Manager?"
-    The Janssen server's Peristence Layer can be  MySQL database. 
+    The Janssen server's Peristence Layer can be  MySQL database.
     Information about an entity (person, session, client, scripts etc) constitutes an Entry.
-    The Entry Manager (CRUD operations) implementation for each type of Persistence is available in the Janssen server and the relevant Entry Manager (SQLEntryManager, etc.) is created when the server starts up. 
+    The Entry Manager (CRUD operations) implementation for each type of Persistence is available in the Janssen server and the relevant Entry Manager (SQLEntryManager, etc.) is created when the server starts up.
 
 ## Usage
 
@@ -30,7 +30,7 @@ The Jans-Auth server contains a [`PeristenceType`](https://github.com/JanssenPro
 ## Hashed Passwords
 
 Hashed passwords can be created using any method from this [enum](https://github.com/JanssenProject/jans/blob/main/jans-orm/core/src/main/java/io/jans/orm/operation/auth/PasswordEncryptionMethod.java), instead of the native/default SSHA256.
-The ORM module of the Janssen server does the following: 
+The ORM module of the Janssen server does the following:
 
 1. When User entry is persisted and `userPassword` is specified, ORM calls `createHashedPassword`
 2. User authenticates and the password is checked, the ORM module invokes `compareHashedPasswords` 
