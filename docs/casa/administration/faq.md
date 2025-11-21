@@ -63,7 +63,7 @@ Both soft (mobile apps) or hard tokens (keyfobs, cards, etc.) are supported. Sup
 
 ### Authentication fails when using TOTP or HOTP with no apparent reason
 
-For Time-based OTP, ensure the time of your server is correctly synchronized (use NTP for instance). The time lag of the authentication device used (for instance, a mobile phone) with respect to server time should not be representative.
+For Time-based OTP, ensure the time of your server is correctly synchronized (use NTP for instance). The time lag of the authentication device used (for instance, a mobile phone) versus server time should not be significant.
 
 Big time differences can cause unsuccessful attempts to enroll TOTP credentials in Casa.
 

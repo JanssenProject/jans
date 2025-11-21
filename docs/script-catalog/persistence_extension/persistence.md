@@ -14,12 +14,12 @@ By overriding the interface methods in [PersistenceType](https://github.com/Jans
 
 1. Load initialization data from DB or initialize services after the creation of Entry Manager. 
 2. Release resources, terminate services etc. after the destruction of Entry Manager.
-3. Create hashed passwords 
+3. Create hashed passwords
 4. Compare hashed passwords
 
 !!! note annotate "What is an Entry Manager?"
     The Janssen server's Peristence Layer can be  MySQL database.
-    Information about an entity (person, session, client, scripts etc) constitutes an Entry.
+    Information about an entity (person, session, client, scripts etc.) constitutes an Entry.
     The Entry Manager (CRUD operations) implementation for each type of Persistence is available in the Janssen server and the relevant Entry Manager (SQLEntryManager, etc.) is created when the server starts up.
 
 ## Usage
@@ -45,7 +45,7 @@ The ORM module of the Janssen server does the following:
             hashed_password= PasswordEncryptionHelper.createStoragePassword(credential, PasswordEncryptionMethod.HASH_METHOD_PKCS5S2)
             return hashed_password
     ```
-    
+
     - Comparing Hashed Password:
     ```
         def compareHashedPasswords(self, credential, storedCredential):
