@@ -5201,6 +5201,7 @@ paths:
                   - health_check
                   - authz_detail
                   - update_token
+                  - tx_token
                   - logout_status_jwt
                   - par
                   - config_api_auth
@@ -15674,15 +15675,15 @@ components:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        userCanEdit:
           type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -16594,8 +16595,6 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16605,6 +16604,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17310,6 +17311,10 @@ components:
           type: array
           items:
             type: string
+        txTokenScriptDns:
+          type: array
+          items:
+            type: string
         backchannelLogoutUri:
           type: array
           items:
@@ -17774,6 +17779,7 @@ components:
           - health_check
           - authz_detail
           - update_token
+          - tx_token
           - logout_status_jwt
           - par
           - config_api_auth
@@ -18262,10 +18268,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
