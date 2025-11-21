@@ -65,7 +65,7 @@ fi
 PERSISTENCE_TYPE="sql"
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
   sudo microk8s.kubectl get po --kubeconfig="$KUBECONFIG"
-  sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/mysql --kubeconfig="$KUBECONFIG"
+  sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans,image.repository=bitnamilegacy/mysql,image.tag=9.4.0-debian-12-r1 -n jans oci://registry-1.docker.io/bitnamicharts/mysql --kubeconfig="$KUBECONFIG"
   cat << EOF > override.yaml
 config:
   countryCode: US
@@ -84,7 +84,7 @@ EOF
 fi
 if [[ $JANS_PERSISTENCE == "PGSQL" ]]; then
   sudo microk8s.kubectl get po --kubeconfig="$KUBECONFIG"
-  sudo helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/postgresql --kubeconfig="$KUBECONFIG"
+  sudo helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans,image.repository=bitnamilegacy/postgresql,image.tag=16.4.0-debian-12-r0 -n jans oci://registry-1.docker.io/bitnamicharts/postgresql --kubeconfig="$KUBECONFIG"
   cat << EOF > override.yaml
 config:
   countryCode: US

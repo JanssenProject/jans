@@ -100,7 +100,7 @@ tags:
         For testing purposes, you can deploy it on the AKS cluster using the following command:
 
         ```
-        helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/postgresql
+        helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans,image.repository=bitnamilegacy/postgresql,image.tag=16.4.0-debian-12-r0 -n jans oci://registry-1.docker.io/bitnamicharts/postgresql
         ```
 
         Add the following yaml snippet to your `override.yaml` file:
@@ -127,7 +127,7 @@ tags:
         For testing purposes, you can deploy it on the AKS cluster using the following command:
 
         ```
-        helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/mysql
+        helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans,image.repository=bitnamilegacy/mysql,image.tag=9.4.0-debian-12-r1 -n jans oci://registry-1.docker.io/bitnamicharts/mysql
         ```
 
         Add the following yaml snippet to your `override.yaml` file:
