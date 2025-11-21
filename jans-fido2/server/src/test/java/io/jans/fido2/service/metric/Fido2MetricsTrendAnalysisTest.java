@@ -86,7 +86,7 @@ class Fido2MetricsTrendAnalysisTest {
         assertTrue(result.containsKey("insights"));
 
         // Verify trend direction is INCREASING (since we have increasing data)
-        assertEquals("INCREASING", result.get("trendDirection"));
+        assertEquals(Fido2MetricsConstants.INCREASING, result.get("trendDirection"));
         
         // Verify growth rate is positive
         Double growthRate = (Double) result.get("growthRate");
@@ -122,12 +122,12 @@ class Fido2MetricsTrendAnalysisTest {
 
         // Verify results
         assertNotNull(result);
-        assertTrue(result.containsKey("currentPeriod"));
-        assertTrue(result.containsKey("previousPeriod"));
-        assertTrue(result.containsKey("comparison"));
+        assertTrue(result.containsKey(Fido2MetricsConstants.CURRENT_PERIOD));
+        assertTrue(result.containsKey(Fido2MetricsConstants.PREVIOUS_PERIOD));
+        assertTrue(result.containsKey(Fido2MetricsConstants.COMPARISON));
 
         // Verify comparison contains change percentage
-        Map<String, Object> comparison = (Map<String, Object>) result.get("comparison");
+        Map<String, Object> comparison = (Map<String, Object>) result.get(Fido2MetricsConstants.COMPARISON);
         assertTrue(comparison.containsKey("totalOperationsChange"));
     }
 
@@ -196,7 +196,7 @@ class Fido2MetricsTrendAnalysisTest {
             LocalDateTime.now().minusDays(3), LocalDateTime.now());
 
         // Verify stable trend
-        assertEquals("STABLE", result.get("trendDirection"));
+        assertEquals(Fido2MetricsConstants.STABLE, result.get("trendDirection"));
         assertEquals(0.0, (Double) result.get("growthRate"), 0.01);
     }
 }

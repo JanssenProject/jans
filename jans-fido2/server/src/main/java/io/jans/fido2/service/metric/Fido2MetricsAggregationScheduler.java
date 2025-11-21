@@ -10,6 +10,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.cluster.Fido2ClusterNodeService;
 import io.jans.model.cluster.ClusterNode;
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.quartz.Job;
@@ -69,12 +70,14 @@ public class Fido2MetricsAggregationScheduler {
                 }
 
                 ScheduledFuture<?> updateTask = scheduler.startPeriodicLockUpdates();
+                if (updateTask == null) {
+                    log.warn("Skipping {} aggregation - failed to start periodic lock updates or lock not held", jobType);
+                    return;
+                }
                 try {
                     aggregationTask.accept(metricsService);
                 } finally {
-                    if (updateTask != null) {
-                        updateTask.cancel(false);
-                    }
+                    updateTask.cancel(false);
                 }
             }
         } catch (Exception e) {
@@ -255,22 +258,18 @@ public class Fido2MetricsAggregationScheduler {
     
     /**
      * Verify that we successfully acquired the lock
+     * Checks if our lock key exists in the live list (handles race conditions where multiple nodes allocate simultaneously)
      */
     private boolean verifyLockAcquired(List<ClusterNode> liveList) {
-        if (liveList.size() != 1) {
-            log.debug("Multiple live nodes detected (size: {}), skipping aggregation", liveList.size());
-            return false;
-        }
-        
-        ClusterNode liveNode = liveList.get(0);
         String ourLockKey = clusterNodeService.getLockKey();
-        if (ourLockKey.equals(liveNode.getLockKey())) {
-            log.info("Acquired lock for FIDO2 metrics aggregation on cluster node {}", liveNode.getId());
-            return true;
-        } else {
-            log.debug("Lock acquired by another node (lock key mismatch)");
-            return false;
+        for (ClusterNode liveNode : liveList) {
+            if (ourLockKey.equals(liveNode.getLockKey())) {
+                log.info("Acquired lock for FIDO2 metrics aggregation on cluster node {}", liveNode.getId());
+                return true;
+            }
         }
+        log.debug("Lock not acquired (our lock key not found in {} live nodes)", liveList.size());
+        return false;
     }
     
     /**
@@ -351,6 +350,7 @@ public class Fido2MetricsAggregationScheduler {
      * Cleanup resources on shutdown
      * Shutdown the executor service used for periodic lock updates
      */
+    @PreDestroy
     public void releaseClusterNode() {
         try {
             updateExecutor.shutdown();
