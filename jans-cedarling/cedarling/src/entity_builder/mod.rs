@@ -18,11 +18,12 @@ mod built_entities;
 mod entity_id_getters;
 mod error;
 mod schema;
-mod value_to_expr;
+pub(crate) mod value_to_expr;
 
 use crate::authz::AuthorizeEntitiesData;
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
+use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::normalize_issuer;
 use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
@@ -304,7 +305,7 @@ pub struct EntityBuilder {
     config: EntityBuilderConfig,
     iss_entities: HashMap<Origin, Entity>,
     schema: Option<MappingSchema>,
-    default_entities: HashMap<EntityUid, Entity>,
+    default_entities: DefaultEntities,
 }
 
 impl EntityBuilder {
@@ -312,7 +313,7 @@ impl EntityBuilder {
         config: EntityBuilderConfig,
         trusted_issuers: &HashMap<String, TrustedIssuer>,
         schema: Option<&ValidatorSchema>,
-        default_entities_data: Option<&HashMap<String, Value>>,
+        default_entities: DefaultEntities,
         namespace: Option<&str>,
         logger: Logger,
     ) -> Result<Self, InitEntityBuilderError> {
@@ -331,14 +332,6 @@ impl EntityBuilder {
         }
 
         let iss_entities = ok.into_iter().collect::<HashMap<Origin, Entity>>();
-
-        // Parse default entities if provided
-        let default_entities = if let Some(entities_data) = default_entities_data {
-            parse_default_entities(entities_data, namespace, logger)
-                .map_err(|e| InitEntityBuilderError::BuildIssEntities(vec![e].into()))?
-        } else {
-            HashMap::new()
-        };
 
         Ok(Self {
             config,
@@ -403,7 +396,7 @@ impl EntityBuilder {
         };
 
         let mut resource = self.build_resource_entity(resource_data)?;
-        if let Some(resource_default_entity) = self.default_entities.get(&resource.uid())
+        if let Some(resource_default_entity) = self.default_entities.inner.get(&resource.uid())
             && resource_data.attributes.is_empty()
         {
             resource = resource_default_entity.clone()
@@ -698,7 +691,7 @@ mod test {
             config,
             &issuers,
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
             None,
             TEST_LOGGER.clone(),
         )
@@ -790,7 +783,7 @@ mod test {
         let schema = ValidatorSchema::from_str(schema_src).expect("should parse schema");
 
         // Create default entities data
-        let default_entities_data = HashMap::from([
+        let default_entities_data: HashMap<String, Value> = HashMap::from([
             (
                 "1694c954f8d9".to_string(),
                 json!({
@@ -831,7 +824,7 @@ mod test {
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
 
         // Create tokens
-        let tokens = HashMap::from([(
+        let tokens: HashMap<String, Arc<Token>> = HashMap::from([(
             "id_token".to_string(),
             Arc::new(Token::new(
                 "id_token",
@@ -857,7 +850,7 @@ mod test {
             config,
             &trusted_issuers,
             Some(&schema),
-            Some(&default_entities_data),
+            DefaultEntities::from_hashmap(&default_entities_data),
             None,
             TEST_LOGGER.clone(),
         )
@@ -879,7 +872,7 @@ mod test {
 
         // Verify default entities are included
         assert_eq!(
-            entities_data.default_entities.len(),
+            entities_data.default_entities.inner.len(),
             2,
             "should have 2 default entities"
         );
@@ -935,7 +928,7 @@ mod test {
 
         // Verify all default entities are present and accessible
         assert_eq!(
-            entities_data.default_entities.len(),
+            entities_data.default_entities.inner.len(),
             2,
             "should have 2 default entities"
         );
@@ -1028,7 +1021,7 @@ mod test {
             config,
             &trusted_issuers,
             Some(&validator_schema),
-            Some(&default_entities_data),
+            DefaultEntities::from_hashmap(&default_entities_data),
             None,
             TEST_LOGGER.clone(),
         )
@@ -1176,7 +1169,7 @@ mod test {
             config,
             &trusted_issuers,
             Some(&validator_schema),
-            Some(&default_entities_data),
+            DefaultEntities::from_hashmap(&default_entities_data),
             None,
             TEST_LOGGER.clone(),
         )
@@ -1368,7 +1361,7 @@ mod test {
             config,
             &trusted_issuers,
             Some(&validator_schema),
-            Some(&default_entities_data),
+            DefaultEntities::from_hashmap(&default_entities_data),
             None,
             TEST_LOGGER.clone(),
         )

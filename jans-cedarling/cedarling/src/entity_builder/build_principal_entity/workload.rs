@@ -171,7 +171,7 @@ mod test {
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
             None,
             TEST_LOGGER.clone(),
         )
@@ -248,7 +248,7 @@ mod test {
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
             None,
             TEST_LOGGER.clone(),
         )
@@ -310,7 +310,7 @@ mod test {
             EntityBuilderConfig::default().with_workload(),
             &issuers,
             None,
-            None,
+            DefaultEntities::default(),
             None,
             TEST_LOGGER.clone(),
         )

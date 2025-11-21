@@ -48,7 +48,7 @@ mod test {
             EntityBuilderConfig::default(),
             &HashMap::new(),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
-            None,
+            DefaultEntities::default(),
             None,
             TEST_LOGGER.clone(),
         )
@@ -96,7 +96,7 @@ mod test {
             EntityBuilderConfig::default(),
             &HashMap::new(),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
-            None,
+            DefaultEntities::default(),
             None,
             TEST_LOGGER.clone(),
         )

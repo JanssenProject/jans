@@ -99,7 +99,7 @@ mod test {
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
             None,
             TEST_LOGGER.clone(),
         )
@@ -145,7 +145,7 @@ mod test {
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
             None,
             TEST_LOGGER.clone(),
         )
@@ -201,7 +201,7 @@ mod test {
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
             None,
             TEST_LOGGER.clone(),
         )

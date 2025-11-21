@@ -114,7 +114,7 @@ mod test {
             EntityBuilderConfig::default(),
             &issuers,
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
             None,
             TEST_LOGGER.clone(),
         )
@@ -168,7 +168,7 @@ mod test {
             EntityBuilderConfig::default(),
             &issuers,
             None,
-            None,
+            DefaultEntities::default(),
             None,
             TEST_LOGGER.clone(),
         )
