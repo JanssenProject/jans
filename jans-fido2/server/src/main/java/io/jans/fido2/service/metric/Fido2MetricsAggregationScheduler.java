@@ -20,7 +20,11 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Scheduler service for FIDO2 metrics aggregation
@@ -42,8 +46,8 @@ public class Fido2MetricsAggregationScheduler {
     @Inject
     private Fido2ClusterNodeService clusterNodeService;
 
-    // Cluster node for distributed locking (AtomicReference ensures thread-safe operations)
-    private final AtomicReference<ClusterNode> clusterNode = new AtomicReference<>();
+    // Scheduled executor for periodic lock updates during aggregation
+    private final ScheduledExecutorService updateExecutor = Executors.newScheduledThreadPool(1);
 
     /**
      * Job for hourly aggregation
@@ -68,15 +72,24 @@ public class Fido2MetricsAggregationScheduler {
                         return;
                     }
 
-                    // Process the previous hour to ensure data is complete
-                    LocalDateTime previousHour = LocalDateTime.now().minusHours(1)
-                        .truncatedTo(ChronoUnit.HOURS);
-                    
-                    // Persist aggregation to database immediately
-                    metricsService.createHourlyAggregation(previousHour);
-                    
-                    // Log completion for monitoring
-                    log.info("Hourly aggregation completed for: {}", previousHour);
+                    // Start periodic lock updates to keep lock alive during aggregation
+                    java.util.concurrent.ScheduledFuture<?> updateTask = scheduler.startPeriodicLockUpdates();
+                    try {
+                        // Process the previous hour to ensure data is complete
+                        LocalDateTime previousHour = LocalDateTime.now().minusHours(1)
+                            .truncatedTo(ChronoUnit.HOURS);
+                        
+                        // Persist aggregation to database immediately
+                        metricsService.createHourlyAggregation(previousHour);
+                        
+                        // Log completion for monitoring
+                        log.info("Hourly aggregation completed for: {}", previousHour);
+                    } finally {
+                        // Cancel periodic updates when aggregation is done
+                        if (updateTask != null) {
+                            updateTask.cancel(false);
+                        }
+                    }
                 }
             } catch (Exception e) {
                 // Log error but don't fail the job to prevent cluster issues
@@ -106,10 +119,19 @@ public class Fido2MetricsAggregationScheduler {
                         return;
                     }
 
-                    LocalDateTime previousDay = LocalDateTime.now().minusDays(1)
-                        .truncatedTo(ChronoUnit.DAYS);
-                    metricsService.createDailyAggregation(previousDay);
-                    log.info("Daily aggregation completed for: {}", previousDay);
+                    // Start periodic lock updates to keep lock alive during aggregation
+                    java.util.concurrent.ScheduledFuture<?> updateTask = scheduler.startPeriodicLockUpdates();
+                    try {
+                        LocalDateTime previousDay = LocalDateTime.now().minusDays(1)
+                            .truncatedTo(ChronoUnit.DAYS);
+                        metricsService.createDailyAggregation(previousDay);
+                        log.info("Daily aggregation completed for: {}", previousDay);
+                    } finally {
+                        // Cancel periodic updates when aggregation is done
+                        if (updateTask != null) {
+                            updateTask.cancel(false);
+                        }
+                    }
                 }
             } catch (Exception e) {
                 log.error("Failed to execute daily aggregation: {}", e.getMessage(), e);
@@ -138,11 +160,20 @@ public class Fido2MetricsAggregationScheduler {
                         return;
                     }
 
-                    LocalDateTime previousWeek = LocalDateTime.now().minusWeeks(1)
-                        .with(java.time.DayOfWeek.MONDAY)
-                        .truncatedTo(ChronoUnit.DAYS);
-                    metricsService.createWeeklyAggregation(previousWeek);
-                    log.info("Weekly aggregation completed for: {}", previousWeek);
+                    // Start periodic lock updates to keep lock alive during aggregation
+                    java.util.concurrent.ScheduledFuture<?> updateTask = scheduler.startPeriodicLockUpdates();
+                    try {
+                        LocalDateTime previousWeek = LocalDateTime.now().minusWeeks(1)
+                            .with(java.time.DayOfWeek.MONDAY)
+                            .truncatedTo(ChronoUnit.DAYS);
+                        metricsService.createWeeklyAggregation(previousWeek);
+                        log.info("Weekly aggregation completed for: {}", previousWeek);
+                    } finally {
+                        // Cancel periodic updates when aggregation is done
+                        if (updateTask != null) {
+                            updateTask.cancel(false);
+                        }
+                    }
                 }
             } catch (Exception e) {
                 log.error("Failed to execute weekly aggregation: {}", e.getMessage(), e);
@@ -171,11 +202,20 @@ public class Fido2MetricsAggregationScheduler {
                         return;
                     }
 
-                    LocalDateTime previousMonth = LocalDateTime.now().minusMonths(1)
-                        .withDayOfMonth(1)
-                        .truncatedTo(ChronoUnit.DAYS);
-                    metricsService.createMonthlyAggregation(previousMonth);
-                    log.info("Monthly aggregation completed for: {}", previousMonth);
+                    // Start periodic lock updates to keep lock alive during aggregation
+                    java.util.concurrent.ScheduledFuture<?> updateTask = scheduler.startPeriodicLockUpdates();
+                    try {
+                        LocalDateTime previousMonth = LocalDateTime.now().minusMonths(1)
+                            .withDayOfMonth(1)
+                            .truncatedTo(ChronoUnit.DAYS);
+                        metricsService.createMonthlyAggregation(previousMonth);
+                        log.info("Monthly aggregation completed for: {}", previousMonth);
+                    } finally {
+                        // Cancel periodic updates when aggregation is done
+                        if (updateTask != null) {
+                            updateTask.cancel(false);
+                        }
+                    }
                 }
             } catch (Exception e) {
                 log.error("Failed to execute monthly aggregation: {}", e.getMessage(), e);
@@ -248,85 +288,134 @@ public class Fido2MetricsAggregationScheduler {
     /**
      * Check if this node should perform aggregation
      * In cluster environments, only one node should perform aggregation to avoid conflicts
-     * Uses distributed locking via ClusterNode
+     * Uses distributed locking via ClusterNode with getClusterNodesLive() pattern
      * Synchronized to prevent race conditions between concurrent job threads
      */
     public synchronized boolean shouldPerformAggregation() {
         try {
-            // If we don't have a cluster node, try to allocate one
-            ClusterNode node = clusterNode.get();
-            if (node == null) {
-                node = clusterNodeService.allocate();
-                if (node == null) {
+            // Step 1: Get list of live cluster nodes (nodes updated within last 3 minutes)
+            List<ClusterNode> liveList = clusterNodeService.getClusterNodesLive();
+            
+            // Step 2: If there are no live nodes, try to acquire the lock
+            if (liveList.size() == 0) {
+                // Try to allocate a cluster node (acquire lock)
+                ClusterNode allocatedNode = clusterNodeService.allocate();
+                if (allocatedNode == null) {
                     log.debug("Failed to allocate cluster node for FIDO2 metrics aggregation");
                     return false;
                 }
-                clusterNode.set(node);
-                log.info("Allocated cluster node {} for FIDO2 metrics aggregation", node.getId());
+                
+                // Step 3: Verify we got the lock by checking live list again
+                liveList = clusterNodeService.getClusterNodesLive();
+                
+                // Step 4: Verify we're the only live node and lock is ours
+                if (liveList.size() == 1) {
+                    ClusterNode liveNode = liveList.get(0);
+                    String ourLockKey = clusterNodeService.getLockKey();
+                    if (ourLockKey.equals(liveNode.getLockKey())) {
+                        log.info("Acquired lock for FIDO2 metrics aggregation on cluster node {}", liveNode.getId());
+                        return true;
+                    } else {
+                        log.debug("Lock acquired by another node (lock key mismatch)");
+                        return false;
+                    }
+                } else {
+                    log.debug("Multiple live nodes detected (size: {}), skipping aggregation", liveList.size());
+                    return false;
+                }
+            } else {
+                // There are already live nodes - check if we hold the lock
+                String ourLockKey = clusterNodeService.getLockKey();
+                for (ClusterNode liveNode : liveList) {
+                    if (ourLockKey.equals(liveNode.getLockKey())) {
+                        // We hold the lock
+                        log.debug("Already holding lock for FIDO2 metrics aggregation on cluster node {}", liveNode.getId());
+                        return true;
+                    }
+                }
+                // Another node holds the lock
+                log.debug("Another node holds the lock for FIDO2 metrics aggregation ({} live nodes)", liveList.size());
+                return false;
             }
-
-            // Refresh the node to keep the lock alive
-            clusterNodeService.refresh(node);
-
-            // Verify we still hold the lock
-            ClusterNode currentNode = clusterNodeService.getClusterNodeByDn(node.getDn());
-            if (currentNode == null || !clusterNodeService.hasLock(currentNode)) {
-                log.warn("Lost lock on cluster node {}. Attempting to re-allocate...", node.getId());
-                node = clusterNodeService.allocate();
-                clusterNode.set(node);
-                return node != null;
-            }
-
-            return true;
         } catch (Exception e) {
             log.error("Error checking aggregation lock", e);
             return false;
         }
     }
-
+    
     /**
-     * Initialize cluster node for this server instance
-     * Called during application startup
-     * Synchronized to prevent race conditions with shouldPerformAggregation()
+     * Start periodic updates to keep the lock alive during aggregation work
+     * Should be called at the start of aggregation work
+     * 
+     * @return ScheduledFuture that can be used to cancel the updates
      */
-    public synchronized void initializeClusterNode() {
-        if (!isAggregationEnabled()) {
-            log.info("FIDO2 metrics aggregation is disabled");
-            return;
-        }
-
+    public ScheduledFuture<?> startPeriodicLockUpdates() {
         try {
-            // First, clean up any orphaned locks from previous server instances
-            clusterNodeService.cleanupOrphanedLocks();
+            // Get the current live node that we hold
+            List<ClusterNode> liveList = clusterNodeService.getClusterNodesLive();
+            String ourLockKey = clusterNodeService.getLockKey();
             
-            // Then allocate a cluster node for this instance
-            ClusterNode node = clusterNodeService.allocate();
-            clusterNode.set(node);
-            if (node != null) {
-                log.info("Initialized cluster node {} for FIDO2 metrics aggregation", node.getId());
-            } else {
-                log.warn("Failed to initialize cluster node for FIDO2 metrics aggregation");
+            ClusterNode ourNode = null;
+            for (ClusterNode node : liveList) {
+                if (ourLockKey.equals(node.getLockKey())) {
+                    ourNode = node;
+                    break;
+                }
             }
+            
+            if (ourNode == null) {
+                log.warn("Cannot start periodic lock updates - we don't hold the lock");
+                return null;
+            }
+            
+            final ClusterNode nodeToUpdate = ourNode;
+            
+            // Schedule updates every 30 seconds to keep the lock alive
+            return updateExecutor.scheduleAtFixedRate(() -> {
+                try {
+                    // Refresh the node timestamp to keep it alive
+                    clusterNodeService.refresh(nodeToUpdate);
+                    log.trace("Updated lock timestamp for cluster node {}", nodeToUpdate.getId());
+                } catch (Exception e) {
+                    log.error("Failed to update lock timestamp for cluster node {}: {}", 
+                        nodeToUpdate.getId(), e.getMessage(), e);
+                }
+            }, 30, 30, TimeUnit.SECONDS);
         } catch (Exception e) {
-            log.error("Error initializing cluster node", e);
+            log.error("Failed to start periodic lock updates: {}", e.getMessage(), e);
+            return null;
         }
     }
 
     /**
-     * Release cluster node lock
-     * Called during application shutdown
-     * Synchronized to prevent race conditions with shouldPerformAggregation()
+     * Initialize cluster node service
+     * Called during application startup
+     * With the new pattern, we don't need to pre-allocate a node
+     * The lock is acquired on-demand when aggregation jobs run
      */
-    public synchronized void releaseClusterNode() {
-        ClusterNode node = clusterNode.get();
-        if (node != null) {
-            try {
-                clusterNodeService.releaseLock(node);
-                log.info("Released cluster node {} for FIDO2 metrics aggregation", node.getId());
-                clusterNode.set(null);
-            } catch (Exception e) {
-                log.error("Error releasing cluster node", e);
+    public void initializeClusterNode() {
+        if (!isAggregationEnabled()) {
+            log.info("FIDO2 metrics aggregation is disabled");
+            return;
+        }
+        log.info("FIDO2 metrics aggregation enabled - locks will be acquired on-demand");
+    }
+
+    /**
+     * Cleanup resources on shutdown
+     * Shutdown the executor service used for periodic lock updates
+     */
+    public void releaseClusterNode() {
+        try {
+            updateExecutor.shutdown();
+            if (!updateExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                updateExecutor.shutdownNow();
             }
+            log.info("Shutdown periodic lock update executor for FIDO2 metrics aggregation");
+        } catch (InterruptedException e) {
+            updateExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+            log.warn("Interrupted while shutting down lock update executor", e);
         }
     }
 }
