@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
  * @author FIDO2 Team
  */
 @ExtendWith(MockitoExtension.class)
-public class Fido2MetricsTrendAnalysisTest {
+class Fido2MetricsTrendAnalysisTest {
 
     @Mock
     private Logger log;
