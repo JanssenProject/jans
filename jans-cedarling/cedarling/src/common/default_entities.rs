@@ -101,11 +101,11 @@ impl<'de> Deserialize<'de> for DefaultEntitiesWithWarns {
                 // check size of base64 string
                 let _ = limits
                     .validate_default_entity(&entry_id, &raw_value)
-                    .map_err(|e| D::Error::custom(e));
+                    .map_err(D::Error::custom);
                 // check size of HashMap
                 let _ = limits
                     .validate_entities_count(&default_entities)
-                    .map_err(|e| D::Error::custom(e));
+                    .map_err(D::Error::custom);
 
                 // first decode from base64
                 let b64 = raw_value.as_str().ok_or_else(|| {
@@ -140,7 +140,7 @@ impl<'de> Deserialize<'de> for DefaultEntitiesWithWarns {
                     })?;
 
                 let entity = parse_single_entity(None, &mut warns, &entry_id, &entity_data)
-                    .map_err(|err| D::Error::custom(err))?;
+                    .map_err(D::Error::custom)?;
                 default_entities.insert(entity.uid().clone(), entity);
             }
 

@@ -10,20 +10,20 @@ pub enum DefaultEntitiesLimitsError {
     #[error(
         "Cedar entity data size ({size}) for default entity '{entity_id}' exceeds maximum allowed size ({max_size})"
     )]
-    EntityDataSizeExceeded {
+    DataSizeExceeded {
         entity_id: String,
         size: usize,
         max_size: usize,
     },
     #[error("Maximum number of default entities ({max_entities}) exceeded, found {found}")]
-    EntityCountExceeded { max_entities: usize, found: usize },
+    CountExceeded { max_entities: usize, found: usize },
     #[error(
         "Could not convert cedar entity '{entity_id}' to JSON value for size validation: {source}"
     )]
-    EntityConversionError {
+    ConversionError {
         entity_id: String,
         #[source]
-        source: EntitiesError,
+        source: Box<EntitiesError>,
     },
 }
 
@@ -57,7 +57,7 @@ impl DefaultEntitiesLimits {
         entity_str: &str,
     ) -> Result<(), DefaultEntitiesLimitsError> {
         if entity_str.len() > self.max_base64_size {
-            Err(DefaultEntitiesLimitsError::EntityDataSizeExceeded {
+            Err(DefaultEntitiesLimitsError::DataSizeExceeded {
                 entity_id: entity_id.to_string(),
                 size: entity_str.len(),
                 max_size: self.max_base64_size,
@@ -85,7 +85,7 @@ impl DefaultEntitiesLimits {
     ) -> Result<(), DefaultEntitiesLimitsError> {
         // Check entity count limit
         if entities.len() > self.max_entities {
-            Err(DefaultEntitiesLimitsError::EntityCountExceeded {
+            Err(DefaultEntitiesLimitsError::CountExceeded {
                 max_entities: self.max_entities,
                 found: entities.len(),
             })
@@ -103,9 +103,9 @@ impl DefaultEntitiesLimits {
 
         for (euid, e) in entities {
             let json_entity_data = e.to_json_string().map_err(|source| {
-                DefaultEntitiesLimitsError::EntityConversionError {
+                DefaultEntitiesLimitsError::ConversionError {
                     entity_id: euid.to_string(),
-                    source,
+                    source: Box::new(source),
                 }
             })?;
             self.validate_default_entity_data_size(euid.to_string().as_str(), &json_entity_data)?;
