@@ -5,6 +5,7 @@
 
 use std::{collections::HashMap, sync::Arc};
 
+use super::errors::IdTokenTrustModeError;
 use crate::jwt::{Token, TokenClaimTypeError};
 
 /// Enforces the trust mode setting set by the `CEDARLING_ID_TOKEN_TRUST_MODE`
@@ -97,24 +98,6 @@ fn get_tkn_claim_as_str(
                 .map(|s| s.into())
                 .map_err(|e| IdTokenTrustModeError::TokenClaimTypeError(token.name.clone(), e))
         })
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum IdTokenTrustModeError {
-    #[error("the access token's `client_id` does not match with the id token's `aud`")]
-    AccessTokenClientIdMismatch,
-    #[error("an access token is required when using strict mode")]
-    MissingAccessToken,
-    #[error("an id token is required when using strict mode")]
-    MissingIdToken,
-    #[error("the id token's `sub` does not match with the userinfo token's `sub`")]
-    SubMismatchIdTokenUserinfo,
-    #[error("the access token's `client_id` does not match with the userinfo token's `aud`")]
-    ClientIdUserinfoAudMismatch,
-    #[error("missing a required claim `{0}` from `{1}` token")]
-    MissingRequiredClaim(String, String),
-    #[error("invalid claim type in {0} token: {1}")]
-    TokenClaimTypeError(String, TokenClaimTypeError),
 }
 
 #[cfg(test)]
