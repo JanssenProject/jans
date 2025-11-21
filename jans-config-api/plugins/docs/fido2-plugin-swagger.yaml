@@ -37,6 +37,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
     put:
       tags:
       - Fido2 - Configuration
@@ -63,6 +69,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /fido2/registration/id/{jansId}:
     get:
       tags:
@@ -141,6 +151,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
     delete:
       tags:
       - Fido2 - Registration
@@ -180,6 +196,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.delete
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/delete-all
   /fido2/registration/entries/{username}:
     get:
       tags:
@@ -333,6 +353,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /fido2/registration:
     get:
       tags:
@@ -523,6 +549,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
 components:
   schemas:
     AppConfiguration:

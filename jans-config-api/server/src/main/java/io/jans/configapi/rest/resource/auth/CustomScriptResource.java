@@ -71,15 +71,20 @@ public class CustomScriptResource extends ConfigBaseResource {
     ConfigurationService configurationService;
 
     @Operation(summary = "Gets a list of custom scripts", description = "Gets a list of custom scripts", operationId = "get-config-scripts", tags = {
-            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SCRIPTS_READ_ACCESS }))
+            "Custom Scripts" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getAllCustomScripts(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -102,8 +107,12 @@ public class CustomScriptResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Fetch custom script by name", description = "Fetch custom script by name", operationId = "get-custom-script-by-name", tags = {
-            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SCRIPTS_READ_ACCESS }))
+            "Custom Scripts" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "CustomScript", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-by-name.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -112,7 +121,8 @@ public class CustomScriptResource extends ConfigBaseResource {
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.NAME + ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getCustomScriptByName(
             @Parameter(description = "Script name") @PathParam(ApiConstants.NAME) @NotNull String name) {
 
@@ -128,8 +138,12 @@ public class CustomScriptResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Gets list of scripts by type", description = "Gets list of scripts by type", operationId = "get-config-scripts-by-type", tags = {
-            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SCRIPTS_READ_ACCESS }))
+            "Custom Scripts" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-by-type.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -138,7 +152,8 @@ public class CustomScriptResource extends ConfigBaseResource {
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.TYPE + ApiConstants.TYPE_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getCustomScriptsByTypePattern(
             @Parameter(description = "Script type") @PathParam(ApiConstants.TYPE) @NotNull String type,
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
@@ -162,8 +177,12 @@ public class CustomScriptResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Gets a script by Inum", description = "Gets a script by Inum", operationId = "get-config-scripts-by-inum", tags = {
-            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SCRIPTS_READ_ACCESS }))
+            "Custom Scripts" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-by-id.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -172,7 +191,8 @@ public class CustomScriptResource extends ConfigBaseResource {
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.INUM + PATH_SEPARATOR + ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getCustomScriptByInum(
             @Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
@@ -192,8 +212,10 @@ public class CustomScriptResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Adds a new custom script", description = "Adds a new custom script", operationId = "post-config-scripts", tags = {
-            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SCRIPTS_WRITE_ACCESS }))
+            "Custom Scripts" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "CustomScript object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class), examples = @ExampleObject(name = "Request json example", value = "example/auth/scripts/scripts.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-response.json"))),
@@ -202,7 +224,7 @@ public class CustomScriptResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.SCRIPTS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createScript(@Valid CustomScript customScript,
             @Parameter(description = "Boolean flag to indicate if script template is to be added. If CustomScript request object has script populated then script template will not be added.") @DefaultValue("false") @QueryParam(value = ApiConstants.ADD_SCRIPT_TEMPLATE) boolean addScriptTemplate) {
         logger.info("Custom Script to create - customScript:{}, addScriptTemplate:{}", customScript, addScriptTemplate);
@@ -232,8 +254,10 @@ public class CustomScriptResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Updates a custom script", description = "Updates a custom script", operationId = "put-config-scripts", tags = {
-            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SCRIPTS_WRITE_ACCESS }))
+            "Custom Scripts" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "CustomScript object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class), examples = @ExampleObject(name = "Request json example", value = "example/auth/scripts/scripts.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-response.json"))),
@@ -242,7 +266,7 @@ public class CustomScriptResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.SCRIPTS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateScript(@Valid @NotNull CustomScript customScript) {
         logger.debug("Custom Script to update - customScript:{}", customScript);
         CustomScript existingScript = customScriptService.getScriptByInum(customScript.getInum());
@@ -266,8 +290,10 @@ public class CustomScriptResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Deletes a custom script", description = "Deletes a custom script", operationId = "delete-config-scripts-by-inum", tags = {
-            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SCRIPTS_DELETE_ACCESS }))
+            "Custom Scripts" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
@@ -275,7 +301,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_DELETE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+            ApiAccessConstants.SCRIPTS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteScript(
             @Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         try {
@@ -298,8 +324,10 @@ public class CustomScriptResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Patches a custom script", description = "Patches a custom script", operationId = "patch-config-scripts-by-inum", tags = {
-            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SCRIPTS_WRITE_ACCESS }))
+            "Custom Scripts" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/auth/scripts/scripts-patch.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class))),
@@ -309,7 +337,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.SCRIPTS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchScript(
             @Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
@@ -336,8 +364,12 @@ public class CustomScriptResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Fetch custom script types", description = "Fetch custom script types", operationId = "get-custom-script-type", tags = {
-            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SCRIPTS_READ_ACCESS }))
+            "Custom Scripts" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScriptType.class)), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-types.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -346,7 +378,8 @@ public class CustomScriptResource extends ConfigBaseResource {
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.TYPES)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getCustomScriptTypes() {
         logger.info("Fetch type of custom script ");
         List<CustomScriptType> customScriptTypes = Arrays.asList(CustomScriptType.values());
@@ -355,8 +388,12 @@ public class CustomScriptResource extends ConfigBaseResource {
     }
     
     @Operation(summary = "Fetch custom script types", description = "Fetch custom script types", operationId = "get-custom-script-types", tags = {
-            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SCRIPTS_READ_ACCESS }))
+            "Custom Scripts" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-types.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -365,7 +402,8 @@ public class CustomScriptResource extends ConfigBaseResource {
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.SCRIPTS_TYPES)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SCRIPTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getCustomScriptTypesDetails() {
         logger.info("Fetch type of custom script ");
 

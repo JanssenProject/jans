@@ -12,8 +12,9 @@ public class Constants {
 
     public static final String KC_LINK_CONFIG = "/kcLinkConfig";
 	
-	
+    public static final String KC_ADMIN_ACCESS = "https://jans.io/oauth/config/kc-link.admin";
 	public static final String KC_LINK_CONFIG_READ_ACCESS = "https://jans.io/oauth/kc-link-config.readonly";
     public static final String KC_LINK_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/kc-link-config.write";
+
 
 }

@@ -8,6 +8,7 @@ import io.jans.configapi.plugin.saml.model.MetadataSourceType;
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
 import io.jans.configapi.plugin.saml.form.TrustRelationshipForm;
 import io.jans.configapi.plugin.saml.util.Constants;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.plugin.saml.service.SamlService;
 
@@ -57,14 +58,19 @@ public class TrustRelationshipResource extends BaseResource {
     SamlService samlService;
 
     @Operation(summary = "Get all Trust Relationship", description = "Get all TrustRelationship.", operationId = "get-trust-relationships", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_READ_ACCESS }))
+            "SAML - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS }, groupScopes = {
+            Constants.SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAllTrustRelationship() {
         List<TrustRelationship> trustRelationshipList = samlService.getAllTrustRelationships();
         logger.info("All trustRelationshipList:{}", trustRelationshipList);
@@ -72,15 +78,20 @@ public class TrustRelationshipResource extends BaseResource {
     }
 
     @Operation(summary = "Get TrustRelationship by Id", description = "Get TrustRelationship by Id", operationId = "get-trust-relationship-by-id", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_READ_ACCESS }))
+            "SAML - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Trust relationship not found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class))),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS }, groupScopes = {
+            Constants.SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(Constants.ID_PATH + Constants.ID_PATH_PARAM)
     public Response getTrustRelationshipById(
             @Parameter(description = "Unique identifier - Id") @PathParam(Constants.ID) @NotNull String id) {
@@ -103,8 +114,10 @@ public class TrustRelationshipResource extends BaseResource {
     }
 
     @Operation(summary = "Create Trust Relationship with Metadata File", description = "Create Trust Relationship with Metadata File", operationId = "post-trust-relationship-metadata-file", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_WRITE_ACCESS }))
+            "SAML - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationshipForm.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-post.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Newly created Trust Relationship", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
@@ -115,7 +128,7 @@ public class TrustRelationshipResource extends BaseResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/upload")
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            Constants.SAML_WRITE_ACCESS })
+            Constants.SAML_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @POST
     public Response createTrustRelationshipWithFile(@MultipartForm TrustRelationshipForm trustRelationshipForm,
             InputStream metadatafile) throws IOException {
@@ -161,8 +174,10 @@ public class TrustRelationshipResource extends BaseResource {
     }
 
     @Operation(summary = "Update TrustRelationship", description = "Update TrustRelationship", operationId = "put-trust-relationship", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_WRITE_ACCESS }))
+            "SAML - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationshipForm.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-put.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
@@ -170,7 +185,8 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
-    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SAML_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/upload")
     @PUT
@@ -239,13 +255,16 @@ public class TrustRelationshipResource extends BaseResource {
     }
 
     @Operation(summary = "Delete TrustRelationship", description = "Delete TrustRelationship", operationId = "delete-trust-relationship", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_WRITE_ACCESS }))
+            "SAML - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @Path(Constants.ID_PATH_PARAM)
-    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_DELETE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SAML_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @DELETE
     public Response deleteTrustRelationship(
             @Parameter(description = "Unique Id of Trust Relationship") @PathParam(Constants.ID) @NotNull String id) {

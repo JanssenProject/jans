@@ -51,16 +51,20 @@ public class LockStatResource extends BaseResource {
     LockService lockService;
 
     @Operation(summary = "Provides basic statistic", description = "Provides basic statistic", operationId = "get-lock-stat", tags = {
-            "Statistics" }, security = @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_READ_ACCESS,
-                    ApiAccessConstants.JANS_STAT }))
+            "Statistics" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_READ_ACCESS,
+                            ApiAccessConstants.JANS_STAT }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Stats", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonNode.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.LOCK_READ_ACCESS,
-            ApiAccessConstants.JANS_STAT }, groupScopes = {}, superScopes = {
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_STAT }, groupScopes = {}, superScopes = { Constants.LOCK_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatistics(
             @Parameter(description = "Authorization code") @HeaderParam("Authorization") String authorization,

@@ -23,6 +23,7 @@ public class Constants {
 
     public static final String LOCK_READ_ACCESS = "https://jans.io/oauth/lock/read-all";
     public static final String LOCK_WRITE_ACCESS = "https://jans.io/oauth/lock/write-all";
+    public static final String LOCK_ADMIN_ACCESS = "https://jans.io/oauth/config/lock.admin";
 
     public static final String LOCK_CONFIG_READ_ACCESS = "https://jans.io/oauth/lock-config.readonly";
     public static final String LOCK_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/lock-config.write";

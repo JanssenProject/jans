@@ -45,15 +45,19 @@ public class Fido2RegistrationResource extends BaseResource {
     };
 
     @Operation(summary = "Get a list of Fido2RegistrationEntry.", description = "Get a list of Fido2RegistrationEntry.", operationId = "search-fido2-registration-data", tags = {
-            "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.FIDO2_CONFIG_READ_ACCESS }))
+            "Fido2 - Registration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2RegistrationEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-registration-data.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getFido2RegistrationEntry(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -78,8 +82,11 @@ public class Fido2RegistrationResource extends BaseResource {
     }
 
     @Operation(summary = "Fetch Fido2RegistrationEntry by Id.", description = "Fetch Fido2RegistrationEntry by Id.", operationId = "get-fido2-by-id", tags = {
-            "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.FIDO2_CONFIG_READ_ACCESS }))
+            "Fido2 - Registration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2RegistrationEntry.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/get-fido2-by-id.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -87,7 +94,8 @@ public class Fido2RegistrationResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.JANSID_PATH + ApiConstants.JANSID_PATH_PARAM)
     public Response getFido2RegistrationEntryById(
             @Parameter(description = "Fido2Registration identifier") @PathParam(ApiConstants.JANSID) @NotNull String jansId) {
@@ -101,15 +109,20 @@ public class Fido2RegistrationResource extends BaseResource {
     }
 
     @Operation(summary = "Get details of connected FIDO2 devices registered to user", description = "Get details of connected FIDO2 devices registered to user", operationId = "get-registration-entries-fido2", tags = {
-            "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.FIDO2_CONFIG_READ_ACCESS }))
+            "Fido2 - Registration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2RegistrationEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-registration-data.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(Constants.ENTRIES + ApiConstants.USERNAME_PATH)
-    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response findAllRegisteredByUsername(
             @Parameter(description = "User name") @PathParam("username") @NotNull String username) {
         logger.info("FIDO2 registration entries by username.");
@@ -120,8 +133,10 @@ public class Fido2RegistrationResource extends BaseResource {
     }
 
     @Operation(summary = "Delete Fido2 Device Data based on device UID", description = "Delete Fido2 Device Data based on device UID", operationId = "delete-fido2-data", tags = {
-            "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.FIDO2_CONFIG_DELETE_ACCESS }))
+            "Fido2 - Registration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -129,7 +144,8 @@ public class Fido2RegistrationResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
     @DELETE
     @Path(ApiConstants.JANSID_PATH + ApiConstants.JANSID_PATH_PARAM)
-    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_DELETE_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_DELETE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.FIDO2_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteFido2Data(
             @Parameter(description = "Fido2Registration Unique identifier.") @PathParam(ApiConstants.JANSID) @NotNull String jansId) {
         if (logger.isInfoEnabled()) {

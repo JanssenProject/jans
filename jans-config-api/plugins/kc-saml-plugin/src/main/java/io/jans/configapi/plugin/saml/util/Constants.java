@@ -74,6 +74,8 @@ public class Constants {
                     "postBindingAuthnRequest", SINGLE_SIGN_ON_SERVICE_URL, "wantAuthnRequestsSigned",
                     "signingCertificate", "addExtensionsElementWithKeyInfo"));
 
+    public static final String SAML_ADMIN_ACCESS = "https://jans.io/oauth/config/saml.admin";
+    
     // Scopes
     public static final String SAML_READ_ACCESS = "https://jans.io/oauth/config/saml.readonly";
     public static final String SAML_WRITE_ACCESS = "https://jans.io/oauth/config/saml.write";
