@@ -1,4 +1,4 @@
-<h1 align="center"><img src="https://github.com/JanssenProject/jans/blob/main/docs/assets/logo/janssen_project_transparent_630px_182px.png" alt="Janssen Project - Open Source Digital Identity Infrastructure Software"></h1>
+nano README.md<h1 align="center"><img src="https://github.com/JanssenProject/jans/blob/main/docs/assets/logo/janssen_project_transparent_630px_182px.png" alt="Janssen Project - Open Source Digital Identity Infrastructure Software"></h1>
 
 ## Welcome to the Janssen Project
 
@@ -9,7 +9,7 @@ Janssen is a self-funded project chartered directly under the Linux Foundation
 to foster the development of enterprise digital identity and access management 
 infrastructure. As the lead Contributors, the [Gluu team](https://gluu.org) drives the 
 priorities on a day-to-day basis, governed and guided by the Janssen community 
-Technical Steering Commitee.
+Technical Steering Committee.
 
 There are several Janssen Components in different stages of development, from demos 
 to stable releases. Janssen Project software has batteries included. You 
@@ -57,7 +57,7 @@ The table below lists components of the Janssen Project and their
 | **[Jans SCIM](jans-scim)**                   | [SCIM](http://www.simplecloud.info/) JSON/REST [API](https://docs.jans.io/head/admin/reference/openapi/) for user management, including associated FIDO devices.                                                                            | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Jans Config API](jans-config-api)**       | RESTful APIs manage configuration for all Janssen components.                                                                                                                                                                                           | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Text UI ("TUI")](jans-cli-tui)**          | User interface accessible from command line. TUI is text-based interactive configuration tool that leverages config-API to configure Janssen Server modules                                                                                                                                                 | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
-| **[Jans CLI](jans-cli-tui)**                 | Command line configuration tools to help you correctly call the Config API.                                                                                                                                                 | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
+| **[Jans CLI](jans-cli)**                 | Command line configuration tools to help you correctly call the Config API.                                                                                                                                                 | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Jans Casa](jans-casa)**                   | Jans Casa is a self-service web portal for end-users to manage authentication and authorization preferences for their account in the Janssen Server                                                                                         | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Jans KC](jans-keycloak-integration)**     | provides an array of out of the box IAM services in a single lightweight container image. It's handy for many workforce requirements like SAML. The Janssen authenticator module (SPI) simplifies SSO across Janssen and Keycloak websites. | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans LDAP Link](jans-link)**              | a group of components that provide synchronization services to update the Janssen User Store from an external authoritative LDAP data sources                                                                                               | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
@@ -99,7 +99,7 @@ for an introduction on the Janssen development lifecycle.
 
 * If you think you found a security vulnerability, please refrain from posting
 it publicly on the forums, the chat, or GitHub. Instead, email us at
-`security@jans.io`. Refer to [Janssen Security Policy](.github/SECURITY.md)
+`security@jans.io`. Refer to the [Janssen Security Policy](.github/SECURITY.md)
 
 ### Governance
 
@@ -120,7 +120,7 @@ is the main channel for community support. There is also a
 
 ### Releases
 
-Check out the [latest release]((https://github.com/JanssenProject/jans/releases/latest)) of the Janssen Project for new features and updates.
+Check out the [latest release](https://github.com/JanssenProject/jans/releases/latest) of the Janssen Project for new features and updates.
 
 ### Janssen History
 
