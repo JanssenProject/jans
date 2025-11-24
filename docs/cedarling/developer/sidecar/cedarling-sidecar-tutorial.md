@@ -88,14 +88,14 @@ Before you begin, make sure you have the following:
 To begin using Cedarling, you need to set up a policy store. We'll use this [Agama Lab](https://cloud.gluu.org/agama-lab/login) for this purpose.
 
 1. Sign in to [Agama Lab](https://cloud.gluu.org/agama-lab/login) using your GitHub account and click on Policy Designer.
-   ![image](../assets/cedarling-policy-designer.png)
+   ![image](../../../assets/cedarling-policy-designer.png)
 2. Choose a repository to store your Cedarling policies and schemas. Ensure that the repository has at least one commit on the default branch.
-   ![image](../assets/cedarling-select-repo.png)
+   ![image](../../../assets/cedarling-select-repo.png)
 3. After initialization, create a policy store named `gatewayDemo`.
-   ![image](../assets/cedarling-policy-store-name.png)
+   ![image](../../../assets/cedarling-policy-store-name.png)
 4. Open the policy store and navigate to Policies.
 5. Click `Add Policy`, select `Text Editor`.
-   ![image](../assets/cedarling-add-policy.png)
+   ![image](../../../assets/cedarling-add-policy.png)
 6. Paste the following Cedar policy:
 
    ```bash
@@ -118,7 +118,7 @@ To begin using Cedarling, you need to set up a policy store. We'll use this [Aga
    - Description: `Gluu`
    - OpenID Configuration Endpoint: `https://account.gluu.org/.well-known/openid-configuration`
    - Copy the URL for your policy store; you'll need it for the sidecar setup.
-     ![image](../assets/cedarling-copylink.png)
+     ![image](../../../assets/cedarling-copylink.png)
 
 ## Deploy Cedarling Sidecar
 

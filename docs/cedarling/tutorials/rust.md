@@ -78,7 +78,7 @@ let bootstrap_config = BootstrapConfig.from_env();
 let cedarling = Cedarling::new(bootstrap_config)
 ```
 
-See the [bootstrap properties docs](../cedarling-properties.md) for other config loading options.
+See the [bootstrap properties docs](../reference/cedarling-properties.md) for other config loading options.
 
 ### Authorization
 
@@ -291,20 +291,20 @@ let logs = cedarling.pop_logs();
 println!("{:#?}", logs);
 ```
 
-For more detailed logging capabilities, see the [Cedarling Rust Developer Guide](../cedarling-rust.md#log-retrieval).
+For more detailed logging capabilities, see the [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#log-retrieval).
 
 ## Example
 
-Refer to [Cedarling Rust Developer Guide](../cedarling-rust.md#complete-example) 
+Refer to [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#complete-example)
 for a complete code example.
 
 ## Defined API
 
-Please refer to [Cedarling Rust Developer Guide](../cedarling-rust.md#api-reference).
+Please refer to [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#api-reference).
 
 ## See Also
 
-- [Cedarling Rust Developer Guide](../cedarling-rust.md)
-- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-tbac-using-cedarling)
-- [Cedarling Unsigned quickstart](../cedarling-quick-start.md#authorization-using-the-cedarling)
-- [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
+- [Cedarling Rust Developer Guide](../developer/cedarling-rust.md)
+- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-tbac-using-cedarling)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#authorization-using-the-cedarling)
+- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)

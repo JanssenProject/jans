@@ -9,19 +9,19 @@ tags:
 
 **Cedarling** is a lightweight, embeddable Policy Decision Point (PDP) that enables fast, fine-grained, and decentralized access control across modern applications. Built on the Rust-based [Cedar](https://cedarpolicy.com/) engine, Cedarling is designed for both client-side and server-side use, supporting environments like browsers, mobile apps, cloud-native services, and API gateways.
 
-Cedarling supports both [Token-Based Access Control (TBAC)](./cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac) using JWTs and unsigned authorization requests. In both cases, it enforces policies locally for low-latency and consistent Zero Trust security.
+Cedarling supports both [Token-Based Access Control (TBAC)](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac) using JWTs and unsigned authorization requests. In both cases, it enforces policies locally for low-latency and consistent Zero Trust security.
 
 You can integrate Cedarling into your application using the following language libraries:
 
-- [JavaScript](./getting-started/javascript.md)
-- [Python](./getting-started/python.md)
-- [Rust](./getting-started/rust.md)
-- [Kotlin](./getting-started/kotlin.md)
-- [Swift](./getting-started/swift.md)
-- [Golang](./getting-started/go.md)
-- [Java](./getting-started/java.md)
+- [JavaScript](./javascript.md)
+- [Python](./python.md)
+- [Rust](./rust.md)
+- [Kotlin](./kotlin.md)
+- [Swift](./swift.md)
+- [Golang](./go.md)
+- [Java](./java.md)
 
-Alternatively, you can use the [Cedarling Sidecar](./cedarling-sidecar-overview.md) for a drop-in deployment.
+Alternatively, you can use the [Cedarling Sidecar](../developer/sidecar/cedarling-sidecar-overview.md) for a drop-in deployment.
 
 From here, you can either jump directly to the language-specific examples above or continue reading for a high-level overview of how Cedarling works.
 
@@ -42,12 +42,12 @@ The initialization or `init` interface is how you will initialize Cedarling. Ini
 **Bootstrap Configuration**
 
 - A set of properties that will tells how Cedarling behaves within your application.
-- Learn more in the [bootstrap properties guide](./cedarling-properties.md).
+- Learn more in the [bootstrap properties guide](../reference/cedarling-properties.md).
 
 **Policy Store**
 
 - A JSON file containing the schema, policies, trusted issuers, and token metadata schema used for making authorization decisions.
-- Learn more in the [policy store guide](./cedarling-policy-store.md).
+- Learn more in the [policy store guide](../reference/cedarling-policy-store.md).
 
 The bootstrap configuration and policy store directly influence how Cedarling performs [authorization](#authorization).
 
@@ -148,7 +148,7 @@ The authorization, or `authz`, interface is used to evaluate access control deci
 
 > Is this **Action**, on this **Resource**, in this **Context**, allowed for these **Principals**?
 
-When using Cedarling, **Action** and **Resource** are typically defined in the [policy store](./cedarling-policy-store.md), while **Principal** and **Context** are supplied at runtime via the `authz` interface.
+When using Cedarling, **Action** and **Resource** are typically defined in the [policy store](../reference/cedarling-policy-store.md), while **Principal** and **Context** are supplied at runtime via the `authz` interface.
 
 Cedarling currently provides two modes of authorization:
 
@@ -482,9 +482,16 @@ Cedarling currently provides two modes of authorization:
 - This makes authorization decisions by passing a set of **Principals** directly.
 - Similar to the standard interface, the **Context** is passed in as-is in a map-like structure.
 
+**Multi-Issuer Authorization**
+
+- Doesn't use principal and all token information is stored in context.
+- This makes authorization decisions by rules based on context values (token payloads).
+
+[More information](./cedarling-multi-issuer.md)
+
 ### Logging
 
-Cedarling supports logging of both **decision** and **system** events, useful for auditing and troubleshooting. Logging is optional and can be configured (or disabled) via the [bootstrap properties](./cedarling-properties.md).
+Cedarling supports logging of both **decision** and **system** events, useful for auditing and troubleshooting. Logging is optional and can be configured (or disabled) via the [bootstrap properties](../reference/cedarling-properties.md).
 
 ---
 
@@ -492,7 +499,8 @@ Cedarling supports logging of both **decision** and **system** events, useful fo
 
 You're now ready to dive deeper into Cedarling. From here, you could either:
 
-- See how you can use [RBAC with Cedarling](./cedarling-quick-start.md#implement-rbac-using-cedarling).
-- Explore how to use [Cedarling's Unsigned interface](./cedarling-authz.md#unsigned-authorization-authorize_unsigned).
-- Use the [Cedarling Sidecar](./cedarling-sidecar-overview.md) for a quick, zero-code deployment.
-- Learn more about [why Cedarling exists](./README.md#why-zero-trust-needs-cedarlings) and the problems it solves.
+- See how you can use [RBAC with Cedarling using signed tokens](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac).
+- Explore how to use [Cedarling's Unsigned interface](../quick-start/cedarling-quick-start.md#implement-rbac-using-cedarling).
+- Use the [Cedarling Sidecar](../developer/sidecar/cedarling-sidecar-overview.md) for a quick, zero-code deployment.
+- Learn more about [why Cedarling exists](../README.md#why-zero-trust-needs-cedarlings) and the problems it solves.
+ RBAC using signed tokens (TBAC)

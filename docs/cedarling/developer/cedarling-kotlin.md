@@ -2,11 +2,11 @@
 
 [UniFFI](https://mozilla.github.io/uniffi-rs/latest/) (Universal Foreign Function Interface) is a tool developed by Mozilla to simplify cross-language bindings, primarily between Rust and other languages like Kotlin, Swift, and Python. It allows Rust libraries to be used in these languages without manually writing complex foreign function interface (FFI) bindings.
 
-Please refer to [this document](./cedarling-uniffi.md) for details on the structs, enums, and functions exposed by UniFFI bindings. This section outlines the process of generating the Kotlin binding for Cedarling using Cedarling UniFFI. The Kotlin binding is then wrapped in a Java class to enable convenient use in Java applications.
+Please refer to [this document](../developer/mobile-apps/cedarling-uniffi.md) for details on the structs, enums, and functions exposed by UniFFI bindings. This section outlines the process of generating the Kotlin binding for Cedarling using Cedarling UniFFI. The Kotlin binding is then wrapped in a Java class to enable convenient use in Java applications.
 
 ## Building from Source
 
-Apart from using the Cedarling binding [using the package manager](../../getting-started/java/#using-the-package-manager), you 
+Apart from using the Cedarling binding [using the package manager](../tutorials/java.md#using-the-package-manager), you 
 can also build it from source.
 
 ### Prerequisites
@@ -64,14 +64,14 @@ when {
 
 **Steps:** 
 
-- Upload [bootstrap.json](./cedarling-sample-inputs.md/#bootstrapjson) and [policy-store.json](./cedarling-sample-inputs.md/#policy-storejson) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
+- Upload [bootstrap.json](../uniffi/cedarling-sample-inputs.md/#bootstrapjson) and [policy-store.json](../uniffi/cedarling-sample-inputs.md/#policy-storejson) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
 - Upload the generate `cedarling-java-{version}.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
 
 !!! note
     Rather than building the cedarling-java-{version}.jar from source code, you can directly download 
     the latest version of the jar from the [Maven repository](https://maven.jans.io/maven/io/jans/cedarling-java/).
    
-- The following java [Update Token](./cedarling-sample-inputs.md/#sample_cedarling_update_tokenjava) script has been created for calling Cedarling authorization. Enable the script with following Custom Properties:
+- The following java [Update Token](../uniffi/cedarling-sample-inputs.md/#sample_cedarling_update_tokenjava) script has been created for calling Cedarling authorization. Enable the script with following Custom Properties:
    
    |Key|Values|
    |---|------|

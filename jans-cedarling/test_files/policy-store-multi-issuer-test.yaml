@@ -1,0 +1,127 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+cedar_version: v4.0.0
+policy_stores:
+  a1bf93115de86de760ee0bea1d529b521489e5a11747:
+    cedar_version: v4.0.0
+    name: Jans
+    description: A test policy store for multi-issuer authorization testing.
+    trusted_issuers:
+      JansTestIssuer:
+        name: "JansTestIssuer"
+        description: "Test issuer for multi-issuer authorization"
+        openid_configuration_endpoint: "https://test.jans.org/.well-known/openid-configuration"
+        token_metadata:
+          access_token:
+            entity_type_name: "Jans::Access_Token"
+            workload_id: "client_id"
+            principal_mapping:
+              - "Jans::Workload"
+          id_token:
+            entity_type_name: "Jans::Id_Token"
+            principal_mapping:
+              - "Jans::User"
+          userinfo_token:
+            entity_type_name: "Jans::Userinfo_Token"
+            user_id: "sub"
+            principal_mapping:
+              - "Jans::User"
+    policies:
+      840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+        description: Multi-issuer policy example using context tokens
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action in [Jans::Action::"Update"],
+                resource is Jans::Issue
+            )when{
+                context has tokens.janstestissuer_access_token &&
+                context.tokens.janstestissuer_access_token.hasTag("org_id") &&
+                context.tokens.janstestissuer_access_token.getTag("org_id").contains(resource.org_id)
+            };
+      444da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+        description: Multi-issuer policy example using context tokens for user
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action in [Jans::Action::"Update"],
+                resource is Jans::Issue
+            )when{
+                context has tokens.janstestissuer_userinfo_token &&
+                context.tokens.janstestissuer_userinfo_token.hasTag("country") &&
+                context.tokens.janstestissuer_userinfo_token.getTag("country").contains(resource.country)
+            };
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+        namespace Jans {
+          type Url = {"host": String, "path": String, "protocol": String};
+          entity Access_Token = {
+            token_type: String,
+            jti: String,
+              iss: JansTestIssuer::TrustedIssuer,
+            validated_at: Long,
+            exp: Long,
+            sub?: String,
+            aud?: String,
+            org_id?: String,
+          } tags Set<String>;
+          entity Id_Token = {
+            token_type: String,
+            jti: String,
+            iss: JansTestIssuer::TrustedIssuer,
+            validated_at: Long,
+            exp: Long,
+            sub?: String,
+            aud?: String,
+            acr?: String,
+          } tags Set<String>;
+          entity Userinfo_Token = {
+            token_type: String,
+            jti: String,
+            iss: JansTestIssuer::TrustedIssuer,
+            validated_at: Long,
+            exp: Long,
+            sub?: String,
+            aud?: String,
+            country?: String,
+          } tags Set<String>;
+          entity Issue = {"country": String, "org_id": String};
+          entity TrustedIssuer = {"issuer_entity_id": Url};
+          entity User = {"country": String, "email": String, "sub": String, "username": String};
+          entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String, "access_token": Access_Token};
+          action "Update" appliesTo {
+            principal: [Workload, User],
+            resource: [Issue],
+            context: Context
+          };
+          action "DeniedAction" appliesTo {
+            principal: [Workload, User],
+            resource: [Issue],
+            context: Context
+          };
+        }
+        namespace JansTestIssuer {
+          entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
+        }
+        
+        type Context = {
+          tokens: {
+            janstestissuer_access_token?: Jans::Access_Token,
+            janstestissuer_id_token?: Jans::Id_Token,
+            janstestissuer_userinfo_token?: Jans::Userinfo_Token,
+            total_token_count: Long
+          },
+          some_context?: String
+        };

@@ -39,7 +39,7 @@ Except for `code` and `web` directories, all elements in the file structure abov
 
 ### Metadata
 
-`project.json` file is expected to contain metadata about the contents of the project in JSON format. 
+`project.json` file is expected to contain metadata about the contents of the project in JSON format.
 
 |Field|Description|data type|
 |-|-|-|

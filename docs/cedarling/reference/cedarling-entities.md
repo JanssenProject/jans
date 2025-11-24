@@ -19,7 +19,7 @@ Cedarling automatically creates the following entities:
 
 The entity type names of the Workload and User entities can be customized via the `CEDARLING_MAPPING_USER` and `CEDARLING_MAPPING_WORKLOAD` [properties](./cedarling-properties.md) respectively.
 
->  ***Notes***
+> ***Notes***
 >
 > - All entity creation and attribute population logic is configurable via the [Token Metadata Schema (TEMS)](./cedarling-policy-store.md#token-metadata-schema) and [Cedarling bootstrap properties](./cedarling-properties.md).
 > - Attribute presence depends on token contents and policy store configuration.
@@ -29,8 +29,9 @@ The entity type names of the Workload and User entities can be customized via th
 
 Cedarling creates a Trusted Issuer entity at startup for each trusted issuer defined in the [policy store](./cedarling-policy-store.md#trusted-issuers-schema).
 
-- *Default Type Name:* `Jans::TrustedIssuer`
-- *Entity ID:*  Set using the name of the trusted issuer object in the policy store.
+- *Namespace:* Corresponds to the trusted issuer name of the trusted issuer object in the policy store..
+- *Type Name:* `TrustedIssuer`
+- *Entity ID:*  Set using issuer url and corresponds iss in token.
 
 ## Workload Entity
 
@@ -59,9 +60,12 @@ With the following `access_token` claims:
 and Cedar schema:
 
 ```cedarschema
-entity TrustedIssuer;
+namespace Jans{
+  entity TrustedIssuer;
+};
+
 entity Workload = {
-  iss: TrustedIssuer,
+  iss: Jans::TrustedIssuer,
   client_id?: String,
   aud?: String,
   name?: String,
@@ -77,14 +81,13 @@ The following entity Workload Entity could be created:
 {
   "uid": {"type": "Workload", "id": "some_aud"},
   "attrs": {
-    "iss": {"__entity": {"type": "TrustedIssuer", "id": "https://test.com/"}},
+    "iss": {"__entity": {"type": "Jans::TrustedIssuer", "id": "https://test.com/"}},
     "aud": "some_aud"
     "access_token": {"__entity": {"type": "Access_token", "id": "some_jti"}},
   },
   "parents": []
 }
 ```
-
 
 ## User Entity
 
@@ -175,8 +178,7 @@ permit (
 
 ## JWT Entities
 
-Cedarling creates **JWT entities** for each token defined in the [trusted issuers schema](./cedarling-properties.md#trusted-issuers-schema). 
-
+Cedarling creates **JWT entities** for each token defined in the [trusted issuers schema](./cedarling-properties.md#trusted-issuers-schema).
 
 - *Type Name:* Determined by the `entity_type_name` attribute from the [TEMS](./cedarling-policy-store.md#token-metadata-schema).
 - *Entity ID:* Determined by the `token_id` attribute from the [TEMS](./cedarling-policy-store.md#token-metadata-schema).
