@@ -10,9 +10,9 @@ tags:
 
 With this plugin, administrators can onboard a new type of authentication factor consisting of one-time passcodes (OTP) delivered to the user's inbox.
 
-This plugin simply shows a list of the already registered e-mail addresses of the user in the UI of Casa, however the accompanying Agama project contributes a new option in the authentication experience where the user is prompted to enter an OTP delivered to one of his e-mail addresses, if any. 
+This plugin simply shows a list of the already registered e-mail addresses of the user in the UI of Casa, however the accompanying Agama project contributes a new option in the authentication experience where the user is prompted to enter an OTP delivered to one of his e-mail addresses, if any.
 
-By adding the plugin and the corresponding Agama project to your server, all users having at least one e-mail address in his profile (database attribute `mail`) will be given the option to get a passcode delivered and then prompted for such as a form of 2FA. 
+By adding the plugin and the corresponding Agama project to your server, all users having at least one e-mail address in his profile (database attribute `mail`) will be given the option to get a passcode delivered and then prompted for such as a form of 2FA.
 
 ## Requirements
 
@@ -47,7 +47,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
     - `otp_length`: Number of digits the OTPs will have (passcode length)
     - `otp_lifetime`: Passcode expiration in minutes
     - `subject`: Subject to use in e-mail messages. You can use `%s` as a placeholder to insert the value of the generated OTP
-    - `message`: Body of e-mail messages. You can use `%s` as a placeholder to insert the value of the generated OTP. Basic HTML markup is supported; ensure to properly escape characters like double quotes - keep in mind this is JSON content  
+    - `message`: Body of e-mail messages. You can use `%s` as a placeholder to insert the value of the generated OTP. Basic HTML markup is supported; ensure to properly escape characters like double quotes - keep in mind this is JSON content.
 
 1. Parameterize the `casa` project: in the `casa` project configuration, locate the `selector` section under `io.jans.casa.authn.main` flow and add an entry with key `io.jans.casa.authn.emailotp`. Assign an icon and a pointer to a short descriptive text. Example:
 
