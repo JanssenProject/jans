@@ -86,7 +86,7 @@ We need to initialize Cedarling first.
 Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
 
 - [**Token-Based Authorization**](#token-based-authorization) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
-- [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
+- [**Unsigned Authorization**](#custom-principal-authorization-unsigned) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
 
 
 #### Token-Based Authorization
@@ -226,6 +226,7 @@ Defined APIs are listed [here](https://janssenproject.github.io/developer-docs/j
 
 ## See Also
 
-- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-tbac-using-cedarling)
+- [Cedarling TBAC quickstart](../cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
+
 - [Cedarling Unsigned quickstart](../cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
 
