@@ -127,7 +127,7 @@ server for end user authentication.
 
 ## Customizing using Interception Scripts
 
-[Interception scripts](../../../janssen-server/developer/scripts/README.md) allows
+[Interception scripts](../../../janssen-server/developer/scripts/README.md) allow
 flexibility to configure and customize multiple aspects in Janssen Server. For example, see this documentation to learn
 how [person authentication](../../../script-catalog/person_authentication/person-authentication.md)
 and [consent gathering](../../../script-catalog/consent_gathering/consent-gathering.md) can be customized using interception scripts.
