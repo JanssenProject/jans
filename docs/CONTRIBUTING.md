@@ -2,7 +2,7 @@
 
 Purpose of this guide is to provide necessary information and resources to community in order to make successful contribution to the Janssen Project.
 
-There are many ways you can contribute. Of course you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PR's, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild. 
+There are many ways you can contribute. Of course you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PR's, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild.
 
 
 ## Join the Community
@@ -102,7 +102,7 @@ Janssen Project mandates all commits to follow guidelines as below.
   $ git commit -s -m 'This is my commit message'
   ```
 
-In all, if you have your GPG verification setup, your commit command should look like 
+In all, if you have your GPG verification setup, your commit command should look like
 
 ```
 git commit -S -s -m 'message that follows conventional commit style'
@@ -130,7 +130,7 @@ The flow consists of creating a new branch, cherry-picking the changes of the or
 
 #### License Header
 
-The Janssen Project uses Apache-2.0 license. Any existing or new code file 
+The Janssen Project uses Apache-2.0 license. Any existing or new code file
 has to start with the license header as shown below:
 
 ```Text
@@ -142,10 +142,10 @@ has to start with the license header as shown below:
  */
 ```
 
-If the developers [sign a CLA(Contributor License Agreement)]() they can retain 
+If the developers [sign a CLA(Contributor License Agreement)]() they can retain
 the copyright. Once the CLA has been signed, contributions can be accepted
 from the contributor
-with the License header as below. Make sure to replace `[github-username]` with 
+with the License header as below. Make sure to replace `[github-username]` with
 contributor's GitHub username:
 
 ```Text
@@ -159,7 +159,7 @@ contributor's GitHub username:
 
  **Signing the CLA**
 
-The current version of CLA can be found 
+The current version of CLA can be found
 [here](governance/cla.md). This is just for your reference.
 This same CLA will be signed digitally by following the steps below:
 
@@ -191,7 +191,7 @@ Follow the instructions and complete the signing process.
 
 ## Contributing to the documentation
 
-Great documentation is a reflection of software's maturity and the great community that stands behind it. Contributing to the Janssen Project documentation is the easiest way to learn about the Janssen Project and to get involved in the community process. 
+Great documentation is a reflection of software's maturity and the great community that stands behind it. Contributing to the Janssen Project documentation is the easiest way to learn about the Janssen Project and to get involved in the community process.
 
 In order to ensure consistency of style, language, format, and terminology across all documents, please follow the guidelines below:
 
@@ -217,7 +217,7 @@ This glossary helps to keep terms and their meanings consistent across documenta
 
 ### Documentation Style Guide
 
-Janssen Project documentation uses Markdown. Guidelines below are intended to bring consistency in writing and formatting documents. 
+Janssen Project documentation uses Markdown. Guidelines below are intended to bring consistency in writing and formatting documents.
 
 !!! Testing
 
@@ -293,12 +293,12 @@ for previous releases.
  - Leave a blank line between paragraphs. Count a header as a paragraph for this purpose
  - Avoid passive voice as much as possible. It's clearer to say that a subject does something than to say a result was done
  - Avoid using `you` in statements as much as possible. For example, instead of saying `You can navigate to...` simply say `Navigate to...` 
- 
+
 #### Page Setup
  - Start your page with a title on the first line
  - Follow with a concise overview of the document / product's purpose
  - Organize the information in the document from least technical to most technical if possible. Start conceptual, then get detailed
- 
+
 #### Lists
  - Leave a blank line between text and first item in the list
  - Only use a numbered list if the order of the list matters
@@ -321,7 +321,7 @@ for previous releases.
     2. This is the second item
     3. This is the third item
     ```
- 
+
  - To include additional lines in a list item, start the sub-line with four spaces. For example:
  
     ```
@@ -345,7 +345,7 @@ It will look like this:
  **Other formatting considerations**
 
  - Admonitions cannot be nested inside a list. They must be aligned all the way left. Inserting them within a list will break the list sequence (starting back over from 1).
-    
+
  - Nesting a [fenced block of code](#code-formatting) in a numbered list is more challenging, as the list and code block syntaxes clash. To nest a code block into a list, insert four spaces to the left of all lines of the formatting. For example:
 
 ```
@@ -380,10 +380,10 @@ It will look like this:
         This is code
         ```
     ```
-    
+
   - We use the [SuperFences](https://facelessuser.github.io/pymdown-extensions/extensions/superfences/) plugin to enhance this functionality.
-  
-  
+
+
 #### Examples & Navigation
  - When possible, provide an example in the form of code output or a screenshot
  - To instruct a user to click a button, or navigate to a certain page or through a menu, use the following style:
@@ -391,32 +391,32 @@ It will look like this:
      ```
      Navigate to `Configuration` > `Authentication` and click the `Passport` tab
      ```  
- 
-It will look like this:  
- 
+
+It will look like this:
+
 Navigate to `Configuration` > `Authentication` and click the `Passport` tab
- 
+
 #### Linking
 
 We recommend using relative linking syntax when linking to other artifacts in repository. Linking to a page within the same repo use this format: `[text for the link](../where/the/link/goes.md)`
  - You must link to the `.md` file on GitHub for it to work properly
  - As an example, to make text `this link` link to a Markdown document named `example.md` in the same directory, you'd type it as `[this link](./example.md)`
- 
+
 **Service Commands**
 
-The Janssen Server supports many different Operating Systems (e.g. Ubuntu, SUSE etc.). Service commands can vary. Rather than "hard coding" service commands into documentation, please instead reference the dedicated documentation page for [Service Commands](https://jans.io/docs/vm-ops/checking-service-status/). 
+The Janssen Server supports many different Operating Systems (e.g. Ubuntu, SUSE etc.). Service commands can vary. Rather than "hard coding" service commands into documentation, please instead reference the dedicated documentation page for [Service Commands](https://jans.io/docs/vm-ops/checking-service-status/).
 
-In documenting a process that involves a service restart, the Service Command documentation is linked:  
+In documenting a process that involves a service restart, the Service Command documentation is linked:
 
-```  
+```
 ## Add the attribute to MySQL
 
  - Add custom attribute 
  - [Restart](https://jans.io/docs/vm-ops/restarting-services/) the `jans-auth.service` service.
 ```
 
-The word `Restart` is simply linked to the dedicated doc for Service Commands. 
- 
+The word `Restart` is simply linked to the dedicated doc for Service Commands.
+
 #### Tables
  - Try to make tables visually readable by spacing to make distinct columns
  - The header for each column must be separated by at least three dashes
@@ -459,7 +459,7 @@ Take your time to write a proper issue including a good summary and description.
 Remember that issue may be the first thing a reviewer of your PR will look at to get an idea of what you are proposing. It will also be used by the community in the future to find about what new features and enhancements are included in new releases.
 
 ### Implement the change
-All contributions to Janssen Project should be made via Github pull requests(PR). 
+All contributions to Janssen Project should be made via Github pull requests(PR).
 
 > New to PR workflow?? Learn and practice it at [first-contributions](https://github.com/firstcontributions/first-contributions)
 
@@ -468,7 +468,7 @@ Fork [Janssen repository](https://github.com/JanssenProject/jans). And create a 
 
 #### Implement the Change
 
-Start working on changes as required. 
+Start working on changes as required.
 
 - Make sure the [code conventions](#code-conventions-and-guidelines) are being followed.
 - Use static code analysis and linting tools to make sure the code is high-quality.
@@ -490,7 +490,7 @@ To run tests locally before pushing your code, refer to [TESTING] guide.
 of the following :
   - A commit that follows [commit guidelines](#commits) with `docs:` message 
   - Changes in artifacts under `jans/docs`
-  
+
 - If PR does not need any documentation changes, then the developer needs to acknowledge that in one of two ways:
   - Add an empty commit to the PR (using `--allow-empty` git flag) with `docs:` message (i.e `docs: no doc changes required`)
   - Add footer to the commit message of one of the code commits with `docs:` message e.g
@@ -501,7 +501,7 @@ of the following :
 
   docs: no docs modification
   ```
-    
+
 
 ### Raise a PR
 - Make sure that PR title follows these [guidelines](#prs)
@@ -511,7 +511,7 @@ of the following :
 
 ### Follow Through
 
-Once the PR is raised, wait for reviewers to start review. Reviewers will start review at the first opportunity available. If you want to draw attention, give a gentle reminder in PR comments. But please be patient. 
+Once the PR is raised, wait for reviewers to start review. Reviewers will start review at the first opportunity available. If you want to draw attention, give a gentle reminder in PR comments. But please be patient.
 
 Follow activities on your PR closely till the time PR is merged. PR reviewer may want to suggest a change or may need to ask a question to get more clarity. Make sure you are actively collaborating. Once Reviewer has completed the review and approved the changes, the PR will be merged.
 

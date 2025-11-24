@@ -12,7 +12,7 @@ tags:
 # Authorization Using The Cedarling
 
 This quick start guide shows how to quickly test authorization of a user action
-using the Cedarling. We will be using [the application-asserted identity approach](../README.md#token-based-access-control-tbac-v-application-asserted-identity) 
+using the Cedarling. We will be using [the application-asserted identity approach](../README.md#token-based-access-control-tbac-v-application-asserted-identity)
 in this guide to implement role based access control(RBAC). Refer to [this section](#implement-tbac-using-cedarling) to understand how to use Cedarling
 with TBAC approach.
 
@@ -40,7 +40,7 @@ call this approach [the application asserted identity approach](../README.md#tok
 
 ### Step-1: Create the Cedar Policy and Schema
 
-The Cedarling needs policies and a schema to authorize access. These are bundled in a _policy store_ (a JSON file). To aid in this quick start guide, we have already created a 
+The Cedarling needs policies and a schema to authorize access. These are bundled in a _policy store_ (a JSON file). To aid in this quick start guide, we have already created a
 [policy store](https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/refs/heads/main/6d9f73b2d44ad4e7aa8f1182cde9f72dcbaa244f4327.json) at
 [quick start GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart/tree/main).
 We will use this policy store to allow/deny the incoming authorization request.
@@ -100,7 +100,7 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
 4. Click `Save` to initialize the Cedarling. The Cedarling will fetch and validate your policy store during the
 initialization. 
 
-The Cedarling is ready to receive and evaluate authorization requests at this 
+The Cedarling is ready to receive and evaluate authorization requests at this
 stage.
 
 ### Step-3: Test authorization using the Cedarling
@@ -139,9 +139,9 @@ stage.
 
 Leave the `Context` blank.
 
-The request is ready to be sent. Click `Cedarling Authz Request` to send the 
+The request is ready to be sent. Click `Cedarling Authz Request` to send the
 request to the embedded Cedarling. After evaluation of the authorization
-request, the Cedarling will respond with a JSON payload. Similar to what is 
+request, the Cedarling will respond with a JSON payload. Similar to what is
 shown below.
 
 ```JSON title="Sample Response"
@@ -184,10 +184,10 @@ The top-level `decision: false` shows Cedarling denying authorization.
 
 ## Implement RBAC using signed tokens (TBAC)
 
-In this guide, we will use [Token-Based Access Control (TBAC)](../README.md#token-based-access-control-tbac-v-application-asserted-identity) to 
-implement role-based access control (RBAC). 
+In this guide, we will use [Token-Based Access Control (TBAC)](../README.md#token-based-access-control-tbac-v-application-asserted-identity) to
+implement role-based access control (RBAC).
 
-For better understanding of the TBAC flow, see the diagram below. 
+For better understanding of the TBAC flow, see the diagram below.
 
 ??? "TBAC Sequence diagram"
 
@@ -228,8 +228,8 @@ For better understanding of the TBAC flow, see the diagram below.
 
 ### Step-1: Create Cedar Policy and Schema
 
-For this guide, we have created a policy store in the 
-[demo GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart). 
+For this guide, we have created a policy store in the
+[demo GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart).
 
 The policy store has two policies. The first grants access to all actions and all resources to the users with the `Teacher` role. The second allows only `Read` permission to students with the `Student` role to any resource. The two policies are as follows:
 
@@ -253,9 +253,9 @@ permit(
 
 ### Step-2 Update the IDP information
 
-The policy store in the demo repository has information about the IDP that 
-released the tokens. You'll need to fork the demo repository and update the 
-policy store to point it to your IDP instance. Follow the steps below to do 
+The policy store in the demo repository has information about the IDP that
+released the tokens. You'll need to fork the demo repository and update the
+policy store to point it to your IDP instance. Follow the steps below to do
 this.
 
 - Fork the [demo repository](https://github.com/JanssenProject/CedarlingQuickstart). While creating the fork, uncheck the
@@ -279,7 +279,7 @@ this.
     ```
 
 ??? info "Agama Lab: For authoring policies and managing the policy store"
-    
+
     Alternatively, you can also use the Agama Lab For authoring policies and 
     managing the policy stores. 
 
@@ -306,7 +306,7 @@ this.
 
 We will now add the policy store details in the Janssen Tarp that is
 installed in the browser. The Cedarling instance embedded in the Tarp will
-use the policy from the store (from [step-1](#step-1-create-cedar-policy-and-schema)) 
+use the policy from the store (from [step-1](#step-1-create-cedar-policy-and-schema))
 to evaluate the authorization request.
 
 
@@ -354,7 +354,7 @@ Since we are implementing TBAC, we have to authenticate the user first to get th
       - ACR: `basic`
       - Scopes: `openid`, `profile`, `role`
       - Check the `Display access and ID token after authentication` checkbox
-   
+
 3. Click the `Trigger auth flow` button
 3. Login using username and password of a user who has the `Teacher` role assigned in the IDP
 4. Click `Allow` on the consent screen

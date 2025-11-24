@@ -36,7 +36,7 @@ described above.
     ```sh
     go build .
     ```
-    
+
 5. Run the application
 
     - **Windows**
@@ -394,3 +394,4 @@ Auto-generated documentation is available on [pkg.go.dev](https://pkg.go.dev/git
 - [Multi-Issuer Authorization Details](../cedarling-authz.md#multi-issuer-authorization-authorize_multi_issuer)
 - [JWT Mapping for Multi-Issuer](../cedarling-jwt-mapping.md#multi-issuer-jwt-mapping-authorize_multi_issuer)
 - [Policy Store Configuration](../cedarling-policy-store.md#multi-issuer-token-entities)
+

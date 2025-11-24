@@ -180,6 +180,7 @@ permit (
 
 Cedarling creates **JWT entities** for each token defined in the [trusted issuers schema](./cedarling-properties.md#trusted-issuers-schema).
 
+
 - *Type Name:* Determined by the `entity_type_name` attribute from the [TEMS](./cedarling-policy-store.md#token-metadata-schema).
 - *Entity ID:* Determined by the `token_id` attribute from the [TEMS](./cedarling-policy-store.md#token-metadata-schema).
 
