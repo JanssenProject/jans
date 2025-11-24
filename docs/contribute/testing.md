@@ -13,11 +13,11 @@ The Janssen Project is a large, complex project with tons of inter-dependency.  
 Every line of code at Janssen Project goes through various tests at different stages of development. Most of these tests
 are automated and executed as part of our CI-CD pipeline, while others are executed manually.
 
-## Unit testing
+## Unit Testing
 Do not submit any code without a corresponding unit test. Also, any bug fixes should increment unit test coverage. 
 All unit tests are executed with any subsequent Jenkins build.
 
-## Component testing
+## Component Testing
 Component testing uses real world use cases to exercise a portion of the software, using typical data inputs. 
 Developers should document component stories and submit them to the component test library for the respective 
 repository. A tester should be able to run component tests manually. Component tests should run automatically with each 
@@ -26,7 +26,7 @@ Jenkins build.
 The OpenID Foundation [certification tests](https://openid.net/certification) supplement the component testing library, 
 and should be run for each major release of the software for which they are available.
 
-## Performance testing
+## Performance Testing
 Performance tests are critical to optimization of the persistence and caching implementation. 
 All major releases of the software should be tested for performance with all supported database and cache 
 configurations using the Cloud Native distribution. The VM distribution will not be performance tested, as the main 
@@ -40,7 +40,7 @@ HA tests should be run against the Cloud Native distribution, which by design is
 failure. The HA testing should simulate taking down various pieces of infrastructure, to see if authentications can 
 still proceed. Also, what happens to transactions that were in progress during the crash?
 
-## Penetration tests
+## Penetration Tests
 Penetration testing is highly deployment specific. Depending on different implementations of the Janssen Project 
 software, you may achieve different levels of risk mitigation. Thus it is important that organizations that operate 
 their own IAM platform based on Janssen perform their own penetration
@@ -51,7 +51,7 @@ testing.
 Dependency vulnerabilities are monitored by Gihub. In addition we plan to use 
 the [Linux Foundation Community Bridge](https://security.communitybridge.org) vulnerability detection platform.
 
-## Contributing to the Documentation
+## Contributing To The Documentation
 
 While contributing documentation to official Janssen 
 Project [documentation](https://jans.io/docs/) it is important 
@@ -83,21 +83,27 @@ git clone --depth 100 --filter blob:none --no-checkout https://github.com/jansse
 
 We are working on developing this content under [issue 2548](https://github.com/JanssenProject/jans/issues/2548). If you’d like to contribute the content, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation) 
 
-### How to test OpenBanking?
+### How To Test OpenBanking?
 
 This test uses a Gluu Testing Certificate.
 
-### device authentication
+### Device Authentication
 
 After installation, we have to complete device authentication to use OpenBanking.
 
-###  Testing using commnd line mode
+###  Testing Using Commnd Line Mode
 
 We can run the below command on the command line. For example:
 
-```
-jans cli -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key –operation-id get-oauth-openid-clients
-```
+```bash
+jans cli -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key --operation-id get-oauth-openid-clients
+
+
+3. **Important:** Check that the `–` before `operation-id` is a **regular hyphen (`-`)**, not an en dash (`–`) — sometimes copying from docs changes it. The terminal won’t recognize `–` as a valid flag. It should be:
+
+```bash
+jans cli -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key --operation-id get-oauth-openid-clients
+
 
 in the same way we can run other commands. Rest of the testing is same for jans and openbanking.
 
@@ -124,14 +130,14 @@ As part of pre-release QA check, we run a set of [manual sanity checks](#sanity-
 | 11 | Ubuntu22     | Mysql            | VM                      | installation and sanity testing |
 | 12 | Ubuntu22     | Pgsql            | VM                      | installation and sanity testing |
 
-#### Sanity checks
+#### Sanity Checks
 
 - Review functioning of `.well-known` endpoints for OpenId, Fido, UMA, SCIM modules 
 - Test device authentication flow using TUI  
 - Test password authentication flow using Jans Tarp 
 - Test Agama project deployment and functioning  
 
-### Post-release QA checklist
+### Post-Release QA Checklist
 
 | # | QA Checks                                                                     |
 |---|-------------------------------------------------------------------------------|
