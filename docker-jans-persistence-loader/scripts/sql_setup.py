@@ -469,7 +469,7 @@ class SQLBackend:
     def import_custom_ldif(self, ctx):
         custom_dir = Path("/app/custom_ldif")
 
-        for file_ in custom_dir.rglob("*.ldif"):
+        for file_ in sorted(custom_dir.rglob("*.ldif")):
             logger.info(f"Importing {file_} file")
             self.client.upsert_from_file(file_, ctx, self.safe_column_mapping)
 
