@@ -3,7 +3,6 @@ import json
 
 from typing import Optional, Sequence, Callable, Any
 from functools import partial
-from operator import itemgetter
 
 from prompt_toolkit import HTML
 from prompt_toolkit.layout.dimension import D
@@ -221,7 +220,9 @@ class EditUserDialog(JansGDialog, DialogUtils):
             if claim.get('status') == 'active':
                 claims_list.append((claim['name'], claim['displayName']))
 
-        claims_checkbox = CheckboxList(values=sorted(claims_list, key=itemgetter(1)))
+        claims_checkbox = CheckboxList(
+            alues=sorted(claims_list, key=lambda c: c[1].lower())
+        )
 
         def add_claim(dialog) -> None:
             for claim_ in claims_checkbox.current_values:
