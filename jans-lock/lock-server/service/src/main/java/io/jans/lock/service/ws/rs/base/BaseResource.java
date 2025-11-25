@@ -40,7 +40,7 @@ public class BaseResource {
 	private static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
 
 	@Context
-	UriInfo uriInfo;
+	private UriInfo uriInfo;
 
 	@Context
 	private HttpServletRequest httpRequest;
@@ -216,6 +216,14 @@ public class BaseResource {
 			rootCause = rootCause.getCause();
 		}
 		return rootCause;
+	}
+
+	protected boolean getResponseResult(Response response) {
+		if (response == null) {
+			return false;
+		}
+
+		return response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL;
 	}
 
 }

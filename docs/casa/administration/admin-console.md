@@ -24,7 +24,6 @@ Widgets shown vary according to plugins installed. In a fresh installation, the 
 - OTP via SMS
 - TOTP/HOTP: mobile OTP apps and hard tokens (cards, key fobs, dongles, etc.)
 - FIDO devices
-- [Super Gluu](https://docs.gluu.org/head/supergluu/) for push notifications 
 
 To add more authentication methods, please check the developer [guide](../developer/add-authn-methods.md).
 
