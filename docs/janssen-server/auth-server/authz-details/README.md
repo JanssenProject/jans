@@ -43,13 +43,13 @@ While `scope` is used for coarse-grained access, `authorization_details` is used
 ### Authorization Details Types
 
 `type` - is required element in single authorization detail and specifies the authorization details type as a string.
-Type defines how single authorization detail is handled by both AS and RS. 
+Type defines how single authorization detail is handled by both AS and RS.
 Because "shape" and structure of single authorization detail can vary a lot, validation and representation logic is externalized to `AuthzDetailType` custom scripts.
 
 `type` defines type of authorization detail. Each such type is represented by AS `AuthzDetailType` custom scripts.
-It means that for example above administrator must define two `AuthzDetailType` custom scripts with names: `demo_authz_detail` and `financial-transaction`. 
+It means that for example above administrator must define two `AuthzDetailType` custom scripts with names: `demo_authz_detail` and `financial-transaction`.
 
-If `authorization_details` parameter is absent in request then `AuthzDetailType` custom scripts are not invoked. 
+If `authorization_details` parameter is absent in request then `AuthzDetailType` custom scripts are not invoked.
 
 `demo_authz_detail` and `financial-transaction` `AuthzDetailType` custom scripts must be provided by administrator.
 
@@ -64,9 +64,9 @@ Host: yuriyz-fond-skink.gluu.info
 response_type=code&client_id=7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc&scope=openid+profile+address+email+phone+user_name&redirect_uri=https%3A%2F%2Fyuriyz-relaxed-jawfish.gluu.info%2Fjans-auth-rp%2Fhome.htm&state=6cdc7701-178c-4653-adac-5c1e9c6c4aba&nonce=b9a1ecc4-548e-475c-8b29-f019417e1aef&prompt=&ui_locales=&claims_locales=&acr_values=&request_session_id=false&authorization_details=%5B%0A++%7B%0A++++%22type%22%3A+%22demo_authz_detail%22%2C%0A++++%22actions%22%3A+%5B%0A++++++%22list_accounts%22%2C%0A++++++%22read_balances%22%0A++++%5D%2C%0A++++%22locations%22%3A+%5B%0A++++++%22https%3A%2F%2Fexample.com%2Faccounts%22%0A++++%5D%2C%0A++++%22ui_representation%22%3A+%22Read+balances+and+list+accounts+at+https%3A%2F%2Fexample.com%2Faccounts%22%0A++%7D%0A%5D
 ```
 
-Request is rejected if request's `authorization_details` has types which does not have corresponding `AuthzDetailType` custom script. 
+Request is rejected if request's `authorization_details` has types which does not have corresponding `AuthzDetailType` custom script.
 
-Check more details about [`AuthzDetailType` custom scripts](../../../script-catalog/authz_detail/AuthzDetail.java)  
+Check more details about [`AuthzDetailType` custom scripts](../../../script-catalog/authz_detail/AuthzDetail.java)
 
 ### AS Metadata (Discovery)
 
@@ -81,7 +81,7 @@ For `demo_authz_detail` and `financial-transaction` `AuthzDetailType` custom scr
     ...
 }
 ```
-  
+
 ### Client Registration
 
 Client registration request has new parameter `authorization_details_types` to limit authorization details types supported by client.
@@ -175,7 +175,7 @@ X-Xss-Protection: 1; mode=block
 
 
 
- 
+
 
 
 

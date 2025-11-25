@@ -9,10 +9,10 @@ tags:
 # End Session Endpoint
 
 
-Janssen Server's `/end_session` endpoint supports logout using 
+Janssen Server's `/end_session` endpoint supports logout using
 [OpenId Connect RP-initiated Logout](https://openid.net/specs/openid-connect-rpinitiated-1_0.html) mechanism.
-When using OpenID Connect Logout, it is recommended to use Front-Channel Logout. In Front-Channel Logout the browser 
-receives a page with a list of application logout urls within an iframe. This prompts the browser to call each 
+When using OpenID Connect Logout, it is recommended to use Front-Channel Logout. In Front-Channel Logout the browser
+receives a page with a list of application logout urls within an iframe. This prompts the browser to call each
 application logout individually and the OpenID Connect end-session endpoint via Javascript.
 
 URL to access end session endpoint on Janssen Server is listed in the response of Janssen Server's well-known
@@ -22,17 +22,17 @@ URL to access end session endpoint on Janssen Server is listed in the response o
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
-`end_session_endpoint` claim in the response specifies the URL for end session endpoint. By default, end session 
+`end_session_endpoint` claim in the response specifies the URL for end session endpoint. By default, end session
 ndpoint looks like below:
 
 ```
 https://janssen.server.host/jans-auth/restv1/end_session
 ```
 
-Refer to [this](https://gluu.org/docs/gluu-server/4.4/operation/logout/#openid-connect-single-log-out-slo) article from 
-Gluu Server documentation to understand how end session endpoint works in Janssen Server.  
+Refer to [this](https://gluu.org/docs/gluu-server/4.4/operation/logout/#openid-connect-single-log-out-slo) article from
+Gluu Server documentation to understand how end session endpoint works in Janssen Server.
 
-More information about request and response of the end session endpoint can be found in the OpenAPI specification 
+More information about request and response of the end session endpoint can be found in the OpenAPI specification
 of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml).
 
 
@@ -61,7 +61,7 @@ navigate via `Auth Server`->`Properties`.
 - [forceIdTokenHintPresence](../../reference/json/properties/janssenauthserver-properties.md#forceidtokenhintpresence)
 
 Apart from the above-mentioned server properties, the properties relevant to individual clients can be configured
-during client registration or can be edited later. When using 
+during client registration or can be edited later. When using
 [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) to configure the properties, navigate via `Auth Server`->
 `Clients`->`logout` as show in image below:
 

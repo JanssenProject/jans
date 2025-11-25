@@ -11,7 +11,7 @@ tags:
 
 ### Dynamic Client Registration (DCR)
 
-Dynamic client registration refers to the process by which a client submits a registration request to the Authorization 
+Dynamic client registration refers to the process by which a client submits a registration request to the Authorization
 server and how that request is served by the Authorization server. It is explained in the following specifications:
 
 - [For OpenID Connect relying parties](https://openid.net/specs/openid-connect-registration-1_0.html)
@@ -20,8 +20,8 @@ server and how that request is served by the Authorization server. It is explain
 - [OpenBanking OpenID Dynamic Client Registration](https://openbanking.atlassian.net/wiki/spaces/DZ/pages/36667724/OpenBanking+OpenID+Dynamic+Client+Registration+Specification+-+v1.0.0-rc2#OpenBankingOpenIDDynamicClientRegistrationSpecification-v1.0.0-rc2-ClientRegistrationRequest) 
 
 ### Client Registration endpoint
-The URI to dynamically register a client to a Janssen Auth Server can be found by checking the `registration_endpoint` 
-claim of the OpenID Connect configuration reponse, typically deployed at 
+The URI to dynamically register a client to a Janssen Auth Server can be found by checking the `registration_endpoint`
+claim of the OpenID Connect configuration reponse, typically deployed at
 
 ```text
 https://<my.jans.server>/.well-known/openid-configuration
@@ -36,16 +36,16 @@ The Janssen Authorization server will serve a DCR request if the following confi
 
 **Client expiration**
 
-Client expiration is set based on `dynamicRegistrationExpirationTime` AS configuration property or otherwise 
-if `dcrForbidExpirationTimeInRequest` is `false` then it can be requested in Dynamic Client Registration Request via `lifetime` parameter 
-which expected value in seconds. 
+Client expiration is set based on `dynamicRegistrationExpirationTime` AS configuration property or otherwise
+if `dcrForbidExpirationTimeInRequest` is `false` then it can be requested in Dynamic Client Registration Request via `lifetime` parameter
+which expected value in seconds.
 
 Configure the Janssen AS using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
 
 ### Client registration Requests
 
-Client registration request primarily does two things: Communicate client metadata to the authorization server, and 
-optionally authenticate. 
+Client registration request primarily does two things: Communicate client metadata to the authorization server, and
+optionally authenticate.
 
 There are different ways in which the client metadata is communicated to the authorization server using
 dynamic client registration requests.
@@ -105,7 +105,7 @@ in example below:
 }
 ```
 
-In a typical DCR request the client or developer calls the client registration endpoint with a set of client metadata 
+In a typical DCR request the client or developer calls the client registration endpoint with a set of client metadata
 as specified in [RFC7591](https://www.rfc-editor.org/rfc/rfc7591.html#page-8)
 
 ```shell
@@ -134,7 +134,7 @@ curl -X POST -k -H 'Content-Type: application/jwt' \
     --data 'eyJraWQiOiJrWTIyZXBUT......ueOg2HkjpggwAEP84jq9Q'
 ```
 
-When such will be the nature of client registration requests, the following configuration properties should be set in 
+When such will be the nature of client registration requests, the following configuration properties should be set in
 the authorization server:
 
 - `dcrSignatureValidationEnabled` - enables DCR signature validation
@@ -145,7 +145,7 @@ Configure the Janssen AS using steps explained in the [link](#curl-commands-to-c
 
 #### Using software statement
 
-A signed assertion from a trusted party, a Software statement or Software Statement Assertion (SSA), is used to 
+A signed assertion from a trusted party, a Software statement or Software Statement Assertion (SSA), is used to
 dynamically register clients to an Authorization server.
 
 Example:
@@ -160,7 +160,7 @@ curl -X POST https://my.jans.server/jans-auth/restv1/register \
 } DATA
 ```
 
-To enable client registrations using Software statements, the AS should be configured using the following configuration 
+To enable client registrations using Software statements, the AS should be configured using the following configuration
 parameters:
 
  - `softwareStatementValidationType` - The value of this variable is one of the following:
@@ -194,15 +194,15 @@ Configure the AS using steps explained in the [link](#curl-commands-to-configure
 
 #### Special mention about FAPI:
 
-In case of a typical [client registration request in FAPI implementation]( https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html), 
-the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or 
-DCR payload. This SSA can contain the software_statement inside it which is also a signed JWT. Each of the JWTs, the 
-outer JWT called the SSA and the inner JWT called the software_statement are signed by different entities - the TPP and 
+In case of a typical [client registration request in FAPI implementation]( https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html),
+the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or
+DCR payload. This SSA can contain the software_statement inside it which is also a signed JWT. Each of the JWTs, the
+outer JWT called the SSA and the inner JWT called the software_statement are signed by different entities - the TPP and
 OBIE respectively.
 
 ### Security Pointers
 
-If `dynamicRegistrationEnabled` is enabled in the Authorization Server, assess the following points to minimize 
+If `dynamicRegistrationEnabled` is enabled in the Authorization Server, assess the following points to minimize
 potential exposure of sensitive personal data:
 
 1. `trustedClientEnabled` and `dynamicRegistrationPersistClientAuthorizations` properties determine whether clients 
@@ -222,7 +222,7 @@ Jans-auth server is configured using [Jans Config Api](https://github.com/Jansse
 curl -u "put_client_id_here:put_config_api_client_secret_here" https://<your.jans.server>/jans-auth/restv1/token \
      -d  "grant_type=client_credentials&scope=https://jans.io/oauth/jans-auth-server/config/properties.write"
 ```
-   
+
 #### Patch jans-auth server configurations
 
 Patch jans-auth server configurations to reflect `anExampleConfigField` with the value `anExampleConfigField_value`
@@ -457,7 +457,7 @@ Decoded DCR Example:
 {
     Signature
 }
-``` 
+```
 
 AS has `dcrSsaValidationConfigs` configuration value which holds json array. It can be used to validated both DCR and SSA.
 
@@ -566,7 +566,7 @@ Learn more in the [Client Registration Script Guide](../../../script-catalog/cli
 
 AS supports "The Use of Attestation in OAuth 2.0 Dynamic Client Registration" [specification draft](https://www.ietf.org/id/draft-tschofenig-oauth-attested-dclient-reg-00.html).
 
-Specification draft does not define exact attestation request/response formats. 
+Specification draft does not define exact attestation request/response formats.
 Thus AS supports Attestation calls to Verifier via `ClientRegistrationType` custom script type.
 
 Use `createClient` method of `ClientRegistrationType` to prevent client creation if attestation result does not satisfy expectation.
@@ -590,7 +590,7 @@ Use `createClient` method of `ClientRegistrationType` to prevent client creation
             
         print "Attestation result is OK"
         return True            
-```  
+```
 
 **Configuration options**
 - `dcrAttestationEvidenceRequired` - Boolean value indicating if DCR attestation evidence is required. Default value is `false`.
@@ -626,9 +626,9 @@ and throw error from custom script.
             
         print "Attestation result is OK"
         return True            
-```  
+```
 
-`context.createStaleEvidenceWebApplicationException(nonceFromVerifier)` leads to `stale_evidence` error creation, 
+`context.createStaleEvidenceWebApplicationException(nonceFromVerifier)` leads to `stale_evidence` error creation,
 see example above (`nonceFromVerifier` must be string value).
 
 In case goal is to create own custom error, please use standard `context.createWebApplicationException` methods and return `False` from script to prevent client creation.
@@ -644,18 +644,18 @@ Example
 
 ### CRUD Operations
 
-Janssen Server allows client management through client configuration endpoint 
-[(RFC 7592)](https://www.rfc-editor.org/rfc/rfc7592). 
+Janssen Server allows client management through client configuration endpoint
+[(RFC 7592)](https://www.rfc-editor.org/rfc/rfc7592).
 
 [JSON response](#using-request-body) to client registration request contains `registration_client_uri` and
 `registration_access_token` data elements. The URI mentioned using `registration_client_uri` provides functionality to
 read, update and delete the client. This endpoint is a protected endpoint where request has to be authenticated using
 access token `registration_access_token`.
 
-#### Read client metadata 
+#### Read client metadata
 
-A read request to the same client that got created in [earlier](#using-request-body) section should be as shown in the 
-example below. HTTP method `GET` is used to send the request which signifies that it is a request to `read` client 
+A read request to the same client that got created in [earlier](#using-request-body) section should be as shown in the
+example below. HTTP method `GET` is used to send the request which signifies that it is a request to `read` client
 metadata.
 
 ```shell
@@ -663,19 +663,19 @@ curl -k -H 'Authorization: Bearer eaee20de-54ce-4217-b960-6b72b55e6cab' \
 -i 'https://my.jans.server/jans-auth/restv1/register?client_id=85192707-a38c-496c-806c-ef01a6a3ae4a'
 ```
 
-JSON response from Janssen Server will contain the current state of client metadata. 
+JSON response from Janssen Server will contain the current state of client metadata.
 
 #### Update client metadata
 
-Client metadata can be updated by sending request with `PUT` HTTP method to `registration_client_uri`. Janssen Server 
-replaces current metadata with the one sent with update request as outlined in 
-[the specification](https://www.rfc-editor.org/rfc/rfc7592#section-2.2) 
+Client metadata can be updated by sending request with `PUT` HTTP method to `registration_client_uri`. Janssen Server
+replaces current metadata with the one sent with update request as outlined in
+[the specification](https://www.rfc-editor.org/rfc/rfc7592#section-2.2)
 
 #### Delete Client
 
 Client can be deleted by sending a request using `DELETE` method to `registration_client_uri`.
 
-A successful delete action will invalidate the "client_id", "client_secret", and "registration_access_token" for this 
+A successful delete action will invalidate the "client_id", "client_secret", and "registration_access_token" for this
 client, thereby preventing the "client_id" from being used at either the authorization endpoint or token endpoint of the
 authorization server.
 
