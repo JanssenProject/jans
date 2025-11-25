@@ -70,6 +70,7 @@ use std::sync::LazyLock;
 use std::sync::{Arc, Weak};
 
 pub use interface::LogStorage;
+pub(crate) use interface::LogWriter;
 pub(crate) use log_strategy::LogStrategy;
 
 use crate::LockServiceConfig;
@@ -114,4 +115,33 @@ pub(crate) fn init_test_logger() -> Logger {
         )
         .unwrap(),
     )
+}
+
+/// Logs an entry asynchronously on native platforms, synchronously on WASM and during tests.
+///
+/// This function offloads log serialization to a background thread in native builds to avoid
+/// blocking the authorization response path. In WASM builds and during unit tests, logging
+/// is performed synchronously to maintain deterministic behavior.
+///
+/// # Arguments
+///
+/// * `logger` - The logger instance to use
+/// * `entry` - The log entry to write
+#[cfg(all(not(target_arch = "wasm32"), not(test)))]
+pub(crate) fn log_async<T>(logger: &Logger, entry: T)
+where
+    T: interface::Loggable + Send + 'static,
+{
+    let logger = logger.clone();
+    tokio::task::spawn_blocking(move || {
+        logger.log_any(entry);
+    });
+}
+
+#[cfg(any(target_arch = "wasm32", test))]
+pub(crate) fn log_async<T>(logger: &Logger, entry: T)
+where
+    T: interface::Loggable + 'static,
+{
+    logger.log_any(entry);
 }

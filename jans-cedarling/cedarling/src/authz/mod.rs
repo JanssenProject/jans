@@ -14,10 +14,10 @@ use crate::common::json_rules::ApplyRuleError;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::entity_builder::*;
 use crate::jwt::{self, Token};
-use crate::log::interface::{LogWriter, Loggable};
+use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, DecisionLogEntry, Diagnostics,
-    DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, LogType, Logger, gen_uuid7,
+    DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, LogType, Logger, gen_uuid7, log_async,
 };
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
@@ -244,7 +244,7 @@ impl Authz {
         let decision_diagnostics =
             collect_diagnostics(&[user_authz_info.as_ref(), workload_authz_info.as_ref()]);
 
-        // Log policy evaluation errors if any exist
+        // Log policy evaluation errors per principal if any exist
         if let Some(info) = user_authz_info.as_ref() {
             self.log_policy_evaluation_errors(&info.diagnostics, "user principal", request_id);
         }
@@ -513,22 +513,29 @@ impl Authz {
         }
     }
 
+    /// Logs a summary of all diagnostics errors when authorization is denied.
+    ///
+    /// This provides a consolidated view of all policy evaluation errors across all principals,
+    /// complementing the per-principal error logs. Only logs when there are actual errors
+    /// to avoid noise.
     fn log_failed_diagnostics(&self, diagnostics: &[Diagnostics], request_id: Uuid) {
-        for diagnostic in diagnostics {
-            if diagnostic.errors.is_empty() {
-                continue;
-            }
+        let all_errors: Vec<_> = diagnostics.iter().flat_map(|d| &d.errors).collect();
 
-            let serialized_errors = serde_json::to_string(&diagnostic.errors)
-                .unwrap_or_else(|_| "failed to serialize diagnostics errors".to_string());
-
-            let log_entry = LogEntry::new_with_data(LogType::Decision, Some(request_id))
-                .set_level(LogLevel::ERROR)
-                .set_message("Authorization denied due to Cedar policy errors".to_string())
-                .set_error(serialized_errors);
-
-            log_async(&self.config.log_service, log_entry);
+        if all_errors.is_empty() {
+            return;
         }
+
+        let serialized_errors = serde_json::to_string(&all_errors)
+            .unwrap_or_else(|_| "failed to serialize diagnostics errors".to_string());
+
+        let log_entry = LogEntry::new_with_data(LogType::Decision, Some(request_id))
+            .set_level(LogLevel::ERROR)
+            .set_message(
+                "Authorization denied: summary of all policy evaluation errors".to_string(),
+            )
+            .set_error(serialized_errors);
+
+        log_async(&self.config.log_service, log_entry);
     }
 }
 
@@ -538,25 +545,6 @@ fn collect_diagnostics(infos: &[Option<&AuthorizeInfo>]) -> Vec<Diagnostics> {
         .flatten()
         .map(|info| info.diagnostics.clone())
         .collect()
-}
-
-#[cfg(all(not(target_arch = "wasm32"), not(test)))]
-fn log_async<T>(logger: &Logger, entry: T)
-where
-    T: Loggable + Send + 'static,
-{
-    let logger = logger.clone();
-    tokio::task::spawn_blocking(move || {
-        logger.log_any(entry);
-    });
-}
-
-#[cfg(any(target_arch = "wasm32", test))]
-fn log_async<T>(logger: &Logger, entry: T)
-where
-    T: Loggable + 'static,
-{
-    logger.log_any(entry);
 }
 
 #[derive(Debug, thiserror::Error)]
