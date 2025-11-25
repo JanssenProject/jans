@@ -98,7 +98,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
                         title = _(title),
                         values = values,
                         data = data,
-                        label_width=100,
+                        label_width=int(common_data.app.dialog_width*1.1) - 28,
                         add_handler=add_handler,
                         jans_name = jans_name
                         )
