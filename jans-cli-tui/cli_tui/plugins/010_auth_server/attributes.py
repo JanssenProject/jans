@@ -11,6 +11,7 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 
 from utils.multi_lang import _
+from utils import background_tasks
 from utils.utils import common_data
 from utils.utils import DialogUtils
 from utils.static import cli_style, common_strings
@@ -264,8 +265,11 @@ class Attributes(DialogUtils):
                     self.app.start_progressing(_("Attribute was saved"))
                     self.get_attributes()
                     common_data.claims_retreived = False
+                    self.app.create_background_task(background_tasks.get_attributes_coroutine(self.app))
                 else:
                     self.myparent.show_message(_("A server error ocurred while saving attribute"), str(response.text), tobefocused=self.main_container)
+
+
             asyncio.ensure_future(coroutine())
 
 
@@ -378,6 +382,7 @@ class Attributes(DialogUtils):
                 self.app.stop_progressing()
                 self.get_attributes()
                 common_data.claims_retreived = False
+                self.app.create_background_task(background_tasks.get_attributes_coroutine(self.app))
 
             asyncio.ensure_future(coroutine())
 
