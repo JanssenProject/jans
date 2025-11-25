@@ -107,14 +107,11 @@ impl<'a> ServiceFactory<'a> {
             .clone()
             .unwrap_or_default();
         let schema = &self.policy_store().schema.validator_schema;
-        let namespace = Some(policy_store.name.as_str());
         let entity_builder = EntityBuilder::new(
             config.clone(),
             &trusted_issuers,
             Some(schema),
             default_entities_with_warn.entities().to_owned(),
-            namespace,
-            logger,
         )?;
         let service = Arc::new(entity_builder);
         self.container.entity_builder_service = Some(service.clone());

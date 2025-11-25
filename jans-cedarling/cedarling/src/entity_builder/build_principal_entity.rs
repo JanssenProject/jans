@@ -129,8 +129,6 @@ mod test {
             &issuers,
             Some(&validator_schema),
             DefaultEntities::default(),
-            None,
-            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
 

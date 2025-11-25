@@ -39,7 +39,6 @@ mod test {
     use super::super::*;
     use super::*;
     use crate::CedarEntityMapping;
-    use crate::log::TEST_LOGGER;
     use serde_json::json;
 
     #[test]
@@ -49,8 +48,6 @@ mod test {
             &HashMap::new(),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
             DefaultEntities::default(),
-            None,
-            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let resource_data = EntityData {
@@ -97,8 +94,6 @@ mod test {
             &HashMap::new(),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
             DefaultEntities::default(),
-            None,
-            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let resource_data = EntityData {

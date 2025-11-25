@@ -121,7 +121,6 @@ mod test {
     use super::*;
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder::test::*;
-    use crate::log::TEST_LOGGER;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
@@ -172,8 +171,6 @@ mod test {
             &issuers,
             Some(&validator_schema),
             DefaultEntities::default(),
-            None,
-            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -249,8 +246,6 @@ mod test {
             &issuers,
             Some(&validator_schema),
             DefaultEntities::default(),
-            None,
-            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -311,8 +306,6 @@ mod test {
             &issuers,
             None,
             DefaultEntities::default(),
-            None,
-            TEST_LOGGER.clone(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);

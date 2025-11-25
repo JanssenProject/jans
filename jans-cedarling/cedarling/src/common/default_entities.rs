@@ -19,8 +19,14 @@ pub struct DefaultEntities {
 }
 
 impl DefaultEntities {
+    /// Get entity by [EntityUid]
     pub fn get(&self, key: &EntityUid) -> Option<&Entity> {
         self.inner.get(key)
+    }
+
+    /// Returns the number of elements in the map.
+    pub fn len(&self) -> usize {
+        self.inner.len()
     }
 
     // This method expect in JSON Value object!
@@ -155,6 +161,8 @@ impl<'de> Deserialize<'de> for DefaultEntitiesWithWarns {
 /// Constant for unknown entity type in error messages
 const UNKNOWN_ENTITY_TYPE: &str = "Unknown";
 
+/// Parse single entity, return entity and error (in critical case),
+/// But not critical case will populate `warn` vector with log message
 fn parse_single_entity(
     namespace: Option<&str>,
     warns: &mut Vec<String>,
@@ -383,4 +391,117 @@ fn parse_entity_attrs<'a>(
         }
     }
     Ok(cedar_attrs)
+}
+
+#[cfg(test)]
+mod test {
+    use super::DefaultEntitiesWithWarns;
+    use cedar_policy::EntityUid;
+    use serde::Deserialize;
+    use serde_json::json;
+    use std::str::FromStr;
+    use test_utils::assert_eq;
+
+    #[test]
+    fn can_parse_default_entities() {
+        // Test the parse_default_entities function directly
+        // We don't need the schema for this test since we're not validating the entities
+
+        // Create test default entities
+        let default_entities_data = json!({
+                "1694c954f8d9".to_string(): json!({
+                    "entity_id": "1694c954f8d9",
+                    "entity_type": "Jans::DefaultEntity",
+                    "o": "Acme Dolphins Division",
+                    "org_id": "100129"
+                }),
+        });
+
+        let parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("should parse default entities");
+        let entities_hashmap = &parsed_entities.entities();
+
+        assert_eq!(entities_hashmap.len(), 1, "should have 1 default entity");
+
+        // Verify the entity
+        let entity = entities_hashmap
+            .get(&EntityUid::from_str("Jans::DefaultEntity::\"1694c954f8d9\"").unwrap())
+            .expect("should have entity");
+        assert_eq!(entity.uid().type_name().to_string(), "Jans::DefaultEntity");
+        assert_eq!(entity.uid().id().as_ref() as &str, "1694c954f8d9");
+    }
+
+    #[test]
+    fn test_parse_error_missing_uid() {
+        // Test entity missing uid field
+        let entity_data = json!({
+            "attrs": {
+                "attribute": "value"
+            }
+        });
+
+        let default_entities_data = json!({"test123".to_string(): entity_data});
+
+        let _parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("Should return error when uid field is missing");
+    }
+
+    #[test]
+    fn test_parse_error_invalid_uid_structure() {
+        // Test entity with uid that is not an object
+        let entity_data = json!({
+            "uid": "not-an-object",
+            "attrs": {}
+        });
+
+        let default_entities_data = json!({"test123".to_string(): entity_data});
+
+        let _parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("Should return error when uid is not an object");
+
+        // Test entity with uid missing type field
+        let entity_data_no_type = json!({
+            "uid": {
+                "id": "test"
+            },
+            "attrs": {}
+        });
+
+        let default_entities_data = json!({"test456".to_string(): entity_data_no_type});
+        let _parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("Should return error when uid.type is missing");
+    }
+
+    #[test]
+    fn test_parse_entity_with_empty_attrs_and_parents() {
+        // Test entity with empty attrs and empty parents
+        let entity_data = json!({
+            "uid": {
+                "type": "Test::EmptyTest",
+                "id": "test789"
+            },
+            "attrs": {},
+            "parents": []
+        });
+
+        let default_entities_data = json!({"test789".to_string(): entity_data});
+        let parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("should parse with empty attrs and parents");
+        let entities = parsed_entities.entities();
+
+        let uid = &EntityUid::from_str("Test::EmptyTest::\"test789\"").unwrap();
+        let entity = entities.get(&uid).expect("should have entity");
+        assert_eq!(
+            entity.uid().type_name().to_string(),
+            "Test::EmptyTest",
+            "Entity type should have namespace prefix"
+        );
+        let entity_json = entity.to_json_value().expect("should convert to JSON");
+        let attrs = entity_json.get("attrs").expect("should have attrs");
+        assert_eq!(
+            attrs.as_object().unwrap().len(),
+            0,
+            "Entity should have empty attrs"
+        );
+    }
 }
