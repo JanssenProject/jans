@@ -506,3 +506,85 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
         }
     }
 }
+
+/// Verifies that Cedarling can initialize and perform unsigned authorization
+/// even when no trusted issuers are configured and JWT signature validation is enabled.
+#[test]
+async fn test_unsigned_authz_works_without_trusted_issuers() {
+    use crate::JwtConfig;
+    use jsonwebtoken::Algorithm;
+    use std::collections::HashSet;
+
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        |config| {
+            // Enable JWT signature validation but don't provide trusted issuers
+            config.jwt_config = JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                signature_algorithms_supported: HashSet::from_iter([
+                    Algorithm::HS256,
+                    Algorithm::RS256,
+                ]),
+            };
+        },
+    )
+    .await;
+
+    // Verify unsigned authorization works
+    let request = RequestUnsigned {
+        action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
+        context: json!({}),
+        principals: vec![
+            EntityData::deserialize(serde_json::json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "test_id"
+                },
+                "is_ok": true
+            }))
+            .unwrap(),
+        ],
+        resource: EntityData::deserialize(serde_json::json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "issue1"
+            },
+            "org_id": "some_id",
+            "country": "US"
+        }))
+        .unwrap(),
+    };
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("unsigned authorization should work without trusted issuers");
+
+    // Verify the request was processed successfully
+    assert!(
+        result.principals.contains_key("Jans::TestPrincipal1"),
+        "Should have result for TestPrincipal1"
+    );
+
+    // Verify logs were created
+    let logs = cedarling.pop_logs();
+    assert!(!logs.is_empty(), "Should have created logs");
+
+    // Verify there's a warning about signed authorization being unavailable
+    let warning_logs: Vec<&serde_json::Value> = logs
+        .iter()
+        .filter(|log| {
+            log.get("msg")
+                .and_then(|m| m.as_str())
+                .map(|m| m.contains("signed authorization is unavailable"))
+                .unwrap_or(false)
+        })
+        .collect();
+
+    assert!(
+        !warning_logs.is_empty(),
+        "Should have logged a warning about signed authorization being unavailable"
+    );
+}
