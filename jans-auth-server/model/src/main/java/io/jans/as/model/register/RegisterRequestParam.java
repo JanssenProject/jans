@@ -409,6 +409,11 @@ public enum RegisterRequestParam {
     PAR_SCRIPT_DNS("par_script_dns"),
 
     /**
+     * list of tx token script dns
+     */
+    TX_TOKEN_SCRIPT_DNS("tx_token_script_dns"),
+
+    /**
      * list of post authn script dns
      */
     POST_AUTHN_SCRIPT_DNS("post_authn_script_dns"),

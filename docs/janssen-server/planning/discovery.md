@@ -31,4 +31,4 @@ write a cookie so next time, you don't have to bother them.
 While it's possible to implement a discovery workflow using an Agama script
 or an Auth Server person authentication interception script, you also write
 a simple web application, and then redirect to the authorization endpoint
-with a hint as an extra parameter and a specific `acr_values`. 
+with a hint as an extra parameter and a specific `acr_values`.

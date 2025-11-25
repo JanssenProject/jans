@@ -22,7 +22,7 @@ public class PolicyStoreMapperHelper {
     private static final Pattern RESOURCE_ASSIGNMENT_PATTERN =
             Pattern.compile("resource\\s*(?:==|in|is)\\s*([^;\\n]+)");
     private static final Pattern SINGLE_ACTION_PATTERN =
-            Pattern.compile("action\\s*==\\s*([^;\\n]+)");
+            Pattern.compile("action\\s*(?:==|in)\\s*([A-Za-z0-9_:\\\"']+)");
     private static final Pattern MULTI_ACTION_PATTERN =
             Pattern.compile("action\\s*in\\s*\\[([^\\]]+)\\]");
 
@@ -32,6 +32,9 @@ public class PolicyStoreMapperHelper {
     private static final String FEATURES_PREFIX = "Features::";
     private static final String FEATURES_PREFIX_FOR_DEFAULT_ENTITIES = RESOURCE_PREFIX + "Features";
 
+    private PolicyStoreMapperHelper() {
+        throw new IllegalStateException("Utility class");
+    }
     /**
      * Main entry point for mapping principals to scopes.
      *
@@ -336,8 +339,8 @@ public class PolicyStoreMapperHelper {
             // Array form: [Resource1, Resource2]
             String arrayContent = resourceValue.substring(1, resourceValue.length() - 1);
             Arrays.stream(arrayContent.split(","))
-                    .map(PolicyStoreMapperHelper::cleanValue)
                     .map(PolicyStoreMapperHelper::normalizeResource)
+                    .map(PolicyStoreMapperHelper::cleanValue)
                     .filter(cleaned -> !cleaned.isEmpty())
                     .forEach(resources::add);
         } else if (!resourceValue.isEmpty()) {
@@ -351,24 +354,23 @@ public class PolicyStoreMapperHelper {
      */
     private static Set<String> extractActionsFromPolicy(String policy) {
         Set<String> actions = new HashSet<>();
+        if (policy == null || policy.isEmpty()) return actions;
 
-        // Single action
-        Matcher singleMatcher = SINGLE_ACTION_PATTERN.matcher(policy);
-        if (singleMatcher.find()) {
-            actions.add(normalizeAction(cleanValue(singleMatcher.group(1))));
+        Matcher matcher = SINGLE_ACTION_PATTERN.matcher(policy);
+        if (matcher.find()) {
+            // Found single action
+            actions.add(cleanValue(normalizeAction(matcher.group(1))));
+        } else {
+            // Try multiple actions
+            matcher = MULTI_ACTION_PATTERN.matcher(policy);
+            if (matcher.find()) {
+                Arrays.stream(matcher.group(1).split(","))
+                        .map(PolicyStoreMapperHelper::normalizeAction)
+                        .map(PolicyStoreMapperHelper::cleanValue)
+                        .filter(cleaned -> !cleaned.isEmpty())
+                        .forEach(actions::add);
+            }
         }
-
-        // Multiple actions
-        Matcher multiMatcher = MULTI_ACTION_PATTERN.matcher(policy);
-        if (multiMatcher.find()) {
-            String actionsString = multiMatcher.group(1);
-            Arrays.stream(actionsString.split(","))
-                    .map(PolicyStoreMapperHelper::cleanValue)
-                    .map(PolicyStoreMapperHelper::normalizeAction)
-                    .filter(cleaned -> !cleaned.isEmpty())
-                    .forEach(actions::add);
-        }
-
         return actions;
     }
 
@@ -452,7 +454,8 @@ public class PolicyStoreMapperHelper {
      * Normalizes action by removing namespace prefix.
      */
     private static String normalizeAction(String value) {
-        return value.replace(ACTION_PREFIX, "").trim();
+        return value.replace(ACTION_PREFIX, "")
+                .trim();
     }
 
     /**
@@ -460,10 +463,7 @@ public class PolicyStoreMapperHelper {
      */
     private static String cleanValue(String value) {
         if (value == null) return null;
-        return value.trim()
-                .replaceAll("^\"|\"$", "")
-                .replaceAll("^'|'$", "")
-                .trim();
+        return value.trim().replaceAll("^[\"']|[\"']$", "");
     }
 
     /**
@@ -572,27 +572,6 @@ public class PolicyStoreMapperHelper {
 
         String value = node.asText("");
         return value.isEmpty() ? null : value;
-    }
-    /**
-     * Determines if entity type should be included based on resource matching.
-     */
-    private static boolean shouldIncludeEntityType(String entityTypeName, JsonNode entityTypeNode, String resourceLower) {
-        // Direct name match
-        if (entityTypeName.equalsIgnoreCase(resourceLower)) {
-            return true;
-        }
-
-        // MemberOf types match
-        JsonNode memberOf = entityTypeNode.path("memberOfTypes");
-        if (memberOf.isArray()) {
-            for (JsonNode member : memberOf) {
-                if (member.isTextual() && member.asText().equalsIgnoreCase(resourceLower)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
     /**
      * Gets first non-empty text value from multiple possible field names.

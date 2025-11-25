@@ -36,8 +36,11 @@ pub use crate::common::json_rules::JsonRule;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
-pub use authz::request::{EntityData, Request, RequestUnsigned, CedarEntityMapping};
-pub use authz::{AuthorizeError, AuthorizeResult};
+pub use authz::request::{
+    AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, Request, RequestUnsigned,
+    TokenInput,
+};
+pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
 use init::ServiceFactory;
@@ -156,6 +159,15 @@ impl Cedarling {
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
         self.authz.authorize_unsigned(request).await
+    }
+
+    /// Authorize multi-issuer request.
+    /// makes authorization decision based on multiple JWT tokens from different issuers
+    pub async fn authorize_multi_issuer(
+        &self,
+        request: AuthorizeMultiIssuerRequest,
+    ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
+        self.authz.authorize_multi_issuer(request).await
     }
 
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.

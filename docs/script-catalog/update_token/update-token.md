@@ -13,7 +13,7 @@ By overriding the interface methods in [`UpdateTokenType`](https://github.com/Ja
    Example use-case:  
       * As per the open banking standard, the id_token should contain claim `openbanking_intent_id` and the same value should also reflect in the `sub` claim.
       * As specified in the [FAPI Baseline Specification](https://openid.net/specs/openid-financial-api-part-1-1_0.html) the `sub` claim should have the user id.
-      
+
 2. Set a specific token lifetime
 
 3. Perform extra business logic like adding or removing scopes.
@@ -166,7 +166,7 @@ Pseudocode and example :
 
 ![Inspecting a modified ID token](https://github.com/JanssenProject/jans/blob/main/docs/assets/update-id-token.png)
 
-###  modifyAccessToken()  
+###  modifyAccessToken()
 
 #### Granularity of access control
 
@@ -247,7 +247,7 @@ Pseudocode and example - Issue Access token only if account balance is greater t
 Access token lifetime from script has highest priority (it wins from client's access token lifetime configuration).
 
 
-### modifyRefreshToken() :  
+### modifyRefreshToken() :
 Used to modify claims in a Refresh Token
 
 ```
@@ -294,7 +294,7 @@ from org.json import JSONObject;
 ```
 jsonWebResponse.getClaims().setClaim("claimY", Integer.valueOf(124456191))
 ```
-Get it as integer, via 
+Get it as integer, via
 ```
 getClaims().getClaimAsInteger("claimY")
 ```

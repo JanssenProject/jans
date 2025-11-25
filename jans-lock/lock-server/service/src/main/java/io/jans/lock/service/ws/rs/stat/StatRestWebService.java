@@ -12,12 +12,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.enterprise.context.Dependent;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -43,7 +45,7 @@ public interface StatRestWebService {
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_STAT_READ_ACCESS })
 	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id="lock_stat_query", path="/internal/stat")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response statGet(@QueryParam("month") String months, @QueryParam("start-month") String startMonth,
+	public Response statGet(@Context HttpServletRequest request, @QueryParam("month") String months, @QueryParam("start-month") String startMonth,
 			@QueryParam("end-month") String endMonth, @QueryParam("format") String format);
 
 	@Operation(summary = "Request stat data", description = "Request stat data", tags = {
@@ -59,6 +61,6 @@ public interface StatRestWebService {
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_STAT_READ_ACCESS })
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_stat_query", path="/internal/stat")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response statPost(@FormParam("month") String months, @FormParam("start-month") String startMonth,
+	public Response statPost(@Context HttpServletRequest request, @FormParam("month") String months, @FormParam("start-month") String startMonth,
 			@FormParam("end-month") String endMonth, @FormParam("format") String format);
 }
