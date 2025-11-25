@@ -87,7 +87,7 @@ analysis to show everything the attacker attempted, both allowed and denied.
 
 ## Sample logs
 
-The JSON in this document is formatted for readability but is not prettified in the actual implementation.  
+The JSON in this document is formatted for readability but is not prettified in the actual implementation.
 
 ### Startup Message
 

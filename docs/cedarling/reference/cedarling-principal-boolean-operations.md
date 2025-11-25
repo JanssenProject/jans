@@ -20,8 +20,8 @@ Make sure that you use correct `var` name for `principal` types.
 
 When referencing principals in your JSON logic rules, you must use the full Cedar principal type identifier that includes namespace, entity name and optionally the entity ID. This matches exactly how principals are defined in your Cedar policies.
 
-**Correct Format**: `<Namespace>::<EntityType>` or `<Namespace>::<EntityType>::"<EntityID>"`  
-Examples:  
+**Correct Format**: `<Namespace>::<EntityType>` or `<Namespace>::<EntityType>::"<EntityID>"`
+Examples:
 
 * Without ID: `Jans::User`, `Jans::Workload`, `Acme::Service`
 * With ID: `Jans::User::"john_doe"`, `Jans::Device::"mobile_1234"`, `Acme::Service::"api_gateway"`.  
@@ -54,10 +54,10 @@ Examples:
 }
 ```
 
-**Consequences of Incorrect Format**  
-❌ Authorization will fail with DENY  
-❌ Potential evaluation errors in JSON logic  
-❌ Mismatches with actual Cedar policy definitions  
+**Consequences of Incorrect Format**
+❌ Authorization will fail with DENY
+❌ Potential evaluation errors in JSON logic
+❌ Mismatches with actual Cedar policy definitions
 
 ### Default configuration
 
@@ -72,7 +72,7 @@ Default value:
 }
 ```
 
-Explanation:  
+Explanation:
 
 * The rule uses and to require both principals to be authorized
 * `{"var": "Jans::Workload"}` checks the workload principal's decision
