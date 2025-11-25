@@ -1,0 +1,271 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+cedar_version: v4.0.0
+policy_stores:
+  multi_issuer_basic_store:
+    cedar_version: v4.0.0
+    name: MultiIssuerBasic
+    description: A policy store for testing multi-issuer authorization with basic token queries
+    trusted_issuers:
+      AcmeIssuer:
+        name: "Acme"
+        description: "Acme Corporation Identity Provider"
+        openid_configuration_endpoint: "https://idp.acme.com/.well-known/openid-configuration"
+        token_metadata:
+          access_token:
+            entity_type_name: "Acme::Access_Token"
+            workload_id: "client_id"
+            principal_mapping:
+              - "Acme::Workload"
+          id_token:
+            entity_type_name: "Acme::Id_Token"
+            principal_mapping:
+              - "Acme::User"
+      DolphinIssuer:
+        name: "Dolphin"
+        description: "Dolphin Sea Identity Provider"
+        openid_configuration_endpoint: "https://idp.dolphin.sea/.well-known/openid-configuration"
+        token_metadata:
+          access_token:
+            entity_type_name: "Dolphin::Access_Token"
+            workload_id: "client_id"
+            principal_mapping:
+              - "Dolphin::Workload"
+          dolphin_token:
+            entity_type_name: "Dolphin::Dolphin_Token"
+            principal_mapping:
+              - "Dolphin::User"
+    policies:
+      basic_token_query_1:
+        description: Query tokens from specific issuer with claim check
+        creation_date: '2024-12-19T10:00:00.000000'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action == Acme::Action::"GetFood",
+                resource in Acme::Resource::"ApprovedDolphinFoods"
+            ) when {
+                context has tokens.dolphin_access_token &&
+                context.tokens.dolphin_access_token.hasTag("location") &&
+                context.tokens.dolphin_access_token.getTag("location").contains("miami")
+            };
+      basic_token_query_1.1_default_entity:
+        description: Query for default entity Acme::Resource::"1694c954f8a3"
+        creation_date: '2024-12-19T10:00:00.000000'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action == Acme::Action::"GetFood",
+                resource in Acme::Resource::"1694c954f8a3"
+            ) when {
+                context has tokens.dolphin_access_token &&
+                context.tokens.dolphin_access_token.hasTag("location") &&
+                context.tokens.dolphin_access_token.getTag("location").contains("miami")
+            };
+      basic_token_query_2:
+        description: Query specific token type with scope
+        creation_date: '2024-12-19T10:00:00.000000'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action == Acme::Action::"ReadProfile",
+                resource in Acme::Resource::"WikiPages"
+            ) when {
+                context has tokens.acme_access_token &&
+                context.tokens.acme_access_token.hasTag("scope") &&
+                context.tokens.acme_access_token.getTag("scope").contains("read:wiki")
+            };
+      basic_token_query_3:
+        description: Handle custom token type like DolphinToken
+        creation_date: '2024-12-19T10:00:00.000000'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action == Acme::Action::"SwimWithOrca",
+                resource == Acme::Resource::"MiamiAcquarium"
+            ) when {
+                context has tokens.dolphin_dolphin_token &&
+                context.tokens.dolphin_dolphin_token.hasTag("waiver") &&
+                context.tokens.dolphin_dolphin_token.getTag("waiver").contains("signed")
+            };
+      multi_token_scope_1:
+        description: Allow action if any token from different issuers has required scope
+        creation_date: '2024-12-19T10:00:00.000000'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action == Acme::Action::"ManageDocuments",
+                resource in Acme::Resource::"SharedDocs"
+            ) when {
+                (context has tokens.acme_access_token &&
+                 context.tokens.acme_access_token.hasTag("scope") &&
+                 context.tokens.acme_access_token.getTag("scope").contains("write:documents")) ||
+                (context has tokens.dolphin_access_token &&
+                 context.tokens.dolphin_access_token.hasTag("scope") &&
+                 context.tokens.dolphin_access_token.getTag("scope").contains("write:documents"))
+            };
+      multi_token_scope_2:
+        description: Require tokens from multiple issuers with specific scopes
+        creation_date: '2024-12-19T10:00:00.000000'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action == Acme::Action::"SubmitVote",
+                resource == Acme::Resource::"TradeAssociationElection"
+            ) when {
+                (context has tokens.acme_access_token &&
+                 context.tokens.acme_access_token.hasTag("scope") &&
+                 context.tokens.acme_access_token.getTag("scope").contains("trade:vote")) &&
+                (context has tokens.dolphin_access_token &&
+                 context.tokens.dolphin_access_token.hasTag("member_status") &&
+                 context.tokens.dolphin_access_token.getTag("member_status").contains("verified"))
+            };
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+        namespace Acme {
+          entity User = {
+            sub?: String,
+            email: String,
+            username: String,
+            id_token?: Id_Token,
+          };
+          entity Workload = {
+            iss: Acme::TrustedIssuer,
+            aud?: String,
+            client_id?: String,
+            name: String,
+            access_token: Access_Token,
+          };
+          entity Access_Token = {
+            token_type: String,
+            jti: String,
+            iss: TrustedIssuer,
+            validated_at: Long,
+            exp: Long,
+            sub?: String,
+            scope?: Set<String>,
+            location?: String,
+            waiver?: String,
+          } tags Set<String>;
+          entity Id_Token = {
+            token_type: String,
+            jti: String,
+            iss: TrustedIssuer,
+            validated_at: Long,
+            exp: Long,
+            sub?: String,
+            aud?: Set<String>,
+          } tags Set<String>;
+          entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
+          entity Resource = {"name": String};
+          entity Any;
+          action "GetFood" appliesTo {
+            principal: [Any],
+            resource: [Resource],
+            context: Context
+          };
+          action "ReadProfile" appliesTo {
+            principal: [Any],
+            resource: [Resource],
+            context: Context
+          };
+          action "SwimWithOrca" appliesTo {
+            principal: [Any],
+            resource: [Resource],
+            context: Context
+          };
+          action "ManageDocuments" appliesTo {
+            principal: [Any],
+            resource: [Resource],
+            context: Context
+          };
+          action "SubmitVote" appliesTo {
+            principal: [Any],
+            resource: [Resource],
+            context: Context
+          };
+        }
+        
+        namespace Dolphin {
+          entity User = {
+            sub?: String,
+            email: String,
+            username: String,
+            dolphin_token?: Dolphin_Token,
+          };
+          entity Workload = {
+            iss: Dolphin::TrustedIssuer,
+            aud?: String,
+            client_id?: String,
+            name: String,
+            access_token: Access_Token,
+          };
+          entity Access_Token = {
+            token_type: String,
+            jti: String,
+            iss: TrustedIssuer,
+            validated_at: Long,
+            exp: Long,
+            sub?: String,
+            scope?: Set<String>,
+            location?: String,
+          } tags Set<String>;
+          entity Dolphin_Token = {
+            token_type: String,
+            jti: String,
+            iss: TrustedIssuer,
+            validated_at: Long,
+            exp: Long,
+            sub?: String,
+            waiver?: String,
+          } tags Set<String>;
+          entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
+        }
+        
+        namespace Jans {
+          type Url = {"host": String, "path": String, "protocol": String};
+          entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};
+          entity Issue = {"country": String, "org_id": String};
+          entity TrustedIssuer = {"issuer_entity_id": Url};
+          entity User = {"country": String, "email": String, "sub": String, "username": String};
+          entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String, "access_token": Access_token};
+          entity id_token = {"acr": String, "amr": String, "aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "sub": String};
+          action "Update" appliesTo {
+            principal: [Workload, User],
+            resource: [Issue],
+            context: {}
+          };
+        }
+        
+        type Context = {
+          tokens: {
+            acme_access_token?: Acme::Access_Token,
+            dolphin_access_token?: Dolphin::Access_Token,
+            dolphin_dolphin_token?: Dolphin::Dolphin_Token,
+            total_token_count: Long
+          }
+        };
+    default_entities:
+      "1694c954f8a3": "ewogICAgInVpZCI6IHsKICAgICAgICAidHlwZSI6ICJBY21lOjpSZXNvdXJjZSIsCiAgICAgICAgImlkIjogIjE2OTRjOTU0ZjhhMyIKICAgIH0sCiAgICAiYXR0cnMiOiB7CiAgICAgICAgIm5hbWUiOiAiQXBwcm92ZWQgRG9scGhpbiBGb29kcyIKICAgIH0KfQ=="
