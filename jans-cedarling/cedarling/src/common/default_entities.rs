@@ -114,17 +114,23 @@ impl<'de> Deserialize<'de> for DefaultEntitiesWithWarns {
                 let _ = limits
                     .validate_entities_count(&default_entities)
                     .map_err(D::Error::custom);
+                let entity = match &raw_value {
+                    Value::String(b64_string) => {
+                        parse_base64_single_entity(&mut warns, entry_id, b64_string)
+                            .map_err(D::Error::custom)?
+                    },
+                    Value::Object(_) => {
+                        parse_single_entity(None, &mut warns, &entry_id, &raw_value)
+                            .map_err(D::Error::custom)?
+                    },
+                    _ => {
+                        return Err(D::Error::custom(format!(
+                            "could not parse default entity, expected base64-encoded JSON string or JSON object; entry: {}",
+                            entry_id
+                        )));
+                    },
+                };
 
-                // first decode from base64
-                let b64 = raw_value.as_str().ok_or_else(|| {
-                            D::Error::custom(format!(
-                                "error parsing default entities: entity '{}' must be a base64-encoded JSON string",
-                                entry_id
-                            ))
-                        })?;
-
-                let entity = parse_base64_single_entity(&mut warns, entry_id, b64)
-                    .map_err(D::Error::custom)?;
                 default_entities.insert(entity.uid().clone(), entity);
             }
 
@@ -442,7 +448,7 @@ mod test {
         let default_entities_data = json!({"test123".to_string(): entity_data});
 
         let _parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
-            .expect("Should return error when uid field is missing");
+            .expect_err("Should return error when uid field is missing");
     }
 
     #[test]
@@ -456,7 +462,7 @@ mod test {
         let default_entities_data = json!({"test123".to_string(): entity_data});
 
         let _parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
-            .expect("Should return error when uid is not an object");
+            .expect_err("Should return error when uid is not an object");
 
         // Test entity with uid missing type field
         let entity_data_no_type = json!({
@@ -468,7 +474,7 @@ mod test {
 
         let default_entities_data = json!({"test456".to_string(): entity_data_no_type});
         let _parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
-            .expect("Should return error when uid.type is missing");
+            .expect_err("Should return error when uid.type is missing");
     }
 
     #[test]
