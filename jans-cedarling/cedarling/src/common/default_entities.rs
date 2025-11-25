@@ -15,6 +15,16 @@ use crate::entity_builder::BuildEntityError;
 use crate::entity_builder::build_cedar_entity;
 use crate::entity_builder::value_to_expr;
 
+/// Dangerous patterns that should not appear in entity IDs for security reasons
+const DANGEROUS_PATTERNS: [&str; 6] = [
+    "<script",
+    "javascript:",
+    "data:",
+    "vbscript:",
+    "onload=",
+    "onerror=",
+];
+
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct DefaultEntities {
     pub inner: HashMap<EntityUid, Entity>,
@@ -216,148 +226,48 @@ fn parse_single_entity(
     entry_id: &String,
     entity_data: &Value,
 ) -> Result<Entity, ParseDefaultEntityError> {
+    validate_entry_id(entry_id)?;
+
+    let entity_obj = if let Value::Object(obj) = entity_data {
+        obj
+    } else {
+        return Err(ParseEntityErrorKind::IsNotJsonObject.with_entry_id(entry_id.to_owned()));
+    };
+
+    let (entity_type, entity_id_from_uid, cedar_attrs, parents) = if entity_obj.contains_key("uid")
+    {
+        // New Cedar entity format: {"uid": {"type": "...", "id": "..."}, "attrs": {}, "parents": [...]}
+        parse_cedar_format(namespace, warns, entry_id, entity_data)?
+    } else if entity_obj.contains_key("entity_type") {
+        // Old format with entity_type field
+        parse_legacy_format(namespace, warns, entry_id, entity_data)?
+    } else {
+        return Err(
+            ParseEntityErrorKind::HaveNoUidOrEntityTypeField.with_entry_id(entry_id.to_owned())
+        );
+    };
+
+    let entity = build_cedar_entity(&entity_type, entity_id_from_uid, cedar_attrs, parents)
+        .map_err(|err| ParseEntityErrorKind::BuildEntity(err).with_entry_id(entry_id.to_owned()))?;
+    Ok(entity)
+}
+
+/// Validate entry ID for security and format requirements
+fn validate_entry_id(entry_id: &str) -> Result<(), ParseDefaultEntityError> {
     if entry_id.trim().is_empty() {
         return Err(ParseEntityErrorKind::EntityIdIsEmpty.with_entry_id(entry_id.to_owned()));
     }
-    let dangerous_patterns = [
-        "<script",
-        "javascript:",
-        "data:",
-        "vbscript:",
-        "onload=",
-        "onerror=",
-    ];
+
     let entry_id_lower = entry_id.to_lowercase();
-    for pattern in &dangerous_patterns {
+    for pattern in &DANGEROUS_PATTERNS {
         if entry_id_lower.contains(pattern) {
             return Err(
                 ParseEntityErrorKind::EntityIdIsDangerous.with_entry_id(entry_id.to_owned())
             );
         }
     }
-    let entity_obj = if let Value::Object(obj) = entity_data {
-        obj
-    } else {
-        return Err(ParseEntityErrorKind::IsNotJsonObject.with_entry_id(entry_id.to_owned()));
-    };
-    let (entity_type, entity_id_from_uid, cedar_attrs, parents) = if entity_obj.contains_key("uid")
-    {
-        // New Cedar entity format: {"uid": {"type": "...", "id": "..."}, "attrs": {}, "parents": [...]}
 
-        // get uid and type
-        let entity_type_from_uid = entity_obj
-            .get("uid")
-            .and_then(|v| v.as_object())
-            .and_then(|v| v.get("type"))
-            .and_then(|v| v.as_str())
-            .ok_or_else(|| {
-                ParseEntityErrorKind::InvalidUidTypeField.with_entry_id(entry_id.to_owned())
-            })?;
-
-        // Add namespace prefix if not already present
-        let full_entity_type = build_entity_type_name(entity_type_from_uid, &namespace);
-
-        // Get the entity ID from uid.id if present
-        let entity_id_from_uid = entity_obj
-            .get("uid")
-            .and_then(|v| v.as_object())
-            .and_then(|v| v.get("id"))
-            .and_then(|v| v.as_str())
-          // Fall back to the HashMap key if uid.id is not specified
-            .unwrap_or(entry_id);
-
-        // Parse attributes from attrs field
-        let empty_map = serde_json::Map::new();
-        let attrs_obj = entity_obj
-            .get("attrs")
-            .and_then(|v| v.as_object())
-            .unwrap_or(&empty_map);
-
-        let cedar_attrs = parse_entity_attrs(attrs_obj.iter(), &full_entity_type)?;
-
-        // Parse parents from parents field
-        let empty_vec: Vec<Value> = Vec::new();
-        let parents_array = entity_obj
-            .get("parents")
-            .and_then(|v| v.as_array())
-            .unwrap_or(&empty_vec);
-
-        let mut parents_set = HashSet::new();
-        for parent in parents_array {
-            if let Value::Object(parent_obj) = parent
-                && let (Some(type_v), Some(id_v)) = (
-                    parent_obj.get("type").and_then(|v| v.as_str()),
-                    parent_obj.get("id").and_then(|v| v.as_str()),
-                )
-            {
-                // Add namespace if not present
-                let full_parent_entity_type = build_entity_type_name(type_v, &namespace);
-                let parent_uid_str = format!("{}::\"{}\"", full_parent_entity_type, id_v);
-                match EntityUid::from_str(&parent_uid_str) {
-                    Ok(parent_uid) => {
-                        parents_set.insert(parent_uid);
-                    },
-                    Err(e) => {
-                        // log warn that we could not parse uid
-                        let msg = format!(
-                            "Could not parse parent UID '{}' for default entity '{}': {}",
-                            parent_uid_str, entry_id, e
-                        );
-                        warns.push(msg);
-                    },
-                }
-            } else {
-                // log warn that we skip value because it is not object
-                let msg = format!(
-                    "In default entity parent array json value should be object, skip: {}",
-                    parent
-                );
-                warns.push(msg);
-            }
-        }
-
-        (
-            full_entity_type,
-            entity_id_from_uid,
-            cedar_attrs,
-            parents_set,
-        )
-    } else if entity_obj.contains_key("entity_type") {
-        // Old format with entity_type field
-        let entity_type = entity_obj
-            .get("entity_type")
-            .and_then(|v| v.as_str())
-            .ok_or_else(|| {
-                ParseEntityErrorKind::InvalidEntityTypeField.with_entry_id(entry_id.to_owned())
-            })?;
-
-        let entity_id_from_uid = entity_obj
-            .get("entity_id")
-            .and_then(|v| v.as_str())
-            .unwrap_or(entry_id);
-
-        // Convert JSON attributes to Cedar expressions
-        let cedar_attrs = parse_entity_attrs(
-            entity_obj
-                .iter()
-                .filter(|(key, _)| key != &"entity_type" && key != &"entity_id"),
-            entry_id,
-        )?;
-
-        (
-            entity_type.to_string(),
-            entity_id_from_uid,
-            cedar_attrs,
-            HashSet::new(),
-        )
-    } else {
-        return Err(
-            ParseEntityErrorKind::HaveNoUidOrEntityTypeField.with_entry_id(entry_id.to_owned())
-        );
-    };
-    let entity = build_cedar_entity(&entity_type, entity_id_from_uid, cedar_attrs, parents)
-        .map_err(|err| ParseEntityErrorKind::BuildEntity(err).with_entry_id(entry_id.to_owned()))?;
-    Ok(entity)
+    Ok(())
 }
 
 fn build_entity_type_name(entity_type_from_uid: &str, namespace: &Option<&str>) -> String {
@@ -370,6 +280,156 @@ fn build_entity_type_name(entity_type_from_uid: &str, namespace: &Option<&str>) 
     } else {
         entity_type_from_uid.to_string()
     }
+}
+
+/// Parse entity in the new Cedar format with "uid" field
+fn parse_cedar_format<'a>(
+    namespace: Option<&str>,
+    warns: &mut Vec<String>,
+    entry_id: &'a str,
+    entity_data: &'a Value,
+) -> Result<
+    (
+        String,
+        &'a str,
+        HashMap<String, RestrictedExpression>,
+        HashSet<EntityUid>,
+    ),
+    ParseDefaultEntityError,
+> {
+    let entity_obj = if let Value::Object(obj) = entity_data {
+        obj
+    } else {
+        return Err(ParseEntityErrorKind::IsNotJsonObject.with_entry_id(entry_id.to_owned()));
+    };
+
+    // get uid and type
+    let entity_type_from_uid = entity_obj
+        .get("uid")
+        .and_then(|v| v.as_object())
+        .and_then(|v| v.get("type"))
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| {
+            ParseEntityErrorKind::InvalidUidTypeField.with_entry_id(entry_id.to_owned())
+        })?;
+
+    // Add namespace prefix if not already present
+    let full_entity_type = build_entity_type_name(entity_type_from_uid, &namespace);
+
+    // Get the entity ID from uid.id if present
+    let entity_id_from_uid = entity_obj
+        .get("uid")
+        .and_then(|v| v.as_object())
+        .and_then(|v| v.get("id"))
+        .and_then(|v| v.as_str())
+      // Fall back to the HashMap key if uid.id is not specified
+        .unwrap_or(entry_id);
+
+    // Parse attributes from attrs field
+    let empty_map = serde_json::Map::new();
+    let attrs_obj = entity_obj
+        .get("attrs")
+        .and_then(|v| v.as_object())
+        .unwrap_or(&empty_map);
+
+    let cedar_attrs = parse_entity_attrs(attrs_obj.iter(), &full_entity_type)?;
+
+    // Parse parents from parents field
+    let empty_vec: Vec<Value> = Vec::new();
+    let parents_array = entity_obj
+        .get("parents")
+        .and_then(|v| v.as_array())
+        .unwrap_or(&empty_vec);
+
+    let mut parents_set = HashSet::new();
+    for parent in parents_array {
+        if let Value::Object(parent_obj) = parent
+            && let (Some(type_v), Some(id_v)) = (
+                parent_obj.get("type").and_then(|v| v.as_str()),
+                parent_obj.get("id").and_then(|v| v.as_str()),
+            )
+        {
+            // Add namespace if not present
+            let full_parent_entity_type = build_entity_type_name(type_v, &namespace);
+            let parent_uid_str = format!("{}::\"{}\"", full_parent_entity_type, id_v);
+            match EntityUid::from_str(&parent_uid_str) {
+                Ok(parent_uid) => {
+                    parents_set.insert(parent_uid);
+                },
+                Err(e) => {
+                    // log warn that we could not parse uid
+                    let msg = format!(
+                        "Could not parse parent UID '{}' for default entity '{}': {}",
+                        parent_uid_str, entry_id, e
+                    );
+                    warns.push(msg);
+                },
+            }
+        } else {
+            // log warn that we skip value because it is not object
+            let msg = format!(
+                "In default entity parent array json value should be object, skip: {}",
+                parent
+            );
+            warns.push(msg);
+        }
+    }
+
+    Ok((
+        full_entity_type,
+        entity_id_from_uid,
+        cedar_attrs,
+        parents_set,
+    ))
+}
+
+/// Parse entity in the legacy format with "entity_type" field
+fn parse_legacy_format<'a>(
+    _namespace: Option<&str>,
+    _warns: &mut Vec<String>,
+    entry_id: &'a str,
+    entity_data: &'a Value,
+) -> Result<
+    (
+        String,
+        &'a str,
+        HashMap<String, RestrictedExpression>,
+        HashSet<EntityUid>,
+    ),
+    ParseDefaultEntityError,
+> {
+    let entity_obj = if let Value::Object(obj) = entity_data {
+        obj
+    } else {
+        return Err(ParseEntityErrorKind::IsNotJsonObject.with_entry_id(entry_id.to_owned()));
+    };
+
+    let entity_type = entity_obj
+        .get("entity_type")
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| {
+            ParseEntityErrorKind::InvalidEntityTypeField.with_entry_id(entry_id.to_owned())
+        })?;
+
+    let entity_id_from_uid = entity_obj
+        .get("entity_id")
+        .and_then(|v| v.as_str())
+        .unwrap_or(entry_id);
+
+    // Convert JSON attributes to Cedar expressions
+    let cedar_attrs = parse_entity_attrs(
+        entity_obj
+            .iter()
+            .filter(|(key, _)| key != &"entity_type" && key != &"entity_id"),
+        entry_id,
+    )?;
+
+    Ok((
+        entity_type.to_string(),
+        entity_id_from_uid,
+        cedar_attrs,
+        HashSet::new(),
+    ))
 }
 
 /// Helper function to parse entity attributes from a key-value iterator
