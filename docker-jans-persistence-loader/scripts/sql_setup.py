@@ -243,9 +243,6 @@ class SQLBackend:
                 "To enable the feature, set the environment variable CN_PERSISTENCE_IMPORT_BUILTIN_LDIF=true"
             )
 
-        logger.info("Importing custom LDIF files (if any)")
-        self.import_custom_ldif(ctx)
-
     def update_schema(self):
         """Updates schema (may include data migration)"""
 
@@ -420,12 +417,6 @@ class SQLBackend:
                         logger.info(f"Converting {table_name}.{column} column type from multivalued {old_data_type} to {data_type}")
                         column_from_multivalued(table_name, column)
 
-    def import_custom_ldif(self, ctx):
-        custom_dir = Path("/app/custom_ldif")
-
-        for file_ in custom_dir.rglob("*.ldif"):
-            self._import_ldif(file_, ctx, self.safe_column_mapping)
-
     def _import_ldif(self, path, ctx, transform_column_mapping=None):
         logger.info(f"Importing {path} file")
         self.client.create_from_ldif(path, ctx, transform_column_mapping)
@@ -469,6 +460,18 @@ class SQLBackend:
                 data_type = self.get_data_type(attr, table)
                 table_mapping[table].update({attr: data_type})
         return table_mapping
+
+    def customize(self):
+        logger.info("Importing custom LDIF files (if any)")
+        ctx = prepare_template_ctx(self.manager)
+        self.import_custom_ldif(ctx)
+
+    def import_custom_ldif(self, ctx):
+        custom_dir = Path("/app/custom_ldif")
+
+        for file_ in custom_dir.rglob("*.ldif"):
+            logger.info(f"Importing {file_} file")
+            self.client.upsert_from_file(file_, ctx, self.safe_column_mapping)
 
     def safe_column_mapping(self, table_name, column_mapping):
         if table_name == "jansToken" and "jansUsrId" in column_mapping:
