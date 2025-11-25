@@ -1,15 +1,17 @@
+use base64::prelude::*;
 use cedar_policy::Entity;
 use cedar_policy::EntityUid;
+use cedar_policy::ExpressionConstructionError;
 use cedar_policy::RestrictedExpression;
 use serde::de::{Deserialize, Deserializer, Error};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::str::FromStr;
+use std::string::FromUtf8Error;
 
 use crate::common::default_entities_limits::DefaultEntitiesLimits;
 use crate::entity_builder::BuildEntityError;
-use crate::entity_builder::BuildEntityErrorKind;
 use crate::entity_builder::build_cedar_entity;
 use crate::entity_builder::value_to_expr;
 
@@ -121,31 +123,7 @@ impl<'de> Deserialize<'de> for DefaultEntitiesWithWarns {
                             ))
                         })?;
 
-                // Decode base64 string into UTF-8 JSON
-                use base64::prelude::*;
-                let buf = BASE64_STANDARD.decode(b64).map_err(|err| {
-                    D::Error::custom(format!(
-                        "error parsing default entities: failed to decode base64 for '{}': {}",
-                        entry_id, err
-                    ))
-                })?;
-
-                let json_str = String::from_utf8(buf).map_err(|err| {
-                    D::Error::custom(format!(
-                        "error parsing default entities: failed to decode utf8 for '{}': {}",
-                        entry_id, err
-                    ))
-                })?;
-
-                let entity_data: serde_json::Value =
-                    serde_json::from_str(&json_str).map_err(|err| {
-                        D::Error::custom(format!(
-                            "error parsing default entities: invalid JSON for '{}': {}",
-                            entry_id, err
-                        ))
-                    })?;
-
-                let entity = parse_single_entity(None, &mut warns, &entry_id, &entity_data)
+                let entity = parse_base64_single_entity(&mut warns, entry_id, b64)
                     .map_err(D::Error::custom)?;
                 default_entities.insert(entity.uid().clone(), entity);
             }
@@ -158,8 +136,71 @@ impl<'de> Deserialize<'de> for DefaultEntitiesWithWarns {
     }
 }
 
-/// Constant for unknown entity type in error messages
-const UNKNOWN_ENTITY_TYPE: &str = "Unknown";
+#[derive(Debug, thiserror::Error)]
+#[error("failed to parse default entity, id: \"{entry_id}\" error: {error}")]
+pub struct ParseDefaultEntityError {
+    pub entry_id: String,
+    pub error: Box<ParseEntityErrorKind>,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum ParseEntityErrorKind {
+    #[error("unable to decode base64 string: {0}")]
+    Base64Decode(#[from] base64::DecodeError),
+    #[error("unable to decode base64 string as utf8: {0}")]
+    UnicodeDecode(#[from] FromUtf8Error),
+    #[error("base64 decoded value is not valid json: {0}")]
+    Base64DecodedIsNotJson(#[from] serde_json::Error),
+    #[error("entity ID cannot be empty or whitespace-only")]
+    EntityIdIsEmpty,
+    #[error("entity ID contains potentially dangerous content")]
+    EntityIdIsDangerous,
+    #[error("entity data must be JSON object")]
+    IsNotJsonObject,
+    #[error("entity has invalid 'uid.type' field, expect string")]
+    InvalidUidTypeField,
+    #[error("entity has invalid 'entity_type' field, expect string")]
+    InvalidEntityTypeField,
+    #[error("entity must have ether 'uid.type' or 'entity_type' (legacy format) field")]
+    HaveNoUidOrEntityTypeField,
+    #[error(transparent)]
+    BuildEntity(BuildEntityError),
+    #[error("Failed to convert attribute '{attr}' to cedar expr: {errs:?}")]
+    ParseEntityAttribute {
+        attr: String,
+        errs: Vec<ExpressionConstructionError>,
+    },
+}
+
+impl ParseEntityErrorKind {
+    fn with_entry_id(self, entry_id: String) -> ParseDefaultEntityError {
+        ParseDefaultEntityError {
+            entry_id,
+            error: Box::new(self),
+        }
+    }
+}
+
+/// Decode base64 string into UTF-8 JSON and call [parse_single_entity]
+fn parse_base64_single_entity(
+    warns: &mut Vec<String>,
+    entry_id: String,
+    b64: &str,
+) -> Result<Entity, ParseDefaultEntityError> {
+    let buf = BASE64_STANDARD
+        .decode(b64)
+        .map_err(|err| ParseEntityErrorKind::Base64Decode(err).with_entry_id(entry_id.clone()))?;
+
+    let json_str = String::from_utf8(buf)
+        .map_err(|err| ParseEntityErrorKind::UnicodeDecode(err).with_entry_id(entry_id.clone()))?;
+
+    let entity_data: serde_json::Value = serde_json::from_str(&json_str).map_err(|err| {
+        ParseEntityErrorKind::Base64DecodedIsNotJson(err).with_entry_id(entry_id.clone())
+    })?;
+
+    let entity = parse_single_entity(None, warns, &entry_id, &entity_data)?;
+    Ok(entity)
+}
 
 /// Parse single entity, return entity and error (in critical case),
 /// But not critical case will populate `warn` vector with log message
@@ -168,14 +209,9 @@ fn parse_single_entity(
     warns: &mut Vec<String>,
     entry_id: &String,
     entity_data: &Value,
-) -> Result<Entity, BuildEntityError> {
+) -> Result<Entity, ParseDefaultEntityError> {
     if entry_id.trim().is_empty() {
-        return Err(BuildEntityError::new(
-            "DefaultEntity".to_string(),
-            BuildEntityErrorKind::InvalidEntityData(
-                "Entity ID cannot be empty or whitespace-only".to_string(),
-            ),
-        ));
+        return Err(ParseEntityErrorKind::EntityIdIsEmpty.with_entry_id(entry_id.to_owned()));
     }
     let dangerous_patterns = [
         "<script",
@@ -188,63 +224,40 @@ fn parse_single_entity(
     let entry_id_lower = entry_id.to_lowercase();
     for pattern in &dangerous_patterns {
         if entry_id_lower.contains(pattern) {
-            return Err(BuildEntityError::new(
-                "DefaultEntity".to_string(),
-                BuildEntityErrorKind::InvalidEntityData(format!(
-                    "Entity ID '{}' contains potentially dangerous content",
-                    entry_id
-                )),
-            ));
+            return Err(
+                ParseEntityErrorKind::EntityIdIsDangerous.with_entry_id(entry_id.to_owned())
+            );
         }
     }
     let entity_obj = if let Value::Object(obj) = entity_data {
         obj
     } else {
-        return Err(BuildEntityError::new(
-            UNKNOWN_ENTITY_TYPE.to_string(),
-            BuildEntityErrorKind::InvalidEntityData(format!(
-                "Default entity data for '{}' must be a JSON object",
-                entry_id
-            )),
-        ));
+        return Err(ParseEntityErrorKind::IsNotJsonObject.with_entry_id(entry_id.to_owned()));
     };
     let (entity_type, entity_id_from_uid, cedar_attrs, parents) = if entity_obj.contains_key("uid")
     {
         // New Cedar entity format: {"uid": {"type": "...", "id": "..."}, "attrs": {}, "parents": [...]}
-        let uid_obj = entity_obj
+
+        // get uid and type
+        let entity_type_from_uid = entity_obj
             .get("uid")
             .and_then(|v| v.as_object())
+            .and_then(|v| v.get("type"))
+            .and_then(|v| v.as_str())
             .ok_or_else(|| {
-                BuildEntityError::new(
-                    UNKNOWN_ENTITY_TYPE.to_string(),
-                    BuildEntityErrorKind::InvalidEntityData(format!(
-                        "Default entity '{}' has invalid uid field",
-                        entry_id
-                    )),
-                )
+                ParseEntityErrorKind::InvalidUidTypeField.with_entry_id(entry_id.to_owned())
             })?;
-
-        let entity_type_from_uid =
-            uid_obj
-                .get("type")
-                .and_then(|v| v.as_str())
-                .ok_or_else(|| {
-                    BuildEntityError::new(
-                        UNKNOWN_ENTITY_TYPE.to_string(),
-                        BuildEntityErrorKind::InvalidEntityData(format!(
-                            "Default entity '{}' has invalid uid.type field",
-                            entry_id
-                        )),
-                    )
-                })?;
 
         // Add namespace prefix if not already present
         let full_entity_type = build_entity_type_name(entity_type_from_uid, &namespace);
 
         // Get the entity ID from uid.id if present
-        let entity_id_from_uid = uid_obj.get("id")
+        let entity_id_from_uid = entity_obj
+            .get("uid")
+            .and_then(|v| v.as_object())
+            .and_then(|v| v.get("id"))
             .and_then(|v| v.as_str())
-            // Fall back to the HashMap key if uid.id is not specified
+          // Fall back to the HashMap key if uid.id is not specified
             .unwrap_or(entry_id);
 
         // Parse attributes from attrs field
@@ -254,11 +267,10 @@ fn parse_single_entity(
             .and_then(|v| v.as_object())
             .unwrap_or(&empty_map);
 
-        let cedar_attrs =
-            parse_entity_attrs(attrs_obj.iter(), &full_entity_type, entity_id_from_uid)?;
+        let cedar_attrs = parse_entity_attrs(attrs_obj.iter(), &full_entity_type)?;
 
         // Parse parents from parents field
-        let empty_vec: Vec<Value> = vec![];
+        let empty_vec: Vec<Value> = Vec::new();
         let parents_array = entity_obj
             .get("parents")
             .and_then(|v| v.as_array())
@@ -310,13 +322,7 @@ fn parse_single_entity(
             .get("entity_type")
             .and_then(|v| v.as_str())
             .ok_or_else(|| {
-                BuildEntityError::new(
-                    UNKNOWN_ENTITY_TYPE.to_string(),
-                    BuildEntityErrorKind::InvalidEntityData(format!(
-                        "Default entity '{}' has invalid entity_type field",
-                        entry_id
-                    )),
-                )
+                ParseEntityErrorKind::InvalidEntityTypeField.with_entry_id(entry_id.to_owned())
             })?;
 
         let entity_id_from_uid = entity_obj
@@ -329,7 +335,6 @@ fn parse_single_entity(
             entity_obj
                 .iter()
                 .filter(|(key, _)| key != &"entity_type" && key != &"entity_id"),
-            entity_type,
             entry_id,
         )?;
 
@@ -340,15 +345,12 @@ fn parse_single_entity(
             HashSet::new(),
         )
     } else {
-        return Err(BuildEntityError::new(
-            UNKNOWN_ENTITY_TYPE.to_string(),
-            BuildEntityErrorKind::InvalidEntityData(format!(
-                "Default entity '{}' must have either uid field (Cedar format) or entity_type field (legacy format)",
-                entry_id
-            )),
-        ));
+        return Err(
+            ParseEntityErrorKind::HaveNoUidOrEntityTypeField.with_entry_id(entry_id.to_owned())
+        );
     };
-    let entity = build_cedar_entity(&entity_type, entity_id_from_uid, cedar_attrs, parents)?;
+    let entity = build_cedar_entity(&entity_type, entity_id_from_uid, cedar_attrs, parents)
+        .map_err(|err| ParseEntityErrorKind::BuildEntity(err).with_entry_id(entry_id.to_owned()))?;
     Ok(entity)
 }
 
@@ -367,9 +369,8 @@ fn build_entity_type_name(entity_type_from_uid: &str, namespace: &Option<&str>) 
 /// Helper function to parse entity attributes from a key-value iterator
 fn parse_entity_attrs<'a>(
     attrs_iter: impl Iterator<Item = (&'a String, &'a Value)>,
-    entity_type: &str,
-    entity_id: &str,
-) -> Result<HashMap<String, RestrictedExpression>, BuildEntityError> {
+    entry_id: &str,
+) -> Result<HashMap<String, RestrictedExpression>, ParseDefaultEntityError> {
     let mut cedar_attrs = HashMap::new();
     for (key, value) in attrs_iter {
         match value_to_expr::value_to_expr(value) {
@@ -380,13 +381,11 @@ fn parse_entity_attrs<'a>(
                 continue;
             },
             Err(errors) => {
-                return Err(BuildEntityError::new(
-                    entity_type.to_string(),
-                    BuildEntityErrorKind::InvalidEntityData(format!(
-                        "Failed to convert attribute '{}' for entity '{}': {:?}",
-                        key, entity_id, errors
-                    )),
-                ));
+                return Err(ParseEntityErrorKind::ParseEntityAttribute {
+                    attr: key.to_owned(),
+                    errs: errors,
+                }
+                .with_entry_id(entry_id.to_owned()));
             },
         }
     }
