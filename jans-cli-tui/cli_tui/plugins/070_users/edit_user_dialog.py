@@ -221,7 +221,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 claims_list.append((claim['name'], claim['displayName']))
 
         claims_checkbox = CheckboxList(
-            alues=sorted(claims_list, key=lambda c: c[1].lower())
+            values=sorted(claims_list, key=lambda c: c[1].lower())
         )
 
         def add_claim(dialog) -> None:
