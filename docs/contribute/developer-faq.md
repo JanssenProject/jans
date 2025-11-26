@@ -43,7 +43,7 @@ sudo certbot certonly --webroot -w /srv/www/htdocs -d FQDN
 
 ### Ubuntu
 
-```bash 
+```bash
 sudo apt update && sudo apt install certbot python3-certbot-apache
 ```
 ```bash

@@ -26,7 +26,7 @@ The "out-of-the-box" login experience in Casa consists of the usual username and
 ### Add the strong authentication settings plugin
 
 This step is optional. Check [this](../plugins/2fa-settings.md) page for more information. Use this plugin if you need to exercise an advanced control on how 2FA behaves in your Casa deployment.
- 
+
 ### Test enrollment and 2FA
 
 Do the following steps using a testing account with no administrative privileges:
@@ -40,10 +40,10 @@ Click [here](./2fa-basics.md) to learn more about 2FA in Casa.
 
 ## Finish configuration
 
-Once you are done with testing, you may use casa as the default authentication method of 
-Janssen Server using [TUI](../../janssen-server/config-guide/config-tools/jans-tui/README.md) 
+Once you are done with testing, you may use casa as the default authentication method of
+Janssen Server using [TUI](../../janssen-server/config-guide/config-tools/jans-tui/README.md)
  to log in users via Casa for all applications the server protects.
- 
+
 Finally, as a security measure you can thoroughly disable access to the administrative console of Casa by following the steps below:
 
 1. Connect to your server
