@@ -10,6 +10,7 @@
 mod build_entity_attrs;
 mod build_expr;
 mod build_iss_entity;
+mod build_multi_issuer_entity;
 mod build_principal_entity;
 mod build_resource_entity;
 mod build_role_entity;
@@ -40,7 +41,9 @@ use std::str::FromStr;
 use std::sync::Arc;
 use url::Origin;
 
+pub(crate) use build_multi_issuer_entity::MultiIssuerEntityError;
 pub(crate) use built_entities::BuiltEntities;
+
 pub use error::*;
 
 pub struct EntityBuilder {
@@ -48,6 +51,7 @@ pub struct EntityBuilder {
     iss_entities: HashMap<Origin, Entity>,
     schema: Option<MappingSchema>,
     default_entities: DefaultEntities,
+    trusted_issuers: HashMap<String, TrustedIssuer>,
 }
 
 impl EntityBuilder {
@@ -63,7 +67,9 @@ impl EntityBuilder {
             .values()
             .map(|iss| {
                 let iss_id = normalize_issuer(&iss.oidc_endpoint.origin().ascii_serialization());
-                build_iss_entity(&config.entity_names.iss, &iss_id, iss, schema.as_ref())
+
+                let iss_type_name = Self::trusted_issuer_typename(&iss.name);
+                build_iss_entity(&iss_type_name.to_string(), &iss_id, iss, schema.as_ref())
             })
             .partition_result();
 
@@ -78,6 +84,7 @@ impl EntityBuilder {
             iss_entities,
             schema,
             default_entities,
+            trusted_issuers: trusted_issuers.clone(),
         })
     }
 
@@ -135,12 +142,7 @@ impl EntityBuilder {
             (None, Vec::new())
         };
 
-        let mut resource = self.build_resource_entity(resource_data)?;
-        if let Some(resource_default_entity) = self.default_entities.inner.get(&resource.uid())
-            && resource_data.attributes.is_empty()
-        {
-            resource = resource_default_entity.clone()
-        }
+        let resource = self.build_resource_entity(resource_data)?;
 
         let issuers = self.iss_entities.values().cloned().collect();
         Ok(AuthorizeEntitiesData {
@@ -206,6 +208,34 @@ impl EntityBuilder {
 
         build_cedar_entity(type_name, id, attrs, parents)
     }
+
+    pub fn trusted_issuer_typename(namespace: &str) -> String {
+        format!("{namespace}::TrustedIssuer")
+    }
+
+    pub fn trusted_issuer_cedar_uid(
+        namespace: &str,
+        iss_url: &str,
+    ) -> Result<EntityUid, BuildEntityError> {
+        let iss_id = normalize_issuer(iss_url);
+        build_cedar_uid(&format!("{namespace}::TrustedIssuer"), &iss_id)
+    }
+
+    #[cfg(test)]
+    // is used only for testing to get trusted issuer
+    fn find_trusted_issuer_by_iss(&self, issuer: &str) -> Option<Arc<TrustedIssuer>> {
+        // First, try to find the issuer in trusted issuer metadata
+        for trusted_issuer in self.trusted_issuers.values() {
+            let trusted_issuer_url = trusted_issuer.oidc_endpoint.origin().ascii_serialization();
+            // Compare both the full URL and just the origin
+            if trusted_issuer_url == issuer || trusted_issuer.oidc_endpoint.as_str() == issuer {
+                // Use the trusted issuer's name field
+                return Some(Arc::new(trusted_issuer.to_owned()));
+            }
+        }
+
+        None
+    }
 }
 
 pub struct BuiltEntitiesUnsigned {
@@ -215,17 +245,21 @@ pub struct BuiltEntitiesUnsigned {
     pub built_entities: BuiltEntities,
 }
 
+pub fn build_cedar_uid(type_name: &str, id: &str) -> Result<EntityUid, BuildEntityError> {
+    EntityUid::from_str(&format!("{}::\"{}\"", type_name, id)).map_err(
+            |e: cedar_policy::ParseErrors| {
+                BuildEntityErrorKind::from(Box::new(e)).while_building(type_name)
+            },
+        )
+}
+
 pub fn build_cedar_entity(
     type_name: &str,
     id: &str,
     attrs: HashMap<String, RestrictedExpression>,
     parents: HashSet<EntityUid>,
 ) -> Result<Entity, BuildEntityError> {
-    let uid = EntityUid::from_str(&format!("{}::\"{}\"", type_name, id)).map_err(
-        |e: cedar_policy::ParseErrors| {
-            BuildEntityErrorKind::from(Box::new(e)).while_building(type_name)
-        },
-    )?;
+    let uid = build_cedar_uid(type_name, id)?;
     let entity = Entity::new(uid, attrs, parents)
         .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
 
@@ -514,7 +548,7 @@ mod test {
 
         // Create trusted issuer
         let trusted_issuer = TrustedIssuer {
-            name: "Test Issuer".to_string(),
+            name: "Jans".to_string(),
             description: "Test".to_string(),
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
@@ -548,9 +582,11 @@ mod test {
         )]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = true;
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: true,
+            ..Default::default()
+        };
 
         let entity_builder = EntityBuilder::new(
             config,
@@ -689,6 +725,9 @@ mod test {
                     description: String
                 };
             }
+            namespace Jans2 {
+                entity TrustedIssuer;
+            }   
         "#;
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
@@ -707,7 +746,7 @@ mod test {
 
         // Create trusted issuer
         let trusted_issuer = TrustedIssuer {
-            name: "Test Issuer".to_string(),
+            name: "Jans2".to_string(),
             description: "Test".to_string(),
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
@@ -717,9 +756,11 @@ mod test {
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = false;
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: false,
+            ..Default::default()
+        };
 
         let entity_builder = EntityBuilder::new(
             config,
@@ -853,7 +894,7 @@ mod test {
 
         // Create trusted issuer
         let trusted_issuer = TrustedIssuer {
-            name: "Test Issuer".to_string(),
+            name: "Jans".to_string(),
             description: "Test".to_string(),
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
@@ -863,9 +904,11 @@ mod test {
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = false;
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: false,
+            ..Default::default()
+        };
 
         let entity_builder = EntityBuilder::new(
             config,
@@ -1043,7 +1086,7 @@ mod test {
 
         // Create trusted issuer
         let trusted_issuer = TrustedIssuer {
-            name: "Test Issuer".to_string(),
+            name: "Jans".to_string(),
             description: "Test".to_string(),
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
@@ -1053,9 +1096,11 @@ mod test {
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = false;
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: false,
+            ..Default::default()
+        };
 
         let entity_builder = EntityBuilder::new(
             config,

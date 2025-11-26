@@ -11,8 +11,8 @@
 use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
-use crate::common::json_rules::ApplyRuleError;
 use crate::common::policy_store::PolicyStoreWithID;
+use crate::entity_builder::BuiltEntities;
 use crate::entity_builder::*;
 use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
@@ -23,7 +23,8 @@ use crate::log::{
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
-use request::{Request, RequestUnsigned};
+use request::{AuthorizeMultiIssuerRequest, Request, RequestUnsigned};
+use serde_json::json;
 use std::collections::{HashMap, HashSet};
 use std::io::Cursor;
 use std::str::FromStr;
@@ -33,11 +34,13 @@ use uuid7::Uuid;
 
 mod authorize_result;
 mod build_ctx;
+mod errors;
 mod trust_mode;
 
 pub(crate) mod request;
 
-pub use authorize_result::AuthorizeResult;
+pub use authorize_result::{AuthorizeResult, MultiIssuerAuthorizeResult};
+pub use errors::*;
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -107,7 +110,7 @@ impl Authz {
 
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
-            .map_err(|e| AuthorizeError::Action(Box::new(e)))?;
+            .map_err(AuthorizeError::Action)?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
         let entities_data = self
@@ -140,12 +143,12 @@ impl Authz {
                 let authz_result = self
                     .execute_authorize(ExecuteAuthorizeParameters {
                         entities: &entities,
-                        principal: principal.clone(),
+                        principal: Some(principal.clone()),
                         action: action.clone(),
                         resource: resource_uid.clone(),
                         context: context.clone(),
                     })
-                    .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
+                    .map_err(|err| InvalidPrincipalError::new(&principal, *err))?;
 
                 let authz_info = AuthorizeInfo {
                     principal: principal.to_string(),
@@ -182,12 +185,12 @@ impl Authz {
                 let authz_result = self
                     .execute_authorize(ExecuteAuthorizeParameters {
                         entities: &entities,
-                        principal: principal.clone(),
+                        principal: Some(principal.clone()),
                         action: action.clone(),
                         resource: resource_uid.clone(),
                         context: context.clone(),
                     })
-                    .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
+                    .map_err(|err| InvalidPrincipalError::new(&principal, *err))?;
 
                 let authz_info = AuthorizeInfo {
                     principal: principal.to_string(),
@@ -311,6 +314,150 @@ impl Authz {
         Ok(result)
     }
 
+    /// Evaluate Multi-Issuer Authorization Request
+    ///
+    /// This implementation processes multiple JWT tokens from different issuers.
+    /// It validates the request format and JWT tokens, builds entities, and performs authorization evaluation.
+    ///
+    /// Unlike traditional authorization which uses workload/user principals, multi-issuer authorization
+    /// evaluates policies based solely on the context (tokens) without requiring a principal.
+    pub async fn authorize_multi_issuer(
+        &self,
+        request: AuthorizeMultiIssuerRequest,
+    ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
+        let start_time = Utc::now();
+        let request_id = gen_uuid7();
+
+        // Validate the request structure
+        request
+            .validate()
+            .map_err(AuthorizeError::MultiIssuerValidation)?;
+
+        let schema = &self.config.policy_store.schema;
+
+        let validated_tokens = self
+            .config
+            .jwt_service
+            .validate_multi_issuer_tokens(&request.tokens)
+            .map_err(AuthorizeError::MultiIssuerValidation)?;
+
+        let entities_data = self
+            .config
+            .entity_builder
+            .build_multi_issuer_entities(
+                &validated_tokens,
+                &request.resource,
+                self.config.log_service.as_ref(),
+            )
+            .map_err(AuthorizeError::MultiIssuerEntity)?;
+
+        let action = cedar_policy::EntityUid::from_str(request.action.as_str())
+            .map_err(AuthorizeError::Action)?;
+
+        let context = build_multi_issuer_context(
+            request.context.clone().unwrap_or(json!({})),
+            &entities_data.tokens,
+            &schema.schema,
+            &action,
+        )?;
+
+        let resource_uid = entities_data.resource.uid();
+
+        let entities = entities_data.entities(Some(&schema.schema))?;
+
+        // Multi-issuer authorization does not use a principal
+        // Authorization is based solely on the context (tokens)
+        let authz_result = self.execute_authorize(ExecuteAuthorizeParameters {
+            entities: &entities,
+            principal: None,
+            action: action.clone(),
+            resource: resource_uid.clone(),
+            context,
+        })?;
+
+        let authz_info = AuthorizeInfo {
+            principal: "None (multi-issuer)".to_string(),
+            diagnostics: Diagnostics::new(
+                authz_result.diagnostics(),
+                &self.config.policy_store.policies,
+            ),
+            decision: authz_result.decision().into(),
+        };
+
+        let result = MultiIssuerAuthorizeResult::new(authz_result.clone(), request_id);
+
+        // measure time how long request executes
+        let since_start = Utc::now().signed_duration_since(start_time);
+        let decision_time_micro_sec = since_start.num_microseconds().unwrap_or({
+            //overflow (exceeding 2^63 microseconds in either direction)
+            i64::MAX
+        });
+
+        // FROM THIS POINT WE ONLY MAKE LOGS
+
+        // getting entities as json
+        let mut entities_raw_json = Vec::new();
+        let cursor = Cursor::new(&mut entities_raw_json);
+
+        entities.write_to_json(cursor)?;
+        let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
+            .map_err(AuthorizeError::EntitiesToJson)?;
+
+        // Log policy evaluation errors if any exist
+        self.log_policy_evaluation_errors(
+            &authz_info.diagnostics,
+            "multi-issuer (no principal)",
+            request_id,
+        );
+
+        let tokens_logging_info = LogTokensInfo::new(
+            &validated_tokens,
+            self.config
+                .authorization
+                .decision_log_default_jwt_id
+                .as_str(),
+        );
+
+        // Decision log
+        // we log decision log before debug log, to avoid cloning diagnostic info
+        self.config.log_service.as_ref().log_any(&DecisionLogEntry {
+            base: BaseLogEntry::new(LogType::Decision, request_id),
+            policystore_id: self.config.policy_store.id.as_str(),
+            policystore_version: self.config.policy_store.get_store_version(),
+            principal: DecisionLogEntry::principal(
+                false, // No person principal for multi-issuer
+                false, // No workload principal for multi-issuer
+            ),
+            user: None,     // No user claims for multi-issuer
+            workload: None, // No workload claims for multi-issuer
+            lock_client_id: None,
+            action: request.action.clone(),
+            resource: resource_uid.to_string(),
+            decision: result.decision.into(),
+            tokens: tokens_logging_info,
+            decision_time_micro_sec,
+            diagnostics: DiagnosticsRefs::new(&[Some(&authz_info.diagnostics)]),
+        });
+
+        // DEBUG LOG
+        // Log all result information about multi-issuer authorization
+        self.config.log_service.as_ref().log_any(
+            LogEntry::new_with_data(LogType::System, Some(request_id))
+                .set_level(LogLevel::DEBUG)
+                .set_auth_info(AuthorizationLogInfo {
+                    action: request.action.clone(),
+                    context: request.context.clone().unwrap_or(json!({})),
+                    resource: resource_uid.to_string(),
+                    entities: entities_json,
+                    authorize_info: vec![authz_info],
+                    authorized: result.decision,
+                })
+                .set_message("Result of multi-issuer authorize.".to_string()),
+        );
+
+        Ok(result)
+    }
+
     /// Evaluate Authorization Request with unsigned data.
     pub async fn authorize_unsigned(
         &self,
@@ -327,7 +474,7 @@ impl Authz {
         let schema = &self.config.policy_store.schema;
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
-            .map_err(|e| AuthorizeError::Action(Box::new(e)))?;
+            .map_err(AuthorizeError::Action)?;
 
         let BuiltEntitiesUnsigned {
             principals,
@@ -364,12 +511,12 @@ impl Authz {
             let auth_result = self
                 .execute_authorize(ExecuteAuthorizeParameters {
                     entities: &entities,
-                    principal: principal_uid.clone(),
+                    principal: Some(principal_uid.clone()),
                     action: action.clone(),
                     resource: resource_uid.clone(),
                     context: context.clone(),
                 })
-                .map_err(|err| InvalidPrincipalError::new(principal_uid, err))?;
+                .map_err(|err| InvalidPrincipalError::new(principal_uid, *err))?;
 
             principal_responses.insert(principal_uid.clone(), auth_result);
         }
@@ -466,16 +613,20 @@ impl Authz {
         &self,
         parameters: ExecuteAuthorizeParameters,
     ) -> Result<cedar_policy::Response, Box<cedar_policy::RequestValidationError>> {
-        let request_principal_workload = cedar_policy::Request::new(
-            parameters.principal,
-            parameters.action,
-            parameters.resource,
-            parameters.context,
-            Some(&self.config.policy_store.schema.schema),
-        )?;
+        let mut request_builder = cedar_policy::Request::builder()
+            .action(parameters.action)
+            .resource(parameters.resource)
+            .context(parameters.context)
+            .schema(&self.config.policy_store.schema.schema);
+
+        if let Some(principal) = parameters.principal {
+            request_builder = request_builder.principal(principal);
+        }
+
+        let request = request_builder.build().map_err(Box::new)?;
 
         let response = self.authorizer.is_authorized(
-            &request_principal_workload,
+            &request,
             self.config.policy_store.policies.get_set(),
             parameters.entities,
         );
@@ -513,22 +664,17 @@ impl Authz {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum AuthzServiceInitError {
-    #[error(transparent)]
-    InitEntityBuilder(#[from] InitEntityBuilderError),
-}
-
 /// Helper struct to hold named parameters for [`Authz::execute_authorize`] method.
 struct ExecuteAuthorizeParameters<'a> {
     entities: &'a Entities,
-    principal: EntityUid,
+    principal: Option<EntityUid>,
     action: EntityUid,
     resource: EntityUid,
     context: cedar_policy::Context,
 }
 
 /// Structure to hold entites created from tokens
+#[derive(Debug)]
 pub struct AuthorizeEntitiesData {
     pub issuers: HashSet<Entity>,
     pub tokens: HashMap<String, Entity>,
@@ -620,62 +766,6 @@ impl AuthorizeEntitiesData {
 
         // Return built entities from merged collection
         BuiltEntities::from_iter(merged_entities.values().map(|e| e.uid()))
-    }
-}
-
-/// Error type for Authorization Service
-#[derive(thiserror::Error, Debug)]
-pub enum AuthorizeError {
-    /// Error encountered while processing JWT token data
-    #[error(transparent)]
-    ProcessTokens(#[from] jwt::JwtProcessingError),
-    /// Error encountered while parsing Action to EntityUid
-    #[error("could not parse action: {0}")]
-    Action(Box<cedar_policy::ParseErrors>),
-    /// Error encountered while validating context according to the schema
-    #[error("could not create context: {0}")]
-    CreateContext(#[from] Box<cedar_policy::ContextJsonError>),
-    /// Error encountered while creating [`cedar_policy::Request`] for entity principal
-    #[error(transparent)]
-    InvalidPrincipal(#[from] InvalidPrincipalError),
-    /// Error encountered while checking if the Entities adhere to the schema
-    #[error("failed to validate Cedar entities: {0:?}")]
-    ValidateEntities(#[from] Box<cedar_policy::entities_errors::EntitiesError>),
-    /// Error encountered while parsing all entities to json for logging
-    #[error("could convert entities to json: {0}")]
-    EntitiesToJson(serde_json::Error),
-    /// Error encountered while building the context for the request
-    #[error("Failed to build context: {0}")]
-    BuildContext(#[from] BuildContextError),
-    /// Error encountered while building the context for the request
-    #[error("error while running on strict id token trust mode: {0}")]
-    IdTokenTrustMode(#[from] IdTokenTrustModeError),
-    /// Error encountered while building Cedar Entities
-    #[error(transparent)]
-    BuildEntity(#[from] BuildEntityError),
-    /// Error encountered while executing the rule for principals
-    #[error(transparent)]
-    ExecuteRule(#[from] ApplyRuleError),
-    #[error("failed to build role entities for unsigned request: {0}")]
-    /// Error encountered while building Role entity in an unsigned request
-    BuildUnsignedRoleEntity(#[from] BuildUnsignedEntityError),
-}
-
-#[derive(Debug, derive_more::Error, derive_more::Display)]
-#[display("The request for `{principal}` does not conform to the schema: {err}")]
-pub struct InvalidPrincipalError {
-    /// Principal name
-    principal: String,
-    /// Error value
-    err: Box<cedar_policy::RequestValidationError>,
-}
-
-impl InvalidPrincipalError {
-    fn new(principal: &EntityUid, err: Box<cedar_policy::RequestValidationError>) -> Self {
-        InvalidPrincipalError {
-            principal: principal.to_string(),
-            err,
-        }
     }
 }
 

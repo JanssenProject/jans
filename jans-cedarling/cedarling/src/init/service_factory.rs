@@ -8,13 +8,14 @@
 //! Module to lazily initialize internal cedarling services
 
 use super::service_config::ServiceConfig;
+use crate::LogLevel;
 use crate::authz::{Authz, AuthzConfig, AuthzServiceInitError};
 use crate::bootstrap_config::BootstrapConfig;
-use crate::common::policy_store::PolicyStoreWithID;
+use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuersValidationError};
+use crate::entity_builder::*;
 use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log::interface::LogWriter;
 use crate::log::{self, LogEntry, LogType};
-use crate::{LogLevel, entity_builder::*};
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -49,8 +50,13 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get policy store
-    pub fn policy_store(&self) -> PolicyStoreWithID {
-        self.service_config.policy_store.clone()
+    pub fn policy_store(&self) -> Result<&PolicyStoreWithID, ServiceInitError> {
+        // it potentyally can be called many times, but it is only during initialization so it shouldn't be a problem
+        self.service_config
+            .policy_store
+            .validate_trusted_issuers()?;
+
+        Ok(&self.service_config.policy_store)
     }
 
     // get log service
@@ -64,7 +70,7 @@ impl<'a> ServiceFactory<'a> {
             Ok(jwt_service.clone())
         } else {
             let config = &self.bootstrap_config.jwt_config;
-            let trusted_issuers = self.policy_store().trusted_issuers.clone();
+            let trusted_issuers = self.policy_store()?.trusted_issuers.clone();
             let logger = self.log_service();
             let service = Arc::new(
                 JwtService::new(
@@ -87,7 +93,7 @@ impl<'a> ServiceFactory<'a> {
         }
 
         let logger = self.log_service();
-        let policy_store = &self.policy_store().store;
+        let policy_store = &self.policy_store()?.store;
 
         let default_entities_with_warn = &policy_store.default_entities;
         // Log warns that some default entities loaded not correctly
@@ -101,12 +107,10 @@ impl<'a> ServiceFactory<'a> {
         }
 
         let config = &self.bootstrap_config.entity_builder_config;
-        let trusted_issuers = self
-            .policy_store()
-            .trusted_issuers
-            .clone()
-            .unwrap_or_default();
-        let schema = &self.policy_store().schema.validator_schema;
+        let policy_store = self.policy_store()?;
+
+        let trusted_issuers = policy_store.trusted_issuers.clone().unwrap_or_default();
+        let schema = &policy_store.schema.validator_schema;
         let entity_builder = EntityBuilder::new(
             config.clone(),
             &trusted_issuers,
@@ -125,7 +129,7 @@ impl<'a> ServiceFactory<'a> {
         } else {
             let config = AuthzConfig {
                 log_service: self.log_service(),
-                policy_store: self.policy_store(),
+                policy_store: self.policy_store()?.clone(),
                 jwt_service: self.jwt_service().await?,
                 entity_builder: self.entity_builder()?,
                 authorization: self.bootstrap_config.authorization_config.clone(),
@@ -146,4 +150,6 @@ pub enum ServiceInitError {
     JwtService(#[from] JwtServiceInitError),
     #[error(transparent)]
     EntityBuilder(#[from] InitEntityBuilderError),
+    #[error(transparent)]
+    PolicyStore(#[from] TrustedIssuersValidationError),
 }

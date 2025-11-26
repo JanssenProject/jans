@@ -6,7 +6,7 @@ tags:
 
 # Jans Casa User Guide
 
-Jans Casa ("Casa") is a self-service web portal for managing account security preferences. The primary use-case for Casa is self-service 2FA, but other use cases and functionalities can be supported via Casa plugins. The options displayed in the user portal will always depend upon which settings have been enabled by the administrator. 
+Jans Casa ("Casa") is a self-service web portal for managing account security preferences. The primary use-case for Casa is self-service 2FA, but other use cases and functionalities can be supported via Casa plugins. The options displayed in the user portal will always depend upon which settings have been enabled by the administrator.
 
 ## Sign in for the first time
 
@@ -20,7 +20,7 @@ The credential dashboard displays widgets for each type of supported 2FA credent
 
 ![cred-dashboard](../assets/casa/dashboard-no-creds-enrolled.png)
 
-To manage existing credentials and enroll new credentials, click the `Manage` button: 
+To manage existing credentials and enroll new credentials, click the `Manage` button:
 
 ![cred-focused](../assets/casa/manage-highlighted.png)
 
@@ -28,7 +28,7 @@ To manage existing credentials and enroll new credentials, click the `Manage` bu
 
 ### Turn 2FA on/off
 
-After the minimum number of credentials have been enrolled (as specified by the system admin), 2FA can be turned on by clicking the switch in the Second Factor Authentication widget: 
+After the minimum number of credentials have been enrolled (as specified by the system admin), 2FA can be turned on by clicking the switch in the Second Factor Authentication widget:
 
 ![preferred-2fa](../assets/casa/preferred.png)
 
@@ -38,11 +38,11 @@ When prompted for 2FA, the specific credential to be prompted first varies depen
 
 If at any time the credential prompted is unavailable, you have the option to present any other previously enrolled 2FA credential type.
 
-To turn off 2FA, click again the switch. 
+To turn off 2FA, click again the switch.
 
 ### 2FA settings and trusted devices
 
-If enabled by the system administrator, you can set your own policy for when 2FA is enforced. To manage your settings, after enrolling credentials and turning on 2FA, click the `Manage your 2FA settings` button in the Preferred Authentication Mechanism widget. 
+If enabled by the system administrator, you can set your own policy for when 2FA is enforced. To manage your settings, after enrolling credentials and turning on 2FA, click the `Manage your 2FA settings` button in the Preferred Authentication Mechanism widget.
 
 ![2fa-settings](../assets/casa/user-facing-2fa-settings.png)
 
@@ -52,7 +52,7 @@ By default, you will be able to choose from a few 2FA policies:
 - If the location (e.g. city) detected in the login attempt is unrecognized
 - If the device used to login is unrecognized
 
-If you opt for 2FA based on location, device, or both, a new widget will appear to display your trusted devices. 
+If you opt for 2FA based on location, device, or both, a new widget will appear to display your trusted devices.
 
 ![2fa-settings-and-trusted-devices](../assets/casa/2fa-settings-trusted-devices.png)
 
@@ -60,17 +60,17 @@ If you opt for 2FA based on location, device, or both, a new widget will appear 
 
 Depending on the device used to get access, some credentials are more convenient to use than others. For instance, security keys may not be compatible with mobile phones or certain browsers.
 
-**To reduce the chance of account lockout**, enroll at least two different _types_ of 2FA credentials -- e.g. one security key and one OTP app; or one OTP app and one SMS phone number, etc. This way, regardless which device you're using to access a protected resource, you will have a usable option for passing strong authentication. 
+**To reduce the chance of account lockout**, enroll at least two different _types_ of 2FA credentials -- e.g. one security key and one OTP app; or one OTP app and one SMS phone number, etc. This way, regardless which device you're using to access a protected resource, you will have a usable option for passing strong authentication.
 
 
 ## 2FA credential details & enrollment
 
-The details page provides additional information about each enrolled credential, for instance its name and date of enrollment. Nicknames can be edited, credentials can be deleted and new credentials can be enrolled and nicknamed. 
+The details page provides additional information about each enrolled credential, for instance its name and date of enrollment. Nicknames can be edited, credentials can be deleted and new credentials can be enrolled and nicknamed.
 
-Depending on administrator configurations, some of the below sections may nor may not be available, or sections not listed here may appear.
+Depending on administrator configurations, some of the below sections may or may not be available, or sections not listed here may appear.
 
-!!! Warning  
-    When a credential is deleted, it cannot be recovered. Deleting credentials may result in 2FA being turned off. 
+!!! Warning
+    When a credential is deleted, it cannot be recovered. Deleting credentials may result in 2FA being turned off.
 
 ### FIDO 2 security keys
 
@@ -97,7 +97,7 @@ For a hard token, choose the `Hard Token` option.
 Add the key associated with the device and the 6 digit code. Add a nickname for the device and click `Add`.
 
 Once it's added, the new device will appear in a list on the same page. Click the pencil to edit the device's nickname or the trashcan to delete the device.
-    
+
 ### Mobile Phone Numbers
 
 To add a new mobile phone number for one-time passcodes, navigate to `2FA credentials` > `Mobile Phone Numbers`.
@@ -107,10 +107,10 @@ To add a new mobile phone number for one-time passcodes, navigate to `2FA creden
 Enter a phone number and click 'Send SMS' to get the passcode. Enter the code received, nickname the mobile number, and click `Add`.
 
 Once it's added, the new mobile number will appear in a list on the same page. Click the pencil to edit the mobile number's nickname or the trashcan to delete the mobile number.
-    
+
 ## Password Reset
 
-If enabled by the system administrator, Casa can also be used to change your password. 
+If enabled by the system administrator, Casa can also be used to change your password.
 
 Navigate to the `Password Reset` widget. Enter your current and new passwords, then click `Change password`.
 
@@ -118,11 +118,11 @@ Navigate to the `Password Reset` widget. Enter your current and new passwords, t
 
 ## Consent Management
 
-If the administrator has enabled the `Consent Management` plugin, it will appear in the navigation menu for all users. 
+If the administrator has enabled the `Consent Management` plugin, it will appear in the navigation menu for all users.
 
-New entries are added automatically whenever the user is prompted for, and authorizes the release of their personal data to an application accessed using their Janssen Server account.   
+New entries are added automatically whenever the user is prompted for, and authorizes the release of their personal data to an application accessed using their Janssen Server account.
 
 ![image](https://user-images.githubusercontent.com/5271048/53795147-f5e7d900-3ef6-11e9-9907-ee4c2be2516f.png)
 
 ### Revoking consent
-When a previously granted consent decision is revoked, the user will be re-prompted to authorize release of their data if/when they attempt to access the application again. 
+When a previously granted consent decision is revoked, the user will be re-prompted to authorize release of their data if/when they attempt to access the application again.
