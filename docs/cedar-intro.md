@@ -21,13 +21,13 @@ Cedar uses the **PARC** syntax:
 * **P**rincipal
 * **A**ction
 * **R**esource
-* **C**ontext 
+* **C**ontext
 
 For example, you may have a policy that says *Admins* can *write* to the */config* folder. The *Admin* role
 is the Principal, *write* is the Action, and the */config* folder is the Resource. The Context is used to
-specify information about the enivironment, like the time of day or network address.
+specify information about the environment, like the time of day or network address.
 
-![](../assets/lock-cedarling-diagram-3.jpg)
+![Cedar, Cedarling, and Lock diagram](../assets/lock-cedarling-diagram-3.jpg)
 
 Fine grain access control makes sense in both the frontend and backend. In the frontend, mastery of
 authz can help developers build better UX. For example, why display form fields a user is not

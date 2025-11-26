@@ -52,4 +52,4 @@ debugger can be attached. The steps below will show how to configure
 
    For IntelliJIdea, create a debug configuration as below:
 
-   ![](../assets/image-jans-remote-debug-intellij.png)
+   ![IntelliJ IDEA Remote Debug Configuration](../assets/image-jans-remote-debug-intellij.png)

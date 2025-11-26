@@ -67,7 +67,7 @@ Depending on the device used to get access, some credentials are more convenient
 
 The details page provides additional information about each enrolled credential, for instance its name and date of enrollment. Nicknames can be edited, credentials can be deleted and new credentials can be enrolled and nicknamed.
 
-Depending on administrator configurations, some of the below sections may nor may not be available, or sections not listed here may appear.
+Depending on administrator configurations, some of the below sections may or may not be available, or sections not listed here may appear.
 
 !!! Warning
     When a credential is deleted, it cannot be recovered. Deleting credentials may result in 2FA being turned off.

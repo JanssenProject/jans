@@ -55,9 +55,9 @@ Examples:
 ```
 
 **Consequences of Incorrect Format**
-❌ Authorization will fail with DENY
-❌ Potential evaluation errors in JSON logic
-❌ Mismatches with actual Cedar policy definitions
+ - Authorization will fail with DENY
+ - Potential evaluation errors in JSON logic
+ - Mismatches with actual Cedar policy definitions
 
 ### Default configuration
 

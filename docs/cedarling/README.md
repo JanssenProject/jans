@@ -120,9 +120,9 @@ Bob, trust me, I authenticated him."
 It's actually more powerful than that. The Cedarling allows the developer to pass not one
 token, but several tokens. This enables the developer to assert not only the human
 identity, but the software identities (or "Workload") that were involved in the issuance
-of the token. Token Based Access Control (TBAC) answers the question: _"Given this bundle
-of tokens, is this action on this resource allowed in this context?"_ Or you could say
-more simply, _"Does this bundle of tokens authorize this capability?"_ While RBAC
+of the token. Token Based Access Control (TBAC) answers the question: *"Given this bundle
+of tokens, is this action on this resource allowed in this context?"* Or you could say
+more simply, *"Does this bundle of tokens authorize this capability?"* While RBAC
 policies are about roles, ABAC policies are about attributes, TBAC policies are about
 tokens.
 
@@ -141,6 +141,7 @@ end-to-end Zero Trust enforcement by embedding fine-grained authorization across
 entire security stack, from client devices to backend services and databases.
 
 ### End-to-End Authorization Enforcement
+
 The Cedarling can be deployed **at every layer** to ensure that access decisions are
 consistently enforced. The diagram below illustrates how the Cedarling operates in a
 hypothetical mobile application architecture:
@@ -178,6 +179,7 @@ hypothetical mobile application architecture:
     can only access their own organization's data.
 
 ### Why Zero Trust Needs Cedarlings
+
 Traditional access control models assume network perimeters are secure, leading to
 excessive trust in internal components. The Cedarling aligns with Zero Trust by:
 
@@ -188,15 +190,17 @@ excessive trust in internal components. The Cedarling aligns with Zero Trust by:
   enforcing the same security rules everywhere.
 
 ### Cedarling and Threat Detection
+
 Beyond enforcing policies, the Cedarling plays a role in intrusion detection by logging
 every decision. These logs can be analyzed in a SIEM (Security Information and Event
 Management) system to detect:
-- Unusual access patterns (e.g., a user requesting sensitive data from an unrecognized 
+- Unusual access patterns (e.g., a user requesting sensitive data from an unrecognized
   location).
 - Token misuse (e.g., an expired JWT being replayed).
 - Privilege escalation attempts (e.g., a non-admin trying to access admin-only APIs).
 
 ### Zero Trust Conclusion
+
 By embedding the Cedarling across multiple layers of the application stack, organizations
 can enforce Zero Trust security, reduce unauthorized access, and gain visibility into
 access patterns. Whether it's protecting frontend applications, securing API gateways, or
