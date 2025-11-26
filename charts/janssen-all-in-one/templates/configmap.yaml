@@ -178,9 +178,7 @@ data:
   | squote
   }}
   {{- end }}
-  {{- if .Values.casa.adminEnabled }}
   CN_CASA_ADMIN_ENABLED: {{ .Values.casa.adminEnabled | quote }}
-  {{- end }}
   CN_SQL_PASSWORD_FILE: {{ .Values.cnSqlPasswordFile }}
   CN_CONFIG_API_PLUGINS: {{ index .Values "config-api" "plugins" | quote }}
   CN_AIO_COMPONENTS: {{ include "janssen-all-in-one.aioComponents" . | fromJsonArray | join "," | quote}}
