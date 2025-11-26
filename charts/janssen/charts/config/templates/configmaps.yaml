@@ -182,6 +182,9 @@ data:
   | squote
   }}
   {{- end }}
+  {{- if .Values.global.casa.adminEnabled }}
+  CN_CASA_ADMIN_ENABLED: {{ .Values.global.casa.adminEnabled | quote }}
+  {{- end }}
   CN_SQL_PASSWORD_FILE: {{ .Values.global.cnSqlPasswordFile }}
   CN_CONFIG_API_PLUGINS: {{ index .Values "global" "config-api" "plugins" | quote  }}
   {{- if .Values.global.saml.enabled }}

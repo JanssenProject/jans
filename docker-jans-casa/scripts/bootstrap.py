@@ -4,6 +4,7 @@ import os
 from uuid import uuid4
 from string import Template
 from functools import cached_property
+from pathlib import Path
 
 from ldif import LDIFWriter
 
@@ -164,6 +165,11 @@ def main():
     except ValueError:
         # likely secret is not created yet
         logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
+
+    # enable/disable admin console via environment variable check; by default the admin console
+    # should be enabled (see https://github.com/JanssenProject/jans/issues/5806)
+    if as_boolean(os.environ.get("CN_CASA_ADMIN_ENABLED", "true")):
+        Path(os.environ.get("CN_CASA_ADMIN_LOCK_FILE")).touch(exist_ok=True)
 
 
 class PersistenceSetup:
