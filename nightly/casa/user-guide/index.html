@@ -14689,25 +14689,25 @@
 
 
 <h1 id="jans-casa-user-guide">Jans Casa User Guide<a class="headerlink" href="#jans-casa-user-guide" title="Permanent link">#</a></h1>
-<p>Jans Casa ("Casa") is a self-service web portal for managing account security preferences. The primary use-case for Casa is self-service 2FA, but other use cases and functionalities can be supported via Casa plugins. The options displayed in the user portal will always depend upon which settings have been enabled by the administrator. </p>
+<p>Jans Casa ("Casa") is a self-service web portal for managing account security preferences. The primary use-case for Casa is self-service 2FA, but other use cases and functionalities can be supported via Casa plugins. The options displayed in the user portal will always depend upon which settings have been enabled by the administrator.</p>
 <h2 id="sign-in-for-the-first-time">Sign in for the first time<a class="headerlink" href="#sign-in-for-the-first-time" title="Permanent link">#</a></h2>
 <p>To log in to Casa, navigate to <code>https://&lt;yourdomain&gt;/jans-casa</code>.</p>
 <p>If you have an existing account, sign in with your standard username and password.</p>
 <h2 id="credential-dashboard">Credential Dashboard<a class="headerlink" href="#credential-dashboard" title="Permanent link">#</a></h2>
 <p>The credential dashboard displays widgets for each type of supported 2FA credential (e.g. U2F keys, OTP apps, etc.). Each widget includes summary details of enrolled credentials and a button to add / change credentials.</p>
 <p><img alt="cred-dashboard" src="../../assets/casa/dashboard-no-creds-enrolled.png" /></p>
-<p>To manage existing credentials and enroll new credentials, click the <code>Manage</code> button: </p>
+<p>To manage existing credentials and enroll new credentials, click the <code>Manage</code> button:</p>
 <p><img alt="cred-focused" src="../../assets/casa/manage-highlighted.png" /></p>
 <h2 id="2fa-overview">2FA overview<a class="headerlink" href="#2fa-overview" title="Permanent link">#</a></h2>
 <h3 id="turn-2fa-onoff">Turn 2FA on/off<a class="headerlink" href="#turn-2fa-onoff" title="Permanent link">#</a></h3>
-<p>After the minimum number of credentials have been enrolled (as specified by the system admin), 2FA can be turned on by clicking the switch in the Second Factor Authentication widget: </p>
+<p>After the minimum number of credentials have been enrolled (as specified by the system admin), 2FA can be turned on by clicking the switch in the Second Factor Authentication widget:</p>
 <p><img alt="preferred-2fa" src="../../assets/casa/preferred.png" /></p>
 <p>If the switch is not visible, your administrator may have configured the system so that 2FA is turned on automatically when enough credentials are available.</p>
 <p>When prompted for 2FA, the specific credential to be prompted first varies depending on the priority of credentials established by the administrator and the user's preferred method, if set.</p>
 <p>If at any time the credential prompted is unavailable, you have the option to present any other previously enrolled 2FA credential type.</p>
-<p>To turn off 2FA, click again the switch. </p>
+<p>To turn off 2FA, click again the switch.</p>
 <h3 id="2fa-settings-and-trusted-devices">2FA settings and trusted devices<a class="headerlink" href="#2fa-settings-and-trusted-devices" title="Permanent link">#</a></h3>
-<p>If enabled by the system administrator, you can set your own policy for when 2FA is enforced. To manage your settings, after enrolling credentials and turning on 2FA, click the <code>Manage your 2FA settings</code> button in the Preferred Authentication Mechanism widget. </p>
+<p>If enabled by the system administrator, you can set your own policy for when 2FA is enforced. To manage your settings, after enrolling credentials and turning on 2FA, click the <code>Manage your 2FA settings</code> button in the Preferred Authentication Mechanism widget.</p>
 <p><img alt="2fa-settings" src="../../assets/casa/user-facing-2fa-settings.png" /></p>
 <p>By default, you will be able to choose from a few 2FA policies:</p>
 <ul>
@@ -14715,17 +14715,17 @@
 <li>If the location (e.g. city) detected in the login attempt is unrecognized</li>
 <li>If the device used to login is unrecognized</li>
 </ul>
-<p>If you opt for 2FA based on location, device, or both, a new widget will appear to display your trusted devices. </p>
+<p>If you opt for 2FA based on location, device, or both, a new widget will appear to display your trusted devices.</p>
 <p><img alt="2fa-settings-and-trusted-devices" src="../../assets/casa/2fa-settings-trusted-devices.png" /></p>
 <h3 id="2fa-best-practices">2FA best practices<a class="headerlink" href="#2fa-best-practices" title="Permanent link">#</a></h3>
 <p>Depending on the device used to get access, some credentials are more convenient to use than others. For instance, security keys may not be compatible with mobile phones or certain browsers.</p>
-<p><strong>To reduce the chance of account lockout</strong>, enroll at least two different <em>types</em> of 2FA credentials -- e.g. one security key and one OTP app; or one OTP app and one SMS phone number, etc. This way, regardless which device you're using to access a protected resource, you will have a usable option for passing strong authentication. </p>
+<p><strong>To reduce the chance of account lockout</strong>, enroll at least two different <em>types</em> of 2FA credentials -- e.g. one security key and one OTP app; or one OTP app and one SMS phone number, etc. This way, regardless which device you're using to access a protected resource, you will have a usable option for passing strong authentication.</p>
 <h2 id="2fa-credential-details-enrollment">2FA credential details &amp; enrollment<a class="headerlink" href="#2fa-credential-details-enrollment" title="Permanent link">#</a></h2>
-<p>The details page provides additional information about each enrolled credential, for instance its name and date of enrollment. Nicknames can be edited, credentials can be deleted and new credentials can be enrolled and nicknamed. </p>
-<p>Depending on administrator configurations, some of the below sections may nor may not be available, or sections not listed here may appear.</p>
+<p>The details page provides additional information about each enrolled credential, for instance its name and date of enrollment. Nicknames can be edited, credentials can be deleted and new credentials can be enrolled and nicknamed.</p>
+<p>Depending on administrator configurations, some of the below sections may or may not be available, or sections not listed here may appear.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>When a credential is deleted, it cannot be recovered. Deleting credentials may result in 2FA being turned off. </p>
+<p>When a credential is deleted, it cannot be recovered. Deleting credentials may result in 2FA being turned off.</p>
 </div>
 <h3 id="fido-2-security-keys">FIDO 2 security keys<a class="headerlink" href="#fido-2-security-keys" title="Permanent link">#</a></h3>
 <p>To add a new FIDO 2 credential, navigate to <code>2FA credentials</code> &gt; <code>Security Keys</code>. Insert the fido key and click <code>Ready</code>. Casa will prompt to press the button on the key.</p>
@@ -14746,15 +14746,15 @@
 <p>Enter a phone number and click 'Send SMS' to get the passcode. Enter the code received, nickname the mobile number, and click <code>Add</code>.</p>
 <p>Once it's added, the new mobile number will appear in a list on the same page. Click the pencil to edit the mobile number's nickname or the trashcan to delete the mobile number.</p>
 <h2 id="password-reset">Password Reset<a class="headerlink" href="#password-reset" title="Permanent link">#</a></h2>
-<p>If enabled by the system administrator, Casa can also be used to change your password. </p>
+<p>If enabled by the system administrator, Casa can also be used to change your password.</p>
 <p>Navigate to the <code>Password Reset</code> widget. Enter your current and new passwords, then click <code>Change password</code>.</p>
 <p><img alt="change-password" src="../../assets/casa/password-reset-casa.png" /></p>
 <h2 id="consent-management">Consent Management<a class="headerlink" href="#consent-management" title="Permanent link">#</a></h2>
-<p>If the administrator has enabled the <code>Consent Management</code> plugin, it will appear in the navigation menu for all users. </p>
-<p>New entries are added automatically whenever the user is prompted for, and authorizes the release of their personal data to an application accessed using their Janssen Server account.   </p>
+<p>If the administrator has enabled the <code>Consent Management</code> plugin, it will appear in the navigation menu for all users.</p>
+<p>New entries are added automatically whenever the user is prompted for, and authorizes the release of their personal data to an application accessed using their Janssen Server account.</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/5271048/53795147-f5e7d900-3ef6-11e9-9907-ee4c2be2516f.png" /></p>
 <h3 id="revoking-consent">Revoking consent<a class="headerlink" href="#revoking-consent" title="Permanent link">#</a></h3>
-<p>When a previously granted consent decision is revoked, the user will be re-prompted to authorize release of their data if/when they attempt to access the application again. </p>
+<p>When a previously granted consent decision is revoked, the user will be re-prompted to authorize release of their data if/when they attempt to access the application again.</p>
 
 
 
@@ -14777,7 +14777,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 19, 2025 09:55:56 UTC"><span class="timeago" datetime="2025-11-19T09:55:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 19, 2025 09:55:56 UTC">2025-11-19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
   </span>
 
     

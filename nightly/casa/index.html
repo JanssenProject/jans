@@ -14464,7 +14464,7 @@
 
 
 <h1 id="jans-casa-documentation">Jans Casa Documentation<a class="headerlink" href="#jans-casa-documentation" title="Permanent link">#</a></h1>
-<p>Jans Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Server. </p>
+<p>Jans Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Server.</p>
 <p>For example, as people interact with an organization's digital services, they may need to:</p>
 <ul>
 <li>Enroll, delete and manage two-factor authentication (2FA) credentials for their account (e.g. FIDO security keys, mobile apps, phone numbers, etc.)</li>
@@ -14472,10 +14472,10 @@
 <li>View and manage which external apps have been authorized to access what personal data</li>
 <li>View trusted devices</li>
 </ul>
-<p>Casa provides a platform for people to perform these account security functions and more in a friendly, straightforward manner. </p>
+<p>Casa provides a platform for people to perform these account security functions and more in a friendly, straightforward manner.</p>
 <h2 id="two-factor-authentication">Two-factor authentication<a class="headerlink" href="#two-factor-authentication" title="Permanent link">#</a></h2>
-<p>The core use case for Casa is self-service 2FA. If people need to call the helpdesk every time they get a new phone or security key, supporting strong authentication becomes prohibitively expensive. </p>
-<p>Out-of-the-box, Casa can be used to enroll and manage the following authenticators:    </p>
+<p>The core use case for Casa is self-service 2FA. If people need to call the helpdesk every time they get a new phone or security key, supporting strong authentication becomes prohibitively expensive.</p>
+<p>Out-of-the-box, Casa can be used to enroll and manage the following authenticators:</p>
 <ul>
 <li>FIDO2 security keys like <a href="https://www.yubico.com/products/">Yubikeys</a>           </li>
 <li>OTP hardware cards like <a href="https://www.ftsafe.com/Products/Power_Card/Standard">these</a> or dongles like <a href="https://www.ftsafe.com/Products/OTP/Single_Button_OTP">these</a></li>
@@ -14485,14 +14485,14 @@
 </ul>
 <p>Additional authenticators and use cases can be supported via <a href="#existing-plugins">custom plugins</a>.</p>
 <h2 id="2fa-enrollment-apis">2FA enrollment APIs<a class="headerlink" href="#2fa-enrollment-apis" title="Permanent link">#</a></h2>
-<p>To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml">APIs</a>  for enrolling the following types of authenticators:   </p>
+<p>To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml">APIs</a>  for enrolling the following types of authenticators:</p>
 <ul>
 <li>Phone numbers for SMS OTP</li>
 <li>OTP apps, cards, or dongles  </li>
 <li>FIDO security keys</li>
 </ul>
 <h2 id="configuration-via-apis">Configuration via APIs<a class="headerlink" href="#configuration-via-apis" title="Permanent link">#</a></h2>
-<p>Besides a comprehensive graphical <a href="administration/admin-console/">admin console</a>, application settings can also be manipulated by means of a configuration <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml">API</a>.</p>
+<p>Besides a comprehensive graphical <a href="administration/admin-console/">admin console</a>, application settings can also be manipulated by means of a configuration <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml">API</a>.</p>
 <h2 id="existing-plugins">Existing plugins<a class="headerlink" href="#existing-plugins" title="Permanent link">#</a></h2>
 <p>Casa is a plugin-oriented, Java web application. Existing functionality can be extended and new functionality and APIs can be introduced through plugins. Currently, there are plugins available for the following:</p>
 <ul>
@@ -14514,10 +14514,10 @@
 <p><strong>Admin users</strong>: Users having the <code>CasaAdmin</code> role </p>
 </li>
 </ul>
-<p>Admin users have access to the Casa <a href="administration/admin-console/">admin console</a>. All users can manage their 2FA credentials, as outlined in the <a href="user-guide/">user guide</a>. </p>
+<p>Admin users have access to the Casa <a href="administration/admin-console/">admin console</a>. All users can manage their 2FA credentials, as outlined in the <a href="user-guide/">user guide</a>.</p>
 <p>A user can be "turned" into an administrator by editing his profile - in <a href="../janssen-server/config-guide/config-tools/jans-tui/">TUI</a> for instance - ensuring <code>CasaAdmin</code> is part of his <code>role</code> attribute.</p>
 <h2 id="get-started">Get started<a class="headerlink" href="#get-started" title="Permanent link">#</a></h2>
-<p>Use the following links to get started with Casa:  </p>
+<p>Use the following links to get started with Casa:</p>
 <h3 id="admin-guide">Admin Guide<a class="headerlink" href="#admin-guide" title="Permanent link">#</a></h3>
 <ul>
 <li><a href="administration/quick-start/">Quick start</a></li>
@@ -14556,7 +14556,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 19, 2025 09:55:56 UTC"><span class="timeago" datetime="2025-11-19T09:55:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 19, 2025 09:55:56 UTC">2025-11-19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
   </span>
 
     

@@ -14613,7 +14613,7 @@
 <p>The flow finishes successfully and the user gets access to the target application</p>
 </li>
 </ol>
-<p>Note the above design does not involve communication protocols. It is responsability of the concrete provider flow how to implement this aspect. The main flow can remain unmodified regardless of any change in existing flows or when new ones are added. </p>
+<p>Note the above design does not involve communication protocols. It is responsability of the concrete provider flow how to implement this aspect. The main flow can remain unmodified regardless of any change in existing flows or when new ones are added.</p>
 <p>Feel free to modify this flow or create one based on it if customizations are required.</p>
 <h2 id="deployment">Deployment<a class="headerlink" href="#deployment" title="Permanent link">#</a></h2>
 <p>To start, ensure the Agama engine and bridge are enabled. More info <a href="https://docs.jans.io/head/admin/developer/agama/engine-bridge-config/#availability">here</a>.</p>
@@ -14631,7 +14631,7 @@
 cd jans/docs/agama-catalog/jans/inboundID/project
 </code></pre></div>
 <h3 id="deploy-the-archive">Deploy the archive<a class="headerlink" href="#deploy-the-archive" title="Permanent link">#</a></h3>
-<p>Transfer the archive to your server, and then run <code>/opt/jans/jans-cli/jans_cli_tui.py</code>. Follow the prompts and then enter the Agama menu (<code>Alt + m</code>). Using you keyboard TAB key, highlight the button "Upload", and press ENTER. Browse and select the file. </p>
+<p>Transfer the archive to your server, and then run <code>/opt/jans/jans-cli/jans_cli_tui.py</code>. Follow the prompts and then enter the Agama menu (<code>Alt + m</code>). Using you keyboard TAB key, highlight the button "Upload", and press ENTER. Browse and select the file.</p>
 <p>Wait 30 seconds and press the <code>d</code> key. This will show the result of the deployment. Ensure no errors are reported.</p>
 <h2 id="configuration-handling">Configuration handling<a class="headerlink" href="#configuration-handling" title="Permanent link">#</a></h2>
 <h3 id="collect-providers-configurations">Collect providers configurations<a class="headerlink" href="#collect-providers-configurations" title="Permanent link">#</a></h3>
@@ -14826,15 +14826,15 @@ cd jans/docs/agama-catalog/jans/inboundID/project
 }
 </code></pre></div>
 <p>None of this attributes exist in Janssen; database adheres to LDAP naming. Conformant names would be <code>uid</code>, <code>mail</code>, <code>sn</code>, and <code>givenName</code>. Also, let's assume you want to set <code>displayName</code> to a string composed by the first and last names separated by a white space. Writing a mapping is required.</p>
-<p>A mapping is implemented in Java in the form of a <code>java.util.function.UnaryOperator&lt;Map&lt;String, Object&gt;&gt;</code>, that is, a function that takes a <code>Map&lt;String, Object&gt;</code> as input and returns a <code>Map&lt;String, Object&gt;</code> as result. Several examples are provided <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java">here</a>. </p>
+<p>A mapping is implemented in Java in the form of a <code>java.util.function.UnaryOperator&lt;Map&lt;String, Object&gt;&gt;</code>, that is, a function that takes a <code>Map&lt;String, Object&gt;</code> as input and returns a <code>Map&lt;String, Object&gt;</code> as result. Several examples are provided <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java">here</a>.</p>
 <p>Note property <code>mappingClassField</code> of every provider defined in the main flow points to the fully qualified name of a mapping. Not all mappings have to belong to the same class.</p>
 <h3 id="import-configurations">Import configurations<a class="headerlink" href="#import-configurations" title="Permanent link">#</a></h3>
 <p>Once the JSON file you have been editing is ready, hit <code>c</code> key again in TUI. This time choose to import the configuration and select the file.</p>
 <h2 id="test">Test<a class="headerlink" href="#test" title="Permanent link">#</a></h2>
-<p>Launch the main flow (learn about this topic <a href="https://docs.jans.io/head/admin/developer/agama/jans-agama-engine/#launching-flows">here</a>). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it links to the providers sites. When clicking on a link, the browser will be taken to the given website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is returned back to your server and then to the target application as described <a href="#main-flow">earlier</a>. </p>
+<p>Launch the main flow (learn about this topic <a href="https://docs.jans.io/head/admin/developer/agama/jans-agama-engine/#launching-flows">here</a>). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it links to the providers sites. When clicking on a link, the browser will be taken to the given website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is returned back to your server and then to the target application as described <a href="#main-flow">earlier</a>.</p>
 <h2 id="how-to-add-another-provider">How to add another provider?<a class="headerlink" href="#how-to-add-another-provider" title="Permanent link">#</a></h2>
 <p><strong>Note</strong>: If you want to integrate Apple Sign In, skip this section: guidelines are included at the end of this document.</p>
-<p>In practice most identity providers adhere to the OAuth2 <code>code</code> grant and require configurations similar to the sample provided. Follow these steps: </p>
+<p>In practice most identity providers adhere to the OAuth2 <code>code</code> grant and require configurations similar to the sample provided. Follow these steps:</p>
 <ol>
 <li>In your local machine, create a new project with the required layout: directories <code>web</code>, <code>code</code> and <code>lib</code></li>
 <li>Place the logo inside <code>web</code></li>
@@ -14857,8 +14857,8 @@ cd jans/docs/agama-catalog/jans/inboundID/project
 <li>A mapping has to be declared as a public field in a public class</li>
 <li>Several providers can use the same mapping</li>
 </ul>
-<p>While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can place the source (java) file in the <code>lib</code> directory of your project and leverage hot reloading. Ensure to create the usual directory hierarchy in <code>lib</code> corresponding to your class package. </p>
-<p>A "template" for quickly start writing a mapping is already <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt">available</a>. Save with <code>.java</code> extension and edit the body of the lambda expression. </p>
+<p>While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can place the source (java) file in the <code>lib</code> directory of your project and leverage hot reloading. Ensure to create the usual directory hierarchy in <code>lib</code> corresponding to your class package.</p>
+<p>A "template" for quickly start writing a mapping is already <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt">available</a>. Save with <code>.java</code> extension and edit the body of the lambda expression.</p>
 <!--
 Also you have to update the main flow as follows:
 
@@ -14878,7 +14878,7 @@ From there onwards, you only need to re-upload the file as many times as needed.
 <li>A key ID and a key file </li>
 </ul>
 <p>You will be prompted to provide a domain name and a return URL. Provide <code>&lt;your-jans-host&gt;</code> and <code>https://&lt;your-jans-host&gt;/jans-auth/fl/callback</code> respectively, ensuring the changes are effectively saved in the developer's portal.</p>
-<p>The configuration for this provider would look like: </p>
+<p>The configuration for this provider would look like:</p>
 <div class="highlight"><pre><span></span><code>&quot;apple&quot;: {
   &quot;flowQname&quot;: &quot;io.jans.inbound.Apple&quot;,
   &quot;displayName&quot;: &quot;Apple&quot;,
@@ -14945,7 +14945,7 @@ From there onwards, you only need to re-upload the file as many times as needed.
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 16, 2025 14:46:41 UTC"><span class="timeago" datetime="2025-05-16T14:46:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 16, 2025 14:46:41 UTC">2025-05-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
   </span>
 
     

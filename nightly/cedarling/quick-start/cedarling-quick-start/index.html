@@ -14674,7 +14674,7 @@
 
 <h1 id="authorization-using-the-cedarling">Authorization Using The Cedarling<a class="headerlink" href="#authorization-using-the-cedarling" title="Permanent link">#</a></h1>
 <p>This quick start guide shows how to quickly test authorization of a user action
-using the Cedarling. We will be using <a href="../../#token-based-access-control-tbac-v-application-asserted-identity">the application-asserted identity approach</a> 
+using the Cedarling. We will be using <a href="../../#token-based-access-control-tbac-v-application-asserted-identity">the application-asserted identity approach</a>
 in this guide to implement role based access control(RBAC). Refer to <a href="#implement-tbac-using-cedarling">this section</a> to understand how to use Cedarling
 with TBAC approach.</p>
 <p>To see authorization using Cedarling in action, we need 3 things.</p>
@@ -14695,7 +14695,7 @@ using the Cedarling when
 the information about the principal is supplied by the host application. We can
 call this approach <a href="../../#token-based-access-control-tbac-v-application-asserted-identity">the application asserted identity approach</a>.</p>
 <h3 id="step-1-create-the-cedar-policy-and-schema">Step-1: Create the Cedar Policy and Schema<a class="headerlink" href="#step-1-create-the-cedar-policy-and-schema" title="Permanent link">#</a></h3>
-<p>The Cedarling needs policies and a schema to authorize access. These are bundled in a <em>policy store</em> (a JSON file). To aid in this quick start guide, we have already created a 
+<p>The Cedarling needs policies and a schema to authorize access. These are bundled in a <em>policy store</em> (a JSON file). To aid in this quick start guide, we have already created a
 <a href="https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/refs/heads/main/6d9f73b2d44ad4e7aa8f1182cde9f72dcbaa244f4327.json">policy store</a> at
 <a href="https://github.com/JanssenProject/CedarlingQuickstart/tree/main">quick start GitHub repository</a>.
 We will use this policy store to allow/deny the incoming authorization request.</p>
@@ -14754,7 +14754,7 @@ use the policy stored in the store (from <a href="#step-1-create-the-cedar-polic
 <li>Click <code>Save</code> to initialize the Cedarling. The Cedarling will fetch and validate your policy store during the
 initialization. </li>
 </ol>
-<p>The Cedarling is ready to receive and evaluate authorization requests at this 
+<p>The Cedarling is ready to receive and evaluate authorization requests at this
 stage.</p>
 <h3 id="step-3-test-authorization-using-the-cedarling">Step-3: Test authorization using the Cedarling<a class="headerlink" href="#step-3-test-authorization-using-the-cedarling" title="Permanent link">#</a></h3>
 <ol>
@@ -14784,9 +14784,9 @@ stage.</p>
 <span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 <p>Leave the <code>Context</code> blank.</p>
-<p>The request is ready to be sent. Click <code>Cedarling Authz Request</code> to send the 
+<p>The request is ready to be sent. Click <code>Cedarling Authz Request</code> to send the
 request to the embedded Cedarling. After evaluation of the authorization
-request, the Cedarling will respond with a JSON payload. Similar to what is 
+request, the Cedarling will respond with a JSON payload. Similar to what is
 shown below.</p>
 <div class="highlight"><span class="filename">Sample Response</span><pre><span></span><code><span class="w">    </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
@@ -14816,9 +14816,9 @@ shown below.</p>
 </code></pre></div>
 <p>The top-level <code>decision: false</code> shows Cedarling denying authorization.</p>
 <h2 id="implement-rbac-using-signed-tokens-tbac">Implement RBAC using signed tokens (TBAC)<a class="headerlink" href="#implement-rbac-using-signed-tokens-tbac" title="Permanent link">#</a></h2>
-<p>In this guide, we will use <a href="../../#token-based-access-control-tbac-v-application-asserted-identity">Token-Based Access Control (TBAC)</a> to 
-implement role-based access control (RBAC). </p>
-<p>For better understanding of the TBAC flow, see the diagram below. </p>
+<p>In this guide, we will use <a href="../../#token-based-access-control-tbac-v-application-asserted-identity">Token-Based Access Control (TBAC)</a> to
+implement role-based access control (RBAC).</p>
+<p>For better understanding of the TBAC flow, see the diagram below.</p>
 <details>
 <summary>TBAC Sequence diagram</summary>
 <pre class="mermaid"><code>sequenceDiagram
@@ -14857,8 +14857,8 @@ implement role-based access control (RBAC). </p>
 </li>
 </ul>
 <h3 id="step-1-create-cedar-policy-and-schema">Step-1: Create Cedar Policy and Schema<a class="headerlink" href="#step-1-create-cedar-policy-and-schema" title="Permanent link">#</a></h3>
-<p>For this guide, we have created a policy store in the 
-<a href="https://github.com/JanssenProject/CedarlingQuickstart">demo GitHub repository</a>. </p>
+<p>For this guide, we have created a policy store in the
+<a href="https://github.com/JanssenProject/CedarlingQuickstart">demo GitHub repository</a>.</p>
 <p>The policy store has two policies. The first grants access to all actions and all resources to the users with the <code>Teacher</code> role. The second allows only <code>Read</code> permission to students with the <code>Student</code> role to any resource. The two policies are as follows:</p>
 <div class="highlight"><pre><span></span><code>@id(&quot;allow_teacher&quot;)
 permit(
@@ -14875,9 +14875,9 @@ permit(
 )
 </code></pre></div>
 <h3 id="step-2-update-the-idp-information">Step-2 Update the IDP information<a class="headerlink" href="#step-2-update-the-idp-information" title="Permanent link">#</a></h3>
-<p>The policy store in the demo repository has information about the IDP that 
-released the tokens. You'll need to fork the demo repository and update the 
-policy store to point it to your IDP instance. Follow the steps below to do 
+<p>The policy store in the demo repository has information about the IDP that
+released the tokens. You'll need to fork the demo repository and update the
+policy store to point it to your IDP instance. Follow the steps below to do
 this.</p>
 <ul>
 <li>Fork the <a href="https://github.com/JanssenProject/CedarlingQuickstart">demo repository</a>. While creating the fork, uncheck the
@@ -14924,7 +14924,7 @@ the steps below to make changes to the policy that we are using above.</p>
 <h3 id="step-3-configure-tarp-with-the-policy-store">Step-3: Configure Tarp with the policy store<a class="headerlink" href="#step-3-configure-tarp-with-the-policy-store" title="Permanent link">#</a></h3>
 <p>We will now add the policy store details in the Janssen Tarp that is
 installed in the browser. The Cedarling instance embedded in the Tarp will
-use the policy from the store (from <a href="#step-1-create-cedar-policy-and-schema">step-1</a>) 
+use the policy from the store (from <a href="#step-1-create-cedar-policy-and-schema">step-1</a>)
 to evaluate the authorization request.</p>
 <ol>
 <li>Open Tarp installed in the Chrome browser</li>
@@ -15034,7 +15034,7 @@ to evaluate the authorization request.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 20, 2025 09:07:18 UTC"><span class="timeago" datetime="2025-11-20T09:07:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 20, 2025 09:07:18 UTC">2025-11-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
   </span>
 
     

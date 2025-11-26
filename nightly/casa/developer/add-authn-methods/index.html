@@ -14732,9 +14732,9 @@
 <p>Authentication in Casa is implemented through an Agama project called <em>casa</em> - in TUI you can see it listed in the Agama management screen. As a first step, the user is requested to enter the username and password combination, then depending on how the application is configured, personal user settings,  and access policies defined, a second factor may be requested.</p>
 <p>The <em>casa</em> project allows to onboard new types of second factors (authentication mechanisms) and also provides a user experience that supports backtracking: if a user is asked to present a specific credential and that credential is not currently available or is not working, he can choose an alternative method for authentication where a different type of credential will be prompted. Users can backtrack several times.</p>
 <h3 id="flow-requisites">Flow requisites<a class="headerlink" href="#flow-requisites" title="Permanent link">#</a></h3>
-<p>To code the flow corresponding to the authentication method to add, you can use the Agama project found  <a href="https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred/agama#readme">here</a> as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:</p>
+<p>To code the flow corresponding to the authentication method to add, you can use the Agama project found  <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred/agama#readme">here</a> as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:</p>
 <p>The flow will be passed an Agama <em>map</em> containing information of the person attempting the authentication. This input parameter will contain at least three keys: <code>uid</code>, <code>inum</code>, and <code>name</code>. <code>uid</code> and <code>inum</code> map directly to attributes stored in the user's profile and are never empty, <code>name</code> is a displayable name which may come from attribute <code>givenName</code> or <code>displayName</code>. All values are <em>strings</em>.</p>
-<p>The flow should terminate with a <code>true</code> outcome if the user successfully passes the challenge, presents the expected credential, etc. In any other case, <code>false</code> must be returned and an optional error message can be included for the caller flow (<code>io.jans.casa.authn.main</code>) to show it in the screen. Any additional data attached in the <code>Finish</code> instruction will not be processed. </p>
+<p>The flow should terminate with a <code>true</code> outcome if the user successfully passes the challenge, presents the expected credential, etc. In any other case, <code>false</code> must be returned and an optional error message can be included for the caller flow (<code>io.jans.casa.authn.main</code>) to show it in the screen. Any additional data attached in the <code>Finish</code> instruction will not be processed.</p>
 <p>If for some reason your flow crashes, the corresponding exception will be printed to the logs, the caller will continue running, and the browser taken to the <a href="#the-selector-page">selector page</a> where an error message will be displayed.</p>
 <p>Note your project may contain more flows to serve as utilitarians or simply to break down the authentication flow into smaller, more manageable pieces.</p>
 <h3 id="about-templates">About templates<a class="headerlink" href="#about-templates" title="Permanent link">#</a></h3>
@@ -14748,7 +14748,7 @@
 &lt;@com.main&gt;
 </code></pre></div>
 <p>The above will generate a page incorporating the required CSS files and will render the header and footer appropriately while leaving your content in the center of the page. The <em>casa</em> project makes heavy use the Tachyons CSS. You may like to use those for building templates instead of incorporating yet another styling framework.</p>
-<p>It is highly recommended to include the following near the bottom of your markup (still inside the <code>main</code> call block): </p>
+<p>It is highly recommended to include the following near the bottom of your markup (still inside the <code>main</code> call block):</p>
 <div class="highlight"><pre><span></span><code>&lt;@com.alternative /&gt;
 </code></pre></div>
 <p>This will render a form with a text and a link that will allow users to "escape" from your flow and take another route, i.e. to backtrack:</p>
@@ -14786,7 +14786,7 @@ When data.skipped is &quot;&quot;
             }
             ...
 </code></pre></div>
-<p>as long as the message key <code>foodAuth.methodTitle</code> is defined in the project's <code>labels.txt</code> file, or elsewhere in another project. Note <code>textKey</code> takes precedence over <code>text</code> when rendering the page. </p>
+<p>as long as the message key <code>foodAuth.methodTitle</code> is defined in the project's <code>labels.txt</code> file, or elsewhere in another project. Note <code>textKey</code> takes precedence over <code>text</code> when rendering the page.</p>
 <p>Both <code>icon</code> and <code>textKey</code> (or <code>text</code>) may contain HTML markup. In this example we are using the font awesome library available in the selector page for rendering a nice <a href="https://fontawesome.com/v5/search?q=pizza&amp;o=r&amp;m=free">icon</a> but we could have used any other thing here like an <code>img</code> tag, for instance.</p>
 <p>Ensure to properly escape double quotes if necessary. Also make the markup a one-liner: JSON strings cannot span several lines.</p>
 <h3 id="recommended-practices">Recommended practices<a class="headerlink" href="#recommended-practices" title="Permanent link">#</a></h3>
@@ -14803,7 +14803,7 @@ JSONObject p = ips.getAgamaFlowConfigProperties(&quot;flow qname&quot;);
 <h4 id="retries">Retries<a class="headerlink" href="#retries" title="Permanent link">#</a></h4>
 <p>Giving the user only one chance to pass an authentication challenge is unfair. Code your flow so users have a couple of opportunities to fail before finishing with <code>false</code> as outcome. Agama's <code>Repeat</code> directive helps you cover this case.</p>
 <h3 id="key-questions">Key questions<a class="headerlink" href="#key-questions" title="Permanent link">#</a></h3>
-<p>As you try to assemble your project, you will come up with some design decisions, for instance: </p>
+<p>As you try to assemble your project, you will come up with some design decisions, for instance:</p>
 <ul>
 <li>How to model and store credentials associated to the authentication method? </li>
 <li>What kind of parameters are relevant for the authentication method?</li>
@@ -14811,7 +14811,7 @@ JSONObject p = ips.getAgamaFlowConfigProperties(&quot;flow qname&quot;);
 </ul>
 <p>Depending on the answers, you may like to start instead with plugin development first. This is not always the case though, however, getting your hands on the plugin might help unclutter the path.</p>
 <h2 id="enrollment-plugin">Enrollment plugin<a class="headerlink" href="#enrollment-plugin" title="Permanent link">#</a></h2>
-<p>Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" <a href="https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred#readme">plugin</a> as a template to start the work. Ensure you have:</p>
+<p>Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred#readme">plugin</a> as a template to start the work. Ensure you have:</p>
 <ul>
 <li>
 <p>A Jans Server installation that includes Jans Casa - prefer a VM environment over the CN edition for development purposes. Also, you'll need a way to connect to your server via SSH</p>
@@ -14828,7 +14828,7 @@ JSONObject p = ips.getAgamaFlowConfigProperties(&quot;flow qname&quot;);
 <li>A <code>target</code> folder with a couple of jar files in it will be generated</li>
 </ol>
 <p>Access Casa admin console and in the plugins page, upload the file suffixed with <code>jar-with-dependencies.jar</code>. After one minute approximately, visit the "Authentication methods" page, check the "Favorite color" widget, and click on "Save". Then logout.</p>
-<p>Login again, this time with a non administrative account. In the landing page (user's dashboard), an item labeled "Your favorite color" will be shown on the left (under the "2FA credentials" heading). Also, a panel in the central area of the page will be added in accordance. </p>
+<p>Login again, this time with a non administrative account. In the landing page (user's dashboard), an item labeled "Your favorite color" will be shown on the left (under the "2FA credentials" heading). Also, a panel in the central area of the page will be added in accordance.</p>
 <p>Click on "Your favorite color" and you'll land a page to let Casa know what your favorite color is!. This color will be used as a second factor for authentication. Ensure you have enabled another method such as OTP so you can enroll an additional credential in order to be able to active 2FA for this account.</p>
 <h3 id="study-the-sample-project">Study the sample project<a class="headerlink" href="#study-the-sample-project" title="Permanent link">#</a></h3>
 <p>Now it's time for you to go through the project folder checking one file at a time. Most of files contain comments that explain the purpose of things.</p>
@@ -14878,7 +14878,7 @@ JSONObject p = ips.getAgamaFlowConfigProperties(&quot;flow qname&quot;);
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 13, 2024 17:16:17 UTC"><span class="timeago" datetime="2024-12-13T17:16:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 13, 2024 17:16:17 UTC">2024-12-13</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
   </span>
 
     

@@ -14473,15 +14473,15 @@
 
 
 <h1 id="an-overview-of-the-cedarling">An Overview of The Cedarling<a class="headerlink" href="#an-overview-of-the-cedarling" title="Permanent link">#</a></h1>
-<p>The Cedarling, powered by the Rust Cedar engine, provides a fast, embeddable, and 
-self-contained solution for policy-based authorization, designed for both client-side and 
-server-side enforcement. This makes it particularly well-suited for latency-sensitive 
-environments like databases, browser-based applications, mobile apps, API gateways, and 
-embedded devices. At less than 2M in size, it's small enough to load into your browser or 
-mobile application. When embedded, the Cedarling avoids slow cloud policy decisions, 
-enabling sub-millisecond performance. The Cedarling never fetches data to make a 
-decision--this is a performance killer and would make the PDP unreliable. The application 
-must fetch all data and tokens before it makes an authorization request. </p>
+<p>The Cedarling, powered by the Rust Cedar engine, provides a fast, embeddable, and
+self-contained solution for policy-based authorization, designed for both client-side and
+server-side enforcement. This makes it particularly well-suited for latency-sensitive
+environments like databases, browser-based applications, mobile apps, API gateways, and
+embedded devices. At less than 2M in size, it's small enough to load into your browser or
+mobile application. When embedded, the Cedarling avoids slow cloud policy decisions,
+enabling sub-millisecond performance. The Cedarling never fetches data to make a
+decision--this is a performance killer and would make the PDP unreliable. The application
+must fetch all data and tokens before it makes an authorization request.</p>
 <p>The Cedarling can be:</p>
 <ul>
 <li>Embedded in browsers using the WASM npm package</li>
@@ -14491,18 +14491,18 @@ must fetch all data and tokens before it makes an authorization request. </p>
 <li>Deployed as a centralized cloud PDP service</li>
 </ul>
 <p><img alt="" src="../assets/cedarling/cedarling-readme-01.jpg" /></p>
-<p>The Cedarling is not merely a library--it is an embeddable Policy Decision Point (PDP), 
-which includes an in-memory cache to enable efficient logging. It connects to a Policy 
-Repository to obtain its policies. Enterprises may also want to connect the Cedarling to a 
-hub system to send its audit logs--a record of every decision to allow or deny access to a 
-capability. From the hub system, enterprises can perform threat detection and stream the 
+<p>The Cedarling is not merely a library--it is an embeddable Policy Decision Point (PDP),
+which includes an in-memory cache to enable efficient logging. It connects to a Policy
+Repository to obtain its policies. Enterprises may also want to connect the Cedarling to a
+hub system to send its audit logs--a record of every decision to allow or deny access to a
+capability. From the hub system, enterprises can perform threat detection and stream the
 logs to a SIEM or ITDR.</p>
-<p>The supports JWT validation and claims mapping through some of its authorization 
-interfaces. We call this Token Based Access Control--where developers present a collection 
-of tokens to obtain authorization to a capability. JWTs provide trusted contextual 
-information to the Cedarling.  The payload of a JWT token is a JSON document, and 
-frequently a complex string, like a URI. Through the use of regular expressions, 
-developers can parse strings and map them to Cedar entities. This provides a mechanism to 
+<p>The supports JWT validation and claims mapping through some of its authorization
+interfaces. We call this Token Based Access Control--where developers present a collection
+of tokens to obtain authorization to a capability. JWTs provide trusted contextual
+information to the Cedarling.  The payload of a JWT token is a JSON document, and
+frequently a complex string, like a URI. Through the use of regular expressions,
+developers can parse strings and map them to Cedar entities. This provides a mechanism to
 map data from trusted issuers to Cedar policies.</p>
 <div class="admonition tip">
 <p class="admonition-title">About Cedar</p>
@@ -14517,10 +14517,10 @@ or watch this <a href="https://www.youtube.com/watch?v=k6pPcnLuOXY&amp;t=1779s">
 <p>These Cedarling docs assume you have a basic understanding of Cedar policy syntax and 
 language features.</p>
 </div>
-<p>On initialization, the Cedarling loads a "policy store" -- a set of policies, a schema, 
-and a list of trusted token issuers. Policy stores are application-specific, meaning each 
-store does <strong>not</strong> contain all policies and schema for all applications in your domain. 
-Each policy store has unique policies and a schema needed only for one specific 
+<p>On initialization, the Cedarling loads a "policy store" -- a set of policies, a schema,
+and a list of trusted token issuers. Policy stores are application-specific, meaning each
+store does <strong>not</strong> contain all policies and schema for all applications in your domain.
+Each policy store has unique policies and a schema needed only for one specific
 application.</p>
 <h3 id="cedarling-interfaces">Cedarling Interfaces<a class="headerlink" href="#cedarling-interfaces" title="Permanent link">#</a></h3>
 <p>At a high level, developers interact with the Cedarling using five core interfaces:</p>
@@ -14531,21 +14531,21 @@ application.</p>
 <li><strong>Multi-Issuer Authorization</strong> (<code>authorize_multi_issuer</code>) – Evaluates policies based on multiple JWT tokens from different issuers without requiring traditional user/workload principals.</li>
 <li><strong>Logging</strong> (<code>log</code>) – Retrieves decision and system logs for auditing. </li>
 </ul>
-<p>Developers call the <code>init</code> interface on startup of their application, causing the 
-Cedarling to read its <a href="reference/cedarling-properties/">bootstrap properties</a> and load its 
-<a href="reference/cedarling-policy-store/">policy store</a>. If configured for JWT validation, the Cedarling 
+<p>Developers call the <code>init</code> interface on startup of their application, causing the
+Cedarling to read its <a href="reference/cedarling-properties/">bootstrap properties</a> and load its
+<a href="reference/cedarling-policy-store/">policy store</a>. If configured for JWT validation, the Cedarling
 will fetch the most recent issuer public keys and metadata.</p>
-<p>The standard <code>authorize</code> method answers the question: "Is this action, on this resource, 
-given this context, allowed with these JWTs?". The Cedarling returns the 
-decision--<em>allow</em> or <em>deny</em>. If denied, the Cedarling returns "diagnostics"--additional 
-context to clarify why the decision was not allowed. During <code>authz</code>, the Cedarling can 
-perform two more important jobs: (1) validate JWT tokens; (2) log the resulting decision. </p>
-<p>The <code>authorize_unsigned</code> variant is used when JWTs have already been validated by the 
-application, or when working with non-token based principals. It follows the same 
+<p>The standard <code>authorize</code> method answers the question: "Is this action, on this resource,
+given this context, allowed with these JWTs?". The Cedarling returns the
+decision--<em>allow</em> or <em>deny</em>. If denied, the Cedarling returns "diagnostics"--additional
+context to clarify why the decision was not allowed. During <code>authz</code>, the Cedarling can
+perform two more important jobs: (1) validate JWT tokens; (2) log the resulting decision.</p>
+<p>The <code>authorize_unsigned</code> variant is used when JWTs have already been validated by the
+application, or when working with non-token based principals. It follows the same
 evaluation logic but skips JWT validation steps.</p>
 <p>The <code>authorize_multi_issuer</code> method is designed for scenarios where applications need to evaluate authorization based on multiple JWT tokens from different issuers in a single request. Unlike the standard <code>authorize</code> method which creates traditional User and Workload principals, this method evaluates policies based purely on the token entities themselves. Each token is validated, converted to a Cedar entity, and made available in the policy evaluation context. This approach is particularly useful for federation scenarios, API gateways handling tokens from multiple identity providers, or applications where authorization depends on capabilities asserted by different issuers rather than a single user identity. Policies can reference individual tokens using predictable naming conventions like <code>context.tokens.acme_access_token</code> or <code>context.tokens.google_id_token</code>.</p>
-<p>The <code>log</code> interface enables developers to retrieve decision and system logs from the Cedarling's 
-in-memory cache. See the Cedarling <a href="reference/cedarling-logs/">log</a> documentation for more information. </p>
+<p>The <code>log</code> interface enables developers to retrieve decision and system logs from the Cedarling's
+in-memory cache. See the Cedarling <a href="reference/cedarling-logs/">log</a> documentation for more information.</p>
 <h3 id="cedarling-components">Cedarling Components<a class="headerlink" href="#cedarling-components" title="Permanent link">#</a></h3>
 <p>The following diagram is a high-level picture of the Cedarling components:</p>
 <p><img alt="" src="../assets/cedarling/lock-cedarling-rust-core-components.jpg" /></p>
@@ -14559,32 +14559,32 @@ in-memory cache. See the Cedarling <a href="reference/cedarling-logs/">log</a> d
   trusted source and send logs for central storage. </li>
 </ul>
 <h2 id="token-based-access-control-tbac-v-application-asserted-identity">Token Based Access Control (TBAC) v. Application Asserted Identity<a class="headerlink" href="#token-based-access-control-tbac-v-application-asserted-identity" title="Permanent link">#</a></h2>
-<p>The Cedarling has two different authorization interfaces. One requires the developer to 
-provide JWTs to prove the identity of the principal: "It's Bob, and here's the token to 
-prove it!" The other allows the application to assert the identity of the principal: "It's 
-Bob, trust me, I authenticated him." </p>
-<p>It's actually more powerful than that. The Cedarling allows the developer to pass not one 
-token, but several tokens. This enables the developer to assert not only the human 
-identity, but the software identities (or "Workload") that were involved in the issuance 
-of the token. Token Based Access Control (TBAC) answers the question: <em>"Given this bundle 
-of tokens, is this action on this resource allowed in this context?"</em> Or you could say 
-more simply, <em>"Does this bundle of tokens authorize this capability?"</em> While RBAC 
-policies are about roles, ABAC policies are about attributes, TBAC policies are about 
+<p>The Cedarling has two different authorization interfaces. One requires the developer to
+provide JWTs to prove the identity of the principal: "It's Bob, and here's the token to
+prove it!" The other allows the application to assert the identity of the principal: "It's
+Bob, trust me, I authenticated him."</p>
+<p>It's actually more powerful than that. The Cedarling allows the developer to pass not one
+token, but several tokens. This enables the developer to assert not only the human
+identity, but the software identities (or "Workload") that were involved in the issuance
+of the token. Token Based Access Control (TBAC) answers the question: <em>"Given this bundle
+of tokens, is this action on this resource allowed in this context?"</em> Or you could say
+more simply, <em>"Does this bundle of tokens authorize this capability?"</em> While RBAC
+policies are about roles, ABAC policies are about attributes, TBAC policies are about
 tokens.</p>
-<p>TBAC helps developers implement security based on JWTs from trusted issuers like identity 
-providers, hardware platforms, and federations. One of the Cedarling authorization 
-interfaces automatically creates a User and Workload entity based on the most common OAuth 
-and OpenID tokens. A new Cedarling authorization interface will enable reasoning on a 
-collection of tokens from different issuers(watch the issue 
-<a href="https://github.com/JanssenProject/jans/issues/11834">Jans-11834</a>). </p>
+<p>TBAC helps developers implement security based on JWTs from trusted issuers like identity
+providers, hardware platforms, and federations. One of the Cedarling authorization
+interfaces automatically creates a User and Workload entity based on the most common OAuth
+and OpenID tokens. A new Cedarling authorization interface will enable reasoning on a
+collection of tokens from different issuers(watch the issue
+<a href="https://github.com/JanssenProject/jans/issues/11834">Jans-11834</a>).</p>
 <h2 id="cedarling-and-zero-trust">Cedarling and Zero Trust<a class="headerlink" href="#cedarling-and-zero-trust" title="Permanent link">#</a></h2>
-<p>Zero Trust is a modern security model that assumes no implicit trust—every request must be 
-explicitly authorized based on policies, identity, and context. The Cedarling enables 
-end-to-end Zero Trust enforcement by embedding fine-grained authorization across the 
+<p>Zero Trust is a modern security model that assumes no implicit trust—every request must be
+explicitly authorized based on policies, identity, and context. The Cedarling enables
+end-to-end Zero Trust enforcement by embedding fine-grained authorization across the
 entire security stack, from client devices to backend services and databases.</p>
 <h3 id="end-to-end-authorization-enforcement">End-to-End Authorization Enforcement<a class="headerlink" href="#end-to-end-authorization-enforcement" title="Permanent link">#</a></h3>
-<p>The Cedarling can be deployed <strong>at every layer</strong> to ensure that access decisions are 
-consistently enforced. The diagram below illustrates how the Cedarling operates in a 
+<p>The Cedarling can be deployed <strong>at every layer</strong> to ensure that access decisions are
+consistently enforced. The diagram below illustrates how the Cedarling operates in a
 hypothetical mobile application architecture:</p>
 <p><img alt="" src="../assets/cedarling/lock-cedarling-mobile-generic.jpg" /></p>
 <ol>
@@ -14631,7 +14631,7 @@ hypothetical mobile application architecture:</p>
     can only access their own organization's data.</li>
 </ol>
 <h3 id="why-zero-trust-needs-cedarlings">Why Zero Trust Needs Cedarlings<a class="headerlink" href="#why-zero-trust-needs-cedarlings" title="Permanent link">#</a></h3>
-<p>Traditional access control models assume network perimeters are secure, leading to 
+<p>Traditional access control models assume network perimeters are secure, leading to
 excessive trust in internal components. The Cedarling aligns with Zero Trust by:</p>
 <ul>
 <li>Eliminating implicit trust—each authorization decision is enforced based on real-time 
@@ -14641,18 +14641,18 @@ excessive trust in internal components. The Cedarling aligns with Zero Trust by:
   enforcing the same security rules everywhere.</li>
 </ul>
 <h3 id="cedarling-and-threat-detection">Cedarling and Threat Detection<a class="headerlink" href="#cedarling-and-threat-detection" title="Permanent link">#</a></h3>
-<p>Beyond enforcing policies, the Cedarling plays a role in intrusion detection by logging 
-every decision. These logs can be analyzed in a SIEM (Security Information and Event 
+<p>Beyond enforcing policies, the Cedarling plays a role in intrusion detection by logging
+every decision. These logs can be analyzed in a SIEM (Security Information and Event
 Management) system to detect:
-- Unusual access patterns (e.g., a user requesting sensitive data from an unrecognized 
+- Unusual access patterns (e.g., a user requesting sensitive data from an unrecognized
   location).
 - Token misuse (e.g., an expired JWT being replayed).
 - Privilege escalation attempts (e.g., a non-admin trying to access admin-only APIs).</p>
 <h3 id="zero-trust-conclusion">Zero Trust Conclusion<a class="headerlink" href="#zero-trust-conclusion" title="Permanent link">#</a></h3>
-<p>By embedding the Cedarling across multiple layers of the application stack, organizations 
-can enforce Zero Trust security, reduce unauthorized access, and gain visibility into 
-access patterns. Whether it's protecting frontend applications, securing API gateways, or 
-enforcing access policies at the database level, the Cedarling ensures every request is 
+<p>By embedding the Cedarling across multiple layers of the application stack, organizations
+can enforce Zero Trust security, reduce unauthorized access, and gain visibility into
+access patterns. Whether it's protecting frontend applications, securing API gateways, or
+enforcing access policies at the database level, the Cedarling ensures every request is
 explicitly authorized everywhere.</p>
 <div class="admonition tip">
 <p class="admonition-title">Why is it "The Cedarling"</p>
@@ -14685,7 +14685,7 @@ It’s a presence.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 20, 2025 14:25:12 UTC"><span class="timeago" datetime="2025-11-20T14:25:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 20, 2025 14:25:12 UTC">2025-11-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
   </span>
 
     
