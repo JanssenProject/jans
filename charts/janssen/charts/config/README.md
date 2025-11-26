@@ -1,6 +1,6 @@
 # config
 
-![Version: 1.12.0](https://img.shields.io/badge/Version-1.12.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.12.0](https://img.shields.io/badge/AppVersion-1.12.0-informational?style=flat-square)
+![Version: 0.0.0-nightly](https://img.shields.io/badge/Version-0.0.0--nightly-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.0-nightly](https://img.shields.io/badge/AppVersion-0.0.0--nightly-informational?style=flat-square)
 
 Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 
@@ -60,9 +60,9 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
 | configmap.cnSqlSslCaCert | string | `""` | Base64-encoded string of CA certificate used to sign client/server certificate of MySQL/PostgreSQL server. Required if using client cert authentication. |
 | configmap.cnSqlSslClientCert | string | `""` | Base64-encoded string of client certificate signed by CA. Required if using client cert authentication. |
-| configmap.cnSqlSslClientKey | string | `""` | Base64-encoded string of client key signed by CA. Required if using client cert authentication. |
-| configmap.cnSqlSslEnabled | bool | `false` | Enforce connection to SQL database using SSL. |
-| configmap.cnSqlSslMode | string | `""` | Mode when connecting to SQL database using SSL. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`. |
+| configmap.cnSqlSslClientKey | string | `""` | Base64-encoded client private key corresponding to the client certificate. Required if using client cert authentication. We advise to not commit real private keys in values.yaml. |
+| configmap.cnSqlSslEnabled | bool | `false` | Enable SSL connection to SQL database. |
+| configmap.cnSqlSslMode | string | `""` | Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected in the secrets. |
 | configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
 | configmap.cnVaultAppRolePath | string | `"approle"` | Path to Vault AppRole. |
@@ -95,7 +95,7 @@ Kubernetes: `>=v1.22.0-0`
 | fullNameOverride | string | `""` |  |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"janssenproject/configurator"` | Image  to use for deploying. |
-| image.tag | string | `"1.12.0-1"` | Image  tag to use for deploying. |
+| image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | lifecycle | object | `{}` |  |
 | migration | object | `{"enabled":false,"migrationDataFormat":"ldif","migrationDir":"/ce-migration"}` | CE to CN Migration section |
 | migration.enabled | bool | `false` | Boolean flag to enable migration from CE |

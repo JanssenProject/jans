@@ -18,9 +18,13 @@ package io.jans.lock.service.ws.rs;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.jans.lock.model.app.audit.AuditActionType;
+import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.core.LockApiError;
+import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.config.ConfigurationService;
 import io.jans.lock.service.ws.rs.base.BaseResource;
+import io.jans.net.InetAddressUtility;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,9 +32,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
@@ -47,6 +53,9 @@ public class ConfigurationRestWebService extends BaseResource {
 	@Inject
 	private ConfigurationService configurationService;
 
+	@Inject
+	private ApplicationAuditLogger applicationAuditLogger;
+
 	@Operation(summary = "Request .well-known data", description = "Request .well-know Lock server configuration", tags = {
 			"Lock - Server Configuration" })
 	@ApiResponses(value = {
@@ -55,11 +64,20 @@ public class ConfigurationRestWebService extends BaseResource {
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response getConfiguration() {
-		ObjectNode response = configurationService.getLockConfiguration();
+	public Response getConfiguration(@Context HttpServletRequest request) {
+		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+				AuditActionType.CONFIGURATION_READ);
 
-		ResponseBuilder builder = Response.ok().entity(response.toString());
-		return builder.build();
+		boolean success = false;
+		try {
+			ObjectNode response = configurationService.getLockConfiguration();
+			ResponseBuilder builder = Response.ok().entity(response.toString());
+
+			success = true;
+			return builder.build();
+		} finally {
+			applicationAuditLogger.log(auditLogEntry, success);
+		}
 	}
 
 }
