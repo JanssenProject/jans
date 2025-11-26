@@ -53,7 +53,7 @@ impl DefaultEntities {
         let mut warns = Vec::new();
 
         for (entry_id, entity_data) in raw_data {
-            match parse_single_entity(None, &mut warns, &entry_id, &entity_data) {
+            match parse_single_entity(&mut warns, &entry_id, &entity_data) {
                 Ok(entity) => {
                     default_entities.insert(entity.uid().clone(), entity);
                 },
@@ -168,7 +168,7 @@ pub fn parse_default_entities_with_warns(
                 Value::String(b64_string) => {
                     parse_base64_single_entity(&mut warns, &entry_id, b64_string)?
                 },
-                Value::Object(_) => parse_single_entity(None, &mut warns, &entry_id, &raw_value)?,
+                Value::Object(_) => parse_single_entity(&mut warns, &entry_id, &raw_value)?,
                 _ => {
                     return Err(ParseEntityErrorKind::IsNotJsonObject.with_entry_id(entry_id));
                 },
@@ -279,14 +279,13 @@ fn parse_base64_single_entity(
         ParseEntityErrorKind::Base64DecodedIsNotJson(err).with_entry_id(entry_id.to_owned())
     })?;
 
-    let entity = parse_single_entity(None, warns, entry_id, &entity_data)?;
+    let entity = parse_single_entity(warns, entry_id, &entity_data)?;
     Ok(entity)
 }
 
 /// Parse single entity, return entity and error (in critical case),
 /// But not critical case will populate `warn` vector with log message
 fn parse_single_entity(
-    namespace: Option<&str>,
     warns: &mut Vec<DefaultEntityWarning>,
     entry_id: &str,
     entity_data: &Value,
@@ -299,10 +298,10 @@ fn parse_single_entity(
 
     let parse_result = if entity_obj.contains_key("uid") {
         // New Cedar entity format: {"uid": {"type": "...", "id": "..."}, "attrs": {}, "parents": [...]}
-        parse_cedar_format(namespace, warns, entry_id, entity_data)?
+        parse_cedar_format(warns, entry_id, entity_data)?
     } else if entity_obj.contains_key("entity_type") {
         // Old format with entity_type field
-        parse_legacy_format(namespace, warns, entry_id, entity_data)?
+        parse_legacy_format(warns, entry_id, entity_data)?
     } else {
         return Err(
             ParseEntityErrorKind::HaveNoUidOrEntityTypeField.with_entry_id(entry_id.to_owned())
@@ -310,7 +309,7 @@ fn parse_single_entity(
     };
 
     let entity = build_cedar_entity(
-        &parse_result.entity_type,
+        parse_result.entity_type,
         parse_result.entity_id,
         parse_result.cedar_attrs,
         parse_result.parents,
@@ -337,21 +336,9 @@ fn validate_entry_id(entry_id: &str) -> Result<(), ParseDefaultEntityError> {
     Ok(())
 }
 
-fn build_entity_type_name(entity_type_from_uid: &str, namespace: Option<&str>) -> String {
-    if entity_type_from_uid.contains("::") {
-        entity_type_from_uid.to_string()
-    } else if let Some(ns) = namespace
-        && !ns.is_empty()
-    {
-        format!("{ns}::{entity_type_from_uid}")
-    } else {
-        entity_type_from_uid.to_string()
-    }
-}
-
 /// Result structure for entity parsing with named parameters
 pub struct EntityParseResultData<'a> {
-    pub entity_type: String,
+    pub entity_type: &'a str,
     pub entity_id: &'a str,
     pub cedar_attrs: HashMap<String, RestrictedExpression>,
     pub parents: HashSet<EntityUid>,
@@ -359,7 +346,6 @@ pub struct EntityParseResultData<'a> {
 
 /// Parse entity in the new Cedar format with "uid" field
 fn parse_cedar_format<'a>(
-    namespace: Option<&str>,
     warns: &mut Vec<DefaultEntityWarning>,
     entry_id: &'a str,
     entity_data: &'a Value,
@@ -369,7 +355,7 @@ fn parse_cedar_format<'a>(
     };
 
     // get uid and type
-    let entity_type_from_uid = entity_obj
+    let entity_type = entity_obj
         .get("uid")
         .and_then(|v| v.as_object())
         .and_then(|v| v.get("type"))
@@ -377,9 +363,6 @@ fn parse_cedar_format<'a>(
         .ok_or_else(|| {
             ParseEntityErrorKind::InvalidUidTypeField.with_entry_id(entry_id.to_owned())
         })?;
-
-    // Add namespace prefix if not already present
-    let full_entity_type = build_entity_type_name(entity_type_from_uid, namespace);
 
     // Get the entity ID from uid.id if present
     let entity_id_from_uid = entity_obj
@@ -397,7 +380,7 @@ fn parse_cedar_format<'a>(
         .and_then(|v| v.as_object())
         .unwrap_or(&empty_map);
 
-    let cedar_attrs = parse_entity_attrs(attrs_obj.iter(), &full_entity_type)?;
+    let cedar_attrs = parse_entity_attrs(attrs_obj.iter(), entry_id)?;
 
     // Parse parents from parents field
     let empty_vec: Vec<Value> = Vec::new();
@@ -409,14 +392,12 @@ fn parse_cedar_format<'a>(
     let mut parents_set = HashSet::new();
     for parent in parents_array {
         if let Value::Object(parent_obj) = parent
-            && let (Some(type_v), Some(id_v)) = (
+            && let (Some(parent_entity_type), Some(id_v)) = (
                 parent_obj.get("type").and_then(|v| v.as_str()),
                 parent_obj.get("id").and_then(|v| v.as_str()),
             )
         {
-            // Add namespace if not present
-            let full_parent_entity_type = build_entity_type_name(type_v, namespace);
-            let parent_uid_str = format!("{full_parent_entity_type}::\"{id_v}\"");
+            let parent_uid_str = format!("{parent_entity_type}::\"{id_v}\"");
             match EntityUid::from_str(&parent_uid_str) {
                 Ok(parent_uid) => {
                     parents_set.insert(parent_uid);
@@ -440,7 +421,7 @@ fn parse_cedar_format<'a>(
     }
 
     Ok(EntityParseResultData {
-        entity_type: full_entity_type,
+        entity_type,
         entity_id: entity_id_from_uid,
         cedar_attrs,
         parents: parents_set,
@@ -449,7 +430,6 @@ fn parse_cedar_format<'a>(
 
 /// Parse entity in the legacy format with "`entity_type`" field
 fn parse_legacy_format<'a>(
-    _namespace: Option<&str>,
     _warns: &mut Vec<DefaultEntityWarning>,
     entry_id: &'a str,
     entity_data: &'a Value,
@@ -479,7 +459,7 @@ fn parse_legacy_format<'a>(
     )?;
 
     Ok(EntityParseResultData {
-        entity_type: entity_type.to_string(),
+        entity_type,
         entity_id: entity_id_from_uid,
         cedar_attrs,
         parents: HashSet::new(),
