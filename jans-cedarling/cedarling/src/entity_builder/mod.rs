@@ -612,7 +612,7 @@ mod test {
 
         // Verify default entities are included
         assert_eq!(
-            entities_data.default_entities.inner.len(),
+            entities_data.default_entities.len(),
             2,
             "should have 2 default entities"
         );
@@ -668,7 +668,7 @@ mod test {
 
         // Verify all default entities are present and accessible
         assert_eq!(
-            entities_data.default_entities.inner.len(),
+            entities_data.default_entities.len(),
             2,
             "should have 2 default entities"
         );
