@@ -56,6 +56,26 @@ If you want to make the admin console available again you need to recreate the m
 1. Run `chown casa:casa .administrable` (do this only if you are on FIPS environment)
 1. Logout in case you have an open browser session, and login again
 
+!!! Note
+    In cloud-native setup, the admin console can be enabled/disabled by changing the value of `casa.adminEnabled` attribute in `values.yaml` file. See examples below:
+
+    1. For the vanilla Janssen chart:
+
+        ```yaml
+        global:
+          casa:
+            # admin console is enabled by default; set the value to false to disable the console
+            adminEnabled: true
+        ```
+
+    1. For the all-in-one Janssen chart:
+
+        ```yaml
+        casa:
+          # admin console is enabled by default; set the value to false to disable the console
+          adminEnabled: true
+        ```
+
 ## Check out available plugins
 
 Browse our [catalog of plugins](../index.md#existing-plugins) to add features and expand Casa!.
