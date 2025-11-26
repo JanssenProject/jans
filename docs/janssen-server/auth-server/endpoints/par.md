@@ -46,7 +46,7 @@ In response to a valid request, the PAR endpoint returns `request_uri` in respon
 ```
 
 Since PAR endpoint is a protected resource. The client has to authenticate itself to the endpoint. Authentication
-methods used are same as the once used for client authentication at [token endpoint](./token.md#client-authentication).
+methods used are same as the ones used for client authentication at [token endpoint](./token.md#client-authentication).
 
 More information about request and response of the PAR endpoint can be found in
 the OpenAPI specification of
@@ -179,4 +179,4 @@ You can ask questions through [GitHub Discussions](https://github.com/JanssenPro
 
 ## Want to contribute?
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).

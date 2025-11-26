@@ -46,7 +46,7 @@ In response to a valid request, the userinfo endpoint returns user information i
 
 User Info response should contain: `sub`, `jti` and `client_id` claims.
 
-Since userinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to
+Since userinfo endpoint is an OAuth2-protected resource, a valid access token with appropriate scope is required to
 access the endpoint. More information about request and response of the userinfo endpoint can be found in
 the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info).
 

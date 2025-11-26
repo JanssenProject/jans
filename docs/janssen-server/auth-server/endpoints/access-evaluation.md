@@ -55,14 +55,13 @@ changed via `AccessEvaluationDiscoveryType` custom script.
 `access_evaluation_v1_endpoint` claim in the response specifies the URL for access evaluation endpoint. By default, access
 evaluation endpoint looks like below:
 
-```
+```text
 https://janssen.server.host/jans-auth/restv1/access/v1/evaluation
 ```
 
-In order to call Access Evaluation Endpoint client must have `access_evaluation` scope.
-If scope is not present AS rejects call with 401 (unauthorized) http status code.
-`Authorization` header must contain valid `access_token` with `access_evaluation` scope granted to it.
-Otherwise it's possible to use `Basic` token with encoded client credentials if set
+To call Authorization Challenge Endpoint, client must have `authorization_challenge` scope.
+If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP status code.
+Otherwise, it's possible to use `Basic` token with encoded client credentials if set
 `accessEvaluationAllowBasicClientAuthorization` AS configuration property to `true`.
 
 - Bearer token : `Authorization: Bearer <access_token>`
@@ -73,7 +72,7 @@ More information about request and response of the Access Evaluation Endpoint ca
 of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/access-evaluation).
 
 Sample request
-```
+```http
 POST /jans-auth/restv1/access/v1/evaluation HTTP/1.1
 Host: happy-example.gluu.info
 Content-Type: application/json

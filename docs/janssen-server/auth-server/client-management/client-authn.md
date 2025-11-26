@@ -86,14 +86,14 @@ navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> TODO
 
 ## private_key_jwt
 
-`private_key_jwt` is private key based method where secret is not shared between client and authorization server.
+`private_key_jwt` is private-key-based method where secret is not shared between client and authorization server.
 Instead, the client generates an JSON Web Token(JWT) which is shared with the Janssen Server. Upon receiving JWT singned
 by client's private key, the Janssen Server can validate this JWT using public keys supplied by client at the time of
 registration.
 
 The client can supply public keys in form of [JSON Web Key Set(JWKS)](https://www.rfc-editor.org/rfc/rfc7517#section-5) or
 provide a URI where the client publishes its JWKS. Providing JWKS URI is preferred method as it enable easy key rotations
-without client having to update JWKS manualy. Check `jwks` and `jwks_uri` elements in [OIDC client metadata section](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata)
+without client having to update JWKS manually. Check `jwks` and `jwks_uri` elements in [OIDC client metadata section](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata)
 for more details.
 
 This authentication method is further described in OpenId Connect specification,

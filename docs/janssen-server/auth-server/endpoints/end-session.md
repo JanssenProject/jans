@@ -23,7 +23,7 @@ https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
 `end_session_endpoint` claim in the response specifies the URL for end session endpoint. By default, end session
-ndpoint looks like below:
+endpoint looks like below:
 
 ```
 https://janssen.server.host/jans-auth/restv1/end_session

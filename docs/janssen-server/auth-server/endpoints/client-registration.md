@@ -21,7 +21,7 @@ server and how that request is served by the Authorization server. It is explain
 
 ### Client Registration endpoint
 The URI to dynamically register a client to a Janssen Auth Server can be found by checking the `registration_endpoint`
-claim of the OpenID Connect configuration reponse, typically deployed at
+claim of the OpenID Connect configuration response, typically deployed at
 
 ```text
 https://<my.jans.server>/.well-known/openid-configuration
@@ -40,7 +40,7 @@ Client expiration is set based on `dynamicRegistrationExpirationTime` AS configu
 if `dcrForbidExpirationTimeInRequest` is `false` then it can be requested in Dynamic Client Registration Request via `lifetime` parameter
 which expected value in seconds.
 
-Configure the Janssen AS using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
+Configure the Janssen AS using steps explained in the [Configure the Janssen AS](#curl-commands-to-configure-jans-auth-server)
 
 ### Client registration Requests
 
@@ -659,8 +659,8 @@ example below. HTTP method `GET` is used to send the request which signifies tha
 metadata.
 
 ```shell
-curl -k -H 'Authorization: Bearer eaee20de-54ce-4217-b960-6b72b55e6cab' \
--i 'https://my.jans.server/jans-auth/restv1/register?client_id=85192707-a38c-496c-806c-ef01a6a3ae4a'
+curl -k -H 'Authorization: Bearer <REDACTED>' \
+i 'https://my.jans.server/jans-auth/restv1/register?client_id=85192707-a38c-496c-806c-ef01a6a3ae4a'
 ```
 
 JSON response from Janssen Server will contain the current state of client metadata.

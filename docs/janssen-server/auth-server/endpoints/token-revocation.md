@@ -65,7 +65,7 @@ To remove all tokens for given `client_id` it's required:
 
 ## Revoke tokens of other clients
 
-By default Revoke Endpoint allows revoke only own client's tokens.
+By default, the Revoke Endpoint allows only revoking of own client's tokens.
 However it is possible to allow revoking of any token (which is issued with other client).
 
 For this it is required:
