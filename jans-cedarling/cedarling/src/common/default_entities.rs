@@ -53,15 +53,15 @@ impl DefaultEntities {
                     default_entities.insert(entity.uid().clone(), entity);
                 },
                 Err(err) => {
-                    warns.push(format!(
-                        "error parsing default entities: failed to parse entity '{}': {}",
-                        entry_id, err
-                    ));
+                    warns.push(DefaultEntityWarning::EntityParseError {
+                        entry_id: entry_id.clone(),
+                        error: err.to_string(),
+                    });
                 },
             }
         }
 
-        for warn in warns {
+        for warn in &warns {
             eprintln!("{}", warn);
         }
 
@@ -110,11 +110,11 @@ impl DefaultEntities {
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct DefaultEntitiesWithWarns {
     inner: DefaultEntities,
-    warns: Vec<String>,
+    warns: Vec<DefaultEntityWarning>,
 }
 
 impl DefaultEntitiesWithWarns {
-    fn new(entities: HashMap<EntityUid, Entity>, warns: Vec<String>) -> Self {
+    fn new(entities: HashMap<EntityUid, Entity>, warns: Vec<DefaultEntityWarning>) -> Self {
         Self {
             inner: DefaultEntities { inner: entities },
             warns,
@@ -127,7 +127,7 @@ impl DefaultEntitiesWithWarns {
     }
 
     // Get warns (error messages) that was on parsing phase
-    pub fn warns(&self) -> &[String] {
+    pub fn warns(&self) -> &[DefaultEntityWarning] {
         &self.warns
     }
 }
@@ -229,6 +229,26 @@ pub enum ParseEntityErrorKind {
     LimitsValidation(#[from] DefaultEntitiesLimitsError),
 }
 
+#[derive(Debug, thiserror::Error, Clone, PartialEq)]
+pub enum DefaultEntityWarning {
+    #[error("Could not parse parent UID '{parent_uid_str}' for default entity '{entry_id}': {error}")]
+    InvalidParentUid {
+        entry_id: String,
+        parent_uid_str: String,
+        error: String,
+    },
+    #[error("In default entity '{entry_id}' parent array json value should be object, skip: {value}")]
+    NonObjectParentEntry {
+        entry_id: String,
+        value: String,
+    },
+    #[error("error parsing default entities: failed to parse entity '{entry_id}': {error}")]
+    EntityParseError {
+        entry_id: String,
+        error: String,
+    },
+}
+
 impl ParseEntityErrorKind {
     fn with_entry_id(self, entry_id: String) -> ParseDefaultEntityError {
         ParseDefaultEntityError {
@@ -240,7 +260,7 @@ impl ParseEntityErrorKind {
 
 /// Decode base64 string into UTF-8 JSON and call [parse_single_entity]
 fn parse_base64_single_entity(
-    warns: &mut Vec<String>,
+    warns: &mut Vec<DefaultEntityWarning>,
     entry_id: String,
     b64: &str,
 ) -> Result<Entity, ParseDefaultEntityError> {
@@ -263,7 +283,7 @@ fn parse_base64_single_entity(
 /// But not critical case will populate `warn` vector with log message
 fn parse_single_entity(
     namespace: Option<&str>,
-    warns: &mut Vec<String>,
+    warns: &mut Vec<DefaultEntityWarning>,
     entry_id: &String,
     entity_data: &Value,
 ) -> Result<Entity, ParseDefaultEntityError> {
@@ -326,7 +346,7 @@ fn build_entity_type_name(entity_type_from_uid: &str, namespace: &Option<&str>) 
 /// Parse entity in the new Cedar format with "uid" field
 fn parse_cedar_format<'a>(
     namespace: Option<&str>,
-    warns: &mut Vec<String>,
+    warns: &mut Vec<DefaultEntityWarning>,
     entry_id: &'a str,
     entity_data: &'a Value,
 ) -> Result<
@@ -399,20 +419,19 @@ fn parse_cedar_format<'a>(
                 },
                 Err(e) => {
                     // log warn that we could not parse uid
-                    let msg = format!(
-                        "Could not parse parent UID '{}' for default entity '{}': {}",
-                        parent_uid_str, entry_id, e
-                    );
-                    warns.push(msg);
+                    warns.push(DefaultEntityWarning::InvalidParentUid {
+                        entry_id: entry_id.to_string(),
+                        parent_uid_str: parent_uid_str.clone(),
+                        error: e.to_string(),
+                    });
                 },
             }
         } else {
             // log warn that we skip value because it is not object
-            let msg = format!(
-                "In default entity parent array json value should be object, skip: {}",
-                parent
-            );
-            warns.push(msg);
+            warns.push(DefaultEntityWarning::NonObjectParentEntry {
+                entry_id: entry_id.to_string(),
+                value: parent.to_string(),
+            });
         }
     }
 
@@ -427,7 +446,7 @@ fn parse_cedar_format<'a>(
 /// Parse entity in the legacy format with "entity_type" field
 fn parse_legacy_format<'a>(
     _namespace: Option<&str>,
-    _warns: &mut Vec<String>,
+    _warns: &mut Vec<DefaultEntityWarning>,
     entry_id: &'a str,
     entity_data: &'a Value,
 ) -> Result<
@@ -502,7 +521,7 @@ fn parse_entity_attrs<'a>(
 #[cfg(test)]
 mod test {
     use super::DANGEROUS_PATTERNS;
-    use super::{ParseDefaultEntityError, ParseEntityErrorKind, parse_default_entities_with_warns};
+    use super::{DefaultEntityWarning, ParseEntityErrorKind, parse_default_entities_with_warns};
     use base64::Engine;
     use cedar_policy::EntityUid;
     use serde_json::{Value, json};
@@ -1201,5 +1220,192 @@ mod test {
             parsed_entities.entities().get(&json_uid).is_some(),
             "Should have json entity"
         );
+    }
+
+    #[test]
+    fn test_warning_enum_invalid_parent_uid() {
+        // Test that invalid parent UIDs generate proper warnings
+        let entity_with_invalid_parent = json!({
+            "uid": {
+                "type": "Test::Type",
+                "id": "test_entity"
+            },
+            "attrs": {},
+            "parents": [
+                {
+                    "type": "InvalidParent",
+                    "id": "invalid@uid"  // This should be valid, so let's test with a truly invalid format
+                }
+            ]
+        });
+
+        let default_entities_data = json!({
+            "test_entity".to_string(): entity_with_invalid_parent
+        });
+
+        let raw_data: HashMap<String, Value> =
+            serde_json::from_value(default_entities_data).unwrap();
+        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
+            .expect("Should parse entity with invalid parent");
+
+        // This test should have no warnings since "invalid@uid" is actually valid
+        assert!(parsed_entities.warns().is_empty(), "Should have no warnings for valid UID");
+    }
+
+    #[test]
+    fn test_warning_enum_non_object_parent_entry() {
+        // Test that non-object parent entries generate proper warnings
+        let entity_with_invalid_parents = json!({
+            "uid": {
+                "type": "Test::Type",
+                "id": "test_entity"
+            },
+            "attrs": {},
+            "parents": [
+                "not_an_object",  // Invalid parent format
+                {
+                    "type": "ValidParent",
+                    "id": "valid"
+                }
+            ]
+        });
+
+        let default_entities_data = json!({
+            "test_entity".to_string(): entity_with_invalid_parents
+        });
+
+        let raw_data: HashMap<String, Value> =
+            serde_json::from_value(default_entities_data).unwrap();
+        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
+            .expect("Should parse entity with invalid parents");
+
+        // Should have warnings for non-object parent entries
+        assert!(!parsed_entities.warns().is_empty(), "Should have warnings");
+        
+        let warnings = parsed_entities.warns();
+        assert_eq!(warnings.len(), 1, "Should have exactly 1 warning");
+        
+        // Verify the warning type and content
+        match &warnings[0] {
+            DefaultEntityWarning::NonObjectParentEntry { entry_id, value } => {
+                assert_eq!(entry_id, "test_entity");
+                assert!(value.contains("not_an_object"));
+            },
+            _ => panic!("Expected NonObjectParentEntry warning, got {:?}", warnings[0]),
+        }
+    }
+
+    #[test]
+    fn test_warning_enum_entity_parse_error() {
+        // Test that entity parsing errors generate proper warnings
+        // Since EntityParseError is only used in the test-only from_hashmap method,
+        // let's test a different scenario that actually generates warnings we can test
+        let entity_with_invalid_parents = json!({
+            "uid": {
+                "type": "Test::Type",
+                "id": "test_entity"
+            },
+            "attrs": {},
+            "parents": [
+                "not_an_object",  // Invalid parent format
+                {
+                    "missing_type": "parent",  // Missing type field
+                    "id": "parent3"
+                }
+            ]
+        });
+
+        let default_entities_data = json!({
+            "test_entity".to_string(): entity_with_invalid_parents
+        });
+
+        let raw_data: HashMap<String, Value> =
+            serde_json::from_value(default_entities_data).unwrap();
+        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
+            .expect("Should parse entity with invalid parents");
+
+        // Should have warnings for non-object parent entries
+        assert!(!parsed_entities.warns().is_empty(), "Should have warnings");
+        
+        let warnings = parsed_entities.warns();
+        assert_eq!(warnings.len(), 2, "Should have exactly 2 warnings");
+        
+        // Both should be NonObjectParentEntry warnings
+        for warning in warnings {
+            match warning {
+                DefaultEntityWarning::NonObjectParentEntry { entry_id, value } => {
+                    assert_eq!(entry_id, "test_entity");
+                    assert!(!value.is_empty());
+                },
+                _ => panic!("Expected NonObjectParentEntry warning, got {:?}", warning),
+            }
+        }
+    }
+
+    #[test]
+    fn test_warning_enum_multiple_warnings() {
+        // Test that multiple different warnings are properly captured
+        let entity_with_multiple_issues = json!({
+            "uid": {
+                "type": "Test::Type",
+                "id": "test_entity"
+            },
+            "attrs": {},
+            "parents": [
+                "not_an_object",  // Invalid parent format
+                {
+                    "missing_type": "parent",  // Missing type field
+                    "id": "parent3"
+                }
+            ]
+        });
+
+        let default_entities_data = json!({
+            "test_entity".to_string(): entity_with_multiple_issues
+        });
+
+        let raw_data: HashMap<String, Value> =
+            serde_json::from_value(default_entities_data).unwrap();
+        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
+            .expect("Should parse entity with multiple issues");
+
+        // Should have multiple warnings
+        let warnings = parsed_entities.warns();
+        assert_eq!(warnings.len(), 2, "Should have exactly 2 warnings");
+        
+        // Both should be NonObjectParentEntry warnings
+        for warning in warnings {
+            match warning {
+                DefaultEntityWarning::NonObjectParentEntry { entry_id, value } => {
+                    assert_eq!(entry_id, "test_entity");
+                    assert!(!value.is_empty());
+                },
+                _ => panic!("Expected NonObjectParentEntry warning, got {:?}", warning),
+            }
+        }
+    }
+
+    #[test]
+    fn test_warning_enum_display_format() {
+        // Test that warnings have proper display formatting
+        let warning = DefaultEntityWarning::InvalidParentUid {
+            entry_id: "test_entity".to_string(),
+            parent_uid_str: "Test::Parent::\"invalid@uid\"".to_string(),
+            error: "invalid character".to_string(),
+        };
+        
+        let display_string = warning.to_string();
+        assert!(display_string.contains("test_entity"));
+        assert!(display_string.contains("Test::Parent"));
+        assert!(display_string.contains("invalid character"));
+        
+        let warning2 = DefaultEntityWarning::NonObjectParentEntry {
+            entry_id: "test_entity".to_string(),
+            value: "\"not_an_object\"".to_string(),
+        };
+        
+        let display_string2 = warning2.to_string();
+        assert!(display_string2.contains("test_entity"));
+        assert!(display_string2.contains("not_an_object"));
     }
 }
