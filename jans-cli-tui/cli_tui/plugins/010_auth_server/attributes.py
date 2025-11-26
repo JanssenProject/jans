@@ -229,6 +229,12 @@ class Attributes(DialogUtils):
 
         self.edit_attribute(data={})
 
+    def refresh_attributes_cache(self) -> None:
+        self.get_attributes()
+        common_data.claims_retreived = False
+        self.app.create_background_task(background_tasks.get_attributes_coroutine(self.app))
+
+
     def save_attribute(self, dialog: JansGDialog) -> None:
         """Saves attribute
 
@@ -263,9 +269,7 @@ class Attributes(DialogUtils):
 
                 if response.status_code in (200, 201):
                     self.app.start_progressing(_("Attribute was saved"))
-                    self.get_attributes()
-                    common_data.claims_retreived = False
-                    self.app.create_background_task(background_tasks.get_attributes_coroutine(self.app))
+                    self.refresh_attributes_cache()
                 else:
                     self.myparent.show_message(_("A server error ocurred while saving attribute"), str(response.text), tobefocused=self.main_container)
 
