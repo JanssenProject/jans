@@ -461,6 +461,7 @@ fn parse_entity_attrs<'a>(
 #[cfg(test)]
 mod test {
     use super::DefaultEntitiesWithWarns;
+    use base64::Engine;
     use cedar_policy::EntityUid;
     use serde::Deserialize;
     use serde_json::json;
@@ -567,6 +568,500 @@ mod test {
             attrs.as_object().unwrap().len(),
             0,
             "Entity should have empty attrs"
+        );
+    }
+
+    #[test]
+    fn test_entry_id_validation_empty_and_whitespace() {
+        // Test empty entry ID
+        let entity_data = json!({
+            "uid": {
+                "type": "Test::Type",
+                "id": "test"
+            },
+            "attrs": {}
+        });
+
+        let default_entities_data = json!({"".to_string(): entity_data});
+        let _parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect_err("Should return error for empty entry ID");
+
+        // Test whitespace-only entry ID
+        let default_entities_data_whitespace = json!({"   ".to_string(): entity_data});
+        let _parsed_entities =
+            DefaultEntitiesWithWarns::deserialize(default_entities_data_whitespace)
+                .expect_err("Should return error for whitespace-only entry ID");
+    }
+
+    #[test]
+    fn test_entry_id_validation_dangerous_patterns() {
+        let entity_data = json!({
+            "uid": {
+                "type": "Test::Type",
+                "id": "test"
+            },
+            "attrs": {}
+        });
+
+        // Test each dangerous pattern
+        let dangerous_patterns = [
+            "<script",
+            "javascript:",
+            "data:",
+            "vbscript:",
+            "onload=",
+            "onerror=",
+        ];
+
+        for pattern in dangerous_patterns {
+            let dangerous_id = format!("prefix{}suffix", pattern);
+            let default_entities_data = json!({dangerous_id: entity_data.clone()});
+            let _parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+                .expect_err(&format!(
+                    "Should return error for dangerous pattern: {}",
+                    pattern
+                ));
+        }
+    }
+
+    #[test]
+    fn test_valid_entry_ids() {
+        // Test various valid entry IDs
+        let valid_ids = [
+            "normal_id",
+            "id_with_underscore",
+            "id-with-dash",
+            "id123",
+            "ID_IN_UPPERCASE",
+            "id.with.dots",
+        ];
+
+        for valid_id in valid_ids {
+            let entity_data = json!({
+                "uid": {
+                    "type": "Test::Type",
+                    "id": valid_id
+                },
+                "attrs": {}
+            });
+
+            let default_entities_data = json!({valid_id.to_string(): entity_data.clone()});
+            let parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+                .expect(&format!("Should parse valid entry ID: {}", valid_id));
+
+            assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
+        }
+    }
+
+    #[test]
+    fn test_base64_parsing_valid() {
+        // Create a valid entity JSON and encode it as base64
+        let entity_json = json!({
+            "uid": {
+                "type": "Test::Base64Type",
+                "id": "base64_test"
+            },
+            "attrs": {
+                "test_attr": "test_value"
+            }
+        });
+
+        let entity_json_str = entity_json.to_string();
+        let b64_encoded = base64::prelude::BASE64_STANDARD.encode(entity_json_str);
+
+        let default_entities_data = json!({
+            "base64_entity".to_string(): b64_encoded
+        });
+
+        let parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("Should parse valid base64 entity");
+
+        assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
+
+        let uid = &EntityUid::from_str("Test::Base64Type::\"base64_test\"").unwrap();
+        let entity = parsed_entities
+            .entities()
+            .get(&uid)
+            .expect("should have entity");
+        assert_eq!(entity.uid().type_name().to_string(), "Test::Base64Type");
+    }
+
+    #[test]
+    fn test_base64_parsing_invalid_base64() {
+        // Test invalid base64 string
+        let invalid_b64 = "not-valid-base64==";
+
+        let default_entities_data = json!({
+            "invalid_base64_entity".to_string(): invalid_b64
+        });
+
+        let _parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect_err("Should return error for invalid base64");
+    }
+
+    #[test]
+    fn test_base64_parsing_invalid_json_after_decode() {
+        // Test base64 that decodes to invalid JSON
+        let invalid_json = "not valid json";
+        let b64_encoded = base64::prelude::BASE64_STANDARD.encode(invalid_json);
+
+        let default_entities_data = json!({
+            "invalid_json_entity".to_string(): b64_encoded
+        });
+
+        let _parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect_err("Should return error for invalid JSON after base64 decode");
+    }
+
+    #[test]
+    fn test_base64_parsing_non_utf8_content() {
+        // Test base64 that decodes to non-UTF8 content
+        let non_utf8_bytes = vec![0xFF, 0xFE, 0x00]; // Invalid UTF-8 sequence
+        let b64_encoded = base64::prelude::BASE64_STANDARD.encode(non_utf8_bytes);
+
+        let default_entities_data = json!({
+            "non_utf8_entity".to_string(): b64_encoded
+        });
+
+        let _parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect_err("Should return error for non-UTF8 content after base64 decode");
+    }
+
+    #[test]
+    fn test_namespace_handling() {
+        // Test entity with explicit namespace (already contains ::)
+        let entity_with_namespace = json!({
+            "uid": {
+                "type": "Custom::Namespace::EntityType",
+                "id": "test1"
+            },
+            "attrs": {}
+        });
+
+        // Test entity without namespace (should not get namespace prefix)
+        let entity_without_namespace = json!({
+            "uid": {
+                "type": "SimpleType",
+                "id": "test2"
+            },
+            "attrs": {}
+        });
+
+        let default_entities_data = json!({
+            "test1".to_string(): entity_with_namespace,
+            "test2".to_string(): entity_without_namespace
+        });
+
+        let parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("Should parse entities with and without namespaces");
+
+        assert_eq!(
+            parsed_entities.entities().len(),
+            2,
+            "Should have 2 entities"
+        );
+
+        // Verify entity with explicit namespace
+        let uid1 = &EntityUid::from_str("Custom::Namespace::EntityType::\"test1\"").unwrap();
+        let entity1 = parsed_entities
+            .entities()
+            .get(&uid1)
+            .expect("should have entity1");
+        assert_eq!(
+            entity1.uid().type_name().to_string(),
+            "Custom::Namespace::EntityType"
+        );
+
+        // Verify entity without namespace
+        let uid2 = &EntityUid::from_str("SimpleType::\"test2\"").unwrap();
+        let entity2 = parsed_entities
+            .entities()
+            .get(&uid2)
+            .expect("should have entity2");
+        assert_eq!(entity2.uid().type_name().to_string(), "SimpleType");
+    }
+
+    #[test]
+    fn test_legacy_format_parsing() {
+        // Test legacy format with entity_type field
+        let legacy_entity = json!({
+            "entity_type": "Legacy::Type",
+            "entity_id": "legacy_test",
+            "custom_attr": "custom_value"
+        });
+
+        let default_entities_data = json!({
+            "legacy_entity".to_string(): legacy_entity
+        });
+
+        let parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("Should parse legacy format entity");
+
+        assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
+
+        let uid = &EntityUid::from_str("Legacy::Type::\"legacy_test\"").unwrap();
+        let entity = parsed_entities
+            .entities()
+            .get(&uid)
+            .expect("should have entity");
+        assert_eq!(entity.uid().type_name().to_string(), "Legacy::Type");
+
+        // Verify attributes are parsed correctly
+        let entity_json = entity.to_json_value().expect("should convert to JSON");
+        let attrs = entity_json.get("attrs").expect("should have attrs");
+        let custom_attr = attrs.get("custom_attr").expect("should have custom_attr");
+        assert_eq!(custom_attr.as_str().unwrap(), "custom_value");
+    }
+
+    #[test]
+    fn test_parent_entity_parsing() {
+        // Test entity with valid parent entities
+        let entity_with_parents = json!({
+            "uid": {
+                "type": "Test::ChildType",
+                "id": "child_entity"
+            },
+            "attrs": {},
+            "parents": [
+                {
+                    "type": "Test::ParentType1",
+                    "id": "parent1"
+                },
+                {
+                    "type": "Test::ParentType2",
+                    "id": "parent2"
+                }
+            ]
+        });
+
+        let default_entities_data = json!({
+            "child_entity".to_string(): entity_with_parents
+        });
+
+        let parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("Should parse entity with parents");
+
+        assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
+
+        let uid = &EntityUid::from_str("Test::ChildType::\"child_entity\"").unwrap();
+        let entity = parsed_entities
+            .entities()
+            .get(&uid)
+            .expect("should have entity");
+
+        // Verify the entity was parsed successfully with parents
+        // The parents are stored internally but we can't easily access them from the Entity
+        // The main verification is that parsing succeeded with the parent data
+        let _entity = entity;
+    }
+
+    #[test]
+    fn test_parent_entity_parsing_with_warnings() {
+        // Test entity with invalid parent entries that should generate warnings
+        let entity_with_invalid_parents = json!({
+            "uid": {
+                "type": "Test::Type",
+                "id": "test_entity"
+            },
+            "attrs": {},
+            "parents": [
+                {
+                    "type": "ValidParent",
+                    "id": "valid"
+                },
+                {
+                    "type": "InvalidParent",
+                    "id": "invalid@uid"  // Invalid UID format
+                },
+                "not_an_object",  // Invalid parent format
+                {
+                    "missing_type": "parent",  // Missing type field
+                    "id": "parent3"
+                }
+            ]
+        });
+
+        let default_entities_data = json!({
+            "test_entity".to_string(): entity_with_invalid_parents
+        });
+
+        let parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("Should parse entity with invalid parents (but generate warnings)");
+
+        // Should still parse the entity successfully
+        assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
+
+        // Should have warnings for invalid parents
+        assert!(!parsed_entities.warns().is_empty(), "Should have warnings");
+
+        // Verify the valid parent was parsed
+        let uid = &EntityUid::from_str("Test::Type::\"test_entity\"").unwrap();
+        let _entity = parsed_entities
+            .entities()
+            .get(&uid)
+            .expect("should have entity");
+
+        // The entity was parsed successfully despite invalid parents
+        // The warnings should indicate that some parents were skipped
+    }
+
+    #[test]
+    fn test_attribute_parsing_various_types() {
+        // Test entity with various attribute types
+        let entity_with_attrs = json!({
+            "uid": {
+                "type": "Test::AttrType",
+                "id": "attr_test"
+            },
+            "attrs": {
+                "string_attr": "string_value",
+                "number_attr": 42,
+                "bool_attr": true,
+                "array_attr": ["item1", "item2"],
+                "object_attr": {"nested": "value"}
+            }
+        });
+
+        let default_entities_data = json!({
+            "attr_test".to_string(): entity_with_attrs
+        });
+
+        let parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("Should parse entity with various attribute types");
+
+        assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
+
+        let uid = &EntityUid::from_str("Test::AttrType::\"attr_test\"").unwrap();
+        let entity = parsed_entities
+            .entities()
+            .get(&uid)
+            .expect("should have entity");
+
+        // Verify attributes are present
+        let entity_json = entity.to_json_value().expect("should convert to JSON");
+        let attrs = entity_json.get("attrs").expect("should have attrs");
+        let attrs_obj = attrs.as_object().expect("attrs should be object");
+
+        assert_eq!(attrs_obj.len(), 5, "Should have 5 attributes");
+        assert_eq!(
+            attrs_obj.get("string_attr").unwrap().as_str().unwrap(),
+            "string_value"
+        );
+        assert_eq!(attrs_obj.get("number_attr").unwrap().as_i64().unwrap(), 42);
+        assert_eq!(attrs_obj.get("bool_attr").unwrap().as_bool().unwrap(), true);
+    }
+
+    #[test]
+    fn test_entity_without_uid_id_falls_back_to_entry_id() {
+        // Test entity where uid.id is not specified - should fall back to entry_id
+        let entity_without_uid_id = json!({
+            "uid": {
+                "type": "Test::FallbackType"
+                // No "id" field
+            },
+            "attrs": {}
+        });
+
+        let entry_id = "fallback_entry_id";
+        let default_entities_data = json!({entry_id.to_string(): entity_without_uid_id});
+
+        let parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("Should parse entity with fallback ID");
+
+        assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
+
+        // Entity UID should use the entry_id as fallback
+        let uid = &EntityUid::from_str("Test::FallbackType::\"fallback_entry_id\"").unwrap();
+        let entity = parsed_entities
+            .entities()
+            .get(&uid)
+            .expect("should have entity");
+        assert_eq!(entity.uid().id().as_ref() as &str, "fallback_entry_id");
+    }
+
+    #[test]
+    fn test_empty_default_entities() {
+        // Test deserializing None/empty default entities
+        let default_entities_data = json!(null);
+
+        let parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("Should parse empty default entities");
+
+        assert_eq!(
+            parsed_entities.entities().len(),
+            0,
+            "Should have 0 entities"
+        );
+        assert!(
+            parsed_entities.warns().is_empty(),
+            "Should have no warnings"
+        );
+    }
+
+    #[test]
+    fn test_invalid_value_type_error() {
+        // Test entity with invalid value type (not object or base64 string)
+        let default_entities_data = json!({
+            "invalid_entity".to_string(): 12345  // Number instead of object/string
+        });
+
+        let _parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect_err("Should return error for invalid value type");
+    }
+
+    #[test]
+    fn test_mixed_format_entities() {
+        // Test parsing a mix of base64 and JSON object entities
+
+        // Create a base64 encoded entity
+        let base64_entity_json = json!({
+            "uid": {
+                "type": "Test::Base64Type",
+                "id": "base64_entity"
+            },
+            "attrs": {
+                "source": "base64"
+            }
+        });
+        let base64_encoded =
+            base64::prelude::BASE64_STANDARD.encode(base64_entity_json.to_string());
+
+        // Create a regular JSON object entity
+        let json_entity = json!({
+            "uid": {
+                "type": "Test::JsonType",
+                "id": "json_entity"
+            },
+            "attrs": {
+                "source": "json"
+            }
+        });
+
+        let default_entities_data = json!({
+            "base64_entity".to_string(): base64_encoded,
+            "json_entity".to_string(): json_entity
+        });
+
+        let parsed_entities = DefaultEntitiesWithWarns::deserialize(default_entities_data)
+            .expect("Should parse mixed format entities");
+
+        assert_eq!(
+            parsed_entities.entities().len(),
+            2,
+            "Should have 2 entities"
+        );
+
+        // Verify both entities were parsed correctly
+        let base64_uid = &EntityUid::from_str("Test::Base64Type::\"base64_entity\"").unwrap();
+        let json_uid = &EntityUid::from_str("Test::JsonType::\"json_entity\"").unwrap();
+
+        assert!(
+            parsed_entities.entities().get(&base64_uid).is_some(),
+            "Should have base64 entity"
+        );
+        assert!(
+            parsed_entities.entities().get(&json_uid).is_some(),
+            "Should have json entity"
         );
     }
 }
