@@ -15,7 +15,7 @@ tags:
 
 - Java Development Kit (JDK): version 11 or higher
 
-To use Cedarling Java bindings in Java Maven Project add following 
+To use Cedarling Java bindings in Java Maven Project add following
 `repository` and `dependency` in pom.xml of the project.
 
 ```declarative

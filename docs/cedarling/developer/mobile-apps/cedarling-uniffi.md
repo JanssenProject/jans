@@ -164,7 +164,7 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
   val logs = cedarling.getLogsByTag("DEBUG")
 
   ```
-   
+
 - **Cedarling::get_logs_by_request_id**
 
    Get all logs by request_id
