@@ -221,7 +221,7 @@ pub enum ParseEntityErrorKind {
     InvalidUidTypeField,
     #[error("entity has invalid 'entity_type' field, expect string")]
     InvalidEntityTypeField,
-    #[error("entity must have ether 'uid.type' or 'entity_type' (legacy format) field")]
+    #[error("entity must have either 'uid.type' or 'entity_type' (legacy format) field")]
     HaveNoUidOrEntityTypeField,
     #[error(transparent)]
     BuildEntity(BuildEntityError),
