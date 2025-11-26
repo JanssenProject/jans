@@ -482,6 +482,13 @@ Cedarling currently provides two modes of authorization:
 - This makes authorization decisions by passing a set of **Principals** directly.
 - Similar to the standard interface, the **Context** is passed in as-is in a map-like structure.
 
+**Multi-Issuer Authorization**
+
+- Doesn't use principal and all token information is stored in context.
+- This makes authorization decisions by rules based on context values (token payloads).
+
+[More information](./cedarling-multi-issuer.md)
+
 ### Logging
 
 Cedarling supports logging of both **decision** and **system** events, useful for auditing and troubleshooting. Logging is optional and can be configured (or disabled) via the [bootstrap properties](../reference/cedarling-properties.md).

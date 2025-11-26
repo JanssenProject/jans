@@ -9,7 +9,7 @@ tags:
 
 # Cedarling Interfaces
 
-Cedarling provides a number of methods to interface with the Cedar engine. 
+Cedarling provides a number of methods to interface with the Cedar engine.
 These are described below.
 
 ## Init
@@ -34,7 +34,7 @@ These methods are used to create a `BootstrapConfig` object, which is needed to 
 
 ## Authz
 
-These methods are called to create an authorization request, run authorization, and get decisions back. 
+These methods are called to create an authorization request, run authorization, and get decisions back.
 
 - `Entity(entity_type, id, payload)`
 
@@ -52,6 +52,22 @@ These methods are called to create an authorization request, run authorization, 
 
     Creates a `RequestUnsigned` object which contains inputs for Cedarling's unsigned authorization call.
 
+- `TokenInput(mapping, payload)`
+
+    Creates a `TokenInput` object representing a JWT token with an explicit type mapping. Used for multi-issuer authorization.
+    
+    - `mapping`: A string specifying the Cedar entity type (e.g., "Jans::Access_Token", "Acme::DolphinToken")
+    - `payload`: The JWT token string
+
+- `AuthorizeMultiIssuerRequest(tokens, action, resource, context)`
+
+    Creates an `AuthorizeMultiIssuerRequest` object for multi-issuer authorization. 
+    
+    - `tokens`: Array of `TokenInput` objects
+    - `action`: The action to be authorized (required)
+    - `resource`: The resource entity being accessed (required)
+    - `context`: Optional additional context for policy evaluation
+
 - `authorize(request)`
 
     Runs authorization against the provided `Request` object.
@@ -60,9 +76,15 @@ These methods are called to create an authorization request, run authorization, 
 
     Runs unsigned authorization against the provided `RequestUnsigned` object. A trusted issuer is not required for this call.
 
+- `authorize_multi_issuer(request)`
+
+    Runs multi-issuer authorization against the provided `AuthorizeMultiIssuerRequest` object. Validates multiple JWT tokens from different issuers and evaluates policies based on token entities without requiring traditional user/workload principals.
+
 ### Authz Result
 
 The following methods are called on the result obtained from the authorization call to view and analyze results, reasons and possible errors.
+
+#### AuthorizeResult (for `authorize` and `authorize_unsigned`)
 
 - `is_allowed()`
 
@@ -96,9 +118,28 @@ The following methods are called on the result obtained from the authorization c
 
       This field contains a list of errors during authorization, if they exist.
 
+#### MultiIssuerAuthorizeResult (for `authorize_multi_issuer`)
+
+- `decision`
+
+    A boolean field representing whether the authorization request is allowed (`true`) or denied (`false`)
+
+- `response`
+
+    The Cedar policy engine response containing detailed decision information
+
+    - `decision()` - Returns the decision (Allow/Deny)
+    - `diagnostics()` - Returns diagnostics including reasons and errors
+        - `reason()` - Set of policy IDs that contributed to an Allow decision
+        - `errors()` - List of errors encountered during policy evaluation
+
+- `request_id`
+
+    The request ID for this authorization call, used for log retrieval and auditing
+
 ## Logs
 
-These methods are called to retrieve logs from the memory of the Cedarling instance when it is running in `memory` mode. 
+These methods are called to retrieve logs from the memory of the Cedarling instance when it is running in `memory` mode.
 
   - `pop_logs()`
 

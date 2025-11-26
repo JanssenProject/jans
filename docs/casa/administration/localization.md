@@ -8,7 +8,7 @@ tags:
 # Casa localization
 
 Casa supports multilingual support through resource bundles. Administrators supply bundles as plaintext files ending with the `.properties` file extension.
- 
+
 By default, Casa contains three bundles, each in a separate file. These bundles contain the internationalization labels in the English language, as displayed in a default Casa installation. For example, to add support for French, you would have to create the following files:
 
 | File                    | Description                                                |
@@ -16,7 +16,7 @@ By default, Casa contains three bundles, each in a separate file. These bundles 
 | `user_fr.properties`    | Contains labels mostly found in user-facing pages          |
 | `admin_fr.properties`   | Contains labels mostly found in administrator-facing pages |
 | `general_fr.properties` | Contains labels found widely across the app and plugins    |
- 
+
 ## Adding internationalization labels
 
 To supply labels in a particular language (or even if you want to override the English translation provided), do the following:
@@ -63,7 +63,7 @@ To add your own translation for plugin texts, proceed as follows:
 !!! Note
     If your plugins have a `zk-label.properties`, you can accumulate all plugin texts into a single file, or you can use a different filename for each plugin.
 
-## Properties file syntax 
+## Properties file syntax
 
 Administrators acquainted with the format used for properties files in Java will find Casa resource bundle files familiar. The format used in Casa differs slightly, but it is more powerful. To learn more about this topic, visit this [page](https://www.zkoss.org/wiki/ZK%20Developer's%20Reference/Internationalization/Labels/The%20Format%20of%20Properties%20Files).
 

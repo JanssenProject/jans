@@ -267,13 +267,106 @@ Finally, call the `authorize` function to check whether the principals are allow
 result = cedarling.authorize_unsigned(request);
 ```
 
+#### Multi-Issuer Authorization
+
+Multi-issuer authorization allows you to make authorization decisions based on multiple JWT tokens from different issuers without requiring traditional User/Workload principals.
+
+**1. Create Tokens**
+
+```py
+from cedarling_python import TokenInput
+
+tokens = [
+  TokenInput(
+    mapping="Jans::Access_Token",
+    payload="<access_token_jwt>"
+  ),
+  TokenInput(
+    mapping="Jans::Id_Token",
+    payload="<id_token_jwt>"
+  ),
+  TokenInput(
+    mapping="Acme::DolphinToken",  # Custom token type
+    payload="<custom_token_jwt>"
+  )
+]
+```
+
+**2. Define the Resource**
+
+```py
+resource = EntityData(
+  cedar_entity_mapping=CedarEntityMapping(
+    entity_type="Jans::Document",
+    id="doc_123"
+  ),
+  owner="alice@example.com",
+  classification="confidential"
+)
+```
+
+**3. Define the Action**
+
+```py
+action = 'Jans::Action::"Read"'
+```
+
+**4. Define Context**
+
+```py
+context = {
+  "ip_address": "54.9.21.201",
+  "time": int(time.time())
+}
+```
+
+**5. Build the Request**
+
+```py
+from cedarling_python import AuthorizeMultiIssuerRequest
+
+request = AuthorizeMultiIssuerRequest(
+  tokens=tokens,
+  action=action,
+  resource=resource,
+  context=context
+)
+```
+
+**6. Perform Authorization**
+
+```py
+result = cedarling.authorize_multi_issuer(request)
+
+# Check decision
+if result.decision:
+  print("Access allowed")
+  print(f"Request ID: {result.request_id}")
+else:
+  print("Access denied")
+```
+
+**Key Differences from standard authentication**:
+
+| Feature | authorize | authorize_multi_issuer |
+|---------|-----------|------------------------|
+| Principal Model | User/Workload entities | No principals - token-based |
+| Token Sources | Single issuer expected | Multiple issuers supported |
+| Result Type | `AuthorizeResult` | `MultiIssuerAuthorizeResult` |
+| Decision Access | `result.is_allowed()`, `result.workload()`, `result.person()` | `result.decision` (boolean) |
+| Use Case | Standard RBAC/ABAC | Federation, multi-org access |
+
 ### Logging
 
 The logs could be retrieved using the `pop_logs` function.
 
 ```py
-logs = cedarling.pop_logs()
-print(logs)
+# Obtain latest logs from cedarling
+logs: dict = cedarling.pop_logs()
+
+# Or obtain by request ID after authorization is performed
+request_id = result.request_id()
+logs: dict = cedarling.get_log_by_id(request_id)
 ```
 
 ---
@@ -283,3 +376,4 @@ print(logs)
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
 - [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
+- [Multi-Issuer Authorization Details](../reference/cedarling-authz.md#multi-issuer-authorization-authorize_multi_issuer)

@@ -23,6 +23,8 @@ from sqlalchemy import select
 from sqlalchemy import delete
 from sqlalchemy import event
 from sqlalchemy.engine.url import URL
+from sqlalchemy.dialects.mysql import insert as mysql_insert
+from sqlalchemy.dialects.postgresql import insert as postgres_insert
 from ldif import LDIFParser
 from ldap3.utils import dn as dnutils
 from pymysql.err import ProgrammingError
@@ -37,6 +39,7 @@ if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
     # these won't be executed in runtime
     from sqlalchemy.engine import Engine
+    from sqlalchemy.schema import Table
     from jans.pycloudlib.manager import Manager
 
 logger = logging.getLogger(__name__)
@@ -106,6 +109,12 @@ class PostgresqlAdapter:
                 opts["sslkey"] = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
         return opts
 
+    def upsert_query(self, table: Table, column_mapping: dict[str, _t.Any], update_mapping: dict[str, _t.Any]) -> _t.Any:
+        return postgres_insert(table).values(column_mapping).on_conflict_do_update(
+            index_elements=[table.c.doc_id],
+            set_=update_mapping,
+        )
+
 
 class MysqlAdapter:
     """Class for MySQL adapter."""
@@ -169,6 +178,9 @@ class MysqlAdapter:
             elif ssl_mode == "REQUIRED":
                 opts["ssl"]["check_hostname"] = False
         return opts
+
+    def upsert_query(self, table: Table, column_mapping: dict[str, _t.Any], update_mapping: dict[str, _t.Any]) -> _t.Any:
+        return mysql_insert(table).values(column_mapping).on_duplicate_key_update(update_mapping)
 
 
 def doc_id_from_dn(dn: str) -> str:
@@ -447,25 +459,7 @@ class SqlClient(SqlSchemaMixin):
     def insert_into(self, table_name: str, column_mapping: dict[str, _t.Any]) -> None:
         """Insert a row into a table."""
         table = self.metadata.tables.get(table_name)
-
-        for column in table.c:
-            unmapped = column.name not in column_mapping
-
-            if self.dialect == "mysql":
-                json_type = "json"
-                if self.use_simple_json:
-                    json_default_values = []
-                else:
-                    json_default_values: dict[str, _t.Any] | list[_t.Any] = {"v": []}
-            else:
-                json_type = "jsonb"
-                json_default_values = []
-
-            is_json = bool(column.type.__class__.__name__.lower() == json_type)
-
-            if not all([unmapped, is_json]):
-                continue
-            column_mapping[column.name] = json_default_values
+        column_mapping = self._apply_json_defaults(table, column_mapping)
 
         query = table.insert().values(column_mapping)
         with self.engine.connect() as conn:
@@ -668,6 +662,77 @@ class SqlClient(SqlSchemaMixin):
 
         sql_overrides = load_sql_overrides()
         return as_boolean(sql_overrides.get("MYSQL_SIMPLE_JSON", "true"))
+
+    def upsert(self, table_name: str, column_mapping: dict[str, _t.Any]) -> None:
+        table = self.metadata.tables.get(table_name)
+
+        # doc_id might be required for inserting new entry
+        if "doc_id" not in column_mapping:
+            raise ValueError(f"doc_id is required in column_mapping for upsert operation on {table_name}")
+
+        # column mapping for update (doc_id is excluded)
+        update_mapping = {
+            k: v for k, v in column_mapping.items()
+            if k != "doc_id"
+        }
+
+        # apply defaults for column mapping used for inserting entry
+        column_mapping = self._apply_json_defaults(table, column_mapping)
+
+        with self.engine.connect() as conn:
+            query = self.adapter.upsert_query(table, column_mapping, update_mapping)
+            conn.execute(query)
+
+    def upsert_from_file(
+        self,
+        filepath: str,
+        ctx: dict[str, _t.Any],
+        transform_column_mapping: None | Callable[[str, dict], dict] = None,
+    ) -> None:
+        """Upsert entry with data loaded from a template file.
+
+        Args:
+            filepath: Path to LDIF template file.
+            ctx: Key-value pairs of context that rendered into LDIF template file.
+        """
+        supported_tables = self.get_table_mapping().keys()
+
+        with open(filepath) as src, NamedTemporaryFile("w+") as dst:
+            dst.write(safe_render(src.read(), ctx))
+            # ensure rendered template is written
+            dst.flush()
+
+            for table_name, column_mapping in self._data_from_ldif(dst.name):
+                if table_name not in supported_tables:
+                    continue
+
+                if callable(transform_column_mapping):
+                    column_mapping = transform_column_mapping(table_name, column_mapping)
+
+                # create or update entry
+                self.upsert(table_name, column_mapping)
+
+    def _apply_json_defaults(self, table: Table, column_mapping: dict[str, _t.Any]) -> dict[str, _t.Any]:
+        for column in table.c:
+            unmapped = column.name not in column_mapping
+            json_default_values: list[_t.Any] | dict[str, _t.Any] = []
+
+            if self.dialect == "mysql":
+                # probably using legacy data structure
+                if not self.use_simple_json:
+                    json_default_values = {"v": []}
+                json_type = "json"
+            else:
+                json_type = "jsonb"
+
+            is_json = bool(column.type.__class__.__name__.lower() == json_type)
+
+            if not all([unmapped, is_json]):
+                continue
+            column_mapping[column.name] = json_default_values
+
+        # finalized column mapping
+        return column_mapping
 
 
 def render_sql_properties(manager: Manager, src: str, dest: str) -> None:

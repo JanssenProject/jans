@@ -104,7 +104,7 @@ Cedarling also supports validating the contents of a JWT by enforcing the presen
 
 ### Required Claims
 
-If timestamps are provided in the context, Cedarling always verifies: 
+If timestamps are provided in the context, Cedarling always verifies:
 
 - `exp` (expiration)
 - `nbf` (not before)
