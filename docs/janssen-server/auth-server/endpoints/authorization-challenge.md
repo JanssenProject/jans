@@ -23,12 +23,12 @@ https://janssen.server.host/jans-auth/.well-known/openid-configuration
 `authorization_challenge_endpoint` claim in the response specifies the URL for authorization challenge endpoint. By default, authorization
 challenge endpoint looks like below:
 
-```
+```text
 https://janssen.server.host/jans-auth/restv1/authorize-challenge
 ```
 
-In order to call Authorization Challenge Endpoint client must have `authorization_challenge` scope.
-If scope is not present AS rejects call with 401 (unauthorized) http status code.
+To call Authorization Challenge Endpoint, client must have `authorization_challenge` scope.
+If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP status code.
 
 Authorization Challenge Endpoint supports Proof Key for Code Exchange (PKCE).
 
