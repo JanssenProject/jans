@@ -36,7 +36,7 @@ configurations using the Cloud Native distribution. The VM distribution will not
 goal for this distribution is development and small deployments. The JMeter test tool should be used to generate the
 load. These tests are published so community members can run their own bench-marking analysis.
 
-In addition to standard performance testing, it’s highly recommended to perform full benchmarking to understand your system’s performance under stress. The [Benchmarking Documentation](../janssen-server/recipes/benchmark.md) provides a comprehensive guide for testing with JMeter scripts and other load generation tools.
+In addition to standard performance testing, it’s highly recommended to perform full benchmarking to understand your system’s performance under load. The [Benchmarking Documentation](../janssen-server/recipes/benchmark.md) provides a comprehensive guide for testing with JMeter scripts and other load generation tools.
 
 ## HA Tests
 
