@@ -84,6 +84,7 @@ use crate::lock::{InitLockServiceError, LockService};
 pub(crate) type Logger = Arc<LogStrategy>;
 pub(crate) type LoggerWeak = Weak<LogStrategy>;
 
+#[allow(dead_code)]
 #[cfg(test)]
 pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(|| init_test_logger());
 
@@ -104,6 +105,7 @@ pub(crate) async fn init_logger(
     Ok(logger)
 }
 
+#[allow(dead_code)]
 #[cfg(test)]
 pub(crate) fn init_test_logger() -> Logger {
     Arc::new(

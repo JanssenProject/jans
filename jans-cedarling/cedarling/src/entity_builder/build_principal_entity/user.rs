@@ -110,7 +110,6 @@ mod test {
     use super::*;
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder::test::*;
-    use crate::log::TEST_LOGGER;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;

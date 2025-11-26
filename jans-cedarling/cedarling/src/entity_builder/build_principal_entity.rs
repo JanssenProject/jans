@@ -110,7 +110,6 @@ pub struct PrincipalIdSrc<'a> {
 mod test {
     use super::*;
     use crate::common::policy_store::TrustedIssuer;
-    use crate::log::TEST_LOGGER;
 
     #[test]
     fn err_on_missing_entity_id() {

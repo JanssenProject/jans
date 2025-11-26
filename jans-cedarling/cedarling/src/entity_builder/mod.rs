@@ -247,10 +247,10 @@ pub struct BuiltEntitiesUnsigned {
 
 pub fn build_cedar_uid(type_name: &str, id: &str) -> Result<EntityUid, BuildEntityError> {
     EntityUid::from_str(&format!("{}::\"{}\"", type_name, id)).map_err(
-            |e: cedar_policy::ParseErrors| {
-                BuildEntityErrorKind::from(Box::new(e)).while_building(type_name)
-            },
-        )
+        |e: cedar_policy::ParseErrors| {
+            BuildEntityErrorKind::from(Box::new(e)).while_building(type_name)
+        },
+    )
 }
 
 pub fn build_cedar_entity(
@@ -332,7 +332,7 @@ mod test {
     use serde_json::{Value, json};
     use std::collections::HashMap;
     use std::sync::LazyLock;
-    use test_utils::{SortedJson, assert_eq};
+    use test_utils::assert_eq;
 
     pub static CEDARLING_VALIDATOR_SCHEMA: LazyLock<ValidatorSchema> = LazyLock::new(|| {
         ValidatorSchema::from_str(include_str!("../../../schema/cedarling_core.cedarschema"))
