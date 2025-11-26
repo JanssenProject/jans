@@ -131,7 +131,7 @@ impl DefaultEntitiesWithWarns {
         &self.inner
     }
 
-    // Get warns (error messages) that was on parsing phase
+    /// Gets warnings generated during the parsing phase.
     pub fn warns(&self) -> &[DefaultEntityWarning] {
         &self.warns
     }
