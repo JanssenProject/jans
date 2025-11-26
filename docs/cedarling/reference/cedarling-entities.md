@@ -205,19 +205,29 @@ When a resource entity has the same UID as a default entity:
 // Default entity in policy store
 {
   "org1": {
-    "entity_id": "org1",
-    "entity_type": "Jans::Organization", 
-    "name": "Default Organization",
-    "is_active": true
+    "uid": {
+      "type": "Jans::Organization",
+      "id": "org1"
+    },
+    "attrs": {
+      "name": "Default Organization",
+      "is_active": true
+    },
+    "parents": []
   }
 }
 
 // Request resource entity
 {
-  "entity_type": "Jans::Organization",
-  "id": "org1", // Same UID as default entity
-  "name": "Updated Organization", // Different name
-  "is_active": false // Different status
+  "uid": {
+    "type": "Jans::Organization",
+    "id": "org1"
+  },
+  "attrs": {
+    "name": "Updated Organization", // Different name
+    "is_active": false // Different status
+  },
+  "parents": []
 }
 ```
 
