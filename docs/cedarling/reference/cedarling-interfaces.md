@@ -9,7 +9,7 @@ tags:
 
 # Cedarling Interfaces
 
-Cedarling provides a number of methods to interface with the Cedar engine. 
+Cedarling provides a number of methods to interface with the Cedar engine.
 These are described below.
 
 ## Init
@@ -34,7 +34,7 @@ These methods are used to create a `BootstrapConfig` object, which is needed to 
 
 ## Authz
 
-These methods are called to create an authorization request, run authorization, and get decisions back. 
+These methods are called to create an authorization request, run authorization, and get decisions back.
 
 - `Entity(entity_type, id, payload)`
 
@@ -139,7 +139,7 @@ The following methods are called on the result obtained from the authorization c
 
 ## Logs
 
-These methods are called to retrieve logs from the memory of the Cedarling instance when it is running in `memory` mode. 
+These methods are called to retrieve logs from the memory of the Cedarling instance when it is running in `memory` mode.
 
   - `pop_logs()`
 

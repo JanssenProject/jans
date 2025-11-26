@@ -8,7 +8,7 @@ tags:
 # Consent Management Plugin
 
 
-The Consent Management plugin gives end-users the ability to view and revoke previously granted authorizations provided to applications accessed with their account in a Janssen Server. 
+The Consent Management plugin gives end-users the ability to view and revoke previously granted authorizations provided to applications accessed with their account in a Janssen Server.
 
 ## Requirements
 

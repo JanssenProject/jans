@@ -40,7 +40,7 @@ cedarling = { git = "https://github.com/JanssenProject/jans", package = "cedarli
 
 ### Building Cedarling
 
-To build an executable library for Cedarling, follow the instructions 
+To build an executable library for Cedarling, follow the instructions
 [here](../tutorials/rust.md#building-from-source).
 
 ### Building Examples

@@ -8,7 +8,7 @@ tags:
 
 For a Cedarling client to communicate with the Lock Server, it has to perform [Dynamic Client Registration **(DCR)**](https://datatracker.ietf.org/doc/html/rfc7591) with the Jans Auth Server.
 
-By default, clients cannot obtain the necessary scopes to interact with the lock server. Additional configuration is required on both the Auth Server and the client. 
+By default, clients cannot obtain the necessary scopes to interact with the lock server. Additional configuration is required on both the Auth Server and the client.
 
 This guide will walk you through the following setup processes:
 
@@ -159,7 +159,7 @@ class ClientRegistration(ClientRegistrationType):
 
 * *you can also find a copy of this script in [jans/jans-cedarling/lock-server-script/add_cedarling_scopes.py](../../jans-cedarling/lock-server-script/add_cedarling_scopes.py)*.
 
-Next, create a JSON file named `script_schema.json` with the following content: 
+Next, create a JSON file named `script_schema.json` with the following content:
 
 ```json
 {
