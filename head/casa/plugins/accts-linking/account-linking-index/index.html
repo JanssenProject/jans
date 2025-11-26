@@ -14484,8 +14484,8 @@
 <p>a) The Casa plugin jar file</p>
 <p>b) The Agama inbound identity project</p>
 <p>c) The Casa accounts linking Agama project</p>
-<p>Most of work is demanded on setting up project <em>c</em>, where configuration of identity providers and attribute mapping tuning takes place. </p>
-<p>In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and <code>git</code> installed. </p>
+<p>Most of work is demanded on setting up project <em>c</em>, where configuration of identity providers and attribute mapping tuning takes place.</p>
+<p>In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and <code>git</code> installed.</p>
 <ol>
 <li>
 <p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/replace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
@@ -14542,7 +14542,7 @@ zip<span class="w"> </span>-r<span class="w"> </span>inbound.zip<span class="w">
 <li>Apply changes as needed - this is covered in a separate doc page <a href="../accts-linking-agama/">here</a>. Note you can add or remove sections in the file at will, and that providers can also be disabled so they are not listed in the login page or in Casa app</li>
 <li>Still in TUI, choose to import the file you have edited</li>
 </ol>
-<p>For VM-based installations, update the file <code>/etc/default/jans-casa</code>. Locate a segment that reads <code>-Dacr=</code> and assign  <code>agama_io.jans.casa.authn.acctlinking</code> as new value. This will make Casa use the flow found in the accounts linking project - not the flow bundled out-of-the-box. </p>
+<p>For VM-based installations, update the file <code>/etc/default/jans-casa</code>. Locate a segment that reads <code>-Dacr=</code> and assign  <code>agama_io.jans.casa.authn.acctlinking</code> as new value. This will make Casa use the flow found in the accounts linking project - not the flow bundled out-of-the-box.</p>
 <p>Finally restart Casa and conduct your testing. You will now see the login page contains a list of links to the configured identity providers.</p>
 
 
@@ -14566,7 +14566,7 @@ zip<span class="w"> </span>-r<span class="w"> </span>inbound.zip<span class="w">
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 30, 2025 08:13:21 UTC"><span class="timeago" datetime="2025-10-30T08:13:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 30, 2025 08:13:21 UTC">2025-10-30</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
   </span>
 
     

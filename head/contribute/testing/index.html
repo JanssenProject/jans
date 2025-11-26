@@ -14759,38 +14759,38 @@
 <p>Every line of code at Janssen Project goes through various tests at different stages of development. Most of these tests
 are automated and executed as part of our CI-CD pipeline, while others are executed manually.</p>
 <h2 id="unit-testing">Unit testing<a class="headerlink" href="#unit-testing" title="Permanent link">#</a></h2>
-<p>Do not submit any code without a corresponding unit test. Also, any bug fixes should increment unit test coverage. 
+<p>Do not submit any code without a corresponding unit test. Also, any bug fixes should increment unit test coverage.
 All unit tests are executed with any subsequent Jenkins build.</p>
 <h2 id="component-testing">Component testing<a class="headerlink" href="#component-testing" title="Permanent link">#</a></h2>
-<p>Component testing uses real world use cases to exercise a portion of the software, using typical data inputs. 
-Developers should document component stories and submit them to the component test library for the respective 
-repository. A tester should be able to run component tests manually. Component tests should run automatically with each 
+<p>Component testing uses real-world use cases to exercise a portion of the software, using typical data inputs.
+Developers should document component stories and submit them to the component test library for the respective
+repository. A tester should be able to run component tests manually. Component tests should run automatically with each
 Jenkins build.</p>
-<p>The OpenID Foundation <a href="https://openid.net/certification">certification tests</a> supplement the component testing library, 
+<p>The OpenID Foundation <a href="https://openid.net/certification">certification tests</a> supplement the component testing library,
 and should be run for each major release of the software for which they are available.</p>
 <h2 id="performance-testing">Performance testing<a class="headerlink" href="#performance-testing" title="Permanent link">#</a></h2>
-<p>Performance tests are critical to optimization of the persistence and caching implementation. 
-All major releases of the software should be tested for performance with all supported database and cache 
-configurations using the Cloud Native distribution. The VM distribution will not be performance tested, as the main 
-goal for this distribution is development and small deployments. The JMeter test tool should be used to generate the 
+<p>Performance tests are critical to optimization of the persistence and caching implementation.
+All major releases of the software should be tested for performance with all supported database and cache
+configurations using the Cloud Native distribution. The VM distribution will not be performance tested, as the main
+goal for this distribution is development and small deployments. The JMeter test tool should be used to generate the
 load. These tests are published so community members can run their own bench-marking analysis.</p>
-<p>In addition to standard performance testing, it’s highly recommended to perform full benchmarking to understand your system’s performance under stress. The <a href="../../janssen-server/recipes/benchmark/">Benchmarking Documentation</a> provides a comprehensive guide for testing with JMeter scripts and other load generation tools.</p>
+<p>In addition to standard performance testing, it’s highly recommended to perform full benchmarking to understand your system’s performance under load. The <a href="../../janssen-server/recipes/benchmark/">Benchmarking Documentation</a> provides a comprehensive guide for testing with JMeter scripts and other load generation tools.</p>
 <h2 id="ha-tests">HA Tests<a class="headerlink" href="#ha-tests" title="Permanent link">#</a></h2>
-<p>HA tests should be run against the Cloud Native distribution, which by design is active-active with no single point of 
-failure. The HA testing should simulate taking down various pieces of infrastructure, to see if authentications can 
+<p>HA tests should be run against the Cloud Native distribution, which by design is active-active with no single point of
+failure. The HA testing should simulate taking down various pieces of infrastructure, to see if authentications can
 still proceed. Also, what happens to transactions that were in progress during the crash?</p>
 <h2 id="penetration-tests">Penetration tests<a class="headerlink" href="#penetration-tests" title="Permanent link">#</a></h2>
-<p>Penetration testing is highly deployment specific. Depending on different implementations of the Janssen Project 
-software, you may achieve different levels of risk mitigation. Thus it is important that organizations that operate 
+<p>Penetration testing is highly deployment specific. Depending on different implementations of the Janssen Project
+software, you may achieve different levels of risk mitigation. Thus it is important that organizations that operate
 their own IAM platform based on Janssen perform their own penetration
 testing.</p>
 <h2 id="dependency-vulnerabilities">Dependency Vulnerabilities<a class="headerlink" href="#dependency-vulnerabilities" title="Permanent link">#</a></h2>
-<p>Dependency vulnerabilities are monitored by Gihub. In addition we plan to use 
+<p>Dependency vulnerabilities are monitored by GitHub. In addition we plan to use
 the <a href="https://security.communitybridge.org">Linux Foundation Community Bridge</a> vulnerability detection platform.</p>
 <h2 id="contributing-to-the-documentation">Contributing to the Documentation<a class="headerlink" href="#contributing-to-the-documentation" title="Permanent link">#</a></h2>
-<p>While contributing documentation to official Janssen 
-Project <a href="https://jans.io/docs/">documentation</a> it is important 
-to ensure the following. </p>
+<p>While contributing documentation to official Janssen
+Project <a href="https://jans.io/docs/">documentation</a> it is important
+to ensure the following.</p>
 <ul>
 <li>Changes adhere to the <a href="../../CONTRIBUTING/#documentation-style-guide">style guidelines</a> </li>
 <li>Changes have been proofread to remove any typographical or grammatical errors</li>
@@ -14800,7 +14800,7 @@ links to that section.</li>
 </ul>
 <p>The command below will checkout the documentation and deploy the static site
 locally. Any changes made to the local documentation will be live reloaded
-on the locally deployed static site. </p>
+on the locally deployed static site.</p>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--depth<span class="w"> </span><span class="m">100</span><span class="w"> </span>--filter<span class="w"> </span>blob:none<span class="w"> </span>--no-checkout<span class="w"> </span>https://github.com/janssenproject/jans<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>jans<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>sparse-checkout<span class="w"> </span>init<span class="w"> </span>--cone<span class="w"> </span><span class="se">\</span>
@@ -14812,7 +14812,7 @@ on the locally deployed static site. </p>
 <span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>poetry<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>serve<span class="w"> </span>-f<span class="w"> </span>../mkdocs.yml
 </code></pre></div>
 <h2 id="open-banking">Open Banking<a class="headerlink" href="#open-banking" title="Permanent link">#</a></h2>
-<p>We are working on developing this content under <a href="https://github.com/JanssenProject/jans/issues/2548">issue 2548</a>. If you’d like to contribute the content, get started with the <a href="https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation">Contribution Guide</a> </p>
+<p>We are working on developing this content under <a href="https://github.com/JanssenProject/jans/issues/2548">issue 2548</a>. If you’d like to contribute the content, get started with the <a href="https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation">Contribution Guide</a></p>
 <h3 id="how-to-test-openbanking">How to test OpenBanking?<a class="headerlink" href="#how-to-test-openbanking" title="Permanent link">#</a></h3>
 <p>This test uses a Gluu Testing Certificate.</p>
 <h3 id="device-authentication">device authentication<a class="headerlink" href="#device-authentication" title="Permanent link">#</a></h3>
@@ -14826,7 +14826,7 @@ on the locally deployed static site. </p>
 <p>Once all the code changes for a particular release have been committed, we perform a set of tests and go through a list
 of checkpoints to make sure release candidate (RC) build is healthy and functioning well.</p>
 <h3 id="pre-release-qa-checklist">Pre-release QA checklist<a class="headerlink" href="#pre-release-qa-checklist" title="Permanent link">#</a></h3>
-<p>As part of pre-release QA check, we run a set of <a href="#sanity-checks">manual sanity checks</a> on 
+<p>As part of pre-release QA check, we run a set of <a href="#sanity-checks">manual sanity checks</a> on
 <a href="#test-environments">test environments</a> with various deployment configurations.</p>
 <h4 id="test-environments">Test Environments<a class="headerlink" href="#test-environments" title="Permanent link">#</a></h4>
 <table>
@@ -14942,7 +14942,7 @@ of checkpoints to make sure release candidate (RC) build is healthy and function
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 19, 2025 07:13:18 UTC"><span class="timeago" datetime="2025-08-19T07:13:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 19, 2025 07:13:18 UTC">2025-08-19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
   </span>
 
     

@@ -14537,38 +14537,38 @@
 <h1 id="about-two-factor-authentication-2fa">About Two-Factor Authentication (2FA)<a class="headerlink" href="#about-two-factor-authentication-2fa" title="Permanent link">#</a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You can tailor different aspects of 2FA behavior in Casa using the <a href="../../plugins/2fa-settings/">plugin</a> developed 
+<p>You can tailor different aspects of 2FA behavior in Casa using the <a href="../../plugins/2fa-settings/">plugin</a> developed
 for this purpose.</p>
 </div>
 <h2 id="availability">Availability<a class="headerlink" href="#availability" title="Permanent link">#</a></h2>
-<p>By default, strong (two-factor) authentication will be available to users of Casa once they have added at least two 
-credentials. By requiring users to register two strong credentials, the number of account lockouts that require admin 
-intervention will be greatly reduced. If one credential is lost, there will be at least one fallback mechanism 
+<p>By default, strong (two-factor) authentication will be available to users of Casa once they have added at least two
+credentials. By requiring users to register two strong credentials, the number of account lockouts that require admin
+intervention will be greatly reduced. If one credential is lost, there will be at least one fallback mechanism
 available. Avoiding user lockout is important because it prevents a serious burden for IT administrators.</p>
-<p>There is no limit to the number of credentials a user can enroll, and credentials do not need to be of the same type: 
-any combination is valid. </p>
+<p>There is no limit to the number of credentials a user can enroll, and credentials do not need to be of the same type:
+any combination is valid.</p>
 <h2 id="supported-types-of-2fa">Supported types of 2FA<a class="headerlink" href="#supported-types-of-2fa" title="Permanent link">#</a></h2>
-<p>Users will only be able to add credentials with a type matching one of the already enabled authentication methods in 
+<p>Users will only be able to add credentials with a type matching one of the already enabled authentication methods in
 the <a href="../admin-console/#authentication-methods">admin console</a>. Other methods may be supported via <a href="../../#existing-plugins">plugins</a>.</p>
 <h2 id="resetting-a-users-2fa-availability">Resetting a user's 2FA availability<a class="headerlink" href="#resetting-a-users-2fa-availability" title="Permanent link">#</a></h2>
-<p>In the event a user loses access to his account, admins can revert the user's authentication method to "password only" 
+<p>In the event a user loses access to his account, admins can revert the user's authentication method to "password only"
 by following the steps shown in the <a href="../faq/">troubleshooting guide</a>.</p>
 <h2 id="associated-strength-of-credentials">Associated "strength" of credentials<a class="headerlink" href="#associated-strength-of-credentials" title="Permanent link">#</a></h2>
-<p>When authenticating, a user with 2FA turned on, will be challenged to present the credential having the "strongest" 
+<p>When authenticating, a user with 2FA turned on, will be challenged to present the credential having the "strongest"
 authentication method (from his already available enrolled credentials). The relative strength of methods can be assigned in the <a href="../admin-console/#authentication-methods">authentication methods</a> screen of the admin console.</p>
 <h2 id="forcing-users-to-enroll-a-specific-credential-before-2fa-is-available">Forcing users to enroll a specific credential before 2FA is available<a class="headerlink" href="#forcing-users-to-enroll-a-specific-credential-before-2fa-is-available" title="Permanent link">#</a></h2>
-<p>To further reduce the likelihood of lockouts, you can force users to initially enroll, for instance, one OTP 
-credential before any other. OTP credentials are generally more accessible than their counterparts (like Fido) since 
+<p>To further reduce the likelihood of lockouts, you can force users to initially enroll, for instance, one OTP
+credential before any other. OTP credentials are generally more accessible than their counterparts (like Fido) since
 they normally don't demand special conditions from the device used to access, like having a USB port.</p>
 <p>To do so, add a property named <code>2fa_requisite</code> to the configuration of the Agama flow that backs the given authentication method, and assign <code>true</code> as its value. You can do this via <a href="../../../janssen-server/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen">TUI</a>. Note
-this mechanism is applicable for the out-of-the box authentication methods supported by Casa. For other methods contributed via plugins, consult their respective documentation.</p>
-<p>You can flag more than one method as requisite. In this case users will be encouraged to enroll one credential 
+this mechanism is applicable for the out-of-the-box authentication methods supported by Casa. For other methods contributed via plugins, consult their respective documentation.</p>
+<p>You can flag more than one method as requisite. In this case users will be encouraged to enroll one credential
 associated to any of the flagged methods.</p>
-<p>If a user attempts to delete their only available credential matching the requisite method, a prompt will appear 
+<p>If a user attempts to delete their only available credential matching the requisite method, a prompt will appear
 warning that doing so will disable 2FA, that is, resetting to password authentication.</p>
 <p>If you are a developer coding a plugin that adds an authentication method, you can make the method a requisite by properly implementing method <code>mayBe2faActivationRequisite</code> part of interface <code>AuthnMethod</code>.</p>
 <h2 id="enrolling-credentials-upon-registration-or-first-login">Enrolling credentials upon registration or first login<a class="headerlink" href="#enrolling-credentials-upon-registration-or-first-login" title="Permanent link">#</a></h2>
-<p>If the previous scenario is not enough for your needs, you can force users to enroll credentials and turn 2FA on 
+<p>If the previous scenario is not enough for your needs, you can force users to enroll credentials and turn 2FA on
 before the first usage of the application. This can be done in two ways:</p>
 <ul>
 <li>
@@ -14600,7 +14600,7 @@ before the first usage of the application. This can be done in two ways:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 1, 2024 08:56:03 UTC"><span class="timeago" datetime="2024-10-01T08:56:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 1, 2024 08:56:03 UTC">2024-10-01</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
   </span>
 
     

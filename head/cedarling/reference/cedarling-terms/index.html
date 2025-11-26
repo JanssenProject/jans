@@ -14620,14 +14620,14 @@
 </code></pre></div>
 <p>Cedarling creates a number of entities based on the input provided, which are described below.</p>
 <h3 id="principal">Principal<a class="headerlink" href="#principal" title="Permanent link">#</a></h3>
-<p>The principal element in a Cedar policy represents a user, service, or other identity that can make a request to perform an action on a resource in your application. The principal entity in Cedarling is an object that is evaluated against the principal element in a cedar policy. 
+<p>The principal element in a Cedar policy represents a user, service, or other identity that can make a request to perform an action on a resource in your application. The principal entity in Cedarling is an object that is evaluated against the principal element in a cedar policy.
 As Cedarling is primarily concerned with OpenID Connect flows, the principal entity is generally created from the three standard OpenID tokens: Access, ID, and Userinfo. Based on these tokens, Cedarling creates a principal entity that falls into one of these categories:</p>
 <ul>
 <li>Workload: When only the access token is provided. This represents an OAuth client.</li>
 <li>User: When at least two tokens are provided. This represents an end user attempting to be authorized.</li>
 <li>Role: As per <a href="https://docs.cedarpolicy.com/bestpractices/bp-implementing-roles.html#what-is-a-role">cedar best practices</a>, a role in Cedarling is defined as a group of user or workload entities with no additional attributes. This allows us to create role based access control (RBAC) policies which are more performant than attribute based access control. The default schema provides definition for <code>Role</code> and Cedarling automatically creates the <code>Role</code> entity if this claim is present in one or more tokens.</li>
 </ul>
-<p>In case no token is provided or the use case is not based on OpenID, Cedarling supports unsigned authorization, where the principal entity is manually provided by the user in the form of a list of JSON objects. </p>
+<p>In case no token is provided or the use case is not based on OpenID, Cedarling supports unsigned authorization, where the principal entity is manually provided by the user in the form of a list of JSON objects.</p>
 <p>For example, given a schema defining a user:</p>
 <p><div class="highlight"><pre><span></span><code>entity HTTP_Request = {
     &quot;sub&quot;: String,
@@ -14733,7 +14733,7 @@ when {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 20, 2025 09:07:18 UTC"><span class="timeago" datetime="2025-11-20T09:07:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 20, 2025 09:07:18 UTC">2025-11-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
   </span>
 
     
