@@ -520,17 +520,13 @@ mod test {
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
 
-        let result = parse_default_entities_with_warns(Some(raw_data));
-        match result {
-            Err(ParseDefaultEntityError { entry_id, error }) => {
-                assert_eq!(entry_id, "test123");
-                assert!(matches!(
-                    *error,
-                    ParseEntityErrorKind::HaveNoUidOrEntityTypeField
-                ));
-            },
-            Ok(_) => panic!("Expected error, got success"),
-        }
+        let err = parse_default_entities_with_warns(Some(raw_data))
+            .expect_err("Expected error for entity missing uid field");
+        assert_eq!(err.entry_id, "test123", "Expected entry_id to be 'test123'");
+        assert!(
+            matches!(*err.error, ParseEntityErrorKind::HaveNoUidOrEntityTypeField),
+            "Expected error to be HaveNoUidOrEntityTypeField"
+        );
     }
 
     #[test]
@@ -545,14 +541,13 @@ mod test {
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
 
-        let result = parse_default_entities_with_warns(Some(raw_data));
-        match result {
-            Err(ParseDefaultEntityError { entry_id, error }) => {
-                assert_eq!(entry_id, "test123");
-                assert!(matches!(*error, ParseEntityErrorKind::InvalidUidTypeField));
-            },
-            Ok(_) => panic!("Should return error when uid is not an object"),
-        }
+        let err = parse_default_entities_with_warns(Some(raw_data))
+            .expect_err("Expected error when uid is not an object");
+        assert_eq!(err.entry_id, "test123", "Expected entry_id to be 'test123'");
+        assert!(
+            matches!(*err.error, ParseEntityErrorKind::InvalidUidTypeField),
+            "Expected error to be InvalidUidTypeField"
+        );
 
         // Test entity with uid missing type field
         let entity_data_no_type = json!({
@@ -565,14 +560,13 @@ mod test {
         let default_entities_data = json!({"test456".to_string(): entity_data_no_type});
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let result = parse_default_entities_with_warns(Some(raw_data));
-        match result {
-            Err(ParseDefaultEntityError { entry_id, error }) => {
-                assert_eq!(entry_id, "test456");
-                assert!(matches!(*error, ParseEntityErrorKind::InvalidUidTypeField));
-            },
-            Ok(_) => panic!("Should return error when uid.type is missing"),
-        }
+        let err = parse_default_entities_with_warns(Some(raw_data))
+            .expect_err("Expected error when uid.type is missing");
+        assert_eq!(err.entry_id, "test456", "Expected entry_id to be 'test456'");
+        assert!(
+            matches!(*err.error, ParseEntityErrorKind::InvalidUidTypeField),
+            "Expected error to be InvalidUidTypeField"
+        );
     }
 
     #[test]
@@ -624,27 +618,28 @@ mod test {
         let default_entities_data = json!({"".to_string(): entity_data});
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let result = parse_default_entities_with_warns(Some(raw_data));
-        match result {
-            Err(ParseDefaultEntityError { entry_id, error }) => {
-                assert_eq!(entry_id, "");
-                assert!(matches!(*error, ParseEntityErrorKind::EntityIdIsEmpty));
-            },
-            Ok(_) => panic!("Expected error for empty entry ID, got success"),
-        }
+        let err = parse_default_entities_with_warns(Some(raw_data))
+            .expect_err("Expected error for empty entry ID");
+        assert_eq!(err.entry_id, "", "Expected entry_id to be empty");
+        assert!(
+            matches!(*err.error, ParseEntityErrorKind::EntityIdIsEmpty),
+            "Expected error to be EntityIdIsEmpty"
+        );
 
         // Test whitespace-only entry ID
         let default_entities_data_whitespace = json!({"   ".to_string(): entity_data});
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data_whitespace).unwrap();
-        let result = parse_default_entities_with_warns(Some(raw_data));
-        match result {
-            Err(ParseDefaultEntityError { entry_id, error }) => {
-                assert_eq!(entry_id, "   ");
-                assert!(matches!(*error, ParseEntityErrorKind::EntityIdIsEmpty));
-            },
-            Ok(_) => panic!("Expected error for whitespace-only entry ID, got success"),
-        }
+        let err = parse_default_entities_with_warns(Some(raw_data))
+            .expect_err("Expected error for whitespace-only entry ID");
+        assert_eq!(
+            err.entry_id, "   ",
+            "Expected entry_id to be whitespace-only"
+        );
+        assert!(
+            matches!(*err.error, ParseEntityErrorKind::EntityIdIsEmpty),
+            "Expected error to be EntityIdIsEmpty"
+        );
     }
 
     #[test]
@@ -662,14 +657,16 @@ mod test {
             let default_entities_data = json!({dangerous_id.clone(): entity_data.clone()});
             let raw_data: HashMap<String, Value> =
                 serde_json::from_value(default_entities_data).unwrap();
-            let result = parse_default_entities_with_warns(Some(raw_data));
-            match result {
-                Err(ParseDefaultEntityError { entry_id, error }) => {
-                    assert_eq!(entry_id, dangerous_id);
-                    assert!(matches!(*error, ParseEntityErrorKind::EntityIdIsDangerous));
-                },
-                Ok(_) => panic!("Should return error for dangerous pattern: {}", pattern),
-            }
+            let err = parse_default_entities_with_warns(Some(raw_data))
+                .expect_err(&format!("Should return error for dangerous pattern: {}", pattern));
+            assert_eq!(
+                err.entry_id, dangerous_id,
+                "Expected entry_id to match dangerous pattern"
+            );
+            assert!(
+                matches!(*err.error, ParseEntityErrorKind::EntityIdIsDangerous),
+                "Expected error to be EntityIdIsDangerous"
+            );
         }
     }
 
@@ -750,14 +747,16 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let result = parse_default_entities_with_warns(Some(raw_data));
-        match result {
-            Err(ParseDefaultEntityError { entry_id, error }) => {
-                assert_eq!(entry_id, "invalid_base64_entity");
-                assert!(matches!(*error, ParseEntityErrorKind::Base64Decode(_)));
-            },
-            Ok(_) => panic!("Expected error for invalid base64, got success"),
-        }
+        let err = parse_default_entities_with_warns(Some(raw_data))
+            .expect_err("Expected error for invalid base64");
+        assert_eq!(
+            err.entry_id, "invalid_base64_entity",
+            "Expected entry_id to be 'invalid_base64_entity'"
+        );
+        assert!(
+            matches!(*err.error, ParseEntityErrorKind::Base64Decode(_)),
+            "Expected error to be Base64Decode"
+        );
     }
 
     #[test]
@@ -772,17 +771,16 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let result = parse_default_entities_with_warns(Some(raw_data));
-        match result {
-            Err(ParseDefaultEntityError { entry_id, error }) => {
-                assert_eq!(entry_id, "invalid_json_entity");
-                assert!(matches!(
-                    *error,
-                    ParseEntityErrorKind::Base64DecodedIsNotJson(_)
-                ));
-            },
-            Ok(_) => panic!("Expected error for invalid JSON after base64 decode, got success"),
-        }
+        let err = parse_default_entities_with_warns(Some(raw_data))
+            .expect_err("Expected error for invalid JSON after base64 decode");
+        assert_eq!(
+            err.entry_id, "invalid_json_entity",
+            "Expected entry_id to be 'invalid_json_entity'"
+        );
+        assert!(
+            matches!(*err.error, ParseEntityErrorKind::Base64DecodedIsNotJson(_)),
+            "Expected error to be Base64DecodedIsNotJson"
+        );
     }
 
     #[test]
@@ -797,14 +795,16 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let result = parse_default_entities_with_warns(Some(raw_data));
-        match result {
-            Err(ParseDefaultEntityError { entry_id, error }) => {
-                assert_eq!(entry_id, "non_utf8_entity");
-                assert!(matches!(*error, ParseEntityErrorKind::UnicodeDecode(_)));
-            },
-            Ok(_) => panic!("Expected error for non-UTF8 content after base64 decode, got success"),
-        }
+        let err = parse_default_entities_with_warns(Some(raw_data))
+            .expect_err("Expected error for non-UTF8 content after base64 decode");
+        assert_eq!(
+            err.entry_id, "non_utf8_entity",
+            "Expected entry_id to be 'non_utf8_entity'"
+        );
+        assert!(
+            matches!(*err.error, ParseEntityErrorKind::UnicodeDecode(_)),
+            "Expected error to be UnicodeDecode"
+        );
     }
 
     #[test]
@@ -1097,14 +1097,16 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let result = parse_default_entities_with_warns(Some(raw_data));
-        match result {
-            Err(ParseDefaultEntityError { entry_id, error }) => {
-                assert_eq!(entry_id, "invalid_entity");
-                assert!(matches!(*error, ParseEntityErrorKind::IsNotJsonObject));
-            },
-            Ok(_) => panic!("Expected error for invalid value type, got success"),
-        }
+        let err = parse_default_entities_with_warns(Some(raw_data))
+            .expect_err("Expected error for invalid value type");
+        assert_eq!(
+            err.entry_id, "invalid_entity",
+            "Expected entry_id to be 'invalid_entity'"
+        );
+        assert!(
+            matches!(*err.error, ParseEntityErrorKind::IsNotJsonObject),
+            "Expected error to be IsNotJsonObject"
+        );
     }
 
     #[test]
