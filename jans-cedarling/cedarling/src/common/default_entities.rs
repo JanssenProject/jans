@@ -73,6 +73,40 @@ impl DefaultEntities {
 
 /// Structure that holds parsed default entities.
 /// Errors that may occur during parsing holds inside structure and can get my `warns` method.
+///
+/// # JSON Serialization
+/// This structure is deserialized from JSON with the following format:
+/// - `None` or empty map: Returns empty default entities
+/// - Map of entity IDs to entity data:
+///   - Base64-encoded JSON string: Decoded and parsed as entity
+///   - JSON object: Parsed directly as entity
+///
+/// Entity data supports two formats:
+/// - Cedar format: {"uid": {"type": "...", "id": "..."}, "attrs": {...}, "parents": [...]}
+/// - Legacy format: {"entity_type": "...", "entity_id": "...", ...attributes...}
+///
+/// # JSON Map Example
+/// ```json
+/// {
+///   "user123": {
+///     "uid": {
+///       "type": "User",
+///       "id": "user123"
+///     },
+///     "attrs": {
+///       "name": "John Doe",
+///       "age": 30
+///     },
+///     "parents": [
+///       {
+///         "type": "Group",
+///         "id": "admin"
+///       }
+///     ]
+///   },
+///   "user456": "eyJ1aWQiOnsidHlwZSI6IlVzZXIiLCJpZCI6InVzZXI0NTYifSwiYXR0cnMiOnsibmFtZSI6IkpvaG4gRG9lIn19"
+/// }
+/// ```
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct DefaultEntitiesWithWarns {
     inner: DefaultEntities,
@@ -657,8 +691,10 @@ mod test {
             let default_entities_data = json!({dangerous_id.clone(): entity_data.clone()});
             let raw_data: HashMap<String, Value> =
                 serde_json::from_value(default_entities_data).unwrap();
-            let err = parse_default_entities_with_warns(Some(raw_data))
-                .expect_err(&format!("Should return error for dangerous pattern: {}", pattern));
+            let err = parse_default_entities_with_warns(Some(raw_data)).expect_err(&format!(
+                "Should return error for dangerous pattern: {}",
+                pattern
+            ));
             assert_eq!(
                 err.entry_id, dangerous_id,
                 "Expected entry_id to match dangerous pattern"
