@@ -88,8 +88,7 @@ The ParType interception script has the following method(s):
 |Method |Method description|
 |:-----|:------|
 | `def createPar(self, par, context)`| Used to modify PAR object before it is persisted. `par` is `io.jans.as.persistence.model.Par`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`|
-| `def modifyParResponse(self, response, context)`| Used to modify response from `/par` endpoint.
-`response` is `org.json.JSONObject`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`|
+| `def modifyParResponse(self, response, context)`| Used to modify response from `/par` endpoint. `response` is `org.json.JSONObject`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`|
 
 
 ## Script Type: Java

@@ -147,6 +147,7 @@ it should be put in attributes of `auth_session` object.
 If `authorizationChallengeSessionLifetimeInSeconds` is not set then value falls back to `86400` seconds.
 
 Example
+
 ```java
 String clientId = context.getHttpRequest().getParameter("client_id");
 authorizationChallengeSessionObject.getAttributes().getAttributes().put("client_id", clientId);

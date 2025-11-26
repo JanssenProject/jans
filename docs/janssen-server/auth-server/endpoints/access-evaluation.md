@@ -72,6 +72,7 @@ More information about request and response of the Access Evaluation Endpoint ca
 of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/access-evaluation).
 
 Sample request
+
 ```http
 POST /jans-auth/restv1/access/v1/evaluation HTTP/1.1
 Host: happy-example.gluu.info
@@ -102,6 +103,7 @@ Authorization: Basic M2NjOTdhYWItMDE0Zi00ZWM5LWI4M2EtNTE3MTRlODE3MDMwOmFlYmMwZWF
 ```
 
 Sample successful response with `authorization_code`.
+
 ```
 HTTP/1.1 200
 Content-Type: application/json
@@ -117,6 +119,7 @@ Content-Type: application/json
 ```
 
 Sample error response
+
 ```
 HTTP/1.1 401 Unauthorized
 Content-Type: application/json
