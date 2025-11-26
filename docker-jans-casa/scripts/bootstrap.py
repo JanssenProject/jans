@@ -155,6 +155,22 @@ def main():
         persistence_setup = PersistenceSetup(manager)
         persistence_setup.import_ldif_files()
 
+        # enable/disable admin console via environment variable check; by default the admin console
+        # should be enabled (see https://github.com/JanssenProject/jans/issues/5806)
+        lock_file = os.environ.get("CN_CASA_ADMIN_LOCK_FILE", "/opt/jans/jetty/jans-casa/resources/.administrable")
+        lock_path = Path(lock_file)
+
+        if as_boolean(os.environ.get("CN_CASA_ADMIN_ENABLED", "true")):
+            logger.info(f"Detected CN_CASA_ADMIN_ENABLED=true; creating or updating {lock_file} to enable the admin console")
+            lock_path.parent.mkdir(parents=True, exist_ok=True)
+            lock_path.touch(exist_ok=True)
+        else:
+            logger.info(f"Detected CN_CASA_ADMIN_ENABLED=false; removing {lock_file} (if exists) to disable the admin console")
+            try:
+                lock_path.unlink(missing_ok=True)
+            except Exception as exc:
+                logger.warning(f"Unable to remove {lock_file}; reason={exc}")
+
     try:
         manager.secret.to_file(
             "smtp_jks_base64",
@@ -165,11 +181,6 @@ def main():
     except ValueError:
         # likely secret is not created yet
         logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
-
-    # enable/disable admin console via environment variable check; by default the admin console
-    # should be enabled (see https://github.com/JanssenProject/jans/issues/5806)
-    if as_boolean(os.environ.get("CN_CASA_ADMIN_ENABLED", "true")):
-        Path(os.environ.get("CN_CASA_ADMIN_LOCK_FILE")).touch(exist_ok=True)
 
 
 class PersistenceSetup:
