@@ -1,3 +1,8 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 use base64::prelude::*;
 use cedar_policy::Entity;
 use cedar_policy::EntityUid;
@@ -231,22 +236,20 @@ pub enum ParseEntityErrorKind {
 
 #[derive(Debug, thiserror::Error, Clone, PartialEq)]
 pub enum DefaultEntityWarning {
-    #[error("Could not parse parent UID '{parent_uid_str}' for default entity '{entry_id}': {error}")]
+    #[error(
+        "Could not parse parent UID '{parent_uid_str}' for default entity '{entry_id}': {error}"
+    )]
     InvalidParentUid {
         entry_id: String,
         parent_uid_str: String,
         error: String,
     },
-    #[error("In default entity '{entry_id}' parent array json value should be object, skip: {value}")]
-    NonObjectParentEntry {
-        entry_id: String,
-        value: String,
-    },
+    #[error(
+        "In default entity '{entry_id}' parent array json value should be object, skip: {value}"
+    )]
+    NonObjectParentEntry { entry_id: String, value: String },
     #[error("error parsing default entities: failed to parse entity '{entry_id}': {error}")]
-    EntityParseError {
-        entry_id: String,
-        error: String,
-    },
+    EntityParseError { entry_id: String, error: String },
 }
 
 impl ParseEntityErrorKind {
@@ -1249,7 +1252,10 @@ mod test {
             .expect("Should parse entity with invalid parent");
 
         // This test should have no warnings since "invalid@uid" is actually valid
-        assert!(parsed_entities.warns().is_empty(), "Should have no warnings for valid UID");
+        assert!(
+            parsed_entities.warns().is_empty(),
+            "Should have no warnings for valid UID"
+        );
     }
 
     #[test]
@@ -1281,17 +1287,20 @@ mod test {
 
         // Should have warnings for non-object parent entries
         assert!(!parsed_entities.warns().is_empty(), "Should have warnings");
-        
+
         let warnings = parsed_entities.warns();
         assert_eq!(warnings.len(), 1, "Should have exactly 1 warning");
-        
+
         // Verify the warning type and content
         match &warnings[0] {
             DefaultEntityWarning::NonObjectParentEntry { entry_id, value } => {
                 assert_eq!(entry_id, "test_entity");
                 assert!(value.contains("not_an_object"));
             },
-            _ => panic!("Expected NonObjectParentEntry warning, got {:?}", warnings[0]),
+            _ => panic!(
+                "Expected NonObjectParentEntry warning, got {:?}",
+                warnings[0]
+            ),
         }
     }
 
@@ -1326,10 +1335,10 @@ mod test {
 
         // Should have warnings for non-object parent entries
         assert!(!parsed_entities.warns().is_empty(), "Should have warnings");
-        
+
         let warnings = parsed_entities.warns();
         assert_eq!(warnings.len(), 2, "Should have exactly 2 warnings");
-        
+
         // Both should be NonObjectParentEntry warnings
         for warning in warnings {
             match warning {
@@ -1372,7 +1381,7 @@ mod test {
         // Should have multiple warnings
         let warnings = parsed_entities.warns();
         assert_eq!(warnings.len(), 2, "Should have exactly 2 warnings");
-        
+
         // Both should be NonObjectParentEntry warnings
         for warning in warnings {
             match warning {
@@ -1393,17 +1402,17 @@ mod test {
             parent_uid_str: "Test::Parent::\"invalid@uid\"".to_string(),
             error: "invalid character".to_string(),
         };
-        
+
         let display_string = warning.to_string();
         assert!(display_string.contains("test_entity"));
         assert!(display_string.contains("Test::Parent"));
         assert!(display_string.contains("invalid character"));
-        
+
         let warning2 = DefaultEntityWarning::NonObjectParentEntry {
             entry_id: "test_entity".to_string(),
             value: "\"not_an_object\"".to_string(),
         };
-        
+
         let display_string2 = warning2.to_string();
         assert!(display_string2.contains("test_entity"));
         assert!(display_string2.contains("not_an_object"));
