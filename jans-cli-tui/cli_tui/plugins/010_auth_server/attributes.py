@@ -384,9 +384,7 @@ class Attributes(DialogUtils):
                 self.app.start_progressing(_("Deleting attribute {}").format(selected_attribute['name']))
                 await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
-                self.get_attributes()
-                common_data.claims_retreived = False
-                self.app.create_background_task(background_tasks.get_attributes_coroutine(self.app))
+                self.refresh_attributes_cache()
 
             asyncio.ensure_future(coroutine())
 
