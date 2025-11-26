@@ -8,10 +8,10 @@ tags:
 ---
 # JWKS URI Endpoint
 
-Janssen Server supports `/jwks` metadata endpoint and publishes its JSON Web Key Set (JWKS) at this endpoint. This 
+Janssen Server supports `/jwks` metadata endpoint and publishes its JSON Web Key Set (JWKS) at this endpoint. This
 endpoint publishes signing keys as well as encryption keys used by Janssen Server. RP can use these keys to validate
-signatures from Janssen Server, and also to perform encryption and decryption.  Like other metadata endpoints, this is 
-not a secure endpoint. Further details on this endpoint and JWKs can be found in [OpenID Connect Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata) 
+signatures from Janssen Server, and also to perform encryption and decryption.  Like other metadata endpoints, this is
+not a secure endpoint. Further details on this endpoint and JWKs can be found in [OpenID Connect Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata)
 specification.
 
 URL to access jwks endpoint on Janssen Server is listed in the response of Janssen Server's well-known
