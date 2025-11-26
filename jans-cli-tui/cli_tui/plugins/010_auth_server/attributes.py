@@ -231,7 +231,7 @@ class Attributes(DialogUtils):
 
     def refresh_attributes_cache(self) -> None:
         self.get_attributes()
-        common_data.claims_retreived = False
+        common_data.claims_retrieved = False
         self.app.create_background_task(background_tasks.get_attributes_coroutine(self.app))
 
 

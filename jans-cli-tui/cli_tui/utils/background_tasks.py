@@ -41,7 +41,7 @@ async def get_attributes_coroutine(app) -> None:
             break
 
     common_data.jans_attributes = jans_attributes
-    common_data.claims_retreived = True
+    common_data.claims_retrieved = True
 
     for feed in common_data.background_tasks_feeds['attributes']:
         app.logger.info(f"Executing feed {feed.__name__}")
