@@ -190,7 +190,8 @@ impl<'de> Deserialize<'de> for DefaultEntitiesWithWarns {
         D: Deserializer<'de>,
     {
         let option_raw_data: Option<HashMap<String, Value>> =
-            Deserialize::deserialize(deserializer)?;
+            Deserialize::deserialize(deserializer)
+                .map_err(|err| D::Error::custom(format!("expect to be JSON object: {}", err)))?;
 
         parse_default_entities_with_warns(option_raw_data).map_err(D::Error::custom)
     }

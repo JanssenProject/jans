@@ -586,11 +586,6 @@ impl<'de> Deserialize<'de> for PolicyStore {
                 .get("default_entities")
                 .map(|v| {
                     // Expect an object mapping entity_id -> base64 string
-                    // At first check if it is an object
-                    let _map = v
-                        .as_object()
-                        .ok_or_else(|| D::Error::custom("'default_entities' must be a JSON object"))?;
-
                     DefaultEntitiesWithWarns::deserialize(v).map_err(|e| {
                         D::Error::custom(format!("could not deserialize `default entities`: {}", e))
                     })
