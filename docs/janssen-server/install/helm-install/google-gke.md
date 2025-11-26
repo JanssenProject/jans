@@ -65,7 +65,6 @@ tags:
         ```yaml
         global:
             lbIp: #Add the Loadbalance IP from the previous command
-            isFqdnRegistered: false
         ```
 
     - FQDN/domain is registered:
@@ -75,7 +74,6 @@ tags:
         ```yaml
         global:
             lbIp: #Add the LoadBalancer IP from the previous command
-            isFqdnRegistered: true
             fqdn: demoexample.jans.io #CHANGE-THIS to the FQDN used for Jans
         nginx-ingress:
           ingress:
@@ -92,24 +90,22 @@ tags:
 
         In a production environment, a production-grade PostgreSQL server should be used such as `Cloud SQL`
 
-        For testing purposes, you can deploy it on the GKE cluster using the following command:
+        For testing purposes, you can deploy it on the GKE cluster using the following commands:
 
         ```
-        helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans,image.repository=bitnamilegacy/postgresql,image.tag=16.4.0-debian-12-r0 -n jans oci://registry-1.docker.io/bitnamicharts/postgresql
+        wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
+        kubectl apply -f pgsql.yaml
         ```
 
         Add the following yaml snippet to your `override.yaml` file:
         
         ```yaml
-        
-        global:
-          cnPersistenceType: sql
         config:
           configmap:
             cnSqlDbName: jans
             cnSqlDbPort: 5432
             cnSqlDbDialect: pgsql
-            cnSqlDbHost: my-release-postgresql.jans.svc
+            cnSqlDbHost: postgresql.jans.svc
             cnSqlDbUser: postgres
             cnSqlDbTimezone: UTC
             cnSqldbUserPassword: Test1234#
@@ -119,23 +115,23 @@ tags:
 
         In a production environment, a production-grade MySQL server should be used such as `Cloud SQL`
 
-        For testing purposes, you can deploy it on the GKE cluster using the following command:
+        For testing purposes, you can deploy it on the GKE cluster using the following commands:
 
         ```
-        helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans,image.repository=bitnamilegacy/mysql,image.tag=9.4.0-debian-12-r1 -n jans oci://registry-1.docker.io/bitnamicharts/mysql
+        wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
+        kubectl apply -f mysql.yaml
+
         ```
 
         Add the following yaml snippet to your `override.yaml` file:
         
         ```yaml        
-        global:
-          cnPersistenceType: sql
         config:
           configmap:
             cnSqlDbName: jans
             cnSqlDbPort: 3306
             cnSqlDbDialect: mysql
-            cnSqlDbHost: my-release-mysql.jans.svc
+            cnSqlDbHost: mysql.jans.svc
             cnSqlDbUser: root
             cnSqlDbTimezone: UTC
             cnSqldbUserPassword: Test1234#
@@ -145,9 +141,7 @@ tags:
 
         ```yaml
         global:
-          cnPersistenceType: sql
           lbIp: "" #Add the LoadBalancer IP from previous command
-          isFqdnRegistered: true
           fqdn: demoexample.jans.io #CHANGE-THIS to the FQDN used for Jans
         nginx-ingress:
           ingress:
@@ -163,7 +157,7 @@ tags:
             cnSqlDbName: jans
             cnSqlDbPort: 3306
             cnSqlDbDialect: mysql
-            cnSqlDbHost: my-release-mysql.jans.svc
+            cnSqlDbHost: mysql.jans.svc
             cnSqlDbUser: root
             cnSqlDbTimezone: UTC
             cnSqldbUserPassword: Test1234#
