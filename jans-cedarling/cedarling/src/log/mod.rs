@@ -152,7 +152,7 @@ where
 #[cfg(any(target_arch = "wasm32", test))]
 pub(crate) fn log_async<T>(logger: &Logger, entry: T)
 where
-    T: interface::Loggable + 'static,
+    T: interface::Loggable + Send + 'static,
 {
     logger.log_any(entry);
 }
