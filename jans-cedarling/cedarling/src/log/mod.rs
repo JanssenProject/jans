@@ -74,7 +74,7 @@ use std::sync::{Arc, Weak};
 
 pub use interface::LogStorage;
 pub(crate) use interface::LogWriter;
-pub(crate) use log_strategy::LogStrategy;
+pub(crate) use log_strategy::{LogStrategy, LogStrategyLogger};
 
 use crate::LockServiceConfig;
 use crate::app_types::{ApplicationName, PdpID};
@@ -135,6 +135,12 @@ pub(crate) fn log_async<T>(logger: &Logger, entry: T)
 where
     T: interface::Loggable + Send + 'static,
 {
+    if matches!(logger.logger(), LogStrategyLogger::MemoryLogger(_)) {
+        // Memory logger must remain synchronous so clients can immediately read logs.
+        logger.log_any(entry);
+        return;
+    }
+
     let logger = logger.clone();
     tokio::task::spawn_blocking(move || {
         logger.log_any(entry);
