@@ -909,7 +909,42 @@
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false
-    }
+    },
+    {
+     "tag": "kc-link-config",
+     "permission": "https://jans.io/oauth/kc-link-config.readonly",
+     "description": "",
+     "defaultPermissionInToken": false,
+     "essentialPermissionInAdminUI": false
+    },
+   {
+     "tag": "kc-link-config",
+     "permission": "https://jans.io/oauth/kc-link-config.write",
+     "description": "",
+     "defaultPermissionInToken": false,
+     "essentialPermissionInAdminUI": false
+   },
+   {
+     "tag": "database",
+     "permission": "https://jans.io/oauth/config/database.readonly",
+     "description": "",
+     "defaultPermissionInToken": false,
+     "essentialPermissionInAdminUI": false
+   },
+   {
+     "tag": "ssa",
+     "permission": "https://jans.io/oauth/config/ssa.readonly",
+     "description": "",
+     "defaultPermissionInToken": false,
+     "essentialPermissionInAdminUI": false
+   },
+   {
+     "tag": "ssa",
+     "permission": "https://jans.io/oauth/config/ssa.write",
+     "description": "",
+     "defaultPermissionInToken": false,
+     "essentialPermissionInAdminUI": false
+   }
   ],
   "rolePermissionMapping": [
     {
