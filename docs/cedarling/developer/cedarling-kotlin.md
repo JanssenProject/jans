@@ -6,7 +6,7 @@ Please refer to [this document](../developer/mobile-apps/cedarling-uniffi.md) fo
 
 ## Building from Source
 
-Apart from using the Cedarling binding [using the package manager](../tutorials/java.md#using-the-package-manager), you 
+Apart from using the Cedarling binding [using the package manager](../tutorials/java.md#using-the-package-manager), you
 can also build it from source.
 
 ### Prerequisites
@@ -42,11 +42,11 @@ can also build it from source.
    ```bash
     mvn clean install
    ```
-   
+
 
 ## Recipes
 
-### Use the Cedarling Java binding in custom scripts 
+### Use the Cedarling Java binding in custom scripts
 
 Here is a simple recipe to add scopes in access-token using update_token script only if the requesting client has `authorization_code` grant-type. We will use below policy for this:
 
@@ -62,15 +62,15 @@ when {
 };
 ```
 
-**Steps:** 
+**Steps:**
 
 - Upload [bootstrap.json](../uniffi/cedarling-sample-inputs.md/#bootstrapjson) and [policy-store.json](../uniffi/cedarling-sample-inputs.md/#policy-storejson) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
 - Upload the generate `cedarling-java-{version}.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
 
 !!! note
-    Rather than building the cedarling-java-{version}.jar from source code, you can directly download 
+    Rather than building the cedarling-java-{version}.jar from source code, you can directly download
     the latest version of the jar from the [Maven repository](https://maven.jans.io/maven/io/jans/cedarling-java/).
-   
+
 - The following java [Update Token](../uniffi/cedarling-sample-inputs.md/#sample_cedarling_update_tokenjava) script has been created for calling Cedarling authorization. Enable the script with following Custom Properties:
    
    |Key|Values|

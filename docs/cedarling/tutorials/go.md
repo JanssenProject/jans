@@ -36,7 +36,7 @@ described above.
     ```sh
     go build .
     ```
-    
+
 5. Run the application
 
     - **Windows**

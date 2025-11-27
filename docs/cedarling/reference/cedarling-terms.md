@@ -54,14 +54,14 @@ Cedarling creates a number of entities based on the input provided, which are de
 
 ### Principal
 
-The principal element in a Cedar policy represents a user, service, or other identity that can make a request to perform an action on a resource in your application. The principal entity in Cedarling is an object that is evaluated against the principal element in a cedar policy. 
+The principal element in a Cedar policy represents a user, service, or other identity that can make a request to perform an action on a resource in your application. The principal entity in Cedarling is an object that is evaluated against the principal element in a cedar policy.
 As Cedarling is primarily concerned with OpenID Connect flows, the principal entity is generally created from the three standard OpenID tokens: Access, ID, and Userinfo. Based on these tokens, Cedarling creates a principal entity that falls into one of these categories:
 
 - Workload: When only the access token is provided. This represents an OAuth client.
 - User: When at least two tokens are provided. This represents an end user attempting to be authorized.
 - Role: As per [cedar best practices](https://docs.cedarpolicy.com/bestpractices/bp-implementing-roles.html#what-is-a-role), a role in Cedarling is defined as a group of user or workload entities with no additional attributes. This allows us to create role based access control (RBAC) policies which are more performant than attribute based access control. The default schema provides definition for `Role` and Cedarling automatically creates the `Role` entity if this claim is present in one or more tokens.
 
-In case no token is provided or the use case is not based on OpenID, Cedarling supports unsigned authorization, where the principal entity is manually provided by the user in the form of a list of JSON objects. 
+In case no token is provided or the use case is not based on OpenID, Cedarling supports unsigned authorization, where the principal entity is manually provided by the user in the form of a list of JSON objects.
 
 For example, given a schema defining a user:
 
