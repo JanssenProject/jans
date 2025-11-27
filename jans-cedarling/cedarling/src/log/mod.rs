@@ -74,7 +74,9 @@ use std::sync::{Arc, Weak};
 
 pub use interface::LogStorage;
 pub(crate) use interface::LogWriter;
-pub(crate) use log_strategy::{LogStrategy, LogStrategyLogger};
+pub(crate) use log_strategy::LogStrategy;
+#[cfg(all(not(target_arch = "wasm32"), not(test)))]
+pub(crate) use log_strategy::LogStrategyLogger;
 
 use crate::LockServiceConfig;
 use crate::app_types::{ApplicationName, PdpID};
