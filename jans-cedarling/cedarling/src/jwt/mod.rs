@@ -171,7 +171,7 @@ impl JwtService {
         // quick check so we don't get surprised if the program runs but can't validate
         // anything
         let signed_authz_available = key_service.has_keys();
-        if !signed_authz_available {
+        if !signed_authz_available && jwt_config.jwt_sig_validation {
             logger.log_any(JwtLogEntry::new(
                 "signed authorization is unavailable because no trusted issuers or JWKS were configured".to_string(),
                 Some(LogLevel::WARN),
