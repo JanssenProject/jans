@@ -416,12 +416,14 @@ impl Authz {
                 .as_str(),
         );
 
+        let multi_diagnostics = vec![authz_info.diagnostics.clone()];
+
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
-        self.config.log_service.as_ref().log_any(&DecisionLogEntry {
+        let decision_log_entry = DecisionLogEntry {
             base: BaseLogEntry::new(LogType::Decision, request_id),
-            policystore_id: self.config.policy_store.id.as_str(),
-            policystore_version: self.config.policy_store.get_store_version(),
+            policystore_id: self.config.policy_store.id.as_str().into(),
+            policystore_version: self.config.policy_store.get_store_version().into(),
             principal: DecisionLogEntry::principal(
                 false, // No person principal for multi-issuer
                 false, // No workload principal for multi-issuer
@@ -434,24 +436,24 @@ impl Authz {
             decision: result.decision.into(),
             tokens: tokens_logging_info,
             decision_time_micro_sec,
-            diagnostics: DiagnosticsRefs::new(&[Some(&authz_info.diagnostics)]),
-        });
+            diagnostics: DiagnosticsSummary::from_diagnostics(&multi_diagnostics),
+        };
+        log_async(&self.config.log_service, decision_log_entry);
 
         // DEBUG LOG
         // Log all result information about multi-issuer authorization
-        self.config.log_service.as_ref().log_any(
-            LogEntry::new_with_data(LogType::System, Some(request_id))
-                .set_level(LogLevel::DEBUG)
-                .set_auth_info(AuthorizationLogInfo {
-                    action: request.action.clone(),
-                    context: request.context.clone().unwrap_or(json!({})),
-                    resource: resource_uid.to_string(),
-                    entities: entities_json,
-                    authorize_info: vec![authz_info],
-                    authorized: result.decision,
-                })
-                .set_message("Result of multi-issuer authorize.".to_string()),
-        );
+        let debug_log_entry = LogEntry::new_with_data(LogType::System, Some(request_id))
+            .set_level(LogLevel::DEBUG)
+            .set_auth_info(AuthorizationLogInfo {
+                action: request.action.clone(),
+                context: request.context.clone().unwrap_or(json!({})),
+                resource: resource_uid.to_string(),
+                entities: entities_json,
+                authorize_info: vec![authz_info],
+                authorized: result.decision,
+            })
+            .set_message("Result of multi-issuer authorize.".to_string());
+        log_async(&self.config.log_service, debug_log_entry);
 
         Ok(result)
     }
