@@ -196,25 +196,4 @@ mod tests {
                 .contains("Maximum number of default entities (2) exceeded")
         );
     }
-
-    #[test]
-    fn test_validate_entities_count_by_count() {
-        let limits = DefaultEntitiesLimits {
-            max_entities: 2,
-            max_base64_size: 100,
-        };
-
-        // Test valid entity count
-        let result = limits.validate_entities_count(2);
-        assert!(result.is_ok());
-
-        // Test entity count limit
-        let result = limits.validate_entities_count(3);
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("Maximum number of default entities (2) exceeded")
-        );
-    }
 }
