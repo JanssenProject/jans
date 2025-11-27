@@ -141,6 +141,8 @@ impl JwtService {
         let mut key_service = KeyService::new();
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
+        let has_trusted_issuers = !trusted_issuers.is_empty();
+
         for (issuer_id, iss) in trusted_issuers.into_iter() {
             // this is what we expect to find in the JWT `iss` claim
             let mut iss_claim = iss.oidc_endpoint.origin().ascii_serialization();
@@ -166,6 +168,14 @@ impl JwtService {
             }
 
             issuer_configs.insert(normalize_issuer(&iss_claim), iss_config);
+        }
+
+        // Load local JWKS if configured and no trusted issuers were provided
+        // This ensures local JWKS-only configurations work correctly
+        if !has_trusted_issuers && jwt_config.jwt_sig_validation {
+            if let Some(jwks) = jwt_config.jwks.as_ref() {
+                key_service.insert_keys_from_str(jwks)?;
+            }
         }
 
         // quick check so we don't get surprised if the program runs but can't validate
