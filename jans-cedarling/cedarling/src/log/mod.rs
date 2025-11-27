@@ -122,11 +122,12 @@ pub(crate) fn init_test_logger() -> Logger {
     )
 }
 
-/// Logs an entry asynchronously on native platforms, synchronously on WASM and during tests.
+/// Logs an entry, offloading to a background thread on native (except MemoryLogger), synchronously on WASM and during tests.
 ///
-/// This function offloads log serialization to a background thread in native builds to avoid
-/// blocking the authorization response path. In WASM builds and during unit tests, logging
-/// is performed synchronously to maintain deterministic behavior.
+/// This function offloads synchronous log serialization to a background thread (via `tokio::task::spawn_blocking`)
+/// in native builds to avoid blocking the authorization response path. The MemoryLogger remains synchronous
+/// even on native to ensure logs are immediately available for retrieval. In WASM builds and during unit tests,
+/// logging is performed synchronously in the calling thread to maintain deterministic behavior.
 ///
 /// # Arguments
 ///
