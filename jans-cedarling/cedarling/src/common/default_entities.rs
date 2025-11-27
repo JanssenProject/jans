@@ -146,6 +146,7 @@ pub fn parse_default_entities_with_warns(
     if let Some(raw_data) = raw_data {
         let mut default_entities = HashMap::new();
         let mut warns = Vec::new();
+        let mut entity_count = 0;
 
         for (entry_id, raw_value) in raw_data {
             // Validate against limits (using default limits for deserialization)
@@ -157,9 +158,9 @@ pub fn parse_default_entities_with_warns(
                 .map_err(|err| {
                     ParseEntityErrorKind::LimitsValidation(err).with_entry_id(entry_id.clone())
                 })?;
-            // check size of HashMap
+            // check size of HashMap using explicit counter
             limits
-                .validate_entities_count(&default_entities)
+                .validate_entities_count(entity_count)
                 .map_err(|err| {
                     ParseEntityErrorKind::LimitsValidation(err).with_entry_id(entry_id.clone())
                 })?;
@@ -175,6 +176,7 @@ pub fn parse_default_entities_with_warns(
             };
 
             default_entities.insert(entity.uid().clone(), entity);
+            entity_count += 1;
         }
 
         Ok(DefaultEntitiesWithWarns::new(default_entities, warns))

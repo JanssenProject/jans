@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use cedar_policy::entities_errors::EntitiesError;
 
 use crate::common::default_entities::DefaultEntities;
@@ -79,15 +77,22 @@ impl DefaultEntitiesLimits {
         }
     }
 
-    pub fn validate_entities_count<K, V>(
+    pub fn validate_entities_len(
         &self,
-        entities: &HashMap<K, V>,
+        entities: &DefaultEntities,
+    ) -> Result<(), DefaultEntitiesLimitsError> {
+        self.validate_entities_count(entities.len())
+    }
+
+    pub fn validate_entities_count(
+        &self,
+        entity_count: usize,
     ) -> Result<(), DefaultEntitiesLimitsError> {
         // Check entity count limit
-        if entities.len() > self.max_entities {
+        if entity_count > self.max_entities {
             Err(DefaultEntitiesLimitsError::CountExceeded {
                 max_entities: self.max_entities,
-                found: entities.len(),
+                found: entity_count,
             })
         } else {
             Ok(())
@@ -98,10 +103,9 @@ impl DefaultEntitiesLimits {
         &self,
         entities: &DefaultEntities,
     ) -> Result<(), DefaultEntitiesLimitsError> {
-        let entities = &entities.inner;
-        self.validate_entities_count(entities)?;
+        self.validate_entities_len(entities)?;
 
-        for (euid, e) in entities {
+        for (euid, e) in &entities.inner {
             let json_entity_data = e.to_json_string().map_err(|source| {
                 DefaultEntitiesLimitsError::ConversionError {
                     entity_id: euid.to_string(),
@@ -164,7 +168,6 @@ mod tests {
         let large_base64 = "dGVzdA==".repeat(20); // Much larger than 100 bytes
         let large_entity = json!(large_base64);
         let result = limits.validate_default_entity("entity1", &large_entity);
-        assert!(result.is_err());
         assert!(
             result
                 .unwrap_err()
@@ -181,21 +184,32 @@ mod tests {
         };
 
         // Test valid entity count
-        let valid_entities = HashMap::from([
-            ("entity1".to_string(), "value1"),
-            ("entity2".to_string(), "value2"),
-        ]);
-        let result = limits.validate_entities_count(&valid_entities);
+        let result = limits.validate_entities_count(2);
         assert!(result.is_ok());
 
         // Test entity count limit
-        let too_many_entities = HashMap::from([
-            ("entity1".to_string(), "value1"),
-            ("entity2".to_string(), "value2"),
-            ("entity3".to_string(), "value3"),
-        ]);
-        let result = limits.validate_entities_count(&too_many_entities);
-        assert!(result.is_err());
+        let result = limits.validate_entities_count(3);
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("Maximum number of default entities (2) exceeded")
+        );
+    }
+
+    #[test]
+    fn test_validate_entities_count_by_count() {
+        let limits = DefaultEntitiesLimits {
+            max_entities: 2,
+            max_base64_size: 100,
+        };
+
+        // Test valid entity count
+        let result = limits.validate_entities_count(2);
+        assert!(result.is_ok());
+
+        // Test entity count limit
+        let result = limits.validate_entities_count(3);
         assert!(
             result
                 .unwrap_err()
