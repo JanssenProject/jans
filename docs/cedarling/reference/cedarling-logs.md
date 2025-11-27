@@ -20,8 +20,8 @@ There are three different log records produced by the Cedarling:
 * `System` - Startup, debug and other Cedarling messages not related to authz
 * `Metric`- Performance and usage data
 
-!!! note "Async vs. synchronous logging"
-In native builds, Cedarling serializes Decision/System logs on background threads so that policy evaluations are not blocked by JSON encoding. In WASM (and during unit tests) logs are written synchronously to preserve deterministic behavior. Regardless of the runtime, the log contents and retrieval APIs remain the same.
+!!! note "Logging execution model"
+In native builds, Cedarling offloads Decision/System log serialization to background threads (via `tokio::task::spawn_blocking`) so that policy evaluations are not blocked by synchronous JSON encoding. The MemoryLogger remains synchronous even on native to ensure logs are immediately available for retrieval. In WASM builds and during unit tests, all logging is performed synchronously in the calling thread to preserve deterministic behavior. Regardless of the runtime, the log contents and retrieval APIs remain the same.
 
 The Cedarling has four logging options, which are configurable via the `CEDARLING_LOG_TYPE`
 bootstrap property:
