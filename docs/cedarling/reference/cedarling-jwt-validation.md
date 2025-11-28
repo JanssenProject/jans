@@ -35,6 +35,9 @@ See the complete [bootstrap properties reference](./cedarling-properties.md) for
 
 At startup, Cedarling fetches public keys from trusted identity providers (IDPs) defined in the [policy store](./cedarling-policy-store.md). These keys are used to validate the signature of incoming JWTs.
 
+!!! note "Running without trusted issuers"
+When `CEDARLING_JWT_SIG_VALIDATION` is enabled, if no trusted issuers (or local JWKS) are configured, Cedarling still starts and logs a **WARN** indicating that signed authorization is unavailable. Unsigned requests (`authorize_unsigned`) continue to work, but any attempt to validate signed JWTs fails with `SignedAuthzUnavailable` until at least one trusted issuer or JWKS is configured. When `CEDARLING_JWT_SIG_VALIDATION` is disabled, this warning does not appear as signature validation is not required.
+
 ### Configuration
 
 To enable this feature, set the `CEDARLING_JWT_SIG_VALIDATION` bootstrap property to `enabled`. For development and testing purposes, you can set this property to `disabled` and submit an unsigned JWT, such as one generated from [jwt.io](https://jwt.io).

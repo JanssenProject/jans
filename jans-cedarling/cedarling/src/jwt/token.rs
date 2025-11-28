@@ -42,7 +42,7 @@ impl Token {
         self.claims.claims.get(name)
     }
 
-    pub fn logging_info<'a>(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
+    pub fn logging_info(&self, claim: &str) -> HashMap<String, serde_json::Value> {
         self.claims.logging_info(claim)
     }
 
@@ -78,14 +78,13 @@ impl TokenClaims {
         })
     }
 
-    pub fn logging_info<'a>(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
+    pub fn logging_info(&self, claim: &str) -> HashMap<String, serde_json::Value> {
         let claim = if !claim.is_empty() { claim } else { "jti" };
 
-        let iter = [self.claims.get(claim).map(|value| (claim, value))]
-            .into_iter()
-            .flatten();
-
-        HashMap::from_iter(iter)
+        self.claims
+            .get(claim)
+            .map(|value| HashMap::from([(claim.to_string(), value.clone())]))
+            .unwrap_or_default()
     }
 
     // Update TokenClaims claim value by consuming itself.
