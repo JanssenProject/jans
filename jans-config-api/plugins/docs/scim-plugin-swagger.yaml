@@ -140,3 +140,5 @@ components:
             https://jans.io/scim/config.readonly: View SCIM configuration related
               information
             https://jans.io/scim/config.write: Manage SCIM configuration related information
+            https://jans.io/oauth/config/scim.admin: Admin to manage SCIM configuration
+              related information

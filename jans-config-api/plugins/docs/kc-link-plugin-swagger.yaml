@@ -288,3 +288,5 @@ components:
               related information
             https://jans.io/oauth/kc-link-config.write: Manage Keycloak Link configuration
               related information
+            https://jans.io/oauth/config/kc-link.admin: Admin for Keycloak Link configuration
+              related information

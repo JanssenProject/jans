@@ -891,10 +891,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     CustomUser:
       type: object
       properties:
@@ -1007,3 +1007,5 @@ components:
             https://jans.io/oauth/config/user.readonly: View user related information
             https://jans.io/oauth/config/user.write: Manage user related information
             https://jans.io/oauth/config/user.delete: Delete user related information
+            https://jans.io/oauth/config/user.admin: Admin to manage user related
+              information

@@ -225,3 +225,5 @@ components:
               related information
             https://jans.io/oauth/config/jans-link.write: Manage Jans link configuration
               related information
+            https://jans.io/oauth/config/link.admin: Admin for Jans link configuration
+              related information

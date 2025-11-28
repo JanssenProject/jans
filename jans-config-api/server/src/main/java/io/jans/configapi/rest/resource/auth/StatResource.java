@@ -43,7 +43,7 @@ public class StatResource extends ConfigBaseResource {
             "Statistics - User" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_STAT }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.STATS_USER_ASMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.STATS_USER_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
@@ -53,7 +53,7 @@ public class StatResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS,
             ApiAccessConstants.JANS_STAT }, groupScopes = {}, superScopes = {
-                    ApiAccessConstants.STATS_USER_ASMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+                    ApiAccessConstants.STATS_USER_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatistics(@Parameter(description = "Authorization code") @HeaderParam("Authorization") String authorization,

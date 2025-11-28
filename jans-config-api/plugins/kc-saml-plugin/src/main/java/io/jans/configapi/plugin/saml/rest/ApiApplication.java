@@ -30,7 +30,8 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 @OAuthScope(name = Constants.SAML_READ_ACCESS, description = "View SAML related information"),
 @OAuthScope(name = Constants.SAML_WRITE_ACCESS, description = "Manage SAML related information"),
 @OAuthScope(name = Constants.SAML_CONFIG_READ_ACCESS, description = "View SAML configuration related information"),
-@OAuthScope(name = Constants.SAML_CONFIG_WRITE_ACCESS, description = "Manage SAML configuration related information")
+@OAuthScope(name = Constants.SAML_CONFIG_WRITE_ACCESS, description = "Manage SAML configuration related information"),
+@OAuthScope(name = Constants.SAML_ADMIN_ACCESS, description = "Admin to manage SAML configuration related information"),
 }
 )))
 public class ApiApplication extends BaseApiApplication {

@@ -75,7 +75,7 @@ public class ApiAccessConstants {
     public static final String SCOPES_ADMIN_ACCESS = "https://jans.io/oauth/config/scopes.write";
 
     public static final String STATS_USER_READ_ACCESS = "https://jans.io/oauth/config/stats.readonly";
-    public static final String STATS_USER_ASMIN_ACCESS = "https://jans.io/oauth/config/stats.admin";
+    public static final String STATS_USER_ADMIN_ACCESS = "https://jans.io/oauth/config/stats.admin";
     public static final String JANS_STAT = "jans_stat";
 
     public static final String ORG_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/organization.readonly";

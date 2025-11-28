@@ -1385,3 +1385,5 @@ components:
               related information
             https://jans.io/oauth/config/saml-config.write: Manage SAML configuration
               related information
+            https://jans.io/oauth/config/saml.admin: Admin to manage SAML configuration
+              related information

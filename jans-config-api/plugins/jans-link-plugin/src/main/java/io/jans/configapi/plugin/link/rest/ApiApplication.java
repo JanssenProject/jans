@@ -24,7 +24,9 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
 @OAuthScope(name = Constants.JANSLINK_CONFIG_READ_ACCESS, description = "View Jans link configuration related information"),
-@OAuthScope(name = Constants.JANSLINK_CONFIG_WRITE_ACCESS, description = "Manage Jans link configuration related information")}
+@OAuthScope(name = Constants.JANSLINK_CONFIG_WRITE_ACCESS, description = "Manage Jans link configuration related information"),
+@OAuthScope(name = Constants.JANSLINK_ADMIN_ACCESS, description = "Admin for Jans link configuration related information"),
+}
 )))
 public class ApiApplication extends Application {
 

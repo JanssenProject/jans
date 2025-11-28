@@ -15671,19 +15671,19 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        selected:
-          type: boolean
         userCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        selected:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -17429,10 +17429,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -18268,10 +18268,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -18442,6 +18442,10 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        logoutStatusJwt:
+          type: boolean
+        accessToken:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18452,10 +18456,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
@@ -18563,7 +18563,7 @@ components:
             https://jans.io/oauth/config/openid/clients.delete: Delete clients related
               information
             https://jans.io/oauth/config/scopes.readonly: View scope related information
-            https://jans.io/oauth/config/scopes.write: Manage scope related information
+            https://jans.io/oauth/config/scopes.write: Admin for scope management
             https://jans.io/oauth/config/scopes.delete: Delete scope related information
             https://jans.io/oauth/config/uma/resources.readonly: View UMA Resource
               related information
@@ -18610,3 +18610,30 @@ components:
             https://jans.io/oauth/config/ssa.readonly: View SSA details
             https://jans.io/oauth/config/ssa.write: Manage SSA details
             https://jans.io/oauth/config/ssa.delete: Delete SSA details
+            https://jans.io/oauth/jans-auth-server/config/properties.admin: Admin
+              scope for Auth Server properties
+            https://jans.io/oauth/config/attributes.admin: Admin for Attribute management
+            https://jans.io/oauth/config/acrs.admin: Admin for ACRS management
+            https://jans.io/oauth/config/database.admin: Admin for Database config
+              management
+            https://jans.io/oauth/config/scripts.admin: Admin for Scripts management
+            https://jans.io/oauth/config/cache.admin: Admin for Cache management
+            https://jans.io/oauth/config/message.write: Admin for Message management
+            https://jans.io/oauth/config/smtp.admin: Admin for SMTP management
+            https://jans.io/oauth/config/logging.admin: Admin for Logging management
+            https://jans.io/oauth/config/jwks.admin: Admin for JWKS management
+            https://jans.io/oauth/config/clients.admin: Admin for clients management
+            https://jans.io/oauth/token.admin: Admin for Token management
+            https://jans.io/oauth/config/stats.admin: Admin for statistic management
+            https://jans.io/oauth/config/organization.admin: Admin for organization
+              configuration management
+            https://jans.io/oauth/config/agama.admin: Admin for Agama flow management
+            https://jans.io/oauth/config/session.admin: Admin for Session management
+            https://jans.io/oauth/config/uma.admin: Admin for UMA management
+            https://jans.io/oauth/config/plugin.admin: Admin for Plugin management
+            https://jans.io/oauth/config/properties.admin: Admin for Config-API management
+            https://jans.io/oauth/config/authorizations.admin: Admin for Client Authorizations
+              management
+            https://jans.io/oauth/config/asset.admin: Admin for Jans Assets management
+            https://jans.io/auth/ssa.admin: Admin for SSA management
+            https://jans.io/oauth/config/health.admin: Admin for Health API management

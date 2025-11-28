@@ -2091,3 +2091,9 @@ components:
               Admin UI security related information
             https://jans.io/oauth/jans-auth-server/config/adminui/security.write: Manage
               Admin UI security related information
+            https://jans.io/oauth/config/adminui/role.admin: Manage admin user role
+              related information
+            https://jans.io/oauth/config/adminui/permission.admin: Manage admin permission
+              related information
+            https://jans.io/oauth/config/adminui/rolePermissionMapping.admin: Manage
+              admin role-permission related information

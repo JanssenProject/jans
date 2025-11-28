@@ -24,7 +24,9 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
 @OAuthScope(name = Constants.KC_LINK_CONFIG_READ_ACCESS, description = "View Keycloak Link configuration related information"),
-@OAuthScope(name = Constants.KC_LINK_CONFIG_WRITE_ACCESS, description = "Manage Keycloak Link configuration related information")}
+@OAuthScope(name = Constants.KC_LINK_CONFIG_WRITE_ACCESS, description = "Manage Keycloak Link configuration related information"),
+@OAuthScope(name = Constants.KC_ADMIN_ACCESS, description = "Admin for Keycloak Link configuration related information")
+}
 )))
 public class ApiApplication extends Application {
 
