@@ -172,10 +172,11 @@ impl JwtService {
 
         // Load local JWKS if configured and no trusted issuers were provided
         // This ensures local JWKS-only configurations work correctly
-        if !has_trusted_issuers && jwt_config.jwt_sig_validation {
-            if let Some(jwks) = jwt_config.jwks.as_ref() {
-                key_service.insert_keys_from_str(jwks)?;
-            }
+        if !has_trusted_issuers
+            && jwt_config.jwt_sig_validation
+            && let Some(jwks) = jwt_config.jwks.as_ref()
+        {
+            key_service.insert_keys_from_str(jwks)?;
         }
 
         // quick check so we don't get surprised if the program runs but can't validate
