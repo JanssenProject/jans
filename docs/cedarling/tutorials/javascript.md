@@ -31,7 +31,7 @@ Alternatively, see [here](#build-from-source), if you want to build Cedarling fr
 
 #### Requirements
 
-Rust 1.63 or Greater. Ensure that you have `Rust` version 1.63 or higher installed. 
+Rust 1.63 or Greater. Ensure that you have `Rust` version 1.63 or higher installed.
 You can check your current version of Rust using the command below.
 
 ```bash title="Command"

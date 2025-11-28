@@ -38,9 +38,9 @@ Each property part of the JSON object `io.jans.casa.auth.acctlinking` holds the 
     }
 }
    
-```         
+```
 
-In this case, we are populating the configuration of an OAuth-based provider called "Goooogle". 
+In this case, we are populating the configuration of an OAuth-based provider called "Goooogle".
 
 The tables shown in [this](../../../agama-catalog/jans/inboundID/README.md#supply-configurations) page list all possible properties to configure a provider. Particularly, two properties deserve the most detail:
 
@@ -49,7 +49,7 @@ The tables shown in [this](../../../agama-catalog/jans/inboundID/README.md#suppl
     - `io.jans.inbound.GenericProvider`. It implements the authorization code flow where the user's browser is taken to the external site. When authentication completes, a `code` is received at a designated redirect (callback) URL. With such `code` an access token is obtained as well as user's profile data. This flow supports _dynamic client registration_
 
     - `io.jans.inbound.Apple`. It implements the authorization code flow with some nuances required in order to integrate "Apple Sign In"
-    
+
 
 2. `mappingClassField`. This is key for performing the attribute mapping process and the user provisioning. The remainder of this document is dedicated to these two aspects
 
@@ -74,13 +74,13 @@ profile -> {
 }
 ```
 
-In the above example, `profile` is a `Map<String, Object>` that holds the attribute-value pairs the third-party identity provider released for this user. For the interested, `profile` contents are dumped to the server logs (check `jans-auth_script.log`) so it is easy to peak into the values. Check for a message in `debug` level starting with "Profile data". 
-    
+In the above example, `profile` is a `Map<String, Object>` that holds the attribute-value pairs the third-party identity provider released for this user. For the interested, `profile` contents are dumped to the server logs (check `jans-auth_script.log`) so it is easy to peak into the values. Check for a message in `debug` level starting with "Profile data".
+
 Both the ID of identity provider and the ID of the user will end up stored in an auxiliary database attribute. This helps to identify if the incoming user is already known (has been onboarded previously).
 
 When the attribute mapping is applied, the `uid` attribute is set as well. This is the username the incoming user will be assigned in the local Jans database. The `uid` is automatically generated based on `ID` unless the mapping already populates the `uid` directly.
 
-The return value of the mapping is a `Map<String, Object>`. This caters for cases where resulting attributes hold booleans, dates, numbers, strings, etc. When the attribute has to hold multiple values, you can use an array or a Java `Collection` object, like a `List`.      
+The return value of the mapping is a `Map<String, Object>`. This caters for cases where resulting attributes hold booleans, dates, numbers, strings, etc. When the attribute has to hold multiple values, you can use an array or a Java `Collection` object, like a `List`.
 
 ## User provisioning
 
