@@ -262,6 +262,9 @@ public class RegisterService {
         if (requestObject.getParScriptDns() != null) {
             client.getAttributes().setParScriptDns(requestObject.getParScriptDns());
         }
+        if (requestObject.getTxTokenScriptDns() != null) {
+            client.getAttributes().setTxTokenScriptDns(requestObject.getTxTokenScriptDns());
+        }
         if (requestObject.getPostAuthnScriptDns() != null) {
             client.getAttributes().setPostAuthnScripts(requestObject.getPostAuthnScriptDns());
         }

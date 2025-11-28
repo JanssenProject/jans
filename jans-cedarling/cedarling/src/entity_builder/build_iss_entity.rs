@@ -39,7 +39,6 @@ pub fn build_iss_entity(
     .map_err(|e| BuildEntityErrorKind::from(e).while_building(iss_type_name))?;
 
     let entity = build_cedar_entity(iss_type_name, id, attrs, HashSet::new())?;
-
     Ok((origin, entity))
 }
 

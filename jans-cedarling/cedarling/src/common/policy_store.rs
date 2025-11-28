@@ -225,6 +225,33 @@ impl PolicyStore {
 
         Ok(())
     }
+
+    pub(crate) fn validate_trusted_issuers(&self) -> Result<(), TrustedIssuersValidationError> {
+        // check if iss already present in other policy store
+        let mut oidc_to_trusted_issuer: HashMap<String, String> = HashMap::new();
+
+        for (issuer_name, trusted_issuer) in self.trusted_issuers.iter().flatten() {
+            let oidc_url = trusted_issuer.oidc_endpoint.to_string();
+            if let Some(_previous_issuer_name) = oidc_to_trusted_issuer.get(&oidc_url) {
+                return Err(TrustedIssuersValidationError {
+                    oidc_url: format!(
+                        "openid_configuration_endpoint: '{}' is used for more than one issuer",
+                        oidc_url
+                    ),
+                });
+            } else {
+                oidc_to_trusted_issuer.insert(oidc_url, issuer_name.to_owned());
+            }
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, derive_more::Display, derive_more::Error)]
+#[display("openid_configuration_endpoint: '{oidc_url}' is used for more than one issuer")]
+pub struct TrustedIssuersValidationError {
+    oidc_url: String,
 }
 
 /// Wrapper around [`PolicyStore`] to have access to it and ID of policy store
@@ -244,6 +271,7 @@ pub struct PolicyStoreWithID {
 #[derive(Debug, Clone, Deserialize, PartialEq)]
 pub struct TrustedIssuer {
     /// The name of the trusted issuer.
+    /// Name also describe namespace in Cedar policy where entity `TrustedIssuer` is located.
     pub name: String,
     /// A brief description of the trusted issuer.
     pub description: String,

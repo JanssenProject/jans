@@ -56,14 +56,15 @@ type CacheConfiguration struct {
 // GetCacheConfiguration fetches the cache configuration from the server.
 func (c *Client) GetCacheConfiguration(ctx context.Context) (*CacheConfiguration, error) {
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/cache.readonly")
+	scope := "https://jans.io/oauth/config/cache.readonly"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	ret := &CacheConfiguration{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/config/cache", token, ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/config/cache", token, scope, ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -83,11 +84,6 @@ func (c *Client) PatchCacheConfiguration(ctx context.Context, patches []PatchReq
 		return nil, fmt.Errorf("failed to get cache configuration: %w", err)
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/cache.write")
-	if err != nil {
-		return nil, fmt.Errorf("failed to get token: %w", err)
-	}
-
 	updates, err := createPatchesDiff(orig, patches)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create patches: %w", err)
@@ -97,7 +93,13 @@ func (c *Client) PatchCacheConfiguration(ctx context.Context, patches []PatchReq
 		return c.GetCacheConfiguration(ctx)
 	}
 
-	if err := c.patch(ctx, "/jans-config-api/api/v1/config/cache", token, updates); err != nil {
+	scope := "https://jans.io/oauth/config/cache.write"
+	token, err := c.ensureToken(ctx, scope)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get token: %w", err)
+	}
+
+	if err := c.patch(ctx, "/jans-config-api/api/v1/config/cache", token, scope, updates); err != nil {
 		return nil, fmt.Errorf("patch request failed: %w", err)
 	}
 

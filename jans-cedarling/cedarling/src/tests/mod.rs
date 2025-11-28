@@ -13,6 +13,7 @@ mod cases_authorize_different_principals;
 mod cases_authorize_namespace_jans2;
 mod cases_authorize_without_check_jwt;
 mod json_logic;
+mod authorize_multi_issuer;
 mod schema_type_mapping;
 mod ssa_validation_integration;
 mod success_test_json;
