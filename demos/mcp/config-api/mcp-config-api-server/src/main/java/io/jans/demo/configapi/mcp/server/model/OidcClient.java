@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
 
+// TODO: This class should be replaced by OIDC client model from jans-config-api
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OidcClient {
 

@@ -1,8 +1,6 @@
 package io.jans.demo.configapi.mcp.server;
 
 import io.jans.demo.configapi.mcp.server.handler.ToolHandler;
-import io.jans.demo.configapi.mcp.server.handler.ResourceHandler;
-import io.jans.demo.configapi.mcp.server.handler.PromptHandler;
 import io.jans.demo.configapi.mcp.server.service.JansConfigApiClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.server.McpServer;
@@ -35,11 +33,11 @@ public class McpServerMain {
                         }
 
                         // Load configuration from environment variables
-                        String baseUrl = System.getenv("JANS_CONFIG_API_URL");
+                        String baseUrl = System.getenv("JANS_HOST_URL");
                         String accessToken = System.getenv("JANS_OAUTH_ACCESS_TOKEN");
 
                         if (baseUrl == null || baseUrl.isEmpty()) {
-                                throw new IllegalStateException("JANS_CONFIG_API_URL environment variable is required");
+                                throw new IllegalStateException("JANS_HOST_URL environment variable is required");
                         }
                         if (accessToken == null || accessToken.isEmpty()) {
                                 throw new IllegalStateException(
@@ -49,8 +47,6 @@ public class McpServerMain {
                         // Create API client and tool handler
                         JansConfigApiClient apiClient = new JansConfigApiClient(baseUrl, accessToken, devMode);
                         ToolHandler toolHandler = new ToolHandler(apiClient);
-                        ResourceHandler resourceHandler = new ResourceHandler(apiClient);
-                        PromptHandler promptHandler = new PromptHandler();
 
                         // Create JSON mapper
                         ObjectMapper objectMapper = new ObjectMapper();
@@ -71,8 +67,6 @@ public class McpServerMain {
                         McpSyncServer server = McpServer.sync(transportProvider)
                                         .serverInfo("jans-oidc-clients-viewer", "2.0.0")
                                         .capabilities(capabilities)
-                                        .resourceTemplates(createResourceTemplate(resourceHandler))
-                                        .prompts(createPrompt(promptHandler))
                                         .build();
 
                         // Register tools
@@ -147,30 +141,6 @@ public class McpServerMain {
                 return new McpServerFeatures.SyncToolSpecification(
                                 tool,
                                 (exchange, arguments) -> executor.execute(arguments));
-        }
-
-        private static McpServerFeatures.SyncResourceTemplateSpecification createResourceTemplate(
-                        ResourceHandler handler) {
-                return new McpServerFeatures.SyncResourceTemplateSpecification(
-                                new McpSchema.ResourceTemplate(
-                                                "oidc-client://{inum}",
-                                                "OIDC Client by inum",
-                                                "Access an OpenID Connect client by its inum",
-                                                "application/json",
-                                                null),
-                                (exchange, request) -> handler.readResource(request.uri()));
-        }
-
-        private static McpServerFeatures.SyncPromptSpecification createPrompt(PromptHandler handler) {
-                return new McpServerFeatures.SyncPromptSpecification(
-                                new McpSchema.Prompt(
-                                                "analyze-resource",
-                                                "Analyze a resource",
-                                                java.util.List.of(
-                                                                new McpSchema.PromptArgument("resourceId",
-                                                                                "The ID of the resource to analyze",
-                                                                                true))),
-                                (exchange, request) -> handler.getPrompt(request.name(), request.arguments()));
         }
 
         @FunctionalInterface
