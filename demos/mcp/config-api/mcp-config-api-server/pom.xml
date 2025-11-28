@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     
     <groupId>com.example</groupId>
-    <artifactId>mcp-jans-oidc-viewer</artifactId>
-    <version>2.0.0</version>
+    <artifactId>jans-mcp-config-api-server</artifactId>
+    <version>0.0.1</version>
     
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

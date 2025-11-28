@@ -32,7 +32,7 @@ Project creates an uber jar in `target` directory.
     ```
     export JANS_HOST_URL="https://example.jans.host.io" && 
     export JANS_OAUTH_ACCESS_TOKEN="b6c8ef0b-09b5-xxx-xxx-xxx" && 
-    npx @modelcontextprotocol/inspector java -jar target/mcp-jans-oidc-viewer-2.0.0.jar
+    npx @modelcontextprotocol/inspector java -jar target/jans-mcp-config-api-server-0.0.1.jar
     ```
 
 - Navigate to the Chrome instance opened by MCP Inspector.
@@ -51,6 +51,6 @@ when running MCP server against a Janssen server with self-signed certificate.
     ```
     export JANS_HOST_URL="https://example.jans.host.io" && 
     export JANS_OAUTH_ACCESS_TOKEN="b6c8ef0b-09b5-xxx-xxx-xxx" && 
-    npx @modelcontextprotocol/inspector java -jar target/mcp-jans-oidc-viewer-2.0.0.jar -dev
+    npx @modelcontextprotocol/inspector java -jar target/jans-mcp-config-api-server-0.0.1.jar -dev
     ```
 
