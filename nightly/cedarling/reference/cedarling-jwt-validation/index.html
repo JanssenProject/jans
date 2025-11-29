@@ -14753,6 +14753,10 @@
 <p>See the complete <a href="../cedarling-properties/">bootstrap properties reference</a> for all available configuration options.</p>
 <h2 id="jwt-signature-validation">JWT Signature Validation<a class="headerlink" href="#jwt-signature-validation" title="Permanent link">#</a></h2>
 <p>At startup, Cedarling fetches public keys from trusted identity providers (IDPs) defined in the <a href="../cedarling-policy-store/">policy store</a>. These keys are used to validate the signature of incoming JWTs.</p>
+<div class="admonition note">
+<p class="admonition-title">Running without trusted issuers</p>
+</div>
+<p>When <code>CEDARLING_JWT_SIG_VALIDATION</code> is enabled, if no trusted issuers (or local JWKS) are configured, Cedarling still starts and logs a <strong>WARN</strong> indicating that signed authorization is unavailable. Unsigned requests (<code>authorize_unsigned</code>) continue to work, but any attempt to validate signed JWTs fails with <code>SignedAuthzUnavailable</code> until at least one trusted issuer or JWKS is configured. When <code>CEDARLING_JWT_SIG_VALIDATION</code> is disabled, this warning does not appear as signature validation is not required.</p>
 <h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h3>
 <p>To enable this feature, set the <code>CEDARLING_JWT_SIG_VALIDATION</code> bootstrap property to <code>enabled</code>. For development and testing purposes, you can set this property to <code>disabled</code> and submit an unsigned JWT, such as one generated from <a href="https://jwt.io">jwt.io</a>.</p>
 <p>On initialization, Cedarling will fetch the latest public keys from the issuers specified in the Policy Store and cache them. The system uses the JWT <code>iss</code> claim to select the appropriate keys for validation.</p>
@@ -14890,7 +14894,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 28, 2025 11:27:18 UTC"><span class="timeago" datetime="2025-11-28T11:27:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 28, 2025 11:27:18 UTC">2025-11-28</span>
   </span>
 
     
