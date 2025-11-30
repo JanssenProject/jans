@@ -119,6 +119,7 @@ impl PolicyStore {
     }
 
     /// Apply configuration limits to default entities
+    // TODO: add bootstrap configuration parameters and use it for check
     pub fn apply_default_entities_limits(
         &mut self,
         max_entities: Option<usize>,
@@ -126,8 +127,8 @@ impl PolicyStore {
     ) -> Result<(), DefaultEntitiesLimitsError> {
         let limits = DefaultEntitiesLimits {
             max_entities: max_entities.unwrap_or(DefaultEntitiesLimits::DEFAULT_MAX_ENTITIES),
-            max_base64_size: max_base64_size
-                .unwrap_or(DefaultEntitiesLimits::DEFAULT_MAX_BASE64_SIZE),
+            max_entity_size: max_base64_size
+                .unwrap_or(DefaultEntitiesLimits::DEFAULT_MAX_ENTITY_SIZE),
         };
         limits.validate_default_entities(self.default_entities.entities())
     }

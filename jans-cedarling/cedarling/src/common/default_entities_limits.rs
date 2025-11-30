@@ -30,15 +30,15 @@ pub enum DefaultEntitiesLimitsError {
 pub struct DefaultEntitiesLimits {
     /// Maximum number of default entities allowed
     pub max_entities: usize,
-    /// Maximum size of base64-encoded strings in bytes
-    pub max_base64_size: usize,
+    /// Maximum size of entity JSON representation in bytes
+    pub max_entity_size: usize,
 }
 
 impl Default for DefaultEntitiesLimits {
     fn default() -> Self {
         Self {
             max_entities: Self::DEFAULT_MAX_ENTITIES,
-            max_base64_size: Self::DEFAULT_MAX_BASE64_SIZE,
+            max_entity_size: Self::DEFAULT_MAX_ENTITY_SIZE,
         }
     }
 }
@@ -47,18 +47,18 @@ impl DefaultEntitiesLimits {
     /// Default maximum number of entities allowed
     pub const DEFAULT_MAX_ENTITIES: usize = 1000;
     /// Default maximum size of base64-encoded strings in bytes
-    pub const DEFAULT_MAX_BASE64_SIZE: usize = 1024 * 1024;
+    pub const DEFAULT_MAX_ENTITY_SIZE: usize = 1024 * 1024;
 
     pub fn validate_default_entity_data_size(
         &self,
         entity_id: &str,
         entity_str: &str,
     ) -> Result<(), DefaultEntitiesLimitsError> {
-        if entity_str.len() > self.max_base64_size {
+        if entity_str.len() > self.max_entity_size {
             Err(DefaultEntitiesLimitsError::DataSizeExceeded {
                 entity_id: entity_id.to_string(),
                 size: entity_str.len(),
-                max_size: self.max_base64_size,
+                max_size: self.max_entity_size,
             })
         } else {
             Ok(())
@@ -70,6 +70,7 @@ impl DefaultEntitiesLimits {
         entity_id: &str,
         entity_data: &serde_json::Value,
     ) -> Result<(), DefaultEntitiesLimitsError> {
+        // If string check string size (should be base64 encoded data)
         if let Some(entity_str) = entity_data.as_str() {
             self.validate_default_entity_data_size(entity_id, entity_str)
         } else {
@@ -128,7 +129,7 @@ mod tests {
     fn test_validate_default_entity_data_size() {
         let limits = DefaultEntitiesLimits {
             max_entities: 2,
-            max_base64_size: 100,
+            max_entity_size: 100,
         };
 
         // Test valid base64 size
@@ -151,7 +152,7 @@ mod tests {
     fn test_validate_default_entity() {
         let limits = DefaultEntitiesLimits {
             max_entities: 2,
-            max_base64_size: 100,
+            max_entity_size: 100,
         };
 
         // Test valid entity with string value
@@ -180,7 +181,7 @@ mod tests {
     fn test_validate_entities_count() {
         let limits = DefaultEntitiesLimits {
             max_entities: 2,
-            max_base64_size: 100,
+            max_entity_size: 100,
         };
 
         // Test valid entity count
