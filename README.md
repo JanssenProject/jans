@@ -116,7 +116,7 @@ If you find a bug in the Janssen project, would like to suggest a new feature, o
 have a "howto" question, please post on
 [GitHub Discussions](https://github.com/JanssenProject/jans/discussions), which
 is the main channel for community support. There is also a
-[community chat on Gitter](https://app.gitter.im/#/room/#JanssenProject_Lobby:gitter.im).
+[community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/).
 
 ### Releases
 
