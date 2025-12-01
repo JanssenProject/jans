@@ -249,7 +249,7 @@ pub enum DefaultEntityWarning {
         error: String,
     },
     #[error(
-        "In default entity '{entry_id}' parent array json value should be object, skip: {value}"
+        "In default entity '{entry_id}' each parent entry must be an object with 'type' and 'id'; skipping value: {value}"
     )]
     NonObjectParentEntry { entry_id: String, value: String },
     #[error("error parsing default entities: failed to parse entity '{entry_id}': {error}")]
