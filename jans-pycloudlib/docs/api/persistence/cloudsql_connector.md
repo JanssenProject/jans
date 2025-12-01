@@ -70,7 +70,22 @@ The implementation uses:
 - **LAZY refresh strategy**: The connector is initialized with `refresh_strategy='LAZY'` to defer token refresh until needed.
 - **Private IP**: Connections use `IPTypes.PRIVATE` for connecting to Cloud SQL instances via Private IP.
 
-### Code Example - PostgreSQL
+### Architecture
+
+The Cloud SQL Connector functionality is implemented using a shared mixin pattern:
+
+- **`CloudSqlConnectorMixin`**: Base mixin class that provides:
+  - Connector lifecycle management (`_ensure_connector`, `close`)
+  - Instance name validation (`_get_instance_connection_name`)
+  - Connection creator factory (`get_cloudsql_connection_creator`)
+  - `cloudsql_connector_enabled` property
+
+- **`PostgresqlAdapter`**: Inherits from `CloudSqlConnectorMixin`, sets `cloudsql_driver = "pg8000"`
+- **`MysqlAdapter`**: Inherits from `CloudSqlConnectorMixin`, sets `cloudsql_driver = "pymysql"`
+
+This design eliminates code duplication while allowing each adapter to specify its driver.
+
+### Code Example - PostgreSQL (Context Manager)
 
 ```python
 from jans.pycloudlib.persistence.sql import SqlClient
@@ -84,13 +99,13 @@ os.environ["CN_SQL_DB_USER"] = "jans"
 os.environ["CN_SQL_DB_NAME"] = "jans"
 
 manager = Manager()
-client = SqlClient(manager)
 
-if client.connected():
-    print("Successfully connected to Cloud SQL PostgreSQL via Private IP")
+with SqlClient(manager) as client:
+    if client.connected():
+        print("Successfully connected to Cloud SQL PostgreSQL via Private IP")
 ```
 
-### Code Example - MySQL
+### Code Example - MySQL (Context Manager)
 
 ```python
 from jans.pycloudlib.persistence.sql import SqlClient
@@ -104,11 +119,35 @@ os.environ["CN_SQL_DB_USER"] = "jans"
 os.environ["CN_SQL_DB_NAME"] = "jans"
 
 manager = Manager()
-client = SqlClient(manager)
 
-if client.connected():
-    print("Successfully connected to Cloud SQL MySQL via Private IP")
+with SqlClient(manager) as client:
+    if client.connected():
+        print("Successfully connected to Cloud SQL MySQL via Private IP")
 ```
+
+### Resource Cleanup
+
+The `SqlClient` class implements proper resource cleanup for both the SQLAlchemy engine and the Cloud SQL Connector:
+
+**Using Context Manager (Recommended)**:
+```python
+with SqlClient(manager) as client:
+    # Use the client
+    pass
+# Resources automatically cleaned up
+```
+
+**Manual Cleanup**:
+```python
+client = SqlClient(manager)
+try:
+    # Use the client
+    pass
+finally:
+    client.close()
+```
+
+**Automatic Cleanup**: An `atexit` handler is registered to clean up any remaining `SqlClient` instances when the Python interpreter shuts down.
 
 ---
 
