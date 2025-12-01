@@ -25,7 +25,7 @@ commercial distribution of Janssen Project Components called
 
 **Releases**: [Latest](https://github.com/JanssenProject/jans/releases/latest) | [All](https://github.com/JanssenProject/jans/releases)
 
-**Get Help**: [Discussions](https://github.com/JanssenProject/jans/discussions) | [Chat](https://gitter.im/JanssenProject/Lobby)
+**Get Help**: [Discussions](https://github.com/JanssenProject/jans/discussions) | [Chat](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/)
 
 **Docs**: [Documentation](https://docs.jans.io/)
 
