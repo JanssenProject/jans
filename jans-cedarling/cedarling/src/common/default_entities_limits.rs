@@ -122,6 +122,11 @@ impl DefaultEntitiesLimits {
 
 #[cfg(test)]
 mod tests {
+    use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid};
+    use std::collections::HashMap;
+    use std::collections::HashSet;
+    use std::str::FromStr;
+
     use super::*;
     use serde_json::json;
 
@@ -195,6 +200,53 @@ mod tests {
                 .unwrap_err()
                 .to_string()
                 .contains("Maximum number of default entities (2) exceeded")
+        );
+    }
+
+    /// Validate method DefaultEntitiesLimits::validate_default_entities
+    #[test]
+    fn test_validate_default_entities() {
+        let limits = DefaultEntitiesLimits {
+            max_entities: 2,
+            max_entity_size: 100,
+        };
+
+        // Test with valid entities within limits
+        let mut entities_map = HashMap::new();
+        let type_name = EntityTypeName::from_str("User").unwrap();
+        let entity_id = EntityId::from_str("alice").unwrap();
+        let euid = EntityUid::from_type_name_and_id(type_name.clone(), entity_id);
+        let entity = Entity::new_no_attrs(euid.clone(), HashSet::new());
+        entities_map.insert(euid, entity);
+
+        let valid_entities = DefaultEntities {
+            inner: entities_map.clone(),
+        };
+        let _ = limits
+            .validate_default_entities(&valid_entities)
+            .expect("added only one entity, should not exceed limit");
+
+        // Test entity count exceeded
+        let type_name2 = EntityTypeName::from_str("User").unwrap();
+        let entity_id2 = EntityId::from_str("bob").unwrap();
+        let euid2 = EntityUid::from_type_name_and_id(type_name2.clone(), entity_id2);
+        let entity2 = Entity::new_no_attrs(euid2.clone(), HashSet::new());
+        entities_map.insert(euid2.clone(), entity2);
+
+        let entity_id3 = EntityId::from_str("charlie").unwrap();
+        let euid3 = EntityUid::from_type_name_and_id(type_name2, entity_id3);
+        let entity3 = Entity::new_no_attrs(euid3.clone(), HashSet::new());
+        entities_map.insert(euid3, entity3);
+
+        let too_many_entities = DefaultEntities {
+            inner: entities_map,
+        };
+        let err = limits
+            .validate_default_entities(&too_many_entities)
+            .expect_err("added 3 entities, should exceed limit");
+        assert!(
+            matches!(err, DefaultEntitiesLimitsError::CountExceeded { .. }),
+            "should get error CountExceeded"
         );
     }
 }
