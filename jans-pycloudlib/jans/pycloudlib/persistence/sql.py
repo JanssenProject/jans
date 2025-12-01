@@ -35,6 +35,15 @@ from jans.pycloudlib.utils import get_password_from_file
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import exec_cmd
 
+CLOUDSQL_CONNECTOR_AVAILABLE = False
+try:
+    from google.cloud.sql.connector import Connector
+    from google.cloud.sql.connector import IPTypes
+    CLOUDSQL_CONNECTOR_AVAILABLE = True
+except ImportError:
+    Connector = None
+    IPTypes = None
+
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
     # these won't be executed in runtime
@@ -63,6 +72,9 @@ class PostgresqlAdapter:
 
     #: Query to display server version
     server_version_query = "SHOW server_version"
+
+    def __init__(self) -> None:
+        self._cloudsql_connector: _t.Any = None
 
     def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
@@ -98,8 +110,35 @@ class PostgresqlAdapter:
             raise exc
 
     @property
-    def connect_args(self):
-        opts = {}
+    def cloudsql_connector_enabled(self) -> bool:
+        """Check if Cloud SQL Python Connector is enabled.
+
+        Returns:
+            True if CN_SQL_CLOUDSQL_CONNECTOR_ENABLED is set to true and the
+            connector library is available, False otherwise.
+        """
+        enabled = as_boolean(os.environ.get("CN_SQL_CLOUDSQL_CONNECTOR_ENABLED", "false"))
+        if enabled and not CLOUDSQL_CONNECTOR_AVAILABLE:
+            logger.warning(
+                "CN_SQL_CLOUDSQL_CONNECTOR_ENABLED is set but cloud-sql-python-connector "
+                "is not installed. Falling back to standard psycopg2 connection. "
+                "Install with: pip install 'jans-pycloudlib[cloudsql]'"
+            )
+            return False
+        return enabled and CLOUDSQL_CONNECTOR_AVAILABLE
+
+    @property
+    def connect_args(self) -> dict[str, _t.Any]:
+        """Get connection arguments for SQLAlchemy.
+
+        Returns:
+            Dictionary of connection arguments. When Cloud SQL Connector is enabled,
+            returns empty dict as connection is handled by the connector.
+        """
+        if self.cloudsql_connector_enabled:
+            return {}
+
+        opts: dict[str, _t.Any] = {}
 
         if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
             opts["sslmode"] = os.environ.get("CN_SQL_SSL_MODE", "require")
@@ -108,6 +147,67 @@ class PostgresqlAdapter:
                 opts["sslcert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
                 opts["sslkey"] = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
         return opts
+
+    def get_cloudsql_connection_creator(self, manager: _t.Optional[Manager] = None) -> _t.Callable[[], _t.Any]:
+        """Create a connection factory for Cloud SQL Python Connector.
+
+        This function creates a SQLAlchemy-compatible connection factory that uses
+        Google Cloud SQL Python Connector with LAZY refresh strategy and Private IP.
+
+        Environment variables used:
+            - CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME: Cloud SQL instance connection name
+              (format: project:region:instance)
+            - CN_SQL_DB_USER: Database username
+            - CN_SQL_DB_NAME: Database name
+            - CN_SQL_PASSWORD_FILE: Path to file containing database password
+
+        Args:
+            manager: An instance of Manager class for retrieving secrets.
+
+        Returns:
+            A callable that creates database connections via Cloud SQL Connector.
+
+        Raises:
+            RuntimeError: If Cloud SQL Connector library is not installed.
+
+        Example:
+            >>> adapter = PostgresqlAdapter()
+            >>> creator = adapter.get_cloudsql_connection_creator()
+            >>> engine = create_engine("postgresql+pg8000://", creator=creator)
+        """
+        if not CLOUDSQL_CONNECTOR_AVAILABLE:
+            raise RuntimeError(
+                "Cloud SQL Python Connector is not installed. "
+                "Install with: pip install 'jans-pycloudlib[cloudsql]'"
+            )
+
+        if self._cloudsql_connector is None:
+            self._cloudsql_connector = Connector(refresh_strategy="LAZY")
+
+        instance_connection_name = os.environ.get(
+            "CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME", ""
+        )
+        db_user = os.environ.get("CN_SQL_DB_USER", "jans")
+        db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
+        db_password = get_sql_password(manager)
+
+        def getconn() -> _t.Any:
+            """Create a connection to Cloud SQL using Private IP.
+
+            Returns:
+                A database connection object from pg8000.
+            """
+            conn = self._cloudsql_connector.connect(
+                instance_connection_name,
+                "pg8000",
+                user=db_user,
+                password=db_password,
+                db=db_name,
+                ip_type=IPTypes.PRIVATE,
+            )
+            return conn
+
+        return getconn
 
     def upsert_query(self, table: Table, column_mapping: dict[str, _t.Any], update_mapping: dict[str, _t.Any]) -> _t.Any:
         return postgres_insert(table).values(column_mapping).on_conflict_do_update(
@@ -130,6 +230,9 @@ class MysqlAdapter:
 
     #: Query to display server version
     server_version_query = "SELECT VERSION()"
+
+    def __init__(self) -> None:
+        self._cloudsql_connector: _t.Any = None
 
     def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
@@ -165,8 +268,35 @@ class MysqlAdapter:
             raise exc
 
     @property
-    def connect_args(self):
-        opts = {}
+    def cloudsql_connector_enabled(self) -> bool:
+        """Check if Cloud SQL Python Connector is enabled.
+
+        Returns:
+            True if CN_SQL_CLOUDSQL_CONNECTOR_ENABLED is set to true and the
+            connector library is available, False otherwise.
+        """
+        enabled = as_boolean(os.environ.get("CN_SQL_CLOUDSQL_CONNECTOR_ENABLED", "false"))
+        if enabled and not CLOUDSQL_CONNECTOR_AVAILABLE:
+            logger.warning(
+                "CN_SQL_CLOUDSQL_CONNECTOR_ENABLED is set but cloud-sql-python-connector "
+                "is not installed. Falling back to standard pymysql connection. "
+                "Install with: pip install 'jans-pycloudlib[cloudsql]'"
+            )
+            return False
+        return enabled and CLOUDSQL_CONNECTOR_AVAILABLE
+
+    @property
+    def connect_args(self) -> dict[str, _t.Any]:
+        """Get connection arguments for SQLAlchemy.
+
+        Returns:
+            Dictionary of connection arguments. When Cloud SQL Connector is enabled,
+            returns empty dict as connection is handled by the connector.
+        """
+        if self.cloudsql_connector_enabled:
+            return {}
+
+        opts: dict[str, _t.Any] = {}
 
         if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
             opts["ssl"] = {}
@@ -178,6 +308,67 @@ class MysqlAdapter:
             elif ssl_mode == "REQUIRED":
                 opts["ssl"]["check_hostname"] = False
         return opts
+
+    def get_cloudsql_connection_creator(self, manager: _t.Optional[Manager] = None) -> _t.Callable[[], _t.Any]:
+        """Create a connection factory for Cloud SQL Python Connector.
+
+        This function creates a SQLAlchemy-compatible connection factory that uses
+        Google Cloud SQL Python Connector with LAZY refresh strategy and Private IP.
+
+        Environment variables used:
+            - CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME: Cloud SQL instance connection name
+              (format: project:region:instance)
+            - CN_SQL_DB_USER: Database username
+            - CN_SQL_DB_NAME: Database name
+            - CN_SQL_PASSWORD_FILE: Path to file containing database password
+
+        Args:
+            manager: An instance of Manager class for retrieving secrets.
+
+        Returns:
+            A callable that creates database connections via Cloud SQL Connector.
+
+        Raises:
+            RuntimeError: If Cloud SQL Connector library is not installed.
+
+        Example:
+            >>> adapter = MysqlAdapter()
+            >>> creator = adapter.get_cloudsql_connection_creator()
+            >>> engine = create_engine("mysql+pymysql://", creator=creator)
+        """
+        if not CLOUDSQL_CONNECTOR_AVAILABLE:
+            raise RuntimeError(
+                "Cloud SQL Python Connector is not installed. "
+                "Install with: pip install 'jans-pycloudlib[cloudsql]'"
+            )
+
+        if self._cloudsql_connector is None:
+            self._cloudsql_connector = Connector(refresh_strategy="LAZY")
+
+        instance_connection_name = os.environ.get(
+            "CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME", ""
+        )
+        db_user = os.environ.get("CN_SQL_DB_USER", "jans")
+        db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
+        db_password = get_sql_password(manager)
+
+        def getconn() -> _t.Any:
+            """Create a connection to Cloud SQL using Private IP.
+
+            Returns:
+                A database connection object from pymysql.
+            """
+            conn = self._cloudsql_connector.connect(
+                instance_connection_name,
+                "pymysql",
+                user=db_user,
+                password=db_password,
+                db=db_name,
+                ip_type=IPTypes.PRIVATE,
+            )
+            return conn
+
+        return getconn
 
     def upsert_query(self, table: Table, column_mapping: dict[str, _t.Any], update_mapping: dict[str, _t.Any]) -> _t.Any:
         return mysql_insert(table).values(column_mapping).on_duplicate_key_update(update_mapping)
@@ -326,14 +517,40 @@ class SqlClient(SqlSchemaMixin):
 
     @property
     def engine(self) -> Engine:
-        """Lazy init of engine instance object."""
+        """Lazy init of engine instance object.
+
+        When CN_SQL_CLOUDSQL_CONNECTOR_ENABLED is set to 'true', the engine uses
+        Cloud SQL Python Connector with:
+        - LAZY refresh strategy for token refresh
+        - PRIVATE IP for connecting to Cloud SQL instance
+        - pg8000 driver for PostgreSQL, pymysql for MySQL
+
+        Otherwise, uses the standard connection method with psycopg2/pymysql.
+        """
         if not self._engine:
-            self._engine = create_engine(
-                self.engine_url,
-                pool_pre_ping=True,
-                hide_parameters=True,
-                connect_args=self.adapter.connect_args,
-            )
+            if self._use_cloudsql_connector():
+                logger.info("Using Cloud SQL Python Connector with LAZY refresh strategy and Private IP")
+                if isinstance(self.adapter, PostgresqlAdapter):
+                    self._engine = create_engine(
+                        "postgresql+pg8000://",
+                        creator=self.adapter.get_cloudsql_connection_creator(self.manager),
+                        pool_pre_ping=True,
+                        hide_parameters=True,
+                    )
+                else:
+                    self._engine = create_engine(
+                        "mysql+pymysql://",
+                        creator=self.adapter.get_cloudsql_connection_creator(self.manager),
+                        pool_pre_ping=True,
+                        hide_parameters=True,
+                    )
+            else:
+                self._engine = create_engine(
+                    self.engine_url,
+                    pool_pre_ping=True,
+                    hide_parameters=True,
+                    connect_args=self.adapter.connect_args,
+                )
 
             if self.dialect == "mysql":
                 event.listen(self._engine, "first_connect", set_mysql_strict_mode)
@@ -342,9 +559,21 @@ class SqlClient(SqlSchemaMixin):
         # initialized engine
         return self._engine
 
+    def _use_cloudsql_connector(self) -> bool:
+        """Check if Cloud SQL Connector should be used.
+
+        Returns:
+            True if the adapter has Cloud SQL Connector enabled.
+        """
+        return getattr(self.adapter, "cloudsql_connector_enabled", False)
+
     @property
     def engine_url(self) -> URL:
-        """Engine connection URL."""
+        """Engine connection URL.
+
+        Note: When Cloud SQL Connector is enabled, this URL is not used.
+        The connection is handled by the connector's creator function instead.
+        """
         return URL(
             drivername=self.adapter.connector,
             username=os.environ.get("CN_SQL_DB_USER", "jans"),

@@ -74,6 +74,12 @@ dependencies = [
 ]
 requires-python = ">=3.9"
 
+[project.optional-dependencies]
+cloudsql = [
+    "cloud-sql-python-connector[pg8000]>=1.0.0",
+    "pg8000>=1.30.0",
+]
+
 [project.scripts]
 jans-pycloudlib = "jans.pycloudlib.cli:cli"
 
