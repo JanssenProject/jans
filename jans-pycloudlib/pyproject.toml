@@ -71,14 +71,12 @@ dependencies = [
     "grpc-interceptor>=0.15.4",
 
     "javaproperties>=0.8.2",
-]
-requires-python = ">=3.9"
 
-[project.optional-dependencies]
-cloudsql = [
+    # Cloud SQL Python Connector for Cloud Run to Cloud SQL connections
     "cloud-sql-python-connector[pg8000]>=1.0.0",
     "pg8000>=1.30.0",
 ]
+requires-python = ">=3.9"
 
 [project.scripts]
 jans-pycloudlib = "jans.pycloudlib.cli:cli"

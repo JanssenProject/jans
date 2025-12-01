@@ -17,17 +17,16 @@ The Cloud SQL Python Connector provides a secure and efficient way to connect to
 
 ## Installation
 
-Install the optional Cloud SQL dependencies:
+The Cloud SQL Python Connector is included as a base dependency in jans-pycloudlib:
 
 ```bash
-pip install 'jans-pycloudlib[cloudsql]'
+pip install jans-pycloudlib
 ```
 
-This installs:
+This automatically includes:
 - `cloud-sql-python-connector[pg8000]>=1.0.0`
 - `pg8000>=1.30.0`
-
-**Note**: For MySQL connections, `pymysql` is already included as a base dependency.
+- `pymysql>=1.0.2` (for MySQL connections)
 
 ## Configuration
 
