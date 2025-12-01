@@ -146,9 +146,11 @@ pub fn parse_default_entities_with_warns(
     if let Some(raw_data) = raw_data {
         let mut default_entities = HashMap::new();
         let mut warns = Vec::new();
-        let mut entity_count = 0;
 
-        for (entry_id, raw_value) in raw_data {
+        for (n, (entry_id, raw_value)) in raw_data.into_iter().enumerate() {
+            // `n` starts with zero, so we add 1
+            let entity_count = n + 1;
+
             // Validate against limits (using default limits for deserialization)
             // Note: Configuration limits will be applied later when the policy store is initialized
 
@@ -176,7 +178,6 @@ pub fn parse_default_entities_with_warns(
             };
 
             default_entities.insert(entity.uid().clone(), entity);
-            entity_count += 1;
         }
 
         Ok(DefaultEntitiesWithWarns::new(default_entities, warns))
