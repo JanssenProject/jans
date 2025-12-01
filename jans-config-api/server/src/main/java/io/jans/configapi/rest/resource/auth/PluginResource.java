@@ -46,6 +46,14 @@ public class PluginResource extends ConfigBaseResource {
     @Inject
     AuthUtil authUtil;
 
+    /**
+     * Retrieve summaries of deployed plugins.
+     *
+     * <p>Each returned entry contains the plugin's name and description for plugins whose implementation
+     * classes are present on the classpath.</p>
+     *
+     * @return a list of PluginConf objects containing the name and description of each deployed plugin
+     */
     @Operation(summary = "Gets list of Plugins", description = "Gets list of Plugins", operationId = "get-plugins", tags = {
             "Plugins" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }),
@@ -64,6 +72,12 @@ public class PluginResource extends ConfigBaseResource {
         return Response.ok(getPluginNames()).build();
     }
 
+    /**
+     * Check whether a plugin with the given name is currently deployed.
+     *
+     * @param pluginName the plugin name to check; comparison is case-insensitive
+     * @return `true` if a plugin with the given name is deployed, `false` otherwise
+     */
     @Operation(summary = "Get plugin by name", description = "Get plugin by name", operationId = "get-plugin-by-name", tags = {
             "Plugins" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }),

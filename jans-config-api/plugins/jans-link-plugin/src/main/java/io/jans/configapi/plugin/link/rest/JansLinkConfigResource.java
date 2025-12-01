@@ -50,6 +50,11 @@ public class JansLinkConfigResource extends BaseResource {
     @Inject
     private EncryptionService encryptionService;
 
+    /**
+     * Retrieve the Jans Link application configuration.
+     *
+     * @return the current AppConfiguration instance representing Jans Link settings
+     */
     @Operation(summary = "Gets Jans Link App configuration.", description = "Gets Jans Link App configuration.", operationId = "get-jans-link-properties", tags = {
             "Jans Link - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.JANSLINK_CONFIG_READ_ACCESS }),
@@ -70,6 +75,16 @@ public class JansLinkConfigResource extends BaseResource {
         return Response.ok(appConfiguration).build();
     }
 
+    /**
+     * Update Jans Link configuration with the provided properties.
+     *
+     * The provided configuration is validated (must not be null), any LDAP bind passwords
+     * are encrypted as needed, and the configuration is persisted.
+     *
+     * @param appConfiguration the new Jans Link configuration to persist; passwords will be encrypted if required
+     * @return an HTTP 200 response containing the updated AppConfiguration
+     * @throws EncryptionException if encryption or decryption of bind passwords fails
+     */
     @Operation(summary = "Updates Jans Link configuration properties.", description = "Updates Jans Link configuration properties.", operationId = "put-jans-link-properties", tags = {
             "Jans Link - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.JANSLINK_CONFIG_WRITE_ACCESS }),

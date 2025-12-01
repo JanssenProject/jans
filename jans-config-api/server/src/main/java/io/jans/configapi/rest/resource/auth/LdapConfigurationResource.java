@@ -48,6 +48,11 @@ public class LdapConfigurationResource extends ConfigBaseResource {
     @Inject
     ConnectionStatus connectionStatus;
 
+    /**
+     * Retrieves all LDAP configurations.
+     *
+     * @return a list of GluuLdapConfiguration objects; empty list if none exist.
+     */
     @Operation(summary = "Gets list of existing LDAP configurations.", description = "Gets list of existing LDAP configurations.", operationId = "get-config-database-ldap", tags = {
             "Database - LDAP configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }),
@@ -68,6 +73,13 @@ public class LdapConfigurationResource extends ConfigBaseResource {
         return Response.ok(ldapConfigurationList).build();
     }
 
+    /**
+     * Retrieves the LDAP configuration identified by the given name.
+     *
+     * @param name the LDAP configuration name to retrieve
+     * @return the matching GluuLdapConfiguration
+     * @throws javax.ws.rs.NotFoundException if no configuration with the given name exists
+     */
     @Operation(summary = "Gets an LDAP configuration by name.", description = "Gets an LDAP configuration by name.", operationId = "get-config-database-ldap-by-name", tags = {
             "Database - LDAP configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }),
@@ -89,6 +101,15 @@ public class LdapConfigurationResource extends ConfigBaseResource {
         return Response.ok(ldapConfiguration).build();
     }
 
+    /**
+     * Create a new LDAP configuration.
+     *
+     * Attempts to persist the provided GluuLdapConfiguration and returns the created resource.
+     *
+     * @param ldapConfiguration the LDAP configuration to create
+     * @return a Response containing the created GluuLdapConfiguration with HTTP status 201 (Created)
+     * @throws NotAcceptableException if a configuration with the same configId already exists
+     */
     @Operation(summary = "Adds a new LDAP configuration", description = "Adds a new LDAP configuration", operationId = "post-config-database-ldap", tags = {
             "Database - LDAP configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }),
@@ -119,6 +140,12 @@ public class LdapConfigurationResource extends ConfigBaseResource {
         }
     }
 
+    /**
+     * Update an existing LDAP configuration.
+     *
+     * @param ldapConfiguration the LDAP configuration to persist; its `configId` must match an existing configuration
+     * @return the updated {@link GluuLdapConfiguration}
+     */
     @Operation(summary = "Updates LDAP configuration", description = "Updates LDAP configuration", operationId = "put-config-database-ldap", tags = {
             "Database - LDAP configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }),
@@ -140,6 +167,13 @@ public class LdapConfigurationResource extends ConfigBaseResource {
         return Response.ok(ldapConfiguration).build();
     }
 
+    /**
+     * Deletes the LDAP configuration with the given name.
+     *
+     * @param name the name of the LDAP configuration to delete
+     * @return a Response with HTTP 204 No Content on success
+     * @throws NotFoundException if no configuration with the given name exists
+     */
     @Operation(summary = "Deletes an LDAP configuration", description = "Deletes an LDAP configuration", operationId = "delete-config-database-ldap-by-name", tags = {
             "Database - LDAP configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS }),
@@ -163,6 +197,15 @@ public class LdapConfigurationResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
+    /**
+     * Applies a JSON Patch to the LDAP configuration identified by the given name and persists the updated configuration.
+     *
+     * @param name the identifier of the LDAP configuration to patch
+     * @param requestString the JSON Patch payload as a string
+     * @return the updated GluuLdapConfiguration
+     * @throws JsonPatchException if the patch cannot be applied to the configuration
+     * @throws IOException if an I/O error occurs while processing the patch
+     */
     @Operation(summary = "Patches a LDAP configuration by name", description = "Patches a LDAP configuration by name", operationId = "patch-config-database-ldap-by-name", tags = {
             "Database - LDAP configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }),
@@ -190,6 +233,12 @@ public class LdapConfigurationResource extends ConfigBaseResource {
         return Response.ok(ldapConfiguration).build();
     }
 
+    /**
+     * Check whether the provided LDAP configuration can establish a connection to its LDAP server.
+     *
+     * @param ldapConfiguration the LDAP configuration to test connectivity for
+     * @return HTTP 200 response containing `true` if a connection to the LDAP server can be established using the provided configuration, `false` otherwise
+     */
     @Operation(summary = "Tests an LDAP configuration", description = "Tests an LDAP configuration", operationId = "post-config-database-ldap-test", tags = {
             "Database - LDAP configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }),

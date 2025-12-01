@@ -43,6 +43,11 @@ public class LoggingResource extends ConfigBaseResource {
     @Inject
     ConfigurationService configurationService;
 
+    /**
+     * Retrieve the current Jans Authorization Server logging configuration.
+     *
+     * @return an HTTP response whose entity is the current Logging configuration serialized as JSON
+     */
     @Operation(summary = "Returns Jans Authorization Server logging settings", description = "Returns Jans Authorization Server logging settings", operationId = "get-config-logging", tags = {
             "Configuration – Logging" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_READ_ACCESS }),
@@ -62,6 +67,15 @@ public class LoggingResource extends ConfigBaseResource {
         return Response.ok(this.getLoggingConfiguration()).build();
     }
 
+    /**
+     * Update Jans Authorization Server logging settings from the provided model and persist the changes.
+     *
+     * The request's values are applied to the server's live logging configuration; after persisting,
+     * the current effective logging configuration is returned.
+     *
+     * @param logging the logging settings to apply (fields left blank will not overwrite existing values)
+     * @return the current Logging configuration after the update
+     */
     @Operation(summary = "Updates Jans Authorization Server logging settings", description = "Updates Jans Authorization Server logging settings", operationId = "put-config-logging", tags = {
             "Configuration – Logging" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS }),

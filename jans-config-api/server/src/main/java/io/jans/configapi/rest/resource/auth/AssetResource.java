@@ -70,6 +70,18 @@ public class AssetResource extends ConfigBaseResource {
     @Inject
     AssetService assetService;
 
+    /**
+     * Retrieves Jans assets matching the provided search and sorting criteria.
+     *
+     * @param limit          maximum number of results to return
+     * @param pattern        search pattern to filter assets
+     * @param status         status filter for assets
+     * @param startIndex     1-based index of the first result to return
+     * @param sortBy         attribute name to sort results by
+     * @param sortOrder      sort direction, either "ascending" or "descending"
+     * @param fieldValuePair comma-separated field=value pairs to further filter results (e.g. "adminCanEdit=true,dataType=string")
+     * @return               HTTP 200 response containing a paged result of matching asset documents
+     */
     @Operation(summary = "Gets all Jans assets.", description = "Gets all Jans assets.", operationId = "get-all-assets", tags = {
             "Jans Assets" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }),
@@ -105,6 +117,12 @@ public class AssetResource extends ConfigBaseResource {
         return Response.ok(doSearch(searchReq, status)).build();
     }
 
+    /**
+     * Retrieves the asset for the given inum.
+     *
+     * @param inum the unique asset identifier
+     * @return the Document representing the asset with the specified inum
+     */
     @Operation(summary = "Gets an asset by inum - unique identifier", description = "Gets an asset by inum - unique identifier", operationId = "get-asset-by-inum", tags = {
             "Jans Assets" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }),
@@ -138,6 +156,14 @@ public class AssetResource extends ConfigBaseResource {
         return Response.ok(asset).build();
     }
 
+    /**
+     * Fetch assets that match the provided asset name.
+     *
+     * Returns a paged result containing Document entries for assets whose name matches the provided value.
+     *
+     * @param name the asset name to search for
+     * @return a DocumentPagedResult containing matching asset documents
+     */
     @Operation(summary = "Fetch asset by name", description = "Fetch asset by name.", operationId = "get-asset-by-name", tags = {
             "Jans Assets" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }),
@@ -177,6 +203,11 @@ public class AssetResource extends ConfigBaseResource {
         return Response.ok(documentPagedResult).build();
     }
 
+    /**
+     * Retrieve valid asset service (module) names.
+     *
+     * @return a list of valid asset service/module names; an empty list if no services are available
+     */
     @Operation(summary = "Gets asset services", description = "Gets asset services", operationId = "get-asset-services", tags = {
             "Jans Assets" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }),
@@ -205,6 +236,11 @@ public class AssetResource extends ConfigBaseResource {
         return Response.ok(services).build();
     }
 
+    /**
+     * Retrieve valid asset file types supported by the server.
+     *
+     * @return a List of valid asset file extensions/types (each element is a file type string); returns an empty list if none are configured
+     */
     @Operation(summary = "Get valid asset types", description = "Get valid asset types", operationId = "get-asset-types", tags = {
             "Jans Assets" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }),
@@ -230,6 +266,11 @@ public class AssetResource extends ConfigBaseResource {
         return Response.ok(validTypes).build();
     }
 
+    /**
+     * Retrieve configured mappings between asset types and their directory locations.
+     *
+     * @return a list of AssetDirMapping objects representing asset type → directory mappings; an empty list if no mappings are configured
+     */
     @Operation(summary = "Get valid asset types", description = "Get valid asset types", operationId = "get-asset-dir-mapping", tags = {
             "Jans Assets" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }),
@@ -255,6 +296,16 @@ public class AssetResource extends ConfigBaseResource {
         return Response.ok(assetDirMappingList).build();
     }
 
+    /**
+     * Create a new asset from multipart form data.
+     *
+     * Processes the supplied AssetForm (which must contain a Document with a non-null fileName and a non-empty file stream),
+     * saves the asset, and returns the created asset representation.
+     *
+     * @param assetForm multipart form containing the asset Document and file stream; the Document must include `fileName` and the form must include a non-empty `assetFile`
+     * @return HTTP response with the created Document as the entity and status 201 (Created)
+     * @throws Exception if an unexpected error occurs while processing or saving the asset
+     */
     @Operation(summary = "Upload new asset", description = "Upload new asset", operationId = "post-new-asset", tags = {
             "Jans Assets" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }),
@@ -312,6 +363,15 @@ public class AssetResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(asset).build();
     }
 
+    /**
+     * Update an existing asset using data supplied in a multipart form.
+     *
+     * The provided AssetForm must contain a Document with a valid `inum` and a `fileName`, and may include the asset file stream.
+     *
+     * @param assetForm multipart form containing the asset Document and optional asset file; the Document's `inum` and `fileName` are required
+     * @return the modified Document representing the updated asset
+     * @throws Exception if validation fails (missing form, missing Document or inum, asset not found, or name conflict) or if persisting the updated asset fails
+     */
     @Operation(summary = "Update existing asset", description = "Update existing asset", operationId = "put-asset", tags = {
             "Jans Assets" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }),
@@ -382,6 +442,15 @@ public class AssetResource extends ConfigBaseResource {
         return Response.status(Response.Status.OK).entity(asset).build();
     }
 
+    /**
+     * Load assets for the specified service on the server.
+     *
+     * Initiates loading of assets associated with the given service and returns a message describing the outcome.
+     *
+     * @param serviceName the name of the service whose assets will be loaded
+     * @return a message describing the result of the load operation
+     * @throws Exception if an error occurs while loading assets
+     */
     @Operation(summary = "Load assets on server for a service", description = "Load assets on server for a service", operationId = "load-service-asset", tags = {
             "Jans Assets" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }),
@@ -423,6 +492,12 @@ public class AssetResource extends ConfigBaseResource {
         return Response.status(Response.Status.OK).entity(result).build();
     }
 
+    /**
+     * Delete the asset identified by the given inum.
+     *
+     * @param inum the asset's unique identifier
+     * @return HTTP 204 No Content response on successful deletion
+     */
     @Operation(summary = "Delete an asset", description = "Delete an asset", operationId = "delete-asset", tags = {
             "Jans Assets" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_ASSET_DELETE_ACCESS }),

@@ -70,7 +70,13 @@ public class AuditResource extends BaseResource {
 	@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
 	PersistenceEntryManager persistenceEntryManager;
 
-    @Operation(summary = "Save health data", description = "Save health data", operationId = "save-health-data", tags = {
+    /**
+	 * Persist a health audit entry.
+	 *
+	 * @param healthEntry the health entry to record in the audit store
+	 * @return a Response with HTTP 200 OK when the entry has been recorded
+	 */
+	@Operation(summary = "Save health data", description = "Save health data", operationId = "save-health-data", tags = {
             "Lock - Audit" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_HEALTH_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
@@ -93,7 +99,13 @@ public class AuditResource extends BaseResource {
 		return Response.status(Response.Status.OK).build();
 	}
 
-    @Operation(summary = "Bulk save health data", description = "Bulk save health data", operationId = "bulk-save-health-data", tags = {
+    /**
+	 * Persists each HealthEntry from the provided list.
+	 *
+	 * @param healthEntries list of health events to persist; each entry will be saved
+	 * @return HTTP 200 OK response when all entries have been processed
+	 */
+	@Operation(summary = "Bulk save health data", description = "Bulk save health data", operationId = "bulk-save-health-data", tags = {
             "Lock - Audit" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_HEALTH_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
@@ -118,6 +130,14 @@ public class AuditResource extends BaseResource {
 		return Response.status(Response.Status.OK).build();
 	}
 
+	/**
+	 * Retrieve health records for a specified event date range.
+	 *
+	 * @param limit the maximum number of results to return
+	 * @param eventStartDateIso8601 start of the event range in ISO-8601 format (e.g., 2023-01-01T00:00:00Z)
+	 * @param eventEndDateIso8601 end of the event range in ISO-8601 format (e.g., 2023-01-31T23:59:59Z)
+	 * @return the response containing a JSON array of HealthEntry objects that fall within the specified range; may be empty
+	 */
 	@Operation(summary = "Rerquest health records for specific event range", description = "Rerquest health records for specific event range", operationId = "request-lock-health-records-event-range", tags = {
 			"Lock - Audit" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_HEALTH_READ_ACCESS }),
@@ -155,7 +175,13 @@ public class AuditResource extends BaseResource {
 		return Response.ok(entries).build();
 	}
 
-    @Operation(summary = "Save log data", description = "Save log data", operationId = "save-log-data", tags = {
+    /**
+	 * Save a single log entry to the audit store.
+	 *
+	 * @param logEntry the log entry to persist (validated)
+	 * @return HTTP 200 OK response with no body
+	 */
+	@Operation(summary = "Save log data", description = "Save log data", operationId = "save-log-data", tags = {
             "Lock - Audit" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_LOG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
@@ -178,7 +204,13 @@ public class AuditResource extends BaseResource {
 		return Response.status(Response.Status.OK).build();
 	}
 
-    @Operation(summary = "Bulk save log data", description = "Bulk save log data", operationId = "bulk-save-log-data", tags = {
+    /**
+	 * Persists multiple log entries in bulk.
+	 *
+	 * @param logEntries list of LogEntry objects to persist; each entry is validated before processing
+	 * @return a Response with HTTP status 200 (OK) when all entries have been accepted
+	 */
+	@Operation(summary = "Bulk save log data", description = "Bulk save log data", operationId = "bulk-save-log-data", tags = {
             "Lock - Audit" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_LOG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
@@ -203,7 +235,17 @@ public class AuditResource extends BaseResource {
 		return Response.status(Response.Status.OK).build();
 	}
 
-    @Operation(summary = "Rerquest log records for specific event range", description = "Rerquest log records for specific event range", operationId = "request-lock-log-records-event-range", tags = {
+    /**
+	 * Retrieve log entries within the specified event time range.
+	 *
+	 * Validates and parses the provided ISO-8601 start and end timestamps and returns matching log entries up to the specified limit.
+	 *
+	 * @param limit the maximum number of results to return
+	 * @param eventStartDateIso8601 event start timestamp in ISO-8601 format
+	 * @param eventEndDateIso8601 event end timestamp in ISO-8601 format
+	 * @return a Response whose entity is a list of LogEntry objects matching the given time range, limited by {@code limit}
+	 */
+	@Operation(summary = "Rerquest log records for specific event range", description = "Rerquest log records for specific event range", operationId = "request-lock-log-records-event-range", tags = {
             "Lock - Log" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_LOG_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_LOG_WRITE_ACCESS }),
@@ -240,7 +282,13 @@ public class AuditResource extends BaseResource {
 		return Response.ok(entries).build();
 	}
 
-    @Operation(summary = "Save telemetry data", description = "Save telemetry data", operationId = "save-telemetry-data", tags = {
+    /**
+	 * Save telemetry data.
+	 *
+	 * @param telemetryEntry the telemetry entry containing metrics and metadata to persist
+	 * @return an HTTP 200 OK response on successful save
+	 */
+	@Operation(summary = "Save telemetry data", description = "Save telemetry data", operationId = "save-telemetry-data", tags = {
             "Lock - Audit" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
@@ -263,7 +311,15 @@ public class AuditResource extends BaseResource {
 		return Response.status(Response.Status.OK).build();
 	}
 
-    @Operation(summary = "Bulk save telemetry data", description = "Bulk save telemetry data", operationId = "bulk-save-telemetry-data", tags = {
+    /**
+	 * Bulk-save telemetry entries.
+	 *
+	 * Persists all telemetry entries contained in the provided list.
+	 *
+	 * @param telemetryEntries list of telemetry entries to persist
+	 * @return a Response with HTTP 200 OK status
+	 */
+	@Operation(summary = "Bulk save telemetry data", description = "Bulk save telemetry data", operationId = "bulk-save-telemetry-data", tags = {
             "Lock - Audit" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
@@ -288,7 +344,15 @@ public class AuditResource extends BaseResource {
 		return Response.status(Response.Status.OK).build();
 	}
 
-    @Operation(summary = "Request telemetry records for specific event range", description = "Rerquest telemetry records for specific event range", operationId = "request-lock-telemetry-records-event-range", tags = {
+    /**
+	 * Retrieve telemetry records within the specified event date range.
+	 *
+	 * @param limit the maximum number of entries to return
+	 * @param eventStartDateIso8601 the start of the event range in ISO-8601 format (required)
+	 * @param eventEndDateIso8601 the end of the event range in ISO-8601 format (required)
+	 * @return a list of TelemetryEntry objects whose event timestamps fall between the start and end dates, limited by {@code limit}
+	 */
+	@Operation(summary = "Request telemetry records for specific event range", description = "Rerquest telemetry records for specific event range", operationId = "request-lock-telemetry-records-event-range", tags = {
             "Lock - Audit" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_TELEMETRY_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }),

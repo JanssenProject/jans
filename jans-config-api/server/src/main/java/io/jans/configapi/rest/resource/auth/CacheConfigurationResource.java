@@ -56,6 +56,12 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return configurationService.findGluuConfiguration().getCacheConfiguration();
     }
 
+    /**
+     * Apply a modification to the current CacheConfiguration and persist the updated GluuConfiguration.
+     *
+     * @param function a function that receives the current CacheConfiguration and returns the modified CacheConfiguration
+     * @return the modified CacheConfiguration
+     */
     private CacheConfiguration mergeModifiedCache(Function<CacheConfiguration, CacheConfiguration> function) {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
 
@@ -66,6 +72,11 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return modifiedCache;
     }
 
+    /**
+     * Retrieve the application's cache configuration.
+     *
+     * @return the current CacheConfiguration
+     */
     @Operation(summary = "Returns cache configuration.", description = "Returns cache configuration.", operationId = "get-config-cache", tags = {
             "Cache Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_READ_ACCESS }),
@@ -85,6 +96,16 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(loadCacheConfiguration()).build();
     }
 
+    /**
+     * Apply a JSON Patch to the persisted cache configuration and return the updated configuration.
+     *
+     * Applies the JSON Patch document to the current CacheConfiguration, persists the updated configuration,
+     * and returns an HTTP response containing the modified CacheConfiguration.
+     *
+     * @param requestString a JSON Patch document (RFC 6902) as a string describing changes to apply to the cache configuration
+     * @return a Response containing the modified CacheConfiguration
+     * @throws InternalServerErrorException if the patch cannot be applied or an I/O error occurs while processing the patch
+     */
     @Operation(summary = "Patch cache configuration.", description = "Patch cache configuration", operationId = "patch-config-cache", tags = {
             "Cache Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
@@ -111,6 +132,11 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(modifiedCache).build();
     }
 
+    /**
+     * Retrieve the Redis cache configuration.
+     *
+     * @return the current RedisConfiguration for the cache
+     */
     @Operation(summary = "Returns Redis cache configuration.", description = "Returns Redis cache configuration", operationId = "get-config-cache-redis", tags = {
             "Cache Configuration – Redis" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_READ_ACCESS }),
@@ -131,6 +157,12 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(loadCacheConfiguration().getRedisConfiguration()).build();
     }
 
+    /**
+     * Replace the Redis cache configuration with the provided configuration.
+     *
+     * @param redisConfiguration the new RedisConfiguration to persist
+     * @return the persisted RedisConfiguration after update
+     */
     @Operation(summary = "Updates Redis cache configuration.", description = "Updates Redis cache configuration", operationId = "put-config-cache-redis", tags = {
             "Cache Configuration – Redis" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
@@ -154,6 +186,12 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(modifiedCache.getRedisConfiguration()).build();
     }
 
+    /**
+     * Apply a JSON Patch to the Redis cache configuration and persist the updated configuration.
+     *
+     * @param requestString a JSON Patch document (media type application/json-patch+json) as a string
+     * @return a Response containing the updated RedisConfiguration
+     */
     @Operation(summary = "Patch Redis cache configuration.", description = "Patch Redis cache configuration", operationId = "patch-config-cache-redis", tags = {
             "Cache Configuration – Redis" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
@@ -183,6 +221,11 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(loadCacheConfiguration().getRedisConfiguration()).build();
     }
 
+    /**
+     * Retrieve the in-memory cache configuration.
+     *
+     * @return a Response whose entity is the current InMemoryConfiguration serialized as JSON (HTTP 200)
+     */
     @Operation(summary = "Returns in-Memory cache configuration.", description = "Returns in-Memory cache configuration.", operationId = "get-config-cache-in-memory", tags = {
             "Cache Configuration – in-Memory" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_READ_ACCESS }),
@@ -203,6 +246,12 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(loadCacheConfiguration().getInMemoryConfiguration()).build();
     }
 
+    /**
+     * Replaces the in-memory cache configuration with the provided settings.
+     *
+     * @param inMemoryConfiguration the new in-memory cache configuration to apply
+     * @return the updated in-memory cache configuration
+     */
     @Operation(summary = "Updates in-Memory cache configuration.", description = "Updates in-Memory cache configuration", operationId = "put-config-cache-in-memory", tags = {
             "Cache Configuration – in-Memory" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
@@ -227,6 +276,12 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(modifiedCache.getInMemoryConfiguration()).build();
     }
 
+    /**
+     * Applies a JSON Patch to the in-memory cache configuration.
+     *
+     * @param requestString a JSON Patch document as a JSON string to apply to the in-memory cache configuration
+     * @return a Response containing the updated InMemoryConfiguration
+     */
     @Operation(summary = "Patch In-Memory cache configuration.", description = "Patch In-Memory cache configuration", operationId = "patch-config-cache-in-memory", tags = {
             "Cache Configuration – in-Memory" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
@@ -255,6 +310,11 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(loadCacheConfiguration().getInMemoryConfiguration()).build();
     }
 
+    /**
+     * Retrieve native persistence cache configuration.
+     *
+     * @return the current NativePersistenceConfiguration from the cache configuration
+     */
     @Operation(summary = "Returns native persistence cache configuration.", description = "Returns native persistence cache configuration.", operationId = "get-config-cache-native-persistence", tags = {
             "Cache Configuration – Native-Persistence" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_READ_ACCESS }),
@@ -275,6 +335,14 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(loadCacheConfiguration().getNativePersistenceConfiguration()).build();
     }
 
+    /**
+     * Replace the native persistence cache configuration with the provided settings.
+     *
+     * Persists the updated configuration and returns the stored native persistence configuration.
+     *
+     * @param nativePersistenceConfiguration the new native persistence cache settings
+     * @return the updated NativePersistenceConfiguration
+     */
     @Operation(summary = "Updates native persistence cache configuration.", description = "Updates native persistence cache configuration", operationId = "put-config-cache-native-persistence", tags = {
             "Cache Configuration – Native-Persistence" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
@@ -300,6 +368,12 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(modifiedCache.getNativePersistenceConfiguration()).build();
     }
 
+    /**
+     * Apply a JSON Patch to the native-persistence cache configuration and persist the updated configuration.
+     *
+     * @param requestString JSON Patch document (as a string) describing the updates to apply to the native persistence configuration
+     * @return the updated NativePersistenceConfiguration after the patch is applied
+     */
     @Operation(summary = "Patch native persistence cache configuration.", description = "Patch native persistence cache configuration", operationId = "patch-config-cache-native-persistence", tags = {
             "Cache Configuration – Native-Persistence" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
@@ -329,6 +403,11 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(loadCacheConfiguration().getNativePersistenceConfiguration()).build();
     }
 
+    /**
+     * Retrieve the memcached-specific cache configuration.
+     *
+     * @return the current MemcachedConfiguration object
+     */
     @Operation(summary = "Returns memcached cache configuration.", description = "Returns memcached cache configuration.", operationId = "get-config-cache-memcached", tags = {
             "Cache Configuration – Memcached" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_READ_ACCESS }),
@@ -349,6 +428,12 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(loadCacheConfiguration().getMemcachedConfiguration()).build();
     }
 
+    /**
+     * Replace the memcached section of the cache configuration with the provided settings.
+     *
+     * @param memcachedConfiguration the new memcached configuration to apply
+     * @return the applied MemcachedConfiguration
+     */
     @Operation(summary = "Updates memcached cache configuration.", description = "Updates memcached cache configuration", operationId = "put-config-cache-memcached", tags = {
             "Cache Configuration – Memcached" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),
@@ -373,6 +458,12 @@ public class CacheConfigurationResource extends ConfigBaseResource {
         return Response.ok(modifiedCache.getMemcachedConfiguration()).build();
     }
 
+    /**
+     * Apply a JSON Patch to the memcached cache configuration.
+     *
+     * @param requestString JSON Patch document as a string (media type application/json-patch+json) that describes modifications to apply to the memcached configuration.
+     * @return the updated MemcachedConfiguration
+     */
     @Operation(summary = "Patch memcached cache configuration.", description = "Patch memcached cache configuration", operationId = "patch-config-cache-memcached", tags = {
             "Cache Configuration – Memcached" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }),

@@ -30,6 +30,13 @@ import jakarta.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AgamaResource extends ConfigBaseResource {
 
+    /**
+     * Check whether the provided text is valid Agama source for the named flow.
+     *
+     * @param qname the Agama flow name to validate against
+     * @param source the Agama code text to check
+     * @return an Exception object describing the syntax-check result: on success a TranspilerException with an empty message, on failure the caught SyntaxException or TranspilerException; the returned exception's stack trace is cleared
+     */
     @Operation(summary = "Determine if the text passed is valid Agama code", description = "Determine if the text passed is valid Agama code", operationId = "agama-syntax-check", tags = {
             "Agama - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }),

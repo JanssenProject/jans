@@ -57,6 +57,11 @@ public class TrustRelationshipResource extends BaseResource {
     @Inject
     SamlService samlService;
 
+    /**
+     * Retrieves all SAML trust relationships.
+     *
+     * @return a Response containing a JSON array of TrustRelationship objects
+     */
     @Operation(summary = "Get all Trust Relationship", description = "Get all TrustRelationship.", operationId = "get-trust-relationships", tags = {
             "SAML - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_READ_ACCESS }),
@@ -77,6 +82,13 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.ok(trustRelationshipList).build();
     }
 
+    /**
+     * Retrieve a TrustRelationship by its identifier.
+     *
+     * @param id the unique identifier (inum) of the trust relationship to retrieve
+     * @return a Response containing the TrustRelationship with HTTP 200 when found;
+     *         otherwise a HTTP 404 Response with an ApiError describing the missing resource
+     */
     @Operation(summary = "Get TrustRelationship by Id", description = "Get TrustRelationship by Id", operationId = "get-trust-relationship-by-id", tags = {
             "SAML - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_READ_ACCESS }),
@@ -113,6 +125,16 @@ public class TrustRelationshipResource extends BaseResource {
         }
     }
 
+    /**
+     * Create a new SAML Trust Relationship from a multipart form, optionally using an uploaded SP metadata file.
+     *
+     * Validates the submitted form and trust relationship (including unique name and SP metadata source requirements),
+     * persists the new trust relationship, and returns the created entity.
+     *
+     * @param trustRelationshipForm multipart form containing the TrustRelationship and optional metadata file
+     * @param metadatafile optional metadata InputStream (used when SP metadata is supplied as a file)
+     * @return the created TrustRelationship
+     */
     @Operation(summary = "Create Trust Relationship with Metadata File", description = "Create Trust Relationship with Metadata File", operationId = "post-trust-relationship-metadata-file", tags = {
             "SAML - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_WRITE_ACCESS }),
@@ -173,6 +195,17 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
+    /**
+     * Update an existing SAML TrustRelationship using multipart form data.
+     *
+     * Validates the provided form and trust relationship, enforces name uniqueness,
+     * applies metadata from the uploaded file or existing record as appropriate,
+     * and returns the updated TrustRelationship after persistence.
+     *
+     * @param trustRelationshipForm multipart form containing the TrustRelationship and optional metadata file
+     * @param metadatafile raw InputStream of the uploaded metadata file; may be null or empty
+     * @return the updated TrustRelationship
+     */
     @Operation(summary = "Update TrustRelationship", description = "Update TrustRelationship", operationId = "put-trust-relationship", tags = {
             "SAML - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_WRITE_ACCESS }),
@@ -254,6 +287,12 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.ok(trustRelationship).build();
     }
 
+    /**
+     * Delete a trust relationship by its identifier.
+     *
+     * @param id the unique identifier (inum) of the trust relationship to delete
+     * @return a 204 No Content response when the trust relationship is successfully deleted; produces a 404 response if the trust relationship does not exist
+     */
     @Operation(summary = "Delete TrustRelationship", description = "Delete TrustRelationship", operationId = "delete-trust-relationship", tags = {
             "SAML - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_DELETE_ACCESS }),

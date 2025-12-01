@@ -58,6 +58,16 @@ public class AuditLogResource extends ConfigBaseResource {
     @Inject
     AuthUtil authUtil;
 
+    /**
+     * Searches and returns paginated audit log entries filtered by an optional pattern and date range.
+     *
+     * @param pattern   a substring or regex to filter log lines; blank returns all entries
+     * @param startIndex the 1-based index of the first result to return
+     * @param limit     maximum number of results to return
+     * @param startDate optional start date (dd-MM-yyyy) to include entries on or after this date
+     * @param endDate   optional end date (dd-MM-yyyy) to include entries on or before this date
+     * @return          a HTTP 200 Response containing a LogPagedResult with the matching log lines and pagination metadata
+     */
     @Operation(summary = "Get audit details.", description = "Get audit details.", operationId = "get-audit-data", tags = {
             "Logs" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_READ_ACCESS }),

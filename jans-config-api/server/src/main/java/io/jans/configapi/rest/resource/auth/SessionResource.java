@@ -48,6 +48,14 @@ public class SessionResource extends ConfigBaseResource {
     @Inject
     SessionService sessionService;
 
+    /**
+     * Retrieve all sessions using the resource's default search, paging, and sorting parameters.
+     *
+     * This endpoint returns a paged listing of session entries built with the default start index,
+     * page size, and sort order defined by the service.
+     *
+     * @return a Response whose entity is a SessionPagedResult containing session entries and paging metadata
+     */
     @Operation(summary = "Return all session", description = "Return all session", operationId = "get-sessions", tags = {
             "Auth - Session Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = {
@@ -76,6 +84,17 @@ public class SessionResource extends ConfigBaseResource {
         return Response.ok(sessionPagedResult).build();
     }
 
+    /**
+     * Searches sessions matching the provided criteria and returns a paged result.
+     *
+     * @param limit max number of results to return
+     * @param pattern filter pattern applied to session attributes
+     * @param startIndex 1-based index of the first result to return
+     * @param sortBy attribute used to order the returned results
+     * @param sortOrder "ascending" or "descending" sort direction
+     * @param fieldValuePair comma-separated field/value filters or comparisons (for example: "userDn=...,expirationDate>2025-09-25")
+     * @return HTTP 200 response containing a SessionPagedResult with the matching sessions
+     */
     @Operation(summary = "Search session", description = "Search session", operationId = "search-session", tags = {
             "Auth - Session Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = {
@@ -116,6 +135,12 @@ public class SessionResource extends ConfigBaseResource {
 
     }
 
+    /**
+     * Retrieve the session corresponding to the provided session identifier.
+     *
+     * @param sid the session identifier (SID) to retrieve
+     * @return the SessionId corresponding to the provided SID
+     */
     @Operation(summary = "Get session by id.", description = "Get session by id.", operationId = "get-session-by-id", tags = {
             "Auth - Session Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = {
@@ -145,6 +170,12 @@ public class SessionResource extends ConfigBaseResource {
         return Response.ok(session).build();
     }
 
+    /**
+     * Revokes all active sessions for the specified user distinguished name (DN).
+     *
+     * @param userDn the user's distinguished name whose sessions will be revoked
+     * @return an empty Response with HTTP 200 OK when revocation is completed
+     */
     @Operation(summary = "Revoke all sessions by userDn", description = "Revoke all sessions by userDn", operationId = "revoke-user-session", tags = {
             "Auth - Session Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
@@ -171,6 +202,12 @@ public class SessionResource extends ConfigBaseResource {
         return Response.ok().build();
     }
 
+    /**
+     * Deletes the session identified by the given session identifier.
+     *
+     * @param sid the session identifier to revoke
+     * @return an HTTP response; on successful revocation returns 200 OK with an empty body
+     */
     @Operation(summary = "Delete a session.", description = "Delete a session.", operationId = "delete-session", tags = {
             "Auth - Session Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,

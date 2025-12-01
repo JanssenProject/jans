@@ -60,6 +60,17 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @Inject
     ClientService clientService;
 
+    /**
+     * Retrieve a paged list of UMA resources matching the given search criteria.
+     *
+     * @param limit        maximum number of results to return
+     * @param pattern      search pattern used to filter resources
+     * @param startIndex   1-based index of the first result to return
+     * @param sortBy       attribute used to order the results
+     * @param sortOrder    sort direction; allowed values are "ascending" and "descending"
+     * @param fieldValuePair  single field=value filter to apply to the search
+     * @return             a Response whose entity is a PagedResult of UmaResource objects (HTTP 200)
+     */
     @Operation(summary = "Gets list of UMA resources", description = "Gets list of UMA resources", operationId = "get-oauth-uma-resources", tags = {
             "OAuth - UMA Resources" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }),
@@ -98,6 +109,13 @@ public class UmaResourcesResource extends ConfigBaseResource {
         return Response.ok(doSearch(searchReq)).build();
     }
 
+    /**
+     * Retrieve an UMA resource by its identifier.
+     *
+     * @param id the UMA resource identifier (inum)
+     * @return the UMA resource with the given id
+     * @throws NotFoundException if no UMA resource exists for the given id
+     */
     @Operation(summary = "Gets an UMA resource by ID", description = "Gets an UMA resource by ID", operationId = "get-oauth-uma-resources-by-id", tags = {
             "OAuth - UMA Resources" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }),
@@ -120,6 +138,12 @@ public class UmaResourcesResource extends ConfigBaseResource {
         return Response.ok(findOrThrow(id)).build();
     }
 
+    /**
+     * Fetches UMA resources associated with a given client identifier.
+     *
+     * @param associatedClientId the client identifier whose UMA resources will be returned
+     * @return a Response whose entity is a list of UmaResource objects serialized as JSON
+     */
     @Operation(summary = "Fetch uma resources by client id", description = "Fetch uma resources by client id", operationId = "get-oauth-uma-resources-by-clientid", tags = {
             "OAuth - UMA Resources" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }),
@@ -143,6 +167,15 @@ public class UmaResourcesResource extends ConfigBaseResource {
         return Response.ok(getUmaResourceByClient(associatedClientId)).build();
     }
 
+    /**
+     * Create a new UMA resource and persist it.
+     *
+     * Validates that the resource's name and description are present, assigns a new identifier and DN,
+     * persists the resource, and returns the created resource with its id and DN populated.
+     *
+     * @param umaResource the UMA resource to create; must include non-null name and description
+     * @return the created UmaResource with its generated id and DN
+     */
     @Operation(summary = "Creates an UMA resource", description = "Creates an UMA resource", operationId = "post-oauth-uma-resources", tags = {
             "OAuth - UMA Resources" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }),
@@ -171,6 +204,13 @@ public class UmaResourcesResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(umaResource).build();
     }
 
+    /**
+     * Retrieve the UMA resource with the specified id.
+     *
+     * @param id the UMA resource id (inum)
+     * @return the UmaResource with the specified id
+     * @throws NotFoundException if no resource exists for the given id
+     */
     private UmaResource findOrThrow(String id) {
         try {
             UmaResource existingResource = umaResourceService.getResourceById(id);
@@ -181,6 +221,14 @@ public class UmaResourcesResource extends ConfigBaseResource {
         }
     }
 
+    /**
+     * Update an existing UMA resource.
+     *
+     * Updates the stored UMA resource identified by the supplied resource's id. The provided resource must include an id; the response contains the updated UMA resource.
+     *
+     * @param resource the UMA resource payload; must include a valid id
+     * @return the updated UmaResource
+     */
     @Operation(summary = "Updates an UMA resource", description = "Updates an UMA resource", operationId = "put-oauth-uma-resources", tags = {
             "OAuth - UMA Resources" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }),
@@ -209,6 +257,15 @@ public class UmaResourcesResource extends ConfigBaseResource {
         return Response.ok(resource).build();
     }
 
+    /**
+     * Apply a JSON Patch document to an existing UMA resource identified by its id.
+     *
+     * @param id         the identifier of the UMA resource to patch
+     * @param pathString a JSON Patch document (as a JSON string) to apply to the resource
+     * @return           a Response containing the patched UmaResource with HTTP 200 OK
+     * @throws JsonPatchException if the patch document cannot be applied to the resource
+     * @throws IOException        if the patch document cannot be read or parsed
+     */
     @Operation(summary = "Patch UMA resource", description = "Patch UMA resource", operationId = "patch-oauth-uma-resources-by-id", tags = {
             "OAuth - UMA Resources" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }),
@@ -237,6 +294,12 @@ public class UmaResourcesResource extends ConfigBaseResource {
         return Response.ok(existingResource).build();
     }
 
+    /**
+     * Deletes the UMA resource identified by the given id.
+     *
+     * @param id the identifier of the UMA resource to delete
+     * @return HTTP 204 No Content response when the resource is successfully deleted
+     */
     @Operation(summary = "Deletes an UMA resource", description = "Deletes an UMA resource", operationId = "delete-oauth-uma-resources-by-id", tags = {
             "OAuth - UMA Resources" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_RESOURCES_DELETE_ACCESS }),

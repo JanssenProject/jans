@@ -65,6 +65,18 @@ public class AttributesResource extends ConfigBaseResource {
     @Inject
     AttributeService attributeService;
 
+    /**
+     * Retrieve a paged list of Jans attributes matching the provided filters.
+     *
+     * @param limit         maximum number of results to return
+     * @param pattern       search pattern to match attribute fields
+     * @param status        attribute status filter (use ApiConstants.ALL to include all)
+     * @param startIndex    1-based index of the first result to return
+     * @param sortBy        attribute field used to sort results
+     * @param sortOrder     sorting direction; allowed values are "ascending" and "descending"
+     * @param fieldValuePair comma-separated field=value pairs to further filter results (e.g. "adminCanEdit=true,dataType=string")
+     * @return              a Response containing a PagedResult of JansAttribute objects that match the query
+     */
     @Operation(summary = "Gets a list of Jans attributes.", description = "Gets a list of Jans attributes.", operationId = "get-attributes", tags = {
             "Attribute" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS }),
@@ -102,6 +114,12 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.ok(doSearch(searchReq, status)).build();
     }
 
+    /**
+     * Retrieve the JansAttribute identified by the provided inum.
+     *
+     * @param inum the attribute's inum (unique identifier)
+     * @return the attribute that matches the given inum
+     */
     @Operation(summary = "Gets an attribute based on inum", description = "Gets an attribute based on inum", operationId = "get-attributes-by-inum", tags = {
             "Attribute" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS }),
@@ -124,6 +142,14 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.ok(attribute).build();
     }
 
+    /**
+     * Creates a new JansAttribute if valid and not conflicting.
+     *
+     * Validates required fields (name, displayName, dataType), ensures the attribute name is unique and defined in the DB schema, assigns a new inum and DN, persists the attribute, and returns the created resource.
+     *
+     * @param attribute the JansAttribute to create; must include non-null name, displayName, and dataType
+     * @return the created JansAttribute with assigned inum and dn
+     */
     @Operation(summary = "Adds a new attribute", description = "Adds a new attribute", operationId = "post-attributes", tags = {
             "Attribute" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }),
@@ -173,6 +199,17 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
+    /**
+     * Update an existing JansAttribute identified by its inum.
+     *
+     * Validates required fields, checks for name conflicts and schema definition, applies the update, and returns the persisted attribute.
+     *
+     * @param attribute the JansAttribute to update; must include a valid `inum` and non-null `name`, `displayName`, and `dataType`
+     * @return the updated JansAttribute
+     * @throws WebApplicationException if the attribute type is not defined in the DB schema (results in 406 Not Acceptable)
+     * @throws WebApplicationException if the target attribute (by inum) is not found
+     * @throws WebApplicationException if another attribute with the same name but a different inum exists (bad request)
+     */
     @Operation(summary = "Updates an existing attribute", description = "Updates an existing attribute", operationId = "put-attributes", tags = {
             "Attribute" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }),
@@ -229,6 +266,17 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.ok(result).build();
     }
 
+    /**
+     * Apply a JSON Patch to the JansAttribute identified by the given inum.
+     *
+     * Retrieves the attribute, applies the provided JSON Patch document, persists the update, and returns the modified attribute.
+     *
+     * @param inum the identifier of the attribute to patch
+     * @param pathString the JSON Patch document as a string (RFC 6902)
+     * @return the updated JansAttribute
+     * @throws JsonPatchException if the patch document is invalid or cannot be applied to the attribute
+     * @throws IOException if the patch cannot be read or parsed
+     */
     @Operation(summary = "Partially modify a JansAttribute", description = "Partially modify a JansAttribute", operationId = "patch-attributes-by-inum", tags = {
             "Attribute" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }),
@@ -256,6 +304,12 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.ok(existingAttribute).build();
     }
 
+    /**
+     * Deletes the attribute identified by the provided inum.
+     *
+     * @param inum the attribute identifier (inum)
+     * @return a Response with HTTP 204 No Content when deletion succeeds
+     */
     @Operation(summary = "Deletes an attribute based on inum", description = "Deletes an attribute based on inum", operationId = "delete-attributes-by-inum", tags = {
             "Attribute" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_DELETE_ACCESS }),

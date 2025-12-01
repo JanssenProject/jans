@@ -51,6 +51,11 @@ public class KcLinkConfigResource extends BaseResource {
     @Inject
     KcLinkConfigService kcLinkConfigService;
 
+    /**
+     * Retrieve the KC Link application configuration.
+     *
+     * @return the current AppConfiguration containing KC Link properties
+     */
     @Operation(summary = "Gets KC Link configuration properties", description = "Gets KC Link configuration properties", operationId = "get-kc-link-properties", tags = {
             "KC Link - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_LINK_CONFIG_READ_ACCESS }),
@@ -77,6 +82,12 @@ public class KcLinkConfigResource extends BaseResource {
         
     }
 
+    /**
+     * Persist the provided KC Link configuration properties and return the applied configuration.
+     *
+     * @param kcLinkAppConf the KC Link configuration to apply
+     * @return the updated AppConfiguration reflecting the persisted KC Link settings
+     */
     @Operation(summary = "Update KC Link configuration properties", description = "Update KC Link configuration properties", operationId = "put-kc-link-properties", tags = {
             "KC Link - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_LINK_CONFIG_WRITE_ACCESS }),
@@ -106,6 +117,14 @@ public class KcLinkConfigResource extends BaseResource {
 
     }
 
+    /**
+     * Apply a JSON Patch to the KC Link configuration and persist the changes.
+     *
+     * @param jsonPatchString JSON Patch document (RFC 6902) as a string to apply to the current KC Link dynamic configuration.
+     * @return HTTP 200 response containing the updated AppConfiguration.
+     * @throws JsonPatchException if the patch document cannot be applied to the current configuration.
+     * @throws IOException if processing the patch fails due to I/O or parsing errors.
+     */
     @Operation(summary = "Partially modifies KC Link configuration properties.", description = "Partially modifies KC Link configuration properties.", operationId = "patch-kc-link-properties", tags = {
             "KC Link - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_LINK_CONFIG_WRITE_ACCESS }),

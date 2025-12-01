@@ -42,6 +42,11 @@ public class ScimConfigResource extends BaseResource {
     @Inject
     ScimConfigService scimConfigService;
 
+    /**
+     * Retrieve the current SCIM application configuration.
+     *
+     * @return a Response with the current AppConfiguration serialized as JSON (HTTP 200 on success)
+     */
     @Operation(summary = "Retrieves SCIM App configuration", description = "Retrieves SCIM App configuration", operationId = "get-scim-config", tags = {
             "SCIM - Config Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SCIM_READ_ACCESS }),
@@ -62,6 +67,14 @@ public class ScimConfigResource extends BaseResource {
         return Response.ok(appConfiguration).build();
     }
 
+    /**
+     * Apply a JSON Patch to the SCIM App configuration and persist the change.
+     *
+     * @param requestString JSON Patch document (array of patch operations) as a string.
+     * @return the updated AppConfiguration after the patch is applied.
+     * @throws IOException if reading or writing the stored configuration fails.
+     * @throws JsonPatchException if the provided patch document cannot be applied.
+     */
     @Operation(summary = "Patch SCIM App configuration", description = "Patch SCIM App configuration", operationId = "patch-scim-config", tags = {
             "SCIM - Config Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SCIM_WRITE_ACCESS }),
