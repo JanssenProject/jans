@@ -143,6 +143,9 @@ class CloudSqlConnectorMixin:
         This function creates a SQLAlchemy-compatible connection factory that uses
         Google Cloud SQL Python Connector with LAZY refresh strategy and Private IP.
 
+        The password is fetched fresh on each connection to support runtime
+        password rotation without requiring application restart.
+
         Environment variables used:
             - CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME: Cloud SQL instance connection name
               (format: project:region:instance)
@@ -165,20 +168,23 @@ class CloudSqlConnectorMixin:
 
         db_user = os.environ.get("CN_SQL_DB_USER", "jans")
         db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
-        db_password = get_sql_password(manager)
         driver = self.cloudsql_driver
+        connector = self._cloudsql_connector
 
         def getconn() -> _t.Any:
             """Create a connection to Cloud SQL using Private IP.
 
+            The password is fetched fresh on each call to support runtime
+            password rotation.
+
             Returns:
                 A database connection object.
             """
-            conn = self._cloudsql_connector.connect(
+            conn = connector.connect(
                 instance_connection_name,
                 driver,
                 user=db_user,
-                password=db_password,
+                password=get_sql_password(manager),
                 db=db_name,
                 ip_type=IPTypes.PRIVATE,
             )
@@ -463,7 +469,7 @@ class SqlSchemaMixin:
         return syntax
 
 
-_sql_client_instances: weakref.WeakSet["SqlClient"] = weakref.WeakSet()
+_sql_client_instances: weakref.WeakSet[SqlClient] = weakref.WeakSet()
 
 
 def _cleanup_sql_clients() -> None:
