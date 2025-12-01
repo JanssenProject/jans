@@ -25,7 +25,6 @@ import io.jans.fido2.model.conf.Conf;
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.Configuration;
-import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
