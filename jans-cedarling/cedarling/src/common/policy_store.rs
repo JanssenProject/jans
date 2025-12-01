@@ -13,6 +13,7 @@ pub mod entity_parser;
 pub mod errors;
 pub mod issuer_parser;
 pub mod loader;
+pub mod manager;
 pub mod manifest_validator;
 pub mod metadata;
 pub mod policy_parser;
@@ -44,6 +45,7 @@ pub use loader::{
     DefaultPolicyStoreLoader, EntityFile, IssuerFile, LoadedPolicyStore, PolicyFile,
     PolicyStoreLoader,
 };
+pub use manager::{ConversionError, PolicyStoreManager};
 pub use manifest_validator::{
     ManifestValidationError, ManifestValidationResult, ManifestValidator,
 };
@@ -489,6 +491,45 @@ pub struct PoliciesContainer {
 }
 
 impl PoliciesContainer {
+    /// Create a new `PoliciesContainer` from a policy set and description map.
+    ///
+    /// This constructor is used by the policy store manager when converting
+    /// from the new directory/archive format to the legacy format.
+    ///
+    /// # Arguments
+    ///
+    /// * `policy_set` - The compiled Cedar policy set
+    /// * `descriptions` - Map of policy ID to description (typically filename)
+    pub fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
+        let raw_policy_info = descriptions
+            .into_iter()
+            .map(|(id, desc)| {
+                (
+                    id,
+                    RawPolicy {
+                        policy_content: MaybeEncoded::Plain(String::new()),
+                        description: desc,
+                    },
+                )
+            })
+            .collect();
+
+        Self {
+            policy_set,
+            raw_policy_info,
+        }
+    }
+
+    /// Create an empty `PoliciesContainer` with the given policy set.
+    ///
+    /// Used when there are no policy descriptions available.
+    pub fn new_empty(policy_set: cedar_policy::PolicySet) -> Self {
+        Self {
+            policy_set,
+            raw_policy_info: HashMap::new(),
+        }
+    }
+
     /// Get [`cedar_policy::PolicySet`]
     pub fn get_set(&self) -> &cedar_policy::PolicySet {
         &self.policy_set
