@@ -46,7 +46,7 @@ impl Default for DefaultEntitiesLimits {
 impl DefaultEntitiesLimits {
     /// Default maximum number of entities allowed
     pub const DEFAULT_MAX_ENTITIES: usize = 1000;
-    /// Default maximum size of base64-encoded strings in bytes
+    /// Default maximum size of entity JSON representation in bytes
     pub const DEFAULT_MAX_ENTITY_SIZE: usize = 1024 * 1024;
 
     pub fn validate_default_entity_data_size(
