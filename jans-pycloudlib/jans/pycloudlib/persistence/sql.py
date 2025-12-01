@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import atexit
 import json
 import logging
 import os
 import re
 import typing as _t
 import warnings
+import weakref
 from collections import defaultdict
 from collections.abc import Callable
 from functools import cached_property
@@ -169,6 +171,7 @@ class PostgresqlAdapter:
 
         Raises:
             RuntimeError: If Cloud SQL Connector library is not installed.
+            ValueError: If CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME is not set or empty.
 
         Example:
             >>> adapter = PostgresqlAdapter()
@@ -181,12 +184,20 @@ class PostgresqlAdapter:
                 "Install with: pip install 'jans-pycloudlib[cloudsql]'"
             )
 
+        instance_connection_name = os.environ.get(
+            "CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME", ""
+        ).strip()
+
+        if not instance_connection_name:
+            raise ValueError(
+                "CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME environment variable is not set or empty. "
+                "Please set it to your Cloud SQL instance connection name in the format: "
+                "project:region:instance (e.g., my-project:us-central1:my-instance)"
+            )
+
         if self._cloudsql_connector is None:
             self._cloudsql_connector = Connector(refresh_strategy="LAZY")
 
-        instance_connection_name = os.environ.get(
-            "CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME", ""
-        )
         db_user = os.environ.get("CN_SQL_DB_USER", "jans")
         db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
         db_password = get_sql_password(manager)
@@ -214,6 +225,22 @@ class PostgresqlAdapter:
             index_elements=[table.c.doc_id],
             set_=update_mapping,
         )
+
+    def close(self) -> None:
+        """Close the Cloud SQL Connector and release resources.
+
+        This method should be called when the adapter is no longer needed to
+        properly release the token-refresh thread and other resources used by
+        the Cloud SQL Python Connector.
+        """
+        if self._cloudsql_connector is not None:
+            try:
+                self._cloudsql_connector.close()
+                logger.debug("Cloud SQL Connector closed successfully")
+            except Exception as exc:
+                logger.warning(f"Error closing Cloud SQL Connector: {exc}")
+            finally:
+                self._cloudsql_connector = None
 
 
 class MysqlAdapter:
@@ -330,6 +357,7 @@ class MysqlAdapter:
 
         Raises:
             RuntimeError: If Cloud SQL Connector library is not installed.
+            ValueError: If CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME is not set or empty.
 
         Example:
             >>> adapter = MysqlAdapter()
@@ -342,12 +370,20 @@ class MysqlAdapter:
                 "Install with: pip install 'jans-pycloudlib[cloudsql]'"
             )
 
+        instance_connection_name = os.environ.get(
+            "CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME", ""
+        ).strip()
+
+        if not instance_connection_name:
+            raise ValueError(
+                "CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME environment variable is not set or empty. "
+                "Please set it to your Cloud SQL instance connection name in the format: "
+                "project:region:instance (e.g., my-project:us-central1:my-instance)"
+            )
+
         if self._cloudsql_connector is None:
             self._cloudsql_connector = Connector(refresh_strategy="LAZY")
 
-        instance_connection_name = os.environ.get(
-            "CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME", ""
-        )
         db_user = os.environ.get("CN_SQL_DB_USER", "jans")
         db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
         db_password = get_sql_password(manager)
@@ -372,6 +408,22 @@ class MysqlAdapter:
 
     def upsert_query(self, table: Table, column_mapping: dict[str, _t.Any], update_mapping: dict[str, _t.Any]) -> _t.Any:
         return mysql_insert(table).values(column_mapping).on_duplicate_key_update(update_mapping)
+
+    def close(self) -> None:
+        """Close the Cloud SQL Connector and release resources.
+
+        This method should be called when the adapter is no longer needed to
+        properly release the token-refresh thread and other resources used by
+        the Cloud SQL Python Connector.
+        """
+        if self._cloudsql_connector is not None:
+            try:
+                self._cloudsql_connector.close()
+                logger.debug("Cloud SQL Connector closed successfully")
+            except Exception as exc:
+                logger.warning(f"Error closing Cloud SQL Connector: {exc}")
+            finally:
+                self._cloudsql_connector = None
 
 
 def doc_id_from_dn(dn: str) -> str:
@@ -470,13 +522,41 @@ class SqlSchemaMixin:
         return syntax
 
 
+_sql_client_instances: weakref.WeakSet["SqlClient"] = weakref.WeakSet()
+
+
+def _cleanup_sql_clients() -> None:
+    """Cleanup all SqlClient instances on interpreter shutdown.
+
+    This function is registered with atexit to ensure proper cleanup of
+    Cloud SQL Connectors and SQLAlchemy engines when the process exits.
+    """
+    for client in list(_sql_client_instances):
+        try:
+            client.close()
+        except Exception as exc:
+            logger.debug(f"Error during atexit cleanup of SqlClient: {exc}")
+
+
+atexit.register(_cleanup_sql_clients)
+
+
 class SqlClient(SqlSchemaMixin):
     """This class interacts with SQL database.
+
+    This class can be used as a context manager to ensure proper cleanup of
+    resources (Cloud SQL Connector and SQLAlchemy engine) when done.
 
     Args:
         manager: An instance of manager class.
         *args: Positional arguments.
         **kwargs: Keyword arguments.
+
+    Example:
+        >>> with SqlClient(manager) as client:
+        ...     if client.connected():
+        ...         print("Connected to database")
+        # Resources are automatically cleaned up when exiting the context
     """
 
     def __init__(self, manager: Manager, *args: _t.Any, **kwargs: _t.Any) -> None:
@@ -491,9 +571,12 @@ class SqlClient(SqlSchemaMixin):
         self.dialect = self.adapter.dialect
         self._metadata: _t.Optional[MetaData] = None
         self._engine = None
+        self._closed = False
 
         if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
             self._bootstrap_ssl_assets()
+
+        _sql_client_instances.add(self)
 
     def _bootstrap_ssl_assets(self):
         for filepath, secret_name in [
@@ -566,6 +649,57 @@ class SqlClient(SqlSchemaMixin):
             True if the adapter has Cloud SQL Connector enabled.
         """
         return getattr(self.adapter, "cloudsql_connector_enabled", False)
+
+    def close(self) -> None:
+        """Close the SQL client and release all resources.
+
+        This method disposes the SQLAlchemy engine (releasing connection pool)
+        and closes the Cloud SQL Connector (stopping token-refresh threads).
+        After calling this method, the client should not be used.
+
+        This method is idempotent - calling it multiple times is safe.
+        """
+        if self._closed:
+            return
+
+        self._closed = True
+
+        if self._engine is not None:
+            try:
+                self._engine.dispose()
+                logger.debug("SQLAlchemy engine disposed successfully")
+            except Exception as exc:
+                logger.warning(f"Error disposing SQLAlchemy engine: {exc}")
+            finally:
+                self._engine = None
+
+        if hasattr(self.adapter, "close"):
+            self.adapter.close()
+
+        self._metadata = None
+
+    def __enter__(self) -> "SqlClient":
+        """Enter the context manager.
+
+        Returns:
+            The SqlClient instance.
+        """
+        return self
+
+    def __exit__(
+        self,
+        exc_type: _t.Optional[type[BaseException]],
+        exc_val: _t.Optional[BaseException],
+        exc_tb: _t.Optional[_t.Any],
+    ) -> None:
+        """Exit the context manager and cleanup resources.
+
+        Args:
+            exc_type: Exception type if an exception was raised.
+            exc_val: Exception value if an exception was raised.
+            exc_tb: Exception traceback if an exception was raised.
+        """
+        self.close()
 
     @property
     def engine_url(self) -> URL:
