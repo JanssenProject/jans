@@ -9,6 +9,8 @@
 
 pub(crate) mod app_types;
 pub(crate) mod cedar_schema;
+pub(crate) mod default_entities;
+pub(crate) mod default_entities_limits;
 pub(crate) mod json_rules;
 
 pub mod issuer_utils;
