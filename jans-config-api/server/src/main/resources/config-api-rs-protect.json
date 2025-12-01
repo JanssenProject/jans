@@ -2929,7 +2929,7 @@
           "superScopes": [
             {
               "inum": "1800.05.26",
-              "name": "https://jans.io/oauth/config/authorizations.admin"
+              "name": "https://jans.io/oauth/client/authorizations.admin"
             },
             {
               "inum": "1800.03.1",
@@ -2955,7 +2955,7 @@
           "superScopes": [
             {
               "inum": "1800.05.26",
-              "name": "https://jans.io/oauth/config/authorizations.admin"
+              "name": "https://jans.io/oauth/client/authorizations.admin"
             },
             {
               "inum": "1800.03.3",
