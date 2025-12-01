@@ -76,8 +76,8 @@ impl DefaultEntities {
     }
 }
 
-/// Structure that holds parsed default entities.
-/// Errors that may occur during parsing holds inside structure and can get my `warns` method.
+/// Structure that holds parsed default entities along with non-fatal parsing issues.
+/// Warnings collected during parsing are exposed via the `warns` method.
 ///
 /// # JSON Serialization
 /// This structure is deserialized from JSON with the following format:
