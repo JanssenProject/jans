@@ -20,7 +20,7 @@ needs an access token with appropriate scopes. Get the access token from the Jan
 
 ### Build MCP server
 
-- Clone the `Jans` repository from GitHub and navigate to 
+- Clone the `Jans` repository from GitHub and navigate to
 `demos/mcp/config-api/mcp-config-api-server` directory.
 - Run `mvn clean package` to build the project
 
@@ -29,7 +29,7 @@ Project creates an uber jar in `target` directory.
 ### Run the MCP server
 
 - Run the command below after replacing the values for `JANS_HOST_URL` and `JANS_OAUTH_ACCESS_TOKEN` with the values for your Janssen server. This will start chrome and run mcp inspector. If you are running MCP server against a Janssen server with self-signed certificate, run this server in [development mode](#development-mode).
-    ```
+    ```bash
     export JANS_HOST_URL="https://example.jans.host.io" && 
     export JANS_OAUTH_ACCESS_TOKEN="b6c8ef0b-09b5-xxx-xxx-xxx" && 
     npx @modelcontextprotocol/inspector java -jar target/jans-mcp-config-api-server-0.0.1.jar
@@ -48,7 +48,7 @@ This MCP server can be run in development mode by adding `-dev` flag to the
 command line. This will disable SSL certificate validation. This is useful
 when running MCP server against a Janssen server with self-signed certificate.
 
-    ```
+    ```bash
     export JANS_HOST_URL="https://example.jans.host.io" && 
     export JANS_OAUTH_ACCESS_TOKEN="b6c8ef0b-09b5-xxx-xxx-xxx" && 
     npx @modelcontextprotocol/inspector java -jar target/jans-mcp-config-api-server-0.0.1.jar -dev
