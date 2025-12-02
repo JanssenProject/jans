@@ -9,8 +9,12 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ToolHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(ToolHandler.class);
     private final JansConfigApiClient apiClient;
     private final ObjectMapper objectMapper;
 
@@ -66,7 +70,7 @@ public class ToolHandler {
                     .isError(false)
                     .build();
         } catch (Exception e) {
-            e.printStackTrace(); // Print full stack trace for debugging
+            logger.error("Error listing OIDC clients", e);
             return createErrorResult("Error listing OIDC clients: " + e.getClass().getName() + ": " + e.getMessage());
         }
     }
