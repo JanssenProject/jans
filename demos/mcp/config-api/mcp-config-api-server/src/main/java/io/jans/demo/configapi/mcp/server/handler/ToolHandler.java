@@ -24,7 +24,6 @@ public class ToolHandler {
             // Extract query parameters from arguments
             // Handle both String and Number types (different LLMs send different types)
             Integer limit = 50;
-            Integer limit = 50;
             if (arguments.get("limit") != null) {
                 Object limitObj = arguments.get("limit");
                 try {
