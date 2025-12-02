@@ -84,11 +84,30 @@ The Cloud SQL Connector functionality is implemented using a shared mixin patter
 
 This design eliminates code duplication while allowing each adapter to specify its driver.
 
+### Creating a Manager Instance
+
+To create a proper `Manager` instance, use the following method:
+
+```python
+from jans.pycloudlib.manager import Manager
+
+manager = Manager()
+manager.bootstrap()  # handles asset bootstrap, e.g. Vault's RoleID and SecretID, for configs and secrets layers
+```
+
+or use the shortcut instead:
+
+```python
+from jans.pycloudlib import get_manager
+
+manager = get_manager()
+```
+
 ### Code Example - PostgreSQL (Context Manager)
 
 ```python
 from jans.pycloudlib.persistence.sql import SqlClient
-from jans.pycloudlib.manager import Manager
+from jans.pycloudlib import get_manager
 
 import os
 os.environ["CN_SQL_CLOUDSQL_CONNECTOR_ENABLED"] = "true"
@@ -97,7 +116,7 @@ os.environ["CN_SQL_DB_DIALECT"] = "pgsql"
 os.environ["CN_SQL_DB_USER"] = "jans"
 os.environ["CN_SQL_DB_NAME"] = "jans"
 
-manager = Manager()
+manager = get_manager()
 
 with SqlClient(manager) as client:
     if client.connected():
@@ -108,7 +127,7 @@ with SqlClient(manager) as client:
 
 ```python
 from jans.pycloudlib.persistence.sql import SqlClient
-from jans.pycloudlib.manager import Manager
+from jans.pycloudlib import get_manager
 
 import os
 os.environ["CN_SQL_CLOUDSQL_CONNECTOR_ENABLED"] = "true"
@@ -117,7 +136,7 @@ os.environ["CN_SQL_DB_DIALECT"] = "mysql"
 os.environ["CN_SQL_DB_USER"] = "jans"
 os.environ["CN_SQL_DB_NAME"] = "jans"
 
-manager = Manager()
+manager = get_manager()
 
 with SqlClient(manager) as client:
     if client.connected():
@@ -258,32 +277,28 @@ The Cloud SQL Connector is **opt-in** and disabled by default. Existing deployme
 
 To migrate to Cloud SQL Connector:
 
-1. Install the optional dependencies: `pip install 'jans-pycloudlib[cloudsql]'`
-2. Complete the IAM and VPC checklist above
-3. Set `CN_SQL_CLOUDSQL_CONNECTOR_ENABLED=true`
-4. Set `CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME` to your instance connection name
-5. Deploy your updated Cloud Run service
+1. Complete the IAM and VPC checklist above
+2. Set `CN_SQL_CLOUDSQL_CONNECTOR_ENABLED=true`
+3. Set `CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME` to your instance connection name
+4. Deploy your updated Cloud Run service
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **"Cloud SQL Python Connector is not installed"**
-   - Install with: `pip install 'jans-pycloudlib[cloudsql]'`
-
-2. **"Permission denied" or IAM errors**
+1. **"Permission denied" or IAM errors**
    - Verify the service account has `roles/cloudsql.client` role
    - Check that the correct service account is attached to Cloud Run
 
-3. **Connection timeout**
+2. **Connection timeout**
    - Verify the VPC connector is properly configured
    - Check that the Cloud SQL instance has Private IP enabled
    - Ensure firewall rules allow egress to the instance
 
-4. **"Could not connect to Cloud SQL instance"**
+3. **"Could not connect to Cloud SQL instance"**
    - Verify `CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME` format: `project:region:instance`
    - Check that the instance exists and is running
 
-5. **MySQL strict mode errors**
+4. **MySQL strict mode errors**
    - The Cloud SQL Connector still applies MySQL strict mode settings
    - Check your data for compatibility with strict mode

@@ -92,8 +92,8 @@ class CloudSqlConnectorMixin:
         if enabled and not CLOUDSQL_CONNECTOR_AVAILABLE:
             logger.warning(
                 "CN_SQL_CLOUDSQL_CONNECTOR_ENABLED is set but cloud-sql-python-connector "
-                f"is not installed. Falling back to standard {self.fallback_driver_name} connection. "
-                "Install with: pip install 'jans-pycloudlib[cloudsql]'"
+                f"failed to import. Falling back to standard {self.fallback_driver_name} connection. "
+                "This may indicate a corrupt installation. Try reinstalling jans-pycloudlib."
             )
             return False
         return enabled and CLOUDSQL_CONNECTOR_AVAILABLE
@@ -130,14 +130,14 @@ class CloudSqlConnectorMixin:
         """
         if not CLOUDSQL_CONNECTOR_AVAILABLE:
             raise RuntimeError(
-                "Cloud SQL Python Connector is not installed. "
-                "Install with: pip install 'jans-pycloudlib[cloudsql]'"
+                "Cloud SQL Python Connector failed to import. "
+                "This may indicate a corrupt installation. Try reinstalling jans-pycloudlib."
             )
 
         if self._cloudsql_connector is None:
             self._cloudsql_connector = Connector(refresh_strategy="LAZY")
 
-    def get_cloudsql_connection_creator(self, manager: _t.Optional[Manager] = None) -> _t.Callable[[], _t.Any]:
+    def get_cloudsql_connection_creator(self, manager: Manager) -> _t.Callable[[], _t.Any]:
         """Create a connection factory for Cloud SQL Python Connector.
 
         This function creates a SQLAlchemy-compatible connection factory that uses
@@ -154,7 +154,8 @@ class CloudSqlConnectorMixin:
             - CN_SQL_PASSWORD_FILE: Path to file containing database password
 
         Args:
-            manager: An instance of Manager class for retrieving secrets.
+            manager: An instance of Manager class for retrieving secrets. Required
+                to fetch the database password when the password file is absent.
 
         Returns:
             A callable that creates database connections via Cloud SQL Connector.
@@ -610,6 +611,11 @@ class SqlClient(SqlSchemaMixin):
             return
 
         self._closed = True
+
+        try:
+            _sql_client_instances.discard(self)
+        except Exception:
+            pass
 
         if self._engine is not None:
             try:
@@ -1106,12 +1112,33 @@ def sync_sql_password(manager: Manager) -> None:
     )
 
 
-def get_sql_password(manager: Manager | None = None):
+def get_sql_password(manager: Manager | None = None) -> str:
+    """Get the SQL database password.
+
+    The password is retrieved from the password file if it exists,
+    otherwise it is fetched from the Manager's secret store.
+
+    Args:
+        manager: An instance of Manager class for retrieving secrets.
+            Required when the password file does not exist.
+
+    Returns:
+        The database password string.
+
+    Raises:
+        RuntimeError: If the password file does not exist and manager is None.
+    """
     password_file = get_sql_password_file()
     if os.path.isfile(password_file):
         return get_password_from_file(password_file)
 
-    # safer method to get credential
+    if manager is None:
+        raise RuntimeError(
+            f"SQL password file '{password_file}' does not exist and no Manager instance "
+            "was provided. Either create the password file or pass a Manager instance "
+            "to retrieve the password from the secret store."
+        )
+
     return manager.secret.get("sql_password")
 
 
