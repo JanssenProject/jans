@@ -356,14 +356,25 @@ class JCA_CLI:
                 if log_args and log_args[0].startswith('send:'):
                     try:
                         log_data = json.loads(log_args[1].strip("b").strip("'"))
+
+                    except Exception as e:
+                        self.cli_logger.debug(f"Error while parsing json string: {e}")
+
+                    else:
+                        hidden_password_str = '*****'
+
+                        if 'customAttributes' in log_data:
+                            for prop in log_data['customAttributes']:
+                                if prop['name'] == 'userPassword':
+                                    prop['value'] = hidden_password_str
+
                         for prop in log_data:
                             if prop in ('userPassword', 'clientSecret'):
-                                log_data[prop] = '*****'
-                        log_args[1] = str(log_data)
-                    except Exception as e:
-                        pass
+                                log_data[prop] = hidden_password_str
 
-                self.cli_logger.debug(" ".join(log_args))
+                        log_args[1] = str(log_data)
+                        self.cli_logger.debug(" ".join(log_args))
+
             http.client.print = print_to_log
 
 
