@@ -39,9 +39,14 @@ public class ToolHandler {
             Integer startIndex = 0;
             if (arguments.get("startIndex") != null) {
                 Object startIndexObj = arguments.get("startIndex");
-                startIndex = startIndexObj instanceof Number
-                        ? ((Number) startIndexObj).intValue()
-                        : Integer.parseInt(startIndexObj.toString());
+                try {
+                    startIndex = startIndexObj instanceof Number
+                            ? ((Number) startIndexObj).intValue()
+                            : Integer.parseInt(startIndexObj.toString());
+                    startIndex = Math.max(0, startIndex); // Ensure non-negative
+                } catch (NumberFormatException e) {
+                    startIndex = 0; // Fall back to default
+                }
             }
 
             String sortBy = arguments.get("sortBy") != null
