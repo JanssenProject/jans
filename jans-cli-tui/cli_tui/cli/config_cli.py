@@ -357,8 +357,8 @@ class JCA_CLI:
                     try:
                         log_data = json.loads(log_args[1].strip("b").strip("'"))
 
-                    except Exception as e:
-                        self.cli_logger.debug(f"Error while parsing json string: {e}")
+                    except (TypeError, ValueError) as e:
+                        self.cli_logger.debug("Error while parsing json string: %s", e)
 
                     else:
                         hidden_password_str = '*****'
