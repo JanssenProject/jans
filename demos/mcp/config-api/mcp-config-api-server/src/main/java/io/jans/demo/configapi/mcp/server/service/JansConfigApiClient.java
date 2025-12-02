@@ -64,9 +64,21 @@ public class JansConfigApiClient {
                         }
                 };
 
-                SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
+                SSLContext sslContext;
+                try {
+                    sslContext = SSLContext.getInstance("TLSv1.3");
+                } catch (Exception e) {
+                    logger.warn("TLSv1.3 not available, falling back to TLSv1.2");
+                    sslContext = SSLContext.getInstance("TLSv1.2");
+                }
                 sslContext.init(null, trustAllCerts, new SecureRandom());
-                builder.sslContext(sslContext);
+                
+                // Explicitly restrict to modern TLS protocols
+                javax.net.ssl.SSLParameters sslParams = new javax.net.ssl.SSLParameters();
+                sslParams.setProtocols(new String[]{"TLSv1.3", "TLSv1.2"});
+                
+                builder.sslContext(sslContext)
+                       .sslParameters(sslParams);
             } else {
                 // PRODUCTION MODE: Use default SSL certificate validation
                 logger.info("Running in PRODUCTION mode - SSL certificate validation is ENABLED");
