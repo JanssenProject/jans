@@ -621,8 +621,8 @@ class SqlClient(SqlSchemaMixin):
 
         try:
             _sql_client_instances.discard(self)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"Error removing SqlClient from instance tracker: {exc}")
 
         if self._engine is not None:
             try:
@@ -638,7 +638,7 @@ class SqlClient(SqlSchemaMixin):
 
         self._metadata = None
 
-    def __enter__(self) -> SqlClient:
+    def __enter__(self) -> "SqlClient":
         """Enter the context manager.
 
         Returns:
