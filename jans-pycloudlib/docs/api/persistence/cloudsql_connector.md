@@ -1,14 +1,29 @@
-# Cloud SQL Python Connector
+# Cloud SQL Connector
 
-This module provides support for connecting to Google Cloud SQL instances (PostgreSQL and MySQL) from Cloud Run services using the Cloud SQL Python Connector with Private IP.
+This module provides support for connecting to Google Cloud SQL instances (PostgreSQL and MySQL) from Cloud Run services using Cloud SQL Connectors with Private IP.
 
 ## Overview
 
-The Cloud SQL Python Connector provides a secure and efficient way to connect to Cloud SQL instances without managing IP allowlists, SSL certificates, or network configurations manually. The connector handles secure tunnel establishment and automatic SSL/TLS encryption.
+The Cloud SQL Connectors provide a secure and efficient way to connect to Cloud SQL instances without managing IP allowlists, SSL certificates, or network configurations manually. The connectors handle secure tunnel establishment and automatic SSL/TLS encryption.
 
-**Note**: This implementation uses standard SQL username/password authentication. For IAM database authentication, additional configuration would be required (setting `enable_iam_auth=True` in the connector).
+**Note**: This implementation uses standard SQL username/password authentication. For IAM database authentication, additional configuration would be required.
 
-## Supported Databases
+## Architecture
+
+The Janssen Project uses two Cloud SQL Connectors to support both Python and Java components:
+
+| Component | Connector | Purpose |
+|-----------|-----------|---------|
+| Python services (jans-pycloudlib) | Cloud SQL Python Connector | SQLAlchemy database connections |
+| Java services (jans-auth-server, etc.) | Cloud SQL JDBC Socket Factory | JDBC database connections |
+
+Both connectors use the same environment variables (`CN_SQL_CLOUDSQL_CONNECTOR_ENABLED`, `CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME`) for consistent configuration.
+
+---
+
+## Python Connector
+
+### Supported Databases
 
 | Database | Driver | SQLAlchemy URL |
 |----------|--------|----------------|
@@ -169,9 +184,85 @@ finally:
 
 ---
 
+## Java JDBC Socket Factory
+
+The Janssen Project's Java services (jans-auth-server, jans-config-api, etc.) use the Cloud SQL JDBC Socket Factory for database connections when the Cloud SQL Connector is enabled.
+
+### How It Works
+
+When `CN_SQL_CLOUDSQL_CONNECTOR_ENABLED=true`, the Java services use a different JDBC connection URL format that leverages the Cloud SQL JDBC Socket Factory instead of direct TCP connections:
+
+**Standard Connection (Cloud SQL Connector disabled):**
+```
+jdbc:mysql://10.13.0.3:3306/jans?enabledTLSProtocols=TLSv1.2
+jdbc:postgresql://10.13.0.3:5432/jans
+```
+
+**Cloud SQL Connector Connection (Cloud SQL Connector enabled):**
+```
+jdbc:mysql:///jans?cloudSqlInstance=project:region:instance&socketFactory=com.google.cloud.sql.mysql.SocketFactory&serverTimezone=UTC
+jdbc:postgresql:///jans?cloudSqlInstance=project:region:instance&socketFactory=com.google.cloud.sql.postgres.SocketFactory
+```
+
+### Included JARs
+
+The following Cloud SQL JDBC Socket Factory JARs are included in the Janssen Docker images:
+
+| Database | JAR | Maven Coordinates |
+|----------|-----|-------------------|
+| MySQL | `mysql-socket-factory-connector-j-8-X.X.X.jar` | `com.google.cloud.sql:mysql-socket-factory-connector-j-8` |
+| PostgreSQL | `postgres-socket-factory-X.X.X.jar` | `com.google.cloud.sql:postgres-socket-factory` |
+
+These JARs are automatically copied to the Java classpath when `CN_SQL_CLOUDSQL_CONNECTOR_ENABLED=true`.
+
+### Configuration
+
+The Java services use the same environment variables as the Python connector:
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `CN_SQL_CLOUDSQL_CONNECTOR_ENABLED` | Enable Cloud SQL JDBC Socket Factory | Yes |
+| `CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME` | Cloud SQL instance connection name (format: `project:region:instance`) | Yes (when enabled) |
+| `CN_SQL_DB_NAME` | Database name | Yes |
+| `CN_SQL_DB_DIALECT` | Database dialect (`mysql` or `pgsql`) | Yes |
+
+### Why Use JDBC Socket Factory?
+
+When connecting from Cloud Run to Cloud SQL via Private IP, standard JDBC connections may fail with SSL certificate verification errors like:
+
+```
+java.security.cert.CertificateException: Server identity verification failed.
+None of the certificate's DNS or IP Subject Alternative Name entries matched the server hostname/IP '10.13.0.3'.
+```
+
+This happens because:
+1. Cloud SQL's SSL certificates have SANs for DNS names, not internal IPs
+2. The JDBC driver tries to verify the certificate against the IP address
+3. Verification fails because the IP isn't in the certificate's SANs
+
+The Cloud SQL JDBC Socket Factory solves this by:
+1. Establishing a secure tunnel to Cloud SQL
+2. Handling SSL/TLS encryption automatically
+3. Using Google's Application Default Credentials (ADC) for authentication to the Cloud SQL Admin API
+
+### Example Deployment
+
+```bash
+# Set environment variables for Cloud Run
+gcloud run deploy jans-auth-server \
+  --image=ghcr.io/janssenproject/jans/auth-server:latest \
+  --vpc-connector=my-vpc-connector \
+  --set-env-vars="CN_SQL_CLOUDSQL_CONNECTOR_ENABLED=true" \
+  --set-env-vars="CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME=my-project:us-central1:my-instance" \
+  --set-env-vars="CN_SQL_DB_NAME=jans" \
+  --set-env-vars="CN_SQL_DB_DIALECT=mysql"
+```
+
+---
+
 ## MANDATORY CHECKLIST: IAM and VPC Requirements
 
-Before deploying your Cloud Run service with Cloud SQL Python Connector, ensure all the following requirements are met:
+Before deploying your Cloud Run service with Cloud SQL Connector, ensure all the following requirements are met:
 
 ### IAM Requirements
 

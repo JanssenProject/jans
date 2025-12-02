@@ -69,9 +69,12 @@ RUN mkdir -p /usr/share/java \
 
 ARG TWILIO_VERSION=7.17.0
 ARG JSMPP_VERSION=2.3.7
+ARG CLOUDSQL_SOCKET_FACTORY_VERSION=1.27.0
 
 RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
+    && wget -q https://repo1.maven.org/maven2/com/google/cloud/sql/mysql-socket-factory-connector-j-8/${CLOUDSQL_SOCKET_FACTORY_VERSION}/mysql-socket-factory-connector-j-8-${CLOUDSQL_SOCKET_FACTORY_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
+    && wget -q https://repo1.maven.org/maven2/com/google/cloud/sql/postgres-socket-factory/${CLOUDSQL_SOCKET_FACTORY_VERSION}/postgres-socket-factory-${CLOUDSQL_SOCKET_FACTORY_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound jans-lock-service jans-lock-model jans-lock-cedarling cedarling-java; \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/${custom_lib}/${CN_VERSION}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/_libs"; \
@@ -88,7 +91,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=5343272241b17a3e4efa7d998ae031f6ad512aa1
+ENV JANS_SOURCE_VERSION=04d297c046dd9d8ef54c0544e6187153b7ed87cf
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)

@@ -1058,6 +1058,54 @@ class SqlClient(SqlSchemaMixin):
         return column_mapping
 
 
+def _build_jdbc_connection_uri(db_dialect: str, db_name: str, server_time_zone: str) -> str:
+    """Build the JDBC connection URI based on the database dialect and Cloud SQL connector settings.
+
+    Args:
+        db_dialect: The database dialect ('mysql' or 'pgsql').
+        db_name: The database name.
+        server_time_zone: The server timezone.
+
+    Returns:
+        The JDBC connection URI string.
+
+    Raises:
+        RuntimeError: If Cloud SQL connector is enabled but instance connection name is not set.
+    """
+    cloudsql_connector_enabled = as_boolean(os.environ.get("CN_SQL_CLOUDSQL_CONNECTOR_ENABLED", "false"))
+
+    if cloudsql_connector_enabled:
+        instance_connection_name = os.environ.get("CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME", "").strip()
+        if not instance_connection_name:
+            raise RuntimeError(
+                "Cloud SQL connector is enabled (CN_SQL_CLOUDSQL_CONNECTOR_ENABLED=true) but "
+                "CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME is not set. "
+                "Set it to your Cloud SQL instance connection name (project:region:instance)."
+            )
+
+        if db_dialect == "mysql":
+            return (
+                f"jdbc:mysql:///{db_name}"
+                f"?cloudSqlInstance={instance_connection_name}"
+                f"&socketFactory=com.google.cloud.sql.mysql.SocketFactory"
+                f"&serverTimezone={server_time_zone}"
+            )
+        else:  # pgsql
+            return (
+                f"jdbc:postgresql:///{db_name}"
+                f"?cloudSqlInstance={instance_connection_name}"
+                f"&socketFactory=com.google.cloud.sql.postgres.SocketFactory"
+            )
+    else:
+        db_host = os.environ.get("CN_SQL_DB_HOST", "localhost")
+        db_port = os.environ.get("CN_SQL_DB_PORT", 3306)
+
+        if db_dialect == "mysql":
+            return f"jdbc:mysql://{db_host}:{db_port}/{db_name}?enabledTLSProtocols=TLSv1.2"
+        else:  # pgsql
+            return f"jdbc:postgresql://{db_host}:{db_port}/{db_name}"
+
+
 def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to SQL database server.
 
@@ -1072,6 +1120,7 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
     with open(dest, "w") as f:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
+        server_time_zone = os.environ.get("CN_SQL_DB_TIMEZONE", "UTC")
 
         # In MySQL, physically, a schema is synonymous with a database
         if db_dialect == "mysql":
@@ -1087,12 +1136,13 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
             "rdbm_type": "postgresql" if db_dialect == "pgsql" else "mysql",
             "rdbm_host": os.environ.get("CN_SQL_DB_HOST", "localhost"),
             "rdbm_port": os.environ.get("CN_SQL_DB_PORT", 3306),
+            "rdbm_connection_uri": _build_jdbc_connection_uri(db_dialect, db_name, server_time_zone),
             "rdbm_user": os.environ.get("CN_SQL_DB_USER", "jans"),
             "rdbm_password_enc": encode_text(
                 get_sql_password(manager),
                 manager.secret.get("encoded_salt"),
             ).decode(),
-            "server_time_zone": os.environ.get("CN_SQL_DB_TIMEZONE", "UTC"),
+            "server_time_zone": server_time_zone,
         }
         f.write(rendered_txt)
 
