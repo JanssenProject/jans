@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
-import './options.css'
-import './alerts.css';
+import '../static/css/options.css'
+import '../static/css/alerts.css';
 import { WindmillSpinner } from 'react-spinner-overlay'
 import { JsonEditor } from 'json-edit-react'
 import Button from '@mui/material/Button';

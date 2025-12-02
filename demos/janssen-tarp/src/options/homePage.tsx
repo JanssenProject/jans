@@ -5,11 +5,13 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Password from '@mui/icons-material/Password';
 import LockPerson from '@mui/icons-material/LockPerson';
+import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import OIDCClients from './oidcClients';
 import CedarlingMgmt from './cedarling';
 import Grid from '@mui/material/Grid';
 import Utils from './Utils';
 import UserDetails from './userDetails'
+import AIAgent from './AIAgent'
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -64,6 +66,7 @@ export default function HomePage({ data, notifyOnDataChange }) {
             <Tab label="User Details" icon={<Password />} /> :
             <Tab label="Authentication Flow" icon={<Password />} />}
           <Tab label="Cedarling" icon={<LockPerson />} />
+          <Tab label="AI Agent" icon={<SmartToyOutlinedIcon />} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
@@ -84,6 +87,14 @@ export default function HomePage({ data, notifyOnDataChange }) {
               data={data}
               isLoggedIn={(!Utils.isEmpty(data.loginDetails) && Object.keys(data.loginDetails).length !== 0)}
               notifyOnDataChange={notifyOnDataChange}
+            />
+          </Grid>
+        </Grid>
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={2}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <AIAgent
             />
           </Grid>
         </Grid>
