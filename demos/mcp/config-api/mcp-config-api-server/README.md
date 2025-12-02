@@ -15,8 +15,7 @@ Current tools:
 - Maven
 - MCP Inspector installed
 - A Janssen server instance
-- In order to connect and invoke config-api on the Janssen server, this MCP server
-needs an access token with appropriate scopes. Get the access token from the Janssen server.
+- To connect and invoke config-api on the Janssen server, this MCP server needs an access token with appropriate scopes. Get the access token from the Janssen server.
 
 ### Build MCP server
 
