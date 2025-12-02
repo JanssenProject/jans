@@ -163,9 +163,16 @@ class CloudSqlConnectorMixin:
         Raises:
             RuntimeError: If Cloud SQL Connector library is not installed or
                 CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME is not set.
+            ValueError: If the adapter's cloudsql_driver attribute is not defined.
         """
         self._ensure_connector()
         instance_connection_name = self._get_instance_connection_name()
+
+        if not self.cloudsql_driver:
+            raise ValueError(
+                f"{self.__class__.__name__} must define a non-empty 'cloudsql_driver' "
+                "class attribute (e.g., 'pg8000' for PostgreSQL, 'pymysql' for MySQL)."
+            )
 
         db_user = os.environ.get("CN_SQL_DB_USER", "jans")
         db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
