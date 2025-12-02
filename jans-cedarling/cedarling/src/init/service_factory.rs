@@ -8,12 +8,14 @@
 //! Module to lazily initialize internal cedarling services
 
 use super::service_config::ServiceConfig;
+use crate::LogLevel;
 use crate::authz::{Authz, AuthzConfig, AuthzServiceInitError};
 use crate::bootstrap_config::BootstrapConfig;
 use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuersValidationError};
 use crate::entity_builder::*;
 use crate::jwt::{JwtService, JwtServiceInitError};
-use crate::log;
+use crate::log::interface::LogWriter;
+use crate::log::{self, LogEntry, LogType};
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -91,21 +93,29 @@ impl<'a> ServiceFactory<'a> {
         }
 
         let logger = self.log_service();
+        let policy_store = &self.policy_store()?.store;
+
+        let default_entities_with_warn = &policy_store.default_entities;
+        // Log warns that some default entities loaded not correctly
+        // it will be logged only once.
+        for warn in default_entities_with_warn.warns() {
+            let log_entry = LogEntry::new_with_data(LogType::System, None)
+                .set_level(LogLevel::WARN)
+                .set_message(warn.to_string());
+
+            logger.log_any(log_entry);
+        }
 
         let config = &self.bootstrap_config.entity_builder_config;
         let policy_store = self.policy_store()?;
 
         let trusted_issuers = policy_store.trusted_issuers.clone().unwrap_or_default();
         let schema = &policy_store.schema.validator_schema;
-        let policy_store = &policy_store.store;
-        let namespace = Some(policy_store.name.as_str());
         let entity_builder = EntityBuilder::new(
             config.clone(),
             &trusted_issuers,
             Some(schema),
-            policy_store.default_entities.as_ref(),
-            namespace,
-            logger,
+            default_entities_with_warn.entities().to_owned(),
         )?;
         let service = Arc::new(entity_builder);
         self.container.entity_builder_service = Some(service.clone());
