@@ -1,6 +1,6 @@
 package io.jans.demo.configapi.mcp.server.service;
 
-import io.jans.demo.configapi.mcp.server.model.OidcClient;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.slf4j.Logger;
@@ -86,10 +86,10 @@ public class JansConfigApiClient {
      * @param sortBy     Field to sort by (default: "inum")
      * @param sortOrder  Sort order: "ascending" or "descending" (default:
      *                   "ascending")
-     * @return List of OidcClient objects
+     * @return List of JsonNode objects representing OIDC clients
      * @throws Exception if API call fails
      */
-    public List<OidcClient> getAllClients(Integer limit, Integer startIndex, String sortBy, String sortOrder)
+    public List<JsonNode> getAllClients(Integer limit, Integer startIndex, String sortBy, String sortOrder)
             throws Exception {
 
         // Set default values
@@ -143,7 +143,7 @@ public class JansConfigApiClient {
             // Try direct list parsing
             return objectMapper.readValue(
                     response.body(),
-                    new TypeReference<List<OidcClient>>() {
+                    new TypeReference<List<JsonNode>>() {
                     });
         } catch (Exception e) {
             // If that fails, try parsing as PagedResult and extract entries
@@ -151,7 +151,7 @@ public class JansConfigApiClient {
             if (jsonNode.has("entries")) {
                 return objectMapper.readValue(
                         jsonNode.get("entries").toString(),
-                        new TypeReference<List<OidcClient>>() {
+                        new TypeReference<List<JsonNode>>() {
                         });
             }
             throw e;

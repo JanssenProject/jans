@@ -1,7 +1,7 @@
 package io.jans.demo.configapi.mcp.server.handler;
 
 import io.jans.demo.configapi.mcp.server.service.JansConfigApiClient;
-import io.jans.demo.configapi.mcp.server.model.OidcClient;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
@@ -58,7 +58,7 @@ public class ToolHandler {
                     : "ascending";
 
             // Call API with parameters
-            List<OidcClient> clients = apiClient.getAllClients(limit, startIndex, sortBy, sortOrder);
+            List<JsonNode> clients = apiClient.getAllClients(limit, startIndex, sortBy, sortOrder);
             String jsonResult = objectMapper.writeValueAsString(clients);
 
             return CallToolResult.builder()

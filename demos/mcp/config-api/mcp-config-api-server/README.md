@@ -53,3 +53,19 @@ when running MCP server against a Janssen server with self-signed certificate.
     npx @modelcontextprotocol/inspector java -jar target/jans-mcp-config-api-server-0.0.1.jar -dev
     ```
 
+## Architectural Decision Records (ADRs)
+
+### Use JsonNode instead of custom model classes
+
+#### Decision
+
+Use `JsonNode` instead of custom model classes to represent the response from the Janssen server.
+
+#### Rationale
+
+- Using model classes provided one benefit of type safety and compile time checking. Type checking is not essential for MCP server as it is a tool to interact with the Janssen server. The final JSON is used by the MCP client or agents that 
+are calling the MCP server. So, type safety should be considered at the actual consumer of the JSON response if at all required. Having custom model classes for each response from the Janssen server adds complexity of writing model classes for each response from the Janssen server. Using `JsonNode` provides a simple and flexible way to represent the response from the Janssen server.
+
+#### Consequences
+
+Type safety is not provided at the MCP server level.
