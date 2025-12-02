@@ -21,7 +21,7 @@ public class OidcClient {
     @JsonProperty("displayName")
     private String displayName;
 
-    @JsonProperty("clientSecret")
+    @JsonProperty(value = "clientSecret", access = JsonProperty.Access.WRITE_ONLY)
     private String clientSecret;
 
     private String description;
