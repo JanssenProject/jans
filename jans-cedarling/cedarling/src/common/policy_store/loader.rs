@@ -643,7 +643,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     ///
     /// This design follows the Interface Segregation Principle: manifest validation
     /// is only available where it makes sense (native filesystem).
-    fn load_directory(&self, dir: &str) -> Result<LoadedPolicyStore, PolicyStoreError> {
+    pub fn load_directory(&self, dir: &str) -> Result<LoadedPolicyStore, PolicyStoreError> {
         // Validate structure first
         self.validate_directory_structure(dir)?;
 

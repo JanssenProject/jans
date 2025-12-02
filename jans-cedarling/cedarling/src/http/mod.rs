@@ -76,6 +76,37 @@ impl HttpClient {
                 .map_err(HttpClientError::DecodeResponseUtf8)?,
         })
     }
+
+    /// Sends a GET request to the specified URI with retry logic, returning raw bytes.
+    ///
+    /// This method is useful for fetching binary content like archive files.
+    pub async fn get_bytes(&self, uri: &str) -> Result<Vec<u8>, HttpClientError> {
+        let mut attempts = 0;
+        let response = loop {
+            match self.client.get(uri).send().await {
+                Ok(response) => break response,
+                Err(e) if attempts < self.max_retries => {
+                    attempts += 1;
+                    eprintln!(
+                        "Request failed (attempt {} of {}): {}. Retrying...",
+                        attempts, self.max_retries, e
+                    );
+                    tokio::time::sleep(self.retry_delay * attempts).await;
+                },
+                Err(e) => return Err(HttpClientError::MaxHttpRetriesReached(e)),
+            }
+        };
+
+        let response = response
+            .error_for_status()
+            .map_err(HttpClientError::HttpStatus)?;
+
+        response
+            .bytes()
+            .await
+            .map(|b| b.to_vec())
+            .map_err(HttpClientError::DecodeResponseUtf8)
+    }
 }
 
 #[derive(Debug)]
