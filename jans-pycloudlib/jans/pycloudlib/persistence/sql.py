@@ -631,7 +631,7 @@ class SqlClient(SqlSchemaMixin):
 
         self._metadata = None
 
-    def __enter__(self) -> "SqlClient":
+    def __enter__(self) -> SqlClient:
         """Enter the context manager.
 
         Returns:
