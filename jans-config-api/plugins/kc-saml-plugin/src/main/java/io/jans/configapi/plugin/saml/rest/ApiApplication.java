@@ -3,6 +3,7 @@ package io.jans.configapi.plugin.saml.rest;
 import io.jans.configapi.core.configuration.ObjectMapperContextResolver;
 import io.jans.configapi.core.rest.BaseApiApplication;
 import io.jans.configapi.plugin.saml.util.Constants;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.*;
@@ -32,6 +33,9 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 @OAuthScope(name = Constants.SAML_CONFIG_READ_ACCESS, description = "View SAML configuration related information"),
 @OAuthScope(name = Constants.SAML_CONFIG_WRITE_ACCESS, description = "Manage SAML configuration related information"),
 @OAuthScope(name = Constants.SAML_ADMIN_ACCESS, description = "Admin to manage SAML configuration related information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin for viewing application resource information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin for updating application resource information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin for deleting application resource information"),
 }
 )))
 public class ApiApplication extends BaseApiApplication {

@@ -12,8 +12,7 @@ import io.jans.configapi.ConfigServerBaseTest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import jakarta.ws.rs.HttpMethod;
-import jakarta.ws.rs.client.Entity;
+import io.jans.configapi.util.ApiAccessConstants;
 import jakarta.ws.rs.client.Invocation.Builder;
 
 import jakarta.ws.rs.core.MediaType;
@@ -22,8 +21,8 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class AssetResourceTest extends ConfigServerBaseTest {
 	
-	private static final String INVALID_SCOPE = "https://jans.io/oauth/config/attributes.readonly";
-	private static final String SUPER_ADMIN_SCOPE = "https://jans.io/oauth/config/asset.admin";
+	private static final String INVALID_SCOPE = ApiAccessConstants.ATTRIBUTES_READ_ACCESS;
+	private static final String ASSET_ADMIN_SCOPE = ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS;
 
     @Parameters({ "test.issuer", "assetUrl" })
     @Test
@@ -47,7 +46,7 @@ public class AssetResourceTest extends ConfigServerBaseTest {
     public void getAssets(final String issuer, final String assetUrl) {
         log.info("getAssets() - accessToken:{}, issuer:{}, assetUrl:{}", accessToken, issuer,
                 assetUrl);
-		String adminToken = this.getAccessTokenForGivenScope(SUPER_ADMIN_SCOPE);
+		String adminToken = this.getAccessTokenForGivenScope(ASSET_ADMIN_SCOPE);
         log.info("getAssets() - adminToken:{}, issuer:{}, assetUrl:{}", adminToken, issuer, assetUrl);
         Builder request = getResteasyService().getClientBuilder(issuer + assetUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + adminToken);

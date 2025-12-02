@@ -544,7 +544,7 @@
           "superScopes": [
             {
               "inum": "1800.05.4",
-              "name": "https://jans.io/oauth/config/clients.admin"
+              "name": "https://jans.io/oauth/config/openid/clients.admin"
             },
             {
               "inum": "1800.03.1",
@@ -577,7 +577,7 @@
           "superScopes": [
             {
               "inum": "1800.05.4",
-              "name": "https://jans.io/oauth/config/clients.admin"
+              "name": "https://jans.io/oauth/config/openid/clients.admin"
             },
             {
               "inum": "1800.03.2",
@@ -604,7 +604,7 @@
           "superScopes": [
             {
               "inum": "1800.05.4",
-              "name": "https://jans.io/oauth/config/clients.admin"
+              "name": "https://jans.io/oauth/config/openid/clients.admin"
             },
             {
               "inum": "1800.03.3",
@@ -1888,7 +1888,7 @@
           "groupScopes": [
             {
               "inum": "1800.01.37",
-              "name": "https://jans.io/scim/config.readonly"
+              "name": "https://jans.io/scim/config.write"
             }
           ],
           "superScopes": [
@@ -2160,7 +2160,7 @@
           ],
           "scopes": [
             {
-              "inum": "1800.01.44",
+              "inum": "1800.01.43",
               "name": "https://jans.io/oauth/config/agama.readonly"
             }
           ],
@@ -2176,8 +2176,12 @@
               "name": "https://jans.io/oauth/config/agama.admin"
             },
             {
-              "inum": "1800.03.2",
+              "inum": "1800.03.1",
               "name": "https://jans.io/oauth/config/read-all"
+            },
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
             }
           ]
         }
@@ -2338,7 +2342,7 @@
           "superScopes": [
             {
               "inum": "1800.05.19",
-              "name": "https://jans.io/oauth/config/session.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/session.admin"
             },
             {
               "inum": "1800.03.1",
@@ -2368,7 +2372,7 @@
           "superScopes": [
             {
               "inum": "1800.05.19",
-              "name": "https://jans.io/oauth/config/session.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/session.admin"
             },
             {
               "inum": "1800.03.3",
@@ -3060,8 +3064,7 @@
         {
           "httpMethods": [
             "POST",
-            "PUT",
-            "DELETE"
+            "PUT"
           ],
           "scopes": [
             {
@@ -3410,7 +3413,7 @@
           ],
           "scopes": [
             {
-              "inum": "1800.01.067",
+              "inum": "1800.01.67",
               "name": "https://jans.io/idp/saml.delete"
             }
           ],
@@ -3852,7 +3855,7 @@
           "superScopes": [
             {
               "inum": "1800.05.32",
-              "name": "https://jans.io/oauth/config/asset.admin"
+              "name": "https://jans.io/oauth/config/jans_asset-admin"
             },
             {
               "inum": "1800.03.1",
@@ -3879,7 +3882,7 @@
           "superScopes": [
             {
               "inum": "1800.05.32",
-              "name": "https://jans.io/oauth/config/asset.admin"
+              "name": "https://jans.io/oauth/config/jans_asset-admin"
             },
             {
               "inum": "1800.03.2",
@@ -3901,7 +3904,7 @@
           "superScopes": [
             {
               "inum": "1800.05.32",
-              "name": "https://jans.io/oauth/config/asset.admin"
+              "name": "https://jans.io/oauth/config/jans_asset-admin"
             },
             {
               "inum": "1800.03.3",
@@ -3933,7 +3936,7 @@
           "superScopes": [
             {
               "inum": "1800.05.32",
-              "name": "https://jans.io/oauth/config/asset.admin"
+              "name": "https://jans.io/oauth/config/jans_asset-admin"
             },
             {
               "inum": "1800.03.1",
@@ -3969,7 +3972,7 @@
           "superScopes": [
             {
               "inum": "1800.05.32",
-              "name": "https://jans.io/oauth/config/asset.admin"
+              "name": "https://jans.io/oauth/config/jans_asset-admin"
             },
             {
               "inum": "1800.03.1",
@@ -4005,7 +4008,7 @@
           "superScopes": [
             {
               "inum": "1800.05.32",
-              "name": "https://jans.io/oauth/config/asset.admin"
+              "name": "https://jans.io/oauth/config/jans_asset-admin"
             },
             {
               "inum": "1800.03.1",
@@ -4041,7 +4044,7 @@
           "superScopes": [
             {
               "inum": "1800.05.32",
-              "name": "https://jans.io/oauth/config/asset.admin"
+              "name": "https://jans.io/oauth/config/jans_asset-admin"
             },
             {
               "inum": "1800.03.1",
@@ -4146,7 +4149,7 @@
               "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
-              "inum": "1800.01.78",
+              "inum": "1800.03.4",
               "name": "https://jans.io/oauth/lock/read-all"
             },
             {
@@ -4212,7 +4215,7 @@
               "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
-              "inum": "1800.01.78",
+              "inum": "1800.03.4",
               "name": "https://jans.io/oauth/lock/read-all"
             },
             {
@@ -4278,7 +4281,7 @@
               "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
-              "inum": "1800.01.78",
+              "inum": "1800.03.4",
               "name": "https://jans.io/oauth/lock/read-all"
             },
             {
@@ -4401,7 +4404,7 @@
           "superScopes": [
             {
               "inum": "1800.05.33",
-              "name": "https://jans.io/oauth/token.admin"
+              "name": "https://jans.io/oauth/config/token.admin"
             },
             {
               "inum": "1800.03.3",

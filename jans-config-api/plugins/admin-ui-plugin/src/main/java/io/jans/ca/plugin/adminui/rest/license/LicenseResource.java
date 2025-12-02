@@ -86,7 +86,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @DELETE
     @Path(CONFIG_DELETE)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, groupScopes = {}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteLicenseConfiguration() {
         GenericResponse licenseResponse = null;

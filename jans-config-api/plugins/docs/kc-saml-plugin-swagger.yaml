@@ -853,6 +853,8 @@ paths:
         - https://jans.io/oauth/config/saml.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /kc/saml/trust-relationship/id/{id}:
     get:
       tags:
@@ -893,6 +895,8 @@ paths:
         - https://jans.io/oauth/config/saml.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /kc/saml/trust-relationship/sp-metadata-file/{id}:
     get:
       tags:
@@ -934,6 +938,14 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
 components:
   schemas:
     BrokerIdentityProviderForm:
@@ -1387,3 +1399,9 @@ components:
               related information
             https://jans.io/oauth/config/saml.admin: Admin to manage SAML configuration
               related information
+            https://jans.io/oauth/config/read-all: Super admin for viewing application
+              resource information
+            https://jans.io/oauth/config/write-all: Super admin for updating application
+              resource information
+            https://jans.io/oauth/config/delete-all: Super admin for deleting application
+              resource information

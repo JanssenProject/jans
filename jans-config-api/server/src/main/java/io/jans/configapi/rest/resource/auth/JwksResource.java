@@ -191,7 +191,7 @@ public class JwksResource extends ConfigBaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS }, groupScopes = {}, 
-    superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    superScopes = { ApiAccessConstants.JWKS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.KID_PATH)
     public Response patch(@Parameter(description = "The unique identifier for the key") @PathParam(ApiConstants.KID) @NotNull String kid, @NotNull String requestString)
             throws JsonPatchException, IOException {

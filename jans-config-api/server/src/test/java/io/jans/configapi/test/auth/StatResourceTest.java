@@ -24,8 +24,7 @@ public class StatResourceTest extends ConfigServerBaseTest {
 	
 	private static final String INVALID_SCOPE = "https://jans.io/oauth/config/attributes.readonly";
 	private static final String SUPER_ADMIN_SCOPE = "https://jans.io/oauth/config/stats.admin";
-	private static final String STAT_READONLY_ADMIN_SCOPE = "https://jans.io/oauth/config/stats.readonly";
-    private static final String STAT_SCOPE = "jans_stat";
+
 
     @Parameters({ "test.issuer", "statUrl" })
     @Test
@@ -47,15 +46,15 @@ public class StatResourceTest extends ConfigServerBaseTest {
 	@Parameters({ "test.issuer", "statUrl" })
     @Test
     public void getStats(final String issuer, final String statUrl) {
-        log.info("getAssets() - accessToken:{}, issuer:{}, statUrl:{}", accessToken, issuer,
+        log.info("getStats() - accessToken:{}, issuer:{}, statUrl:{}", accessToken, issuer,
                 statUrl);
 		String adminToken = this.getAccessTokenForGivenScope(SUPER_ADMIN_SCOPE);
-        log.info("getAssets() - adminToken:{}, issuer:{}, statUrl:{}", adminToken, issuer, statUrl);
+        log.info("getStats() - adminToken:{}, issuer:{}, statUrl:{}", adminToken, issuer, statUrl);
         Builder request = getResteasyService().getClientBuilder(issuer + statUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + adminToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         Response response = request.get();
-        log.info("Response for getAssets() -  response:{}, response.getStatus():{}", response,
+        log.info("Response for getStats() -  response:{}, response.getStatus():{}", response,
                 response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
 

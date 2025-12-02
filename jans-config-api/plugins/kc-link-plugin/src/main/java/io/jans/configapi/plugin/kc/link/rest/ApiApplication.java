@@ -1,6 +1,7 @@
 package io.jans.configapi.plugin.kc.link.rest;
 
 import io.jans.configapi.plugin.kc.link.util.Constants;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.*;
@@ -25,7 +26,10 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
 @OAuthScope(name = Constants.KC_LINK_CONFIG_READ_ACCESS, description = "View Keycloak Link configuration related information"),
 @OAuthScope(name = Constants.KC_LINK_CONFIG_WRITE_ACCESS, description = "Manage Keycloak Link configuration related information"),
-@OAuthScope(name = Constants.KC_ADMIN_ACCESS, description = "Admin for Keycloak Link configuration related information")
+@OAuthScope(name = Constants.KC_ADMIN_ACCESS, description = "Admin for Keycloak Link configuration related information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin for viewing application resource information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin for updating application resource information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin for deleting application resource information"),
 }
 )))
 public class ApiApplication extends Application {
