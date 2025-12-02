@@ -47,6 +47,23 @@ pub enum PolicyStoreSource {
 
     /// Read policy from a YAML File.
     FileYaml(PathBuf),
+
+    /// Read policy from a Cedar Archive (.cjar) file.
+    ///
+    /// The path points to a `.cjar` archive containing the policy store
+    /// in the new directory structure format.
+    CjarFile(PathBuf),
+
+    /// Read policy from a Cedar Archive (.cjar) fetched from a URL.
+    ///
+    /// The string contains a URL where the `.cjar` archive can be downloaded.
+    CjarUrl(String),
+
+    /// Read policy from a directory structure.
+    ///
+    /// The path points to a directory containing the policy store
+    /// in the new directory structure format (with manifest.json, policies/, etc.).
+    Directory(PathBuf),
 }
 
 /// Raw policy store source
@@ -61,6 +78,12 @@ pub enum PolicyStoreSourceRaw {
     FileJson(String),
     /// File YAML
     FileYaml(String),
+    /// Cedar Archive file (.cjar)
+    CjarFile(String),
+    /// Cedar Archive URL (.cjar)
+    CjarUrl(String),
+    /// Directory structure
+    Directory(String),
 }
 
 impl From<PolicyStoreConfigRaw> for PolicyStoreConfig {
@@ -72,6 +95,9 @@ impl From<PolicyStoreConfigRaw> for PolicyStoreConfig {
                 "lock_server" => PolicyStoreSource::LockServer(raw.path.unwrap_or_default()),
                 "file_json" => PolicyStoreSource::FileJson(raw.path.unwrap_or_default().into()),
                 "file_yaml" => PolicyStoreSource::FileYaml(raw.path.unwrap_or_default().into()),
+                "cjar_file" => PolicyStoreSource::CjarFile(raw.path.unwrap_or_default().into()),
+                "cjar_url" => PolicyStoreSource::CjarUrl(raw.path.unwrap_or_default()),
+                "directory" => PolicyStoreSource::Directory(raw.path.unwrap_or_default().into()),
                 _ => PolicyStoreSource::FileYaml("policy-store.yaml".into()),
             },
         }
