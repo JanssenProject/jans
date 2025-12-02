@@ -24,11 +24,17 @@ public class ToolHandler {
             // Extract query parameters from arguments
             // Handle both String and Number types (different LLMs send different types)
             Integer limit = 50;
+            Integer limit = 50;
             if (arguments.get("limit") != null) {
                 Object limitObj = arguments.get("limit");
-                limit = limitObj instanceof Number
-                        ? ((Number) limitObj).intValue()
-                        : Integer.parseInt(limitObj.toString());
+                try {
+                    limit = limitObj instanceof Number
+                            ? ((Number) limitObj).intValue()
+                            : Integer.parseInt(limitObj.toString());
+                    limit = Math.max(1, Math.min(limit, 200)); // Clamp to valid range
+                } catch (NumberFormatException e) {
+                    limit = 50; // Fall back to default
+                }
             }
 
             Integer startIndex = 0;

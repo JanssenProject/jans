@@ -64,7 +64,7 @@ public class JansConfigApiClient {
                         }
                 };
 
-                SSLContext sslContext = SSLContext.getInstance("TLS");
+                SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
                 sslContext.init(null, trustAllCerts, new SecureRandom());
                 builder.sslContext(sslContext);
             } else {
@@ -121,6 +121,8 @@ public class JansConfigApiClient {
         // Add OAuth2 Bearer token
         if (accessToken != null && !accessToken.isEmpty()) {
             requestBuilder.header("Authorization", "Bearer " + accessToken);
+        } else {
+            logger.warn("No access token provided - API calls may fail with 401 Unauthorized");
         }
 
         HttpRequest request = requestBuilder.build();

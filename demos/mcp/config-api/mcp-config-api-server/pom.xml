@@ -4,7 +4,7 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     
-    <groupId>com.example</groupId>
+    <groupId>io.jans.demo</groupId>
     <artifactId>jans-mcp-config-api-server</artifactId>
     <version>0.0.1</version>
     
