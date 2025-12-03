@@ -172,6 +172,80 @@ public class JansConfigApiClient {
     }
 
     /**
+<<<<<<< Updated upstream
+=======
+     * Creates a new OpenID Connect client in the Jans Config API
+     * 
+     * @param clientPayload JSON payload representing the client to create
+     * @return JsonNode representing the created OIDC client
+     * @throws Exception if API call fails
+     */
+    public JsonNode createClient(JsonNode clientPayload) throws IOException, InterruptedException {
+        String url = String.format("%s/jans-config-api/api/v1/openid/clients", baseUrl);
+
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(clientPayload.toString()))
+                .timeout(Duration.ofSeconds(30));
+
+        // Add OAuth2 Bearer token
+        if (accessToken != null && !accessToken.isEmpty()) {
+            requestBuilder.header("Authorization", "Bearer " + accessToken);
+        } else {
+            logger.warn("No access token provided - API calls may fail with 401 Unauthorized");
+        }
+
+        HttpRequest request = requestBuilder.build();
+
+        HttpResponse<String> response = httpClient.send(
+                request,
+                HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() >= 400) {
+            throw new IOException("Jans Config API Error: " + response.statusCode() + " - " + response.body());
+        }
+
+        return objectMapper.readTree(response.body());
+    }
+
+    /**
+     * Gets application health status from the Jans Config API
+     * 
+     * @return JsonNode representing the health status
+     * @throws Exception if API call fails
+     */
+    public JsonNode getHealth() throws IOException, InterruptedException {
+        String url = String.format("%s/jans-config-api/api/v1/health", baseUrl);
+
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .GET()
+                .timeout(Duration.ofSeconds(30));
+
+        // Add OAuth2 Bearer token if available
+        if (accessToken != null && !accessToken.isEmpty()) {
+            requestBuilder.header("Authorization", "Bearer " + accessToken);
+        }
+
+        HttpRequest request = requestBuilder.build();
+
+        HttpResponse<String> response = httpClient.send(
+                request,
+                HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() >= 400) {
+            throw new IOException("Jans Config API Error: " + response.statusCode() + " - " + response.body());
+        }
+
+        return objectMapper.readTree(response.body());
+    }
+
+    /**
+>>>>>>> Stashed changes
      * URL encode a value for use in query parameters
      */
     private String encodeValue(String value) {

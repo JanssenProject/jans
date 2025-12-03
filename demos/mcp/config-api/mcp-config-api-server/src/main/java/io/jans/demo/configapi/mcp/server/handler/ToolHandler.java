@@ -75,6 +75,56 @@ public class ToolHandler {
         }
     }
 
+<<<<<<< Updated upstream
+=======
+    public CallToolResult handleCreateClient(Map<String, Object> arguments) {
+        try {
+            // Extract client_data from arguments
+            Object clientDataObj = arguments.get("client_data");
+            if (clientDataObj == null) {
+                return createErrorResult("Missing required parameter: client_data");
+            }
+
+            // Parse the client_data into JsonNode
+            JsonNode clientPayload;
+            if (clientDataObj instanceof String) {
+                // If it's a JSON string, parse it
+                clientPayload = objectMapper.readTree((String) clientDataObj);
+            } else {
+                // If it's already a Map/Object, convert it to JsonNode
+                clientPayload = objectMapper.valueToTree(clientDataObj);
+            }
+
+            // Call API to create the client
+            JsonNode createdClient = apiClient.createClient(clientPayload);
+            String jsonResult = objectMapper.writeValueAsString(createdClient);
+
+            return CallToolResult.builder()
+                    .content(List.of(new TextContent(jsonResult)))
+                    .isError(false)
+                    .build();
+        } catch (Exception e) {
+            logger.error("Error creating OIDC client", e);
+            return createErrorResult("Error creating OIDC client: " + e.getClass().getName() + ": " + e.getMessage());
+        }
+    }
+
+    public CallToolResult handleGetHealth(Map<String, Object> arguments) {
+        try {
+            JsonNode healthStatus = apiClient.getHealth();
+            String jsonResult = objectMapper.writeValueAsString(healthStatus);
+
+            return CallToolResult.builder()
+                    .content(List.of(new TextContent(jsonResult)))
+                    .isError(false)
+                    .build();
+        } catch (Exception e) {
+            logger.error("Error getting health status", e);
+            return createErrorResult("Error getting health status: " + e.getClass().getName() + ": " + e.getMessage());
+        }
+    }
+
+>>>>>>> Stashed changes
     private CallToolResult createErrorResult(String errorMessage) {
         return CallToolResult.builder()
                 .content(List.of(new TextContent(errorMessage)))

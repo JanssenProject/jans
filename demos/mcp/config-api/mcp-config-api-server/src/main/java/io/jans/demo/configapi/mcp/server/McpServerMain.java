@@ -121,6 +121,33 @@ public class McpServerMain {
                                                                                 "default", "ascending")),
                                                 "required", List.of()),
                                 toolHandler::handleListClients));
+<<<<<<< Updated upstream
+=======
+
+                // Tool: create_client
+                server.addTool(createTool(
+                                "create_client",
+                                "Creates a new OpenID Connect client in the Jans Config API. This tool accepts a JSON object representing the client configuration.",
+                                Map.of(
+                                                "type", "object",
+                                                "properties", Map.of(
+                                                                "client_data", Map.of(
+                                                                                "type", "object",
+                                                                                "description",
+                                                                                "JSON object containing the OIDC client configuration. Must include fields like redirectUris, responseTypes, grantTypes, applicationType, etc.")),
+                                                "required", List.of("client_data")),
+                                toolHandler::handleCreateClient));
+
+                // Tool: get_health
+                server.addTool(createTool(
+                                "get_health",
+                                "Returns application health status from the Jans Config API",
+                                Map.of(
+                                                "type", "object",
+                                                "properties", Map.of(),
+                                                "required", List.of()),
+                                toolHandler::handleGetHealth));
+>>>>>>> Stashed changes
         }
 
         private static McpServerFeatures.SyncToolSpecification createTool(
