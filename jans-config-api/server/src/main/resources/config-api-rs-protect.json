@@ -1651,7 +1651,7 @@
           "superScopes": [
             {
               "inum": "1800.05.13",
-              "name": "https://jans.io/oauth/config/uma.admin"
+              "name": "https://jans.io/oauth/config/uma-admin"
             },
             {
               "inum": "1800.03.1",
@@ -1683,7 +1683,7 @@
           "superScopes": [
             {
               "inum": "1800.05.13",
-              "name": "https://jans.io/oauth/config/uma.admin"
+              "name": "https://jans.io/oauth/config/uma-admin"
             },
             {
               "inum": "1800.03.2",
@@ -1719,7 +1719,7 @@
           "superScopes": [
             {
               "inum": "1800.05.13",
-              "name": "https://jans.io/oauth/config/uma.admin"
+              "name": "https://jans.io/oauth/config/uma-admin"
             },
             {
               "inum": "1800.03.1",
@@ -1750,7 +1750,7 @@
           "superScopes": [
             {
               "inum": "1800.05.13",
-              "name": "https://jans.io/oauth/config/uma.admin"
+              "name": "https://jans.io/oauth/config/uma-admin"
             },
             {
               "inum": "1800.03.2",
@@ -1777,7 +1777,7 @@
           "superScopes": [
             {
               "inum": "1800.05.13",
-              "name": "https://jans.io/oauth/config/uma.admin"
+              "name": "https://jans.io/oauth/config/uma-admin"
             },
             {
               "inum": "1800.03.3",
@@ -2404,7 +2404,7 @@
           "superScopes": [
             {
               "inum": "1800.05.20",
-              "name": "https://jans.io/oauth/config/adminui/role.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin"
             },
             {
               "inum": "1800.04.12",
@@ -2427,7 +2427,7 @@
           "superScopes": [
             {
               "inum": "1800.05.20",
-              "name": "https://jans.io/oauth/config/adminui/role.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin"
             },
             {
               "inum": "1800.04.13",
@@ -2459,7 +2459,7 @@
           "superScopes": [
             {
               "inum": "1800.05.20",
-              "name": "https://jans.io/oauth/config/adminui/role.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin"
             },
             {
               "inum": "1800.04.12",
@@ -2481,7 +2481,7 @@
           "superScopes": [
             {
               "inum": "1800.05.20",
-              "name": "https://jans.io/oauth/config/adminui/role.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin"
             },
             {
               "inum": "1800.04.14",
@@ -2513,7 +2513,7 @@
           "superScopes": [
             {
               "inum": "1800.05.21",
-              "name": "https://jans.io/oauth/config/adminui/permission.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin"
             },
             {
               "inum": "1800.04.12",
@@ -2536,7 +2536,7 @@
           "superScopes": [
             {
               "inum": "1800.05.21",
-              "name": "https://jans.io/oauth/config/adminui/permission.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin"
             },
             {
               "inum": "1800.04.13",
@@ -2568,7 +2568,7 @@
           "superScopes": [
             {
               "inum": "1800.05.21",
-              "name": "https://jans.io/oauth/config/adminui/permission.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin"
             },
             {
               "inum": "1800.04.12",
@@ -2590,7 +2590,7 @@
           "superScopes": [
             {
               "inum": "1800.05.21",
-              "name": "https://jans.io/oauth/config/adminui/permission.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin"
             },
             {
               "inum": "1800.04.14",
@@ -2622,7 +2622,7 @@
           "superScopes": [
             {
               "inum": "1800.05.22",
-              "name": "https://jans.io/oauth/config/adminui/rolePermissionMapping.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin"
             },
             {
               "inum": "1800.04.12",
@@ -2645,7 +2645,7 @@
           "superScopes": [
             {
               "inum": "1800.05.22",
-              "name": "https://jans.io/oauth/config/adminui/rolePermissionMapping.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin"
             },
             {
               "inum": "1800.04.13",
@@ -2677,7 +2677,7 @@
           "superScopes": [
             {
               "inum": "1800.05.22",
-              "name": "https://jans.io/oauth/config/adminui/rolePermissionMapping.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin"
             },
             {
               "inum": "1800.04.12",
@@ -2699,7 +2699,7 @@
           "superScopes": [
             {
               "inum": "1800.05.22",
-              "name": "https://jans.io/oauth/config/adminui/rolePermissionMapping.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin"
             },
             {
               "inum": "1800.04.14",
@@ -2731,7 +2731,7 @@
           "superScopes": [
             {
               "inum": "1800.05.23",
-              "name": "https://jans.io/oauth/config/adminui/license.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/license.admin"
             },
             {
               "inum": "1800.04.12",
@@ -2758,7 +2758,7 @@
           "superScopes": [
             {
               "inum": "1800.05.23",
-              "name": "https://jans.io/oauth/config/adminui/license.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/license.admin"
             },
             {
               "inum": "1800.04.13",
@@ -2790,7 +2790,7 @@
           "superScopes": [
             {
               "inum": "1800.05.23",
-              "name": "https://jans.io/oauth/config/adminui/license.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/license.admin"
             },
             {
               "inum": "1800.04.12",
@@ -2817,7 +2817,7 @@
           "superScopes": [
             {
               "inum": "1800.05.23",
-              "name": "https://jans.io/oauth/config/adminui/license.admin"
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/license.admin"
             },
             {
               "inum": "1800.04.13",
@@ -4179,7 +4179,7 @@
               "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
-              "inum": "1800.01.79",
+              "inum": "1800.03.5",
               "name": "https://jans.io/oauth/lock/write-all"
             },
             {
@@ -4245,7 +4245,7 @@
               "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
-              "inum": "1800.01.79",
+              "inum": "1800.03.5",
               "name": "https://jans.io/oauth/lock/write-all"
             },
             {
@@ -4311,7 +4311,7 @@
               "name": "https://jans.io/oauth/config/lock.admin"
             },
             {
-              "inum": "1800.01.79",
+              "inum": "1800.03.5",
               "name": "https://jans.io/oauth/lock/write-all"
             },
             {

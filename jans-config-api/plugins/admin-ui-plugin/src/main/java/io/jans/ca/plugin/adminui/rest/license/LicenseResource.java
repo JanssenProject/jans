@@ -38,7 +38,7 @@ public class LicenseResource {
 
     public static final String SCOPE_LICENSE_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly";
     public static final String SCOPE_LICENSE_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/license.write";
-    public static final String SCOPE_LICENSE_ADMIN = "https://jans.io/oauth/config/adminui/license.admin";
+    public static final String SCOPE_LICENSE_ADMIN = "https://jans.io/oauth/jans-auth-server/config/adminui/license.admin";
 
     @Inject
     Logger log;
@@ -254,7 +254,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(DETAILS)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response details() {
         try {

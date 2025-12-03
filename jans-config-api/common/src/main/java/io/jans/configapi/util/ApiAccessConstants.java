@@ -35,7 +35,7 @@ public class ApiAccessConstants {
 
     public static final String CACHE_READ_ACCESS = "https://jans.io/oauth/config/cache.readonly";
     public static final String CACHE_WRITE_ACCESS = "https://jans.io/oauth/config/cache.write";
-    public static final String CACHE_ADMINS_ACCESS = "https://jans.io/oauth/config/cache.admin";
+    public static final String CACHE_ADMIN_ACCESS = "https://jans.io/oauth/config/cache.admin";
 
     public static final String MESSAGE_READ_ACCESS = "https://jans.io/oauth/config/message.readonly";
     public static final String MESSAGE_WRITE_ACCESS = "https://jans.io/oauth/config/message.write";
@@ -110,7 +110,7 @@ public class ApiAccessConstants {
     public static final String UMA_READ_ACCESS  = "https://jans.io/oauth/config/uma-read";
     public static final String UMA_WRITE_ACCESS = "https://jans.io/oauth/config/uma-write";
     public static final String UMA_DELETE_ACCESS = "https://jans.io/oauth/config/uma-delete";
-    public static final String UMA_ADMIN_ACCESS = "https://jans.io/oauth/config/uma.admin";
+    public static final String UMA_ADMIN_ACCESS = "https://jans.io/oauth/config/uma-admin";
     
     public static final String PLUGIN_READ_ACCESS = "https://jans.io/oauth/config/plugin.readonly";
     public static final String PLUGIN_ADMIN_ACCESS = "https://jans.io/oauth/config/plugin.admin";
