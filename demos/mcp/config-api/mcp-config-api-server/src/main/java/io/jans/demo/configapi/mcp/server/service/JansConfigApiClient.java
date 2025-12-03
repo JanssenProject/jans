@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -72,13 +74,13 @@ public class JansConfigApiClient {
                     sslContext = SSLContext.getInstance("TLSv1.2");
                 }
                 sslContext.init(null, trustAllCerts, new SecureRandom());
-                
+
                 // Explicitly restrict to modern TLS protocols
                 javax.net.ssl.SSLParameters sslParams = new javax.net.ssl.SSLParameters();
-                sslParams.setProtocols(new String[]{"TLSv1.3", "TLSv1.2"});
-                
+                sslParams.setProtocols(new String[] { "TLSv1.3", "TLSv1.2" });
+
                 builder.sslContext(sslContext)
-                       .sslParameters(sslParams);
+                        .sslParameters(sslParams);
             } else {
                 // PRODUCTION MODE: Use default SSL certificate validation
                 logger.info("Running in PRODUCTION mode - SSL certificate validation is ENABLED");
@@ -102,7 +104,7 @@ public class JansConfigApiClient {
      * @throws Exception if API call fails
      */
     public List<JsonNode> getAllClients(Integer limit, Integer startIndex, String sortBy, String sortOrder)
-            throws Exception {
+            throws IOException, InterruptedException {
 
         // Set default values
         if (limit == null)
@@ -144,8 +146,7 @@ public class JansConfigApiClient {
                 HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() >= 400) {
-            throw new RuntimeException("Jans Config API Error: " + response.statusCode() + " - "
-                    + response.body());
+            throw new IOException("Jans Config API Error: " + response.statusCode() + " - " + response.body());
         }
 
         // The API returns a PagedResult, but we need to extract the "entries" array
