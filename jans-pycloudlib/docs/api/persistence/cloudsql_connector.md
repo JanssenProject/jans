@@ -213,7 +213,7 @@ The following Cloud SQL JDBC Socket Factory JARs are included in the Janssen Doc
 | MySQL | `mysql-socket-factory-connector-j-8-X.X.X.jar` | `com.google.cloud.sql:mysql-socket-factory-connector-j-8` |
 | PostgreSQL | `postgres-socket-factory-X.X.X.jar` | `com.google.cloud.sql:postgres-socket-factory` |
 
-These JARs are automatically copied to the Java classpath when `CN_SQL_CLOUDSQL_CONNECTOR_ENABLED=true`.
+These JARs are downloaded directly to the Java classpath (`/opt/jans/jetty/<component>/custom/libs`) during Docker image build and are always available.
 
 ### Configuration
 

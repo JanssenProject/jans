@@ -232,8 +232,18 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
     org.opencontainers.image.title="Janssen Config API" \
     org.opencontainers.image.description=""
 
+# ===========
+# Custom libs
+# ===========
+
+ARG CLOUDSQL_SOCKET_FACTORY_VERSION=1.27.0
+
+# Download Cloud SQL JDBC Socket Factory JARs directly to custom/libs (always available)
+RUN mkdir -p ${JETTY_BASE}/jans-config-api/custom/libs \
+    && wget -q https://repo1.maven.org/maven2/com/google/cloud/sql/mysql-socket-factory-connector-j-8/${CLOUDSQL_SOCKET_FACTORY_VERSION}/mysql-socket-factory-connector-j-8-${CLOUDSQL_SOCKET_FACTORY_VERSION}.jar -P ${JETTY_BASE}/jans-config-api/custom/libs/ \
+    && wget -q https://repo1.maven.org/maven2/com/google/cloud/sql/postgres-socket-factory/${CLOUDSQL_SOCKET_FACTORY_VERSION}/postgres-socket-factory-${CLOUDSQL_SOCKET_FACTORY_VERSION}.jar -P ${JETTY_BASE}/jans-config-api/custom/libs/
+
 RUN mkdir -p /etc/certs \
-    ${JETTY_BASE}/jans-config-api/custom/libs \
     ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
     ${JETTY_BASE}/jans-config-api/logs \
     ${JETTY_BASE}/common/libs \

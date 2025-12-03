@@ -65,19 +65,26 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
 # ===========
 
 RUN mkdir -p /usr/share/java \
-    ${JETTY_BASE}/jans-auth/_libs
+    ${JETTY_BASE}/jans-auth/_libs \
+    ${JETTY_BASE}/jans-auth/custom/libs
 
 ARG TWILIO_VERSION=7.17.0
 ARG JSMPP_VERSION=2.3.7
 ARG CLOUDSQL_SOCKET_FACTORY_VERSION=1.27.0
 
-RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
-    && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
-    && wget -q https://repo1.maven.org/maven2/com/google/cloud/sql/mysql-socket-factory-connector-j-8/${CLOUDSQL_SOCKET_FACTORY_VERSION}/mysql-socket-factory-connector-j-8-${CLOUDSQL_SOCKET_FACTORY_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
-    && wget -q https://repo1.maven.org/maven2/com/google/cloud/sql/postgres-socket-factory/${CLOUDSQL_SOCKET_FACTORY_VERSION}/postgres-socket-factory-${CLOUDSQL_SOCKET_FACTORY_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
-    && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound jans-lock-service jans-lock-model jans-lock-cedarling cedarling-java; \
+# Download custom libs directly to custom/libs (always available)
+RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
+    && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
+    && wget -q https://repo1.maven.org/maven2/com/google/cloud/sql/mysql-socket-factory-connector-j-8/${CLOUDSQL_SOCKET_FACTORY_VERSION}/mysql-socket-factory-connector-j-8-${CLOUDSQL_SOCKET_FACTORY_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
+    && wget -q https://repo1.maven.org/maven2/com/google/cloud/sql/postgres-socket-factory/${CLOUDSQL_SOCKET_FACTORY_VERSION}/postgres-socket-factory-${CLOUDSQL_SOCKET_FACTORY_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
+    && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound cedarling-java; \
     do \
-        wget -nv "https://jenkins.jans.io/maven/io/jans/${custom_lib}/${CN_VERSION}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/_libs"; \
+        wget -nv "https://jenkins.jans.io/maven/io/jans/${custom_lib}/${CN_VERSION}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/custom/libs"; \
+    done
+
+RUN for lock_lib in jans-lock-service jans-lock-model jans-lock-cedarling; \
+    do \
+        wget -nv "https://jenkins.jans.io/maven/io/jans/${lock_lib}/${CN_VERSION}/${lock_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/_libs"; \
     done
 
 # ===========

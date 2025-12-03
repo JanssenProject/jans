@@ -175,20 +175,11 @@ def configure_logging():
 
 def copy_builtin_libs():
     lock_enabled = as_boolean(os.environ.get("CN_LOCK_ENABLED", "false"))
-    cloudsql_connector_enabled = as_boolean(os.environ.get("CN_SQL_CLOUDSQL_CONNECTOR_ENABLED", "false"))
 
-    for src in Path("/opt/jans/jetty/jans-auth/_libs").glob("*.jar"):
-        # skip jans-lock-service and jans-lock-model unless lock is enabled
-        if lock_enabled is False and src.name.startswith("jans-lock"):
-            continue
+    if not lock_enabled:
+        return
 
-        # skip Cloud SQL JDBC Socket Factory JARs unless connector is enabled
-        if cloudsql_connector_enabled is False and (
-            src.name.startswith("mysql-socket-factory") or
-            src.name.startswith("postgres-socket-factory")
-        ):
-            continue
-
+    for src in Path("/opt/jans/jetty/jans-auth/_libs").glob("jans-lock*.jar"):
         dst = f"/opt/jans/jetty/jans-auth/custom/libs/{src.name}"
         shutil.copyfile(src, dst)
 

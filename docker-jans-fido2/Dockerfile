@@ -209,9 +209,19 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/fido2" \
     org.opencontainers.image.title="Janssen FIDO2" \
     org.opencontainers.image.description="FIDO2 server"
 
+# ===========
+# Custom libs
+# ===========
+
+ARG CLOUDSQL_SOCKET_FACTORY_VERSION=1.27.0
+
+# Download Cloud SQL JDBC Socket Factory JARs directly to custom/libs (always available)
+RUN mkdir -p ${JETTY_BASE}/jans-fido2/custom/libs \
+    && wget -q https://repo1.maven.org/maven2/com/google/cloud/sql/mysql-socket-factory-connector-j-8/${CLOUDSQL_SOCKET_FACTORY_VERSION}/mysql-socket-factory-connector-j-8-${CLOUDSQL_SOCKET_FACTORY_VERSION}.jar -P ${JETTY_BASE}/jans-fido2/custom/libs/ \
+    && wget -q https://repo1.maven.org/maven2/com/google/cloud/sql/postgres-socket-factory/${CLOUDSQL_SOCKET_FACTORY_VERSION}/postgres-socket-factory-${CLOUDSQL_SOCKET_FACTORY_VERSION}.jar -P ${JETTY_BASE}/jans-fido2/custom/libs/
+
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-fido2/logs \
-    ${JETTY_BASE}/jans-fido2/custom/libs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java

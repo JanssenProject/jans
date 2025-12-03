@@ -206,6 +206,17 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/casa" \
     org.opencontainers.image.title="Janssen Casa" \
     org.opencontainers.image.description="Self-service portal for people to manage their account security preferences in the Janssen, like 2FA"
 
+# ===========
+# Custom libs
+# ===========
+
+ARG CLOUDSQL_SOCKET_FACTORY_VERSION=1.27.0
+
+# Download Cloud SQL JDBC Socket Factory JARs directly to custom/libs (always available)
+RUN mkdir -p ${JETTY_BASE}/jans-casa/custom/libs \
+    && wget -q https://repo1.maven.org/maven2/com/google/cloud/sql/mysql-socket-factory-connector-j-8/${CLOUDSQL_SOCKET_FACTORY_VERSION}/mysql-socket-factory-connector-j-8-${CLOUDSQL_SOCKET_FACTORY_VERSION}.jar -P ${JETTY_BASE}/jans-casa/custom/libs/ \
+    && wget -q https://repo1.maven.org/maven2/com/google/cloud/sql/postgres-socket-factory/${CLOUDSQL_SOCKET_FACTORY_VERSION}/postgres-socket-factory-${CLOUDSQL_SOCKET_FACTORY_VERSION}.jar -P ${JETTY_BASE}/jans-casa/custom/libs/
+
 RUN mkdir -p /opt/jans/python/libs \
     ${JETTY_BASE}/jans-casa/static \
     ${JETTY_BASE}/jans-casa/plugins \
