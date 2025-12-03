@@ -128,7 +128,7 @@ import org.slf4j.Logger;
         @OAuthScope(name = ApiAccessConstants.ACRS_ADMIN_ACCESS, description = "Admin for ACRS management"),
         @OAuthScope(name = ApiAccessConstants.DATABASE_ADMIN_ACCESS, description = "Admin for Database config management"),
         @OAuthScope(name = ApiAccessConstants.SCRIPTS_ADMIN_ACCESS, description = "Admin for Scripts management"),
-        @OAuthScope(name = ApiAccessConstants.CACHE_ADMINS_ACCESS, description = "Admin for Cache management"),
+        @OAuthScope(name = ApiAccessConstants.CACHE_ADMIN_ACCESS, description = "Admin for Cache management"),
         @OAuthScope(name = ApiAccessConstants.MESSAGE_ADMIN_ACCESS, description = "Admin for Message management"),
         @OAuthScope(name = ApiAccessConstants.SMTP_ADMIN_ACCESS, description = "Admin for SMTP management"),
         @OAuthScope(name = ApiAccessConstants.LOGGING_ADMIN_ACCESS, description = "Admin for Logging management"),

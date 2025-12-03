@@ -14998,7 +14998,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/uma-write
       - oauth2:
-        - https://jans.io/oauth/config/uma.admin
+        - https://jans.io/oauth/config/uma-admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
       - oauth2:
@@ -15068,7 +15068,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/uma-write
       - oauth2:
-        - https://jans.io/oauth/config/uma.admin
+        - https://jans.io/oauth/config/uma-admin
       - oauth2:
         - https://jans.io/oauth/config/write-all
     post:
@@ -15132,7 +15132,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/uma-write
       - oauth2:
-        - https://jans.io/oauth/config/uma.admin
+        - https://jans.io/oauth/config/uma-admin
       - oauth2:
         - https://jans.io/oauth/config/write-all
   /api/v1/uma/resources/{id}:
@@ -15186,7 +15186,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/uma-write
       - oauth2:
-        - https://jans.io/oauth/config/uma.admin
+        - https://jans.io/oauth/config/uma-admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
       - oauth2:
@@ -15217,7 +15217,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/uma-delete
       - oauth2:
-        - https://jans.io/oauth/config/uma.admin
+        - https://jans.io/oauth/config/uma-admin
       - oauth2:
         - https://jans.io/oauth/config/delete-all
     patch:
@@ -15280,7 +15280,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/uma-write
       - oauth2:
-        - https://jans.io/oauth/config/uma.admin
+        - https://jans.io/oauth/config/uma-admin
       - oauth2:
         - https://jans.io/oauth/config/write-all
   /api/v1/uma/resources/clientId/{clientId}:
@@ -15352,7 +15352,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/uma-write
       - oauth2:
-        - https://jans.io/oauth/config/uma.admin
+        - https://jans.io/oauth/config/uma-admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
       - oauth2:
@@ -15693,15 +15693,15 @@ components:
           type: string
         selected:
           type: boolean
+        adminCanView:
+          type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
+        userCanAccess:
           type: boolean
         userCanEdit:
-          type: boolean
-        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -16615,8 +16615,6 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16626,6 +16624,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -18645,7 +18645,7 @@ components:
             https://jans.io/oauth/config/agama.admin: Admin for Agama flow management
             https://jans.io/oauth/jans-auth-server/session.admin: Admin for Session
               management
-            https://jans.io/oauth/config/uma.admin: Admin for UMA management
+            https://jans.io/oauth/config/uma-admin: Admin for UMA management
             https://jans.io/oauth/config/plugin.admin: Admin for Plugin management
             https://jans.io/oauth/config/properties.admin: Admin for Config-API management
             https://jans.io/oauth/client/authorizations.admin: Admin for Client Authorizations
