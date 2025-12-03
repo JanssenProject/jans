@@ -1,0 +1,3 @@
+mcp
+ollama
+python-dotenv
