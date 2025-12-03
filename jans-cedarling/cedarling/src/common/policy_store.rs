@@ -11,6 +11,7 @@ mod token_entity_metadata;
 use crate::common::{
     default_entities::DefaultEntitiesWithWarns,
     default_entities_limits::{DefaultEntitiesLimits, DefaultEntitiesLimitsError},
+    issuer_utils::normalize_issuer,
 };
 
 use super::{PartitionResult, cedar_schema::CedarSchema};
@@ -259,6 +260,11 @@ impl TrustedIssuer {
 
     pub fn get_token_metadata(&self, token_name: &str) -> Option<&TokenEntityMetadata> {
         self.token_metadata.get(token_name)
+    }
+
+    pub fn normalized_issuer(&self) -> String {
+        let issuer_url = self.oidc_endpoint.origin().ascii_serialization();
+        normalize_issuer(&issuer_url)
     }
 }
 

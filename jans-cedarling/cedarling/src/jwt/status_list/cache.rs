@@ -15,10 +15,11 @@ use url::Url;
 use crate::{
     LogLevel, LogWriter,
     jwt::{
-        IssuerConfig,
+        IssuerConfig, TokenCache,
         decode::{DecodeJwtError, decode_jwt},
         key_service::KeyService,
         log_entry::JwtLogEntry,
+        token_cache::IndexKey,
         validation::{JwtValidator, JwtValidatorCache, TokenKind, ValidatorInfo},
     },
     log::Logger,
@@ -42,6 +43,7 @@ impl StatusListCache {
         iss_config: &IssuerConfig,
         validators: &JwtValidatorCache,
         key_service: &KeyService,
+        token_cache: TokenCache,
         logger: Option<Logger>,
     ) -> Result<(), UpdateStatusListError> {
         let openid_config = iss_config
@@ -55,6 +57,7 @@ impl StatusListCache {
         let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url)
             .await
             .map_err(UpdateStatusListError::GetStatusListJwt)?;
+        let iss = iss_config.policy.normalized_issuer();
 
         let decoded_jwt = decode_jwt(&status_list_jwt.0)?;
 
@@ -97,6 +100,10 @@ impl StatusListCache {
                 validator,
                 self.status_lists.clone(),
                 logger,
+                // callback is called on updated status list
+                move || {
+                    token_cache.invalidate_by_index(IndexKey::Iss(iss.clone()));
+                },
             ));
         }
 
@@ -113,14 +120,18 @@ impl StatusListCache {
 }
 
 /// Keeps the statuslist form the given URL updated based on the TTL
-async fn keep_status_list_updated(
+/// `cb` will be called when status list updated
+async fn keep_status_list_updated<F>(
     mut ttl: u64,
     status_list_url: Url,
     decoding_key: Option<DecodingKey>,
     validator: Arc<RwLock<JwtValidator>>,
     status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
     logger: Option<Logger>,
-) {
+    cb: F,
+) where
+    F: Fn(),
+{
     loop {
         tokio::time::sleep(Duration::from_secs(ttl)).await;
 
@@ -198,6 +209,8 @@ async fn keep_status_list_updated(
 
             if let Some(list) = lists.get_mut(status_list_url.as_str()) {
                 *list = updated_status_list;
+                // call callback on updated status list
+                cb()
             } else {
                 logger.log_any(JwtLogEntry::new(
                     format!(
@@ -266,7 +279,13 @@ mod test {
             None,
         );
         status_list
-            .init_for_iss(&iss_config, &validators, &key_service, None)
+            .init_for_iss(
+                &iss_config,
+                &validators,
+                &key_service,
+                TokenCache::new(0),
+                None,
+            )
             .await
             .unwrap();
 

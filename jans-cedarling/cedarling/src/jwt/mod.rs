@@ -137,6 +137,8 @@ impl JwtService {
         let mut validators = JwtValidatorCache::default();
         let mut key_service = KeyService::new();
 
+        let token_cache = TokenCache::new(token_cache_max_ttl_sec);
+
         let trusted_issuers = trusted_issuers.unwrap_or_default();
         let has_trusted_issuers = !trusted_issuers.is_empty();
 
@@ -160,7 +162,13 @@ impl JwtService {
 
             if jwt_config.jwt_status_validation {
                 status_lists
-                    .init_for_iss(&iss_config, &validators, &key_service, logger.clone())
+                    .init_for_iss(
+                        &iss_config,
+                        &validators,
+                        &key_service,
+                        token_cache.clone(),
+                        logger.clone(),
+                    )
                     .await?;
             }
 
@@ -192,7 +200,7 @@ impl JwtService {
             key_service,
             issuer_configs,
             logger,
-            token_cache: TokenCache::new(token_cache_max_ttl_sec),
+            token_cache,
             signed_authz_available,
             jwt_sig_validation_required: jwt_config.jwt_sig_validation,
         })

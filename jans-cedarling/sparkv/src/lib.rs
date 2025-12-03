@@ -195,15 +195,18 @@ impl<T> SparKV<T> {
         let mut cleared_count: usize = 0;
         while let Some(exp_item) = self.expiries.peek().cloned() {
             if exp_item.is_expired() {
-                let Some(kv_entry) = self.data.get(&exp_item.key) else {
-                    // workaround to avoid unwrap
-                    continue;
+                let should_pop = match self.data.get(&exp_item.key) {
+                    Some(kv_entry) => {
+                        kv_entry.key == exp_item.key && kv_entry.expired_at == exp_item.expired_at
+                    },
+                    None => false,
                 };
-                if kv_entry.key == exp_item.key && kv_entry.expired_at == exp_item.expired_at {
+
+                if should_pop {
                     cleared_count += 1;
                     self.pop(&exp_item.key);
                 }
-                // remove current item
+                // remove current item from expiries
                 self.expiries.pop();
             } else {
                 break;
@@ -234,6 +237,19 @@ impl<T> SparKV<T> {
 
         keys.into_iter()
             .filter_map(move |value_key| self.data.get(&value_key.0).map(|entry| &entry.value))
+    }
+
+    /// Remove all values in database by index key
+    pub fn remove_by_index<'a>(&'a mut self, index_key: &'a str) {
+        // keys is cloned to avoid borrowing issues of mutable `self`
+        let keys: Vec<_> = self
+            .index
+            .get_by_index_key(&index::IndexKey(index_key.into()))
+            .cloned()
+            .collect();
+        for key in keys {
+            self.pop(&key.0);
+        }
     }
 
     /// Empty the container. That is, remove all key-values and expiries.

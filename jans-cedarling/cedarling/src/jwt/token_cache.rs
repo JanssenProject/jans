@@ -15,6 +15,7 @@ use crate::jwt::validation::TokenKind;
 ///
 /// The cache uses a thread-safe key-value store with automatic expiration
 /// based on token expiration claims and a configurable maximum TTL.
+#[derive(Clone)]
 pub struct TokenCache {
     cache: Arc<RwLock<SparKV<Arc<Token>>>>,
     max_ttl: usize,
@@ -53,7 +54,32 @@ impl TokenCache {
     pub fn save(&self, kind: &TokenKind, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
         let key = hash_jwt_token(kind, jwt);
 
-        let cache_duration_opt = token
+        // Extract issuer for indexing
+        let index_keys = token
+            .extract_normalized_issuer()
+            .map(|iss| vec![IndexKey::Iss(iss).index_value()])
+            .unwrap_or_default();
+
+        if let Some(duration) = self.cache_duration(&token, now) {
+            let _ = self
+                .cache
+                .write()
+                .expect("token cache mutex shouldn't be poisoned")
+                .set_with_ttl(&key, token, Duration::seconds(duration), &index_keys);
+        } else {
+            // set with SparkKV default TTL (5 minutes)
+            let _ = self
+                .cache
+                .write()
+                .expect("token cache mutex shouldn't be poisoned")
+                .set(&key, token, &index_keys);
+        }
+    }
+
+    /// Extract cache duration, result is optional
+    fn cache_duration(&self, token: &Arc<Token>, now: DateTime<Utc>) -> Option<i64> {
+        
+        token
             .claims
             .get_claim("exp")
             .and_then(|exp| exp.value().as_i64())
@@ -62,13 +88,11 @@ impl TokenCache {
                 let duration = exp - now.timestamp();
                 if duration > 0 {
                     // if duration bigger than configured max ttl, use the max ttl
-                    Some(
-                        if self.max_ttl > 0 && duration > self.max_ttl as i64 {
-                            self.max_ttl as i64
-                        } else {
-                            duration
-                        },
-                    )
+                    Some(if self.max_ttl > 0 && duration > self.max_ttl as i64 {
+                        self.max_ttl as i64
+                    } else {
+                        duration
+                    })
                 } else {
                     None
                 }
@@ -80,22 +104,7 @@ impl TokenCache {
                 } else {
                     None
                 }
-            });
-
-        if let Some(duration) = cache_duration_opt {
-            let _ = self
-                .cache
-                .write()
-                .expect("token cache mutex shouldn't be poisoned")
-                .set_with_ttl(&key, token, Duration::seconds(duration), &[]);
-        } else {
-            // set with SparkKV default TTL (5 minutes)
-            let _ = self
-                .cache
-                .write()
-                .expect("token cache mutex shouldn't be poisoned")
-                .set(&key, token, &[]);
-        }
+            })
     }
 
     /// Clears expired tokens from the cache.
@@ -107,6 +116,14 @@ impl TokenCache {
             .write()
             .expect("token cache mutex shouldn't be poisoned")
             .clear_expired();
+    }
+
+    /// Remove tokens from cache by index key
+    pub fn invalidate_by_index(&self, index_key: IndexKey) {
+        self.cache
+            .write()
+            .expect("token cache mutex shouldn't be poisoned")
+            .remove_by_index(&index_key.index_value());
     }
 }
 
@@ -134,4 +151,21 @@ fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
     jwt.hash(&mut hasher);
 
     hasher.finish().to_string()
+}
+
+/// IndexKey is structure that is used for indexing [TokenCache]
+//
+// thiserror is used for usefull string conversation
+#[derive(Debug, thiserror::Error)]
+pub enum IndexKey {
+    #[error("iss:{0}")]
+    Iss(String),
+}
+
+impl IndexKey {
+    // We use special method to have string representation of index value
+    // because in future it may change, for example applying hash function
+    fn index_value(&self) -> String {
+        self.to_string()
+    }
 }
