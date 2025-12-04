@@ -14681,11 +14681,11 @@
 
 
 <h1 id="introspection-endpoint">Introspection Endpoint<a class="headerlink" href="#introspection-endpoint" title="Permanent link">#</a></h1>
-<p>Introspection endpoint allows a protected resource to determine the active state of an OAuth 2.0 token and to determine 
+<p>Introspection endpoint allows a protected resource to determine the active state of an OAuth 2.0 token and to determine
 meta-information about this token. This endpoint can be used to introspect
 both opaque token (i.e. reference tokens) and structured tokens(i.e. value tokens). This endpoint conforms to <a href="https://datatracker.ietf.org/doc/html/rfc7662">OAuth2 token
 introspection</a> specifications.</p>
-<p>The URI to invoke the introspection endpoint in Janssen Server 
+<p>The URI to invoke the introspection endpoint in Janssen Server
 can be found by checking the <code>introspection_endpoint</code> claim of the OpenID Connect configuration response, typically deployed at <code>https://janssen.server.host/.well-known/openid-configuration</code></p>
 <p>"introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `</p>
 <p>More information about request and response of the Introspection endpoint can be found in
@@ -14812,7 +14812,7 @@ navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#introspectionaccesstokenmusthaveintrospectionscope">introspectionAccessTokenMustHaveIntrospectionScope</a></li>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#introspectionresponsescopesbackwardcompatibility">introspectionResponseScopesBackwardCompatibility</a></li>
 </ul>
-<p>There difference between <code>introspectionAccessTokenMustHaveUmaProtectionScope</code> and <code>introspectionAccessTokenMustHaveIntrospectionScope</code> is that <code>uma_protection</code> scope is enabled for Dynamic Client Registration while <code>introspection</code> scope is not. Thus if set <code>introspectionAccessTokenMustHaveIntrospectionScope</code> to <code>true</code> value allows disable access to Introspection Endpoint to all clients which does not have explicitly granted <code>introspection</code> scope. </p>
+<p>There difference between <code>introspectionAccessTokenMustHaveUmaProtectionScope</code> and <code>introspectionAccessTokenMustHaveIntrospectionScope</code> is that <code>uma_protection</code> scope is enabled for Dynamic Client Registration while <code>introspection</code> scope is not. Thus if set <code>introspectionAccessTokenMustHaveIntrospectionScope</code> to <code>true</code> value allows disable access to Introspection Endpoint to all clients which does not have explicitly granted <code>introspection</code> scope.</p>
 <h2 id="customising-introspection-endpoint-behaviour-using-custom-script">Customising Introspection Endpoint Behaviour using Custom script:<a class="headerlink" href="#customising-introspection-endpoint-behaviour-using-custom-script" title="Permanent link">#</a></h2>
 <p>Customizing certain aspects of endpoint behaviour, for example, one can modify claims of an access token as JWT, using
 <a href="../../../../script-catalog/introspection/">introspection scripts</a>. Use
@@ -14858,7 +14858,7 @@ navigate to</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 27, 2024 12:12:23 UTC"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 27, 2024 12:12:23 UTC">2024-09-27</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
   </span>
 
     

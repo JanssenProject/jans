@@ -14682,18 +14682,18 @@
 
 <h1 id="authorization-endpoint">Authorization Endpoint<a class="headerlink" href="#authorization-endpoint" title="Permanent link">#</a></h1>
 <p>Janssen Server exposes authorization endpoint compliant with <a href="https://www.rfc-editor.org/rfc/rfc6749#section-3.1">OAuth2 framework</a>.
-A client uses authorization endpoint to obtain an authorization grant. Based on response type requested by the client, 
+A client uses authorization endpoint to obtain an authorization grant. Based on response type requested by the client,
 the authorization endpoint issues an authorization code or an access token. Authorization endpoint is a protected endpoint
 which will require end-user authentication before issuing authorization code or access token.</p>
 <p>URL to access authorization endpoint on Janssen Server is listed in the response of Janssen Server's well-known
 <a href="../configuration/">configuration endpoint</a> given below.</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
 </code></pre></div>
-<p><code>authorization_endpoint</code> claim in the response specifies the URL for authorization endpoint. By default, authorization 
+<p><code>authorization_endpoint</code> claim in the response specifies the URL for authorization endpoint. By default, authorization
 endpoint looks like below:</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/authorize
 </code></pre></div>
-<p>More information about request and response of the authorization endpoint can be found in the OpenAPI specification 
+<p>More information about request and response of the authorization endpoint can be found in the OpenAPI specification
 of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization">jans-auth-server module</a>.</p>
 <h2 id="configuration-properties">Configuration Properties<a class="headerlink" href="#configuration-properties" title="Permanent link">#</a></h2>
 <p>Authorization endpoint can be further configured using Janssen Server configuration properties listed below. When using
@@ -14719,38 +14719,38 @@ navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#cibamaxexpirationtimeallowedsec">cibaMaxExpirationTimeAllowedSec</a></li>
 </ul>
 <h2 id="required-client-configuration">Required Client Configuration<a class="headerlink" href="#required-client-configuration" title="Permanent link">#</a></h2>
-<p>Clients must be registered with Janssen Server as using <a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.1">code</a> 
+<p>Clients must be registered with Janssen Server as using <a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.1">code</a>
 and/or <a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.2">implicit</a> grant types in order to use authorization endpoint.</p>
 <p>Using <a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a>, client can be registered for appropriate grant type by
 navigating to <code>Auth-Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code></p>
 <h2 id="using-pkce">Using PKCE<a class="headerlink" href="#using-pkce" title="Permanent link">#</a></h2>
 <p>Janssen Server <a href="../../oauth-features/pkce/">supports PKCE</a>, which recommended and more secure method for using <code>code</code>
-grant. </p>
+grant.</p>
 <p>PKCE can be enabled/disable by setting <a href="../../../reference/json/properties/janssenauthserver-properties/#requirepkce">requirePkce</a>
-property. Janssen server supports <code>plain</code> as well as <code>s256</code> code challenge methods. </p>
+property. Janssen server supports <code>plain</code> as well as <code>s256</code> code challenge methods.</p>
 <h2 id="using-par">Using PAR<a class="headerlink" href="#using-par" title="Permanent link">#</a></h2>
-<p>As a separate endpoint, Janssen Server <a href="../../oauth-features/par/">supports PAR</a>(Pushed Authorization Requests) to enable authorization using 
-more complex authorization requests and making it more secure at the same time. </p>
+<p>As a separate endpoint, Janssen Server <a href="../../oauth-features/par/">supports PAR</a>(Pushed Authorization Requests) to enable authorization using
+more complex authorization requests and making it more secure at the same time.</p>
 <p>Use Janssen Server configuration property <a href="../../../reference/json/properties/janssenauthserver-properties/#requirepar">requirePar</a>
-to accept only PAR requests. </p>
+to accept only PAR requests.</p>
 <h2 id="using-jarm">Using JARM<a class="headerlink" href="#using-jarm" title="Permanent link">#</a></h2>
-<p>Authorization endpoint supports JWT Secured Authorization Response Mode, or <a href="../../openid-features/jarm/">JARM</a>. Using 
-JARM makes authorization responses more secure and compliant to be used in FAPI deployments. </p>
-<p>Janssen Server supports all response modes as defined in <a href="https://openid.net//specs/openid-financial-api-jarm.html#response-encoding">JARM specification</a> </p>
+<p>Authorization endpoint supports JWT Secured Authorization Response Mode, or <a href="../../openid-features/jarm/">JARM</a>. Using
+JARM makes authorization responses more secure and compliant to be used in FAPI deployments.</p>
+<p>Janssen Server supports all response modes as defined in <a href="https://openid.net//specs/openid-financial-api-jarm.html#response-encoding">JARM specification</a></p>
 <h2 id="using-prompt-parameter">Using Prompt Parameter<a class="headerlink" href="#using-prompt-parameter" title="Permanent link">#</a></h2>
 <p><code>prompt</code> request parameter is an ASCII string value that specifies whether the Authorization Server prompts the End-User
 for re-authentication and consent. Janssen Server supports <code>none</code>, <code>login</code>, <code>consent</code>, <code>create</code> and <code>select_account</code> values for
-<code>prompt</code> parameter. Multiple values can be specified by separating them with single space. Based on value/s of this 
+<code>prompt</code> parameter. Multiple values can be specified by separating them with single space. Based on value/s of this
 request parameter Authorization Server prompts the End-User for re-authentication (<code>login</code>), consent or user registration details (<code>create</code>).</p>
 <p>Check <a href="../../openid-features/prompt-parameter/">Prompt</a> page for more details.</p>
 <h3 id="none">none<a class="headerlink" href="#none" title="Permanent link">#</a></h3>
-<p><code>none</code> value will instruct Janssen Server NOT to display any authentication or consent user interface pages. 
+<p><code>none</code> value will instruct Janssen Server NOT to display any authentication or consent user interface pages.
 An error is returned if the End-User is not already authenticated or the Client does not have pre-configured consent for
 the requested scopes. This can be used as a method to check for existing authentication and/or consent.</p>
 <h3 id="login">login<a class="headerlink" href="#login" title="Permanent link">#</a></h3>
 <p><code>login</code> value will instruct Janssen Server to prompt the End-User for re-authentication.</p>
 <h3 id="consent">consent<a class="headerlink" href="#consent" title="Permanent link">#</a></h3>
-<p><code>consent</code> value will instruct Janssen Server to prompt the End-User for consent before returning information to the 
+<p><code>consent</code> value will instruct Janssen Server to prompt the End-User for consent before returning information to the
 Client.</p>
 <h3 id="select_account">select_account<a class="headerlink" href="#select_account" title="Permanent link">#</a></h3>
 <p><code>select_account</code> value will instruct Janssen Server to prompt the End-User to select a user account. This allows a user
@@ -14766,10 +14766,10 @@ server for end user authentication.</p>
 <p><a href="../../developer/interception-scripts.md">Interception scripts</a> allows
 flexibility to configure and customize multiple aspects in Janssen Server. For example, see this documentation to learn
 how <a href="../../developer/scripts/person-authentication.md">person authentication</a>
-and <a href="../../developer/scripts/consent-gathering.md">consent gathering</a> can be 
+and <a href="../../developer/scripts/consent-gathering.md">consent gathering</a> can be
 customized using interception scripts.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<p>If you'd like to contribute content to this page, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
 
 
@@ -14792,7 +14792,7 @@ customized using interception scripts.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2025 11:50:32 UTC"><span class="timeago" datetime="2025-03-25T11:50:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2025 11:50:32 UTC">2025-03-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
   </span>
 
     

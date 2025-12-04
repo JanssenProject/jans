@@ -14598,11 +14598,11 @@
 
 <h1 id="pushed-authorization-request-par-endpoint">Pushed Authorization Request (PAR) Endpoint<a class="headerlink" href="#pushed-authorization-request-par-endpoint" title="Permanent link">#</a></h1>
 <p>PAR endpoint is used by client to send authorization request directly to the Janssen Server without using the usual
-redirection mechanism via user agent. When PAR endpoint receives a valid request, it responds with a request URI. 
-The request URI is a reference created and stored by Janssen Server. It is a reference to  authorization request and 
+redirection mechanism via user agent. When PAR endpoint receives a valid request, it responds with a request URI.
+The request URI is a reference created and stored by Janssen Server. It is a reference to  authorization request and
 the metadata sent with it by the client. Client can send this request uri to the Janssen Server in a authorization
-request using user agent redirect mechanism. There are multiple benefits of using this flow which are described along 
-with other details in <a href="https://datatracker.ietf.org/doc/html/rfc9126">PAR specification</a>. Janssen Server PAR implementation 
+request using user agent redirect mechanism. There are multiple benefits of using this flow which are described along
+with other details in <a href="https://datatracker.ietf.org/doc/html/rfc9126">PAR specification</a>. Janssen Server PAR implementation
 conforms to PAR specification.</p>
 <p>URL to access PAR endpoint on Janssen Server is listed in the response of Janssen Server's well-known
 <a href="../configuration/">configuration endpoint</a> given below.</p>
@@ -14623,10 +14623,10 @@ like below:</p>
   &quot;expires_in&quot;: 60
  }
 </code></pre></div>
-<p>Since PAR endpoint is a protected resource. The client has to authenticate itself to the endpoint. Authentication 
-methods used are same as the once used for client authentication at <a href="../token/#client-authentication">token endpoint</a>. </p>
+<p>Since PAR endpoint is a protected resource. The client has to authenticate itself to the endpoint. Authentication
+methods used are same as the ones used for client authentication at <a href="../token/#client-authentication">token endpoint</a>.</p>
 <p>More information about request and response of the PAR endpoint can be found in
-the OpenAPI specification of 
+the OpenAPI specification of
 <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization/post_par">jans-auth-server module</a>.</p>
 <h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
 <p><code>PAR</code> endpoint can be enabled or disabled using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#par">PAR feature flag</a>.
@@ -14666,11 +14666,7 @@ disable <code>PAR</code> flag as required.</p>
 </tr>
 <tr>
 <td style="text-align: left;"><code>def modifyParResponse(self, response, context)</code></td>
-<td style="text-align: left;">Used to modify response from <code>/par</code> endpoint.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>response</code> is <code>org.json.JSONObject</code><br/> <code>context</code> is <code>io.jans.as.server.service.external.context.ExternalScriptContext</code></td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;">Used to modify response from <code>/par</code> endpoint. <code>response</code> is <code>org.json.JSONObject</code><br/> <code>context</code> is <code>io.jans.as.server.service.external.context.ExternalScriptContext</code></td>
 </tr>
 </tbody>
 </table>
@@ -14749,7 +14745,7 @@ disable <code>PAR</code> flag as required.</p>
 <h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
 <p>You can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/">community chat on Zulip</a>. Any questions you have will help determine what information our documentation should cover.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<p>If you have content you'd like to contribute to this page, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
 
 
@@ -14772,7 +14768,7 @@ disable <code>PAR</code> flag as required.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 1, 2025 09:54:31 UTC"><span class="timeago" datetime="2025-12-01T09:54:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 1, 2025 09:54:31 UTC">2025-12-01</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
   </span>
 
     

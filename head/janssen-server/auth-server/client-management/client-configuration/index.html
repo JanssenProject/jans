@@ -14721,7 +14721,7 @@ is exposing its key set. For client who can host keys and expose a URI, it is <s
 static <code>JWKS</code> key set. Using <code>JWKS URI</code> enables client to rotate its cryptographic keys without having to change the
 client configuration on Janssen Server.</p>
 <h3 id="available-algorithms-for-encryption-and-signing">Available Algorithms for Encryption and Signing<a class="headerlink" href="#available-algorithms-for-encryption-and-signing" title="Permanent link">#</a></h3>
-<p>The client can select algorithms for cryptographic and encryption during client configuration. Janssen 
+<p>The client can select algorithms for cryptographic and encryption during client configuration. Janssen
 Server supports a list of algorithms as listed in response of Janssen Server's well-known
 <a href="../../endpoints/configuration/">configuration endpoint</a> given below.</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
@@ -14756,7 +14756,7 @@ list of supported grant types can be found in the response of the Janssen Server
 <p>Claim <code>grant_types_supported</code> lists all the supported grant types in the response.</p>
 <h3 id="configuring-grant-type-for-client">Configuring Grant Type For Client<a class="headerlink" href="#configuring-grant-type-for-client" title="Permanent link">#</a></h3>
 <p>Janssen Server will allow requests from a client with grant types that the client is configured to use. Client can be
-configured to use or not use certain grant types using <a href="../../../config-guide/config-tools/jans-cli/">CLI</a> or 
+configured to use or not use certain grant types using <a href="../../../config-guide/config-tools/jans-cli/">CLI</a> or
 <a href="../../../config-guide/config-tools/jans-tui/">TUI</a> tools.</p>
 <h3 id="recommendations-for-using-grant-types-and-flows">Recommendations For Using Grant Types and Flows<a class="headerlink" href="#recommendations-for-using-grant-types-and-flows" title="Permanent link">#</a></h3>
 <p>Developers should use the grant types based on the ability of the client to protect the client credentials as well as
@@ -14825,12 +14825,12 @@ to internal clients (not a third party) where there is no need to prompt the per
 client informs the authorization server of the desired grant. Response type parameter is
 <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.1">defined</a> in the OAuth 2.0 framework.</p>
 <p>Janssen Server supports response types
-defined by OAuth 2.0, OAuth 2.1.The complete list of supported response types can be found in the response of the 
+defined by OAuth 2.0, OAuth 2.1.The complete list of supported response types can be found in the response of the
 Janssen Server's well-known <a href="../../endpoints/configuration/">configuration endpoint</a> given below.</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
 </code></pre></div>
 <p>Claim <code>response_types_supported</code> lists all the supported grant types in the response.</p>
-<p>When registering client using dynamic client registration, if the <code>response_type</code> parameter is not specified, it'll 
+<p>When registering client using dynamic client registration, if the <code>response_type</code> parameter is not specified, it'll
 default to <code>code</code>.</p>
 <h3 id="response-type-recommendations">Response Type Recommendations<a class="headerlink" href="#response-type-recommendations" title="Permanent link">#</a></h3>
 <ul>
@@ -14841,8 +14841,8 @@ Make sure appropriate grant types are configured in Janssen Server client config
 authorization requests containing response types not permitted for respective client.</li>
 </ul>
 <h2 id="client-expiration">Client expiration<a class="headerlink" href="#client-expiration" title="Permanent link">#</a></h2>
-<p>Client expiration is set based on <code>dynamicRegistrationExpirationTime</code> AS configuration property or otherwise 
-if <code>dcrForbidExpirationTimeInRequest</code> is <code>false</code> then it is set with Dynamic Client Registration Request via <code>lifetime</code> parameter 
+<p>Client expiration is set based on <code>dynamicRegistrationExpirationTime</code> AS configuration property or otherwise
+if <code>dcrForbidExpirationTimeInRequest</code> is <code>false</code> then it is set with Dynamic Client Registration Request via <code>lifetime</code> parameter
 which expected value in seconds.</p>
 <p>Client activity time is tracked/recorded each time client is used for authentication or authorization (date is written in <code>jansLastAccessTime</code> client attribute).</p>
 <div class="admonition contribute">
@@ -14871,7 +14871,7 @@ which expected value in seconds.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2025 10:42:13 UTC"><span class="timeago" datetime="2025-03-25T10:42:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2025 10:42:13 UTC">2025-03-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
   </span>
 
     

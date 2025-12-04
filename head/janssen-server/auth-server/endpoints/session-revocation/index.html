@@ -14489,9 +14489,9 @@
 
 
 <h1 id="session-revocation-endpoint">Session Revocation Endpoint<a class="headerlink" href="#session-revocation-endpoint" title="Permanent link">#</a></h1>
-<p><strong>Note:</strong> Endpoint is deprecated in favor of <a href="../global-token-revocation/">Global Token Revocation</a> </p>
+<p><strong>Note:</strong> Endpoint is deprecated in favor of <a href="../global-token-revocation/">Global Token Revocation</a></p>
 <p>Janssen Server provides session revocation endpoint to enable the client to revoke all sessions of a users.
-Though not being part of any industry standard/specification, Janssen Server provides this endpoint to allow greater 
+Though not being part of any industry standard/specification, Janssen Server provides this endpoint to allow greater
 control and better management of sessions on OP.</p>
 <p>URL to access revocation endpoint on Janssen Server is listed in the response of Janssen Server's well-known
 <a href="../configuration/">configuration endpoint</a> given below.</p>
@@ -14504,7 +14504,7 @@ looks like below:</p>
 <p>More information about request and response of the revocation endpoint can be found in
 the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Session_Management/revoke-session">jans-auth-server module</a>.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<p>A request to this endpoint can revoke all sessions of one particular user. Use the request parameters to specify 
+<p>A request to this endpoint can revoke all sessions of one particular user. Use the request parameters to specify
 criteria to select the user. If there are multiple users matching the given criteria, the first found user will be affected.</p>
 <h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
 <p><code>Session revocation</code> endpoint can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#revoke_session">REVOKE_SESSION feature flag</a>.
@@ -14539,7 +14539,7 @@ disable <code>REVOKE_SESSION</code> flag as required.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 19, 2025 07:03:06 UTC"><span class="timeago" datetime="2025-08-19T07:03:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 19, 2025 07:03:06 UTC">2025-08-19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
   </span>
 
     

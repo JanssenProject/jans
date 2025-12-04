@@ -14663,7 +14663,9 @@
 
 
 <h1 id="keys">Keys<a class="headerlink" href="#keys" title="Permanent link">#</a></h1>
-<p>Janssen uses keys for signing and encryption, primarily concerning JSON documents. Janssen supports several signing and encryption algorithms in salted and unsalted, to fit a variety of business needs. If other algorithms are necessary, Janssen supports them via interception scripts.</p>
+<p>Janssen uses keys for signing and encryption, primarily concerning JSON documents. Janssen
+supports several signing and encryption algorithms in salted and unsalted
+formats to meet different business requirements. If other algorithms are necessary, Janssen supports them via interception scripts.</p>
 <p>A key is a piece of information, usually a string of numbers or letters that are stored in a file, which, when processed through a cryptographic algorithm, can encode or decode cryptographic data. In Janssen we use keys for creating token like <code>id_token</code>,<code>access_token</code>.</p>
 <ul>
 <li>
@@ -14681,7 +14683,7 @@ It contains information about what happened when a user authenticated, and is in
 <p><code>https://&lt;your_server&gt;/jans-auth/restv1/jwks</code></p>
 <p><strong><em>Let's see some example of JWT public keys used in janssen.</em></strong></p>
 <p>When jwk is expired, it is archived and can be access by following url:</p>
-<p><code>https://&lt;your_server&gt;/jans-auth/restv1/jwks/archived/{kid}</code> </p>
+<p><code>https://&lt;your_server&gt;/jans-auth/restv1/jwks/archived/{kid}</code></p>
 <p>More info about archived jwks can be found <a href="../../endpoints/archived-jwks-uri/">here</a></p>
 <h3 id="example-1">Example-1<a class="headerlink" href="#example-1" title="Permanent link">#</a></h3>
 <p>The "kty" (Key Type) of this key is RSA. This key is "use" (Public Key Use) for "sig" (Signature) on data. The "alg" (Algorithm) intended with this key is "RS256".
@@ -14783,15 +14785,15 @@ The &quot;kty&quot; (Key Type) of this key is &quot;RSA&quot;. This key is &quot
  }
 </code></pre></div></p>
 <h1 id="crypto-supported">Crypto Supported<a class="headerlink" href="#crypto-supported" title="Permanent link">#</a></h1>
-<p>Depending on the transport through which the messages are sent, the integrity of the message might not be guaranteed and the 
-originator of the message might not be authenticated. To mitigate these risks, ID Token, UserInfo Response, Request Object, 
-and Client Authentication JWT values can utilize <a href="https://openid.net/specs/openid-connect-core-1_0.html#JWS">JSON Web Signature (JWS) [JWS]</a> to sign their contents. To achieve message 
+<p>Depending on the transport through which the messages are sent, the integrity of the message might not be guaranteed and the
+originator of the message might not be authenticated. To mitigate these risks, ID Token, UserInfo Response, Request Object,
+and Client Authentication JWT values can utilize <a href="https://openid.net/specs/openid-connect-core-1_0.html#JWS">JSON Web Signature (JWS) [JWS]</a> to sign their contents. To achieve message
 confidentiality, these values can also use <a href="https://openid.net/specs/openid-connect-core-1_0.html#JWE">JSON Web Encryption (JWE) [JWE]</a> to encrypt their contents.</p>
 <h2 id="signing-algorithms">Signing algorithms<a class="headerlink" href="#signing-algorithms" title="Permanent link">#</a></h2>
-<p>Signing or Signature algorithm is a cryptographic mechanism used to verify the authenticity and 
-integrity of digital data. We may consider it as a digital version of the ordinary handwritten signatures, but with higher 
+<p>Signing or Signature algorithm is a cryptographic mechanism used to verify the authenticity and
+integrity of digital data. We may consider it as a digital version of the ordinary handwritten signatures, but with higher
 levels of complexity and security.</p>
-<p>Let's see some signing key algorithms </p>
+<p>Let's see some signing key algorithms</p>
 <table>
 <thead>
 <tr>
@@ -14865,8 +14867,8 @@ levels of complexity and security.</p>
 </tbody>
 </table>
 <h2 id="encryption-algorithms">Encryption algorithms<a class="headerlink" href="#encryption-algorithms" title="Permanent link">#</a></h2>
-<p>In cryptography, encryption is the process of encoding information. This process converts the original 
-representation of the information, known as plaintext, into an alternative form known as ciphertext. 
+<p>In cryptography, encryption is the process of encoding information. This process converts the original
+representation of the information, known as plaintext, into an alternative form known as ciphertext.
 Ideally, only authorized parties can decipher a ciphertext back to plaintext and access the original information.</p>
 <p>Let's see some encryption keys.</p>
 <table>
@@ -14907,9 +14909,9 @@ Ideally, only authorized parties can decipher a ciphertext back to plaintext and
 <li>PKCS#1 unencrypted "RSAPrivateKey" (OpenSSL private key file format)</li>
 <li>X.509 "SubjectPublicKeyInfo" (OpenSSL public key file format)</li>
 </ul>
-<p>The above key values can be passed as (a) a binary DER-encoded ASN.1 file, (b) a text file in PEM format, (c) a 
+<p>The above key values can be passed as (a) a binary DER-encoded ASN.1 file, (b) a text file in PEM format, (c) a
 string containing the key in <a href="https://www.cryptosys.net/pki/manpki/pki_pemstring.html">PEM format</a>.</p>
-<p>Also supported are RSA private and public keys represented in XML format to XKMS 2.0 [XKMS] and JSON Web Key (JWK) format <a href="https://www.cryptosys.net/pki/manpki/pki_References.html#JWK">[JWK]</a>. 
+<p>Also supported are RSA private and public keys represented in XML format to XKMS 2.0 [XKMS] and JSON Web Key (JWK) format <a href="https://www.cryptosys.net/pki/manpki/pki_References.html#JWK">[JWK]</a>.
 For more details, see <a href="https://www.cryptosys.net/pki/manpki/pki_Keystorage.html">Key Storage Format</a>.
 To know more about RSA keyformat browse <a href="https://www.cryptosys.net/pki/rsakeyformats.html">here</a></p>
 <h2 id="janssen-keystore-formats">Janssen Keystore Formats<a class="headerlink" href="#janssen-keystore-formats" title="Permanent link">#</a></h2>
@@ -14941,7 +14943,7 @@ We can store private keys, secret keys and certificates on this type. You can fi
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2025 11:50:32 UTC"><span class="timeago" datetime="2025-03-25T11:50:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2025 11:50:32 UTC">2025-03-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
   </span>
 
     
