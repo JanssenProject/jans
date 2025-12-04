@@ -2,11 +2,12 @@
 # Cloud SQL JDBC Socket Factory Builder
 # =================================
 # Builds fat JARs with all dependencies for Cloud SQL connectivity
-FROM maven:3.9-eclipse-temurin-17-alpine AS cloudsql-builder
+FROM maven:3.9-eclipse-temurin-17 AS cloudsql-builder
 
 ARG CLOUDSQL_SOCKET_FACTORY_VERSION=1.27.0
 
-RUN apk add --no-cache git \
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/* \
     && git clone --depth 1 --branch v${CLOUDSQL_SOCKET_FACTORY_VERSION} \
        https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory.git /build
 
