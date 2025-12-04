@@ -11,6 +11,7 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 
 from utils.multi_lang import _
+from utils import background_tasks
 from utils.utils import common_data
 from utils.utils import DialogUtils
 from utils.static import cli_style, common_strings
@@ -228,6 +229,12 @@ class Attributes(DialogUtils):
 
         self.edit_attribute(data={})
 
+    def refresh_attributes_cache(self) -> None:
+        self.get_attributes()
+        common_data.claims_retrieved = False
+        self.app.create_background_task(background_tasks.get_attributes_coroutine(self.app))
+
+
     def save_attribute(self, dialog: JansGDialog) -> None:
         """Saves attribute
 
@@ -262,10 +269,11 @@ class Attributes(DialogUtils):
 
                 if response.status_code in (200, 201):
                     self.app.start_progressing(_("Attribute was saved"))
-                    self.get_attributes()
-                    common_data.claims_retreived = False
+                    self.refresh_attributes_cache()
                 else:
                     self.myparent.show_message(_("A server error ocurred while saving attribute"), str(response.text), tobefocused=self.main_container)
+
+
             asyncio.ensure_future(coroutine())
 
 
@@ -376,8 +384,7 @@ class Attributes(DialogUtils):
                 self.app.start_progressing(_("Deleting attribute {}").format(selected_attribute['name']))
                 await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
-                self.get_attributes()
-                common_data.claims_retreived = False
+                self.refresh_attributes_cache()
 
             asyncio.ensure_future(coroutine())
 
