@@ -14922,7 +14922,7 @@
 
 <h1 id="client-registration-endpoint">Client Registration Endpoint<a class="headerlink" href="#client-registration-endpoint" title="Permanent link">#</a></h1>
 <h3 id="dynamic-client-registration-dcr">Dynamic Client Registration (DCR)<a class="headerlink" href="#dynamic-client-registration-dcr" title="Permanent link">#</a></h3>
-<p>Dynamic client registration refers to the process by which a client submits a registration request to the Authorization 
+<p>Dynamic client registration refers to the process by which a client submits a registration request to the Authorization
 server and how that request is served by the Authorization server. It is explained in the following specifications:</p>
 <ul>
 <li><a href="https://openid.net/specs/openid-connect-registration-1_0.html">For OpenID Connect relying parties</a></li>
@@ -14931,8 +14931,8 @@ server and how that request is served by the Authorization server. It is explain
 <li><a href="https://openbanking.atlassian.net/wiki/spaces/DZ/pages/36667724/OpenBanking+OpenID+Dynamic+Client+Registration+Specification+-+v1.0.0-rc2#OpenBankingOpenIDDynamicClientRegistrationSpecification-v1.0.0-rc2-ClientRegistrationRequest">OpenBanking OpenID Dynamic Client Registration</a> </li>
 </ul>
 <h3 id="client-registration-endpoint_1">Client Registration endpoint<a class="headerlink" href="#client-registration-endpoint_1" title="Permanent link">#</a></h3>
-<p>The URI to dynamically register a client to a Janssen Auth Server can be found by checking the <code>registration_endpoint</code> 
-claim of the OpenID Connect configuration reponse, typically deployed at </p>
+<p>The URI to dynamically register a client to a Janssen Auth Server can be found by checking the <code>registration_endpoint</code>
+claim of the OpenID Connect configuration response, typically deployed at</p>
 <div class="highlight"><pre><span></span><code>https://&lt;my.jans.server&gt;/.well-known/openid-configuration
 </code></pre></div>
 <h3 id="configuring-janssen-as-to-allow-clients-to-dynamically-register">Configuring Janssen AS to allow clients to dynamically register<a class="headerlink" href="#configuring-janssen-as-to-allow-clients-to-dynamically-register" title="Permanent link">#</a></h3>
@@ -14943,13 +14943,13 @@ claim of the OpenID Connect configuration reponse, typically deployed at </p>
 <li><code>dcrForbidExpirationTimeInRequest</code> : Boolean value specifying whether to allow to set client's expiration time in seconds during dynamic registration.. Default value is <code>false</code>.</li>
 </ol>
 <p><strong>Client expiration</strong></p>
-<p>Client expiration is set based on <code>dynamicRegistrationExpirationTime</code> AS configuration property or otherwise 
-if <code>dcrForbidExpirationTimeInRequest</code> is <code>false</code> then it can be requested in Dynamic Client Registration Request via <code>lifetime</code> parameter 
-which expected value in seconds. </p>
-<p>Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
+<p>Client expiration is set based on <code>dynamicRegistrationExpirationTime</code> AS configuration property or otherwise
+if <code>dcrForbidExpirationTimeInRequest</code> is <code>false</code> then it can be requested in Dynamic Client Registration Request via <code>lifetime</code> parameter
+which expected value in seconds.</p>
+<p>Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">Configure the Janssen AS</a></p>
 <h3 id="client-registration-requests">Client registration Requests<a class="headerlink" href="#client-registration-requests" title="Permanent link">#</a></h3>
-<p>Client registration request primarily does two things: Communicate client metadata to the authorization server, and 
-optionally authenticate. </p>
+<p>Client registration request primarily does two things: Communicate client metadata to the authorization server, and
+optionally authenticate.</p>
 <p>There are different ways in which the client metadata is communicated to the authorization server using
 dynamic client registration requests.</p>
 <ul>
@@ -15001,7 +15001,7 @@ in example below:</p>
 <span class="w">    </span><span class="nt">&quot;response_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>In a typical DCR request the client or developer calls the client registration endpoint with a set of client metadata 
+<p>In a typical DCR request the client or developer calls the client registration endpoint with a set of client metadata
 as specified in <a href="https://www.rfc-editor.org/rfc/rfc7591.html#page-8">RFC7591</a></p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-k<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-auth/restv1/register&#39;</span><span class="w">  </span><span class="se">\</span>
 <span class="w">     </span>--data<span class="w"> </span><span class="s1">&#39;{ \</span>
@@ -15023,7 +15023,7 @@ as specified in <a href="https://www.rfc-editor.org/rfc/rfc7591.html#page-8">RFC
 <span class="w">    </span>-i<span class="w"> </span><span class="s1">&#39;https://my-jans-server/jans-auth/restv1/register&#39;</span><span class="w">  </span><span class="se">\</span>
 <span class="w">    </span>--data<span class="w"> </span><span class="s1">&#39;eyJraWQiOiJrWTIyZXBUT......ueOg2HkjpggwAEP84jq9Q&#39;</span>
 </code></pre></div>
-<p>When such will be the nature of client registration requests, the following configuration properties should be set in 
+<p>When such will be the nature of client registration requests, the following configuration properties should be set in
 the authorization server:</p>
 <ul>
 <li><code>dcrSignatureValidationEnabled</code> - enables DCR signature validation</li>
@@ -15032,7 +15032,7 @@ the authorization server:</p>
 </ul>
 <p>Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
 <h4 id="using-software-statement">Using software statement<a class="headerlink" href="#using-software-statement" title="Permanent link">#</a></h4>
-<p>A signed assertion from a trusted party, a Software statement or Software Statement Assertion (SSA), is used to 
+<p>A signed assertion from a trusted party, a Software statement or Software Statement Assertion (SSA), is used to
 dynamically register clients to an Authorization server.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>https://my.jans.server/jans-auth/restv1/register<span class="w"> </span><span class="se">\</span>
@@ -15043,7 +15043,7 @@ dynamically register clients to an Authorization server.</p>
 <span class="s">  &quot;jwks_uri&quot;:&quot;https://my.portal/portal/jwks&quot; \</span>
 <span class="s">} DATA</span>
 </code></pre></div>
-<p>To enable client registrations using Software statements, the AS should be configured using the following configuration 
+<p>To enable client registrations using Software statements, the AS should be configured using the following configuration
 parameters:</p>
 <ul>
 <li><code>softwareStatementValidationType</code> - The value of this variable is one of the following:<ul>
@@ -15076,13 +15076,13 @@ should point to inlined JWKS.</li>
 </ul>
 <p>Configure the AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
 <h4 id="special-mention-about-fapi">Special mention about FAPI:<a class="headerlink" href="#special-mention-about-fapi" title="Permanent link">#</a></h4>
-<p>In case of a typical <a href="https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html">client registration request in FAPI implementation</a>, 
-the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or 
-DCR payload. This SSA can contain the software_statement inside it which is also a signed JWT. Each of the JWTs, the 
-outer JWT called the SSA and the inner JWT called the software_statement are signed by different entities - the TPP and 
+<p>In case of a typical <a href="https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html">client registration request in FAPI implementation</a>,
+the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or
+DCR payload. This SSA can contain the software_statement inside it which is also a signed JWT. Each of the JWTs, the
+outer JWT called the SSA and the inner JWT called the software_statement are signed by different entities - the TPP and
 OBIE respectively.</p>
 <h3 id="security-pointers">Security Pointers<a class="headerlink" href="#security-pointers" title="Permanent link">#</a></h3>
-<p>If <code>dynamicRegistrationEnabled</code> is enabled in the Authorization Server, assess the following points to minimize 
+<p>If <code>dynamicRegistrationEnabled</code> is enabled in the Authorization Server, assess the following points to minimize
 potential exposure of sensitive personal data:</p>
 <ol>
 <li><code>trustedClientEnabled</code> and <code>dynamicRegistrationPersistClientAuthorizations</code> properties determine whether clients 
@@ -15403,7 +15403,7 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJJREFtYX...
 <p>Learn more in the <a href="../../../../script-catalog/client_registration/client-registration/">Client Registration Script Guide</a></p>
 <h3 id="the-use-of-attestation-in-dynamic-client-registration">The Use of Attestation in Dynamic Client Registration<a class="headerlink" href="#the-use-of-attestation-in-dynamic-client-registration" title="Permanent link">#</a></h3>
 <p>AS supports "The Use of Attestation in OAuth 2.0 Dynamic Client Registration" <a href="https://www.ietf.org/id/draft-tschofenig-oauth-attested-dclient-reg-00.html">specification draft</a>.</p>
-<p>Specification draft does not define exact attestation request/response formats. 
+<p>Specification draft does not define exact attestation request/response formats.
 Thus AS supports Attestation calls to Verifier via <code>ClientRegistrationType</code> custom script type.</p>
 <p>Use <code>createClient</code> method of <code>ClientRegistrationType</code> to prevent client creation if attestation result does not satisfy expectation.</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span><span class="w"> </span><span class="nf">createClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
@@ -15454,7 +15454,7 @@ and throw error from custom script.</p>
         <span class="nb">print</span> <span class="s2">&quot;Attestation result is OK&quot;</span>
         <span class="k">return</span> <span class="kc">True</span>            
 </code></pre></div>
-<p><code>context.createStaleEvidenceWebApplicationException(nonceFromVerifier)</code> leads to <code>stale_evidence</code> error creation, 
+<p><code>context.createStaleEvidenceWebApplicationException(nonceFromVerifier)</code> leads to <code>stale_evidence</code> error creation,
 see example above (<code>nonceFromVerifier</code> must be string value).</p>
 <p>In case goal is to create own custom error, please use standard <code>context.createWebApplicationException</code> methods and return <code>False</code> from script to prevent client creation.</p>
 <p>Example
@@ -15463,27 +15463,27 @@ see example above (<code>nonceFromVerifier</code> must be string value).</p>
 </code></pre></div></p>
 <h3 id="dynamic-registration-custom-attributes">Dynamic registration custom attributes<a class="headerlink" href="#dynamic-registration-custom-attributes" title="Permanent link">#</a></h3>
 <h3 id="crud-operations">CRUD Operations<a class="headerlink" href="#crud-operations" title="Permanent link">#</a></h3>
-<p>Janssen Server allows client management through client configuration endpoint 
-<a href="https://www.rfc-editor.org/rfc/rfc7592">(RFC 7592)</a>. </p>
+<p>Janssen Server allows client management through client configuration endpoint
+<a href="https://www.rfc-editor.org/rfc/rfc7592">(RFC 7592)</a>.</p>
 <p><a href="#using-request-body">JSON response</a> to client registration request contains <code>registration_client_uri</code> and
 <code>registration_access_token</code> data elements. The URI mentioned using <code>registration_client_uri</code> provides functionality to
 read, update and delete the client. This endpoint is a protected endpoint where request has to be authenticated using
 access token <code>registration_access_token</code>.</p>
 <h4 id="read-client-metadata">Read client metadata<a class="headerlink" href="#read-client-metadata" title="Permanent link">#</a></h4>
-<p>A read request to the same client that got created in <a href="#using-request-body">earlier</a> section should be as shown in the 
-example below. HTTP method <code>GET</code> is used to send the request which signifies that it is a request to <code>read</code> client 
+<p>A read request to the same client that got created in <a href="#using-request-body">earlier</a> section should be as shown in the
+example below. HTTP method <code>GET</code> is used to send the request which signifies that it is a request to <code>read</code> client
 metadata.</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-k<span class="w"> </span>-H<span class="w"> </span><span class="s1">&#39;Authorization: Bearer eaee20de-54ce-4217-b960-6b72b55e6cab&#39;</span><span class="w"> </span><span class="se">\</span>
--i<span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-auth/restv1/register?client_id=85192707-a38c-496c-806c-ef01a6a3ae4a&#39;</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-k<span class="w"> </span>-H<span class="w"> </span><span class="s1">&#39;Authorization: Bearer &lt;REDACTED&gt;&#39;</span><span class="w"> </span><span class="se">\</span>
+i<span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-auth/restv1/register?client_id=85192707-a38c-496c-806c-ef01a6a3ae4a&#39;</span>
 </code></pre></div>
-<p>JSON response from Janssen Server will contain the current state of client metadata. </p>
+<p>JSON response from Janssen Server will contain the current state of client metadata.</p>
 <h4 id="update-client-metadata">Update client metadata<a class="headerlink" href="#update-client-metadata" title="Permanent link">#</a></h4>
-<p>Client metadata can be updated by sending request with <code>PUT</code> HTTP method to <code>registration_client_uri</code>. Janssen Server 
-replaces current metadata with the one sent with update request as outlined in 
-<a href="https://www.rfc-editor.org/rfc/rfc7592#section-2.2">the specification</a> </p>
+<p>Client metadata can be updated by sending request with <code>PUT</code> HTTP method to <code>registration_client_uri</code>. Janssen Server
+replaces current metadata with the one sent with update request as outlined in
+<a href="https://www.rfc-editor.org/rfc/rfc7592#section-2.2">the specification</a></p>
 <h4 id="delete-client">Delete Client<a class="headerlink" href="#delete-client" title="Permanent link">#</a></h4>
 <p>Client can be deleted by sending a request using <code>DELETE</code> method to <code>registration_client_uri</code>.</p>
-<p>A successful delete action will invalidate the "client_id", "client_secret", and "registration_access_token" for this 
+<p>A successful delete action will invalidate the "client_id", "client_secret", and "registration_access_token" for this
 client, thereby preventing the "client_id" from being used at either the authorization endpoint or token endpoint of the
 authorization server.</p>
 <h3 id="internationalization-for-client-metadata">Internationalization for Client metadata<a class="headerlink" href="#internationalization-for-client-metadata" title="Permanent link">#</a></h3>
@@ -15509,7 +15509,7 @@ authorization server.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 4, 2025 09:17:08 UTC"><span class="timeago" datetime="2025-11-04T09:17:08+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 4, 2025 09:17:08 UTC">2025-11-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
   </span>
 
     

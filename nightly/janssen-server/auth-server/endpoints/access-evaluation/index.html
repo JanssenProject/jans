@@ -14490,17 +14490,17 @@
 
 <h1 id="access-evaluation-endpoint">Access Evaluation Endpoint<a class="headerlink" href="#access-evaluation-endpoint" title="Permanent link">#</a></h1>
 <p>The Jans-Auth server implements <a href="https://openid.github.io/authzen/">OpenID AuthZEN Authorization API 1.0 – draft 01</a>.
-The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between 
-Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems. 
-It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests, 
-enhancing interoperability and scalability in authorization processes. 
-The specification is transport-agnostic, with an initial focus on HTTPS bindings, and emphasizes secure, fine-grained, 
+The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between
+Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems.
+It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests,
+enhancing interoperability and scalability in authorization processes.
+The specification is transport-agnostic, with an initial focus on HTTPS bindings, and emphasizes secure, fine-grained,
 and dynamic authorization mechanisms.</p>
-<p>The Access Evaluation Endpoint in the AuthZEN specification serves as a mechanism for Policy Enforcement Points (PEPs) 
-to request access decisions from a Policy Decision Point (PDP) for specific resources and actions. 
-Upon receiving a request, the endpoint evaluates the subject, resource, and action against defined policies to determine 
-if access should be granted, denied, or if additional information is needed. 
-The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time. 
+<p>The Access Evaluation Endpoint in the AuthZEN specification serves as a mechanism for Policy Enforcement Points (PEPs)
+to request access decisions from a Policy Decision Point (PDP) for specific resources and actions.
+Upon receiving a request, the endpoint evaluates the subject, resource, and action against defined policies to determine
+if access should be granted, denied, or if additional information is needed.
+The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time.
 The goal is to provide a scalable, secure interface for dynamic and fine-grained access control across applications.</p>
 <p>URL to access access evaluation endpoint on Janssen Server is listed in both:
  - the response of Janssen Server's well-known <a href="../configuration/">configuration endpoint</a> given below.
@@ -14511,8 +14511,8 @@ The goal is to provide a scalable, secure interface for dynamic and fine-grained
 <p><strong>AuthZEN Discovery</strong>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/authzen-configuration
 </code></pre></div></p>
-<p><code>/.well-known/authzen-configuration</code> allows to publish data specific to AuthZEN only. Response of AuthZEN discovery endpoint can be 
-changed via <code>AccessEvaluationDiscoveryType</code> custom script. </p>
+<p><code>/.well-known/authzen-configuration</code> allows to publish data specific to AuthZEN only. Response of AuthZEN discovery endpoint can be
+changed via <code>AccessEvaluationDiscoveryType</code> custom script.</p>
 <p><strong>Snippet of AccessEvaluationDiscoveryType</strong>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="nd">@Override</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyResponse</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -14522,50 +14522,49 @@ changed via <code>AccessEvaluationDiscoveryType</code> custom script. </p>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 </code></pre></div></p>
-<p><code>access_evaluation_v1_endpoint</code> claim in the response specifies the URL for access evaluation endpoint. By default, access 
+<p><code>access_evaluation_v1_endpoint</code> claim in the response specifies the URL for access evaluation endpoint. By default, access
 evaluation endpoint looks like below:</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/access/v1/evaluation
 </code></pre></div>
-<p>In order to call Access Evaluation Endpoint client must have <code>access_evaluation</code> scope. 
-If scope is not present AS rejects call with 401 (unauthorized) http status code.
-<code>Authorization</code> header must contain valid <code>access_token</code> with <code>access_evaluation</code> scope granted to it.
-Otherwise it's possible to use <code>Basic</code> token with encoded client credentials if set
+<p>To call Authorization Challenge Endpoint, client must have <code>authorization_challenge</code> scope.
+If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP status code.
+Otherwise, it's possible to use <code>Basic</code> token with encoded client credentials if set
 <code>accessEvaluationAllowBasicClientAuthorization</code> AS configuration property to <code>true</code>.</p>
 <ul>
 <li>Bearer token : <code>Authorization: Bearer &lt;access_token&gt;</code></li>
 <li>Basic authorization : <code>Authorization: Basic &lt;encoded client credentials&gt;</code></li>
 </ul>
-<p>More information about request and response of the Access Evaluation Endpoint can be found in the OpenAPI specification 
-of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/access-evaluation">jans-auth-server module</a>.</p>
-<p>Sample request
-<div class="highlight"><pre><span></span><code>POST /jans-auth/restv1/access/v1/evaluation HTTP/1.1
-Host: happy-example.gluu.info
-Content-Type: application/json
-Authorization: Basic M2NjOTdhYWItMDE0Zi00ZWM5LWI4M2EtNTE3MTRlODE3MDMwOmFlYmMwZWFhLWY5N2YtNDU5NS04ZWExLWFlNmU1NDFmNDZjNg==
+<p>More information about request and response of the Access Evaluation Endpoint can be found in the OpenAPI specification
+of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/access-evaluation">jans-auth-server module</a>.</p>
+<p>Sample request</p>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/jans-auth/restv1/access/v1/evaluation</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">happy-example.gluu.info</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Basic M2NjOTdhYWItMDE0Zi00ZWM5LWI4M2EtNTE3MTRlODE3MDMwOmFlYmMwZWFhLWY5N2YtNDU5NS04ZWExLWFlNmU1NDFmNDZjNg==</span>
 
-{
-  &quot;subject&quot;: {
-    &quot;id&quot;: &quot;alice@acmecorp.com&quot;,
-    &quot;type&quot;: &quot;super_admin&quot;,
-    &quot;properties&quot;: null
-  },
-  &quot;resource&quot;: {
-    &quot;id&quot;: &quot;123&quot;,
-    &quot;type&quot;: &quot;account&quot;,
-    &quot;properties&quot;: null
-  },
-  &quot;action&quot;: {
-    &quot;name&quot;: &quot;can_read&quot;,
-    &quot;properties&quot;: {
-      &quot;method&quot;: &quot;GET&quot;
-    }
-  },
-  &quot;context&quot;: {
-    &quot;properties&quot;: null
-  }
-}
-</code></pre></div></p>
-<p>Sample successful response with <code>authorization_code</code>.
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alice@acmecorp.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;super_admin&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;account&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;can_read&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GET&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Sample successful response with <code>authorization_code</code>.</p>
 <div class="highlight"><pre><span></span><code>HTTP/1.1 200
 Content-Type: application/json
 
@@ -14577,8 +14576,8 @@ Content-Type: application/json
     &quot;reason_user&quot;:null
   }
 }
-</code></pre></div></p>
-<p>Sample error response
+</code></pre></div>
+<p>Sample error response</p>
 <div class="highlight"><pre><span></span><code>HTTP/1.1 401 Unauthorized
 Content-Type: application/json
 Cache-Control: no-store
@@ -14586,7 +14585,7 @@ Cache-Control: no-store
 {
   &quot;error&quot;: &quot;invalid_token&quot;
 }
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="configuration-properties">Configuration Properties<a class="headerlink" href="#configuration-properties" title="Permanent link">#</a></h2>
 <p>Access Evaluation Endpoint AS configuration:</p>
 <ul>
@@ -14596,7 +14595,7 @@ Cache-Control: no-store
 <h2 id="custom-script">Custom script<a class="headerlink" href="#custom-script" title="Permanent link">#</a></h2>
 <p>AS provides <code>AccessEvaluationType</code> custom script which must be used to control Access Evaluation Endpoint behaviour.</p>
 <p>Use <code>accessEvaluationScriptName</code> configuration property to specify custom script.   If not set AS falls back to first valid script found in database.</p>
-<p>Main <code>evaluate</code> method returns response which grants or denies access. </p>
+<p>Main <code>evaluate</code> method returns response which grants or denies access.</p>
 <p>Please see following snippet below:</p>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="nd">@Override</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">AccessEvaluationResponse</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="n">AccessEvaluationRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -14892,7 +14891,7 @@ X-Xss-Protection: 1; mode=block
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 4, 2025 09:22:15 UTC"><span class="timeago" datetime="2025-11-04T09:22:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 4, 2025 09:22:15 UTC">2025-11-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
   </span>
 
     

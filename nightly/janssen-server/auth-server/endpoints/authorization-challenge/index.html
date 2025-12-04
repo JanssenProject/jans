@@ -14568,15 +14568,15 @@ This can provide an entirely browserless OAuth 2.0 experience suited for native 
 <a href="../configuration/">configuration endpoint</a> given below.</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
 </code></pre></div>
-<p><code>authorization_challenge_endpoint</code> claim in the response specifies the URL for authorization challenge endpoint. By default, authorization 
+<p><code>authorization_challenge_endpoint</code> claim in the response specifies the URL for authorization challenge endpoint. By default, authorization
 challenge endpoint looks like below:</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/authorize-challenge
 </code></pre></div>
-<p>In order to call Authorization Challenge Endpoint client must have <code>authorization_challenge</code> scope. 
-If scope is not present AS rejects call with 401 (unauthorized) http status code. </p>
+<p>To call Authorization Challenge Endpoint, client must have <code>authorization_challenge</code> scope.
+If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP status code.</p>
 <p>Authorization Challenge Endpoint supports Proof Key for Code Exchange (PKCE).</p>
-<p>More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification 
-of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/authorize-challenge">jans-auth-server module</a>.</p>
+<p>More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification
+of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/authorize-challenge">jans-auth-server module</a>.</p>
 <p>Sample request
 <div class="highlight"><pre><span></span><code>POST /authorize HTTP/1.1
 Host: server.example.com
@@ -14614,7 +14614,7 @@ Cache-Control: no-store
 <h2 id="custom-script">Custom script<a class="headerlink" href="#custom-script" title="Permanent link">#</a></h2>
 <p>AS provides <code>AuthorizationChallengeType</code> custom script which must be used to control Authorization Challenge Endpoint behaviour.</p>
 <p>If request does not have <code>acr_values</code> specified and script name falls back to <code>default_challenge</code> which is available and enabled during installation.
-Default script name can be changed via <code>authorizationChallengeDefaultAcr</code> configuration property. </p>
+Default script name can be changed via <code>authorizationChallengeDefaultAcr</code> configuration property.</p>
 <p>Main method return true/false which indicates to server whether to issue <code>authorization_code</code> in response or not.</p>
 <p>If parameters is not present then error has to be created and <code>false</code> returned.
 If all is good script has to return <code>true</code> and it's strongly recommended to set user <code>context.getExecutionContext().setUser(user);</code> so AS can keep tracking what exactly user is authenticated.</p>
@@ -14662,16 +14662,16 @@ If all is good script has to return <code>true</code> and it's strongly recommen
 <p>More details in <a href="../../../../script-catalog/authorization_challenge/authorization-challenge/">Authorization Challenge Custom Script Page</a></p>
 <p>Full sample script can be found <a href="../../../../script-catalog/authorization_challenge/AuthorizationChallenge.java">here</a></p>
 <h2 id="auth-session">Auth session<a class="headerlink" href="#auth-session" title="Permanent link">#</a></h2>
-<p>Auth session is optional. AS does not return it by default. 
+<p>Auth session is optional. AS does not return it by default.
 It's possible to pass in request <code>use_auth_session=true</code> which makes AS return it in error response.
-If it is desired to use <code>auth_session</code> and don't pass <code>client_id</code> (or other parameters) in next request, 
-it should be put in attributes of <code>auth_session</code> object. 
-<code>auth_session</code> object lifetime is set by <code>authorizationChallengeSessionLifetimeInSeconds</code> AS configuration property. 
+If it is desired to use <code>auth_session</code> and don't pass <code>client_id</code> (or other parameters) in next request,
+it should be put in attributes of <code>auth_session</code> object.
+<code>auth_session</code> object lifetime is set by <code>authorizationChallengeSessionLifetimeInSeconds</code> AS configuration property.
 If <code>authorizationChallengeSessionLifetimeInSeconds</code> is not set then value falls back to <code>86400</code> seconds.</p>
-<p>Example
+<p>Example</p>
 <div class="highlight"><pre><span></span><code><span class="n">String</span><span class="w"> </span><span class="n">clientId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameter</span><span class="p">(</span><span class="s">&quot;client_id&quot;</span><span class="p">);</span>
 <span class="n">authorizationChallengeSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;client_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">clientId</span><span class="p">);</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>AS automatically validates DPoP if it is set during auth session creation.
 Thus it's recommended to set <code>jkt</code> of the auth session if DPoP is used.
 <div class="highlight"><pre><span></span><code><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">dpop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getHeader</span><span class="p">(</span><span class="n">DpopService</span><span class="p">.</span><span class="na">DPOP</span><span class="p">);</span>
@@ -14681,9 +14681,9 @@ Thus it's recommended to set <code>jkt</code> of the auth session if DPoP is use
 </code></pre></div></p>
 <p>Full sample script can be found <a href="../../../../script-catalog/authorization_challenge/AuthorizationChallenge.java">here</a></p>
 <h2 id="web-session">Web session<a class="headerlink" href="#web-session" title="Permanent link">#</a></h2>
-<p>Authorization challenge script is first-party flow and thus web session is not created by default. 
+<p>Authorization challenge script is first-party flow and thus web session is not created by default.
 However there can be cases when such session has to be created. Please set <strong>authorizationChallengeShouldGenerateSession</strong> configuration property to <strong>true</strong>
-to force session creation. </p>
+to force session creation.</p>
 <p>In case it is needed to prepare session with specific data, it is possible to create session
 in script and set it into context. Example:</p>
 <div class="highlight"><pre><span></span><code><span class="n">SessionIdService</span><span class="w"> </span><span class="n">sessionIdService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CdiUtil</span><span class="p">.</span><span class="na">bean</span><span class="p">(</span><span class="n">SessionIdService</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
@@ -14699,8 +14699,8 @@ in script and set it into context. Example:</p>
 <span class="n">scriptLogger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="s">&quot;Created Authorization challenge session successfully&quot;</span><span class="p">);</span>
 </code></pre></div>
 <h2 id="multi-step-example">Multi-step example<a class="headerlink" href="#multi-step-example" title="Permanent link">#</a></h2>
-<p>Sometimes it's required to send data sequentially. Step by step. Calls to Authorization Challenge Endpoint must have 
-<code>use_auth_session=true</code> parameter to force tracking data between request. </p>
+<p>Sometimes it's required to send data sequentially. Step by step. Calls to Authorization Challenge Endpoint must have
+<code>use_auth_session=true</code> parameter to force tracking data between request.</p>
 <p>Lets consider example when RP first sends <code>username</code> and then in next request <code>OTP</code>.</p>
 <div class="highlight"><pre><span></span><code>POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: server.example.com
@@ -15295,7 +15295,7 @@ X-Xss-Protection: 1; mode=block
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 4, 2025 09:20:48 UTC"><span class="timeago" datetime="2025-11-04T09:20:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 4, 2025 09:20:48 UTC">2025-11-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
   </span>
 
     
