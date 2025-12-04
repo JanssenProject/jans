@@ -74,8 +74,10 @@ public class DiscoveryService {
         jsonObj.put(ARCHIVED_JWKS_URI, appConfiguration.getArchivedJwksUri());
         jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
 
-        if (appConfiguration.isFeatureEnabled(FeatureFlagType.STATUS_LIST))
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.STATUS_LIST)) {
             jsonObj.put(STATUS_LIST_ENDPOINT, getTokenStatusListEndpoint());
+            jsonObj.put(STATUS_LIST_AGGREGATION_ENDPOINT, getStatusListAggregationEndpoint());
+        }
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION))
             jsonObj.put(ACCESS_EVALUATION_V1_ENDPOINT, getAccessEvaluationV1Endpoint(appConfiguration));
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_TOKEN))
@@ -243,6 +245,10 @@ public class DiscoveryService {
         return endpointUrl("/status_list");
     }
 
+    public String getStatusListAggregationEndpoint() {
+        return endpointUrl("/status_list_aggregation");
+    }
+
     public static String getAccessEvaluationV1Endpoint(AppConfiguration appConfiguration) {
         return endpointUrl(appConfiguration.getEndSessionEndpoint(), "/access/v1/evaluation");
     }
@@ -298,8 +304,10 @@ public class DiscoveryService {
             aliases.put(AUTHORIZATION_CHALLENGE_ENDPOINT, appConfiguration.getMtlsAuthorizationChallengeEndpoint());
         if (StringUtils.isNotBlank(appConfiguration.getMtlsTokenEndpoint()))
             aliases.put(TOKEN_ENDPOINT, appConfiguration.getMtlsTokenEndpoint());
-        if (appConfiguration.isFeatureEnabled(FeatureFlagType.STATUS_LIST) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.STATUS_LIST) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint())) {
             aliases.put(STATUS_LIST_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/status_list"));
+            jsonObj.put(STATUS_LIST_AGGREGATION_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/status_list_aggregation"));
+        }
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
             aliases.put(ACCESS_EVALUATION_V1_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/access/v1/evaluation"));
         if (StringUtils.isNotBlank(appConfiguration.getMtlsJwksUri()))
