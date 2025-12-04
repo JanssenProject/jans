@@ -86,6 +86,11 @@ impl TokenCache {
     /// 2. The configured maximum TTL (if set)
     /// 3. Default TTL (5 minutes) if neither applies
     pub fn save(&self, kind: &TokenKind, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
+        if self.check_token_expired(&token, now) {
+            // token is expired, no need to save it
+            return;
+        }
+
         let key = hash_jwt_token(kind, jwt);
 
         // Extract issuer for indexing
@@ -109,6 +114,17 @@ impl TokenCache {
         if let Err(err) = result {
             self.log_warn(format!("could not set token to token cache: {}", err));
         }
+    }
+
+    /// Check if token is expired
+    /// true - means is expired
+    fn check_token_expired(&self, token: &Arc<Token>, now: DateTime<Utc>) -> bool {
+        token
+            .claims
+            .get_claim("exp")
+            .and_then(|exp| exp.value().as_i64())
+            .map(|exp| exp <= now.timestamp())
+            .unwrap_or(false)
     }
 
     /// Extract cache duration, result is optional
