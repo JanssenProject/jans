@@ -260,7 +260,12 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
     pub token_cache_max_ttl: usize,
     /// Maximum number of tokens the cache can store.
-    #[serde(rename = "CEDARLING_TOKEN_CACHE_CAPACITY", default)]
+    /// Default value is 100.
+    /// 0 means no limit.
+    #[serde(
+        rename = "CEDARLING_TOKEN_CACHE_CAPACITY",
+        default = "default_token_cache_capacity"
+    )]
     pub token_cache_capacity: usize,
     /// Enables eviction policy based on the earliest expiration time.
     ///

@@ -5,10 +5,16 @@
 
 //! In this file we define functions for serde `default` macro.
 
+use crate::JwtConfig;
+
 pub fn default_jti() -> String {
     "jti".to_string()
 }
 
 pub fn default_true() -> bool {
     true
+}
+
+pub fn default_token_cache_capacity() -> usize {
+    JwtConfig::default().token_cache_capacity
 }
