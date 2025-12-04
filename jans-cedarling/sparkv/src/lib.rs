@@ -114,9 +114,18 @@ impl<T> SparKV<T> {
         index_keys: &[String],
     ) -> Result<(), Error> {
         self.clear_expired_if_auto();
-        self.ensure_capacity_ignore_key(key)?;
         self.ensure_item_size(&value)?;
         self.ensure_max_ttl(ttl)?;
+
+        if let Err(err) = self.ensure_capacity_ignore_key(key) {
+            // check if we have no capacity and config parameter is active
+            // we remove last element, like lru cache
+            if err == Error::CapacityExceeded && self.config.earliest_expiration_eviction {
+                self.remove_last();
+            } else {
+                return Err(err);
+            }
+        };
 
         let item: KvEntry<T> = KvEntry::new(key, value, ttl);
         let exp_item: ExpEntry = ExpEntry::from_kv_entry(&item);
@@ -189,6 +198,30 @@ impl<T> SparKV<T> {
 
     pub fn contains_key(&self, key: &str) -> bool {
         self.data.contains_key(key)
+    }
+
+    /// Removes only last element from expires BinaryHeap, even if value is not expired.
+    /// Is used when [Config::earliest_expiration_eviction] is true
+    fn remove_last(&mut self) {
+        let mut cleared_count: usize = 0;
+        while let Some(exp_item) = self.expiries.peek().cloned() {
+            if cleared_count != 0 {
+                break;
+            }
+            let should_pop = match self.data.get(&exp_item.key) {
+                Some(kv_entry) => {
+                    kv_entry.key == exp_item.key && kv_entry.expired_at == exp_item.expired_at
+                },
+                None => false,
+            };
+
+            if should_pop {
+                cleared_count += 1;
+                self.pop(&exp_item.key);
+            }
+            // remove current item from expiries
+            self.expiries.pop();
+        }
     }
 
     pub fn clear_expired(&mut self) -> usize {
