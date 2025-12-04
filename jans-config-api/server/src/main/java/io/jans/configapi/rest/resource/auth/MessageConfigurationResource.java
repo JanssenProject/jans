@@ -68,6 +68,12 @@ public class MessageConfigurationResource extends ConfigBaseResource {
         return configurationService.findGluuConfiguration().getMessageConfiguration();
     }
 
+    /**
+     * Apply a transformation to the current MessageConfiguration and persist the updated configuration.
+     *
+     * @param function a function that receives the current MessageConfiguration and returns the modified MessageConfiguration
+     * @return the modified MessageConfiguration
+     */
     private MessageConfiguration mergeModifiedMessage(Function<MessageConfiguration, MessageConfiguration> function) {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
 
@@ -78,6 +84,11 @@ public class MessageConfigurationResource extends ConfigBaseResource {
         return modifiedMessage;
     }
 
+    /**
+     * Retrieve the current global MessageConfiguration.
+     *
+     * @return the current MessageConfiguration in the response body (HTTP 200)
+     */
     @Operation(summary = "Returns message configuration.", description = "Returns message configuration.", operationId = "get-config-message", tags = {
             "Message Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_READ_ACCESS }),
@@ -97,6 +108,13 @@ public class MessageConfigurationResource extends ConfigBaseResource {
         return Response.ok(loadMessageConfiguration()).build();
     }
 
+    /**
+     * Applies a JSON Patch document to the global MessageConfiguration and persists the change.
+     *
+     * @param requestString a JSON Patch document (application/json-patch+json) as a string
+     * @return a JAX-RS Response containing the updated MessageConfiguration
+     * @throws InternalServerErrorException if the patch cannot be applied or an I/O error occurs
+     */
     @Operation(summary = "Patch message configuration.", description = "Patch message configuration", operationId = "patch-config-message", tags = {
             "Message Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_WRITE_ACCESS }),
@@ -123,6 +141,11 @@ public class MessageConfigurationResource extends ConfigBaseResource {
         return Response.ok(modifiedMessage).build();
     }
 
+    /**
+     * Retrieve the Redis section of the global MessageConfiguration.
+     *
+     * @return a Response whose entity is the current RedisMessageConfiguration.
+     */
     @Operation(summary = "Returns Redis message configuration.", description = "Returns Redis message configuration", operationId = "get-config-message-redis", tags = {
             "Message Configuration – Redis" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_READ_ACCESS }),
@@ -143,6 +166,12 @@ public class MessageConfigurationResource extends ConfigBaseResource {
         return Response.ok(loadMessageConfiguration().getRedisConfiguration()).build();
     }
 
+    /**
+     * Update the global Redis message configuration used by the application.
+     *
+     * @param redisConfiguration the RedisMessageConfiguration to apply to the global MessageConfiguration
+     * @return the updated RedisMessageConfiguration
+     */
     @Operation(summary = "Updates Redis message configuration.", description = "Updates Redis message configuration", operationId = "put-config-message-redis", tags = {
             "Message Configuration – Redis" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_WRITE_ACCESS }),
@@ -166,6 +195,12 @@ public class MessageConfigurationResource extends ConfigBaseResource {
         return Response.ok(modifiedMessage.getRedisConfiguration()).build();
     }
 
+    /**
+     * Applies a JSON Patch to the stored RedisMessageConfiguration and returns the updated configuration.
+     *
+     * @param requestString JSON Patch document as a string (media type application/json-patch+json) describing modifications to apply
+     * @return the updated RedisMessageConfiguration after applying the patch
+     */
     @Operation(summary = "Patch Redis message configuration.", description = "Patch Redis message configuration", operationId = "patch-config-message-redis", tags = {
             "Message Configuration – Redis" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_WRITE_ACCESS }),
@@ -195,6 +230,11 @@ public class MessageConfigurationResource extends ConfigBaseResource {
         return Response.ok(loadMessageConfiguration().getRedisConfiguration()).build();
     }
 
+    /**
+     * Retrieve the Postgres message configuration.
+     *
+     * @return the current PostgresMessageConfiguration.
+     */
     @Operation(summary = "Returns Postgres message configuration.", description = "Returns Postgres message configuration.", operationId = "get-config-message-postgres", tags = {
             "Message Configuration – Postgres" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_READ_ACCESS }),
@@ -215,6 +255,14 @@ public class MessageConfigurationResource extends ConfigBaseResource {
         return Response.ok(loadMessageConfiguration().getPostgresConfiguration()).build();
     }
 
+    /**
+     * Replace the Postgres message configuration with the provided configuration.
+     *
+     * Persists the supplied PostgresMessageConfiguration into the global MessageConfiguration and returns the stored configuration.
+     *
+     * @param postgresMessageConfiguration the new PostgresMessageConfiguration to store; must not be null
+     * @return the persisted PostgresMessageConfiguration
+     */
     @Operation(summary = "Updates Postgres message configuration.", description = "Updates Postgres message configuration", operationId = "put-config-message-postgres", tags = {
             "Message Configuration – Postgres" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_WRITE_ACCESS }),
@@ -240,6 +288,13 @@ public class MessageConfigurationResource extends ConfigBaseResource {
         return Response.ok(modifiedMessage.getPostgresConfiguration()).build();
     }
 
+    /**
+     * Apply a JSON Patch to the Postgres message configuration.
+     *
+     * @param requestString JSON Patch document (application/json-patch+json) as a string.
+     * @return the updated PostgresMessageConfiguration.
+     * @throws InternalServerErrorException if the patch cannot be parsed or applied.
+     */
     @Operation(summary = "Patch Postgres message configuration.", description = "Patch Postgres message configuration", operationId = "patch-config-message-postgres", tags = {
             "Message Configuration – Postgres" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.MESSAGE_WRITE_ACCESS }),

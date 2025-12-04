@@ -44,6 +44,17 @@ public class Fido2RegistrationResource extends BaseResource {
     private class Fido2RegistrationEntryPagedResult extends PagedResult<Fido2RegistrationEntry> {
     };
 
+    /**
+     * Retrieve a paged list of FIDO2 registration entries matching the provided search criteria.
+     *
+     * @param limit          maximum number of results to return
+     * @param pattern        search pattern to match entry attributes
+     * @param startIndex     1-based index of the first result to return
+     * @param sortBy         attribute used to order results
+     * @param sortOrder      order direction applied to {@code sortBy}; allowed values are "ascending" and "descending"
+     * @param fieldValuePair comma-separated field=value pairs to further filter results (e.g. {@code mail=abc@mail.com,jansStatus=true})
+     * @return               a Response containing a Fido2RegistrationEntryPagedResult with the matching entries
+     */
     @Operation(summary = "Get a list of Fido2RegistrationEntry.", description = "Get a list of Fido2RegistrationEntry.", operationId = "search-fido2-registration-data", tags = {
             "Fido2 - Registration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }),
@@ -81,6 +92,12 @@ public class Fido2RegistrationResource extends BaseResource {
         return Response.ok(this.doSearch(searchReq)).build();
     }
 
+    /**
+     * Fetches a Fido2RegistrationEntry identified by the provided Jans ID.
+     *
+     * @param jansId the FIDO2 registration identifier to look up
+     * @return HTTP 200 response containing the matching Fido2RegistrationEntry serialized as JSON
+     */
     @Operation(summary = "Fetch Fido2RegistrationEntry by Id.", description = "Fetch Fido2RegistrationEntry by Id.", operationId = "get-fido2-by-id", tags = {
             "Fido2 - Registration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }),
@@ -108,6 +125,12 @@ public class Fido2RegistrationResource extends BaseResource {
         return Response.ok(fido2RegistrationEntry).build();
     }
 
+    /**
+     * Retrieves FIDO2 registration entries associated with the specified username.
+     *
+     * @param username the username whose FIDO2 registrations are requested
+     * @return a paged result containing the FIDO2 registration entries for the given user
+     */
     @Operation(summary = "Get details of connected FIDO2 devices registered to user", description = "Get details of connected FIDO2 devices registered to user", operationId = "get-registration-entries-fido2", tags = {
             "Fido2 - Registration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }),
@@ -132,6 +155,12 @@ public class Fido2RegistrationResource extends BaseResource {
         return Response.ok(entries).build();
     }
 
+    /**
+     * Deletes the FIDO2 registration entry identified by the given Jans ID.
+     *
+     * @param jansId the unique identifier of the FIDO2 registration entry to delete
+     * @return HTTP 204 No Content response when the entry is successfully deleted
+     */
     @Operation(summary = "Delete Fido2 Device Data based on device UID", description = "Delete Fido2 Device Data based on device UID", operationId = "delete-fido2-data", tags = {
             "Fido2 - Registration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_DELETE_ACCESS }),

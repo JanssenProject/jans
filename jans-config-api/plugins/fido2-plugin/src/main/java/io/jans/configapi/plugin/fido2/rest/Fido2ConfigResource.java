@@ -46,6 +46,11 @@ public class Fido2ConfigResource extends BaseResource {
     @Inject
     Fido2Util fido2Util;
 
+    /**
+     * Retrieve the Jans Authorization Server FIDO2 configuration properties.
+     *
+     * @return the current AppConfiguration containing FIDO2 settings
+     */
     @Operation(summary = "Gets Jans Authorization Server Fido2 configuration properties", description = "Gets Jans Authorization Server Fido2 configuration properties", operationId = "get-properties-fido2", tags = {
             "Fido2 - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }),
@@ -66,6 +71,15 @@ public class Fido2ConfigResource extends BaseResource {
         return Response.ok(appConfiguration).build();
     }
 
+    /**
+     * Apply the provided FIDO2 configuration and return the persisted result.
+     *
+     * Validates the input, persists the updated configuration, and returns the authoritative
+     * stored configuration.
+     *
+     * @param appConfiguration the FIDO2 configuration values to persist; must not be null
+     * @return an HTTP 200 response whose body is the updated AppConfiguration
+     */
     @Operation(summary = "Updates Fido2 configuration properties", description = "Updates Fido2 configuration properties", operationId = "put-properties-fido2", tags = {
             "Fido2 - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),

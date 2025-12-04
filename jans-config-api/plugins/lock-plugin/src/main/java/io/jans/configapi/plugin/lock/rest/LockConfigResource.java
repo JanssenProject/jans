@@ -52,6 +52,11 @@ public class LockConfigResource extends BaseResource {
     @Inject
     LockConfigService lockConfigService;
 
+    /**
+     * Retrieve the current Lock configuration properties.
+     *
+     * @return Response containing the current AppConfiguration as the entity (HTTP 200 on success)
+     */
     @Operation(summary = "Gets Lock configuration properties", description = "Gets Lock configuration properties", operationId = "get-lock-properties", tags = {
             "Lock - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_CONFIG_READ_ACCESS }),
@@ -80,6 +85,12 @@ public class LockConfigResource extends BaseResource {
         
     }
 
+    /**
+     * Update Lock configuration properties.
+     *
+     * @param lockAppConf the new lock configuration values to apply
+     * @return the updated AppConfiguration after persistence
+     */
     @Operation(summary = "Update Lock configuration properties", description = "Update Lock configuration properties", operationId = "put-lock-properties", tags = {
             "Lock - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_CONFIG_WRITE_ACCESS }),
@@ -110,6 +121,14 @@ public class LockConfigResource extends BaseResource {
 
     }
 
+    /**
+     * Apply a JSON Patch to the lock configuration, persist the change, and return the updated configuration.
+     *
+     * @param jsonPatchString JSON Patch document as a string (media type application/json-patch+json).
+     * @return the updated AppConfiguration wrapped in a Response.
+     * @throws JsonPatchException if the patch cannot be applied to the existing configuration.
+     * @throws IOException if the patch document cannot be read or parsed.
+     */
     @Operation(summary = "Partially modifies Lock configuration properties.", description = "Partially modifies Lock configuration properties.", operationId = "patch-lock-properties", tags = {
             "Lock - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_CONFIG_WRITE_ACCESS }),

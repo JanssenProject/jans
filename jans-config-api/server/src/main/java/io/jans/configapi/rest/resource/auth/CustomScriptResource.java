@@ -70,6 +70,17 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Inject
     ConfigurationService configurationService;
 
+    /**
+     * Retrieve a paginated list of custom scripts matching the provided filters.
+     *
+     * @param limit         maximum number of results to return
+     * @param pattern       substring or pattern to filter script attributes
+     * @param startIndex    1-based index of the first result to include
+     * @param sortBy        attribute name to sort results by
+     * @param sortOrder     sort direction; allowed values are "ascending" and "descending"
+     * @param fieldValuePair comma-separated field=value pairs to further filter results
+     * @return              a Response containing a PagedResult of CustomScript objects that match the query
+     */
     @Operation(summary = "Gets a list of custom scripts", description = "Gets a list of custom scripts", operationId = "get-config-scripts", tags = {
             "Custom Scripts" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }),
@@ -106,6 +117,12 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(doSearch(searchReq, null)).build();
     }
 
+    /**
+     * Fetches a custom script by its display name.
+     *
+     * @param name the display name of the custom script to retrieve
+     * @return the CustomScript that matches the given display name
+     */
     @Operation(summary = "Fetch custom script by name", description = "Fetch custom script by name", operationId = "get-custom-script-by-name", tags = {
             "Custom Scripts" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }),
@@ -137,6 +154,11 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(customScript).build();
     }
 
+    /**
+     * Lists custom scripts of the specified type, supporting pagination, search pattern, sorting, and field-value filtering.
+     *
+     * @return HTTP 200 response containing a paged result of matching CustomScript objects
+     */
     @Operation(summary = "Gets list of scripts by type", description = "Gets list of scripts by type", operationId = "get-config-scripts-by-type", tags = {
             "Custom Scripts" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }),
@@ -176,6 +198,12 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(doSearch(searchReq, CustomScriptType.getByValue(type.toLowerCase()))).build();
     }
 
+    /**
+     * Retrieve the CustomScript identified by the given inum.
+     *
+     * @param inum the script identifier (Inum)
+     * @return a JAX-RS Response containing the CustomScript when found (HTTP 200), or 404 Not Found when no script matches
+     */
     @Operation(summary = "Gets a script by Inum", description = "Gets a script by Inum", operationId = "get-config-scripts-by-inum", tags = {
             "Custom Scripts" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }),
@@ -211,6 +239,18 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(script).build();
     }
 
+    /**
+     * Creates a new CustomScript and persists it.
+     *
+     * Validates and prepares the provided CustomScript (generating an inum if missing,
+     * handling script/template selection, applying file-location adjustments, and setting revision/DN)
+     * before storing it and returning the created resource.
+     *
+     * @param customScript the CustomScript to create; must not be null
+     * @param addScriptTemplate if true, a default script template may be added when the script body is blank
+     * @return a Response with status 201 and the created CustomScript as the entity
+     * @throws BadRequestException when the script's location type is invalid (deprecated LDAP location)
+     */
     @Operation(summary = "Adds a new custom script", description = "Adds a new custom script", operationId = "post-config-scripts", tags = {
             "Custom Scripts" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }),
@@ -253,6 +293,16 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(customScript).build();
     }
 
+    /**
+     * Update an existing custom script.
+     *
+     * Updates the stored CustomScript identified by the provided object's inum, applies revision and
+     * file-location adjustments, persists the change, and synchronizes related authentication method
+     * state where applicable.
+     *
+     * @param customScript the CustomScript containing updated values (must include a valid `inum`)
+     * @return a Response containing the updated CustomScript with HTTP 200 status
+     */
     @Operation(summary = "Updates a custom script", description = "Updates a custom script", operationId = "put-config-scripts", tags = {
             "Custom Scripts" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }),
@@ -289,6 +339,16 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(customScript).build();
     }
 
+    /**
+     * Delete the custom script identified by the given inum.
+     *
+     * Removes the script from storage and, if it was configured as the default ACR (authentication
+     * method), clears that configuration so it is no longer used.
+     *
+     * @param inum the script identifier (inum) to delete
+     * @return an HTTP 204 No Content response on successful deletion
+     * @throws NotFoundException if the script does not exist or cannot be deleted
+     */
     @Operation(summary = "Deletes a custom script", description = "Deletes a custom script", operationId = "delete-config-scripts-by-inum", tags = {
             "Custom Scripts" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_DELETE_ACCESS }),
@@ -323,6 +383,15 @@ public class CustomScriptResource extends ConfigBaseResource {
         }
     }
 
+    /**
+     * Applies a JSON Patch (RFC 6902) to the CustomScript identified by the given inum.
+     *
+     * @param inum the identifier (inum) of the CustomScript to patch
+     * @param pathString a JSON Patch document as a string describing the modifications
+     * @return the patched CustomScript
+     * @throws JsonPatchException if the patch cannot be applied to the existing resource
+     * @throws IOException if the patch document cannot be read or parsed
+     */
     @Operation(summary = "Patches a custom script", description = "Patches a custom script", operationId = "patch-config-scripts-by-inum", tags = {
             "Custom Scripts" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }),
@@ -363,6 +432,11 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(existingScript).build();
     }
 
+    /**
+     * Retrieve all available custom script types.
+     *
+     * @return a list of CustomScriptType values
+     */
     @Operation(summary = "Fetch custom script types", description = "Fetch custom script types", operationId = "get-custom-script-type", tags = {
             "Custom Scripts" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }),
@@ -387,6 +461,11 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(customScriptTypes).build();
     }
     
+    /**
+     * Fetches distinct custom script type values.
+     *
+     * @return a Response containing a Set of unique custom script type strings
+     */
     @Operation(summary = "Fetch custom script types", description = "Fetch custom script types", operationId = "get-custom-script-types", tags = {
             "Custom Scripts" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }),

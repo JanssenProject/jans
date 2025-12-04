@@ -52,6 +52,15 @@ public class TokenResource extends ConfigBaseResource {
     @Inject
     ClientService clientService;
 
+    /**
+     * Retrieve a token by its code.
+     *
+     * Validates the provided token code and returns the corresponding TokenEntity.
+     *
+     * @param tknCde the token identifier code to look up
+     * @return a Response with status 200 containing the TokenEntity as JSON when found
+     * @throws javax.ws.rs.WebApplicationException if no token exists for the given code (results in 404 Not Found)
+     */
     @Operation(summary = "Get token details by Id.", description = "Get token details by Id.", operationId = "get-token-by-id", tags = {
             "Token" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_READ_ACCESS }),
@@ -86,6 +95,12 @@ public class TokenResource extends ConfigBaseResource {
 
     }
 
+    /**
+     * Retrieves tokens associated with the specified client.
+     *
+     * @param clientId the client's identifier (inum) used to filter tokens
+     * @return a TokenEntityPagedResult containing the matching tokens and pagination metadata
+     */
     @Operation(summary = "Get token details by client.", description = "Get token details by client.", operationId = "get-token-by-client", tags = {
             "Token" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_READ_ACCESS }),
@@ -129,6 +144,17 @@ public class TokenResource extends ConfigBaseResource {
 
     }
 
+    /**
+     * Search for tokens using pagination, sorting, and optional filtering criteria.
+     *
+     * @param limit         maximum number of results to return
+     * @param pattern       substring or pattern to match against token fields
+     * @param startIndex    1-based index of the first result to return
+     * @param sortBy        attribute name to sort results by (e.g., token code)
+     * @param sortOrder     sort direction, either "ascending" or "descending"
+     * @param fieldValuePair comma-separated field=value pairs to filter results (e.g., "grtTyp=client_credentials,tknTyp=access_token")
+     * @return              a Response whose entity is a TokenEntityPagedResult containing the matching tokens and pagination metadata
+     */
     @Operation(summary = "Search tokens", description = "Search tokens", operationId = "search-token", tags = {
             "Token" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_READ_ACCESS }),
@@ -169,6 +195,12 @@ public class TokenResource extends ConfigBaseResource {
 
     }
 
+    /**
+     * Revoke a token identified by its token code.
+     *
+     * @param tknCde the token code to revoke
+     * @return an HTTP 204 No Content response when the token is successfully revoked
+     */
     @Operation(summary = "Revoke client token.", description = "Revoke client token.", operationId = "revoke-token", tags = {
             "Token" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_DELETE_ACCESS }),

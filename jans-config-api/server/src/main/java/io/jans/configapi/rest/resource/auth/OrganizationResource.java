@@ -41,6 +41,11 @@ public class OrganizationResource extends ConfigBaseResource {
     @Inject
     OrganizationService organizationService;
 
+    /**
+     * Retrieve the current organization configuration.
+     *
+     * @return a Response containing the current {@link GluuOrganization} representation
+     */
     @Operation(summary = "Retrieves organization configuration", description = "Retrieves organization configuration", operationId = "get-organization-config", tags = {
             "Organization Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ORG_CONFIG_READ_ACCESS }),
@@ -60,6 +65,17 @@ public class OrganizationResource extends ConfigBaseResource {
         return Response.ok(organizationService.getOrganization()).build();
     }
 
+    /**
+     * Apply a JSON Patch to the stored organization configuration.
+     *
+     * Applies the provided JSON Patch to the current organization configuration, persists the changes,
+     * and returns the updated organization in the response.
+     *
+     * @param pathString a JSON Patch document as a string
+     * @return a Response containing the updated GluuOrganization
+     * @throws JsonPatchException if the patch is invalid or cannot be applied to the organization
+     * @throws IOException if an I/O error occurs while processing the patch
+     */
     @Operation(summary = "Patch organization configuration", description = "Patch organization configuration", operationId = "patch-organization-config", tags = {
             "Organization Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ORG_CONFIG_WRITE_ACCESS }),

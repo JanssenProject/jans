@@ -39,6 +39,16 @@ public class StatResource extends ConfigBaseResource {
     @Inject
     AuthService authService;
 
+    /**
+     * Fetches basic server statistics for a specified month or month range.
+     *
+     * @param authorization the Authorization header value used to authenticate the request
+     * @param month         month for which the stat report is requested; required if both start_month and end_month are absent (format: YYYYMM)
+     * @param startMonth    start month of the range for which the stat report is requested (format: YYYYMM)
+     * @param endMonth      end month of the range for which the stat report is requested (format: YYYYMM)
+     * @param format        report format; an empty value requests the default format
+     * @return              the JSON value of the "response" field containing the requested statistics
+     */
     @Operation(summary = "Provides server with basic statistic", description = "Provides server with basic statistic", operationId = "get-stat", tags = {
             "Statistics - User" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS }),

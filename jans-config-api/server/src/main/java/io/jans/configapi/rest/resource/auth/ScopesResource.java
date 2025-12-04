@@ -67,6 +67,13 @@ public class ScopesResource extends ConfigBaseResource {
     @Inject
     ScopeService scopeService;
 
+    /**
+     * Retrieve a paged list of scopes matching the provided search, sorting, and paging criteria.
+     *
+     * @param withAssociatedClients if `true`, include clients associated with each returned scope
+     * @param fieldValuePair        a comma-separated "field=value" list to filter results (e.g. "scopeType=spontaneous,defaultScope=true")
+     * @return                      a Response whose entity is a PagedResult of CustomScope objects matching the query
+     */
     @Operation(summary = "Gets list of Scopes", description = "Gets list of Scopes", operationId = "get-oauth-scopes", tags = {
             "OAuth - Scopes" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCOPES_READ_ACCESS }),
@@ -102,6 +109,15 @@ public class ScopesResource extends ConfigBaseResource {
         return Response.ok(doSearch(searchReq, type, withAssociatedClients)).build();
     }
 
+    /**
+     * Retrieve a scope by its inum.
+     *
+     * If `withAssociatedClients` is true, the returned scope will include associated client references.
+     *
+     * @param inum the unique inum identifier of the scope
+     * @param withAssociatedClients when true, include associated client information in the returned scope
+     * @return a Response containing the matching CustomScope
+     */
     @Operation(summary = "Get Scope by Inum", description = "Get Scope by Inum", operationId = "get-oauth-scopes-by-inum", tags = {
             "OAuth - Scopes" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCOPES_READ_ACCESS }),
@@ -130,6 +146,12 @@ public class ScopesResource extends ConfigBaseResource {
         return Response.ok(scope).build();
     }
 
+    /**
+     * Retrieves all scopes created by the given creator id.
+     *
+     * @param creatorId Id of the scope creator; use the client's client_id for client creators or the user's user_id for user creators.
+     * @return a list of CustomScope objects created by the specified creator.
+     */
     @Operation(summary = "Get Scope by creatorId", description = "Get Scope by creatorId", operationId = "get-scope-by-creator", tags = {
             "OAuth - Scopes" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCOPES_READ_ACCESS }),
@@ -158,6 +180,12 @@ public class ScopesResource extends ConfigBaseResource {
         return Response.ok(scopes).build();
     }
 
+    /**
+     * Retrieves scopes that match the specified scope type.
+     *
+     * @param type the scope type to filter by (for example, "openid" or "oauth")
+     * @return a list of CustomScope objects that match the given type; an empty list if no matches are found
+     */
     @Operation(summary = "Get Scope by type", description = "Get Scope by type", operationId = "get-scope-by-type", tags = {
             "OAuth - Scopes" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCOPES_READ_ACCESS }),
@@ -187,6 +215,14 @@ public class ScopesResource extends ConfigBaseResource {
         return Response.ok(scopes).build();
     }
 
+    /**
+     * Create a new Scope resource and persist it.
+     *
+     * The provided Scope will be assigned a generated inum and DN and persisted. If the scope's displayName is not provided it will be set to the scope id; if scopeType is not provided it defaults to OAUTH.
+     *
+     * @param scope the Scope to create; must have a non-null `id`
+     * @return the created Scope populated with its generated `inum` and `dn`
+     */
     @Operation(summary = "Create Scope", description = "Create Scope", operationId = "post-oauth-scopes", tags = {
             "OAuth - Scopes" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS }),
@@ -220,6 +256,14 @@ public class ScopesResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
+    /**
+     * Updates an existing scope and returns the updated representation.
+     *
+     * If the provided Scope has a null scopeType, it will be set to ScopeType.OAUTH before persisting.
+     *
+     * @param scope the Scope to update; must include a valid inum that identifies an existing scope
+     * @return the updated Scope
+     */
     @Operation(summary = "Update Scope", description = "Update Scope", operationId = "put-oauth-scopes", tags = {
             "OAuth - Scopes" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS }),
@@ -253,6 +297,15 @@ public class ScopesResource extends ConfigBaseResource {
         return Response.ok(result).build();
     }
 
+    /**
+     * Apply a JSON Patch document to an existing scope identified by `inum`.
+     *
+     * @param inum       the scope identifier
+     * @param pathString a JSON Patch document (as a string) describing the modifications to apply
+     * @return the patched Scope
+     * @throws JsonPatchException if the patch document is invalid or cannot be applied
+     * @throws IOException        if an I/O error occurs while processing the patch
+     */
     @Operation(summary = "Patch Scope", description = "Patch Scope", operationId = "patch-oauth-scopes-by-id", tags = {
             "OAuth - Scopes" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS }),
@@ -286,6 +339,12 @@ public class ScopesResource extends ConfigBaseResource {
         return Response.ok(existingScope).build();
     }
 
+    /**
+     * Delete the scope identified by the given inum.
+     *
+     * @param inum the scope identifier
+     * @return HTTP 204 No Content response when the scope is successfully deleted
+     */
     @Operation(summary = "Delete Scope", description = "Delete Scope", operationId = "delete-oauth-scopes-by-inum", tags = {
             "OAuth - Scopes" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SCOPES_DELETE_ACCESS }),

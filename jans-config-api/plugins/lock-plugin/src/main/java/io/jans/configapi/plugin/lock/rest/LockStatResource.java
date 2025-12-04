@@ -50,6 +50,16 @@ public class LockStatResource extends BaseResource {
     @Inject
     LockService lockService;
 
+    /**
+     * Provides basic lock statistics for the configured issuer.
+     *
+     * @param authorization the Authorization header value (bearer token) used to authenticate the request
+     * @param month the month for which the report should be fetched; required if both startMonth and endMonth are not provided
+     * @param startMonth the start month for a ranged report (inclusive)
+     * @param endMonth the end month for a ranged report (inclusive)
+     * @param format optional report format; empty string selects the default JSON response
+     * @return HTTP 200 response containing the statistics as a JSON payload (JsonNode)
+     */
     @Operation(summary = "Provides basic statistic", description = "Provides basic statistic", operationId = "get-lock-stat", tags = {
             "Statistics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_READ_ACCESS,

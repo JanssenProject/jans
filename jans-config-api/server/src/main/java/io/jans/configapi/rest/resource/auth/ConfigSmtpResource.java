@@ -63,6 +63,14 @@ public class ConfigSmtpResource extends ConfigBaseResource {
     @Inject
     private MailService mailService;
 
+    /**
+     * Retrieve the current SMTP server configuration.
+     *
+     * The returned configuration has sensitive password fields decrypted for consumer use.
+     *
+     * @return the current SmtpConfiguration with decrypted password fields
+     * @throws EncryptionException if decryption of stored password values fails
+     */
     @Operation(summary = "Returns SMTP server configuration", description = "Returns SMTP server configuration", operationId = "get-config-smtp", tags = {
             "Configuration – SMTP" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SMTP_READ_ACCESS }),
@@ -86,6 +94,16 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         return Response.ok(smtpConfiguration).build();
     }
 
+    /**
+     * Create and persist an SMTP server configuration.
+     *
+     * Encrypts sensitive fields of the provided configuration for storage, saves it to the global configuration,
+     * then returns the stored SmtpConfiguration with decrypted password fields populated for client consumption.
+     *
+     * @param smtpConfiguration the SMTP configuration payload to store; sensitive password fields will be encrypted before persistence
+     * @return the created SmtpConfiguration as stored (with decrypted password fields populated)
+     * @throws EncryptionException if an error occurs while encrypting or decrypting sensitive fields
+     */
     @Operation(summary = "Adds SMTP server configuration", description = "Adds SMTP server configuration", operationId = "post-config-smtp", tags = {
             "Configuration – SMTP" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SMTP_WRITE_ACCESS }),
@@ -112,6 +130,13 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(smtpConfiguration).build();
     }
 
+    /**
+     * Replace the stored SMTP configuration with the provided settings and return the saved configuration.
+     *
+     * @param smtpConfiguration the new SMTP settings to persist; sensitive password fields will be encrypted before storage
+     * @return the HTTP response containing the updated SmtpConfiguration
+     * @throws EncryptionException if encryption or decryption of SMTP password fields fails during processing
+     */
     @Operation(summary = "Updates SMTP server configuration", description = "Updates SMTP server configuration", operationId = "put-config-smtp", tags = {
             "Configuration – SMTP" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SMTP_WRITE_ACCESS }),
@@ -139,6 +164,16 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         return Response.ok(smtpConfiguration).build();
     }
 
+    /**
+     * Sends a test SMTP message using the current SMTP configuration, optionally signed.
+     *
+     * Decrypts stored SMTP password fields as needed and attempts to send either a signed or
+     * unsigned message according to the `sign` flag on the request.
+     *
+     * @param smtpTest contains the test message payload and flags (subject, message, and `sign`)
+     * @return `true` if the test email was sent successfully, `false` otherwise.
+     * @throws EncryptionException if decryption of stored SMTP password fields fails.
+     */
     @Operation(summary = "Signing Test SMTP server configuration", description = "Signing Test SMTP server configuration", operationId = "test-config-smtp", tags = {
             "Configuration – SMTP" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SMTP_WRITE_ACCESS }),
@@ -177,6 +212,11 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         return Response.ok(status).build();
     }
 
+    /**
+     * Removes the stored SMTP server configuration and persists the change.
+     *
+     * @return HTTP 204 No Content response indicating the SMTP configuration was removed
+     */
     @Operation(summary = "Deletes SMTP server configuration", description = "Deletes SMTP server configuration", operationId = "delete-config-smtp", tags = {
             "Configuration – SMTP" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SMTP_DELETE_ACCESS }),

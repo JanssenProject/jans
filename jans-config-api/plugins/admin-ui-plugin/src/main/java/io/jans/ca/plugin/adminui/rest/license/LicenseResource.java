@@ -46,6 +46,16 @@ public class LicenseResource {
     @Inject
     LicenseDetailsService licenseDetailsService;
 
+    /**
+     * Check whether an active admin‑ui license exists.
+     *
+     * <p>Responds with a JSON payload describing the license check result.</p>
+     *
+     * @return HTTP Response whose entity is a GenericResponse. The GenericResponse's `success` is
+     *         `true` if an active license exists, `false` otherwise; the Response's HTTP status code
+     *         reflects the result. On unexpected error the method returns a 500 server error and the
+     *         entity may be null.
+     */
     @Operation(summary = "Check if admin-ui license is active", description = "Check if admin-ui license is active", operationId = "is-license-active", tags = {
             "Admin UI - License"}, security ={
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_READ }),
@@ -74,6 +84,11 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Delete license details from the admin UI configuration.
+     *
+     * @return a {@code GenericResponse} describing the operation result; its {@code success} flag indicates whether deletion succeeded and its {@code responseCode} contains the HTTP status to return
+     */
     @Operation(summary = "Delete license details in admin-ui configuration", description = "Delete license details in admin-ui configuration", operationId = "license-config-delete", tags = {
             "Admin UI - License"}, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
@@ -101,6 +116,11 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Retrieve the current license from SCAN.
+     *
+     * @return HTTP Response whose entity is a GenericResponse containing license details and an operation status; the HTTP status code reflects the operation result.
+     */
     @Operation(summary = "Retrieve license from SCAN", description = "Retrieve license from SCAN", operationId = "retrieve-license", tags = {
             "Admin UI - License"}, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_READ }),
@@ -129,6 +149,13 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Generate a trial license for the admin UI.
+     *
+     * @return Response containing a GenericResponse describing the result of the trial license generation.
+     *         On success the HTTP status equals the GenericResponse's responseCode and the entity contains details;
+     *         on internal error the endpoint returns HTTP 500 with the GenericResponse entity (which may be null).
+     */
     @Operation(summary = "Generate trial license", description = "Generate trial license", operationId = "get-trial-license", tags = {
             "Admin UI - License"}, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_READ }),
@@ -157,6 +184,12 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Activate the admin UI license using the provided license key.
+     *
+     * @param licenseRequest request containing the license key and any related metadata
+     * @return a JAX-RS Response whose entity is a GenericResponse describing whether activation succeeded and carrying the appropriate response code
+     */
     @Operation(summary = "Activate license using license-key", description = "Activate license using license-key", operationId = "activate-adminui-license", tags = {
             "Admin UI - License"}, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
@@ -185,6 +218,14 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Save Single Sign-On (SSA) configuration.
+     *
+     * Persists the provided SSA configuration and returns the operation result.
+     *
+     * @param ssaRequest SSARequest payload containing SSA configuration; must be non-null and valid.
+     * @return a Response whose entity is a GenericResponse describing success and containing the HTTP response code.
+     */
     @Operation(summary = "Save SSA in configuration", description = "Save SSA in configuration", operationId = "adminui-post-ssa", tags = {
             "Admin UI - License"}, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
@@ -213,6 +254,11 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Checks whether the stored Admin UI license configuration is valid.
+     *
+     * @return an HTTP Response containing a GenericResponse whose `success` is `true` if the configuration is valid and `false` otherwise; the response status code reflects the operation result
+     */
     @Operation(summary = "Is license configuration valid", description = "Is license configuration valid", operationId = "check-adminui-license-config", tags = {
             "Admin UI - License"}, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_READ }),
@@ -241,6 +287,11 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Retrieves admin UI license details.
+     *
+     * @return LicenseResponse containing the current admin UI license details on success; a GenericResponse containing error information on failure.
+     */
     @Operation(summary = "Get admin ui license details", description = "Get admin ui license details", operationId = "get-adminui-license", tags = {
             "Admin UI - License"}, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_READ }),

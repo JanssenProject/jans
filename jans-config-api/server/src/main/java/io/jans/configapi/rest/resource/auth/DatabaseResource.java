@@ -51,6 +51,11 @@ public class DatabaseResource extends ConfigBaseResource {
     @Inject
     DatabaseService databaseService;
 
+    /**
+     * Retrieves the database schema as a mapping from table names to their column attributes.
+     *
+     * @return a DatabaseSchemaMap where each key is a table name and each value is a map from column/attribute name to its {@link AttributeType}
+     */
     @Operation(summary = "Gets schema objects", description = "Gets schema objects.", operationId = "get-schema", tags = {
             "Database" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_READ_ACCESS }),

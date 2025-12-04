@@ -36,6 +36,12 @@ public class SsaResource extends ConfigBaseResource {
     @Inject
     SsaService ssaService;
 
+    /**
+     * Revoke an active Software Statement Assertion (SSA) identified by its JWT ID (`jti`).
+     *
+     * @param jti the JWT ID of the SSA to revoke
+     * @return an HTTP 200 OK response with no body when the revocation is processed
+     */
     @Operation(summary = "Revoke existing active SSA based on `jti` or `org_id`", description = "Revoke existing active SSA based on `jti` or `org_id`", operationId = "revoke-ssa", tags = {
             "Software Statement Assertion (SSA)" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SSA_DELETE_ACCESS }),
