@@ -117,6 +117,9 @@ impl BootstrapConfig {
             jwt_sig_validation: raw.jwt_sig_validation.into(),
             jwt_status_validation: raw.jwt_status_validation.into(),
             signature_algorithms_supported: raw.jwt_signature_algorithms_supported.clone(),
+            token_cache_max_ttl_secs: raw.token_cache_max_ttl,
+            token_cache_capacity: raw.token_cache_capacity,
+            token_cache_earliest_expiration_eviction: raw.token_cache_earliest_expiration_eviction,
         };
 
         let authorization_config = AuthorizationConfig {
@@ -139,7 +142,6 @@ impl BootstrapConfig {
             lock_config,
             max_default_entities: raw.max_default_entities,
             max_base64_size: raw.max_base64_size,
-            token_cache_max_ttl_secs: raw.token_cache_max_ttl,
         })
     }
 }

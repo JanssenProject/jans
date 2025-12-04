@@ -8,3 +8,7 @@
 pub fn default_jti() -> String {
     "jti".to_string()
 }
+
+pub fn default_true() -> bool {
+    true
+}

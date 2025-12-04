@@ -259,6 +259,18 @@ pub struct BootstrapConfigRaw {
     /// Zero means no token cache TTL limit.
     #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
     pub token_cache_max_ttl: usize,
+    /// Maximum number of tokens the cache can store.
+    #[serde(rename = "CEDARLING_TOKEN_CACHE_CAPACITY", default)]
+    pub token_cache_capacity: usize,
+    /// Enables eviction policy based on the earliest expiration time.
+    ///
+    /// When the cache reaches its capacity, the entry with the nearest
+    /// expiration timestamp will be removed to make room for a new one.
+    #[serde(
+        rename = "CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION",
+        default = "default_true"
+    )]
+    pub token_cache_earliest_expiration_eviction: bool,
 }
 
 impl BootstrapConfigRaw {

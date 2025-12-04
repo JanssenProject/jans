@@ -130,14 +130,17 @@ impl JwtService {
         jwt_config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
-        token_cache_max_ttl_sec: usize,
     ) -> Result<Self, JwtServiceInitError> {
         let mut status_lists = StatusListCache::default();
         let mut issuer_configs = HashMap::default();
         let mut validators = JwtValidatorCache::default();
         let mut key_service = KeyService::new();
 
-        let token_cache = TokenCache::new(token_cache_max_ttl_sec);
+        let token_cache = TokenCache::new(
+            jwt_config.token_cache_max_ttl_secs,
+            jwt_config.token_cache_capacity,
+            jwt_config.token_cache_earliest_expiration_eviction,
+        );
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
         let has_trusted_issuers = !trusted_issuers.is_empty();
@@ -590,10 +593,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([("Jans".into(), iss.clone())])),
             None,
-            0,
         )
         .await
         .inspect_err(|e| eprintln!("error msg: {}", e))
@@ -707,10 +710,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([(server.issuer(), iss)])),
             None,
-            3600, // token_cache_max_ttl_sec
         )
         .await
         .expect("Should create JwtService");
@@ -743,10 +746,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([(server.issuer(), iss)])),
             None,
-            3600, // token_cache_max_ttl_sec
         )
         .await
         .expect("Should create JwtService");
@@ -769,10 +772,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([(server.issuer(), iss)])),
             None,
-            3600, // token_cache_max_ttl_sec
         )
         .await
         .expect("Should create JwtService");
@@ -842,10 +845,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([(server.issuer(), iss)])),
             None,
-            3600, // token_cache_max_ttl_sec
         )
         .await
         .expect("Should create JwtService");
@@ -911,10 +914,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([(server.issuer(), iss)])),
             None,
-            3600, // token_cache_max_ttl_sec
         )
         .await
         .expect("Should create JwtService");
@@ -953,10 +956,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([(server.issuer(), iss)])),
             None,
-            3600, // token_cache_max_ttl_sec
         )
         .await
         .expect("Should create JwtService");

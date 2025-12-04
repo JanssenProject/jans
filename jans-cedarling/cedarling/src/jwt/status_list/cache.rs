@@ -274,6 +274,7 @@ mod test {
                 jwt_sig_validation: false,
                 jwt_status_validation: true,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
+                ..Default::default()
             },
             &status_list,
             None,
@@ -283,7 +284,7 @@ mod test {
                 &iss_config,
                 &validators,
                 &key_service,
-                TokenCache::new(0),
+                TokenCache::default(),
                 None,
             )
             .await

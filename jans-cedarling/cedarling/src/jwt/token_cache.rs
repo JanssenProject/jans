@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use chrono::{DateTime, Duration, Utc};
-use sparkv::SparKV;
+use sparkv::{Config, SparKV};
 use std::hash::Hash;
 use std::sync::{Arc, RwLock};
 
@@ -21,13 +21,26 @@ pub struct TokenCache {
     max_ttl: usize,
 }
 
+#[cfg(test)]
+impl Default for TokenCache {
+    fn default() -> Self {
+        // default parameters, is used only for testing
+        Self::new(60 * 5, 100, true)
+    }
+}
+
 impl TokenCache {
     /// Creates a new `TokenCache` with the specified maximum TTL in seconds.
     ///
     /// If `max_ttl` is set to 0, tokens will use their natural expiration or default TTL.
-    pub fn new(max_ttl: usize) -> Self {
+    pub fn new(max_ttl: usize, capacity: usize, earliest_expiration_eviction: bool) -> Self {
         Self {
-            cache: Arc::new(RwLock::new(SparKV::new())),
+            cache: Arc::new(RwLock::new(SparKV::with_config(Config {
+                max_ttl: Duration::seconds(max_ttl as i64),
+                max_items: capacity,
+                earliest_expiration_eviction,
+                ..Default::default()
+            }))),
             max_ttl,
         }
     }
@@ -78,7 +91,6 @@ impl TokenCache {
 
     /// Extract cache duration, result is optional
     fn cache_duration(&self, token: &Arc<Token>, now: DateTime<Utc>) -> Option<i64> {
-        
         token
             .claims
             .get_claim("exp")
