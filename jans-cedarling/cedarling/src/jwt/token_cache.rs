@@ -8,8 +8,10 @@ use sparkv::{Config, SparKV};
 use std::hash::Hash;
 use std::sync::{Arc, RwLock};
 
+use crate::LogLevel;
 use crate::jwt::token::Token;
 use crate::jwt::validation::TokenKind;
+use crate::log::{LogEntry, LogType, LogWriter, Logger};
 
 /// A dedicated cache for storing validated JWT tokens.
 ///
@@ -19,13 +21,16 @@ use crate::jwt::validation::TokenKind;
 pub struct TokenCache {
     cache: Arc<RwLock<SparKV<Arc<Token>>>>,
     max_ttl: usize,
+    logger: Option<Logger>,
 }
 
 #[cfg(test)]
 impl Default for TokenCache {
     fn default() -> Self {
         // default parameters, is used only for testing
-        Self::new(60 * 5, 100, true)
+
+        use crate::log::TEST_LOGGER;
+        Self::new(60 * 5, 100, true, Some(TEST_LOGGER.clone()))
     }
 }
 
@@ -33,7 +38,12 @@ impl TokenCache {
     /// Creates a new `TokenCache` with the specified maximum TTL in seconds.
     ///
     /// If `max_ttl` is set to 0, tokens will use their natural expiration or default TTL.
-    pub fn new(max_ttl: usize, capacity: usize, earliest_expiration_eviction: bool) -> Self {
+    pub fn new(
+        max_ttl: usize,
+        capacity: usize,
+        earliest_expiration_eviction: bool,
+        logger: Option<Logger>,
+    ) -> Self {
         Self {
             cache: Arc::new(RwLock::new(SparKV::with_config(Config {
                 max_ttl: Duration::seconds(max_ttl as i64),
@@ -42,6 +52,17 @@ impl TokenCache {
                 ..Default::default()
             }))),
             max_ttl,
+            logger,
+        }
+    }
+
+    fn log_warn(&self, msg: String) {
+        if let Some(logger) = &self.logger {
+            logger.log_any(
+                LogEntry::new_with_data(LogType::System, None)
+                    .set_level(LogLevel::WARN)
+                    .set_message(msg),
+            );
         }
     }
 
@@ -73,19 +94,20 @@ impl TokenCache {
             .map(|iss| vec![IndexKey::Iss(iss).index_value()])
             .unwrap_or_default();
 
-        if let Some(duration) = self.cache_duration(&token, now) {
-            let _ = self
-                .cache
+        let result = if let Some(duration) = self.cache_duration(&token, now) {
+            self.cache
                 .write()
                 .expect("token cache mutex shouldn't be poisoned")
-                .set_with_ttl(&key, token, Duration::seconds(duration), &index_keys);
+                .set_with_ttl(&key, token, Duration::seconds(duration), &index_keys)
         } else {
             // set with SparkKV default TTL (5 minutes)
-            let _ = self
-                .cache
+            self.cache
                 .write()
                 .expect("token cache mutex shouldn't be poisoned")
-                .set(&key, token, &index_keys);
+                .set(&key, token, &index_keys)
+        };
+        if let Err(err) = result {
+            self.log_warn(format!("could not set token to token cache: {}", err));
         }
     }
 

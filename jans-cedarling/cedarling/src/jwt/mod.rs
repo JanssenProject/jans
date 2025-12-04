@@ -140,6 +140,7 @@ impl JwtService {
             jwt_config.token_cache_max_ttl_secs,
             jwt_config.token_cache_capacity,
             jwt_config.token_cache_earliest_expiration_eviction,
+            logger.clone(),
         );
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
