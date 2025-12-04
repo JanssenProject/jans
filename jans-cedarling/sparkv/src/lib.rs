@@ -203,24 +203,13 @@ impl<T> SparKV<T> {
     /// Removes only last element from expires BinaryHeap, even if value is not expired.
     /// Is used when [Config::earliest_expiration_eviction] is true
     fn remove_last(&mut self) {
-        let mut cleared_count: usize = 0;
-        while let Some(exp_item) = self.expiries.peek().cloned() {
-            if cleared_count != 0 {
-                break;
+        while let Some(exp_item) = self.expiries.pop() {
+            if let Some(kv_entry) = self.data.get(&exp_item.key) {
+                if kv_entry.key == exp_item.key && kv_entry.expired_at == exp_item.expired_at {
+                    self.pop(&exp_item.key);
+                    return;
+                }
             }
-            let should_pop = match self.data.get(&exp_item.key) {
-                Some(kv_entry) => {
-                    kv_entry.key == exp_item.key && kv_entry.expired_at == exp_item.expired_at
-                },
-                None => false,
-            };
-
-            if should_pop {
-                cleared_count += 1;
-                self.pop(&exp_item.key);
-            }
-            // remove current item from expiries
-            self.expiries.pop();
         }
     }
 
