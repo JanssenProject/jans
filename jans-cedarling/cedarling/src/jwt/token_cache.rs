@@ -206,9 +206,9 @@ fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
 /// IndexKey is structure that is used for indexing [TokenCache]
 //
 // thiserror is used for usefull string conversation
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, derive_more::Display)]
 pub enum IndexKey {
-    #[error("iss:{0}")]
+    #[display("iss:{_0}")]
     Iss(String),
 }
 
