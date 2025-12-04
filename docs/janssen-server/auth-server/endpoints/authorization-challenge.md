@@ -20,19 +20,19 @@ URL to access authorization challenge endpoint on Janssen Server is listed in th
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
-`authorization_challenge_endpoint` claim in the response specifies the URL for authorization challenge endpoint. By default, authorization 
+`authorization_challenge_endpoint` claim in the response specifies the URL for authorization challenge endpoint. By default, authorization
 challenge endpoint looks like below:
 
-```
+```text
 https://janssen.server.host/jans-auth/restv1/authorize-challenge
 ```
 
-In order to call Authorization Challenge Endpoint client must have `authorization_challenge` scope. 
-If scope is not present AS rejects call with 401 (unauthorized) http status code. 
+To call Authorization Challenge Endpoint, client must have `authorization_challenge` scope.
+If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP status code.
 
 Authorization Challenge Endpoint supports Proof Key for Code Exchange (PKCE).
 
-More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification 
+More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification
 of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
 
 Sample request
@@ -77,12 +77,12 @@ Authorization Challenge Endpoint AS configuration:
 - **authorizationChallengeShouldGenerateSession** - Boolean value specifying whether to generate session_id (AS object and cookie) during authorization at Authorization Challenge Endpoint. Default value is `false`.
 - **mtlsAuthorizationChallengeEndpoint** - URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Authorization Challenge Endpoint.
 
-## Custom script  
+## Custom script
 
 AS provides `AuthorizationChallengeType` custom script which must be used to control Authorization Challenge Endpoint behaviour.
 
 If request does not have `acr_values` specified and script name falls back to `default_challenge` which is available and enabled during installation.
-Default script name can be changed via `authorizationChallengeDefaultAcr` configuration property. 
+Default script name can be changed via `authorizationChallengeDefaultAcr` configuration property.
 
 Main method return true/false which indicates to server whether to issue `authorization_code` in response or not.
 
@@ -139,18 +139,19 @@ Full sample script can be found [here](../../../script-catalog/authorization_cha
 
 ## Auth session
 
-Auth session is optional. AS does not return it by default. 
+Auth session is optional. AS does not return it by default.
 It's possible to pass in request `use_auth_session=true` which makes AS return it in error response.
-If it is desired to use `auth_session` and don't pass `client_id` (or other parameters) in next request, 
-it should be put in attributes of `auth_session` object. 
-`auth_session` object lifetime is set by `authorizationChallengeSessionLifetimeInSeconds` AS configuration property. 
+If it is desired to use `auth_session` and don't pass `client_id` (or other parameters) in next request,
+it should be put in attributes of `auth_session` object.
+`auth_session` object lifetime is set by `authorizationChallengeSessionLifetimeInSeconds` AS configuration property.
 If `authorizationChallengeSessionLifetimeInSeconds` is not set then value falls back to `86400` seconds.
 
 Example
+
 ```java
 String clientId = context.getHttpRequest().getParameter("client_id");
 authorizationChallengeSessionObject.getAttributes().getAttributes().put("client_id", clientId);
-``` 
+```
 
 AS automatically validates DPoP if it is set during auth session creation.
 Thus it's recommended to set `jkt` of the auth session if DPoP is used.
@@ -165,9 +166,9 @@ Full sample script can be found [here](../../../script-catalog/authorization_cha
 
 ## Web session
 
-Authorization challenge script is first-party flow and thus web session is not created by default. 
+Authorization challenge script is first-party flow and thus web session is not created by default.
 However there can be cases when such session has to be created. Please set **authorizationChallengeShouldGenerateSession** configuration property to **true**
-to force session creation. 
+to force session creation.
 
 In case it is needed to prepare session with specific data, it is possible to create session
 in script and set it into context. Example:
@@ -184,13 +185,13 @@ SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(context.ge
 
 context.getExecutionContext().setAuthorizationChallengeSessionId(sessionId);
 scriptLogger.trace("Created Authorization challenge session successfully");
-``` 
+```
 
 ## Multi-step example
 
-Sometimes it's required to send data sequentially. Step by step. Calls to Authorization Challenge Endpoint must have 
-`use_auth_session=true` parameter to force tracking data between request. 
- 
+Sometimes it's required to send data sequentially. Step by step. Calls to Authorization Challenge Endpoint must have
+`use_auth_session=true` parameter to force tracking data between request.
+
 Lets consider example when RP first sends `username` and then in next request `OTP`.
 
 ```text
@@ -202,7 +203,7 @@ username=alice
 &scope=photos
 &client_id=bb16c14c73415
 ```
- 
+
 AS accepts `username` and returns back error with `auth_session`.
 
 ```text
@@ -786,4 +787,4 @@ X-Xss-Protection: 1; mode=block
 
 {"error": "username_invalid"}
 
-``` 
+```

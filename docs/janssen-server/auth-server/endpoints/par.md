@@ -10,11 +10,11 @@ tags:
 # Pushed Authorization Request (PAR) Endpoint
 
 PAR endpoint is used by client to send authorization request directly to the Janssen Server without using the usual
-redirection mechanism via user agent. When PAR endpoint receives a valid request, it responds with a request URI. 
-The request URI is a reference created and stored by Janssen Server. It is a reference to  authorization request and 
+redirection mechanism via user agent. When PAR endpoint receives a valid request, it responds with a request URI.
+The request URI is a reference created and stored by Janssen Server. It is a reference to  authorization request and
 the metadata sent with it by the client. Client can send this request uri to the Janssen Server in a authorization
-request using user agent redirect mechanism. There are multiple benefits of using this flow which are described along 
-with other details in [PAR specification](https://datatracker.ietf.org/doc/html/rfc9126). Janssen Server PAR implementation 
+request using user agent redirect mechanism. There are multiple benefits of using this flow which are described along
+with other details in [PAR specification](https://datatracker.ietf.org/doc/html/rfc9126). Janssen Server PAR implementation
 conforms to PAR specification.
 
 URL to access PAR endpoint on Janssen Server is listed in the response of Janssen Server's well-known
@@ -45,11 +45,11 @@ In response to a valid request, the PAR endpoint returns `request_uri` in respon
  }
 ```
 
-Since PAR endpoint is a protected resource. The client has to authenticate itself to the endpoint. Authentication 
-methods used are same as the once used for client authentication at [token endpoint](./token.md#client-authentication). 
+Since PAR endpoint is a protected resource. The client has to authenticate itself to the endpoint. Authentication
+methods used are same as the ones used for client authentication at [token endpoint](./token.md#client-authentication).
 
 More information about request and response of the PAR endpoint can be found in
-the OpenAPI specification of 
+the OpenAPI specification of
 [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization/post_par).
 
 ## Disabling The Endpoint Using Feature Flag
@@ -88,11 +88,10 @@ The ParType interception script has the following method(s):
 |Method |Method description|
 |:-----|:------|
 | `def createPar(self, par, context)`| Used to modify PAR object before it is persisted. `par` is `io.jans.as.persistence.model.Par`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`|
-| `def modifyParResponse(self, response, context)`| Used to modify response from `/par` endpoint. 
-`response` is `org.json.JSONObject`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`|
+| `def modifyParResponse(self, response, context)`| Used to modify response from `/par` endpoint. `response` is `org.json.JSONObject`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`|
 
 
-## Script Type: Java 
+## Script Type: Java
 
 
 ```java
@@ -179,4 +178,4 @@ You can ask questions through [GitHub Discussions](https://github.com/JanssenPro
 
 ## Want to contribute?
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
