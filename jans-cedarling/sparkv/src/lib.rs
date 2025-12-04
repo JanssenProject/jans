@@ -240,16 +240,15 @@ impl<T> SparKV<T> {
     }
 
     /// Remove all values in database by index key
-    pub fn remove_by_index<'a>(&'a mut self, index_key: &'a str) {
+    pub fn remove_by_index<'a>(&'a mut self, index_key: &'a str) -> usize {
         // keys is cloned to avoid borrowing issues of mutable `self`
         let keys: Vec<_> = self
             .index
             .get_by_index_key(&index::IndexKey(index_key.into()))
             .cloned()
             .collect();
-        for key in keys {
-            self.pop(&key.0);
-        }
+
+        keys.into_iter().filter_map(|key| self.pop(&key.0)).count()
     }
 
     /// Empty the container. That is, remove all key-values and expiries.
