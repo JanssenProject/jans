@@ -63,6 +63,7 @@ async fn init_cedarling() -> Cedarling {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
+            ..Default::default()
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
@@ -78,7 +79,6 @@ async fn init_cedarling() -> Cedarling {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
-        token_cache_max_ttl_secs: 60,
     })
     .await
     .expect("should initialize cedarling")
