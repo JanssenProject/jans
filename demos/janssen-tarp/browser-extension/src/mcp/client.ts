@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import MCPUtils from './MCPUtils';
+import MCPService from './MCPService';
 
 const LLM_API_KEY_STORAGE_KEY = 'llm_api_key';
 const LLM_MODEL_STORAGE_KEY = 'llm_model';
@@ -173,8 +173,8 @@ export async function handleUserPrompt(prompt: string) {
             name: toolCall.function.name,
             arguments: args,
           });
-
-          MCPUtils.generateRandomString(toolResult)
+          const mcpService = new MCPService(); 
+          mcpService.saveClientInTarpStorage(toolResult);
           
           results.push({
             tool: toolCall.function.name,

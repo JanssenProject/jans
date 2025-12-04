@@ -12,6 +12,7 @@
     "@cfworker/json-schema": "^4.1.1",
     "@modelcontextprotocol/sdk": "^1.23.0",
     "axios": "^1.13.2",
+    "crypto": "^1.0.1",
     "express": "^5.1.0",
     "zod": "^4.1.13"
   },

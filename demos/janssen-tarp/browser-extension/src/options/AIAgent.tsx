@@ -1,8 +1,7 @@
 import React from 'react';
 import TextField from '@mui/material/TextField';
 import Container from '@mui/material/Container';
-//import { handleUserPrompt } from "../mcp/index";
-import { handleUserPrompt } from "../mcp/client";
+import { handleUserPrompt } from "../mcp/index";
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import AirplanemodeActiveOutlinedIcon from '@mui/icons-material/AirplanemodeActiveOutlined';
@@ -45,7 +44,7 @@ import Divider from '@mui/material/Divider';
 const LLM_API_KEY_STORAGE_KEY = 'llm_api_key';
 const LLM_MODEL_STORAGE_KEY = 'llm_model';
 const LLM_PROVIDER_STORAGE_KEY = 'llm_provider';
-const MCP_SERVER_URL_STORAGE_KEY = 'mcp_server_url';
+const MCP_SERVER_URL = 'mcp_server_url';
 
 // Available LLM providers
 const LLM_PROVIDERS = [
@@ -134,7 +133,7 @@ const AIAgent = (props) => {
                     LLM_API_KEY_STORAGE_KEY,
                     LLM_MODEL_STORAGE_KEY,
                     LLM_PROVIDER_STORAGE_KEY,
-                    MCP_SERVER_URL_STORAGE_KEY
+                    MCP_SERVER_URL
                 ], (result) => {
                     resolve(result);
                 });
@@ -156,7 +155,7 @@ const AIAgent = (props) => {
                 setProvider(savedProvider);
             }
             
-            const savedMcpUrl = results[MCP_SERVER_URL_STORAGE_KEY];
+            const savedMcpUrl = results[MCP_SERVER_URL];
             if (savedMcpUrl) {
                 setMcpServerUrl(savedMcpUrl);
                 validateMcpUrl(savedMcpUrl);
@@ -324,7 +323,7 @@ const AIAgent = (props) => {
                 [LLM_API_KEY_STORAGE_KEY]: apiKey,
                 [LLM_MODEL_STORAGE_KEY]: getFinalModelName(),
                 [LLM_PROVIDER_STORAGE_KEY]: provider,
-                [MCP_SERVER_URL_STORAGE_KEY]: mcpServerUrl
+                [MCP_SERVER_URL]: mcpServerUrl
             });
             
             // Test MCP connection after saving
@@ -358,7 +357,7 @@ const AIAgent = (props) => {
             LLM_API_KEY_STORAGE_KEY,
             LLM_MODEL_STORAGE_KEY,
             LLM_PROVIDER_STORAGE_KEY,
-            MCP_SERVER_URL_STORAGE_KEY
+            MCP_SERVER_URL
         ]);
 
         setApiKey("");
@@ -404,7 +403,7 @@ const AIAgent = (props) => {
             chrome.storage.local.get([
                 LLM_API_KEY_STORAGE_KEY,
                 LLM_PROVIDER_STORAGE_KEY,
-                MCP_SERVER_URL_STORAGE_KEY
+                MCP_SERVER_URL
             ], (result) => {
                 resolve(result);
             });
@@ -412,7 +411,7 @@ const AIAgent = (props) => {
         
         const savedApiKey = results[LLM_API_KEY_STORAGE_KEY];
         const savedProvider = results[LLM_PROVIDER_STORAGE_KEY] || 'openai';
-        const savedMcpUrl = results[MCP_SERVER_URL_STORAGE_KEY];
+        const savedMcpUrl = results[MCP_SERVER_URL];
         
         if (!savedApiKey) {
             setSnackbar({
