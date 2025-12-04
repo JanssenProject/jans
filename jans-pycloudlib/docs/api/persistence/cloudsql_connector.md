@@ -163,6 +163,7 @@ with SqlClient(manager) as client:
 The `SqlClient` class implements proper resource cleanup for both the SQLAlchemy engine and the Cloud SQL Connector:
 
 **Using Context Manager (Recommended)**:
+
 ```python
 with SqlClient(manager) as client:
     # Use the client
@@ -171,6 +172,7 @@ with SqlClient(manager) as client:
 ```
 
 **Manual Cleanup**:
+
 ```python
 client = SqlClient(manager)
 try:
@@ -193,13 +195,15 @@ The Janssen Project's Java services (jans-auth-server, jans-config-api, etc.) us
 When `CN_SQL_CLOUDSQL_CONNECTOR_ENABLED=true`, the Java services use a different JDBC connection URL format that leverages the Cloud SQL JDBC Socket Factory instead of direct TCP connections:
 
 **Standard Connection (Cloud SQL Connector disabled):**
-```
+
+```text
 jdbc:mysql://10.13.0.3:3306/jans?enabledTLSProtocols=TLSv1.2
 jdbc:postgresql://10.13.0.3:5432/jans
 ```
 
 **Cloud SQL Connector Connection (Cloud SQL Connector enabled):**
-```
+
+```text
 jdbc:mysql:///jans?cloudSqlInstance=project:region:instance&socketFactory=com.google.cloud.sql.mysql.SocketFactory&serverTimezone=UTC
 jdbc:postgresql:///jans?cloudSqlInstance=project:region:instance&socketFactory=com.google.cloud.sql.postgres.SocketFactory
 ```
@@ -230,7 +234,7 @@ The Java services use the same environment variables as the Python connector:
 
 When connecting from Cloud Run to Cloud SQL via Private IP, standard JDBC connections may fail with SSL certificate verification errors like:
 
-```
+```text
 java.security.cert.CertificateException: Server identity verification failed.
 None of the certificate's DNS or IP Subject Alternative Name entries matched the server hostname/IP '10.13.0.3'.
 ```
@@ -268,19 +272,19 @@ Before deploying your Cloud Run service with Cloud SQL Connector, ensure all the
 
 - [ ] **Cloud SQL Client Role**: The Cloud Run service account must have the `roles/cloudsql.client` IAM role on the Cloud SQL instance.
 
-  ```bash
-  gcloud projects add-iam-policy-binding PROJECT_ID \
-    --member="serviceAccount:SERVICE_ACCOUNT_EMAIL" \
-    --role="roles/cloudsql.client"
-  ```
+```bash
+gcloud projects add-iam-policy-binding PROJECT_ID \
+  --member="serviceAccount:SERVICE_ACCOUNT_EMAIL" \
+  --role="roles/cloudsql.client"
+```
 
 - [ ] **Cloud SQL Instance User Role** (Optional but recommended): For IAM database authentication, grant `roles/cloudsql.instanceUser`.
 
-  ```bash
-  gcloud projects add-iam-policy-binding PROJECT_ID \
-    --member="serviceAccount:SERVICE_ACCOUNT_EMAIL" \
-    --role="roles/cloudsql.instanceUser"
-  ```
+```bash
+gcloud projects add-iam-policy-binding PROJECT_ID \
+  --member="serviceAccount:SERVICE_ACCOUNT_EMAIL" \
+  --role="roles/cloudsql.instanceUser"
+```
 
 - [ ] **Service Account Configured**: The Cloud Run service is configured to use a service account with the above roles (not the default compute service account in production).
 
@@ -290,21 +294,21 @@ Before deploying your Cloud Run service with Cloud SQL Connector, ensure all the
 
 - [ ] **Serverless VPC Access Connector Created**: A VPC Access connector is created in the same region as your Cloud Run service.
 
-  ```bash
-  gcloud compute networks vpc-access connectors create CONNECTOR_NAME \
-    --region=REGION \
-    --network=VPC_NETWORK \
-    --range=IP_RANGE  # e.g., 10.8.0.0/28
-  ```
+```bash
+gcloud compute networks vpc-access connectors create CONNECTOR_NAME \
+  --region=REGION \
+  --network=VPC_NETWORK \
+  --range=IP_RANGE  # e.g., 10.8.0.0/28
+```
 
 - [ ] **Cloud Run Service Configured with VPC Connector**: The Cloud Run service is deployed with the VPC connector.
 
-  ```bash
-  gcloud run deploy SERVICE_NAME \
-    --image=IMAGE_URL \
-    --vpc-connector=CONNECTOR_NAME \
-    --vpc-egress=private-ranges-only
-  ```
+```bash
+gcloud run deploy SERVICE_NAME \
+  --image=IMAGE_URL \
+  --vpc-connector=CONNECTOR_NAME \
+  --vpc-egress=private-ranges-only
+```
 
 ### Cloud SQL Instance Requirements
 
@@ -348,17 +352,19 @@ Before deploying your Cloud Run service with Cloud SQL Connector, ensure all the
 2. **Check Logs**: Review Cloud Run logs for connection errors or IAM permission issues.
 
 3. **Verify IAM Bindings**:
-   ```bash
-   gcloud projects get-iam-policy PROJECT_ID \
-     --flatten="bindings[].members" \
-     --filter="bindings.role:roles/cloudsql.client"
-   ```
+
+```bash
+gcloud projects get-iam-policy PROJECT_ID \
+  --flatten="bindings[].members" \
+  --filter="bindings.role:roles/cloudsql.client"
+```
 
 4. **Verify VPC Connector Status**:
-   ```bash
-   gcloud compute networks vpc-access connectors describe CONNECTOR_NAME \
-     --region=REGION
-   ```
+
+```bash
+gcloud compute networks vpc-access connectors describe CONNECTOR_NAME \
+  --region=REGION
+```
 
 ---
 

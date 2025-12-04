@@ -37,14 +37,8 @@ from jans.pycloudlib.utils import get_password_from_file
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import exec_cmd
 
-CLOUDSQL_CONNECTOR_AVAILABLE = False
-try:
-    from google.cloud.sql.connector import Connector
-    from google.cloud.sql.connector import IPTypes
-    CLOUDSQL_CONNECTOR_AVAILABLE = True
-except ImportError:
-    Connector = None
-    IPTypes = None
+from google.cloud.sql.connector import Connector
+from google.cloud.sql.connector import IPTypes
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -85,18 +79,9 @@ class CloudSqlConnectorMixin:
         """Check if Cloud SQL Python Connector is enabled.
 
         Returns:
-            True if CN_SQL_CLOUDSQL_CONNECTOR_ENABLED is set to true and the
-            connector library is available, False otherwise.
+            True if CN_SQL_CLOUDSQL_CONNECTOR_ENABLED is set to true, False otherwise.
         """
-        enabled = as_boolean(os.environ.get("CN_SQL_CLOUDSQL_CONNECTOR_ENABLED", "false"))
-        if enabled and not CLOUDSQL_CONNECTOR_AVAILABLE:
-            logger.warning(
-                "CN_SQL_CLOUDSQL_CONNECTOR_ENABLED is set but cloud-sql-python-connector "
-                f"failed to import. Falling back to standard {self.fallback_driver_name} connection. "
-                "This may indicate a corrupt installation. Try reinstalling jans-pycloudlib."
-            )
-            return False
-        return enabled and CLOUDSQL_CONNECTOR_AVAILABLE
+        return as_boolean(os.environ.get("CN_SQL_CLOUDSQL_CONNECTOR_ENABLED", "false"))
 
     def _get_instance_connection_name(self) -> str:
         """Get and validate the Cloud SQL instance connection name.
@@ -124,16 +109,7 @@ class CloudSqlConnectorMixin:
         """Initialize the Cloud SQL Connector if not already created.
 
         Uses LAZY refresh strategy for deferred token refresh.
-
-        Raises:
-            RuntimeError: If Cloud SQL Connector library is not installed.
         """
-        if not CLOUDSQL_CONNECTOR_AVAILABLE:
-            raise RuntimeError(
-                "Cloud SQL Python Connector failed to import. "
-                "This may indicate a corrupt installation. Try reinstalling jans-pycloudlib."
-            )
-
         if self._cloudsql_connector is None:
             self._cloudsql_connector = Connector(refresh_strategy="LAZY")
 
@@ -161,8 +137,7 @@ class CloudSqlConnectorMixin:
             A callable that creates database connections via Cloud SQL Connector.
 
         Raises:
-            RuntimeError: If Cloud SQL Connector library is not installed or
-                CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME is not set.
+            RuntimeError: If CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME is not set.
             ValueError: If the adapter's cloudsql_driver attribute is not defined.
         """
         self._ensure_connector()
