@@ -56,6 +56,25 @@ jobs:
         with:
           egress-policy: audit
 
+      - name: Free disk space
+        run: |
+          echo "=== Disk space before cleanup ==="
+          df -h
+          echo "=== Removing pre-installed tools ==="
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /usr/share/swift || true
+          echo "=== Cleaning Docker ==="
+          docker system prune -af --volumes || true
+          echo "=== Cleaning apt cache ==="
+          sudo apt-get clean || true
+          sudo rm -rf /var/lib/apt/lists/* || true
+          echo "=== Disk space after cleanup ==="
+          df -h
+
       - name: Install Cosign
         uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
 
@@ -229,6 +248,13 @@ jobs:
           platforms: linux/amd64, linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
+          cache-from: type=gha,scope=${{ matrix.docker-images }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.docker-images }}
+
+      - name: Prune BuildKit cache
+        if: always()
+        run: docker buildx prune -af --keep-storage 2GB || true
+
       - name: Image digest
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         run: echo ${{ steps.docker_build.outputs.digest }}
