@@ -30,7 +30,9 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
 @OAuthScope(name = ApiAccessConstants.USER_READ_ACCESS, description = "View user related information"),
 @OAuthScope(name = ApiAccessConstants.USER_WRITE_ACCESS, description = "Manage user related information"),
-@OAuthScope(name = ApiAccessConstants.USER_DELETE_ACCESS, description = "Delete user related information")}
+@OAuthScope(name = ApiAccessConstants.USER_DELETE_ACCESS, description = "Delete user related information"),
+@OAuthScope(name = ApiAccessConstants.USER_ADMIN_ACCESS, description = "Admin to manage user related information"),
+}
 )))
 public class ApiApplication extends Application {
 

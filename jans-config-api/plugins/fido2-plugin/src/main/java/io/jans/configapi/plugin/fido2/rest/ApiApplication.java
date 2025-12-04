@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.fido2.rest;
 
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -27,7 +28,10 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
 @OAuthScope(name = Constants.FIDO2_CONFIG_READ_ACCESS, description = "View fido2 related information"),
 @OAuthScope(name = Constants.FIDO2_CONFIG_WRITE_ACCESS, description = "Manage fido2 related information"),
-@OAuthScope(name = Constants.FIDO2_CONFIG_DELETE_ACCESS, description = "Delete fido2 related information")
+@OAuthScope(name = Constants.FIDO2_CONFIG_DELETE_ACCESS, description = "Delete fido2 related information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin for viewing application resource information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin for updating application resource information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin for deleting application resource information"),
 }
 )))
 public class ApiApplication extends Application {

@@ -20,6 +20,7 @@ import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.lock.service.AuditService;
 import io.jans.configapi.plugin.lock.util.Constants;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.lock.model.audit.HealthEntry;
 import io.jans.lock.model.audit.LogEntry;
@@ -69,18 +70,22 @@ public class AuditResource extends BaseResource {
 	@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
 	PersistenceEntryManager persistenceEntryManager;
 
-	@Operation(summary = "Save health data", description = "Save health data", operationId = "save-health-data", tags = {
-			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_HEALTH_WRITE_ACCESS }))
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
-			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
-			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
-	@POST
-	@ProtectedApi(scopes = { Constants.LOCK_HEALTH_WRITE_ACCESS })
-	@Path(Constants.HEALTH)
-	public Response postHealthData(@Valid HealthEntry healthEntry) {
+    @Operation(summary = "Save health data", description = "Save health data", operationId = "save-health-data", tags = {
+            "Lock - Audit" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_HEALTH_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @POST
+    @ProtectedApi(scopes = { Constants.LOCK_HEALTH_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.LOCK_ADMIN_ACCESS, Constants.LOCK_WRITE_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @Path(Constants.HEALTH)
+    public Response postHealthData(@Valid HealthEntry healthEntry) {
 		logger.debug("Save Health Data - healthEntry:{}", healthEntry);
 
 		auditService.addHealthEntry(healthEntry);
@@ -88,17 +93,21 @@ public class AuditResource extends BaseResource {
 		return Response.status(Response.Status.OK).build();
 	}
 
-	@Operation(summary = "Bulk save health data", description = "Bulk save health data", operationId = "bulk-save-health-data", tags = {
-			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_HEALTH_WRITE_ACCESS }))
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
-			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
-			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
-	@POST
-	@ProtectedApi(scopes = { Constants.LOCK_HEALTH_WRITE_ACCESS })
-	@Path(Constants.HEALTH + Constants.BULK)
+    @Operation(summary = "Bulk save health data", description = "Bulk save health data", operationId = "bulk-save-health-data", tags = {
+            "Lock - Audit" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_HEALTH_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @POST
+    @ProtectedApi(scopes = { Constants.LOCK_HEALTH_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.LOCK_ADMIN_ACCESS, Constants.LOCK_WRITE_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @Path(Constants.HEALTH + Constants.BULK)
 	public Response postBulkHealthData(@Valid List<HealthEntry> healthEntries) {
 		logger.debug("Bulk save Health Data - healthEntries:{}", healthEntries);
 
@@ -110,15 +119,21 @@ public class AuditResource extends BaseResource {
 	}
 
 	@Operation(summary = "Rerquest health records for specific event range", description = "Rerquest health records for specific event range", operationId = "request-lock-health-records-event-range", tags = {
-			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_HEALTH_READ_ACCESS }))
+			"Lock - Audit" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_HEALTH_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_HEALTH_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = HealthEntry.class)))),
 			@ApiResponse(responseCode = "400", description = "Wrong date range specified"),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
 			@ApiResponse(responseCode = "500", description = "InternalServerError") })
 	@GET
-	@ProtectedApi(scopes = { Constants.LOCK_HEALTH_READ_ACCESS })
+	@ProtectedApi(scopes = { Constants.LOCK_HEALTH_READ_ACCESS }, groupScopes = {
+	            Constants.LOCK_HEALTH_WRITE_ACCESS }, superScopes = { Constants.LOCK_ADMIN_ACCESS,Constants.LOCK_READ_ACCESS,
+	                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
 	@Path(Constants.HEALTH + Constants.SEARCH)
 	public Response getHealthEntrysByRange(
 			@Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(ApiConstants.LIMIT) int limit,
@@ -140,17 +155,21 @@ public class AuditResource extends BaseResource {
 		return Response.ok(entries).build();
 	}
 
-	@Operation(summary = "Save log data", description = "Save log data", operationId = "save-log-data", tags = {
-			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_LOG_WRITE_ACCESS }))
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
-			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
-			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
-	@POST
-	@ProtectedApi(scopes = { Constants.LOCK_LOG_WRITE_ACCESS })
-	@Path(Constants.LOG)
+    @Operation(summary = "Save log data", description = "Save log data", operationId = "save-log-data", tags = {
+            "Lock - Audit" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_LOG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @POST
+    @ProtectedApi(scopes = { Constants.LOCK_LOG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.LOCK_ADMIN_ACCESS, Constants.LOCK_WRITE_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @Path(Constants.LOG)
 	public Response postLogData(@Valid LogEntry logEntry) {
 		logger.debug("Save Log Data - logEntry:{}", logEntry);
 
@@ -159,16 +178,20 @@ public class AuditResource extends BaseResource {
 		return Response.status(Response.Status.OK).build();
 	}
 
-	@Operation(summary = "Bulk save log data", description = "Bulk save log data", operationId = "bulk-save-log-data", tags = {
-			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_LOG_WRITE_ACCESS }))
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
-			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
-			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
-	@POST
-	@ProtectedApi(scopes = { Constants.LOCK_LOG_WRITE_ACCESS })
+    @Operation(summary = "Bulk save log data", description = "Bulk save log data", operationId = "bulk-save-log-data", tags = {
+            "Lock - Audit" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_LOG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @POST
+    @ProtectedApi(scopes = { Constants.LOCK_LOG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.LOCK_ADMIN_ACCESS, Constants.LOCK_WRITE_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
 	@Path(Constants.LOG + Constants.BULK)
 	public Response postBulkLogData(@Valid List<LogEntry> logEntries) {
 		logger.debug("Bulk save Log Data - logEntries:{}", logEntries);
@@ -180,16 +203,22 @@ public class AuditResource extends BaseResource {
 		return Response.status(Response.Status.OK).build();
 	}
 
-	@Operation(summary = "Rerquest log records for specific event range", description = "Rerquest log records for specific event range", operationId = "request-lock-log-records-event-range", tags = {
-			"Lock - Log" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_LOG_READ_ACCESS }))
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = LogEntry.class)))),
-			@ApiResponse(responseCode = "400", description = "Wrong date range specified"),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "500", description = "InternalServerError") })
-	@GET
-	@ProtectedApi(scopes = { Constants.LOCK_LOG_READ_ACCESS })
+    @Operation(summary = "Rerquest log records for specific event range", description = "Rerquest log records for specific event range", operationId = "request-lock-log-records-event-range", tags = {
+            "Lock - Log" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_LOG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_LOG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = LogEntry.class)))),
+            @ApiResponse(responseCode = "400", description = "Wrong date range specified"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { Constants.LOCK_LOG_READ_ACCESS }, groupScopes = {
+            Constants.LOCK_LOG_WRITE_ACCESS }, superScopes = { Constants.LOCK_ADMIN_ACCESS, Constants.LOCK_READ_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
 	@Path(Constants.LOG + Constants.SEARCH)
 	public Response getLogEntrysByRange(
 			@Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(ApiConstants.LIMIT) int limit,
@@ -211,17 +240,21 @@ public class AuditResource extends BaseResource {
 		return Response.ok(entries).build();
 	}
 
-	@Operation(summary = "Save telemetry data", description = "Save telemetry data", operationId = "save-telemetry-data", tags = {
-			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_TELEMETRY_WRITE_ACCESS }))
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
-			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
-			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
-	@POST
-	@ProtectedApi(scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS })
-	@Path(Constants.TELEMETRY)
+    @Operation(summary = "Save telemetry data", description = "Save telemetry data", operationId = "save-telemetry-data", tags = {
+            "Lock - Audit" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @POST
+    @ProtectedApi(scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.LOCK_ADMIN_ACCESS, Constants.LOCK_WRITE_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @Path(Constants.TELEMETRY)
 	public Response postTelemetryData(@Valid TelemetryEntry telemetryEntry) {
 		logger.debug("Save Telemetry Data - telemetryEntry:{}", telemetryEntry);
 
@@ -230,17 +263,21 @@ public class AuditResource extends BaseResource {
 		return Response.status(Response.Status.OK).build();
 	}
 
-	@Operation(summary = "Bulk save telemetry data", description = "Bulk save telemetry data", operationId = "bulk-save-telemetry-data", tags = {
-			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_TELEMETRY_WRITE_ACCESS }))
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
-			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
-			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
-	@POST
-	@ProtectedApi(scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS })
-	@Path(Constants.TELEMETRY + Constants.BULK)
+    @Operation(summary = "Bulk save telemetry data", description = "Bulk save telemetry data", operationId = "bulk-save-telemetry-data", tags = {
+            "Lock - Audit" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @POST
+    @ProtectedApi(scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.LOCK_ADMIN_ACCESS, Constants.LOCK_WRITE_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @Path(Constants.TELEMETRY + Constants.BULK)
 	public Response postBulkTelemetryData(@Valid List<TelemetryEntry> telemetryEntries) {
 		logger.debug("Bulk save Telemetry Data - telemetryEntries:{}", telemetryEntries);
 
@@ -251,17 +288,23 @@ public class AuditResource extends BaseResource {
 		return Response.status(Response.Status.OK).build();
 	}
 
-	@Operation(summary = "Request telemetry records for specific event range", description = "Rerquest telemetry records for specific event range", operationId = "request-lock-telemetry-records-event-range", tags = {
-			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_TELEMETRY_READ_ACCESS }))
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TelemetryEntry.class)))),
-			@ApiResponse(responseCode = "400", description = "Wrong date range specified"),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "500", description = "InternalServerError") })
-	@GET
-	@ProtectedApi(scopes = { Constants.LOCK_TELEMETRY_READ_ACCESS })
-	@Path(Constants.TELEMETRY + Constants.SEARCH)
+    @Operation(summary = "Request telemetry records for specific event range", description = "Rerquest telemetry records for specific event range", operationId = "request-lock-telemetry-records-event-range", tags = {
+            "Lock - Audit" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_TELEMETRY_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TelemetryEntry.class)))),
+            @ApiResponse(responseCode = "400", description = "Wrong date range specified"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { Constants.LOCK_TELEMETRY_READ_ACCESS }, groupScopes = {
+            Constants.LOCK_TELEMETRY_WRITE_ACCESS }, superScopes = { Constants.LOCK_ADMIN_ACCESS,
+                    Constants.LOCK_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(Constants.TELEMETRY + Constants.SEARCH)
 	public Response getTelemetryEntrysByRange(
 			@Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(ApiConstants.LIMIT) int limit,
 			@Parameter(description = "Event start date in ISO8601 format") @QueryParam("eventStartDate") @NotNull String eventStartDateIso8601,
