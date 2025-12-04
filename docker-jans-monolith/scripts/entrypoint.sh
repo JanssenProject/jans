@@ -29,10 +29,8 @@ wait_for_rdbms() {
         echo "Error: RDBMS_HOST is not set. Cannot wait for database."
         exit 1
     fi
-
     local port=""
     local db_type=""
-
     if [[ "${CN_INSTALL_MYSQL}" == "true" ]]; then
         port=3306
         db_type="MySQL"
@@ -43,11 +41,8 @@ wait_for_rdbms() {
         echo "No RDBMS specified in CN_INSTALL_MYSQL or CN_INSTALL_PGSQL. Skipping wait."
         return 0
     fi
-
     echo "Waiting for ${db_type} at ${RDBMS_HOST}:${port}..."
-    # Use curl to check the port. We install curl in the Dockerfile, so it's available.
-    # Loop until curl can successfully connect to the RDBMS port
-    until curl ${RDBMS_HOST}:${port} > /dev/null 2>&1; do
+    until timeout 1 bash -c "</dev/tcp/${RDBMS_HOST}/${port}" > /dev/null 2>&1; do
         echo "${db_type} is unavailable - sleeping for 2 seconds..."
         sleep 2
     done
