@@ -8,12 +8,12 @@ tags:
 
 # Token Revocation Endpoint
 
-Janssen Server supports token revocation endpoint enables a client to notify the server that previously obtained 
-refresh or access token is no longer needed, allowing the server to clean up security credentials. Implementation 
+Janssen Server supports token revocation endpoint enables a client to notify the server that previously obtained
+refresh or access token is no longer needed, allowing the server to clean up security credentials. Implementation
 conforms with [token revocation specification](https://datatracker.ietf.org/doc/html/rfc7009).
 
 Since a token is part of a grant, when the token is invalidated, all other token within the same grant are also revoked.
-i.e when a refresh token related to a grant is invalidated, all access tokens from the same grant are also invalidated 
+i.e when a refresh token related to a grant is invalidated, all access tokens from the same grant are also invalidated
 and vice-versa.
 
 URL to access revocation endpoint on Janssen Server is listed in the response of Janssen Server's well-known
@@ -65,7 +65,7 @@ To remove all tokens for given `client_id` it's required:
 
 ## Revoke tokens of other clients
 
-By default Revoke Endpoint allows revoke only own client's tokens. 
+By default, the Revoke Endpoint allows only revoking of own client's tokens.
 However it is possible to allow revoking of any token (which is issued with other client).
 
 For this it is required:
