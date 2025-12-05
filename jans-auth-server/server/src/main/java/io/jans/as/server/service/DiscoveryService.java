@@ -75,7 +75,7 @@ public class DiscoveryService {
         jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
 
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.STATUS_LIST)) {
-            jsonObj.put(STATUS_LIST_ENDPOINT, getTokenStatusListEndpoint());
+            jsonObj.put(STATUS_LIST_ENDPOINT, getStatusListEndpoint());
             jsonObj.put(STATUS_LIST_AGGREGATION_ENDPOINT, getStatusListAggregationEndpoint());
         }
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION))
@@ -241,7 +241,7 @@ public class DiscoveryService {
         return StringUtils.replace(endSessionEndpoint, "/end_session", path);
     }
 
-    public String getTokenStatusListEndpoint() {
+    public String getStatusListEndpoint() {
         return endpointUrl("/status_list");
     }
 

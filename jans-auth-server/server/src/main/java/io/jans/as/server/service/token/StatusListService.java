@@ -166,7 +166,7 @@ public class StatusListService {
      * @return Returns sub of status list
      */
     public String getSub() {
-        return discoveryService.getTokenStatusListEndpoint();
+        return discoveryService.getStatusListEndpoint();
     }
 
     public String createResponseJwt(JSONObject response) throws Exception {
