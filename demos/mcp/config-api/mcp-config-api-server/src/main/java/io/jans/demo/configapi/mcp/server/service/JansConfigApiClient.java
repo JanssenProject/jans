@@ -172,8 +172,6 @@ public class JansConfigApiClient {
     }
 
     /**
-<<<<<<< Updated upstream
-=======
      * Creates a new OpenID Connect client in the Jans Config API
      * 
      * @param clientPayload JSON payload representing the client to create
@@ -245,7 +243,6 @@ public class JansConfigApiClient {
     }
 
     /**
->>>>>>> Stashed changes
      * URL encode a value for use in query parameters
      */
     private String encodeValue(String value) {

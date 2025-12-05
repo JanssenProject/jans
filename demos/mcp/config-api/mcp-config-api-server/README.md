@@ -27,14 +27,19 @@ Project creates an uber jar in `target` directory.
 
 ### Run the MCP server
 
-- Run the command below after replacing the values for `JANS_HOST_URL` and `JANS_OAUTH_ACCESS_TOKEN` with the values for your Janssen server. This will start chrome and run mcp inspector. If you are running MCP server against a Janssen server with self-signed certificate, run this server in [development mode](#development-mode).
+- Run the command below after replacing the values for `JANS_HOST_URL` and `JANS_OAUTH_ACCESS_TOKEN` with the values for your Janssen server. Set `MCP_SERVER_PORT` to port of your choice. This will start the MCP server hosted on Jetty server. If you are running MCP server against a Janssen server with self-signed certificate, run this server in [development mode](#development-mode).
 
     ```bash
     export JANS_HOST_URL="https://example.jans.host.io" &&
     export JANS_OAUTH_ACCESS_TOKEN="b6c8ef0b-09b5-xxx-xxx-xxx" &&
-    npx @modelcontextprotocol/inspector java -jar target/jans-mcp-config-api-server-0.0.1.jar
+    export MCP_SERVER_PORT=8181 &&
+    java -jar target/jans-mcp-config-api-server-0.0.1.jar
     ```
+- Start a client to connect with the MCP server. If you are using MCP Inspector, run the following command:
 
+    ```bash
+    npx @modelcontextprotocol/inspector --transport http --server-url http://localhost:8181/mcp
+    ``` 
 - Navigate to the Chrome instance opened by MCP Inspector.
 - Click `connect` to connect with the MCP server. Then click `tools` to
 list all the available tools. 
@@ -51,7 +56,8 @@ when running MCP server against a Janssen server with self-signed certificate.
     ```bash
     export JANS_HOST_URL="https://example.jans.host.io" &&
     export JANS_OAUTH_ACCESS_TOKEN="b6c8ef0b-09b5-xxx-xxx-xxx" &&
-    npx @modelcontextprotocol/inspector java -jar target/jans-mcp-config-api-server-0.0.1.jar -dev
+    export MCP_SERVER_PORT=8181 &&
+    java -jar target/jans-mcp-config-api-server-0.0.1.jar -dev
     ```
 
 ## Architectural Decision Records (ADRs)

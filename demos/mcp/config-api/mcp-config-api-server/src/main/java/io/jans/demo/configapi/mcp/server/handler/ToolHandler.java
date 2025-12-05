@@ -75,8 +75,6 @@ public class ToolHandler {
         }
     }
 
-<<<<<<< Updated upstream
-=======
     public CallToolResult handleCreateClient(Map<String, Object> arguments) {
         try {
             // Extract client_data from arguments
@@ -124,7 +122,6 @@ public class ToolHandler {
         }
     }
 
->>>>>>> Stashed changes
     private CallToolResult createErrorResult(String errorMessage) {
         return CallToolResult.builder()
                 .content(List.of(new TextContent(errorMessage)))

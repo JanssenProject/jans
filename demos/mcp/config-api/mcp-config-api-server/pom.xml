@@ -22,7 +22,25 @@
             <version>0.16.0</version>
         </dependency>
 
-        
+        <!-- Jakarta Servlet API for HTTP/SSE transport -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+
+        <!-- Jetty embedded server for HTTP/SSE endpoints -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>12.0.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty.ee10</groupId>
+            <artifactId>jetty-ee10-servlet</artifactId>
+            <version>12.0.5</version>
+        </dependency>
 
         <!-- Jackson for JSON processing -->
         <dependency>

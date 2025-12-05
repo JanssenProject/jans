@@ -10,7 +10,10 @@ import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.Tool;
 import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
-import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
+import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +25,7 @@ public class McpServerMain {
         private static final Logger logger = LoggerFactory.getLogger(McpServerMain.class);
 
         public static void main(String[] args) {
+                Server jettyServer = null;
                 try {
                         // Parse command-line arguments
                         boolean devMode = false;
@@ -35,6 +39,8 @@ public class McpServerMain {
                         // Load configuration from environment variables
                         String baseUrl = System.getenv("JANS_HOST_URL");
                         String accessToken = System.getenv("JANS_OAUTH_ACCESS_TOKEN");
+                        int serverPort = Integer.parseInt(
+                                        System.getenv().getOrDefault("MCP_SERVER_PORT", "8080"));
 
                         if (baseUrl == null || baseUrl.isEmpty()) {
                                 throw new IllegalStateException("JANS_HOST_URL environment variable is required");
@@ -50,10 +56,14 @@ public class McpServerMain {
 
                         // Create JSON mapper
                         ObjectMapper objectMapper = new ObjectMapper();
+                        JacksonMcpJsonMapper jsonMapper = new JacksonMcpJsonMapper(objectMapper);
 
-                        // Create STDIO transport
-                        StdioServerTransportProvider transportProvider = new StdioServerTransportProvider(
-                                        new JacksonMcpJsonMapper(objectMapper));
+                        // Create HTTP/Streamable transport provider (replaces deprecated SSE)
+                        HttpServletStreamableServerTransportProvider transportProvider = HttpServletStreamableServerTransportProvider
+                                        .builder()
+                                        .mcpEndpoint("/mcp")
+                                        .jsonMapper(jsonMapper)
+                                        .build();
 
                         // Create server capabilities
                         McpSchema.ServerCapabilities capabilities = McpSchema.ServerCapabilities.builder()
@@ -64,27 +74,60 @@ public class McpServerMain {
                                         .build();
 
                         // Create and configure MCP server
-                        McpSyncServer server = McpServer.sync(transportProvider)
-                                        .serverInfo("jans-oidc-clients-viewer", "2.0.0")
+                        McpSyncServer mcpServer = McpServer.sync(transportProvider)
+                                        .serverInfo("jans-config-api-server", "2.0.0")
                                         .capabilities(capabilities)
                                         .build();
 
                         // Register tools
-                        registerTools(server, toolHandler);
+                        registerTools(mcpServer, toolHandler);
 
-                        logger.info("MCP Jans OIDC Clients Viewer started successfully");
+                        // Create and configure Jetty server
+                        jettyServer = new Server(serverPort);
+                        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+                        context.setContextPath("/");
+
+                        // Register the MCP servlet (handles StreamableHttp POST messages)
+                        ServletHolder mcpServletHolder = new ServletHolder(transportProvider);
+                        context.addServlet(mcpServletHolder, "/mcp/*");
+
+                        jettyServer.setHandler(context);
+
+                        // Start Jetty server
+                        jettyServer.start();
+
+                        logger.info("=================================================");
+                        logger.info("MCP Jans Config API Server started successfully");
+                        logger.info("Server Port: {}", serverPort);
+                        logger.info("MCP Endpoint: http://localhost:{}/mcp", serverPort);
+                        logger.info("Connect with: npx @modelcontextprotocol/inspector http://localhost:{}/mcp",
+                                        serverPort);
+                        logger.info("=================================================");
 
                         // Keep server running
+                        final Server finalJettyServer = jettyServer;
                         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                                 logger.info("Shutting down MCP server...");
-                                server.close();
+                                try {
+                                        mcpServer.close();
+                                        finalJettyServer.stop();
+                                } catch (Exception e) {
+                                        logger.error("Error during shutdown", e);
+                                }
                         }));
 
                         // Block main thread
-                        Thread.currentThread().join();
+                        jettyServer.join();
 
                 } catch (Exception e) {
                         logger.error("Failed to start MCP server", e);
+                        if (jettyServer != null) {
+                                try {
+                                        jettyServer.stop();
+                                } catch (Exception stopException) {
+                                        logger.error("Error stopping server", stopException);
+                                }
+                        }
                         System.exit(1);
                 }
         }
@@ -121,8 +164,6 @@ public class McpServerMain {
                                                                                 "default", "ascending")),
                                                 "required", List.of()),
                                 toolHandler::handleListClients));
-<<<<<<< Updated upstream
-=======
 
                 // Tool: create_client
                 server.addTool(createTool(
@@ -147,7 +188,6 @@ public class McpServerMain {
                                                 "properties", Map.of(),
                                                 "required", List.of()),
                                 toolHandler::handleGetHealth));
->>>>>>> Stashed changes
         }
 
         private static McpServerFeatures.SyncToolSpecification createTool(
