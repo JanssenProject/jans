@@ -156,7 +156,7 @@ public class LogoutStatusJwtService {
 
         final JSONObject statusList = new JSONObject();
         statusList.put("idx", index);
-        statusList.put("uri", discoveryService.getTokenStatusListEndpoint());
+        statusList.put("uri", discoveryService.getStatusListEndpoint());
 
         jwt.getClaims().setExpirationTime(expirationCalendar.getTime());
         jwt.getClaims().setIat(now);
