@@ -232,7 +232,7 @@
         <dependency>
             <groupId>com.twilio.sdk</groupId>
             <artifactId>twilio</artifactId>
-            <version>11.0.2</version>
+            <version>11.2.0</version>
         </dependency>
 
         <!-- OTP -->
