@@ -306,7 +306,7 @@ public class DiscoveryService {
             aliases.put(TOKEN_ENDPOINT, appConfiguration.getMtlsTokenEndpoint());
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.STATUS_LIST) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint())) {
             aliases.put(STATUS_LIST_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/status_list"));
-            jsonObj.put(STATUS_LIST_AGGREGATION_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/status_list_aggregation"));
+            aliases.put(STATUS_LIST_AGGREGATION_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/status_list_aggregation"));
         }
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
             aliases.put(ACCESS_EVALUATION_V1_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/access/v1/evaluation"));
