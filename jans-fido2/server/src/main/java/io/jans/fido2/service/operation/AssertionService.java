@@ -32,6 +32,7 @@ import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
@@ -155,7 +156,7 @@ public class AssertionService {
 			if (allowedCredentials.isEmpty()) {
 				// Track fallback event - user has no registered passkeys, will likely use password
 				try {
-					metricService.recordPasskeyFallback(username, "PASSWORD", 
+					metricService.recordPasskeyFallback(username, Fido2MetricsConstants.FALLBACK_METHOD_PASSWORD, 
 							"No registered passkeys found for user");
 				} catch (Exception e) {
 					log.debug("Failed to record fallback metrics for KEYS_NOT_FOUND: {}", e.getMessage());
@@ -403,7 +404,7 @@ public class AssertionService {
 			recordAuthenticationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
 			
 			// Track fallback event for specific error types that might cause users to switch methods
-			recordFallbackForError(username, httpRequest, e);
+			recordFallbackForError(username, e);
 			
 			// Re-throw the original exception
 			throw e;
@@ -491,49 +492,17 @@ public class AssertionService {
 	 * Record fallback event for specific error types that typically lead users to switch authentication methods
 	 * 
 	 * @param username Username who encountered the error
-	 * @param httpRequest HTTP request for context
 	 * @param error The exception that occurred
 	 */
-	private void recordFallbackForError(String username, HttpServletRequest httpRequest, Exception error) {
+	private void recordFallbackForError(String username, Exception error) {
 		if (username == null) {
 			return; // Can't track fallback without username
 		}
 
 		try {
 			String errorMessage = error.getMessage() != null ? error.getMessage().toLowerCase() : "";
-			String errorClass = error.getClass().getSimpleName();
-			String fallbackMethod = "PASSWORD"; // Default fallback method
-			String reason = "Authentication error";
-
-			// Determine fallback reason based on error type
-			if (error instanceof Fido2RuntimeException) {
-				if (errorMessage.contains("can't find") || errorMessage.contains("not found") || 
-					errorMessage.contains("keys not found")) {
-					reason = "No registered passkeys found";
-					fallbackMethod = "PASSWORD";
-				} else if (errorMessage.contains("timeout") || errorMessage.contains("expired")) {
-					reason = "Authentication timeout";
-					fallbackMethod = "PASSWORD";
-				} else if (errorMessage.contains("compromised") || errorMessage.contains("revoked")) {
-					reason = "Device compromised or revoked";
-					fallbackMethod = "PASSWORD";
-				} else if (errorMessage.contains("invalid") || errorMessage.contains("verification failed")) {
-					reason = "Authentication verification failed";
-					fallbackMethod = "PASSWORD";
-				} else {
-					reason = "FIDO2 authentication error: " + errorMessage;
-					fallbackMethod = "PASSWORD";
-				}
-			} else if (errorMessage.contains("timeout") || errorMessage.contains("expired")) {
-				reason = "Authentication timeout or expired";
-				fallbackMethod = "PASSWORD";
-			} else if (errorMessage.contains("user not found") || errorMessage.contains("user doesn't exist")) {
-				reason = "User not found";
-				fallbackMethod = "PASSWORD";
-			} else if (errorMessage.contains("device") && (errorMessage.contains("not supported") || errorMessage.contains("incompatible"))) {
-				reason = "Device not supported";
-				fallbackMethod = "PASSWORD";
-			}
+			String fallbackMethod = Fido2MetricsConstants.FALLBACK_METHOD_PASSWORD;
+			String reason = determineFallbackReason(error, errorMessage);
 
 			// Only track fallback for errors that are likely to cause users to switch methods
 			// Skip tracking for internal errors that don't affect user experience
@@ -544,6 +513,55 @@ public class AssertionService {
 		} catch (Exception e) {
 			log.debug("Failed to record fallback metrics: {}", e.getMessage());
 		}
+	}
+
+	/**
+	 * Determine the fallback reason based on error type and message
+	 * Extracted to reduce cognitive complexity
+	 */
+	private String determineFallbackReason(Exception error, String errorMessage) {
+		if (error instanceof Fido2RuntimeException) {
+			return determineFido2RuntimeExceptionReason(errorMessage);
+		}
+		return determineGenericExceptionReason(errorMessage);
+	}
+
+	/**
+	 * Determine fallback reason for Fido2RuntimeException
+	 */
+	private String determineFido2RuntimeExceptionReason(String errorMessage) {
+		if (errorMessage.contains("can't find") || errorMessage.contains("not found") || 
+			errorMessage.contains("keys not found")) {
+			return "No registered passkeys found";
+		}
+		if (errorMessage.contains(Fido2MetricsConstants.ERROR_KEYWORD_TIMEOUT) || 
+			errorMessage.contains(Fido2MetricsConstants.ERROR_KEYWORD_EXPIRED)) {
+			return "Authentication timeout";
+		}
+		if (errorMessage.contains("compromised") || errorMessage.contains("revoked")) {
+			return "Device compromised or revoked";
+		}
+		if (errorMessage.contains("invalid") || errorMessage.contains("verification failed")) {
+			return "Authentication verification failed";
+		}
+		return "FIDO2 authentication error: " + errorMessage;
+	}
+
+	/**
+	 * Determine fallback reason for generic exceptions
+	 */
+	private String determineGenericExceptionReason(String errorMessage) {
+		if (errorMessage.contains(Fido2MetricsConstants.ERROR_KEYWORD_TIMEOUT) || 
+			errorMessage.contains(Fido2MetricsConstants.ERROR_KEYWORD_EXPIRED)) {
+			return "Authentication timeout or expired";
+		}
+		if (errorMessage.contains("user not found") || errorMessage.contains("user doesn't exist")) {
+			return "User not found";
+		}
+		if (errorMessage.contains("device") && (errorMessage.contains("not supported") || errorMessage.contains("incompatible"))) {
+			return "Device not supported";
+		}
+		return "Authentication error";
 	}
 
 	/**
@@ -560,8 +578,8 @@ public class AssertionService {
 		// Track fallback for user-facing errors
 		if (lowerError.contains("keys not found") ||
 			lowerError.contains("can't find") ||
-			lowerError.contains("timeout") ||
-			lowerError.contains("expired") ||
+			lowerError.contains(Fido2MetricsConstants.ERROR_KEYWORD_TIMEOUT) ||
+			lowerError.contains(Fido2MetricsConstants.ERROR_KEYWORD_EXPIRED) ||
 			lowerError.contains("compromised") ||
 			lowerError.contains("revoked") ||
 			lowerError.contains("verification failed") ||
