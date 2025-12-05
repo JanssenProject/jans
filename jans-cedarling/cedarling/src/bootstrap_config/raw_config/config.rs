@@ -280,7 +280,7 @@ pub struct BootstrapConfigRaw {
 
 impl Default for BootstrapConfigRaw {
     fn default() -> Self {
-        BootstrapConfigRaw::deserialize(serde_json::json!({"CEDARLING_APPLICATION_NAME":""}))
+        serde_json::from_value(serde_json::json!({"CEDARLING_APPLICATION_NAME":""}))
             .expect("BootstrapConfigRaw should be deserialized from empty json object")
     }
 }
