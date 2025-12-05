@@ -20,7 +20,7 @@ use std::collections::HashSet;
 #[cfg(not(target_arch = "wasm32"))]
 use std::env;
 
-#[derive(Deserialize, Serialize, PartialEq, Debug, Default)]
+#[derive(Deserialize, Serialize, PartialEq, Debug)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 ///
@@ -278,6 +278,13 @@ pub struct BootstrapConfigRaw {
     pub token_cache_earliest_expiration_eviction: bool,
 }
 
+impl Default for BootstrapConfigRaw {
+    fn default() -> Self {
+        BootstrapConfigRaw::deserialize(serde_json::json!({"CEDARLING_APPLICATION_NAME":""}))
+            .expect("BootstrapConfigRaw should be deserialized from empty json object")
+    }
+}
+
 impl BootstrapConfigRaw {
     /// Construct `BootstrapConfig` from environment variables and `BootstrapConfigRaw` config.
     /// Environment variables have bigger priority.
@@ -403,8 +410,8 @@ mod tests {
                 "Decision log workload claims should be empty by default"
             );
             assert_eq!(
-                config.decision_log_default_jwt_id, "",
-                "Default JWT ID for decision logging should be ''"
+                config.decision_log_default_jwt_id, "jti",
+                "Default JWT ID for decision logging should be 'jti'"
             );
             assert_eq!(
                 config.user_authz,
