@@ -153,6 +153,13 @@ public class AssertionService {
 					username);
 			List<PublicKeyCredentialDescriptor> allowedCredentials = allowedCredentialsPair.getLeft();
 			if (allowedCredentials.isEmpty()) {
+				// Track fallback event - user has no registered passkeys, will likely use password
+				try {
+					metricService.recordPasskeyFallback(username, "PASSWORD", 
+							"No registered passkeys found for user");
+				} catch (Exception e) {
+					log.debug("Failed to record fallback metrics for KEYS_NOT_FOUND: {}", e.getMessage());
+				}
 				throw errorResponseFactory.badRequestException(AssertionErrorResponseType.KEYS_NOT_FOUND,
 						"Can't find associated key(s). Username: " + username);
 			}
@@ -395,6 +402,9 @@ public class AssertionService {
 			// Record metrics for failed authentication
 			recordAuthenticationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
 			
+			// Track fallback event for specific error types that might cause users to switch methods
+			recordFallbackForError(username, httpRequest, e);
+			
 			// Re-throw the original exception
 			throw e;
 		}
@@ -475,6 +485,101 @@ public class AssertionService {
 			registrationPersistenceService.update(registrationEntry);
 			throw ex;
 		}
+	}
+
+	/**
+	 * Record fallback event for specific error types that typically lead users to switch authentication methods
+	 * 
+	 * @param username Username who encountered the error
+	 * @param httpRequest HTTP request for context
+	 * @param error The exception that occurred
+	 */
+	private void recordFallbackForError(String username, HttpServletRequest httpRequest, Exception error) {
+		if (username == null) {
+			return; // Can't track fallback without username
+		}
+
+		try {
+			String errorMessage = error.getMessage() != null ? error.getMessage().toLowerCase() : "";
+			String errorClass = error.getClass().getSimpleName();
+			String fallbackMethod = "PASSWORD"; // Default fallback method
+			String reason = "Authentication error";
+
+			// Determine fallback reason based on error type
+			if (error instanceof Fido2RuntimeException) {
+				if (errorMessage.contains("can't find") || errorMessage.contains("not found") || 
+					errorMessage.contains("keys not found")) {
+					reason = "No registered passkeys found";
+					fallbackMethod = "PASSWORD";
+				} else if (errorMessage.contains("timeout") || errorMessage.contains("expired")) {
+					reason = "Authentication timeout";
+					fallbackMethod = "PASSWORD";
+				} else if (errorMessage.contains("compromised") || errorMessage.contains("revoked")) {
+					reason = "Device compromised or revoked";
+					fallbackMethod = "PASSWORD";
+				} else if (errorMessage.contains("invalid") || errorMessage.contains("verification failed")) {
+					reason = "Authentication verification failed";
+					fallbackMethod = "PASSWORD";
+				} else {
+					reason = "FIDO2 authentication error: " + errorMessage;
+					fallbackMethod = "PASSWORD";
+				}
+			} else if (errorMessage.contains("timeout") || errorMessage.contains("expired")) {
+				reason = "Authentication timeout or expired";
+				fallbackMethod = "PASSWORD";
+			} else if (errorMessage.contains("user not found") || errorMessage.contains("user doesn't exist")) {
+				reason = "User not found";
+				fallbackMethod = "PASSWORD";
+			} else if (errorMessage.contains("device") && (errorMessage.contains("not supported") || errorMessage.contains("incompatible"))) {
+				reason = "Device not supported";
+				fallbackMethod = "PASSWORD";
+			}
+
+			// Only track fallback for errors that are likely to cause users to switch methods
+			// Skip tracking for internal errors that don't affect user experience
+			if (shouldTrackFallback(error, errorMessage)) {
+				metricService.recordPasskeyFallback(username, fallbackMethod, reason);
+				log.debug("Recorded fallback event for user {}: {} - {}", username, fallbackMethod, reason);
+			}
+		} catch (Exception e) {
+			log.debug("Failed to record fallback metrics: {}", e.getMessage());
+		}
+	}
+
+	/**
+	 * Determine if an error should trigger fallback tracking
+	 * Some errors are internal and don't represent user-initiated fallbacks
+	 */
+	private boolean shouldTrackFallback(Exception error, String errorMessage) {
+		if (errorMessage == null) {
+			return false;
+		}
+
+		String lowerError = errorMessage.toLowerCase();
+
+		// Track fallback for user-facing errors
+		if (lowerError.contains("keys not found") ||
+			lowerError.contains("can't find") ||
+			lowerError.contains("timeout") ||
+			lowerError.contains("expired") ||
+			lowerError.contains("compromised") ||
+			lowerError.contains("revoked") ||
+			lowerError.contains("verification failed") ||
+			lowerError.contains("device not supported") ||
+			lowerError.contains("user not found")) {
+			return true;
+		}
+
+		// Don't track fallback for internal/server errors that users don't see
+		if (lowerError.contains("null pointer") ||
+			lowerError.contains("internal error") ||
+			lowerError.contains("database") ||
+			lowerError.contains("connection")) {
+			return false;
+		}
+
+		// Default: track fallback for Fido2RuntimeException and other user-facing errors
+		return error instanceof Fido2RuntimeException;
 	}
 
 }
