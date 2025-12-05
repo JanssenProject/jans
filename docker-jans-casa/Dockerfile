@@ -1,3 +1,27 @@
+# =================================
+# Cloud SQL JDBC Socket Factory Builder
+# =================================
+# Builds fat JARs with all dependencies for Cloud SQL connectivity
+FROM maven:3.9-eclipse-temurin-17 AS cloudsql-builder
+
+ARG CLOUDSQL_SOCKET_FACTORY_VERSION=1.27.0
+
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/* \
+    && git clone --depth 1 --branch v${CLOUDSQL_SOCKET_FACTORY_VERSION} \
+       https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory.git /build
+
+WORKDIR /build
+
+# Build fat JARs with all dependencies bundled
+RUN mvn -P jar-with-dependencies clean package -DskipTests -q \
+    && mkdir -p /jars \
+    && cp jdbc/mysql-j-8/target/mysql-socket-factory-connector-j-8-*-jar-with-dependencies.jar /jars/ \
+    && cp jdbc/postgres/target/postgres-socket-factory-*-jar-with-dependencies.jar /jars/
+
+# =================================
+# Main Image
+# =================================
 FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
 
 # ===============
@@ -58,7 +82,7 @@ RUN mkdir -p /app/static/rdbm \
     /app/schema \
     /app/templates/jans-casa
 
-ENV JANS_SOURCE_VERSION=04d297c046dd9d8ef54c0544e6187153b7ed87cf
+ENV JANS_SOURCE_VERSION=9489a963cde645364b18127548244925f6c7fb43
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -206,6 +230,14 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/casa" \
     org.opencontainers.image.title="Janssen Casa" \
     org.opencontainers.image.description="Self-service portal for people to manage their account security preferences in the Janssen, like 2FA"
 
+# ===========
+# Custom libs
+# ===========
+
+# Copy Cloud SQL Socket Factory fat JARs from builder (includes all dependencies)
+RUN mkdir -p ${JETTY_BASE}/jans-casa/custom/libs
+COPY --from=cloudsql-builder /jars/*.jar ${JETTY_BASE}/jans-casa/custom/libs/
+
 RUN mkdir -p /opt/jans/python/libs \
     ${JETTY_BASE}/jans-casa/static \
     ${JETTY_BASE}/jans-casa/plugins \
@@ -238,6 +270,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-casa/static \
     && chmod -R g=u /etc/jans \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-casa/custom/libs \
+    && chmod -R g=u ${JETTY_BASE}/jans-casa/custom/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-casa/webapps/jans-casa.xml \

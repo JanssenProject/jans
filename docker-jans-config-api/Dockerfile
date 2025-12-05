@@ -1,3 +1,27 @@
+# =================================
+# Cloud SQL JDBC Socket Factory Builder
+# =================================
+# Builds fat JARs with all dependencies for Cloud SQL connectivity
+FROM maven:3.9-eclipse-temurin-17 AS cloudsql-builder
+
+ARG CLOUDSQL_SOCKET_FACTORY_VERSION=1.27.0
+
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/* \
+    && git clone --depth 1 --branch v${CLOUDSQL_SOCKET_FACTORY_VERSION} \
+       https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory.git /build
+
+WORKDIR /build
+
+# Build fat JARs with all dependencies bundled
+RUN mvn -P jar-with-dependencies clean package -DskipTests -q \
+    && mkdir -p /jars \
+    && cp jdbc/mysql-j-8/target/mysql-socket-factory-connector-j-8-*-jar-with-dependencies.jar /jars/ \
+    && cp jdbc/postgres/target/postgres-socket-factory-*-jar-with-dependencies.jar /jars/
+
+# =================================
+# Main Image
+# =================================
 FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
 
 # ===============
@@ -71,7 +95,7 @@ RUN mkdir -p /etc/jans/conf \
     /usr/share/java \
     /opt/jans/bin
 
-ENV JANS_SOURCE_VERSION=4cf1bf2085bbdeab678e51ab3aff34d4c48be96b
+ENV JANS_SOURCE_VERSION=9489a963cde645364b18127548244925f6c7fb43
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -232,8 +256,15 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
     org.opencontainers.image.title="Janssen Config API" \
     org.opencontainers.image.description=""
 
+# ===========
+# Custom libs
+# ===========
+
+# Copy Cloud SQL Socket Factory fat JARs from builder (includes all dependencies)
+RUN mkdir -p ${JETTY_BASE}/jans-config-api/custom/libs
+COPY --from=cloudsql-builder /jars/*.jar ${JETTY_BASE}/jans-config-api/custom/libs/
+
 RUN mkdir -p /etc/certs \
-    ${JETTY_BASE}/jans-config-api/custom/libs \
     ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
     ${JETTY_BASE}/jans-config-api/logs \
     ${JETTY_BASE}/common/libs \
@@ -273,6 +304,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chmod -R g=u /app/templates/jans-config-api \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/custom/libs \
+    && chmod -R g=u ${JETTY_BASE}/jans-config-api/custom/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/_plugins \

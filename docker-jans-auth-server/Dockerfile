@@ -1,3 +1,27 @@
+# =================================
+# Cloud SQL JDBC Socket Factory Builder
+# =================================
+# Builds fat JARs with all dependencies for Cloud SQL connectivity
+FROM maven:3.9-eclipse-temurin-17 AS cloudsql-builder
+
+ARG CLOUDSQL_SOCKET_FACTORY_VERSION=1.27.0
+
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/* \
+    && git clone --depth 1 --branch v${CLOUDSQL_SOCKET_FACTORY_VERSION} \
+       https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory.git /build
+
+WORKDIR /build
+
+# Build fat JARs with all dependencies bundled
+RUN mvn -P jar-with-dependencies clean package -DskipTests -q \
+    && mkdir -p /jars \
+    && cp jdbc/mysql-j-8/target/mysql-socket-factory-connector-j-8-*-jar-with-dependencies.jar /jars/ \
+    && cp jdbc/postgres/target/postgres-socket-factory-*-jar-with-dependencies.jar /jars/
+
+# =================================
+# Main Image
+# =================================
 FROM bellsoft/liberica-openjdk-alpine:17.0.17@sha256:0e8ae43555ad8e2d69431c2078df256c01b625a8a3010e76b5a6baff0d165d2c
 
 # ===============
@@ -65,16 +89,31 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
 # ===========
 
 RUN mkdir -p /usr/share/java \
-    ${JETTY_BASE}/jans-auth/_libs
+    ${JETTY_BASE}/jans-auth/_libs \
+    ${JETTY_BASE}/jans-auth/custom/libs
 
 ARG TWILIO_VERSION=7.17.0
 ARG JSMPP_VERSION=2.3.7
 
-RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
-    && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
-    && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound jans-lock-service jans-lock-model jans-lock-cedarling cedarling-java; \
+# Copy Cloud SQL Socket Factory fat JARs from builder (includes all dependencies)
+COPY --from=cloudsql-builder /jars/*.jar ${JETTY_BASE}/jans-auth/custom/libs/
+
+# Download other custom libs directly to custom/libs (always available)
+# Using set -e to ensure any failed wget aborts the build
+RUN set -e \
+    && wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
+    && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
+    && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound cedarling-java; \
     do \
-        wget -nv "https://jenkins.jans.io/maven/io/jans/${custom_lib}/${CN_VERSION}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/_libs"; \
+        wget -nv "https://jenkins.jans.io/maven/io/jans/${custom_lib}/${CN_VERSION}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/custom/libs" || exit 1; \
+    done
+
+# Download jans-lock JARs to _libs (conditionally copied via Python script when lock is enabled)
+# Using set -e to ensure any failed wget aborts the build
+RUN set -e \
+    && for lock_lib in jans-lock-service jans-lock-model jans-lock-cedarling; \
+    do \
+        wget -nv "https://jenkins.jans.io/maven/io/jans/${lock_lib}/${CN_VERSION}/${lock_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/_libs" || exit 1; \
     done
 
 # ===========
@@ -88,7 +127,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=04d297c046dd9d8ef54c0544e6187153b7ed87cf
+ENV JANS_SOURCE_VERSION=9489a963cde645364b18127548244925f6c7fb43
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -287,6 +326,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/resources \
     && chown -R 1000:0 /opt/jans/python/libs \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/custom/libs \
+    && chmod -R g=u ${JETTY_BASE}/jans-auth/custom/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-auth/webapps/jans-auth.xml \
