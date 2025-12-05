@@ -7,14 +7,13 @@
 package io.jans.as.client;
 
 import io.jans.as.model.util.Util;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import jakarta.ws.rs.HttpMethod;
-import jakarta.ws.rs.client.Invocation.Builder;
-import jakarta.ws.rs.core.MediaType;
 
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
 
@@ -106,6 +105,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         response.setAuthorizationEndpoint(jsonObj.optString(AUTHORIZATION_ENDPOINT, null));
         response.setAuthorizationChallengeEndpoint(jsonObj.optString(AUTHORIZATION_CHALLENGE_ENDPOINT, null));
         response.setStatusListEndpoint(jsonObj.optString(STATUS_LIST_ENDPOINT, null));
+        response.setStatusListAggregationEndpoint(jsonObj.optString(STATUS_LIST_AGGREGATION_ENDPOINT, null));
         response.setAccessEvaluationV1Endpoint(jsonObj.optString(ACCESS_EVALUATION_V1_ENDPOINT, null));
         response.setTokenEndpoint(jsonObj.optString(TOKEN_ENDPOINT, null));
         response.setRevocationEndpoint(jsonObj.optString(REVOCATION_ENDPOINT, null));
