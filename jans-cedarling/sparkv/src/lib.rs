@@ -182,7 +182,6 @@ impl<T> SparKV<T> {
     }
 
     pub fn pop(&mut self, key: &str) -> Option<T> {
-        self.clear_expired_if_auto();
         let item = self.data.remove(key)?;
         self.index.remove_value_key(&index::ValueKey(item.key));
 

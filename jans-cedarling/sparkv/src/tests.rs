@@ -536,3 +536,22 @@ fn test_earliest_expiration_eviction() {
     assert!(sparkv.contains_key("long"));
     assert!(sparkv.contains_key("new"));
 }
+
+#[test]
+fn test_auto_clear_with_expired_entry() {
+    let mut config: Config = Config::new();
+    config.auto_clear_expired = true;
+    let mut sparkv = SparKV::<String>::with_config(config);
+
+    sparkv
+        .set_with_ttl("expired", "v".into(), Duration::milliseconds(1), &[])
+        .unwrap();
+
+    std::thread::sleep(std::time::Duration::from_millis(5));
+
+    // This should clear the expired entry without panicking/recursing
+    sparkv.set("other", "x".into(), &[]).unwrap();
+
+    assert!(!sparkv.contains_key("expired"));
+    assert!(sparkv.contains_key("other"));
+}
