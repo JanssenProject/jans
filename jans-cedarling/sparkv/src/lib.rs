@@ -122,6 +122,8 @@ impl<T> SparKV<T> {
             // we remove last element, like lru cache
             if err == Error::CapacityExceeded && self.config.earliest_expiration_eviction {
                 self.remove_last();
+                // If nothing could be evicted (or invariants are broken), keep signaling capacity error.
+                self.ensure_capacity_ignore_key(key)?;
             } else {
                 return Err(err);
             }
