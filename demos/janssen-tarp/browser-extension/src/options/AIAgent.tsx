@@ -104,7 +104,7 @@ const PROVIDER_ICONS = {
   deepseek: <DeepSeekIcon />
 };
 
-const AIAgent = (props) => {
+const AIAgent = ({ notifyOnDataChange }) => {
     const [query, setQuery] = React.useState("");
     const [result, setResult] = React.useState(null);
     const [loading, setLoading] = React.useState(false);
@@ -123,6 +123,7 @@ const AIAgent = (props) => {
     const [customModel, setCustomModel] = React.useState("");
     const [modelError, setModelError] = React.useState("");
     const [mcpUrlError, setMcpUrlError] = React.useState("");
+    //const [onAuthDataChange, setOnAuthDataChange] = React.useState(false);
     const [connectionStatus, setConnectionStatus] = React.useState<"disconnected" | "connecting" | "connected">("disconnected");
 
     // Load settings from storage on component mount
@@ -442,7 +443,10 @@ const AIAgent = (props) => {
             if(result?.type === 'text') {
               setResult(result.content);  
             } else if(result?.type === 'tool_results') {
-              setResult(result.results);  
+              setResult(result?.results);  
+              if(result?.results[0]?.notifyOnDataChange) {
+                notifyOnDataChange();
+              }
             } else {
               setResult(result);
             }

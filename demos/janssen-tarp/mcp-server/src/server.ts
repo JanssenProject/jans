@@ -9,97 +9,201 @@ import crypto from "crypto";
 const app = express();
 app.use(express.json());
 
+// Constants
+const PORT = parseInt(process.env.PORT || "3001");
+const SERVER_NAME = "jans-tarp-mcp-server";
+const SERVER_VERSION = "1.0.0";
+
+// Types
 interface OIDCDiscoveryMetadata {
-    registration_endpoint?: string;
-    [key: string]: unknown;
+  registration_endpoint?: string;
+  authorization_endpoint?: string;
+  token_endpoint?: string;
+  userinfo_endpoint?: string;
+  [key: string]: unknown;
 }
 
-const server = new McpServer({ name: "jans-tarp-mcp-server", version: "1.0.0" });
+interface OIDCClientConfig {
+  issuer: string;
+  redirect_uris: string[];
+  scopes: string[];
+  response_types: string[];
+  token_endpoint_auth_method: string;
+  userinfo_signed_response_alg: string;
+  jansInclClaimsInIdTkn: string;
+}
 
-// Tool: registerOIDCClient (existing + store)
-server.registerTool(
-    "registerOIDCClient",
-    {
-        description: "Registers an OIDC client using dynamic registration endpoint",
-        inputSchema: z.object({
-            issuer: z.string().url(),
-            redirect_uris: z.array(z.string().url()),
-            scopes: z.array(z.string()),
-            response_types: z.array(z.string())
-        }),
-        outputSchema: z.object({ result: z.any() })
-    },
-    async ({ issuer, redirect_uris, scopes, response_types }) => {
+// HTTP Client with retry and timeout configuration
+const httpClient = axios.create({
+  timeout: 10000,
+  maxRedirects: 3,
+  validateStatus: (status) => status < 500,
+});
 
-        // Discover OIDC metadata
-        const discoveryRes = await fetch(`${issuer}/.well-known/openid-configuration`);
-        if (!discoveryRes.ok) throw new Error("Failed to fetch OIDC metadata");
+// Cache for OIDC metadata to avoid repeated discovery calls
+const metadataCache = new Map<string, {
+  metadata: OIDCDiscoveryMetadata;
+  timestamp: number;
+}>();
+
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 
-        const metadata = await discoveryRes.json() as OIDCDiscoveryMetadata;
-        if (!metadata.registration_endpoint) throw new Error("Provider does not support dynamic registration");
-
-
-        // Register client
-        const registrationRes = await fetch(metadata.registration_endpoint, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                redirect_uris,
-                scope: scopes.join(" "),
-                response_types
-            })
-        });
-
-        const registrationJson = await registrationRes.json() as Record<string, unknown>;
-
-        return {
-            content: [{ type: "text", text: `OIDC client registered successfully` }],
-            structuredContent: registrationJson
-        };
+// Helper Functions
+async function discoverOIDCMetadata(issuer: string): Promise<OIDCDiscoveryMetadata> {
+  const cached = metadataCache.get(issuer);
+  const now = Date.now();
+  
+  if (cached && (now - cached.timestamp) < CACHE_TTL) {
+    return cached.metadata;
+  }
+  
+  try {
+    const response = await httpClient.get(
+      `${issuer}/.well-known/openid-configuration`
+    );
+    
+    if (!response.data) {
+      throw new Error("Empty response from OIDC discovery endpoint");
     }
+    
+    const metadata = response.data as OIDCDiscoveryMetadata;
+    metadataCache.set(issuer, { metadata, timestamp: now });
+    return metadata;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(`OIDC discovery failed: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+function generateRandomString(bytes: number): string {
+  return Utils.base64url(crypto.randomBytes(bytes));
+}
+
+function validateIssuerUrl(issuer: string): void {
+  try {
+    new URL(issuer);
+  } catch {
+    throw new Error(`Invalid issuer URL: ${issuer}`);
+  }
+}
+
+// Create MCP Server
+const server = new McpServer({ 
+  name: SERVER_NAME, 
+  version: SERVER_VERSION 
+});
+
+// Tool: registerOIDCClient
+server.registerTool(
+  "registerOIDCClient",
+  {
+    description: "Registers an OIDC client using dynamic registration endpoint",
+    inputSchema: z.object({
+      issuer: z.string().url().describe("OIDC provider issuer URL"),
+      redirect_uris: z.array(z.string().url()).min(1).describe("Allowed redirect URIs"),
+      scopes: z.array(z.string()).min(1).describe("Requested scopes"),
+      response_types: z.array(z.string()).min(1).describe("OAuth2 response types"),
+      token_endpoint_auth_method: z.string().describe("Token endpoint authentication method"),
+      userinfo_signed_response_alg: z.string().describe("Userinfo signed response algorithm"),
+      jansInclClaimsInIdTkn: z.string().describe("Include claims in ID token setting"),
+    }),
+    outputSchema: z.object({
+      client_id: z.string(),
+      client_secret: z.string().optional(),
+      registration_client_uri: z.string().optional(),
+      registration_access_token: z.string().optional(),
+    })
+  },
+  async (input: OIDCClientConfig) => {
+    console.log('Inside registerOIDCClient method')
+    validateIssuerUrl(input.issuer);
+    
+    const metadata = await discoverOIDCMetadata(input.issuer);
+    
+    if (!metadata.registration_endpoint) {
+      throw new Error("OIDC provider does not support dynamic client registration");
+    }
+
+    const registrationData = {
+      redirect_uris: input.redirect_uris,
+      scope: input.scopes.join(" "),
+      response_types: input.response_types,
+      token_endpoint_auth_method: input.token_endpoint_auth_method,
+      userinfo_signed_response_alg: input.userinfo_signed_response_alg,
+      jansInclClaimsInIdTkn: input.jansInclClaimsInIdTkn,
+    };
+
+    try {
+      const response = await httpClient.post(
+        metadata.registration_endpoint,
+        registrationData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      const result = response.data as Record<string, unknown>;
+      console.log('Inside startAuthFlow method'+ JSON.stringify(result))
+      return {
+        content: [{
+          type: "text",
+          text: "OIDC client registered successfully"
+        }],
+        structuredContent: result
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(`Client registration failed: ${error.response?.data?.error_description || error.message}`);
+      }
+      throw error;
+    }
+  }
 );
 
 // Tool: startAuthFlow
 server.registerTool(
   "startAuthFlow",
   {
-    description: "Generate authorization URL for a registered client_id (PKCE + state)",
+    description: "Generate authorization URL for a registered client (PKCE + state)",
     inputSchema: z.object({
-      issuer: z.string(),
-      client_id: z.string(),
-      scope: z.string(),
-      response_type: z.string(),
-      redirect_uri: z.string(),
-      code_challenge_method: z.string(),
-      code_challenge: z.string(),
-      nonce: z.string(),
+      issuer: z.string().url().describe("OIDC provider issuer URL"),
+      client_id: z.string().min(1).describe("Registered client ID"),
+      scope: z.string().min(1).describe("Space-separated scopes"),
+      response_type: z.string().default("code").describe("OAuth2 response type"),
+      redirect_uri: z.string().describe("Redirect URI for authorization response"),
+      code_challenge_method: z.string().default("S256").describe("PKCE code challenge method"),
+      code_challenge: z.string().min(1).describe("PKCE code challenge"),
+      nonce: z.string().min(16).describe("Nonce for ID token validation"),
     }),
     outputSchema: z.object({
       authorization_url: z.string(),
-      redirect_uri: z.string(),
-      code_verifier: z.string(),
       state: z.string(),
-      issuer: z.string()
+      expires_in: z.number(),
     })
   },
-  async ({ issuer, client_id, scope, response_type, redirect_uri, code_challenge_method, nonce}) => {
-    //const client = registeredClients[client_id];
-    //if (!client) throw new Error("client_id not found. Register it first with registerOIDCClient");
-    console.log("code_challenge_method==========================="+code_challenge_method)
-    // discover OIDC metadata
-    const discoveryRes = await axios.get(`${issuer}/.well-known/openid-configuration`);
-    const metadata = discoveryRes.data;
-    if (!metadata.authorization_endpoint) throw new Error("Provider missing authorization_endpoint");
+  async ({
+    issuer,
+    client_id,
+    scope,
+    response_type,
+    redirect_uri,
+    code_challenge_method,
+    code_challenge,
+    nonce
+  }) => {
+    console.log('Inside startAuthFlow method')
+    validateIssuerUrl(issuer);
 
-    // PKCE
-    const code_verifier = Utils.base64url(crypto.randomBytes(32));
-    const code_challenge = Utils.codeChallengeFromVerifier(code_verifier);
+    const metadata = await discoverOIDCMetadata(issuer);
+    
+    if (!metadata.authorization_endpoint) {
+      throw new Error("OIDC provider missing authorization endpoint");
+    }
 
-    const state = Utils.base64url(crypto.randomBytes(16));
-    //const redirect_uri = client.redirect_uris[0]; // assume first registered redirect uri
+    const state = generateRandomString(16);
 
     const params = new URLSearchParams({
       response_type,
@@ -109,86 +213,128 @@ server.registerTool(
       state,
       code_challenge,
       code_challenge_method,
-      nonce
+      nonce,
     });
 
     const authorization_url = `${metadata.authorization_endpoint}?${params.toString()}`;
-    console.log("authorization_url==========================="+authorization_url)
-    // Return code_verifier so the extension can save it (for exchange)
-    // Also return state so extension can map verifier -> state
+    console.log('Inside startAuthFlow method'+authorization_url)
     return {
-      content: [
-        {
-          type: "text",
-          text: "Generated authorization URL. See structured content for details."
-        }
-      ],
-      structuredContent: { authorization_url, redirect_uri, code_verifier, state, issuer }
+      content: [{
+        type: "text",
+        text: "Generated authorization URL with PKCE protection"
+      }],
+      structuredContent: {
+        authorization_url,
+        state,
+        expires_in: 600 // 10 minutes validity
+      }
     };
   }
 );
 
 // Tool: exchangeToken
 server.registerTool(
-  "TokenExchange",
+  "exchangeToken",
   {
-    description: "Exchange authorization code for tokens and call userinfo",
+    description: "Exchange authorization code for tokens and fetch userinfo",
     inputSchema: z.object({
-      issuer: z.string().url(),
-      code: z.string(),
-      client_id: z.string(),
-      client_secret: z.string().optional(),
-      code_verifier: z.string(),
-      redirect_uri: z.string()
+      issuer: z.string().url().describe("OIDC provider issuer URL"),
+      code: z.string().min(1).describe("Authorization code from redirect"),
+      client_id: z.string().min(1).describe("Registered client ID"),
+      client_secret: z.string().optional().describe("Client secret (if confidential)"),
+      code_verifier: z.string().min(1).describe("PKCE code verifier"),
+      redirect_uri: z.string().url().describe("Redirect URI used in authorization"),
     }),
     outputSchema: z.object({
-      tokens: z.any(),
-      userinfo: z.any()
+      tokens: z.object({
+        access_token: z.string(),
+        token_type: z.string(),
+        expires_in: z.number().optional(),
+        refresh_token: z.string().optional(),
+        id_token: z.string().optional(),
+      }),
+      userinfo: z.any().optional(),
     })
   },
-   async ({ issuer, code, client_id, client_secret, code_verifier, redirect_uri }) => {
-    //const client = registeredClients[client_id];
-    //if (!client) throw new Error("client_id not found");
+  async ({
+    issuer,
+    code,
+    client_id,
+    client_secret,
+    code_verifier,
+    redirect_uri
+  }) => {
+    validateIssuerUrl(issuer);
 
-    // discover endpoints
-    const discoveryRes = await axios.get(`${issuer}/.well-known/openid-configuration`);
-    const metadata = discoveryRes.data;
-    if (!metadata.token_endpoint) throw new Error("Provider missing token_endpoint");
+    const metadata = await discoverOIDCMetadata(issuer);
+    
+    if (!metadata.token_endpoint) {
+      throw new Error("OIDC provider missing token endpoint");
+    }
 
-    // Build token request. For public clients, client_secret is usually not present.
+    // Build token request
     const tokenParams = new URLSearchParams({
       grant_type: "authorization_code",
       code,
       redirect_uri,
       client_id,
-      code_verifier
+      code_verifier,
     });
 
-    // If registration includes client_secret, include basic auth
-     const headers: Record<string, string> = { "Content-Type": "application/x-www-form-urlencoded" };
+    // Configure authentication
+    const headers: Record<string, string> = {
+      "Content-Type": "application/x-www-form-urlencoded",
+    };
+
     if (client_secret) {
-      const cred = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
-      headers["Authorization"] = `Basic ${cred}`;
+      const credentials = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
+      headers["Authorization"] = `Basic ${credentials}`;
     }
 
-    const tokenResp = await axios.post(metadata.token_endpoint, tokenParams.toString(), { headers });
-    const tokens = tokenResp.data;
+    try {
+      const response = await httpClient.post(
+        metadata.token_endpoint,
+        tokenParams.toString(),
+        { headers }
+      );
 
-    // call userinfo if available
-    let userinfo = null;
-    if (metadata.userinfo_endpoint && tokens.access_token) {
-      const uiResp = await axios.get(metadata.userinfo_endpoint, {
-        headers: { Authorization: `Bearer ${tokens.access_token}` }
-      });
-      userinfo = uiResp.data;
+      const tokens = response.data;
+
+      // Fetch userinfo if endpoint exists and we have an access token
+      let userinfo = null;
+      if (metadata.userinfo_endpoint && tokens.access_token) {
+        try {
+          const userinfoResponse = await httpClient.get(
+            metadata.userinfo_endpoint,
+            {
+              headers: { 
+                Authorization: `Bearer ${tokens.access_token}`,
+                Accept: "application/json" 
+              },
+            }
+          );
+          userinfo = userinfoResponse.data;
+        } catch (error) {
+          console.warn("Failed to fetch userinfo:", error);
+          // Continue without userinfo - tokens are still valid
+        }
+      }
+
+      return {
+        content: [{
+          type: "text",
+          text: "Successfully exchanged code for tokens" + 
+                (userinfo ? " and fetched userinfo" : "")
+        }],
+        structuredContent: { tokens, userinfo }
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorDetail = error.response?.data?.error_description || error.message;
+        throw new Error(`Token exchange failed: ${errorDetail}`);
+      }
+      throw error;
     }
-
-     return {
-      content: [
-        { type: "text", text: "Exchanged code for token then fetch userinfo using token. See structured content." }
-      ],
-      structuredContent: { tokens, userinfo }
-     };
   }
 );
 
@@ -198,50 +344,70 @@ const transport = new StreamableHTTPServerTransport({
   enableJsonResponse: true, // Return JSON responses instead of SSE
 });
 
-// Connect the server to the transport (after registering tools)
-// 5. Connect the MCP Server to the Transport
-async function startMcpServer() {
-    await server.connect(transport);
-    console.log("MCP Server connected to StreamableHTTPServerTransport.");
-  }
-
-app.post("/mcp", async (req, res) => {
-  /*
-  console.log(req.body)
-  console.log(JSON.stringify(req.body.params.capabilities.sampling))
-  const result = await transport.handleRequest(req, res, req.body);
-  console.log(result);
-  res.json(result);
-*/
+// Connect MCP Server to Transport
+async function connectMcpServer() {
   try {
-    //await server.connect(transport);
-    //await server.connect(transport);
+    await server.connect(transport);
+    console.log("MCP Server connected to StreamableHTTPServerTransport");
+  } catch (error) {
+    console.error("Failed to connect MCP Server:", error);
+    process.exit(1);
+  }
+}
+
+// Request handler middleware
+async function handleMcpRequest(req: express.Request, res: express.Response) {
+  try {
     const result = await transport.handleRequest(req, res, req.body);
     console.log(result);
-    //res.json(result);
+    // Ensure JSON response if not already sent
+    //if (!res.headersSent) {
+      //res.json(result);
+    //}
   } catch (error) {
     console.error('Error handling MCP request:', error);
+    
     if (!res.headersSent) {
       res.status(500).json({
         jsonrpc: '2.0',
-        error: { code: -32603, message: 'Internal server error' },
-        id: null,
+        error: { 
+          code: -32603, 
+          message: 'Internal server error',
+          data: process.env.NODE_ENV === 'development' ? String(error) : undefined
+        },
+        id: req.body?.id || null,
       });
     }
   }
-});
+}
 
-app.get("/", (req, res) => {
-    console.log("Server is running!")
-  //const result = await transport.handleRequest(req, res, req.body);
-  res.json({ message: "Server is running!" });
-});
+// Routes
+app.post("/mcp", (req, res) => handleMcpRequest(req, res));
 
-const port = parseInt(process.env.PORT || "3001");
-app.listen(port, () => {
-    console.log(`MCP server running on http://localhost:${port}/mcp`);
-    startMcpServer(); // Connect MCP server after Express starts
-  }).on("error", (error) => {
-    console.error("Server error:", error);
-    process.exit(1);
+app.get("/health", (_req, res) => {
+  res.json({ 
+    status: "healthy", 
+    server: SERVER_NAME,
+    version: SERVER_VERSION,
+    timestamp: new Date().toISOString()
   });
+});
+
+app.get("/", (_req, res) => {
+  res.json({ 
+    message: "Jans TARP MCP Server",
+    endpoints: {
+      mcp: "POST /mcp",
+      health: "GET /health"
+    }
+  });
+});
+
+app.listen(PORT, async () => {
+  console.log(`MCP server running on http://localhost:${PORT}`);
+  
+  // Connect MCP server after Express starts
+  await connectMcpServer();
+  
+  console.log("Server ready to accept requests");
+});

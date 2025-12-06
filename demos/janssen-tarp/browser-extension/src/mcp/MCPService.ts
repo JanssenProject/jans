@@ -1,16 +1,10 @@
 
-interface OIDCDiscoveryMetadata {
-    registration_endpoint?: string;
-    [key: string]: unknown;
-}
-interface OIDCClient {
-    registration_endpoint?: string;
-    [key: string]: unknown;
-}
+import { ILooseObject } from '../options/ILooseObject';
+
 export default class MCPService {
     constructor() {
     }
-    public async getClientByClientId(clientId): Promise<OIDCClient> {
+    public async getClientByClientId(clientId): Promise<ILooseObject> {
         return new Promise((resolve, reject) => {
             chrome.storage.local.get(["oidcClients"], (result) => {
                 if (chrome.runtime.lastError) {
@@ -29,13 +23,12 @@ export default class MCPService {
     }
 
     public async saveClientInTarpStorage(registrationResp) {
-    const issuer = new URL(registrationResp?.structuredContent?.registration_client_uri).origin;
-    const discoveryRes = await fetch(`${issuer}/.well-known/openid-configuration`);
-    if (!discoveryRes.ok) throw new Error("Failed to fetch OIDC metadata");
+        const issuer = new URL(registrationResp?.structuredContent?.registration_client_uri).origin;
+        const discoveryRes = await fetch(`${issuer}/.well-known/openid-configuration`);
+        if (!discoveryRes.ok) throw new Error("Failed to fetch OIDC metadata");
 
-    const didcoveryMetadata = await discoveryRes.json() as OIDCDiscoveryMetadata;
-
-    if (registrationResp !== undefined) {
+        const didcoveryMetadata = await discoveryRes.json() as ILooseObject;
+        if (registrationResp == undefined) return;
         chrome.storage.local.get(["oidcClients"], (result) => {
             let clientArr = []
             if (!!result.oidcClients) {
@@ -64,9 +57,5 @@ export default class MCPService {
 
         console.log('OIDC client registered successfully!')
         console.log("oidcClient is set for client_id: " + registrationResp?.structuredContent?.client_id);
-
-    } else {
-        //setErrorMessage(REGISTRATION_ERROR)
     }
-}
 }

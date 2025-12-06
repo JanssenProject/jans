@@ -95,6 +95,7 @@ export default function HomePage({ data, notifyOnDataChange }) {
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <AIAgent
+              notifyOnDataChange={notifyOnDataChange}
             />
           </Grid>
         </Grid>

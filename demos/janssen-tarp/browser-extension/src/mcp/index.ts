@@ -3,16 +3,20 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 import MCPService from './MCPService';
 import { LLMClientFactory, LLMProvider } from './LLMClient';
 import { v4 as uuidv4 } from 'uuid';
-import Utils from '../options//Utils';
+import Utils from '../options/Utils';
+import AuthenticationService from '../service/authenticationService';
+import { ILooseObject } from "../options/ILooseObject";
+
 const LLM_API_KEY_STORAGE_KEY = 'llm_api_key';
 const LLM_MODEL_STORAGE_KEY = 'llm_model';
 const LLM_PROVIDER_STORAGE_KEY = 'llm_provider';
 const MCP_SERVER_URL = 'mcp_server_url';
 const mcpService = new MCPService();
+const authenticationService = new AuthenticationService();
 // Initialize MCP client
 const client = new Client(
   {
-    name: "oidc-client",
+    name: "jans-tarp-mcp-client",
     version: "1.0.0"
   },
   {
@@ -27,6 +31,33 @@ const client = new Client(
 // Track connection state
 let isConnected = false;
 let llmClient: any = null;
+
+async function saveLoginDetailsInStorage(tokenResponse, userInfoResponse, displayToken) {
+  new Promise((resolve, reject) => {
+    chrome.storage.local.set({
+      loginDetails: {
+        'access_token': tokenResponse.data.access_token,
+        'userDetails': userInfoResponse.data,
+        'id_token': tokenResponse.data.id_token,
+        'displayToken': displayToken,
+      }
+    });
+  });
+}
+
+
+// Function to get provider from Chrome storage
+async function getCodeVerifierFromStorage(): Promise<LLMProvider> {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(["code_verifier"], (result) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve(result["code_verifier"]);
+      }
+    });
+  });
+}
 
 // Function to get provider from Chrome storage
 async function getProviderFromStorage(): Promise<LLMProvider> {
@@ -167,11 +198,6 @@ export async function handleUserPrompt(prompt: string) {
                   type: "string",
                   description: "The OIDC issuer URL (e.g., https://op-host.gluu.org)"
                 },
-                redirect_uris: {
-                  type: "array",
-                  items: { type: "string" },
-                  description: "Array of redirect URIs"
-                },
                 scopes: {
                   type: "array",
                   items: { type: "string" },
@@ -183,7 +209,7 @@ export async function handleUserPrompt(prompt: string) {
                   description: "Array of response types (e.g., code)"
                 }
               },
-              required: ["issuer", "redirect_uris", "scopes", "response_types"]
+              required: ["issuer", "scopes", "response_types"]
             }
           }
         },
@@ -247,6 +273,12 @@ export async function handleUserPrompt(prompt: string) {
           : toolCall.function.arguments;
 
         if (toolName === "registerOIDCClient") {
+          //adding other request params
+          args.redirect_uris = [chrome.identity.getRedirectURL()];
+          args.token_endpoint_auth_method = "client_secret_basic";
+          args.userinfo_signed_response_alg = "RS256";
+          args.jansInclClaimsInIdTkn = "true";
+
           console.log("Calling MCP tool with arguments:", args);
 
           const toolResult = await client.callTool({
@@ -264,6 +296,7 @@ export async function handleUserPrompt(prompt: string) {
           console.log("OIDC Client Registration Result:", toolResult);
         } else if (toolName === "startAuthFlow") {
           const oidcClient = await mcpService.getClientByClientId(args.client_id)
+          //adding other request params
           args.scope = oidcClient.scope;
           args.response_type = oidcClient.responseType[0];
           args.redirect_uri = oidcClient.redirectUris[0];
@@ -277,11 +310,43 @@ export async function handleUserPrompt(prompt: string) {
           const toolResult = await client.callTool({
             name: toolCall.function.name,
             arguments: args,
-          });
+          }) as ILooseObject;
+
+          const authorizationUrl = toolResult?.structuredContent?.authorization_url;
+          const code = await authenticationService.invokeAuthFlow(authorizationUrl);
+
+          if (code == null || code === '') {
+            console.log('Error in authentication. The authorization-code is null.');
+            results.push({
+              tool: toolCall.function.name,
+              error: 'Error in authentication. The authorization-code is null.'
+            });
+          }
+          console.log('getCodeVerifierFromStorage:' + await getCodeVerifierFromStorage())
+          console.log('secret:' + secret)
+          const tokenResponse = await authenticationService.getAccessToken(code, oidcClient, secret);
+          if (!(tokenResponse &&
+            tokenResponse.data &&
+            tokenResponse.data.access_token)) {
+            console.log(`Error in authentication. Token response does not contain access_token. ${tokenResponse?.data?.error_description || tokenResponse?.data?.error ||
+              ''
+              }`);
+            results.push({
+              tool: toolCall.function.name,
+              error: `Error in authentication. Token response does not contain access_token. ${tokenResponse?.data?.error_description || tokenResponse?.data?.error ||
+                ''
+                }`
+            });
+          }
+          const userInfoResponse = await authenticationService.getUserInfo(tokenResponse, oidcClient);
+
+          //saveLoginDetails
+          await saveLoginDetailsInStorage(tokenResponse, userInfoResponse, true);
 
           results.push({
             tool: toolCall.function.name,
-            result: toolResult
+            result: userInfoResponse,
+            notifyOnDataChange: true
           });
 
         } else if (toolName === "exchangeToken") {
