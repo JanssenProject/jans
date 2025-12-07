@@ -11,7 +11,7 @@ import CedarlingMgmt from './cedarling';
 import Grid from '@mui/material/Grid';
 import Utils from './Utils';
 import UserDetails from './userDetails'
-import AIAgent from './AIAgent'
+import {AIAgent} from '../ai/agentUI/index'
 
 interface TabPanelProps {
   children?: React.ReactNode;

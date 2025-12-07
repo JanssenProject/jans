@@ -146,7 +146,7 @@ server.registerTool(
       );
 
       const result = response.data as Record<string, unknown>;
-      console.log('Inside startAuthFlow method'+ JSON.stringify(result))
+      
       return {
         content: [{
           type: "text",
@@ -217,7 +217,7 @@ server.registerTool(
     });
 
     const authorization_url = `${metadata.authorization_endpoint}?${params.toString()}`;
-    console.log('Inside startAuthFlow method'+authorization_url)
+    
     return {
       content: [{
         type: "text",
