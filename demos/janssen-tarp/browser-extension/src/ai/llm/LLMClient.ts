@@ -1,3 +1,5 @@
+import {LLMProvider} from '../helper/Constants'
+
 export interface LLMClient {
   chatCompletion(params: {
     model?: string;
@@ -5,12 +7,6 @@ export interface LLMClient {
     tools?: Array<any>;
     tool_choice?: string;
   }): Promise<any>;
-}
-
-export enum LLMProvider {
-  OPENAI = "openai",
-  GEMINI = "gemini",
-  DEEPSEEK = "deepseek"
 }
 
 export class LLMClientFactory {
