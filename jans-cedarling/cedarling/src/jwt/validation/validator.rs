@@ -318,6 +318,12 @@ pub enum ValidateJwtError {
     MissingStatusList,
     #[error("failed to deserialize the JWT's status claim: {0}")]
     DeserializeStatusClaim(#[from] serde_json::Error),
+    #[error("token issuer '{0}' is not in the list of trusted issuers")]
+    UntrustedIssuer(String),
+    #[error("token type '{token_type}' is not configured for issuer '{issuer}'")]
+    TokenTypeNotConfigured { token_type: String, issuer: String },
+    #[error("token is missing the 'iss' claim")]
+    MissingIssuerClaim,
 }
 
 #[cfg(test)]

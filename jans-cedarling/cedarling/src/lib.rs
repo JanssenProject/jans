@@ -51,6 +51,9 @@ use log::interface::LogWriter;
 use log::{LogEntry, LogType};
 pub use log::{LogLevel, LogStorage};
 
+// JWT validation exports
+pub use jwt::{JwtService, TrustedIssuerError, TrustedIssuerValidator, validate_required_claims};
+
 #[doc(hidden)]
 pub mod bindings {
     pub use cedar_policy;
