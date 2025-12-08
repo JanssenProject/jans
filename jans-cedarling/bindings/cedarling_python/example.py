@@ -215,7 +215,11 @@ def authorize_with_token():
     )
 
     # Authorize call
-    authorize_result = instance.authorize(request)
+    try:
+        authorize_result = instance.authorize(request)
+    except authorize_errors.AuthorizeError as e:
+        print(e)
+        return
 
     # Print logs from MemoryLogConfig
     # print(*instance.pop_logs())
@@ -312,8 +316,11 @@ def authorize_without_token():
     )
 
     # Authorize call
-    authorize_result = instance.authorize_unsigned(request)
-
+    try:
+        authorize_result = instance.authorize_unsigned(request)
+    except authorize_errors.AuthorizeError as e:
+        print(e)
+        return
     # Print logs from MemoryLogConfig
     # print(*instance.pop_logs())
 
