@@ -4,7 +4,6 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
-#![allow(unexpected_cfgs)]
 
 use cedarling::AuthorizeError as CedarlingAuthorizeError;
 use pyo3::{create_exception, prelude::*};
