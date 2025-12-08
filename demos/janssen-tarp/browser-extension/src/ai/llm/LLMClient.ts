@@ -1,4 +1,4 @@
-import {LLMProvider} from '../helper/Constants'
+import {LLMProviderType} from '../helper/Constants'
 
 export interface LLMClient {
   chatCompletion(params: {
@@ -10,17 +10,21 @@ export interface LLMClient {
 }
 
 export class LLMClientFactory {
-  static async createClient(provider: LLMProvider): Promise<LLMClient> {
+  /**
+   * Creates an LLM client for the specified provider.
+   * Note: You must call initialize(apiKey) on the returned client before use.
+   */
+  static async createClient(provider: LLMProviderType): Promise<LLMClient> {
     switch (provider) {
-      case LLMProvider.OPENAI: {
+      case LLMProviderType.OPENAI: {
         const { OpenAIClient } = await import('./OpenAIClient');
         return new OpenAIClient();
       }
-      case LLMProvider.GEMINI: {
+      case LLMProviderType.GEMINI: {
         const { GeminiClient } = await import('./GeminiClient');
         return new GeminiClient();
       }
-      case LLMProvider.DEEPSEEK: {
+      case LLMProviderType.DEEPSEEK: {
         const { DeepSeekClient } = await import('./DeepSeekClient');
         return new DeepSeekClient();
       }

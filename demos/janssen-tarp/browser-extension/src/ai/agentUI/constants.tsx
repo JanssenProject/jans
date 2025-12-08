@@ -12,11 +12,11 @@ export const LLM_PROVIDERS: LLMProvider[] = [
     description: 'GPT models from OpenAI',
     apiKeyFormat: 'sk-...',
     apiKeyPlaceholder: 'sk-...',
-    apiKeyValidation: (key: string) => key.startsWith('sk-') && key.length > 20,
-    apiKeyValidationMessage: "API key should start with 'sk-' and be at least 20 characters",
+    apiKeyValidation: (key: string) => key.startsWith('sk-') && key.length > 40,
+    apiKeyValidationMessage: "API key should start with 'sk-' and be at least 40 characters",
     models: [
       { value: 'gpt-4o', label: 'GPT-4o', description: 'Latest and most capable model' },
-      { value: 'gpt-4o-mini', label: 'GPT-4o-mini', description: 'Latest and most capable model' },
+      { value: 'gpt-4o-mini', label: 'GPT-4o-mini', description: 'Fast and cost-effective GPT-4o variant' },
       { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', description: 'High intelligence with 128K context' },
       { value: 'gpt-4', label: 'GPT-4', description: 'Original GPT-4 model' },
       { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', description: 'Fast and cost-effective' },
@@ -54,11 +54,9 @@ export const LLM_PROVIDERS: LLMProvider[] = [
   }
 ];
 
-export const PROVIDER_ICONS = {
-  openai: <OpenAIIcon />,
-  gemini: <GeminiIcon />,
-  deepseek: <DeepSeekIcon />
-};
+export const PROVIDER_ICONS = Object.fromEntries(
+    LLM_PROVIDERS.map(p => [p.value, p.icon])
+  ) as Record<string, JSX.Element>;
 
 export const DEFAULT_MODEL = 'gpt-4o-mini';
 export const DEFAULT_PROVIDER = 'openai';

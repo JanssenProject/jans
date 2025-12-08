@@ -28,6 +28,7 @@ const StatusPanel: React.FC<StatusPanelProps> = ({
       case 'connected': return 'success';
       case 'connecting': return 'warning';
       case 'disconnected': return 'error';
+      default: return 'info';
     }
   };
 
@@ -36,6 +37,7 @@ const StatusPanel: React.FC<StatusPanelProps> = ({
       case 'connected': return 'Connected';
       case 'connecting': return 'Connecting...';
       case 'disconnected': return 'Disconnected';
+      default: return 'Unknown';
     }
   };
 

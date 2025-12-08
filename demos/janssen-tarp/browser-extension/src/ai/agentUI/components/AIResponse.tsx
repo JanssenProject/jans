@@ -21,9 +21,9 @@ const AIResponse: React.FC<AIResponseProps> = ({
 }) => {
   const getProviderColor = () => {
     switch (provider) {
-      case 'openai': return blue[500];
-      case 'gemini': return orange[500];
-      case 'deepseek': return green[500];
+      case 'openai': return 'primary';
+      case 'gemini': return 'secondary';
+      case 'deepseek': return 'success';
       default: return 'primary';
     }
   };

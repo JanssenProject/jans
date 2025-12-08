@@ -2,7 +2,7 @@
 
 ## Table of Contents
 
-1. [Overview](#Overview)
+1. [Overview](#overview)
 2. [Supporting Browsers](#supporting-browser)
 3. [Prerequisite](#prerequisite)
 4. [Build Instructions](#build)
@@ -14,8 +14,8 @@
 8. [Testing Using Janssen Tarp](#testing-using-janssen-tarp)
 9. [Cedarling Authorization](#cedarling-authorization)
 10. [Cedarling Unsigned Authorization](#cedarling-unsigned-authorization)
-11. [AI Agents in Admin UI](#ai-agents-in-admin-ui)
-12. [Testing with Keycloak](./docs/ai-agents.md#testing-with-keycloak-installed-on-localhost)
+11. [AI Agents in Admin UI](./docs/ai-agents.md#ai-agents-in-admin-ui)
+12. [Testing with Keycloak](#testing-with-keycloak-installed-on-localhost)
 
 ## Overview
 
@@ -25,7 +25,8 @@ Janssen Tarp is a Relying Party tool in form of a Browser Extension
 
 - This extension is for convenient testing of authentication flows on browser.
 - [Cedarling](https://docs.jans.io/head/cedarling/cedarling-overview/) is an embeddable stateful Policy Decision Point, or "PDP". Cedarling is integrated with Janssen Tarp to make authorization decision post-authentication.
-- 
+- AI Agents can be configured on Janssen Tarp to register OIDC client and invoke authentication flow with natural language input.
+
 ## Supporting Browser
 
 - Chrome

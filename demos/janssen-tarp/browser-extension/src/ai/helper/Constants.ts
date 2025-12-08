@@ -8,7 +8,7 @@ export const STORAGE_KEYS = {
     LOGIN_DETAILS: 'loginDetails'
   } as const;
   
-  export enum LLMProvider {
+  export enum LLMProviderType {
     OPENAI = "openai",
     GEMINI = "gemini",
     DEEPSEEK = "deepseek"
@@ -16,7 +16,7 @@ export const STORAGE_KEYS = {
 
   export const DEFAULT_VALUES = {
     MODEL: 'gpt-4o-mini',
-    PROVIDER: LLMProvider.OPENAI,
+    PROVIDER: LLMProviderType.OPENAI,
     CODE_CHALLENGE_METHOD: 'S256'
   } as const;
   

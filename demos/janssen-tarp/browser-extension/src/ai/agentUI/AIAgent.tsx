@@ -68,7 +68,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
   const handleSend = useCallback(async () => {
     try {
       await send();
-    } catch (err: any) {
+    } catch (err) {
       if (err.message.includes("configure your API key") || err.message.includes("configure MCP server")) {
         setSettingsOpen(true);
       }
@@ -144,7 +144,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
           maxRows={6}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress}
           disabled={loading || !apiKeyValid || connectionStatus !== 'connected'}
           placeholder={apiKeyValid && connectionStatus === 'connected' 
             ? `Describe what you want to accomplish... (using ${getCurrentProviderConfig().label} - ${getCurrentModelName()})` 

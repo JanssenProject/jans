@@ -44,7 +44,7 @@ export const useAIOperations = (notifyOnDataChange: () => void) => {
         setResult(result.content);  
       } else if(result?.type === 'tool_results') {
         setResult(result?.results);  
-        if(result?.results[0]?.notifyOnDataChange) {
+        if(result?.results?.[0]?.notifyOnDataChange) {
           notifyOnDataChange();
         }
       } else {

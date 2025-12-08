@@ -1,15 +1,15 @@
 # Using the AI Assistant in Janssen Tarp
 
-The AI Assistant in Tarp is a tool that allows you to interact with your Tarp extension using natural language. It leverages AI models (OpenAI, Google Gemini, or DeepSeek) to understand your requests and perform actions through the Model Context Protocol (MCP) server.
+The AI Assistant in Tarp allows you to interact with your Tarp extension using natural language. It leverages AI models (OpenAI, Google Gemini, or DeepSeek) to understand your requests and perform actions through the Model Context Protocol (MCP) server.
 
-The AI Assistant in Tarp can perform following functions:
+The AI Assistant in Tarp can perform following things:
 
 1. Register OIDC client
 2. Invoke Authentication Flow
 
 # Getting Started
 
-## MCP server 
+## MCP server
 
 ### Prerequisite
 
@@ -20,7 +20,7 @@ The AI Assistant in Tarp can perform following functions:
 1. Change directory to the project directory (`/janssen-tarp/mcp-server`).
 2. Run `npm install`.
 3. Run `npx tsc` to compile the typescript files to javascript files into the `./janssen-tarp/mcp-server/dist` directory.
-3. Run `node './dist/server.js'` to start MCP server at port 3001.
+4. Run `node './dist/server.js'` to start MCP server at port 3001.
 
 ## Browser extension
 

@@ -2,29 +2,14 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import MCPService from './service/MCPService';
 import { LLMClientFactory } from './llm/LLMClient';
-import { LLMProvider } from './helper/Constants'
+import { LLMProviderType } from './helper/Constants'
 import { v4 as uuidv4 } from 'uuid';
 import Utils from '../options/Utils';
 import AuthenticationService from '../service/authenticationService';
 import { ILooseObject } from "../options/ILooseObject";
 import StorageHelper from './helper/StorageHelper'
 import ConfigurationManager from './helper/ConfigurationManager'
-
-// Constants
-const STORAGE_KEYS = {
-  LLM_API_KEY: 'llm_api_key',
-  LLM_MODEL: 'llm_model',
-  LLM_PROVIDER: 'llm_provider',
-  MCP_SERVER_URL: 'mcp_server_url',
-  CODE_VERIFIER: 'code_verifier',
-  LOGIN_DETAILS: 'loginDetails'
-} as const;
-
-const DEFAULT_VALUES = {
-  MODEL: 'gpt-4o-mini',
-  PROVIDER: LLMProvider.OPENAI,
-  CODE_CHALLENGE_METHOD: 'S256'
-} as const;
+import { STORAGE_KEYS, DEFAULT_VALUES } from './helper/Constants';
 
 // Services
 const mcpService = new MCPService();
@@ -74,9 +59,9 @@ async function saveLoginDetailsInStorage(
   displayToken: boolean
 ): Promise<void> {
   await StorageHelper.set(STORAGE_KEYS.LOGIN_DETAILS, {
-    access_token: tokenResponse.data.access_token,
-    userDetails: userInfoResponse.data,
-    id_token: tokenResponse.data.id_token,
+    access_token: tokenResponse.access_token,
+    userDetails: userInfoResponse,
+    id_token: tokenResponse.id_token,
     displayToken
   });
 }
@@ -190,9 +175,9 @@ async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
       secret
     );
 
-    if (!tokenResponse?.data?.access_token) {
-      const errorMsg = tokenResponse?.data?.error_description || 
-                      tokenResponse?.data?.error || 
+    if (!tokenResponse?.access_token) {
+      const errorMsg = tokenResponse?.error_description || 
+                      tokenResponse?.error || 
                       "Unknown error";
       throw new Error(`Token exchange failed: ${errorMsg}`);
     }
@@ -290,8 +275,8 @@ export async function handleUserPrompt(prompt: string) {
       tool_choice: "auto"
     });
 
-    const message = response.choices[0].message;
-    const toolCalls = response.tool_calls || message.tool_calls;
+    const message = response.choices?.[0]?.message || response.message;
+    const toolCalls = response.tool_calls || message?.tool_calls;
 
     if (!toolCalls || toolCalls.length === 0) {
       return {

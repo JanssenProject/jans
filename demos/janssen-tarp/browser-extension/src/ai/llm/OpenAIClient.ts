@@ -6,7 +6,7 @@ export class OpenAIClient implements LLMClient {
 
   async initialize(apiKey: string): Promise<void> {
     this.client = new OpenAI({
-      apiKey: apiKey,
+      apiKey,
       dangerouslyAllowBrowser: true
     });
   }

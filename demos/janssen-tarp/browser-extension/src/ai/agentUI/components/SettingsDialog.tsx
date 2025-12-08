@@ -28,7 +28,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import CloudIcon from '@mui/icons-material/Cloud';
-import { LLM_PROVIDERS, DEFAULT_MODEL, DEFAULT_PROVIDER, DEFAULT_MCP_URL } from '../constants';
+import { LLM_PROVIDERS } from '../constants';
 import { LLMProvider, ConnectionStatus } from '../types';
 
 interface SettingsDialogProps {
@@ -91,6 +91,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
       case 'connected': return '#4caf50';
       case 'connecting': return '#ff9800';
       case 'disconnected': return '#f44336';
+      default: return '#9e9e9e'; // grey for unknown status
     }
   };
 
@@ -99,6 +100,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
       case 'connected': return 'Connected';
       case 'connecting': return 'Connecting...';
       case 'disconnected': return 'Disconnected';
+      default: return 'Unknown';
     }
   };
 

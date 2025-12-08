@@ -37,7 +37,7 @@ interface OIDCClientConfig {
 const httpClient = axios.create({
   timeout: 10000,
   maxRedirects: 3,
-  validateStatus: (status) => status < 500,
+  validateStatus: (status) => status >= 200 && status < 300,
 });
 
 // Cache for OIDC metadata to avoid repeated discovery calls
@@ -53,20 +53,20 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 async function discoverOIDCMetadata(issuer: string): Promise<OIDCDiscoveryMetadata> {
   const cached = metadataCache.get(issuer);
   const now = Date.now();
-  
+
   if (cached && (now - cached.timestamp) < CACHE_TTL) {
     return cached.metadata;
   }
-  
+
   try {
     const response = await httpClient.get(
-      `${issuer}/.well-known/openid-configuration`
+      `${issuer.replace(/\/+$/, '')}/.well-known/openid-configuration`
     );
-    
+
     if (!response.data) {
       throw new Error("Empty response from OIDC discovery endpoint");
     }
-    
+
     const metadata = response.data as OIDCDiscoveryMetadata;
     metadataCache.set(issuer, { metadata, timestamp: now });
     return metadata;
@@ -91,9 +91,9 @@ function validateIssuerUrl(issuer: string): void {
 }
 
 // Create MCP Server
-const server = new McpServer({ 
-  name: SERVER_NAME, 
-  version: SERVER_VERSION 
+const server = new McpServer({
+  name: SERVER_NAME,
+  version: SERVER_VERSION
 });
 
 // Tool: registerOIDCClient
@@ -120,9 +120,9 @@ server.registerTool(
   async (input: OIDCClientConfig) => {
     console.log('Inside registerOIDCClient method')
     validateIssuerUrl(input.issuer);
-    
+
     const metadata = await discoverOIDCMetadata(input.issuer);
-    
+
     if (!metadata.registration_endpoint) {
       throw new Error("OIDC provider does not support dynamic client registration");
     }
@@ -146,7 +146,7 @@ server.registerTool(
       );
 
       const result = response.data as Record<string, unknown>;
-      
+
       return {
         content: [{
           type: "text",
@@ -198,7 +198,7 @@ server.registerTool(
     validateIssuerUrl(issuer);
 
     const metadata = await discoverOIDCMetadata(issuer);
-    
+
     if (!metadata.authorization_endpoint) {
       throw new Error("OIDC provider missing authorization endpoint");
     }
@@ -217,7 +217,7 @@ server.registerTool(
     });
 
     const authorization_url = `${metadata.authorization_endpoint}?${params.toString()}`;
-    
+
     return {
       content: [{
         type: "text",
@@ -267,7 +267,7 @@ server.registerTool(
     validateIssuerUrl(issuer);
 
     const metadata = await discoverOIDCMetadata(issuer);
-    
+
     if (!metadata.token_endpoint) {
       throw new Error("OIDC provider missing token endpoint");
     }
@@ -299,6 +299,9 @@ server.registerTool(
       );
 
       const tokens = response.data;
+      if (!tokens?.access_token || !tokens?.token_type) {
+        throw new Error('Invalid token response: missing required fields');
+      }
 
       // Fetch userinfo if endpoint exists and we have an access token
       let userinfo = null;
@@ -307,9 +310,9 @@ server.registerTool(
           const userinfoResponse = await httpClient.get(
             metadata.userinfo_endpoint,
             {
-              headers: { 
+              headers: {
                 Authorization: `Bearer ${tokens.access_token}`,
-                Accept: "application/json" 
+                Accept: "application/json"
               },
             }
           );
@@ -323,8 +326,8 @@ server.registerTool(
       return {
         content: [{
           type: "text",
-          text: "Successfully exchanged code for tokens" + 
-                (userinfo ? " and fetched userinfo" : "")
+          text: "Successfully exchanged code for tokens" +
+            (userinfo ? " and fetched userinfo" : "")
         }],
         structuredContent: { tokens, userinfo }
       };
@@ -362,16 +365,16 @@ async function handleMcpRequest(req: express.Request, res: express.Response) {
     console.log(result);
     // Ensure JSON response if not already sent
     //if (!res.headersSent) {
-      //res.json(result);
+    //res.json(result);
     //}
   } catch (error) {
     console.error('Error handling MCP request:', error);
-    
+
     if (!res.headersSent) {
       res.status(500).json({
         jsonrpc: '2.0',
-        error: { 
-          code: -32603, 
+        error: {
+          code: -32603,
           message: 'Internal server error',
           data: process.env.NODE_ENV === 'development' ? String(error) : undefined
         },
@@ -385,8 +388,8 @@ async function handleMcpRequest(req: express.Request, res: express.Response) {
 app.post("/mcp", (req, res) => handleMcpRequest(req, res));
 
 app.get("/health", (_req, res) => {
-  res.json({ 
-    status: "healthy", 
+  res.json({
+    status: "healthy",
     server: SERVER_NAME,
     version: SERVER_VERSION,
     timestamp: new Date().toISOString()
@@ -394,7 +397,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.get("/", (_req, res) => {
-  res.json({ 
+  res.json({
     message: "Jans TARP MCP Server",
     endpoints: {
       mcp: "POST /mcp",
@@ -403,11 +406,25 @@ app.get("/", (_req, res) => {
   });
 });
 
-app.listen(PORT, async () => {
+const httpServer = app.listen(PORT, async () => {
   console.log(`MCP server running on http://localhost:${PORT}`);
-  
+
   // Connect MCP server after Express starts
   await connectMcpServer();
-  
+
   console.log("Server ready to accept requests");
 });
+
+// Graceful shutdown
+const shutdown = async () => {
+  console.log('Shutting down gracefully...');
+  httpServer.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
+  // Force exit after timeout
+  setTimeout(() => process.exit(1), 10000);
+};
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
