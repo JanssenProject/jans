@@ -9,7 +9,7 @@ use std::{fs, io};
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::{
-    AgamaPolicyStore, ConversionError, PolicyStoreManager, PolicyStoreWithID,
+    AgamaPolicyStore, ConversionError, PolicyStoreManager, PolicyStoreWithID, source::ArchiveSource,
 };
 use crate::http::{HttpClient, HttpClientError};
 
@@ -55,6 +55,7 @@ fn extract_first_policy_store(
         .map(|(k, v)| PolicyStoreWithID {
             id: k.to_owned(),
             store: v.to_owned(),
+            metadata: None, // Legacy format doesn't include metadata
         })
         .next();
 
@@ -119,27 +120,25 @@ async fn load_policy_store_from_lock_master(
 
 /// Loads the policy store from a Cedar Archive (.cjar) file.
 ///
-/// Uses the new directory structure format and converts it to the legacy format
-/// for backward compatibility with existing code.
+/// Uses the VFS-agnostic load_policy_store function from the loader module
+/// and converts to legacy format for backward compatibility.
 #[cfg(not(target_arch = "wasm32"))]
 async fn load_policy_store_from_cjar_file(
     path: &Path,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    use crate::common::policy_store::DefaultPolicyStoreLoader;
-    use crate::common::policy_store::archive_handler::ArchiveVfs;
+    use crate::common::policy_store::loader;
 
-    // Create an archive VFS from the file path
-    let archive_vfs = ArchiveVfs::from_file(path)
-        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to open archive: {}", e)))?;
-
-    // Use the DefaultPolicyStoreLoader to load from the archive
-    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let loaded = loader.load_directory(".").map_err(|e| {
+    // Use the VFS-agnostic load_policy_store function
+    let source = crate::common::policy_store::source::PolicyStoreSource::Archive(
+        ArchiveSource::File(path.to_path_buf()),
+    );
+    let loaded = loader::load_policy_store(&source).await.map_err(|e| {
         PolicyStoreLoadError::Archive(format!("Failed to load from archive: {}", e))
     })?;
 
-    // Get the policy store ID from the metadata
+    // Get the policy store ID and metadata
     let store_id = loaded.metadata.policy_store.id.clone();
+    let store_metadata = loaded.metadata.clone();
 
     // Convert to legacy format using PolicyStoreManager
     let legacy_store = PolicyStoreManager::convert_to_legacy(loaded)?;
@@ -147,6 +146,7 @@ async fn load_policy_store_from_cjar_file(
     Ok(PolicyStoreWithID {
         id: store_id,
         store: legacy_store,
+        metadata: Some(store_metadata),
     })
 }
 
@@ -163,33 +163,33 @@ async fn load_policy_store_from_cjar_file(
 
 /// Loads the policy store from a Cedar Archive (.cjar) URL.
 ///
-/// Downloads the archive and loads it using the new directory structure format,
-/// then converts to legacy format for backward compatibility.
+/// Uses the VFS-agnostic load_policy_store function from the loader module
+/// and converts to legacy format for backward compatibility.
 async fn load_policy_store_from_cjar_url(
     url: &str,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    use crate::common::policy_store::DefaultPolicyStoreLoader;
-    use crate::common::policy_store::archive_handler::ArchiveVfs;
+    use crate::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
 
-    // Fetch the archive from the URL
+    // Note: The loader's load_policy_store function for URLs is not fully implemented yet,
+    // so we handle URL fetching here and use from_buffer
     let client = HttpClient::new(3, Duration::from_secs(30))?;
     let bytes = client
         .get_bytes(url)
         .await
         .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {}", e)))?;
 
-    // Create an archive VFS from the downloaded bytes
+    // Use ArchiveVfs::from_buffer which works in both native and WASM
     let archive_vfs = ArchiveVfs::from_buffer(bytes)
         .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to open archive: {}", e)))?;
 
-    // Use the DefaultPolicyStoreLoader to load from the archive
-    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let loaded = loader.load_directory(".").map_err(|e| {
+    let loader_instance = DefaultPolicyStoreLoader::new(archive_vfs);
+    let loaded = loader_instance.load_directory(".").map_err(|e| {
         PolicyStoreLoadError::Archive(format!("Failed to load from archive: {}", e))
     })?;
 
-    // Get the policy store ID from the metadata
+    // Get the policy store ID and metadata
     let store_id = loaded.metadata.policy_store.id.clone();
+    let store_metadata = loaded.metadata.clone();
 
     // Convert to legacy format using PolicyStoreManager
     let legacy_store = PolicyStoreManager::convert_to_legacy(loaded)?;
@@ -197,33 +197,30 @@ async fn load_policy_store_from_cjar_url(
     Ok(PolicyStoreWithID {
         id: store_id,
         store: legacy_store,
+        metadata: Some(store_metadata),
     })
 }
 
 /// Loads the policy store from a directory structure.
 ///
-/// Uses the new directory structure format (with manifest.json, policies/, etc.)
+/// Uses the VFS-agnostic load_policy_store function from the loader module
 /// and converts to legacy format for backward compatibility.
 #[cfg(not(target_arch = "wasm32"))]
 async fn load_policy_store_from_directory(
     path: &Path,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    use crate::common::policy_store::DefaultPolicyStoreLoader;
-    use crate::common::policy_store::PhysicalVfs;
+    use crate::common::policy_store::loader;
 
-    // Create a physical VFS
-    let physical_vfs = PhysicalVfs::new();
+    // Use the VFS-agnostic load_policy_store function
+    let source =
+        crate::common::policy_store::source::PolicyStoreSource::Directory(path.to_path_buf());
+    let loaded = loader::load_policy_store(&source).await.map_err(|e| {
+        PolicyStoreLoadError::Directory(format!("Failed to load from directory: {}", e))
+    })?;
 
-    // Use the DefaultPolicyStoreLoader to load from the directory
-    let loader = DefaultPolicyStoreLoader::new(physical_vfs);
-    let loaded = loader
-        .load_directory(path.to_string_lossy().as_ref())
-        .map_err(|e| {
-            PolicyStoreLoadError::Directory(format!("Failed to load from directory: {}", e))
-        })?;
-
-    // Get the policy store ID from the metadata
+    // Get the policy store ID and metadata
     let store_id = loaded.metadata.policy_store.id.clone();
+    let store_metadata = loaded.metadata.clone();
 
     // Convert to legacy format using PolicyStoreManager
     let legacy_store = PolicyStoreManager::convert_to_legacy(loaded)?;
@@ -231,6 +228,7 @@ async fn load_policy_store_from_directory(
     Ok(PolicyStoreWithID {
         id: store_id,
         store: legacy_store,
+        metadata: Some(store_metadata),
     })
 }
 
