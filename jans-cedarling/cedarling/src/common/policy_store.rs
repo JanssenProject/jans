@@ -32,32 +32,12 @@ use url::Url;
 pub(crate) use claim_mapping::ClaimMappings;
 pub use token_entity_metadata::TokenEntityMetadata;
 
-// Re-export for convenience
+// Re-export types used by init/policy_store.rs and external consumers
 pub use archive_handler::ArchiveVfs;
-pub use entity_parser::{EntityParser, ParsedEntity};
-pub use errors::{
-    ArchiveError, CedarEntityErrorType, CedarSchemaErrorType, ManifestErrorType, PolicyStoreError,
-    TokenError, TrustedIssuerErrorType, ValidationError,
-};
-pub use issuer_parser::{IssuerParser, ParsedIssuer};
-pub use loader::load_policy_store;
-pub use loader::{
-    DefaultPolicyStoreLoader, EntityFile, IssuerFile, LoadedPolicyStore, PolicyFile,
-    PolicyStoreLoader,
-};
+pub use loader::DefaultPolicyStoreLoader;
 pub use manager::{ConversionError, PolicyStoreManager};
-pub use manifest_validator::{
-    ManifestValidationError, ManifestValidationResult, ManifestValidator,
-};
-pub use metadata::{FileInfo, PolicyStoreInfo, PolicyStoreManifest, PolicyStoreMetadata};
-pub use policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
-pub use schema_parser::{ParsedSchema, SchemaParser};
-pub use source::{ArchiveSource, PolicyStoreFormat, PolicyStoreSource};
-pub use validator::MetadataValidator;
-pub use vfs_adapter::{MemoryVfs, VfsFileSystem};
-
-#[cfg(not(target_arch = "wasm32"))]
-pub use vfs_adapter::PhysicalVfs;
+pub use metadata::PolicyStoreMetadata;
+pub use vfs_adapter::VfsFileSystem;
 /// Default maximum number of entities allowed
 const DEFAULT_MAX_ENTITIES: usize = 1000;
 /// Default maximum size of base64-encoded strings in bytes
@@ -256,7 +236,10 @@ pub struct TrustedIssuersValidationError {
     oidc_url: String,
 }
 
-/// Wrapper around [`PolicyStore`] to have access to it and ID of policy store
+/// Wrapper around [`PolicyStore`] to have access to it and ID of policy store.
+///
+/// When loaded from the new directory/archive format, includes optional metadata
+/// containing version, description, and other policy store information.
 #[derive(Clone, derive_more::Deref)]
 pub struct PolicyStoreWithID {
     /// ID of policy store
@@ -264,6 +247,9 @@ pub struct PolicyStoreWithID {
     /// Policy store value
     #[deref]
     pub store: PolicyStore,
+    /// Optional metadata from new format policy stores.
+    /// Contains cedar_version, policy_store info (name, version, description, etc.)
+    pub metadata: Option<metadata::PolicyStoreMetadata>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.

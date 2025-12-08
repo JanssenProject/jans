@@ -259,6 +259,10 @@ pub enum PolicyStoreError {
         #[source]
         source: std::io::Error,
     },
+
+    /// Unsupported format
+    #[error("Unsupported format: {message}")]
+    UnsupportedFormat { message: String },
 }
 
 /// Validation errors for policy store components.
