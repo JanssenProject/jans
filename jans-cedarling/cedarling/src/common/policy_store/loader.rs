@@ -47,18 +47,26 @@
 //! # fn fetch_archive_bytes() -> Result<Vec<u8>, Box<dyn std::error::Error>> { Ok(vec![]) }
 //! ```
 
-use super::archive_handler::ArchiveVfs;
-use super::errors::{ArchiveError, PolicyStoreError, ValidationError};
+use super::errors::{PolicyStoreError, ValidationError};
+
+#[cfg(test)]
+use super::errors::ArchiveError;
 use super::manifest_validator::ManifestValidator;
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
-use super::policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
-use super::source::{ArchiveSource, PolicyStoreFormat, PolicyStoreSource};
+use super::source::{ArchiveSource, PolicyStoreSource};
+
+#[cfg(test)]
+use super::source::PolicyStoreFormat;
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
-use cedar_policy::PolicySet;
 use std::path::{Path, PathBuf};
 
 /// Policy store loader trait for loading policy stores from various sources.
+///
+/// This trait provides a unified interface for loading policy stores from different
+/// sources (directories, archives, URLs). The main code path uses `DefaultPolicyStoreLoader`
+/// directly; this trait is used in tests for more generic loading scenarios.
+#[cfg(test)]
 pub trait PolicyStoreLoader {
     /// Load a policy store from the given source.
     fn load(&self, source: &PolicyStoreSource) -> Result<LoadedPolicyStore, PolicyStoreError>;
@@ -70,56 +78,42 @@ pub trait PolicyStoreLoader {
     fn validate_structure(&self, source: &PolicyStoreSource) -> Result<(), PolicyStoreError>;
 }
 
-/// Load a policy store from any source (VFS-agnostic, async).
+/// Load a policy store from directory or archive file sources.
 ///
-/// This function matches on the `PolicyStoreSource` and creates the appropriate
-/// VFS and loader internally. It supports:
+/// This function handles:
 /// - Directory sources (uses PhysicalVfs) - Native only
-/// - Archive sources from file paths (uses ArchiveVfs<File>) - Native only
-/// - Archive sources from URLs (fetches and uses ArchiveVfs<Cursor<Vec<u8>>>) - Works in both native and WASM (once implemented)
-/// - Legacy sources (to be implemented)
+/// - Archive sources from file paths (uses ArchiveVfs) - Native only
 ///
-/// # WASM Support
-///
-/// Archives are fully supported in WASM:
-/// - Use `ArchiveSource::Url` for remote archives (once URL fetching is implemented)
-/// - Or use `ArchiveVfs::from_buffer()` directly with bytes you fetch yourself
+/// For other sources (URLs, legacy JSON/YAML), use `init::policy_store::load_policy_store`
+/// which handles all source types including HTTP fetching and legacy format parsing.
 ///
 /// # Example (Native)
 ///
 /// ```no_run
-/// use cedarling::common::policy_store::{load_policy_store, PolicyStoreSource, source::ArchiveSource};
+/// use cedarling::common::policy_store::loader::load_policy_store;
+/// use cedarling::common::policy_store::source::{PolicyStoreSource, ArchiveSource};
 /// use std::path::PathBuf;
 ///
 /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-/// // Load from directory (native only)
+/// // Load from directory
 /// let loaded = load_policy_store(&PolicyStoreSource::Directory(PathBuf::from("./store"))).await?;
 ///
-/// // Load from archive file (native only)
+/// // Load from archive file
 /// let loaded = load_policy_store(&PolicyStoreSource::Archive(
 ///     ArchiveSource::File(PathBuf::from("./store.cjar"))
-/// )).await?;
-///
-/// // Load from archive URL (works in both native and WASM once implemented)
-/// let loaded = load_policy_store(&PolicyStoreSource::Archive(
-///     ArchiveSource::Url("https://example.com/store.cjar".to_string())
 /// )).await?;
 /// # Ok(())
 /// # }
 /// ```
 ///
-/// # Example (WASM)
+/// # WASM
+///
+/// For WASM, use `ArchiveVfs::from_buffer()` directly with bytes you fetch yourself:
 ///
 /// ```no_run
-/// use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader, PolicyStoreSource, source::ArchiveSource};
+/// use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
 ///
 /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-/// // Option 1: Use ArchiveSource::Url (once URL fetching is implemented)
-/// let loaded = load_policy_store(&PolicyStoreSource::Archive(
-///     ArchiveSource::Url("https://example.com/store.cjar".to_string())
-/// )).await?;
-///
-/// // Option 2: Fetch bytes yourself and use ArchiveVfs directly
 /// let archive_bytes: Vec<u8> = fetch_from_network().await?;
 /// let archive_vfs = ArchiveVfs::from_buffer(archive_bytes)?;
 /// let loader = DefaultPolicyStoreLoader::new(archive_vfs);
@@ -133,7 +127,6 @@ pub async fn load_policy_store(
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     match source {
         PolicyStoreSource::Directory(path) => {
-            // Use PhysicalVfs for directory sources
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let vfs = super::vfs_adapter::PhysicalVfs::new();
@@ -152,45 +145,39 @@ pub async fn load_policy_store(
                 })
             }
         },
-        PolicyStoreSource::Archive(archive_source) => {
-            match archive_source {
-                ArchiveSource::File(path) => {
-                    // Load archive from file path (native only - file I/O not available in WASM)
-                    #[cfg(not(target_arch = "wasm32"))]
-                    {
-                        use super::archive_handler::ArchiveVfs;
-                        let archive_vfs = ArchiveVfs::from_file(path)?;
-                        let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-                        loader.load_directory(".")
-                    }
-                    #[cfg(target_arch = "wasm32")]
-                    {
-                        // File paths not supported in WASM - use ArchiveSource::Url or ArchiveVfs::from_buffer() directly
-                        Err(PolicyStoreError::Archive(
-                            super::errors::ArchiveError::WasmUnsupported,
-                        ))
-                    }
-                },
-                ArchiveSource::Url(url) => {
-                    // Fetch archive from URL and load from bytes (works in both native and WASM)
-                    // TODO: Implement HTTP fetching using reqwest or HttpClient
-                    // Once implemented, this will work in WASM environments
+        PolicyStoreSource::Archive(archive_source) => match archive_source {
+            ArchiveSource::File(path) => {
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    use super::archive_handler::ArchiveVfs;
+                    let archive_vfs = ArchiveVfs::from_file(path)?;
+                    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
+                    loader.load_directory(".")
+                }
+                #[cfg(target_arch = "wasm32")]
+                {
                     Err(PolicyStoreError::Archive(
-                        super::errors::ArchiveError::InvalidZipFormat {
-                            details: format!(
-                                "URL loading not yet implemented: {}. This will work in both native and WASM once implemented.",
-                                url
-                            ),
-                        },
+                        super::errors::ArchiveError::WasmUnsupported,
                     ))
-                },
-            }
+                }
+            },
+            ArchiveSource::Url(_) => {
+                // URL loading is handled by init::policy_store::load_policy_store_from_cjar_url
+                // which fetches bytes via HttpClient and uses ArchiveVfs::from_buffer
+                Err(PolicyStoreError::Archive(
+                    super::errors::ArchiveError::InvalidZipFormat {
+                        details: "Use init::policy_store::load_policy_store for URL sources"
+                            .to_string(),
+                    },
+                ))
+            },
         },
         PolicyStoreSource::Legacy(_) => {
-            // TODO: Implement legacy format loading
+            // Legacy JSON/YAML format is handled by init::policy_store::load_policy_store
+            // which parses AgamaPolicyStore directly
             Err(PolicyStoreError::Validation(
                 super::errors::ValidationError::InvalidPolicyStoreId {
-                    id: "Legacy format not yet implemented".to_string(),
+                    id: "Use init::policy_store::load_policy_store for legacy sources".to_string(),
                 },
             ))
         },
@@ -294,12 +281,12 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
         let result = validator.validate(Some(&metadata.policy_store.id));
 
         // If validation fails, return the first error
-        if !result.is_valid {
-            if let Some(error) = result.errors.first() {
-                return Err(PolicyStoreError::ManifestError {
-                    err: error.error_type.clone(),
-                });
-            }
+        if !result.is_valid
+            && let Some(error) = result.errors.first()
+        {
+            return Err(PolicyStoreError::ManifestError {
+                err: error.error_type.clone(),
+            });
         }
 
         if !result.unlisted_files.is_empty() {
@@ -687,45 +674,44 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             trusted_issuers,
         })
     }
+}
 
+// Test-only helper functions for parsing policies
+// These are thin wrappers around PolicyParser for test convenience
+#[cfg(test)]
+impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// Parse and validate Cedar policies from loaded policy files.
-    ///
-    /// Extracts policy IDs from @id annotations or filenames and validates syntax.
-    fn parse_policies(policy_files: &[PolicyFile]) -> Result<Vec<ParsedPolicy>, PolicyStoreError> {
+    fn parse_policies(
+        policy_files: &[PolicyFile],
+    ) -> Result<Vec<super::policy_parser::ParsedPolicy>, PolicyStoreError> {
+        use super::policy_parser::PolicyParser;
         let mut parsed_policies = Vec::with_capacity(policy_files.len());
-
         for file in policy_files {
             let parsed = PolicyParser::parse_policy(&file.content, &file.name)?;
             parsed_policies.push(parsed);
         }
-
         Ok(parsed_policies)
     }
 
     /// Parse and validate Cedar templates from loaded template files.
-    ///
-    /// Extracts template IDs from @id annotations or filenames and validates
-    /// syntax including slot definitions.
     fn parse_templates(
         template_files: &[PolicyFile],
-    ) -> Result<Vec<ParsedTemplate>, PolicyStoreError> {
+    ) -> Result<Vec<super::policy_parser::ParsedTemplate>, PolicyStoreError> {
+        use super::policy_parser::PolicyParser;
         let mut parsed_templates = Vec::with_capacity(template_files.len());
-
         for file in template_files {
             let parsed = PolicyParser::parse_template(&file.content, &file.name)?;
             parsed_templates.push(parsed);
         }
-
         Ok(parsed_templates)
     }
 
     /// Create a Cedar PolicySet from parsed policies and templates.
-    ///
-    /// Validates no ID conflicts and that all policies/templates can be added.
     fn create_policy_set(
-        policies: Vec<ParsedPolicy>,
-        templates: Vec<ParsedTemplate>,
-    ) -> Result<PolicySet, PolicyStoreError> {
+        policies: Vec<super::policy_parser::ParsedPolicy>,
+        templates: Vec<super::policy_parser::ParsedTemplate>,
+    ) -> Result<cedar_policy::PolicySet, PolicyStoreError> {
+        use super::policy_parser::PolicyParser;
         PolicyParser::create_policy_set(policies, templates)
     }
 }
@@ -737,6 +723,7 @@ impl Default for DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
     }
 }
 
+#[cfg(test)]
 impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
     fn load(&self, source: &PolicyStoreSource) -> Result<LoadedPolicyStore, PolicyStoreError> {
         match source {
@@ -781,8 +768,14 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
                 }
             },
             PolicyStoreSource::Legacy(_) => {
-                // TODO: Legacy format integration will be handled
-                todo!("Legacy format integration not yet implemented ")
+                // Legacy JSON/YAML format is not supported through the loader module.
+                // Use init::policy_store::load_policy_store() which handles legacy formats
+                // via AgamaPolicyStore deserialization.
+                Err(PolicyStoreError::UnsupportedFormat {
+                    message: "Legacy format not supported through PolicyStoreLoader. \
+                              Use init::policy_store::load_policy_store() for legacy JSON/YAML formats."
+                        .to_string(),
+                })
             },
         }
     }
@@ -836,8 +829,14 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
                 }
             },
             PolicyStoreSource::Legacy(_) => {
-                // TODO: Legacy format validation will be handled
-                todo!("Legacy format validation not yet implemented")
+                // Legacy format validation is not supported through the loader module.
+                // Legacy formats are validated during JSON/YAML deserialization in
+                // init::policy_store::load_policy_store().
+                Err(PolicyStoreError::UnsupportedFormat {
+                    message: "Legacy format validation not supported through PolicyStoreLoader. \
+                              Use init::policy_store::load_policy_store() for legacy JSON/YAML formats."
+                        .to_string(),
+                })
             },
         }
     }
@@ -845,13 +844,18 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
 
 #[cfg(test)]
 mod tests {
+    use super::super::archive_handler::ArchiveVfs;
+    use super::super::entity_parser::EntityParser;
+    use super::super::issuer_parser::IssuerParser;
+    use super::super::manifest_validator::ManifestValidator;
     use super::super::schema_parser::SchemaParser;
+    use super::super::vfs_adapter::{MemoryVfs, PhysicalVfs};
     use super::*;
     use std::fs;
     use std::path::PathBuf;
     use tempfile::TempDir;
 
-    type PhysicalLoader = DefaultPolicyStoreLoader<super::super::vfs_adapter::PhysicalVfs>;
+    type PhysicalLoader = DefaultPolicyStoreLoader<PhysicalVfs>;
 
     /// Helper to create a minimal valid policy store directory for testing.
     fn create_test_policy_store(dir: &Path) -> std::io::Result<()> {
@@ -1469,7 +1473,6 @@ permit(
         assert!(!loaded.entities.is_empty(), "Entities should be loaded");
 
         // Parse entities from all files
-        use super::super::entity_parser::EntityParser;
         let mut all_entities = Vec::new();
 
         for entity_file in &loaded.entities {
@@ -1545,8 +1548,6 @@ permit(
         assert!(!loaded.entities.is_empty());
 
         // Parse and validate all components
-        use super::super::entity_parser::EntityParser;
-        use super::super::schema_parser::SchemaParser;
 
         // Schema
         let parsed_schema = SchemaParser::parse_schema(&loaded.schema, "schema.cedarschema")
@@ -1615,7 +1616,6 @@ permit(
         let loaded = loader.load(&source).unwrap();
 
         // Parse entities
-        use super::super::entity_parser::EntityParser;
         let mut all_entities = Vec::new();
 
         for entity_file in &loaded.entities {
@@ -1711,7 +1711,6 @@ permit(
         );
 
         // Parse issuers from all files
-        use super::super::issuer_parser::IssuerParser;
         let mut all_issuers = Vec::new();
 
         for issuer_file in &loaded.trusted_issuers {
@@ -1786,7 +1785,6 @@ permit(
         let loaded = loader.load(&source).unwrap();
 
         // Parse issuers
-        use super::super::issuer_parser::IssuerParser;
         let mut all_issuers = Vec::new();
 
         for issuer_file in &loaded.trusted_issuers {
@@ -1811,8 +1809,6 @@ permit(
 
     #[test]
     fn test_detect_duplicate_issuer_ids() {
-        use super::super::vfs_adapter::MemoryVfs;
-
         // Create in-memory filesystem
         let vfs = MemoryVfs::new();
 
@@ -1897,7 +1893,6 @@ namespace TestApp {
         let loaded = loader.load(&source).unwrap();
 
         // Parse issuers
-        use super::super::issuer_parser::IssuerParser;
         let mut all_issuers = Vec::new();
 
         for issuer_file in &loaded.trusted_issuers {
@@ -1919,8 +1914,6 @@ namespace TestApp {
 
     #[test]
     fn test_issuer_missing_required_field() {
-        use super::super::vfs_adapter::MemoryVfs;
-
         // Create in-memory filesystem
         let vfs = MemoryVfs::new();
 
@@ -1967,7 +1960,6 @@ namespace TestApp {
         let loaded = loader.load(&source).unwrap();
 
         // Parse issuers - should fail
-        use super::super::issuer_parser::IssuerParser;
         let result = IssuerParser::parse_issuer(
             &loaded.trusted_issuers[0].content,
             &loaded.trusted_issuers[0].name,
@@ -2033,9 +2025,6 @@ namespace TestApp {
         assert!(!loaded.trusted_issuers.is_empty());
 
         // Parse and validate all components
-        use super::super::entity_parser::EntityParser;
-        use super::super::issuer_parser::IssuerParser;
-        use super::super::schema_parser::SchemaParser;
 
         // Schema
         let parsed_schema = SchemaParser::parse_schema(&loaded.schema, "schema.cedarschema")
@@ -2084,7 +2073,6 @@ namespace TestApp {
     #[test]
     #[cfg(not(target_arch = "wasm32"))]
     fn test_archive_vfs_end_to_end_from_file() {
-        use super::super::archive_handler::ArchiveVfs;
         use std::fs::File;
         use std::io::Write;
         use tempfile::TempDir;
@@ -2166,8 +2154,6 @@ namespace TestApp {
         assert_eq!(loaded.entities[0].name, "users.json");
 
         // Step 5: Verify components can be parsed
-        use super::super::entity_parser::EntityParser;
-        use super::super::schema_parser::SchemaParser;
 
         let parsed_schema = SchemaParser::parse_schema(&loaded.schema, "schema.cedarschema")
             .expect("Should parse schema from archive");
@@ -2184,7 +2170,6 @@ namespace TestApp {
 
     #[test]
     fn test_archive_vfs_end_to_end_from_bytes() {
-        use super::super::archive_handler::ArchiveVfs;
         use std::io::{Cursor, Write};
         use zip::CompressionMethod;
         use zip::write::{ExtendedFileOptions, FileOptions};
@@ -2253,8 +2238,6 @@ namespace TestApp {
     #[test]
     #[cfg(not(target_arch = "wasm32"))]
     fn test_archive_vfs_with_manifest_validation() {
-        use super::super::archive_handler::ArchiveVfs;
-        use super::super::manifest_validator::ManifestValidator;
         use std::fs::File;
         use std::io::Write;
         use std::path::PathBuf;
@@ -2341,7 +2324,6 @@ namespace TestApp {
 
     #[test]
     fn test_archive_vfs_with_multiple_policies() {
-        use super::super::archive_handler::ArchiveVfs;
         use std::io::{Cursor, Write};
         use zip::CompressionMethod;
         use zip::write::{ExtendedFileOptions, FileOptions};
@@ -2418,7 +2400,6 @@ namespace TestApp {
         // This test demonstrates that ArchiveVfs and PhysicalVfs are
         // functionally equivalent from the loader's perspective
 
-        use super::super::archive_handler::ArchiveVfs;
         use std::io::{Cursor, Write};
         use zip::CompressionMethod;
         use zip::write::{ExtendedFileOptions, FileOptions};
