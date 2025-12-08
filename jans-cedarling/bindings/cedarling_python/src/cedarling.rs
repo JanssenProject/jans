@@ -150,7 +150,7 @@ impl Cedarling {
     /// Return logs and remove them from the storage
     fn pop_logs(&self) -> PyResult<Vec<Py<PyAny>>> {
         let logs = self.inner.pop_logs();
-        Python::with_gil(|py| -> PyResult<Vec<Py<PyAny>>> {
+        Python::attach(|py| -> PyResult<Vec<Py<PyAny>>> {
             logs.iter()
                 .map(|entry| log_entry_to_py(py, entry))
                 .collect::<PyResult<Vec<Py<PyAny>>>>()
@@ -163,7 +163,7 @@ impl Cedarling {
         // and this code easy to read
         if let Some(entry) = self.inner.get_log_by_id(id) {
             let py_obj =
-                Python::with_gil(|py| -> PyResult<Py<PyAny>> { log_entry_to_py(py, &entry) })?;
+                Python::attach(|py| -> PyResult<Py<PyAny>> { log_entry_to_py(py, &entry) })?;
             Ok(Some(py_obj))
         } else {
             Ok(None)
@@ -180,7 +180,7 @@ impl Cedarling {
     fn get_logs_by_tag(&self, tag: &str) -> PyResult<Vec<Py<PyAny>>> {
         let logs = self.inner.get_logs_by_tag(tag);
 
-        Python::with_gil(|py| -> PyResult<Vec<Py<PyAny>>> {
+        Python::attach(|py| -> PyResult<Vec<Py<PyAny>>> {
             logs.iter()
                 .map(|entry| log_entry_to_py(py, entry))
                 .collect::<PyResult<Vec<Py<PyAny>>>>()
@@ -190,7 +190,7 @@ impl Cedarling {
     /// Returns a list of log entries by request id.
     fn get_logs_by_request_id(&self, request_id: &str) -> PyResult<Vec<Py<PyAny>>> {
         let logs = self.inner.get_logs_by_request_id(request_id);
-        Python::with_gil(|py| -> PyResult<Vec<Py<PyAny>>> {
+        Python::attach(|py| -> PyResult<Vec<Py<PyAny>>> {
             logs.iter()
                 .map(|entry| log_entry_to_py(py, entry))
                 .collect::<PyResult<Vec<Py<PyAny>>>>()
@@ -202,7 +202,7 @@ impl Cedarling {
     fn get_logs_by_request_id_and_tag(&self, id: &str, tag: &str) -> PyResult<Vec<Py<PyAny>>> {
         let logs = self.inner.get_logs_by_request_id_and_tag(id, tag);
 
-        Python::with_gil(|py| -> PyResult<Vec<Py<PyAny>>> {
+        Python::attach(|py| -> PyResult<Vec<Py<PyAny>>> {
             logs.iter()
                 .map(|entry| log_entry_to_py(py, entry))
                 .collect::<PyResult<Vec<Py<PyAny>>>>()
