@@ -140,6 +140,92 @@ impl Cedarling {
 
         let mut service_factory = ServiceFactory::new(config, service_config, log.clone());
 
+        // Log policy store metadata if available (new format only)
+        if let Some(metadata) = service_factory.policy_store_metadata() {
+            // Build detailed log message using accessor methods
+            let mut details = format!(
+                "Policy store '{}' (ID: {}) v{} loaded",
+                metadata.name(),
+                if metadata.id().is_empty() {
+                    "<auto>"
+                } else {
+                    metadata.id()
+                },
+                metadata.version()
+            );
+
+            // Add description if available
+            if let Some(desc) = metadata.description() {
+                details.push_str(&format!(" - {}", desc));
+            }
+
+            // Add Cedar version info
+            details.push_str(&format!(" [Cedar {}]", metadata.cedar_version()));
+
+            // Add timestamp info if available
+            if let Some(created) = metadata.created_date() {
+                details.push_str(&format!(" (created: {})", created.format("%Y-%m-%d")));
+            }
+            if let Some(updated) = metadata.updated_date() {
+                details.push_str(&format!(" (updated: {})", updated.format("%Y-%m-%d")));
+            }
+
+            log.log_any(
+                LogEntry::new_with_data(LogType::System, None)
+                    .set_level(LogLevel::DEBUG)
+                    .set_message(details),
+            );
+
+            // Log version compatibility check with current Cedar
+            const CURRENT_CEDAR_VERSION: &str = "4.4.0";
+            match metadata.is_compatible_with_cedar(CURRENT_CEDAR_VERSION) {
+                Ok(true) => {
+                    log.log_any(
+                        LogEntry::new_with_data(LogType::System, None)
+                            .set_level(LogLevel::DEBUG)
+                            .set_message(format!(
+                                "Policy store Cedar version {} is compatible with runtime version {}",
+                                metadata.cedar_version(),
+                                CURRENT_CEDAR_VERSION
+                            )),
+                    );
+                },
+                Ok(false) => {
+                    log.log_any(
+                        LogEntry::new_with_data(LogType::System, None)
+                            .set_level(LogLevel::WARN)
+                            .set_message(format!(
+                                "Policy store Cedar version {} may not be compatible with runtime version {}",
+                                metadata.cedar_version(),
+                                CURRENT_CEDAR_VERSION
+                            )),
+                    );
+                },
+                Err(e) => {
+                    log.log_any(
+                        LogEntry::new_with_data(LogType::System, None)
+                            .set_level(LogLevel::WARN)
+                            .set_message(format!(
+                                "Could not check Cedar version compatibility: {}",
+                                e
+                            )),
+                    );
+                },
+            }
+
+            // Log parsed version for debugging if available
+            if let Some(parsed_version) = metadata.version_parsed() {
+                log.log_any(
+                    LogEntry::new_with_data(LogType::System, None)
+                        .set_level(LogLevel::TRACE)
+                        .set_message(format!(
+                            "Policy store semantic version: {}.{}.{}",
+                            parsed_version.major, parsed_version.minor, parsed_version.patch
+                        )),
+                );
+            }
+        }
+
         Ok(Cedarling {
             log,
             authz: service_factory.authz_service().await?,
