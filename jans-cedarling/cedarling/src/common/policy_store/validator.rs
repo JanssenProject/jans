@@ -73,18 +73,16 @@ impl MetadataValidator {
         }
 
         // Validate description length if provided
-        if let Some(desc) = &info.description {
-            if desc.len() > 1000 {
+        if let Some(desc) = &info.description
+            && desc.len() > 1000 {
                 return Err(ValidationError::DescriptionTooLong { length: desc.len() });
             }
-        }
 
         // Validate timestamps ordering if both are provided
-        if let (Some(created), Some(updated)) = (info.created_date, info.updated_date) {
-            if updated < created {
+        if let (Some(created), Some(updated)) = (info.created_date, info.updated_date)
+            && updated < created {
                 return Err(ValidationError::InvalidTimestampOrdering);
             }
-        }
 
         Ok(())
     }

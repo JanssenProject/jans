@@ -14,8 +14,10 @@
 //! different storage backends without changing the loading logic.
 
 use std::io::{self, Read};
-use std::path::Path;
 use vfs::{PhysicalFS, VfsPath};
+
+#[cfg(test)]
+use std::path::Path;
 
 /// Represents a directory entry from VFS.
 #[derive(Debug, Clone)]
@@ -155,9 +157,7 @@ impl VfsFileSystem for PhysicalVfs {
 
         let mut result = Vec::new();
         for entry in entries {
-            let metadata = entry
-                .metadata()
-                .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+            let metadata = entry.metadata().map_err(io::Error::other)?;
             let filename = entry.filename();
             let full_path = entry.as_str().to_string();
 
@@ -190,14 +190,18 @@ impl VfsFileSystem for PhysicalVfs {
     }
 }
 
-/// In-memory filesystem implementation for testing and WASM.
+/// In-memory filesystem implementation for testing.
 ///
-/// Uses `vfs::MemoryFS` to store files in memory.
+/// Uses `vfs::MemoryFS` to store files in memory. This is useful for:
+/// - Unit testing without touching the real filesystem
+/// - Building policy stores programmatically in memory for tests
+#[cfg(test)]
 #[derive(Debug)]
 pub struct MemoryVfs {
     root: VfsPath,
 }
 
+#[cfg(test)]
 impl MemoryVfs {
     /// Create a new empty in-memory VFS.
     pub fn new() -> Self {
@@ -211,45 +215,39 @@ impl MemoryVfs {
     }
 
     /// Create a file with the given content.
-    ///
-    /// This is a helper method for testing.
     pub fn create_file(&self, path: &str, content: &[u8]) -> io::Result<()> {
         let vfs_path = self.get_path(path);
 
         // Create parent directories if needed
-        if let Some(parent) = Path::new(path).parent() {
-            if !parent.as_os_str().is_empty() {
-                let parent_str = parent.to_str().ok_or_else(|| {
-                    io::Error::new(io::ErrorKind::InvalidInput, "Invalid parent path")
-                })?;
-                self.create_dir_all(parent_str)?;
-            }
+        if let Some(parent) = Path::new(path).parent()
+            && !parent.as_os_str().is_empty()
+        {
+            let parent_str = parent.to_str().ok_or_else(|| {
+                io::Error::new(io::ErrorKind::InvalidInput, "Invalid parent path")
+            })?;
+            self.create_dir_all(parent_str)?;
         }
 
-        let mut file = vfs_path
-            .create_file()
-            .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+        let mut file = vfs_path.create_file().map_err(io::Error::other)?;
         std::io::Write::write_all(&mut file, content)?;
         Ok(())
     }
 
     /// Create a directory and all of its parents.
-    ///
-    /// This is a helper method for testing.
     pub fn create_dir_all(&self, path: &str) -> io::Result<()> {
         let vfs_path = self.get_path(path);
-        vfs_path
-            .create_dir_all()
-            .map_err(|e| io::Error::new(io::ErrorKind::Other, e))
+        vfs_path.create_dir_all().map_err(io::Error::other)
     }
 }
 
+#[cfg(test)]
 impl Default for MemoryVfs {
     fn default() -> Self {
         Self::new()
     }
 }
 
+#[cfg(test)]
 impl VfsFileSystem for MemoryVfs {
     fn open_file(&self, path: &str) -> io::Result<Box<dyn Read + Send>> {
         let vfs_path = self.get_path(path);
@@ -267,9 +265,7 @@ impl VfsFileSystem for MemoryVfs {
 
         let mut result = Vec::new();
         for entry in entries {
-            let metadata = entry
-                .metadata()
-                .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+            let metadata = entry.metadata().map_err(io::Error::other)?;
             let filename = entry.filename();
             let full_path = entry.as_str().to_string();
 
