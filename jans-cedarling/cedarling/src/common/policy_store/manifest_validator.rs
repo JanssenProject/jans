@@ -333,23 +333,6 @@ mod tests {
     use chrono::Utc;
     use std::collections::HashMap;
 
-    fn create_test_vfs_with_files() -> MemoryVfs {
-        let vfs = MemoryVfs::new();
-
-        // Create test files
-        vfs.create_file("metadata.json", b"{\"test\": \"data\"}")
-            .expect("should create metadata file");
-        vfs.create_file(
-            "policies/policy1.cedar",
-            b"permit(principal, action, resource);",
-        )
-        .expect("should create policy file");
-        vfs.create_file("schemas/schema1.cedarschema", b"namespace Test {}")
-            .expect("should create schema file");
-
-        vfs
-    }
-
     #[test]
     fn test_compute_checksum() {
         let vfs = MemoryVfs::new();

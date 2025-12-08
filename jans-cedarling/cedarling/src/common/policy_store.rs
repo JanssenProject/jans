@@ -37,7 +37,7 @@ pub use archive_handler::ArchiveVfs;
 pub use loader::DefaultPolicyStoreLoader;
 pub use manager::{ConversionError, PolicyStoreManager};
 pub use metadata::PolicyStoreMetadata;
-pub use vfs_adapter::VfsFileSystem;
+
 /// Default maximum number of entities allowed
 const DEFAULT_MAX_ENTITIES: usize = 1000;
 /// Default maximum size of base64-encoded strings in bytes
