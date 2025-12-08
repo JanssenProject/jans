@@ -121,6 +121,9 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
     }
 
     /// Compute SHA-256 checksum for a file.
+    ///
+    /// Useful for manifest generation and file integrity verification in tests and tooling.
+    #[cfg(test)]
     pub fn compute_checksum(&self, file_path: &str) -> Result<String, PolicyStoreError> {
         let content_bytes =
             self.vfs
@@ -276,16 +279,16 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
         };
 
         // Validate policy store ID if metadata is provided
-        if let Some(metadata_id) = metadata_id {
-            if manifest.policy_store_id != metadata_id {
-                result.add_error(
-                    ManifestErrorType::PolicyStoreIdMismatch {
-                        expected: manifest.policy_store_id.clone(),
-                        actual: metadata_id.to_string(),
-                    },
-                    None,
-                );
-            }
+        if let Some(metadata_id) = metadata_id
+            && manifest.policy_store_id != metadata_id
+        {
+            result.add_error(
+                ManifestErrorType::PolicyStoreIdMismatch {
+                    expected: manifest.policy_store_id.clone(),
+                    actual: metadata_id.to_string(),
+                },
+                None,
+            );
         }
 
         // Validate each file in manifest
@@ -324,9 +327,9 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
 
 #[cfg(test)]
 mod tests {
+    use super::super::metadata::FileInfo;
+    use super::super::vfs_adapter::MemoryVfs;
     use super::*;
-    use crate::common::policy_store::metadata::FileInfo;
-    use crate::common::policy_store::vfs_adapter::MemoryVfs;
     use chrono::Utc;
     use std::collections::HashMap;
 

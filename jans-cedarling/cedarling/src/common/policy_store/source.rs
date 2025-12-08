@@ -5,11 +5,10 @@
 
 //! Policy store source and format types.
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 /// Source of a policy store, supporting multiple input formats.
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub enum PolicyStoreSource {
     /// Directory structure format (for development)
     Directory(PathBuf),
@@ -20,9 +19,51 @@ pub enum PolicyStoreSource {
     Legacy(String),
 }
 
+impl PolicyStoreSource {
+    /// Create a source from a directory path.
+    pub fn from_directory(path: impl Into<PathBuf>) -> Self {
+        Self::Directory(path.into())
+    }
+
+    /// Create a source from an archive file path.
+    pub fn from_archive_file(path: impl Into<PathBuf>) -> Self {
+        Self::Archive(ArchiveSource::File(path.into()))
+    }
+
+    /// Create a source from an archive URL.
+    pub fn from_archive_url(url: impl Into<String>) -> Self {
+        Self::Archive(ArchiveSource::Url(url.into()))
+    }
+
+    /// Create a source from legacy JSON/YAML content.
+    pub fn from_legacy(content: impl Into<String>) -> Self {
+        Self::Legacy(content.into())
+    }
+
+    /// Returns the format of this source.
+    pub fn format(&self) -> PolicyStoreFormat {
+        match self {
+            Self::Directory(_) => PolicyStoreFormat::Directory,
+            Self::Archive(_) => PolicyStoreFormat::Archive,
+            Self::Legacy(_) => PolicyStoreFormat::Legacy,
+        }
+    }
+
+    /// Returns a description of this source for logging purposes.
+    pub fn description(&self) -> String {
+        match self {
+            Self::Directory(path) => format!("directory: {}", path.display()),
+            Self::Archive(archive) => match archive {
+                ArchiveSource::File(path) => format!("archive file: {}", path.display()),
+                ArchiveSource::Url(url) => format!("archive URL: {}", url),
+            },
+            Self::Legacy(content) => format!("legacy content ({} bytes)", content.len()),
+        }
+    }
+}
+
 /// Source for archive-based policy stores.
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub enum ArchiveSource {
     /// Local file path
     File(PathBuf),
@@ -32,7 +73,6 @@ pub enum ArchiveSource {
 
 /// Format of a policy store.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(dead_code)]
 pub enum PolicyStoreFormat {
     /// Directory structure format
     Directory,
@@ -45,6 +85,7 @@ pub enum PolicyStoreFormat {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::Path;
 
     #[test]
     fn test_policy_store_source_variants() {

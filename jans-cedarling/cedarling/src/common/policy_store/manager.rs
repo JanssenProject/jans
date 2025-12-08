@@ -98,19 +98,28 @@ impl PolicyStoreManager {
     ///
     /// Returns `ConversionError` if any component fails to convert.
     pub fn convert_to_legacy(loaded: LoadedPolicyStore) -> Result<PolicyStore, ConversionError> {
-        // 1. Convert schema
+        // 1. Log manifest info if present (manifest is used for integrity checking during load)
+        if let Some(ref manifest) = loaded.manifest {
+            eprintln!(
+                "Info: Policy store '{}' loaded with manifest (generated: {})",
+                manifest.policy_store_id, manifest.generated_date
+            );
+        }
+
+        // 2. Convert schema
         let cedar_schema = Self::convert_schema(&loaded.schema)?;
 
-        // 2. Convert policies
-        let policies_container = Self::convert_policies(&loaded.policies)?;
+        // 3. Convert policies and templates into a single PoliciesContainer
+        let policies_container =
+            Self::convert_policies_and_templates(&loaded.policies, &loaded.templates)?;
 
-        // 3. Convert trusted issuers
+        // 4. Convert trusted issuers
         let trusted_issuers = Self::convert_trusted_issuers(&loaded.trusted_issuers)?;
 
-        // 4. Convert entities
+        // 5. Convert entities
         let default_entities = Self::convert_entities(&loaded.entities)?;
 
-        // 5. Parse cedar version
+        // 6. Parse cedar version
         let cedar_version = Self::parse_cedar_version(&loaded.metadata.cedar_version)?;
 
         Ok(PolicyStore {
@@ -127,27 +136,45 @@ impl PolicyStoreManager {
 
     /// Convert raw schema string to `CedarSchema`.
     ///
+    /// Uses `SchemaParser` to parse and validate the schema, then converts
+    /// to the `CedarSchema` format required by the legacy system.
+    ///
     /// The `CedarSchema` requires:
     /// - `schema: cedar_policy::Schema`
     /// - `json: CedarSchemaJson`
     /// - `validator_schema: ValidatorSchema`
     fn convert_schema(schema_content: &str) -> Result<CedarSchema, ConversionError> {
+        use super::schema_parser::SchemaParser;
         use cedar_policy::SchemaFragment;
         use std::str::FromStr;
 
-        // Parse schema fragment from content (human-readable Cedar schema format)
-        let fragment = SchemaFragment::from_str(schema_content).map_err(|e| {
-            ConversionError::SchemaConversion(format!("Failed to parse schema: {}", e))
+        // Extract namespaces for error reporting
+        let namespaces = SchemaParser::extract_namespaces(schema_content);
+
+        // Parse and validate schema using SchemaParser
+        let parsed_schema = SchemaParser::parse_schema(schema_content, "schema.cedarschema")
+            .map_err(|e| {
+                ConversionError::SchemaConversion(format!(
+                    "Failed to parse schema (namespaces: {:?}): {}",
+                    namespaces, e
+                ))
+            })?;
+
+        // Validate the schema
+        parsed_schema.validate().map_err(|e| {
+            ConversionError::SchemaConversion(format!("Schema validation failed: {}", e))
         })?;
 
-        // Convert fragment to JSON string
+        // Get the Cedar schema from the parsed result
+        let schema = parsed_schema.get_schema().clone();
+
+        // Convert to JSON for CedarSchemaJson and ValidatorSchema
+        let fragment = SchemaFragment::from_str(schema_content).map_err(|e| {
+            ConversionError::SchemaConversion(format!("Failed to parse schema fragment: {}", e))
+        })?;
+
         let json_string = fragment.to_json_string().map_err(|e| {
             ConversionError::SchemaConversion(format!("Failed to serialize schema to JSON: {}", e))
-        })?;
-
-        // Create schema from fragment
-        let schema = cedar_policy::Schema::from_schema_fragments([fragment]).map_err(|e| {
-            ConversionError::SchemaConversion(format!("Failed to create schema: {}", e))
         })?;
 
         // Parse CedarSchemaJson
@@ -171,15 +198,16 @@ impl PolicyStoreManager {
         })
     }
 
-    /// Convert policy files to `PoliciesContainer`.
+    /// Convert policy and template files to `PoliciesContainer`.
     ///
     /// The `PoliciesContainer` requires:
-    /// - `policy_set: cedar_policy::PolicySet`
+    /// - `policy_set: cedar_policy::PolicySet` (includes both policies and templates)
     /// - `raw_policy_info: HashMap<String, RawPolicy>` (for descriptions)
-    fn convert_policies(
+    fn convert_policies_and_templates(
         policy_files: &[super::loader::PolicyFile],
+        template_files: &[super::loader::PolicyFile],
     ) -> Result<PoliciesContainer, ConversionError> {
-        if policy_files.is_empty() {
+        if policy_files.is_empty() && template_files.is_empty() {
             // Return empty policy set
             let policy_set = PolicySet::new();
             return Ok(PoliciesContainer::new_empty(policy_set));
@@ -194,11 +222,24 @@ impl PolicyStoreManager {
             parsed_policies.push(parsed);
         }
 
-        // Create policy set using PolicyParser
-        let policy_set = PolicyParser::create_policy_set(parsed_policies.clone(), vec![])
-            .map_err(|e| ConversionError::PolicySetCreation(e.to_string()))?;
+        // Parse each template file
+        let mut parsed_templates = Vec::with_capacity(template_files.len());
+        for file in template_files {
+            let parsed = PolicyParser::parse_template(&file.content, &file.name).map_err(|e| {
+                ConversionError::PolicyConversion(format!(
+                    "Failed to parse template '{}': {}",
+                    file.name, e
+                ))
+            })?;
+            parsed_templates.push(parsed);
+        }
 
-        // Build raw_policy_info for descriptions
+        // Create policy set using PolicyParser (includes both policies and templates)
+        let policy_set =
+            PolicyParser::create_policy_set(parsed_policies.clone(), parsed_templates.clone())
+                .map_err(|e| ConversionError::PolicySetCreation(e.to_string()))?;
+
+        // Build raw_policy_info for descriptions (policies only, templates don't have descriptions in legacy format)
         let raw_policy_info = parsed_policies
             .into_iter()
             .map(|p| (p.id.to_string(), p.filename))
@@ -223,9 +264,22 @@ impl PolicyStoreManager {
             all_issuers.extend(parsed);
         }
 
-        // Validate for duplicates
+        // Validate for duplicates - include content in error for debugging
         if let Err(errors) = IssuerParser::validate_issuers(&all_issuers) {
-            return Err(ConversionError::IssuerConversion(errors.join("; ")));
+            // Build detailed error with issuer content for debugging
+            let error_details: Vec<String> = errors
+                .iter()
+                .zip(all_issuers.iter())
+                .map(|(err, issuer)| {
+                    let content_preview = if issuer.content.len() > 100 {
+                        format!("{}...(truncated)", &issuer.content[..100])
+                    } else {
+                        issuer.content.clone()
+                    };
+                    format!("{} [content: {}]", err, content_preview)
+                })
+                .collect();
+            return Err(ConversionError::IssuerConversion(error_details.join("; ")));
         }
 
         // Create issuer map
@@ -236,6 +290,12 @@ impl PolicyStoreManager {
     }
 
     /// Convert entity files to `HashMap<String, serde_json::Value>`.
+    ///
+    /// This function:
+    /// 1. Parses all entity files
+    /// 2. Detects duplicate entity UIDs (returns error if found)
+    /// 3. Optionally validates entity hierarchy (parent references)
+    /// 4. Converts to the required HashMap format
     fn convert_entities(
         entity_files: &[super::loader::EntityFile],
     ) -> Result<Option<HashMap<String, serde_json::Value>>, ConversionError> {
@@ -243,7 +303,8 @@ impl PolicyStoreManager {
             return Ok(None);
         }
 
-        let mut all_entities = HashMap::new();
+        // Step 1: Parse all entity files
+        let mut all_parsed_entities = Vec::new();
         for file in entity_files {
             let parsed =
                 EntityParser::parse_entities(&file.content, &file.name, None).map_err(|e| {
@@ -252,19 +313,50 @@ impl PolicyStoreManager {
                         file.name, e
                     ))
                 })?;
-
-            for entity in parsed {
-                let json_value = entity.entity.to_json_value().map_err(|e| {
-                    ConversionError::EntityConversion(format!(
-                        "Failed to serialize entity '{}': {}",
-                        entity.uid, e
-                    ))
-                })?;
-                all_entities.insert(entity.uid.to_string(), json_value);
-            }
+            all_parsed_entities.extend(parsed);
         }
 
-        Ok(Some(all_entities))
+        // Step 2: Detect duplicate entity UIDs
+        let unique_entities = EntityParser::detect_duplicates(all_parsed_entities.clone())
+            .map_err(|errors| ConversionError::EntityConversion(errors.join("; ")))?;
+
+        // Step 3: Validate entity hierarchy (optional but recommended)
+        // This ensures all parent references point to entities that exist
+        if let Err(hierarchy_errors) = EntityParser::validate_hierarchy(&all_parsed_entities) {
+            // Log warnings but don't fail - parent entities may be provided at runtime
+            eprintln!(
+                "Warning: Entity hierarchy validation found issues: {}",
+                hierarchy_errors.join("; ")
+            );
+        }
+
+        // Step 4: Validate entities can form a valid Cedar entity store
+        // This validates entity constraints like types and attribute compatibility
+        EntityParser::create_entities_store(all_parsed_entities).map_err(|e| {
+            ConversionError::EntityConversion(format!("Failed to create entity store: {}", e))
+        })?;
+
+        // Step 5: Convert to HashMap<String, Value>
+        let mut result = HashMap::with_capacity(unique_entities.len());
+        for (uid, parsed_entity) in unique_entities {
+            let json_value = parsed_entity.entity.to_json_value().map_err(|e| {
+                // Include the original content in the error for debugging
+                ConversionError::EntityConversion(format!(
+                    "Failed to serialize entity '{}' from '{}': {}. Original content: {}",
+                    uid,
+                    parsed_entity.filename,
+                    e,
+                    if parsed_entity.content.len() > 200 {
+                        format!("{}...(truncated)", &parsed_entity.content[..200])
+                    } else {
+                        parsed_entity.content.clone()
+                    }
+                ))
+            })?;
+            result.insert(uid.to_string(), json_value);
+        }
+
+        Ok(Some(result))
     }
 
     /// Parse cedar version string to `semver::Version`.
@@ -366,8 +458,10 @@ mod tests {
                 content: "forbid(principal, action, resource);".to_string(),
             },
         ];
+        let template_files: Vec<PolicyFile> = vec![];
 
-        let result = PolicyStoreManager::convert_policies(&policy_files);
+        let result =
+            PolicyStoreManager::convert_policies_and_templates(&policy_files, &template_files);
         assert!(
             result.is_ok(),
             "Policy conversion failed: {:?}",
@@ -379,9 +473,34 @@ mod tests {
     }
 
     #[test]
+    fn test_convert_policies_with_templates() {
+        let policy_files = vec![PolicyFile {
+            name: "allow.cedar".to_string(),
+            content: "permit(principal, action, resource);".to_string(),
+        }];
+        let template_files = vec![PolicyFile {
+            name: "template.cedar".to_string(),
+            content: "permit(principal == ?principal, action, resource);".to_string(),
+        }];
+
+        let result =
+            PolicyStoreManager::convert_policies_and_templates(&policy_files, &template_files);
+        assert!(
+            result.is_ok(),
+            "Policy/template conversion failed: {:?}",
+            result.err()
+        );
+
+        let container = result.unwrap();
+        assert!(!container.get_set().is_empty());
+    }
+
+    #[test]
     fn test_convert_policies_empty() {
         let policy_files: Vec<PolicyFile> = vec![];
-        let result = PolicyStoreManager::convert_policies(&policy_files);
+        let template_files: Vec<PolicyFile> = vec![];
+        let result =
+            PolicyStoreManager::convert_policies_and_templates(&policy_files, &template_files);
         assert!(result.is_ok());
 
         let container = result.unwrap();
@@ -394,8 +513,10 @@ mod tests {
             name: "invalid.cedar".to_string(),
             content: "this is not valid cedar policy".to_string(),
         }];
+        let template_files: Vec<PolicyFile> = vec![];
 
-        let result = PolicyStoreManager::convert_policies(&policy_files);
+        let result =
+            PolicyStoreManager::convert_policies_and_templates(&policy_files, &template_files);
         assert!(result.is_err());
     }
 

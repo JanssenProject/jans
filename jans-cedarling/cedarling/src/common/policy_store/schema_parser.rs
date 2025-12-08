@@ -112,22 +112,20 @@ impl SchemaParser {
     /// Extract namespace declarations from schema content.
     ///
     /// Returns a list of namespaces defined in the schema, useful for
-    /// validation and debugging. This performs simple text parsing to
-    /// find namespace declarations.
+    /// validation, debugging, and policy store analysis.
     pub fn extract_namespaces(content: &str) -> Vec<String> {
         let mut namespaces = Vec::new();
 
         // Simple regex-like parsing for namespace declarations
         for line in content.lines() {
             let trimmed = line.trim();
-            if trimmed.starts_with("namespace ") {
-                if let Some(ns_name) = trimmed
+            if trimmed.starts_with("namespace ")
+                && let Some(ns_name) = trimmed
                     .strip_prefix("namespace ")
                     .and_then(|s| s.split_whitespace().next())
                     .map(|s| s.trim_end_matches('{').trim())
-                {
-                    namespaces.push(ns_name.to_string());
-                }
+            {
+                namespaces.push(ns_name.to_string());
             }
         }
 

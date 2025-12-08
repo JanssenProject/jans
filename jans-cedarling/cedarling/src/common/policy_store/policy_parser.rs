@@ -11,8 +11,9 @@
 
 use super::errors::{PolicyStoreError, ValidationError};
 use cedar_policy::{Policy, PolicyId, PolicySet, Template};
+
+#[cfg(test)]
 use std::collections::HashMap;
-use std::str::FromStr;
 
 /// Represents a parsed Cedar policy with metadata.
 #[derive(Debug, Clone)]
@@ -134,6 +135,9 @@ impl PolicyParser {
     }
 
     /// Parse multiple policies and return a map of policy ID to filename.
+    ///
+    /// Useful for batch processing of policy files in tests and tooling.
+    #[cfg(test)]
     pub fn parse_policies<'a, I>(
         policy_files: I,
     ) -> Result<HashMap<PolicyId, String>, PolicyStoreError>
@@ -152,6 +156,9 @@ impl PolicyParser {
     }
 
     /// Parse multiple templates and return a map of template ID to filename.
+    ///
+    /// Useful for batch processing of template files in tests and tooling.
+    #[cfg(test)]
     pub fn parse_templates<'a, I>(
         template_files: I,
     ) -> Result<HashMap<PolicyId, String>, PolicyStoreError>
@@ -285,6 +292,7 @@ impl PolicyParser {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::str::FromStr;
 
     #[test]
     fn test_parse_simple_policy() {
