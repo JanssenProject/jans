@@ -8,7 +8,7 @@ tags:
 # Access Evaluation Custom Script
 
 
-The Jans-Auth server implements [OpenID AuthZEN Authorization API 1.0 – draft 01](https://openid.github.io/authzen/).
+The Jans-Auth server implements [OpenID AuthZEN Authorization API 1.0 – draft 05](https://openid.github.io/authzen/).
 The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between 
 Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems. 
 It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests, 

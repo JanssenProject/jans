@@ -15,6 +15,9 @@ public class Context implements Serializable {
     @JsonProperty("properties")
     private JsonNode properties;
 
+    @JsonProperty("time")
+    private String time;
+
     public JsonNode getProperties() {
         return properties;
     }
@@ -24,10 +27,20 @@ public class Context implements Serializable {
         return this;
     }
 
+    public String getTime() {
+        return time;
+    }
+
+    public Context setTime(String time) {
+        this.time = time;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "Context{" +
                 "properties=" + properties +
+                "time=" + time +
                 '}';
     }
 }

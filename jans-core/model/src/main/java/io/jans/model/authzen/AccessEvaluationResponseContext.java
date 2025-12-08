@@ -19,6 +19,9 @@ public class AccessEvaluationResponseContext implements Serializable {
     @JsonProperty("reason_user")
     private JsonNode reasonUser;
 
+    @JsonProperty("metadata")
+    private JsonNode metadata;
+
     public AccessEvaluationResponseContext() {
     }
 
@@ -55,12 +58,22 @@ public class AccessEvaluationResponseContext implements Serializable {
         return this;
     }
 
+    public JsonNode getMetadata() {
+        return metadata;
+    }
+
+    public AccessEvaluationResponseContext setMetadata(JsonNode metadata) {
+        this.metadata = metadata;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "AccessEvaluationResponseContext{" +
                 "id='" + id + '\'' +
                 ", reasonAdmin=" + reasonAdmin +
                 ", reasonUser=" + reasonUser +
+                ", metadata=" + metadata +
                 '}';
     }
 }
