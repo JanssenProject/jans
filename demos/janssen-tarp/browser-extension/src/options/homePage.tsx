@@ -42,6 +42,17 @@ function a11yProps(index: number) {
   };
 }
 
+/**
+ * Renders the main home page containing three tabs: user/authentication, Cedarling management, and AI Agent.
+ *
+ * The first tab shows either user details or the authentication (OIDC clients) flow depending on whether
+ * `data.loginDetails` is present and non-empty. The second tab displays Cedarling management and receives
+ * the full `data` object plus an `isLoggedIn` flag derived from `data.loginDetails`. The third tab hosts the AI Agent UI.
+ *
+ * @param data - Application data used to populate the tabs (expected keys include `loginDetails` and `oidcClients`)
+ * @param notifyOnDataChange - Callback invoked by child components to notify the parent of data changes
+ * @returns The page's React element containing the tabbed interface
+ */
 export default function HomePage({ data, notifyOnDataChange }) {
 
   const [value, setValue] = React.useState(0);

@@ -49,7 +49,13 @@ const metadataCache = new Map<string, {
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 
-// Helper Functions
+/**
+ * Fetches the OpenID Connect discovery metadata for the given issuer and caches it for subsequent requests.
+ *
+ * @param issuer - The issuer base URL (e.g., `https://example.com`) whose `.well-known/openid-configuration` will be retrieved
+ * @returns The provider's OpenID Connect discovery metadata
+ * @throws If the discovery endpoint returns an empty response or if the HTTP request fails
+ */
 async function discoverOIDCMetadata(issuer: string): Promise<OIDCDiscoveryMetadata> {
   const cached = metadataCache.get(issuer);
   const now = Date.now();
@@ -78,10 +84,22 @@ async function discoverOIDCMetadata(issuer: string): Promise<OIDCDiscoveryMetada
   }
 }
 
+/**
+ * Generates a cryptographically secure random string encoded in base64url.
+ *
+ * @param bytes - Number of random bytes to generate
+ * @returns A base64url-encoded string representing the generated random bytes
+ */
 function generateRandomString(bytes: number): string {
   return Utils.base64url(crypto.randomBytes(bytes));
 }
 
+/**
+ * Validates that the given issuer string is a well-formed URL.
+ *
+ * @param issuer - The issuer URL to validate.
+ * @throws Error if `issuer` is not a valid URL.
+ */
 function validateIssuerUrl(issuer: string): void {
   try {
     new URL(issuer);
@@ -347,7 +365,11 @@ const transport = new StreamableHTTPServerTransport({
   enableJsonResponse: true, // Return JSON responses instead of SSE
 });
 
-// Connect MCP Server to Transport
+/**
+ * Establishes the MCP server's connection to the configured transport.
+ *
+ * Attempts to connect the global MCP `server` to the provided `transport`. On successful connection it logs a confirmation; on failure it logs the error and terminates the process with exit code `1`.
+ */
 async function connectMcpServer() {
   try {
     await server.connect(transport);
@@ -358,7 +380,14 @@ async function connectMcpServer() {
   }
 }
 
-// Request handler middleware
+/**
+ * Handle an incoming MCP HTTP request by delegating to the configured transport and ensure a JSON-RPC error response on failure.
+ *
+ * Delegates request processing to `transport.handleRequest(req, res, req.body)`. If an unhandled error occurs and no response has been sent, responds with a JSON-RPC 2.0 error object (code -32603) and includes the original request id; in development mode the error's string form is included in the `data` field.
+ *
+ * @param req - Express request for the incoming MCP call
+ * @param res - Express response used to send the transport result or an error response
+ */
 async function handleMcpRequest(req: express.Request, res: express.Response) {
   try {
     const result = await transport.handleRequest(req, res, req.body);

@@ -52,7 +52,13 @@ interface OIDCClientRegistrationArgs {
   jansInclClaimsInIdTkn?: string;
 }
 
-// ==================== SERVICE FUNCTIONS ====================
+/**
+ * Persist OIDC login tokens and user information to storage under the LOGIN_DETAILS key.
+ *
+ * @param tokenResponse - Token response object containing at least `access_token` and `id_token`
+ * @param userInfoResponse - User info object (claims/profile) obtained from the OIDC userinfo endpoint
+ * @param displayToken - Whether the token should be marked for display in the UI
+ */
 async function saveLoginDetailsInStorage(
   tokenResponse: any, 
   userInfoResponse: any, 
@@ -66,6 +72,12 @@ async function saveLoginDetailsInStorage(
   });
 }
 
+/**
+ * Ensure an LLM client is created and initialized, then return the client instance.
+ *
+ * @returns The initialized LLM client instance.
+ * @throws If no API key is configured for the selected provider, or if client creation or initialization fails.
+ */
 async function initializeLLMClient(): Promise<any> {
   if (llmClient) return llmClient;
 
@@ -87,6 +99,14 @@ async function initializeLLMClient(): Promise<any> {
   }
 }
 
+/**
+ * Establishes and caches a connection to the MCP server.
+ *
+ * Initializes the MCP client using the configured MCP server URL and marks the module as connected.
+ *
+ * @throws If the MCP server URL is not configured.
+ * @throws If establishing the connection to the MCP server fails.
+ */
 async function initializeMCPClient(): Promise<void> {
   if (isConnected) return;
 
@@ -108,6 +128,14 @@ async function initializeMCPClient(): Promise<void> {
   }
 }
 
+/**
+ * Registers an OIDC client with the MCP tool and persists the resulting client record.
+ *
+ * Enhances the provided registration parameters with a Chrome extension redirect URI, standard token auth method, and signing settings, calls the MCP `registerOIDCClient` tool, and saves the returned client information in TARP storage.
+ *
+ * @param args - OIDC client registration parameters (issuer, scopes, response types, client metadata, etc.)
+ * @returns A ToolCallResult containing the MCP tool response for the registered OIDC client
+ */
 async function handleRegisterOIDCClient(args: OIDCClientRegistrationArgs): Promise<ToolCallResult> {
   const enhancedArgs: OIDCClientRegistrationArgs = {
     ...args,
@@ -132,6 +160,16 @@ async function handleRegisterOIDCClient(args: OIDCClientRegistrationArgs): Promi
   };
 }
 
+/**
+ * Initiates an OIDC authorization flow for the specified client, completes the login (PKCE + token exchange),
+ * persists login details, and returns the authenticated user's information.
+ *
+ * @param args - Arguments for starting the auth flow; must include `client_id` and may include additional
+ *               OIDC start parameters accepted by the MCP `startAuthFlow` tool.
+ * @returns A ToolCallResult whose `result` is the user info object on success and whose `error` is an error
+ *          message on failure. The `tool` field is `"startAuthFlow"`. When successful, `notifyOnDataChange`
+ *          is set to `true`.
+ */
 async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
   try {
     const oidcClient = await mcpService.getClientByClientId(args.client_id);
@@ -203,6 +241,17 @@ async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
   }
 }
 
+/**
+ * Dispatches an array of LLM tool calls to their corresponding handlers and collects results.
+ *
+ * Processes each entry of `toolCalls` that has type `"function"`, parses its arguments,
+ * invokes the matching handler (e.g., `registerOIDCClient`, `startAuthFlow`), and records
+ * a `ToolCallResult` for each call. Individual handler errors are caught and returned as
+ * per-call error results rather than thrown.
+ *
+ * @param toolCalls - Array of tool call objects produced by the LLM; expected entries include a `type` of `"function"` and a `function` object with `name` and `arguments`.
+ * @returns An array of `ToolCallResult` objects representing success or error for each processed tool call.
+ */
 async function processToolCalls(toolCalls: any[]): Promise<ToolCallResult[]> {
   const results: ToolCallResult[] = [];
 
@@ -253,7 +302,15 @@ async function processToolCalls(toolCalls: any[]): Promise<ToolCallResult[]> {
   return results;
 }
 
-// ==================== MAIN FUNCTION ====================
+/**
+ * Process a user prompt with the LLM and MCP, invoking OIDC tools when requested and returning the resulting response or tool results.
+ *
+ * @param prompt - The user's input text describing the desired action or OIDC information (e.g., issuer, client_id, scopes).
+ * @returns An object describing the outcome:
+ *  - When no tools are invoked: `{ type: "text", content: string }` with a natural-language reply or guidance.
+ *  - When tools are invoked: `{ type: "tool_results", results: ToolCallResult[] }` containing the processed tool outcomes.
+ *  - On failure: `{ type: "error", content: string }` with an error message.
+ */
 
 export async function handleUserPrompt(prompt: string) {
   try {
