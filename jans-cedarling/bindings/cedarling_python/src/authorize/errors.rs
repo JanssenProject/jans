@@ -149,7 +149,7 @@ macro_rules! errors_functions {
         // is used to register errors in py module
         pub fn register_errors(m: &Bound<'_, PyModule>) -> PyResult<()> {
             $(
-                m.add(stringify!($error_class), m.py().get_type_bound::<$error_class>())?;
+                m.add(stringify!($error_class), m.py().get_type::<$error_class>())?;
             )*
             Ok(())
         }
@@ -177,7 +177,7 @@ errors_functions! {
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add("AuthorizeError", m.py().get_type_bound::<AuthorizeError>())?;
+    m.add("AuthorizeError", m.py().get_type::<AuthorizeError>())?;
     register_errors(m)?;
     Ok(())
 }
