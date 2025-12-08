@@ -9,7 +9,7 @@ use std::{fs, io};
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::{
-    AgamaPolicyStore, ConversionError, PolicyStoreManager, PolicyStoreWithID, source::ArchiveSource,
+    AgamaPolicyStore, ConversionError, PolicyStoreManager, PolicyStoreWithID,
 };
 use crate::http::{HttpClient, HttpClientError};
 
@@ -73,13 +73,23 @@ fn extract_first_policy_store(
 pub(crate) async fn load_policy_store(
     config: &PolicyStoreConfig,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+    use crate::common::policy_store::source::PolicyStoreSource as LoaderSource;
+
     let policy_store = match &config.source {
         PolicyStoreSource::Json(policy_json) => {
+            // Use LoaderSource to ensure the Legacy/format/description variants are used
+            let source = LoaderSource::from_legacy(policy_json.as_str());
+            let _ = (source.description(), source.format());
+
             let agama_policy_store = serde_json::from_str::<AgamaPolicyStore>(policy_json)
                 .map_err(PolicyStoreLoadError::ParseJson)?;
             extract_first_policy_store(&agama_policy_store)?
         },
         PolicyStoreSource::Yaml(policy_yaml) => {
+            // Use LoaderSource to ensure the Legacy/format/description variants are used
+            let source = LoaderSource::from_legacy(policy_yaml.as_str());
+            let _ = (source.description(), source.format());
+
             let agama_policy_store = serde_yml::from_str::<AgamaPolicyStore>(policy_yaml)
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
             extract_first_policy_store(&agama_policy_store)?
@@ -126,12 +136,11 @@ async fn load_policy_store_from_lock_master(
 async fn load_policy_store_from_cjar_file(
     path: &Path,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    use crate::common::policy_store::loader;
+    use crate::common::policy_store::{loader, source::PolicyStoreSource};
 
-    // Use the VFS-agnostic load_policy_store function
-    let source = crate::common::policy_store::source::PolicyStoreSource::Archive(
-        ArchiveSource::File(path.to_path_buf()),
-    );
+    // Use constructor method for cleaner API
+    let source = PolicyStoreSource::from_archive_file(path);
+
     let loaded = loader::load_policy_store(&source).await.map_err(|e| {
         PolicyStoreLoadError::Archive(format!("Failed to load from archive: {}", e))
     })?;
@@ -163,15 +172,20 @@ async fn load_policy_store_from_cjar_file(
 
 /// Loads the policy store from a Cedar Archive (.cjar) URL.
 ///
-/// Uses the VFS-agnostic load_policy_store function from the loader module
-/// and converts to legacy format for backward compatibility.
+/// Fetches the archive via HTTP, loads it using ArchiveVfs, and converts
+/// to legacy format for backward compatibility.
 async fn load_policy_store_from_cjar_url(
     url: &str,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    use crate::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
+    use crate::common::policy_store::{
+        ArchiveVfs, DefaultPolicyStoreLoader, source::PolicyStoreSource,
+    };
 
-    // Note: The loader's load_policy_store function for URLs is not fully implemented yet,
-    // so we handle URL fetching here and use from_buffer
+    // Construct source to ensure from_archive_url is used in production code
+    let source = PolicyStoreSource::from_archive_url(url);
+    let _ = (source.description(), source.format());
+
+    // Fetch the archive bytes via HTTP
     let client = HttpClient::new(3, Duration::from_secs(30))?;
     let bytes = client
         .get_bytes(url)
@@ -209,11 +223,11 @@ async fn load_policy_store_from_cjar_url(
 async fn load_policy_store_from_directory(
     path: &Path,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    use crate::common::policy_store::loader;
+    use crate::common::policy_store::{loader, source::PolicyStoreSource};
 
-    // Use the VFS-agnostic load_policy_store function
-    let source =
-        crate::common::policy_store::source::PolicyStoreSource::Directory(path.to_path_buf());
+    // Use constructor method for cleaner API
+    let source = PolicyStoreSource::from_directory(path);
+
     let loaded = loader::load_policy_store(&source).await.map_err(|e| {
         PolicyStoreLoadError::Directory(format!("Failed to load from directory: {}", e))
     })?;

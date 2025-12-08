@@ -10,7 +10,9 @@
 use super::service_config::ServiceConfig;
 use crate::authz::{Authz, AuthzConfig, AuthzServiceInitError};
 use crate::bootstrap_config::BootstrapConfig;
-use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuersValidationError};
+use crate::common::policy_store::{
+    PolicyStoreMetadata, PolicyStoreWithID, TrustedIssuersValidationError,
+};
 use crate::entity_builder::*;
 use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log;
@@ -55,6 +57,14 @@ impl<'a> ServiceFactory<'a> {
             .validate_trusted_issuers()?;
 
         Ok(&self.service_config.policy_store)
+    }
+
+    /// Get the policy store metadata if available.
+    ///
+    /// Metadata is only available when the policy store is loaded from the new
+    /// directory/archive format. Legacy JSON/YAML formats do not include metadata.
+    pub fn policy_store_metadata(&self) -> Option<&PolicyStoreMetadata> {
+        self.service_config.policy_store.metadata.as_ref()
     }
 
     // get log service
