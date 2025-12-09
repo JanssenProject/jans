@@ -527,6 +527,7 @@ async fn test_unsigned_authz_works_without_trusted_issuers() {
                     Algorithm::HS256,
                     Algorithm::RS256,
                 ]),
+                ..Default::default()
             };
         },
     )
