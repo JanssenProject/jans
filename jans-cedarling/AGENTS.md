@@ -93,5 +93,6 @@
 - After making changes to `bindings/cedarling_python`, always validate the `.pyi` files in `bindings/cedarling_python/cedarling_python`
 - Check if type hints need adjustment to match Rust interface changes
 - **Before running tests, ensure Python virtual environment is activated if available**
+- To build updated python bindings execute `cd bindings/cedarling_python && maturin develop` if you have error during execution read readme file `bindings/cedarling_python/README.md`
 - Run Python tests to ensure bindings work correctly: `cd bindings/cedarling_python && python -m pytest` , if it's not installed install by using `pip install pytest`.
 - Use `mypy` to validate type annotations: `mypy cedarling_python`, if it's not installed install by using `pip install mypy`.
