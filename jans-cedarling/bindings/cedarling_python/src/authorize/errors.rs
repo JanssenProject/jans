@@ -18,13 +18,6 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    DecodeTokens,
-    AuthorizeError,
-    "Error encountered while decoding JWT token data"
-);
-
-create_exception!(
-    authorize_errors,
     ProcessTokens,
     AuthorizeError,
     "Error encountered while processing JWT token data"
