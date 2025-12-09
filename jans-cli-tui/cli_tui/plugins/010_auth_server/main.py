@@ -78,6 +78,7 @@ class Plugin(DialogUtils):
         self.sessions = Sessions()
 
         self.oauth_containers = {}
+        self.PROPERTIES_EXCLUDED_FROM_EDIT = {'acrMappings'}
 
         self.oauth_prepare_navbar()
         self.oauth_prepare_containers()
@@ -571,7 +572,7 @@ class Plugin(DialogUtils):
         missing_properties = []
 
         for prop in self.schema['properties']:
-            if prop in ('acrMappings',):
+            if prop in self.PROPERTIES_EXCLUDED_FROM_EDIT:
                 continue
             if prop not in self.app.app_configuration:
                 missing_properties.append(prop)
