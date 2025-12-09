@@ -83,7 +83,7 @@ create_exception!(
     authorize_errors,
     BuildEntityError,
     AuthorizeError,
-    "Error encountered while running on strict id token trust mode"
+    "Error encountered while building Cedar entities"
 );
 
 create_exception!(
