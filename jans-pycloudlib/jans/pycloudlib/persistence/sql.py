@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import atexit
 import json
 import logging
 import os
 import re
 import typing as _t
 import warnings
+import weakref
 from collections import defaultdict
 from collections.abc import Callable
 from functools import cached_property
@@ -35,6 +37,9 @@ from jans.pycloudlib.utils import get_password_from_file
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import exec_cmd
 
+from google.cloud.sql.connector import Connector
+from google.cloud.sql.connector import IPTypes
+
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
     # these won't be executed in runtime
@@ -49,7 +54,145 @@ SIMPLE_JSON_RE = re.compile(r"(mysql.simple-json)(=)(.*)")
 SQL_OVERRIDES_FILE = "/etc/jans/conf/sql-overrides.json"
 
 
-class PostgresqlAdapter:
+class CloudSqlConnectorMixin:
+    """Mixin class providing Cloud SQL Python Connector support.
+
+    This mixin centralizes the Cloud SQL Connector lifecycle management,
+    instance name validation, and connection creator logic for database adapters.
+
+    Subclasses must define:
+        cloudsql_driver: The driver string for the connector (e.g., "pg8000", "pymysql")
+        fallback_driver_name: Human-readable driver name for warning messages
+    """
+
+    #: Driver string used by Cloud SQL Connector (e.g., "pg8000", "pymysql")
+    cloudsql_driver: str = ""
+
+    #: Human-readable driver name for fallback warning messages
+    fallback_driver_name: str = ""
+
+    def __init__(self) -> None:
+        self._cloudsql_connector: _t.Any = None
+
+    @property
+    def cloudsql_connector_enabled(self) -> bool:
+        """Check if Cloud SQL Python Connector is enabled.
+
+        Returns:
+            True if CN_SQL_CLOUDSQL_CONNECTOR_ENABLED is set to true, False otherwise.
+        """
+        return as_boolean(os.environ.get("CN_SQL_CLOUDSQL_CONNECTOR_ENABLED", "false"))
+
+    def _get_instance_connection_name(self) -> str:
+        """Get and validate the Cloud SQL instance connection name.
+
+        Returns:
+            The validated instance connection name.
+
+        Raises:
+            RuntimeError: If CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME is not set or empty.
+        """
+        instance_connection_name = os.environ.get(
+            "CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME", ""
+        ).strip()
+
+        if not instance_connection_name:
+            raise RuntimeError(
+                "CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME environment variable is not set or empty. "
+                "Please set it to your Cloud SQL instance connection name in the format: "
+                "project:region:instance (e.g., my-project:us-central1:my-instance)"
+            )
+
+        return instance_connection_name
+
+    def _ensure_connector(self) -> None:
+        """Initialize the Cloud SQL Connector if not already created.
+
+        Uses LAZY refresh strategy for deferred token refresh.
+        """
+        if self._cloudsql_connector is None:
+            self._cloudsql_connector = Connector(refresh_strategy="LAZY")
+
+    def get_cloudsql_connection_creator(self, manager: Manager) -> _t.Callable[[], _t.Any]:
+        """Create a connection factory for Cloud SQL Python Connector.
+
+        This function creates a SQLAlchemy-compatible connection factory that uses
+        Google Cloud SQL Python Connector with LAZY refresh strategy and Private IP.
+
+        The password is fetched fresh on each connection to support runtime
+        password rotation without requiring application restart.
+
+        Environment variables used:
+            - CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME: Cloud SQL instance connection name
+              (format: project:region:instance)
+            - CN_SQL_DB_USER: Database username
+            - CN_SQL_DB_NAME: Database name
+            - CN_SQL_PASSWORD_FILE: Path to file containing database password
+
+        Args:
+            manager: An instance of Manager class for retrieving secrets. Required
+                to fetch the database password when the password file is absent.
+
+        Returns:
+            A callable that creates database connections via Cloud SQL Connector.
+
+        Raises:
+            RuntimeError: If CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME is not set.
+            ValueError: If the adapter's cloudsql_driver attribute is not defined.
+        """
+        self._ensure_connector()
+        instance_connection_name = self._get_instance_connection_name()
+
+        if not self.cloudsql_driver:
+            raise ValueError(
+                f"{self.__class__.__name__} must define a non-empty 'cloudsql_driver' "
+                "class attribute (e.g., 'pg8000' for PostgreSQL, 'pymysql' for MySQL)."
+            )
+
+        db_user = os.environ.get("CN_SQL_DB_USER", "jans")
+        db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
+        driver = self.cloudsql_driver
+        connector = self._cloudsql_connector
+
+        def getconn() -> _t.Any:
+            """Create a connection to Cloud SQL using Private IP.
+
+            The password is fetched fresh on each call to support runtime
+            password rotation.
+
+            Returns:
+                A database connection object.
+            """
+            conn = connector.connect(
+                instance_connection_name,
+                driver,
+                user=db_user,
+                password=get_sql_password(manager),
+                db=db_name,
+                ip_type=IPTypes.PRIVATE,
+            )
+            return conn
+
+        return getconn
+
+    def close(self) -> None:
+        """Close the Cloud SQL Connector and release resources.
+
+        This method should be called when the adapter is no longer needed to
+        properly release the token-refresh thread and other resources used by
+        the Cloud SQL Python Connector.
+        """
+        if self._cloudsql_connector is not None:
+            try:
+                self._cloudsql_connector.close()
+                logger.debug("Cloud SQL Connector closed successfully")
+            except Exception as exc:
+                logger.warning(f"Error closing Cloud SQL Connector: {exc}")
+            finally:
+                self._cloudsql_connector = None
+
+
+class PostgresqlAdapter(CloudSqlConnectorMixin):
     """Class for PostgreSQL adapter."""
 
     #: Dialect name
@@ -63,6 +206,12 @@ class PostgresqlAdapter:
 
     #: Query to display server version
     server_version_query = "SHOW server_version"
+
+    #: Driver for Cloud SQL Connector
+    cloudsql_driver = "pg8000"
+
+    #: Fallback driver name for warning messages
+    fallback_driver_name = "psycopg2"
 
     def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
@@ -98,8 +247,17 @@ class PostgresqlAdapter:
             raise exc
 
     @property
-    def connect_args(self):
-        opts = {}
+    def connect_args(self) -> dict[str, _t.Any]:
+        """Get connection arguments for SQLAlchemy.
+
+        Returns:
+            Dictionary of connection arguments. When Cloud SQL Connector is enabled,
+            returns empty dict as connection is handled by the connector.
+        """
+        if self.cloudsql_connector_enabled:
+            return {}
+
+        opts: dict[str, _t.Any] = {}
 
         if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
             opts["sslmode"] = os.environ.get("CN_SQL_SSL_MODE", "require")
@@ -116,7 +274,7 @@ class PostgresqlAdapter:
         )
 
 
-class MysqlAdapter:
+class MysqlAdapter(CloudSqlConnectorMixin):
     """Class for MySQL adapter."""
 
     #: Dialect name.
@@ -130,6 +288,12 @@ class MysqlAdapter:
 
     #: Query to display server version
     server_version_query = "SELECT VERSION()"
+
+    #: Driver for Cloud SQL Connector
+    cloudsql_driver = "pymysql"
+
+    #: Fallback driver name for warning messages
+    fallback_driver_name = "pymysql"
 
     def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
@@ -165,8 +329,17 @@ class MysqlAdapter:
             raise exc
 
     @property
-    def connect_args(self):
-        opts = {}
+    def connect_args(self) -> dict[str, _t.Any]:
+        """Get connection arguments for SQLAlchemy.
+
+        Returns:
+            Dictionary of connection arguments. When Cloud SQL Connector is enabled,
+            returns empty dict as connection is handled by the connector.
+        """
+        if self.cloudsql_connector_enabled:
+            return {}
+
+        opts: dict[str, _t.Any] = {}
 
         if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
             opts["ssl"] = {}
@@ -279,13 +452,41 @@ class SqlSchemaMixin:
         return syntax
 
 
+_sql_client_instances: weakref.WeakSet[SqlClient] = weakref.WeakSet()
+
+
+def _cleanup_sql_clients() -> None:
+    """Cleanup all SqlClient instances on interpreter shutdown.
+
+    This function is registered with atexit to ensure proper cleanup of
+    Cloud SQL Connectors and SQLAlchemy engines when the process exits.
+    """
+    for client in list(_sql_client_instances):
+        try:
+            client.close()
+        except Exception as exc:
+            logger.debug(f"Error during atexit cleanup of SqlClient: {exc}")
+
+
+atexit.register(_cleanup_sql_clients)
+
+
 class SqlClient(SqlSchemaMixin):
     """This class interacts with SQL database.
+
+    This class can be used as a context manager to ensure proper cleanup of
+    resources (Cloud SQL Connector and SQLAlchemy engine) when done.
 
     Args:
         manager: An instance of manager class.
         *args: Positional arguments.
         **kwargs: Keyword arguments.
+
+    Example:
+        >>> with SqlClient(manager) as client:
+        ...     if client.connected():
+        ...         print("Connected to database")
+        # Resources are automatically cleaned up when exiting the context
     """
 
     def __init__(self, manager: Manager, *args: _t.Any, **kwargs: _t.Any) -> None:
@@ -300,9 +501,12 @@ class SqlClient(SqlSchemaMixin):
         self.dialect = self.adapter.dialect
         self._metadata: _t.Optional[MetaData] = None
         self._engine = None
+        self._closed = False
 
         if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
             self._bootstrap_ssl_assets()
+
+        _sql_client_instances.add(self)
 
     def _bootstrap_ssl_assets(self):
         for filepath, secret_name in [
@@ -326,14 +530,40 @@ class SqlClient(SqlSchemaMixin):
 
     @property
     def engine(self) -> Engine:
-        """Lazy init of engine instance object."""
+        """Lazy init of engine instance object.
+
+        When CN_SQL_CLOUDSQL_CONNECTOR_ENABLED is set to 'true', the engine uses
+        Cloud SQL Python Connector with:
+        - LAZY refresh strategy for token refresh
+        - PRIVATE IP for connecting to Cloud SQL instance
+        - pg8000 driver for PostgreSQL, pymysql for MySQL
+
+        Otherwise, uses the standard connection method with psycopg2/pymysql.
+        """
         if not self._engine:
-            self._engine = create_engine(
-                self.engine_url,
-                pool_pre_ping=True,
-                hide_parameters=True,
-                connect_args=self.adapter.connect_args,
-            )
+            if self._use_cloudsql_connector():
+                logger.info("Using Cloud SQL Python Connector with LAZY refresh strategy and Private IP")
+                if isinstance(self.adapter, PostgresqlAdapter):
+                    self._engine = create_engine(
+                        "postgresql+pg8000://",
+                        creator=self.adapter.get_cloudsql_connection_creator(self.manager),
+                        pool_pre_ping=True,
+                        hide_parameters=True,
+                    )
+                else:
+                    self._engine = create_engine(
+                        "mysql+pymysql://",
+                        creator=self.adapter.get_cloudsql_connection_creator(self.manager),
+                        pool_pre_ping=True,
+                        hide_parameters=True,
+                    )
+            else:
+                self._engine = create_engine(
+                    self.engine_url,
+                    pool_pre_ping=True,
+                    hide_parameters=True,
+                    connect_args=self.adapter.connect_args,
+                )
 
             if self.dialect == "mysql":
                 event.listen(self._engine, "first_connect", set_mysql_strict_mode)
@@ -342,9 +572,77 @@ class SqlClient(SqlSchemaMixin):
         # initialized engine
         return self._engine
 
+    def _use_cloudsql_connector(self) -> bool:
+        """Check if Cloud SQL Connector should be used.
+
+        Returns:
+            True if the adapter has Cloud SQL Connector enabled.
+        """
+        return getattr(self.adapter, "cloudsql_connector_enabled", False)
+
+    def close(self) -> None:
+        """Close the SQL client and release all resources.
+
+        This method disposes the SQLAlchemy engine (releasing connection pool)
+        and closes the Cloud SQL Connector (stopping token-refresh threads).
+        After calling this method, the client should not be used.
+
+        This method is idempotent - calling it multiple times is safe.
+        """
+        if self._closed:
+            return
+
+        self._closed = True
+
+        try:
+            _sql_client_instances.discard(self)
+        except Exception as exc:
+            logger.debug(f"Error removing SqlClient from instance tracker: {exc}")
+
+        if self._engine is not None:
+            try:
+                self._engine.dispose()
+                logger.debug("SQLAlchemy engine disposed successfully")
+            except Exception as exc:
+                logger.warning(f"Error disposing SQLAlchemy engine: {exc}")
+            finally:
+                self._engine = None
+
+        if hasattr(self.adapter, "close"):
+            self.adapter.close()
+
+        self._metadata = None
+
+    def __enter__(self) -> "SqlClient":
+        """Enter the context manager.
+
+        Returns:
+            The SqlClient instance.
+        """
+        return self
+
+    def __exit__(
+        self,
+        exc_type: _t.Optional[type[BaseException]],
+        exc_val: _t.Optional[BaseException],
+        exc_tb: _t.Optional[_t.Any],
+    ) -> None:
+        """Exit the context manager and cleanup resources.
+
+        Args:
+            exc_type: Exception type if an exception was raised.
+            exc_val: Exception value if an exception was raised.
+            exc_tb: Exception traceback if an exception was raised.
+        """
+        self.close()
+
     @property
     def engine_url(self) -> URL:
-        """Engine connection URL."""
+        """Engine connection URL.
+
+        Note: When Cloud SQL Connector is enabled, this URL is not used.
+        The connection is handled by the connector's creator function instead.
+        """
         return URL(
             drivername=self.adapter.connector,
             username=os.environ.get("CN_SQL_DB_USER", "jans"),
@@ -735,6 +1033,54 @@ class SqlClient(SqlSchemaMixin):
         return column_mapping
 
 
+def _build_jdbc_connection_uri(db_dialect: str, db_name: str, server_time_zone: str) -> str:
+    """Build the JDBC connection URI based on the database dialect and Cloud SQL connector settings.
+
+    Args:
+        db_dialect: The database dialect ('mysql' or 'pgsql').
+        db_name: The database name.
+        server_time_zone: The server timezone.
+
+    Returns:
+        The JDBC connection URI string.
+
+    Raises:
+        RuntimeError: If Cloud SQL connector is enabled but instance connection name is not set.
+    """
+    cloudsql_connector_enabled = as_boolean(os.environ.get("CN_SQL_CLOUDSQL_CONNECTOR_ENABLED", "false"))
+
+    if cloudsql_connector_enabled:
+        instance_connection_name = os.environ.get("CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME", "").strip()
+        if not instance_connection_name:
+            raise RuntimeError(
+                "Cloud SQL connector is enabled (CN_SQL_CLOUDSQL_CONNECTOR_ENABLED=true) but "
+                "CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME is not set. "
+                "Set it to your Cloud SQL instance connection name (project:region:instance)."
+            )
+
+        if db_dialect == "mysql":
+            return (
+                f"jdbc:mysql:///{db_name}"
+                f"?cloudSqlInstance={instance_connection_name}"
+                f"&socketFactory=com.google.cloud.sql.mysql.SocketFactory"
+                f"&serverTimezone={server_time_zone}"
+            )
+        else:  # pgsql
+            return (
+                f"jdbc:postgresql:///{db_name}"
+                f"?cloudSqlInstance={instance_connection_name}"
+                f"&socketFactory=com.google.cloud.sql.postgres.SocketFactory"
+            )
+    else:
+        db_host = os.environ.get("CN_SQL_DB_HOST", "localhost")
+        db_port = os.environ.get("CN_SQL_DB_PORT", 3306)
+
+        if db_dialect == "mysql":
+            return f"jdbc:mysql://{db_host}:{db_port}/{db_name}?enabledTLSProtocols=TLSv1.2"
+        else:  # pgsql
+            return f"jdbc:postgresql://{db_host}:{db_port}/{db_name}"
+
+
 def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to SQL database server.
 
@@ -749,6 +1095,7 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
     with open(dest, "w") as f:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
+        server_time_zone = os.environ.get("CN_SQL_DB_TIMEZONE", "UTC")
 
         # In MySQL, physically, a schema is synonymous with a database
         if db_dialect == "mysql":
@@ -764,12 +1111,13 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
             "rdbm_type": "postgresql" if db_dialect == "pgsql" else "mysql",
             "rdbm_host": os.environ.get("CN_SQL_DB_HOST", "localhost"),
             "rdbm_port": os.environ.get("CN_SQL_DB_PORT", 3306),
+            "rdbm_connection_uri": _build_jdbc_connection_uri(db_dialect, db_name, server_time_zone),
             "rdbm_user": os.environ.get("CN_SQL_DB_USER", "jans"),
             "rdbm_password_enc": encode_text(
                 get_sql_password(manager),
                 manager.secret.get("encoded_salt"),
             ).decode(),
-            "server_time_zone": os.environ.get("CN_SQL_DB_TIMEZONE", "UTC"),
+            "server_time_zone": server_time_zone,
         }
         f.write(rendered_txt)
 
@@ -796,12 +1144,33 @@ def sync_sql_password(manager: Manager) -> None:
     )
 
 
-def get_sql_password(manager: Manager | None = None):
+def get_sql_password(manager: Manager | None = None) -> str:
+    """Get the SQL database password.
+
+    The password is retrieved from the password file if it exists,
+    otherwise it is fetched from the Manager's secret store.
+
+    Args:
+        manager: An instance of Manager class for retrieving secrets.
+            Required when the password file does not exist.
+
+    Returns:
+        The database password string.
+
+    Raises:
+        RuntimeError: If the password file does not exist and manager is None.
+    """
     password_file = get_sql_password_file()
     if os.path.isfile(password_file):
         return get_password_from_file(password_file)
 
-    # safer method to get credential
+    if manager is None:
+        raise RuntimeError(
+            f"SQL password file '{password_file}' does not exist and no Manager instance "
+            "was provided. Either create the password file or pass a Manager instance "
+            "to retrieve the password from the secret store."
+        )
+
     return manager.secret.get("sql_password")
 
 

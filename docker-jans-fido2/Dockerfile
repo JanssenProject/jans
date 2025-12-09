@@ -1,3 +1,12 @@
+# =================================
+# Cloud SQL JDBC Socket Factory
+# =================================
+# Pre-built fat JARs from GHCR for Cloud SQL connectivity
+FROM ghcr.io/janssenproject/jans/cloudsql-socket-factory:1.27.0 AS cloudsql-libs
+
+# =================================
+# Main Image
+# =================================
 FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
 
 # ===============
@@ -209,9 +218,16 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/fido2" \
     org.opencontainers.image.title="Janssen FIDO2" \
     org.opencontainers.image.description="FIDO2 server"
 
+# ===========
+# Custom libs
+# ===========
+
+# Copy Cloud SQL Socket Factory fat JARs from builder (includes all dependencies)
+RUN mkdir -p ${JETTY_BASE}/jans-fido2/custom/libs
+COPY --from=cloudsql-libs /cloudsql/*.jar ${JETTY_BASE}/jans-fido2/custom/libs/
+
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-fido2/logs \
-    ${JETTY_BASE}/jans-fido2/custom/libs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java
@@ -236,6 +252,8 @@ RUN chmod 664 ${JETTY_BASE}/jans-fido2/resources/log4j2.xml \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 /etc/jans/conf/fido2/mds/toc \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-fido2/custom/libs \
+    && chmod -R g=u ${JETTY_BASE}/jans-fido2/custom/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-fido2/webapps/jans-fido2.xml \

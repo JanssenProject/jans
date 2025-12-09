@@ -1,3 +1,12 @@
+# =================================
+# Cloud SQL JDBC Socket Factory
+# =================================
+# Pre-built fat JARs from GHCR for Cloud SQL connectivity
+FROM ghcr.io/janssenproject/jans/cloudsql-socket-factory:1.27.0 AS cloudsql-libs
+
+# =================================
+# Main Image
+# =================================
 FROM bellsoft/liberica-openjdk-alpine:17.0.17@sha256:0e8ae43555ad8e2d69431c2078df256c01b625a8a3010e76b5a6baff0d165d2c
 
 # ===============
@@ -203,9 +212,16 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/scim" \
     org.opencontainers.image.title="Janssen SCIM" \
     org.opencontainers.image.description="SCIM server"
 
+# ===========
+# Custom libs
+# ===========
+
+# Copy Cloud SQL Socket Factory fat JARs from builder (includes all dependencies)
+RUN mkdir -p ${JETTY_BASE}/jans-scim/custom/libs
+COPY --from=cloudsql-libs /cloudsql/*.jar ${JETTY_BASE}/jans-scim/custom/libs/
+
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-scim/logs \
-    ${JETTY_BASE}/jans-scim/custom/libs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java
@@ -229,6 +245,8 @@ RUN chmod 664 ${JETTY_BASE}/jans-scim/resources/log4j2.xml \
     && chmod -R g=u /etc/jans \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-scim/custom/libs \
+    && chmod -R g=u ${JETTY_BASE}/jans-scim/custom/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-scim/webapps/jans-scim.xml \
