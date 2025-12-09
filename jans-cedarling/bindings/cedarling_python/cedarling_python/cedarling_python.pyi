@@ -29,7 +29,7 @@ class BootstrapConfig:
 
         Args:
             options (dict): A dictionary containing configuration key-value pairs.
-            For more imformation visit https://docs.jans.io/head/cedarling/cedarling-properties/
+            For more information visit https://docs.jans.io/head/cedarling/cedarling-properties/
         Returns:
             None: This method initializes the instance.
 
