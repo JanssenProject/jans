@@ -78,7 +78,9 @@ class Plugin(DialogUtils):
         self.sessions = Sessions()
 
         self.oauth_containers = {}
-        self.PROPERTIES_EXCLUDED_FROM_EDIT = {'acrMappings'}
+        self.PROPERTIES_EXCLUDED_FROM_EDIT = {
+            'acrMappings' : _("To add or edit <b>acrMappings</b> please use Auth Server / Authn / Aliases")
+            }
 
         self.oauth_prepare_navbar()
         self.oauth_prepare_containers()
@@ -726,10 +728,10 @@ class Plugin(DialogUtils):
 
         selected_line_data = params['passed']
 
-        if selected_line_data[0] == 'acrMappings':
+        if selected_line_data[0] in self.PROPERTIES_EXCLUDED_FROM_EDIT:
             self.app.show_message(
             title=_(common_strings.warning),
-            message=HTML(_("To add or edit <b>acrMappings</b> please use Auth Server / Authn / Aliases")),
+            message=HTML(self.PROPERTIES_EXCLUDED_FROM_EDIT[selected_line_data[0]]),
             tobefocused=self.app.center_frame
             )
             return
