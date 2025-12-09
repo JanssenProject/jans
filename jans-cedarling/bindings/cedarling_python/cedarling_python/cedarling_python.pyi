@@ -126,8 +126,6 @@ class Cedarling:
             BuildEntityError: Error encountered while building Cedar entities.
             ExecuteRuleError: Error encountered while executing the rule for principals.
             BuildUnsignedRoleEntityError: Error building Role entity for unsigned request.
-            MultiIssuerValidationError: Error encountered during multi-issuer token validation.
-            MultiIssuerEntityError: Error encountered while building multi-issuer entities.
             RequestValidationError: Error encountered while validating the request.
             RuntimeError: If JSON conversion of tokens or context fails.
         """
