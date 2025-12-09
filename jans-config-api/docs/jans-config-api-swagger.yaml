@@ -4796,6 +4796,7 @@ paths:
                   - health_check
                   - authz_detail
                   - update_token
+                  - tx_token
                   - logout_status_jwt
                   - par
                   - config_api_auth
@@ -14948,21 +14949,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
+        selected:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanEdit:
+          type: boolean
         adminCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
         adminCanView:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        selected:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -16588,6 +16589,10 @@ components:
           type: array
           items:
             type: string
+        txTokenScriptDns:
+          type: array
+          items:
+            type: string
         backchannelLogoutUri:
           type: array
           items:
@@ -17052,6 +17057,7 @@ components:
           - health_check
           - authz_detail
           - update_token
+          - tx_token
           - logout_status_jwt
           - par
           - config_api_auth

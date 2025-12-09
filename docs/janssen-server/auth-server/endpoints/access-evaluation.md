@@ -9,18 +9,18 @@ tags:
 
 
 The Jans-Auth server implements [OpenID AuthZEN Authorization API 1.0 – draft 01](https://openid.github.io/authzen/).
-The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between 
-Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems. 
-It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests, 
-enhancing interoperability and scalability in authorization processes. 
-The specification is transport-agnostic, with an initial focus on HTTPS bindings, and emphasizes secure, fine-grained, 
+The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between
+Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems.
+It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests,
+enhancing interoperability and scalability in authorization processes.
+The specification is transport-agnostic, with an initial focus on HTTPS bindings, and emphasizes secure, fine-grained,
 and dynamic authorization mechanisms.
 
-The Access Evaluation Endpoint in the AuthZEN specification serves as a mechanism for Policy Enforcement Points (PEPs) 
-to request access decisions from a Policy Decision Point (PDP) for specific resources and actions. 
-Upon receiving a request, the endpoint evaluates the subject, resource, and action against defined policies to determine 
-if access should be granted, denied, or if additional information is needed. 
-The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time. 
+The Access Evaluation Endpoint in the AuthZEN specification serves as a mechanism for Policy Enforcement Points (PEPs)
+to request access decisions from a Policy Decision Point (PDP) for specific resources and actions.
+Upon receiving a request, the endpoint evaluates the subject, resource, and action against defined policies to determine
+if access should be granted, denied, or if additional information is needed.
+The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time.
 The goal is to provide a scalable, secure interface for dynamic and fine-grained access control across applications.
 
 
@@ -38,8 +38,8 @@ https://janssen.server.host/jans-auth/.well-known/openid-configuration
 https://janssen.server.host/jans-auth/.well-known/authzen-configuration
 ```
 
-`/.well-known/authzen-configuration` allows to publish data specific to AuthZEN only. Response of AuthZEN discovery endpoint can be 
-changed via `AccessEvaluationDiscoveryType` custom script. 
+`/.well-known/authzen-configuration` allows to publish data specific to AuthZEN only. Response of AuthZEN discovery endpoint can be
+changed via `AccessEvaluationDiscoveryType` custom script.
 
 **Snippet of AccessEvaluationDiscoveryType**
 ```java
@@ -52,28 +52,28 @@ changed via `AccessEvaluationDiscoveryType` custom script.
     }
 ```
 
-`access_evaluation_v1_endpoint` claim in the response specifies the URL for access evaluation endpoint. By default, access 
+`access_evaluation_v1_endpoint` claim in the response specifies the URL for access evaluation endpoint. By default, access
 evaluation endpoint looks like below:
 
-```
+```text
 https://janssen.server.host/jans-auth/restv1/access/v1/evaluation
 ```
 
-In order to call Access Evaluation Endpoint client must have `access_evaluation` scope. 
-If scope is not present AS rejects call with 401 (unauthorized) http status code.
-`Authorization` header must contain valid `access_token` with `access_evaluation` scope granted to it.
-Otherwise it's possible to use `Basic` token with encoded client credentials if set
+To call Authorization Challenge Endpoint, client must have `authorization_challenge` scope.
+If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP status code.
+Otherwise, it's possible to use `Basic` token with encoded client credentials if set
 `accessEvaluationAllowBasicClientAuthorization` AS configuration property to `true`.
 
 - Bearer token : `Authorization: Bearer <access_token>`
 - Basic authorization : `Authorization: Basic <encoded client credentials>`
 
 
-More information about request and response of the Access Evaluation Endpoint can be found in the OpenAPI specification 
+More information about request and response of the Access Evaluation Endpoint can be found in the OpenAPI specification
 of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/access-evaluation).
 
 Sample request
-```
+
+```http
 POST /jans-auth/restv1/access/v1/evaluation HTTP/1.1
 Host: happy-example.gluu.info
 Content-Type: application/json
@@ -103,6 +103,7 @@ Authorization: Basic M2NjOTdhYWItMDE0Zi00ZWM5LWI4M2EtNTE3MTRlODE3MDMwOmFlYmMwZWF
 ```
 
 Sample successful response with `authorization_code`.
+
 ```
 HTTP/1.1 200
 Content-Type: application/json
@@ -118,6 +119,7 @@ Content-Type: application/json
 ```
 
 Sample error response
+
 ```
 HTTP/1.1 401 Unauthorized
 Content-Type: application/json
@@ -136,13 +138,13 @@ Access Evaluation Endpoint AS configuration:
 - **accessEvaluationScriptName** - Access evaluation custom script name. If not set AS falls back to first valid script found in database.
 - **accessEvaluationAllowBasicClientAuthorization** - Allow basic client authorization for access evaluation endpoint.
 
-## Custom script  
+## Custom script
 
 AS provides `AccessEvaluationType` custom script which must be used to control Access Evaluation Endpoint behaviour.
 
 Use `accessEvaluationScriptName` configuration property to specify custom script.   If not set AS falls back to first valid script found in database.
 
-Main `evaluate` method returns response which grants or denies access. 
+Main `evaluate` method returns response which grants or denies access.
 
 Please see following snippet below:
 

@@ -10,6 +10,7 @@
 
 use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
+use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::entity_builder::BuiltEntities;
 use crate::entity_builder::*;
@@ -718,7 +719,7 @@ pub struct AuthorizeEntitiesData {
     pub user: Option<Entity>,
     pub roles: Vec<Entity>,
     pub resource: Entity,
-    pub default_entities: HashMap<EntityUid, Entity>,
+    pub default_entities: DefaultEntities,
 }
 
 impl AuthorizeEntitiesData {
@@ -730,7 +731,12 @@ impl AuthorizeEntitiesData {
         let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::new();
 
         // Add default entities first
-        merged_entities.extend(self.default_entities.into_values().map(|e| (e.uid(), e)));
+        merged_entities.extend(
+            self.default_entities
+                .inner
+                .into_values()
+                .map(|e| (e.uid(), e)),
+        );
 
         // Add request entities (these will override default entities if conflicts exist)
         merged_entities.extend(vec![self.resource].into_iter().map(|e| (e.uid(), e)));
@@ -772,7 +778,12 @@ impl AuthorizeEntitiesData {
         let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::new();
 
         // Add default entities first
-        merged_entities.extend(self.default_entities.values().map(|e| (e.uid(), e.clone())));
+        merged_entities.extend(
+            self.default_entities
+                .inner
+                .values()
+                .map(|e| (e.uid(), e.clone())),
+        );
 
         // Add request entities, overriding any conflicting default entities
         merged_entities.extend(

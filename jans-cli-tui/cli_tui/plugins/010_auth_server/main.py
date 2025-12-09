@@ -78,6 +78,9 @@ class Plugin(DialogUtils):
         self.sessions = Sessions()
 
         self.oauth_containers = {}
+        self.PROPERTIES_EXCLUDED_FROM_EDIT = {
+            'acrMappings' : _("To add or edit <b>acrMappings</b> please use Auth Server / Authn / Aliases")
+            }
 
         self.oauth_prepare_navbar()
         self.oauth_prepare_containers()
@@ -571,9 +574,12 @@ class Plugin(DialogUtils):
         missing_properties = []
 
         for prop in self.schema['properties']:
+            if prop in self.PROPERTIES_EXCLUDED_FROM_EDIT:
+                continue
             if prop not in self.app.app_configuration:
                 missing_properties.append(prop)
         missing_properties.sort()
+
         missing_properties_data = [ [prop] for prop in missing_properties ]
 
         def add_property(**params: Any) -> None:
@@ -720,14 +726,18 @@ class Plugin(DialogUtils):
         """This method view the properties in Dialog to edit
         """
 
-        selected_line_data = params['passed']    ##self.uma_result 
+        selected_line_data = params['passed']
 
-        open("/tmp/property.json","w").write(json.dumps(selected_line_data))
+        if selected_line_data[0] in self.PROPERTIES_EXCLUDED_FROM_EDIT:
+            self.app.show_message(
+            title=_(common_strings.warning),
+            message=HTML(self.PROPERTIES_EXCLUDED_FROM_EDIT[selected_line_data[0]]),
+            tobefocused=self.app.center_frame
+            )
+            return
 
         title = _("Edit property")
-
         dialog = ViewProperty(app=self.app, parent=self, title=title, data=selected_line_data, op_type=params.get('op_type', 'replace'))
-
         self.app.show_jans_dialog(dialog)
  
     def search_properties(self, tbuffer:Buffer) -> None:

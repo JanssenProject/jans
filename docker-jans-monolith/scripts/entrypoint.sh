@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-
+set -o pipefail
 # ======================================================================================================================
 # INSTALL JANSSEN
 # PASSED VARS:
@@ -17,12 +17,40 @@ set -e
 # RDBMS_DATABASE
 # RDBMS_USER
 # RDBMS_PASSWORD
-# ======================================================================================================================
+wait_for_rdbms() {
+    echo "Checking RDBMS connection..."
+    # Check if RDBMS_HOST is set
+    if [ -z "${RDBMS_HOST}" ]; then
+        echo "Error: RDBMS_HOST is not set. Cannot wait for database."
+        exit 1
+    fi
 
-IS_JANS_DEPLOYED=/janssen/deployed
+    local port=""
+    local db_type=""
+
+    if [[ "${CN_INSTALL_MYSQL}" == "true" ]]; then
+        port=3306
+        db_type="MySQL"
+    elif [[ "${CN_INSTALL_PGSQL}" == "true" ]]; then
+        port=5432
+        db_type="PostgreSQL"
+    else
+        echo "No RDBMS specified in CN_INSTALL_MYSQL or CN_INSTALL_PGSQL. Skipping wait."
+        return 0
+    fi
+
+    echo "Waiting for ${db_type} at ${RDBMS_HOST}:${port}..."
+    # Use bash builtin /dev/tcp to verify TCP connectivity
+    until timeout 1 bash -c "</dev/tcp/${RDBMS_HOST}/${port}" > /dev/null 2>&1; do
+        echo "${db_type} is unavailable - sleeping for 2 seconds..."
+        sleep 2
+    done
+    echo "${db_type} is up and running!"
+}
+
 # Functions
 install_jans() {
-  echo "*****   Writing properties!!   *****"
+  echo "***** Writing properties!!   *****"
   echo "hostname=${CN_HOSTNAME}" | tee -a setup.properties > /dev/null
   # shellcheck disable=SC2016
   echo "admin_password=${CN_ADMIN_PASS}" | tee -a setup.properties > /dev/null
@@ -41,7 +69,7 @@ install_jans() {
   echo "install_jans_keycloak_link=""$([[ ${CN_INSTALL_KC_LINK} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_jans_link=""$([[ ${CN_INSTALL_LINK} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "test_client_id=${TEST_CLIENT_ID}"| tee -a setup.properties > /dev/null
-  echo "test_client_pw=${TEST_CLIENT_SECRET}" | tee -a setup.properties > /dev/null1
+  echo "test_client_pw=${TEST_CLIENT_SECRET}" | tee -a setup.properties > /dev/null
   echo "test_client_trusted=""$([[ ${TEST_CLIENT_TRUSTED} == true ]] && echo True || echo True)" | tee -a setup.properties > /dev/null
   echo "loadTestData=True" | tee -a setup.properties > /dev/null
   if [[ "${CN_INSTALL_MYSQL}" == "true" ]] || [[ "${CN_INSTALL_PGSQL}" == "true" ]]; then
@@ -63,20 +91,34 @@ install_jans() {
     echo "rdbm_port=5432" | tee -a setup.properties > /dev/null
   fi
 
-  echo "*****   Running the setup script for ${CN_ORG_NAME}!!   *****"
-  echo "*****   PLEASE NOTE THAT THIS MAY TAKE A WHILE TO FINISH. PLEASE BE PATIENT!!   *****"
+  echo "***** Running the setup script for ${CN_ORG_NAME}!!   *****"
+  echo "***** PLEASE NOTE THAT THIS MAY TAKE A WHILE TO FINISH. PLEASE BE PATIENT!!   *****"
   echo "Executing https://raw.githubusercontent.com/JanssenProject/jans/${JANS_SOURCE_VERSION}/jans-linux-setup/jans_setup/install.py > install.py"
-  curl https://raw.githubusercontent.com/JanssenProject/jans/"${JANS_SOURCE_VERSION}"/jans-linux-setup/jans_setup/install.py > install.py
+  curl -L https://raw.githubusercontent.com/JanssenProject/jans/"${JANS_SOURCE_VERSION}"/jans-linux-setup/jans_setup/install.py > install.py
   echo "Executing python3 install.py -yes --args=-f setup.properties -n"
-  python3 install.py -yes --args="-f setup.properties -n"
-  echo "*****   Setup script completed!!    *****"
 
+
+  python3 install.py -yes --args="-f setup.properties -n"
+  local exit_code=$?
+
+  if [ $exit_code -ne 0 ]; then
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "ERROR: python3 install.py failed with exit code $exit_code"
+    echo "Check /setup_log (inside the container) for details."
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    exit $exit_code
+  fi
+
+  echo "***** Setup script completed!!    *****"
 }
 
 check_installed_jans() {
   if [ -f "$IS_JANS_DEPLOYED" ]; then
     echo "Janssen Authorization has already been installed. Starting services..."
   else
+    if [[ "${CN_INSTALL_MYSQL}" == "true" ]] || [[ "${CN_INSTALL_PGSQL}" == "true" ]]; then
+        wait_for_rdbms
+    fi
     install_jans 2>&1 | tee setup_log || exit 1
     mkdir janssen
     touch "$IS_JANS_DEPLOYED"
@@ -91,7 +133,7 @@ register_fqdn() {
 
 prepare_auth_server_tests() {
     WORKING_DIRECTORY=$PWD
-    echo "*****   cloning jans auth server folder!!   *****"
+    echo "***** cloning jans auth server folder!!   *****"
     rm -rf /tmp/jans || echo "Jans isn't cloned yet..Cloning"\
     && git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans /tmp/jans \
     && cd /tmp/jans \
@@ -163,14 +205,14 @@ prepare_config_api_test() {
 
 prepare_java_tests() {
   if [[ "${RUN_TESTS}" == "true" ]]; then
-    echo "*****   Running Java tests!!   *****"
-    echo "*****   Running Auth server tests!!   *****"
+    echo "***** Running Java tests!!   *****"
+    echo "***** Running Auth server tests!!   *****"
     prepare_auth_server_tests
-    echo "*****   Running Scim tests!!   *****"
+    echo "***** Running Scim tests!!   *****"
     prepare_scim_test
-    echo "*****   Running Config Api tests!!   *****"
+    echo "***** Running Config Api tests!!   *****"
     prepare_config_api_test
-    echo "*****   Java tests completed!!   *****"
+    echo "***** Java tests completed!!   *****"
   fi
 }
 
@@ -190,8 +232,6 @@ start_services
 register_fqdn
 prepare_java_tests || "Java test preparations failed!!"
 
-# use -F option to follow (and retry) logs
-tail -F /opt/jans/jetty/jans-auth/logs/*.log \
-  /opt/jans/jetty/jans-config-api/logs/*.log \
-  /opt/jans/jetty/jans-fido2/logs/*.log \
-  /opt/jans/jetty/jans-scim/logs/*.log
+echo "Janssen setup process complete."
+echo "Systemd is now managing the service lifecycle."
+echo "You can follow logs with: docker-compose logs -f jans"

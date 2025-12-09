@@ -176,11 +176,19 @@ def configure_logging():
 def copy_builtin_libs():
     lock_enabled = as_boolean(os.environ.get("CN_LOCK_ENABLED", "false"))
 
-    for src in Path("/opt/jans/jetty/jans-auth/_libs").glob("*.jar"):
-        # skip jans-lock-service and jans-lock-model
-        if lock_enabled is False and src.name.startswith("jans-lock"):
-            continue
+    if not lock_enabled:
+        return
 
+    libs_path = Path("/opt/jans/jetty/jans-auth/_libs")
+    lock_jars = list(libs_path.glob("jans-lock*.jar"))
+
+    if not lock_jars:
+        logger.warning(
+            f"CN_LOCK_ENABLED is true but no jans-lock*.jar files were found in {libs_path}"
+        )
+        return
+
+    for src in lock_jars:
         dst = f"/opt/jans/jetty/jans-auth/custom/libs/{src.name}"
         shutil.copyfile(src, dst)
 

@@ -9,7 +9,7 @@ There are many ways you can contribute. Of course you can contribute code. But w
 
 * **Repo**: Watch and Star [Janssen repository](https://github.com/JanssenProject/jans) on Github
 * **Discussions**: Join interesting discussions at [Github Discussions](https://github.com/JanssenProject/jans/discussions)
-* **Chat**: We have an active [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). You can register for free their with your Github identity.
+* **Chat**: We have an active [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). You can register for free their with your Github identity.
 * **Tweet**: Janssen is on [Twitter](https://twitter.com/janssen_project) too. Follow us there to stay up to date on release announcements and news around Janssen.
 
 ## First Time Contributors
