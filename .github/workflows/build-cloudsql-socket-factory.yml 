@@ -55,13 +55,17 @@ jobs:
           else
             VERSION=$(cat automation/cloudsql-socket-factory/version.txt | tr -d '\n')
           fi
+          if [ -z "$VERSION" ]; then
+            echo "::error::Failed to determine version"
+            exit 1
+          fi
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Building Cloud SQL Socket Factory version: ${VERSION}"
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@737ba1e397ec2caff0d098f75e1136f9a926dc0a # master
+        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
         with:
-          image: tonistiigi/binfmt:master
+          image: tonistiigi/binfmt:qemu-v8.1.5
           platforms: all
 
       - name: Set up Docker Buildx
@@ -114,7 +118,7 @@ jobs:
             images+="${tag}@${DIGEST} "
           done
           if [[ -n $images ]]; then
-            cosign sign --yes -a author=JanssenProject ${images} || echo "Failed to sign images"
+            cosign sign --yes -a author=JanssenProject ${images}
           fi
 
       - name: Image digest
