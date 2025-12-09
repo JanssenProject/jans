@@ -293,8 +293,7 @@ request = Request(access_token="token123", action="read", resource=resource, con
 ```
 ___
 
-# RequestUnsigned
-Request
+RequestUnsigned
 =======
 
 A Python wrapper for the Rust `cedarling::RequestUnsigned` struct. Represents

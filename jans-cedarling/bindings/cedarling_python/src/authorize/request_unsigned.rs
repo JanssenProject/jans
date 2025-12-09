@@ -11,7 +11,7 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_pyobject::from_pyobject;
 
-/// Request
+/// RequestUnsigned
 /// =======
 ///
 /// A Python wrapper for the Rust `cedarling::RequestUnsigned` struct. Represents
