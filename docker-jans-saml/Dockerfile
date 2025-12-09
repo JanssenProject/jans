@@ -39,7 +39,7 @@ RUN mkdir -p /app/static/rdbm \
     /app/schema \
     /app/templates/jans-saml
 
-ENV JANS_SOURCE_VERSION=be95dc67a0f482b417aaab2e13ff9bde09f8d7ad
+ENV JANS_SOURCE_VERSION=e9e5450c54750da81da4b3cfa64694d032a12053
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
