@@ -310,7 +310,7 @@ Example
 -------
 ```python
 # Create a request for authorization
-request = Request(principals=[principal], action="read", resource=resource, context={})
+request = RequestUnsigned(principals=[principal], action="read", resource=resource, context={})
 ```
 ___
 
