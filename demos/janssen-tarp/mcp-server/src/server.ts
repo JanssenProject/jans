@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 
 // Constants
-const PORT = parseInt(process.env.PORT || "3001");
+const PORT = parseInt(process.env.PORT || "3001", 10);
 const SERVER_NAME = "jans-tarp-mcp-server";
 const SERVER_VERSION = "1.0.0";
 
@@ -305,7 +305,9 @@ server.registerTool(
     };
 
     if (client_secret) {
-      const credentials = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
+      const encodedClientId = encodeURIComponent(client_id);
+      const encodedSecret = encodeURIComponent(client_secret);
+      const credentials = Buffer.from(`${encodedClientId}:${encodedSecret}`).toString('base64');
       headers["Authorization"] = `Basic ${credentials}`;
     }
 
@@ -335,8 +337,17 @@ server.registerTool(
             }
           );
           userinfo = userinfoResponse.data;
-        } catch (error) {
-          console.warn("Failed to fetch userinfo:", error);
+        } catch (error: unknown) {
+          let errorMessage = 'Unknown error';
+
+          if (axios.isAxiosError(error)) {
+            const status = error.response?.status;
+            errorMessage = status ? `${error.message} (status: ${status})` : error.message;
+          } else if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+
+          console.warn("Failed to fetch userinfo:", errorMessage);
           // Continue without userinfo - tokens are still valid
         }
       }
@@ -391,11 +402,9 @@ async function connectMcpServer() {
 async function handleMcpRequest(req: express.Request, res: express.Response) {
   try {
     const result = await transport.handleRequest(req, res, req.body);
-    console.log(result);
-    // Ensure JSON response if not already sent
-    //if (!res.headersSent) {
-    //res.json(result);
-    //}
+    if (process.env.NODE_ENV === 'development') {
+      console.log('MCP request handled successfully');
+    }
   } catch (error) {
     console.error('Error handling MCP request:', error);
 

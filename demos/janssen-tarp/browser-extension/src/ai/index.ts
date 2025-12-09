@@ -338,7 +338,7 @@ export async function handleUserPrompt(prompt: string) {
     if (!toolCalls || toolCalls.length === 0) {
       return {
         type: "text",
-        content: message.content || 
+        content: message?.content || 
                "I can only help with OIDC operations. Please provide details like issuer, client_id, or scopes."
       };
     }
