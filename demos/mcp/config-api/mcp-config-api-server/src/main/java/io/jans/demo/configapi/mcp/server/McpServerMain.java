@@ -1,6 +1,7 @@
 package io.jans.demo.configapi.mcp.server;
 
 import io.jans.demo.configapi.mcp.server.handler.ToolHandler;
+import io.jans.demo.configapi.mcp.server.service.AuthorizationService;
 import io.jans.demo.configapi.mcp.server.service.JansConfigApiClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.server.McpServer;
@@ -50,9 +51,11 @@ public class McpServerMain {
                                                 "JANS_OAUTH_ACCESS_TOKEN environment variable is required");
                         }
 
-                        // Create API client and tool handler
+                        // Create API client, authorization service, and tool handler
                         JansConfigApiClient apiClient = new JansConfigApiClient(baseUrl, accessToken, devMode);
-                        ToolHandler toolHandler = new ToolHandler(apiClient);
+                        AuthorizationService authorizationService = AuthorizationService.initAuthorizationService();
+
+                        ToolHandler toolHandler = new ToolHandler(apiClient, authorizationService);
 
                         // Create JSON mapper
                         ObjectMapper objectMapper = new ObjectMapper();

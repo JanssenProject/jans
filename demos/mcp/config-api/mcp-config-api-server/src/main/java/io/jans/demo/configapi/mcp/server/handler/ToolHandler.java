@@ -1,5 +1,8 @@
 package io.jans.demo.configapi.mcp.server.handler;
 
+import io.jans.demo.configapi.mcp.server.model.Permission;
+import io.jans.demo.configapi.mcp.server.service.AuthorizationService;
+import io.jans.demo.configapi.mcp.server.service.AuthorizationService.UnauthorizedException;
 import io.jans.demo.configapi.mcp.server.service.JansConfigApiClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,15 +19,22 @@ public class ToolHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ToolHandler.class);
     private final JansConfigApiClient apiClient;
+    private final AuthorizationService authorizationService;
     private final ObjectMapper objectMapper;
 
-    public ToolHandler(JansConfigApiClient apiClient) {
+    public ToolHandler(JansConfigApiClient apiClient, AuthorizationService authorizationService) {
         this.apiClient = apiClient;
+        this.authorizationService = authorizationService;
         this.objectMapper = new ObjectMapper();
     }
 
     public CallToolResult handleListClients(Map<String, Object> arguments) {
         try {
+            // Authorization checkpoint: Check if user has permission to read clients
+            if (!authorizationService.checkAuthorization()) {
+                throw new UnauthorizedException("Unauthorized access!");
+            }
+
             // Extract query parameters from arguments
             // Handle both String and Number types (different LLMs send different types)
             Integer limit = 50;
@@ -69,6 +79,9 @@ public class ToolHandler {
                     .content(List.of(new TextContent(jsonResult)))
                     .isError(false)
                     .build();
+        } catch (UnauthorizedException e) {
+            logger.warn("Authorization failed for list_clients: {}", e.getMessage());
+            return createErrorResult("Authorization failed: " + e.getMessage());
         } catch (Exception e) {
             logger.error("Error listing OIDC clients", e);
             return createErrorResult("Error listing OIDC clients: " + e.getClass().getName() + ": " + e.getMessage());
@@ -77,6 +90,11 @@ public class ToolHandler {
 
     public CallToolResult handleCreateClient(Map<String, Object> arguments) {
         try {
+            // Authorization checkpoint: Check if user has permission to read clients
+            if (!authorizationService.checkAuthorization()) {
+                throw new UnauthorizedException("Unauthorized access!");
+            }
+
             // Extract client_data from arguments
             Object clientDataObj = arguments.get("client_data");
             if (clientDataObj == null) {
@@ -101,6 +119,9 @@ public class ToolHandler {
                     .content(List.of(new TextContent(jsonResult)))
                     .isError(false)
                     .build();
+        } catch (UnauthorizedException e) {
+            logger.warn("Authorization failed for create_client: {}", e.getMessage());
+            return createErrorResult("Authorization failed: " + e.getMessage());
         } catch (Exception e) {
             logger.error("Error creating OIDC client", e);
             return createErrorResult("Error creating OIDC client: " + e.getClass().getName() + ": " + e.getMessage());
@@ -109,6 +130,11 @@ public class ToolHandler {
 
     public CallToolResult handleGetHealth(Map<String, Object> arguments) {
         try {
+            // Authorization checkpoint: Check if user has permission to read clients
+            if (!authorizationService.checkAuthorization()) {
+                throw new UnauthorizedException("Unauthorized access!");
+            }
+
             JsonNode healthStatus = apiClient.getHealth();
             String jsonResult = objectMapper.writeValueAsString(healthStatus);
 
@@ -116,6 +142,9 @@ public class ToolHandler {
                     .content(List.of(new TextContent(jsonResult)))
                     .isError(false)
                     .build();
+        } catch (UnauthorizedException e) {
+            logger.warn("Authorization failed for get_health: {}", e.getMessage());
+            return createErrorResult("Authorization failed: " + e.getMessage());
         } catch (Exception e) {
             logger.error("Error getting health status", e);
             return createErrorResult("Error getting health status: " + e.getClass().getName() + ": " + e.getMessage());
