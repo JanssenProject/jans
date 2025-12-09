@@ -218,7 +218,7 @@ def authorize_with_token():
     try:
         authorize_result = instance.authorize(request)
     except authorize_errors.AuthorizeError as e:
-        print(e)
+        print("authorize:", e)
         return
 
     # Print logs from MemoryLogConfig
@@ -403,7 +403,11 @@ def authorize_multi_issuer():
         context=context,
     )
 
-    result = instance.authorize_multi_issuer(request)
+    try:
+        result = instance.authorize_multi_issuer(request)
+    except authorize_errors.AuthorizeError as e:
+        print("authorize_multi_issuer:", e)
+        return
 
     # High-level allowed flag
     print(f"Multi-issuer allowed: {result.is_allowed()}")
