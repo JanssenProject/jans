@@ -159,13 +159,14 @@ public class AuthorizeRestWebServiceImplTest {
     }
 
     @Test
-    public void isSessionAuthnTimeOldForPromptLogin_whenSessionAuthnTimeIsValid_shouldReturnTrue() {
+    public void isSessionAuthnTimeOldForPromptLogin_whenSessionAuthnTimeIsValid_shouldReturnFalse() {
         SessionId sessionId = new SessionId();
-        sessionId.setAuthenticationTime(new Date());
+        sessionId.setAuthenticationTime(new Date(new Date().getTime() - 10));
 
         when(appConfiguration.getSkipSessionAuthnTimeCheckDuringPromptLogin()).thenReturn(false);
+        when(appConfiguration.getSessionAuthnTimeCheckDuringPromptLoginThresholdMs()).thenReturn(500);
 
-        assertTrue(authorizeRestWebService.isSessionAuthnTimeOldForPromptLogin(sessionId));
+        assertFalse(authorizeRestWebService.isSessionAuthnTimeOldForPromptLogin(sessionId));
     }
 
     @Test
