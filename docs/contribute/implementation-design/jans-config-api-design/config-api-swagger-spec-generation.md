@@ -6,8 +6,8 @@ tags:
 
 # Config API Swagger Spec generation at build time
 
-**What Is OpenAPI?** OpenAPI Specification (formerly Swagger Specification) 
-is an API description format for REST APIs. An OpenAPI file allows you to 
+**What Is OpenAPI?** OpenAPI Specification (formerly Swagger Specification)
+is an API description format for REST APIs. An OpenAPI file allows you to
 describe your entire API, including:
 
 * Available endpoints (/users) and operations on each endpoint (GET /users, POST /users)
@@ -28,8 +28,8 @@ This document is related to build time generation.
 
 ## Quick start
 
-OpenAPI Specification is generated when pre-processing the API based on the 
-meta-data added against the various resources, methods, and controllers. 
+OpenAPI Specification is generated when pre-processing the API based on the
+meta-data added against the various resources, methods, and controllers.
 This is also called the code first approach.
 
 ### Project POM changes
@@ -232,8 +232,8 @@ Checkout a sample code [here](https://github.com/JanssenProject/jans/blob/main/j
 
 ### Generate code with Maven
 
-The Maven compile command can be used to generate the OpenAPI Swagger Specification. 
-Specification should be generated in `outputFormat` and `outputPath` 
+The Maven compile command can be used to generate the OpenAPI Swagger Specification.
+Specification should be generated in `outputFormat` and `outputPath`
 as specified in the `swagger-maven-plugin-...`
 
 

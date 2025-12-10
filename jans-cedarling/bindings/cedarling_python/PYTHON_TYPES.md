@@ -19,7 +19,6 @@ Attributes
 
 Example
 -------
-
 ```python
 # Create a multi-issuer authorization request
 tokens = [
@@ -33,7 +32,6 @@ request = AuthorizeMultiIssuerRequest(
     context={"location": "miami"}
 )
 ```
-
 ___
 
 AuthorizeResult
@@ -296,7 +294,7 @@ request = Request(access_token="token123", action="read", resource=resource, con
 ___
 
 RequestUnsigned
-===============
+=======
 
 A Python wrapper for the Rust `cedarling::RequestUnsigned` struct. Represents
 authorization data for unsigned authorization requests for many principals.
@@ -348,7 +346,7 @@ Error encountered while building the request context
 ___
 
 # authorize_errors.BuildEntityError
-Error encountered while running on strict id token trust mode
+Error encountered while building Cedar entities
 ___
 
 # authorize_errors.BuildUnsignedRoleEntityError

@@ -112,6 +112,7 @@ Kubernetes: `>=v1.23.0-0`
 | auth-server.ingress.webfingerEnabled | bool | `true` | Enable endpoint /.well-known/webfinger |
 | auth-server.ingress.webfingerLabels | object | `{}` | webfinger ingress resource labels. key app is taken |
 | auth-server.lockEnabled | bool | `false` | Enable jans-lock as service running inside auth-server |
+| casa.adminEnabled | bool | `true` | Boolean flag to enable/disable the casa admin console. |
 | casa.appLoggers | object | `{"casaLogLevel":"INFO","casaLogTarget":"STDOUT","enableStdoutLogPrefix":"true","timerLogLevel":"INFO","timerLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
 | casa.appLoggers.casaLogLevel | string | `"INFO"` | casa.log level |
 | casa.appLoggers.casaLogTarget | string | `"STDOUT"` | casa.log target |
