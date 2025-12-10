@@ -5,7 +5,13 @@
 
 mod claim_mapping;
 #[cfg(test)]
+mod mock_jwks_server;
+#[cfg(test)]
+mod security_tests;
+#[cfg(test)]
 mod test;
+#[cfg(test)]
+pub mod test_utils;
 mod token_entity_metadata;
 
 pub mod archive_handler;
