@@ -9,7 +9,7 @@ use super::entity_data::EntityData;
 use super::token_input::TokenInput;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict};
+use pyo3::types::PyDict;
 use serde_pyobject::from_pyobject;
 
 /// AuthorizeMultiIssuerRequest
@@ -76,7 +76,7 @@ impl AuthorizeMultiIssuerRequest {
         let tokens = self.tokens.clone().into_iter().map(Into::into).collect();
 
         let context = if let Some(ref ctx) = self.context {
-            Some(Python::with_gil(|py| -> Result<serde_json::Value, PyErr> {
+            Some(Python::attach(|py| -> Result<serde_json::Value, PyErr> {
                 let context = ctx.clone_ref(py).into_bound(py);
                 from_pyobject(context).map_err(|err| {
                     PyRuntimeError::new_err(format!("Failed to convert context to json: {}", err))
@@ -94,4 +94,3 @@ impl AuthorizeMultiIssuerRequest {
         })
     }
 }
-
