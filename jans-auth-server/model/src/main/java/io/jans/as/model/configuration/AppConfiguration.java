@@ -181,6 +181,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value true allows to skip session authentication time check when client is configured from prompt login (has property defaultPromptLogin=true)")
     private Boolean skipSessionAuthnTimeCheckDuringPromptLogin = false;
 
+    @DocProperty(description = "Integer value that allows to specify session authentication time threshold in milliseconds when client is configured from prompt login (has property defaultPromptLogin=true)")
+    private Integer sessionAuthnTimeCheckDuringPromptLoginThresholdMs = 500;
+
     @DocProperty(description = "Sector Identifier cache lifetime in minutes", defaultValue = "1440")
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
 
@@ -1087,6 +1090,15 @@ public class AppConfiguration implements Configuration {
 
     public void setSkipSessionAuthnTimeCheckDuringPromptLogin(Boolean skipSessionAuthnTimeCheckDuringPromptLogin) {
         this.skipSessionAuthnTimeCheckDuringPromptLogin = skipSessionAuthnTimeCheckDuringPromptLogin;
+    }
+
+    public Integer getSessionAuthnTimeCheckDuringPromptLoginThresholdMs() {
+        if (sessionAuthnTimeCheckDuringPromptLoginThresholdMs == null) sessionAuthnTimeCheckDuringPromptLoginThresholdMs = 500;
+        return sessionAuthnTimeCheckDuringPromptLoginThresholdMs;
+    }
+
+    public void setSessionAuthnTimeCheckDuringPromptLoginThresholdMs(Integer sessionAuthnTimeCheckDuringPromptLoginThresholdMs) {
+        this.sessionAuthnTimeCheckDuringPromptLoginThresholdMs = sessionAuthnTimeCheckDuringPromptLoginThresholdMs;
     }
 
     public Boolean getReturnDeviceSecretFromAuthzEndpoint() {

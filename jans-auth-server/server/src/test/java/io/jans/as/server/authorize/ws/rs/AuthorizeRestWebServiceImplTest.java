@@ -129,7 +129,17 @@ public class AuthorizeRestWebServiceImplTest {
     private ExternalCreateUserService externalCreateUserService;
 
     @Test
-    public void isSessionAuthnTimeOldForPromptLogin_whenSkipCheckIsFalseAndSessionAuthnTimeIdOld_shouldReturnFalse() {
+    public void isSessionAuthnTimeOldForPromptLogin_whenSessionAuthnTimeIsNull_shouldReturnFalse() {
+        SessionId sessionId = new SessionId();
+        sessionId.setAuthenticationTime(null);
+
+        when(appConfiguration.getSkipSessionAuthnTimeCheckDuringPromptLogin()).thenReturn(false);
+
+        assertFalse(authorizeRestWebService.isSessionAuthnTimeOldForPromptLogin(sessionId));
+    }
+
+    @Test
+    public void isSessionAuthnTimeOldForPromptLogin_whenSkipCheckIsTrueAndSessionAuthnTimeIsOld_shouldReturnFalse() {
         SessionId sessionId = new SessionId();
         sessionId.setAuthenticationTime(new Date(0));
 
@@ -139,9 +149,19 @@ public class AuthorizeRestWebServiceImplTest {
     }
 
     @Test
-    public void isSessionAuthnTimeOldForPromptLogin_whenSkipCheckIsFalseAndSessionAuthnTimeIdOld_shouldReturnTrue() {
+    public void isSessionAuthnTimeOldForPromptLogin_whenSkipCheckIsFalseAndSessionAuthnTimeIsOld_shouldReturnTrue() {
         SessionId sessionId = new SessionId();
         sessionId.setAuthenticationTime(new Date(0));
+
+        when(appConfiguration.getSkipSessionAuthnTimeCheckDuringPromptLogin()).thenReturn(false);
+
+        assertTrue(authorizeRestWebService.isSessionAuthnTimeOldForPromptLogin(sessionId));
+    }
+
+    @Test
+    public void isSessionAuthnTimeOldForPromptLogin_whenSessionAuthnTimeIsValid_shouldReturnTrue() {
+        SessionId sessionId = new SessionId();
+        sessionId.setAuthenticationTime(new Date());
 
         when(appConfiguration.getSkipSessionAuthnTimeCheckDuringPromptLogin()).thenReturn(false);
 

@@ -689,7 +689,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     public boolean isSessionAuthnTimeOldForPromptLogin(SessionId sessionId) {
         if (appConfiguration.getSkipSessionAuthnTimeCheckDuringPromptLogin() || sessionId.getAuthenticationTime() == null)
             return false;
-        return new Date().getTime() - sessionId.getAuthenticationTime().getTime() > 500;
+        return new Date().getTime() - sessionId.getAuthenticationTime().getTime() > appConfiguration.getSessionAuthnTimeCheckDuringPromptLoginThresholdMs();
     }
 
     private Pair<ClientAuthorization, Boolean> grantAccessOrFetchClientAuthorization(AuthzRequest authzRequest, Client client, SessionId sessionUser, User user, Set<String> scopes) {
