@@ -25,9 +25,9 @@ public class StatusListRestWebService {
     @Path("/status_list")
     @Consumes({CONTENT_TYPE_STATUSLIST_JSON, CONTENT_TYPE_STATUSLIST_JWT})
     @Produces({CONTENT_TYPE_STATUSLIST_JSON, CONTENT_TYPE_STATUSLIST_JWT})
-    public Response requestStatusList(@HeaderParam("Accept") String acceptHeader) {
+    public Response requestStatusList(@HeaderParam("Accept") String acceptHeader, @QueryParam("time") String time) {
         try {
-            return statusService.requestStatusList(acceptHeader);
+            return statusService.requestStatusList(acceptHeader, time);
         } catch (WebApplicationException e) {
             log.debug(e.getMessage(), e);
             throw e;
