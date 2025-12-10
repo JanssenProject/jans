@@ -34,7 +34,7 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<authorize_result::AuthorizeResult>()?;
     m.add_class::<multi_issuer_authorize_result::MultiIssuerAuthorizeResult>()?;
 
-    let submodule = PyModule::new_bound(m.py(), "authorize_errors")?;
+    let submodule = PyModule::new(m.py(), "authorize_errors")?;
     errors::authorize_errors_module(&submodule)?;
     m.add_submodule(&submodule)?;
 
