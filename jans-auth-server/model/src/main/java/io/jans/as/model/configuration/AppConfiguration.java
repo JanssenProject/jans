@@ -181,7 +181,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value true allows to skip session authentication time check when client is configured from prompt login (has property defaultPromptLogin=true)")
     private Boolean skipSessionAuthnTimeCheckDuringPromptLogin = false;
 
-    @DocProperty(description = "Integer value that allows to specify session authentication time threshold in milliseconds when client is configured from prompt login (has property defaultPromptLogin=true)")
+    @DocProperty(description = "Integer value that allows to specify session authentication time threshold in milliseconds when client is configured from prompt login (has property defaultPromptLogin=true). For high-latency environments, consider increasing this value to 2000-5000ms.")
     private Integer sessionAuthnTimeCheckDuringPromptLoginThresholdMs = 500;
 
     @DocProperty(description = "Sector Identifier cache lifetime in minutes", defaultValue = "1440")
