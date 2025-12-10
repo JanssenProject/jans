@@ -426,11 +426,11 @@ public class Fido2MetricsAggregationScheduler {
                     .build();
 
             quartzSchedulerManager.schedule(jobDetail, trigger);
-        } catch (IllegalStateException e) {
-            log.error("Failed to register {} job: {}", jobName, e.getMessage(), e);
-            throw e;
         } catch (Exception e) {
             log.error("Failed to register {} job: {}", jobName, e.getMessage(), e);
+            if (e instanceof IllegalStateException) {
+                throw e;
+            }
             throw new IllegalStateException("Failed to register " + jobName + " job", e);
         }
     }
@@ -453,7 +453,7 @@ public class Fido2MetricsAggregationScheduler {
      */
     private String getConfigString(String key, String defaultValue) {
         try {
-            if (METRICS_CONFIG.containsKey(key)) {
+            if (METRICS_CONFIG != null && METRICS_CONFIG.containsKey(key)) {
                 return METRICS_CONFIG.getString(key);
             }
             return defaultValue;
