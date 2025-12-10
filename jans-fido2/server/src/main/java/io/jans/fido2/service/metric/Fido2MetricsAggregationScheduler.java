@@ -429,7 +429,7 @@ public class Fido2MetricsAggregationScheduler {
         } catch (Exception e) {
             log.error("Failed to register {} job: {}", jobName, e.getMessage(), e);
             if (e instanceof IllegalStateException) {
-                throw e;
+                throw (IllegalStateException) e;
             }
             throw new IllegalStateException("Failed to register " + jobName + " job", e);
         }
