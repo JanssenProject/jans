@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Date;
 import java.util.Set;
 
 import static org.mockito.Mockito.mock;
@@ -126,6 +127,26 @@ public class AuthorizeRestWebServiceImplTest {
 
     @Mock
     private ExternalCreateUserService externalCreateUserService;
+
+    @Test
+    public void isSessionAuthnTimeOldForPromptLogin_whenSkipCheckIsFalseAndSessionAuthnTimeIdOld_shouldReturnFalse() {
+        SessionId sessionId = new SessionId();
+        sessionId.setAuthenticationTime(new Date(0));
+
+        when(appConfiguration.getSkipSessionAuthnTimeCheckDuringPromptLogin()).thenReturn(true);
+
+        assertFalse(authorizeRestWebService.isSessionAuthnTimeOldForPromptLogin(sessionId));
+    }
+
+    @Test
+    public void isSessionAuthnTimeOldForPromptLogin_whenSkipCheckIsFalseAndSessionAuthnTimeIdOld_shouldReturnTrue() {
+        SessionId sessionId = new SessionId();
+        sessionId.setAuthenticationTime(new Date(0));
+
+        when(appConfiguration.getSkipSessionAuthnTimeCheckDuringPromptLogin()).thenReturn(false);
+
+        assertTrue(authorizeRestWebService.isSessionAuthnTimeOldForPromptLogin(sessionId));
+    }
 
     @Test
     public void checkPromptCreate_whenDisabledPromptCreate_shouldNotThrowException() {

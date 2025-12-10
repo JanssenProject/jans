@@ -16,9 +16,9 @@ import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.jans.doc.annotation.DocProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.*;
 
@@ -177,6 +177,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Boolean value true allows revoking of any token for any client. False value allows remove only tokens issued by client used at Revoke Endpoint", defaultValue = "false")
     private Boolean allowRevokeForOtherClients = false;
+
+    @DocProperty(description = "Boolean value true allows to skip session authentication time check when client is configured from prompt login (has property defaultPromptLogin=true)")
+    private Boolean skipSessionAuthnTimeCheckDuringPromptLogin = false;
 
     @DocProperty(description = "Sector Identifier cache lifetime in minutes", defaultValue = "1440")
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
@@ -1075,6 +1078,15 @@ public class AppConfiguration implements Configuration {
 
     public void setAllowRevokeForOtherClients(Boolean allowRevokeForOtherClients) {
         this.allowRevokeForOtherClients = allowRevokeForOtherClients;
+    }
+
+    public Boolean getSkipSessionAuthnTimeCheckDuringPromptLogin() {
+        if (skipSessionAuthnTimeCheckDuringPromptLogin == null) skipSessionAuthnTimeCheckDuringPromptLogin = false;
+        return skipSessionAuthnTimeCheckDuringPromptLogin;
+    }
+
+    public void setSkipSessionAuthnTimeCheckDuringPromptLogin(Boolean skipSessionAuthnTimeCheckDuringPromptLogin) {
+        this.skipSessionAuthnTimeCheckDuringPromptLogin = skipSessionAuthnTimeCheckDuringPromptLogin;
     }
 
     public Boolean getReturnDeviceSecretFromAuthzEndpoint() {
