@@ -27,6 +27,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -49,6 +50,7 @@ public class TrustRelationshipResource extends BaseResource {
     private static final String NAME_CONFLICT_MSG = "Trust Relationship with same name `%s` already exists!";
     private static final String DATA_NULL_CHK = "RESOURCE_IS_NULL";
     private static final String DATA_NULL_MSG = "`%s` should not be null!";
+    private static final String APPLICATION_ERROR = "Application Error";
 
     @Inject
     Logger logger;
@@ -152,10 +154,16 @@ public class TrustRelationshipResource extends BaseResource {
 
             trustRelationship = samlService.addTrustRelationship(trustRelationship, metaDataFile);
 
-            logger.info("Create created by TrustRelationship:{}", trustRelationship);
-        } catch (Exception ex) {
-            throwInternalServerException("Error while creating by TrustRelationship - {" + trustRelationship + "}", ex);
-
+            logger.info("Created by TrustRelationship:{}", trustRelationship);
+        }catch (WebApplicationException wex) {
+            StringBuilder sb = new StringBuilder(wex.getMessage());
+            logger.error("Application Error while creating TR is - status:{}, message:{}",wex.getResponse().getStatus(), wex.getMessage());
+            if (wex.getResponse() != null && wex.getResponse().getStatus()== Status.BAD_REQUEST.getStatusCode()) {
+                sb = new StringBuilder().append(String.format(NAME_CONFLICT_MSG, trustRelationship.getName()));
+                logger.error("NAME_CONFLICT_MSG {}",sb);
+            }
+            logger.error("APPLICATION_ERROR {}",sb);
+            throwInternalServerException(APPLICATION_ERROR, sb.toString());
         }
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
@@ -231,9 +239,15 @@ public class TrustRelationshipResource extends BaseResource {
             trustRelationship = samlService.updateTrustRelationship(trustRelationship, metaDataFile);
 
             logger.info("Post update trustRelationship:{}", trustRelationship);
-        } catch (Exception ex) {
-            throwInternalServerException("Error while updating by TrustRelationship - {" + trustRelationship + "}", ex);
-
+        }catch (WebApplicationException wex) {
+            StringBuilder sb = new StringBuilder(wex.getMessage());
+            logger.error("Application Error while updating TR is - status:{}, message:{}",wex.getResponse().getStatus(), wex.getMessage());
+            if (wex.getResponse() != null && wex.getResponse().getStatus()== Status.BAD_REQUEST.getStatusCode()) {
+                sb = new StringBuilder().append(String.format(NAME_CONFLICT_MSG, trustRelationship.getName()));
+                logger.error("NAME_CONFLICT_MSG {}",sb);
+            }
+            logger.error("APPLICATION_ERROR {}",sb);
+            throwInternalServerException(APPLICATION_ERROR, sb.toString());
         }
         return Response.ok(trustRelationship).build();
     }
