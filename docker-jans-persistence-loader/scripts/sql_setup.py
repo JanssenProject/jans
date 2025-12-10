@@ -104,8 +104,8 @@ class SQLBackend:
         fields = self.sql_indexes.get(table_name, {}).get("fields", [])
         fields += self.sql_indexes["__common__"]["fields"]
 
-        # make unique fields
-        return list(set(fields))
+        # make unique fields while preserving order
+        return list(dict.fromkeys(fields))
 
     def create_mysql_indexes(self, table_name: str, column_mapping: dict):
         fields = self.get_index_fields(table_name)
@@ -455,8 +455,8 @@ class SQLBackend:
                 "dn": "VARCHAR(128)",
             })
 
-            # make sure ``oc["may"]`` doesn't have duplicate attribute
-            for attr in set(oc["may"]):
+            # make sure ``oc["may"]`` doesn't have duplicate attribute while preserving order
+            for attr in list(dict.fromkeys(oc["may"])):
                 data_type = self.get_data_type(attr, table)
                 table_mapping[table].update({attr: data_type})
         return table_mapping
