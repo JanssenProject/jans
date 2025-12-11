@@ -77,19 +77,11 @@ pub(crate) async fn load_policy_store(
 
     let policy_store = match &config.source {
         PolicyStoreSource::Json(policy_json) => {
-            // Use LoaderSource to ensure the Legacy/format/description variants are used
-            let source = LoaderSource::from_legacy(policy_json.as_str());
-            let _ = (source.description(), source.format());
-
             let agama_policy_store = serde_json::from_str::<AgamaPolicyStore>(policy_json)
                 .map_err(PolicyStoreLoadError::ParseJson)?;
             extract_first_policy_store(&agama_policy_store)?
         },
         PolicyStoreSource::Yaml(policy_yaml) => {
-            // Use LoaderSource to ensure the Legacy/format/description variants are used
-            let source = LoaderSource::from_legacy(policy_yaml.as_str());
-            let _ = (source.description(), source.format());
-
             let agama_policy_store = serde_yml::from_str::<AgamaPolicyStore>(policy_yaml)
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
             extract_first_policy_store(&agama_policy_store)?
@@ -180,10 +172,6 @@ async fn load_policy_store_from_cjar_url(
     use crate::common::policy_store::{
         ArchiveVfs, DefaultPolicyStoreLoader, source::PolicyStoreSource,
     };
-
-    // Construct source to ensure from_archive_url is used in production code
-    let source = PolicyStoreSource::from_archive_url(url);
-    let _ = (source.description(), source.format());
 
     // Fetch the archive bytes via HTTP
     let client = HttpClient::new(3, Duration::from_secs(30))?;
