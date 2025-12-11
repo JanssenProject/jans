@@ -7,9 +7,10 @@
 //!
 //! Run with: `cargo bench --bench policy_store_benchmark`
 
-use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use std::hint::black_box as bb;
 use std::io::{Cursor, Write};
+
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use tempfile::TempDir;
 use zip::write::{ExtendedFileOptions, FileOptions};
 use zip::{CompressionMethod, ZipWriter};
