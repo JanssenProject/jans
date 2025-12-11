@@ -242,7 +242,7 @@ impl PolicyStoreManager {
         // Build raw_policy_info for descriptions (policies only, templates don't have descriptions in legacy format)
         let raw_policy_info = parsed_policies
             .into_iter()
-            .map(|p| (p.id.to_string(), p.filename))
+            .map(|p| (p.id.to_string(), format!("Policy from {}", p.filename)))
             .collect();
 
         Ok(PoliciesContainer::new(policy_set, raw_policy_info))
