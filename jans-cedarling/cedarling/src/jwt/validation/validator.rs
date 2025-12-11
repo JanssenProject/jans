@@ -324,6 +324,8 @@ pub enum ValidateJwtError {
     TokenTypeNotConfigured { token_type: String, issuer: String },
     #[error("token is missing the 'iss' claim")]
     MissingIssuerClaim,
+    #[error("failed to validate the JWT's trusted issuer: {0}")]
+    TrustedIssuerValidation(String),
 }
 
 #[cfg(test)]
