@@ -58,11 +58,12 @@ mod path_traversal {
         let archive = zip.finish().unwrap().into_inner();
         let result = ArchiveVfs::from_buffer(archive);
 
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ArchiveError::PathTraversal { .. }
-        ));
+        let err = result.expect_err("archive with path traversal should be rejected");
+        assert!(
+            matches!(err, ArchiveError::PathTraversal { .. }),
+            "expected PathTraversal error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -156,8 +157,7 @@ mod malicious_archives {
     fn test_rejects_empty_file() {
         let empty: Vec<u8> = Vec::new();
         let result = ArchiveVfs::from_buffer(empty);
-
-        assert!(result.is_err());
+        result.expect_err("empty buffer should not be a valid archive");
     }
 
     #[test]
@@ -214,8 +214,8 @@ mod malicious_archives {
         // Should handle gracefully
         match result {
             Ok(vfs) => {
-                // Long name should be accessible if accepted
-                assert!(vfs.exists(&long_name) || !vfs.exists(&long_name));
+                // If accepted, verify VFS is functional
+                let _ = vfs.read_dir(".");
             },
             Err(_) => {
                 // Rejection is also acceptable
@@ -282,12 +282,13 @@ mod input_validation {
         // If implementation allows empty/invalid entities directory, this may succeed
         // In that case, the test documents current behavior
         if result.is_err() {
-            let err = result.unwrap_err();
-            assert!(
-                err.to_string().contains("JSON") || err.to_string().contains("entity"),
-                "Error should mention JSON or entity: {}",
-                err
-            );
+            if let Err(err) = result {
+                assert!(
+                    err.to_string().contains("JSON") || err.to_string().contains("entity"),
+                    "Error should mention JSON or entity: {}",
+                    err
+                );
+            }
         }
     }
 
@@ -379,8 +380,9 @@ permit(principal, action, resource);"#,
 
         // May succeed or fail gracefully based on policy ID validation
         let result = loader.load_directory(".");
-        // Not asserting success/failure - just should not panic
-        let _ = result;
+        // Test passes if we reach here without panic - result may succeed or fail
+        // depending on policy ID validation rules
+        drop(result);
     }
 }
 
@@ -506,7 +508,11 @@ when {{ {} }};"#,
         // Should handle large policies
         let result = loader.load_directory(".");
         // May succeed or fail due to policy complexity - should not panic
-        let _ = result;
+        // Reaching this point without panic is the success criteria
+        match result {
+            Ok(_) => (), // Large policy accepted
+            Err(e) => eprintln!("Large policy rejected (acceptable): {}", e),
+        }
     }
 
     #[test]
