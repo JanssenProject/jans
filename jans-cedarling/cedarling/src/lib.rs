@@ -180,7 +180,7 @@ impl Cedarling {
             );
 
             // Log version compatibility check with current Cedar
-            const CURRENT_CEDAR_VERSION: &str = "4.4.0";
+            const CURRENT_CEDAR_VERSION: &str = "4.3.2";
             match metadata.is_compatible_with_cedar(CURRENT_CEDAR_VERSION) {
                 Ok(true) => {
                     log.log_any(
