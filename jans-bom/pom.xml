@@ -800,6 +800,12 @@
 			    <artifactId>postgres-socket-factory</artifactId>
 			    <version>${postgresql-socket.version}</version>
 			</dependency>
+			
+			<dependency>
+			    <groupId>com.google.protobuf</groupId>
+			    <artifactId>protobuf-java</artifactId>
+			    <version>4.33.2</version>
+			</dependency>
 
 			<!-- SQL Query -->
 			<dependency>
