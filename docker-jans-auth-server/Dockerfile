@@ -1,10 +1,4 @@
 # =================================
-# Cloud SQL JDBC Socket Factory
-# =================================
-# Pre-built fat JARs from GHCR for Cloud SQL connectivity
-FROM ghcr.io/janssenproject/jans/cloudsql-socket-factory:1.27.0 AS cloudsql-libs
-
-# =================================
 # Main Image
 # =================================
 FROM bellsoft/liberica-openjdk-alpine:17.0.17@sha256:0e8ae43555ad8e2d69431c2078df256c01b625a8a3010e76b5a6baff0d165d2c
@@ -79,9 +73,6 @@ RUN mkdir -p /usr/share/java \
 
 ARG TWILIO_VERSION=7.17.0
 ARG JSMPP_VERSION=2.3.7
-
-# Copy Cloud SQL Socket Factory fat JARs from builder (includes all dependencies)
-COPY --from=cloudsql-libs /cloudsql/*.jar ${JETTY_BASE}/jans-auth/custom/libs/
 
 # Download other custom libs directly to custom/libs (always available)
 # Using set -e to ensure any failed wget aborts the build
