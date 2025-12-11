@@ -92,12 +92,25 @@ impl From<PolicyStoreConfigRaw> for PolicyStoreConfig {
             source: match raw.source.as_str() {
                 "json" => PolicyStoreSource::Json(raw.path.unwrap_or_default()),
                 "yaml" => PolicyStoreSource::Yaml(raw.path.unwrap_or_default()),
+
                 "lock_server" => PolicyStoreSource::LockServer(raw.path.unwrap_or_default()),
                 "file_json" => PolicyStoreSource::FileJson(raw.path.unwrap_or_default().into()),
                 "file_yaml" => PolicyStoreSource::FileYaml(raw.path.unwrap_or_default().into()),
-                "cjar_file" => PolicyStoreSource::CjarFile(raw.path.unwrap_or_default().into()),
-                "cjar_url" => PolicyStoreSource::CjarUrl(raw.path.unwrap_or_default()),
-                "directory" => PolicyStoreSource::Directory(raw.path.unwrap_or_default().into()),
+                "cjar_file" => PolicyStoreSource::CjarFile(
+                    raw.path
+                        .filter(|p| !p.is_empty())
+                        .unwrap_or_else(|| "policy-store.cjar".to_string())
+                        .into(),
+                ),
+                "cjar_url" => PolicyStoreSource::CjarUrl(
+                    raw.path.filter(|p| !p.is_empty()).unwrap_or_default(),
+                ),
+                "directory" => PolicyStoreSource::Directory(
+                    raw.path
+                        .filter(|p| !p.is_empty())
+                        .unwrap_or_else(|| "policy-store".to_string())
+                        .into(),
+                ),
                 _ => PolicyStoreSource::FileYaml("policy-store.yaml".into()),
             },
         }
