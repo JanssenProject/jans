@@ -1,6 +1,5 @@
 package io.jans.demo.configapi.mcp.server.handler;
 
-import io.jans.demo.configapi.mcp.server.model.Permission;
 import io.jans.demo.configapi.mcp.server.service.AuthorizationService;
 import io.jans.demo.configapi.mcp.server.service.AuthorizationService.UnauthorizedException;
 import io.jans.demo.configapi.mcp.server.service.JansConfigApiClient;
@@ -22,6 +21,43 @@ public class ToolHandler {
     private final AuthorizationService authorizationService;
     private final ObjectMapper objectMapper;
 
+    String principalJsonStr = """
+
+            {
+            "cedar_entity_mapping": {
+            "entity_type": "Jans::User",
+            "id": "some_id"
+            },
+            "role": [
+            "Teacher"
+            ],
+            "sub": "some_sub"
+            }
+            """;
+
+    String actionString = "Jans::Action::\"Read\"";
+    String resourceString = """
+                {
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::SecretDocument",
+                    "id": "some_id"
+                }
+                }
+            """;
+    String contextString = """
+            {
+                  "device_health": ["Healthy"],
+                  "fraud_indicators": ["Allowed"],
+                  "geolocation": ["America"],
+                  "network": "127.0.0.1",
+                  "network_type": "Local",
+                  "operating_system": "Linux",
+                  "user_agent": "Linux"
+                }
+            """;
+
+    Map<String, String> tokens = null;
+
     public ToolHandler(JansConfigApiClient apiClient, AuthorizationService authorizationService) {
         this.apiClient = apiClient;
         this.authorizationService = authorizationService;
@@ -31,7 +67,8 @@ public class ToolHandler {
     public CallToolResult handleListClients(Map<String, Object> arguments) {
         try {
             // Authorization checkpoint: Check if user has permission to read clients
-            if (!authorizationService.checkAuthorization()) {
+            if (!authorizationService.checkAuthorizationUnsigned(principalJsonStr, actionString, resourceString,
+                    contextString)) {
                 throw new UnauthorizedException("Unauthorized access!");
             }
 
@@ -91,7 +128,8 @@ public class ToolHandler {
     public CallToolResult handleCreateClient(Map<String, Object> arguments) {
         try {
             // Authorization checkpoint: Check if user has permission to read clients
-            if (!authorizationService.checkAuthorization()) {
+            if (!authorizationService.checkAuthorizationUnsigned(principalJsonStr, actionString, resourceString,
+                    contextString)) {
                 throw new UnauthorizedException("Unauthorized access!");
             }
 
@@ -131,7 +169,8 @@ public class ToolHandler {
     public CallToolResult handleGetHealth(Map<String, Object> arguments) {
         try {
             // Authorization checkpoint: Check if user has permission to read clients
-            if (!authorizationService.checkAuthorization()) {
+            if (!authorizationService.checkAuthorizationUnsigned(principalJsonStr, actionString, resourceString,
+                    contextString)) {
                 throw new UnauthorizedException("Unauthorized access!");
             }
 
