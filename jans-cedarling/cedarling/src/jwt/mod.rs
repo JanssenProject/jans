@@ -116,7 +116,7 @@ pub struct JwtService {
     key_service: Arc<KeyService>,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
     /// Trusted issuer validator for advanced validation scenarios
-    trusted_issuer_validator: TrustedIssuerValidator,
+    trusted_issuer_validator: Arc<RwLock<TrustedIssuerValidator>>,
     logger: Option<Logger>,
     token_cache: Arc<RwLock<SparKV<Arc<Token>>>>,
     token_cache_max_ttl: usize,
@@ -154,7 +154,7 @@ impl JwtService {
         let mut validators = JwtValidatorCache::default();
         let mut key_service = KeyService::new();
 
-        // Clone trusted_issuers for TrustedIssuerValidator
+        // Clone trusted_issuers before consumption - original is iterated and consumed below
         let trusted_issuers_for_validator = trusted_issuers.clone().unwrap_or_default();
 
         for (issuer_id, iss) in trusted_issuers.unwrap_or_default().into_iter() {
@@ -192,8 +192,9 @@ impl JwtService {
         let key_service = Arc::new(key_service);
 
         // Create TrustedIssuerValidator for advanced validation scenarios
-        let trusted_issuer_validator =
-            TrustedIssuerValidator::with_logger(trusted_issuers_for_validator, logger.clone());
+        let trusted_issuer_validator = Arc::new(RwLock::new(
+            TrustedIssuerValidator::with_logger(trusted_issuers_for_validator, logger.clone())
+        ));
 
         Ok(Self {
             validators,
@@ -386,7 +387,7 @@ impl JwtService {
 
         // Try to find trusted issuer using TrustedIssuerValidator
         let trusted_iss = if let Some(iss) = iss_claim {
-            match self.trusted_issuer_validator.find_trusted_issuer(iss) {
+            match self.trusted_issuer_validator.read().expect("RwLock poisoned").find_trusted_issuer(iss) {
                 Ok(issuer) => Some(issuer),
                 Err(TrustedIssuerError::UntrustedIssuer(_)) => {
                     // Fall back to issuer_configs for backward compatibility
@@ -432,7 +433,9 @@ impl JwtService {
                                 return Err(ValidateJwtError::MissingClaims(vec![claim]));
                             },
                             _ => {
-                                return Err(ValidateJwtError::MissingClaims(vec![err.to_string()]));
+                                return Err(ValidateJwtError::TrustedIssuerValidation(
+                                    err.to_string(),
+                                ));
                             },
                         }
                     }
@@ -604,16 +607,8 @@ impl JwtService {
     /// - `find_trusted_issuer()` - Find a trusted issuer by claim
     /// - `validate_required_claims()` - Validate token claims against issuer config
     /// - `preload_and_validate_token()` - Full async token validation with JWKS loading
-    pub fn trusted_issuer_validator(&self) -> &TrustedIssuerValidator {
-        &self.trusted_issuer_validator
-    }
-
-    /// Returns a mutable reference to the trusted issuer validator.
-    ///
-    /// Use this for async operations like `preload_and_validate_token()` which
-    /// may need to fetch and cache JWKS keys.
-    pub fn trusted_issuer_validator_mut(&mut self) -> &mut TrustedIssuerValidator {
-        &mut self.trusted_issuer_validator
+    pub fn trusted_issuer_validator(&self) -> Arc<RwLock<TrustedIssuerValidator>> {
+        Arc::clone(&self.trusted_issuer_validator)
     }
 
     /// Validates a JWT token using the TrustedIssuerValidator with full JWKS loading.
@@ -645,11 +640,13 @@ impl JwtService {
     ///     .await?;
     /// ```
     pub async fn validate_token_with_issuer_validator(
-        &mut self,
+        &self,
         token: &str,
         token_type: &str,
     ) -> Result<(serde_json::Value, Arc<TrustedIssuer>), TrustedIssuerError> {
         self.trusted_issuer_validator
+            .write()
+            .expect("RwLock poisoned")
             .preload_and_validate_token(token, token_type)
             .await
     }
