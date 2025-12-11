@@ -17,7 +17,7 @@ Jans has next persistence modules out-of-the-box:
 
 -  [MySQL](./mysql-config.md)
 -  [PostgreSQL](./pgsql-config.md)
--  [Hybrid](./pgsql-config.md). This is virtual DB layer which allows to combine few DB types based on record type.
+-  Hybrid. This is virtual DB layer which allows to combine few DB types based on record type.
 
 ## Configuration
 

@@ -82,7 +82,7 @@ Algorithms supported by Janssen Server are listed in the response of Janssen Ser
 `token_endpoint_auth_signing_alg_values_supported` lists the supported algorithms.
 
 To specify preferred algorithm for a client, using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md),
-navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> TODO: which exact properties.
+navigate via `Auth Server` -> `Clients` -> Select your client -> `Encryption/Signing` tab -> Set `Token Endpoint Auth Signing Algorithm` property.
 
 ## private_key_jwt
 
