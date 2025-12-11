@@ -278,15 +278,15 @@ impl PolicyStoreTestBuilder {
             files.insert(path, content.as_bytes().to_vec());
         }
 
-        // Add extra files
-        for (path, content) in &self.extra_files {
-            files.insert(path.clone(), content.as_bytes().to_vec());
-        }
-
-        // Generate manifest if requested (must be last)
+        // Generate manifest if requested (must be last before extra_files)
         if self.generate_manifest {
             let manifest_content = self.build_manifest_json(&files);
             files.insert("manifest.json".to_string(), manifest_content.into_bytes());
+        }
+
+        // Add extra files last, overwriting any generated files with the same path
+        for (path, content) in &self.extra_files {
+            files.insert(path.clone(), content.as_bytes().to_vec());
         }
 
         files
@@ -320,15 +320,12 @@ impl PolicyStoreTestBuilder {
         }
 
         // Create required directories even if empty
-        let required_dirs = ["policies", "templates", "entities", "trusted-issuers"];
-        for dir in required_dirs {
-            let full_path = base_path.join(dir);
-            if !full_path.exists() {
-                fs::create_dir_all(&full_path).map_err(|e| PolicyStoreError::FileReadError {
-                    path: full_path.display().to_string(),
-                    source: e,
-                })?;
-            }
+        let policies_path = base_path.join("policies");
+        if !policies_path.exists() {
+            fs::create_dir_all(&policies_path).map_err(|e| PolicyStoreError::FileReadError {
+                path: policies_path.display().to_string(),
+                source: e,
+            })?;
         }
 
         // Write files
@@ -724,49 +721,6 @@ permit(
     }
 
     builder
-}
-
-/// Measures memory usage during an operation.
-#[cfg(not(target_arch = "wasm32"))]
-pub fn measure_memory<F, R>(f: F) -> (R, MemoryStats)
-where
-    F: FnOnce() -> R,
-{
-    use std::alloc::{GlobalAlloc, Layout, System};
-    use std::sync::atomic::{AtomicUsize, Ordering};
-
-    static ALLOCATED: AtomicUsize = AtomicUsize::new(0);
-    static DEALLOCATED: AtomicUsize = AtomicUsize::new(0);
-
-    struct TrackingAllocator;
-
-    unsafe impl GlobalAlloc for TrackingAllocator {
-        unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-            ALLOCATED.fetch_add(layout.size(), Ordering::SeqCst);
-            unsafe { System.alloc(layout) }
-        }
-
-        unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-            DEALLOCATED.fetch_add(layout.size(), Ordering::SeqCst);
-            unsafe { System.dealloc(ptr, layout) }
-        }
-    }
-
-    let before_alloc = ALLOCATED.load(Ordering::SeqCst);
-    let before_dealloc = DEALLOCATED.load(Ordering::SeqCst);
-
-    let result = f();
-
-    let after_alloc = ALLOCATED.load(Ordering::SeqCst);
-    let after_dealloc = DEALLOCATED.load(Ordering::SeqCst);
-
-    let stats = MemoryStats {
-        allocated: after_alloc - before_alloc,
-        deallocated: after_dealloc - before_dealloc,
-        net: (after_alloc - before_alloc) as isize - (after_dealloc - before_dealloc) as isize,
-    };
-
-    (result, stats)
 }
 
 /// Memory statistics from an operation.
