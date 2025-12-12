@@ -266,20 +266,13 @@ impl PolicyStoreManager {
 
         // Validate for duplicates - include content in error for debugging
         if let Err(errors) = IssuerParser::validate_issuers(&all_issuers) {
-            // Build detailed error with issuer content for debugging
-            let error_details: Vec<String> = errors
+            // Return validation errors directly, joined into a single string
+            let error_details = errors
                 .iter()
-                .zip(all_issuers.iter())
-                .map(|(err, issuer)| {
-                    let content_preview = if issuer.content.len() > 100 {
-                        format!("{}...(truncated)", &issuer.content[..100])
-                    } else {
-                        issuer.content.clone()
-                    };
-                    format!("{} [content: {}]", err, content_preview)
-                })
-                .collect();
-            return Err(ConversionError::IssuerConversion(error_details.join("; ")));
+                .map(|e| e.to_string())
+                .collect::<Vec<_>>()
+                .join("; ");
+            return Err(ConversionError::IssuerConversion(error_details));
         }
 
         // Create issuer map
