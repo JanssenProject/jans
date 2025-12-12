@@ -310,6 +310,9 @@ impl PolicyStoreManager {
         }
 
         // Step 2: Detect duplicate entity UIDs
+        // Note: We clone all_parsed_entities here because EntityParser::detect_duplicates
+        // currently takes ownership of the Vec and mutates it internally.
+        // This preserves the original all_parsed_entities for later hierarchy validation.
         let unique_entities = EntityParser::detect_duplicates(all_parsed_entities.clone())
             .map_err(|errors| ConversionError::EntityConversion(errors.join("; ")))?;
 
