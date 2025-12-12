@@ -4,8 +4,15 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 mod claim_mapping;
+pub(crate) mod log_entry;
+#[cfg(test)]
+mod mock_jwks_server;
+#[cfg(test)]
+mod security_tests;
 #[cfg(test)]
 mod test;
+#[cfg(test)]
+pub mod test_utils;
 mod token_entity_metadata;
 
 pub mod archive_handler;
@@ -13,6 +20,7 @@ pub mod entity_parser;
 pub mod errors;
 pub mod issuer_parser;
 pub mod loader;
+pub mod manager;
 pub mod manifest_validator;
 pub mod metadata;
 pub mod policy_parser;
@@ -31,31 +39,12 @@ use url::Url;
 pub(crate) use claim_mapping::ClaimMappings;
 pub use token_entity_metadata::TokenEntityMetadata;
 
-// Re-export for convenience
+// Re-export types used by init/policy_store.rs and external consumers
 pub use archive_handler::ArchiveVfs;
-pub use entity_parser::{EntityParser, ParsedEntity};
-pub use errors::{
-    ArchiveError, CedarEntityErrorType, CedarSchemaErrorType, ManifestErrorType, PolicyStoreError,
-    TokenError, TrustedIssuerErrorType, ValidationError,
-};
-pub use issuer_parser::{IssuerParser, ParsedIssuer};
-pub use loader::load_policy_store;
-pub use loader::{
-    DefaultPolicyStoreLoader, EntityFile, IssuerFile, LoadedPolicyStore, PolicyFile,
-    PolicyStoreLoader,
-};
-pub use manifest_validator::{
-    ManifestValidationError, ManifestValidationResult, ManifestValidator,
-};
-pub use metadata::{FileInfo, PolicyStoreInfo, PolicyStoreManifest, PolicyStoreMetadata};
-pub use policy_parser::{ParsedPolicy, ParsedTemplate, PolicyParser};
-pub use schema_parser::{ParsedSchema, SchemaParser};
-pub use source::{ArchiveSource, PolicyStoreFormat, PolicyStoreSource};
-pub use validator::MetadataValidator;
-pub use vfs_adapter::{MemoryVfs, VfsFileSystem};
+pub use loader::DefaultPolicyStoreLoader;
+pub use manager::{ConversionError, PolicyStoreManager};
+pub use metadata::PolicyStoreMetadata;
 
-#[cfg(not(target_arch = "wasm32"))]
-pub use vfs_adapter::PhysicalVfs;
 /// Default maximum number of entities allowed
 const DEFAULT_MAX_ENTITIES: usize = 1000;
 /// Default maximum size of base64-encoded strings in bytes
@@ -254,7 +243,10 @@ pub struct TrustedIssuersValidationError {
     oidc_url: String,
 }
 
-/// Wrapper around [`PolicyStore`] to have access to it and ID of policy store
+/// Wrapper around [`PolicyStore`] to have access to it and ID of policy store.
+///
+/// When loaded from the new directory/archive format, includes optional metadata
+/// containing version, description, and other policy store information.
 #[derive(Clone, derive_more::Deref)]
 pub struct PolicyStoreWithID {
     /// ID of policy store
@@ -262,6 +254,9 @@ pub struct PolicyStoreWithID {
     /// Policy store value
     #[deref]
     pub store: PolicyStore,
+    /// Optional metadata from new format policy stores.
+    /// Contains cedar_version, policy_store info (name, version, description, etc.)
+    pub metadata: Option<metadata::PolicyStoreMetadata>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.
@@ -489,6 +484,45 @@ pub struct PoliciesContainer {
 }
 
 impl PoliciesContainer {
+    /// Create a new `PoliciesContainer` from a policy set and description map.
+    ///
+    /// This constructor is used by the policy store manager when converting
+    /// from the new directory/archive format to the legacy format.
+    ///
+    /// # Arguments
+    ///
+    /// * `policy_set` - The compiled Cedar policy set
+    /// * `descriptions` - Map of policy ID to description (typically filename)
+    pub fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
+        let raw_policy_info = descriptions
+            .into_iter()
+            .map(|(id, desc)| {
+                (
+                    id,
+                    RawPolicy {
+                        policy_content: MaybeEncoded::Plain(String::new()),
+                        description: desc,
+                    },
+                )
+            })
+            .collect();
+
+        Self {
+            policy_set,
+            raw_policy_info,
+        }
+    }
+
+    /// Create an empty `PoliciesContainer` with the given policy set.
+    ///
+    /// Used when there are no policy descriptions available.
+    pub fn new_empty(policy_set: cedar_policy::PolicySet) -> Self {
+        Self {
+            policy_set,
+            raw_policy_info: HashMap::new(),
+        }
+    }
+
     /// Get [`cedar_policy::PolicySet`]
     pub fn get_set(&self) -> &cedar_policy::PolicySet {
         &self.policy_set

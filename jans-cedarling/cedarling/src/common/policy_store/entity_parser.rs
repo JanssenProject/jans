@@ -304,10 +304,11 @@ mod tests {
         });
 
         let result = EntityParser::parse_entity(&content, "user1.json", None);
-        if let Err(ref e) = result {
-            eprintln!("Error parsing entity: {}", e);
-        }
-        assert!(result.is_ok(), "Should parse simple entity");
+        assert!(
+            result.is_ok(),
+            "Should parse simple entity: {:?}",
+            result.err()
+        );
 
         let parsed = result.unwrap();
         assert_eq!(parsed.filename, "user1.json");

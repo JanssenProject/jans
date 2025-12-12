@@ -326,10 +326,7 @@ where
         // First pass: collect all unique entry paths
         for i in 0..archive.len() {
             let file = archive.by_index(i).map_err(|e| {
-                std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    format!("Failed to read archive entry {}: {}", i, e),
-                )
+                std::io::Error::other(format!("Failed to read archive entry {}: {}", i, e))
             })?;
 
             let file_name = file.name();
@@ -386,13 +383,6 @@ where
         Ok(Box::new(Cursor::new(bytes)))
     }
 }
-
-/// Type alias for ArchiveVfs backed by in-memory buffer (WASM-compatible).
-pub type ArchiveVfsBuffer = ArchiveVfs<Cursor<Vec<u8>>>;
-
-#[cfg(not(target_arch = "wasm32"))]
-/// Type alias for ArchiveVfs backed by file (native only).
-pub type ArchiveVfsFile = ArchiveVfs<std::fs::File>;
 
 #[cfg(test)]
 mod tests {

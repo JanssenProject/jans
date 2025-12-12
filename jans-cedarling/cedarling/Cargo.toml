@@ -84,3 +84,7 @@ harness = false
 [[bench]]
 name = "authz_authorize_multi_issuer_benchmark"
 harness = false
+
+[[bench]]
+name = "policy_store_benchmark"
+harness = false
