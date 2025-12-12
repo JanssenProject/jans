@@ -197,8 +197,9 @@ fn bench_archive_parsing_policies(c: &mut Criterion) {
                     // Read all files to simulate loading
                     let mut total_size = 0;
                     for i in 0..zip.len() {
-                        let file = zip.by_index(i).unwrap();
-                        total_size += file.size();
+                        let mut file = zip.by_index(i).unwrap();
+                        let bytes_read = std::io::copy(&mut file, &mut std::io::sink()).unwrap();
+                        total_size += bytes_read;
                     }
                     bb(total_size)
                 })
@@ -227,8 +228,9 @@ fn bench_archive_parsing_entities(c: &mut Criterion) {
                     // Read all files to simulate loading
                     let mut total_size = 0;
                     for i in 0..zip.len() {
-                        let file = zip.by_index(i).unwrap();
-                        total_size += file.size();
+                        let mut file = zip.by_index(i).unwrap();
+                        let bytes_read = std::io::copy(&mut file, &mut std::io::sink()).unwrap();
+                        total_size += bytes_read;
                     }
                     bb(total_size)
                 })
