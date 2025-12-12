@@ -40,6 +40,9 @@ impl HttpClient {
 
 impl HttpClient {
     /// Private helper for GET requests with retry logic.
+    ///
+    /// Retries are performed silently - the final error is returned if all attempts fail.
+    /// This keeps HttpClient as a simple, low-level utility without logging dependencies.
     async fn get_with_retry(&self, uri: &str) -> Result<reqwest::Response, HttpClientError> {
         let mut attempts = 0;
         loop {
@@ -47,10 +50,7 @@ impl HttpClient {
                 Ok(response) => return Ok(response),
                 Err(e) if attempts < self.max_retries => {
                     attempts += 1;
-                    eprintln!(
-                        "Request failed (attempt {} of {}): {}. Retrying...",
-                        attempts, self.max_retries, e
-                    );
+                    // Retry silently - callers can log the final error if needed
                     tokio::time::sleep(self.retry_delay * attempts).await;
                 },
                 Err(e) => return Err(HttpClientError::MaxHttpRetriesReached(e)),

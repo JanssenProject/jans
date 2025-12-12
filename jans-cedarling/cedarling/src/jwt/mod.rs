@@ -192,9 +192,10 @@ impl JwtService {
         let key_service = Arc::new(key_service);
 
         // Create TrustedIssuerValidator for advanced validation scenarios
-        let trusted_issuer_validator = Arc::new(RwLock::new(
-            TrustedIssuerValidator::with_logger(trusted_issuers_for_validator, logger.clone())
-        ));
+        let trusted_issuer_validator = Arc::new(RwLock::new(TrustedIssuerValidator::with_logger(
+            trusted_issuers_for_validator,
+            logger.clone(),
+        )));
 
         Ok(Self {
             validators,
@@ -387,7 +388,12 @@ impl JwtService {
 
         // Try to find trusted issuer using TrustedIssuerValidator
         let trusted_iss = if let Some(iss) = iss_claim {
-            match self.trusted_issuer_validator.read().expect("RwLock poisoned").find_trusted_issuer(iss) {
+            match self
+                .trusted_issuer_validator
+                .read()
+                .expect("RwLock poisoned")
+                .find_trusted_issuer(iss)
+            {
                 Ok(issuer) => Some(issuer),
                 Err(TrustedIssuerError::UntrustedIssuer(_)) => {
                     // Fall back to issuer_configs for backward compatibility
@@ -811,7 +817,6 @@ mod test {
             0,
         )
         .await
-        .inspect_err(|e| eprintln!("error msg: {}", e))
         .expect("Should create JwtService");
         let iss = Arc::new(iss);
 

@@ -5,3 +5,11 @@ reason = "not allowed method in WASM, use cedarling::log::log_entry::gen_uuid7()
 [[disallowed-methods]]
 path = "std::time::SystemTime::now"
 reason = "may not work correctly in WASM, use chrono::Utc::now() instead"
+
+[[disallowed-macros]]
+path = "std::eprintln"
+reason = "bypasses logging infrastructure, doesn't work in WASM, use Logger instead"
+
+[[disallowed-macros]]
+path = "std::eprint"
+reason = "bypasses logging infrastructure, doesn't work in WASM, use Logger instead"
