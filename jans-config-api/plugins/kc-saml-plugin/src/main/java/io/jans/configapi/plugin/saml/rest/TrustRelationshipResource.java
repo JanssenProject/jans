@@ -136,13 +136,19 @@ public class TrustRelationshipResource extends BaseResource {
             // check if TrustRelationship with same name already exists
             List<TrustRelationship> existingTrustRelationship = samlService
                     .getAllTrustRelationshipByName(trustRelationship.getName());
-            logger.debug(" existingTrustRelationship:{} ", existingTrustRelationship);
+            logger.error(" existingTrustRelationship:{} ", existingTrustRelationship);
+
             if (existingTrustRelationship != null && !existingTrustRelationship.isEmpty()) {
+                for (TrustRelationship tr : existingTrustRelationship) {
+                    logger.error(" existingTrustRelationship trustRelationship.getName():{} ",
+                            trustRelationship.getName());
+                }
+                logger.error(" throwing BadRequestException");
                 throwBadRequestException(NAME_CONFLICT, String.format(NAME_CONFLICT_MSG, trustRelationship.getName()));
             }
 
             InputStream metaDataFile = trustRelationshipForm.getMetaDataFile();
-            logger.debug(" Create metaDataFile:{} ", metaDataFile);
+            logger.error(" Create metaDataFile:{} ", metaDataFile);
             if (metaDataFile != null) {
                 logger.debug(" Create metaDataFile.available():{}", metaDataFile.available());
             }
@@ -155,15 +161,18 @@ public class TrustRelationshipResource extends BaseResource {
             trustRelationship = samlService.addTrustRelationship(trustRelationship, metaDataFile);
 
             logger.info("Created by TrustRelationship:{}", trustRelationship);
-        }catch (WebApplicationException wex) {
-            StringBuilder sb = new StringBuilder(wex.getMessage());
-            logger.error("Application Error while creating TR is - status:{}, message:{}",wex.getResponse().getStatus(), wex.getMessage());
-            if (wex.getResponse() != null && wex.getResponse().getStatus()== Status.BAD_REQUEST.getStatusCode()) {
-                sb = new StringBuilder().append(String.format(NAME_CONFLICT_MSG, trustRelationship.getName()));
-                logger.error("NAME_CONFLICT_MSG {}",sb);
+        } catch (WebApplicationException wex) {
+            logger.error("Application Error while creating TR is - status:{}, message:{}",
+                    wex.getResponse().getStatus(), wex.getMessage());
+            if (wex.getResponse() != null && wex.getResponse().getStatus() == Status.BAD_REQUEST.getStatusCode()) {
+                logger.error("NEW NAME_CONFLICT_MSG wex.getResponse().getStatus():{}, wex.getResponse().getEntity():{}", wex.getResponse().getStatus(), wex.getResponse().getEntity());
+                 Response.status(wex.getResponse().getStatus()).entity(wex.getResponse().getEntity()).build();
+
             }
-            logger.error("APPLICATION_ERROR {}",sb);
-            throwInternalServerException(APPLICATION_ERROR, sb.toString());
+
+            logger.error("APPLICATION_ERROR while creating ", wex);
+            Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(wex.getResponse().getEntity()).build();
+
         }
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
@@ -239,15 +248,14 @@ public class TrustRelationshipResource extends BaseResource {
             trustRelationship = samlService.updateTrustRelationship(trustRelationship, metaDataFile);
 
             logger.info("Post update trustRelationship:{}", trustRelationship);
-        }catch (WebApplicationException wex) {
-            StringBuilder sb = new StringBuilder(wex.getMessage());
-            logger.error("Application Error while updating TR is - status:{}, message:{}",wex.getResponse().getStatus(), wex.getMessage());
-            if (wex.getResponse() != null && wex.getResponse().getStatus()== Status.BAD_REQUEST.getStatusCode()) {
-                sb = new StringBuilder().append(String.format(NAME_CONFLICT_MSG, trustRelationship.getName()));
-                logger.error("NAME_CONFLICT_MSG {}",sb);
+        } catch (WebApplicationException wex) {
+            if (wex.getResponse() != null && wex.getResponse().getStatus() == Status.BAD_REQUEST.getStatusCode()) {
+                logger.error("NAME_CONFLICT_MSG {}");
+                throwBadRequestException(wex.getResponse());
             }
-            logger.error("APPLICATION_ERROR {}",sb);
-            throwInternalServerException(APPLICATION_ERROR, sb.toString());
+
+            logger.error("APPLICATION_ERROR while updating {}", wex);
+            throwInternalServerException(APPLICATION_ERROR, wex);
         }
         return Response.ok(trustRelationship).build();
     }
