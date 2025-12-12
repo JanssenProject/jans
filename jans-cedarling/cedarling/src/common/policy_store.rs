@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 mod claim_mapping;
+pub(crate) mod log_entry;
 #[cfg(test)]
 mod mock_jwks_server;
 #[cfg(test)]
