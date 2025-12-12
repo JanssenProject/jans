@@ -187,9 +187,8 @@ mod malicious_archives {
                 let entries = vfs.read_dir(".");
                 assert!(entries.is_ok());
             },
-            Err(e) => {
-                // Should fail gracefully, not panic
-                eprintln!("Deep nesting rejected: {}", e);
+            Err(_) => {
+                // Should fail gracefully, not panic - rejection is acceptable
             },
         }
     }
@@ -509,10 +508,8 @@ when {{ {} }};"#,
         let result = loader.load_directory(".");
         // May succeed or fail due to policy complexity - should not panic
         // Reaching this point without panic is the success criteria
-        match result {
-            Ok(_) => (), // Large policy accepted
-            Err(e) => eprintln!("Large policy rejected (acceptable): {}", e),
-        }
+        // Test passes whether result succeeds or fails - just should not panic
+        drop(result);
     }
 
     #[test]

@@ -39,10 +39,13 @@
 use super::entity_parser::EntityParser;
 use super::issuer_parser::IssuerParser;
 use super::loader::LoadedPolicyStore;
+use super::log_entry::PolicyStoreLogEntry;
 use super::policy_parser::PolicyParser;
 use super::{PoliciesContainer, PolicyStore, TrustedIssuer};
 use crate::common::cedar_schema::CedarSchema;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
+use crate::log::Logger;
+use crate::log::interface::LogWriter;
 use cedar_policy::PolicySet;
 use cedar_policy_core::extensions::Extensions;
 use cedar_policy_validator::ValidatorSchema;
@@ -98,29 +101,60 @@ impl PolicyStoreManager {
     ///
     /// Returns `ConversionError` if any component fails to convert.
     pub fn convert_to_legacy(loaded: LoadedPolicyStore) -> Result<PolicyStore, ConversionError> {
-        // 1. Log manifest info if present (manifest is used for integrity checking during load)
-        if let Some(ref manifest) = loaded.manifest {
-            eprintln!(
-                "Info: Policy store '{}' loaded with manifest (generated: {})",
+        Self::convert_to_legacy_with_logger(loaded, None)
+    }
+
+    /// Convert a `LoadedPolicyStore` to `PolicyStore` with optional logging.
+    ///
+    /// This version accepts an optional logger for structured logging during conversion.
+    /// Use this when a logger is available to get detailed conversion logs.
+    ///
+    /// # Arguments
+    ///
+    /// * `loaded` - The loaded policy store from the new loader
+    /// * `logger` - Optional logger for structured logging
+    ///
+    /// # Returns
+    ///
+    /// Returns a `PolicyStore` that can be used with existing Cedarling services.
+    ///
+    /// # Errors
+    ///
+    /// Returns `ConversionError` if any component fails to convert.
+    pub fn convert_to_legacy_with_logger(
+        loaded: LoadedPolicyStore,
+        logger: Option<Logger>,
+    ) -> Result<PolicyStore, ConversionError> {
+        // Log manifest info if available
+        if let Some(manifest) = &loaded.manifest {
+            logger.log_any(PolicyStoreLogEntry::info(format!(
+                "Converting policy store '{}' (generated: {})",
                 manifest.policy_store_id, manifest.generated_date
-            );
+            )));
         }
 
-        // 2. Convert schema
+        // 1. Convert schema
         let cedar_schema = Self::convert_schema(&loaded.schema)?;
 
-        // 3. Convert policies and templates into a single PoliciesContainer
+        // 2. Convert policies and templates into a single PoliciesContainer
         let policies_container =
             Self::convert_policies_and_templates(&loaded.policies, &loaded.templates)?;
 
-        // 4. Convert trusted issuers
+        // 3. Convert trusted issuers
         let trusted_issuers = Self::convert_trusted_issuers(&loaded.trusted_issuers)?;
 
-        // 5. Convert entities
-        let default_entities = Self::convert_entities(&loaded.entities)?;
+        // 4. Convert entities with logger for hierarchy warnings
+        let default_entities = Self::convert_entities_with_logger(&loaded.entities, &logger)?;
 
-        // 6. Parse cedar version
+        // 5. Parse cedar version
         let cedar_version = Self::parse_cedar_version(&loaded.metadata.cedar_version)?;
+
+        logger.log_any(PolicyStoreLogEntry::info(format!(
+            "Policy store conversion complete: {} policies, {} issuers, {} entities",
+            policies_container.get_set().policies().count(),
+            trusted_issuers.as_ref().map(|i| i.len()).unwrap_or(0),
+            default_entities.as_ref().map(|e| e.len()).unwrap_or(0)
+        )));
 
         Ok(PolicyStore {
             name: loaded.metadata.policy_store.name,
@@ -292,6 +326,14 @@ impl PolicyStoreManager {
     fn convert_entities(
         entity_files: &[super::loader::EntityFile],
     ) -> Result<Option<HashMap<String, serde_json::Value>>, ConversionError> {
+        Self::convert_entities_with_logger(entity_files, &None)
+    }
+
+    /// Convert entity files with optional logging for hierarchy warnings.
+    fn convert_entities_with_logger(
+        entity_files: &[super::loader::EntityFile],
+        logger: &Option<Logger>,
+    ) -> Result<Option<HashMap<String, serde_json::Value>>, ConversionError> {
         if entity_files.is_empty() {
             return Ok(None);
         }
@@ -316,14 +358,15 @@ impl PolicyStoreManager {
         let unique_entities = EntityParser::detect_duplicates(all_parsed_entities.clone())
             .map_err(|errors| ConversionError::EntityConversion(errors.join("; ")))?;
 
-        // Step 3: Validate entity hierarchy (optional but recommended)
-        // This ensures all parent references point to entities that exist
-        if let Err(hierarchy_errors) = EntityParser::validate_hierarchy(&all_parsed_entities) {
-            // Log warnings but don't fail - parent entities may be provided at runtime
-            eprintln!(
-                "Warning: Entity hierarchy validation found issues: {}",
-                hierarchy_errors.join("; ")
-            );
+        // Step 3: Validate entity hierarchy (optional - parent entities may be provided at runtime)
+        // This ensures all parent references point to entities that exist in this store
+        // Note: Hierarchy validation errors are non-fatal since parent entities
+        // might be provided at runtime via authorization requests
+        if let Err(warnings) = EntityParser::validate_hierarchy(&all_parsed_entities) {
+            logger.log_any(PolicyStoreLogEntry::warn(format!(
+                "Entity hierarchy validation warnings (non-fatal): {:?}",
+                warnings
+            )));
         }
 
         // Step 4: Validate entities can form a valid Cedar entity store
@@ -412,15 +455,15 @@ mod tests {
     #[test]
     fn test_convert_schema_valid() {
         let schema_content = r#"
-            namespace TestApp {
-                entity User;
-                entity Resource;
-                action "read" appliesTo {
-                    principal: [User],
-                    resource: [Resource]
-                };
-            }
-        "#;
+    namespace TestApp {
+        entity User;
+        entity Resource;
+        action "read" appliesTo {
+            principal: [User],
+            resource: [Resource]
+        };
+    }
+"#;
 
         let result = PolicyStoreManager::convert_schema(schema_content);
         assert!(
@@ -521,17 +564,17 @@ mod tests {
         let issuer_files = vec![IssuerFile {
             name: "issuer.json".to_string(),
             content: r#"{
-                "test_issuer": {
-                    "name": "Test Issuer",
-                    "description": "A test issuer",
-                    "openid_configuration_endpoint": "https://test.com/.well-known/openid-configuration",
-                    "token_metadata": {
-                        "access_token": {
-                            "entity_type_name": "Test::access_token"
-                        }
-                    }
+        "test_issuer": {
+            "name": "Test Issuer",
+            "description": "A test issuer",
+            "openid_configuration_endpoint": "https://test.com/.well-known/openid-configuration",
+            "token_metadata": {
+                "access_token": {
+                    "entity_type_name": "Test::access_token"
                 }
-            }"#
+            }
+        }
+    }"#
             .to_string(),
         }];
 
@@ -562,12 +605,12 @@ mod tests {
         let entity_files = vec![EntityFile {
             name: "users.json".to_string(),
             content: r#"[
-                {
-                    "uid": {"type": "User", "id": "alice"},
-                    "attrs": {"name": "Alice"},
-                    "parents": []
-                }
-            ]"#
+        {
+            "uid": {"type": "User", "id": "alice"},
+            "attrs": {"name": "Alice"},
+            "parents": []
+        }
+    ]"#
             .to_string(),
         }];
 
@@ -598,14 +641,14 @@ mod tests {
             metadata: create_test_metadata(),
             manifest: None,
             schema: r#"
-                namespace TestApp {
-                    entity User;
-                    action "read" appliesTo {
-                        principal: [User],
-                        resource: [User]
-                    };
-                }
-            "#
+        namespace TestApp {
+            entity User;
+            action "read" appliesTo {
+                principal: [User],
+                resource: [User]
+            };
+        }
+    "#
             .to_string(),
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
@@ -632,45 +675,45 @@ mod tests {
     #[test]
     fn test_convert_to_legacy_full() {
         let loaded = LoadedPolicyStore {
-            metadata: create_test_metadata(),
-            manifest: None,
-            schema: r#"
-                namespace TestApp {
-                    entity User;
-                    action "read" appliesTo {
-                        principal: [User],
-                        resource: [User]
-                    };
-                }
-            "#
+    metadata: create_test_metadata(),
+    manifest: None,
+    schema: r#"
+        namespace TestApp {
+            entity User;
+            action "read" appliesTo {
+                principal: [User],
+                resource: [User]
+            };
+        }
+    "#
+    .to_string(),
+    policies: vec![PolicyFile {
+        name: "test.cedar".to_string(),
+        content: "permit(principal, action, resource);".to_string(),
+    }],
+    templates: vec![],
+    entities: vec![EntityFile {
+        name: "users.json".to_string(),
+        content: r#"[{"uid": {"type": "User", "id": "alice"}, "attrs": {}, "parents": []}]"#
             .to_string(),
-            policies: vec![PolicyFile {
-                name: "test.cedar".to_string(),
-                content: "permit(principal, action, resource);".to_string(),
-            }],
-            templates: vec![],
-            entities: vec![EntityFile {
-                name: "users.json".to_string(),
-                content: r#"[{"uid": {"type": "User", "id": "alice"}, "attrs": {}, "parents": []}]"#
-                    .to_string(),
-            }],
-            trusted_issuers: vec![IssuerFile {
-                name: "issuer.json".to_string(),
-                content: r#"{
-                    "main": {
-                        "name": "Main Issuer",
-                        "description": "Primary issuer",
-                        "openid_configuration_endpoint": "https://auth.test/.well-known/openid-configuration",
-                        "token_metadata": {
-                            "access_token": {
-                                "entity_type_name": "Test::access_token"
-                            }
-                        }
+    }],
+    trusted_issuers: vec![IssuerFile {
+        name: "issuer.json".to_string(),
+        content: r#"{
+            "main": {
+                "name": "Main Issuer",
+                "description": "Primary issuer",
+                "openid_configuration_endpoint": "https://auth.test/.well-known/openid-configuration",
+                "token_metadata": {
+                    "access_token": {
+                        "entity_type_name": "Test::access_token"
                     }
-                }"#
-                .to_string(),
-            }],
-        };
+                }
+            }
+        }"#
+        .to_string(),
+    }],
+};
 
         let result = PolicyStoreManager::convert_to_legacy(loaded);
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());

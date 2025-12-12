@@ -274,6 +274,22 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
         metadata: &PolicyStoreMetadata,
         _manifest: &PolicyStoreManifest,
     ) -> Result<(), PolicyStoreError> {
+        self.validate_manifest_with_logger(dir, metadata, _manifest, None)
+    }
+
+    /// Validate the manifest file with optional logging for unlisted files.
+    ///
+    /// Same as `validate_manifest` but accepts an optional logger for structured logging.
+    pub fn validate_manifest_with_logger(
+        &self,
+        dir: &str,
+        metadata: &PolicyStoreMetadata,
+        _manifest: &PolicyStoreManifest,
+        logger: Option<crate::log::Logger>,
+    ) -> Result<(), PolicyStoreError> {
+        use super::log_entry::PolicyStoreLogEntry;
+        use crate::log::interface::LogWriter;
+
         // Create a new PhysicalVfs instance for validation
         let validator =
             ManifestValidator::new(super::vfs_adapter::PhysicalVfs::new(), PathBuf::from(dir));
@@ -289,12 +305,13 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
             });
         }
 
+        // Log unlisted files if any (informational - these files are allowed but not checksummed)
         if !result.unlisted_files.is_empty() {
-            eprintln!(
-                "Warning: {} file(s) found in policy store but not listed in manifest: {:?}",
+            logger.log_any(PolicyStoreLogEntry::info(format!(
+                "Policy store contains {} unlisted file(s) not in manifest: {:?}",
                 result.unlisted_files.len(),
                 result.unlisted_files
-            );
+            )));
         }
 
         Ok(())
