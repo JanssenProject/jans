@@ -37,11 +37,6 @@ impl PolicyStoreLogEntry {
     pub fn warn(msg: impl Into<String>) -> Self {
         Self::new(msg, Some(LogLevel::WARN))
     }
-
-    /// Create a debug-level log entry.
-    pub fn debug(msg: impl Into<String>) -> Self {
-        Self::new(msg, Some(LogLevel::DEBUG))
-    }
 }
 
 impl Loggable for PolicyStoreLogEntry {
