@@ -9,7 +9,7 @@
 	<artifactId>user-mgt-plugin</artifactId>
 	
 	<properties>
-		<httpcore.version>4.4.14</httpcore.version>
+		<httpcore.version>4.4.16</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 		<jans.version>${project.version}</jans.version>
 		
