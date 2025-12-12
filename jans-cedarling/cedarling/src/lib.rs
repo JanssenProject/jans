@@ -53,6 +53,7 @@ pub use log::{LogLevel, LogStorage};
 
 // JWT validation exports
 pub use jwt::{JwtService, TrustedIssuerError, TrustedIssuerValidator, validate_required_claims};
+use semver::Version;
 
 #[doc(hidden)]
 pub mod bindings {
@@ -180,8 +181,8 @@ impl Cedarling {
             );
 
             // Log version compatibility check with current Cedar
-            const CURRENT_CEDAR_VERSION: &str = "4.3.2";
-            match metadata.is_compatible_with_cedar(CURRENT_CEDAR_VERSION) {
+            let current_cedar_version: Version = cedar_policy::get_lang_version();
+            match metadata.is_compatible_with_cedar(&current_cedar_version) {
                 Ok(true) => {
                     log.log_any(
                         LogEntry::new_with_data(LogType::System, None)
@@ -189,7 +190,7 @@ impl Cedarling {
                             .set_message(format!(
                                 "Policy store Cedar version {} is compatible with runtime version {}",
                                 metadata.cedar_version(),
-                                CURRENT_CEDAR_VERSION
+                                current_cedar_version
                             )),
                     );
                 },
@@ -200,7 +201,7 @@ impl Cedarling {
                             .set_message(format!(
                                 "Policy store Cedar version {} may not be compatible with runtime version {}",
                                 metadata.cedar_version(),
-                                CURRENT_CEDAR_VERSION
+                                current_cedar_version
                             )),
                     );
                 },

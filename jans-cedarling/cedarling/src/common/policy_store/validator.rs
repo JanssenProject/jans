@@ -74,15 +74,17 @@ impl MetadataValidator {
 
         // Validate description length if provided
         if let Some(desc) = &info.description
-            && desc.len() > 1000 {
-                return Err(ValidationError::DescriptionTooLong { length: desc.len() });
-            }
+            && desc.len() > 1000
+        {
+            return Err(ValidationError::DescriptionTooLong { length: desc.len() });
+        }
 
         // Validate timestamps ordering if both are provided
         if let (Some(created), Some(updated)) = (info.created_date, info.updated_date)
-            && updated < created {
-                return Err(ValidationError::InvalidTimestampOrdering);
-            }
+            && updated < created
+        {
+            return Err(ValidationError::InvalidTimestampOrdering);
+        }
 
         Ok(())
     }
@@ -174,7 +176,7 @@ impl PolicyStoreMetadata {
     /// Check if this policy store is compatible with a given Cedar version.
     pub fn is_compatible_with_cedar(
         &self,
-        required_version: &str,
+        required_version: &Version,
     ) -> Result<bool, ValidationError> {
         let store_version =
             Version::parse(&self.cedar_version).map_err(|e| ValidationError::InvalidMetadata {
@@ -182,14 +184,12 @@ impl PolicyStoreMetadata {
                 message: format!("Invalid cedar_version: {}", e),
             })?;
 
-        let required =
-            Version::parse(required_version).map_err(|e| ValidationError::InvalidMetadata {
-                file: "compatibility_check".to_string(),
-                message: format!("Invalid required version: {}", e),
-            })?;
+        // Check if the store version is compatible with the required version
+        if store_version.major == required_version.major {
+            return Ok(store_version >= *required_version);
+        }
 
-        // Compatible if major version matches and minor version is >= required
-        Ok(store_version.major == required.major && store_version >= required)
+        Ok(false)
     }
 }
 
@@ -577,7 +577,7 @@ mod tests {
         };
 
         let is_compatible = metadata
-            .is_compatible_with_cedar("4.4.0")
+            .is_compatible_with_cedar(&Version::new(4, 4, 0))
             .expect("Should successfully check compatibility");
         assert!(is_compatible);
     }
@@ -597,7 +597,7 @@ mod tests {
         };
 
         let is_compatible = metadata
-            .is_compatible_with_cedar("4.4.0")
+            .is_compatible_with_cedar(&Version::new(4, 4, 0))
             .expect("Should successfully check compatibility");
         assert!(is_compatible);
     }
@@ -617,7 +617,7 @@ mod tests {
         };
 
         let is_compatible = metadata
-            .is_compatible_with_cedar("3.0.0")
+            .is_compatible_with_cedar(&Version::new(3, 0, 0))
             .expect("Should successfully check compatibility");
         assert!(!is_compatible);
     }
@@ -637,7 +637,7 @@ mod tests {
         };
 
         let is_compatible = metadata
-            .is_compatible_with_cedar("4.4.0")
+            .is_compatible_with_cedar(&Version::new(4, 4, 0))
             .expect("Should successfully check compatibility");
         assert!(!is_compatible);
     }
