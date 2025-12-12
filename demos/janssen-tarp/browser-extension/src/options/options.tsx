@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import './options.css'
+import '../static/css/options.css'
 import Header from './header'
 import HomePage from './homePage'
 import UserDetails from './userDetails'

@@ -1,5 +1,5 @@
 import React from "react";
-import './options.css'
+import '../static/css/options.css'
 
 const Header = () => {
     return (

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import './options.css'
-import './alerts.css';
+import '../static/css/options.css'
+import '../static/css/alerts.css';
 import { JsonEditor } from 'json-edit-react'
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
