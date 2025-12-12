@@ -48,14 +48,14 @@
             "name": "String",
             "required": false
           },
-          "user_agent": {
-            "type": "EntityOrCommon",
-            "name": "String",
-            "required": false
-          },
           "tokens": {
             "type": "EntityOrCommon",
             "name": "TokensContext",
+            "required": false
+          },
+          "user_agent": {
+            "type": "EntityOrCommon",
+            "name": "String",
             "required": false
           }
         }
@@ -105,21 +105,6 @@
         "shape": {
           "type": "Record",
           "attributes": {
-            "token_type": {
-              "type": "EntityOrCommon",
-              "name": "String",
-              "required": false
-            },
-            "issuer": {
-              "type": "EntityOrCommon",
-              "name": "String",
-              "required": false
-            },
-            "validated_at": {
-              "type": "EntityOrCommon",
-              "name": "Long",
-              "required": false
-            },
             "aud": {
               "type": "EntityOrCommon",
               "name": "String",
@@ -127,8 +112,7 @@
             },
             "exp": {
               "type": "EntityOrCommon",
-              "name": "Long",
-              "required": false
+              "name": "Long"
             },
             "iat": {
               "type": "EntityOrCommon",
@@ -142,8 +126,7 @@
             },
             "jti": {
               "type": "EntityOrCommon",
-              "name": "String",
-              "required": false
+              "name": "String"
             },
             "nbf": {
               "type": "EntityOrCommon",
@@ -157,6 +140,14 @@
                 "name": "String"
               },
               "required": false
+            },
+            "token_type": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "validated_at": {
+              "type": "EntityOrCommon",
+              "name": "Long"
             }
           }
         },
@@ -268,21 +259,6 @@
         "shape": {
           "type": "Record",
           "attributes": {
-            "token_type": {
-              "type": "EntityOrCommon",
-              "name": "String",
-              "required": false
-            },
-            "issuer": {
-              "type": "EntityOrCommon",
-              "name": "String",
-              "required": false
-            },
-            "validated_at": {
-              "type": "EntityOrCommon",
-              "name": "Long",
-              "required": false
-            },
             "aud": {
               "type": "EntityOrCommon",
               "name": "String",
@@ -300,8 +276,7 @@
             },
             "exp": {
               "type": "EntityOrCommon",
-              "name": "Long",
-              "required": false
+              "name": "Long"
             },
             "iat": {
               "type": "EntityOrCommon",
@@ -313,10 +288,14 @@
               "name": "TrustedIssuer",
               "required": false
             },
-            "jti": {
+            "issuer": {
               "type": "EntityOrCommon",
               "name": "String",
               "required": false
+            },
+            "jti": {
+              "type": "EntityOrCommon",
+              "name": "String"
             },
             "name": {
               "type": "EntityOrCommon",
@@ -340,6 +319,14 @@
               "type": "EntityOrCommon",
               "name": "String",
               "required": false
+            },
+            "token_type": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "validated_at": {
+              "type": "EntityOrCommon",
+              "name": "Long"
             }
           }
         },
@@ -366,7 +353,8 @@
             },
             "iss": {
               "type": "EntityOrCommon",
-              "name": "TrustedIssuer"
+              "name": "TrustedIssuer",
+              "required": false
             },
             "name": {
               "type": "EntityOrCommon",
@@ -390,21 +378,6 @@
         "shape": {
           "type": "Record",
           "attributes": {
-            "token_type": {
-              "type": "EntityOrCommon",
-              "name": "String",
-              "required": false
-            },
-            "issuer": {
-              "type": "EntityOrCommon",
-              "name": "String",
-              "required": false
-            },
-            "validated_at": {
-              "type": "EntityOrCommon",
-              "name": "Long",
-              "required": false
-            },
             "acr": {
               "type": "EntityOrCommon",
               "name": "String",
@@ -443,8 +416,7 @@
             },
             "exp": {
               "type": "EntityOrCommon",
-              "name": "Long",
-              "required": false
+              "name": "Long"
             },
             "iat": {
               "type": "EntityOrCommon",
@@ -458,8 +430,7 @@
             },
             "jti": {
               "type": "EntityOrCommon",
-              "name": "String",
-              "required": false
+              "name": "String"
             },
             "name": {
               "type": "EntityOrCommon",
@@ -483,6 +454,14 @@
               "type": "EntityOrCommon",
               "name": "String",
               "required": false
+            },
+            "token_type": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "validated_at": {
+              "type": "EntityOrCommon",
+              "name": "Long"
             }
           }
         },
