@@ -27,6 +27,7 @@ use crate::jwt::http_utils::{GetFromUrl, OpenIdConfig};
 use crate::jwt::key_service::{DecodingKeyInfo, KeyService, KeyServiceError};
 use crate::log::Logger;
 use crate::log::interface::LogWriter;
+use chrono::{DateTime, Utc};
 use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
@@ -111,7 +112,7 @@ pub type Result<T> = std::result::Result<T, TrustedIssuerError>;
 /// - Required claims validation based on token metadata
 /// - JWKS fetching and caching
 /// - JWT signature verification
-use std::time::{Duration, SystemTime};
+use std::time::Duration;
 
 /// Default JWKS cache duration (1 hour) used when no Cache-Control header is present
 const DEFAULT_JWKS_CACHE_DURATION_SECS: u64 = 3600;
@@ -157,7 +158,7 @@ pub struct TrustedIssuerValidator {
     oidc_configs: HashMap<String, Arc<OpenIdConfig>>,
     /// Timestamp of last JWKS fetch for expiration tracking
     /// Maps issuer OIDC endpoint to (fetch_time, cache_duration)
-    keys_fetch_time: HashMap<String, (SystemTime, Duration)>,
+    keys_fetch_time: HashMap<String, (DateTime<Utc>, Duration)>,
     /// Optional logger for diagnostic messages
     logger: Option<Logger>,
 }
@@ -279,14 +280,13 @@ impl TrustedIssuerValidator {
         // Check if we have keys and if they've expired
         let should_refresh = if self.key_service.has_keys() {
             if let Some((fetch_time, cache_duration)) = self.keys_fetch_time.get(endpoint_str) {
-                // Check if keys have expired
-                if let Ok(elapsed) = fetch_time.elapsed() {
-                    // Refresh if elapsed time exceeds cache duration
-                    elapsed >= *cache_duration
-                } else {
-                    // System time went backwards, refresh to be safe
-                    true
-                }
+                // Calculate elapsed time using chrono
+                let elapsed = Utc::now().signed_duration_since(*fetch_time);
+                // Refresh if elapsed time exceeds cache duration
+                // Note: chrono::Duration can represent negative values if time went backwards
+                elapsed
+                    >= chrono::Duration::from_std(*cache_duration)
+                        .unwrap_or(chrono::Duration::zero())
             } else {
                 // No timestamp recorded, keys are fresh
                 false
@@ -309,10 +309,8 @@ impl TrustedIssuerValidator {
         let cache_duration = self.determine_cache_duration(trusted_issuer);
 
         // Record fetch time for expiration tracking
-        self.keys_fetch_time.insert(
-            endpoint_str.to_string(),
-            (SystemTime::now(), cache_duration),
-        );
+        self.keys_fetch_time
+            .insert(endpoint_str.to_string(), (Utc::now(), cache_duration));
 
         // Log key refresh for monitoring
         self.logger.log_any(JwtLogEntry::new(
