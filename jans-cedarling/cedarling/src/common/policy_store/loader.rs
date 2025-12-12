@@ -50,7 +50,7 @@
 use super::errors::{PolicyStoreError, ValidationError};
 
 #[cfg(test)]
-use super::errors::ArchiveError;
+use super::errors::{ArchiveError, CedarParseErrorDetail};
 use super::manifest_validator::ManifestValidator;
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
 
@@ -815,11 +815,7 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
                 // Legacy JSON/YAML format is not supported through the loader module.
                 // Use init::policy_store::load_policy_store() which handles legacy formats
                 // via AgamaPolicyStore deserialization.
-                Err(PolicyStoreError::UnsupportedFormat {
-                    message: "Legacy format not supported through PolicyStoreLoader. \
-                              Use init::policy_store::load_policy_store() for legacy JSON/YAML formats."
-                        .to_string(),
-                })
+                Err(PolicyStoreError::LegacyFormatNotSupported)
             },
         }
     }
@@ -876,11 +872,7 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
                 // Legacy format validation is not supported through the loader module.
                 // Legacy formats are validated during JSON/YAML deserialization in
                 // init::policy_store::load_policy_store().
-                Err(PolicyStoreError::UnsupportedFormat {
-                    message: "Legacy format validation not supported through PolicyStoreLoader. \
-                              Use init::policy_store::load_policy_store() for legacy JSON/YAML formats."
-                        .to_string(),
-                })
+                Err(PolicyStoreError::LegacyFormatNotSupported)
             },
         }
     }
@@ -1198,9 +1190,10 @@ permit(
         let result = PhysicalLoader::parse_policies(&policy_files);
         assert!(result.is_err());
 
-        if let Err(PolicyStoreError::CedarParsing { file, message }) = result {
+        if let Err(PolicyStoreError::CedarParsing { file, detail }) = result {
             assert_eq!(file, "invalid.cedar");
-            assert!(!message.is_empty());
+            // The detail should be a ParseError with a non-empty message
+            assert!(matches!(detail, CedarParseErrorDetail::ParseError(_)));
         } else {
             panic!("Expected CedarParsing error");
         }

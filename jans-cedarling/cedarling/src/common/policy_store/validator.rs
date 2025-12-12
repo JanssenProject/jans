@@ -119,9 +119,9 @@ impl MetadataValidator {
     pub fn parse_and_validate(json: &str) -> Result<PolicyStoreMetadata, ValidationError> {
         // Parse JSON
         let metadata: PolicyStoreMetadata =
-            serde_json::from_str(json).map_err(|e| ValidationError::InvalidMetadata {
+            serde_json::from_str(json).map_err(|e| ValidationError::MetadataJsonParseFailed {
                 file: "metadata.json".to_string(),
-                message: format!("Failed to parse JSON: {}", e),
+                source: e,
             })?;
 
         // Validate
@@ -178,11 +178,12 @@ impl PolicyStoreMetadata {
         &self,
         required_version: &Version,
     ) -> Result<bool, ValidationError> {
-        let store_version =
-            Version::parse(&self.cedar_version).map_err(|e| ValidationError::InvalidMetadata {
+        let store_version = Version::parse(&self.cedar_version).map_err(|e| {
+            ValidationError::MetadataInvalidCedarVersion {
                 file: "metadata.json".to_string(),
-                message: format!("Invalid cedar_version: {}", e),
-            })?;
+                source: e,
+            }
+        })?;
 
         // Check if the store version is compatible with the required version
         if store_version.major == required_version.major {
@@ -499,7 +500,10 @@ mod tests {
 
         let result = MetadataValidator::parse_and_validate(json);
         let err = result.expect_err("Should fail on invalid JSON");
-        assert!(matches!(err, ValidationError::InvalidMetadata { .. }));
+        assert!(matches!(
+            err,
+            ValidationError::MetadataJsonParseFailed { .. }
+        ));
     }
 
     #[test]
@@ -514,7 +518,10 @@ mod tests {
 
         let result = MetadataValidator::parse_and_validate(json);
         let err = result.expect_err("Should fail on missing required field");
-        assert!(matches!(err, ValidationError::InvalidMetadata { .. }));
+        assert!(matches!(
+            err,
+            ValidationError::MetadataJsonParseFailed { .. }
+        ));
     }
 
     #[test]

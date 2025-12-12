@@ -143,8 +143,8 @@ impl PolicyStoreManager {
         // 3. Convert trusted issuers
         let trusted_issuers = Self::convert_trusted_issuers(&loaded.trusted_issuers)?;
 
-        // 4. Convert entities with logger for hierarchy warnings
-        let default_entities = Self::convert_entities_with_logger(&loaded.entities, &logger)?;
+        // 4. Convert entities (logs hierarchy warnings if logger provided)
+        let default_entities = Self::convert_entities(&loaded.entities, &logger)?;
 
         // 5. Parse cedar version
         let cedar_version = Self::parse_cedar_version(&loaded.metadata.cedar_version)?;
@@ -321,16 +321,14 @@ impl PolicyStoreManager {
     /// This function:
     /// 1. Parses all entity files
     /// 2. Detects duplicate entity UIDs (returns error if found)
-    /// 3. Optionally validates entity hierarchy (parent references)
+    /// 3. Optionally validates entity hierarchy (parent references - logs warnings if logger provided)
     /// 4. Converts to the required HashMap format
+    ///
+    /// # Arguments
+    ///
+    /// * `entity_files` - The entity files to convert
+    /// * `logger` - Optional logger for hierarchy warnings
     fn convert_entities(
-        entity_files: &[super::loader::EntityFile],
-    ) -> Result<Option<HashMap<String, serde_json::Value>>, ConversionError> {
-        Self::convert_entities_with_logger(entity_files, &None)
-    }
-
-    /// Convert entity files with optional logging for hierarchy warnings.
-    fn convert_entities_with_logger(
         entity_files: &[super::loader::EntityFile],
         logger: &Option<Logger>,
     ) -> Result<Option<HashMap<String, serde_json::Value>>, ConversionError> {
@@ -614,7 +612,7 @@ mod tests {
             .to_string(),
         }];
 
-        let result = PolicyStoreManager::convert_entities(&entity_files);
+        let result = PolicyStoreManager::convert_entities(&entity_files, &None);
         assert!(
             result.is_ok(),
             "Entity conversion failed: {:?}",
@@ -630,7 +628,7 @@ mod tests {
     #[test]
     fn test_convert_entities_empty() {
         let entity_files: Vec<EntityFile> = vec![];
-        let result = PolicyStoreManager::convert_entities(&entity_files);
+        let result = PolicyStoreManager::convert_entities(&entity_files, &None);
         assert!(result.is_ok());
         assert!(result.unwrap().is_none());
     }

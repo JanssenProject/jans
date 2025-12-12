@@ -94,11 +94,14 @@ pub enum TrustedIssuerError {
     /// Missing issuer claim in token
     #[error("Token missing 'iss' claim")]
     MissingIssuerClaim,
-    /// Token metadata configuration is invalid  
-    #[error("Invalid token metadata configuration: {message}")]
-    InvalidTokenMetadataConfig {
-        /// The error message describing the invalid configuration
-        message: String,
+
+    /// Token metadata has empty entity_type_name
+    #[error(
+        "Invalid token metadata configuration: entity_type_name is empty for token type '{token_type}'"
+    )]
+    EmptyEntityTypeName {
+        /// The token type with empty entity_type_name
+        token_type: String,
     },
 }
 
@@ -377,8 +380,8 @@ pub fn validate_required_claims(
 ) -> Result<()> {
     // Check for entity_type_name (configuration validation, always required)
     if token_metadata.entity_type_name.is_empty() {
-        return Err(TrustedIssuerError::InvalidTokenMetadataConfig {
-            message: format!("entity_type_name is empty for token type '{}'", token_type),
+        return Err(TrustedIssuerError::EmptyEntityTypeName {
+            token_type: token_type.to_string(),
         });
     }
 

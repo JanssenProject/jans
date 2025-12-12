@@ -189,10 +189,10 @@ pub enum PolicyStoreError {
     },
 
     /// Cedar parsing error
-    #[error("Cedar parsing error in '{file}'")]
+    #[error("Cedar parsing error in '{file}': {detail}")]
     CedarParsing {
         file: String,
-        message: String, // Cedar errors don't implement std::error::Error
+        detail: CedarParseErrorDetail,
     },
 
     /// Cedar schema error
@@ -260,50 +260,76 @@ pub enum PolicyStoreError {
         source: std::io::Error,
     },
 
-    /// Unsupported format
-    #[error("Unsupported format: {message}")]
-    UnsupportedFormat { message: String },
+    /// Unsupported format - legacy format not supported through this loader
+    #[error(
+        "Unsupported format: legacy JSON/YAML format not supported through PolicyStoreLoader. Use init::policy_store::load_policy_store() instead"
+    )]
+    LegacyFormatNotSupported,
+}
+
+/// Details about Cedar parsing errors.
+#[derive(Debug, Clone, thiserror::Error)]
+pub enum CedarParseErrorDetail {
+    /// Missing @id() annotation
+    #[error("No @id() annotation found and could not derive ID from filename")]
+    MissingIdAnnotation,
+
+    /// Failed to parse Cedar policy or template
+    #[error("{0}")]
+    ParseError(String),
+
+    /// Failed to add policy to policy set
+    #[error("Failed to add policy to set: {0}")]
+    AddPolicyFailed(String),
+
+    /// Failed to add template to policy set
+    #[error("Failed to add template to set: {0}")]
+    AddTemplateFailed(String),
 }
 
 /// Validation errors for policy store components.
 #[derive(Debug, thiserror::Error)]
 #[allow(dead_code)]
 pub enum ValidationError {
-    /// Invalid metadata
-    #[error("Invalid metadata in file {file}: {message}")]
-    InvalidMetadata { file: String, message: String },
-
-    /// Invalid policy
-    #[error("Invalid policy in file {file}{}: {message}", .line.map(|l| format!(" at line {}", l)).unwrap_or_default())]
-    InvalidPolicy {
+    /// Failed to parse metadata JSON
+    #[error("Invalid metadata in file {file}: failed to parse JSON")]
+    MetadataJsonParseFailed {
         file: String,
-        line: Option<u32>,
-        message: String,
+        #[source]
+        source: serde_json::Error,
     },
 
-    /// Invalid template
-    #[error("Invalid template in file {file}{}: {message}", .line.map(|l| format!(" at line {}", l)).unwrap_or_default())]
-    InvalidTemplate {
+    /// Invalid cedar version format in metadata
+    #[error("Invalid metadata in file {file}: invalid cedar_version format")]
+    MetadataInvalidCedarVersion {
         file: String,
-        line: Option<u32>,
-        message: String,
+        #[source]
+        source: semver::Error,
     },
 
-    /// Invalid entity
-    #[error("Invalid entity in file {file}: {message}")]
-    InvalidEntity { file: String, message: String },
+    /// Invalid policy - kept for compatibility but prefer specific errors
+    #[error("Invalid policy in file {file}{}", .line.map(|l| format!(" at line {}", l)).unwrap_or_default())]
+    InvalidPolicy { file: String, line: Option<u32> },
 
-    /// Invalid trusted issuer
-    #[error("Invalid trusted issuer in file {file}: {message}")]
-    InvalidTrustedIssuer { file: String, message: String },
+    /// Invalid template - kept for compatibility but prefer specific errors
+    #[error("Invalid template in file {file}{}", .line.map(|l| format!(" at line {}", l)).unwrap_or_default())]
+    InvalidTemplate { file: String, line: Option<u32> },
 
-    /// Invalid schema
-    #[error("Invalid schema in file {file}: {message}")]
-    InvalidSchema { file: String, message: String },
+    /// Invalid entity - kept for compatibility
+    #[error("Invalid entity in file {file}")]
+    InvalidEntity { file: String },
 
-    /// Manifest validation failed
-    #[error("Manifest validation failed: {message}")]
-    ManifestValidation { message: String },
+    /// Invalid trusted issuer - kept for compatibility
+    #[error("Invalid trusted issuer in file {file}")]
+    InvalidTrustedIssuer { file: String },
+
+    /// Invalid schema - kept for compatibility
+    #[error("Invalid schema in file {file}")]
+    InvalidSchema { file: String },
+
+    /// Manifest validation failed - kept for compatibility
+    #[error("Manifest validation failed")]
+    ManifestValidation,
 
     /// File checksum mismatch
     #[error("Checksum mismatch for file {file}: expected {expected}, got {actual}")]
@@ -349,9 +375,15 @@ pub enum ValidationError {
         file2: String,
     },
 
-    /// Invalid policy ID format
-    #[error("Invalid policy ID format in {file}: {message}")]
-    InvalidPolicyId { file: String, message: String },
+    /// Policy ID is empty
+    #[error("Invalid policy ID format in {file}: Policy ID cannot be empty")]
+    EmptyPolicyId { file: String },
+
+    /// Policy ID contains invalid characters
+    #[error(
+        "Invalid policy ID format in {file}: Policy ID '{id}' contains invalid characters. Only alphanumeric, '_', '-', and ':' are allowed"
+    )]
+    InvalidPolicyIdCharacters { file: String, id: String },
 
     // Specific metadata validation errors
     /// Empty Cedar version
@@ -438,17 +470,33 @@ pub enum TokenError {
     #[error("Missing required claim '{claim}' in token from issuer {issuer}")]
     MissingRequiredClaim { claim: String, issuer: String },
 
-    /// Token signature validation failed
-    #[error("Token signature validation failed for issuer {issuer}: {message}")]
-    SignatureValidation { issuer: String, message: String },
+    /// Token signature validation failed - invalid signature
+    #[error("Token signature validation failed for issuer {issuer}: invalid signature")]
+    InvalidSignature { issuer: String },
 
-    /// JWKS fetch failed
-    #[error("Failed to fetch JWKS from endpoint {endpoint}: {message}")]
-    JwksFetchFailed { endpoint: String, message: String },
+    /// Token signature validation failed - no matching key
+    #[error("Token signature validation failed for issuer {issuer}: no matching key found")]
+    NoMatchingKey { issuer: String },
 
-    /// Invalid token format
-    #[error("Invalid token format: {message}")]
-    InvalidFormat { message: String },
+    /// Token signature validation failed - algorithm mismatch
+    #[error("Token signature validation failed for issuer {issuer}: algorithm mismatch")]
+    AlgorithmMismatch { issuer: String },
+
+    /// JWKS fetch failed - network error
+    #[error("Failed to fetch JWKS from endpoint {endpoint}: network error")]
+    JwksFetchNetworkError { endpoint: String },
+
+    /// JWKS fetch failed - invalid response
+    #[error("Failed to fetch JWKS from endpoint {endpoint}: invalid response format")]
+    JwksFetchInvalidResponse { endpoint: String },
+
+    /// Invalid token format - missing header
+    #[error("Invalid token format: missing header")]
+    MissingHeader,
+
+    /// Invalid token format - malformed JWT
+    #[error("Invalid token format: malformed JWT structure")]
+    MalformedJwt,
 
     /// Token expired
     #[error("Token has expired")]
@@ -465,19 +513,15 @@ mod tests {
 
     #[test]
     fn test_validation_error_messages() {
-        let err = ValidationError::InvalidMetadata {
-            file: "metadata.json".to_string(),
-            message: "missing field 'name'".to_string(),
+        let err = ValidationError::EmptyPolicyId {
+            file: "policy.cedar".to_string(),
         };
-        assert_eq!(
-            err.to_string(),
-            "Invalid metadata in file metadata.json: missing field 'name'"
-        );
+        assert!(err.to_string().contains("Policy ID cannot be empty"));
+        assert!(err.to_string().contains("policy.cedar"));
 
         let err = ValidationError::InvalidPolicy {
             file: "policy1.cedar".to_string(),
             line: Some(42),
-            message: "syntax error".to_string(),
         };
         assert!(err.to_string().contains("policy1.cedar"));
         assert!(err.to_string().contains("at line 42"));
@@ -532,9 +576,8 @@ mod tests {
 
     #[test]
     fn test_policy_store_error_from_validation() {
-        let val_err = ValidationError::InvalidMetadata {
-            file: "test.json".to_string(),
-            message: "invalid".to_string(),
+        let val_err = ValidationError::EmptyPolicyId {
+            file: "test.cedar".to_string(),
         };
         let ps_err: PolicyStoreError = val_err.into();
         assert!(ps_err.to_string().contains("Validation error"));
