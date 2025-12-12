@@ -53,10 +53,9 @@ use super::errors::{PolicyStoreError, ValidationError};
 use super::errors::ArchiveError;
 use super::manifest_validator::ManifestValidator;
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
-use super::source::{ArchiveSource, PolicyStoreSource};
 
 #[cfg(test)]
-use super::source::PolicyStoreFormat;
+use super::source::{ArchiveSource, PolicyStoreFormat, PolicyStoreSource};
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
 use std::path::{Path, PathBuf};
@@ -78,110 +77,138 @@ pub trait PolicyStoreLoader {
     fn validate_structure(&self, source: &PolicyStoreSource) -> Result<(), PolicyStoreError>;
 }
 
-/// Load a policy store from directory or archive file sources.
+/// Load a policy store from a directory path.
 ///
-/// This function handles:
-/// - Directory sources (uses PhysicalVfs) - Native only
-/// - Archive sources from file paths (uses ArchiveVfs) - Native only
+/// This function uses `PhysicalVfs` to read from the local filesystem.
+/// It is only available on native platforms (not WASM).
 ///
-/// For other sources (URLs, legacy JSON/YAML), use `init::policy_store::load_policy_store`
-/// which handles all source types including HTTP fetching and legacy format parsing.
-///
-/// # Example (Native)
+/// # Example
 ///
 /// ```no_run
-/// use cedarling::common::policy_store::loader::load_policy_store;
-/// use cedarling::common::policy_store::source::{PolicyStoreSource, ArchiveSource};
-/// use std::path::PathBuf;
+/// use cedarling::common::policy_store::loader::load_policy_store_directory;
+/// use std::path::Path;
 ///
 /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-/// // Load from directory
-/// let loaded = load_policy_store(&PolicyStoreSource::Directory(PathBuf::from("./store"))).await?;
-///
-/// // Load from archive file
-/// let loaded = load_policy_store(&PolicyStoreSource::Archive(
-///     ArchiveSource::File(PathBuf::from("./store.cjar"))
-/// )).await?;
+/// let loaded = load_policy_store_directory(Path::new("./policy_store")).await?;
+/// println!("Loaded store: {}", loaded.metadata.policy_store.name);
 /// # Ok(())
 /// # }
 /// ```
 ///
-/// # WASM
+/// # Errors
 ///
-/// For WASM, use `ArchiveVfs::from_buffer()` directly with bytes you fetch yourself:
+/// Returns an error if:
+/// - The directory does not exist
+/// - Required files are missing (metadata.json, schema.cedarschema)
+/// - Files contain invalid content
+#[cfg(not(target_arch = "wasm32"))]
+pub async fn load_policy_store_directory(
+    path: &Path,
+) -> Result<LoadedPolicyStore, PolicyStoreError> {
+    let vfs = super::vfs_adapter::PhysicalVfs::new();
+    let loader = DefaultPolicyStoreLoader::new(vfs);
+    let path_str = path
+        .to_str()
+        .ok_or_else(|| PolicyStoreError::PathNotFound {
+            path: path.display().to_string(),
+        })?;
+    loader.load_directory(path_str)
+}
+
+/// Load a policy store from a directory path (WASM stub).
+///
+/// Directory loading is not supported in WASM environments.
+/// Use `load_policy_store_archive_bytes` instead.
+#[cfg(target_arch = "wasm32")]
+pub async fn load_policy_store_directory(
+    _path: &Path,
+) -> Result<LoadedPolicyStore, PolicyStoreError> {
+    Err(PolicyStoreError::PathNotFound {
+        path: "Directory loading not supported in WASM".to_string(),
+    })
+}
+
+/// Load a policy store from a Cedar Archive (.cjar) file.
+///
+/// This function uses `ArchiveVfs` to read from a zip archive.
+/// It is only available on native platforms (not WASM).
+///
+/// # Example
 ///
 /// ```no_run
-/// use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
+/// use cedarling::common::policy_store::loader::load_policy_store_archive;
+/// use std::path::Path;
 ///
 /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+/// let loaded = load_policy_store_archive(Path::new("./policy_store.cjar")).await?;
+/// println!("Loaded store: {}", loaded.metadata.policy_store.name);
+/// # Ok(())
+/// # }
+/// ```
+///
+/// # Errors
+///
+/// Returns an error if:
+/// - The file does not exist
+/// - The file is not a valid zip archive
+/// - Required files are missing (metadata.json, schema.cedarschema)
+/// - Files contain invalid content
+#[cfg(not(target_arch = "wasm32"))]
+pub async fn load_policy_store_archive(path: &Path) -> Result<LoadedPolicyStore, PolicyStoreError> {
+    use super::archive_handler::ArchiveVfs;
+    let archive_vfs = ArchiveVfs::from_file(path)?;
+    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
+    loader.load_directory(".")
+}
+
+/// Load a policy store from a Cedar Archive (.cjar) file (WASM stub).
+///
+/// File-based archive loading is not supported in WASM environments.
+/// Use `load_policy_store_archive_bytes` instead.
+#[cfg(target_arch = "wasm32")]
+pub async fn load_policy_store_archive(
+    _path: &Path,
+) -> Result<LoadedPolicyStore, PolicyStoreError> {
+    Err(PolicyStoreError::Archive(
+        super::errors::ArchiveError::WasmUnsupported,
+    ))
+}
+
+/// Load a policy store from archive bytes.
+///
+/// This function is useful for:
+/// - WASM environments where file system access is not available
+/// - Loading archives fetched from URLs
+/// - Loading archives from any byte source
+///
+/// # Example
+///
+/// ```no_run
+/// use cedarling::common::policy_store::loader::load_policy_store_archive_bytes;
+///
+/// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+/// // Fetch archive bytes from network, storage, etc.
 /// let archive_bytes: Vec<u8> = fetch_from_network().await?;
-/// let archive_vfs = ArchiveVfs::from_buffer(archive_bytes)?;
-/// let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-/// let loaded = loader.load_directory(".")?;
+/// let loaded = load_policy_store_archive_bytes(archive_bytes)?;
+/// println!("Loaded store: {}", loaded.metadata.policy_store.name);
 /// # Ok(())
 /// # }
 /// # async fn fetch_from_network() -> Result<Vec<u8>, Box<dyn std::error::Error>> { Ok(vec![]) }
 /// ```
-pub async fn load_policy_store(
-    source: &PolicyStoreSource,
+///
+/// # Errors
+///
+/// Returns an error if:
+/// - The bytes are not a valid zip archive
+/// - Required files are missing (metadata.json, schema.cedarschema)
+/// - Files contain invalid content
+pub fn load_policy_store_archive_bytes(
+    bytes: Vec<u8>,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    match source {
-        PolicyStoreSource::Directory(path) => {
-            #[cfg(not(target_arch = "wasm32"))]
-            {
-                let vfs = super::vfs_adapter::PhysicalVfs::new();
-                let loader = DefaultPolicyStoreLoader::new(vfs);
-                let path_str = path
-                    .to_str()
-                    .ok_or_else(|| PolicyStoreError::PathNotFound {
-                        path: path.display().to_string(),
-                    })?;
-                loader.load_directory(path_str)
-            }
-            #[cfg(target_arch = "wasm32")]
-            {
-                Err(PolicyStoreError::PathNotFound {
-                    path: "Directory loading not supported in WASM".to_string(),
-                })
-            }
-        },
-        PolicyStoreSource::Archive(archive_source) => match archive_source {
-            ArchiveSource::File(path) => {
-                #[cfg(not(target_arch = "wasm32"))]
-                {
-                    use super::archive_handler::ArchiveVfs;
-                    let archive_vfs = ArchiveVfs::from_file(path)?;
-                    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-                    loader.load_directory(".")
-                }
-                #[cfg(target_arch = "wasm32")]
-                {
-                    Err(PolicyStoreError::Archive(
-                        super::errors::ArchiveError::WasmUnsupported,
-                    ))
-                }
-            },
-            ArchiveSource::Url(_) => {
-                // URL loading is handled by init::policy_store::load_policy_store_from_cjar_url
-                // which fetches bytes via HttpClient and uses ArchiveVfs::from_buffer
-                Err(PolicyStoreError::Archive(
-                    super::errors::ArchiveError::InvalidZipFormat {
-                        details: "Use init::policy_store::load_policy_store for URL sources"
-                            .to_string(),
-                    },
-                ))
-            },
-        },
-        PolicyStoreSource::Legacy(_) => {
-            // Legacy JSON/YAML format is handled by init::policy_store::load_policy_store
-            // which parses AgamaPolicyStore directly
-            Err(PolicyStoreError::Validation(
-                super::errors::ValidationError::InvalidPolicyStoreId {
-                    id: "Use init::policy_store::load_policy_store for legacy sources".to_string(),
-                },
-            ))
-        },
-    }
+    use super::archive_handler::ArchiveVfs;
+    let archive_vfs = ArchiveVfs::from_buffer(bytes)?;
+    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
+    loader.load_directory(".")
 }
 
 /// A loaded policy store with all its components.
