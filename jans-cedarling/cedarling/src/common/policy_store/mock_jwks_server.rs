@@ -265,12 +265,7 @@ impl MockJwksServer {
         aud: &str,
         extra_claims: Option<Value>,
     ) -> Result<String, MockServerError> {
-        use std::time::{SystemTime, UNIX_EPOCH};
-
-        let now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_secs();
+        let now = chrono::Utc::now().timestamp();
 
         let mut claims = json!({
             "sub": sub,
@@ -278,7 +273,7 @@ impl MockJwksServer {
             "iss": self.url(),
             "iat": now,
             "exp": now + 3600, // 1 hour
-            "jti": uuid7::uuid7().to_string(),
+            "jti": crate::log::gen_uuid7().to_string(),
         });
 
         if let Some(extra) = extra_claims {
@@ -317,12 +312,7 @@ impl MockJwksServer {
         aud: &str,
         email: &str,
     ) -> Result<String, MockServerError> {
-        use std::time::{SystemTime, UNIX_EPOCH};
-
-        let now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs();
+        let now = chrono::Utc::now().timestamp();
 
         self.generate_standard_token(
             sub,
