@@ -73,8 +73,6 @@ fn extract_first_policy_store(
 pub(crate) async fn load_policy_store(
     config: &PolicyStoreConfig,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    use crate::common::policy_store::source::PolicyStoreSource as LoaderSource;
-
     let policy_store = match &config.source {
         PolicyStoreSource::Json(policy_json) => {
             let agama_policy_store = serde_json::from_str::<AgamaPolicyStore>(policy_json)
@@ -169,9 +167,7 @@ async fn load_policy_store_from_cjar_file(
 async fn load_policy_store_from_cjar_url(
     url: &str,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    use crate::common::policy_store::{
-        ArchiveVfs, DefaultPolicyStoreLoader, source::PolicyStoreSource,
-    };
+    use crate::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
 
     // Fetch the archive bytes via HTTP
     let client = HttpClient::new(3, Duration::from_secs(30))?;
