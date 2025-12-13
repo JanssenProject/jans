@@ -337,10 +337,8 @@ mod tests {
             ]
         });
 
-        let result = EntityParser::parse_entity(&content, "user2.json", None);
-        assert!(result.is_ok(), "Should parse entity with parents");
-
-        let parsed = result.unwrap();
+        let parsed = EntityParser::parse_entity(&content, "user2.json", None)
+            .expect("Should parse entity with parents");
         // Verify parents using into_inner()
         let parents = &parsed.entity.clone().into_inner().2;
         assert_eq!(parents.len(), 2, "Should have 2 parents");
@@ -359,10 +357,8 @@ mod tests {
             "parents": []
         });
 
-        let result = EntityParser::parse_entity(&content, "jans_user.json", None);
-        assert!(result.is_ok(), "Should parse entity with namespace");
-
-        let parsed = result.unwrap();
+        let parsed = EntityParser::parse_entity(&content, "jans_user.json", None)
+            .expect("Should parse entity with namespace");
         assert_eq!(parsed.uid.to_string(), "Jans::User::\"user123\"");
     }
 
@@ -377,8 +373,8 @@ mod tests {
             "parents": []
         });
 
-        let result = EntityParser::parse_entity(&content, "resource.json", None);
-        assert!(result.is_ok(), "Should parse entity with empty attrs");
+        EntityParser::parse_entity(&content, "resource.json", None)
+            .expect("Should parse entity with empty attrs");
     }
 
     #[test]
@@ -425,10 +421,8 @@ mod tests {
             }
         ]"#;
 
-        let result = EntityParser::parse_entities(content, "users.json", None);
-        assert!(result.is_ok(), "Should parse entity array");
-
-        let parsed = result.unwrap();
+        let parsed = EntityParser::parse_entities(content, "users.json", None)
+            .expect("Should parse entity array");
         assert_eq!(parsed.len(), 2, "Should have 2 entities");
     }
 
@@ -447,10 +441,8 @@ mod tests {
             }
         }"#;
 
-        let result = EntityParser::parse_entities(content, "users.json", None);
-        assert!(result.is_ok(), "Should parse entity object");
-
-        let parsed = result.unwrap();
+        let parsed = EntityParser::parse_entities(content, "users.json", None)
+            .expect("Should parse entity object");
         assert_eq!(parsed.len(), 2, "Should have 2 entities");
     }
 
@@ -481,10 +473,7 @@ mod tests {
             },
         ];
 
-        let result = EntityParser::detect_duplicates(entities);
-        assert!(result.is_ok(), "Should have no duplicates");
-
-        let map = result.unwrap();
+        let map = EntityParser::detect_duplicates(entities).expect("Should have no duplicates");
         assert_eq!(map.len(), 2, "Should have 2 unique entities");
     }
 
@@ -557,8 +546,7 @@ mod tests {
         };
 
         let entities = vec![parent, child];
-        let result = EntityParser::validate_hierarchy(&entities);
-        assert!(result.is_ok(), "Hierarchy should be valid");
+        EntityParser::validate_hierarchy(&entities).expect("Hierarchy should be valid");
     }
 
     #[test]
@@ -615,10 +603,8 @@ mod tests {
             },
         ];
 
-        let result = EntityParser::create_entities_store(entities);
-        assert!(result.is_ok(), "Should create entity store");
-
-        let store = result.unwrap();
+        let store =
+            EntityParser::create_entities_store(entities).expect("Should create entity store");
         assert_eq!(store.iter().count(), 2, "Store should have 2 entities");
     }
 
