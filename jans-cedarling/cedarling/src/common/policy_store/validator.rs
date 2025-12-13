@@ -9,6 +9,9 @@ use super::errors::ValidationError;
 use super::metadata::{PolicyStoreInfo, PolicyStoreMetadata};
 use semver::Version;
 
+/// Maximum allowed length for policy store description.
+pub const DESCRIPTION_MAX_LENGTH: usize = 1000;
+
 /// Validator for policy store metadata.
 pub struct MetadataValidator;
 
@@ -74,9 +77,12 @@ impl MetadataValidator {
 
         // Validate description length if provided
         if let Some(desc) = &info.description
-            && desc.len() > 1000
+            && desc.len() > DESCRIPTION_MAX_LENGTH
         {
-            return Err(ValidationError::DescriptionTooLong { length: desc.len() });
+            return Err(ValidationError::DescriptionTooLong {
+                length: desc.len(),
+                max_length: DESCRIPTION_MAX_LENGTH,
+            });
         }
 
         // Validate timestamps ordering if both are provided
@@ -427,12 +433,13 @@ mod tests {
 
     #[test]
     fn test_validate_description_too_long() {
+        let over_limit = DESCRIPTION_MAX_LENGTH + 1;
         let metadata = PolicyStoreMetadata {
             cedar_version: "4.4.0".to_string(),
             policy_store: PolicyStoreInfo {
                 id: String::new(),
                 name: "Test".to_string(),
-                description: Some("a".repeat(1001)),
+                description: Some("a".repeat(over_limit)),
                 version: String::new(),
                 created_date: None,
                 updated_date: None,
@@ -443,7 +450,8 @@ mod tests {
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
-            ValidationError::DescriptionTooLong { length: 1001 }
+            ValidationError::DescriptionTooLong { length, max_length }
+                if length == over_limit && max_length == DESCRIPTION_MAX_LENGTH
         ));
     }
 

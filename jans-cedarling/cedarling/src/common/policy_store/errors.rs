@@ -413,8 +413,10 @@ pub enum ValidationError {
     InvalidPolicyStoreVersion { version: String, details: String },
 
     /// Policy store description too long
-    #[error("Policy store description too long in metadata.json: {length} chars (max 1000)")]
-    DescriptionTooLong { length: usize },
+    #[error(
+        "Policy store description too long in metadata.json: {length} chars (max {max_length})"
+    )]
+    DescriptionTooLong { length: usize, max_length: usize },
 
     /// Invalid timestamp ordering
     #[error(
