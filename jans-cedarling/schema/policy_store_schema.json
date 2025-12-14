@@ -44,7 +44,11 @@
         },
         "default_entities": {
             "description": "A collection of default entity identifiers to Base64-encoded JSON objects.",
-            "type": "object"
+            "type": "object",
+            "additionalProperties": {
+                "type": "string",
+                "description": "Base64-encoded JSON object representing the default entity."
+            }
         },
         "policy_stores": {
             "description": "A collection of logically separated policy stores. Each store can contain its own policies, trusted issuers, and schema.",
@@ -64,6 +68,7 @@
             "properties": {
                 "policies": {
                     "description": "A map of policy identifiers to their associated Cedar policies.",
+                    "type": "object",
                     "patternProperties": {
                         "^.*$": {
                             "$ref": "#/$defs/CedarPolicy"
@@ -72,6 +77,7 @@
                 },
                 "trusted_issuers": {
                     "description": "A map of trusted issuers (by identifier) that defines which external identity providers can be trusted when evaluating authorization requests.",
+                    "type": "object",
                     "patternProperties": {
                         "^.*$": {
                             "$ref": "#/$defs/TrustedIssuer"

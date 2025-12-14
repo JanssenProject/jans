@@ -74,7 +74,6 @@ namespace Jans {
     } tags Set<String>;
     entity Userinfo_token = {
         token_type: String,
-        issuer?: String,
         validated_at: Long,
         aud?: String,
         birthdate?: String,

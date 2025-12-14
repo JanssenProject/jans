@@ -288,11 +288,6 @@
               "name": "TrustedIssuer",
               "required": false
             },
-            "issuer": {
-              "type": "EntityOrCommon",
-              "name": "String",
-              "required": false
-            },
             "jti": {
               "type": "EntityOrCommon",
               "name": "String"
