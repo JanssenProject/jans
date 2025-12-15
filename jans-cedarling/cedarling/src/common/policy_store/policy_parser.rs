@@ -337,7 +337,7 @@ mod tests {
 
         let files = vec![("policy1.cedar", policy1), ("policy2.cedar", policy2)];
 
-        let result = PolicyParser::parse_policies(files.into_iter());
+        let result = PolicyParser::parse_policies(files);
         assert!(result.is_ok());
 
         let policy_map = result.unwrap();

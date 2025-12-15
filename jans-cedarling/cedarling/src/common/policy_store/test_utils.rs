@@ -485,7 +485,7 @@ permit(
 
     // Generate entities in batches
     let batch_size = 1000;
-    let entity_batches = (entity_count + batch_size - 1) / batch_size;
+    let entity_batches = entity_count.div_ceil(batch_size);
 
     for batch in 0..entity_batches {
         let start = batch * batch_size;
@@ -558,7 +558,7 @@ mod tests {
         let archive = builder.build_archive().unwrap();
 
         // Verify it's a valid ZIP
-        assert!(archive.len() > 0);
+        assert!(!archive.is_empty());
         assert_eq!(&archive[0..2], &[0x50, 0x4B]); // ZIP magic number
     }
 
@@ -584,18 +584,18 @@ mod tests {
     #[test]
     fn test_path_traversal_archive() {
         let archive = create_path_traversal_archive();
-        assert!(archive.len() > 0);
+        assert!(!archive.is_empty());
     }
 
     #[test]
     fn test_corrupted_archive() {
         let archive = create_corrupted_archive();
-        assert!(archive.len() > 0);
+        assert!(!archive.is_empty());
     }
 
     #[test]
     fn test_deep_nested_archive() {
         let archive = create_deep_nested_archive(50);
-        assert!(archive.len() > 0);
+        assert!(!archive.is_empty());
     }
 }

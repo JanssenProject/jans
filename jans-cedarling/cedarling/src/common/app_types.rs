@@ -15,6 +15,12 @@ use uuid7::{Uuid, uuid4};
 #[derive(Debug, Clone, Copy, Serialize, PartialEq, Display)]
 pub struct PdpID(pub Uuid);
 
+impl Default for PdpID {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PdpID {
     pub fn new() -> Self {
         // we use uuid v4 because it is generated based on random numbers.

@@ -1581,7 +1581,7 @@ mod test {
 
         let uid =
             &EntityUid::from_str("Gluu::Flex::AdminUI::Resources::Features::\"License\"").unwrap();
-        let entity = parsed_entities.get(&uid).expect("should have entity");
+        let entity = parsed_entities.get(uid).expect("should have entity");
         let uid_str = entity.uid().to_string();
 
         // Verify the namespace was added correctly to both the entity type and parent type
@@ -1634,7 +1634,7 @@ mod test {
 
         let uid: &EntityUid =
             &EntityUid::from_str("Existing::Namespace::Features::\"TestFeature\"").unwrap();
-        let entity = parsed_entities.get(&uid).expect("should have entity");
+        let entity = parsed_entities.get(uid).expect("should have entity");
 
         let result_entity_json = entity
             .to_json_value()
@@ -1730,7 +1730,7 @@ mod test {
                 .expect("should parse with empty attrs and parents");
 
         let uid: &EntityUid = &EntityUid::from_str("Test::EmptyTest::\"test789\"").unwrap();
-        let entity = parsed_entities.get(&uid).expect("should have entity");
+        let entity = parsed_entities.get(uid).expect("should have entity");
         assert_eq!(
             entity.uid().type_name().to_string(),
             "Test::EmptyTest",

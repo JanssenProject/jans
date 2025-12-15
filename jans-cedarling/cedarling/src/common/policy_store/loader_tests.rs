@@ -100,14 +100,14 @@ fn create_test_archive(
 
         // Extra policies
         for (policy_name, content) in extra_policies {
-            zip.start_file(&format!("policies/{}", policy_name), options())
+            zip.start_file(format!("policies/{}", policy_name), options())
                 .unwrap();
             zip.write_all(content.as_bytes()).unwrap();
         }
 
         // Extra entities
         for (entity_name, content) in extra_entities {
-            zip.start_file(&format!("entities/{}", entity_name), options())
+            zip.start_file(format!("entities/{}", entity_name), options())
                 .unwrap();
             zip.write_all(content.as_bytes()).unwrap();
         }
@@ -1318,7 +1318,7 @@ fn test_archive_vfs_with_manifest_validation() {
     // including ArchiveVfs (not just PhysicalVfs)
     let validation_result = validator.validate(Some("abc123def456"));
 
-    assert!(validation_result.errors.len() > 0 || !validation_result.is_valid);
+    assert!(!validation_result.errors.is_empty() || !validation_result.is_valid);
 }
 
 #[test]

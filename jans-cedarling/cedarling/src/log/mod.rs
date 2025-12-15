@@ -85,7 +85,7 @@ pub(crate) type Logger = Arc<LogStrategy>;
 pub(crate) type LoggerWeak = Weak<LogStrategy>;
 
 #[cfg(test)]
-pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(|| init_test_logger());
+pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(init_test_logger);
 
 /// Initialize logger.
 /// entry point for initialize logger
