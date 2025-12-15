@@ -774,12 +774,8 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
             PolicyStoreSource::Directory(path) => {
                 let path_str = path
                     .to_str()
-                    .ok_or_else(|| PolicyStoreError::InvalidFileName {
+                    .ok_or_else(|| PolicyStoreError::PathNotFound {
                         path: path.display().to_string(),
-                        source: std::io::Error::new(
-                            std::io::ErrorKind::InvalidInput,
-                            "Path contains invalid UTF-8",
-                        ),
                     })?;
                 self.load_directory(path_str)
             },
@@ -815,7 +811,7 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
                 // Legacy JSON/YAML format is not supported through the loader module.
                 // Use init::policy_store::load_policy_store() which handles legacy formats
                 // via AgamaPolicyStore deserialization.
-                Err(PolicyStoreError::LegacyFormatNotSupported)
+                unimplemented!("Use init::policy_store::load_policy_store() instead.")
             },
         }
     }
@@ -833,12 +829,8 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
             PolicyStoreSource::Directory(path) => {
                 let path_str = path
                     .to_str()
-                    .ok_or_else(|| PolicyStoreError::InvalidFileName {
+                    .ok_or_else(|| PolicyStoreError::PathNotFound {
                         path: path.display().to_string(),
-                        source: std::io::Error::new(
-                            std::io::ErrorKind::InvalidInput,
-                            "Path contains invalid UTF-8",
-                        ),
                     })?;
                 self.validate_directory_structure(path_str)
             },
@@ -872,7 +864,10 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
                 // Legacy format validation is not supported through the loader module.
                 // Legacy formats are validated during JSON/YAML deserialization in
                 // init::policy_store::load_policy_store().
-                Err(PolicyStoreError::LegacyFormatNotSupported)
+                unimplemented!(
+                    "Legacy format not supported through PolicyStoreLoader. \
+                     Use init::policy_store::load_policy_store() instead."
+                )
             },
         }
     }

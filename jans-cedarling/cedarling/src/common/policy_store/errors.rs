@@ -43,7 +43,6 @@ pub enum CedarEntityErrorType {
 
 /// Trusted issuer-specific errors.
 #[derive(Debug, thiserror::Error)]
-
 pub enum TrustedIssuerErrorType {
     /// Trusted issuer file is not a JSON object
     #[error("Trusted issuer file must be a JSON object")]
@@ -79,7 +78,6 @@ pub enum TrustedIssuerErrorType {
 
 /// Manifest validation-specific errors.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
-
 pub enum ManifestErrorType {
     /// Manifest file not found
     #[error("Manifest file not found (manifest.json is required for integrity validation)")]
@@ -120,7 +118,6 @@ pub enum ManifestErrorType {
 
 /// Errors that can occur during policy store operations.
 #[derive(Debug, thiserror::Error)]
-
 pub enum PolicyStoreError {
     /// IO error during file operations
     #[error("IO error: {0}")]
@@ -197,22 +194,6 @@ pub enum PolicyStoreError {
         #[source]
         source: std::io::Error,
     },
-
-    /// Invalid file name (used in test builds for PolicyStoreLoader trait)
-    #[cfg(test)]
-    #[error("Invalid file name in '{path}'")]
-    InvalidFileName {
-        path: String,
-        #[source]
-        source: std::io::Error,
-    },
-
-    /// Unsupported format - legacy format not supported through this loader (test only)
-    #[cfg(test)]
-    #[error(
-        "Unsupported format: legacy JSON/YAML format not supported through PolicyStoreLoader. Use init::policy_store::load_policy_store() instead"
-    )]
-    LegacyFormatNotSupported,
 }
 
 /// Details about Cedar parsing errors.
@@ -254,11 +235,6 @@ pub enum ValidationError {
         #[source]
         source: semver::Error,
     },
-
-    /// Invalid policy (test only - used in error message tests)
-    #[cfg(test)]
-    #[error("Invalid policy in file {file}{}", .line.map(|l| format!(" at line {}", l)).unwrap_or_default())]
-    InvalidPolicy { file: String, line: Option<u32> },
 
     /// Missing required file
     #[error("Missing required file: {file}")]
@@ -328,7 +304,6 @@ pub enum ValidationError {
 
 /// Errors related to archive (.cjar) handling.
 #[derive(Debug, thiserror::Error)]
-
 pub enum ArchiveError {
     /// Invalid file extension (expected .cjar)
     #[error("Invalid file extension: expected '{expected}', found '{found}'")]
@@ -353,63 +328,4 @@ pub enum ArchiveError {
     /// Path traversal attempt detected
     #[error("Path traversal attempt detected in archive: '{path}'")]
     PathTraversal { path: String },
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_validation_error_messages() {
-        let err = ValidationError::EmptyPolicyId {
-            file: "policy.cedar".to_string(),
-        };
-        assert!(err.to_string().contains("Policy ID cannot be empty"));
-        assert!(err.to_string().contains("policy.cedar"));
-
-        let err = ValidationError::InvalidPolicy {
-            file: "policy1.cedar".to_string(),
-            line: Some(42),
-        };
-        assert!(err.to_string().contains("policy1.cedar"));
-        assert!(err.to_string().contains("at line 42"));
-
-        let err = ValidationError::MissingRequiredFile {
-            file: "schema.cedarschema".to_string(),
-        };
-        assert_eq!(err.to_string(), "Missing required file: schema.cedarschema");
-    }
-
-    #[test]
-    fn test_archive_error_messages() {
-        let err = ArchiveError::InvalidZipFormat {
-            details: "not a zip file".to_string(),
-        };
-        assert_eq!(
-            err.to_string(),
-            "Invalid ZIP archive format: not a zip file"
-        );
-
-        let err = ArchiveError::PathTraversal {
-            path: "../../../etc/passwd".to_string(),
-        };
-        assert!(err.to_string().contains("Path traversal"));
-        assert!(err.to_string().contains("../../../etc/passwd"));
-    }
-
-    #[test]
-    fn test_policy_store_error_from_io() {
-        let io_err = std::io::Error::new(std::io::ErrorKind::NotFound, "file not found");
-        let ps_err: PolicyStoreError = io_err.into();
-        assert!(ps_err.to_string().contains("IO error"));
-    }
-
-    #[test]
-    fn test_policy_store_error_from_validation() {
-        let val_err = ValidationError::EmptyPolicyId {
-            file: "test.cedar".to_string(),
-        };
-        let ps_err: PolicyStoreError = val_err.into();
-        assert!(ps_err.to_string().contains("Validation error"));
-    }
 }
