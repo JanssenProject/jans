@@ -7,14 +7,14 @@ tags:
 ---
 
 !!! Note
-    `Attribute` and `User Claims` refer to the same user data fields in 
+    `Attribute` and `User Claims` refer to the same user data fields in
     the Janssen Server.
 
 
 # Attribute
 
-User claims are individual pieces of user data, like `uid` or `email`, that are required 
-by applications in order to identify a user and grant access to protect resources. 
+User claims are individual pieces of user data, like `uid` or `email`, that are required
+by applications in order to identify a user and grant access to protect resources.
 
 Janssen server's default configuration comes with certain user claims already configured. In addition to these, custom user claims can be added as required. The Janssen Server provides multiple configuration tools to perform these tasks.
 
@@ -24,7 +24,7 @@ Janssen server's default configuration comes with certain user claims already co
     Use the command line to perform actions from the terminal. Learn how to 
     use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
     the [Using Command Line](#using-command-line)
-  
+
 === "Use Text-based UI"
 
     Use a fully functional text-based user interface from the terminal. 
@@ -42,7 +42,7 @@ Janssen server's default configuration comes with certain user claims already co
 ##  Using Command Line
 
 
-To get the details of Janssen command line operations relevant to user claims configuration, you can check the operations under `Attribute` task using 
+To get the details of Janssen command line operations relevant to user claims configuration, you can check the operations under `Attribute` task using
 the command below:
 
 
@@ -90,8 +90,8 @@ To get sample schema type jans cli --schema <schma>, for example jans cli --sche
 ### Get Custom User Claims
 
 
-The user claims 
-that the available in your Janssen Server can be found by using this operation-ID. If we look at 
+The user claims
+that the available in your Janssen Server can be found by using this operation-ID. If we look at
 the description below:
 
 ```text
@@ -245,16 +245,16 @@ In return, we get a list of claims that are matched with the given `pattern` and
 
 ```
 
-### Creating a Custom User Claims 
+### Creating a Custom User Claims
 
-While standard claims provide basic user 
-information, custom user claims allow for the inclusion of domain-specific attributes or 
-application-specific data that might be required for user personalization, authorization, 
+While standard claims provide basic user
+information, custom user claims allow for the inclusion of domain-specific attributes or
+application-specific data that might be required for user personalization, authorization,
 or other business logic. A user claim should be unique and non-null or empty. Follow the steps below to add a custom user claim to the Janssen Server.
 
 #### Add entry into persistence
 
-In order to support the new custom claim, add a column to table `jansPerson` in the persistence backend. 
+In order to support the new custom claim, add a column to table `jansPerson` in the persistence backend.
 
 Command will be similar to the one below:
 
@@ -274,9 +274,9 @@ jans-config-api.service
 
 #### Configure custom user claim in the Janssen Server
 
-Add and configure the custom claim using `post-attributes` operation-ID. As shown in the [output](#using-command-line) 
-for the `--info` command, the `post-attributes` operation requires data to be sent 
-according to the `JansAttribute` schema. 
+Add and configure the custom claim using `post-attributes` operation-ID. As shown in the [output](#using-command-line)
+for the `--info` command, the `post-attributes` operation requires data to be sent
+according to the `JansAttribute` schema.
 
 To see the schema, use the command below:
 
@@ -284,7 +284,7 @@ To see the schema, use the command below:
 jans cli --schema JansAttribute
 ```
 
-The Janssen Server also provides an example of data that adheres to the above schema. 
+The Janssen Server also provides an example of data that adheres to the above schema.
 To fetch the example, use the command below.
 
 ```bash title="Command"
@@ -315,7 +315,7 @@ Using the schema and the example above, add the below data to the file /tmp/cust
 
 Example:
 
-```json title="Input" linenums="1"  
+```json title="Input" linenums="1"
 {
   "dn": "string",
   "inum": "string",
@@ -447,7 +447,7 @@ jans cli --operation-id get-attributes-by-inum \
 ```
 ## Delete Custom Claim
 
-Delete a user claim using its `inum`. 
+Delete a user claim using its `inum`.
 
 ```bash title="Command"
 jans cli --operation-id delete-attributes-by-inum --url-suffix inum:EC3A 
@@ -498,8 +498,8 @@ in the image below.
 
 ![image](../../../assets/tui-attribute-screen.png)
 
-To get the list of currently added user claims, bring the control to the `Search` 
-box (using the tab key), and press the `Enter` key. Type the search string to search 
+To get the list of currently added user claims, bring the control to the `Search`
+box (using the tab key), and press the `Enter` key. Type the search string to search
 for the user claim with the matching claim name.
 
 
@@ -512,12 +512,12 @@ for the user claim with the matching claim name.
 * To update the user claim, bring the control to the specific `User Claim` row and press the 
 Enter key, then it will show the edit screen. 
 
-!!!warning 
+!!!warning
     If the attribute is `Multivalued` enabled in TUI, datatype should be JSON.
 
 ![image](../../../assets/tui-edit-attribute.png)
 
-Close and reopen the TUI. The new custom user claim can now be added to any user 
+Close and reopen the TUI. The new custom user claim can now be added to any user
 from [user management](../../usermgmt/usermgmt-cli-tui.md).
 
 ![](../../../assets/image-tui-user-claim.png)
@@ -527,7 +527,7 @@ from [user management](../../usermgmt/usermgmt-cli-tui.md).
 * To delete the user claim, bring the control to the specific `Claim` row and press the 
 `Delete` key. Then it will show the Delete confirmation box.
 
- ![image](../../../assets/tui-delete-attribute.png) 
+ ![image](../../../assets/tui-delete-attribute.png)
 
 Close and reopen TUI before proceeding with further configuration.
 

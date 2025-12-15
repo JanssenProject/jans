@@ -42,7 +42,7 @@ configuration as shown below:
 
 ![pkce3.png](../../../assets/pkce3.png)
 
-AS requires PKCE if `requirePkce` global AS configuration property is set to `true` or otherwise if 
+AS requires PKCE if `requirePkce` global AS configuration property is set to `true` or otherwise if
 client involved in request has `requirePkce` set to `true` in client attributes ( inside `jansAttrs` json).
 
 ## Authorization Code Flow + PKCE

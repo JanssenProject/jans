@@ -8,14 +8,14 @@ tags:
   - jwt-grant
 ---
 
-# OAuth 2.0 JWT Grant 
+# OAuth 2.0 JWT Grant
 
 The [  JSON Web Token (JWT) Profile
-           for OAuth 2.0 Client Authentication and Authorization Grants spec](https://datatracker.ietf.org/doc/html/rfc7523) . 
+           for OAuth 2.0 Client Authentication and Authorization Grants spec](https://datatracker.ietf.org/doc/html/rfc7523) .
 
-JWT Grant is identified by `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer` at Token Endpoint.           
-           
-AS requires client authentication during JWT Grant usage. 
+JWT Grant is identified by `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer` at Token Endpoint.
+
+AS requires client authentication during JWT Grant usage.
 
 **Assertion validation**
 1. Client's `jwks` or `jwks_uri` is used to get keys for `assertion` signature validation
@@ -47,7 +47,7 @@ However it's possible to associate user with JWT Grant for this two things has t
 1. explicitly allow it by setting `jwtGrantAllowUserByUidInAssertion` AS configuration property to `true`
 2. add `uid` claim to `assertion` payload. 
 
-If `jwtGrantAllowUserByUidInAssertion` is `true` and `uid` claim value points to valid user AS will associate JWT Grant with this user. 
+If `jwtGrantAllowUserByUidInAssertion` is `true` and `uid` claim value points to valid user AS will associate JWT Grant with this user.
 
 **Sample request to Token Endpoint**
 

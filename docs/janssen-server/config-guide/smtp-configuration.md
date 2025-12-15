@@ -38,7 +38,7 @@ tasks.
 
 In the Janssen Server, you can deploy and customize the SMTP using the
 command line. To get the details of Janssen command line operations relevant to
-SMTP Configuration, you can check the operations under `ConfigurationSmtp` 
+SMTP Configuration, you can check the operations under `ConfigurationSmtp`
 task using the command below:
 
 ```bash title="Command"
@@ -91,8 +91,8 @@ It will show the SMTP server configuration as below:
 
 
 To add a new SMTP Server, we can use `post-config-smtp` operation id.
-As shown in the [output](#using-command-line) for`--info` 
-command, the `post-config-smtp` operation requires data to be sent 
+As shown in the [output](#using-command-line) for`--info`
+command, the `post-config-smtp` operation requires data to be sent
 according to the `SmtpConfiguration` schema.
 
 To see the schema, use the command below:
@@ -107,7 +107,7 @@ To fetch the example, use the command below.
 jans cli --schema-sample SmtpConfiguration 
 ```
 
-Using the schema and the example above, we have added below  data to the file 
+Using the schema and the example above, we have added below  data to the file
 `/tmp/smtp.json`.
 
 
@@ -160,8 +160,8 @@ jans cli --operation-id post-config-smtp \
 
 ### Update SMTP Server Configuration
 
-To update the SMTP server, we can use the `put-config-smtp` operation id. 
-simply change any information on `/tmp/smtp.json`file and run the following 
+To update the SMTP server, we can use the `put-config-smtp` operation id.
+simply change any information on `/tmp/smtp.json`file and run the following
 command:
 
 In that file, update the value `false` to `true` of the `trust_host` field.
@@ -186,15 +186,15 @@ jans cli --operation-id delete-config-smtp
 
 ### Test SMTP Server Configuration
 
-Testing SMTP Server configuration token with `https://jans.io/oauth/config/smtp.write` 
-scope is required. To test the SMTP server configuration update, change any information 
+Testing SMTP Server configuration token with `https://jans.io/oauth/config/smtp.write`
+scope is required. To test the SMTP server configuration update, change any information
 on the `/tmp/smtp.json` file with test data and run the following command:
 
 ```bash title="Command"
 jans cli --operation-id test-config-smtp \
 --data /tmp/smtp.json
 ```
-This will return status code 200 with a response as true or false based on the 
+This will return status code 200 with a response as true or false based on the
 SMTP test result.
 Note:  `SMTP Password` should be an App password and not a web login password.
 
