@@ -14766,7 +14766,7 @@ Operation ID: post-new-asset
 To get sample schema type jans cli --schema-sample &lt;schema&gt;, for example jans cli --schema-sample AssetForm
 </code></pre></div></td></tr></table></div>
 <h3 id="get-all-current-custom-assets">Get All Current Custom Assets<a class="headerlink" href="#get-all-current-custom-assets" title="Permanent link">#</a></h3>
-<p>Use the operation ID <code>get-all-assets</code> to get all the currently configured 
+<p>Use the operation ID <code>get-all-assets</code> to get all the currently configured
 custom assets on the Janssen Server.</p>
 <p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-all-assets
 </code></pre></div>
@@ -14865,7 +14865,7 @@ custom assets on the Janssen Server.</p>
 <span class="p">}</span>
 </code></pre></div></td></tr></table></div></p>
 <h3 id="get-custom-asset-by-inum">Get Custom Asset By inum<a class="headerlink" href="#get-custom-asset-by-inum" title="Permanent link">#</a></h3>
-<p>With <code>get-asset-by-inum</code> operation-id, we can get any specific asset matched 
+<p>With <code>get-asset-by-inum</code> operation-id, we can get any specific asset matched
 with <code>inum</code>. If we know the <code>inum</code>, we can simply use the below command:</p>
 <p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-asset-by-inum<span class="w"> </span><span class="se">\</span>
 --url-suffix<span class="w"> </span>inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
@@ -14945,7 +14945,7 @@ It returns the details as below:</p>
 <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="get-services">Get Services<a class="headerlink" href="#get-services" title="Permanent link">#</a></h3>
-<p>Get the list of Janssen Server services that support custom assets 
+<p>Get the list of Janssen Server services that support custom assets
 by performing <code>get-asset-services</code> operation.</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-asset-services
 </code></pre></div>
@@ -14970,7 +14970,7 @@ by performing <code>get-asset-services</code> operation.</p>
 ]
 </code></pre></div></td></tr></table></div>
 <h3 id="get-valid-asset-types">Get Valid Asset Types<a class="headerlink" href="#get-valid-asset-types" title="Permanent link">#</a></h3>
-<p>Get the asset types of your Janssen Server by performing <code>get-asset-types</code> 
+<p>Get the asset types of your Janssen Server by performing <code>get-asset-types</code>
 operation.</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-asset-types
 </code></pre></div>
@@ -14998,17 +14998,17 @@ operation.</p>
 </code></pre></div></td></tr></table></div>
 <h3 id="add-new-custom-asset">Add New Custom Asset<a class="headerlink" href="#add-new-custom-asset" title="Permanent link">#</a></h3>
 <p>To create a new asset, we can use <code>post-new-asset</code> operation id. As shown in
-the <a href="#using-the-command-line">output</a> for <code>--info</code> command, the <code>post-new-asset</code> 
+the <a href="#using-the-command-line">output</a> for <code>--info</code> command, the <code>post-new-asset</code>
 operation requires data to be sent according to <code>AssetForm</code> schema.</p>
 <p>To see the schema, use the command below:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema<span class="w"> </span>AssetForm
 </code></pre></div>
-<p>For better understanding, the Janssen Server also provides a sample of data to 
-be sent to the server. This sample conforms to the schema above. Use the command 
+<p>For better understanding, the Janssen Server also provides a sample of data to
+be sent to the server. This sample conforms to the schema above. Use the command
 below to get the sample.</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema-sample<span class="w"> </span>AssetForm
 </code></pre></div>
-<p>Using the schema and the example above, we have added below data to the 
+<p>Using the schema and the example above, we have added below data to the
 file <code>/tmp/add-asset.json</code>. Example below will load <code>p3.properties</code> file as
 a custom asset to the <code>jans-auth</code> service.</p>
 <p><div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Input</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -15193,7 +15193,7 @@ document</a>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 29, 2024 09:13:16 UTC"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 29, 2024 09:13:16 UTC">2024-10-29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 15, 2025 12:33:22 UTC"><span class="timeago" datetime="2025-12-15T12:33:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 15, 2025 12:33:22 UTC">2025-12-15</span>
   </span>
 
     

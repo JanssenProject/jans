@@ -14407,10 +14407,9 @@
 
 
 <h1 id="oauth-20-jwt-grant">OAuth 2.0 JWT Grant<a class="headerlink" href="#oauth-20-jwt-grant" title="Permanent link">#</a></h1>
-<p>The <a href="https://datatracker.ietf.org/doc/html/rfc7523">  JSON Web Token (JWT) Profile
-           for OAuth 2.0 Client Authentication and Authorization Grants spec</a> . </p>
-<p>JWT Grant is identified by <code>grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer</code> at Token Endpoint.           </p>
-<p>AS requires client authentication during JWT Grant usage. </p>
+<p>The <a href="https://datatracker.ietf.org/doc/html/rfc7523">JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants spec</a>.</p>
+<p>JWT Grant is identified by <code>grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer</code> at Token Endpoint.</p>
+<p>AS requires client authentication during JWT Grant usage.</p>
 <p><strong>Assertion validation</strong>
 1. Client's <code>jwks</code> or <code>jwks_uri</code> is used to get keys for <code>assertion</code> signature validation
 2. <code>aud</code> claim of <code>assertion</code> must contain AS <code>issuer</code> or otherwise any <code>aud</code> claim value must starts from AS <code>issuer</code> (for example if Token Endpoint address is set in <code>aud</code> claim value)
@@ -14434,7 +14433,7 @@ It means that User Info Endpoint can't be called with access token obtains with 
 <p>However it's possible to associate user with JWT Grant for this two things has to be done:
 1. explicitly allow it by setting <code>jwtGrantAllowUserByUidInAssertion</code> AS configuration property to <code>true</code>
 2. add <code>uid</code> claim to <code>assertion</code> payload. </p>
-<p>If <code>jwtGrantAllowUserByUidInAssertion</code> is <code>true</code> and <code>uid</code> claim value points to valid user AS will associate JWT Grant with this user. </p>
+<p>If <code>jwtGrantAllowUserByUidInAssertion</code> is <code>true</code> and <code>uid</code> claim value points to valid user AS will associate JWT Grant with this user.</p>
 <p><strong>Sample request to Token Endpoint</strong></p>
 <div class="highlight"><pre><span></span><code>POST /token HTTP/1.1
 Host: authz.example.net
@@ -14484,7 +14483,7 @@ Pragma: no-cache
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 30, 2025 20:36:41 UTC"><span class="timeago" datetime="2025-09-30T20:36:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 30, 2025 20:36:41 UTC">2025-09-30</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 15, 2025 12:33:22 UTC"><span class="timeago" datetime="2025-12-15T12:33:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 15, 2025 12:33:22 UTC">2025-12-15</span>
   </span>
 
     

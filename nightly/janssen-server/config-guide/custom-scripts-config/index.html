@@ -14617,7 +14617,7 @@ To get sample schema type jans cli --schema &lt;schma&gt;, for example jans cli 
 <p>The command line is:</p>
 <div class="highlight"><pre><span></span><code>jans cli --operation-id get-config-scripts
 </code></pre></div>
-<p>It returns all the custom scripts of the Janssen Server. </p>
+<p>It returns all the custom scripts of the Janssen Server.</p>
 <h2 id="adds-a-new-custom-script">Adds a New Custom Script<a class="headerlink" href="#adds-a-new-custom-script" title="Permanent link">#</a></h2>
 <p>If we look at the description of this operation we see it supports schema:</p>
 <div class="highlight"><pre><span></span><code>Operation ID: post-config-scripts
@@ -14658,7 +14658,7 @@ To get sample schema type jans cli --schema &lt;schma&gt;, for example jans cli 
   &quot;internal&quot;: false
 }
 </code></pre></div>
-<p>We need to fill some of these properties with valid data to add this new script. </p>
+<p>We need to fill some of these properties with valid data to add this new script.</p>
 <p><div class="highlight"><pre><span></span><code>{
   &quot;name&quot;: &quot;custom_script_client&quot;,
   &quot;aliases&quot;: null,
@@ -14802,7 +14802,7 @@ Server Response:
 </code></pre></div>
 <p>It returns all the custom scripts that are related to the <code>CLIENT_REGISTRATION</code> type available in the Janssen Server. You will find the name of all the types <a href="./#name-of-the-type-of-scripts">here</a></p>
 <h2 id="get-custom-scripts-by-its-inum">Get Custom Scripts by it's <code>inum</code><a class="headerlink" href="#get-custom-scripts-by-its-inum" title="Permanent link">#</a></h2>
-<p>In case we need to find out details configuration of any custom script, we can search by its unique <code>inum</code> value. </p>
+<p>In case we need to find out details configuration of any custom script, we can search by its unique <code>inum</code> value.</p>
 <div class="highlight"><pre><span></span><code>Operation ID: get-config-scripts-by-inum
   Description: Gets a script by Inum.
   url-suffix: inum
@@ -14850,7 +14850,7 @@ Server Response:
 </code></pre></div>
 <h2 id="how-to-delete-custom-script">How to delete Custom Script?<a class="headerlink" href="#how-to-delete-custom-script" title="Permanent link">#</a></h2>
 <p>Well, we can delete any custom script also in deed. In that case, we need to remember the <code>inum</code> value of the custom script we want to delete. In the above we <a href="./#adds-a-new-custom-script">added</a>, <a href="./#update-an-existing-custom-script">updated</a> a custom script. We know the <code>inum</code> value, so let's delete this one.</p>
-<p>Command line: </p>
+<p>Command line:</p>
 <div class="highlight"><pre><span></span><code>jans cli --operation-id delete-config-scripts-by-inum --url-suffix inum:inum_value
 </code></pre></div>
 <p>For example, in our case; the command line is:</p>
@@ -14883,7 +14883,7 @@ Server Response:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 29, 2024 09:13:16 UTC"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 29, 2024 09:13:16 UTC">2024-10-29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 15, 2025 12:33:22 UTC"><span class="timeago" datetime="2025-12-15T12:33:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 15, 2025 12:33:22 UTC">2025-12-15</span>
   </span>
 
     
