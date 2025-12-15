@@ -287,15 +287,17 @@ mod tests {
         let policy_text = "this is not valid cedar syntax";
 
         let result = PolicyParser::parse_policy(policy_text, "invalid.cedar");
-        assert!(result.is_err());
+        let err = result.expect_err("Expected CedarParsing error for invalid syntax");
 
-        if let Err(PolicyStoreError::CedarParsing { file, detail }) = result {
-            assert_eq!(file, "invalid.cedar");
-            // The detail should be a ParseError with a non-empty message
-            assert!(matches!(detail, CedarParseErrorDetail::ParseError(_)));
-        } else {
-            panic!("Expected CedarParsing error");
-        }
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::CedarParsing { file, detail: CedarParseErrorDetail::ParseError(_) }
+                if file == "invalid.cedar"
+            ),
+            "Expected CedarParsing error with ParseError detail, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -390,18 +392,23 @@ mod tests {
     #[test]
     fn test_validate_policy_id_empty() {
         let result = PolicyParser::validate_policy_id("", "test.cedar");
-        assert!(result.is_err());
-        assert!(matches!(result, Err(ValidationError::EmptyPolicyId { .. })));
+        let err = result.expect_err("Expected EmptyPolicyId error for empty policy ID");
+        assert!(
+            matches!(err, ValidationError::EmptyPolicyId { .. }),
+            "Expected EmptyPolicyId error, got: {:?}",
+            err
+        );
     }
 
     #[test]
     fn test_validate_policy_id_invalid_chars() {
         let result = PolicyParser::validate_policy_id("invalid@policy#id", "test.cedar");
-        assert!(result.is_err());
-        assert!(matches!(
-            result,
-            Err(ValidationError::InvalidPolicyIdCharacters { .. })
-        ));
+        let err = result.expect_err("Expected InvalidPolicyIdCharacters error for invalid chars");
+        assert!(
+            matches!(err, ValidationError::InvalidPolicyIdCharacters { .. }),
+            "Expected InvalidPolicyIdCharacters error, got: {:?}",
+            err
+        );
     }
 
     #[test]

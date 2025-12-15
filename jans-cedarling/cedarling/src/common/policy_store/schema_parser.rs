@@ -211,14 +211,17 @@ mod tests {
         let content = "this is not valid cedar schema syntax!!!";
 
         let result = SchemaParser::parse_schema(content, "invalid.cedarschema");
-        assert!(result.is_err());
+        let err = result.expect_err("Expected CedarSchemaError for invalid syntax");
 
-        let Err(PolicyStoreError::CedarSchemaError { file, err }) = result else {
-            panic!("Expected CedarSchemaError");
-        };
-
-        assert_eq!(file, "invalid.cedarschema");
-        assert!(matches!(err, CedarSchemaErrorType::ParseError(_)));
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::CedarSchemaError { file, err: CedarSchemaErrorType::ParseError(_) }
+                if file == "invalid.cedarschema"
+            ),
+            "Expected CedarSchemaError with ParseError, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -227,10 +230,20 @@ mod tests {
 
         let result = SchemaParser::parse_schema(content, "empty.cedarschema");
         // Empty schema is actually valid in Cedar, but our validation will catch it
-        if result.is_ok() {
-            let parsed = result.unwrap();
+        if let Ok(parsed) = result {
             let validation = parsed.validate();
-            assert!(validation.is_err());
+            let err = validation.expect_err("Expected EmptySchema validation error");
+            assert!(
+                matches!(
+                    &err,
+                    PolicyStoreError::CedarSchemaError {
+                        err: CedarSchemaErrorType::EmptySchema,
+                        ..
+                    }
+                ),
+                "Expected EmptySchema error, got: {:?}",
+                err
+            );
         }
     }
 
@@ -243,7 +256,12 @@ mod tests {
         "#;
 
         let result = SchemaParser::parse_schema(content, "malformed.cedarschema");
-        assert!(result.is_err());
+        let err = result.expect_err("Expected error for missing closing brace");
+        assert!(
+            matches!(&err, PolicyStoreError::CedarSchemaError { .. }),
+            "Expected CedarSchemaError for malformed schema, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -355,10 +373,12 @@ mod tests {
         let content = "namespace { invalid }";
 
         let result = SchemaParser::parse_schema(content, "my_schema.cedarschema");
-        assert!(result.is_err());
-
-        let err_str = result.unwrap_err().to_string();
-        assert!(err_str.contains("my_schema.cedarschema"));
+        let err = result.expect_err("Expected error for invalid namespace syntax");
+        assert!(
+            matches!(&err, PolicyStoreError::CedarSchemaError { file, .. } if file == "my_schema.cedarschema"),
+            "Expected CedarSchemaError with filename my_schema.cedarschema, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -486,7 +506,12 @@ mod tests {
         "#;
 
         let result = SchemaParser::parse_schema(content, "invalid_type.cedarschema");
-        assert!(result.is_err(), "Invalid entity type should fail parsing");
+        let err = result.expect_err("Invalid entity type should fail parsing");
+        assert!(
+            matches!(&err, PolicyStoreError::CedarSchemaError { .. }),
+            "Expected CedarSchemaError for invalid entity type, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -499,7 +524,12 @@ mod tests {
         "#;
 
         let result = SchemaParser::parse_schema(content, "missing_semicolon.cedarschema");
-        assert!(result.is_err(), "Missing semicolon should fail parsing");
+        let err = result.expect_err("Missing semicolon should fail parsing");
+        assert!(
+            matches!(&err, PolicyStoreError::CedarSchemaError { .. }),
+            "Expected CedarSchemaError for missing semicolon, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -513,10 +543,13 @@ mod tests {
 
         let result = SchemaParser::parse_schema(content, "duplicate.cedarschema");
         // Cedar may or may not allow duplicate entity definitions
-        // This test documents the current behavior
-        if result.is_err() {
-            let err_str = result.unwrap_err().to_string();
-            assert!(err_str.contains("duplicate"));
+        // This test documents the current behavior - if an error occurs, it should be a schema error
+        if let Err(err) = result {
+            assert!(
+                matches!(&err, PolicyStoreError::CedarSchemaError { .. }),
+                "Expected CedarSchemaError for duplicate entity, got: {:?}",
+                err
+            );
         }
     }
 
@@ -558,14 +591,11 @@ mod tests {
         let content = "namespace MyApp { entity User = { invalid } }";
 
         let result = SchemaParser::parse_schema(content, "test.cedarschema");
-        assert!(result.is_err());
-
-        let err = result.unwrap_err();
-        let err_msg = err.to_string();
-        assert!(!err_msg.is_empty(), "Error message should not be empty");
+        let err = result.expect_err("Expected error for malformed schema");
         assert!(
-            err_msg.contains("test.cedarschema"),
-            "Error should reference filename"
+            matches!(&err, PolicyStoreError::CedarSchemaError { file, .. } if file == "test.cedarschema"),
+            "Expected CedarSchemaError with filename test.cedarschema, got: {:?}",
+            err
         );
     }
 

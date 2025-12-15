@@ -452,7 +452,12 @@ mod tests {
     #[test]
     fn test_parse_cedar_version_invalid() {
         let result = PolicyStoreManager::parse_cedar_version("invalid");
-        assert!(result.is_err());
+        let err = result.expect_err("Expected error for invalid version format");
+        assert!(
+            matches!(err, ConversionError::VersionParsing { .. }),
+            "Expected VersionParsing error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -485,7 +490,12 @@ mod tests {
     fn test_convert_schema_invalid() {
         let schema_content = "this is not valid cedar schema syntax {{{";
         let result = PolicyStoreManager::convert_schema(schema_content);
-        assert!(result.is_err());
+        let err = result.expect_err("Expected error for invalid Cedar schema syntax");
+        assert!(
+            matches!(err, ConversionError::SchemaConversion(_)),
+            "Expected SchemaConversion error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -559,7 +569,12 @@ mod tests {
 
         let result =
             PolicyStoreManager::convert_policies_and_templates(&policy_files, &template_files);
-        assert!(result.is_err());
+        let err = result.expect_err("Expected ConversionError for invalid policy syntax");
+        assert!(
+            matches!(err, ConversionError::PolicyConversion(_)),
+            "Expected PolicyConversion error, got: {:?}",
+            err
+        );
     }
 
     #[test]

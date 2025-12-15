@@ -14,7 +14,7 @@
 // Note: This module is cfg(test) via parent module declaration in policy_store.rs
 
 use super::archive_handler::ArchiveVfs;
-use super::errors::ArchiveError;
+use super::errors::{ArchiveError, PolicyStoreError, ValidationError};
 use super::loader::DefaultPolicyStoreLoader;
 use super::test_utils::{
     PolicyStoreTestBuilder, create_corrupted_archive, create_deep_nested_archive,
@@ -94,7 +94,12 @@ mod path_traversal {
         let result = ArchiveVfs::from_buffer(archive);
 
         // Should reject due to path traversal
-        assert!(result.is_err());
+        let err = result.expect_err("Expected PathTraversal error for double-dot sequences");
+        assert!(
+            matches!(err, ArchiveError::PathTraversal { .. }),
+            "Expected PathTraversal error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -244,8 +249,14 @@ mod input_validation {
 
         let err = result.expect_err("Expected error for invalid metadata JSON");
         assert!(
-            err.to_string().contains("JSON") || err.to_string().contains("metadata"),
-            "Error should mention JSON or metadata: {}",
+            matches!(
+                &err,
+                PolicyStoreError::JsonParsing { file, .. } if file.contains("metadata")
+            ) || matches!(
+                &err,
+                PolicyStoreError::Validation(ValidationError::MetadataJsonParseFailed { .. })
+            ),
+            "Expected JSON parsing error for metadata, got: {:?}",
             err
         );
     }
@@ -260,11 +271,11 @@ mod input_validation {
         let result = loader.load_directory(".");
 
         let err = result.expect_err("Expected error for invalid Cedar syntax");
+        // The error may be CedarParsing or a validation error depending on where parsing fails
         assert!(
-            err.to_string().contains("Cedar")
-                || err.to_string().contains("policy")
-                || err.to_string().contains("parsing"),
-            "Error should mention Cedar/policy parsing: {}",
+            matches!(&err, PolicyStoreError::CedarParsing { .. })
+                || matches!(&err, PolicyStoreError::Validation(_)),
+            "Expected CedarParsing or Validation error for invalid Cedar syntax, got: {:?}",
             err
         );
     }
@@ -283,8 +294,9 @@ mod input_validation {
         // In that case, the test documents current behavior
         if let Err(err) = result {
             assert!(
-                err.to_string().contains("JSON") || err.to_string().contains("entity"),
-                "Error should mention JSON or entity: {}",
+                matches!(&err, PolicyStoreError::JsonParsing { .. })
+                    || matches!(&err, PolicyStoreError::CedarEntityError { .. }),
+                "Expected JSON parsing or entity error, got: {:?}",
                 err
             );
         }
@@ -303,11 +315,9 @@ mod input_validation {
         // If implementation allows missing optional fields, this may succeed
         if let Err(err) = result {
             assert!(
-                err.to_string().contains("issuer")
-                    || err.to_string().contains("oidc")
-                    || err.to_string().contains("Issuer")
-                    || err.to_string().contains("OIDC"),
-                "Error should mention issuer or OIDC: {}",
+                matches!(&err, PolicyStoreError::TrustedIssuerError { .. })
+                    || matches!(&err, PolicyStoreError::JsonParsing { .. }),
+                "Expected TrustedIssuerError or JsonParsing error, got: {:?}",
                 err
             );
         }
@@ -326,8 +336,9 @@ mod input_validation {
         // Cedar may allow duplicates in some cases (last wins), so test documents behavior
         if let Err(err) = result {
             assert!(
-                err.to_string().contains("duplicate") || err.to_string().contains("Duplicate"),
-                "Error should mention duplicate: {}",
+                matches!(&err, PolicyStoreError::CedarEntityError { .. })
+                    || matches!(&err, PolicyStoreError::JsonParsing { .. }),
+                "Expected CedarEntityError or JsonParsing error for duplicate UIDs, got: {:?}",
                 err
             );
         }

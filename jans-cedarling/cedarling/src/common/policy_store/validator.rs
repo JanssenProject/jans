@@ -256,11 +256,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::EmptyCedarVersion
-        ));
+        let err = result.expect_err("Expected EmptyCedarVersion error");
+        assert!(
+            matches!(err, ValidationError::EmptyCedarVersion),
+            "Expected EmptyCedarVersion, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -278,11 +279,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::InvalidCedarVersion { .. }
-        ));
+        let err = result.expect_err("Expected InvalidCedarVersion error");
+        assert!(
+            matches!(err, ValidationError::InvalidCedarVersion { .. }),
+            "Expected InvalidCedarVersion, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -300,11 +302,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::EmptyPolicyStoreName
-        ));
+        let err = result.expect_err("Expected EmptyPolicyStoreName error");
+        assert!(
+            matches!(err, ValidationError::EmptyPolicyStoreName),
+            "Expected EmptyPolicyStoreName, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -322,11 +325,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::PolicyStoreNameTooLong { length: 256 }
-        ));
+        let err = result.expect_err("Expected PolicyStoreNameTooLong error");
+        assert!(
+            matches!(err, ValidationError::PolicyStoreNameTooLong { length: 256 }),
+            "Expected PolicyStoreNameTooLong with length 256, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -344,11 +348,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::InvalidPolicyStoreId { .. }
-        ));
+        let err = result.expect_err("Expected InvalidPolicyStoreId error");
+        assert!(
+            matches!(err, ValidationError::InvalidPolicyStoreId { .. }),
+            "Expected InvalidPolicyStoreId, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -366,11 +371,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::InvalidPolicyStoreId { .. }
-        ));
+        let err = result.expect_err("Expected InvalidPolicyStoreId error for short ID");
+        assert!(
+            matches!(err, ValidationError::InvalidPolicyStoreId { .. }),
+            "Expected InvalidPolicyStoreId, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -406,11 +412,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::InvalidPolicyStoreVersion { .. }
-        ));
+        let err = result.expect_err("Expected InvalidPolicyStoreVersion error");
+        assert!(
+            matches!(err, ValidationError::InvalidPolicyStoreVersion { .. }),
+            "Expected InvalidPolicyStoreVersion, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -447,12 +454,16 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::DescriptionTooLong { length, max_length }
+        let err = result.expect_err("Expected DescriptionTooLong error");
+        assert!(
+            matches!(
+                err,
+                ValidationError::DescriptionTooLong { length, max_length }
                 if length == over_limit && max_length == DESCRIPTION_MAX_LENGTH
-        ));
+            ),
+            "Expected DescriptionTooLong with correct limits, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -477,11 +488,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::InvalidTimestampOrdering
-        ));
+        let err = result.expect_err("Expected InvalidTimestampOrdering error");
+        assert!(
+            matches!(err, ValidationError::InvalidTimestampOrdering),
+            "Expected InvalidTimestampOrdering, got: {:?}",
+            err
+        );
     }
 
     #[test]

@@ -350,7 +350,8 @@ mod tests {
         let vfs = MemoryVfs::new();
 
         assert!(!vfs.exists("/nonexistent.txt"));
-        assert!(vfs.read_file("/nonexistent.txt").is_err());
+        let result = vfs.read_file("/nonexistent.txt");
+        result.expect_err("Expected error when reading nonexistent file");
     }
 
     #[cfg(not(target_arch = "wasm32"))]

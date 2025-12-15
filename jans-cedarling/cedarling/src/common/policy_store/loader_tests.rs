@@ -9,6 +9,7 @@
 
 use super::super::archive_handler::ArchiveVfs;
 use super::super::entity_parser::EntityParser;
+use super::super::errors::{PolicyStoreError, ValidationError};
 use super::super::issuer_parser::IssuerParser;
 use super::super::manifest_validator::ManifestValidator;
 use super::super::schema_parser::SchemaParser;
@@ -140,8 +141,13 @@ fn test_validate_nonexistent_directory() {
     let source = PolicyStoreSource::Directory(PathBuf::from("/nonexistent/path"));
     let loader = DefaultPolicyStoreLoader::new_physical();
     let result = loader.validate_structure(&source);
-    assert!(result.is_err());
-    assert!(result.unwrap_err().to_string().contains("not found"));
+    let err = result.expect_err("Expected error for nonexistent directory");
+    assert!(
+        matches!(&err, PolicyStoreError::PathNotFound { .. })
+            || matches!(&err, PolicyStoreError::Io(_)),
+        "Expected PathNotFound or Io error, got: {:?}",
+        err
+    );
 }
 
 #[test]
@@ -157,9 +163,16 @@ fn test_validate_directory_missing_metadata() {
     let loader = DefaultPolicyStoreLoader::new_physical();
     let result = loader.validate_structure(&source);
 
-    assert!(result.is_err());
-    let err = result.unwrap_err();
-    assert!(err.to_string().contains("metadata.json"));
+    let err = result.expect_err("Expected error for missing metadata.json");
+    assert!(
+        matches!(
+            &err,
+            PolicyStoreError::Validation(ValidationError::MissingRequiredFile { file })
+            if file.contains("metadata")
+        ),
+        "Expected MissingRequiredFile error for metadata.json, got: {:?}",
+        err
+    );
 }
 
 #[test]
@@ -175,9 +188,16 @@ fn test_validate_directory_missing_schema() {
     let loader = DefaultPolicyStoreLoader::new_physical();
     let result = loader.validate_structure(&source);
 
-    assert!(result.is_err());
-    let err = result.unwrap_err();
-    assert!(err.to_string().contains("schema.cedarschema"));
+    let err = result.expect_err("Expected error for missing schema.cedarschema");
+    assert!(
+        matches!(
+            &err,
+            PolicyStoreError::Validation(ValidationError::MissingRequiredFile { file })
+            if file.contains("schema")
+        ),
+        "Expected MissingRequiredFile error for schema.cedarschema, got: {:?}",
+        err
+    );
 }
 
 #[test]
@@ -193,9 +213,16 @@ fn test_validate_directory_missing_policies_dir() {
     let loader = DefaultPolicyStoreLoader::new_physical();
     let result = loader.validate_structure(&source);
 
-    assert!(result.is_err());
-    let err = result.unwrap_err();
-    assert!(err.to_string().contains("policies"));
+    let err = result.expect_err("Expected error for missing policies directory");
+    assert!(
+        matches!(
+            &err,
+            PolicyStoreError::Validation(ValidationError::MissingRequiredDirectory { directory })
+            if directory.contains("policies")
+        ),
+        "Expected MissingRequiredDirectory error for policies, got: {:?}",
+        err
+    );
 }
 
 #[test]
@@ -284,9 +311,15 @@ fn test_load_directory_invalid_policy_extension() {
     let loader = DefaultPolicyStoreLoader::new_physical();
     let result = loader.load(&source);
 
-    assert!(result.is_err());
-    let err = result.unwrap_err();
-    assert!(err.to_string().contains("extension"));
+    let err = result.expect_err("Expected error for invalid policy file extension");
+    assert!(
+        matches!(
+            &err,
+            PolicyStoreError::Validation(ValidationError::InvalidFileExtension { .. })
+        ),
+        "Expected InvalidFileExtension error, got: {:?}",
+        err
+    );
 }
 
 #[test]
@@ -303,14 +336,15 @@ fn test_load_directory_invalid_json() {
     let loader = DefaultPolicyStoreLoader::new_physical();
     let result = loader.load(&source);
 
-    assert!(result.is_err());
-    let err = result.unwrap_err();
-    // Error could be "JSON parsing error" or "Invalid metadata" from validator
-    let err_str = err.to_string();
+    let err = result.expect_err("Expected error for invalid JSON in metadata.json");
     assert!(
-        err_str.contains("JSON") || err_str.contains("parse") || err_str.contains("Invalid"),
-        "Expected JSON/parse error, got: {}",
-        err_str
+        matches!(&err, PolicyStoreError::JsonParsing { file, .. } if file.contains("metadata"))
+            || matches!(
+                &err,
+                PolicyStoreError::Validation(ValidationError::MetadataJsonParseFailed { .. })
+            ),
+        "Expected JsonParsing or MetadataJsonParseFailed error, got: {:?}",
+        err
     );
 }
 
@@ -369,15 +403,17 @@ fn test_parse_policies_invalid_syntax() {
     }];
 
     let result = PhysicalLoader::parse_policies(&policy_files);
-    assert!(result.is_err());
+    let err = result.expect_err("Expected CedarParsing error for invalid syntax");
 
-    if let Err(PolicyStoreError::CedarParsing { file, detail }) = result {
-        assert_eq!(file, "invalid.cedar");
-        // The detail should be a ParseError with a non-empty message
-        assert!(matches!(detail, CedarParseErrorDetail::ParseError(_)));
-    } else {
-        panic!("Expected CedarParsing error");
-    }
+    assert!(
+        matches!(
+            &err,
+            PolicyStoreError::CedarParsing { file, detail: CedarParseErrorDetail::ParseError(_) }
+            if file == "invalid.cedar"
+        ),
+        "Expected CedarParsing error with ParseError detail, got: {:?}",
+        err
+    );
 }
 
 #[test]
@@ -963,12 +999,18 @@ action "read" appliesTo {
 
     // Detect duplicates
     let validation = IssuerParser::validate_issuers(&all_issuers);
-    assert!(validation.is_err(), "Should detect duplicate issuer IDs");
-
-    let errors = validation.unwrap_err();
+    let errors = validation.expect_err("Should detect duplicate issuer IDs");
     assert_eq!(errors.len(), 1, "Should have 1 duplicate error");
-    assert!(errors[0].contains("issuer1"));
-    assert!(errors[0].contains("file1.json") || errors[0].contains("file2.json"));
+    assert!(
+        errors[0].contains("issuer1"),
+        "Error should mention the duplicate issuer ID 'issuer1', got: {}",
+        errors[0]
+    );
+    assert!(
+        errors[0].contains("file1.json") || errors[0].contains("file2.json"),
+        "Error should mention the source file, got: {}",
+        errors[0]
+    );
 }
 
 #[test]
@@ -1024,7 +1066,12 @@ fn test_issuer_missing_required_field() {
         &loaded.trusted_issuers[0].name,
     );
 
-    assert!(result.is_err(), "Should fail on missing required field");
+    let err = result.expect_err("Should fail on missing required field");
+    assert!(
+        matches!(&err, PolicyStoreError::TrustedIssuerError { .. }),
+        "Expected TrustedIssuerError, got: {:?}",
+        err
+    );
 }
 
 #[test]

@@ -396,11 +396,12 @@ mod tests {
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
 
         let result = validator.validate_file("missing.txt", "sha256:abc", 100);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.expect_err("should fail"),
-            ManifestErrorType::FileMissing { .. }
-        ));
+        let err = result.expect_err("Expected FileMissing error for nonexistent file");
+        assert!(
+            matches!(err, ManifestErrorType::FileMissing { .. }),
+            "Expected FileMissing error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -412,11 +413,12 @@ mod tests {
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
         let result = validator.validate_file("test.txt", "invalid_format", 5);
 
-        assert!(result.is_err());
-        assert!(matches!(
-            result.expect_err("should fail"),
-            ManifestErrorType::InvalidChecksumFormat { .. }
-        ));
+        let err = result.expect_err("Expected InvalidChecksumFormat error");
+        assert!(
+            matches!(err, ManifestErrorType::InvalidChecksumFormat { .. }),
+            "Expected InvalidChecksumFormat error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -428,11 +430,12 @@ mod tests {
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
         let result = validator.validate_file("test.txt", "sha256:abc", 100); // Wrong size
 
-        assert!(result.is_err());
-        assert!(matches!(
-            result.expect_err("should fail"),
-            ManifestErrorType::SizeMismatch { .. }
-        ));
+        let err = result.expect_err("Expected SizeMismatch error");
+        assert!(
+            matches!(err, ManifestErrorType::SizeMismatch { .. }),
+            "Expected SizeMismatch error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -444,11 +447,12 @@ mod tests {
         let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
         let result = validator.validate_file("test.txt", "sha256:wrongchecksum", 5);
 
-        assert!(result.is_err());
-        assert!(matches!(
-            result.expect_err("should fail"),
-            ManifestErrorType::ChecksumMismatch { .. }
-        ));
+        let err = result.expect_err("Expected ChecksumMismatch error");
+        assert!(
+            matches!(err, ManifestErrorType::ChecksumMismatch { .. }),
+            "Expected ChecksumMismatch error, got: {:?}",
+            err
+        );
     }
 
     #[test]

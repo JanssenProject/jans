@@ -420,22 +420,24 @@ mod tests {
     fn test_from_buffer_invalid_zip() {
         let bytes = b"This is not a ZIP file".to_vec();
         let result = ArchiveVfs::from_buffer(bytes);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ArchiveError::InvalidZipFormat { .. }
-        ));
+        let err = result.expect_err("Expected InvalidZipFormat error for non-ZIP data");
+        assert!(
+            matches!(err, ArchiveError::InvalidZipFormat { .. }),
+            "Expected InvalidZipFormat error, got: {:?}",
+            err
+        );
     }
 
     #[test]
     fn test_from_buffer_path_traversal() {
         let bytes = create_test_archive(vec![("../../../etc/passwd", "malicious")]);
         let result = ArchiveVfs::from_buffer(bytes);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ArchiveError::PathTraversal { .. }
-        ));
+        let err = result.expect_err("Expected PathTraversal error for malicious path");
+        assert!(
+            matches!(err, ArchiveError::PathTraversal { .. }),
+            "Expected PathTraversal error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -459,7 +461,11 @@ mod tests {
         let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
 
         let result = vfs.read_file("nonexistent.json");
-        assert!(result.is_err());
+        let err = result.expect_err("Expected error for nonexistent file");
+        assert!(
+            matches!(err, std::io::Error { .. }),
+            "Expected IO error for file not found"
+        );
     }
 
     #[test]
