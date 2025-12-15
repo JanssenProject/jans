@@ -14768,7 +14768,7 @@
 <p>This OAuth 2.0 protocol extension enables OAuth clients to request user authorization from applications on devices (e.g. smart TVs, media consoles, printers) that  are <strong>input-constrained</strong> or <strong>browser-less</strong> . The authorization flow defined by this <a href="https://tools.ietf.org/html/rfc8628">RFC 8628</a>, sometimes referred to as the "device flow", instructs the user to review the authorization request on a secondary device, such as a smartphone or a personal computer, which has the requisite input and browser capabilities to complete the user interaction.</p>
 <h3 id="sequence-diagram">Sequence Diagram<a class="headerlink" href="#sequence-diagram" title="Permanent link">#</a></h3>
 <p><img alt="" src="https://github.com/JanssenProject/jans/raw/main/docs/assets/device_auth_flow.png" /></p>
-<p>Paste the following source text of the sequence diagram on <a href="https://sequencediagram.org/">sequencediagram.org</a> 
+<p>Paste the following source text of the sequence diagram on <a href="https://sequencediagram.org/">sequencediagram.org</a>
 <div class="highlight"><pre><span></span><code>title Oauth2.0 Device Authorization flow
 
 participant User
@@ -14807,7 +14807,7 @@ Third Party App-&gt;Device App: return Response
 <ol>
 <li>After that, user could need to authenticate, then decide whether permissions will be granted.</li>
 </ol>
-<p><code>acr</code> value can be specified in <code>deviceAuthzAcr</code> AS configuration property. </p>
+<p><code>acr</code> value can be specified in <code>deviceAuthzAcr</code> AS configuration property.</p>
 <p><img alt="DeviceFlow3" src="https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-3.png" /></p>
 <ol>
 <li>Finally, the confirmation screen will be shown.</li>
@@ -14815,7 +14815,7 @@ Third Party App-&gt;Device App: return Response
 <p><img alt="DeviceFlow4" src="https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-4.png" /></p>
 <h4 id="acr-value-during-device-authorization">ACR value during Device Authorization<a class="headerlink" href="#acr-value-during-device-authorization" title="Permanent link">#</a></h4>
 <p>User is required to authenticate if not authenticated yet. By default <code>acr_values</code> is not set in authorization request, which means it relies on default AS handling.
-However it's possible explicitly set <code>acr</code> value during Device Authorization by setting <code>deviceAuthzAcr</code> AS configuration property. </p>
+However it's possible explicitly set <code>acr</code> value during Device Authorization by setting <code>deviceAuthzAcr</code> AS configuration property.</p>
 <h2 id="request-user-and-device-codes">Request user and device codes<a class="headerlink" href="#request-user-and-device-codes" title="Permanent link">#</a></h2>
 <p>This first step, device sends an HTTP POST request to Jans authorization server, at <code>/jans-auth/restv1/device_authorization</code> which is also presented in the <code>Discovery url</code> published by Jans Server, this endpoint could process a common authentication method or it could also not do any authentication, depending on the configuration for the client in Jans Server.</p>
 <h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">#</a></h4>
@@ -15031,7 +15031,7 @@ This token endpoint can return any error code already defined, for example wheth
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 27, 2024 12:12:23 UTC"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 27, 2024 12:12:23 UTC">2024-09-27</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 15, 2025 12:33:22 UTC"><span class="timeago" datetime="2025-12-15T12:33:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 15, 2025 12:33:22 UTC">2025-12-15</span>
   </span>
 
     

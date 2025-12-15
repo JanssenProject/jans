@@ -14724,12 +14724,12 @@
 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code>Attribute</code> and <code>User Claims</code> refer to the same user data fields in 
+<p><code>Attribute</code> and <code>User Claims</code> refer to the same user data fields in
 the Janssen Server.</p>
 </div>
 <h1 id="attribute">Attribute<a class="headerlink" href="#attribute" title="Permanent link">#</a></h1>
-<p>User claims are individual pieces of user data, like <code>uid</code> or <code>email</code>, that are required 
-by applications in order to identify a user and grant access to protect resources. </p>
+<p>User claims are individual pieces of user data, like <code>uid</code> or <code>email</code>, that are required by applications to
+identify a user and grant access to protect resources.</p>
 <p>Janssen server's default configuration comes with certain user claims already configured. In addition to these, custom user claims can be added as required. The Janssen Server provides multiple configuration tools to perform these tasks.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
 <div class="tabbed-content">
@@ -14751,7 +14751,7 @@ or Jump straight to the <a href="#using-configuration-rest-api">Using Configurat
 </div>
 </div>
 <h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
-<p>To get the details of Janssen command line operations relevant to user claims configuration, you can check the operations under <code>Attribute</code> task using 
+<p>To get the details of Janssen command line operations relevant to user claims configuration, you can check the operations under <code>Attribute</code> task using
 the command below:</p>
 <p>First thing, let's get the information for <code>Attribute</code>:
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--info<span class="w"> </span>Attribute
@@ -14820,8 +14820,8 @@ Operation ID: patch-attributes-by-inum
 To get sample schema type jans cli --schema &lt;schma&gt;, for example jans cli --schema PatchRequest
 </code></pre></div></td></tr></table></div>
 <h3 id="get-custom-user-claims">Get Custom User Claims<a class="headerlink" href="#get-custom-user-claims" title="Permanent link">#</a></h3>
-<p>The user claims 
-that the available in your Janssen Server can be found by using this operation-ID. If we look at 
+<p>The user claims
+that are available in your Janssen Server can be found by using this operation-ID. If we look at
 the description below:</p>
 <div class="highlight"><pre><span></span><code>Operation ID: get-attributes
   Description: Gets a list of Gluu attributes.
@@ -15069,12 +15069,12 @@ In return, we get a list of claims that are matched with the given <code>pattern
 <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="creating-a-custom-user-claims">Creating a Custom User Claims<a class="headerlink" href="#creating-a-custom-user-claims" title="Permanent link">#</a></h3>
-<p>While standard claims provide basic user 
-information, custom user claims allow for the inclusion of domain-specific attributes or 
-application-specific data that might be required for user personalization, authorization, 
+<p>While standard claims provide basic user
+information, custom user claims allow for the inclusion of domain-specific attributes or
+application-specific data that might be required for user personalization, authorization,
 or other business logic. A user claim should be unique and non-null or empty. Follow the steps below to add a custom user claim to the Janssen Server.</p>
 <h4 id="add-entry-into-persistence">Add entry into persistence<a class="headerlink" href="#add-entry-into-persistence" title="Permanent link">#</a></h4>
-<p>In order to support the new custom claim, add a column to table <code>jansPerson</code> in the persistence backend. </p>
+<p>To support the new custom claim, add a column to table <code>jansPerson</code> in the persistence backend.</p>
 <p>Command will be similar to the one below:</p>
 <div class="highlight"><span class="filename">MySQL</span><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w">  </span><span class="n">jansPerson</span><span class="w">  </span><span class="k">ADD</span><span class="w"> </span><span class="k">COLUMN</span><span class="w"> </span><span class="o">&lt;</span><span class="n">claimName</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">dataType</span><span class="o">&gt;</span>
 </code></pre></div>
@@ -15084,13 +15084,13 @@ or other business logic. A user claim should be unique and non-null or empty. Fo
 <div class="highlight"><pre><span></span><code>jans-config-api.service
 </code></pre></div>
 <h4 id="configure-custom-user-claim-in-the-janssen-server">Configure custom user claim in the Janssen Server<a class="headerlink" href="#configure-custom-user-claim-in-the-janssen-server" title="Permanent link">#</a></h4>
-<p>Add and configure the custom claim using <code>post-attributes</code> operation-ID. As shown in the <a href="#using-command-line">output</a> 
-for the <code>--info</code> command, the <code>post-attributes</code> operation requires data to be sent 
-according to the <code>JansAttribute</code> schema. </p>
+<p>Add and configure the custom claim using <code>post-attributes</code> operation-ID. As shown in the <a href="#using-command-line">output</a>
+for the <code>--info</code> command, the <code>post-attributes</code> operation requires data to be sent
+according to the <code>JansAttribute</code> schema.</p>
 <p>To see the schema, use the command below:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema<span class="w"> </span>JansAttribute
 </code></pre></div>
-<p>The Janssen Server also provides an example of data that adheres to the above schema. 
+<p>The Janssen Server also provides an example of data that adheres to the above schema.
 To fetch the example, use the command below.</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema-sample<span class="w"> </span>JansAttribute
 </code></pre></div>
@@ -15349,7 +15349,7 @@ Upon successful execution of the update, the Janssen Server responds with update
 --url-suffix<span class="w"> </span>inum:bc50c4c4-64c8-45b3-9f38-e8527ddbf833
 </code></pre></div>
 <h2 id="delete-custom-claim">Delete Custom Claim<a class="headerlink" href="#delete-custom-claim" title="Permanent link">#</a></h2>
-<p>Delete a user claim using its <code>inum</code>. </p>
+<p>Delete a user claim using its <code>inum</code>.</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>delete-attributes-by-inum<span class="w"> </span>--url-suffix<span class="w"> </span>inum:EC3A<span class="w"> </span>
 </code></pre></div>
 <h2 id="patch-custom-claim">Patch Custom Claim<a class="headerlink" href="#patch-custom-claim" title="Permanent link">#</a></h2>
@@ -15377,8 +15377,8 @@ Upon successful execution of the update, the Janssen Server responds with update
 <p>Navigate to <code>Auth Server</code> -&gt; <code>Attributes</code> to open the client screen as shown
 in the image below.</p>
 <p><img alt="image" src="../../../../assets/tui-attribute-screen.png" /></p>
-<p>To get the list of currently added user claims, bring the control to the <code>Search</code> 
-box (using the tab key), and press the <code>Enter</code> key. Type the search string to search 
+<p>To get the list of currently added user claims, bring the control to the <code>Search</code>
+box (using the tab key), and press the <code>Enter</code> key. Type the search string to search
 for the user claim with the matching claim name.</p>
 <h3 id="add-update-attributeuser-claims-screen">Add-Update Attribute/User Claims screen<a class="headerlink" href="#add-update-attributeuser-claims-screen" title="Permanent link">#</a></h3>
 <ul>
@@ -15394,7 +15394,7 @@ Enter key, then it will show the edit screen. </li>
 <p>If the attribute is <code>Multivalued</code> enabled in TUI, datatype should be JSON.</p>
 </div>
 <p><img alt="image" src="../../../../assets/tui-edit-attribute.png" /></p>
-<p>Close and reopen the TUI. The new custom user claim can now be added to any user 
+<p>Close and reopen the TUI. The new custom user claim can now be added to any user
 from <a href="../../../usermgmt/usermgmt-cli-tui/">user management</a>.</p>
 <p><img alt="" src="../../../../assets/image-tui-user-claim.png" /></p>
 <h3 id="delete-screen">Delete Screen<a class="headerlink" href="#delete-screen" title="Permanent link">#</a></h3>
@@ -15402,7 +15402,7 @@ from <a href="../../../usermgmt/usermgmt-cli-tui/">user management</a>.</p>
 <li>To delete the user claim, bring the control to the specific <code>Claim</code> row and press the 
 <code>Delete</code> key. Then it will show the Delete confirmation box.</li>
 </ul>
-<p><img alt="image" src="../../../../assets/tui-delete-attribute.png" /> </p>
+<p><img alt="image" src="../../../../assets/tui-delete-attribute.png" /></p>
 <p>Close and reopen TUI before proceeding with further configuration.</p>
 <h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
 <p>Janssen Server Configuration REST API exposes relevant endpoints for managing
@@ -15430,7 +15430,7 @@ document</a>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 5, 2025 19:38:02 UTC"><span class="timeago" datetime="2025-06-05T19:38:02+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 5, 2025 19:38:02 UTC">2025-06-05</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 15, 2025 12:33:22 UTC"><span class="timeago" datetime="2025-12-15T12:33:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 15, 2025 12:33:22 UTC">2025-12-15</span>
   </span>
 
     
