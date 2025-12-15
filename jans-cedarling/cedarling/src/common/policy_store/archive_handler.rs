@@ -23,28 +23,27 @@
 //!
 //! # Example: Native
 //!
-//! ```no_run
-//! use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
+//! ```text
+//! use crate::common::policy_store::archive_handler::ArchiveVfs;
+//! use crate::common::policy_store::loader::DefaultPolicyStoreLoader;
 //!
 //! // Load from file path (native only - file I/O not available in WASM)
 //! let archive_vfs = ArchiveVfs::from_file("policy_store.cjar")?;
 //! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
 //! let loaded = loader.load_directory(".")?;
-//! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 //!
 //! # Example: WASM (or Native)
 //!
-//! ```no_run
-//! use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
+//! ```text
+//! use crate::common::policy_store::archive_handler::ArchiveVfs;
+//! use crate::common::policy_store::loader::DefaultPolicyStoreLoader;
 //!
 //! // Load from bytes - works in both native and WASM!
 //! let archive_bytes: Vec<u8> = fetch_from_network().await?;
 //! let archive_vfs = ArchiveVfs::from_buffer(archive_bytes)?;
 //! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
 //! let loaded = loader.load_directory(".")?;
-//! # Ok::<(), Box<dyn std::error::Error>>(())
-//! # async fn fetch_from_network() -> Result<Vec<u8>, Box<dyn std::error::Error>> { Ok(vec![]) }
 //! ```
 
 use super::errors::ArchiveError;

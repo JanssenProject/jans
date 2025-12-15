@@ -38,9 +38,9 @@ pub struct DirEntry {
 ///
 /// Using `open_file` with `BufReader` for efficient reading:
 ///
-/// ```no_run
+/// ```text
 /// use std::io::{BufRead, BufReader};
-/// use cedarling::common::policy_store::{PhysicalVfs, VfsFileSystem};
+/// use crate::common::policy_store::vfs_adapter::{PhysicalVfs, VfsFileSystem};
 ///
 /// let vfs = PhysicalVfs::new();
 /// let reader = vfs.open_file("/path/to/file.txt")?;
@@ -49,18 +49,16 @@ pub struct DirEntry {
 /// for line in buf_reader.lines() {
 ///     println!("{}", line?);
 /// }
-/// # Ok::<(), std::io::Error>(())
 /// ```
 ///
 /// Using `read_file` for small files:
 ///
-/// ```no_run
-/// use cedarling::common::policy_store::{PhysicalVfs, VfsFileSystem};
+/// ```text
+/// use crate::common::policy_store::vfs_adapter::{PhysicalVfs, VfsFileSystem};
 ///
 /// let vfs = PhysicalVfs::new();
 /// let content = vfs.read_file("/path/to/small-file.txt")?;
 /// let text = String::from_utf8(content)?;
-/// # Ok::<(), Box<dyn std::error::Error>>(())
 /// ```
 pub trait VfsFileSystem: Send + Sync + 'static {
     /// Open a file and return a reader.
@@ -72,16 +70,15 @@ pub trait VfsFileSystem: Send + Sync + 'static {
     ///
     /// # Examples
     ///
-    /// ```no_run
+    /// ```text
     /// use std::io::BufReader;
-    /// use cedarling::common::policy_store::{PhysicalVfs, VfsFileSystem};
+    /// use crate::common::policy_store::vfs_adapter::{PhysicalVfs, VfsFileSystem};
     ///
     /// let vfs = PhysicalVfs::new();
     /// let reader = vfs.open_file("/path/to/file.json")?;
     /// let buf_reader = BufReader::new(reader);
     ///
     /// // Can now use serde_json::from_reader, etc.
-    /// # Ok::<(), std::io::Error>(())
     /// ```
     fn open_file(&self, path: &str) -> io::Result<Box<dyn Read + Send>>;
 

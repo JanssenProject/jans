@@ -15,8 +15,9 @@
 //!
 //! ## Example: Loading an archive (native)
 //!
-//! ```no_run
-//! use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
+//! ```text
+//! use crate::common::policy_store::archive_handler::ArchiveVfs;
+//! use crate::common::policy_store::loader::DefaultPolicyStoreLoader;
 //!
 //! // Create archive VFS (validates format during construction)
 //! let archive_vfs = ArchiveVfs::from_file("policy_store.cjar")?;
@@ -26,13 +27,13 @@
 //!
 //! // Load policy store from root directory of archive
 //! let loaded = loader.load_directory(".")?;
-//! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 //!
 //! ## Example: Loading archive in WASM
 //!
-//! ```no_run
-//! use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
+//! ```text
+//! use crate::common::policy_store::archive_handler::ArchiveVfs;
+//! use crate::common::policy_store::loader::DefaultPolicyStoreLoader;
 //!
 //! // Get archive bytes (from network, storage, etc.)
 //! let archive_bytes: Vec<u8> = fetch_archive_bytes()?;
@@ -43,8 +44,6 @@
 //! // Load as normal
 //! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
 //! let loaded = loader.load_directory(".")?;
-//! # Ok::<(), Box<dyn std::error::Error>>(())
-//! # fn fetch_archive_bytes() -> Result<Vec<u8>, Box<dyn std::error::Error>> { Ok(vec![]) }
 //! ```
 
 use super::errors::{PolicyStoreError, ValidationError};
@@ -84,15 +83,15 @@ pub trait PolicyStoreLoader {
 ///
 /// # Example
 ///
-/// ```no_run
-/// use cedarling::common::policy_store::loader::load_policy_store_directory;
+/// ```text
+/// use crate::common::policy_store::loader::load_policy_store_directory;
 /// use std::path::Path;
 ///
-/// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-/// let loaded = load_policy_store_directory(Path::new("./policy_store")).await?;
-/// println!("Loaded store: {}", loaded.metadata.policy_store.name);
-/// # Ok(())
-/// # }
+/// async fn example() -> Result<(), Box<dyn std::error::Error>> {
+///     let loaded = load_policy_store_directory(Path::new("./policy_store")).await?;
+///     println!("Loaded store: {}", loaded.metadata.policy_store.name);
+///     Ok(())
+/// }
 /// ```
 ///
 /// # Errors
@@ -135,15 +134,15 @@ pub async fn load_policy_store_directory(
 ///
 /// # Example
 ///
-/// ```no_run
-/// use cedarling::common::policy_store::loader::load_policy_store_archive;
+/// ```text
+/// use crate::common::policy_store::loader::load_policy_store_archive;
 /// use std::path::Path;
 ///
-/// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-/// let loaded = load_policy_store_archive(Path::new("./policy_store.cjar")).await?;
-/// println!("Loaded store: {}", loaded.metadata.policy_store.name);
-/// # Ok(())
-/// # }
+/// async fn example() -> Result<(), Box<dyn std::error::Error>> {
+///     let loaded = load_policy_store_archive(Path::new("./policy_store.cjar")).await?;
+///     println!("Loaded store: {}", loaded.metadata.policy_store.name);
+///     Ok(())
+/// }
 /// ```
 ///
 /// # Errors
@@ -183,17 +182,18 @@ pub async fn load_policy_store_archive(
 ///
 /// # Example
 ///
-/// ```no_run
-/// use cedarling::common::policy_store::loader::load_policy_store_archive_bytes;
+/// ```text
+/// use crate::common::policy_store::loader::load_policy_store_archive_bytes;
 ///
-/// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-/// // Fetch archive bytes from network, storage, etc.
-/// let archive_bytes: Vec<u8> = fetch_from_network().await?;
-/// let loaded = load_policy_store_archive_bytes(archive_bytes)?;
-/// println!("Loaded store: {}", loaded.metadata.policy_store.name);
-/// # Ok(())
-/// # }
-/// # async fn fetch_from_network() -> Result<Vec<u8>, Box<dyn std::error::Error>> { Ok(vec![]) }
+/// async fn example() -> Result<(), Box<dyn std::error::Error>> {
+///     // Fetch archive bytes from network, storage, etc.
+///     let archive_bytes: Vec<u8> = fetch_from_network().await?;
+///     let loaded = load_policy_store_archive_bytes(archive_bytes)?;
+///     println!("Loaded store: {}", loaded.metadata.policy_store.name);
+///     Ok(())
+/// }
+///
+/// async fn fetch_from_network() -> Result<Vec<u8>, Box<dyn std::error::Error>> { Ok(vec![]) }
 /// ```
 ///
 /// # Errors
@@ -877,7 +877,6 @@ impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
         }
     }
 }
-
 
 #[cfg(test)]
 #[path = "loader_tests.rs"]

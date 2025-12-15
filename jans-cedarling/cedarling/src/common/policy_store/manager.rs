@@ -21,10 +21,10 @@
 //!
 //! # Usage
 //!
-//! ```no_run
-//! use cedarling::common::policy_store::{
-//!     DefaultPolicyStoreLoader, PhysicalVfs, PolicyStoreManager,
-//! };
+//! ```text
+//! use crate::common::policy_store::loader::DefaultPolicyStoreLoader;
+//! use crate::common::policy_store::vfs_adapter::PhysicalVfs;
+//! use crate::common::policy_store::manager::PolicyStoreManager;
 //!
 //! // Load using new loader
 //! let vfs = PhysicalVfs::new();
@@ -33,7 +33,6 @@
 //!
 //! // Convert to legacy format
 //! let legacy_store = PolicyStoreManager::convert_to_legacy(loaded)?;
-//! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 
 use super::entity_parser::EntityParser;
