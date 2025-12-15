@@ -256,10 +256,15 @@ impl From<JwtConfigRaw> for JwtConfig {
             }
         }
 
-        // Note: Unsupported algorithms are silently ignored.
-        // If needed, validation failures will indicate the algorithm issue.
-        // We can't log here as logger isn't available during bootstrap config creation.
-        let _ = unsupported_algorithms; // Acknowledge unused
+        // Log warnings for unsupported algorithms
+        // Note: We use eprintln! here because the logger isn't available during bootstrap config creation.
+        // TODO: Consider returning a Result or warnings that can be logged after initialization.
+        if !unsupported_algorithms.is_empty() {
+            eprintln!(
+                "Warning: Unsupported JWT signature algorithms were ignored: {}",
+                unsupported_algorithms.join(", ")
+            );
+        }
 
         Self {
             jwks: raw.jwks,
