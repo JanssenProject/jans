@@ -66,7 +66,7 @@ public class ExternalTokenExchangeService extends ExternalScriptService {
 
         log.trace("Finished 'validate' method, script name: {}, clientId: {}, result: {}", script.getName(), client.getClientId(), result);
 
-        return null;
+        return result;
     }
 
     public boolean externalModifyResponse(JSONObject response, ExecutionContext context) {

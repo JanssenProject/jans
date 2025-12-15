@@ -43,6 +43,7 @@ use super::policy_parser::PolicyParser;
 use super::{PoliciesContainer, PolicyStore, TrustedIssuer};
 use crate::common::cedar_schema::CedarSchema;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
+use crate::common::default_entities::parse_default_entities_with_warns;
 use crate::log::Logger;
 use crate::log::interface::LogWriter;
 use cedar_policy::PolicySet;
@@ -143,7 +144,12 @@ impl PolicyStoreManager {
         let trusted_issuers = Self::convert_trusted_issuers(&loaded.trusted_issuers)?;
 
         // 4. Convert entities (logs hierarchy warnings if logger provided)
-        let default_entities = Self::convert_entities(&loaded.entities, &logger)?;
+        let raw_entities = Self::convert_entities(&loaded.entities, &logger)?;
+
+        // Convert raw entities to DefaultEntitiesWithWarns
+        let default_entities = parse_default_entities_with_warns(raw_entities).map_err(|e| {
+            ConversionError::EntityConversion(format!("Failed to parse default entities: {}", e))
+        })?;
 
         // 5. Parse cedar version
         let cedar_version = Self::parse_cedar_version(&loaded.metadata.cedar_version)?;
@@ -152,7 +158,7 @@ impl PolicyStoreManager {
             "Policy store conversion complete: {} policies, {} issuers, {} entities",
             policies_container.get_set().policies().count(),
             trusted_issuers.as_ref().map(|i| i.len()).unwrap_or(0),
-            default_entities.as_ref().map(|e| e.len()).unwrap_or(0)
+            default_entities.entities().len()
         )));
 
         Ok(PolicyStore {
@@ -666,7 +672,7 @@ mod tests {
         assert!(store.cedar_version.is_some());
         assert!(!store.policies.get_set().is_empty());
         assert!(store.trusted_issuers.is_none());
-        assert!(store.default_entities.is_none());
+        assert_eq!(store.default_entities.entities().len(), 0);
     }
 
     #[test]
@@ -717,12 +723,11 @@ mod tests {
 
         let store = result.unwrap();
         assert!(store.trusted_issuers.is_some());
-        assert!(store.default_entities.is_some());
+        assert!(store.default_entities.entities().len() > 0);
 
         let issuers = store.trusted_issuers.unwrap();
         assert!(issuers.contains_key("main"));
 
-        let entities = store.default_entities.unwrap();
-        assert_eq!(entities.len(), 1);
+        assert_eq!(store.default_entities.entities().len(), 1);
     }
 }

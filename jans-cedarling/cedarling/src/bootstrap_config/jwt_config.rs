@@ -39,6 +39,19 @@ pub struct JwtConfig {
     pub jwt_status_validation: bool,
     /// Only tokens signed with algorithms in this list can be valid.
     pub signature_algorithms_supported: HashSet<Algorithm>,
+    /// Maximum TTL (in seconds) for cached tokens.
+    /// Zero means no TTL limit is applied.
+    ///
+    /// It is recommended to keep this value within a few minutes to prevent the
+    /// cache from growing excessively.
+    pub token_cache_max_ttl_secs: usize,
+    /// Maximum number of tokens the cache can store.
+    pub token_cache_capacity: usize,
+    /// Enables eviction policy based on the earliest expiration time.
+    ///
+    /// When the cache reaches its capacity, the entry with the nearest
+    /// expiration timestamp will be removed to make room for a new one.
+    pub token_cache_earliest_expiration_eviction: bool,
 }
 
 /// Validation options related to JSON Web Tokens (JWT).
@@ -161,6 +174,9 @@ impl Default for JwtConfig {
             jwt_sig_validation: true,
             jwt_status_validation: true,
             signature_algorithms_supported: HashSet::new(),
+            token_cache_capacity: 100,
+            token_cache_earliest_expiration_eviction: true,
+            token_cache_max_ttl_secs: 60 * 5, // 5min
         }
     }
 }
@@ -173,6 +189,7 @@ impl JwtConfig {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
+            ..Default::default()
         }
         .allow_all_algorithms()
     }
@@ -249,6 +266,7 @@ impl From<JwtConfigRaw> for JwtConfig {
             jwt_sig_validation: raw.jwt_sig_validation,
             jwt_status_validation: raw.jwt_status_validation,
             signature_algorithms_supported: supported_algorithms,
+            ..Default::default()
         }
     }
 }
