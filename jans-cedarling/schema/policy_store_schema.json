@@ -16,19 +16,21 @@
             "description": "A collection of Cedar policies and their associated metadata.",
             "type": "object",
             "patternProperties": {
-                "^.*$": {
+                "^[a-zA-Z0-9-_=]+$": {
                     "$ref": "#/$defs/CedarPolicy"
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "trusted_issuers": {
             "description": "A collection of trusted issuers.",
             "type": "object",
             "patternProperties": {
-                "^.*$": {
+                "^[a-zA-Z0-9-_=]+$": {
                     "$ref": "#/$defs/TrustedIssuer"
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "schema": {
             "description": "The Cedar schema definition (encoded in Base64).",
@@ -54,10 +56,11 @@
             "description": "A collection of logically separated policy stores. Each store can contain its own policies, trusted issuers, and schema.",
             "type": "object",
             "patternProperties": {
-                "^.*$": {
+                "^[a-zA-Z0-9-_=]+$": {
                     "$ref": "#/$defs/PolicyStore"
                 }
-            }
+            },
+            "additionalProperties": false
         }
     },
     "additionalProperties": false,
@@ -70,19 +73,21 @@
                     "description": "A map of policy identifiers to their associated Cedar policies.",
                     "type": "object",
                     "patternProperties": {
-                        "^.*$": {
+                        "^[a-zA-Z0-9-_=]+$": {
                             "$ref": "#/$defs/CedarPolicy"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "trusted_issuers": {
                     "description": "A map of trusted issuers (by identifier) that defines which external identity providers can be trusted when evaluating authorization requests.",
                     "type": "object",
                     "patternProperties": {
-                        "^.*$": {
+                        "^[a-zA-Z0-9-_=]+$": {
                             "$ref": "#/$defs/TrustedIssuer"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "schema": {
                     "description": "The Cedar schema definition (encoded in Base64) that defines the shape of entities, actions, and context within this policy store.",
@@ -214,10 +219,11 @@
                     "description": "Metadata that describes how to interpret tokens issued by this trusted issuer.",
                     "type": "object",
                     "patternProperties": {
-                        "^.*$": {
+                        "^[a-zA-Z0-9-_=]+$": {
                             "$ref": "#/$defs/TokenMetadata"
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 }
             },
             "required": ["name", "openid_configuration_endpoint"],

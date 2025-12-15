@@ -126,7 +126,8 @@
             },
             "jti": {
               "type": "EntityOrCommon",
-              "name": "String"
+              "name": "String",
+              "required": false
             },
             "nbf": {
               "type": "EntityOrCommon",
@@ -143,11 +144,13 @@
             },
             "token_type": {
               "type": "EntityOrCommon",
-              "name": "String"
+              "name": "String",
+              "required": false
             },
             "validated_at": {
               "type": "EntityOrCommon",
-              "name": "Long"
+              "name": "Long",
+              "required": false
             }
           }
         },
@@ -276,7 +279,8 @@
             },
             "exp": {
               "type": "EntityOrCommon",
-              "name": "Long"
+              "name": "Long",
+              "required": false
             },
             "iat": {
               "type": "EntityOrCommon",
@@ -290,7 +294,8 @@
             },
             "jti": {
               "type": "EntityOrCommon",
-              "name": "String"
+              "name": "String",
+              "required": false
             },
             "name": {
               "type": "EntityOrCommon",
@@ -317,11 +322,13 @@
             },
             "token_type": {
               "type": "EntityOrCommon",
-              "name": "String"
+              "name": "String",
+              "required": false
             },
             "validated_at": {
               "type": "EntityOrCommon",
-              "name": "Long"
+              "name": "Long",
+              "required": false
             }
           }
         },
@@ -411,7 +418,8 @@
             },
             "exp": {
               "type": "EntityOrCommon",
-              "name": "Long"
+              "name": "Long",
+              "required": false
             },
             "iat": {
               "type": "EntityOrCommon",
@@ -425,7 +433,8 @@
             },
             "jti": {
               "type": "EntityOrCommon",
-              "name": "String"
+              "name": "String",
+              "required": false
             },
             "name": {
               "type": "EntityOrCommon",
@@ -452,11 +461,13 @@
             },
             "token_type": {
               "type": "EntityOrCommon",
-              "name": "String"
+              "name": "String",
+              "required": false
             },
             "validated_at": {
               "type": "EntityOrCommon",
-              "name": "Long"
+              "name": "Long",
+              "required": false
             }
           }
         },

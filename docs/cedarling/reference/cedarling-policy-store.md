@@ -524,11 +524,11 @@ All token entities **must** include these five required attributes and declare t
 namespace Jans {
   entity Access_token = {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
-    token_type: String,         // Entity type (e.g., "Jans::Access_Token")
-    jti: String,                // JWT ID - unique token identifier
+    token_type?: String,        // Entity type (e.g., "Jans::Access_Token")
+    jti?: String,               // JWT ID - unique token identifier
     iss?: Jans::TrustedIssuer,  // Issuer entity (for standard authz)
-    exp: Long,                  // Token expiration timestamp
-    validated_at: Long,         // Validation timestamp
+    exp?: Long,                 // Token expiration timestamp
+    validated_at?: Long,        // Validation timestamp
 
     // Optional JWT claims - ALL MUST BE OPTIONAL (?)
     aud?: String,               // Audience
@@ -541,11 +541,11 @@ namespace Jans {
 
   entity id_token = {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
-    token_type: String,
-    jti: String,
+    token_type?: String,
+    jti?: String,
     iss?: Jans::TrustedIssuer,
-    exp: Long,
-    validated_at: Long,
+    exp?: Long,
+    validated_at?: Long,
 
     // Optional JWT claims - ALL MUST BE OPTIONAL (?)
     aud?: Set<String>,
@@ -564,11 +564,11 @@ namespace Jans {
 
   entity Userinfo_token = {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
-    token_type: String,
-    jti: String,
+    token_type?: String,
+    jti?: String,
     iss?: Jans::TrustedIssuer,
-    exp: Long,
-    validated_at: Long,
+    exp?: Long,
+    validated_at?: Long,
 
     // Optional JWT claims - ALL MUST BE OPTIONAL (?)
     aud?: String,
@@ -596,11 +596,11 @@ For custom token types, follow the same pattern:
 namespace Acme {
   entity DolphinToken = {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
-    token_type: String,
-    jti: String,
+    token_type?: String,
+    jti?: String,
     iss?: Acme::TrustedIssuer,
-    exp: Long,
-    validated_at: Long,
+    exp?: Long,
+    validated_at?: Long,
 
     // Custom token-specific attributes (all optional)
     waiver?: String,

@@ -1,0 +1,31 @@
+{
+    "cedar_version": "v4.4.0",
+    "policies": {
+        "policy_1": {
+            "description": "Allow admins to read",
+            "creation_date": "2025-01-15T10:00:00Z",
+            "policy_content": {
+                "encoding": "none",
+                "content_type": "cedar",
+                "body": "permit(principal, action == Jans::Read, resource) when { principal.role.contains(\"admin\") };"
+            }
+        }
+    },
+    "trusted_issuers": {
+        "main_idp": {
+            "name": "Main IDP",
+            "openid_configuration_endpoint": "https://idp.example.com/.well-known/openid-configuration",
+            "token_metadata": {
+                "access_token": {
+                    "entity_type_name": "Jans::Access_token",
+                    "principal_mapping": ["Jans::Workload"]
+                }
+            }
+        }
+    },
+    "schema": {
+        "encoding": "none",
+        "content_type": "cedar",
+        "body": "namespace Jans { entity User = { role: Set<String> }; entity Application; action Read appliesTo { principal: [User], resource: [Application] }; }"
+    }
+}
