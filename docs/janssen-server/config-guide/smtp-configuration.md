@@ -161,7 +161,7 @@ jans cli --operation-id post-config-smtp \
 ### Update SMTP Server Configuration
 
 To update the SMTP server, we can use the `put-config-smtp` operation id.
-simply change any information on `/tmp/smtp.json`file and run the following
+Simply change any information on `/tmp/smtp.json` file and run the following
 command:
 
 In that file, update the value `false` to `true` of the `trust_host` field.

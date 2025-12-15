@@ -43,7 +43,7 @@ However if intention is to leave Refresh Token after logout, it's required to se
 By default AS always creates new Refresh Token on refresh call to Token Endpoint. This property allows to avoid (skip) new Refresh Token creation.
 
 `refreshTokenExtendLifetimeOnRotation`
-: *Default: False* - Boolean value specifying whether to extend refresh tokens on rotation. By default lifetime is not extended, expiration date is set to date of previous Refresh Token. With this property it's possible to have all further Refresh Token have fixed (extended in relation to previuos Refresh Token) lifetime.
+: *Default: False* - Boolean value specifying whether to extend refresh tokens on rotation. By default lifetime is not extended, expiration date is set to date of previous Refresh Token. With this property it's possible to have all further Refresh Token have fixed (extended in relation to previous Refresh Token) lifetime.
 
 `checkUserPresenceOnRefreshToken`
 : *Default: False* - Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.

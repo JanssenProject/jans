@@ -13,8 +13,8 @@ tags:
 
 # Attribute
 
-User claims are individual pieces of user data, like `uid` or `email`, that are required
-by applications in order to identify a user and grant access to protect resources.
+User claims are individual pieces of user data, like `uid` or `email`, that are required by applications to
+identify a user and grant access to protect resources.
 
 Janssen server's default configuration comes with certain user claims already configured. In addition to these, custom user claims can be added as required. The Janssen Server provides multiple configuration tools to perform these tasks.
 
@@ -254,7 +254,7 @@ or other business logic. A user claim should be unique and non-null or empty. Fo
 
 #### Add entry into persistence
 
-In order to support the new custom claim, add a column to table `jansPerson` in the persistence backend.
+To support the new custom claim, add a column to table `jansPerson` in the persistence backend.
 
 Command will be similar to the one below:
 

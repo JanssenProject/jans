@@ -10,8 +10,7 @@ tags:
 
 # OAuth 2.0 JWT Grant
 
-The [  JSON Web Token (JWT) Profile
-           for OAuth 2.0 Client Authentication and Authorization Grants spec](https://datatracker.ietf.org/doc/html/rfc7523) .
+The [JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants spec](https://datatracker.ietf.org/doc/html/rfc7523).
 
 JWT Grant is identified by `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer` at Token Endpoint.
 
