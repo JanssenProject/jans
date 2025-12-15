@@ -15,7 +15,7 @@ use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
 use crate::lock::LockService;
 use serde::Serialize;
 
-pub(crate) struct LogStrategy {
+pub struct LogStrategy {
     logger: LogStrategyLogger,
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
@@ -25,7 +25,7 @@ pub(crate) struct LogStrategy {
 /// LogStrategy implements strategy pattern for logging.
 /// It is used to provide a single point of access for logging and same api for different loggers.
 #[allow(clippy::large_enum_variant)]
-pub(crate) enum LogStrategyLogger {
+pub enum LogStrategyLogger {
     Off(NopLogger),
     MemoryLogger(MemoryLogger),
     StdOut(StdOutLogger),

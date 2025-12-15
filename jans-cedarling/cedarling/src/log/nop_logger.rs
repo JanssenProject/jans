@@ -6,7 +6,7 @@
 use super::interface::LogWriter;
 
 /// A logger that do nothing.
-pub(crate) struct NopLogger;
+pub struct NopLogger;
 
 // Implementation of LogWriter
 impl LogWriter for NopLogger {

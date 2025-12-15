@@ -21,7 +21,7 @@ use memory_calc::calculate_memory_usage;
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
 
 /// A logger that store logs in-memory.
-pub(crate) struct MemoryLogger {
+pub struct MemoryLogger {
     storage: Mutex<SparKV<serde_json::Value>>,
     log_level: LogLevel,
     pdp_id: PdpID,

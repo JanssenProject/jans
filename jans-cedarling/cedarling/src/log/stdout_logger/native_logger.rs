@@ -13,7 +13,7 @@ use crate::log::err_log_entry::ErrorLogEntry;
 use crate::log::interface::{LogWriter, Loggable};
 
 /// A logger that write to std output.
-pub(crate) struct StdOutLogger {
+pub struct StdOutLogger {
     // we use `dyn Write`` trait to make it testable and mockable.
     writer: Mutex<Box<dyn Write + Send + Sync>>,
     log_level: LogLevel,
