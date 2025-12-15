@@ -62,59 +62,6 @@ pub use vfs_adapter::{MemoryVfs, VfsFileSystem};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use vfs_adapter::PhysicalVfs;
-/// Default maximum number of entities allowed
-const DEFAULT_MAX_ENTITIES: usize = 1000;
-/// Default maximum size of base64-encoded strings in bytes
-const DEFAULT_MAX_BASE64_SIZE: usize = 1024 * 1024;
-
-/// Configuration for limiting default entities to prevent DoS and memory exhaustion attacks
-#[derive(Debug, Clone)]
-pub struct DefaultEntitiesLimits {
-    /// Maximum number of default entities allowed
-    pub max_entities: usize,
-    /// Maximum size of base64-encoded strings in bytes
-    pub max_base64_size: usize,
-}
-
-impl Default for DefaultEntitiesLimits {
-    fn default() -> Self {
-        Self {
-            max_entities: DEFAULT_MAX_ENTITIES,
-            max_base64_size: DEFAULT_MAX_BASE64_SIZE,
-        }
-    }
-}
-
-/// Validates default entities against size and count limits
-fn validate_default_entities(
-    entities: &HashMap<String, serde_json::Value>,
-    limits: &DefaultEntitiesLimits,
-) -> Result<(), String> {
-    // Check entity count limit
-    if entities.len() > limits.max_entities {
-        return Err(format!(
-            "Maximum number of default entities ({}) exceeded, found {}",
-            limits.max_entities,
-            entities.len()
-        ));
-    }
-
-    // Check base64 size limit for each entity
-    for (entity_id, entity_data) in entities {
-        if let Some(entity_str) = entity_data.as_str()
-            && entity_str.len() > limits.max_base64_size
-        {
-            return Err(format!(
-                "Base64 string size ({}) for entity '{}' exceeds maximum allowed size ({})",
-                entity_str.len(),
-                entity_id,
-                limits.max_base64_size
-            ));
-        }
-    }
-
-    Ok(())
-}
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone, PartialEq)]
