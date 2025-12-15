@@ -8,7 +8,7 @@ tags:
 
 # Docker Deployments Quick Start
 
-!!! Warning 
+!!! Warning
     **This image is for testing and development purposes only. Use Janssen [helm charts](https://github.com/JanssenProject/jans/tree/main/charts/janssen) for production setups.**
 
 
@@ -54,7 +54,7 @@ To access Janssen Server standard endpoints from outside of the Docker container
 172.22.0.3      demoexample.jans.io
 ```
 
-After adding the record, hit the standard endpoints such as 
+After adding the record, hit the standard endpoints such as
 
 ```
 https://demoexample.jans.io/.well-known/openid-configuration

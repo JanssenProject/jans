@@ -92,8 +92,8 @@ To get sample schema type jans cli -scim --schema-sample <schema>, for example j
 
 ### Get Users List
 
-This operation is used to get list of the users and its properties. The following command line: 
-  
+This operation is used to get list of the users and its properties. The following command line:
+
 ```bash title="Command"
 jans cli -scim --operation-id get-users
 ```
@@ -402,7 +402,7 @@ Let's see at a glance of available user attributes.
 
 |Attributes|Description|
 |---|---|
-|Username|...| 
+|Username|...|
 |Password |...|
 |First Name|...|
 |Middle Name|...|
@@ -413,9 +413,9 @@ Let's see at a glance of available user attributes.
 |Nickname|...|
 |CIBA Device Registration Token|...|
 |CIBA User code|...|
-|Locale|...|      
-|Website URL|...| 
-|IMAP Data|...|   
+|Locale|...|
+|Website URL|...|
+|IMAP Data|...|
 |jansAdminUIRole|...|
 |Enrollment code|...|
 |User Permission|...|
@@ -423,18 +423,18 @@ Let's see at a glance of available user attributes.
 |Profile URL|...|
 |Secret Question|...|
 |Email Verified|...|
-|Birthdate|...|   
+|Birthdate|...|
 |Time zone info|...|
 |Phone Number verified|...|
 |Preferred Username|...|
-|TransientId|...| 
+|TransientId|...|
 |PersistentId|...|
-|Country|...|     
+|Country|...|
 |Secret Answer|...|
 |OpenID Connect JSON formatted address|...|
 |User certificate|...|
 |Organization|...|
-|Picture URL|...| 
+|Picture URL|...|
 
 ### Add User
 
@@ -450,7 +450,7 @@ Finally `save` and exit. We will get an unique `inum`
 
 ### Update User
 
-To modify any user properties, find the user from search box and hit `Enter` to pop-up user details, update user details and finally hit on `Save` button to update the changes. 
+To modify any user properties, find the user from search box and hit `Enter` to pop-up user details, update user details and finally hit on `Save` button to update the changes.
 
 ![update-user](../../../assets/jans-tui-update-user.png)
 
@@ -510,14 +510,14 @@ In response `token.json` we will get `access_token`
 }
 ```
 
-### Retrive existing User 
+### Retrive existing User
 
-To get an existing user 
+To get an existing user
 
 ```
 curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 'filter=displayName co "Admin"' https://<jans-server>/jans-scim/restv1/v2/Users > /tmp/user.json
 ```
-In response `user.json` we will get 
+In response `user.json` we will get
 ```
 {
   "schemas": [
@@ -567,7 +567,7 @@ In response `user.json` we will get
 
 ### Create an User
 
-Let's start creating a dummy user. A client sends a POST request containing a "User" to the "/Users" endpoint. 
+Let's start creating a dummy user. A client sends a POST request containing a "User" to the "/Users" endpoint.
 ```
 POST /Users  HTTP/1.1
 Host: example.com
@@ -594,7 +594,7 @@ Hit on your terminal with bellow command.
 ```
 curl -k -H 'Authorization: Bearer ACCESS_TOKEN' -H 'Content-Type: application/scim+json' -d @input.json -o output.json https://<jans-server>/jans-scim/restv1/v2/Users
 ```
-response looks like 
+response looks like
 ```
 {
     "schemas": [

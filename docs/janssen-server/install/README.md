@@ -32,7 +32,7 @@ configuration tool to perform any other last mile configuration.
 ## Databases
 
 The Janssen Project gives you a few options to store data: MySQL, Postgres.
-MySQL is recommended for production deployments while Postgres for development. 
+MySQL is recommended for production deployments while Postgres for development.
 You can also configure an in-memory cache
 server like Redis. Sometimes installation and configuration of this database
 is included in the setup process. Sometimes, you need to setup the database
@@ -46,15 +46,15 @@ Remember, installation is just a starting point. To get peak performance, you
 may need to tweak some of the configuration dials for your system or the
 database. If you intend to deploy a Janssen Server in production for high
 concurrency, make sure you benchmark the exact flows you expect to serve
-in production. 
+in production.
 
 ## SELinux Policy
 
-Janssen Server installs and uses the Apache web server as a `reverse proxy`. 
-While the Janssen Server itself will bind to `localhost`, the Apache reverse 
-proxy listens to external interfaces and forwards the 
-request to the Janssen Server. If you have SELinux enabled VM, 
-then the Apache web server can't forward the request to Janssen Server. 
+Janssen Server installs and uses the Apache web server as a `reverse proxy`.
+While the Janssen Server itself will bind to `localhost`, the Apache reverse
+proxy listens to external interfaces and forwards the
+request to the Janssen Server. If you have SELinux enabled VM,
+then the Apache web server can't forward the request to Janssen Server.
 Therefore setup script adds the following SELinux policy:
 
 ```

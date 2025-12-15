@@ -34,7 +34,7 @@ Please wait while retrieving data ...
 
 ### Access .well-known endpoints
 
-Janssen Server exposes `.well-known` endpoint for openid configuration as per the [OpenIDConnect RFC](https://openid.net/specs/openid-connect-discovery-1_0.html). Successful response from this endpoint is also an indicator of healthy authentication module. 
+Janssen Server exposes `.well-known` endpoint for openid configuration as per the [OpenIDConnect RFC](https://openid.net/specs/openid-connect-discovery-1_0.html). Successful response from this endpoint is also an indicator of healthy authentication module.
 
 From command-line interface, use CURL to access this endpoint. For example:
 
@@ -42,7 +42,7 @@ From command-line interface, use CURL to access this endpoint. For example:
 curl https://janssen-host-name/jans-auth/.well-known/openid-configuration
 ```
 
-This should return JSON response from Janssen Server as per OpenId 
+This should return JSON response from Janssen Server as per OpenId
 specification. Sample below:
 
 ```text
@@ -105,7 +105,7 @@ Check [logs](#where-can-i-find-janssen-server-logs) for errors
 ## How can I see status of Janssen OS platform services?
 
 ### Ubuntu
-  
+
 ```commandline
 systemctl list-units --all "jans*"
 ```
@@ -170,9 +170,9 @@ This will show version of each Janssen Server modules:
 
 After successful installation of the Janssen Server, start configuring Janssen
 Server to fulfil your organizational requirements and authentication flows you
-intend to implement. Use the 
-[Text-based UI](../config-guide/config-tools/jans-tui/README.md) or  
-[command-line interface](../config-guide/config-tools/jans-cli/README.md) to 
+intend to implement. Use the
+[Text-based UI](../config-guide/config-tools/jans-tui/README.md) or
+[command-line interface](../config-guide/config-tools/jans-cli/README.md) to
 configure the Janssen Server.
 
 ## Does the Janssen Server uninstall process remove the data store as well?
@@ -180,8 +180,8 @@ configure the Janssen Server.
 No. For all persistence options, the
 Janssen server uninstall steps ([this](./vm-install/suse.md#uninstall)
 for instance) will only remove the Janssen Server
-software and it'll keep the data store untouched. Removing the data store is at 
+software and it'll keep the data store untouched. Removing the data store is at
 the discretion of the
 administrator and it is a manual step. If not removed before attempting a
 reinstall of the Janssen Server, the installer would fail due to the existence of
-the previous data store. 
+the previous data store.

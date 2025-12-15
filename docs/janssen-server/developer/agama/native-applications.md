@@ -23,7 +23,7 @@ In this document, we present an overview of how the endpoint works to make your 
 
 Before getting into the technicalities, let's cover some key preliminar concepts.
 
-The engine - the piece of software that actually runs flows - is eminently driven by HTTP requests. This is unsurprising because the main "consumers" of the engine are web browsers. When targetting native apps, the engine remains the same, and flows still run at the server side. This means native apps won't hold any business logic, or make computations of significance. 
+The engine - the piece of software that actually runs flows - is eminently driven by HTTP requests. This is unsurprising because the main "consumers" of the engine are web browsers. When targetting native apps, the engine remains the same, and flows still run at the server side. This means native apps won't hold any business logic, or make computations of significance.
 
 The [RRF](../../../agama/language-reference.md#rrf) (render-reply-fetch) Agama instruction is of paramount importance in flows. In a regular web setting, it involves three steps:
 
@@ -31,7 +31,7 @@ The [RRF](../../../agama/language-reference.md#rrf) (render-reply-fetch) Agama i
 - Reply the markup to the web browser - this will display a web page
 - At the server side, retrieve data the user may have provided in his interaction with the page. This is, _fetch_ 
 
-In a native setting no HTML markup is suppossed to be generated and replied - it's the app that is in charge of displaying the UI now. For this purpose, it will receive (from the endpoint) the data that would be originally injected into the template. Most of times, this will carry information gathered at earlier stages of the flow and that is relevant to properly show or update the UI. 
+In a native setting no HTML markup is suppossed to be generated and replied - it's the app that is in charge of displaying the UI now. For this purpose, it will receive (from the endpoint) the data that would be originally injected into the template. Most of times, this will carry information gathered at earlier stages of the flow and that is relevant to properly show or update the UI.
 
 Likewise, the "data submission" for the _fetch_ phase of RRF is performed by the app too. In this case, the relevant data grabbed from the user interaction is sent to the server side (via challenge endpoint) and becomes the result of the RRF (the value for the variable on the left-hand side of the instruction). Note both the input ("injected" data) and the output (result) is specified in JSON format.
 
@@ -42,11 +42,11 @@ Note this approach has two big benefits:
 1. Regular web flows can be reused in the native world without modifications
 1. The mindset for flows design remain the same
 
-There is a subtle exception regarding the first statement and has to do with flows containing RFAC instructions. [RFAC](../../../agama/language-reference.md#rfac) is used to redirect to external sites, and as such, it requires a web browser. In the case of native apps, flows will crash once an RFAC instruction is hit.   
+There is a subtle exception regarding the first statement and has to do with flows containing RFAC instructions. [RFAC](../../../agama/language-reference.md#rfac) is used to redirect to external sites, and as such, it requires a web browser. In the case of native apps, flows will crash once an RFAC instruction is hit.
 
 ### Inversion of control in apps
 
-The above concepts bring an important constraint to app design that should be accounted before undertaking any project: control is inverted. 
+The above concepts bring an important constraint to app design that should be accounted before undertaking any project: control is inverted.
 
 Normally, an app "knows" exactly what to do at each step of its workflow, and eventually delegates data retrieval tasks to the server side. When using the endpoint, the server side drives the logic: the app does not "take decisions" and instead "reacts" to the received data. This will be demostrated later through a practical example.
 
@@ -149,7 +149,7 @@ curl -i -d acr_values=agama_challenge -d use_auth_session=true
 
 !!! Note
     This command, as all others following has been split into several lines for better readability.
-    
+
 The response will look like:
 
 ```
@@ -263,7 +263,7 @@ Content-Type: application/json
 }
 ```
 
-This means we have hit line 37. 
+This means we have hit line 37.
 
 When a `Finish` instruction is reached it is fully executed and the error reported in the response changes to `flow_finished`. What is left now is binding the user identified by `userId` (Joan) to the authorization request we have been handling (`BmAiCeArLdAa0`). This is how the user actually gets authenticated.
 
@@ -320,7 +320,7 @@ Content-Type: application/json
 }
 ```
 
-### Failed flows 
+### Failed flows
 
 Many times, flows simply fail as a way to reject access. This is achived in Agama by using code like:
 
@@ -465,7 +465,7 @@ Content-Type: application/json
 
 #### Attempt to launch an unknown flow
 
-If the initial request references an inexisting flow or one that has been flagged as [not launchable directly](../../../agama/gama-format.md#metadata) by clients. 
+If the initial request references an inexisting flow or one that has been flagged as [not launchable directly](../../../agama/gama-format.md#metadata) by clients.
 
 ```
 HTTP/1.1 500 Server Error

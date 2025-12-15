@@ -9,7 +9,7 @@ tags:
 ## Endpoints protection
 Config API endpoints are OAuth 2.0 protected. It supports simple bearer and JWT token.
 
-## 
+##
 
 
 1) If a user has `write` permission then should be able to read data as well. That is no need for explicit read permission

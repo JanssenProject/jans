@@ -10,7 +10,7 @@ tags:
 
 # Janssen Config-API Configuration
 
-The Janssen Server provides multiple configuration tools to perform these 
+The Janssen Server provides multiple configuration tools to perform these
 tasks.
 
 === "Use Command-line"
@@ -41,9 +41,9 @@ tasks.
 ##  Using Command Line
 
 
-In the Janssen Server, you can deploy and customize the Config-API Configuration 
-using the command line. To get the details of Janssen command line operations 
-relevant to Config-API Configuration, you can check the operations under 
+In the Janssen Server, you can deploy and customize the Config-API Configuration
+using the command line. To get the details of Janssen command line operations
+relevant to Config-API Configuration, you can check the operations under
 `ConfigurationConfigApi` task using the command below:
 
 
@@ -245,11 +245,11 @@ It will return the result as below:
 
 ### Update Config-API Configuration Properties
 
-To update the configuration, we will use [JSON patch](https://datatracker.ietf.org/doc/html/rfc6902) schema as shown below. 
+To update the configuration, we will use [JSON patch](https://datatracker.ietf.org/doc/html/rfc6902) schema as shown below.
 
 Let's say we want to stop the file extension validation done
 by config-api's asset management module. This can be done by
-setting the `fileExtensionValidationEnabled` property to 
+setting the `fileExtensionValidationEnabled` property to
 `false`. To do that, write a text file (`config-api-assetmgt-patch.json`) with the content that follows the JSON patch schema.
 
 ```json title="config-api-assetmgt-patch.json" linenums="1"
@@ -267,13 +267,13 @@ Now, execute the following command to apply this patch:
   jans tui \
  --operation-id=patch-config-api-properties --data ./config-api-assetmgt-patch.json
  ```
- Upon successful execution of the update, the Janssen Server responds with 
+ Upon successful execution of the update, the Janssen Server responds with
  updated configuration.
 
 #### Updating multi-valued property
 
-Let's say we want to 
-update the configuration property  **userMandatoryAttributes**. This property's value is a list of attributes. We want to remove an attribute from the list. For this, we will have to create a JSON patch file that 
+Let's say we want to
+update the configuration property  **userMandatoryAttributes**. This property's value is a list of attributes. We want to remove an attribute from the list. For this, we will have to create a JSON patch file that
 contains the new list and then run a command to push the update
 to the Janssen Server. Let's do this step-by-step:
 
@@ -296,7 +296,7 @@ to the Janssen Server. Let's do this step-by-step:
  }
  ]
  ```
- 
+
 Now, execute the following command to apply this patch:
  ```bash title="Command"
   jans tui \
@@ -305,8 +305,8 @@ Now, execute the following command to apply this patch:
 
 ### Config API Configuration Parameters:
 
-The table below outlines the key 
-configuration parameters for the Jans Config API. It details settings for 
+The table below outlines the key
+configuration parameters for the Jans Config API. It details settings for
 OAuth2, security, endpoints, logging, and plugin management.
 
 | Field named | Example | Description|
@@ -347,7 +347,7 @@ configuration from the DB.
 
 ### Locating Config API configuration in the Persistence Layer
 
-While it is not recommended that an administrator directly edits a configuration 
+While it is not recommended that an administrator directly edits a configuration
 at the persistence layer, it may be useful information for a developer.
 
 #### MySQL
@@ -366,7 +366,7 @@ erDiagram
 
 #### OAuth authorization
 
-`configOauthEnabled` property can be used to enable or disable the oAuth2 
+`configOauthEnabled` property can be used to enable or disable the oAuth2
 authorization. By default, it is set to true.
 
 ```javascript
@@ -375,9 +375,9 @@ authorization. By default, it is set to true.
   
 ```
 
-#### Api protection 
+#### Api protection
 
-`apiProtectionType` property states the protocol used for API authorization. 
+`apiProtectionType` property states the protocol used for API authorization.
 The currently supported value is `oauth2`.
 
 ```javascript
@@ -390,8 +390,8 @@ The currently supported value is `oauth2`.
 
 ### Api protection auth server
 
-`apiApprovedIssuer` property enables to set more than one authorization servers. 
-By default, the current auth-server is set. You can add more servers separated 
+`apiApprovedIssuer` property enables to set more than one authorization servers.
+By default, the current auth-server is set. You can add more servers separated
 by commas.
 
 ```javascript
@@ -399,10 +399,10 @@ by commas.
 ```
 
 
-### Logging level 
+### Logging level
 
-`loggingLevel` property can be used to change the logging level to the 
-desired values `(TRACE, DEBUG, INFO, WARN, ERROR)`. By default, the level is 
+`loggingLevel` property can be used to change the logging level to the
+desired values `(TRACE, DEBUG, INFO, WARN, ERROR)`. By default, the level is
 set to `INFO`
 
  ```javascript
@@ -414,13 +414,13 @@ set to `INFO`
 
 ### Scopes other than the one defined by config-api
 
-Config API endpoints are oAuth2 protected. These scopes are created during 
-installation. However, few endpoints require scopes defined 
-by other modules like auth-server. 
+Config API endpoints are oAuth2 protected. These scopes are created during
+installation. However, few endpoints require scopes defined
+by other modules like auth-server.
 
-A list of these scopes is maintained in the configuration in order to avoid 
-the creation of these scopes during Config API start-up. `exclusiveAuthScopes` 
-property can be used to change the logging level to the desired value 
+A list of these scopes is maintained in the configuration in order to avoid
+the creation of these scopes during Config API start-up. `exclusiveAuthScopes`
+property can be used to change the logging level to the desired value
 `(TRACE, DEBUG, INFO, WARN, ERROR)`. By default, the level is set to `INFO`
 
  ```javascript
@@ -436,9 +436,9 @@ property can be used to change the logging level to the desired value
 
 ### User - Mandatory and exclusion attributes
 
-#### MandatoryAttributes 
+#### MandatoryAttributes
 
-`userMandatoryAttributes` can be used to define mandatory attributes 
+`userMandatoryAttributes` can be used to define mandatory attributes
 for User while creating and updating.
 
  ```javascript
@@ -455,8 +455,8 @@ for User while creating and updating.
 
 #### Exclusion attributes
 
-`userExclusionAttributes` can be used to define User attributes that are not 
-to be returned in the API response. More attributes that are to be skipped in 
+`userExclusionAttributes` can be used to define User attributes that are not
+to be returned in the API response. More attributes that are to be skipped in
 response can be added to the list.
 
 ```javascript
@@ -469,10 +469,10 @@ response can be added to the list.
 
 ### Agama flow configuration
 
-`agamaConfiguration` stores Agama-related configuration used in Agama related 
+`agamaConfiguration` stores Agama-related configuration used in Agama related
 endpoints.
 
-`mandatoryAttributes` list defines the required attributes for Agama flow creation 
+`mandatoryAttributes` list defines the required attributes for Agama flow creation
 and update.
 `optionalAttributes` list specifies the optional attributes.
 
@@ -503,9 +503,9 @@ You can start TUI using the command below:
 jans tui
 ```
 
-Navigate to `Config API` section where administrators can update 
-Config-API configurations in six sub-tabs, namely 
-**Main**, **Agama**, **Plugins**, **Asset Management**, **Audit Log Conf**, 
+Navigate to `Config API` section where administrators can update
+Config-API configurations in six sub-tabs, namely
+**Main**, **Agama**, **Plugins**, **Asset Management**, **Audit Log Conf**,
 **Data Format Conversion**
 
 
@@ -513,7 +513,7 @@ Config-API configurations in six sub-tabs, namely
 
 ## Using Configuration REST API
 
-Janssen Server Configuration REST API exposes relevant endpoints for 
-managing and configuring the Config-API Configuration. Endpoint details 
-are published in the [Swagger document](../../../../janssen-server/reference/openapi.md), 
+Janssen Server Configuration REST API exposes relevant endpoints for
+managing and configuring the Config-API Configuration. Endpoint details
+are published in the [Swagger document](../../../../janssen-server/reference/openapi.md),
 see endpoint `/api/v1/api-config`

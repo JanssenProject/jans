@@ -45,7 +45,7 @@ It returns all the information of the Jans Authorization server.
 ```text
  jans cli --operation-id get-properties
  ```
- 
+
  You will get output like below
 ```json
 {

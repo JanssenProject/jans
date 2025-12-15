@@ -20,7 +20,7 @@ tags:
 
 2.  Configure your AWS user account using the [aws configure](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) command. This makes you able to authenticate before creating the cluster.
     Note that this user account must have permissions to work with Amazon EKS IAM roles and service linked roles, AWS CloudFormation, and a VPC and related resources
-    
+
 3.  Install [kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html)
 
 4.  Install [eksctl](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html) 

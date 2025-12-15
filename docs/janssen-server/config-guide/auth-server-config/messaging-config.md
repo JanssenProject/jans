@@ -7,10 +7,10 @@ tags:
 
 # Messaging Configuration
 
-The Janssen server provides messaging infrastructure for publish-subscribe message flows. 
+The Janssen server provides messaging infrastructure for publish-subscribe message flows.
 Messaging infrastructure is configurable to the level where it can be enabled or disabled.
 When enabled, the configuration also allows a choice of providers and supplying configuration
-for those providers. 
+for those providers.
 
 The Janssen Server provides multiple configuration tools
 to perform these tasks.
@@ -63,7 +63,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <sche
 
 #### Get Messaging Configuration
 
-You can get the Messaging Configuration 
+You can get the Messaging Configuration
 of the Janssen Server by performing this operation.
 
 ```bash title="Command"
@@ -98,17 +98,17 @@ of the Janssen Server by performing this operation.
 
 #### Patch Messaging Configuration
 
-To patch update the messaging configuration, use 
+To patch update the messaging configuration, use
 the `patch-config-message` operation.
 
 The `patch-config-message` operation uses the
 [JSON Patch](https://jsonpatch.com/#the-patch) schema to describe
 the configuration change. Refer
-[here](../config-tools/jans-cli/README.md#patch-request-schema) 
+[here](../config-tools/jans-cli/README.md#patch-request-schema)
 to know more about schema.
 
 
-For instance, to perform a `replace` operation and change the 
+For instance, to perform a `replace` operation and change the
 `messageProviderType` from `DISABLED` to `REDIS`,
 the JSON Patch data would be like below:
 
@@ -181,7 +181,7 @@ Operation ID: patch-config-message-postgres
  Schema: Array of JsonPatch
 ```
 
-#### Get Postgres Messaging Configuration  
+#### Get Postgres Messaging Configuration
 
 
 You can get the Postgres messaging configuration
@@ -193,7 +193,7 @@ of the Janssen Server by performing this operation.
 
 It will show the configuration details as below.
 
-```json title="Sample Output" linenums="1" 
+```json title="Sample Output" linenums="1"
 {
   "dbSchemaName": "public",
   "connectionUri": "jdbc:postgresql://localhost:5432/jansdb",
@@ -231,7 +231,7 @@ and store it in a file for editing using the command [below].
    ```bash title="Command"
    /opt/jans/jans-cli/config-cli.py --schema-sample PostgresMessageConfiguration
    ```
-   
+
 4. Use the updated file to send the update to the Janssen Server using the command below
  ```bash title="Command"
   /opt/jans/jans-cli/config-cli.py --operation-id put-config-message-postgres \
@@ -240,7 +240,7 @@ and store it in a file for editing using the command [below].
 
 #### Patch Postgres Message  Configuration
 
-To update the messaging configuration use the 
+To update the messaging configuration use the
 `patch-config-message-postgres` operation.
 
 The `patch-config-message-postgres` operation uses the
@@ -440,7 +440,7 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 ```
 
 Navigate to `Auth Server` -> `Messages` to open the Message screen as shown
-in the image below. There are three different message configuration options 
+in the image below. There are three different message configuration options
 accessible on this screen. You can update the details of these messages.
 
 ![image](../../../assets/tui-message-screen.png)
