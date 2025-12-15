@@ -75,7 +75,6 @@ mod token;
 mod validation;
 
 #[cfg(test)]
-#[allow(dead_code)]
 mod test_utils;
 
 use chrono::DateTime;
@@ -605,56 +604,6 @@ impl JwtService {
 
         // If not found, return the original mapping (fallback)
         entity_type_name
-    }
-
-    /// Returns a reference to the trusted issuer validator.
-    ///
-    /// This allows access to advanced validation features like:
-    /// - `find_trusted_issuer()` - Find a trusted issuer by claim
-    /// - `validate_required_claims()` - Validate token claims against issuer config
-    /// - `preload_and_validate_token()` - Full async token validation with JWKS loading
-    pub fn trusted_issuer_validator(&self) -> Arc<RwLock<TrustedIssuerValidator>> {
-        Arc::clone(&self.trusted_issuer_validator)
-    }
-
-    /// Validates a JWT token using the TrustedIssuerValidator with full JWKS loading.
-    ///
-    /// This method provides comprehensive validation including:
-    /// - Issuer matching against configured trusted issuers
-    /// - JWKS key fetching and caching from issuer's OIDC endpoint
-    /// - JWT signature verification
-    /// - Required claims validation based on token metadata
-    ///
-    /// Use this method when you need:
-    /// - Dynamic JWKS key loading and caching
-    /// - Full trusted issuer validation without the standard JwtService flow
-    ///
-    /// # Arguments
-    ///
-    /// * `token` - The JWT token string to validate
-    /// * `token_type` - The type of token (e.g., "access_token", "id_token")
-    ///
-    /// # Returns
-    ///
-    /// A tuple of (validated claims, trusted issuer) on success, or a `TrustedIssuerError` on failure.
-    ///
-    /// # Example
-    ///
-    /// ```ignore
-    /// let (claims, issuer) = jwt_service
-    ///     .validate_token_with_issuer_validator(token, "access_token")
-    ///     .await?;
-    /// ```
-    pub async fn validate_token_with_issuer_validator(
-        &self,
-        token: &str,
-        token_type: &str,
-    ) -> Result<(serde_json::Value, Arc<TrustedIssuer>), TrustedIssuerError> {
-        self.trusted_issuer_validator
-            .write()
-            .expect("RwLock poisoned")
-            .preload_and_validate_token(token, token_type)
-            .await
     }
 }
 

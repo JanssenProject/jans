@@ -393,7 +393,7 @@ fn test_parse_templates_success() {
     let parsed = result.unwrap();
     assert_eq!(parsed.len(), 1);
     assert_eq!(parsed[0].filename, "template1.cedar");
-    assert_eq!(parsed[0].id.to_string(), "template1");
+    assert_eq!(parsed[0].template.id().to_string(), "template1");
 }
 
 #[test]
@@ -553,9 +553,6 @@ fn test_load_and_parse_schema_end_to_end() {
     assert!(!format!("{:?}", schema).is_empty());
 }
 
-// NOTE: test_complete_policy_store_with_schema_and_policies was removed as redundant.
-// The test_complete_policy_store_with_issuers test covers schema, policies, entities, and issuers.
-
 #[test]
 fn test_load_and_parse_entities_end_to_end() {
     let temp_dir = TempDir::new().unwrap();
@@ -642,9 +639,6 @@ fn test_load_and_parse_entities_end_to_end() {
         "Store should have 3 entities"
     );
 }
-
-// NOTE: test_complete_policy_store_with_entities was removed as redundant.
-// The test_complete_policy_store_with_issuers test covers schema, policies, entities, and issuers.
 
 #[test]
 fn test_entity_with_complex_attributes() {
@@ -1323,8 +1317,7 @@ fn test_archive_vfs_with_manifest_validation() {
     // This demonstrates that manifest validation works with ANY VfsFileSystem,
     // including ArchiveVfs (not just PhysicalVfs)
     let validation_result = validator.validate(Some("abc123def456"));
-    // Note: This will have errors because we didn't include proper checksums,
-    // but it proves the validator works with ArchiveVfs
+
     assert!(validation_result.errors.len() > 0 || !validation_result.is_valid);
 }
 

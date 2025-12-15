@@ -4,7 +4,6 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::sync::LazyLock;
-use std::time::Duration;
 
 use super::http_utils::OpenIdConfig;
 use super::status_list::{self, StatusBitSize};
@@ -146,19 +145,6 @@ impl MockEndpoints {
             oidc,
             jwks,
             status_list: None,
-        }
-    }
-
-    #[track_caller]
-    pub fn assert(&self) {
-        if let Some(x) = self.oidc.as_ref() {
-            x.assert()
-        }
-        if let Some(x) = self.jwks.as_ref() {
-            x.assert()
-        }
-        if let Some(x) = self.status_list.as_ref() {
-            x.assert()
         }
     }
 }

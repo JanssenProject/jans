@@ -136,8 +136,8 @@ pub struct RegexMapping {
 }
 
 impl RegexMapping {
-    // builder function, used in testing
-    #[allow(dead_code)]
+    /// Create a new RegexMapping with the given expression and field mappings.
+    #[cfg(test)]
     fn new(
         regex_expression: String,
         fields: HashMap<String, RegexFieldMapping>,
@@ -313,14 +313,20 @@ mod test {
         let re_mapping = RegexMapping::new(
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
-                ("UID".to_string(), RegexFieldMapping {
-                    attr: "uid".to_string(),
-                    r#type: RegexFieldMappingType::String,
-                }),
-                ("DOMAIN".to_string(), RegexFieldMapping {
-                    attr: "domain".to_string(),
-                    r#type: RegexFieldMappingType::String,
-                }),
+                (
+                    "UID".to_string(),
+                    RegexFieldMapping {
+                        attr: "uid".to_string(),
+                        r#type: RegexFieldMappingType::String,
+                    },
+                ),
+                (
+                    "DOMAIN".to_string(),
+                    RegexFieldMapping {
+                        attr: "domain".to_string(),
+                        r#type: RegexFieldMappingType::String,
+                    },
+                ),
             ]),
         )
         .expect("regexp should parse correctly");
@@ -384,15 +390,21 @@ mod test {
         let re_mapping = RegexMapping::new(
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
-                ("UID".to_string(), RegexFieldMapping {
-                    attr: "uid".to_string(),
-                    r#type: RegexFieldMappingType::String,
-                }),
-                ("DOMAIN".to_string(), RegexFieldMapping {
-                    attr: "domain".to_string(),
+                (
+                    "UID".to_string(),
+                    RegexFieldMapping {
+                        attr: "uid".to_string(),
+                        r#type: RegexFieldMappingType::String,
+                    },
+                ),
+                (
+                    "DOMAIN".to_string(),
+                    RegexFieldMapping {
+                        attr: "domain".to_string(),
 
-                    r#type: RegexFieldMappingType::String,
-                }),
+                        r#type: RegexFieldMappingType::String,
+                    },
+                ),
             ]),
         )
         .expect("regexp should parse correctly");

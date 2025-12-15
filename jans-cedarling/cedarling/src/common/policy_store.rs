@@ -25,6 +25,7 @@ pub mod manifest_validator;
 pub mod metadata;
 pub mod policy_parser;
 pub mod schema_parser;
+#[cfg(test)]
 pub mod source;
 pub mod validator;
 pub mod vfs_adapter;
@@ -40,8 +41,6 @@ pub(crate) use claim_mapping::ClaimMappings;
 pub use token_entity_metadata::TokenEntityMetadata;
 
 // Re-export types used by init/policy_store.rs and external consumers
-pub use archive_handler::ArchiveVfs;
-pub use loader::DefaultPolicyStoreLoader;
 pub use manager::{ConversionError, PolicyStoreManager};
 pub use metadata::PolicyStoreMetadata;
 

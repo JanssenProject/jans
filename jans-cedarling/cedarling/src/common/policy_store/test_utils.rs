@@ -12,14 +12,11 @@
 //! - Archive creation utilities for .cjar testing
 //! - Performance testing utilities
 
-#![allow(dead_code)] // Test utilities - not all methods used in every test
-
 use super::errors::PolicyStoreError;
 use chrono::Utc;
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::io::{Cursor, Write};
-use std::path::Path;
 use zip::write::{ExtendedFileOptions, FileOptions};
 use zip::{CompressionMethod, ZipWriter};
 
@@ -125,21 +122,9 @@ impl PolicyStoreTestBuilder {
         self
     }
 
-    /// Set the Cedar version.
-    pub fn with_cedar_version(mut self, version: impl Into<String>) -> Self {
-        self.cedar_version = version.into();
-        self
-    }
-
     /// Set the description.
     pub fn with_description(mut self, desc: impl Into<String>) -> Self {
         self.description = Some(desc.into());
-        self
-    }
-
-    /// Set the schema content.
-    pub fn with_schema(mut self, schema: impl Into<String>) -> Self {
-        self.schema = schema.into();
         self
     }
 
@@ -150,12 +135,6 @@ impl PolicyStoreTestBuilder {
     /// * `content` - Cedar policy content with @id annotation
     pub fn with_policy(mut self, name: impl Into<String>, content: impl Into<String>) -> Self {
         self.policies.insert(name.into(), content.into());
-        self
-    }
-
-    /// Add a template file.
-    pub fn with_template(mut self, name: impl Into<String>, content: impl Into<String>) -> Self {
-        self.templates.insert(name.into(), content.into());
         self
     }
 
@@ -182,12 +161,6 @@ impl PolicyStoreTestBuilder {
     /// Enable manifest generation with checksums.
     pub fn with_manifest(mut self) -> Self {
         self.generate_manifest = true;
-        self
-    }
-
-    /// Add an extra file (for testing invalid structures).
-    pub fn with_extra_file(mut self, path: impl Into<String>, content: impl Into<String>) -> Self {
-        self.extra_files.insert(path.into(), content.into());
         self
     }
 
@@ -292,54 +265,6 @@ impl PolicyStoreTestBuilder {
         files
     }
 
-    /// Build policy store as directory structure.
-    ///
-    /// Creates all necessary directories and files at the given path.
-    #[cfg(not(target_arch = "wasm32"))]
-    pub fn build_directory(&self, base_path: &Path) -> Result<(), PolicyStoreError> {
-        use std::fs;
-
-        let files = self.build_files();
-
-        // Create directories first
-        let dirs: std::collections::HashSet<_> = files
-            .keys()
-            .filter_map(|p| {
-                let path = Path::new(p);
-                path.parent().map(|parent| parent.to_path_buf())
-            })
-            .filter(|p| !p.as_os_str().is_empty())
-            .collect();
-
-        for dir in dirs {
-            let full_path = base_path.join(&dir);
-            fs::create_dir_all(&full_path).map_err(|e| PolicyStoreError::FileReadError {
-                path: full_path.display().to_string(),
-                source: e,
-            })?;
-        }
-
-        // Create required directories even if empty
-        let policies_path = base_path.join("policies");
-        if !policies_path.exists() {
-            fs::create_dir_all(&policies_path).map_err(|e| PolicyStoreError::FileReadError {
-                path: policies_path.display().to_string(),
-                source: e,
-            })?;
-        }
-
-        // Write files
-        for (path, content) in files {
-            let full_path = base_path.join(&path);
-            fs::write(&full_path, content).map_err(|e| PolicyStoreError::FileReadError {
-                path: full_path.display().to_string(),
-                source: e,
-            })?;
-        }
-
-        Ok(())
-    }
-
     /// Build policy store as .cjar archive bytes.
     ///
     /// Returns the archive as a byte vector suitable for `ArchiveVfs::from_buffer()`.
@@ -361,16 +286,6 @@ impl PolicyStoreTestBuilder {
             .finish()
             .map_err(|e| PolicyStoreError::Io(std::io::Error::other(e)))?;
         Ok(cursor.into_inner())
-    }
-
-    /// Build policy store and write as .cjar file.
-    #[cfg(not(target_arch = "wasm32"))]
-    pub fn build_archive_file(&self, path: &Path) -> Result<(), PolicyStoreError> {
-        let bytes = self.build_archive()?;
-        std::fs::write(path, bytes).map_err(|e| PolicyStoreError::FileReadError {
-            path: path.display().to_string(),
-            source: e,
-        })
     }
 }
 
@@ -438,90 +353,6 @@ permit(
         builder
     }
 
-    /// Creates a policy store with entity hierarchy.
-    pub fn with_entity_hierarchy() -> PolicyStoreTestBuilder {
-        let roles = serde_json::json!([
-            {
-                "uid": {"type": "TestApp::Role", "id": "admin"},
-                "attrs": {"level": 10},
-                "parents": []
-            },
-            {
-                "uid": {"type": "TestApp::Role", "id": "user"},
-                "attrs": {"level": 1},
-                "parents": []
-            }
-        ]);
-
-        let users = serde_json::json!([
-            {
-                "uid": {"type": "TestApp::User", "id": "alice"},
-                "attrs": {"name": "Alice"},
-                "parents": [{"type": "TestApp::Role", "id": "admin"}]
-            },
-            {
-                "uid": {"type": "TestApp::User", "id": "bob"},
-                "attrs": {"name": "Bob"},
-                "parents": [{"type": "TestApp::Role", "id": "user"}]
-            }
-        ]);
-
-        PolicyStoreTestBuilder::new("hierarchy123")
-            .with_schema(
-                r#"namespace TestApp {
-    entity User in [Role] {
-        name: String,
-    };
-    entity Role {
-        level: Long,
-    };
-    entity Resource;
-    action "read" appliesTo {
-        principal: [User],
-        resource: [Resource]
-    };
-}"#,
-            )
-            .with_entity("roles", roles.to_string())
-            .with_entity("users", users.to_string())
-            .with_policy(
-                "admin-access",
-                r#"@id("admin-access")
-permit(
-    principal in TestApp::Role::"admin",
-    action,
-    resource
-);"#,
-            )
-    }
-
-    /// Creates a policy store with trusted issuers.
-    pub fn with_trusted_issuers() -> PolicyStoreTestBuilder {
-        let issuer = serde_json::json!({
-            "test-issuer": {
-                "name": "Test Issuer",
-                "oidc_endpoint": "https://test.example.com/.well-known/openid-configuration",
-                "token_metadata": {
-                    "access_token": {
-                        "user_id": "sub",
-                        "required_claims": ["sub", "aud"]
-                    },
-                    "id_token": {
-                        "user_id": "sub",
-                        "required_claims": ["sub", "email"]
-                    }
-                }
-            }
-        });
-
-        minimal_valid().with_trusted_issuer("test-issuer", issuer.to_string())
-    }
-
-    /// Creates a policy store with manifest for integrity testing.
-    pub fn with_manifest() -> PolicyStoreTestBuilder {
-        minimal_valid().with_manifest()
-    }
-
     // ========================================================================
     // Invalid Fixtures
     // ========================================================================
@@ -535,33 +366,10 @@ permit(
         builder
     }
 
-    /// Creates a policy store with missing required field in metadata.
-    pub fn invalid_metadata_missing_name() -> PolicyStoreTestBuilder {
-        let mut builder = minimal_valid();
-        builder.name = "".to_string(); // Empty name is invalid
-        builder
-    }
-
-    /// Creates a policy store with invalid Cedar schema.
-    pub fn invalid_schema() -> PolicyStoreTestBuilder {
-        PolicyStoreTestBuilder::new("invalidschema")
-            .with_schema("this is not a valid cedar schema { } }")
-            .with_policy(
-                "allow",
-                r#"@id("allow") permit(principal, action, resource);"#,
-            )
-    }
-
     /// Creates a policy store with invalid policy syntax.
     pub fn invalid_policy_syntax() -> PolicyStoreTestBuilder {
         PolicyStoreTestBuilder::new("invalidpolicy")
             .with_policy("bad-policy", "permit ( principal action resource );")
-    }
-
-    /// Creates a policy store with policy missing @id annotation.
-    pub fn policy_missing_id() -> PolicyStoreTestBuilder {
-        PolicyStoreTestBuilder::new("missingid123")
-            .with_policy("no-id", "permit(principal, action, resource);")
     }
 
     /// Creates a policy store with duplicate entity UIDs.
@@ -721,17 +529,6 @@ permit(
     }
 
     builder
-}
-
-/// Memory statistics from an operation.
-#[derive(Debug, Clone, Copy)]
-pub struct MemoryStats {
-    /// Total bytes allocated
-    pub allocated: usize,
-    /// Total bytes deallocated
-    pub deallocated: usize,
-    /// Net memory change (allocated - deallocated)
-    pub net: isize,
 }
 
 #[cfg(test)]

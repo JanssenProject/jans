@@ -5,8 +5,8 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use jsonwebtoken::Algorithm;
-use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 
 /// The set of Bootstrap properties related to JWT validation.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -231,19 +231,18 @@ impl From<JwtConfigRaw> for JwtConfig {
                 _ => {
                     unsupported_algorithms.push(alg);
                     None
-                }
+                },
             };
-            
+
             if let Some(alg) = algorithm {
                 supported_algorithms.insert(alg);
             }
         }
 
-        // Log warnings for unsupported algorithms
-        if !unsupported_algorithms.is_empty() {
-            eprintln!("Warning: Unsupported JWT signature algorithms were ignored: {}", 
-                     unsupported_algorithms.join(", "));
-        }
+        // Note: Unsupported algorithms are silently ignored.
+        // If needed, validation failures will indicate the algorithm issue.
+        // We can't log here as logger isn't available during bootstrap config creation.
+        let _ = unsupported_algorithms; // Acknowledge unused
 
         Self {
             jwks: raw.jwks,

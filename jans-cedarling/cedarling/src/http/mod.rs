@@ -48,7 +48,7 @@ impl HttpClient {
         loop {
             match self.client.get(uri).send().await {
                 Ok(response) => return Ok(response),
-                Err(e) if attempts < self.max_retries => {
+                Err(_) if attempts < self.max_retries => {
                     attempts += 1;
                     // Retry silently - callers can log the final error if needed
                     tokio::time::sleep(self.retry_delay * attempts).await;
@@ -230,12 +230,6 @@ mod test {
         assert_eq!(bytes, payload, "Expected bytes to match payload");
         mock_result.assert();
     }
-
-    // Note: Retry logic only triggers on connection/network errors, not HTTP status errors.
-    // HTTP 500 responses are handled by error_for_status() after the successful connection.
-    // The retry-then-succeed scenario for connection errors is tested by:
-    // - get_bytes_max_retries_exceeded (verifies retries happen on connection failure)
-    // - errors_when_max_http_retries_exceeded (same for get())
 
     #[tokio::test]
     async fn get_bytes_http_error_status() {

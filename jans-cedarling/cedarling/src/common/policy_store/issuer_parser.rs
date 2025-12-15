@@ -23,8 +23,6 @@ pub struct ParsedIssuer {
     pub issuer: TrustedIssuer,
     /// Source filename
     pub filename: String,
-    /// Raw JSON content
-    pub content: String,
 }
 
 /// Issuer parser for loading and validating trusted issuer configurations.
@@ -60,13 +58,10 @@ impl IssuerParser {
             let issuer = Self::parse_single_issuer(issuer_json, issuer_id, filename)?;
 
             // Store only this issuer's JSON, not the entire file content
-            let issuer_content = serde_json::to_string(issuer_json).unwrap_or_default();
-
             parsed_issuers.push(ParsedIssuer {
                 id: issuer_id.clone(),
                 issuer,
                 filename: filename.to_string(),
-                content: issuer_content,
             });
         }
 
@@ -464,7 +459,6 @@ mod tests {
                     )]),
                 },
                 filename: "file1.json".to_string(),
-                content: String::new(),
             },
             ParsedIssuer {
                 id: "issuer2".to_string(),
@@ -481,7 +475,6 @@ mod tests {
                     )]),
                 },
                 filename: "file2.json".to_string(),
-                content: String::new(),
             },
         ];
 
@@ -507,7 +500,6 @@ mod tests {
                     )]),
                 },
                 filename: "file1.json".to_string(),
-                content: String::new(),
             },
             ParsedIssuer {
                 id: "issuer1".to_string(),
@@ -524,7 +516,6 @@ mod tests {
                     )]),
                 },
                 filename: "file2.json".to_string(),
-                content: String::new(),
             },
         ];
 
@@ -550,7 +541,6 @@ mod tests {
                 token_metadata: HashMap::new(),
             },
             filename: "file1.json".to_string(),
-            content: String::new(),
         }];
 
         let result = IssuerParser::validate_issuers(&issuers);
@@ -579,7 +569,6 @@ mod tests {
                     )]),
                 },
                 filename: "file1.json".to_string(),
-                content: String::new(),
             },
             ParsedIssuer {
                 id: "issuer2".to_string(),
@@ -596,7 +585,6 @@ mod tests {
                     )]),
                 },
                 filename: "file2.json".to_string(),
-                content: String::new(),
             },
         ];
 

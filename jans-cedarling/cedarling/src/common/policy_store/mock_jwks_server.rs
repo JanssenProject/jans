@@ -30,11 +30,10 @@
 //! server.assert_endpoints_called();
 //! ```
 
-#![cfg(test)]
-#![allow(dead_code)] // Test utilities - not all methods used in every test
+// Note: This module is cfg(test) via parent module declaration in policy_store.rs
 
 use jsonwebtoken::{self as jwt, EncodingKey, Header};
-use mockito::{Mock, Server, ServerGuard};
+use mockito::{Server, ServerGuard};
 use serde::Serialize;
 use serde_json::{Value, json};
 
@@ -109,30 +108,12 @@ impl JwkKeyPair {
     }
 }
 
-/// Mock endpoints configuration.
-pub struct MockEndpoints {
-    /// OpenID Configuration endpoint mock
-    pub oidc_config: Mock,
-    /// JWKS endpoint mock
-    pub jwks: Mock,
-}
-
-impl MockEndpoints {
-    /// Assert all endpoints were called the expected number of times.
-    pub fn assert(&self) {
-        self.oidc_config.assert();
-        self.jwks.assert();
-    }
-}
-
 /// Mock JWKS server for testing trusted issuer validation.
 pub struct MockJwksServer {
     /// The underlying mock server
     server: ServerGuard,
     /// Key pair for signing tokens
     key_pair: JwkKeyPair,
-    /// Endpoints
-    endpoints: MockEndpoints,
 }
 
 impl MockJwksServer {
@@ -154,7 +135,7 @@ impl MockJwksServer {
         let base_url = server.url();
 
         // Setup OpenID Configuration endpoint
-        let oidc_config = server
+        let _oidc_mock = server
             .mock("GET", Self::OIDC_CONFIG_PATH)
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -175,7 +156,7 @@ impl MockJwksServer {
             .create();
 
         // Setup JWKS endpoint
-        let jwks = server
+        let _jwks_mock = server
             .mock("GET", Self::JWKS_PATH)
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -188,11 +169,7 @@ impl MockJwksServer {
             .expect_at_least(0)
             .create();
 
-        Ok(Self {
-            server,
-            key_pair,
-            endpoints: MockEndpoints { oidc_config, jwks },
-        })
+        Ok(Self { server, key_pair })
     }
 
     /// Get the base URL of the mock server.
@@ -230,21 +207,6 @@ impl MockJwksServer {
         })
     }
 
-    /// Generate a trusted issuer configuration with custom token metadata.
-    pub fn trusted_issuer_json_with_metadata(
-        &self,
-        issuer_id: &str,
-        token_metadata: Value,
-    ) -> Value {
-        json!({
-            issuer_id: {
-                "name": format!("Mock Issuer {}", issuer_id),
-                "oidc_endpoint": self.oidc_config_url(),
-                "token_metadata": token_metadata
-            }
-        })
-    }
-
     /// Generate a test token with the given claims.
     ///
     /// Automatically adds `iss` claim set to the server URL.
@@ -276,12 +238,12 @@ impl MockJwksServer {
             "jti": crate::log::gen_uuid7().to_string(),
         });
 
-        if let Some(extra) = extra_claims {
-            if let (Some(claims_obj), Some(extra_obj)) = (claims.as_object_mut(), extra.as_object())
-            {
-                for (k, v) in extra_obj {
-                    claims_obj.insert(k.clone(), v.clone());
-                }
+        if let Some(extra) = extra_claims
+            && let Some(claims_obj) = claims.as_object_mut()
+            && let Some(extra_obj) = extra.as_object()
+        {
+            for (k, v) in extra_obj {
+                claims_obj.insert(k.clone(), v.clone());
             }
         }
 
@@ -326,21 +288,6 @@ impl MockJwksServer {
             })),
         )
     }
-
-    /// Assert that endpoints were called.
-    pub fn assert_endpoints(&self) {
-        self.endpoints.assert();
-    }
-
-    /// Get access to the endpoints for custom assertions.
-    pub fn endpoints(&self) -> &MockEndpoints {
-        &self.endpoints
-    }
-
-    /// Get the key pair for custom token generation.
-    pub fn key_pair(&self) -> &JwkKeyPair {
-        &self.key_pair
-    }
 }
 
 /// Builder for creating multiple mock servers (for multi-issuer testing).
@@ -366,23 +313,6 @@ impl MockJwksServerBuilder {
     /// Build and return all servers.
     pub fn build(self) -> Vec<MockJwksServer> {
         self.servers
-    }
-
-    /// Generate trusted issuers JSON for all servers.
-    pub fn trusted_issuers_json(&self) -> Value {
-        let mut issuers = json!({});
-
-        for (i, server) in self.servers.iter().enumerate() {
-            let issuer_id = format!("issuer{}", i);
-            let issuer_config = server.trusted_issuer_json(&issuer_id);
-            if let Some(obj) = issuer_config.as_object() {
-                for (k, v) in obj {
-                    issuers[k] = v.clone();
-                }
-            }
-        }
-
-        issuers
     }
 }
 

@@ -11,7 +11,7 @@
 //! - Input validation for all file types
 //! - Resource exhaustion (zip bombs, deeply nested structures)
 
-#![cfg(test)]
+// Note: This module is cfg(test) via parent module declaration in policy_store.rs
 
 use super::archive_handler::ArchiveVfs;
 use super::errors::ArchiveError;
@@ -37,11 +37,12 @@ mod path_traversal {
         let archive = create_path_traversal_archive();
         let result = ArchiveVfs::from_buffer(archive);
 
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ArchiveError::PathTraversal { .. }
-        ));
+        let err = result.expect_err("Expected PathTraversal error");
+        assert!(
+            matches!(err, ArchiveError::PathTraversal { .. }),
+            "Expected PathTraversal error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -134,11 +135,12 @@ mod malicious_archives {
         let archive = create_corrupted_archive();
         let result = ArchiveVfs::from_buffer(archive);
 
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ArchiveError::InvalidZipFormat { .. }
-        ));
+        let err = result.expect_err("Expected InvalidZipFormat error");
+        assert!(
+            matches!(err, ArchiveError::InvalidZipFormat { .. }),
+            "Expected InvalidZipFormat error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -146,11 +148,12 @@ mod malicious_archives {
         let not_a_zip = b"This is definitely not a ZIP file".to_vec();
         let result = ArchiveVfs::from_buffer(not_a_zip);
 
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ArchiveError::InvalidZipFormat { .. }
-        ));
+        let err = result.expect_err("Expected InvalidZipFormat error");
+        assert!(
+            matches!(err, ArchiveError::InvalidZipFormat { .. }),
+            "Expected InvalidZipFormat error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -239,8 +242,7 @@ mod input_validation {
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let result = loader.load_directory(".");
 
-        assert!(result.is_err());
-        let err = result.unwrap_err();
+        let err = result.expect_err("Expected error for invalid metadata JSON");
         assert!(
             err.to_string().contains("JSON") || err.to_string().contains("metadata"),
             "Error should mention JSON or metadata: {}",
@@ -257,8 +259,7 @@ mod input_validation {
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let result = loader.load_directory(".");
 
-        assert!(result.is_err());
-        let err = result.unwrap_err();
+        let err = result.expect_err("Expected error for invalid Cedar syntax");
         assert!(
             err.to_string().contains("Cedar")
                 || err.to_string().contains("policy")
@@ -280,14 +281,12 @@ mod input_validation {
         // Should error during entity parsing
         // If implementation allows empty/invalid entities directory, this may succeed
         // In that case, the test documents current behavior
-        if result.is_err() {
-            if let Err(err) = result {
-                assert!(
-                    err.to_string().contains("JSON") || err.to_string().contains("entity"),
-                    "Error should mention JSON or entity: {}",
-                    err
-                );
-            }
+        if let Err(err) = result {
+            assert!(
+                err.to_string().contains("JSON") || err.to_string().contains("entity"),
+                "Error should mention JSON or entity: {}",
+                err
+            );
         }
     }
 
@@ -302,8 +301,7 @@ mod input_validation {
 
         // Should error during trusted issuer validation
         // If implementation allows missing optional fields, this may succeed
-        if result.is_err() {
-            let err = result.unwrap_err();
+        if let Err(err) = result {
             assert!(
                 err.to_string().contains("issuer")
                     || err.to_string().contains("oidc")
@@ -326,8 +324,7 @@ mod input_validation {
 
         // Should detect duplicate entity UIDs
         // Cedar may allow duplicates in some cases (last wins), so test documents behavior
-        if result.is_err() {
-            let err = result.unwrap_err();
+        if let Err(err) = result {
             assert!(
                 err.to_string().contains("duplicate") || err.to_string().contains("Duplicate"),
                 "Error should mention duplicate: {}",
@@ -450,7 +447,6 @@ mod manifest_security {
         let result = loader.load_directory(".");
 
         // Should fail due to invalid checksum format
-        // Note: behavior depends on implementation
         let _ = result;
     }
 }
@@ -565,11 +561,12 @@ mod file_extension_validation {
         std::fs::write(&wrong_ext, &archive_bytes).unwrap();
 
         let result = ArchiveVfs::from_file(&wrong_ext);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ArchiveError::InvalidExtension { .. }
-        ));
+        let err = result.expect_err("Expected InvalidExtension error");
+        assert!(
+            matches!(err, ArchiveError::InvalidExtension { .. }),
+            "Expected InvalidExtension error, got: {:?}",
+            err
+        );
     }
 
     #[test]

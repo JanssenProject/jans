@@ -17,7 +17,7 @@ use std::collections::HashMap;
 
 /// Represents a parsed Cedar policy with metadata.
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
+
 pub struct ParsedPolicy {
     /// The policy ID (from Cedar engine or @id annotation)
     pub id: PolicyId,
@@ -29,10 +29,7 @@ pub struct ParsedPolicy {
 
 /// Represents a parsed Cedar template with metadata.
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub struct ParsedTemplate {
-    /// The template ID (from Cedar engine or @id annotation)
-    pub id: PolicyId,
     /// The original filename
     pub filename: String,
     /// The parsed Cedar template
@@ -126,7 +123,6 @@ impl PolicyParser {
         })?;
 
         Ok(ParsedTemplate {
-            id: template_id,
             filename: filename.to_string(),
             template,
         })
@@ -151,27 +147,6 @@ impl PolicyParser {
         }
 
         Ok(policy_map)
-    }
-
-    /// Parse multiple templates and return a map of template ID to filename.
-    ///
-    /// Useful for batch processing of template files in tests and tooling.
-    #[cfg(test)]
-    pub fn parse_templates<'a, I>(
-        template_files: I,
-    ) -> Result<HashMap<PolicyId, String>, PolicyStoreError>
-    where
-        I: IntoIterator<Item = (&'a str, &'a str)>,
-    {
-        let template_files_vec: Vec<_> = template_files.into_iter().collect();
-        let mut template_map = HashMap::with_capacity(template_files_vec.len());
-
-        for (filename, content) in template_files_vec {
-            let parsed = Self::parse_template(content, filename)?;
-            template_map.insert(parsed.id, parsed.filename);
-        }
-
-        Ok(template_map)
     }
 
     /// Create a PolicySet from parsed policies and templates.
@@ -338,8 +313,8 @@ mod tests {
 
         let parsed = result.unwrap();
         assert_eq!(parsed.filename, "template.cedar");
-        // ID should be derived from filename
-        assert_eq!(parsed.id.to_string(), "template");
+        // ID should be derived from filename - get from template directly
+        assert_eq!(parsed.template.id().to_string(), "template");
     }
 
     #[test]
@@ -466,7 +441,7 @@ mod tests {
 
         // Verify IDs are derived from filenames
         assert_eq!(parsed_policy.id.to_string(), "policy");
-        assert_eq!(parsed_template.id.to_string(), "template");
+        assert_eq!(parsed_template.template.id().to_string(), "template");
 
         let result = PolicyParser::create_policy_set(vec![parsed_policy], vec![parsed_template]);
         assert!(result.is_ok());
