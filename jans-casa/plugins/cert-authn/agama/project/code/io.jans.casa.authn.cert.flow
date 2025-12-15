@@ -1,0 +1,20 @@
+Flow io.jans.casa.authn.cert
+    Basepath ""
+    Inputs userData
+    
+cah = Call io.jans.casa.certauthn.CertAuhnHelper#new userData.inum
+url = Call cah buildRedirectUrl
+//See template index.zul and class io.jans.casa.plugins.certauthn.vm.CertAuthnVM in casa plugin
+RFAC url
+
+outcome = Call cah retrieve
+When outcome is "SUCCESS"
+    Finish true
+Otherwise 
+    When outcome is null        //the cache entry expired
+        outcome = "TIMEOUT"
+
+Log "Cert Authentication failed with status" outcome
+
+obj = { success: false, message: outcome }
+Finish obj

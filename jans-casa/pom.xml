@@ -83,6 +83,8 @@
         <module>plugins/email_2fa</module>
         <module>plugins/email_2fa/agama</module>
         <module>plugins/bioid</module>
+        <module>plugins/cert-authn</module>
+        <module>plugins/cert-authn/agama</module>
     </modules>
 
     <dependencyManagement>
