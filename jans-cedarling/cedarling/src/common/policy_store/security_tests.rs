@@ -375,7 +375,7 @@ mod input_validation {
 
     #[test]
     fn test_handles_special_characters_in_policy_id() {
-        let builder = PolicyStoreTestBuilder::new("test123456789").with_policy(
+        let builder = PolicyStoreTestBuilder::new("abc123def456").with_policy(
             "special-chars",
             r#"@id("policy-with-special-chars!@#$%")
 permit(principal, action, resource);"#,
@@ -385,11 +385,32 @@ permit(principal, action, resource);"#,
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
 
-        // May succeed or fail gracefully based on policy ID validation
+        // Cedar allows special characters in @id() annotations within the policy content.
+        // The loader should handle this gracefully - either by accepting the policy
+        // (Cedar's parser accepts it) or by failing with a validation error.
         let result = loader.load_directory(".");
-        // Test passes if we reach here without panic - result may succeed or fail
-        // depending on policy ID validation rules
-        drop(result);
+        match &result {
+            Ok(loaded) => {
+                // Verify policy was loaded with the special character ID
+                assert!(
+                    !loaded.policies.is_empty(),
+                    "Expected at least one policy to be loaded"
+                );
+            },
+            Err(err) => {
+                // If validation rejects it, should be InvalidPolicyIdCharacters
+                assert!(
+                    matches!(
+                        err,
+                        PolicyStoreError::Validation(
+                            ValidationError::InvalidPolicyIdCharacters { .. }
+                        )
+                    ),
+                    "Expected InvalidPolicyIdCharacters error, got: {:?}",
+                    err
+                );
+            },
+        }
     }
 }
 
@@ -457,8 +478,23 @@ mod manifest_security {
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let result = loader.load_directory(".");
 
-        // Should fail due to invalid checksum format
-        let _ = result;
+        // Manifest validation is optional - loader may succeed even with invalid manifest
+        // The test verifies the loader handles this gracefully (either succeeds or returns
+        // a manifest-related error, but doesn't panic)
+        match &result {
+            Ok(_) => {
+                // Loader succeeded - manifest validation is not enforced
+            },
+            Err(err) => {
+                // If it fails, should be a manifest-related error
+                assert!(
+                    matches!(err, PolicyStoreError::ManifestError { .. })
+                        || matches!(err, PolicyStoreError::JsonParsing { .. }),
+                    "Expected ManifestError or JsonParsing error, got: {:?}",
+                    err
+                );
+            },
+        }
     }
 }
 
@@ -505,18 +541,21 @@ when {{ {} }};"#,
         );
 
         let builder =
-            PolicyStoreTestBuilder::new("test123456789").with_policy("large-policy", &policy);
+            PolicyStoreTestBuilder::new("abc123def456").with_policy("large-policy", &policy);
 
         let archive = builder.build_archive().unwrap();
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
 
-        // Should handle large policies
+        // Large policies should be handled gracefully
         let result = loader.load_directory(".");
-        // May succeed or fail due to policy complexity - should not panic
-        // Reaching this point without panic is the success criteria
-        // Test passes whether result succeeds or fails - just should not panic
-        drop(result);
+
+        // Verify loading succeeds - Cedar can handle large policies
+        assert!(
+            result.is_ok(),
+            "Large policy should load successfully, got error: {:?}",
+            result.err()
+        );
     }
 
     #[test]
