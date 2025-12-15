@@ -46,6 +46,7 @@ jobs:
       packages: write
       id-token: write
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     strategy:
       max-parallel: 8
       matrix:
@@ -188,6 +189,26 @@ jobs:
           sudo python3 ./automation/auto_update_build_date.py
       #END UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
 
+      - name: Free disk space
+        if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
+        run: |
+          echo "=== Disk space before cleanup ==="
+          df -h
+          echo "=== Removing pre-installed tools ==="
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /usr/share/swift || true
+          echo "=== Cleaning Docker ==="
+          docker system prune -af --volumes || true
+          echo "=== Cleaning apt cache ==="
+          sudo apt-get clean || true
+          sudo rm -rf /var/lib/apt/lists/* || true
+          echo "=== Disk space after cleanup ==="
+          df -h
+
       - name: Set up QEMU
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         uses: docker/setup-qemu-action@737ba1e397ec2caff0d098f75e1136f9a926dc0a # master
@@ -229,6 +250,13 @@ jobs:
           platforms: linux/amd64, linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
+          cache-from: type=gha,scope=${{ matrix.docker-images }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.docker-images }}
+
+      - name: Prune BuildKit cache
+        if: always()
+        run: docker buildx prune -af --keep-storage 2GB || true
+
       - name: Image digest
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         run: echo ${{ steps.docker_build.outputs.digest }}

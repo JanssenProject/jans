@@ -20,6 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         jwt_sig_validation: true,
         jwt_status_validation: false,
         signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
+        ..Default::default()
     };
 
     // You must change this with your own tokens
@@ -56,7 +57,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
-        token_cache_max_ttl_secs: 60,
     })
     .await?;
 

@@ -8,7 +8,8 @@ import java.util.Map;
  */
 public enum TokenStatus {
     VALID(0),
-    INVALID(1);
+    INVALID(1),
+    SUSPENDED(2);
 
     private final int value;
 
