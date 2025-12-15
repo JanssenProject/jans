@@ -91,7 +91,7 @@ To get sample schema type jans cli --schema <schma>, for example jans cli --sche
 
 
 The user claims
-that the available in your Janssen Server can be found by using this operation-ID. If we look at
+that are available in your Janssen Server can be found by using this operation-ID. If we look at
 the description below:
 
 ```text

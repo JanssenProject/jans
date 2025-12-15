@@ -91,7 +91,7 @@ It will show the SMTP server configuration as below:
 
 
 To add a new SMTP Server, we can use `post-config-smtp` operation id.
-As shown in the [output](#using-command-line) for`--info`
+As shown in the [output](#using-command-line) for `--info`
 command, the `post-config-smtp` operation requires data to be sent
 according to the `SmtpConfiguration` schema.
 
@@ -107,7 +107,7 @@ To fetch the example, use the command below.
 jans cli --schema-sample SmtpConfiguration 
 ```
 
-Using the schema and the example above, we have added below  data to the file
+Using the schema and the example above, we have added below data to the file
 `/tmp/smtp.json`.
 
 

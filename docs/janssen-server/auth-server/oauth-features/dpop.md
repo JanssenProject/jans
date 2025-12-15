@@ -63,7 +63,7 @@ AS->AS: Validates DPoP JWT
 AS->AS: Validates dpop_jkt against DPoP JWT if it's authz code
 
 AS->AS: Creates access_token bound to public key cnf/jkt
-note right of AS: if AT is bearer cnf/jkt is available via introspection 
+note right of AS: if AT is bearer cnf/jkt is available via introspection
 AS->RP: Returns DPoP-bound access_token with cnf/jkt (response token_type=DPoP)
 RP->RS: Request resource with access_token and DPoP JWT (with "ath" - AT hash)
 RS->RS: Validates access_token against DPoP (public key match cnf/jkt)
