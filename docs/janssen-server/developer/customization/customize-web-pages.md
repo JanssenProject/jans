@@ -201,8 +201,7 @@ Templates refer to the common interface layout and style. For example,
 a banner, logo in the common header, and copyright information in the footer.
 
 Upload the custom template `template.xhtml` file as
-[custom assets](#managing-custom-assets).This file will automatically override
-the built-in
+[custom assets](#managing-custom-assets). This file will automatically override the built-in
 [default template file](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml).
 
 

@@ -67,7 +67,7 @@ Third Party App->Device App: return Response
 #### ACR value during Device Authorization
 
 User is required to authenticate if not authenticated yet. By default `acr_values` is not set in authorization request, which means it relies on default AS handling.
-However it's possible explicitly set `acr` value during Device Authorization by setting `deviceAuthzAcr` AS configuration property.
+However it's possible to explicitly set `acr` value during Device Authorization by setting `deviceAuthzAcr` AS configuration property.
 
 ## Request user and device codes
 

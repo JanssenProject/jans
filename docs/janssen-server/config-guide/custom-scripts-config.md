@@ -284,9 +284,9 @@ jans cli --operation-id get-config-scripts-by-type --url-suffix type:CLIENT_REGI
 
 It returns all the custom scripts that are related to the `CLIENT_REGISTRATION` type available in the Janssen Server. You will find the name of all the types [here](custom-scripts-config.md#name-of-the-type-of-scripts)
 
-## Get Custom Scripts by it's `inum`
+## Get Custom Scripts by its `inum`
 
-In case we need to find out details configuration of any custom script, we can search by its unique `inum` value.
+In case we need to find out detailed configuration of any custom script, we can search by its unique `inum` value.
 
 ```
 Operation ID: get-config-scripts-by-inum

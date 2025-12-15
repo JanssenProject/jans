@@ -154,7 +154,7 @@ flowchart TD
 ### unmet_authentication_requirements
 
 If authorization request is sent to Authorization Endpoint with `acr_values` for which
-AS it not able to find "Person Authentication" custom script, it returns "unmet_authentication_requirements"
+AS is not able to find "Person Authentication" custom script, it returns "unmet_authentication_requirements"
 with detail log in `jans-auth.log`.
 
 ## Want to contribute?

@@ -51,7 +51,7 @@ The built-in user claims in Janssen are listed in below table
 |Profile URL|profile|Profile URL|
 |Secret Question|secret_question|Secret question used to verify user identity|
 |Email Verified|email_verified|Is user's email verified?|
-|Birthdate|birthdate|Baithdate of user|
+|Birthdate|birthdate|Birthdate of user|
 |Time zone info|zoneinfo|The End-User's time zone|
 |Phone Number verified|phone_number_verified|Is user's phone number verified?|
 |Home Telephone Number|phone_number|User's phone number|

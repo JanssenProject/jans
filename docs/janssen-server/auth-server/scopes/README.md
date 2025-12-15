@@ -52,7 +52,7 @@ In AS code, scope object is represented with following [java class](https://gith
 
 ### Dynamic Client Registration
 
-To enabled scope for DCR please set `jansDefScope` to `true` value.
+To enable scope for DCR please set `jansDefScope` to `true` value.
 
 Global AS Configuration for DCR
 - `dynamicRegistrationScopesParamEnabled` - boolean value specifying whether to enable scopes parameter in dynamic registration.
@@ -116,7 +116,7 @@ https://example.gluu.org/oxauth/restv1/authorize?response_type=code&scope=openid
 If `allow_spontaneous_scopes=true` and `spontaneous_scopes` regular expression has match then spontaneous scope is persisted and allowed to be handled as usual scope.
 Spontaneous scope has lifetime and is cleaned up from persistence when expired (and thus not available anymore). Configuration property `spontaneousScopeLifetime` specifies lifetime in seconds.
 
-In addition there is spontaneous scope interception scripts which give additional flexibility.
+In addition there are spontaneous scope interception scripts which give additional flexibility.
 The sample spontaneous scope script is [available here](./../../../script-catalog/spontaneous_scope/spontaneous-scope/spontaneous_scope.py).
 
 #### UMA Spontaneous scopes

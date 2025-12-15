@@ -46,7 +46,7 @@ However it's possible to associate user with JWT Grant for this two things has t
 1. explicitly allow it by setting `jwtGrantAllowUserByUidInAssertion` AS configuration property to `true`
 2. add `uid` claim to `assertion` payload. 
 
-If `jwtGrantAllowUserByUidInAssertion` is `true` and `uid` claim value points to valid user AS will associate JWT Grant with this user.
+If `jwtGrantAllowUserByUidInAssertion` is `true` and `uid` claim value points to valid user, AS will associate JWT Grant with this user.
 
 **Sample request to Token Endpoint**
 
