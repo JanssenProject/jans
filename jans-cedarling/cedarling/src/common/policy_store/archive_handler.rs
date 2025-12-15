@@ -21,11 +21,17 @@
 //! - Use `ArchiveSource::Url` with `load_policy_store()` (once URL fetching is implemented)
 //! - Only `from_file()` is native-only (requires file system access)
 //!
-//! # Example: Native
+//! # Internal API Note
 //!
-//! ```text
-//! use crate::common::policy_store::archive_handler::ArchiveVfs;
-//! use crate::common::policy_store::loader::DefaultPolicyStoreLoader;
+//! This module is part of the internal implementation. External users should use the
+//! `Cedarling` API with `BootstrapConfig` to load policy stores. The examples below
+//! illustrate internal usage patterns.
+//!
+//! # Example: Native (internal)
+//!
+//! ```ignore
+//! use cedarling::common::policy_store::archive_handler::ArchiveVfs;
+//! use cedarling::common::policy_store::loader::DefaultPolicyStoreLoader;
 //!
 //! // Load from file path (native only - file I/O not available in WASM)
 //! let archive_vfs = ArchiveVfs::from_file("policy_store.cjar")?;
@@ -33,11 +39,11 @@
 //! let loaded = loader.load_directory(".")?;
 //! ```
 //!
-//! # Example: WASM (or Native)
+//! # Example: WASM (or Native) (internal)
 //!
-//! ```text
-//! use crate::common::policy_store::archive_handler::ArchiveVfs;
-//! use crate::common::policy_store::loader::DefaultPolicyStoreLoader;
+//! ```ignore
+//! use cedarling::common::policy_store::archive_handler::ArchiveVfs;
+//! use cedarling::common::policy_store::loader::DefaultPolicyStoreLoader;
 //!
 //! // Load from bytes - works in both native and WASM!
 //! let archive_bytes: Vec<u8> = fetch_from_network().await?;

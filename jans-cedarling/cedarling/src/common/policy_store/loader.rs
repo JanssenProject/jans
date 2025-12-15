@@ -5,6 +5,11 @@
 
 //! Policy store loader with format detection and directory loading support.
 //!
+//! # Internal API Note
+//!
+//! This module is part of the internal implementation. External users should use the
+//! `Cedarling` API with `BootstrapConfig` to load policy stores.
+//!
 //! # Loading Archives (.cjar files)
 //!
 //! Archives are loaded using `ArchiveVfs`, which implements the `VfsFileSystem` trait.
@@ -13,11 +18,11 @@
 //! - Is efficient (reads files on-demand from archive)
 //! - Is secure (no temp file cleanup concerns)
 //!
-//! ## Example: Loading an archive (native)
+//! ## Example: Loading an archive (native, internal)
 //!
-//! ```text
-//! use crate::common::policy_store::archive_handler::ArchiveVfs;
-//! use crate::common::policy_store::loader::DefaultPolicyStoreLoader;
+//! ```ignore
+//! use cedarling::common::policy_store::archive_handler::ArchiveVfs;
+//! use cedarling::common::policy_store::loader::DefaultPolicyStoreLoader;
 //!
 //! // Create archive VFS (validates format during construction)
 //! let archive_vfs = ArchiveVfs::from_file("policy_store.cjar")?;
@@ -29,11 +34,11 @@
 //! let loaded = loader.load_directory(".")?;
 //! ```
 //!
-//! ## Example: Loading archive in WASM
+//! ## Example: Loading archive in WASM (internal)
 //!
-//! ```text
-//! use crate::common::policy_store::archive_handler::ArchiveVfs;
-//! use crate::common::policy_store::loader::DefaultPolicyStoreLoader;
+//! ```ignore
+//! use cedarling::common::policy_store::archive_handler::ArchiveVfs;
+//! use cedarling::common::policy_store::loader::DefaultPolicyStoreLoader;
 //!
 //! // Get archive bytes (from network, storage, etc.)
 //! let archive_bytes: Vec<u8> = fetch_archive_bytes()?;
