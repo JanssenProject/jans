@@ -230,7 +230,7 @@ curl -X GET https://my.jans.server/jans-config-api/api/v1/openid/clients/client-
 
 ### Add New Scope to Client
 
-To the above client, lets append the profile, so the scope attrib should now have value "openid user_name profile"`. This new value will be patched onto the client.
+To the above client, let's append the profile, so the scope attrib should now have value "openid user_name profile"`. This new value will be patched onto the client.
 
 1. Obtain an Access Token with scope `https://jans.io/oauth/config/openid/clients.write`
 ```

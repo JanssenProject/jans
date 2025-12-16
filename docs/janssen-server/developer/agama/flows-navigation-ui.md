@@ -26,7 +26,7 @@ If there is no such file, the flow will crash right away, otherwise, processing 
 
 Templates are expected to be written using [Apache FreeMarker](https://freemarker.apache.org/docs/index.html). This is a simple and highly productive language to produce HTML and other forms of output. By convention templates generating HTML markup in Agama should have the extension `ftlh`. Practically they will look and behave as regular HTML files.
 
-Developers are encouraged to take a peep at the [FreeMarker manual](https://freemarker.apache.org/docs/index.html) before trying to write their first pages. It usually boils down to produce the desired markup plus adding some placeholders for information that is dynamic. The key concept there is `Template + data-model = output` which is pretty natural. The sumation in this equation is generally referred to as "rendering a template" in this documentation.
+Developers are encouraged to take a peep at the [FreeMarker manual](https://freemarker.apache.org/docs/index.html) before trying to write their first pages. It usually boils down to produce the desired markup plus adding some placeholders for information that is dynamic. The key concept there is `Template + data-model = output` which is pretty natural. The summation in this equation is generally referred to as "rendering a template" in this documentation.
 
 ## Rendering
 

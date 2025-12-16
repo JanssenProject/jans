@@ -8,7 +8,7 @@ tags:
 
 # Using External Libraries In Interception Scripts
 
-Janssen Server [Interception script](../../janssen-server/developer/scripts/README.md) is a very powerful tool that enables developers to
+Janssen Server [Interception script](../../janssen-server/developer/scripts/README.md) is a powerful tool that enables developers to
 control many different aspects of the authentication process.
 
 It is possible to use external libraries in interception scripts. It is possible to use external Java libraries

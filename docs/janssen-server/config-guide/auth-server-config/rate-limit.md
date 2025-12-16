@@ -7,7 +7,7 @@ tags:
 
 # Rate Limit Configuration
 
-AS has built-in rate limiting support. It is helping to prevent abuse and ensure system stability.
+AS has built-in rate limiting support. This helps prevent abuse and ensure system stability.
 Rate Limit is enabled by default. It can be enabled or disabled by `rate_limit` feature flag.
 
 ## Registration Endpoint Rate Limit

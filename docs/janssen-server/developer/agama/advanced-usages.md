@@ -225,7 +225,7 @@ One way to structure the solution is the following:
 
 This is a feature that in conjuction with [template overrides](#template-overrides) allows developers to implement alternative routing and backtracking. Suppose a flow is designed to reuse two or more existing subflows. As expected these subflows are neither aware of each other nor of its parent. How can the parent make so that once the user has landed at a page belonging to a given subflow A be presented the alternative to take another route, say, to subflow B?
 
-Clearly a page at flow A can be overriden, however, how to abort A and make it jump to B? The answer is cancellation. Through flow cancellation, a running flow can be aborted and the control returned to one of its parents for further processing. This can achieved by overriding a template so that the POST to the current URL includes a form field named `_abort`.
+Clearly a page at flow A can be overridden, however, how to abort A and make it jump to B? The answer is cancellation. Through flow cancellation, a running flow can be aborted and the control returned to one of its parents for further processing. This can achieved by overriding a template so that the POST to the current URL includes a form field named `_abort`.
 
 POSTing this way will provoke the associated `Trigger` call to return a value like `{ aborted: true, data: ..., url: ... }` where `data` is a _map_ consisting of the payload (form fields) sent with the POST. Thus, developers can build custom pages and add for example a button to provoke the cancellation. Then, back in the flow implementation take the user to the desired path. The `url` property will hold the URL where cancellation took place relative to `https://your-server/jans-auth/fl/`.
 
@@ -250,7 +250,7 @@ Finish result
 
 ```
 
-The overriden template `cust_enter_otp.ftlh` would have a form like:
+The overridden template `cust_enter_otp.ftlh` would have a form like:
 
 ```
 ...
@@ -260,13 +260,13 @@ The overriden template `cust_enter_otp.ftlh` would have a form like:
 </form>
 ```
 
-Note you cannot make cancellation occur at an arbitrary point of a flow. It can only happen when a page has been rendered, that is, an `RRF` directive is in execution. When a flow is aborted and the control returned back to a parent, there is no way to "resume" execution of the flow target of the cancellation.
+Note you cannot make cancellation occur at an arbitrary point of a flow. It can only happen when a page has been rendered, that is, an `RRF` directive is in execution. When a flow is aborted and the control returned to a parent, there is no way to "resume" execution of the flow target of the cancellation.
 
 ### Cancellation bubble-up
 
 In order to override a page, the path to the corresponding template can be easily derived from the URL seen at the browser's address bar when the subflow is `Trigger`ed. Note the page may not necessarily belong directly to the subflow  triggered but probably to another flow lying deep in a chain of `Trigger` invocations.
 
-As an example suppose you are interested in building a flow A that reuses flow B. You identify a page shown that needs to be overriden. It might happen this page is actually rendered by C - a flow that B in turn reuses. In scenarios like this cancellation still works transparently and developers need not be aware of flows dependencies. In practice, when cancellation occurs at C, it bubbles up to B and then to A, which is the target of this process.
+As an example suppose you are interested in building a flow A that reuses flow B. You identify a page shown that needs to be overridden. It might happen this page is actually rendered by C - a flow that B in turn reuses. In scenarios like this cancellation still works transparently and developers need not be aware of flows dependencies. In practice, when cancellation occurs at C, it bubbles up to B and then to A, which is the target of this process.
 
 Note that even flow B (as is) may also be overriding C's templates. Resolution of a template path takes place from the inner to the outer flow, so it occurs this way in the example:
 

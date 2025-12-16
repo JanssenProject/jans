@@ -11,7 +11,7 @@ tags:
 
 ### Unable to find a suitable constructor with arity ... in class ...
 
-A Java invocation of the form `Call package.className#new ...` is passing an incorrect number of arguments or their data types do not match the signature of any of the constructors for that class.
+A Java invocation of the form `Call package.className#new ...` is passing an incorrect number of arguments or their data types do not match the signature of the constructors for that class.
 
 ### Unable to find a suitable method called ... with arity ... in class ...
 

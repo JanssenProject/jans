@@ -267,7 +267,7 @@ Operation ID: patch-oauth-scopes-by-id
   Schema: Array of JsonPatch
 ```
 The `patch-oauth-scopes-by-id` operation uses the [JSON Patch](https://jsonpatch.com/#the-patch) schema to describe
-the configuration change. Refer [here](../config-tools/jans-cli/README.md#patch-request-schema)
+the configuration change. Refer [Jans CLI README](../config-tools/jans-cli/README.md#patch-request-schema)
 to know more about schema.
 
 

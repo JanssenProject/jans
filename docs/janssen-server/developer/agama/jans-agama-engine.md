@@ -228,7 +228,7 @@ The usage of a hash sign (or spaces) before a method name helps disambiguate whe
 
 Any method that meets the conditions mentioned (public or interface static) and that is reachable in the JVM [classpath](#classpath) can be called; developers are not restricted solely to `java.*` packages.
 
-When using `Call`, the method to execute is picked based on the name (e.g. after the `#` sign) and the number of arguments supplied. If a class/interface exhibits several methods with the same name and arity (number of parameters), the method that best matches the dataypes of the arguments with respect to its signature is selected. Sometimes this requires to perform arguments [conversions](#arguments-conversion) and they may fail. In such case, the second best suited method is tried and so on.
+When using `Call`, the method to execute is picked based on the name (e.g. after the `#` sign) and the number of arguments supplied. If a class/interface exhibits several methods with the same name and arity (number of parameters), the method that best matches the datatypes of the arguments with respect to its signature is selected. Sometimes this requires to perform arguments [conversions](#arguments-conversion) and they may fail. In such case, the second best suited method is tried and so on.
 
 When all attempts fail or there are no candidate methods to choose from, the `Call` simply throws a `NoSuchMethodException`.
 

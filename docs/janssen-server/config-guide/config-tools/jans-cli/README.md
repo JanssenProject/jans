@@ -9,7 +9,7 @@ tags:
 
 # Janssen CLI
 
-`jans-cli` module is a command line interface for configuring the Janssen
+`jans-cli` module is a command-line interface for configuring the Janssen
 Server. This module interacts with Janssen Server via
 [RESTful configuration APIs](./../config-api/README.md)
 that server exposes. `jans-cli` can be used to retrieve and update configuration
@@ -258,8 +258,8 @@ passed to the operation in form of `parameters` and/or `schema`.
 Operation description provided by `--info` switch details out what parameters
 and schemas are applicable to each operation.
 
-`Parameters` allow simple string based values to be passed to the operation,
-while `schema` allows JSON structured data to be passed to the operation.
+`Parameters` allow simple string-based values to be passed to the operation,
+while `schema` allows JSON structured-data to be passed to the operation.
 For examples of how operations can be used with parameters and schema, refer to
 [Attribute](../../auth-server-config//attribute-configuration.md). Read more about schema in [this
 detail section](#about-schemas).
@@ -352,7 +352,7 @@ In this command line:
 - `patch-replace` type of operation; used to replace values in
 - `memcachedConfiguration/bufferSize:32788` is a `key:value` pair
 
-Multi valued arguments can be privede as `key:value1,key:vlaue2`, for example
+Multi valued arguments can be provided as `key:value1,key:value2`, for example
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id=get-config-scripts  --endpoint-args="fieldValuePair:scriptType=dynamic_scope,fieldValuePair:level=100"
 ```
