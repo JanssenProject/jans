@@ -57,6 +57,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author Mougang T.Gasmyr
  *
@@ -145,7 +147,8 @@ public class ClientsResource extends ConfigBaseResource {
         }
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
-        return Response.ok(getClient(client)).build();
+
+        return Response.ok(getClientResponse(client)).build();
     }
 
     @Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
@@ -199,9 +202,9 @@ public class ClientsResource extends ConfigBaseResource {
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
         result.setClaims(claims);
-        
-        //ClientSecret handling
-        getClient(result);
+
+        // Response handling
+        getClientResponse(result);
         logger.debug("Claim post creation - result.getClaims():{} ", result.getClaims());
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
@@ -251,8 +254,8 @@ public class ClientsResource extends ConfigBaseResource {
         Client result = clientService.getClientByInum(existingClient.getClientId());
         result.setClaims(claims);
 
-        //ClientSecret handling
-        getClient(result);
+        // Response handling
+        getClientResponse(result);
         logger.debug("Claim post updation - result.getClaims():{} ", result.getClaims());
         return Response.ok(result).build();
     }
@@ -282,17 +285,18 @@ public class ClientsResource extends ConfigBaseResource {
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
 
         existingClient = Jackson.applyPatch(jsonPatchString, existingClient);
-        boolean isClientSecretPresent = Jackson.isElementPresent(jsonPatchString, CLIENT_SECRET);
-        logger.error("\n\\n\n **** isClientSecretPresent:{}", isClientSecretPresent);
-        if (isClientSecretPresent) {
-            logger.error("Before encryption - isClientSecretPresent:{}, existingClient.getClientSecret():{}",
-                    isClientSecretPresent, existingClient.getClientSecret());
-            existingClient.setClientSecret(encryptionService.encrypt(existingClient.getClientSecret()));
-            logger.error("After encryption - isClientSecretPresent:{}, existingClient.getClientSecret():{}",
-                    isClientSecretPresent, existingClient.getClientSecret());
 
+        // ClientSecret encryption check
+        boolean isClientSecretPresent = Jackson.isFieldPresent(jsonPatchString, CLIENT_SECRET);
+        logger.info(" isFieldPresent - CLIENT_SECRET - isClientSecretPresent:{}", isClientSecretPresent);
+        
+        if (isClientSecretPresent && StringUtils.isNotBlank(existingClient.getClientSecret())) {
+            existingClient.setClientSecret(encryptionService.encrypt(existingClient.getClientSecret()));
         }
+        
         clientService.updateClient(existingClient);
+        
+        getClientResponse(existingClient);
         return Response.ok(existingClient).build();
     }
 
@@ -318,12 +322,12 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
-    private Client getClient(Client client) throws EncryptionException {
+    private Client getClientResponse(Client client) throws EncryptionException {
         if (client != null) {
 
             List<Client> clients = new ArrayList<>();
             clients.add(client);
-            getClients(clients);
+            getClientResponse(clients);
             if (!clients.isEmpty()) {
                 return clients.get(0);
             }
@@ -331,15 +335,21 @@ public class ClientsResource extends ConfigBaseResource {
         return client;
     }
 
-    private List<Client> getClients(List<Client> clients) throws EncryptionException {
-        if (clients != null && !clients.isEmpty() && !isClientSecretEncryptionEnabled()) {
+    private List<Client> getClientResponse(List<Client> clients) throws EncryptionException {
+        logger.info(
+                " ClientResponse - isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}",
+                isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse());
+        if (clients != null && !clients.isEmpty()) {
             for (Client client : clients) {
-                try {
-                    client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
-                } catch (Exception ex) {
-                    logger.error(
-                            " Error while decrypting ClientSecret for '" + client.getClientId() + "', exception is - ",
-                            ex);
+                if (isReturnClientSecretInResponse() && !isReturnEncryptedClientSecretInResponse()) {
+                    try {
+                        client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+                    } catch (Exception ex) {
+                        logger.error(" Error while decrypting ClientSecret for '" + client.getClientId()
+                                + "', exception is - ", ex);
+                    }
+                } else {
+                    client.setClientSecret(null);
                 }
             }
         }
@@ -366,7 +376,7 @@ public class ClientsResource extends ConfigBaseResource {
                     pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
 
             List<Client> clients = pagedResult.getEntries();
-            getClients(clients);
+            getClientResponse(clients);
             logger.debug("Clients fetched  - clients:{}", clients);
             pagedResult.setEntries(clients);
         }
@@ -484,10 +494,16 @@ public class ClientsResource extends ConfigBaseResource {
         return client;
     }
 
-    private boolean isClientSecretEncryptionEnabled() {
-        logger.info("appConfiguration.isClientSecretEncryptionEnabled():{} ",
-                appConfiguration.isClientSecretEncryptionEnabled());
-        return this.appConfiguration.isClientSecretEncryptionEnabled();
+    private boolean isReturnEncryptedClientSecretInResponse() {
+        logger.info("appConfiguration.isReturnEncryptedClientSecretInResponse():{} ",
+                appConfiguration.isReturnEncryptedClientSecretInResponse());
+        return this.appConfiguration.isReturnEncryptedClientSecretInResponse();
+    }
+
+    private boolean isReturnClientSecretInResponse() {
+        logger.info("appConfiguration.isReturnClientSecretInResponse():{} ",
+                appConfiguration.isReturnClientSecretInResponse());
+        return this.appConfiguration.isReturnClientSecretInResponse();
     }
 
 }
