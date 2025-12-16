@@ -28,6 +28,12 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "Flag to enable/disable check if acr customScript is enabled. Default value `true`.")
     private boolean acrValidationEnabled;
+    
+    @Schema(description = "Flag to enable/disable clientSecret encryption. Default value `true`.")
+    private boolean clientSecretEncryptionEnabled;
+    
+    @Schema(description = "Flag to enable/disable clientSecret in response. Default value `false`.")
+    private boolean returnClientSecretInResponse;
 
     @Schema(description = "List of approved external Auth server to validate token.")
     private List<String> apiApprovedIssuer;
@@ -149,6 +155,22 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setAcrValidationEnabled(boolean acrValidationEnabled) {
         this.acrValidationEnabled = acrValidationEnabled;
+    }
+    
+    public boolean isClientSecretEncryptionEnabled() {
+        return clientSecretEncryptionEnabled;
+    }
+
+    public void setClientSecretEncryptionEnabled(boolean clientSecretEncryptionEnabled) {
+        this.clientSecretEncryptionEnabled = clientSecretEncryptionEnabled;
+    }  
+    
+    public boolean isReturnClientSecretInResponse() {
+        return returnClientSecretInResponse;
+    }
+
+    public void setReturnClientSecretInResponse(boolean returnClientSecretInResponse) {
+        this.returnClientSecretInResponse = returnClientSecretInResponse;
     }
 
     public List<String> getApiApprovedIssuer() {
@@ -359,7 +381,9 @@ public class ApiAppConfiguration implements Configuration {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
                 + ", disableLoggerTimer=" + disableLoggerTimer + ", disableAuditLogger=" + disableAuditLogger
                 + ", customAttributeValidationEnabled=" + customAttributeValidationEnabled + ", acrValidationEnabled="
-                + acrValidationEnabled + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
+                + acrValidationEnabled  + ", clientSecretEncryptionEnabled="+ clientSecretEncryptionEnabled
+                + ", returnClientSecretInResponse=" + returnClientSecretInResponse
+                + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
                 + apiProtectionType + ", apiClientId=" + apiClientId 
                 + ", endpointInjectionEnabled=" + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl
                 + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl="

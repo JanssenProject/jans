@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.json.JSONException;
@@ -53,6 +54,23 @@ public class Jackson {
         LOG.debug("Patch details - patchAsString:{}, obj:{}", patchAsString, obj );
         JsonPatch jsonPatch = JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));
         return applyPatch(jsonPatch, obj);
+    }
+    
+    public static boolean isElementPresent(String patchAsString, String fieldName) throws JsonProcessingException {
+        LOG.error("Check if patchAsString:{} contains fieldName:{}", patchAsString, fieldName );
+        JsonNode jsonNode = Jackson.asJsonNode(patchAsString);
+        LOG.error("patchAsString jsonNode:{}, jsonNode.findPath(fieldName):{}", jsonNode, jsonNode.findPath(fieldName));
+        Iterator<Map.Entry<String, JsonNode>> fieldIterator = jsonNode.fields();
+        java.util.List<String> keys = new java.util.ArrayList<> ();
+        if(fieldIterator!= null ) {
+            while (fieldIterator.hasNext()) {
+                Map.Entry<String, JsonNode> entry = fieldIterator.next();
+                keys.add(entry.getKey());
+            }
+        }
+        boolean isPresent = keys.contains(fieldName);
+        LOG.error("PatchAsString contains fieldName:{}?:{}", fieldName, isPresent);
+        return isPresent;
     }
 
     public static JsonPatch getJsonPatch(String patchAsString) throws JsonPatchException, IOException {

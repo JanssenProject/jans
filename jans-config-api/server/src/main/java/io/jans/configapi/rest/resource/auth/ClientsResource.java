@@ -14,6 +14,7 @@ import io.jans.as.common.service.common.InumService;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.core.annotation.Ignore;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.AttributeService;
@@ -68,6 +69,10 @@ import java.util.UUID;
 public class ClientsResource extends ConfigBaseResource {
 
     private static final String OPENID_CONNECT_CLIENT = "openid connect client";
+    private static final String CLIENT_SECRET = "clientSecret";
+
+    @Inject
+    private ApiAppConfiguration appConfiguration;
 
     @Inject
     ClientService clientService;
@@ -106,15 +111,17 @@ public class ClientsResource extends ConfigBaseResource {
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
-            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "applicationType=web,persistClientAuthorizations=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) throws EncryptionException {
+            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "applicationType=web,persistClientAuthorizations=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair)
+            throws EncryptionException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
+            logger.debug(
+                    "Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
 
         SearchRequest searchReq = createSearchRequest(clientService.getDnForClient(null), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null, this.getMaxCount(),fieldValuePair, Client.class);
+                startIndex, limit, null, null, this.getMaxCount(), fieldValuePair, Client.class);
 
         return Response.ok(this.doSearch(searchReq)).build();
     }
@@ -130,13 +137,15 @@ public class ClientsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getOpenIdClientByInum(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response getOpenIdClientByInum(
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
+            throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client serach by inum:{}", escapeLog(inum));
         }
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
-        return Response.ok(client).build();
+        return Response.ok(getClient(client)).build();
     }
 
     @Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
@@ -260,8 +269,9 @@ public class ClientsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchClient(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String jsonPatchString)
-            throws JsonPatchException, IOException {
+    public Response patchClient(
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
+            @NotNull String jsonPatchString) throws EncryptionException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client details to be patched - inum:{}, jsonPatchString:{}", escapeLog(inum),
                     escapeLog(jsonPatchString));
@@ -270,6 +280,16 @@ public class ClientsResource extends ConfigBaseResource {
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
 
         existingClient = Jackson.applyPatch(jsonPatchString, existingClient);
+        boolean isClientSecretPresent = Jackson.isElementPresent(jsonPatchString, CLIENT_SECRET);
+        logger.error("isClientSecretPresent:{}", isClientSecretPresent);
+        if (isClientSecretPresent) {
+            logger.error("Before encryption - isClientSecretPresent:{}, existingClient.getClientSecret():{}",
+                    isClientSecretPresent, existingClient.getClientSecret());
+            existingClient.setClientSecret(encryptionService.encrypt(existingClient.getClientSecret()));
+            logger.error("After encryption - isClientSecretPresent:{}, existingClient.getClientSecret():{}",
+                    isClientSecretPresent, existingClient.getClientSecret());
+
+        }
         clientService.updateClient(existingClient);
         return Response.ok(existingClient).build();
     }
@@ -285,7 +305,8 @@ public class ClientsResource extends ConfigBaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    public Response deleteClient(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response deleteClient(
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("Client to be deleted - inum:{} ", escapeLog(inum));
         }
@@ -295,13 +316,28 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
+    private Client getClient(Client client) throws EncryptionException {
+        if (client != null) {
+
+            List<Client> clients = new ArrayList<>();
+            clients.add(client);
+            getClients(clients);
+            if (!clients.isEmpty()) {
+                return clients.get(0);
+            }
+        }
+        return client;
+    }
+
     private List<Client> getClients(List<Client> clients) throws EncryptionException {
-        if (clients != null && !clients.isEmpty()) {
+        if (clients != null && !clients.isEmpty() && !isClientSecretEncryptionEnabled()) {
             for (Client client : clients) {
                 try {
                     client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
                 } catch (Exception ex) {
-                    logger.error(" Error while decrypting ClientSecret for '" + client.getClientId() + "', exception is - ",ex);
+                    logger.error(
+                            " Error while decrypting ClientSecret for '" + client.getClientId() + "', exception is - ",
+                            ex);
                 }
             }
         }
@@ -444,6 +480,12 @@ public class ClientsResource extends ConfigBaseResource {
         }
 
         return client;
+    }
+
+    private boolean isClientSecretEncryptionEnabled() {
+        logger.info("appConfiguration.isClientSecretEncryptionEnabled():{} ",
+                appConfiguration.isClientSecretEncryptionEnabled());
+        return this.appConfiguration.isClientSecretEncryptionEnabled();
     }
 
 }
