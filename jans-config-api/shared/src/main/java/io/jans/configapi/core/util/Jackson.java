@@ -68,8 +68,9 @@ public class Jackson {
                 keys.add(entry.getKey());
             }
         }
+        LOG.error("\n\n\n **** PatchAsString keys:{}", keys);
         boolean isPresent = keys.contains(fieldName);
-        LOG.error("PatchAsString contains fieldName:{}?:{}", fieldName, isPresent);
+        LOG.error("\n\n\n **** PatchAsString contains fieldName:{}?:{}", fieldName, isPresent);
         return isPresent;
     }
 

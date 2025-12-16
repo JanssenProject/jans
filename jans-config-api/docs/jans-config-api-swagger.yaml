@@ -14953,17 +14953,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanAccess:
+        adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
         userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -15084,6 +15084,11 @@ components:
           type: boolean
         allowRevokeForOtherClients:
           type: boolean
+        skipSessionAuthnTimeCheckDuringPromptLogin:
+          type: boolean
+        sessionAuthnTimeCheckDuringPromptLoginThresholdMs:
+          type: integer
+          format: int32
         sectorIdentifierCacheLifetimeInMinutes:
           type: integer
           format: int32
@@ -16758,6 +16763,14 @@ components:
           type: boolean
           description: Flag to enable/disable check if acr customScript is enabled.
             Default value `true`.
+        clientSecretEncryptionEnabled:
+          type: boolean
+          description: Flag to enable/disable clientSecret encryption. Default value
+            `true`.
+        returnClientSecretInResponse:
+          type: boolean
+          description: Flag to enable/disable clientSecret in response. Default value
+            `false`.
         apiApprovedIssuer:
           type: array
           description: List of approved external Auth server to validate token.
@@ -17720,10 +17733,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -17734,6 +17743,10 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

@@ -198,9 +198,10 @@ public class ClientsResource extends ConfigBaseResource {
                 client, client.getAttributes(), client.getCustomAttributes());
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
-        result.setClientSecret(encryptionService.decrypt(result.getClientSecret()));
         result.setClaims(claims);
-
+        
+        //ClientSecret handling
+        getClient(result);
         logger.debug("Claim post creation - result.getClaims():{} ", result.getClaims());
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
@@ -248,9 +249,10 @@ public class ClientsResource extends ConfigBaseResource {
         logger.debug("Final Client details to be updated - client:{}", client);
         clientService.updateClient(client);
         Client result = clientService.getClientByInum(existingClient.getClientId());
-        result.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
         result.setClaims(claims);
 
+        //ClientSecret handling
+        getClient(result);
         logger.debug("Claim post updation - result.getClaims():{} ", result.getClaims());
         return Response.ok(result).build();
     }
@@ -281,7 +283,7 @@ public class ClientsResource extends ConfigBaseResource {
 
         existingClient = Jackson.applyPatch(jsonPatchString, existingClient);
         boolean isClientSecretPresent = Jackson.isElementPresent(jsonPatchString, CLIENT_SECRET);
-        logger.error("isClientSecretPresent:{}", isClientSecretPresent);
+        logger.error("\n\\n\n **** isClientSecretPresent:{}", isClientSecretPresent);
         if (isClientSecretPresent) {
             logger.error("Before encryption - isClientSecretPresent:{}, existingClient.getClientSecret():{}",
                     isClientSecretPresent, existingClient.getClientSecret());

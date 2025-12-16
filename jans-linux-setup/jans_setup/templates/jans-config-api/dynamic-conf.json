@@ -6,7 +6,7 @@
   "customAttributeValidationEnabled": true,
   "acrValidationEnabled": true,
   "clientSecretEncryptionEnabled": true,
-  "returnClientSecretInResponse": true,
+  "returnClientSecretInResponse": false,
   "apiApprovedIssuer": ["${apiApprovedIssuer}"],
   "apiProtectionType": "${apiProtectionType}",
   "apiClientId": "${jca_client_id}",
