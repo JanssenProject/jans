@@ -75,7 +75,11 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
 
     public PersistenceEntryManager getPersistenceEntryManager() {
         if (persistenceEntryManager == null) {
-            persistenceEntryManager = ServerUtil.getLdapManager();
+            synchronized (this) {
+                if (persistenceEntryManager == null) {
+                    persistenceEntryManager = ServerUtil.getLdapManager();
+                }
+            }
         }
         return persistenceEntryManager;
     }
