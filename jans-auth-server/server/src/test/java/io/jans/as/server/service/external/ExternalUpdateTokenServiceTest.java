@@ -6,7 +6,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.model.CustomScript;
-import io.jans.model.custom.script.type.par.DummyParType;
+import io.jans.model.custom.script.type.token.DummyUpdateTokenType;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -48,7 +48,7 @@ public class ExternalUpdateTokenServiceTest {
     @Test
     public void getScripts_whenScriptsPresentAndRunAllIsTrue_shouldReturnNonEmptyList() {
         List<CustomScriptConfiguration> scripts = new ArrayList<>();
-        scripts.add(new CustomScriptConfiguration(new CustomScript("", "", ""), new DummyParType(), new HashMap<>()));
+        scripts.add(new CustomScriptConfiguration(new CustomScript("", "", ""), new DummyUpdateTokenType(), new HashMap<>()));
 
         when(appConfiguration.getRunAllUpdateTokenScripts()).thenReturn(true);
         when(externalUpdateTokenService.getCustomScriptConfigurations()).thenReturn(scripts);
@@ -59,7 +59,7 @@ public class ExternalUpdateTokenServiceTest {
     @Test
     public void getScripts_whenScriptsPresentAndRunAllIsFalse_shouldReturnEmptyList() {
         List<CustomScriptConfiguration> scripts = new ArrayList<>();
-        scripts.add(new CustomScriptConfiguration(new CustomScript("", "", ""), new DummyParType(), new HashMap<>()));
+        scripts.add(new CustomScriptConfiguration(new CustomScript("", "", ""), new DummyUpdateTokenType(), new HashMap<>()));
 
         when(appConfiguration.getRunAllUpdateTokenScripts()).thenReturn(false);
         when(externalUpdateTokenService.getCustomScriptConfigurations()).thenReturn(scripts);
@@ -70,7 +70,7 @@ public class ExternalUpdateTokenServiceTest {
     @Test
     public void getScripts_whenScriptsPresentAndRunAllIsFalseAndClientHasNoScripts_shouldReturnEmptyList() {
         List<CustomScriptConfiguration> scripts = new ArrayList<>();
-        scripts.add(new CustomScriptConfiguration(new CustomScript("", "", ""), new DummyParType(), new HashMap<>()));
+        scripts.add(new CustomScriptConfiguration(new CustomScript("", "", ""), new DummyUpdateTokenType(), new HashMap<>()));
 
         when(appConfiguration.getRunAllUpdateTokenScripts()).thenReturn(false);
         when(externalUpdateTokenService.getCustomScriptConfigurations()).thenReturn(scripts);
@@ -84,7 +84,7 @@ public class ExternalUpdateTokenServiceTest {
     @Test
     public void getScripts_whenScriptsPresentAndRunAllIsFalseAndClientHasScripts_shouldReturnNonEmptyList() {
         List<CustomScriptConfiguration> scripts = new ArrayList<>();
-        scripts.add(new CustomScriptConfiguration(new CustomScript("dummy", "", ""), new DummyParType(), new HashMap<>()));
+        scripts.add(new CustomScriptConfiguration(new CustomScript("dummy", "", ""), new DummyUpdateTokenType(), new HashMap<>()));
 
         when(appConfiguration.getRunAllUpdateTokenScripts()).thenReturn(false);
         when(externalUpdateTokenService.getCustomScriptConfigurations()).thenReturn(scripts);
