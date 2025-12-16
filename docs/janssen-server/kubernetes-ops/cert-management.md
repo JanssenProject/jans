@@ -65,7 +65,7 @@ Rotating Certificates and Keys in Kubernetes setup
 1. Create a secret with `web_https.crt` and `web_https.key`. Note that this may already exist in your deployment.
             
     ```bash
-    kubectl create secret generic web-cert-key --from-file=web_https.crt --from-file=web_https.key -n <jans-namespace>` 
+    kubectl create secret generic web-cert-key --from-file=web_https.crt --from-file=web_https.key -n <jans-namespace>
     ```
 
 2.  Create a file named `load-web-key-rotation.yaml` with the following contents :

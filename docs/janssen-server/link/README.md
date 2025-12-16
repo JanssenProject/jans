@@ -25,5 +25,4 @@ component.
 
 ## Want to contribute?
 
-If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
-(https://github.com/JanssenProject/jans/discussions)
+If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/). You can also participate in [community discussions](https://github.com/JanssenProject/jans/discussions).

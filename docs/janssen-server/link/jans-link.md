@@ -25,7 +25,7 @@ python3 /opt/jans/jans-setup/setup.py --install-jans-link`
 Jans LDAP link gets installed as a service that can be managed using below
 commands.
 
-To Satrt Jans-Link
+To Start Jans-Link
 
 ```bash
 systemctl start jans-link
@@ -317,7 +317,7 @@ Add new Source LDAP Config
 This section of the application allows the server administrator to connect to
 the internal LDAP of the Jans Server. As Jans Server administrator, you do not
 need to insert anything here in this section as new Gluu Server versions
-automatically populates this for you (unlessyou try to manually configure it
+automatically populates this for you (unless you try to manually configure it
 anyway).
 
 ## Things To Remember

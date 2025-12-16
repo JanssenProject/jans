@@ -18,9 +18,8 @@ tags:
       <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/36688669f0aa4c22be2eaf3f711fe488-with-play.gif">
     </a>
   </div>
-
-   Installing TUI and connecting to a Kubernetes installation.
-
+</div>
+## Installing TUI and connecting to a Kubernetes installation.
 
 1.  Download jans-cli-tui from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example: 
     

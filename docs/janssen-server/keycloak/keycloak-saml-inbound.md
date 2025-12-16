@@ -46,7 +46,7 @@ figure below:
 
 ## Configure IDP for inbound SAML
 1. SAML IDP should have been configured as stated in above
-1. Use Agama Lab is an online visual editor to build authentication flows. Learn more about [Agama Lab](../../janssen-server/developer/agama/quick-start-using-agama-lab.md)
+1. Agama Lab is an online visual editor to build authentication flows. Learn more about [Agama Lab](../../janssen-server/developer/agama/quick-start-using-agama-lab.md)
 1. Fork existing agama-inbound-saml project from [Agama Lab Projects](https://agama-lab.gluu.org/landing-page/)
 1. In Agama orchestrator create a new flow by adding a RFAC (Redirect and fetch a callback) node for SAML IDP.
 1. Deploying .gama package on Janssen Server 

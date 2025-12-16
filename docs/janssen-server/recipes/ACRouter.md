@@ -50,7 +50,8 @@ The `casa` script offers a 2 steps authentication flow with login and password p
 The `passwordless` script offers a 2 steps authentication flow with username prompted in the first step and a user-preferred authentication mechanism in the second step.
 
 ### Casa App for enrollment of a variety of credentials:
-**Casa** is a self-service web portal for end-users can be used to
+
+**Casa** is a self-service web portal that end-users can use to
 1. Enroll, delete and manage two-factor authentication (2FA) credentials for their account (e.g. FIDO security keys, mobile apps, phone numbers, etc.)
 1. Turn 2FA on and off
 

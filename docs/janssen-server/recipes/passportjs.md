@@ -158,7 +158,7 @@ For seamless flow, You can deploy Passport Project on Jans server and you can us
 </Location>
 ```
 
-After this configurations, you need to use `jans-fqdn` in passport callback URL. This is optional configurations, you can deploy your passport project on another server.
+After these configurations, you need to use `jans-fqdn` in passport callback URL. This is optional configurations, you can deploy your passport project on another server.
 
 ### Add passport-social script
 

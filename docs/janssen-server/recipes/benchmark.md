@@ -15,7 +15,7 @@ With this procedure the [following](#results) with a `10` million user database 
 #### Results
 
 !!!note
-    The authorization code flow  hits a total of 4 steps, 3 authorization steps `/token`, `/authorize`, `/jans-auth/login` and 1 redirect.
+    The authorization code flow hits a total of 4 steps, 3 authorization steps `/token`, `/authorize`, `/jans-auth/login` and 1 redirect.
 
 | Flow                    | Authentications per second |
 |-------------------------|----------------------------|
