@@ -44,7 +44,7 @@ figure below:
 
 ![Edit Isentitiy Provider](../../assets/tui-admin-keycloack-edit-idp.png)
 
-## Configure IDP for inbound SAML 
+## Configure IDP for inbound SAML
 1. SAML IDP should have been configured as stated in above
 1. Use Agama Lab is an online visual editor to build authentication flows. Learn more about [Agama Lab](../../janssen-server/developer/agama/quick-start-using-agama-lab.md)
 1. Fork existing agama-inbound-saml project from [Agama Lab Projects](https://agama-lab.gluu.org/landing-page/)

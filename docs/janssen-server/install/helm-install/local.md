@@ -44,7 +44,7 @@ sudo su -
 wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
 ```
 
-This will install Docker, Microk8s, Helm and Janssen with the default settings that can be found inside [values.yaml](https://github.com/JanssenProject/jans/blob/main/charts/janssen/values.yaml).  
+This will install Docker, Microk8s, Helm and Janssen with the default settings that can be found inside [values.yaml](https://github.com/JanssenProject/jans/blob/main/charts/janssen/values.yaml).
 
 The installer will automatically add a record to your hosts record in the VM but if you want to access the endpoints outside the VM you must map the `ip` of the instance running Ubuntu to the FQDN you provided and then access the endpoints at your browser such in the example in the table below.
 

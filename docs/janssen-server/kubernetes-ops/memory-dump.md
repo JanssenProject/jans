@@ -8,7 +8,7 @@ tags:
   - heap
 ---
 
-# Memory Dump 
+# Memory Dump
 
 This document will demonstrate how to generate a memory dump so that you can analyze your memory usage.
 
@@ -16,7 +16,7 @@ This document will demonstrate how to generate a memory dump so that you can ana
 
 This operation can be made in the following Java-based services:
 
-| Service     | JAVA_OPTIONS environment variable | 
+| Service     | JAVA_OPTIONS environment variable |
 |-------------|-----------------------------------|
 | auth-server | CN_AUTH_JAVA_OPTIONS              |
 | casa        | CN_CASA_JAVA_OPTIONS              |

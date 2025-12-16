@@ -40,8 +40,8 @@ autonumber
     Jans AS->User agent: 10. write Jans session cookie
 ```
 
-### **An ACRouter script**: 
-Currently, the Jans Auth server comes with 2 `PersonAuthenticationType` interception scripts that integrate multiple authentication methods and offer alternative options to users for sign-in. 
+### **An ACRouter script**:
+Currently, the Jans Auth server comes with 2 `PersonAuthenticationType` interception scripts that integrate multiple authentication methods and offer alternative options to users for sign-in.
 
 1. [Casa Script](https://github.com/GluuFederation/flex/blob/main/casa/extras/README.md)
 The `casa` script offers a 2 steps authentication flow with login and password prompted in the first step and a user-preferred authentication mechanism in the second step.
@@ -50,7 +50,7 @@ The `casa` script offers a 2 steps authentication flow with login and password p
 The `passwordless` script offers a 2 steps authentication flow with username prompted in the first step and a user-preferred authentication mechanism in the second step.
 
 ### Casa App for enrollment of a variety of credentials:
-**Casa** is a self-service web portal for end-users can be used to 
+**Casa** is a self-service web portal for end-users can be used to
 1. Enroll, delete and manage two-factor authentication (2FA) credentials for their account (e.g. FIDO security keys, mobile apps, phone numbers, etc.)
 1. Turn 2FA on and off
 
@@ -74,7 +74,7 @@ Ensure the following preconditions are met so that the authentication mehtod int
 |`configurationAttributes`| `configurationProperties` passed in when adding custom script. `Map<String, SimpleCustomProperty> configurationAttributes` |
 |`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
 |`User`|User object [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java)|
- 
+
 
 #### Step2: Modification to web-pages:
 1. Ensure that custom pages returned by `getPageForStep` for step 2 (or higher) contain the fragment:

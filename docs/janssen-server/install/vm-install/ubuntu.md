@@ -101,7 +101,7 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 ```
 
-Or, 
+Or,
 
 ```shell title="Command"
 dpkg -i jans_1.4.0-stable.ubuntu22.04_amd64.deb
@@ -179,7 +179,7 @@ If you have selected casa during installation you can access casa using url ```h
 To enable communication with Janssen Server over tls (https) in production environment, Janssen Server needs details about CA certificate.
 
 To generate Let’s Encrypt CA certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/blob/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
- 
+
 ## Uninstall
 
 Uninstall process involves two steps and removes all the Janssen Server components.

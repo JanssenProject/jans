@@ -18,7 +18,7 @@ For this quick start we will use a [single node Kubernetes install in docker wit
 
 !!! note
     If you are deploying an Ingress controller on a single node deployment, in which Ingress utilizes ports 80 and 443, then you have to adjust the host ports mapped for the rancher/rancher container.
-    Here's an [example](https://ranchermanager.docs.rancher.com/reference-guides/single-node-rancher-in-docker/advanced-options#running-rancherrancher-and-rancherrancher-agent-on-the-same-node) on how to do that. 
+    Here's an [example](https://ranchermanager.docs.rancher.com/reference-guides/single-node-rancher-in-docker/advanced-options#running-rancherrancher-and-rancherrancher-agent-on-the-same-node) on how to do that.
 
 1. Provision a Linux 4 CPU, 16 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Save the VM IP address. For development environments, the VM can be set up using VMWare Workstation Player or VirtualBox with an Ubuntu 20.04 operating system running on a VM.
 2. Install [Docker](https://docs.docker.com/engine/install/).

@@ -11,7 +11,7 @@ The Jans Keycloak Link is a [Jans Link](README.md) module that provides
 synchronization services to update the Janssen User Store from an external
 Keycloak instance.
 
-Jans Keycloak Link accesses Keycloak data via Keycloak API. A new 
+Jans Keycloak Link accesses Keycloak data via Keycloak API. A new
 client needs to be created on Keycloak in order to authorize Jans Keycloak Link
 for API access. The client can be configured to use one of the two
 authentication mechanisms:
@@ -100,6 +100,4 @@ available users in Janssen Server.
 
 ## Want to contribute?
 
-If you have content you'd like to contribute to this page in the meantime, 
-you can get started with 
-our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).

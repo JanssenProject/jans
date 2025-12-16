@@ -28,4 +28,4 @@ combinations of credentials--none of which must include a password.
 
 Net-net, "passwordless" is really just marketing jargon. Normally it implies
 some kind of risk assessment to optimize user experience. If you can imagine
-any such authentication flow, you can implement it in Auth Server. 
+any such authentication flow, you can implement it in Auth Server.

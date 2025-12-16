@@ -13,22 +13,22 @@ Rotating Certificates and Keys in Kubernetes setup
 
 !!! Note
     `janssen-config-cm` in all examples refer to jans installation configuration parameters where `janssen` is the `helm-release-name`.
-       
-    
+
+
 ## Web (Ingress)
-        
+
 | Associated certificates and keys |
 | -------------------------------- |
 | /etc/certs/web_https.crt         |
 | /etc/certs/web_https.key         |
 
 !!! Note
-    During fresh installation, the config-job checks if SSL certificates and keys are mounted as files. 
+    During fresh installation, the config-job checks if SSL certificates and keys are mounted as files.
     If no mounted files are found, it attempts to download SSL certificates from the FQDN supplied. If the download is successful, an empty key file is generated.
     If no mounted or downloaded files are found, it generates self-signed SSL certificates, CA certificates, and keys.
 
 ### Rotate
-        
+
 1.  Create a file named `web-key-rotation.yaml` with the following contents :
         
     ```yaml
@@ -51,23 +51,23 @@ Rotating Certificates and Keys in Kubernetes setup
                   name: janssen-config-cm # This may be differnet in Helm
               args: ["certmanager", "patch", "web", "--opts", "valid-to:365"]
     ```
-            
+
 2.  Apply job        
     ```bash
     kubectl apply -f web-key-rotation.yaml -n <jans-namespace>
     ```            
-        
+
 ### Load from existing source
-        
+
 !!! Note
     This will load `web_https.crt` and `web_https.key` from `/etc/certs`.
-                
+
 1. Create a secret with `web_https.crt` and `web_https.key`. Note that this may already exist in your deployment.
             
     ```bash
     kubectl create secret generic web-cert-key --from-file=web_https.crt --from-file=web_https.key -n <jans-namespace>` 
     ```
-                
+
 2.  Create a file named `load-web-key-rotation.yaml` with the following contents :
                                
     ```yaml
@@ -110,15 +110,15 @@ Rotating Certificates and Keys in Kubernetes setup
                   subPath: web_https.key
               args: ["certmanager", "patch", "web", "--opts", "source:from-files"]
     ```
-            
+
 3.  Apply job
 
 ```bash
 kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
-```            
+```
 
 ## Auth-server
-    
+
 !!! Warning
     key rotation CronJob is usually installed with jans. Please make sure before deploying using `kubectl get cronjobs -n <jans-namespace>`
 
@@ -162,7 +162,7 @@ kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
               restartPolicy: Never
     ```
 
-          
+
 2.  Apply cron job
 
     ```bash

@@ -7,37 +7,37 @@ tags:
 
 # Jans LDAP Link
 
-The Jans LDAPLink synchronization service updates the Janssen User Store when 
-authoritative data is managed in an external LDAP store. 
+The Jans LDAPLink synchronization service updates the Janssen User Store when
+authoritative data is managed in an external LDAP store.
 
 ## Installation
 
-The API is available as the `Jans Link` component of Jans Server. 
+The API is available as the `Jans Link` component of Jans Server.
 Upon [installation](https://docs.jans.
-io/head/admin/install/vm-install/ubuntu/) you can select if you want 
-to install this Service along with other Janssen Server components. Post 
+io/head/admin/install/vm-install/ubuntu/) you can select if you want
+to install this Service along with other Janssen Server components. Post
 installation, to add Jans-Link component, use the following:
 
 ```bash
 python3 /opt/jans/jans-setup/setup.py --install-jans-link`
 ```
 
-Jans LDAP link gets installed as a service that can be managed using below 
+Jans LDAP link gets installed as a service that can be managed using below
 commands.
 
-To Satrt Jans-Link 
+To Satrt Jans-Link
 
 ```bash
 systemctl start jans-link
 ```
 
-To check status 
+To check status
 
 ```bash
 systemctl status jans-link
 ```
 
-To Stop Jans-Link 
+To Stop Jans-Link
 
 ```bash
 systemctl stop jans-link
@@ -84,10 +84,10 @@ Operation ID: put-jans-link-properties
   Description: Updates Jans Link configuration properties.
   Schema: Jans Link Plugin:AppConfiguration
 ```
- 
+
 #### Gets Jans Link App configuration
 
-To see Jans Link properties, use the below command. Use the operation ID 
+To see Jans Link properties, use the below command. Use the operation ID
 `get-jans-link-properties` to get all the Jans link on the Janssen Server.
 
 ```bash title="Command"
@@ -183,8 +183,8 @@ The output of the above command will be similar to this:
 
 #### Updates Jans Link configuration properties
 
-Let's update the Jans Link configuration properties using the Janssen CLI command line. 
-To perform the `put-jans-link-properties` operation, we have to use its schema. 
+Let's update the Jans Link configuration properties using the Janssen CLI command line.
+To perform the `put-jans-link-properties` operation, we have to use its schema.
 To get its schema:
 
 
@@ -233,17 +233,17 @@ in the image below.
 
 The section below covers Jans LDAP link configuration in more detail.
 
-#### Configuration Using 
+#### Configuration Using
 
-In order to configre Jans LDAP Link, the administrator needs to know various 
-values of the backend LDAP(or Active Directory). For example, `host` & `port`, 
-`bindDN`, user information, `password`, `Objectclasses`, `attributes` which 
+In order to configre Jans LDAP Link, the administrator needs to know various
+values of the backend LDAP(or Active Directory). For example, `host` & `port`,
+`bindDN`, user information, `password`, `Objectclasses`, `attributes` which
 will be pulled, etc.
 
-In addition, the administrator needs to know generic information about the 
-Jans Server's LDAP. By default, the deployer can use `localhost:1636`, 
-`cn=directory manager`, `password` chosen during installation, 
-`ou=people,o=site` as server information, `bindDN`, `bindDN` `password` and 
+In addition, the administrator needs to know generic information about the
+Jans Server's LDAP. By default, the deployer can use `localhost:1636`,
+`cn=directory manager`, `password` chosen during installation,
+`ou=people,o=site` as server information, `bindDN`, `bindDN` `password` and
 `baseDN` respectively.
 
 Let's move forward with the Jans-Link setup.
@@ -284,7 +284,7 @@ TUI
 * `Custom LDAP Filter` : If there is any custom search required, this filtering mechanism can be used such as "sn=*" whereas the value of this field ensures that every user must contain an attribute named `SN`.
 
 
-#### Source Backend LDAP Server 
+#### Source Backend LDAP Server
 
 ![sbls](../../assets/ldap-link-source-backend.png)
 
@@ -310,14 +310,14 @@ Add new Source LDAP Config
 * `Enable` : This check-box is used to save and push the changes. Do not use this unless the server administrator has entered all the required values.
 
 
-#### Inum DB Server 
+#### Inum DB Server
 
 ![inumsbs](../../assets/ldap-link-inum-db.png)
 
-This section of the application allows the server administrator to connect to 
-the internal LDAP of the Jans Server. As Jans Server administrator, you do not 
-need to insert anything here in this section as new Gluu Server versions 
-automatically populates this for you (unlessyou try to manually configure it 
+This section of the application allows the server administrator to connect to
+the internal LDAP of the Jans Server. As Jans Server administrator, you do not
+need to insert anything here in this section as new Gluu Server versions
+automatically populates this for you (unlessyou try to manually configure it
 anyway).
 
 ## Things To Remember
@@ -343,9 +343,9 @@ After configuring Jans Link, you should give it some time to run and populate th
 /opt/opendj/bin/ldapsearch -h localhost -p 1636 -Z -X -D "cn=directory manager" -w <pass> -b "ou=people,o=DA....,o=jans" dn | grep "dn\:" | wc -l
 ```
 
-Try to log in with one of these users. We assume that you have also set up your 
+Try to log in with one of these users. We assume that you have also set up your
 Jans Server to use the correct LDAP server for authentication.
 
 ## Want to contribute?
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
