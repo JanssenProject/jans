@@ -15,7 +15,7 @@ This OAuth 2.0 protocol extension enables OAuth clients to request user authoriz
 ### Sequence Diagram
 ![](https://github.com/JanssenProject/jans/raw/main/docs/assets/device_auth_flow.png)
 
-Paste the following source text of the sequence diagram on [sequencediagram.org](https://sequencediagram.org/) 
+Paste the following source text of the sequence diagram on [sequencediagram.org](https://sequencediagram.org/)
 ```
 title Oauth2.0 Device Authorization flow
 
@@ -56,7 +56,7 @@ Third Party App->Device App: return Response
 
 3. After that, user could need to authenticate, then decide whether permissions will be granted.
 
-`acr` value can be specified in `deviceAuthzAcr` AS configuration property. 
+`acr` value can be specified in `deviceAuthzAcr` AS configuration property.
 
 ![DeviceFlow3](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-3.png)
 
@@ -67,7 +67,7 @@ Third Party App->Device App: return Response
 #### ACR value during Device Authorization
 
 User is required to authenticate if not authenticated yet. By default `acr_values` is not set in authorization request, which means it relies on default AS handling.
-However it's possible explicitly set `acr` value during Device Authorization by setting `deviceAuthzAcr` AS configuration property. 
+However it's possible explicitly set `acr` value during Device Authorization by setting `deviceAuthzAcr` AS configuration property.
 
 ## Request user and device codes
 
