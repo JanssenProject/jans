@@ -16,7 +16,7 @@ With this procedure the [following](#results) with a `10` million user database 
 
 !!!note
     The authorization code flow  hits a total of 4 steps, 3 authorization steps `/token`, `/authorize`, `/jans-auth/login` and 1 redirect.
-    
+
 | Flow                    | Authentications per second |
 |-------------------------|----------------------------|
 | Authorization code flow | 800-1000                   |
@@ -52,7 +52,7 @@ Resourcing is  critical as timeouts in connections can occur, resulting in faile
 
 
 A Kubernetes cluster can be created with three nodes or more in one region and that's fine as long as the nodes are in multiple zones. We will continue with the above table and using [microk8s](https://microk8s.io).
-   
+
 
 1. Create three ubuntu 22.04 nodes and run on each one the following:
 
@@ -203,7 +203,7 @@ Loading users requires a hefty but temporary amount of resources. By default, th
     ```bash
     kubectl create ns load
     ```
-   
+
 5. Create `load_users.yaml`
 
     ```bash
@@ -297,7 +297,7 @@ Create the client needed to run the test by executing the following. Make sure t
     ```bash
     kubectl scale deploy janssen-auth-server -n jans --replicas=40
    ```
-   
+
 7. Finally, scale the load test. The replica number here should be manually controlled.
     ```bash
     kubectl scale deploy load-testing-authz -n load --replicas=20
@@ -387,7 +387,7 @@ Create the client needed to run the test by executing the following. Make sure t
     ```bash
     kubectl scale deploy janssen-auth-server -n jans --replicas=40
    ```
-   
+
 7. Finally, scale the load test. The replica number here should be manually controlled.
     ```bash
     kubectl scale deploy load-testing-ropc -n load --replicas=20
@@ -489,7 +489,7 @@ Create the client needed to run the test by executing the following. Make sure t
     ```bash
     kubectl scale deploy janssen-auth-server -n jans --replicas=40
    ```
-   
+
 8. Finally, scale the load test. The replica number here should be manually controlled.
     ```bash
     kubectl scale deploy load-testing-ropc -n load --replicas=20

@@ -21,9 +21,9 @@ tags:
 2.  If you are using `Cloud Shell`, you can skip to step 6.
 
 3.  Install [gcloud](https://cloud.google.com/sdk/docs/quickstarts).
-    
+
 4.  Install `kubectl` using `gcloud components install kubectl` command.
-    
+
 5.  Install [Helm3](https://helm.sh/docs/intro/install/).
 
 6.  Create cluster using a command such as the following example:

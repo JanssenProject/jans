@@ -158,11 +158,11 @@ For seamless flow, You can deploy Passport Project on Jans server and you can us
 </Location>
 ```
 
-After this configurations, you need to use `jans-fqdn` in passport callback URL. This is optional configurations, you can deploy your passport project on another server. 
+After this configurations, you need to use `jans-fqdn` in passport callback URL. This is optional configurations, you can deploy your passport project on another server.
 
 ### Add passport-social script
 
-Download the script from [here](../../script-catalog/person_authentication/passport/passport-social-jans-script.py) and add it to Janssen Server using `jans-cli`. After Janssen Server installation, you will get `jans-cli`. 
+Download the script from [here](../../script-catalog/person_authentication/passport/passport-social-jans-script.py) and add it to Janssen Server using `jans-cli`. After Janssen Server installation, you will get `jans-cli`.
 
 Follow [this jans-cli guide](https://jans.io/docs/config-guide/jans-cli/im/im-custom-scripts/) to add a custom script in Janssen.
 
@@ -177,7 +177,7 @@ The custom script has the following properties:
 | passport_token_endpoint_path | It will use `passport_fqdn` as a prefix so just add path. e.g. `/passport/token`. Jans request this endpoint to get token for next auth request [here](../../script-catalog/person_authentication/passport/passport-social-jans-script.py). Check [Step-1](#setup-passport-js-project) in Setup Passport section to make token endpoint. |
 | passport_auth_endpoint_path | It will use `passport_fqdn` as a prefix so just add path. e.g. `/passport/auth`. Jans request this endpoint to initiate auth request [here](../../script-catalog/person_authentication/passport/passport-social-jans-script.py). Check [Step-2](#setup-passport-js-project) in Setup Passport section to make passport auth endpoint. Jans will append provider and token during auth request e.g. If you have added google provider with id `google` in `providers_json_file` then jans request will be look like `https://your-passport.com/passport/auth/google/<token>`. |
 
-> Note: After adding and enabling successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: https://your-jans-server.com/.well-known/openid-configuration. Find `"acr_values_supported"` and you should see `passport-social`. 
+> Note: After adding and enabling successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: https://your-jans-server.com/.well-known/openid-configuration. Find `"acr_values_supported"` and you should see `passport-social`.
 
 > Note: Once you initiate auth request from your RP Application make sure to add `acr_values=passport-social` in the request. acr_values is your script name.
 
@@ -203,7 +203,7 @@ Below is the `providers_json_file` format:
 |requestForEmail|It is not required to be `true`. If you set it to true then it will prompt a user to enter an email.|
 |emailLinkingSafe|It is not required to be `true`. If you want to link to existing users then set it to true|
 
-### Customize login pages 
+### Customize login pages
 
 `Passport-social` script uses `passportlogin.xhtml` and `passportpostlogin.xhtml` which are already comes which Janssen installation. No need to do anything. For UI Customization, you can download current page source code from [here](https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp/auth/passport), modify UI, replace pages at path `/opt/jans/jetty/jans-auth/custom/pages/auth/passport/` and restart `jans-auth` server.
 
