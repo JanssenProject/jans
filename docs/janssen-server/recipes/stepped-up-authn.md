@@ -10,7 +10,8 @@ tags:
 
 # Stepped-up Authentication Recipe
 
-### What is Stepped Up Authentication ?
+## What is Stepped Up Authentication ?
+
 While navigating through an application, a user is challenged to produce an additional authentication when a certain API (of higher criticality) accessed by the client, does not have the needed scope.
 
 Consider the following sequence of events :
@@ -47,7 +48,8 @@ Auth Server->> Website: Return Access Token with scope containing OTP
 
 ```
 
-## Implementation details :
+## Implementation details
+
 This implementation has been broken down to 5 parts highlighted in different colours. The details contain sample code that can be used to be build the flow using `Person Authentication Scripts` and `Update Token Scripts`
 ```mermaid
 

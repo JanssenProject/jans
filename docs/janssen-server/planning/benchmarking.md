@@ -39,7 +39,7 @@ you guessed they would. And you make changes to your environment and run the
 benchmarking tests again--*ad nauseam*. Leave enough time for benchmarking. However
 much time you think it will take, triple your estimate.
 
-Make sure you look at both short tests and long running tests. A slow memory
+Make sure you look at both short tests and long-running tests. A slow memory
 leak may only present after many hours of high load. Also, run some crazy tests,
 just so you know what happens. Some organizations benchmark for ten times the
 normal volume. But when an incident happens, they see 1,000 times the normal volume.

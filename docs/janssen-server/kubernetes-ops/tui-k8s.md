@@ -19,7 +19,8 @@ tags:
     </a>
   </div>
 </div>
-## Installing TUI and connecting to a Kubernetes installation.
+
+## Installing TUI and connecting to a Kubernetes installation
 
 1.  Download jans-cli-tui from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example: 
     

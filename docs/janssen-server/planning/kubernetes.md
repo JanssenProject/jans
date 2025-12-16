@@ -35,7 +35,7 @@ This determines the amount of investment needed to overcome the learning curve t
 #### Does the deployment need to be highly available(HA)?
 We recommend using Kubernetes-based CN deployments for situations where high availability is a critical factor. Though
 [VM cluster](./vm-cluster.md) can provide high availability, we do not recommend the HA setup with VMs. Primarily
-because effort required to upgrade multiple servers and configuring them is much more as compared to a cloud native
+because effort required to upgrade multiple servers and configuring them is much more as compared to a cloud-native
 deployment and it is error-prone. We recommend you follow the CN setup for HA as you will get automatic upgrades,
 patches with a single helm upgrade command.
 
@@ -58,4 +58,4 @@ Rancher UI can be deployed to several clouds / multi-clouds and also be used to 
 - Helm
 - Terraform
 - Prometheus and Grafana
-- Pipeline tech such as Jenkins, Ansible, Cloud Build ..etc
+- Pipeline tech such as Jenkins, Ansible, Cloud Build etc.
