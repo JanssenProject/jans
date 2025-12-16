@@ -36,7 +36,7 @@ tasks.
 
 In the Janssen Server, you can deploy and customize the SSA using the
 command line. To get the details of Janssen command line operations relevant to
-SSA Configuration, you can check the operations under `Ssa` 
+SSA Configuration, you can check the operations under `Ssa`
 task using the command below:
 
 ```bash title="Command"
@@ -138,7 +138,7 @@ Scopes:
 
 ### Get all SSA
 
-Use the `get-ssa` operation to retrieve the list of SSA configuration, 
+Use the `get-ssa` operation to retrieve the list of SSA configuration,
 run the following command line:
 
 ```bash title="Command"
@@ -202,7 +202,7 @@ jans cli -auth --operation-id get-ssa
 
 
 
-To create a new `SSA`, we can use `post-register-ssa` operation id. As shown in the [output](#using-command-line) for 
+To create a new `SSA`, we can use `post-register-ssa` operation id. As shown in the [output](#using-command-line) for
 `--info` command, the `post-register-ssa` operation requires data to create new SSA.
 
 we have added below key data to the file `/tmp/ssa.json`.
@@ -250,22 +250,22 @@ jans cli -auth --operation-id get-jwt-ssa \
 
 ### Delete SSA
 
-We can delete the specific `SSA` through its `jti` using `delete-ssa` operation. 
-For example, We can put `jti:e94aae83-5a88-410c-a988-277919bdcdaf` with `--url-suffix` to delete the session. 
+We can delete the specific `SSA` through its `jti` using `delete-ssa` operation.
+For example, We can put `jti:e94aae83-5a88-410c-a988-277919bdcdaf` with `--url-suffix` to delete the session.
 The following command as below:
 
 
 
-```bash 
+```bash
 jans cli -auth --operation-id delete-ssa \
 --url-suffix="jti:e94aae83-5a88-410c-a988-277919bdcdaf"
 ```
 
 
-To delete all SSA of the specified organization through its `org_id`. 
+To delete all SSA of the specified organization through its `org_id`.
 The following command as below:
 
-```bash 
+```bash
 jans cli -auth --operation-id delete-ssa --url-suffix="org_id:gluu"
 ```
 

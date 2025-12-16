@@ -9,7 +9,7 @@ tags:
 
 # Pushed Authorization Request (PAR)
 
-Pushed Authorization Request (PAR) allows to push the payload of an OAuth 2.0 authorization request to the authorization server via 
+Pushed Authorization Request (PAR) allows to push the payload of an OAuth 2.0 authorization request to the authorization server via
 a direct request and provides back with a request URI that is used as reference to the data in a subsequent call to the authorization endpoint.
 
 For more information and implementation details please check [PAR Endpoint documentation](../endpoints/par.md)

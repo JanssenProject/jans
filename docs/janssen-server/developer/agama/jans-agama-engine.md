@@ -44,7 +44,7 @@ obj = { success: true, data: { userId: "john_doe" } }
 Finish obj 
 ```
 
-By default `userId` maps to the `uid` attribute that generally all user entries already have in the database of Jans Server, in other words, the "user name". This attribute is configurable though via property `finish_userid_db_attribute` of the [bridge script](./engine-bridge-config.md#bridge-configuration). In some cases, you would like to change that to `mail` in order to pass things like `{ success: true, data: { userId: "john_doe@jd.me" } }` for instance. 
+By default `userId` maps to the `uid` attribute that generally all user entries already have in the database of Jans Server, in other words, the "user name". This attribute is configurable though via property `finish_userid_db_attribute` of the [bridge script](./engine-bridge-config.md#bridge-configuration). In some cases, you would like to change that to `mail` in order to pass things like `{ success: true, data: { userId: "john_doe@jd.me" } }` for instance.
 
 !!! Important
     If the database lookup does not produce exactly one user entry, this is treated as a failed authentication attempt by the authentication server.
@@ -101,7 +101,7 @@ Engine's callback URL is `https://<your-server-name>/jans-auth/fl/callback`. Thi
 
 The mechanism used for redirection is a "302 Found" HTTP redirect that entails a subsequent GET request to the external site. In cases where a POST is expected, the 3-param version of [RRF](./flows-navigation-ui.md#3-param-variant) can be useful.
 
-## RRF, navigation, and assets handling 
+## RRF, navigation, and assets handling
 
 Understanding how `RRF` works in the engine is key to writing meaningful flows. This topic is fully covered [here](./flows-navigation-ui.md).
 
@@ -111,9 +111,9 @@ In the Jans Agama engine, Java or Groovy code can be called by means of the `Cal
 
 !!! Note
     Java language background is required for this section.
-    
+
 The following exemplifies different kind of usages of Java from Agama code:
- 
+
 <table>
 	<tr><th>Example</th><th>Notes</th></tr>
 	<tr>
@@ -226,9 +226,9 @@ The usage of a hash sign (or spaces) before a method name helps disambiguate whe
 
 ### Highlights
 
-Any method that meets the conditions mentioned (public or interface static) and that is reachable in the JVM [classpath](#classpath) can be called; developers are not restricted solely to `java.*` packages. 
+Any method that meets the conditions mentioned (public or interface static) and that is reachable in the JVM [classpath](#classpath) can be called; developers are not restricted solely to `java.*` packages.
 
-When using `Call`, the method to execute is picked based on the name (e.g. after the `#` sign) and the number of arguments supplied. If a class/interface exhibits several methods with the same name and arity (number of parameters), the method that best matches the dataypes of the arguments with respect to its signature is selected. Sometimes this requires to perform arguments [conversions](#arguments-conversion) and they may fail. In such case, the second best suited method is tried and so on. 
+When using `Call`, the method to execute is picked based on the name (e.g. after the `#` sign) and the number of arguments supplied. If a class/interface exhibits several methods with the same name and arity (number of parameters), the method that best matches the datatypes of the arguments with respect to its signature is selected. Sometimes this requires to perform arguments [conversions](#arguments-conversion) and they may fail. In such case, the second best suited method is tried and so on.
 
 When all attempts fail or there are no candidate methods to choose from, the `Call` simply throws a `NoSuchMethodException`.
 

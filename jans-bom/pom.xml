@@ -47,6 +47,7 @@
 		<mysql.version>9.5.0</mysql.version>
 		<mysql-socket.version>1.27.1</mysql-socket.version>
 		<postgresql.version>42.7.8</postgresql.version>
+		<postgresql-socket.version>1.27.1</postgresql-socket.version>
 
 		<jackson.bom.version>2.13.4.20221013</jackson.bom.version>
 		<jackson.version>2.15.0</jackson.version>
@@ -793,6 +794,17 @@
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
 			    <version>${postgresql.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.google.cloud.sql</groupId>
+			    <artifactId>postgres-socket-factory</artifactId>
+			    <version>${postgresql-socket.version}</version>
+			</dependency>
+			
+			<dependency>
+			    <groupId>com.google.protobuf</groupId>
+			    <artifactId>protobuf-java</artifactId>
+			    <version>4.33.2</version>
 			</dependency>
 
 			<!-- SQL Query -->
