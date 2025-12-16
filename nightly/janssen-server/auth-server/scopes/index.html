@@ -14718,13 +14718,13 @@
 </ul>
 <p>In AS code, scope object is represented with following <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java">java class</a></p>
 <h3 id="dynamic-client-registration">Dynamic Client Registration<a class="headerlink" href="#dynamic-client-registration" title="Permanent link">#</a></h3>
-<p>To enabled scope for DCR please set <code>jansDefScope</code> to <code>true</code> value. </p>
+<p>To enabled scope for DCR please set <code>jansDefScope</code> to <code>true</code> value.</p>
 <p>Global AS Configuration for DCR
 - <code>dynamicRegistrationScopesParamEnabled</code> - boolean value specifying whether to enable scopes parameter in dynamic registration.
 - <code>dynamicRegistrationPasswordGrantTypeEnabled</code> - boolean value specifying whether to enable Password Grant Type during Dynamic Registration. Default value is <code>false</code>.
 - <code>dynamicRegistrationAllowedPasswordGrantScopes</code> - string array, list of grant scopes for dynamic registration</p>
 <h3 id="customizing-scopes">Customizing scopes<a class="headerlink" href="#customizing-scopes" title="Permanent link">#</a></h3>
-<p>Similar to client registration, scopes can be customized using interception scripts.  </p>
+<p>Similar to client registration, scopes can be customized using interception scripts.</p>
 <p>The sample dynamic scope script is <a href="../../../script-catalog/dynamic_scope/dynamic-permission/dynamic_permission.py">available here</a>.</p>
 <h3 id="global-as-configuration">Global AS Configuration<a class="headerlink" href="#global-as-configuration" title="Permanent link">#</a></h3>
 <p>Global AS Configurations related to scopes.</p>
@@ -14741,7 +14741,7 @@
 <li><code>openidScopeBackwardCompatibility</code> - boolean value, set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid. Default value is <code>false</code>.</li>
 </ul>
 <h3 id="spontaneous-scopes">Spontaneous scopes<a class="headerlink" href="#spontaneous-scopes" title="Permanent link">#</a></h3>
-<p>Spontaneous scopes are scopes with random part. AS supports both OpenID Connect and UMA Spontaneous scopes. </p>
+<p>Spontaneous scopes are scopes with random part. AS supports both OpenID Connect and UMA Spontaneous scopes.</p>
 <p>Global AS Configuration for spontaneous scopes.</p>
 <ul>
 <li><code>allowSpontaneousScopes</code> - boolean value, specifies whether to allow spontaneous scopes</li>
@@ -14765,7 +14765,7 @@
 </code></pre></div></p>
 <p>If <code>allow_spontaneous_scopes=true</code> and <code>spontaneous_scopes</code> regular expression has match then spontaneous scope is persisted and allowed to be handled as usual scope.
 Spontaneous scope has lifetime and is cleaned up from persistence when expired (and thus not available anymore). Configuration property <code>spontaneousScopeLifetime</code> specifies lifetime in seconds.</p>
-<p>In addition there is spontaneous scope interception scripts which give additional flexibility. 
+<p>In addition there is spontaneous scope interception scripts which give additional flexibility.
 The sample spontaneous scope script is <a href="../../../script-catalog/spontaneous_scope/spontaneous-scope/spontaneous_scope.py">available here</a>.</p>
 <h4 id="uma-spontaneous-scopes">UMA Spontaneous scopes<a class="headerlink" href="#uma-spontaneous-scopes" title="Permanent link">#</a></h4>
 <p>Sometimes it's required to handle scope by pattern. For example we wish to grant access for particular user based on path
@@ -14794,8 +14794,8 @@ It can be handled with spontaneous scopes which works via regular expressions.</
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="uma-scopes">UMA Scopes<a class="headerlink" href="#uma-scopes" title="Permanent link">#</a></h3>
-<p>UMA 2 scopes are used to grant a client permission to do an action on a protected resource. Different scopes can grant access to the same action. For example, a "read" action can be allowed with scope "read" or "all". </p>
-<p>For some actions the Resource Server (RS) may want multiple scopes at the same time. For instance, a "read" action should only be allowed if the authorization request includes the "read" <strong>and</strong> "all" scopes. UMA 2 scopes are bound to resources and are used to fetch policies that check whether the specified user or client should have access to the resource. </p>
+<p>UMA 2 scopes are used to grant a client permission to do an action on a protected resource. Different scopes can grant access to the same action. For example, a "read" action can be allowed with scope "read" or "all".</p>
+<p>Some actions require the Resource Server (RS) to request multiple scopes simultaneously. For instance, a "read" action should only be allowed if the authorization request includes the "read" <strong>and</strong> "all" scopes. UMA 2 scopes are bound to resources and are used to fetch policies that check whether the specified user or client should have access to the resource.</p>
 <p>The scopes are described in JSON and have the following properties:</p>
 <ul>
 <li>name</li>
@@ -14829,10 +14829,10 @@ oxId: View
 oxIconUrl: http://&lt;hostname&gt;/uma/icons/view_scope.png
 </code></pre></div></p>
 <h4 id="uma-scope-expressions">UMA Scope Expressions<a class="headerlink" href="#uma-scope-expressions" title="Permanent link">#</a></h4>
-<p>UMA 2 Scope expressions is Gluu invented extension of UMA 2 which gives flexible way to 
+<p>UMA 2 Scope expressions is Gluu invented extension of UMA 2 which gives flexible way to
 combine scopes and thus propose more robust way to grant access.</p>
 <p><strong>Register resource with <code>scope_expression</code></strong></p>
-<p>RS registers resource </p>
+<p>RS registers resource</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <div class="codehilite"><pre><span></span><code><span class="k">new</span><span class="w"> </span><span class="n n-Quoted">`scope_expression`</span><span class="w"> </span><span class="n">field</span><span class="p">,</span><span class="w"> </span><span class="n n-Quoted">`resource_scopes`</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">ignored</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="k">case</span>
@@ -14873,7 +14873,7 @@ combine scopes and thus propose more robust way to grant access.</p>
 <h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
 <p>You can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/">community chat on Zulip</a>. Any questions you have will help determine what information our documentation should cover.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<p>If you have content you'd like to contribute to this page, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
 
 
@@ -14896,7 +14896,7 @@ combine scopes and thus propose more robust way to grant access.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 1, 2025 09:54:31 UTC"><span class="timeago" datetime="2025-12-01T09:54:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 1, 2025 09:54:31 UTC">2025-12-01</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
   </span>
 
     

@@ -14663,7 +14663,7 @@ To get sample schema type jans cli -scim --schema-sample &lt;schema&gt;, for exa
 <p>This operation can be used to get list of groups. To get the list of groups, run the following command:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-scim<span class="w"> </span>--operation-id<span class="w"> </span>get-groups
 </code></pre></div>
-<p>It will show the list of groups with all the members linked with each of these groups. </p>
+<p>It will show the list of groups with all the members linked with each of these groups.</p>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:api:messages:2.0:ListResponse&quot;</span>
@@ -14733,8 +14733,8 @@ To get sample schema type jans cli -scim --schema-sample &lt;schema&gt;, for exa
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="get-group-by-id">Get Group by ID<a class="headerlink" href="#get-group-by-id" title="Permanent link">#</a></h3>
-<p>We can view the specific group details through its <code>id</code> using <code>get-group-by-id</code> operation. 
-For example, We can put the above created group <code>id:7a20464c-3651-48a0-9c9c-6b59373df60c</code> with <code>--url-suffix</code> to get the groupe details. The following command as below:</p>
+<p>We can view the specific group details through its <code>id</code> using <code>get-group-by-id</code> operation.
+For example, We can put the group created above <code>id:7a20464c-3651-48a0-9c9c-6b59373df60c</code> with <code>--url-suffix</code> to get the group details. The following command as below:</p>
 <p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-scim<span class="w"> </span>--operation-id<span class="w"> </span>get-group-by-id<span class="w"> </span><span class="se">\</span>
 --url-suffix<span class="o">=</span><span class="s2">&quot;id:7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span>
 </code></pre></div>
@@ -14753,7 +14753,7 @@ For example, We can put the above created group <code>id:7a20464c-3651-48a0-9c9c
 <span class="w">  </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="p">}</span>
 </code></pre></div></p>
-<p>We see <code>members</code> is empty since we did not associate any user with this group yet. We will add members into this gorup in the next operation. </p>
+<p>We see <code>members</code> is empty since we did not associate any user with this group yet. We will add members into this group in the next operation.</p>
 <h3 id="update-group-by-id">Update Group by ID<a class="headerlink" href="#update-group-by-id" title="Permanent link">#</a></h3>
 <p>The <code>update-group-by-id</code> operation can be used to update group name and adding members into the group. Let's create a json file <code>/tmp/update-group.json</code> according to the <a href="#create-group"><code>GroupResource</code></a> schema:</p>
 <div class="highlight"><span class="filename">Sample</span><pre><span></span><code><span class="p">{</span>
@@ -14802,7 +14802,7 @@ For example, We can put the above created group <code>id:7a20464c-3651-48a0-9c9c
 <p>It will delete the group and all of its associated data if match with the unique group ID.</p>
 <h3 id="patch-group">Patch Group<a class="headerlink" href="#patch-group" title="Permanent link">#</a></h3>
 <p>This is also an option to update any existing group resources. The only difference between <a href="#update-group-by-id">update-group-by-id</a> and <a href="#patch-group">patch-group</a> is that the first one just replace new data with previous one. It won't add any new data into the group. With <code>patch-group-by-id</code> operation, we can <code>add</code>, <code>remove</code>, and <code>replace</code> properties of group.</p>
-<p>According to the <a href="#using-command-line">output</a> of <code>--info</code> command, we can see <code>patch-group-by-id</code> requires <code>PatchRequest</code> schema. </p>
+<p>According to the <a href="#using-command-line">output</a> of <code>--info</code> command, we can see <code>patch-group-by-id</code> requires <code>PatchRequest</code> schema.</p>
 <div class="highlight"><pre><span></span><code>[
     {
         &quot;op&quot;: &quot;add&quot;,
@@ -14844,7 +14844,7 @@ document</a>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 29, 2024 09:13:16 UTC"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 29, 2024 09:13:16 UTC">2024-10-29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
   </span>
 
     

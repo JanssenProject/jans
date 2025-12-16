@@ -14857,7 +14857,7 @@
 
 
 <h1 id="janssen-config-api-configuration">Janssen Config-API Configuration<a class="headerlink" href="#janssen-config-api-configuration" title="Permanent link">#</a></h1>
-<p>The Janssen Server provides multiple configuration tools to perform these 
+<p>The Janssen Server provides multiple configuration tools to perform these
 tasks.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
 <div class="tabbed-content">
@@ -14881,9 +14881,9 @@ Postman. Learn how to use Janssen Server Config API
 </div>
 </div>
 <h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
-<p>In the Janssen Server, you can deploy and customize the Config-API Configuration 
-using the command line. To get the details of Janssen command line operations 
-relevant to Config-API Configuration, you can check the operations under 
+<p>In the Janssen Server, you can deploy and customize the Config-API Configuration
+using the command line. To get the details of Janssen command line operations
+relevant to Config-API Configuration, you can check the operations under
 <code>ConfigurationConfigApi</code> task using the command below:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui<span class="w"> </span>--info<span class="w"> </span>ConfigurationConfigApi
 </code></pre></div>
@@ -15236,10 +15236,10 @@ To get sample schema type jans tui --schema-sample &lt;schema&gt;, for example j
 <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="update-config-api-configuration-properties">Update Config-API Configuration Properties<a class="headerlink" href="#update-config-api-configuration-properties" title="Permanent link">#</a></h3>
-<p>To update the configuration, we will use <a href="https://datatracker.ietf.org/doc/html/rfc6902">JSON patch</a> schema as shown below. </p>
+<p>To update the configuration, we will use <a href="https://datatracker.ietf.org/doc/html/rfc6902">JSON patch</a> schema as shown below.</p>
 <p>Let's say we want to stop the file extension validation done
 by config-api's asset management module. This can be done by
-setting the <code>fileExtensionValidationEnabled</code> property to 
+setting the <code>fileExtensionValidationEnabled</code> property to
 <code>false</code>. To do that, write a text file (<code>config-api-assetmgt-patch.json</code>) with the content that follows the JSON patch schema.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">config-api-assetmgt-patch.json</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -15259,11 +15259,11 @@ setting the <code>fileExtensionValidationEnabled</code> property to
  <div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>jans<span class="w"> </span>tui<span class="w"> </span><span class="se">\</span>
 --operation-id<span class="o">=</span>patch-config-api-properties<span class="w"> </span>--data<span class="w"> </span>./config-api-assetmgt-patch.json
 </code></pre></div>
- Upon successful execution of the update, the Janssen Server responds with 
+ Upon successful execution of the update, the Janssen Server responds with
  updated configuration.</p>
 <h4 id="updating-multi-valued-property">Updating multi-valued property<a class="headerlink" href="#updating-multi-valued-property" title="Permanent link">#</a></h4>
-<p>Let's say we want to 
-update the configuration property  <strong>userMandatoryAttributes</strong>. This property's value is a list of attributes. We want to remove an attribute from the list. For this, we will have to create a JSON patch file that 
+<p>Let's say we want to
+update the configuration property  <strong>userMandatoryAttributes</strong>. This property's value is a list of attributes. We want to remove an attribute from the list. For this, we will have to create a JSON patch file that
 contains the new list and then run a command to push the update
 to the Janssen Server. Let's do this step-by-step:</p>
 <ol>
@@ -15303,8 +15303,8 @@ to the Janssen Server. Let's do this step-by-step:</p>
 --operation-id<span class="o">=</span>patch-config-api-properties<span class="w"> </span>--data<span class="w"> </span>./config-api-patch.json
 </code></pre></div></p>
 <h3 id="config-api-configuration-parameters">Config API Configuration Parameters:<a class="headerlink" href="#config-api-configuration-parameters" title="Permanent link">#</a></h3>
-<p>The table below outlines the key 
-configuration parameters for the Jans Config API. It details settings for 
+<p>The table below outlines the key
+configuration parameters for the Jans Config API. It details settings for
 OAuth2, security, endpoints, logging, and plugin management.</p>
 <table>
 <thead>
@@ -15455,7 +15455,7 @@ the application. The timer job will detect the change and fetch the latest
 configuration from the DB.</li>
 </ol>
 <h3 id="locating-config-api-configuration-in-the-persistence-layer">Locating Config API configuration in the Persistence Layer<a class="headerlink" href="#locating-config-api-configuration-in-the-persistence-layer" title="Permanent link">#</a></h3>
-<p>While it is not recommended that an administrator directly edits a configuration 
+<p>While it is not recommended that an administrator directly edits a configuration
 at the persistence layer, it may be useful information for a developer.</p>
 <h4 id="mysql">MySQL<a class="headerlink" href="#mysql" title="Permanent link">#</a></h4>
 <pre class="mermaid"><code>erDiagram
@@ -15466,35 +15466,35 @@ at the persistence layer, it may be useful information for a developer.</p>
  }</code></pre>
 <h3 id="important-attributes">Important attributes<a class="headerlink" href="#important-attributes" title="Permanent link">#</a></h3>
 <h4 id="oauth-authorization">OAuth authorization<a class="headerlink" href="#oauth-authorization" title="Permanent link">#</a></h4>
-<p><code>configOauthEnabled</code> property can be used to enable or disable the oAuth2 
+<p><code>configOauthEnabled</code> property can be used to enable or disable the oAuth2
 authorization. By default, it is set to true.</p>
 <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="s2">&quot;configOauthEnabled&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span>
 </code></pre></div>
 <h4 id="api-protection">Api protection<a class="headerlink" href="#api-protection" title="Permanent link">#</a></h4>
-<p><code>apiProtectionType</code> property states the protocol used for API authorization. 
+<p><code>apiProtectionType</code> property states the protocol used for API authorization.
 The currently supported value is <code>oauth2</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="s2">&quot;apiProtectionType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;oauth2&quot;</span>
 </code></pre></div>
 <h3 id="api-protection-auth-server">Api protection auth server<a class="headerlink" href="#api-protection-auth-server" title="Permanent link">#</a></h3>
-<p><code>apiApprovedIssuer</code> property enables to set more than one authorization servers. 
-By default, the current auth-server is set. You can add more servers separated 
+<p><code>apiApprovedIssuer</code> property enables to set more than one authorization servers.
+By default, the current auth-server is set. You can add more servers separated
 by commas.</p>
 <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">apiApprovedIssuer</span><span class="s2">&quot;: [&quot;</span><span class="nx">https</span><span class="o">:</span><span class="c1">//&lt;jans.auth.server&gt;,https://&lt;gluu.server&gt;,https://&lt;anyAuth.server&gt;&quot;]</span>
 </code></pre></div>
 <h3 id="logging-level">Logging level<a class="headerlink" href="#logging-level" title="Permanent link">#</a></h3>
-<p><code>loggingLevel</code> property can be used to change the logging level to the 
-desired values <code>(TRACE, DEBUG, INFO, WARN, ERROR)</code>. By default, the level is 
+<p><code>loggingLevel</code> property can be used to change the logging level to the
+desired values <code>(TRACE, DEBUG, INFO, WARN, ERROR)</code>. By default, the level is
 set to <code>INFO</code></p>
 <p>```javascript</p>
 <p>"loggingLevel":"DEBUG",</p>
 <p>```</p>
 <h3 id="scopes-other-than-the-one-defined-by-config-api">Scopes other than the one defined by config-api<a class="headerlink" href="#scopes-other-than-the-one-defined-by-config-api" title="Permanent link">#</a></h3>
-<p>Config API endpoints are oAuth2 protected. These scopes are created during 
-installation. However, few endpoints require scopes defined 
-by other modules like auth-server. </p>
-<p>A list of these scopes is maintained in the configuration in order to avoid 
-the creation of these scopes during Config API start-up. <code>exclusiveAuthScopes</code> 
-property can be used to change the logging level to the desired value 
+<p>Config API endpoints are oAuth2 protected. These scopes are created during
+installation. However, few endpoints require scopes defined
+by other modules like auth-server.</p>
+<p>A list of these scopes is maintained in the configuration in order to avoid
+the creation of these scopes during Config API start-up. <code>exclusiveAuthScopes</code>
+property can be used to change the logging level to the desired value
 <code>(TRACE, DEBUG, INFO, WARN, ERROR)</code>. By default, the level is set to <code>INFO</code></p>
 <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="s2">&quot;exclusiveAuthScopes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">   </span><span class="s2">&quot;jans_stat&quot;</span><span class="p">,</span>
@@ -15504,7 +15504,7 @@ property can be used to change the logging level to the desired value
 </code></pre></div>
 <h3 id="user-mandatory-and-exclusion-attributes">User - Mandatory and exclusion attributes<a class="headerlink" href="#user-mandatory-and-exclusion-attributes" title="Permanent link">#</a></h3>
 <h4 id="mandatoryattributes">MandatoryAttributes<a class="headerlink" href="#mandatoryattributes" title="Permanent link">#</a></h4>
-<p><code>userMandatoryAttributes</code> can be used to define mandatory attributes 
+<p><code>userMandatoryAttributes</code> can be used to define mandatory attributes
 for User while creating and updating.</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="s2">&quot;userMandatoryAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w"> </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span>
@@ -15515,17 +15515,17 @@ for User while creating and updating.</p>
 <span class="p">],</span>
 </code></pre></div>
 <h4 id="exclusion-attributes">Exclusion attributes<a class="headerlink" href="#exclusion-attributes" title="Permanent link">#</a></h4>
-<p><code>userExclusionAttributes</code> can be used to define User attributes that are not 
-to be returned in the API response. More attributes that are to be skipped in 
+<p><code>userExclusionAttributes</code> can be used to define User attributes that are not
+to be returned in the API response. More attributes that are to be skipped in
 response can be added to the list.</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="s2">&quot;userExclusionAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;userPassword&quot;</span>
 <span class="w"> </span><span class="p">],</span>
 </code></pre></div>
 <h3 id="agama-flow-configuration">Agama flow configuration<a class="headerlink" href="#agama-flow-configuration" title="Permanent link">#</a></h3>
-<p><code>agamaConfiguration</code> stores Agama-related configuration used in Agama related 
+<p><code>agamaConfiguration</code> stores Agama-related configuration used in Agama related
 endpoints.</p>
-<p><code>mandatoryAttributes</code> list defines the required attributes for Agama flow creation 
+<p><code>mandatoryAttributes</code> list defines the required attributes for Agama flow creation
 and update.
 <code>optionalAttributes</code> list specifies the optional attributes.</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="s2">&quot;agamaConfiguration&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
@@ -15543,15 +15543,15 @@ and update.
 <p>You can start TUI using the command below:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
-<p>Navigate to <code>Config API</code> section where administrators can update 
-Config-API configurations in six sub-tabs, namely 
-<strong>Main</strong>, <strong>Agama</strong>, <strong>Plugins</strong>, <strong>Asset Management</strong>, <strong>Audit Log Conf</strong>, 
+<p>Navigate to <code>Config API</code> section where administrators can update
+Config-API configurations in six sub-tabs, namely
+<strong>Main</strong>, <strong>Agama</strong>, <strong>Plugins</strong>, <strong>Asset Management</strong>, <strong>Audit Log Conf</strong>,
 <strong>Data Format Conversion</strong></p>
 <p><img alt="image" src="../../../../../assets/tui-config-api-main.png" /></p>
 <h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
-<p>Janssen Server Configuration REST API exposes relevant endpoints for 
-managing and configuring the Config-API Configuration. Endpoint details 
-are published in the <a href="../../../../reference/openapi/">Swagger document</a>, 
+<p>Janssen Server Configuration REST API exposes relevant endpoints for
+managing and configuring the Config-API Configuration. Endpoint details
+are published in the <a href="../../../../reference/openapi/">Swagger document</a>,
 see endpoint <code>/api/v1/api-config</code></p>
 
 
@@ -15575,7 +15575,7 @@ see endpoint <code>/api/v1/api-config</code></p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 12, 2025 12:09:48 UTC"><span class="timeago" datetime="2025-02-12T12:09:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 12, 2025 12:09:48 UTC">2025-02-12</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
   </span>
 
     

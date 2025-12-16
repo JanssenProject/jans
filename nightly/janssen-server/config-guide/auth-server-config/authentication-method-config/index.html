@@ -14669,20 +14669,20 @@ The Janssen Server provides multiple configuration tools to perform these tasks.
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Only one of the available authentication methods can be set as the default.
-While setting the Default authentication method, the Janssen Server 
+While setting the Default authentication method, the Janssen Server
 checks if the same authentication is available and active.</p>
 </div>
-<p>See 
- <a href="../../custom-scripts-config/#update-an-existing-custom-script">script documentation</a> 
+<p>See
+ <a href="../../custom-scripts-config/#update-an-existing-custom-script">script documentation</a>
  to know how to enable/disable authentication methods using custom scripts.</p>
-<p>If the script is not active then the following error notification is 
+<p>If the script is not active then the following error notification is
  returned by API.
  <code>{
  "code": "400",
  "message": "INVALID_ACR",
  "description": "Authentication script {acr} is not active"
  }</code></p>
-<p>Also, to understand how Janssen Server picks the authentication method <em>in the absence</em> of the default authentication method, refer to 
+<p>Also, to understand how Janssen Server picks the authentication method <em>in the absence</em> of the default authentication method, refer to
  <a href="../../../auth-server/openid-features/acrs/">ACR documentation</a></p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
 <div class="tabbed-content">
@@ -14768,45 +14768,45 @@ the <a href="../../config-tools/jans-tui/">Text-Based UI</a> also.</p>
 </code></pre></div>
 <h3 id="find-current-default-authentication-method">Find Current Default Authentication Method<a class="headerlink" href="#find-current-default-authentication-method" title="Permanent link">#</a></h3>
 <p>Navigate to <code>Auth Server</code> -&gt; <code>Authn</code> to open the <code>Authn</code> screen as shown
-in the image below. In <strong>Default ACR</strong> sub-tab, available authentication 
+in the image below. In <strong>Default ACR</strong> sub-tab, available authentication
 methods are listed
 as radio buttons.</p>
 <p><img alt="image" src="../../../../assets/tui-authn-dafault-acr.png" /></p>
-<p>To update the default authentication method, bring the tab focus to the 
+<p>To update the default authentication method, bring the tab focus to the
 authentication method,
-and navigate to the new default method with <strong>Up</strong> and <strong>Down</strong> keys. 
+and navigate to the new default method with <strong>Up</strong> and <strong>Down</strong> keys.
 To choose hit <strong>Space</strong> key.
 Navigate to <strong>Save</strong> button and hit <strong>Enter</strong> key</p>
 <h3 id="basic-authentication-method">Basic Authentication Method<a class="headerlink" href="#basic-authentication-method" title="Permanent link">#</a></h3>
 <p>This tab displays the basic, builtin, authentication method as shown in the image below.</p>
 <p><img alt="image" src="../../../../assets/tui-authn-basic.png" /></p>
-<p>You can set basic as the default authentication method by selecting 
+<p>You can set basic as the default authentication method by selecting
 <strong>Default Authn Method</strong>,
 navigate to <strong>Save</strong> button and hit <strong>Enter</strong> key</p>
 <h3 id="ldap-servers-as-authentication-method">LDAP Servers As Authentication Method<a class="headerlink" href="#ldap-servers-as-authentication-method" title="Permanent link">#</a></h3>
 <p>In this tab you can add and modify LDAP Servers are to be used as the
 default authentication method. See below image</p>
 <p><img alt="image" src="../../../../assets/tui-authn-ldap-servers.png" /></p>
-<p>To add a new LDAP server, navigate to <strong>Add Source LDAP Server</strong> button and 
+<p>To add a new LDAP server, navigate to <strong>Add Source LDAP Server</strong> button and
 hit <strong>Enter</strong>. A popup screen will
 be displayed as shown in the image below.</p>
 <p><img alt="image" src="../../../../assets/tui-authn-ldap-servers-add.png" /></p>
-<p>Fill in the fields provided in the popup. Before saving LDAP server, it is 
-recommended to test it by navigating 
-<strong>Test</strong> button and hitting <strong>Enter</strong>. If the test is successful, chose 
-<strong>Save</strong> button and hit <strong>Enter</strong>. If you want the current edited LDAP server 
-as the default authentication method, select <strong>Default Authn Method</strong> before 
+<p>Fill in the fields provided in the popup. Before saving LDAP server, it is
+recommended to test it by navigating
+<strong>Test</strong> button and hitting <strong>Enter</strong>. If the test is successful, choose
+<strong>Save</strong> button and hit <strong>Enter</strong>. If you want the current edited LDAP server
+as the default authentication method, select <strong>Default Authn Method</strong> before
 saving.</p>
 <h3 id="authentication-methods-enabled-by-scripts">Authentication Methods Enabled By Scripts<a class="headerlink" href="#authentication-methods-enabled-by-scripts" title="Permanent link">#</a></h3>
 <p>All enabled <strong>Person Authentication</strong> scripts are listed in this tab as below</p>
 <p><img alt="image" src="../../../../assets/tui-authn-scripts.png" /></p>
-<p>To edit <strong>Level</strong> and/or <strong>Properties</strong> of the authentication script, 
+<p>To edit <strong>Level</strong> and/or <strong>Properties</strong> of the authentication script,
 navigate to the script in the list by hitting <strong>tab</strong> key
 and hit <strong>Enter</strong>. You will see a popup like in the image below</p>
 <p><img alt="image" src="../../../../assets/tui-authn-scripts-edit.png" /></p>
-<p>If the script you want to use as the default authentication method is not in 
+<p>If the script you want to use as the default authentication method is not in
 the list, you should enable the script by
-navigating <strong>Scripts</strong> in the main tab. Find the script you want to 
+navigating <strong>Scripts</strong> in the main tab. Find the script you want to
 enable and hit <strong>Enter</strong>, you will get a popup where
 you can select <strong>Enabled</strong> checkbox and <strong>Save</strong> it as shown in the image below:</p>
 <p><img alt="image" src="../../../../assets/tui-authn-scripts-enable.png" /></p>
@@ -14842,7 +14842,7 @@ in the <a href="../../../reference/openapi/">Swagger document</a>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 13, 2024 10:48:56 UTC"><span class="timeago" datetime="2024-11-13T10:48:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 13, 2024 10:48:56 UTC">2024-11-13</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
   </span>
 
     

@@ -14560,8 +14560,8 @@
 
 
 <h1 id="janssen-cli">Janssen CLI<a class="headerlink" href="#janssen-cli" title="Permanent link">#</a></h1>
-<p><code>jans-cli</code> module is a command line interface for configuring the Janssen 
-Server. This module interacts with Janssen Server via 
+<p><code>jans-cli</code> module is a command-line interface for configuring the Janssen
+Server. This module interacts with Janssen Server via
 <a href="../config-api/">RESTful configuration APIs</a>
 that server exposes. <code>jans-cli</code> can be used to retrieve and update configuration
 of Janssen Server.</p>
@@ -14671,13 +14671,13 @@ options:
                         Prints jwt access token and exits
 </code></pre></div></p>
 <h2 id="cli-command-structure">CLI Command Structure<a class="headerlink" href="#cli-command-structure" title="Permanent link">#</a></h2>
-<p>CLI operations are structurally grouped by <code>Operation Modes</code> and within 
-these modes, they are logically grouped together by tasks. Diagram below 
+<p>CLI operations are structurally grouped by <code>Operation Modes</code> and within
+these modes, they are logically grouped together by tasks. Diagram below
 depicts this structure.</p>
 <p><img alt="" src="../../../../assets/jans-cli-structure.png" /></p>
 <h3 id="operation-modes">Operation Modes<a class="headerlink" href="#operation-modes" title="Permanent link">#</a></h3>
 <p>CLI offer three operation modes, JCA, SCIM and AUTH. JCA is the default mode.
-To use SCIM and AUTH modes, the CLI command specifies <code>-scim</code> or <code>-auth</code> 
+To use SCIM and AUTH modes, the CLI command specifies <code>-scim</code> or <code>-auth</code>
 switches. Use <code>-h</code> switch to get help on each mode.</p>
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>-scim<span class="w"> </span>-h
 </code></pre></div>
@@ -14740,7 +14740,7 @@ Operation<span class="w"> </span>ID:<span class="w"> </span>patch-attributes-by-
 operation id is a configuration retrieval/update action on the Janssen Server.
 For example: <code>get-attributes</code> is an operation that <code>Gets a list of Janssen
 Server attributes</code>.</p>
-<p>To perform any operation, you have to run command line with the operation id. 
+<p>To perform any operation, you have to run command line with the operation id.
 For example:</p>
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>get-acrs
 </code></pre></div>
@@ -14750,18 +14750,18 @@ For example:</p>
   &quot;defaultAcr&quot;: &quot;simple_password_auth&quot;
 }
 </code></pre></div>
-<p>Certain operations need data to be able to execute while for others just the 
+<p>Certain operations need data to be able to execute while for others just the
 operation id is enough. For instance in above example <code>get-acrs</code> operation did
-not require any data to be passed and worked only with operation id. While 
+not require any data to be passed and worked only with operation id. While
 operations like <code>delete-attributes-by-inum</code>, <code>post-attributes</code> need additional
-data to be able to execute. For example, for <code>delete-attributes-by-inum</code> to 
+data to be able to execute. For example, for <code>delete-attributes-by-inum</code> to
 execute, it needs to know the <code>inum</code> of the attribute to be deleted.</p>
 <p>For operations which need data the data elements are
 passed to the operation in form of <code>parameters</code> and/or <code>schema</code>.
 Operation description provided by <code>--info</code> switch details out what parameters
 and schemas are applicable to each operation.</p>
-<p><code>Parameters</code> allow simple string based values to be passed to the operation, 
-while <code>schema</code> allows JSON structured data to be passed to the operation. 
+<p><code>Parameters</code> allow simple string-based values to be passed to the operation,
+while <code>schema</code> allows JSON structured-data to be passed to the operation.
 For examples of how operations can be used with parameters and schema, refer to
 <a href="../../auth-server-config/attribute-configuration/">Attribute</a>. Read more about schema in <a href="#about-schemas">this
 detail section</a>.</p>
@@ -14831,7 +14831,7 @@ detail section</a>.</p>
 - <code>patch-config-cache</code> is a operation-id from <em>Cache Configurations</em> task.
 - <code>patch-replace</code> type of operation; used to replace values in
 - <code>memcachedConfiguration/bufferSize:32788</code> is a <code>key:value</code> pair</p>
-<p>Multi valued arguments can be privede as <code>key:value1,key:vlaue2</code>, for example 
+<p>Multi valued arguments can be provided as <code>key:value1,key:value2</code>, for example
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id=get-config-scripts  --endpoint-args=&quot;fieldValuePair:scriptType=dynamic_scope,fieldValuePair:level=100&quot;
 </code></pre></div></p>
 
@@ -14856,7 +14856,7 @@ detail section</a>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 23, 2024 08:45:31 UTC"><span class="timeago" datetime="2024-10-23T08:45:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 23, 2024 08:45:31 UTC">2024-10-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
   </span>
 
     

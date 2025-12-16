@@ -14850,10 +14850,10 @@
 
 <h1 id="customization-using-custom-assets">Customization Using Custom Assets<a class="headerlink" href="#customization-using-custom-assets" title="Permanent link">#</a></h1>
 <p>Janssen Server allows customization and extension of current web page designs,
-images, web templates etc. For 
+images, web templates etc. For
 example, extending the list of languages supported by Janssen Server or maybe
-customizing the login page to show the organization's logo and align styling to 
-meet the branding of the organization. </p>
+customizing the login page to show the organization's logo and align styling to
+meet the branding of the organization.</p>
 <p>All of the above need some amount of custom assets, like custom CSS stylesheets,
 logo images, etc to be available on the Janssen Server. All these are called
 <code>Custom Assets</code>.</p>
@@ -15048,14 +15048,14 @@ logo images, etc to be available on the Janssen Server. All these are called
 </tbody>
 </table>
 <h2 id="managing-custom-assets">Managing Custom Assets<a class="headerlink" href="#managing-custom-assets" title="Permanent link">#</a></h2>
-<p>Janssen Server configuration tools like CLI and TUI provide the ability to add, 
-update, and delete custom assets. Refer to the 
+<p>Janssen Server configuration tools like CLI and TUI provide the ability to add,
+update, and delete custom assets. Refer to the
 <a href="../../../config-guide/custom-assets-configuration/">custom assets configuration guide</a>
 to learn how to manage custom assets.</p>
 <h2 id="customizing-web-pages">Customizing Web Pages<a class="headerlink" href="#customizing-web-pages" title="Permanent link">#</a></h2>
-<p>Janssen Server uses <a href="https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp">xhtml pages</a> to render the web interface needed in 
-interactive web-flows. For example, password authentication flow. </p>
-<p>It is possible to override the built-in <code>xhtml</code> pages or to add completely 
+<p>Janssen Server uses <a href="https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp">xhtml pages</a> to render the web interface needed in
+interactive web-flows. For example, password authentication flow.</p>
+<p>It is possible to override the built-in <code>xhtml</code> pages or to add completely
 new pages.</p>
 <h3 id="customizing-built-in-web-pages">Customizing Built-in Web Pages<a class="headerlink" href="#customizing-built-in-web-pages" title="Permanent link">#</a></h3>
 <p>In order to customize built-in web pages, follow the steps below:</p>
@@ -15064,23 +15064,23 @@ new pages.</p>
 <li>Make changes to the code of the new page according to the need </li>
 <li>Override the built-in page with the new page</li>
 </ul>
-<p>To override the built-in page with the new page, add the new page as 
-a <a href="#managing-custom-assets">custom asset</a> 
-and make sure that the 
-new page has the same name and extension as the built-in page. 
-The Janssen Server will automatically use the custom page instead of the 
-built-in page. </p>
-<p>For example, the default login web page is rendered using 
+<p>To override the built-in page with the new page, add the new page as
+a <a href="#managing-custom-assets">custom asset</a>
+and make sure that the
+new page has the same name and extension as the built-in page.
+The Janssen Server will automatically use the custom page instead of the
+built-in page.</p>
+<p>For example, the default login web page is rendered using
 <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/login.xhtml">login.xhtml</a>.
-To override this page, add a new custom <code>login.xhtml</code>. Same can be done 
+To override this page, add a new custom <code>login.xhtml</code>. Same can be done
 for other built-in pages like <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/authorize.xhtml">authorization page</a>, <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/logout.xhtml">logout page</a>, <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/error.xhtml">error page</a>.</p>
 <h3 id="adding-new-web-pages">Adding New Web Pages<a class="headerlink" href="#adding-new-web-pages" title="Permanent link">#</a></h3>
-<p>If the authentication/authorization flow requires new web pages, the same can be 
+<p>If the authentication/authorization flow requires new web pages, the same can be
 added as <a href="../../../config-guide/custom-assets-configuration/">custom asset</a> and
 then can be referenced using a relative path.</p>
-<p>For instance, if <code>enterOTP.xhtml</code> is your webpage for step 2 of 
+<p>For instance, if <code>enterOTP.xhtml</code> is your webpage for step 2 of
 the authentication flow that is being implemented using a custom script,
-then upload page as a custom asset under the relevant Janssen service and then 
+then upload the page as a custom asset under the relevant Janssen service and then
 reference it in the custom script as follows:</p>
 <div class="highlight"><pre><span></span><code> def getPageForStep(self, configurationAttributes, step):
  # Used to specify the page you want to return for a given step
@@ -15092,19 +15092,19 @@ reference it in the custom script as follows:</p>
 <h4 id="reference-login-pages">Reference login pages:<a class="headerlink" href="#reference-login-pages" title="Permanent link">#</a></h4>
 <p><a href="https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp/auth">Here</a> you will find several login pages for different authentication methods.</p>
 <h4 id="customized-resource-bundles">Customized resource bundles:<a class="headerlink" href="#customized-resource-bundles" title="Permanent link">#</a></h4>
-<p>Janssen Server provides language translation support using a set of 
+<p>Janssen Server provides language translation support using a set of
 <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/resources/">built-in resource bundles</a>.</p>
 <p>To override the defaults, the custom <code>.properties</code> files should be uploaded
-as <a href="#managing-custom-assets">custom assets</a>. If the file name matches the 
+as <a href="#managing-custom-assets">custom assets</a>. If the file name matches the
 existing resource bundle, then the custom bundle will override the built-in
-resource bundle. </p>
+resource bundle.</p>
 <p>Examples of file names are:</p>
 <ul>
 <li>jans-auth_en.properties</li>
 <li>jans-auth_bg.properties</li>
 </ul>
-<p>To add translations for a language that is not yet supported, create a new 
-properties file and name it 
+<p>To add translations for a language that is not yet supported, create a new
+properties file and name it
 jans-auth_[language_code].properties. Then add it to the Janssen Server as
 <a href="#managing-custom-assets">custom asset</a>. Janssen Server will automatically
 add the support for new language using the new resource bundle.</p>
@@ -15112,16 +15112,16 @@ add the support for new language using the new resource bundle.</p>
 <p>Upload the custom CSS files as <a href="#managing-custom-assets">custom assets</a> and then
 reference it in <code>.xhtml</code> file using the URL <code>https://your.jans.server/jans-auth/ext/resources/stylesheet/theme.css</code> or <code>/jans-auth/ext/resources/stylesheet/theme.css</code></p>
 <h4 id="custom-image-files">Custom image files:<a class="headerlink" href="#custom-image-files" title="Permanent link">#</a></h4>
-<p>Upload the custom image files as <a href="#managing-custom-assets">custom assets</a> and 
-then reference it in <code>.xhtml</code> file using the URL 
-<code>https://your.jans.server/jans-auth/ext/resources/img/fileName.png</code> or 
+<p>Upload the custom image files as <a href="#managing-custom-assets">custom assets</a> and
+then reference it in <code>.xhtml</code> file using the URL
+<code>https://your.jans.server/jans-auth/ext/resources/img/fileName.png</code> or
 <code>/jans-auth/ext/resources/img/fileName.jpg</code>.</p>
 <h4 id="page-layout-header-footer-xhtml-template-customization">Page layout, header, footer (xhtml Template) customization<a class="headerlink" href="#page-layout-header-footer-xhtml-template-customization" title="Permanent link">#</a></h4>
-<p>Templates refer to the common interface layout and style. For example, 
+<p>Templates refer to the common interface layout and style. For example,
 a banner, logo in the common header, and copyright information in the footer.</p>
-<p>Upload the custom template <code>template.xhtml</code> file as 
-<a href="#managing-custom-assets">custom assets</a>.This file will automatically override 
-the built-in 
+<p>Upload the custom template <code>template.xhtml</code> file as
+<a href="#managing-custom-assets">custom assets</a>.This file will automatically override
+the built-in
 <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml">default template file</a>.</p>
 
 
@@ -15145,7 +15145,7 @@ the built-in
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 2, 2025 10:27:29 UTC"><span class="timeago" datetime="2025-07-02T10:27:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 2, 2025 10:27:29 UTC">2025-07-02</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
   </span>
 
     
