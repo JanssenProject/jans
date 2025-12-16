@@ -115,7 +115,7 @@ After build you can execute as
 ```
 
 You will be prompted for credentials if you do not have ` ~/.config/jans-cli.ini`.
-Contact your administrator for credentials. Administrator can obtain credidentials on Janssen Server as follows:
+Contact your administrator for credentials. Administrator can obtain credentials on Janssen Server as follows:
 
 ```
 cat /opt/jans/jans-setup/setup.properties.last | grep tui_client

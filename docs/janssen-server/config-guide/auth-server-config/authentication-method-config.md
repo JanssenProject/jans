@@ -191,7 +191,7 @@ be displayed as shown in the image below.
 
 Fill in the fields provided in the popup. Before saving LDAP server, it is
 recommended to test it by navigating
-**Test** button and hitting **Enter**. If the test is successful, chose
+**Test** button and hitting **Enter**. If the test is successful, choose
 **Save** button and hit **Enter**. If you want the current edited LDAP server
 as the default authentication method, select **Default Authn Method** before
 saving.

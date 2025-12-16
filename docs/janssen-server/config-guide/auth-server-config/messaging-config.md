@@ -238,7 +238,7 @@ and store it in a file for editing using the command [below].
  --data /tmp/postgres.json
  ```
 
-#### Patch Postgres Message  Configuration
+#### Patch Postgres Message Configuration
 
 To update the messaging configuration use the
 `patch-config-message-postgres` operation.

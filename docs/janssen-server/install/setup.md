@@ -118,7 +118,7 @@ Below are the optional arguments:
 | -email EMAIL | Email address for support at your organization used for generating X.509 certificates |
 | -city CITY | City field used for generating X.509 certificates |
 | -state STATE | State field used for generating X.509 certificates |
-| -country COUNTRY | Two letters country coude used for generating X.509 certificates |
+| -country COUNTRY | Two letters country code used for generating X.509 certificates |
 | -rdbm-user RDBM_USER | RDBM username |
 | -rdbm-password RDBM_PASSWORD | RDBM password |
 | -rdbm-port RDBM_PORT | RDBM port |

@@ -192,7 +192,7 @@ To see the schema, use the command below:
 jans cli --schema Scope
 ```
 
-For better understanding, the Janssen Server also provides an sample of data to be sent to the server.
+For better understanding, the Janssen Server also provides a sample of data to be sent to the server.
 This sample conforms to the schema above. Use the command below to get the sample.
 
 ```bash title="Command"

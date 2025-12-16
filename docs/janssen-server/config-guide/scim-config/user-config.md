@@ -510,7 +510,7 @@ In response `token.json` we will get `access_token`
 }
 ```
 
-### Retrive existing User
+### Retrieve existing User
 
 To get an existing user
 

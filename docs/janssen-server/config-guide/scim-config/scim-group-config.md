@@ -184,7 +184,7 @@ Now let's run the following command to add group into the server:
 ### Get Group by ID
 
 We can view the specific group details through its `id` using `get-group-by-id` operation.
-For example, We can put the above created group `id:7a20464c-3651-48a0-9c9c-6b59373df60c` with `--url-suffix` to get the groupe details. The following command as below:
+For example, We can put the above created group `id:7a20464c-3651-48a0-9c9c-6b59373df60c` with `--url-suffix` to get the group details. The following command as below:
 
 ```bash title="Command"
 jans cli -scim --operation-id get-group-by-id \

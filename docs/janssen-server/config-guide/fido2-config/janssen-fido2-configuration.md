@@ -142,7 +142,7 @@ To update the configuration follow the steps below.
 
 ##  Using Text-based UI
 
-In the Janssen Server, You can manage FIDO2 Configuration using
+In the Janssen Server, you can manage FIDO2 Configuration using
 the [Text-Based UI](../config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:

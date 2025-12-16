@@ -145,7 +145,7 @@ then can be referenced using a relative path.
 
 For instance, if `enterOTP.xhtml` is your webpage for step 2 of
 the authentication flow that is being implemented using a custom script,
-then upload page as a custom asset under the relevant Janssen service and then
+then upload the page as a custom asset under the relevant Janssen service and then
 reference it in the custom script as follows:
 
 ```

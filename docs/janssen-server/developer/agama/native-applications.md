@@ -31,7 +31,7 @@ The [RRF](../../../agama/language-reference.md#rrf) (render-reply-fetch) Agama i
 - Reply the markup to the web browser - this will display a web page
 - At the server side, retrieve data the user may have provided in his interaction with the page. This is, _fetch_ 
 
-In a native setting no HTML markup is suppossed to be generated and replied - it's the app that is in charge of displaying the UI now. For this purpose, it will receive (from the endpoint) the data that would be originally injected into the template. Most of times, this will carry information gathered at earlier stages of the flow and that is relevant to properly show or update the UI.
+In a native setting no HTML markup is supposed to be generated and returned—it's the app that is in charge of displaying the UI now. For this purpose, it will receive (from the endpoint) the data that would be originally injected into the template. Most of times, this will carry information gathered at earlier stages of the flow and that is relevant to properly show or update the UI.
 
 Likewise, the "data submission" for the _fetch_ phase of RRF is performed by the app too. In this case, the relevant data grabbed from the user interaction is sent to the server side (via challenge endpoint) and becomes the result of the RRF (the value for the variable on the left-hand side of the instruction). Note both the input ("injected" data) and the output (result) is specified in JSON format.
 
@@ -48,7 +48,7 @@ There is a subtle exception regarding the first statement and has to do with flo
 
 The above concepts bring an important constraint to app design that should be accounted before undertaking any project: control is inverted.
 
-Normally, an app "knows" exactly what to do at each step of its workflow, and eventually delegates data retrieval tasks to the server side. When using the endpoint, the server side drives the logic: the app does not "take decisions" and instead "reacts" to the received data. This will be demostrated later through a practical example.
+Normally, an app "knows" exactly what to do at each step of its workflow, and eventually delegates data retrieval tasks to the server side. When using the endpoint, the server side drives the logic: the app does not "take decisions" and instead "reacts" to the received data. This will be demonstrated later through a practical example.
 
 ## About the example: OTP via e-mail
 

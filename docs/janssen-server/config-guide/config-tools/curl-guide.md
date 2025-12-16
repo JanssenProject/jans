@@ -75,7 +75,7 @@ Examples of `name_of_the_script` ( Authentication methods that are present in th
 }
 ```
 In place of `http://localhost:8080` uri used above, any valid redirect URI can be used.
-To provide full client configuration at the time of creation, Download and use this
+To provide full client configuration at the time of creation, download and use this
 [json format](https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/server/src/test/resources/feature/openid/clients/client.json),
 update the values and save it as client.json. Few important fields to populate are `scope`,`responseTypes`,
 `redirectUris` (The only mandatory field), `grantTypes`. If there is a need to update the attributes of the client after

@@ -23,7 +23,7 @@ This occurs when no `Finish` statement has been found in the execution of a flow
 
 ### Serialization errors
 
-Agama engine saves the state of a flow every time an [RRF](../../../agama/language-reference.md#rrf) or [RFAC](../../../agama/language-reference.md#rfac) instruction is reached. The _State_ can be understood as the set of all variables defined in a flow and their associated values up to certain point.
+Agama engine saves the state of a flow every time an [RRF](../../../agama/language-reference.md#rrf) or [RFAC](../../../agama/language-reference.md#rfac) instruction is reached. The _State_ can be understood as the set of all variables defined in a flow and their associated values up to a certain point.
 
 Most of times, variables hold basic Agama [values](../../../agama/language-reference.md#data-types) like strings, booleans, numbers, lists or maps, however, more complex values may appear due to Java `Call`s. The engine does its best  to properly serialize these Java objects, nonetheless, this is not always possible. In these cases, the flow crashes and errors will appear on screen as well as in the server logs.
 
@@ -121,7 +121,7 @@ In your templates use `<#ftl output_format="JSON">` in the first line. Take a lo
 
 ### Are there any IDE or editor plugins available for coding flows and manage projects?
 
-Not plugins but you can use [Agama Lab](https://agama-lab.gluu.org) for projects and flows authoring.
+Not plugins, but you can use [Agama Lab](https://agama-lab.gluu.org) for projects and flows authoring.
 
 ### How to debug flows?
 

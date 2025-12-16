@@ -278,7 +278,7 @@ using the `--url-suffix` and the property and the new value using the
 [JSON Patch](https://jsonpatch.com/#the-patch). Refer [here](../../config-guide/config-tools/jans-cli/README.md#patch-request-schema)
 to know more about schema.
 
-In this example; We will change the value of the property `applicationType`
+In this example: we will change the value of the property `applicationType`
 from `web` to `native`.
 
 ```bash title="Input" linenums="1"
@@ -293,7 +293,7 @@ from `web` to `native`.
 
 Now let's do the operation with the command line.
 
-```bash
+```bash title="Command"
 jans cli \
 --operation-id patch-oauth-openid-client-by-inum \
 --url-suffix inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe --data /tmp/schema.json
