@@ -265,17 +265,16 @@
                     "description": "The claim in the token that lists the user's roles (e.g., 'role', 'group', 'memberOf'). Defaults to 'role'.",
                     "oneOf": [
                         {
-                            "type": "string",
-                            "default": "role"
+                            "type": "string"
                         },
                         {
                             "type": "array",
                             "items": {
                                 "type": "string"
-                            },
-                            "default": []
+                            }
                         }
-                    ]
+                    ],
+                    "default": "role"
                 },
                 "workload_id": {
                     "description": "The primary claim to extract from the token to create the Workload entity. If not specified, Cedarling will attempt to use 'aud', followed by 'client_id', before failing.",

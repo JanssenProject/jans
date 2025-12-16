@@ -26,6 +26,6 @@
     "schema": {
         "encoding": "none",
         "content_type": "cedar",
-        "body": "namespace Jans { entity User = { role: Set<String> }; entity Application; action Read appliesTo { principal: [User], resource: [Application] }; }"
+        "body": "namespace Jans { entity User = { role: Set<String> }; entity Application; entity Workload; entity Access_token; action Read appliesTo { principal: [User, Workload], resource: [Application] }; }"
     }
 }

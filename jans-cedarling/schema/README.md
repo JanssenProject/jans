@@ -33,12 +33,12 @@ Using Python's `jsonschema` module:
 pip install jsonschema
 
 # Validate a policy store file
-python -m jsonschema -i examples/minimal_policy_store.json jans-cedarling/schema/policy_store_schema.json
+python -m jsonschema -i jans-cedarling/schema/minimal_policy_store.json jans-cedarling/schema/policy_store_schema.json
 ```
 
 Using an online validator:
 
-1. Go to https://www.jsonschemavalidator.net/
+1. Go to [JSON Schema Validator](https://www.jsonschemavalidator.net/)
 2. Paste `policy_store_schema.json` in the left panel
 3. Paste your policy store JSON in the right panel
 4. Check for validation errors

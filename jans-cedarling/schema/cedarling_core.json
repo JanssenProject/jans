@@ -112,7 +112,8 @@
             },
             "exp": {
               "type": "EntityOrCommon",
-              "name": "Long"
+              "name": "Long",
+              "required": false
             },
             "iat": {
               "type": "EntityOrCommon",

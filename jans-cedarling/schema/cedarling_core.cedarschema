@@ -47,7 +47,7 @@ namespace Jans {
         token_type?: String,
         validated_at?: Long,
         aud?: String,
-        exp: Long,
+        exp?: Long,
         iat?: Long,
         iss?: TrustedIssuer,
         jti?: String,
