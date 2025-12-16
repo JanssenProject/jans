@@ -131,7 +131,7 @@ We plan to offer a debugger in the future. In the meantime, you can do `printf`-
 
 ### How to launch a flow?
 
-A flow is launched by issuing an authentication request in a browser as explained [launching flows](./jans-agama-engine.md#launching-flows).
+A flow is launched by issuing an authentication request in a browser as explained in the [launching flows documentation](./jans-agama-engine.md#launching-flows).
 
 ### Does flow execution timeout?
 
