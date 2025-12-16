@@ -10,7 +10,7 @@ tags:
 All `jans-auth-server` log files are located in `/opt/jans/jetty/jans-auth/logs/`.
 
 1. `jans-auth.log` - main AS log file. All logs during execution goes here.
-1. `jans-auth_script.log`: - contains [custom interception scripts](../../developer/interception-scripts.md) related log messages. Use `scriptLogger` inside custom script to log messages to this log file.
+1. `jans-auth_script.log`: - contains [custom interception scripts](../../developer/scripts/README.md) related log messages. Use `scriptLogger` inside custom script to log messages to this log file.
 1. `jans-auth_persistence.log` - log which contains entries from AS persistance layer 
 1. `jans-auth_persistence_duration.log` - log which contains duration of query execution. It can be useful during performance issues investigation 
 1. `app_persistence_orm_statistics.log` - contains statistics about persistence layer activities

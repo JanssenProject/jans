@@ -66,7 +66,7 @@ Scopes:
     software_roles*: List of string values, fixed value ["password", "notify"].
     grant_types*: Fixed value ["client_credentials"].
     one_time_use*: Defined whether the SSA will be used only once or can be used multiple times.
-    rotate_ssa*: TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.
+    rotate_ssa*: Controls automatic rotation of SSA expiration. When enabled, the SSA will be automatically renewed before expiration.
     lifetime: SSA lifetime in seconds.
 Operation ID: get-ssa
   Description: # Get all SSA list based on `jti` or `org_id`.
