@@ -9,20 +9,20 @@ tags:
 
 ## Running Setup
 
- After installation, executing `setup.py` will launch the SETUP Command Line by default. 
- 
+ After installation, executing `setup.py` will launch the SETUP Command Line by default.
+
  To run the script, run the following command:
- 
+
  ```bash
  python3 /opt/jans/jans-setup/setup.py
  ```
- 
+
  A warning will pop up if the free disk space is less than the recommended 40 GB. The installer will check that all dependant packages are installed or not, and if missing it will ask to install. When prompted Y/y at the command prompt will install all required packages.
-   
+
 1. The installer will detect which operating system, init type, and Apache version are currently on the server.
-  
+
 2. The setup script will bring up a prompt to provide information for certificates as well as the IP Address and the hostname for the Janssen Authorization Server. Hit Enter to accept the default values.
-  
+
   ```bash
   Enter IP Address:
   Enter hostname:
@@ -34,9 +34,9 @@ tags:
   Enter maximum RAM for applications in MB:
   Enter Password for Admin User:
   ```
-  
+
 3. Next, pick a persistence mechanism. Choose from MySQL, PGSql that can be installed locally or remotely.
-    
+
 4. Next, pick which services should be installed for this deployment:
 
   ```bash
@@ -45,7 +45,7 @@ Install Scim Server? [Yes] :
 Install Fido2 Server? [Yes] :
 Install Gluu Casa? [No] :
   ```
-   
+
 5. Finally, review the summary screen that gives an overview of the selections made during the setup process.
 
 Note! After setup completed, you will be prompted to remove setup files (directories `/opt/dist` and `/opt/jans/jans-setup`).
@@ -65,8 +65,8 @@ Avoid setup issues by acknowledging the following:
    - Use a real hostname--this can always be managed via host file entries if adding a DNS entry is too much work for testing.
      
    - For clustered deployments, use the hostname of the cluster that will be used by applications connecting to Janssen Authorization Server.
-  
-!!! Warning    
+
+!!! Warning
     Use a FQDN (fully qualified domain name) as hostname and refrain from using 127.0.0.1 as IP address or usage of private IP is not supported and not recommended.
 
 ## Script Command Line Options
@@ -120,7 +120,7 @@ Below are the optional arguments:
 | -state STATE | State field used for generating X.509 certificates |
 | -country COUNTRY | Two letters country coude used for generating X.509 certificates |
 | -rdbm-user RDBM_USER | RDBM username |
-| -rdbm-password RDBM_PASSWORD | RDBM password | 
+| -rdbm-password RDBM_PASSWORD | RDBM password |
 | -rdbm-port RDBM_PORT | RDBM port |
 | -rdbm-db RDBM_DB | RDBM database |
 | -rdbm-host RDBM_HOST | RDBM host |

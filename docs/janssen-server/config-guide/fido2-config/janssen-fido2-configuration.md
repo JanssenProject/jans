@@ -7,7 +7,7 @@ tags:
 
 # Janssen FIDO2 Configuration
 
-The Janssen Server provides multiple configuration tools to perform these 
+The Janssen Server provides multiple configuration tools to perform these
 tasks.
 
 === "Use Command-line"
@@ -142,7 +142,7 @@ To update the configuration follow the steps below.
 
 ##  Using Text-based UI
 
-In the Janssen Server, You can manage FIDO2 Configuration using 
+In the Janssen Server, You can manage FIDO2 Configuration using
 the [Text-Based UI](../config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:
@@ -159,6 +159,6 @@ configurations.
 
 ## Using Configuration REST API
 
-Janssen Server Configuration REST API exposes relevant endpoints for 
-managing and configuring the FIDO2 Configuration. Endpoint details 
+Janssen Server Configuration REST API exposes relevant endpoints for
+managing and configuring the FIDO2 Configuration. Endpoint details
 are published in the [Swagger document](./../../reference/openapi.md).

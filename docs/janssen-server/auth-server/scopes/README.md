@@ -52,7 +52,7 @@ In AS code, scope object is represented with following [java class](https://gith
 
 ### Dynamic Client Registration
 
-To enabled scope for DCR please set `jansDefScope` to `true` value. 
+To enabled scope for DCR please set `jansDefScope` to `true` value.
 
 Global AS Configuration for DCR
 - `dynamicRegistrationScopesParamEnabled` - boolean value specifying whether to enable scopes parameter in dynamic registration.
@@ -61,7 +61,7 @@ Global AS Configuration for DCR
 
 ### Customizing scopes
 
-Similar to client registration, scopes can be customized using interception scripts.  
+Similar to client registration, scopes can be customized using interception scripts.
 
 The sample dynamic scope script is [available here](./../../../script-catalog/dynamic_scope/dynamic-permission/dynamic_permission.py).
 
@@ -83,7 +83,7 @@ Global AS Configurations related to scopes.
 
 ### Spontaneous scopes
 
-Spontaneous scopes are scopes with random part. AS supports both OpenID Connect and UMA Spontaneous scopes. 
+Spontaneous scopes are scopes with random part. AS supports both OpenID Connect and UMA Spontaneous scopes.
 
 Global AS Configuration for spontaneous scopes.
 
@@ -116,7 +116,7 @@ https://example.gluu.org/oxauth/restv1/authorize?response_type=code&scope=openid
 If `allow_spontaneous_scopes=true` and `spontaneous_scopes` regular expression has match then spontaneous scope is persisted and allowed to be handled as usual scope.
 Spontaneous scope has lifetime and is cleaned up from persistence when expired (and thus not available anymore). Configuration property `spontaneousScopeLifetime` specifies lifetime in seconds.
 
-In addition there is spontaneous scope interception scripts which give additional flexibility. 
+In addition there is spontaneous scope interception scripts which give additional flexibility.
 The sample spontaneous scope script is [available here](./../../../script-catalog/spontaneous_scope/spontaneous-scope/spontaneous_scope.py).
 
 #### UMA Spontaneous scopes
@@ -155,9 +155,9 @@ RS registers tickets with all scopes mentioned in "data" (we need all scopes in 
 
 ### UMA Scopes
 
-UMA 2 scopes are used to grant a client permission to do an action on a protected resource. Different scopes can grant access to the same action. For example, a "read" action can be allowed with scope "read" or "all". 
+UMA 2 scopes are used to grant a client permission to do an action on a protected resource. Different scopes can grant access to the same action. For example, a "read" action can be allowed with scope "read" or "all".
 
-For some actions the Resource Server (RS) may want multiple scopes at the same time. For instance, a "read" action should only be allowed if the authorization request includes the "read" **and** "all" scopes. UMA 2 scopes are bound to resources and are used to fetch policies that check whether the specified user or client should have access to the resource. 
+For some actions the Resource Server (RS) may want multiple scopes at the same time. For instance, a "read" action should only be allowed if the authorization request includes the "read" **and** "all" scopes. UMA 2 scopes are bound to resources and are used to fetch policies that check whether the specified user or client should have access to the resource.
 
 The scopes are described in JSON and have the following properties:
 
@@ -198,14 +198,14 @@ oxId: View
 oxIconUrl: http://<hostname>/uma/icons/view_scope.png
 ```
 
-#### UMA Scope Expressions 
+#### UMA Scope Expressions
 
-UMA 2 Scope expressions is Gluu invented extension of UMA 2 which gives flexible way to 
+UMA 2 Scope expressions is Gluu invented extension of UMA 2 which gives flexible way to
 combine scopes and thus propose more robust way to grant access.
 
 **Register resource with `scope_expression`**
 
-RS registers resource 
+RS registers resource
 
 !!! Note
         new `scope_expression` field, `resource_scopes` is ignored in this case
@@ -251,4 +251,4 @@ You can ask questions through [GitHub Discussions](https://github.com/JanssenPro
 
 ## Want to contribute?
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).

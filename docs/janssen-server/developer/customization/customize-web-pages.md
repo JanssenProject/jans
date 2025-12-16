@@ -16,10 +16,10 @@ tags:
 # Customization Using Custom Assets
 
 Janssen Server allows customization and extension of current web page designs,
-images, web templates etc. For 
+images, web templates etc. For
 example, extending the list of languages supported by Janssen Server or maybe
-customizing the login page to show the organization's logo and align styling to 
-meet the branding of the organization. 
+customizing the login page to show the organization's logo and align styling to
+meet the branding of the organization.
 
 All of the above need some amount of custom assets, like custom CSS stylesheets,
 logo images, etc to be available on the Janssen Server. All these are called
@@ -102,18 +102,18 @@ Listing of custom asset types that each Janssen Server module accepts:
 
 ## Managing Custom Assets
 
-Janssen Server configuration tools like CLI and TUI provide the ability to add, 
-update, and delete custom assets. Refer to the 
+Janssen Server configuration tools like CLI and TUI provide the ability to add,
+update, and delete custom assets. Refer to the
 [custom assets configuration guide](../../config-guide/custom-assets-configuration.md)
 to learn how to manage custom assets.
 
- 
+
 ## Customizing Web Pages
 
-Janssen Server uses [xhtml pages](https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp) to render the web interface needed in 
-interactive web-flows. For example, password authentication flow. 
+Janssen Server uses [xhtml pages](https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp) to render the web interface needed in
+interactive web-flows. For example, password authentication flow.
 
-It is possible to override the built-in `xhtml` pages or to add completely 
+It is possible to override the built-in `xhtml` pages or to add completely
 new pages.
 
 ### Customizing Built-in Web Pages
@@ -124,28 +124,28 @@ In order to customize built-in web pages, follow the steps below:
 - Make changes to the code of the new page according to the need 
 - Override the built-in page with the new page
 
-To override the built-in page with the new page, add the new page as 
-a [custom asset](#managing-custom-assets) 
-and make sure that the 
-new page has the same name and extension as the built-in page. 
-The Janssen Server will automatically use the custom page instead of the 
-built-in page. 
+To override the built-in page with the new page, add the new page as
+a [custom asset](#managing-custom-assets)
+and make sure that the
+new page has the same name and extension as the built-in page.
+The Janssen Server will automatically use the custom page instead of the
+built-in page.
 
-For example, the default login web page is rendered using 
+For example, the default login web page is rendered using
 [login.xhtml](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/login.xhtml).
-To override this page, add a new custom `login.xhtml`. Same can be done 
+To override this page, add a new custom `login.xhtml`. Same can be done
 for other built-in pages like [authorization page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/authorize.xhtml), [logout page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/logout.xhtml), [error page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/error.xhtml).
 
 
 ### Adding New Web Pages
 
-If the authentication/authorization flow requires new web pages, the same can be 
+If the authentication/authorization flow requires new web pages, the same can be
 added as [custom asset](../../config-guide/custom-assets-configuration.md) and
 then can be referenced using a relative path.
 
-For instance, if `enterOTP.xhtml` is your webpage for step 2 of 
+For instance, if `enterOTP.xhtml` is your webpage for step 2 of
 the authentication flow that is being implemented using a custom script,
-then upload page as a custom asset under the relevant Janssen service and then 
+then upload page as a custom asset under the relevant Janssen service and then
 reference it in the custom script as follows:
 
 ```
@@ -163,13 +163,13 @@ reference it in the custom script as follows:
 
 #### Customized resource bundles:
 
-Janssen Server provides language translation support using a set of 
+Janssen Server provides language translation support using a set of
 [built-in resource bundles](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/resources/).
 
 To override the defaults, the custom `.properties` files should be uploaded
-as [custom assets](#managing-custom-assets). If the file name matches the 
+as [custom assets](#managing-custom-assets). If the file name matches the
 existing resource bundle, then the custom bundle will override the built-in
-resource bundle. 
+resource bundle.
 
 Examples of file names are:
 
@@ -177,8 +177,8 @@ Examples of file names are:
  * jans-auth_bg.properties
 
 
-To add translations for a language that is not yet supported, create a new 
-properties file and name it 
+To add translations for a language that is not yet supported, create a new
+properties file and name it
 jans-auth_[language_code].properties. Then add it to the Janssen Server as
 [custom asset](#managing-custom-assets). Janssen Server will automatically
 add the support for new language using the new resource bundle.
@@ -190,19 +190,19 @@ Upload the custom CSS files as [custom assets](#managing-custom-assets) and then
 reference it in `.xhtml` file using the URL `https://your.jans.server/jans-auth/ext/resources/stylesheet/theme.css` or `/jans-auth/ext/resources/stylesheet/theme.css`
 
 #### Custom image files:
-Upload the custom image files as [custom assets](#managing-custom-assets) and 
-then reference it in `.xhtml` file using the URL 
-`https://your.jans.server/jans-auth/ext/resources/img/fileName.png` or 
+Upload the custom image files as [custom assets](#managing-custom-assets) and
+then reference it in `.xhtml` file using the URL
+`https://your.jans.server/jans-auth/ext/resources/img/fileName.png` or
 `/jans-auth/ext/resources/img/fileName.jpg`.
 
 #### Page layout, header, footer (xhtml Template) customization
 
-Templates refer to the common interface layout and style. For example, 
+Templates refer to the common interface layout and style. For example,
 a banner, logo in the common header, and copyright information in the footer.
 
-Upload the custom template `template.xhtml` file as 
-[custom assets](#managing-custom-assets).This file will automatically override 
-the built-in 
+Upload the custom template `template.xhtml` file as
+[custom assets](#managing-custom-assets).This file will automatically override
+the built-in
 [default template file](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml).
 
- 
+

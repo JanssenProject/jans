@@ -9,8 +9,8 @@ tags:
 
 # Janssen CLI
 
-`jans-cli` module is a command line interface for configuring the Janssen 
-Server. This module interacts with Janssen Server via 
+`jans-cli` module is a command line interface for configuring the Janssen
+Server. This module interacts with Janssen Server via
 [RESTful configuration APIs](./../config-api/README.md)
 that server exposes. `jans-cli` can be used to retrieve and update configuration
 of Janssen Server.
@@ -140,8 +140,8 @@ options:
 
 ## CLI Command Structure
 
-CLI operations are structurally grouped by `Operation Modes` and within 
-these modes, they are logically grouped together by tasks. Diagram below 
+CLI operations are structurally grouped by `Operation Modes` and within
+these modes, they are logically grouped together by tasks. Diagram below
 depicts this structure.
 
 ![](../../../../assets/jans-cli-structure.png)
@@ -149,7 +149,7 @@ depicts this structure.
 ### Operation Modes
 
 CLI offer three operation modes, JCA, SCIM and AUTH. JCA is the default mode.
-To use SCIM and AUTH modes, the CLI command specifies `-scim` or `-auth` 
+To use SCIM and AUTH modes, the CLI command specifies `-scim` or `-auth`
 switches. Use `-h` switch to get help on each mode.
 
 ```shell
@@ -230,7 +230,7 @@ operation id is a configuration retrieval/update action on the Janssen Server.
 For example: `get-attributes` is an operation that `Gets a list of Janssen
 Server attributes`.
 
-To perform any operation, you have to run command line with the operation id. 
+To perform any operation, you have to run command line with the operation id.
 For example:
 
 ```shell
@@ -246,11 +246,11 @@ Getting access token for scope https://jans.io/oauth/config/acrs.readonly
 }
 ```
 
-Certain operations need data to be able to execute while for others just the 
+Certain operations need data to be able to execute while for others just the
 operation id is enough. For instance in above example `get-acrs` operation did
-not require any data to be passed and worked only with operation id. While 
+not require any data to be passed and worked only with operation id. While
 operations like `delete-attributes-by-inum`, `post-attributes` need additional
-data to be able to execute. For example, for `delete-attributes-by-inum` to 
+data to be able to execute. For example, for `delete-attributes-by-inum` to
 execute, it needs to know the `inum` of the attribute to be deleted.
 
 For operations which need data the data elements are
@@ -258,8 +258,8 @@ passed to the operation in form of `parameters` and/or `schema`.
 Operation description provided by `--info` switch details out what parameters
 and schemas are applicable to each operation.
 
-`Parameters` allow simple string based values to be passed to the operation, 
-while `schema` allows JSON structured data to be passed to the operation. 
+`Parameters` allow simple string based values to be passed to the operation,
+while `schema` allows JSON structured data to be passed to the operation.
 For examples of how operations can be used with parameters and schema, refer to
 [Attribute](../../auth-server-config//attribute-configuration.md). Read more about schema in [this
 detail section](#about-schemas).
@@ -352,7 +352,7 @@ In this command line:
 - `patch-replace` type of operation; used to replace values in
 - `memcachedConfiguration/bufferSize:32788` is a `key:value` pair
 
-Multi valued arguments can be privede as `key:value1,key:vlaue2`, for example 
+Multi valued arguments can be privede as `key:value1,key:vlaue2`, for example
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id=get-config-scripts  --endpoint-args="fieldValuePair:scriptType=dynamic_scope,fieldValuePair:level=100"
 ```

@@ -134,7 +134,7 @@ jans cli --operation-id get-oauth-uma-resources
 
 To search using multiple arguments, you can change pattern that you want to find:
 
-```bash 
+```bash
 jans cli --operation-id get-oauth-uma-resources \
 --endpoint-args limit:1,pattern:"Jans Cofig Api Uma Resource /jans-config-api/api/v1/attributes"
 ```
@@ -203,7 +203,7 @@ jans cli --operation-id get-oauth-uma-resources-by-id \
 
 ## Patch OAuth UMA Resource by ID
 
-Using `patch-oauth-uma-resources-by-id` operation, 
+Using `patch-oauth-uma-resources-by-id` operation,
 we can modify `UMA Resource` partially for its properties.
 
 

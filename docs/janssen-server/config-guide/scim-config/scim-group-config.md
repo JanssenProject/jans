@@ -94,7 +94,7 @@ This operation can be used to get list of groups. To get the list of groups, run
 jans cli -scim --operation-id get-groups
 ```
 
-It will show the list of groups with all the members linked with each of these groups. 
+It will show the list of groups with all the members linked with each of these groups.
 
 ```json title="Sample Output"
 {
@@ -163,7 +163,7 @@ Now let's run the following command to add group into the server:
 
 ```bash title="Command"
  jans cli -scim --operation-id create-group --data /tmp/create-group.json
-``` 
+```
 
 ```json title="Command Output"
 {
@@ -183,7 +183,7 @@ Now let's run the following command to add group into the server:
 
 ### Get Group by ID
 
-We can view the specific group details through its `id` using `get-group-by-id` operation. 
+We can view the specific group details through its `id` using `get-group-by-id` operation.
 For example, We can put the above created group `id:7a20464c-3651-48a0-9c9c-6b59373df60c` with `--url-suffix` to get the groupe details. The following command as below:
 
 ```bash title="Command"
@@ -207,7 +207,7 @@ jans cli -scim --operation-id get-group-by-id \
 }
 ```
 
-We see `members` is empty since we did not associate any user with this group yet. We will add members into this gorup in the next operation. 
+We see `members` is empty since we did not associate any user with this group yet. We will add members into this gorup in the next operation.
 
 ### Update Group by ID
 
@@ -272,7 +272,7 @@ It will delete the group and all of its associated data if match with the unique
 
 This is also an option to update any existing group resources. The only difference between [update-group-by-id](#update-group-by-id) and [patch-group](#patch-group) is that the first one just replace new data with previous one. It won't add any new data into the group. With `patch-group-by-id` operation, we can `add`, `remove`, and `replace` properties of group.
 
-According to the [output](#using-command-line) of `--info` command, we can see `patch-group-by-id` requires `PatchRequest` schema. 
+According to the [output](#using-command-line) of `--info` command, we can see `patch-group-by-id` requires `PatchRequest` schema.
 
 ```
 [

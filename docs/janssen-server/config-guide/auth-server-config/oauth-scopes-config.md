@@ -99,7 +99,7 @@ contain `view` in the description and `openid` as the Type.
  jans cli --operation-id get-oauth-scopes \
  --endpoint-args limit:3,pattern:view,type:openid
 ```
- 
+
 ```text title="Sample Output" linenums="1"
  {
   "start": 0,
@@ -192,7 +192,7 @@ To see the schema, use the command below:
 jans cli --schema Scope
 ```
 
-For better understanding, the Janssen Server also provides an sample of data to be sent to the server. 
+For better understanding, the Janssen Server also provides an sample of data to be sent to the server.
 This sample conforms to the schema above. Use the command below to get the sample.
 
 ```bash title="Command"
@@ -201,7 +201,7 @@ jans cli --schema-sample Scope
 
 Using the schema and the example above, we have added below key data to the file `/tmp/scope.json`
 
-```json title="Input" linenums="1"                                                                                                                                                 
+```json title="Input" linenums="1"
 {
   "dn": null,
   "id": "TestScopeID",
@@ -256,7 +256,7 @@ This will updated the existing oauth scopes matched with inum value.
 
 ### Patch OAuth Scopes by `inum`
 
-Let's update `iconUrl` with patch method. So we need a schema for the patch method. 
+Let's update `iconUrl` with patch method. So we need a schema for the patch method.
 Remember when we queried info for the task **OAuthScopes** it printed:
 
 ```
@@ -266,8 +266,8 @@ Operation ID: patch-oauth-scopes-by-id
   inum: Scope identifier [string]
   Schema: Array of JsonPatch
 ```
-The `patch-oauth-scopes-by-id` operation uses the [JSON Patch](https://jsonpatch.com/#the-patch) schema to describe 
-the configuration change. Refer [here](../config-tools/jans-cli/README.md#patch-request-schema) 
+The `patch-oauth-scopes-by-id` operation uses the [JSON Patch](https://jsonpatch.com/#the-patch) schema to describe
+the configuration change. Refer [here](../config-tools/jans-cli/README.md#patch-request-schema)
 to know more about schema.
 
 
@@ -275,8 +275,8 @@ to know more about schema.
 jans cli --schema JsonPatch > /tmp/patch.json
 ```
 
-For instance, to perform a `replace` operation at `iconUrl` 
-and change it from `null` to `https://www.jans.io/icon.png`, 
+For instance, to perform a `replace` operation at `iconUrl`
+and change it from `null` to `https://www.jans.io/icon.png`,
 the JSON Patch data would look like below:
 
 ```json title="Input"
@@ -341,7 +341,7 @@ jans cli --operation-id get-oauth-scopes-by-inum \
 --url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
 ```
 It returns the details of the scope matched with the `inum` value.
-        
+
 ```json title="Sample Output" linenums="1"
 {
   "dn": "inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans",
@@ -381,7 +381,7 @@ You can start TUI using the command below:
 jans tui
 ```
 
-### Scope Screen 
+### Scope Screen
 
 Navigate to `Auth Server` -> `Scopes` to open the scope screen as shown in the image below.
 

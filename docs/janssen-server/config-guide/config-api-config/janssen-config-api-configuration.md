@@ -7,7 +7,7 @@ tags:
 
 # Janssen Config-API Configuration
 
-The Janssen Server provides multiple configuration tools to perform these 
+The Janssen Server provides multiple configuration tools to perform these
 tasks.
 
 === "Use Command-line"
@@ -265,7 +265,7 @@ To update the configuration follow the steps below.
  ```
  Upon successful execution of the update, the Janssen Server responds with updated configuration.
 
-As an another example, let us disable file extension validation in asset management, 
+As an another example, let us disable file extension validation in asset management,
 so our `config-api--assetmgt-patch.json` will be as follows:
 
 ```json title="Sample Output" linenums="1"
@@ -280,7 +280,7 @@ so our `config-api--assetmgt-patch.json` will be as follows:
 
 ##  Using Text-based UI
 
-In the Janssen Server, You can manage Config-API Configuration using 
+In the Janssen Server, You can manage Config-API Configuration using
 the [Text-Based UI](../config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:
@@ -298,6 +298,6 @@ in six sub-tabs, namely **Main**, **Agama**, **Plugins**, **Asset Management**, 
 
 ## Using Configuration REST API
 
-Janssen Server Configuration REST API exposes relevant endpoints for 
-managing and configuring the Config-API Configuration. Endpoint details 
+Janssen Server Configuration REST API exposes relevant endpoints for
+managing and configuring the Config-API Configuration. Endpoint details
 are published in the [Swagger document](./../../reference/openapi.md), see endpoint `/api/v1/api-config`.
