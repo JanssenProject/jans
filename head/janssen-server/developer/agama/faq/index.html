@@ -15103,13 +15103,13 @@
 <h1 id="frequently-asked-questions">Frequently asked questions<a class="headerlink" href="#frequently-asked-questions" title="Permanent link">#</a></h1>
 <h2 id="common-errors">Common errors<a class="headerlink" href="#common-errors" title="Permanent link">#</a></h2>
 <h3 id="unable-to-find-a-suitable-constructor-with-arity-in-class">Unable to find a suitable constructor with arity ... in class ...<a class="headerlink" href="#unable-to-find-a-suitable-constructor-with-arity-in-class" title="Permanent link">#</a></h3>
-<p>A Java invocation of the form <code>Call package.className#new ...</code> is passing an incorrect number of arguments or their data types do not match the signature of any of the constructors for that class. </p>
+<p>A Java invocation of the form <code>Call package.className#new ...</code> is passing an incorrect number of arguments or their data types do not match the signature of the constructors for that class.</p>
 <h3 id="unable-to-find-a-suitable-method-called-with-arity-in-class">Unable to find a suitable method called ... with arity ... in class ...<a class="headerlink" href="#unable-to-find-a-suitable-method-called-with-arity-in-class" title="Permanent link">#</a></h3>
 <p>A java invocation is attempting to call a method that is not part of the given class, the number of arguments passed for the method is not correct, or the arguments could not be converted to make a successful call.</p>
 <h3 id="no-finish-instruction-was-reached">No Finish instruction was reached<a class="headerlink" href="#no-finish-instruction-was-reached" title="Permanent link">#</a></h3>
 <p>This occurs when no <code>Finish</code> statement has been found in the execution of a flow and there are no remaining instructions.</p>
 <h3 id="serialization-errors">Serialization errors<a class="headerlink" href="#serialization-errors" title="Permanent link">#</a></h3>
-<p>Agama engine saves the state of a flow every time an <a href="../../../../agama/language-reference/#rrf">RRF</a> or <a href="../../../../agama/language-reference/#rfac">RFAC</a> instruction is reached. The <em>State</em> can be understood as the set of all variables defined in a flow and their associated values up to certain point. </p>
+<p>Agama engine saves the state of a flow every time an <a href="../../../../agama/language-reference/#rrf">RRF</a> or <a href="../../../../agama/language-reference/#rfac">RFAC</a> instruction is reached. The <em>State</em> can be understood as the set of all variables defined in a flow and their associated values up to a certain point.</p>
 <p>Most of times, variables hold basic Agama <a href="../../../../agama/language-reference/#data-types">values</a> like strings, booleans, numbers, lists or maps, however, more complex values may appear due to Java <code>Call</code>s. The engine does its best  to properly serialize these Java objects, nonetheless, this is not always possible. In these cases, the flow crashes and errors will appear on screen as well as in the server logs.</p>
 <p>Use the information in the logs to detect the problematic Java class. This would normally allow you to identify the variable that is causing the issue. Now you have several options to proceed:</p>
 <ul>
@@ -15119,7 +15119,7 @@
 <li>Tweak the engine serialization <a href="../engine-bridge-config/#serialization-rules">rules</a> so an alternative type of serialization can be used for this particular object </li>
 <li>Modify your Java code so an alternative class is used instead</li>
 </ul>
-<p>In general, a good practice is to avoid handling complex variables in flows. Letting big object graphs live in the state has a negative impact on performance and also increases the risk of serialization issues.   </p>
+<p>In general, a good practice is to avoid handling complex variables in flows. Letting big object graphs live in the state has a negative impact on performance and also increases the risk of serialization issues.</p>
 <h2 id="libraries-and-classes-added-on-the-fly">Libraries and classes added on the fly<a class="headerlink" href="#libraries-and-classes-added-on-the-fly" title="Permanent link">#</a></h2>
 <h3 id="what-groovy-and-java-versions-are-supported">What Groovy and Java versions are supported?<a class="headerlink" href="#what-groovy-and-java-versions-are-supported" title="Permanent link">#</a></h3>
 <p>Groovy 4.0 and Java 8 or higher. The runtime is Amazon Corretto 17.</p>
@@ -15164,32 +15164,32 @@ ref = CdiUtil.bean(managedBean.class);
 <h3 id="how-to-implement-localization">How to implement localization?<a class="headerlink" href="#how-to-implement-localization" title="Permanent link">#</a></h3>
 <p>This topic is covered <a href="../advanced-usages/#localization-and-internationalization">here</a>.</p>
 <h3 id="how-to-modify-the-built-in-error-pages">How to modify the built-in error pages?<a class="headerlink" href="#how-to-modify-the-built-in-error-pages" title="Permanent link">#</a></h3>
-<p>Agama features some error pages out-of-the-box. They can be customized by editing the corresponding files referenced in the <a href="../engine-bridge-config/#engine-configuration">configuration</a> doc page.  </p>
+<p>Agama features some error pages out-of-the-box. They can be customized by editing the corresponding files referenced in the <a href="../engine-bridge-config/#engine-configuration">configuration</a> doc page.</p>
 <h3 id="is-javascript-supported">Is Javascript supported?<a class="headerlink" href="#is-javascript-supported" title="Permanent link">#</a></h3>
-<p>Yes, the template engine is not concerned about the kind of contents linked in markup. It does not even care if your markup makes any sense. For FreeMarker, templates just produce a textual output. </p>
+<p>Yes, the template engine is not concerned about the kind of contents linked in markup. It does not even care if your markup makes any sense. For FreeMarker, templates just produce a textual output.</p>
 <h3 id="a-flow-page-is-not-rendered-as-html-the-browser-just-shows-the-source-code-as-text">A flow page is not rendered as HTML, the browser just shows the source code as text<a class="headerlink" href="#a-flow-page-is-not-rendered-as-html-the-browser-just-shows-the-source-code-as-text" title="Permanent link">#</a></h3>
 <p>This is due to lack of proper <code>Content-Type</code> response header. This occurs if your template has filename extension other than <code>ftlh</code>. If you don't want to rename your template, insert <code>&lt;#ftl output_format="HTML"&gt;</code> at the beginning of the file.</p>
 <h3 id="how-to-produce-json-instead-of-html">How to produce JSON instead of HTML?<a class="headerlink" href="#how-to-produce-json-instead-of-html" title="Permanent link">#</a></h3>
 <p>In your templates use <code>&lt;#ftl output_format="JSON"&gt;</code> in the first line. Take a look at the templates whose name start with <code>json_</code> in folder <code>/opt/jans/jetty/jans-auth/agama</code>. Particularly check how JSON content can be escaped - unfortunately FreeMarker does not support escaping for JSON out-of-the-box.</p>
 <h2 id="development-tools">Development tools<a class="headerlink" href="#development-tools" title="Permanent link">#</a></h2>
 <h3 id="are-there-any-ide-or-editor-plugins-available-for-coding-flows-and-manage-projects">Are there any IDE or editor plugins available for coding flows and manage projects?<a class="headerlink" href="#are-there-any-ide-or-editor-plugins-available-for-coding-flows-and-manage-projects" title="Permanent link">#</a></h3>
-<p>Not plugins but you can use <a href="https://agama-lab.gluu.org">Agama Lab</a> for projects and flows authoring. </p>
+<p>Not plugins, but you can use <a href="https://agama-lab.gluu.org">Agama Lab</a> for projects and flows authoring.</p>
 <h3 id="how-to-debug-flows">How to debug flows?<a class="headerlink" href="#how-to-debug-flows" title="Permanent link">#</a></h3>
 <p>We plan to offer a debugger in the future. In the meantime, you can do <code>printf</code>-like debugging using the <code>Log</code> instruction. See <a href="../jans-agama-engine/#logging">Agama logging</a>.</p>
 <h2 id="miscellaneous">Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permanent link">#</a></h2>
 <h3 id="how-to-launch-a-flow">How to launch a flow?<a class="headerlink" href="#how-to-launch-a-flow" title="Permanent link">#</a></h3>
-<p>A flow is launched by issuing an authentication request in a browser as explained <a href="../jans-agama-engine/#launching-flows">here</a>. </p>
+<p>A flow is launched by issuing an authentication request in a browser as explained in the <a href="../jans-agama-engine/#launching-flows">launching flows documentation</a>.</p>
 <h3 id="does-flow-execution-timeout">Does flow execution timeout?<a class="headerlink" href="#does-flow-execution-timeout" title="Permanent link">#</a></h3>
 <p>Yes. The maximum amount of time an end-user can take to fully complete a flow is driven by the configuration of the authentication server and can be constrained even more in the flow itself. Read about timeouts <a href="../jans-agama-engine/#how-timeouts-work">here</a>.</p>
 <h3 id="how-to-prevent-launching-a-flow-directly-from-the-browser">How to prevent launching a flow directly from the browser?<a class="headerlink" href="#how-to-prevent-launching-a-flow-directly-from-the-browser" title="Permanent link">#</a></h3>
 <p>This can be configured in the project's <a href="../../../../agama/gama-format/#metadata">metadata file</a>.</p>
 <h3 id="updates-in-a-flows-code-are-not-reflected-in-its-execution">Updates in a flow's code are not reflected in its execution<a class="headerlink" href="#updates-in-a-flows-code-are-not-reflected-in-its-execution" title="Permanent link">#</a></h3>
-<p>When a project is re-deployed, a flow remains unchanged if it comes with errors in the provided <code>.gama</code> file. The tool used for deployment will let you know which flows have errors and their descriptions. </p>
+<p>When a project is re-deployed, a flow remains unchanged if it comes with errors in the provided <code>.gama</code> file. The tool used for deployment will let you know which flows have errors and their descriptions.</p>
 <h3 id="why-are-the-contents-of-a-list-or-map-logged-partially">Why are the contents of a list or map logged partially?<a class="headerlink" href="#why-are-the-contents-of-a-list-or-map-logged-partially" title="Permanent link">#</a></h3>
 <p>This is to avoid traversing big structures fully. You can increase the value of <code>maxItemsLoggedInCollections</code> in the <a href="../engine-bridge-config/#engine-configuration">engine configuration</a>.</p>
 <h3 id="how-to-add-two-numbers-or-compare-numeric-values-in-agama">How to add two numbers or compare numeric values in Agama?<a class="headerlink" href="#how-to-add-two-numbers-or-compare-numeric-values-in-agama" title="Permanent link">#</a></h3>
 <p>Agama only provides operators for equality/inequality check in conditional statements. Comparisons like "less-than", "greater-than-or-equal", etc. require Java usage, however, the structure of an authentication flow will rarely have to deal with this kind of computations.</p>
-<p><em>Hint</em>: methods like <code>addExact</code>, <code>incrementExact</code>, etc. in <code>java.lang.Math</code> may help you to do some arithmetic.  </p>
+<p><em>Hint</em>: methods like <code>addExact</code>, <code>incrementExact</code>, etc. in <code>java.lang.Math</code> may help you to do some arithmetic.</p>
 <h3 id="how-to-concatenate-strings-in-agama">How to concatenate strings in Agama?<a class="headerlink" href="#how-to-concatenate-strings-in-agama" title="Permanent link">#</a></h3>
 <p>See the previous answer. A two-lines solution could be:</p>
 <div class="highlight"><pre><span></span><code>strings = [ s1, s2, ... ]
@@ -15234,7 +15234,7 @@ String label = lbls.get(&quot;&lt;label key&gt;&quot;, ... optional extra params
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 10, 2025 13:02:37 UTC"><span class="timeago" datetime="2025-01-10T13:02:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 10, 2025 13:02:37 UTC">2025-01-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
   </span>
 
     

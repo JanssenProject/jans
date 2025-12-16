@@ -3816,9 +3816,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#retrive-existing-user" class="md-nav__link">
+  <a href="#retrieve-existing-user" class="md-nav__link">
     <span class="md-ellipsis">
-      Retrive existing User
+      Retrieve existing User
     </span>
   </a>
   
@@ -14751,9 +14751,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#retrive-existing-user" class="md-nav__link">
+  <a href="#retrieve-existing-user" class="md-nav__link">
     <span class="md-ellipsis">
-      Retrive existing User
+      Retrieve existing User
     </span>
   </a>
   
@@ -14969,7 +14969,7 @@ Operation ID: search-user
 To get sample schema type jans cli -scim --schema-sample &lt;schema&gt;, for example jans cli -scim --schema-sample SearchRequest
 </code></pre></div></td></tr></table></div>
 <h3 id="get-users-list">Get Users List<a class="headerlink" href="#get-users-list" title="Permanent link">#</a></h3>
-<p>This operation is used to get list of the users and its properties. The following command line: </p>
+<p>This operation is used to get list of the users and its properties. The following command line:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-scim<span class="w"> </span>--operation-id<span class="w"> </span>get-users
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -15443,7 +15443,7 @@ jans cli -scim --schema-sample PatchRequest
 <p><img alt="add-claim" src="../../../../assets/jans-tui-add-user-claims.png" /></p>
 <p>Finally <code>save</code> and exit. We will get an unique <code>inum</code></p>
 <h3 id="update-user">Update User<a class="headerlink" href="#update-user" title="Permanent link">#</a></h3>
-<p>To modify any user properties, find the user from search box and hit <code>Enter</code> to pop-up user details, update user details and finally hit on <code>Save</code> button to update the changes. </p>
+<p>To modify any user properties, find the user from search box and hit <code>Enter</code> to pop-up user details, update user details and finally hit on <code>Save</code> button to update the changes.</p>
 <p><img alt="update-user" src="../../../../assets/jans-tui-update-user.png" /></p>
 <h3 id="change-user-password">Change User Password<a class="headerlink" href="#change-user-password" title="Permanent link">#</a></h3>
 <p>No chance to recover user password, but you can change.
@@ -15479,11 +15479,11 @@ document</a>.</p>
 &quot;expires_in&quot;:299
 }
 </code></pre></div>
-<h3 id="retrive-existing-user">Retrive existing User<a class="headerlink" href="#retrive-existing-user" title="Permanent link">#</a></h3>
-<p>To get an existing user </p>
+<h3 id="retrieve-existing-user">Retrieve existing User<a class="headerlink" href="#retrieve-existing-user" title="Permanent link">#</a></h3>
+<p>To get an existing user</p>
 <p><div class="highlight"><pre><span></span><code>curl -k -G -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; --data-urlencode &#39;filter=displayName co &quot;Admin&quot;&#39; https://&lt;jans-server&gt;/jans-scim/restv1/v2/Users &gt; /tmp/user.json
 </code></pre></div>
-In response <code>user.json</code> we will get 
+In response <code>user.json</code> we will get
 <div class="highlight"><pre><span></span><code>{
   &quot;schemas&quot;: [
     &quot;urn:ietf:params:scim:api:messages:2.0:ListResponse&quot;
@@ -15530,7 +15530,7 @@ In response <code>user.json</code> we will get
 }
 </code></pre></div></p>
 <h3 id="create-an-user">Create an User<a class="headerlink" href="#create-an-user" title="Permanent link">#</a></h3>
-<p>Let's start creating a dummy user. A client sends a POST request containing a "User" to the "/Users" endpoint. 
+<p>Let's start creating a dummy user. A client sends a POST request containing a "User" to the "/Users" endpoint.
 <div class="highlight"><pre><span></span><code>POST /Users  HTTP/1.1
 Host: example.com
 Accept: application/scim+json
@@ -15555,7 +15555,7 @@ Open a text editor and copy paste the json body, name as <code>input.json</code>
 Hit on your terminal with bellow command.
 <div class="highlight"><pre><span></span><code>curl -k -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; -H &#39;Content-Type: application/scim+json&#39; -d @input.json -o output.json https://&lt;jans-server&gt;/jans-scim/restv1/v2/Users
 </code></pre></div>
-response looks like 
+response looks like
 <div class="highlight"><pre><span></span><code>{
     &quot;schemas&quot;: [
         &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
@@ -15751,7 +15751,7 @@ response looks like
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 20, 2025 11:36:47 UTC"><span class="timeago" datetime="2025-01-20T11:36:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 20, 2025 11:36:47 UTC">2025-01-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
   </span>
 
     

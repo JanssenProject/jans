@@ -14507,10 +14507,10 @@
 
 
 <h1 id="messaging-configuration">Messaging Configuration<a class="headerlink" href="#messaging-configuration" title="Permanent link">#</a></h1>
-<p>The Janssen server provides messaging infrastructure for publish-subscribe message flows. 
+<p>The Janssen server provides messaging infrastructure for publish-subscribe message flows.
 Messaging infrastructure is configurable to the level where it can be enabled or disabled.
 When enabled, the configuration also allows a choice of providers and supplying configuration
-for those providers. </p>
+for those providers.</p>
 <p>The Janssen Server provides multiple configuration tools
 to perform these tasks.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
@@ -14556,7 +14556,7 @@ Operation ID: patch-config-message
 To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema-sample JsonPatch
 </code></pre></div></td></tr></table></div>
 <h4 id="get-messaging-configuration">Get Messaging Configuration<a class="headerlink" href="#get-messaging-configuration" title="Permanent link">#</a></h4>
-<p>You can get the Messaging Configuration 
+<p>You can get the Messaging Configuration
 of the Janssen Server by performing this operation.</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>get-config-message
 </code></pre></div>
@@ -14607,14 +14607,14 @@ of the Janssen Server by performing this operation.</p>
 <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h4 id="patch-messaging-configuration">Patch Messaging Configuration<a class="headerlink" href="#patch-messaging-configuration" title="Permanent link">#</a></h4>
-<p>To patch update the messaging configuration, use 
+<p>To patch update the messaging configuration, use
 the <code>patch-config-message</code> operation.</p>
 <p>The <code>patch-config-message</code> operation uses the
 <a href="https://jsonpatch.com/#the-patch">JSON Patch</a> schema to describe
 the configuration change. Refer
-<a href="../../config-tools/jans-cli/#patch-request-schema">here</a> 
+<a href="../../config-tools/jans-cli/#patch-request-schema">here</a>
 to know more about schema.</p>
-<p>For instance, to perform a <code>replace</code> operation and change the 
+<p>For instance, to perform a <code>replace</code> operation and change the
 <code>messageProviderType</code> from <code>DISABLED</code> to <code>REDIS</code>,
 the JSON Patch data would be like below:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Input</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -14758,8 +14758,8 @@ and store it in a file for editing using the command [below].
 </code></pre></div></p>
 </li>
 </ol>
-<h4 id="patch-postgres-message-configuration">Patch Postgres Message  Configuration<a class="headerlink" href="#patch-postgres-message-configuration" title="Permanent link">#</a></h4>
-<p>To update the messaging configuration use the 
+<h4 id="patch-postgres-message-configuration">Patch Postgres Message Configuration<a class="headerlink" href="#patch-postgres-message-configuration" title="Permanent link">#</a></h4>
+<p>To update the messaging configuration use the
 <code>patch-config-message-postgres</code> operation.</p>
 <p>The <code>patch-config-message-postgres</code> operation uses the
 <a href="https://jsonpatch.com/#the-patch">JSON Patch</a> schema to describe
@@ -14947,7 +14947,7 @@ the <a href="../../config-tools/jans-tui/">Text-Based UI</a> also.</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>/opt/jans/jans-cli/jans_cli_tui.py
 </code></pre></div>
 <p>Navigate to <code>Auth Server</code> -&gt; <code>Messages</code> to open the Message screen as shown
-in the image below. There are three different message configuration options 
+in the image below. There are three different message configuration options
 accessible on this screen. You can update the details of these messages.</p>
 <p><img alt="image" src="../../../../assets/tui-message-screen.png" /></p>
 <h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
@@ -14976,7 +14976,7 @@ are published in the <a href="../../../reference/openapi/">Swagger document</a>.
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 1, 2024 08:56:03 UTC"><span class="timeago" datetime="2024-10-01T08:56:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 1, 2024 08:56:03 UTC">2024-10-01</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
   </span>
 
     

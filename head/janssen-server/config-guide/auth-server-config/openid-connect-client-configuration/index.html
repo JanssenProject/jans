@@ -14695,7 +14695,7 @@ Postman. Learn how to use Janssen Server Config API
 <h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
 <p>In the Janssen Server, you can deploy and manage the OpenID Connect Client using the
 command Line. To get the details of Janssen command line operations relevant to
-OpenID Connect Client, you can check the operations under <code>OauthOpenidConnectClients</code> 
+OpenID Connect Client, you can check the operations under <code>OauthOpenidConnectClients</code>
 task using the command below:</p>
 <p>Let's get the information about OpenID Connect Client Configuration:
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--info<span class="w"> </span>OauthOpenidConnectClients
@@ -14994,7 +14994,7 @@ according to <code>Client</code> schema.</p>
 the above schema. To fetch the example, use the command below.</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema-sample<span class="w"> </span>Client
 </code></pre></div>
-<p>Using the schema and the example above, we have added OpenID Connect 
+<p>Using the schema and the example above, we have added OpenID Connect
 client data to the file <code>/tmp/openid-connect.json</code>. An OpenID Connect client may have many properties, but we are going to fill only the required properties as shown below:</p>
 <p><div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;redirectUris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -15002,7 +15002,7 @@ client data to the file <code>/tmp/openid-connect.json</code>. An OpenID Connect
 <span class="w"> </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
-Now let's post an OpenID Connect client to the Janssen Server to be 
+Now let's post an OpenID Connect client to the Janssen Server to be
 added to the existing set:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>post-oauth-openid-client<span class="w"> </span><span class="se">\</span>
 --data<span class="w"> </span>/tmp/openid-connect.json
@@ -15026,16 +15026,16 @@ to send the update to the Janssen Server using the command below
 --data<span class="w"> </span>/tmp/update-client.json
 </code></pre></div></li>
 </ol>
-<p>Upon successful execution of the update, the Janssen Server responds with 
+<p>Upon successful execution of the update, the Janssen Server responds with
 updated configuration</p>
 <h3 id="patch-openid-connect-client-by-inum">Patch OpenID Connect Client by inum<a class="headerlink" href="#patch-openid-connect-client-by-inum" title="Permanent link">#</a></h3>
-<p>Using <code>patch-oauth-openid-client-by-inum</code>, we can modify OpenID Connect Clients 
+<p>Using <code>patch-oauth-openid-client-by-inum</code>, we can modify OpenID Connect Clients
 partially for its properties.</p>
-<p>To use this operation, specify the <code>inum</code> of the OpenID Connect Client that needs to be updated 
-using the <code>--url-suffix</code> and the property and the new value using the 
-<a href="https://jsonpatch.com/#the-patch">JSON Patch</a>. Refer <a href="../../config-tools/jans-cli/#patch-request-schema">here</a> 
+<p>To use this operation, specify the <code>inum</code> of the OpenID Connect Client that needs to be updated
+using the <code>--url-suffix</code> and the property and the new value using the
+<a href="https://jsonpatch.com/#the-patch">JSON Patch</a>. Refer <a href="../../config-tools/jans-cli/#patch-request-schema">here</a>
 to know more about schema.</p>
-<p>In this example; We will change the value of the property <code>applicationType</code> 
+<p>In this example: we will change the value of the property <code>applicationType</code>
 from <code>web</code> to <code>native</code>.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Input</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -15052,19 +15052,19 @@ from <code>web</code> to <code>native</code>.</p>
 <span class="o">]</span>
 </code></pre></div></td></tr></table></div>
 <p>Now let's do the operation with the command line.</p>
-<div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span><span class="se">\</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span><span class="se">\</span>
 --operation-id<span class="w"> </span>patch-oauth-openid-client-by-inum<span class="w"> </span><span class="se">\</span>
 --url-suffix<span class="w"> </span>inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe<span class="w"> </span>--data<span class="w"> </span>/tmp/schema.json
 </code></pre></div>
 <h3 id="get-openid-connect-client-by-inum">Get OpenID Connect Client by Inum<a class="headerlink" href="#get-openid-connect-client-by-inum" title="Permanent link">#</a></h3>
-<p>With <code>get-oauth-openid-clients-by-inum</code> operation-id, we can get any specific 
-OpenID Connect Client matched with <code>Inum</code>. If we know the <code>inum</code>, we can use the 
+<p>With <code>get-oauth-openid-clients-by-inum</code> operation-id, we can get any specific
+OpenID Connect Client matched with <code>Inum</code>. If we know the <code>inum</code>, we can use the
 below command:</p>
 <p><div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span><span class="se">\</span>
 --operation-id<span class="w"> </span>get-oauth-openid-clients-by-inum<span class="w"> </span><span class="se">\</span>
 --url-suffix<span class="w"> </span>inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe
 </code></pre></div>
-The result will only show details of client with 
+The result will only show details of client with
 <code>inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe</code>.</p>
 <h3 id="delete-openid-connect-client">Delete OpenID Connect client<a class="headerlink" href="#delete-openid-connect-client" title="Permanent link">#</a></h3>
 <p>Delete the OpenID Connect client using its <code>inum</code>. The command line is:</p>
@@ -15139,7 +15139,7 @@ document</a>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 25, 2024 09:50:49 UTC"><span class="timeago" datetime="2024-11-25T09:50:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 25, 2024 09:50:49 UTC">2024-11-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
   </span>
 
     

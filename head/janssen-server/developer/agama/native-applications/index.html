@@ -14878,14 +14878,14 @@
 </ul>
 <h2 id="how-do-flows-actually-run">How do flows actually run?<a class="headerlink" href="#how-do-flows-actually-run" title="Permanent link">#</a></h2>
 <p>Before getting into the technicalities, let's cover some key preliminar concepts.</p>
-<p>The engine - the piece of software that actually runs flows - is eminently driven by HTTP requests. This is unsurprising because the main "consumers" of the engine are web browsers. When targetting native apps, the engine remains the same, and flows still run at the server side. This means native apps won't hold any business logic, or make computations of significance. </p>
+<p>The engine - the piece of software that actually runs flows - is eminently driven by HTTP requests. This is unsurprising because the main "consumers" of the engine are web browsers. When targetting native apps, the engine remains the same, and flows still run at the server side. This means native apps won't hold any business logic, or make computations of significance.</p>
 <p>The <a href="../../../../agama/language-reference/#rrf">RRF</a> (render-reply-fetch) Agama instruction is of paramount importance in flows. In a regular web setting, it involves three steps:</p>
 <ul>
 <li>Injecting some data to a UI template in order to generate HTML markup. This is known as <em>rendering</em></li>
 <li>Reply the markup to the web browser - this will display a web page</li>
 <li>At the server side, retrieve data the user may have provided in his interaction with the page. This is, <em>fetch</em> </li>
 </ul>
-<p>In a native setting no HTML markup is suppossed to be generated and replied - it's the app that is in charge of displaying the UI now. For this purpose, it will receive (from the endpoint) the data that would be originally injected into the template. Most of times, this will carry information gathered at earlier stages of the flow and that is relevant to properly show or update the UI. </p>
+<p>In a native setting no HTML markup is supposed to be generated and returned—it's the app that is in charge of displaying the UI now. For this purpose, it will receive (from the endpoint) the data that would be originally injected into the template. Most of times, this will carry information gathered at earlier stages of the flow and that is relevant to properly show or update the UI.</p>
 <p>Likewise, the "data submission" for the <em>fetch</em> phase of RRF is performed by the app too. In this case, the relevant data grabbed from the user interaction is sent to the server side (via challenge endpoint) and becomes the result of the RRF (the value for the variable on the left-hand side of the instruction). Note both the input ("injected" data) and the output (result) is specified in JSON format.</p>
 <p>Once the <em>fetch</em> occurs, the flow proceeds its execution until another RRF instruction is hit, where the procedure described above takes place again.</p>
 <p>Note this approach has two big benefits:</p>
@@ -14893,10 +14893,10 @@
 <li>Regular web flows can be reused in the native world without modifications</li>
 <li>The mindset for flows design remain the same</li>
 </ol>
-<p>There is a subtle exception regarding the first statement and has to do with flows containing RFAC instructions. <a href="../../../../agama/language-reference/#rfac">RFAC</a> is used to redirect to external sites, and as such, it requires a web browser. In the case of native apps, flows will crash once an RFAC instruction is hit.   </p>
+<p>There is a subtle exception regarding the first statement and has to do with flows containing RFAC instructions. <a href="../../../../agama/language-reference/#rfac">RFAC</a> is used to redirect to external sites, and as such, it requires a web browser. In the case of native apps, flows will crash once an RFAC instruction is hit.</p>
 <h3 id="inversion-of-control-in-apps">Inversion of control in apps<a class="headerlink" href="#inversion-of-control-in-apps" title="Permanent link">#</a></h3>
-<p>The above concepts bring an important constraint to app design that should be accounted before undertaking any project: control is inverted. </p>
-<p>Normally, an app "knows" exactly what to do at each step of its workflow, and eventually delegates data retrieval tasks to the server side. When using the endpoint, the server side drives the logic: the app does not "take decisions" and instead "reacts" to the received data. This will be demostrated later through a practical example.</p>
+<p>The above concepts bring an important constraint to app design that should be accounted before undertaking any project: control is inverted.</p>
+<p>Normally, an app "knows" exactly what to do at each step of its workflow, and eventually delegates data retrieval tasks to the server side. When using the endpoint, the server side drives the logic: the app does not "take decisions" and instead "reacts" to the received data. This will be demonstrated later through a practical example.</p>
 <h2 id="about-the-example-otp-via-e-mail">About the example: OTP via e-mail<a class="headerlink" href="#about-the-example-otp-via-e-mail" title="Permanent link">#</a></h2>
 <p>To avoid a rather abstract explanation, we'll use an example to illustrate the steps required to run a flow from a native app. Suppose an authentication flow operating in the following manner:</p>
 <ul>
@@ -15101,7 +15101,7 @@ Content-Type: application/json
   &quot;auth_session&quot;: &quot;efb10525-6c43-4e50-88ab-92461c258526&quot;
 }
 </code></pre></div>
-<p>This means we have hit line 37. </p>
+<p>This means we have hit line 37.</p>
 <p>When a <code>Finish</code> instruction is reached it is fully executed and the error reported in the response changes to <code>flow_finished</code>. What is left now is binding the user identified by <code>userId</code> (Joan) to the authorization request we have been handling (<code>BmAiCeArLdAa0</code>). This is how the user actually gets authenticated.</p>
 <h3 id="final-request">Final request<a class="headerlink" href="#final-request" title="Permanent link">#</a></h3>
 <p>To authenticate the user, we issue one last request:</p>
@@ -15258,7 +15258,7 @@ Content-Type: application/json
 }
 </code></pre></div>
 <h4 id="attempt-to-launch-an-unknown-flow">Attempt to launch an unknown flow<a class="headerlink" href="#attempt-to-launch-an-unknown-flow" title="Permanent link">#</a></h4>
-<p>If the initial request references an inexisting flow or one that has been flagged as <a href="../../../../agama/gama-format/#metadata">not launchable directly</a> by clients. </p>
+<p>If the initial request references an inexisting flow or one that has been flagged as <a href="../../../../agama/gama-format/#metadata">not launchable directly</a> by clients.</p>
 <div class="highlight"><pre><span></span><code>HTTP/1.1 500 Server Error
 Content-Type: application/json
 ...
@@ -15301,7 +15301,7 @@ Content-Type: application/json
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 30, 2025 12:28:59 UTC"><span class="timeago" datetime="2025-01-30T12:28:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 30, 2025 12:28:59 UTC">2025-01-30</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
   </span>
 
     

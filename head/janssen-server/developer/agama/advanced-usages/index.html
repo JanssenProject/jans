@@ -14689,7 +14689,7 @@
 <h1 id="advanced-usages">Advanced usages<a class="headerlink" href="#advanced-usages" title="Permanent link">#</a></h1>
 <h2 id="ui-templates">UI templates<a class="headerlink" href="#ui-templates" title="Permanent link">#</a></h2>
 <h3 id="template-overrides">Template overrides<a class="headerlink" href="#template-overrides" title="Permanent link">#</a></h3>
-<p><a href="../../../../agama/language-reference/#template-overrides">Template overrides</a> is a mechanism that allows templates customization and promotes flows reuse. If an existing flow serves well the needs of a new flow you are writing, with this feature you can homogenize your UI for a more pleasant user experience. </p>
+<p><a href="../../../../agama/language-reference/#template-overrides">Template overrides</a> is a mechanism that allows templates customization and promotes flows reuse. If an existing flow serves well the needs of a new flow you are writing, with this feature you can homogenize your UI for a more pleasant user experience.</p>
 <p>To start, use <a href="../../../../agama/language-reference/#subflows"><code>Trigger</code></a> to play around with the existing flow - as is - from the flow you are creating. Collect the URLs of the pages you are not comfortable with: grab them directly from the browser's address bar. Then proceed as follows with every URL to locate the actual templates physically:</p>
 <ol>
 <li>Remove the <code>https://.../fl/</code> portion of the URL</li>
@@ -14743,7 +14743,7 @@ myproject.salutation = hola!
 [it]
 myproject.salutation = ciao!
 </code></pre></div>
-<p>When leaving <code>salutation</code> alone, it is likely other projects added to the server in the future may contain their own version of <code>salutation</code> leading to unexpected results. </p>
+<p>When leaving <code>salutation</code> alone, it is likely other projects added to the server in the future may contain their own version of <code>salutation</code> leading to unexpected results.</p>
 <p>Additional notes:</p>
 <ul>
 <li>Language codes should follow the ISO 639 alpha-2 standard</li>
@@ -14758,7 +14758,7 @@ myproject.salutation = ciao!
 <p>A widespread practice in web page authoring is to compose pages based on reusable pieces. As an example, the need for a common header and footer is ubiquitous in HTML projects. With FreeMarker, composition can be achieved by means of <a href="https://freemarker.apache.org/docs/ref_directive_macro.html">macros</a>. These are the equivalent to functions in programming, they can generate output based on parameters passed and can be called anywhere in a template.</p>
 <p>Agama already makes use of macros for this purpose. Take a look at the <code>ftlh</code> files found at <code>/opt/jans/jetty/jans-auth/agama</code>. These templates are used to present errors, like timeouts, flow crashes, etc.</p>
 <p><strong>Example:</strong></p>
-<p>Here, two pages will be built to demonstrate the concept of composition in FreeMarker templates: a homepage and an "about us" page. These will be made up of a header, a sidebar, and their respective main content. Assume the sidebar should be shown only for the home page. </p>
+<p>Here, two pages will be built to demonstrate the concept of composition in FreeMarker templates: a homepage and an "about us" page. These will be made up of a header, a sidebar, and their respective main content. Assume the sidebar should be shown only for the home page.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>FreeMarker comments are of the form <code>&lt;#-- This won't be printed in the output --&gt;</code></p>
@@ -14844,7 +14844,7 @@ myproject.salutation = ciao!
 
 &lt;/@com.main&gt;
 </code></pre></div>
-<p><code>index.ftlh</code> is the homepage: </p>
+<p><code>index.ftlh</code> is the homepage:</p>
 <ul>
 <li>
 <p>Template <code>commons.ftlh</code> is imported and its macro <code>main</code> called passing <code>true</code> for <code>useSidebar</code></p>
@@ -14872,7 +14872,7 @@ myproject.salutation = ciao!
 <p>Ensure you have previously gone through the contents of this <a href="../flows-navigation-ui/">page</a> before proceeding</p>
 </div>
 <p>This is a feature that in conjuction with <a href="#template-overrides">template overrides</a> allows developers to implement alternative routing and backtracking. Suppose a flow is designed to reuse two or more existing subflows. As expected these subflows are neither aware of each other nor of its parent. How can the parent make so that once the user has landed at a page belonging to a given subflow A be presented the alternative to take another route, say, to subflow B?</p>
-<p>Clearly a page at flow A can be overriden, however, how to abort A and make it jump to B? The answer is cancellation. Through flow cancellation, a running flow can be aborted and the control returned to one of its parents for further processing. This can achieved by overriding a template so that the POST to the current URL includes a form field named <code>_abort</code>.</p>
+<p>Clearly a page at flow A can be overridden, however, how to abort A and make it jump to B? The answer is cancellation. Through flow cancellation, a running flow can be aborted and the control returned to one of its parents for further processing. This can achieved by overriding a template so that the POST to the current URL includes a form field named <code>_abort</code>.</p>
 <p>POSTing this way will provoke the associated <code>Trigger</code> call to return a value like <code>{ aborted: true, data: ..., url: ... }</code> where <code>data</code> is a <em>map</em> consisting of the payload (form fields) sent with the POST. Thus, developers can build custom pages and add for example a button to provoke the cancellation. Then, back in the flow implementation take the user to the desired path. The <code>url</code> property will hold the URL where cancellation took place relative to <code>https://your-server/jans-auth/fl/</code>.</p>
 <p>As an example, suppose there exists two flows that allow users to enter and validate a one-time passcode (OTP), one flow sends the OTP via e-mail while the other through an SMS. Assume these flows receive a user identifier as input and render a single UI page each to enter the received OTP. If we are interested in building a flow that prompts for username/password credentials and use the SMS-based OTP flow with a customization that consists of showing a link like "Didn't get an SMS?, send the passcode to my e-mail", the following is a sketch of an implementation:</p>
 <div class="highlight"><pre><span></span><code>...
@@ -14891,17 +14891,17 @@ When result.success is true
 
 Finish result
 </code></pre></div>
-<p>The overriden template <code>cust_enter_otp.ftlh</code> would have a form like:</p>
+<p>The overridden template <code>cust_enter_otp.ftlh</code> would have a form like:</p>
 <div class="highlight"><pre><span></span><code>...
 &lt;form method=&quot;post&quot; enctype=&quot;application/x-www-form-urlencoded&quot;&gt;
     &lt;button type=&quot;submit&quot; name=&quot;_abort&quot;&gt;
         Didn&#39;t get an SMS?, send the passcode to my e-mail&lt;/button&gt;
 &lt;/form&gt;
 </code></pre></div>
-<p>Note you cannot make cancellation occur at an arbitrary point of a flow. It can only happen when a page has been rendered, that is, an <code>RRF</code> directive is in execution. When a flow is aborted and the control returned back to a parent, there is no way to "resume" execution of the flow target of the cancellation. </p>
+<p>Note you cannot make cancellation occur at an arbitrary point of a flow. It can only happen when a page has been rendered, that is, an <code>RRF</code> directive is in execution. When a flow is aborted and the control returned to a parent, there is no way to "resume" execution of the flow target of the cancellation.</p>
 <h3 id="cancellation-bubble-up">Cancellation bubble-up<a class="headerlink" href="#cancellation-bubble-up" title="Permanent link">#</a></h3>
-<p>In order to override a page, the path to the corresponding template can be easily derived from the URL seen at the browser's address bar when the subflow is <code>Trigger</code>ed. Note the page may not necessarily belong directly to the subflow  triggered but probably to another flow lying deep in a chain of <code>Trigger</code> invocations. </p>
-<p>As an example suppose you are interested in building a flow A that reuses flow B. You identify a page shown that needs to be overriden. It might happen this page is actually rendered by C - a flow that B in turn reuses. In scenarios like this cancellation still works transparently and developers need not be aware of flows dependencies. In practice, when cancellation occurs at C, it bubbles up to B and then to A, which is the target of this process. </p>
+<p>In order to override a page, the path to the corresponding template can be easily derived from the URL seen at the browser's address bar when the subflow is <code>Trigger</code>ed. Note the page may not necessarily belong directly to the subflow  triggered but probably to another flow lying deep in a chain of <code>Trigger</code> invocations.</p>
+<p>As an example suppose you are interested in building a flow A that reuses flow B. You identify a page shown that needs to be overridden. It might happen this page is actually rendered by C - a flow that B in turn reuses. In scenarios like this cancellation still works transparently and developers need not be aware of flows dependencies. In practice, when cancellation occurs at C, it bubbles up to B and then to A, which is the target of this process.</p>
 <p>Note that even flow B (as is) may also be overriding C's templates. Resolution of a template path takes place from the inner to the outer flow, so it occurs this way in the example:</p>
 <ol>
 <li>
@@ -14923,9 +14923,9 @@ Finish result
 <p>Once a web page (or a response in general) is replied to a client (e.g. web browser), a POST is required to <a href="../flows-navigation-ui/#user-data-retrieval">make the flow proceed</a>. The POST is expected to be sent to the current URL only, otherwise, a 404 error will be thrown. The engine will then respond with a redirect (usually 301) so the client will GET the next URL to be rendered. This pattern of navigation is known as "POST-REDIRECT-GET".</p>
 <p>There is a clear correspondence of the "current URL" with the physical path of the template rendered. As an example, if the browser location shows <code>https://&lt;your-host&gt;/jans-auth/fl/foo/bar.fls</code>, the involved template is stored at <code>/opt/jans/jetty/jans-auth/agama/ftl/foo</code> and has name <code>bar</code>. This makes flows more predictable and easier to reason about.</p>
 <p>Note however URLs are not manipulable: an attempt to set the browser location to a URL corresponding to a different template will not make that template be rendered or provoke any unexpected jump in the flow control. Instead, an error page is shown that allows users to re-take where they left off or to restart from scratch. In other words, navigation honors the "current flow URL" avoiding attempts to re-visit past stages or make unexpected moves to future ones.</p>
-<p>Additionally, the engine by default sends responses with proper HTTP headers so page contents are not cached. This is key to prevent manipulation and allows a safe usage of the browser's back button, where it will not be possible to visit past stages. </p>
+<p>Additionally, the engine by default sends responses with proper HTTP headers so page contents are not cached. This is key to prevent manipulation and allows a safe usage of the browser's back button, where it will not be possible to visit past stages.</p>
 <h3 id="code-transpilation">Code transpilation<a class="headerlink" href="#code-transpilation" title="Permanent link">#</a></h3>
-<p>The engine has some timers running in the background. One of them <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/timer/Transpilation.java">transpiles code</a> when a change is detected in a given flow's source (written in Agama language). The transpilation process generates vanilla Javascript code runnable through <a href="https://github.com/mozilla/rhino">Mozilla Rhino</a> by using a transformation chain like  (DSL) flow code -&gt; (ANTLR4) parse tree -&gt; (XML) abstract syntax tree -&gt; JS. </p>
+<p>The engine has some timers running in the background. One of them <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/timer/Transpilation.java">transpiles code</a> when a change is detected in a given flow's source (written in Agama language). The transpilation process generates vanilla Javascript code runnable through <a href="https://github.com/mozilla/rhino">Mozilla Rhino</a> by using a transformation chain like  (DSL) flow code -&gt; (ANTLR4) parse tree -&gt; (XML) abstract syntax tree -&gt; JS.</p>
 <p>The transformation chain guarantees that a flow written in Agama DSL cannot:</p>
 <ul>
 <li>Access Java classes/instances not specified in the original flow code (i.e. the only bridge to Java world is via <code>Call</code>s)</li>
@@ -14967,7 +14967,7 @@ Finish result
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 21, 2024 12:19:41 UTC"><span class="timeago" datetime="2024-11-21T12:19:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 21, 2024 12:19:41 UTC">2024-11-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
   </span>
 
     
