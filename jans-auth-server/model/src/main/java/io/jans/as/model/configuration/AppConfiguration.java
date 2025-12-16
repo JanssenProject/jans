@@ -571,6 +571,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to disable prompt=consent", defaultValue = "false")
     private Boolean disablePromptConsent = false;
 
+    @DocProperty(description = "Boolean value specifying whether to run all Update Token scripts", defaultValue = "false")
+    private Boolean runAllUpdateTokenScripts = false;
+
     @DocProperty(description = "The lifetime of Logout Status JWT. If not set falls back to 1 day", defaultValue = "86400")
     private Integer logoutStatusJwtLifetime = DEFAULT_LOGOUT_STATUS_JWT_LIFETIME;
 
@@ -1440,6 +1443,15 @@ public class AppConfiguration implements Configuration {
 
     public void setDisablePromptConsent(Boolean disablePromptConsent) {
         this.disablePromptConsent = disablePromptConsent;
+    }
+
+    public Boolean getRunAllUpdateTokenScripts() {
+        if (runAllUpdateTokenScripts == null) runAllUpdateTokenScripts = false;
+        return runAllUpdateTokenScripts;
+    }
+
+    public void setRunAllUpdateTokenScripts(Boolean runAllUpdateTokenScripts) {
+        this.runAllUpdateTokenScripts = runAllUpdateTokenScripts;
     }
 
     public Boolean getIncludeSidInResponse() {
