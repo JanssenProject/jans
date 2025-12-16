@@ -58,7 +58,7 @@ jobs:
           egress-policy: audit
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -91,11 +91,8 @@ jobs:
       - name: Install dependencies
         if: steps.build_docker_image.outputs.build || github.event_name == 'tags'
         run: |
-          sudo apt-get update
-          sudo python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
-          sudo pip3 install --ignore-installed setuptools --upgrade
-          sudo pip3 install --ignore-installed -r ./automation/requirements.txt
-          sudo apt-get update
+            python3 -m pip install --upgrade pip --user
+            python3 -m pip install -r ./automation/requirements.txt --user
 
       #- uses: actions/delete-package-versions@v5
       #  continue-on-error: true

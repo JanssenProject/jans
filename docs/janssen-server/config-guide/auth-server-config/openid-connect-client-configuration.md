@@ -37,7 +37,7 @@ tasks.
 
 In the Janssen Server, you can deploy and manage the OpenID Connect Client using the
 command Line. To get the details of Janssen command line operations relevant to
-OpenID Connect Client, you can check the operations under `OauthOpenidConnectClients` 
+OpenID Connect Client, you can check the operations under `OauthOpenidConnectClients`
 task using the command below:
 
 Let's get the information about OpenID Connect Client Configuration:
@@ -224,17 +224,17 @@ the above schema. To fetch the example, use the command below.
 jans cli --schema-sample Client
 ```
 
-Using the schema and the example above, we have added OpenID Connect 
+Using the schema and the example above, we have added OpenID Connect
 client data to the file `/tmp/openid-connect.json`. An OpenID Connect client may have many properties, but we are going to fill only the required properties as shown below:
 
-```json title="Input" 
+```json title="Input"
 {
   "redirectUris": [
     "https://www.google.com/"
  ]
 }
 ```
-Now let's post an OpenID Connect client to the Janssen Server to be 
+Now let's post an OpenID Connect client to the Janssen Server to be
 added to the existing set:
 
 ```bash title="Command"
@@ -264,21 +264,21 @@ jans cli --operation-id put-oauth-openid-client \
 --data /tmp/update-client.json
 ```
 
-Upon successful execution of the update, the Janssen Server responds with 
+Upon successful execution of the update, the Janssen Server responds with
 updated configuration
 
 
-### Patch OpenID Connect Client by inum  
+### Patch OpenID Connect Client by inum
 
-Using `patch-oauth-openid-client-by-inum`, we can modify OpenID Connect Clients 
+Using `patch-oauth-openid-client-by-inum`, we can modify OpenID Connect Clients
 partially for its properties.
 
-To use this operation, specify the `inum` of the OpenID Connect Client that needs to be updated 
-using the `--url-suffix` and the property and the new value using the 
-[JSON Patch](https://jsonpatch.com/#the-patch). Refer [here](../../config-guide/config-tools/jans-cli/README.md#patch-request-schema) 
+To use this operation, specify the `inum` of the OpenID Connect Client that needs to be updated
+using the `--url-suffix` and the property and the new value using the
+[JSON Patch](https://jsonpatch.com/#the-patch). Refer [here](../../config-guide/config-tools/jans-cli/README.md#patch-request-schema)
 to know more about schema.
 
-In this example; We will change the value of the property `applicationType` 
+In this example: we will change the value of the property `applicationType`
 from `web` to `native`.
 
 ```bash title="Input" linenums="1"
@@ -293,7 +293,7 @@ from `web` to `native`.
 
 Now let's do the operation with the command line.
 
-```bash 
+```bash title="Command"
 jans cli \
 --operation-id patch-oauth-openid-client-by-inum \
 --url-suffix inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe --data /tmp/schema.json
@@ -301,17 +301,17 @@ jans cli \
 
 ### Get OpenID Connect Client by Inum
 
-With `get-oauth-openid-clients-by-inum` operation-id, we can get any specific 
-OpenID Connect Client matched with `Inum`. If we know the `inum`, we can use the 
+With `get-oauth-openid-clients-by-inum` operation-id, we can get any specific
+OpenID Connect Client matched with `Inum`. If we know the `inum`, we can use the
 below command:
 
 
-```bash 
+```bash
 jans cli \
 --operation-id get-oauth-openid-clients-by-inum \
 --url-suffix inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe
 ```
-The result will only show details of client with 
+The result will only show details of client with
 `inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe`.
 
 
