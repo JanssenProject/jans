@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 public class Jackson {
 
     private static final Logger LOG = LoggerFactory.getLogger(Jackson.class);
+
     private Jackson() {
     }
 
@@ -52,18 +53,23 @@ public class Jackson {
     }
 
     public static <T> T applyPatch(String patchAsString, T obj) throws JsonPatchException, IOException {
-        LOG.debug("Patch details - patchAsString:{}, obj:{}", patchAsString, obj );
+        LOG.debug("Patch details - patchAsString:{}, obj:{}", patchAsString, obj);
         JsonPatch jsonPatch = JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));
         return applyPatch(jsonPatch, obj);
     }
 
     public static boolean isFieldPresent(String patchAsString, String fieldName) {
-        LOG.debug("Check if FieldPresent patchAsString:{} contains fieldName:{}", patchAsString, fieldName );
+        LOG.debug("Check if FieldPresent patchAsString:{} contains fieldName:{}", patchAsString, fieldName);
         boolean isPresent = false;
+        if (patchAsString == null || fieldName == null) {
+            LOG.warn("isFieldPresent called with null parameter - patchAsString: {}, fieldName: {}", patchAsString,
+                    fieldName);
+            return isPresent;
+        }
         try {
             JsonNode jsonNode = Jackson.asJsonNode(patchAsString);
-            LOG.debug("patchAsString jsonNode:{}, jsonNode.findPath(fieldName):{}", jsonNode, jsonNode.findPath(fieldName));
-            List<String> keys = new ArrayList<> ();
+            LOG.debug("patchAsString jsonNode:{}", jsonNode);
+            List<String> keys = new ArrayList<>();
             if (jsonNode.isArray()) {
                 for (JsonNode operationNode : jsonNode) {
                     JsonNode pathNode = operationNode.get("path");
@@ -71,28 +77,28 @@ public class Jackson {
                         keys.add(pathNode.asText());
                     }
                 }
-                
+
                 LOG.debug(" FieldPresent keys:{}", keys);
-                isPresent = keys.contains("/"+fieldName);
-                LOG.debug(" FieldPresent contains fieldName:{}?:{}", fieldName, isPresent);              
+                isPresent = keys.contains("/" + fieldName);
+                LOG.debug(" FieldPresent contains fieldName:{}?:{}", fieldName, isPresent);
             }
 
         } catch (Exception e) {
             LOG.error("Error processing JSON Patch string for field '{}': {}", fieldName, e.getMessage());
-        }     
+        }
         return isPresent;
     }
-    
+
     public static JsonPatch getJsonPatch(String patchAsString) throws JsonPatchException, IOException {
-        LOG.debug("Patch details - patchAsString:{}", patchAsString  );
+        LOG.debug("Patch details - patchAsString:{}", patchAsString);
         return JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));
     }
 
     public static <T> T applyJsonPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, IOException {
-        LOG.debug("Patch details - jsonPatch:{}, obj:{}", jsonPatch, obj );
+        LOG.debug("Patch details - jsonPatch:{}, obj:{}", jsonPatch, obj);
         return applyPatch(jsonPatch, obj);
     }
-    
+
     @SuppressWarnings("unchecked")
     public static <T> T applyPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, JsonProcessingException {
         Preconditions.checkNotNull(jsonPatch);
@@ -163,7 +169,7 @@ public class Jackson {
 
         return jsonObject;
     }
-    
+
     public static boolean isValidJson(String json) {
         try {
             new JSONObject(json);
@@ -181,7 +187,7 @@ public class Jackson {
         }
         return true;
     }
-    
+
     public static JSONObject convertObjectToJsonObject(Object obj) throws JsonProcessingException {
         final ObjectMapper objectMapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         String jsonString = objectMapper.writeValueAsString(obj);

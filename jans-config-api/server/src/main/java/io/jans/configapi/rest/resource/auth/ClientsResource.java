@@ -148,7 +148,7 @@ public class ClientsResource extends ConfigBaseResource {
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
 
-        return Response.ok(getClientResponse(client)).build();
+        return Response.ok(applyResponsePolicy(client)).build();
     }
 
     @Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
@@ -204,7 +204,7 @@ public class ClientsResource extends ConfigBaseResource {
         result.setClaims(claims);
 
         // Response handling
-        getClientResponse(result);
+        result = applyResponsePolicy(result);
         logger.debug("Claim post creation - result.getClaims():{} ", result.getClaims());
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
@@ -255,7 +255,7 @@ public class ClientsResource extends ConfigBaseResource {
         result.setClaims(claims);
 
         // Response handling
-        result = getClientResponse(result);
+        result = applyResponsePolicy(result);
         logger.debug("Claim post updation - result.getClaims():{} ", result.getClaims());
         return Response.ok(result).build();
     }
@@ -296,7 +296,7 @@ public class ClientsResource extends ConfigBaseResource {
 
         clientService.updateClient(existingClient);
 
-        getClientResponse(existingClient);
+        applyResponsePolicy(existingClient);
         return Response.ok(existingClient).build();
     }
 
@@ -322,35 +322,36 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
-    private Client getClientResponse(Client client) throws EncryptionException {
-        if (client != null) {
-
-            List<Client> clients = new ArrayList<>();
-            clients.add(client);
-            getClientResponse(clients);
-            if (!clients.isEmpty()) {
-                return clients.get(0);
-            }
+    private List<Client> applyResponsePolicy(List<Client> clients) throws EncryptionException {
+        logger.debug("isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}, clients:{}",
+                isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse(), clients);
+        if (clients == null || clients.isEmpty()) {
+            return clients;
         }
-        return client;
+        for (Client client : clients) {
+            applyResponsePolicy(client);
+        }
+
+        return clients;
     }
 
-    private List<Client> getClientResponse(List<Client> clients) throws EncryptionException {
+    private Client applyResponsePolicy(Client client) throws EncryptionException {
         logger.debug(
-                " ClientResponse - isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}",
-                isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse());
-        if (clients != null && !clients.isEmpty()) {
-            for (Client client : clients) {
-                if (isReturnClientSecretInResponse()) {
-                    if (!isReturnEncryptedClientSecretInResponse()) {
-                        getDecryptedClientSecret(client);
-                    }
-                } else {
-                    client.setClientSecret(null);
-                }
-            }
+                " ApplyResponsePolicy - isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}, client:{}",
+                isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse(), client);
+        if (client == null) {
+            return client;
         }
-        return clients;
+
+        if (isReturnClientSecretInResponse()) {
+            if (!isReturnEncryptedClientSecretInResponse()) {
+                getDecryptedClientSecret(client);
+            }
+        } else {
+            client.setClientSecret(null);
+        }
+
+        return client;
     }
 
     private Client getDecryptedClientSecret(Client client) throws EncryptionException {
@@ -386,7 +387,7 @@ public class ClientsResource extends ConfigBaseResource {
                     pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
 
             List<Client> clients = pagedResult.getEntries();
-            getClientResponse(clients);
+            applyResponsePolicy(clients);
             logger.debug("Clients fetched  - clients:{}", clients);
             pagedResult.setEntries(clients);
         }
