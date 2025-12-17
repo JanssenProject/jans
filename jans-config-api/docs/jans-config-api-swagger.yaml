@@ -2648,7 +2648,7 @@ paths:
           default: ascending
       - name: fieldValuePair
         in: query
-        description: Field and value pair for seraching
+        description: Field and value pair for searching
         schema:
           type: string
           default: ""
@@ -14953,17 +14953,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
+        adminCanEdit:
+          type: boolean
         adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanEdit:
-          type: boolean
         userCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16714,10 +16714,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -17745,9 +17745,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object

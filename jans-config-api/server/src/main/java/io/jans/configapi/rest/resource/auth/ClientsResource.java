@@ -113,11 +113,11 @@ public class ClientsResource extends ConfigBaseResource {
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
-            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "applicationType=web,persistClientAuthorizations=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair)
+            @Parameter(description = "Field and value pair for searching", examples = @ExampleObject(name = "Field value example", value = "applicationType=web,persistClientAuthorizations=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair)
             throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug(
-                    "Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
+                    "Client search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
@@ -143,7 +143,7 @@ public class ClientsResource extends ConfigBaseResource {
             @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
             throws EncryptionException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Client serach by inum:{}", escapeLog(inum));
+            logger.debug("Client search by inum:{}", escapeLog(inum));
         }
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
@@ -204,7 +204,7 @@ public class ClientsResource extends ConfigBaseResource {
         result.setClaims(claims);
 
         // Response handling
-        result = applyResponsePolicy(result);
+        applyResponsePolicy(result);
         logger.debug("Claim post creation - result.getClaims():{} ", result.getClaims());
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
@@ -255,7 +255,7 @@ public class ClientsResource extends ConfigBaseResource {
         result.setClaims(claims);
 
         // Response handling
-        result = applyResponsePolicy(result);
+        applyResponsePolicy(result);
         logger.debug("Claim post updation - result.getClaims():{} ", result.getClaims());
         return Response.ok(result).build();
     }
