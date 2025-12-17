@@ -685,8 +685,10 @@ For complete API documentation, see the [Lock Server OpenAPI Specification](http
 
 ## See Also
 
-- **[Janssen Lock Overview](./README.md)**: Complete Lock ecosystem documentation
-- **[Cedarling Documentation](../../cedarling/README.md)**: Client-side authorization engine
-- **[Cedar Policy Language](https://docs.cedarpolicy.com/)**: Official Cedar documentation
-- **[OAuth 2.0 Configuration](../auth-server/oauth-features/README.md)**: OAuth implementation details
-- **[Jans CLI Reference](../config-guide/config-tools/jans-cli/README.md)**: Command-line interface documentation
+## See Also
+
+- [Janssen Lock Overview](./README.md): Complete Lock ecosystem documentation
+- [Cedarling Documentation](../../../jans-cedarling/README.md): Client-side authorization engine
+- [Cedar Policy Language](https://docs.cedarpolicy.com/): Official Cedar documentation
+- [OAuth 2.0 Configuration](../auth-server/oauth-features/README.md): OAuth implementation details
+- [Jans CLI Reference](../config-guide/config-tools/jans-cli/README.md): Command-line interface documentation
