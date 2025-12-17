@@ -7,7 +7,7 @@
             "policy_content": {
                 "encoding": "none",
                 "content_type": "cedar",
-                "body": "permit(principal, action == Jans::Read, resource) when { principal.role.contains(\"admin\") };"
+                "body": "permit(principal, action == Jans::Read, resource) when { principal is Jans::User && principal.role.contains(\"admin\") };"
             }
         }
     },
