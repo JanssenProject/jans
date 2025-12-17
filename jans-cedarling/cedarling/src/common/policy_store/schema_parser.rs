@@ -108,29 +108,6 @@ impl SchemaParser {
             content: content.to_string(),
         })
     }
-
-    /// Extract namespace declarations from schema content.
-    ///
-    /// Returns a list of namespaces defined in the schema, useful for
-    /// validation, debugging, and policy store analysis.
-    pub fn extract_namespaces(content: &str) -> Vec<String> {
-        let mut namespaces = Vec::new();
-
-        // Simple regex-like parsing for namespace declarations
-        for line in content.lines() {
-            let trimmed = line.trim();
-            if trimmed.starts_with("namespace ")
-                && let Some(ns_name) = trimmed
-                    .strip_prefix("namespace ")
-                    .and_then(|s| s.split_whitespace().next())
-                    .map(|s| s.trim_end_matches('{').trim())
-            {
-                namespaces.push(ns_name.to_string());
-            }
-        }
-
-        namespaces
-    }
 }
 
 #[cfg(test)]
@@ -278,53 +255,6 @@ mod tests {
     }
 
     #[test]
-    fn test_extract_namespaces_single() {
-        let content = r#"
-            namespace MyApp {
-                entity User;
-            }
-        "#;
-
-        let namespaces = SchemaParser::extract_namespaces(content);
-        assert_eq!(namespaces.len(), 1);
-        assert_eq!(namespaces[0], "MyApp");
-    }
-
-    #[test]
-    fn test_extract_namespaces_multiple() {
-        let content = r#"
-            namespace App1 {
-                entity User;
-            }
-            
-            namespace App2 {
-                entity Admin;
-            }
-            
-            namespace App3 {
-                entity Guest;
-            }
-        "#;
-
-        let namespaces = SchemaParser::extract_namespaces(content);
-        assert_eq!(namespaces.len(), 3);
-        assert!(namespaces.contains(&"App1".to_string()));
-        assert!(namespaces.contains(&"App2".to_string()));
-        assert!(namespaces.contains(&"App3".to_string()));
-    }
-
-    #[test]
-    fn test_extract_namespaces_none() {
-        let content = r#"
-            entity User;
-            entity File;
-        "#;
-
-        let namespaces = SchemaParser::extract_namespaces(content);
-        assert_eq!(namespaces.len(), 0);
-    }
-
-    #[test]
     fn test_parse_schema_with_entity_hierarchy() {
         let content = r#"
             namespace OrgApp {
@@ -466,33 +396,6 @@ mod tests {
             result.is_ok(),
             "Schema with optional attributes should parse"
         );
-    }
-
-    #[test]
-    fn test_extract_namespaces_with_comments() {
-        let content = r#"
-            // This is a comment
-            namespace App1 {
-                entity User;
-            }
-            
-            /* Block comment */
-            namespace App2 {
-                entity Admin;
-            }
-        "#;
-
-        let namespaces = SchemaParser::extract_namespaces(content);
-        assert_eq!(namespaces.len(), 2);
-        assert!(namespaces.contains(&"App1".to_string()));
-        assert!(namespaces.contains(&"App2".to_string()));
-    }
-
-    #[test]
-    fn test_extract_namespaces_empty_content() {
-        let content = "";
-        let namespaces = SchemaParser::extract_namespaces(content);
-        assert_eq!(namespaces.len(), 0);
     }
 
     #[test]

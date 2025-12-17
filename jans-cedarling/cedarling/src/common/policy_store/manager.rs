@@ -187,16 +187,10 @@ impl PolicyStoreManager {
         use cedar_policy::SchemaFragment;
         use std::str::FromStr;
 
-        // Extract namespaces for error reporting
-        let namespaces = SchemaParser::extract_namespaces(schema_content);
-
         // Parse and validate schema using SchemaParser
         let parsed_schema = SchemaParser::parse_schema(schema_content, "schema.cedarschema")
             .map_err(|e| {
-                ConversionError::SchemaConversion(format!(
-                    "Failed to parse schema (namespaces: {:?}): {}",
-                    namespaces, e
-                ))
+                ConversionError::SchemaConversion(format!("Failed to parse schema: {}", e))
             })?;
 
         // Validate the schema
