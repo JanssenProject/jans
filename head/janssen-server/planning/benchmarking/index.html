@@ -14519,27 +14519,27 @@ without this data. System libraries and hardware choices may also impact your
 results.</p>
 <p>Benchmarking is an iterative process. Inevitably, things never go exactly how
 you guessed they would. And you make changes to your environment and run the
-benchmarking tests again--<em>ad nauseam</em>. Leave enough time for benchmarking. However 
+benchmarking tests again--<em>ad nauseam</em>. Leave enough time for benchmarking. However
 much time you think it will take, triple your estimate.</p>
-<p>Make sure you look at both short tests and long running tests. A slow memory
+<p>Make sure you look at both short tests and long-running tests. A slow memory
 leak may only present after many hours of high load. Also, run some crazy tests,
 just so you know what happens. Some organizations benchmark for ten times the
 normal volume. But when an incident happens, they see 1,000 times the normal volume.
-Think outside-the-box.  </p>
+Think outside-the-box.</p>
 <p>It's tricky load testing some newer two-factor authentication services,
 especially if they rely on new features of the browser. Hopefully the tools to
 benchmark these will evolve.</p>
-<p>Janssen Auth Server supports a number of deployment models--both VM and cloud-native. 
+<p>Janssen Auth Server supports a number of deployment models--both VM and cloud-native.
 While cloud-native architecture enables true horizontal scalability,
 it comes at a cost. Benchmarking can help you understand if that cost is
 justified.</p>
 <h2 id="load-test">Load test<a class="headerlink" href="#load-test" title="Permanent link">#</a></h2>
-<p>In cloud-native architecture, the load testing is executed via k8s pods. </p>
+<p>In cloud-native architecture, the load testing is executed via k8s pods.</p>
 <h3 id="authorization-code-flow-jmeter-load-test">Authorization Code Flow jmeter load test<a class="headerlink" href="#authorization-code-flow-jmeter-load-test" title="Permanent link">#</a></h3>
 <p>For load testing with Authorization Code Flow jmeter test, the following <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/authorization_code_flow.jmx">script</a> is used.</p>
 <p>See <a href="../../recipes/benchmark/#authorization-code-flow">Authorization code flow recipe</a> for details.</p>
 <h3 id="resource-owner-password-grant-ropc-flow-jmeter-load-test">Resource Owner Password Grant (ROPC) Flow jmeter load test<a class="headerlink" href="#resource-owner-password-grant-ropc-flow-jmeter-load-test" title="Permanent link">#</a></h3>
-<p>For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test, the following <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx">script</a> is used.  </p>
+<p>For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test, the following <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx">script</a> is used.</p>
 <p>See <a href="../../recipes/benchmark/#resource-owner-password-credentials-ropc-flow">ROPC flow recipe</a> for details.</p>
 
 
@@ -14563,7 +14563,7 @@ justified.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2025 11:50:32 UTC"><span class="timeago" datetime="2025-03-25T11:50:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2025 11:50:32 UTC">2025-03-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 17, 2025 10:03:16 UTC"><span class="timeago" datetime="2025-12-17T10:03:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 17, 2025 10:03:16 UTC">2025-12-17</span>
   </span>
 
     
