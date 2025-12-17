@@ -8,7 +8,7 @@ pub(crate) mod log_entry;
 #[cfg(test)]
 mod mock_jwks_server;
 #[cfg(test)]
-mod security_tests;
+mod archive_security_tests;
 #[cfg(test)]
 mod test;
 #[cfg(test)]

@@ -33,7 +33,7 @@ mod path_traversal {
     use super::*;
 
     #[test]
-    fn test_rejects_parent_directory_traversal() {
+    fn test_rejects_parent_directory_traversal_in_archive() {
         let archive = create_path_traversal_archive();
         let result = ArchiveVfs::from_buffer(archive);
 
