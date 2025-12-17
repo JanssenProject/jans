@@ -17,7 +17,6 @@ use std::collections::HashMap;
 
 /// Represents a parsed Cedar policy with metadata.
 #[derive(Debug, Clone)]
-
 pub struct ParsedPolicy {
     /// The policy ID (from Cedar engine or @id annotation)
     pub id: PolicyId,
