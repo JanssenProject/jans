@@ -272,7 +272,7 @@ public class IdTokenFactory {
             }
 
             setClaimsFromJwtAuthorizationRequest(jwr, authorizationGrant, executionContext.getScopes());
-            setClaimsFromRequestedClaims(executionContext.getClaimsAsString(), jwr, user);
+            setClaimsFromRequestedClaims(executionContext.getClaimsAsString(), jwr, user, client, executionContext.getScopes());
         }
 
         filterClaimsBasedOnAccessToken(jwr, accessToken, authorizationCode);
@@ -331,7 +331,7 @@ public class IdTokenFactory {
      * @param jwr             Json that contains all claims that should go in id_token.
      * @param user            Authenticated user.
      */
-    private void setClaimsFromRequestedClaims(String requestedClaims, JsonWebResponse jwr, User user)
+    private void setClaimsFromRequestedClaims(String requestedClaims, JsonWebResponse jwr, User user, Client client, Collection<String> scopes)
             throws InvalidClaimException {
 
         if (BooleanUtils.isFalse(appConfiguration.getIncludeRequestedClaimsInIdToken())) {
@@ -346,11 +346,11 @@ public class IdTokenFactory {
                     String claimName = it.next();
                     JansAttribute jansAttribute = attributeService.getByClaimName(claimName);
 
-                    if (jansAttribute != null) {
+                    if (jansAttribute != null && validateRequesteClaim(jansAttribute, client.getClaims(), scopes)) {
                         String ldapClaimName = jansAttribute.getName();
 
                         Object attribute = user.getAttribute(ldapClaimName, false, jansAttribute.getOxMultiValuedAttribute());
-                        log.trace("setClaimsFromRequestedClaims - put in id_token requested claim {} is with value {}", claimName, attribute);
+                        log.trace("setClaimsFromRequestedClaims - put in id_token requested claim {}", claimName);
 
                         if (attribute instanceof List) {
                             jwr.getClaims().setClaim(claimName, (List) attribute);
@@ -399,7 +399,7 @@ public class IdTokenFactory {
                 String ldapClaimName = jansAttribute.getName();
                 Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional, jansAttribute.getOxMultiValuedAttribute());
 
-                log.trace("setClaimsFromJwtAuthorizationRequest - put in id_token requested claim {} is with value {}", claim.getName(), attribute);
+                log.trace("setClaimsFromJwtAuthorizationRequest - put in id_token requested claim {}", claim.getName());
                 jwr.getClaims().setClaimFromJsonObject(claim.getName(), attribute);
             }
         }

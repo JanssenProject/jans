@@ -100,7 +100,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL for Pushed Authorisation Request (PAR) Endpoint")
     private String parEndpoint;
 
-    @DocProperty(description = "Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint)")
+    @DocProperty(description = "Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to put minimize claims in token (for security).")
     private Boolean includeRequestedClaimsInIdToken = false;
 
     @DocProperty(description = "Boolean value to indicate whether to allow client assertion 'aud' without strict server issuer match. Default value is false which means that server requires strict match.", defaultValue = "false")
