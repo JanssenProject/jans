@@ -21,8 +21,8 @@ Jans has next persistence modules out-of-the-box:
 
 ## Configuration
 
-On a Janssen Server instance 
-the type of persistence(DB) used is specified 
+On a Janssen Server instance
+the type of persistence(DB) used is specified
 in `/etc/jans/conf/jans.properties` using the entry as show below:
 
 ```
@@ -36,19 +36,19 @@ on choice of persistence(DB) type, it can be one of these supported values:
 - `hybrid`. 
 
 !!! abstract "Code Connect"
-     
+
      In Janssen Server code base, the list of supported persistence types can be
      found [here](https://github.com/JanssenProject/jans/blob/main/jans-orm/core/src/main/java/io/jans/orm/PersistenceEntryManager.java#L48).
 
 Based on persistent type in use, the corresponding properties file with relevant
 configuration properties will be available on Janssen Server instance under
-the directory `/etc/jans/conf/`. List of configuration files for these 
+the directory `/etc/jans/conf/`. List of configuration files for these
 persistence types are:
 
 - `jans-sql.properties`
 - `jans-hybrid.properties`
 
-The application reloads configuration from these files after start up or on 
+The application reloads configuration from these files after start up or on
 files date time modification after initialization.
 
 ### Overriding DB Configuration Properties
@@ -149,7 +149,7 @@ Jans ORM has modular architecture. The are few layers in this implementation
     - provide base implementation with reusable parts needed for DB modules implementation
 
     - scan beans and work with ORM layer annotations
-  
+
 1. **jans-orm-annotation**: Define annotations which instruct ORM about how to work with beans and properties 
 
 1. **jans-orm-filter**: This module provides Filter API. The syntax is very similar to LDAP filters. The ORM layer converts them at runtime to DB query syntax: *SQL/NoSQL*
@@ -263,7 +263,7 @@ Main **PersistenceEntryManager** API methods which applications can use:
     <T> List<AttributeData> exportEntry(String dn, String objectClass);
 
     <T> void importEntry(String dn, Class<T> entryClass, List<AttributeData> data);
-``` 
+```
 
 ## New DB support and integrations
 
@@ -282,9 +282,9 @@ After this it's enough to put new ORM DB module into application war file or fol
 
 ## DB Schema
 
-The DB schema and beans definitions should match each other. During deployment setup generates schema and indexes based on rules in 
+The DB schema and beans definitions should match each other. During deployment setup generates schema and indexes based on rules in
 schema [file](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/schema/jans_schema.json). The data types defined in it setup map to DB SQL types based on default [rules](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/ldap_sql_data_type_mapping.json).
 
 It's possible to override default generation rules. For this case there is next [file](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/sql_data_types.json).
 
-Default indexes defined in next files: [coubase_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/couchbase/index.json), [mysql_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/mysql_index.json), [pgsql_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/pgsql_index.json) 
+Default indexes defined in next files: [coubase_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/couchbase/index.json), [mysql_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/mysql_index.json), [pgsql_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/pgsql_index.json)

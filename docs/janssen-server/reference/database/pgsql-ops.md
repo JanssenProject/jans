@@ -7,12 +7,12 @@ tags:
 
 # PostgreSQL Operations
 
-PostgreSQL is a versatile and reliable database management system that empowers developers and organizations to build robust 
+PostgreSQL is a versatile and reliable database management system that empowers developers and organizations to build robust
 and efficient applications.
 
 ## Establish Connection to Jans PostgreSQL Server
 
-Connect to PostgreSql workspace: `sudo -u postgres psql` 
+Connect to PostgreSql workspace: `sudo -u postgres psql`
 
 Show all Database list : `\list` or `\l`
 
@@ -50,7 +50,7 @@ To search for users with a filter using PostgreSQL's command-line tool psql, you
 SELECT * FROM "jansPerson" WHERE uid= '<uid>';
 ```
 
-## Modify column size of Jans postgresql 
+## Modify column size of Jans postgresql
 
 The psql command-line tool, you can use the `\d+` command to display detailed information about a table, including its columns. Lets see the details of `jansPerson` table:
 
@@ -90,13 +90,13 @@ COPY (SELECT * FROM "jansPerson") TO '/tmp/output.txt';
 
 After executing the command, the data from the specified column will be copied into the specified text file.
 
-## Back-up and re-store 
+## Back-up and re-store
 
 PostgreSQL is a popular open-source relational database management system used for web applications, business intelligence, and other data-intensive applications. A critical aspect of managing a PostgreSQL database is ensuring data protection by having a backup and restore strategy in place.
 
 ### Back-up
 To `dump` the PostgreSQL database, you can use the `pg_dump` command-line utility.
-To back-up your database 
+To back-up your database
 
 ```
 pg_dump -h localhost -U "<user>" "<dbName>" -Fc > /tmp/back-up.sql
