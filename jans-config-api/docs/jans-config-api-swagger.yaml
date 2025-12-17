@@ -14953,17 +14953,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -15494,6 +15494,8 @@ components:
           type: boolean
         disablePromptConsent:
           type: boolean
+        runAllUpdateTokenScripts:
+          type: boolean
         logoutStatusJwtLifetime:
           type: integer
           format: int32
@@ -15878,6 +15880,8 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -15887,8 +15891,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17733,7 +17735,7 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        logoutStatusJwt:
+        accessToken:
           type: boolean
         tokenTypeEnum:
           type: string
@@ -17745,7 +17747,7 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object

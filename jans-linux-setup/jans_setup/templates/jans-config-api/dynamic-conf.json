@@ -66,25 +66,25 @@
   },
   "auditLogConf": {
     "enabled": true,
-	"logData": true,
+    "logData": true,
     "ignoreHttpMethod": [
       "GET"
     ],
-	"ignoreAnnotation": [
+    "ignoreAnnotation": [
       "ignoreAudit"
     ],
     "ignoreObjectMapping": [
-    {
-      "name": "loggingRequest",
-      "text": [
-	  "action=FETCH"
-	  ]
-    },
-    {
-      "name": "ssaRequest",
-      "text": [ ]
-    }
-  ],
+      {
+        "name": "loggingRequest",
+        "text": [
+          "action=FETCH"
+        ]
+      },
+      {
+        "name": "ssaRequest",
+        "text": []
+      }
+    ],
     "headerAttributes": [
       "User-inum",
       "jans-client"

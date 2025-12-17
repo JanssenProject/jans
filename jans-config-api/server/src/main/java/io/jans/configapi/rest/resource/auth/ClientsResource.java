@@ -289,13 +289,13 @@ public class ClientsResource extends ConfigBaseResource {
         // ClientSecret encryption check
         boolean isClientSecretPresent = Jackson.isFieldPresent(jsonPatchString, CLIENT_SECRET);
         logger.info(" isFieldPresent - CLIENT_SECRET - isClientSecretPresent:{}", isClientSecretPresent);
-        
+
         if (isClientSecretPresent && StringUtils.isNotBlank(existingClient.getClientSecret())) {
             existingClient.setClientSecret(encryptionService.encrypt(existingClient.getClientSecret()));
         }
-        
+
         clientService.updateClient(existingClient);
-        
+
         getClientResponse(existingClient);
         return Response.ok(existingClient).build();
     }
@@ -341,12 +341,9 @@ public class ClientsResource extends ConfigBaseResource {
                 isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse());
         if (clients != null && !clients.isEmpty()) {
             for (Client client : clients) {
-                if (isReturnClientSecretInResponse() && !isReturnEncryptedClientSecretInResponse()) {
-                    try {
-                        client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
-                    } catch (Exception ex) {
-                        logger.error(" Error while decrypting ClientSecret for '" + client.getClientId()
-                                + "', exception is - ", ex);
+                if (isReturnClientSecretInResponse()) {
+                    if (!isReturnEncryptedClientSecretInResponse()) {
+                        getDecryptedClientSecret(client);
                     }
                 } else {
                     client.setClientSecret(null);
@@ -354,6 +351,18 @@ public class ClientsResource extends ConfigBaseResource {
             }
         }
         return clients;
+    }
+
+    private Client getDecryptedClientSecret(Client client) throws EncryptionException {
+        if (client != null) {
+            try {
+                client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+            } catch (Exception ex) {
+                logger.error(" Error while decrypting ClientSecret for '" + client.getClientId() + "', exception is - ",
+                        ex);
+            }
+        }
+        return client;
     }
 
     private String generatePassword() {
