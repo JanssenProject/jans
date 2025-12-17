@@ -87,7 +87,7 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
          "===": [{"var": "Jans::User"}, "ALLOW"]
        },
-       "CEDARLING_JWT_SIG_VALIDATION": "enabled",
+       "CEDARLING_JWT_SIG_VALIDATION": "disabled",
        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
        "CEDARLING_MAPPING_USER": "Jans::User",
        "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
