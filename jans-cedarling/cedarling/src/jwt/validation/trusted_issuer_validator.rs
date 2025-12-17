@@ -9,11 +9,6 @@
 //! trusted issuers, including issuer matching, required claims validation, JWKS fetching,
 //! and signature verification.
 //!
-//! ## Note
-//!
-//! The core required claims validation is integrated into `JwtService` for production use.
-//! This module provides a standalone alternative for testing and advanced use cases.
-//!
 //! ## Features
 //!
 //! - **Issuer matching**: Validates that JWT tokens come from configured trusted issuers
