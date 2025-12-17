@@ -42,6 +42,7 @@ import jakarta.ejb.Stateless;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.json.JSONObject;
@@ -218,9 +219,9 @@ public class IdTokenFactory {
         }
         jwr.setClaim(JwtClaimName.JANS_OPENID_CONNECT_VERSION, appConfiguration.getJansOpenIdConnectVersion());
 
-        User user = authorizationGrant.getUser();
         List<Scope> dynamicScopes = new ArrayList<>();
         if (executionContext.isIncludeIdTokenClaims() && client.isIncludeClaimsInIdToken()) {
+            User user = authorizationGrant.getUser();
             for (String scopeName : executionContext.getScopes()) {
                 Scope scope = scopeService.getScopeById(scopeName);
                 if (scope == null) {
@@ -269,10 +270,11 @@ public class IdTokenFactory {
 
                 jwr.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
             }
+
+            setClaimsFromJwtAuthorizationRequest(jwr, authorizationGrant, executionContext.getScopes());
+            setClaimsFromRequestedClaims(executionContext.getClaimsAsString(), jwr, user, client, executionContext.getScopes());
         }
 
-        setClaimsFromJwtAuthorizationRequest(jwr, authorizationGrant, executionContext.getScopes());
-        setClaimsFromRequestedClaims(executionContext.getClaimsAsString(), jwr, user);
         filterClaimsBasedOnAccessToken(jwr, accessToken, authorizationCode);
         jwrService.setSubjectIdentifier(jwr, authorizationGrant);
 
@@ -329,8 +331,13 @@ public class IdTokenFactory {
      * @param jwr             Json that contains all claims that should go in id_token.
      * @param user            Authenticated user.
      */
-    private void setClaimsFromRequestedClaims(String requestedClaims, JsonWebResponse jwr, User user)
+    private void setClaimsFromRequestedClaims(String requestedClaims, JsonWebResponse jwr, User user, Client client, Collection<String> scopes)
             throws InvalidClaimException {
+
+        if (BooleanUtils.isFalse(appConfiguration.getIncludeRequestedClaimsInIdToken())) {
+            return;
+        }
+
         if (requestedClaims != null) {
             JSONObject claimsObj = new JSONObject(requestedClaims);
             if (claimsObj.has("id_token")) {
@@ -339,10 +346,11 @@ public class IdTokenFactory {
                     String claimName = it.next();
                     JansAttribute jansAttribute = attributeService.getByClaimName(claimName);
 
-                    if (jansAttribute != null) {
+                    if (jansAttribute != null && validateRequesteClaim(jansAttribute, client.getClaims(), scopes)) {
                         String ldapClaimName = jansAttribute.getName();
 
                         Object attribute = user.getAttribute(ldapClaimName, false, jansAttribute.getOxMultiValuedAttribute());
+                        log.trace("setClaimsFromRequestedClaims - put in id_token requested claim {}", claimName);
 
                         if (attribute instanceof List) {
                             jwr.getClaims().setClaim(claimName, (List) attribute);
@@ -390,6 +398,8 @@ public class IdTokenFactory {
             if (validateRequesteClaim(jansAttribute, client.getClaims(), scopes)) {
                 String ldapClaimName = jansAttribute.getName();
                 Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional, jansAttribute.getOxMultiValuedAttribute());
+
+                log.trace("setClaimsFromJwtAuthorizationRequest - put in id_token requested claim {}", claim.getName());
                 jwr.getClaims().setClaimFromJsonObject(claim.getName(), attribute);
             }
         }
