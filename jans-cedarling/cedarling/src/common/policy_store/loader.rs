@@ -52,12 +52,11 @@
 //! ```
 
 use super::errors::{PolicyStoreError, ValidationError};
-use super::manifest_validator::ManifestValidator;
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
 
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 /// Load a policy store from a directory path.
 ///
@@ -151,9 +150,9 @@ pub async fn load_policy_store_archive(path: &Path) -> Result<LoadedPolicyStore,
 pub async fn load_policy_store_archive(
     _path: &Path,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    Err(PolicyStoreError::Archive(
-        super::errors::ArchiveError::WasmUnsupported,
-    ))
+    Err(PolicyStoreError::PathNotFound {
+        path: "File-based archive loading not supported in WASM".to_string(),
+    })
 }
 
 /// Load a policy store from archive bytes.
@@ -298,7 +297,9 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
         logger: Option<crate::log::Logger>,
     ) -> Result<(), PolicyStoreError> {
         use super::log_entry::PolicyStoreLogEntry;
+        use super::manifest_validator::ManifestValidator;
         use crate::log::interface::LogWriter;
+        use std::path::PathBuf;
 
         // Create a new PhysicalVfs instance for validation
         let validator =
