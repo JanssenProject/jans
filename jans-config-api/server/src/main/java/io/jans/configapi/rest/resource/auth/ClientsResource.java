@@ -322,7 +322,7 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
-    private List<Client> applyResponsePolicy(List<Client> clients) throws EncryptionException {
+    private List<Client> applyResponsePolicy(List<Client> clients) {
         logger.debug("isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}, clients:{}",
                 isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse(), clients);
         if (clients == null || clients.isEmpty()) {
@@ -335,7 +335,7 @@ public class ClientsResource extends ConfigBaseResource {
         return clients;
     }
 
-    private Client applyResponsePolicy(Client client) throws EncryptionException {
+    private Client applyResponsePolicy(Client client) {
         logger.debug(
                 " ApplyResponsePolicy - isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}, client:{}",
                 isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse(), client);
@@ -354,7 +354,7 @@ public class ClientsResource extends ConfigBaseResource {
         return client;
     }
 
-    private Client getDecryptedClientSecret(Client client) throws EncryptionException {
+    private Client getDecryptedClientSecret(Client client) {
         if (client != null) {
             try {
                 client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
