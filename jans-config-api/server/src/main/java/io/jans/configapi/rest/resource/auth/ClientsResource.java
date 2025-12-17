@@ -359,7 +359,7 @@ public class ClientsResource extends ConfigBaseResource {
             try {
                 client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
             } catch (Exception ex) {
-                logger.error(" Error while decrypting ClientSecret for '" + client.getClientId() + "', exception is - ",
+                logger.error(" Error while decrypting ClientSecret for '{}', exception is - ", client.getClientId(),
                         ex);
                 client.setClientSecret(null);
             }

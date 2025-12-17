@@ -84,7 +84,7 @@ public class Jackson {
             }
 
         } catch (Exception e) {
-            LOG.error("Error processing JSON Patch string for field '{}': {}", fieldName, e.getMessage());
+            LOG.error("Error processing JSON Patch string for field '{}'", fieldName, e);
         }
         return isPresent;
     }
