@@ -35,6 +35,6 @@
     "schema": {
         "encoding": "none",
         "content_type": "cedar",
-        "body": "namespace Jans { type Context = { network?: String, tokens?: TokensContext, }  type TokensContext = { total_token_count: Long, main_idp_access_token?: Access_token }; entity User = { role: Set<String> }; entity Application; entity Workload; entity Access_token = { token_type?: String, jti?: String, iss?: TrustedIssuer, exp?: Long, validated_at?: Long, scope?: Set<String> } tags: Set<String>; entity TrustedIssuer { issuer_entity_id: Url }; action Read appliesTo { principal: [User, Workload], resource: [Application] context: Context }; }"
+        "body": "namespace Jans { type Url = { host: String, path: String, protocol: String }; type Context = { network?: String, tokens?: TokensContext, }  type TokensContext = { total_token_count: Long, main_idp_access_token?: Access_token }; entity User = { role: Set<String> }; entity Application; entity Workload; entity Access_token = { token_type?: String, jti?: String, iss?: TrustedIssuer, exp?: Long, validated_at?: Long, scope?: Set<String> } tags Set<String>; entity TrustedIssuer { issuer_entity_id: Url }; action Read appliesTo { principal: [User, Workload], resource: [Application], context: Context }; }"
     }
 }
