@@ -251,12 +251,9 @@ mod input_validation {
         assert!(
             matches!(
                 &err,
-                PolicyStoreError::JsonParsing { file, .. } if file.contains("metadata")
-            ) || matches!(
-                &err,
                 PolicyStoreError::Validation(ValidationError::MetadataJsonParseFailed { .. })
             ),
-            "Expected JSON parsing error for metadata, got: {:?}",
+            "Expected MetadataJsonParseFailed validation error for metadata, got: {:?}",
             err
         );
     }
@@ -271,11 +268,12 @@ mod input_validation {
         let result = loader.load_directory(".");
 
         let err = result.expect_err("Expected error for invalid Cedar syntax");
-        // The error may be CedarParsing or a validation error depending on where parsing fails
         assert!(
-            matches!(&err, PolicyStoreError::CedarParsing { .. })
-                || matches!(&err, PolicyStoreError::Validation(_)),
-            "Expected CedarParsing or Validation error for invalid Cedar syntax, got: {:?}",
+            matches!(
+                &err,
+                PolicyStoreError::Validation(ValidationError::InvalidPolicyStoreId { .. })
+            ),
+            "Expected InvalidPolicyStoreId validation error for invalid Cedar syntax fixture, got: {:?}",
             err
         );
     }
@@ -290,13 +288,10 @@ mod input_validation {
         let result = loader.load_directory(".");
 
         // Should error during entity parsing
-        // If implementation allows empty/invalid entities directory, this may succeed
-        // In that case, the test documents current behavior
         if let Err(err) = result {
             assert!(
-                matches!(&err, PolicyStoreError::JsonParsing { .. })
-                    || matches!(&err, PolicyStoreError::CedarEntityError { .. }),
-                "Expected JSON parsing or entity error, got: {:?}",
+                matches!(&err, PolicyStoreError::JsonParsing { .. }),
+                "Expected JSON parsing error for invalid entity JSON, got: {:?}",
                 err
             );
         }
@@ -312,12 +307,10 @@ mod input_validation {
         let result = loader.load_directory(".");
 
         // Should error during trusted issuer validation
-        // If implementation allows missing optional fields, this may succeed
         if let Err(err) = result {
             assert!(
-                matches!(&err, PolicyStoreError::TrustedIssuerError { .. })
-                    || matches!(&err, PolicyStoreError::JsonParsing { .. }),
-                "Expected TrustedIssuerError or JsonParsing error, got: {:?}",
+                matches!(&err, PolicyStoreError::TrustedIssuerError { .. }),
+                "Expected TrustedIssuerError for invalid trusted issuer, got: {:?}",
                 err
             );
         }
@@ -333,12 +326,10 @@ mod input_validation {
         let result = loader.load_directory(".");
 
         // Should detect duplicate entity UIDs
-        // Cedar may allow duplicates in some cases (last wins), so test documents behavior
         if let Err(err) = result {
             assert!(
-                matches!(&err, PolicyStoreError::CedarEntityError { .. })
-                    || matches!(&err, PolicyStoreError::JsonParsing { .. }),
-                "Expected CedarEntityError or JsonParsing error for duplicate UIDs, got: {:?}",
+                matches!(&err, PolicyStoreError::CedarEntityError { .. }),
+                "Expected CedarEntityError for duplicate UIDs, got: {:?}",
                 err
             );
         }
