@@ -14679,25 +14679,25 @@
 
 
 <h1 id="jans-ldap-link">Jans LDAP Link<a class="headerlink" href="#jans-ldap-link" title="Permanent link">#</a></h1>
-<p>The Jans LDAPLink synchronization service updates the Janssen User Store when 
-authoritative data is managed in an external LDAP store. </p>
+<p>The Jans LDAPLink synchronization service updates the Janssen User Store when
+authoritative data is managed in an external LDAP store.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
-<p>The API is available as the <code>Jans Link</code> component of Jans Server. 
+<p>The API is available as the <code>Jans Link</code> component of Jans Server.
 Upon <a href="https://docs.jans.
-io/head/admin/install/vm-install/ubuntu/">installation</a> you can select if you want 
-to install this Service along with other Janssen Server components. Post 
+io/head/admin/install/vm-install/ubuntu/">installation</a> you can select if you want
+to install this Service along with other Janssen Server components. Post
 installation, to add Jans-Link component, use the following:</p>
 <div class="highlight"><pre><span></span><code>python3<span class="w"> </span>/opt/jans/jans-setup/setup.py<span class="w"> </span>--install-jans-link<span class="sb">`</span>
 </code></pre></div>
-<p>Jans LDAP link gets installed as a service that can be managed using below 
+<p>Jans LDAP link gets installed as a service that can be managed using below
 commands.</p>
-<p>To Satrt Jans-Link </p>
+<p>To Start Jans-Link</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>start<span class="w"> </span>jans-link
 </code></pre></div>
-<p>To check status </p>
+<p>To check status</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>jans-link
 </code></pre></div>
-<p>To Stop Jans-Link </p>
+<p>To Stop Jans-Link</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>jans-link
 </code></pre></div>
 <h2 id="jans-ldap-link-configuration">Jans LDAP Link Configuration<a class="headerlink" href="#jans-ldap-link-configuration" title="Permanent link">#</a></h2>
@@ -14733,7 +14733,7 @@ Operation ID: put-jans-link-properties
   Schema: Jans Link Plugin:AppConfiguration
 </code></pre></div>
 <h4 id="gets-jans-link-app-configuration">Gets Jans Link App configuration<a class="headerlink" href="#gets-jans-link-app-configuration" title="Permanent link">#</a></h4>
-<p>To see Jans Link properties, use the below command. Use the operation ID 
+<p>To see Jans Link properties, use the below command. Use the operation ID
 <code>get-jans-link-properties</code> to get all the Jans link on the Janssen Server.</p>
 <p><div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-jans-link-properties
 </code></pre></div>
@@ -14821,8 +14821,8 @@ The output of the above command will be similar to this:</p>
 <span class="p">}</span>
 </code></pre></div>
 <h4 id="updates-jans-link-configuration-properties">Updates Jans Link configuration properties<a class="headerlink" href="#updates-jans-link-configuration-properties" title="Permanent link">#</a></h4>
-<p>Let's update the Jans Link configuration properties using the Janssen CLI command line. 
-To perform the <code>put-jans-link-properties</code> operation, we have to use its schema. 
+<p>Let's update the Jans Link configuration properties using the Janssen CLI command line.
+To perform the <code>put-jans-link-properties</code> operation, we have to use its schema.
 To get its schema:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema<span class="w"> </span><span class="s2">&quot;Jans Link Plugin:AppConfiguration&quot;</span>
 </code></pre></div>
@@ -14855,14 +14855,14 @@ in the image below.</p>
 <p><img alt="link-config" src="../../../assets/ldap-link-main-tab.png" /></p>
 <p>The section below covers Jans LDAP link configuration in more detail.</p>
 <h4 id="configuration-using">Configuration Using<a class="headerlink" href="#configuration-using" title="Permanent link">#</a></h4>
-<p>In order to configre Jans LDAP Link, the administrator needs to know various 
-values of the backend LDAP(or Active Directory). For example, <code>host</code> &amp; <code>port</code>, 
-<code>bindDN</code>, user information, <code>password</code>, <code>Objectclasses</code>, <code>attributes</code> which 
+<p>In order to configre Jans LDAP Link, the administrator needs to know various
+values of the backend LDAP(or Active Directory). For example, <code>host</code> &amp; <code>port</code>,
+<code>bindDN</code>, user information, <code>password</code>, <code>Objectclasses</code>, <code>attributes</code> which
 will be pulled, etc.</p>
-<p>In addition, the administrator needs to know generic information about the 
-Jans Server's LDAP. By default, the deployer can use <code>localhost:1636</code>, 
-<code>cn=directory manager</code>, <code>password</code> chosen during installation, 
-<code>ou=people,o=site</code> as server information, <code>bindDN</code>, <code>bindDN</code> <code>password</code> and 
+<p>In addition, the administrator needs to know generic information about the
+Jans Server's LDAP. By default, the deployer can use <code>localhost:1636</code>,
+<code>cn=directory manager</code>, <code>password</code> chosen during installation,
+<code>ou=people,o=site</code> as server information, <code>bindDN</code>, <code>bindDN</code> <code>password</code> and
 <code>baseDN</code> respectively.</p>
 <p>Let's move forward with the Jans-Link setup.</p>
 <p><img alt="link-config" src="../../../assets/ldap-link-main-tab.png" /></p>
@@ -14942,10 +14942,10 @@ TUI</li>
 </ul>
 <h4 id="inum-db-server">Inum DB Server<a class="headerlink" href="#inum-db-server" title="Permanent link">#</a></h4>
 <p><img alt="inumsbs" src="../../../assets/ldap-link-inum-db.png" /></p>
-<p>This section of the application allows the server administrator to connect to 
-the internal LDAP of the Jans Server. As Jans Server administrator, you do not 
-need to insert anything here in this section as new Gluu Server versions 
-automatically populates this for you (unlessyou try to manually configure it 
+<p>This section of the application allows the server administrator to connect to
+the internal LDAP of the Jans Server. As Jans Server administrator, you do not
+need to insert anything here in this section as new Gluu Server versions
+automatically populates this for you (unless you try to manually configure it
 anyway).</p>
 <h2 id="things-to-remember">Things To Remember<a class="headerlink" href="#things-to-remember" title="Permanent link">#</a></h2>
 <p>The Jans Server supports two LDAP modes:</p>
@@ -14971,10 +14971,10 @@ anyway).</p>
 </ul>
 <div class="highlight"><pre><span></span><code>/opt/opendj/bin/ldapsearch<span class="w"> </span>-h<span class="w"> </span>localhost<span class="w"> </span>-p<span class="w"> </span><span class="m">1636</span><span class="w"> </span>-Z<span class="w"> </span>-X<span class="w"> </span>-D<span class="w"> </span><span class="s2">&quot;cn=directory manager&quot;</span><span class="w"> </span>-w<span class="w"> </span>&lt;pass&gt;<span class="w"> </span>-b<span class="w"> </span><span class="s2">&quot;ou=people,o=DA....,o=jans&quot;</span><span class="w"> </span>dn<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;dn\:&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
 </code></pre></div>
-<p>Try to log in with one of these users. We assume that you have also set up your 
+<p>Try to log in with one of these users. We assume that you have also set up your
 Jans Server to use the correct LDAP server for authentication.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<p>If you have content you'd like to contribute to this page, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
 
 
@@ -14997,7 +14997,7 @@ Jans Server to use the correct LDAP server for authentication.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 2, 2025 10:27:29 UTC"><span class="timeago" datetime="2025-07-02T10:27:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 2, 2025 10:27:29 UTC">2025-07-02</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 17, 2025 10:03:16 UTC"><span class="timeago" datetime="2025-12-17T10:03:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 17, 2025 10:03:16 UTC">2025-12-17</span>
   </span>
 
     

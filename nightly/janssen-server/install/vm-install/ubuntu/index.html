@@ -14625,7 +14625,7 @@
 <li>
 <p>Download the release package from the Github Janssen Project
 <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu24.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
 </li>
 <li>
@@ -14636,27 +14636,27 @@
 <li>
 <p>Verify integrity of the downloaded package by verifying published <code>sha256sum</code>.  </p>
 <ul>
-<li>Go to the <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen Project Releases page</a> and copy the <code>sha256sum</code> value for the <code>jans_0.0.0-nightly.ubuntu24.04_amd64.deb</code> file:</li>
+<li>Go to the <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen Project Releases page</a> and copy the <code>sha256sum</code> value for the <code>jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb</code> file:</li>
 <li>Replace <code>paste-release-sha256sum</code> in the command below with the actual checksum you copied from the release page, and run the following command:
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans_0.0.0-nightly.ubuntu24.04_amd64.deb&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
 </code></pre></div></li>
 </ul>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_0.0.0-nightly.ubuntu24.04_amd64.deb: OK
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 </code></pre></div>
 <h3 id="ubuntu-2204">Ubuntu 22.04<a class="headerlink" href="#ubuntu-2204" title="Permanent link">#</a></h3>
 <ul>
 <li>
 <p>Download the release package from the Github Janssen Project
 <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu22.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
 </li>
 <li>
@@ -14668,25 +14668,25 @@
 <p>Verify integrity of the downloaded package by verifying published <code>sha256sum</code>.   </p>
 <ul>
 <li>
-<p>Go to the <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen Project Releases page</a> and copy the <code>sha256sum</code> value for the <code>jans_0.0.0-nightly.ubuntu22.04_amd64.deb</code> file:</p>
+<p>Go to the <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen Project Releases page</a> and copy the <code>sha256sum</code> value for the <code>jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb</code> file:</p>
 </li>
 <li>
 <p>Replace <code>paste-release-sha256sum</code> in the command below with the actual checksum you copied from the release page, and run the following command:
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans_0.0.0-nightly.ubuntu22.04_amd64.deb&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
 </code></pre></div>
 Output similar to below should confirm the integrity of the downloaded package.</p>
 </li>
 </ul>
-<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_0.0.0-nightly.ubuntu22.04_amd64.deb: OK
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_0.0.0-nightly.ubuntu22.04_amd64.deb
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 </code></pre></div>
-<p>Or, </p>
+<p>Or,</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>dpkg<span class="w"> </span>-i<span class="w"> </span>jans_1.4.0-stable.ubuntu22.04_amd64.deb
 </code></pre></div>
 <h3 id="ubuntu-2004">Ubuntu 20.04<a class="headerlink" href="#ubuntu-2004" title="Permanent link">#</a></h3>
@@ -14694,7 +14694,7 @@ Output similar to below should confirm the integrity of the downloaded package.<
 <li>
 <p>Download the release package from the Github Janssen Project
 <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></p>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu20.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
 </li>
 <li>
@@ -14706,23 +14706,23 @@ Output similar to below should confirm the integrity of the downloaded package.<
 <p>Verify integrity of the downloaded package by verifying published <code>sha256sum</code>.   </p>
 <ul>
 <li>
-<p>Go to the <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen Project Releases page</a> and copy the <code>sha256sum</code> value for the <code>jans_0.0.0-nightly.ubuntu20.04_amd64.deb</code> file:</p>
+<p>Go to the <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen Project Releases page</a> and copy the <code>sha256sum</code> value for the <code>jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb</code> file:</p>
 </li>
 <li>
 <p>Replace <code>paste-release-sha256sum</code> in the command below with the actual checksum you copied from the release page, and run the following command:
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans_0.0.0-nightly.ubuntu20.04_amd64.deb&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>jans_0.0.0-nightly.ubuntu20.04_amd64.deb.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_0.0.0-nightly.ubuntu20.04_amd64.deb.sha256sum
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum
 </code></pre></div></p>
 </li>
 </ul>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_0.0.0-nightly.ubuntu20.04_amd64.deb: OK
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_0.0.0-nightly.ubuntu20.04_amd64.deb
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
@@ -14806,7 +14806,7 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (0.0.0-nightly~ubuntu20.04) ...
+Removing jans (replace-janssen-version~ubuntu20.04) ...
 Checking to make sure service is down...
 </code></pre></div>
 
@@ -14831,7 +14831,7 @@ Checking to make sure service is down...
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 6, 2025 08:07:09 UTC"><span class="timeago" datetime="2025-11-06T08:07:09+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 6, 2025 08:07:09 UTC">2025-11-06</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 17, 2025 10:03:16 UTC"><span class="timeago" datetime="2025-12-17T10:03:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 17, 2025 10:03:16 UTC">2025-12-17</span>
   </span>
 
     
