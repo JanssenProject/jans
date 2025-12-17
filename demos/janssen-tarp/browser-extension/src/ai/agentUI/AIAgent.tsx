@@ -23,7 +23,6 @@ import { useAIOperations } from './hooks/useAIOperations';
 import SettingsDialog from './components/SettingsDialog';
 import StatusPanel from './components/StatusPanel';
 import AIResponse from './components/AIResponse';
-import { LLM_PROVIDERS } from './constants';
 import { AIAgentProps } from './types';
 
 const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {

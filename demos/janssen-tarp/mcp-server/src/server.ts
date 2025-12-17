@@ -5,6 +5,8 @@ import Utils from "./utils"
 import { z } from "zod";
 import axios from "axios";
 import crypto from "crypto";
+import { database } from "./db/index.js";
+import { ApiKey } from "./db/models.js";
 
 const app = express();
 app.use(express.json());
@@ -48,6 +50,12 @@ const metadataCache = new Map<string, {
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+/**
+ * Helper function to get database instance
+ */
+function getDb() {
+  return database.instance;
+}
 
 /**
  * Fetches the OpenID Connect discovery metadata for the given issuer and caches it for subsequent requests.
@@ -402,6 +410,7 @@ async function connectMcpServer() {
 async function handleMcpRequest(req: express.Request, res: express.Response) {
   try {
     const result = await transport.handleRequest(req, res, req.body);
+
     if (process.env.NODE_ENV === 'development') {
       console.log('MCP request handled successfully');
     }
@@ -434,12 +443,235 @@ app.get("/health", (_req, res) => {
   });
 });
 
+// Routes for LLM API Key Management
+
+/**
+ * Store an LLM API key
+ * POST /api/keys
+ */
+app.post("/api/keys", async (req, res) => {
+  try {
+    const { provider, model, key } = req.body;
+
+    if ((!provider && !model) || !key) {
+      return res.status(400).json({
+        error: "Missing required fields: provider or model and key"
+      });
+    }
+
+    const db = getDb();
+    await db.read();
+
+    // Dynamic query based on what's provided
+    let existingKey;
+
+    if (provider && model) {
+      // Query by both provider AND model
+      existingKey = db.data.apiKeys.find((k: ApiKey) =>
+        k.provider === provider && k.model === model && k.key === key
+      );
+    } else if (provider) {
+      // Query only by provider (model not provided)
+      existingKey = db.data.apiKeys.find((k: ApiKey) =>
+        k.provider === provider && k.key === key
+      );
+    } else {
+      // Query only by model (provider not provided)
+      existingKey = db.data.apiKeys.find((k: ApiKey) =>
+        k.model === model && k.key === key
+      );
+    }
+
+    if (existingKey) {
+      return res.status(409).json({
+        error: "API key already exists"
+      });
+    }
+    // Create new API key record
+    const newApiKey: ApiKey = {
+      id: crypto.randomUUID(),
+      provider,
+      model,
+      key,
+      createdAt: new Date().toISOString()
+    };
+
+    db.data.apiKeys.push(newApiKey);
+    await db.write();
+
+    // Return response without exposing the full key
+    const response = {
+      id: newApiKey.id,
+      provider: newApiKey.provider,
+      model: newApiKey.model,
+      createdAt: newApiKey.createdAt,
+      keyPreview: `...${key.slice(-4)}` // Show only last 4 chars
+    };
+
+    res.status(201).json(response);
+  } catch (error) {
+    console.error("Error storing API key:", error);
+    res.status(500).json({
+      error: "Failed to store API key"
+    });
+  }
+});
+
+/**
+ * Fetch all LLM API keys (without full key values)
+ * GET /api/keys
+ */
+app.get("/api/keys", async (_req, res) => {
+  try {
+    const db = getDb();
+    await db.read();
+
+    const keys = db.data.apiKeys.map((apiKey: ApiKey) => ({
+      id: apiKey.id,
+      provider: apiKey.provider,
+      model: apiKey.model,
+      createdAt: apiKey.createdAt,
+      lastUsed: apiKey.lastUsed,
+      keyPreview: `...${apiKey.key.slice(-4)}`
+    }));
+
+    res.json({
+      count: keys.length,
+      keys
+    });
+  } catch (error) {
+    console.error("Error fetching API keys:", error);
+    res.status(500).json({
+      error: "Failed to fetch API keys"
+    });
+  }
+});
+
+/**
+ * Fetch a specific LLM API key by ID
+ * GET /api/keys/:id
+ */
+app.get("/api/keys/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = getDb();
+
+    await db.read();
+
+    const apiKey = db.data.apiKeys.find((k: ApiKey) => k.id === id);
+
+    if (!apiKey) {
+      return res.status(404).json({
+        error: "API key not found"
+      });
+    }
+
+    // Update last used timestamp
+    apiKey.lastUsed = new Date().toISOString();
+    await db.write();
+
+    // Return full key only for this endpoint
+    res.json({
+      id: apiKey.id,
+      provider: apiKey.provider,
+      model: apiKey.model,
+      key: apiKey.key,
+      createdAt: apiKey.createdAt,
+      lastUsed: apiKey.lastUsed
+    });
+  } catch (error) {
+    console.error("Error fetching API key:", error);
+    res.status(500).json({
+      error: "Failed to fetch API key"
+    });
+  }
+});
+
+/**
+ * Delete an LLM API key
+ * DELETE /api/keys/:id
+ */
+app.delete("/api/keys/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = getDb();
+
+    await db.read();
+
+    const initialLength = db.data.apiKeys.length;
+    db.data.apiKeys = db.data.apiKeys.filter((k: ApiKey) => k.id !== id);
+
+    if (db.data.apiKeys.length === initialLength) {
+      return res.status(404).json({
+        error: "API key not found"
+      });
+    }
+
+    await db.write();
+
+    res.json({
+      success: true,
+      message: "API key deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting API key:", error);
+    res.status(500).json({
+      error: "Failed to delete API key"
+    });
+  }
+});
+
+/**
+ * Delete all LLM API keys for a provider
+ * DELETE /api/keys/provider/:provider
+ */
+app.delete("/api/keys/provider/:provider", async (req, res) => {
+  try {
+    const { provider } = req.params;
+    const db = getDb();
+
+    await db.read();
+
+    const initialLength = db.data.apiKeys.length;
+    db.data.apiKeys = db.data.apiKeys.filter((k: ApiKey) => k.provider !== provider);
+
+    const deletedCount = initialLength - db.data.apiKeys.length;
+
+    if (deletedCount === 0) {
+      return res.status(404).json({
+        error: "No API keys found for this provider"
+      });
+    }
+
+    await db.write();
+
+    res.json({
+      success: true,
+      message: `Deleted ${deletedCount} API key(s) for ${provider}`,
+      deletedCount
+    });
+  } catch (error) {
+    console.error("Error deleting API keys by provider:", error);
+    res.status(500).json({
+      error: "Failed to delete API keys"
+    });
+  }
+});
+
+
 app.get("/", (_req, res) => {
   res.json({
     message: "Jans TARP MCP Server",
     endpoints: {
       mcp: "POST /mcp",
-      health: "GET /health"
+      health: "GET /health",
+      apiKeys: {
+        create: "POST /api/keys",
+        list: "GET /api/keys",
+        get: "GET /api/keys/:id",
+        delete: "DELETE /api/keys/:id",
+        deleteByProvider: "DELETE /api/keys/provider/:provider"
+      }
     }
   });
 });
@@ -447,6 +679,8 @@ app.get("/", (_req, res) => {
 const httpServer = app.listen(PORT, async () => {
   console.log(`MCP server running on http://localhost:${PORT}`);
 
+  // Initialize database
+  await database.initialize();
   // Connect MCP server after Express starts
   await connectMcpServer();
 

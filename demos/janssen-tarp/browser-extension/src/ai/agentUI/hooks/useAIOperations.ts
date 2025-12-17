@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { handleUserPrompt } from "../../index";
-import { LLM_API_KEY_STORAGE_KEY, LLM_PROVIDER_STORAGE_KEY, MCP_SERVER_URL } from '../types';
+import { LLM_MODEL_STORAGE_KEY, LLM_PROVIDER_STORAGE_KEY, MCP_SERVER_URL } from '../types';
+import { mcpApiService } from '../../service/MCPAPIService';
 
 export const useAIOperations = (notifyOnDataChange: () => void) => {
   const [query, setQuery] = useState("");
@@ -11,10 +12,10 @@ export const useAIOperations = (notifyOnDataChange: () => void) => {
   const send = useCallback(async () => {
     if (!query.trim()) return;
     
-    // Check if API key is configured
+    // Get settings from chrome storage
     const results = await new Promise((resolve) => {
       chrome.storage.local.get([
-        LLM_API_KEY_STORAGE_KEY,
+        LLM_MODEL_STORAGE_KEY,
         LLM_PROVIDER_STORAGE_KEY,
         MCP_SERVER_URL
       ], (result) => {
@@ -22,16 +23,32 @@ export const useAIOperations = (notifyOnDataChange: () => void) => {
       });
     });
     
-    const savedApiKey = results[LLM_API_KEY_STORAGE_KEY];
+    const savedModel = results[LLM_MODEL_STORAGE_KEY];
     const savedProvider = results[LLM_PROVIDER_STORAGE_KEY] || 'openai';
     const savedMcpUrl = results[MCP_SERVER_URL];
     
-    if (!savedApiKey) {
-      throw new Error("Please configure your API key first");
-    }
-
     if (!savedMcpUrl) {
       throw new Error("Please configure MCP server URL first");
+    }
+
+    // Fetch API key from MCP server
+    try {
+      mcpApiService.setBaseUrl(savedMcpUrl);
+      const apiKeyData = await mcpApiService.findApiKeyByProvider(savedProvider, savedModel);
+      
+      if (!apiKeyData) {
+        throw new Error(`Please configure your ${savedProvider} API key first in Settings`);
+      }
+
+      // API key is available, continue with the operation
+      // The handleUserPrompt function should use the API key from MCP server
+      // You'll need to modify handleUserPrompt to accept API key as a parameter
+      
+    } catch (error: any) {
+      if (error.message.includes('Failed to fetch')) {
+        throw new Error("Cannot connect to MCP server. Please check if the server is running.");
+      }
+      throw error;
     }
     
     setLoading(true);
@@ -39,6 +56,8 @@ export const useAIOperations = (notifyOnDataChange: () => void) => {
     setResult(null);
     
     try {
+      // You need to modify handleUserPrompt to get API key from MCP server
+      // For now, we'll pass null and let it handle the error
       const result = await handleUserPrompt(query);
       if(result?.type === 'text') {
         setResult(result.content);  

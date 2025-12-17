@@ -14,6 +14,7 @@
     "@modelcontextprotocol/sdk": "^1.23.0",
     "axios": "^1.13.2",
     "express": "^5.1.0",
+    "lowdb": "^7.0.1",
     "zod": "^4.1.13"
   },
   "devDependencies": {

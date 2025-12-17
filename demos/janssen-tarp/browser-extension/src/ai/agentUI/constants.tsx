@@ -15,8 +15,8 @@ export const LLM_PROVIDERS: LLMProvider[] = [
     apiKeyValidation: (key: string) => key.startsWith('sk-') && key.length > 40,
     apiKeyValidationMessage: "API key should start with 'sk-' and be at least 40 characters",
     models: [
-      { value: 'gpt-4o', label: 'GPT-4o', description: 'Latest and most capable model' },
       { value: 'gpt-4o-mini', label: 'GPT-4o-mini', description: 'Fast and cost-effective GPT-4o variant' },
+      { value: 'gpt-4o', label: 'GPT-4o', description: 'Latest and most capable model' },
       { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', description: 'High intelligence with 128K context' },
       { value: 'gpt-4', label: 'GPT-4', description: 'Original GPT-4 model' },
       { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', description: 'Fast and cost-effective' },

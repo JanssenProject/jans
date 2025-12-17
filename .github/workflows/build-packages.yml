@@ -470,7 +470,7 @@ jobs:
 
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i; done
         sudo rm demo-janssen-tarp-$VER-source.zip || echo "No such file or directory"
-        cd janssen-tarp
+        cd janssen-tarp/browser-extension
         
         TAG=$(echo "${VER}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then

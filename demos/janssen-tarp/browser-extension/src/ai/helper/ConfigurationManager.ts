@@ -1,5 +1,6 @@
 import { STORAGE_KEYS, LLMProviderType, DEFAULT_VALUES } from './Constants'
 import StorageHelper from './StorageHelper'
+import { mcpApiService } from '../service/MCPAPIService';
 
 export default class ConfigurationManager {
   static async getProvider(): Promise<LLMProviderType> {
@@ -15,8 +16,11 @@ export default class ConfigurationManager {
   }
 
   static async getApiKey(): Promise<string> {
-    const result = await StorageHelper.get<string>(STORAGE_KEYS.LLM_API_KEY, "");
-    return result.data!;
+    //const result = await StorageHelper.get<string>(STORAGE_KEYS.LLM_API_KEY, "");
+    const model = await this.getModel();
+    const provider = await this.getProvider();
+    const apiKeyData = await mcpApiService.findApiKeyByProvider(provider, model);
+    return apiKeyData.key;
   }
 
   static async getModel(): Promise<string> {

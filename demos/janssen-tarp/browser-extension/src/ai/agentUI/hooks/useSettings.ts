@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  LLM_API_KEY_STORAGE_KEY,
   LLM_MODEL_STORAGE_KEY,
   LLM_PROVIDER_STORAGE_KEY,
   MCP_SERVER_URL,
@@ -8,13 +7,7 @@ import {
   SnackbarState
 } from '../types';
 import { LLM_PROVIDERS, DEFAULT_MODEL, DEFAULT_PROVIDER, DEFAULT_MCP_URL } from '../constants';
-
-interface StorageResult {
-  [LLM_API_KEY_STORAGE_KEY]?: string;
-  [LLM_MODEL_STORAGE_KEY]?: string;
-  [LLM_PROVIDER_STORAGE_KEY]?: string;
-  [MCP_SERVER_URL]?: string;
-}
+import { mcpApiService } from '../../service/MCPAPIService';
 
 export const useSettings = () => {
   const [apiKey, setApiKey] = useState("");
@@ -33,53 +26,139 @@ export const useSettings = () => {
     message: "",
     severity: "success"
   });
+  const [loadingApiKey, setLoadingApiKey] = useState(false);
 
-  // Load settings from storage on component mount
+  // Load settings on component mount
   useEffect(() => {
-    const initialize = async () => {
-      const results = await new Promise<StorageResult>((resolve) => {
+    const initializeSettings = async () => {
+      // Load settings from chrome storage
+      const results = await new Promise<Record<string, string>>((resolve) => {
         chrome.storage.local.get([
-          LLM_API_KEY_STORAGE_KEY,
           LLM_MODEL_STORAGE_KEY,
           LLM_PROVIDER_STORAGE_KEY,
           MCP_SERVER_URL
-        ], (result) => {
-          resolve(result);
-        });
+        ], resolve);
       });
-
-      const savedApiKey = results[LLM_API_KEY_STORAGE_KEY];
-      if (savedApiKey) {
-        setApiKey(savedApiKey);
-        validateApiKey(savedApiKey, results[LLM_PROVIDER_STORAGE_KEY] || provider);
-      }
-
+  
       const savedModel = results[LLM_MODEL_STORAGE_KEY];
-      if (savedModel) {
-        setModel(savedModel);
-      }
-
       const savedProvider = results[LLM_PROVIDER_STORAGE_KEY];
-      if (savedProvider) {
-        setProvider(savedProvider);
+      const savedMcpUrl = results[MCP_SERVER_URL] || DEFAULT_MCP_URL;
+  
+      // Determine which MCP URL to use
+      const mcpUrlToUse = savedMcpUrl;
+      const hasSavedSettings = savedProvider && savedModel;
+  
+      // Set MCP URL and test connection
+      setMcpServerUrl(mcpUrlToUse);
+      mcpApiService.setBaseUrl(mcpUrlToUse);
+      validateMcpUrl(mcpUrlToUse);
+      
+      const isConnected = await testMCPConnection(mcpUrlToUse);
+      if (!isConnected) return;
+  
+      // Determine provider and model to use
+      let providerToUse = savedProvider;
+      let modelToUse = savedModel;
+  
+      if (!hasSavedSettings) {
+        // Try to get from MCP server if no saved settings
+        try {
+          const apiKeys = await mcpApiService.getApiKeys();
+          if (apiKeys.count > 0) {
+            providerToUse = apiKeys.keys[0].provider;
+            modelToUse = apiKeys.keys[0].model;
+          } else {
+            // Fallback to defaults
+            providerToUse = DEFAULT_PROVIDER;
+            modelToUse = DEFAULT_MODEL;
+          }
+           // Save other settings to chrome storage
+           await chrome.storage.local.set({
+            [LLM_MODEL_STORAGE_KEY]: modelToUse,
+            [LLM_PROVIDER_STORAGE_KEY]: providerToUse,
+            [MCP_SERVER_URL]: mcpServerUrl
+          });
+        } catch (error) {
+          console.error("Failed to get API keys from MCP:", error);
+          setSnackbar({
+            open: true,
+            message: error.message || "Failed to get API keys from MCP",
+            severity: "error"
+          });
+          providerToUse = DEFAULT_PROVIDER;
+          modelToUse = DEFAULT_MODEL;
+        }
       }
-
-      const savedMcpUrl = results[MCP_SERVER_URL];
-      if (savedMcpUrl) {
-        setMcpServerUrl(savedMcpUrl);
-        validateMcpUrl(savedMcpUrl);
-      }
-
-      // Test MCP connection on load
-      if (savedMcpUrl) {
-        testMCPConnection(savedMcpUrl);
+  
+      // Set provider and model
+      if (providerToUse) setProvider(providerToUse);
+      if (modelToUse) setModel(modelToUse);
+  
+      // Load API key from MCP if we have a provider
+      if (providerToUse && isConnected) {
+        await initLoadApiKeyFromMCP(providerToUse, modelToUse);
       }
     };
-    initialize();
-  }, []);
+  
+    initializeSettings();
+  }, []); // Add loadApiKeyFromMCP as dependency
+
+  // Load API key from MCP server
+  
+  const initLoadApiKeyFromMCP = useCallback(async (providerName: string, modelName: string) => {
+    if (!mcpServerUrl) return;
+    
+    setLoadingApiKey(true);
+    try {
+      const apiKeyData = await mcpApiService.findApiKeyByProvider(providerName, modelName);
+      
+      if (apiKeyData) {
+        setApiKey(apiKeyData.key);
+        mcpApiService.setCurrentApiKeyId(apiKeyData.id || null);
+        validateApiKey(apiKeyData.key, providerName, modelName);
+      } else {
+        setApiKey("");
+        mcpApiService.setCurrentApiKeyId(null);
+        setApiKeyValid(false);
+      }
+    } catch (error) {
+      console.error("Failed to load API key from MCP server:", error);
+      setApiKey("");
+      mcpApiService.setCurrentApiKeyId(null);
+      setApiKeyValid(false);
+    } finally {
+      setLoadingApiKey(false);
+    }
+  }, [mcpServerUrl, connectionStatus]);
+
+  const loadApiKeyFromMCP = useCallback(async (providerName: string, modelName: string) => {
+    if (!mcpServerUrl || (connectionStatus !== "connected")) return;
+    
+    setLoadingApiKey(true);
+    try {
+      const apiKeyData = await mcpApiService.findApiKeyByProvider(providerName, modelName);
+      
+      if (apiKeyData) {
+        setApiKey(apiKeyData.key);
+        mcpApiService.setCurrentApiKeyId(apiKeyData.id || null);
+        validateApiKey(apiKeyData.key, providerName, modelName);
+      } else {
+        setApiKey("");
+        mcpApiService.setCurrentApiKeyId(null);
+        setApiKeyValid(false);
+      }
+    } catch (error) {
+      console.error("Failed to load API key from MCP server:", error);
+      setApiKey("");
+      mcpApiService.setCurrentApiKeyId(null);
+      setApiKeyValid(false);
+    } finally {
+      setLoadingApiKey(false);
+    }
+  }, [mcpServerUrl, connectionStatus]);
 
   // Validate API key based on provider
-  const validateApiKey = useCallback((key: string, currentProvider: string = provider) => {
+  const validateApiKey = useCallback((key: string, currentProvider: string = provider, currentModel: string = model) => {
     const providerConfig = LLM_PROVIDERS.find(p => p.value === currentProvider);
     if (!providerConfig) return false;
 
@@ -140,30 +219,43 @@ export const useSettings = () => {
     validateApiKey(newKey);
   }, [validateApiKey]);
 
-  const handleProviderChange = useCallback((newProvider: string) => {
+  const handleProviderChange = useCallback(async (newProvider: string) => {
     setProvider(newProvider);
+    
     // Reset model to default for new provider
     const providerConfig = LLM_PROVIDERS.find(p => p.value === newProvider);
     if (providerConfig && providerConfig.models.length > 0) {
       setModel(providerConfig.models[0].value);
     }
-    // Re-validate API key with new provider
-    validateApiKey(apiKey, newProvider);
-  }, [apiKey, validateApiKey]);
+    
+    // Load API key for new provider from MCP server
+    if (mcpServerUrl && connectionStatus === "connected") {
+      await loadApiKeyFromMCP(newProvider, providerConfig.models[0].value);
+    }
+  }, [mcpServerUrl, connectionStatus, loadApiKeyFromMCP]);
 
-  const handleModelChange = useCallback((newModel: string) => {
+  const handleModelChange = useCallback(async (newModel: string) => {
     setModel(newModel);
     setModelError("");
 
     if (model === 'custom' && newModel !== 'custom') {
       setCustomModel("");
     }
+    // Load API key for new provider from MCP server
+    if (mcpServerUrl && connectionStatus === "connected") {
+      await loadApiKeyFromMCP(null, newModel);
+    }
   }, [model]);
 
-  const handleMcpUrlChange = useCallback((newUrl: string) => {
+  const handleMcpUrlChange = useCallback(async (newUrl: string) => {
     setMcpServerUrl(newUrl);
-    validateMcpUrl(newUrl);
-  }, [validateMcpUrl]);
+    const isValid = validateMcpUrl(newUrl);
+    
+    if (isValid) {
+      mcpApiService.setBaseUrl(newUrl);
+      await testMCPConnection(newUrl);
+    }
+  }, [validateMcpUrl, testMCPConnection]);
 
   const handleCustomModelChange = useCallback((value: string) => {
     setCustomModel(value);
@@ -225,8 +317,20 @@ export const useSettings = () => {
     }
 
     try {
+      // Save API key to MCP server
+      const currentApiKeyId = mcpApiService.getCurrentApiKeyId();
+      
+      if (currentApiKeyId) {
+        // Update existing API key
+        await mcpApiService.updateApiKey(currentApiKeyId, apiKey);
+      } else {
+        // Create new API key
+        const newApiKey = await mcpApiService.createApiKey(provider, model, apiKey);
+        mcpApiService.setCurrentApiKeyId(newApiKey.id || null);
+      }
+
+      // Save other settings to chrome storage
       await chrome.storage.local.set({
-        [LLM_API_KEY_STORAGE_KEY]: apiKey,
         [LLM_MODEL_STORAGE_KEY]: getFinalModelName(),
         [LLM_PROVIDER_STORAGE_KEY]: provider,
         [MCP_SERVER_URL]: mcpServerUrl
@@ -243,10 +347,10 @@ export const useSettings = () => {
       setModel(getFinalModelName());
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Failed to save settings to storage",
+        message: error.message || "Failed to save settings",
         severity: "error"
       });
       return false;
@@ -254,29 +358,44 @@ export const useSettings = () => {
   }, [apiKey, validateSettings, getFinalModelName, provider, mcpServerUrl, testMCPConnection]);
 
   const clearSettings = useCallback(async () => {
-    await chrome.storage.local.remove([
-      LLM_API_KEY_STORAGE_KEY,
-      LLM_MODEL_STORAGE_KEY,
-      LLM_PROVIDER_STORAGE_KEY,
-      MCP_SERVER_URL
-    ]);
+    try {
+      // Delete API key from MCP server
+      const currentApiKeyId = mcpApiService.getCurrentApiKeyId();
+      if (currentApiKeyId) {
+        await mcpApiService.deleteApiKey(currentApiKeyId);
+      }
 
-    setApiKey("");
-    setApiKeyValid(false);
-    setApiKeyError("");
-    setProvider(DEFAULT_PROVIDER);
-    setModel(DEFAULT_MODEL);
-    setCustomModel("");
-    setModelError("");
-    setMcpServerUrl(DEFAULT_MCP_URL);
-    setMcpUrlError("");
-    setConnectionStatus("disconnected");
+      // Clear other settings from chrome storage
+      await chrome.storage.local.remove([
+        LLM_MODEL_STORAGE_KEY,
+        LLM_PROVIDER_STORAGE_KEY,
+        MCP_SERVER_URL
+      ]);
 
-    setSnackbar({
-      open: true,
-      message: "All settings cleared",
-      severity: "info"
-    });
+      setApiKey("");
+      setApiKeyValid(false);
+      setApiKeyError("");
+      setProvider(DEFAULT_PROVIDER);
+      setModel(DEFAULT_MODEL);
+      setCustomModel("");
+      setModelError("");
+      setMcpServerUrl(DEFAULT_MCP_URL);
+      setMcpUrlError("");
+      setConnectionStatus("disconnected");
+      mcpApiService.setCurrentApiKeyId(null);
+
+      setSnackbar({
+        open: true,
+        message: "All settings cleared",
+        severity: "info"
+      });
+    } catch (error: any) {
+      setSnackbar({
+        open: true,
+        message: error.message || "Failed to clear settings",
+        severity: "error"
+      });
+    }
   }, []);
 
   const testConnection = useCallback(async () => {
@@ -287,6 +406,9 @@ export const useSettings = () => {
         message: "Successfully connected to MCP server!",
         severity: "success"
       });
+      
+      // Load API key after successful connection
+      await loadApiKeyFromMCP(provider, model);
     } else {
       setSnackbar({
         open: true,
@@ -294,7 +416,7 @@ export const useSettings = () => {
         severity: "error"
       });
     }
-  }, [mcpServerUrl, testMCPConnection]);
+  }, [mcpServerUrl, testMCPConnection, provider, loadApiKeyFromMCP]);
 
   const closeSnackbar = useCallback(() => {
     setSnackbar(prev => ({ ...prev, open: false }));
@@ -313,6 +435,7 @@ export const useSettings = () => {
     mcpUrlError,
     connectionStatus,
     snackbar,
+    loadingApiKey,
     setApiKey,
     setShowApiKey,
     setSnackbar,
