@@ -153,26 +153,56 @@ public class ApiAppConfiguration implements Configuration {
         return acrValidationEnabled;
     }
 
+    /**
+     * Sets whether ACR (Authentication Context Class Reference) custom script validation is enabled.
+     *
+     * @param acrValidationEnabled true to enable ACR custom script validation, false to disable it.
+     */
     public void setAcrValidationEnabled(boolean acrValidationEnabled) {
         this.acrValidationEnabled = acrValidationEnabled;
     }
     
+    /**
+     * Indicates whether the configuration allows including client secrets in API responses.
+     *
+     * @return `true` if client secrets are included in responses, `false` otherwise.
+     */
     public boolean isReturnClientSecretInResponse() {
         return returnClientSecretInResponse;
     }
 
+    /**
+     * Enable or disable including the client secret in API responses.
+     *
+     * @param returnClientSecretInResponse true to include the client secret in responses, false to omit it
+     */
     public void setReturnClientSecretInResponse(boolean returnClientSecretInResponse) {
         this.returnClientSecretInResponse = returnClientSecretInResponse;
     }
 
+    /**
+     * Indicates whether the API includes the encrypted client secret in responses.
+     *
+     * @return `true` if the encrypted client secret is returned in responses, `false` otherwise.
+     */
     public boolean isReturnEncryptedClientSecretInResponse() {
         return returnEncryptedClientSecretInResponse;
     }
 
+    /**
+     * Enable or disable including the encrypted client secret in API responses.
+     *
+     * @param returnEncryptedClientSecretInResponse true to include the encrypted client secret in responses, false to exclude it
+     */
     public void setReturnEncryptedClientSecretInResponse(boolean returnEncryptedClientSecretInResponse) {
         this.returnEncryptedClientSecretInResponse = returnEncryptedClientSecretInResponse;
     }
 
+    /**
+     * Retrieve the list of approved external authorization server issuer identifiers used to validate access tokens.
+     *
+     * @return the list of issuer identifiers allowed for token validation, or {@code null} if not configured
+     */
     public List<String> getApiApprovedIssuer() {
         return apiApprovedIssuer;
     }
@@ -376,6 +406,11 @@ public class ApiAppConfiguration implements Configuration {
         this.assetMgtConfiguration = assetMgtConfiguration;
     }
 
+    /**
+     * Provides a compact string representation of this ApiAppConfiguration.
+     *
+     * @return a string containing the current values of the configuration's properties
+     */
     @Override
     public String toString() {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled

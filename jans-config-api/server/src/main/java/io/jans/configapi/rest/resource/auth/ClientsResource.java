@@ -97,6 +97,18 @@ public class ClientsResource extends ConfigBaseResource {
     @Inject
     AttributeService attributeService;
 
+    /**
+     * Retrieve a paginated list of OpenID Connect clients.
+     *
+     * @param limit         maximum number of results to return
+     * @param pattern       search pattern to filter clients
+     * @param startIndex    1-based index of the first result to return
+     * @param sortBy        attribute used to sort the results
+     * @param sortOrder     sort direction; allowed values are "ascending" and "descending"
+     * @param fieldValuePair comma-separated field=value pairs to further filter results (e.g. "applicationType=web,persistClientAuthorizations=true")
+     * @return              a PagedResult containing matching Client entries
+     * @throws EncryptionException if an encryption-related error occurs while preparing the response
+     */
     @Operation(summary = "Gets list of OpenID Connect clients", description = "Gets list of OpenID Connect clients", operationId = "get-oauth-openid-clients", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }))
@@ -128,6 +140,13 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(this.doSearch(searchReq)).build();
     }
 
+    /**
+     * Retrieve an OpenID Connect client by its Inum.
+     *
+     * @param inum the client's Inum identifier
+     * @return a Response containing the requested Client representation
+     * @throws EncryptionException if decrypting the client secret for the response fails
+     */
     @Operation(summary = "Get OpenId Connect Client by Inum", description = "Get OpenId Connect Client by Inum", operationId = "get-oauth-openid-clients-by-inum", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }))
@@ -151,6 +170,20 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(applyResponsePolicy(client)).build();
     }
 
+    /**
+     * Create a new OpenID Connect client.
+     *
+     * Validates required fields (including redirect URIs, scopes, and claims), generates a client identifier
+     * when one is not provided, ensures a client secret exists (generates and encrypts one if absent),
+     * sets the client's DN and deletable flag, persists the client, and returns the created client with
+     * response masking applied according to configuration.
+     *
+     * @param client the Client to create; must include redirect URIs and valid scopes/claims. If `clientId`
+     *               is missing one will be generated. If `clientSecret` is missing one will be generated
+     *               and encrypted before persistence.
+     * @return the created Client with response policy applied
+     * @throws EncryptionException if encrypting the client secret fails
+     */
     @Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
@@ -209,6 +242,15 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
+    /**
+     * Update an existing OpenID Connect client.
+     *
+     * <p>Validates scopes and claims, preserves the existing client identifier and base DN, encrypts the client secret if supplied, persists the updated client, and applies response masking policy before returning.</p>
+     *
+     * @param client the Client object containing updated fields; must include the clientId and redirectUris
+     * @return a Response with HTTP 200 containing the updated Client
+     * @throws EncryptionException if encrypting the client secret fails
+     */
     @Operation(summary = "Update OpenId Connect client", description = "Update OpenId Connect client", operationId = "put-oauth-openid-client", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
@@ -260,6 +302,16 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(result).build();
     }
 
+    /**
+     * Apply a JSON Patch to the OpenID Connect client identified by the given inum and persist the updated client.
+     *
+     * @param inum             the client's identifier (inum)
+     * @param jsonPatchString  the JSON Patch document as a string (application/json-patch+json)
+     * @return                 the updated Client after response policy is applied
+     * @throws EncryptionException if encrypting or decrypting the client secret fails
+     * @throws JsonPatchException  if the patch document is invalid or cannot be applied
+     * @throws IOException         if an I/O error occurs while applying the patch
+     */
     @Operation(summary = "Patch OpenId Connect client", description = "Patch OpenId Connect client", operationId = "patch-oauth-openid-client-by-inum", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
@@ -300,6 +352,12 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(existingClient).build();
     }
 
+    /**
+     * Delete the OpenID Connect client identified by the given inum.
+     *
+     * @param inum the client identifier (inum)
+     * @return HTTP 204 No Content response when the client is deleted
+     */
     @Operation(summary = "Delete OpenId Connect client", description = "Delete OpenId Connect client", operationId = "delete-oauth-openid-client-by-inum", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }))
@@ -322,6 +380,12 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
+    /**
+     * Apply the configured response policy to each client in the provided list, masking or decrypting client secrets as configured.
+     *
+     * @param clients the list of Client objects to process; may be null or empty
+     * @return the input list with each Client modified to reflect the configured response policy for client secrets
+     */
     private List<Client> applyResponsePolicy(List<Client> clients) {
         logger.debug("isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}, clients:{}",
                 isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse(), clients);
@@ -335,6 +399,12 @@ public class ClientsResource extends ConfigBaseResource {
         return clients;
     }
 
+    /**
+     * Apply response masking and decryption policy to a client's secret according to configuration.
+     *
+     * @param client the Client to modify; may be null
+     * @return the same Client instance with `clientSecret` decrypted, left encrypted, or set to `null` depending on configuration
+     */
     private Client applyResponsePolicy(Client client) {
         logger.debug(
                 " ApplyResponsePolicy - isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}, client:{}",
@@ -354,6 +424,14 @@ public class ClientsResource extends ConfigBaseResource {
         return client;
     }
 
+    /**
+     * Decrypts the client's stored secret and sets the decrypted value on the provided client.
+     *
+     * If decryption fails, the client's `clientSecret` is set to null. If `client` is null, null is returned.
+     *
+     * @param client the client whose `clientSecret` should be decrypted; may be null
+     * @return the same client instance with a decrypted `clientSecret`, `clientSecret` set to null on failure, or null if input was null
+     */
     private Client getDecryptedClientSecret(Client client) {
         if (client != null) {
             try {
@@ -367,10 +445,22 @@ public class ClientsResource extends ConfigBaseResource {
         return client;
     }
 
+    /**
+     * Generate a new client secret.
+     *
+     * @return a newly generated secret string
+     */
     private String generatePassword() {
         return UUID.randomUUID().toString();
     }
 
+    /**
+     * Execute a client search and apply response policy to the resulting entries.
+     *
+     * @param searchReq the search request containing search parameters and pagination options
+     * @return the paged result of clients with response policy applied to each entry; may be null if no result
+     * @throws EncryptionException if decrypting client secrets while applying the response policy fails
+     */
     private PagedResult<Client> doSearch(SearchRequest searchReq) throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client search params - searchReq:{} ", escapeLog(searchReq));
@@ -462,6 +552,17 @@ public class ClientsResource extends ConfigBaseResource {
         }
     }
 
+    /**
+     * Validate the client's claims and replace them with their corresponding attribute DNs.
+     *
+     * If the input is null, it is returned unchanged. If any provided claim cannot be resolved
+     * to an attribute, a bad-request exception is thrown; otherwise the client's claims array
+     * is replaced with the resolved attribute DNs and the (possibly modified) client is returned.
+     *
+     * @param client the client whose claims should be validated and normalized; may be modified
+     * @return the input client with claims replaced by attribute DNs when validation succeeds
+     * @throws BadRequestException if one or more claims are invalid or cannot be resolved
+     */
     private Client validateClaim(Client client) {
         if (client == null) {
             return client;
@@ -505,12 +606,22 @@ public class ClientsResource extends ConfigBaseResource {
         return client;
     }
 
+    /**
+     * Determines whether API responses should include client secrets in encrypted form.
+     *
+     * @return `true` if client secrets should be returned encrypted in responses, `false` otherwise.
+     */
     private boolean isReturnEncryptedClientSecretInResponse() {
         logger.debug("appConfiguration.isReturnEncryptedClientSecretInResponse():{} ",
                 appConfiguration.isReturnEncryptedClientSecretInResponse());
         return this.appConfiguration.isReturnEncryptedClientSecretInResponse();
     }
 
+    /**
+     * Indicates whether client secrets should be included in API responses.
+     *
+     * @return `true` if client secrets should be included in responses, `false` otherwise.
+     */
     private boolean isReturnClientSecretInResponse() {
         logger.debug("appConfiguration.isReturnClientSecretInResponse():{} ",
                 appConfiguration.isReturnClientSecretInResponse());
