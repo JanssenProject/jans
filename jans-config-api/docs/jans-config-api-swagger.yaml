@@ -14953,17 +14953,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
-          type: boolean
         userCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
         adminCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -16768,7 +16768,7 @@ components:
         returnClientSecretInResponse:
           type: boolean
           description: Flag to enable/disable sending clientSecret in response. Default
-            value `false`.
+            value `true`.
         returnEncryptedClientSecretInResponse:
           type: boolean
           description: Flag to enable/disable sending encrypted clientSecret in response.
@@ -17735,8 +17735,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -17747,6 +17745,8 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
         logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:

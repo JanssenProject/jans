@@ -29,7 +29,7 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Flag to enable/disable check if acr customScript is enabled. Default value `true`.")
     private boolean acrValidationEnabled;
     
-    @Schema(description = "Flag to enable/disable sending clientSecret in response. Default value `false`.")
+    @Schema(description = "Flag to enable/disable sending clientSecret in response. Default value `true`.")
     private boolean returnClientSecretInResponse;
     
     @Schema(description = "Flag to enable/disable sending encrypted clientSecret in response. Default value `true`.")
