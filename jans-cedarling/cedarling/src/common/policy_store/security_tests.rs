@@ -177,9 +177,7 @@ mod malicious_archives {
 
         // Empty ZIP should be valid but have no files
         let result = ArchiveVfs::from_buffer(archive);
-        assert!(result.is_ok());
-
-        let vfs = result.unwrap();
+        let vfs = result.expect("Empty ZIP archive should be accepted by ArchiveVfs");
         assert!(!vfs.exists("metadata.json"));
     }
 
@@ -192,8 +190,8 @@ mod malicious_archives {
         match result {
             Ok(vfs) => {
                 // If it succeeded, verify it's usable
-                let entries = vfs.read_dir(".");
-                assert!(entries.is_ok());
+                vfs.read_dir(".")
+                    .expect("Deeply nested archive paths should be readable");
             },
             Err(_) => {
                 // Should fail gracefully, not panic - rejection is acceptable
@@ -361,7 +359,7 @@ mod input_validation {
         let result = ArchiveVfs::from_buffer(archive);
 
         // Should handle unicode gracefully
-        assert!(result.is_ok());
+        result.expect("ArchiveVfs should handle unicode filenames without error");
     }
 
     #[test]
@@ -425,9 +423,9 @@ mod manifest_security {
         // For now, just verify manifest is created correctly
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".");
-
-        assert!(result.is_ok());
+        loader
+            .load_directory(".")
+            .expect("Manifest-backed minimal_valid store should load successfully");
     }
 
     #[test]
@@ -441,7 +439,7 @@ mod manifest_security {
         let result = loader.load_directory(".");
 
         // Should succeed without manifest
-        assert!(result.is_ok());
+        result.expect("minimal_valid store without manifest should load successfully");
     }
 
     #[test]
@@ -513,7 +511,7 @@ mod resource_exhaustion {
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let result = loader.load_directory(".");
 
-        assert!(result.is_ok());
+        result.expect("Policy store with many policies should load successfully");
     }
 
     #[test]
@@ -542,11 +540,7 @@ when {{ {} }};"#,
         let result = loader.load_directory(".");
 
         // Verify loading succeeds - Cedar can handle large policies
-        assert!(
-            result.is_ok(),
-            "Large policy should load successfully, got error: {:?}",
-            result.err()
-        );
+        result.expect("Large policy should load successfully");
     }
 
     #[test]
@@ -578,7 +572,7 @@ when {{ {} }};"#,
         let result = loader.load_directory(".");
 
         // Should handle deep hierarchy
-        assert!(result.is_ok());
+        result.expect("Policy store with deeply nested entity hierarchy should load successfully");
     }
 }
 
@@ -623,6 +617,6 @@ mod file_extension_validation {
         std::fs::write(&correct_ext, &archive_bytes).unwrap();
 
         let result = ArchiveVfs::from_file(&correct_ext);
-        assert!(result.is_ok());
+        result.expect("ArchiveVfs should accept .cjar extension");
     }
 }
