@@ -8,8 +8,6 @@ mod archive_security_tests;
 mod claim_mapping;
 pub(crate) mod log_entry;
 #[cfg(test)]
-mod mock_jwks_server;
-#[cfg(test)]
 mod test;
 #[cfg(test)]
 pub mod test_utils;
