@@ -288,7 +288,7 @@ public class ClientsResource extends ConfigBaseResource {
 
         // ClientSecret encryption check
         boolean isClientSecretPresent = Jackson.isFieldPresent(jsonPatchString, CLIENT_SECRET);
-        logger.info(" isFieldPresent - CLIENT_SECRET - isClientSecretPresent:{}", isClientSecretPresent);
+        logger.debug(" isFieldPresent - CLIENT_SECRET - isClientSecretPresent:{}", isClientSecretPresent);
 
         if (isClientSecretPresent && StringUtils.isNotBlank(existingClient.getClientSecret())) {
             existingClient.setClientSecret(encryptionService.encrypt(existingClient.getClientSecret()));
@@ -336,7 +336,7 @@ public class ClientsResource extends ConfigBaseResource {
     }
 
     private List<Client> getClientResponse(List<Client> clients) throws EncryptionException {
-        logger.info(
+        logger.debug(
                 " ClientResponse - isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}",
                 isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse());
         if (clients != null && !clients.isEmpty()) {
@@ -360,6 +360,7 @@ public class ClientsResource extends ConfigBaseResource {
             } catch (Exception ex) {
                 logger.error(" Error while decrypting ClientSecret for '" + client.getClientId() + "', exception is - ",
                         ex);
+                client.setClientSecret(null);
             }
         }
         return client;

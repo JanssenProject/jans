@@ -22,6 +22,8 @@ import com.google.common.base.Preconditions;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONException;
@@ -55,13 +57,13 @@ public class Jackson {
         return applyPatch(jsonPatch, obj);
     }
 
-    public static boolean isFieldPresent(String patchAsString, String fieldName) throws JsonProcessingException {
+    public static boolean isFieldPresent(String patchAsString, String fieldName) {
         LOG.debug("Check if FieldPresent patchAsString:{} contains fieldName:{}", patchAsString, fieldName );
         boolean isPresent = false;
         try {
             JsonNode jsonNode = Jackson.asJsonNode(patchAsString);
             LOG.debug("patchAsString jsonNode:{}, jsonNode.findPath(fieldName):{}", jsonNode, jsonNode.findPath(fieldName));
-            java.util.List<String> keys = new java.util.ArrayList<> ();
+            List<String> keys = new ArrayList<> ();
             if (jsonNode.isArray()) {
                 for (JsonNode operationNode : jsonNode) {
                     JsonNode pathNode = operationNode.get("path");
@@ -72,11 +74,11 @@ public class Jackson {
                 
                 LOG.debug(" FieldPresent keys:{}", keys);
                 isPresent = keys.contains("/"+fieldName);
-                LOG.info(" FieldPresent contains fieldName:{}?:{}", fieldName, isPresent);              
+                LOG.debug(" FieldPresent contains fieldName:{}?:{}", fieldName, isPresent);              
             }
 
         } catch (Exception e) {
-            LOG.error("Error processing JSON Patch string:{} " , e.getMessage());
+            LOG.error("Error processing JSON Patch string for field '{}': {}", fieldName, e.getMessage());
         }     
         return isPresent;
     }
