@@ -364,10 +364,6 @@ impl TrustedIssuerValidator {
 /// * `token_type` - The type of token (e.g., "access_token", "id_token")
 /// * `token_metadata` - The token metadata configuration from the trusted issuer
 ///
-/// # Returns
-///
-/// * `Ok(())` if all required claims are present
-/// * `Err(TrustedIssuerError::MissingRequiredClaim)` if any required claim is missing
 pub fn validate_required_claims(
     claims: &JsonValue,
     token_type: &str,
