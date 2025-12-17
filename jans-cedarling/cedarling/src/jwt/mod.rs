@@ -101,7 +101,6 @@ use serde_json::json;
 use status_list::*;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use std::sync::RwLock;
 use validation::*;
 
 /// The value of the `iss` claim from a JWT
@@ -113,7 +112,7 @@ pub struct JwtService {
     key_service: Arc<KeyService>,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
     /// Trusted issuer validator for advanced validation scenarios
-    trusted_issuer_validator: Arc<RwLock<TrustedIssuerValidator>>,
+    trusted_issuer_validator: TrustedIssuerValidator,
     logger: Option<Logger>,
     token_cache: TokenCache,
     signed_authz_available: bool,
@@ -218,10 +217,8 @@ impl JwtService {
         let key_service = Arc::new(key_service);
 
         // Create TrustedIssuerValidator for advanced validation scenarios
-        let trusted_issuer_validator = Arc::new(RwLock::new(TrustedIssuerValidator::with_logger(
-            trusted_issuers_for_validator,
-            logger.clone(),
-        )));
+        let trusted_issuer_validator =
+            TrustedIssuerValidator::with_logger(trusted_issuers_for_validator, logger.clone());
 
         Ok(Self {
             validators,
@@ -333,10 +330,10 @@ impl JwtService {
             token_kind,
             algorithm: decoded_jwt.header.alg,
         };
-        let validator: Arc<RwLock<JwtValidator>> = self
-            .validators
-            .get(&validator_key)
-            .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
+        let validator: Arc<std::sync::RwLock<JwtValidator>> =
+            self.validators
+                .get(&validator_key)
+                .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
 
         // validate JWT
         // NOTE: the JWT will be validated depending on the validator's settings that
@@ -355,12 +352,7 @@ impl JwtService {
 
         // Try to find trusted issuer using TrustedIssuerValidator
         let trusted_iss = if let Some(iss) = iss_claim {
-            match self
-                .trusted_issuer_validator
-                .read()
-                .expect("RwLock poisoned")
-                .find_trusted_issuer(iss)
-            {
+            match self.trusted_issuer_validator.find_trusted_issuer(iss) {
                 Ok(issuer) => Some(issuer),
                 Err(TrustedIssuerError::UntrustedIssuer(_)) => {
                     // Fall back to issuer_configs for backward compatibility
