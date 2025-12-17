@@ -706,15 +706,17 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 // Test-only helper functions for parsing policies
 // These are thin wrappers around PolicyParser for test convenience
 #[cfg(test)]
+use super::policy_parser;
+
+#[cfg(test)]
 impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// Parse and validate Cedar policies from loaded policy files.
     fn parse_policies(
         policy_files: &[PolicyFile],
-    ) -> Result<Vec<super::policy_parser::ParsedPolicy>, PolicyStoreError> {
-        use super::policy_parser::PolicyParser;
+    ) -> Result<Vec<policy_parser::ParsedPolicy>, PolicyStoreError> {
         let mut parsed_policies = Vec::with_capacity(policy_files.len());
         for file in policy_files {
-            let parsed = PolicyParser::parse_policy(&file.content, &file.name)?;
+            let parsed = policy_parser::PolicyParser::parse_policy(&file.content, &file.name)?;
             parsed_policies.push(parsed);
         }
         Ok(parsed_policies)
@@ -723,11 +725,10 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// Parse and validate Cedar templates from loaded template files.
     fn parse_templates(
         template_files: &[PolicyFile],
-    ) -> Result<Vec<super::policy_parser::ParsedTemplate>, PolicyStoreError> {
-        use super::policy_parser::PolicyParser;
+    ) -> Result<Vec<policy_parser::ParsedTemplate>, PolicyStoreError> {
         let mut parsed_templates = Vec::with_capacity(template_files.len());
         for file in template_files {
-            let parsed = PolicyParser::parse_template(&file.content, &file.name)?;
+            let parsed = policy_parser::PolicyParser::parse_template(&file.content, &file.name)?;
             parsed_templates.push(parsed);
         }
         Ok(parsed_templates)
@@ -735,11 +736,10 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
     /// Create a Cedar PolicySet from parsed policies and templates.
     fn create_policy_set(
-        policies: Vec<super::policy_parser::ParsedPolicy>,
-        templates: Vec<super::policy_parser::ParsedTemplate>,
+        policies: Vec<policy_parser::ParsedPolicy>,
+        templates: Vec<policy_parser::ParsedTemplate>,
     ) -> Result<cedar_policy::PolicySet, PolicyStoreError> {
-        use super::policy_parser::PolicyParser;
-        PolicyParser::create_policy_set(policies, templates)
+        policy_parser::PolicyParser::create_policy_set(policies, templates)
     }
 }
 
