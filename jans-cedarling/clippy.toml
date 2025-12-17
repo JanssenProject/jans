@@ -6,10 +6,13 @@ reason = "not allowed method in WASM, use cedarling::log::log_entry::gen_uuid7()
 path = "std::time::SystemTime::now"
 reason = "may not work correctly in WASM, use chrono::Utc::now() instead"
 
-[[disallowed-macros]]
-path = "std::eprintln"
-reason = "bypasses logging infrastructure, doesn't work in WASM, use Logger instead"
-
-[[disallowed-macros]]
-path = "std::eprint"
-reason = "bypasses logging infrastructure, doesn't work in WASM, use Logger instead"
+## Temporarily allow std::eprintln/std::eprint.
+## These are used during bootstrap before the logger is available (see JwtConfigRaw -> JwtConfig).
+## TODO: Reinstate these disallowed-macros once bootstrap has a way to surface warnings via Logger.
+# [[disallowed-macros]]
+# path = "std::eprintln"
+# reason = "bypasses logging infrastructure, doesn't work in WASM, use Logger instead"
+#
+# [[disallowed-macros]]
+# path = "std::eprint"
+# reason = "bypasses logging infrastructure, doesn't work in WASM, use Logger instead"
