@@ -184,19 +184,12 @@ mod malicious_archives {
     #[test]
     fn test_deeply_nested_paths() {
         let archive = create_deep_nested_archive(100);
-        let result = ArchiveVfs::from_buffer(archive);
+        let vfs = ArchiveVfs::from_buffer(archive)
+            .expect("ArchiveVfs should handle deeply nested paths without error");
 
-        // Should handle deep nesting (may succeed or fail gracefully)
-        match result {
-            Ok(vfs) => {
-                // If it succeeded, verify it's usable
-                vfs.read_dir(".")
-                    .expect("Deeply nested archive paths should be readable");
-            },
-            Err(_) => {
-                // Should fail gracefully, not panic - rejection is acceptable
-            },
-        }
+        // Verify VFS is usable for a deeply nested archive
+        vfs.read_dir(".")
+            .expect("Deeply nested archive paths should be readable");
     }
 
     #[test]
@@ -214,18 +207,12 @@ mod malicious_archives {
         zip.write_all(b"{}").unwrap();
 
         let archive = zip.finish().unwrap().into_inner();
-        let result = ArchiveVfs::from_buffer(archive);
+        let vfs = ArchiveVfs::from_buffer(archive)
+            .expect("ArchiveVfs should handle archives with very long filenames");
 
-        // Should handle gracefully
-        match result {
-            Ok(vfs) => {
-                // If accepted, verify VFS is functional
-                let _ = vfs.read_dir(".");
-            },
-            Err(_) => {
-                // Rejection is also acceptable
-            },
-        }
+        // If accepted, verify VFS is functional
+        vfs.read_dir(".")
+            .expect("VFS created from archive with long filename should be readable");
     }
 }
 
@@ -375,31 +362,16 @@ permit(principal, action, resource);"#,
         let loader = DefaultPolicyStoreLoader::new(vfs);
 
         // Cedar allows special characters in @id() annotations within the policy content.
-        // The loader should handle this gracefully - either by accepting the policy
-        // (Cedar's parser accepts it) or by failing with a validation error.
-        let result = loader.load_directory(".");
-        match &result {
-            Ok(loaded) => {
-                // Verify policy was loaded with the special character ID
-                assert!(
-                    !loaded.policies.is_empty(),
-                    "Expected at least one policy to be loaded"
-                );
-            },
-            Err(err) => {
-                // If validation rejects it, should be InvalidPolicyIdCharacters
-                assert!(
-                    matches!(
-                        err,
-                        PolicyStoreError::Validation(
-                            ValidationError::InvalidPolicyIdCharacters { .. }
-                        )
-                    ),
-                    "Expected InvalidPolicyIdCharacters error, got: {:?}",
-                    err
-                );
-            },
-        }
+        // The loader is expected to accept such policies successfully.
+        let loaded = loader
+            .load_directory(".")
+            .expect("Policy with special-character @id should load successfully");
+
+        // Verify policy was loaded with the special character ID
+        assert!(
+            !loaded.policies.is_empty(),
+            "Expected at least one policy to be loaded"
+        );
     }
 }
 
@@ -467,19 +439,22 @@ mod manifest_security {
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let result = loader.load_directory(".");
 
-        // Manifest validation is optional - loader may succeed even with invalid manifest
-        // The test verifies the loader handles this gracefully (either succeeds or returns
-        // a manifest-related error, but doesn't panic)
+        // Manifest validation is optional - loader may succeed even with invalid manifest.
+        // Currently, invalid checksum format is reported via ManifestError::InvalidChecksumFormat.
         match &result {
             Ok(_) => {
                 // Loader succeeded - manifest validation is not enforced
             },
             Err(err) => {
-                // If it fails, should be a manifest-related error
+                // If it fails, it should be a manifest-related error with invalid checksum format
                 assert!(
-                    matches!(err, PolicyStoreError::ManifestError { .. })
-                        || matches!(err, PolicyStoreError::JsonParsing { .. }),
-                    "Expected ManifestError or JsonParsing error, got: {:?}",
+                    matches!(
+                        err,
+                        PolicyStoreError::ManifestError {
+                            err: crate::common::policy_store::errors::ManifestErrorType::InvalidChecksumFormat { .. }
+                        }
+                    ),
+                    "Expected ManifestError::InvalidChecksumFormat for invalid manifest checksum, got: {:?}",
                     err
                 );
             },
