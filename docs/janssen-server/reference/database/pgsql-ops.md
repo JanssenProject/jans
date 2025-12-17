@@ -12,7 +12,7 @@ and efficient applications.
 
 ## Establish Connection to Jans PostgreSQL Server
 
-Connect to PostgreSql workspace: `sudo -u postgres psql`
+Connect to PostgreSQL workspace: `sudo -u postgres psql`
 
 Show all Database list : `\list` or `\l`
 

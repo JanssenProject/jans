@@ -287,4 +287,4 @@ schema [file](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/
 
 It's possible to override default generation rules. For this case there is next [file](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/sql_data_types.json).
 
-Default indexes defined in next files: [coubase_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/couchbase/index.json), [mysql_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/mysql_index.json), [pgsql_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/pgsql_index.json)
+Default indexes defined in next files: [couchbase_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/couchbase/index.json), [mysql_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/mysql_index.json), [pgsql_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/pgsql_index.json)
