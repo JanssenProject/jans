@@ -52,34 +52,12 @@
 //! ```
 
 use super::errors::{PolicyStoreError, ValidationError};
-
-#[cfg(test)]
-use super::errors::{ArchiveError, CedarParseErrorDetail};
 use super::manifest_validator::ManifestValidator;
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
 
-#[cfg(test)]
-use super::source::{ArchiveSource, PolicyStoreFormat, PolicyStoreSource};
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
 use std::path::{Path, PathBuf};
-
-/// Policy store loader trait for loading policy stores from various sources.
-///
-/// This trait provides a unified interface for loading policy stores from different
-/// sources (directories, archives, URLs). The main code path uses `DefaultPolicyStoreLoader`
-/// directly; this trait is used in tests for more generic loading scenarios.
-#[cfg(test)]
-pub trait PolicyStoreLoader {
-    /// Load a policy store from the given source.
-    fn load(&self, source: &PolicyStoreSource) -> Result<LoadedPolicyStore, PolicyStoreError>;
-
-    /// Detect the format of a policy store source.
-    fn detect_format(&self, source: &PolicyStoreSource) -> PolicyStoreFormat;
-
-    /// Validate the structure of a policy store source.
-    fn validate_structure(&self, source: &PolicyStoreSource) -> Result<(), PolicyStoreError>;
-}
 
 /// Load a policy store from a directory path.
 ///
@@ -769,112 +747,6 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 impl Default for DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
     fn default() -> Self {
         Self::new_physical()
-    }
-}
-
-#[cfg(test)]
-impl<V: VfsFileSystem> PolicyStoreLoader for DefaultPolicyStoreLoader<V> {
-    fn load(&self, source: &PolicyStoreSource) -> Result<LoadedPolicyStore, PolicyStoreError> {
-        match source {
-            PolicyStoreSource::Directory(path) => {
-                let path_str = path
-                    .to_str()
-                    .ok_or_else(|| PolicyStoreError::PathNotFound {
-                        path: path.display().to_string(),
-                    })?;
-                self.load_directory(path_str)
-            },
-            PolicyStoreSource::Archive(archive_source) => {
-                match archive_source {
-                    ArchiveSource::File(path) => {
-                        // For file-based archives, we need to create an ArchiveVfs
-                        // but this method is sync and VFS-specific, so we can't do it here.
-                        // Use the async load_policy_store() function instead for archives.
-                        #[cfg(not(target_arch = "wasm32"))]
-                        {
-                            use super::archive_handler::ArchiveVfs;
-                            let archive_vfs = ArchiveVfs::from_file(path)?;
-                            let archive_loader = DefaultPolicyStoreLoader::new(archive_vfs);
-                            archive_loader.load_directory(".")
-                        }
-                        #[cfg(target_arch = "wasm32")]
-                        {
-                            // File paths not supported in WASM - use ArchiveSource::Url or ArchiveVfs::from_buffer() directly
-                            Err(PolicyStoreError::Archive(ArchiveError::WasmUnsupported))
-                        }
-                    },
-                    ArchiveSource::Url(_) => {
-                        // URL loading requires async, use load_policy_store() instead
-                        Err(PolicyStoreError::Archive(ArchiveError::InvalidZipFormat {
-                            details: "URL loading requires async load_policy_store() function"
-                                .to_string(),
-                        }))
-                    },
-                }
-            },
-            PolicyStoreSource::Legacy(_) => {
-                // Legacy JSON/YAML format is not supported through the loader module.
-                // Use init::policy_store::load_policy_store() which handles legacy formats
-                // via AgamaPolicyStore deserialization.
-                unimplemented!("Use init::policy_store::load_policy_store() instead.")
-            },
-        }
-    }
-
-    fn detect_format(&self, source: &PolicyStoreSource) -> PolicyStoreFormat {
-        match source {
-            PolicyStoreSource::Directory(_) => PolicyStoreFormat::Directory,
-            PolicyStoreSource::Archive(_) => PolicyStoreFormat::Archive,
-            PolicyStoreSource::Legacy(_) => PolicyStoreFormat::Legacy,
-        }
-    }
-
-    fn validate_structure(&self, source: &PolicyStoreSource) -> Result<(), PolicyStoreError> {
-        match source {
-            PolicyStoreSource::Directory(path) => {
-                let path_str = path
-                    .to_str()
-                    .ok_or_else(|| PolicyStoreError::PathNotFound {
-                        path: path.display().to_string(),
-                    })?;
-                self.validate_directory_structure(path_str)
-            },
-            PolicyStoreSource::Archive(archive_source) => {
-                match archive_source {
-                    ArchiveSource::File(path) => {
-                        // Validate by attempting to create ArchiveVfs
-                        // This will validate extension, ZIP format, and path traversal
-                        #[cfg(not(target_arch = "wasm32"))]
-                        {
-                            use super::archive_handler::ArchiveVfs;
-                            ArchiveVfs::from_file(path)?;
-                            Ok(())
-                        }
-                        #[cfg(target_arch = "wasm32")]
-                        {
-                            // File paths not supported in WASM - use ArchiveSource::Url or ArchiveVfs::from_buffer() directly
-                            Err(PolicyStoreError::Archive(ArchiveError::WasmUnsupported))
-                        }
-                    },
-                    ArchiveSource::Url(_) => {
-                        // URL validation requires async, use load_policy_store() for validation
-                        Err(PolicyStoreError::Archive(ArchiveError::InvalidZipFormat {
-                            details: "URL validation requires async load_policy_store() function"
-                                .to_string(),
-                        }))
-                    },
-                }
-            },
-            PolicyStoreSource::Legacy(_) => {
-                // Legacy format validation is not supported through the loader module.
-                // Legacy formats are validated during JSON/YAML deserialization in
-                // init::policy_store::load_policy_store().
-                unimplemented!(
-                    "Legacy format not supported through PolicyStoreLoader. \
-                     Use init::policy_store::load_policy_store() instead."
-                )
-            },
-        }
     }
 }
 

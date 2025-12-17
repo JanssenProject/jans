@@ -9,7 +9,7 @@
 
 use super::super::archive_handler::ArchiveVfs;
 use super::super::entity_parser::EntityParser;
-use super::super::errors::{PolicyStoreError, ValidationError};
+use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 use super::super::issuer_parser::IssuerParser;
 use super::super::manifest_validator::ManifestValidator;
 use super::super::schema_parser::SchemaParser;
@@ -119,28 +119,11 @@ fn create_test_archive(
 }
 
 #[test]
-fn test_format_detection() {
-    let loader = DefaultPolicyStoreLoader::new_physical();
-
-    // Directory format
-    let source = PolicyStoreSource::Directory(PathBuf::from("/path/to/store"));
-    assert_eq!(loader.detect_format(&source), PolicyStoreFormat::Directory);
-
-    // Archive format
-    let source =
-        PolicyStoreSource::Archive(ArchiveSource::File(PathBuf::from("/path/to/store.cjar")));
-    assert_eq!(loader.detect_format(&source), PolicyStoreFormat::Archive);
-
-    // Legacy format
-    let source = PolicyStoreSource::Legacy("{}".to_string());
-    assert_eq!(loader.detect_format(&source), PolicyStoreFormat::Legacy);
-}
-
-#[test]
 fn test_validate_nonexistent_directory() {
-    let source = PolicyStoreSource::Directory(PathBuf::from("/nonexistent/path"));
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.validate_structure(&source);
+    let path = PathBuf::from("/nonexistent/path");
+    let path_str = path.to_str().unwrap_or("/nonexistent/path");
+    let result = loader.validate_directory_structure(path_str);
     let err = result.expect_err("Expected error for nonexistent directory");
     assert!(
         matches!(&err, PolicyStoreError::PathNotFound { .. })
@@ -159,9 +142,8 @@ fn test_validate_directory_missing_metadata() {
     fs::write(dir.join("schema.cedarschema"), "test").unwrap();
     fs::create_dir(dir.join("policies")).unwrap();
 
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.validate_structure(&source);
+    let result = loader.validate_directory_structure(dir.to_str().unwrap());
 
     let err = result.expect_err("Expected error for missing metadata.json");
     assert!(
@@ -184,9 +166,8 @@ fn test_validate_directory_missing_schema() {
     fs::write(dir.join("metadata.json"), "{}").unwrap();
     fs::create_dir(dir.join("policies")).unwrap();
 
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.validate_structure(&source);
+    let result = loader.validate_directory_structure(dir.to_str().unwrap());
 
     let err = result.expect_err("Expected error for missing schema.cedarschema");
     assert!(
@@ -209,9 +190,8 @@ fn test_validate_directory_missing_policies_dir() {
     fs::write(dir.join("metadata.json"), "{}").unwrap();
     fs::write(dir.join("schema.cedarschema"), "test").unwrap();
 
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.validate_structure(&source);
+    let result = loader.validate_directory_structure(dir.to_str().unwrap());
 
     let err = result.expect_err("Expected error for missing policies directory");
     assert!(
@@ -233,9 +213,8 @@ fn test_validate_directory_success() {
     // Create valid structure
     create_test_policy_store(dir).unwrap();
 
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.validate_structure(&source);
+    let result = loader.validate_directory_structure(dir.to_str().unwrap());
 
     assert!(result.is_ok());
 }
@@ -248,12 +227,10 @@ fn test_load_directory_success() {
     // Create valid policy store
     create_test_policy_store(dir).unwrap();
 
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.load(&source);
-
-    assert!(result.is_ok());
-    let loaded = result.unwrap();
+    let loaded = loader
+        .load_directory(dir.to_str().unwrap())
+        .expect("Expected directory load to succeed");
 
     // Verify loaded data
     assert_eq!(loaded.metadata.cedar_version, "4.4.0");
@@ -285,12 +262,10 @@ fn test_load_directory_with_optional_components() {
     fs::create_dir(dir.join("trusted-issuers")).unwrap();
     fs::write(dir.join("trusted-issuers/issuer1.json"), "{}").unwrap();
 
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.load(&source);
-
-    assert!(result.is_ok());
-    let loaded = result.unwrap();
+    let loaded = loader
+        .load_directory(dir.to_str().unwrap())
+        .expect("Expected directory load with optional components to succeed");
 
     assert_eq!(loaded.templates.len(), 1);
     assert_eq!(loaded.entities.len(), 1);
@@ -307,9 +282,8 @@ fn test_load_directory_invalid_policy_extension() {
     // Add file with wrong extension
     fs::write(dir.join("policies/bad.txt"), "invalid").unwrap();
 
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.load(&source);
+    let result = loader.load_directory(dir.to_str().unwrap());
 
     let err = result.expect_err("Expected error for invalid policy file extension");
     assert!(
@@ -332,9 +306,8 @@ fn test_load_directory_invalid_json() {
     fs::write(dir.join("schema.cedarschema"), "schema").unwrap();
     fs::create_dir(dir.join("policies")).unwrap();
 
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.load(&source);
+    let result = loader.load_directory(dir.to_str().unwrap());
 
     let err = result.expect_err("Expected error for invalid JSON in metadata.json");
     assert!(
@@ -496,9 +469,10 @@ fn test_load_and_parse_policies_end_to_end() {
     .unwrap();
 
     // Load the policy store
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded = loader.load(&source).unwrap();
+    let loaded = loader
+        .load_directory(dir.to_str().unwrap())
+        .expect("Expected directory load to succeed");
 
     // Parse the policies
     let parsed_policies = PhysicalLoader::parse_policies(&loaded.policies).unwrap();
@@ -568,9 +542,10 @@ fn test_load_and_parse_schema_end_to_end() {
     fs::write(dir.join("schema.cedarschema"), schema_content).unwrap();
 
     // Load the policy store
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded = loader.load(&source).unwrap();
+    let loaded = loader
+        .load_directory(dir.to_str().unwrap())
+        .expect("Expected directory load to succeed");
 
     // Schema should be loaded
     assert!(!loaded.schema.is_empty(), "Schema should not be empty");
@@ -640,9 +615,10 @@ fn test_load_and_parse_entities_end_to_end() {
     .unwrap();
 
     // Load the policy store
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded = loader.load(&source).unwrap();
+    let loaded = loader
+        .load_directory(dir.to_str().unwrap())
+        .expect("Expected directory load to succeed");
 
     // Entities should be loaded
     assert!(!loaded.entities.is_empty(), "Entities should be loaded");
@@ -709,9 +685,10 @@ fn test_entity_with_complex_attributes() {
     .unwrap();
 
     // Load the policy store
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded = loader.load(&source).unwrap();
+    let loaded = loader
+        .load_directory(dir.to_str().unwrap())
+        .expect("Expected directory load to succeed");
 
     // Parse entities
     let mut all_entities = Vec::new();
@@ -793,9 +770,10 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     .unwrap();
 
     // Load the policy store
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded = loader.load(&source).unwrap();
+    let loaded = loader
+        .load_directory(dir.to_str().unwrap())
+        .expect("Expected directory load to succeed");
 
     // Issuers should be loaded
     assert!(
@@ -877,9 +855,10 @@ fn test_parse_issuer_with_token_metadata() {
     .unwrap();
 
     // Load the policy store
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded = loader.load(&source).unwrap();
+    let loaded = loader
+        .load_directory(dir.to_str().unwrap())
+        .expect("Expected directory load to succeed");
 
     // Parse issuers
     let mut all_issuers = Vec::new();
@@ -984,9 +963,10 @@ action "read" appliesTo {
     .unwrap();
 
     // Load the policy store using the in-memory filesystem
-    let source = PolicyStoreSource::Directory(PathBuf::from("/"));
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let loaded = loader.load(&source).unwrap();
+    let loaded = loader
+        .load_directory("/")
+        .expect("Expected in-memory directory load to succeed");
 
     // Parse issuers
     let mut all_issuers = Vec::new();
@@ -1056,9 +1036,10 @@ fn test_issuer_missing_required_field() {
     .unwrap();
 
     // Load the policy store using in-memory filesystem
-    let source = PolicyStoreSource::Directory(PathBuf::from("/"));
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let loaded = loader.load(&source).unwrap();
+    let loaded = loader
+        .load_directory("/")
+        .expect("Expected in-memory directory load to succeed");
 
     // Parse issuers - should fail
     let result = IssuerParser::parse_issuer(
@@ -1119,9 +1100,10 @@ fn test_complete_policy_store_with_issuers() {
     .unwrap();
 
     // Load the policy store
-    let source = PolicyStoreSource::Directory(dir.to_path_buf());
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded = loader.load(&source).unwrap();
+    let loaded = loader
+        .load_directory(dir.to_str().unwrap())
+        .expect("Expected directory load to succeed");
 
     // Verify all components are loaded
     assert_eq!(loaded.metadata.name(), "Test Policy Store");

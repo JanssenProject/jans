@@ -3,12 +3,12 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#[cfg(test)]
+mod archive_security_tests;
 mod claim_mapping;
 pub(crate) mod log_entry;
 #[cfg(test)]
 mod mock_jwks_server;
-#[cfg(test)]
-mod archive_security_tests;
 #[cfg(test)]
 mod test;
 #[cfg(test)]
@@ -31,8 +31,6 @@ pub mod manifest_validator;
 pub mod metadata;
 pub mod policy_parser;
 pub mod schema_parser;
-#[cfg(test)]
-pub mod source;
 pub mod validator;
 pub mod vfs_adapter;
 
