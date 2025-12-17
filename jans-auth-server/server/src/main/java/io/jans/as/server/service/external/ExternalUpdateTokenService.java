@@ -7,6 +7,7 @@
 package io.jans.as.server.service.external;
 
 import com.google.common.collect.Lists;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.common.AccessToken;
 import io.jans.as.server.model.common.RefreshToken;
@@ -16,11 +17,14 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.token.UpdateTokenType;
 import io.jans.service.custom.script.ExternalScriptService;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Function;
+
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Movchan
@@ -29,6 +33,8 @@ import java.util.function.Function;
 public class ExternalUpdateTokenService extends ExternalScriptService {
 
     private static final long serialVersionUID = -1033475075863270259L;
+    @Inject
+    private AppConfiguration appConfiguration;
 
     public ExternalUpdateTokenService() {
         super(CustomScriptType.UPDATE_TOKEN);
@@ -117,9 +123,20 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
     }
 
     @NotNull
-    private List<CustomScriptConfiguration> getScripts(@NotNull ExternalUpdateTokenContext context) {
-        if (customScriptConfigurations == null || customScriptConfigurations.isEmpty() || context.getClient() == null) {
-            log.trace("No UpdateToken scripts or client is null.");
+    protected List<CustomScriptConfiguration> getScripts(@NotNull ExternalUpdateTokenContext context) {
+        List<CustomScriptConfiguration> customScriptConfigurations = getCustomScriptConfigurations();
+        if (customScriptConfigurations == null || customScriptConfigurations.isEmpty()) {
+            log.trace("No UpdateToken scripts.");
+            return Lists.newArrayList();
+        }
+
+        if (isTrue(appConfiguration.getRunAllUpdateTokenScripts())) {
+            log.trace("Run all UpdateToken scripts.");
+            return customScriptConfigurations;
+        }
+
+        if (context.getClient() == null) {
+            log.trace("No client.");
             return Lists.newArrayList();
         }
 

@@ -1,10 +1,4 @@
 # =================================
-# Cloud SQL JDBC Socket Factory
-# =================================
-# Pre-built fat JARs from GHCR for Cloud SQL connectivity
-FROM ghcr.io/janssenproject/jans/cloudsql-socket-factory:1.27.0 AS cloudsql-libs
-
-# =================================
 # Main Image
 # =================================
 FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
@@ -213,12 +207,9 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/link" \
 # Custom libs
 # ===========
 
-# Copy Cloud SQL Socket Factory fat JARs from builder (includes all dependencies)
-RUN mkdir -p ${JETTY_BASE}/jans-link/custom/libs
-COPY --from=cloudsql-libs /cloudsql/*.jar ${JETTY_BASE}/jans-link/custom/libs/
-
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-link/logs \
+    ${JETTY_BASE}/jans-link/custom/libs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java \
