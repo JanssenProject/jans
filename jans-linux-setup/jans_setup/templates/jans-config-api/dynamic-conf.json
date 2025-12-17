@@ -5,7 +5,7 @@
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
   "acrValidationEnabled": true,
-  "returnClientSecretInResponse": false,
+  "returnClientSecretInResponse": true,
   "returnEncryptedClientSecretInResponse": true,
   "apiApprovedIssuer": ["${apiApprovedIssuer}"],
   "apiProtectionType": "${apiProtectionType}",

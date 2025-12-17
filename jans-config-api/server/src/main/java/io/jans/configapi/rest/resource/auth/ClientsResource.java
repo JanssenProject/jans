@@ -504,13 +504,13 @@ public class ClientsResource extends ConfigBaseResource {
     }
 
     private boolean isReturnEncryptedClientSecretInResponse() {
-        logger.info("appConfiguration.isReturnEncryptedClientSecretInResponse():{} ",
+        logger.debug("appConfiguration.isReturnEncryptedClientSecretInResponse():{} ",
                 appConfiguration.isReturnEncryptedClientSecretInResponse());
         return this.appConfiguration.isReturnEncryptedClientSecretInResponse();
     }
 
     private boolean isReturnClientSecretInResponse() {
-        logger.info("appConfiguration.isReturnClientSecretInResponse():{} ",
+        logger.debug("appConfiguration.isReturnClientSecretInResponse():{} ",
                 appConfiguration.isReturnClientSecretInResponse());
         return this.appConfiguration.isReturnClientSecretInResponse();
     }
