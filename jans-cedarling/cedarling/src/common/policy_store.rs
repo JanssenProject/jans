@@ -405,6 +405,9 @@ enum MaybeEncoded {
 /// Represents a raw policy entry from the `PolicyStore`.
 ///
 /// This is a helper struct used internally for parsing base64-encoded policies.
+// TODO: We only use the `description` field at runtime. The raw `policy_content`
+//       is not needed once policies are compiled into a `PolicySet`. Refactor
+//       to remove `RawPolicy` (and stored raw content) and keep only descriptions.
 #[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 struct RawPolicy {
     /// Base64-encoded content of the policy.
