@@ -255,7 +255,7 @@ public class ClientsResource extends ConfigBaseResource {
         result.setClaims(claims);
 
         // Response handling
-        getClientResponse(result);
+        result = getClientResponse(result);
         logger.debug("Claim post updation - result.getClaims():{} ", result.getClaims());
         return Response.ok(result).build();
     }
