@@ -5,10 +5,10 @@ Google's OAuth 2.0 APIs can be used for both authentication and authorization. T
 
 ## Prerequisites
 
-- A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup#readme))    
-- The [Google authentication script](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup/jans_setup/static/extension/person_authentication/GoogleExternalAuthenticator.py) (included in the default Gluu Server distribution);   
-- A [Google account](https://accounts.google.com/).     
-- Google API jars namely [google-api-client](https://repo1.maven.org/maven2/com/google/api-client/google-api-client/1.33.2/google-api-client-1.33.2.jar), [google-oauth-client](https://repo1.maven.org/maven2/com/google/oauth-client/google-oauth-client/1.33.1/google-oauth-client-1.33.1.jar) and [google-http-client-jackson2](https://repo1.maven.org/maven2/com/google/http-client/google-http-client-jackson2/1.41.5/google-http-client-jackson2-1.41.5.jar) added to jans-auth-server 
+- A Jans-auth Server ([installation instructions](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup#readme))
+- The [Google authentication script](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup/jans_setup/static/extension/person_authentication/GoogleExternalAuthenticator.py) (included in the default Gluu Server distribution);
+- A [Google account](https://accounts.google.com/).
+- Google API jars namely [google-api-client](https://repo1.maven.org/maven2/com/google/api-client/google-api-client/1.33.2/google-api-client-1.33.2.jar), [google-oauth-client](https://repo1.maven.org/maven2/com/google/oauth-client/google-oauth-client/1.33.1/google-oauth-client-1.33.1.jar) and [google-http-client-jackson2](https://repo1.maven.org/maven2/com/google/http-client/google-http-client-jackson2/1.41.5/google-http-client-jackson2-1.41.5.jar) added to jans-auth-server
 
 
 ## Google Configuration
@@ -38,7 +38,7 @@ Place this file in `/etc/certs/google_client_secret.json`
     <Set name="extraClasspath">./custom/libs/google-oauth-client-1.33.1.jar,./custom/libs/google-api-client-1.33.2.jar,./custom/libs/google-http-client-jackson2-1.41.5.jar</Set></Configure>
     ```
 
-- Restart the `jans-auth` service     
+- Restart the `jans-auth` service
 ` systemctl status jans-auth `
 
 ### Properties
@@ -59,11 +59,11 @@ Follow the steps below to enable Google authentication:
 
 
 
-1. Populate the properties table :    
+1. Populate the properties table :
 
-   - `google_creds_file`: `/etc/certs/google_client_secret.json`.   
+   - `google_creds_file`: `/etc/certs/google_client_secret.json`.
 
-1. Enable the script by checking the box 
+1. Enable the script by checking the box
 
 1. Scroll to the bottom of the page and click `Update`
 

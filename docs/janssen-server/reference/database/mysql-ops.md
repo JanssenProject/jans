@@ -46,7 +46,7 @@ Say we want to increase the size of `mail` field to 144. Do the following:<br>
 
 ### Update user information
 
-In this example we are doing to update one user's email address.
+In this example we are going to update one user's email address.
 
 * Search for existing email address: `use jansdb; select * from jansPerson where uid='testUser'\G;`
 * Modify it: `use jansdb; update jansPerson set mail='newEmail@gluu.org' where uid='testUser';`
