@@ -98,8 +98,6 @@ public class ClientsResource extends ConfigBaseResource {
     AttributeService attributeService;
 
     @Operation(summary = "Gets list of OpenID Connect clients", description = "Gets list of OpenID Connect clients", operationId = "get-oauth-openid-clients", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }))
             "OAuth - OpenID Connect - Clients" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
@@ -113,10 +111,8 @@ public class ClientsResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-            ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS, ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getOpenIdConnectClients(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -138,9 +134,7 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(this.doSearch(searchReq)).build();
     }
 
-@Operation(summary = "Get OpenId Connect Client by Inum", description = "Get OpenId Connect Client by Inum", operationId = "get-oauth-openid-clients-by-inum", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }))
+    @Operation(summary = "Get OpenId Connect Client by Inum", description = "Get OpenId Connect Client by Inum", operationId = "get-oauth-openid-clients-by-inum", tags = {
             "OAuth - OpenID Connect - Clients" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
@@ -153,10 +147,8 @@ public class ClientsResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-            ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, superScopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getOpenIdClientByInum(
             @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
@@ -170,9 +162,7 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(applyResponsePolicy(client)).build();
     }
 
-@Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
+    @Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
             "OAuth - OpenID Connect - Clients" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_WRITE_ACCESS }),
@@ -186,7 +176,6 @@ public class ClientsResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
             ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
@@ -236,8 +225,6 @@ public class ClientsResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Update OpenId Connect client", description = "Update OpenId Connect client", operationId = "put-oauth-openid-client", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
             "OAuth - OpenID Connect - Clients" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_WRITE_ACCESS }),
@@ -252,7 +239,6 @@ public class ClientsResource extends ConfigBaseResource {
     @PUT
     @Ignore
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
             ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateClient(@Valid Client client) throws EncryptionException {
@@ -293,9 +279,7 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(result).build();
     }
 
-      @Operation(summary = "Patch OpenId Connect client", description = "Patch OpenId Connect client", operationId = "patch-oauth-openid-client-by-inum", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
+    @Operation(summary = "Patch OpenId Connect client", description = "Patch OpenId Connect client", operationId = "patch-oauth-openid-client-by-inum", tags = {
             "OAuth - OpenID Connect - Clients" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_WRITE_ACCESS }),
@@ -310,7 +294,6 @@ public class ClientsResource extends ConfigBaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
             ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
@@ -340,9 +323,7 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(existingClient).build();
     }
 
-      @Operation(summary = "Delete OpenId Connect client", description = "Delete OpenId Connect client", operationId = "delete-oauth-openid-client-by-inum", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }))
+    @Operation(summary = "Delete OpenId Connect client", description = "Delete OpenId Connect client", operationId = "delete-oauth-openid-client-by-inum", tags = {
             "OAuth - OpenID Connect - Clients" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_DELETE_ACCESS }),
@@ -355,7 +336,6 @@ public class ClientsResource extends ConfigBaseResource {
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
             ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteClient(

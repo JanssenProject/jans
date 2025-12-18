@@ -145,8 +145,8 @@ import org.slf4j.Logger;
         @OAuthScope(name = ApiAccessConstants.CONFIG_ADMIN_ACCESS, description = "Admin for Config-API management"),
         @OAuthScope(name = ApiAccessConstants.CLIENT_AUTHORIZATIONS_ADMIN_ACCESS, description = "Admin for Client Authorizations management"),
         @OAuthScope(name = ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS, description = "Admin for Jans Assets management"),
-        @OAuthScope(name = ApiAccessConstants.AUTH_SSA_ADMIN, description = "Admin for SSA management"),
-        @OAuthScope(name = ApiAccessConstants.HEALTH_ADMIN, description = "Admin for Health API management"),
+        @OAuthScope(name = ApiAccessConstants.AUTH_SSA_ADMIN_ACCESS, description = "Admin for SSA management"),
+        @OAuthScope(name = ApiAccessConstants.HEALTH_ADMIN_ACCESS, description = "Admin for Health API management"),
         }
 
 )))
