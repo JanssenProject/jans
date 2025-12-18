@@ -30,6 +30,7 @@ output "agama_repos" {
 - `repositories` (List of Object) List of Agama repositories (see [below for nested schema](#nestedatt--repositories))
 
 <a id="nestedatt--repositories"></a>
+
 ### Nested Schema for `repositories`
 
 Read-Only:

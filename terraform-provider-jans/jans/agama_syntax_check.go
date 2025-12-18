@@ -3,6 +3,7 @@ package jans
 import (
         "context"
         "fmt"
+        "net/url"
         "strings"
 )
 
@@ -15,15 +16,25 @@ type AgamaSyntaxCheckResult struct {
 
 func (c *Client) CheckAgamaSyntax(ctx context.Context, flowName string, code string) (*AgamaSyntaxCheckResult, error) {
 
+        flowName = strings.TrimSpace(flowName)
+        if flowName == "" {
+                return nil, fmt.Errorf("flowName must be provided")
+        }
+
+        code = strings.TrimSpace(code)
+        if code == "" {
+                return nil, fmt.Errorf("code must be provided")
+        }
+
         token, err := c.ensureToken(ctx, "https://jans.io/oauth/config/agama.readonly")
         if err != nil {
                 return nil, fmt.Errorf("failed to get token: %w", err)
         }
 
-        path := fmt.Sprintf("/jans-config-api/api/v1/agama/syntax-check/%s", flowName)
+        path := fmt.Sprintf("/jans-config-api/api/v1/agama/syntax-check/%s", url.PathEscape(flowName))
 
         var message string
-        if err := c.postText(ctx, path, token, "https://jans.io/oauth/config/agama.readonly", code, &message); err != nil {
+        if err := c.postText(ctx, path, token, code, &message); err != nil {
                 return nil, fmt.Errorf("syntax check request failed: %w", err)
         }
 
@@ -37,7 +48,7 @@ func (c *Client) CheckAgamaSyntax(ctx context.Context, flowName string, code str
         return result, nil
 }
 
-func (c *Client) postText(ctx context.Context, path, token, scope, req string, resp any) error {
+func (c *Client) postText(ctx context.Context, path, token, req string, resp any) error {
 
         params := requestParams{
                 method:      "POST",
@@ -45,7 +56,6 @@ func (c *Client) postText(ctx context.Context, path, token, scope, req string, r
                 contentType: "text/plain",
                 accept:      "application/json",
                 token:       token,
-                scope:       scope,
                 payload:     []byte(req),
                 resp:        resp,
         }
