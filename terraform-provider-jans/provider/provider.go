@@ -109,8 +109,10 @@ func Provider() *schema.Provider {
                 // and must *not* implement Create, Update or Delete.
                 DataSourcesMap: map[string]*schema.Resource{
                         "jans_agama_repository":        dataSourceAgamaRepository(),
+                        "jans_agama_syntax_check":      dataSourceAgamaSyntaxCheck(),
                         "jans_audit_logs":              dataSourceAuditLogs(),
                         "jans_custom_script_types":     dataSourceCustomScriptTypes(),
+                        "jans_database_configuration":  dataSourceDatabaseConfiguration(),
                         "jans_feature_flags":           dataSourceFeatureFlags(),
                         "jans_fido2_configuration":     dataSourceFido2Configuration(),
                         "jans_health_status":           dataSourceHealthStatus(),
