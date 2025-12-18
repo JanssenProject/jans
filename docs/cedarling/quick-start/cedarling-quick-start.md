@@ -87,7 +87,7 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
          "===": [{"var": "Jans::User"}, "ALLOW"]
        },
-       "CEDARLING_JWT_SIG_VALIDATION": "enabled",
+       "CEDARLING_JWT_SIG_VALIDATION": "disabled",
        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
        "CEDARLING_MAPPING_USER": "Jans::User",
        "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
@@ -298,9 +298,6 @@ this.
     - This will open the dashboard with two policy stores listed. Open the policy store named `tarpDemo`.
     - Now you can update the policy and schema using the 
       [policy designer](https://help.gluu.org/kb/article/34/authorization-policy-designer)        
-
-
-
 
 ### Step-3: Configure Tarp with the policy store
 
