@@ -2,7 +2,6 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import MCPService from './service/MCPService';
 import { LLMClientFactory } from './llm/LLMClient';
-import { LLMProviderType } from './helper/Constants'
 import { v4 as uuidv4 } from 'uuid';
 import Utils from '../options/Utils';
 import AuthenticationService from '../service/authenticationService';
@@ -60,8 +59,8 @@ interface OIDCClientRegistrationArgs {
  * @param displayToken - Whether the token should be marked for display in the UI
  */
 async function saveLoginDetailsInStorage(
-  tokenResponse: any, 
-  userInfoResponse: any, 
+  tokenResponse: any,
+  userInfoResponse: any,
   displayToken: boolean
 ): Promise<void> {
   await StorageHelper.set(STORAGE_KEYS.LOGIN_DETAILS, {
@@ -79,11 +78,12 @@ async function saveLoginDetailsInStorage(
  * @throws If no API key is configured for the selected provider, or if client creation or initialization fails.
  */
 async function initializeLLMClient(): Promise<any> {
-  if (llmClient) return llmClient;
 
   try {
     const provider = await ConfigurationManager.getProvider();
     const apiKey = await ConfigurationManager.getApiKey();
+
+    if (llmClient) return llmClient;
 
     if (!apiKey) {
       throw new Error(`API key not found for ${provider}. Please configure your API key.`);
@@ -178,7 +178,7 @@ async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
     }
 
     const { secret, hashed } = await Utils.generateRandomChallengePair();
-    
+
     const authArgs = {
       ...args,
       scope: oidcClient.scope,
@@ -208,20 +208,20 @@ async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
     }
 
     const tokenResponse = await authenticationService.getAccessToken(
-      code, 
-      oidcClient, 
+      code,
+      oidcClient,
       secret
     );
 
     if (!tokenResponse?.access_token) {
-      const errorMsg = tokenResponse?.error_description || 
-                      tokenResponse?.error || 
-                      "Unknown error";
+      const errorMsg = tokenResponse?.error_description ||
+        tokenResponse?.error ||
+        "Unknown error";
       throw new Error(`Token exchange failed: ${errorMsg}`);
     }
 
     const userInfoResponse = await authenticationService.getUserInfo(
-      tokenResponse, 
+      tokenResponse,
       oidcClient
     );
 
@@ -338,8 +338,8 @@ export async function handleUserPrompt(prompt: string) {
     if (!toolCalls || toolCalls.length === 0) {
       return {
         type: "text",
-        content: message?.content || 
-               "I can only help with OIDC operations. Please provide details like issuer, client_id, or scopes."
+        content: message?.content ||
+          "I can only help with OIDC operations. Please provide details like issuer, client_id, or scopes."
       };
     }
 

@@ -18,7 +18,7 @@ class MCPApiService {
     this.baseUrl = baseUrl;
   }
 
-  async setBaseUrl(url: string) {
+  setBaseUrl(url: string) {
     this.baseUrl = url;
   }
 
@@ -50,6 +50,12 @@ class MCPApiService {
 
   // Create/Store a new API key
   async createApiKey(provider: string, model: string, key: string): Promise<ApiKeyData> {
+    if (!provider?.trim() || !model?.trim() || !key?.trim()) {
+      throw new Error('Provider, model, and key are required');
+    }
+    if (key.length < 10) {
+      throw new Error('API key appears to be too short');
+    }
     const response = await fetch(`${this.baseUrl}${MCP_KEYS_ENDPOINT}`, {
       method: 'POST',
       headers: {
@@ -73,8 +79,29 @@ class MCPApiService {
     // For simplicity, we'll delete and recreate
     const provider = await this.getProviderFromId(id);
     const model = await this.getModelFromId(id);
-    await this.deleteApiKey(id);
-    return this.createApiKey(provider || 'unknown', model || 'unknown', key);
+
+    if (!provider?.trim() && !model?.trim() || !key?.trim()) {
+      throw new Error('Provider or model and key are required');
+    }
+    if (key.length < 10) {
+      throw new Error('API key appears to be too short');
+    }
+    const response = await fetch(`${this.baseUrl}${MCP_KEYS_ENDPOINT}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ provider, model, key }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 409) {
+        throw new Error('API key does not exists for this provider');
+      }
+      throw new Error(`Failed to create API key: ${response.statusText}`);
+    }
+
+    return response.json();
   }
 
   // Delete an API key by ID
@@ -132,8 +159,6 @@ class MCPApiService {
         // Query only by model (provider not provided)
         keyPreview = keys.find(k => (k.model === model));
       }
-
-      //const keyPreview = keys.find(key => (key.provider === provider && key.model === model));
 
       if (!keyPreview?.id) return null;
 

@@ -28,6 +28,33 @@ export const useSettings = () => {
   });
   const [loadingApiKey, setLoadingApiKey] = useState(false);
 
+  const loadApiKeyFromMCP = useCallback(async (providerName: string, modelName: string, skipConnectionCheck = false) => {
+    if (!mcpServerUrl) return;
+    if (!skipConnectionCheck && connectionStatus !== "connected") return;
+
+    setLoadingApiKey(true);
+    try {
+      const apiKeyData = await mcpApiService.findApiKeyByProvider(providerName, modelName);
+
+      if (apiKeyData) {
+        setApiKey(apiKeyData.key);
+        mcpApiService.setCurrentApiKeyId(apiKeyData.id || null);
+        validateApiKey(apiKeyData.key, providerName, modelName);
+      } else {
+        setApiKey("");
+        mcpApiService.setCurrentApiKeyId(null);
+        setApiKeyValid(false);
+      }
+    } catch (error) {
+      console.error("Failed to load API key from MCP server:", error);
+      setApiKey("");
+      mcpApiService.setCurrentApiKeyId(null);
+      setApiKeyValid(false);
+    } finally {
+      setLoadingApiKey(false);
+    }
+  }, [mcpServerUrl, connectionStatus]);
+
   // Load settings on component mount
   useEffect(() => {
     const initializeSettings = async () => {
@@ -39,27 +66,27 @@ export const useSettings = () => {
           MCP_SERVER_URL
         ], resolve);
       });
-  
+
       const savedModel = results[LLM_MODEL_STORAGE_KEY];
       const savedProvider = results[LLM_PROVIDER_STORAGE_KEY];
       const savedMcpUrl = results[MCP_SERVER_URL] || DEFAULT_MCP_URL;
-  
+
       // Determine which MCP URL to use
       const mcpUrlToUse = savedMcpUrl;
       const hasSavedSettings = savedProvider && savedModel;
-  
+
       // Set MCP URL and test connection
       setMcpServerUrl(mcpUrlToUse);
       mcpApiService.setBaseUrl(mcpUrlToUse);
       validateMcpUrl(mcpUrlToUse);
-      
+
       const isConnected = await testMCPConnection(mcpUrlToUse);
       if (!isConnected) return;
-  
+
       // Determine provider and model to use
       let providerToUse = savedProvider;
       let modelToUse = savedModel;
-  
+
       if (!hasSavedSettings) {
         // Try to get from MCP server if no saved settings
         try {
@@ -72,8 +99,8 @@ export const useSettings = () => {
             providerToUse = DEFAULT_PROVIDER;
             modelToUse = DEFAULT_MODEL;
           }
-           // Save other settings to chrome storage
-           await chrome.storage.local.set({
+          // Save other settings to chrome storage
+          await chrome.storage.local.set({
             [LLM_MODEL_STORAGE_KEY]: modelToUse,
             [LLM_PROVIDER_STORAGE_KEY]: providerToUse,
             [MCP_SERVER_URL]: mcpServerUrl
@@ -82,80 +109,33 @@ export const useSettings = () => {
           console.error("Failed to get API keys from MCP:", error);
           setSnackbar({
             open: true,
-            message: error.message || "Failed to get API keys from MCP",
+            message: error instanceof Error ? error.message : "Failed to get API keys from MCP",
             severity: "error"
           });
           providerToUse = DEFAULT_PROVIDER;
           modelToUse = DEFAULT_MODEL;
         }
       }
-  
+
       // Set provider and model
       if (providerToUse) setProvider(providerToUse);
       if (modelToUse) setModel(modelToUse);
-  
+
       // Load API key from MCP if we have a provider
       if (providerToUse && isConnected) {
         await initLoadApiKeyFromMCP(providerToUse, modelToUse);
       }
     };
-  
+
     initializeSettings();
-  }, []); // Add loadApiKeyFromMCP as dependency
+  }, []); 
 
-  // Load API key from MCP server
-  
-  const initLoadApiKeyFromMCP = useCallback(async (providerName: string, modelName: string) => {
-    if (!mcpServerUrl) return;
-    
-    setLoadingApiKey(true);
-    try {
-      const apiKeyData = await mcpApiService.findApiKeyByProvider(providerName, modelName);
-      
-      if (apiKeyData) {
-        setApiKey(apiKeyData.key);
-        mcpApiService.setCurrentApiKeyId(apiKeyData.id || null);
-        validateApiKey(apiKeyData.key, providerName, modelName);
-      } else {
-        setApiKey("");
-        mcpApiService.setCurrentApiKeyId(null);
-        setApiKeyValid(false);
-      }
-    } catch (error) {
-      console.error("Failed to load API key from MCP server:", error);
-      setApiKey("");
-      mcpApiService.setCurrentApiKeyId(null);
-      setApiKeyValid(false);
-    } finally {
-      setLoadingApiKey(false);
-    }
-  }, [mcpServerUrl, connectionStatus]);
-
-  const loadApiKeyFromMCP = useCallback(async (providerName: string, modelName: string) => {
-    if (!mcpServerUrl || (connectionStatus !== "connected")) return;
-    
-    setLoadingApiKey(true);
-    try {
-      const apiKeyData = await mcpApiService.findApiKeyByProvider(providerName, modelName);
-      
-      if (apiKeyData) {
-        setApiKey(apiKeyData.key);
-        mcpApiService.setCurrentApiKeyId(apiKeyData.id || null);
-        validateApiKey(apiKeyData.key, providerName, modelName);
-      } else {
-        setApiKey("");
-        mcpApiService.setCurrentApiKeyId(null);
-        setApiKeyValid(false);
-      }
-    } catch (error) {
-      console.error("Failed to load API key from MCP server:", error);
-      setApiKey("");
-      mcpApiService.setCurrentApiKeyId(null);
-      setApiKeyValid(false);
-    } finally {
-      setLoadingApiKey(false);
-    }
-  }, [mcpServerUrl, connectionStatus]);
+  // For initialization, skip connection check
+  const initLoadApiKeyFromMCP = useCallback(
+    (providerName: string, modelName: string) =>
+      loadApiKeyFromMCP(providerName, modelName, true),
+    [loadApiKeyFromMCP]
+  );
 
   // Validate API key based on provider
   const validateApiKey = useCallback((key: string, currentProvider: string = provider, currentModel: string = model) => {
@@ -221,13 +201,13 @@ export const useSettings = () => {
 
   const handleProviderChange = useCallback(async (newProvider: string) => {
     setProvider(newProvider);
-    
+
     // Reset model to default for new provider
     const providerConfig = LLM_PROVIDERS.find(p => p.value === newProvider);
     if (providerConfig && providerConfig.models.length > 0) {
       setModel(providerConfig.models[0].value);
     }
-    
+
     // Load API key for new provider from MCP server
     if (mcpServerUrl && connectionStatus === "connected") {
       await loadApiKeyFromMCP(newProvider, providerConfig.models[0].value);
@@ -250,7 +230,7 @@ export const useSettings = () => {
   const handleMcpUrlChange = useCallback(async (newUrl: string) => {
     setMcpServerUrl(newUrl);
     const isValid = validateMcpUrl(newUrl);
-    
+
     if (isValid) {
       mcpApiService.setBaseUrl(newUrl);
       await testMCPConnection(newUrl);
@@ -319,7 +299,7 @@ export const useSettings = () => {
     try {
       // Save API key to MCP server
       const currentApiKeyId = mcpApiService.getCurrentApiKeyId();
-      
+
       if (currentApiKeyId) {
         // Update existing API key
         await mcpApiService.updateApiKey(currentApiKeyId, apiKey);
@@ -406,7 +386,7 @@ export const useSettings = () => {
         message: "Successfully connected to MCP server!",
         severity: "success"
       });
-      
+
       // Load API key after successful connection
       await loadApiKeyFromMCP(provider, model);
     } else {

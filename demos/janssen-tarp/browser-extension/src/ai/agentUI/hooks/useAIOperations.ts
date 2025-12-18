@@ -5,7 +5,7 @@ import { mcpApiService } from '../../service/MCPAPIService';
 
 export const useAIOperations = (notifyOnDataChange: () => void) => {
   const [query, setQuery] = useState("");
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,7 +72,7 @@ export const useAIOperations = (notifyOnDataChange: () => void) => {
       return result;
     } catch (err: any) {
       console.error("Error:", err);
-      setError(err.message || "An error occurred while processing your request");
+      setError(err.message || "Failed to process your request. Please try again or check your settings.");
       throw err;
     } finally {
       setLoading(false);

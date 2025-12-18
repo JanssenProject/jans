@@ -144,7 +144,9 @@ server.registerTool(
     })
   },
   async (input: OIDCClientConfig) => {
-    console.log('Inside registerOIDCClient method')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('registerOIDCClient called for issuer:', input.issuer);
+    }
     validateIssuerUrl(input.issuer);
 
     const metadata = await discoverOIDCMetadata(input.issuer);
@@ -444,7 +446,8 @@ app.get("/health", (_req, res) => {
 });
 
 // Routes for LLM API Key Management
-
+// WARNING: These endpoints lack authentication. 
+// For production use, add authentication middleware.
 /**
  * Store an LLM API key
  * POST /api/keys
@@ -505,6 +508,80 @@ app.post("/api/keys", async (req, res) => {
       provider: newApiKey.provider,
       model: newApiKey.model,
       createdAt: newApiKey.createdAt,
+      keyPreview: `...${key.slice(-4)}` // Show only last 4 chars
+    };
+
+    res.status(201).json(response);
+  } catch (error) {
+    console.error("Error storing API key:", error);
+    res.status(500).json({
+      error: "Failed to store API key"
+    });
+  }
+});
+
+/**
+ * Store an LLM API key
+ * PUT /api/keys
+ */
+app.put("/api/keys", async (req, res) => {
+  try {
+    const { provider, model, key } = req.body;
+
+    if (!model || !key) {
+      return res.status(400).json({
+        error: "Missing required fields: model and key"
+      });
+    }
+
+    const db = getDb();
+    await db.read();
+
+    // Dynamic query based on what's provided
+    let existingKey;
+
+    if (provider && model) {
+      // Query by both provider AND model
+      existingKey = db.data.apiKeys.find((k: ApiKey) =>
+        k.provider === provider && k.model === model
+      );
+    } else if (provider) {
+      // Query only by provider (model not provided)
+      existingKey = db.data.apiKeys.find((k: ApiKey) =>
+        k.provider === provider
+      );
+    } else {
+      // Query only by model (provider not provided)
+      existingKey = db.data.apiKeys.find((k: ApiKey) =>
+        k.model === model
+      );
+    }
+
+    if (!existingKey) {
+      return res.status(409).json({
+        error: "API key does not exists"
+      });
+    }
+    db.data.apiKeys = db.data.apiKeys.filter((k: ApiKey) => k.id !== existingKey.id);
+
+    // Create new API key record
+    const updatedApiKey: ApiKey = {
+      id: existingKey.id,
+      provider,
+      model,
+      key,
+      createdAt: existingKey.createdAt
+    };
+
+    db.data.apiKeys.push(updatedApiKey);
+    await db.write();
+
+    // Return response without exposing the full key
+    const response = {
+      id: updatedApiKey.id,
+      provider: updatedApiKey.provider,
+      model: updatedApiKey.model,
+      createdAt: updatedApiKey.createdAt,
       keyPreview: `...${key.slice(-4)}` // Show only last 4 chars
     };
 

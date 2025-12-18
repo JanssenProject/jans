@@ -30,7 +30,6 @@ export interface LLMProvider {
   }
   
   // Storage keys
-  //export const LLM_API_KEY_STORAGE_KEY = 'llm_api_key';
   export const LLM_MODEL_STORAGE_KEY = 'llm_model';
   export const LLM_PROVIDER_STORAGE_KEY = 'llm_provider';
   export const MCP_SERVER_URL = 'mcp_server_url';
