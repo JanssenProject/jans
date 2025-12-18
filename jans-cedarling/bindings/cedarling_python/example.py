@@ -7,13 +7,17 @@ from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
 from cedarling_python import EntityData, Request, RequestUnsigned
 from cedarling_python import TokenInput, AuthorizeMultiIssuerRequest
+
+# if you want to use errors
+from cedarling_python import authorize_errors
+
 import time
 import yaml
 import os
 
 
 def load_yaml_to_env(yaml_path):
-    with open(yaml_path, 'r') as file:
+    with open(yaml_path, "r") as file:
         config = yaml.safe_load(file)
 
     for key, value in config.items():
@@ -22,7 +26,8 @@ def load_yaml_to_env(yaml_path):
 
 
 bootstrap_config = BootstrapConfig.load_from_file(
-    "./example_files/sample_bootstrap_props.yaml")
+    "./example_files/sample_bootstrap_props.yaml"
+)
 
 # Create config from environment variables
 # bootstrap_config = BootstrapConfig.from_env()
@@ -43,24 +48,27 @@ instance = Cedarling(bootstrap_config)
 # print("Logs stored in memory:")
 # print(*instance.pop_logs())
 
+
 def authorize_with_token():
     # //// Execute authentication request ////
 
     # field entity_type and id is mandatory
     # other fields are attributes of the resource.
-    resource = EntityData.from_dict({
-        "cedar_entity_mapping": {
-            "entity_type": "Jans::Application",
-            "id": "some_id"
-        },
-        "app_id": "application_id",
-        "name": "Some Application",
-        "url": {
-            "host": "jans.test",
-            "path": "/protected-endpoint",
-            "protocol": "http"
+    resource = EntityData.from_dict(
+        {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Application",
+                "id": "some_id",
+            },
+            "app_id": "application_id",
+            "name": "Some Application",
+            "url": {
+                "host": "jans.test",
+                "path": "/protected-endpoint",
+                "protocol": "http",
+            },
         }
-    })
+    )
 
     access_token = "eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiY29kZSI6IjNlMmEyMDEyLTA5OWMtNDY0Zi04OTBiLTQ0ODE2MGMyYWIyNSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhdWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhY3IiOiJzaW1wbGVfcGFzc3dvcmRfYXV0aCIsIng1dCNTMjU2IjoiIiwibmJmIjoxNzMxOTUzMDMwLCJzY29wZSI6WyJyb2xlIiwib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTczMTk1MzAyNywiZXhwIjoxNzMyMTIxNDYwLCJpYXQiOjE3MzE5NTMwMzAsImp0aSI6InVaVWgxaERVUW82UEZrQlBud3BHemciLCJ1c2VybmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMwNiwidXJpIjoiaHR0cHM6Ly9qYW5zLnRlc3QvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.Pt-Y7F-hfde_WP7ZYwyvvSS11rKYQWGZXTzjH_aJKC5VPxzOjAXqI3Igr6gJLsP1aOd9WJvOPchflZYArctopXMWClbX_TxpmADqyCMsz78r4P450TaMKj-WKEa9cL5KtgnFa0fmhZ1ZWolkDTQ_M00Xr4EIvv4zf-92Wu5fOrdjmsIGFot0jt-12WxQlJFfs5qVZ9P-cDjxvQSrO1wbyKfHQ_txkl1GDATXsw5SIpC5wct92vjAVm5CJNuv_PE8dHAY-KfPTxOuDYBuWI5uA2Yjd1WUFyicbJgcmYzUSVt03xZ0kQX9dxKExwU2YnpDorfwebaAPO7G114Bkw208g"
 
@@ -188,7 +196,7 @@ def authorize_with_token():
         "network": "127.0.0.1",
         "network_type": "Local",
         "operating_system": "Linux",
-        "user_agent": "Linux"
+        "user_agent": "Linux",
     }
 
     # Creating cedarling request
@@ -202,10 +210,16 @@ def authorize_with_token():
             "userinfo_token": userinfo_token,
         },
         action=action,
-        resource=resource, context=context)
+        resource=resource,
+        context=context,
+    )
 
     # Authorize call
-    authorize_result = instance.authorize(request)
+    try:
+        authorize_result = instance.authorize(request)
+    except authorize_errors.AuthorizeError as e:
+        print("authorize:", e)
+        return
 
     # Print logs from MemoryLogConfig
     # print(*instance.pop_logs())
@@ -218,51 +232,56 @@ def authorize_with_token():
 
     # watch on the decision for workload
     workload_result = authorize_result.workload()
-    print(f"Result of workload authorization: {workload_result.decision}")
+    if workload_result is not None:
+        print(f"Result of workload authorization: {workload_result.decision}")
 
-    # show diagnostic information
-    workload_diagnostic = workload_result.diagnostics
-    print("Policy ID used:")
-    for diagnostic in workload_diagnostic.reason:
-        print(diagnostic)
+        # show diagnostic information
+        workload_diagnostic = workload_result.diagnostics
+        print("Policy ID used:")
+        for diagnostic in workload_diagnostic.reason:
+            print(diagnostic)
 
-    print(f"Errors during authorization: {len(workload_diagnostic.errors)}")
-    for diagnostic in workload_diagnostic.errors:
-        print(diagnostic)
+        print(f"Errors during authorization: {len(workload_diagnostic.errors)}")
+        for diagnostic in workload_diagnostic.errors:
+            print(diagnostic)
 
-    print()
+        print()
 
     # watch on the decision for person
     person_result = authorize_result.person()
-    print(f"Result of person authorization: {person_result.decision}")
-    person_diagnostic = person_result.diagnostics
-    print("Policy ID used:")
-    for diagnostic in person_diagnostic.reason:
-        print(diagnostic)
+    if person_result is not None:
+        print(f"Result of person authorization: {person_result.decision}")
+        person_diagnostic = person_result.diagnostics
+        print("Policy ID used:")
+        for diagnostic in person_diagnostic.reason:
+            print(diagnostic)
 
-    print(f"Errors during authorization: {len(person_diagnostic.errors)}")
-    for diagnostic in person_diagnostic.errors:
-        print(diagnostic)
+        print(f"Errors during authorization: {len(person_diagnostic.errors)}")
+        for diagnostic in person_diagnostic.errors:
+            print(diagnostic)
 
-    print()
+        print()
+
 
 def authorize_without_token():
     # //// Execute authentication request without token ////
 
     # Create an entity data object using the EntityData class
-    resource = EntityData.from_dict({
-        "cedar_entity_mapping": {
-            "entity_type": "Jans::Application",
-            "id": "some_id"
-        },
-        "app_id": "application_id",
-        "name": "Some Application",
-        "url": {
-            "host": "jans.test",
-            "path": "/protected-endpoint",
-            "protocol": "http"
+    resource = EntityData.from_dict(
+        {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Application",
+                "id": "some_id",
+            },
+            "app_id": "application_id",
+            "name": "Some Application",
+            "url": {
+                "host": "jans.test",
+                "path": "/protected-endpoint",
+                "protocol": "http",
+            },
         }
-    })
+    )
 
     # Creating context for request
     context = {}
@@ -272,57 +291,68 @@ def authorize_without_token():
 
     request = RequestUnsigned(
         principals=[
-            EntityData.from_dict({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
-                },
-                "is_ok": True
-            }),
-            EntityData.from_dict({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal2",
-                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYkt1"
-                },
-                "is_ok": True
-            })
+            EntityData.from_dict(
+                {
+                    "cedar_entity_mapping": {
+                        "entity_type": "Jans::TestPrincipal1",
+                        "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+                    },
+                    "is_ok": True,
+                }
+            ),
+            EntityData.from_dict(
+                {
+                    "cedar_entity_mapping": {
+                        "entity_type": "Jans::TestPrincipal2",
+                        "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYkt1",
+                    },
+                    "is_ok": True,
+                }
+            ),
         ],
         action=action,
-        resource=resource, context=context)
+        resource=resource,
+        context=context,
+    )
 
     # Authorize call
-    authorize_result = instance.authorize_unsigned(request)
-
+    try:
+        authorize_result = instance.authorize_unsigned(request)
+    except authorize_errors.AuthorizeError as e:
+        print(e)
+        return
     # Print logs from MemoryLogConfig
     # print(*instance.pop_logs())
 
     # watch on the decision for TestPrincipal1
     principal1 = authorize_result.principal("Jans::TestPrincipal1")
-    print(f"Result of principal1 authorization: {principal1.decision}")
+    if principal1 is not None:
+        print(f"Result of principal1 authorization: {principal1.decision}")
 
-    # show diagnostic information
-    workload_diagnostic = principal1.diagnostics
-    print("Policy ID used:")
-    for diagnostic in workload_diagnostic.reason:
-        print(diagnostic)
+        # show diagnostic information
+        workload_diagnostic = principal1.diagnostics
+        print("Policy ID used:")
+        for diagnostic in workload_diagnostic.reason:
+            print(diagnostic)
 
-    print(f"Errors during authorization: {len(workload_diagnostic.errors)}")
-    for diagnostic in workload_diagnostic.errors:
-        print(diagnostic)
+        print(f"Errors during authorization: {len(workload_diagnostic.errors)}")
+        for diagnostic in workload_diagnostic.errors:
+            print(diagnostic)
 
-    print()
+        print()
 
     # watch on the decision for TestPrincipal2
     principal2 = authorize_result.principal("Jans::TestPrincipal2")
-    print(f"Result of principal2 authorization: {principal2.decision}")
-    person_diagnostic = principal2.diagnostics
-    print("Policy ID used:")
-    for diagnostic in person_diagnostic.reason:
-        print(diagnostic)
+    if principal2 is not None:
+        print(f"Result of principal2 authorization: {principal2.decision}")
+        person_diagnostic = principal2.diagnostics
+        print("Policy ID used:")
+        for diagnostic in person_diagnostic.reason:
+            print(diagnostic)
 
-    print(f"Errors during authorization: {len(person_diagnostic.errors)}")
-    for diagnostic in person_diagnostic.errors:
-        print(diagnostic)
+        print(f"Errors during authorization: {len(person_diagnostic.errors)}")
+        for diagnostic in person_diagnostic.errors:
+            print(diagnostic)
 
     """
     authorize_result.is_allowed() only returns true if 
@@ -332,23 +362,26 @@ def authorize_without_token():
 
     print()
 
+
 def authorize_multi_issuer():
     # //// Execute multi-issuer authorization request ////
 
     # Build resource entity
-    resource = EntityData.from_dict({
-        "cedar_entity_mapping": {
-            "entity_type": "Jans::Application",
-            "id": "some_id"
-        },
-        "app_id": "application_id",
-        "name": "Some Application",
-        "url": {
-            "host": "jans.test",
-            "path": "/protected-endpoint",
-            "protocol": "http"
+    resource = EntityData.from_dict(
+        {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Application",
+                "id": "some_id",
+            },
+            "app_id": "application_id",
+            "name": "Some Application",
+            "url": {
+                "host": "jans.test",
+                "path": "/protected-endpoint",
+                "protocol": "http",
+            },
         }
-    })
+    )
 
     # Build typed tokens coming potentially from different issuers
     # Use locally defined sample payloads so this example is self-contained
@@ -370,7 +403,11 @@ def authorize_multi_issuer():
         context=context,
     )
 
-    result = instance.authorize_multi_issuer(request)
+    try:
+        result = instance.authorize_multi_issuer(request)
+    except authorize_errors.AuthorizeError as e:
+        print("authorize_multi_issuer:", e)
+        return
 
     # High-level allowed flag
     print(f"Multi-issuer allowed: {result.is_allowed()}")
@@ -388,7 +425,6 @@ def authorize_multi_issuer():
 
     print(f"Request ID: {result.request_id()}")
     print()
-
 
 
 if __name__ == "__main__":

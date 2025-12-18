@@ -1,3 +1,6 @@
+# =================================
+# Main Image
+# =================================
 FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
 
 # ===============
@@ -58,7 +61,7 @@ RUN mkdir -p /app/static/rdbm \
     /app/schema \
     /app/templates/jans-casa
 
-ENV JANS_SOURCE_VERSION=04d297c046dd9d8ef54c0544e6187153b7ed87cf
+ENV JANS_SOURCE_VERSION=e9e5450c54750da81da4b3cfa64694d032a12053
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -206,10 +209,15 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/casa" \
     org.opencontainers.image.title="Janssen Casa" \
     org.opencontainers.image.description="Self-service portal for people to manage their account security preferences in the Janssen, like 2FA"
 
+# ===========
+# Custom libs
+# ===========
+
 RUN mkdir -p /opt/jans/python/libs \
     ${JETTY_BASE}/jans-casa/static \
     ${JETTY_BASE}/jans-casa/plugins \
     ${JETTY_BASE}/jans-casa/logs \
+    ${JETTY_BASE}/jans-casa/custom/libs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /etc/jans/conf/casa \
@@ -238,6 +246,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-casa/static \
     && chmod -R g=u /etc/jans \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-casa/custom/libs \
+    && chmod -R g=u ${JETTY_BASE}/jans-casa/custom/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-casa/webapps/jans-casa.xml \

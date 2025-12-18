@@ -33,6 +33,11 @@ def main():
         upgrade = Upgrade(manager)
         upgrade.invoke()
 
+    # import custom ldif (if any)
+    with manager.create_lock("persistence-loader-custom"):
+        backend = backend_cls(manager)
+        backend.customize()
+
 
 if __name__ == "__main__":
     main()

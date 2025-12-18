@@ -147,10 +147,12 @@ public class TrustRelationshipResource extends BaseResource {
             checkNotNull(trustRelationship.getName(), "Name");
 
             // check if TrustRelationship with same name already exists
+            logger.debug(" trustRelationship.getName():{} ", trustRelationship.getName());
             List<TrustRelationship> existingTrustRelationship = samlService
                     .getAllTrustRelationshipByName(trustRelationship.getName());
             logger.debug(" existingTrustRelationship:{} ", existingTrustRelationship);
             if (existingTrustRelationship != null && !existingTrustRelationship.isEmpty()) {
+                logger.error(" TrustRelationship with same name exists :{} ", existingTrustRelationship);
                 throwBadRequestException(NAME_CONFLICT, String.format(NAME_CONFLICT_MSG, trustRelationship.getName()));
             }
 
@@ -167,10 +169,13 @@ public class TrustRelationshipResource extends BaseResource {
 
             trustRelationship = samlService.addTrustRelationship(trustRelationship, metaDataFile);
 
-            logger.info("Create created by TrustRelationship:{}", trustRelationship);
-        } catch (Exception ex) {
-            throwInternalServerException("Error while creating by TrustRelationship - {" + trustRelationship + "}", ex);
-
+            logger.info("Create TrustRelationship:{}", trustRelationship);
+        } catch (WebApplicationException wex) {
+            logger.error("WebApplicationException while creating TR - wex.getResponse().getStatusInfo():{}, wex.getResponse().getEntity():{}, ",wex.getResponse().getStatusInfo(), wex.getResponse().getEntity(), wex);
+            return Response.status(wex.getResponse().getStatusInfo()).entity(wex.getResponse().getEntity()).build();
+        }catch(Exception ex) {
+            logger.error("Exception while creating TR", ex);
+            throwInternalServerException("Error while creating TrustRelationship - {" + trustRelationship + "}", ex);
         }
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
@@ -249,9 +254,12 @@ public class TrustRelationshipResource extends BaseResource {
             trustRelationship = samlService.updateTrustRelationship(trustRelationship, metaDataFile);
 
             logger.info("Post update trustRelationship:{}", trustRelationship);
-        } catch (Exception ex) {
-            throwInternalServerException("Error while updating by TrustRelationship - {" + trustRelationship + "}", ex);
-
+        } catch (WebApplicationException wex) {
+            logger.error("WebApplicationException while updating TR - wex.getResponse().getStatusInfo():{}, wex.getResponse().getEntity():{}, ",wex.getResponse().getStatusInfo(), wex.getResponse().getEntity(), wex);
+            return Response.status(wex.getResponse().getStatusInfo()).entity(wex.getResponse().getEntity()).build();
+        }catch(Exception ex) {
+            logger.error("Exception while updating TR", ex);
+            throwInternalServerException("Error while creating TrustRelationship - {" + trustRelationship + "}", ex);
         }
         return Response.ok(trustRelationship).build();
     }

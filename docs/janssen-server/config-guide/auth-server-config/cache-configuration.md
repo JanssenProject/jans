@@ -63,7 +63,7 @@ jans cli --operation-id get-config-cache
 
 It will show the Cache configuration details.
 
-```json title="Sample Output" linenums="1" 
+```json title="Sample Output" linenums="1"
 {
   "cacheProviderType": "NATIVE_PERSISTENCE",
   "memcachedConfiguration": {
@@ -191,5 +191,5 @@ such quick patch operations. Please check them out from [here](../config-tools/j
 ## Using Configuration REST API
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing
-and configuring Cache. Endpoint details are published in the 
+and configuring Cache. Endpoint details are published in the
 [Swagger document](./../../reference/openapi.md).

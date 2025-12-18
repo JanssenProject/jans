@@ -460,8 +460,9 @@ public class UserMgmtService {
     }
 
     public User parseBirthDateAttribute(User user) {
-        if (user.getAttributeObjectValues(BIRTH_DATE) != null) {
-
+        logger.info("user:{}", user);
+        if (user!=null && user.getAttributeObjectValues(BIRTH_DATE) != null) {
+            logger.info("user.getAttributeObjectValues(BIRTH_DATE):{}", user.getAttributeObjectValues(BIRTH_DATE));
             Optional<Object> optionalBithdate = user.getAttributeObjectValues(BIRTH_DATE).stream().findFirst();
 
             if (!optionalBithdate.isPresent()) {
@@ -473,6 +474,7 @@ public class UserMgmtService {
             if (date == null) {
                 date = persistenceEntryManager.decodeTime(null, optionalBithdate.get().toString());
             }
+            logger.info("date:{}, user.getAttributeObjectValues(BIRTH_DATE):{}",date, user.getAttributeObjectValues(BIRTH_DATE));
             user.getCustomAttributes().remove(new CustomObjectAttribute(BIRTH_DATE));
             user.getCustomAttributes().add(new CustomObjectAttribute(BIRTH_DATE, date));
         }
@@ -561,10 +563,12 @@ public class UserMgmtService {
 
         // remove attribute that are not active
         for (Iterator<CustomObjectAttribute> it = customAttributes.iterator(); it.hasNext();) {
-            String attributeName = it.next().getName();
-            logger.debug("Verify status of attributeName: {}", attributeName);
+            CustomObjectAttribute attr = it.next();
+            String attributeName = attr.getName();
+            logger.debug("Verify status of attributeName: {}, attr.getValue():{}, attr.getValues():{}", attributeName,
+                    attr.getValue(), attr.getValues());
             List<JansAttribute> attList = findAttributeByName(attributeName);
-            logger.debug("attributeName:{} data is attList: {}", attributeName, attList);
+            logger.info("attributeName:{} data is attList: {}", attributeName, attList);
 
             if (CollectionUtils.isNotEmpty(attList)
                     && !GluuStatus.ACTIVE.getValue().equalsIgnoreCase(attList.get(0).getStatus().getValue())) {

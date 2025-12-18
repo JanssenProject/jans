@@ -72,17 +72,17 @@ mod key_service;
 mod log_entry;
 mod status_list;
 mod token;
+mod token_cache;
 mod validation;
 
 #[cfg(test)]
 #[allow(dead_code)]
 mod test_utils;
 
-use chrono::DateTime;
-use chrono::Duration;
 pub use decode::*;
 pub use error::*;
 pub use token::{Token, TokenClaimTypeError, TokenClaims};
+pub use token_cache::TokenCache;
 
 use crate::JwtConfig;
 use crate::LogLevel;
@@ -97,10 +97,8 @@ use http_utils::*;
 use key_service::*;
 use log_entry::*;
 use serde_json::json;
-use sparkv::SparKV;
 use status_list::*;
 use std::collections::{HashMap, HashSet};
-use std::hash::Hash;
 use std::sync::Arc;
 use std::sync::RwLock;
 use validation::*;
@@ -114,8 +112,7 @@ pub struct JwtService {
     key_service: Arc<KeyService>,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
     logger: Option<Logger>,
-    token_cache: Arc<RwLock<SparKV<Arc<Token>>>>,
-    token_cache_max_ttl: usize,
+    token_cache: TokenCache,
     signed_authz_available: bool,
     jwt_sig_validation_required: bool,
 }
@@ -133,12 +130,18 @@ impl JwtService {
         jwt_config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
-        token_cache_max_ttl_sec: usize,
     ) -> Result<Self, JwtServiceInitError> {
         let mut status_lists = StatusListCache::default();
         let mut issuer_configs = HashMap::default();
         let mut validators = JwtValidatorCache::default();
         let mut key_service = KeyService::new();
+
+        let token_cache = TokenCache::new(
+            jwt_config.token_cache_max_ttl_secs,
+            jwt_config.token_cache_capacity,
+            jwt_config.token_cache_earliest_expiration_eviction,
+            logger.clone(),
+        );
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
         let has_trusted_issuers = !trusted_issuers.is_empty();
@@ -163,7 +166,13 @@ impl JwtService {
 
             if jwt_config.jwt_status_validation {
                 status_lists
-                    .init_for_iss(&iss_config, &validators, &key_service, logger.clone())
+                    .init_for_iss(
+                        &iss_config,
+                        &validators,
+                        &key_service,
+                        token_cache.clone(),
+                        logger.clone(),
+                    )
                     .await?;
             }
 
@@ -195,8 +204,7 @@ impl JwtService {
             key_service,
             issuer_configs,
             logger,
-            token_cache: Arc::new(RwLock::new(SparKV::new())),
-            token_cache_max_ttl: token_cache_max_ttl_sec,
+            token_cache,
             signed_authz_available,
             jwt_sig_validation_required: jwt_config.jwt_sig_validation,
         })
@@ -220,14 +228,11 @@ impl JwtService {
         let now = Utc::now();
 
         // clear expired tokens from cache
-        self.token_cache
-            .write()
-            .expect("validated_jwt_cache mutex shouldn't be poisoned")
-            .clear_expired();
+        self.token_cache.clear_expired();
 
         for (token_name, jwt) in tokens.iter() {
             let token_kind = TokenKind::AuthzRequestInput(token_name);
-            let token = if let Some(validated_token) = self.find_token_in_cache(&token_kind, jwt) {
+            let token = if let Some(validated_token) = self.token_cache.find(&token_kind, jwt) {
                 validated_token
             } else {
                 // validate token and save to cache
@@ -259,7 +264,7 @@ impl JwtService {
                 };
 
                 let token = Arc::new(Token::new(token_name, claims, validated_jwt.trusted_iss));
-                self.save_token_in_cache(&token_kind, jwt, token.clone(), now);
+                self.token_cache.save(&token_kind, jwt, token.clone(), now);
                 token
             };
 
@@ -267,71 +272,6 @@ impl JwtService {
         }
 
         Ok(validated_tokens)
-    }
-
-    fn find_token_in_cache(&self, kind: &TokenKind, jwt: &str) -> Option<Arc<Token>> {
-        let key = hash_jwt_token(kind, jwt);
-        self.token_cache
-            .read()
-            .expect("validated_jwt_cache mutex shouldn't be poisoned")
-            .get(&key)
-            .map(|v| v.to_owned())
-    }
-
-    fn save_token_in_cache(
-        &self,
-        kind: &TokenKind,
-        jwt: &str,
-        token: Arc<Token>,
-        now: DateTime<Utc>,
-    ) {
-        let key = hash_jwt_token(kind, jwt);
-
-        let cache_duration_opt = token
-            .claims
-            .get_claim("exp")
-            .and_then(|exp| exp.value().as_i64())
-            .and_then(|exp| {
-                // calculate duration until token expiration
-                let duration = exp - now.timestamp();
-                if duration > 0 {
-                    // if duration bigger than configured max ttl, use the max ttl
-                    Some(
-                        if self.token_cache_max_ttl > 0
-                            && duration > self.token_cache_max_ttl as i64
-                        {
-                            self.token_cache_max_ttl as i64
-                        } else {
-                            duration
-                        },
-                    )
-                } else {
-                    None
-                }
-            })
-            .or({
-                // if no exp claim, use the configured max ttl if set
-                if self.token_cache_max_ttl > 0 {
-                    Some(self.token_cache_max_ttl as i64)
-                } else {
-                    None
-                }
-            });
-
-        if let Some(duration) = cache_duration_opt {
-            let _ = self
-                .token_cache
-                .write()
-                .expect("validated_jwt_cache mutex shouldn't be poisoned")
-                .set_with_ttl(&key, token, Duration::seconds(duration), &[]);
-        } else {
-            // set with SparkKV default TTL (5 minutes)
-            let _ = self
-                .token_cache
-                .write()
-                .expect("validated_jwt_cache mutex shouldn't be poisoned")
-                .set(&key, token, &[]);
-        }
     }
 
     fn validate_single_token(
@@ -394,10 +334,7 @@ impl JwtService {
         let mut seen_combinations = HashSet::new();
 
         // clear expired tokens from cache
-        self.token_cache
-            .write()
-            .expect("validated_jwt_cache mutex shouldn't be poisoned")
-            .clear_expired();
+        self.token_cache.clear_expired();
 
         let now = Utc::now();
 
@@ -420,7 +357,7 @@ impl JwtService {
             // Create Token with the mapping as the name
             let token_name = token.mapping.clone();
 
-            if let Some(cedar_token) = self.find_token_in_cache(&token_kind, &token.payload) {
+            if let Some(cedar_token) = self.token_cache.find(&token_kind, &token.payload) {
                 validated_tokens.insert(token_name, cedar_token);
             } else {
                 // Validate JWT using existing single token validation
@@ -468,7 +405,7 @@ impl JwtService {
                                 validated_jwt.trusted_iss,
                             ));
 
-                            self.save_token_in_cache(
+                            self.token_cache.save(
                                 &token_kind,
                                 &token.payload,
                                 cedar_token.clone(),
@@ -599,32 +536,6 @@ fn fix_aud_claim_value_to_array(claims: TokenClaims) -> TokenClaims {
     claims
 }
 
-/// Hash a string using `ahash` and return the hash value as a string
-/// This is used to create a key for caching tokens
-/// The hash value is used instead of the original string to have shorter keys for SparKV which utilizes BTree.
-fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
-    use core::hash::BuildHasher;
-    use std::hash::Hasher;
-    use std::sync::LazyLock;
-    static HASHER_KEYS: LazyLock<(u64, u64, u64, u64)> = LazyLock::new(|| {
-        (
-            rand::random(),
-            rand::random(),
-            rand::random(),
-            rand::random(),
-        )
-    });
-
-    let mut hasher =
-        ahash::RandomState::with_seeds(HASHER_KEYS.0, HASHER_KEYS.1, HASHER_KEYS.2, HASHER_KEYS.3)
-            .build_hasher();
-
-    kind.hash(&mut hasher);
-    jwt.hash(&mut hasher);
-
-    hasher.finish().to_string()
-}
-
 #[cfg(test)]
 mod test {
     use super::test_utils::*;
@@ -683,10 +594,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([("Jans".into(), iss.clone())])),
             None,
-            0,
         )
         .await
         .inspect_err(|e| eprintln!("error msg: {}", e))
@@ -800,10 +711,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([(server.issuer(), iss)])),
             None,
-            3600, // token_cache_max_ttl_sec
         )
         .await
         .expect("Should create JwtService");
@@ -836,10 +747,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([(server.issuer(), iss)])),
             None,
-            3600, // token_cache_max_ttl_sec
         )
         .await
         .expect("Should create JwtService");
@@ -862,10 +773,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([(server.issuer(), iss)])),
             None,
-            3600, // token_cache_max_ttl_sec
         )
         .await
         .expect("Should create JwtService");
@@ -935,10 +846,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([(server.issuer(), iss)])),
             None,
-            3600, // token_cache_max_ttl_sec
         )
         .await
         .expect("Should create JwtService");
@@ -1004,10 +915,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([(server.issuer(), iss)])),
             None,
-            3600, // token_cache_max_ttl_sec
         )
         .await
         .expect("Should create JwtService");
@@ -1046,10 +957,10 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
             },
             Some(HashMap::from([(server.issuer(), iss)])),
             None,
-            3600, // token_cache_max_ttl_sec
         )
         .await
         .expect("Should create JwtService");

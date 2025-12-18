@@ -7,7 +7,7 @@ tags:
   - endpoint
 ---
 
-# Claims Gathering Endpoint 
+# Claims Gathering Endpoint
 
 ## This content is in progress
 
