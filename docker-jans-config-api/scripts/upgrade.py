@@ -58,6 +58,8 @@ def _transform_api_dynamic_config(conf):
         ("acrValidationEnabled", True),
         ("serviceName", "jans-config-api"),
         ("acrExclusionList", ["simple_password_auth"]),
+        ("returnClientSecretInResponse", True),
+        ("returnEncryptedClientSecretInResponse", True),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
