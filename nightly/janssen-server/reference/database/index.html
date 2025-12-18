@@ -14512,8 +14512,8 @@
 <li><a href="pgsql-config/">Hybrid</a>. This is virtual DB layer which allows to combine few DB types based on record type.</li>
 </ul>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
-<p>On a Janssen Server instance 
-the type of persistence(DB) used is specified 
+<p>On a Janssen Server instance
+the type of persistence(DB) used is specified
 in <code>/etc/jans/conf/jans.properties</code> using the entry as show below:</p>
 <div class="highlight"><pre><span></span><code>persistence.type=sql
 </code></pre></div>
@@ -14530,13 +14530,13 @@ on choice of persistence(DB) type, it can be one of these supported values:</p>
 </div>
 <p>Based on persistent type in use, the corresponding properties file with relevant
 configuration properties will be available on Janssen Server instance under
-the directory <code>/etc/jans/conf/</code>. List of configuration files for these 
+the directory <code>/etc/jans/conf/</code>. List of configuration files for these
 persistence types are:</p>
 <ul>
 <li><code>jans-sql.properties</code></li>
 <li><code>jans-hybrid.properties</code></li>
 </ul>
-<p>The application reloads configuration from these files after start up or on 
+<p>The application reloads configuration from these files after start up or on
 files date time modification after initialization.</p>
 <h3 id="overriding-db-configuration-properties">Overriding DB Configuration Properties<a class="headerlink" href="#overriding-db-configuration-properties" title="Permanent link">#</a></h3>
 <p>Configuration properties and the values specified under <code>.properties</code> files
@@ -14750,10 +14750,10 @@ public class SimpleUser implements Serializable {
 </ol>
 <p>After this it's enough to put new ORM DB module into application war file or follow customization sections to add jar file to custom jetty classpath.</p>
 <h2 id="db-schema">DB Schema<a class="headerlink" href="#db-schema" title="Permanent link">#</a></h2>
-<p>The DB schema and beans definitions should match each other. During deployment setup generates schema and indexes based on rules in 
+<p>The DB schema and beans definitions should match each other. During deployment setup generates schema and indexes based on rules in
 schema <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/schema/jans_schema.json">file</a>. The data types defined in it setup map to DB SQL types based on default <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/ldap_sql_data_type_mapping.json">rules</a>.</p>
 <p>It's possible to override default generation rules. For this case there is next <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/sql_data_types.json">file</a>.</p>
-<p>Default indexes defined in next files: <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/couchbase/index.json">coubase_index.json</a>, <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/mysql_index.json">mysql_index.json</a>, <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/pgsql_index.json">pgsql_index.json</a> </p>
+<p>Default indexes defined in next files: <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/couchbase/index.json">couchbase_index.json</a>, <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/mysql_index.json">mysql_index.json</a>, <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/pgsql_index.json">pgsql_index.json</a></p>
 
 
 
@@ -14776,7 +14776,7 @@ schema <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setu
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2025 11:50:32 UTC"><span class="timeago" datetime="2025-03-25T11:50:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2025 11:50:32 UTC">2025-03-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 18, 2025 10:21:52 UTC"><span class="timeago" datetime="2025-12-18T10:21:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 18, 2025 10:21:52 UTC">2025-12-18</span>
   </span>
 
     
