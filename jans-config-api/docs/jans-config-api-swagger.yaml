@@ -2648,7 +2648,7 @@ paths:
           default: ascending
       - name: fieldValuePair
         in: query
-        description: Field and value pair for seraching
+        description: Field and value pair for searching
         schema:
           type: string
           default: ""
@@ -14951,19 +14951,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -15084,6 +15084,11 @@ components:
           type: boolean
         allowRevokeForOtherClients:
           type: boolean
+        skipSessionAuthnTimeCheckDuringPromptLogin:
+          type: boolean
+        sessionAuthnTimeCheckDuringPromptLoginThresholdMs:
+          type: integer
+          format: int32
         sectorIdentifierCacheLifetimeInMinutes:
           type: integer
           format: int32
@@ -15488,6 +15493,8 @@ components:
         disablePromptLogin:
           type: boolean
         disablePromptConsent:
+          type: boolean
+        runAllUpdateTokenScripts:
           type: boolean
         logoutStatusJwtLifetime:
           type: integer
@@ -16758,6 +16765,14 @@ components:
           type: boolean
           description: Flag to enable/disable check if acr customScript is enabled.
             Default value `true`.
+        returnClientSecretInResponse:
+          type: boolean
+          description: Flag to enable/disable sending clientSecret in response. Default
+            value `true`.
+        returnEncryptedClientSecretInResponse:
+          type: boolean
+          description: Flag to enable/disable sending encrypted clientSecret in response.
+            Default value `true`.
         apiApprovedIssuer:
           type: array
           description: List of approved external Auth server to validate token.
@@ -17720,10 +17735,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -17734,6 +17745,10 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        logoutStatusJwt:
+          type: boolean
+        accessToken:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
