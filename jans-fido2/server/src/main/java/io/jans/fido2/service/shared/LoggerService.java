@@ -12,6 +12,8 @@ import jakarta.inject.Named;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 /**
  * Logger service
  *
@@ -31,7 +33,7 @@ public class LoggerService extends io.jans.service.logger.LoggerService {
 
 	@Override
 	public boolean isDisableExternalLoggerConfiguration() {
-		return (appConfiguration.getDisableExternalLoggerConfiguration() != null) && appConfiguration.getDisableExternalLoggerConfiguration();
+		return isTrue(appConfiguration.getDisableExternalLoggerConfiguration());
 	}
 
     @Override

@@ -5,6 +5,8 @@ import jakarta.inject.Inject;
 
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 @ApplicationScoped
 public class LoggerService extends io.jans.service.logger.LoggerService {
 
@@ -18,7 +20,7 @@ public class LoggerService extends io.jans.service.logger.LoggerService {
 
 	@Override
 	public boolean isDisableExternalLoggerConfiguration() {
-		return (appConfiguration.getDisableExternalLoggerConfiguration() != null) && appConfiguration.getDisableExternalLoggerConfiguration();
+		return isTrue(appConfiguration.getDisableExternalLoggerConfiguration());
 	}
 
     @Override
