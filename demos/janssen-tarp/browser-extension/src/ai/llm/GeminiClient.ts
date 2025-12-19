@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, GenerativeModel, Content, Part } from "@google/generative-ai";
+import { GoogleGenerativeAI, Content } from "@google/generative-ai";
 import { LLMClient } from './LLMClient';
 
 export class GeminiClient implements LLMClient {

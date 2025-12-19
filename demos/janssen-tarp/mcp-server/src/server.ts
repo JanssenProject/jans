@@ -508,7 +508,7 @@ app.post("/api/keys", async (req, res) => {
       provider: newApiKey.provider,
       model: newApiKey.model,
       createdAt: newApiKey.createdAt,
-      keyPreview: `...${key.slice(-4)}` // Show only last 4 chars
+      keyPreview: key.length > 4 ? `...${key.slice(-4)}` : `${key.slice(0, 1)}***` // Show only last 4 chars
     };
 
     res.status(201).json(response);
@@ -562,26 +562,21 @@ app.put("/api/keys", async (req, res) => {
         error: "API key does not exists"
       });
     }
-    db.data.apiKeys = db.data.apiKeys.filter((k: ApiKey) => k.id !== existingKey.id);
 
-    // Create new API key record
-    const updatedApiKey: ApiKey = {
-      id: existingKey.id,
-      provider,
-      model,
-      key,
-      createdAt: existingKey.createdAt
-    };
+    // Update existing record in place
+    existingKey.provider = provider;
+    existingKey.model = model;
+    existingKey.key = key;
+    // Keep existingKey.id and existingKey.createdAt unchanged
 
-    db.data.apiKeys.push(updatedApiKey);
     await db.write();
 
     // Return response without exposing the full key
     const response = {
-      id: updatedApiKey.id,
-      provider: updatedApiKey.provider,
-      model: updatedApiKey.model,
-      createdAt: updatedApiKey.createdAt,
+      id: existingKey.id,
+      provider: existingKey.provider,
+      model: existingKey.model,
+      createdAt: existingKey.createdAt,
       keyPreview: `...${key.slice(-4)}` // Show only last 4 chars
     };
 

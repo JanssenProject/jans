@@ -1,7 +1,7 @@
 
 import { ILooseObject } from '../../options/ILooseObject';
 
-export default class MCPService {
+export default class AuthClientService {
 
   constructor() {
   }

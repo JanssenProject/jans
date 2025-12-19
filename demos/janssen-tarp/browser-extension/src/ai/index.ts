@@ -1,6 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import MCPService from './service/MCPService';
+import AuthClientService from './service/AuthClientService';
 import { LLMClientFactory } from './llm/LLMClient';
 import { v4 as uuidv4 } from 'uuid';
 import Utils from '../options/Utils';
@@ -11,7 +11,7 @@ import ConfigurationManager from './helper/ConfigurationManager'
 import { STORAGE_KEYS, DEFAULT_VALUES } from './helper/Constants';
 
 // Services
-const mcpService = new MCPService();
+const authClientService = new AuthClientService();
 const authenticationService = new AuthenticationService();
 
 // MCP Client initialization
@@ -152,7 +152,7 @@ async function handleRegisterOIDCClient(args: OIDCClientRegistrationArgs): Promi
     arguments: enhancedArgs as ILooseObject,
   });
 
-  await mcpService.saveClientInTarpStorage(toolResult);
+  await authClientService.saveClientInTarpStorage(toolResult);
 
   return {
     tool: "registerOIDCClient",
@@ -172,7 +172,7 @@ async function handleRegisterOIDCClient(args: OIDCClientRegistrationArgs): Promi
  */
 async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
   try {
-    const oidcClient = await mcpService.getClientByClientId(args.client_id);
+    const oidcClient = await authClientService.getClientByClientId(args.client_id);
     if (!oidcClient?.clientId) {
       throw new Error(`Client with ID ${args.client_id} not found`);
     }
@@ -325,10 +325,10 @@ export async function handleUserPrompt(prompt: string) {
     const response = await llmClient.chatCompletion({
       model,
       messages: [
-        { role: "system", content: mcpService.createSystemPrompt() },
+        { role: "system", content: authClientService.createSystemPrompt() },
         { role: "user", content: prompt }
       ],
-      tools: mcpService.createOIDCTools(),
+      tools: authClientService.createOIDCTools(),
       tool_choice: "auto"
     });
 

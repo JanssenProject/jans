@@ -43,15 +43,6 @@ export const useAIOperations = (notifyOnDataChange: () => void) => {
         throw new Error(`Please configure your ${savedProvider} API key first in Settings`);
       }
 
-    } catch (error: any) {
-      if (error.message.includes('Failed to fetch')) {
-        throw new Error("Cannot connect to MCP server. Please check if the server is running.");
-      }
-      throw error;
-    }
-
-    try {
-      // You need to modify handleUserPrompt to get API key from MCP server
       // For now, we'll pass null and let it handle the error
       const result = await handleUserPrompt(query);
       if (result?.type === 'text') {
