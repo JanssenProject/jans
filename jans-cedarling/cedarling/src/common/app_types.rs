@@ -16,7 +16,7 @@ use uuid7::{Uuid, uuid4};
 pub struct PdpID(pub Uuid);
 
 impl PdpID {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         // we use uuid v4 because it is generated based on random numbers.
         PdpID(uuid4())
     }
